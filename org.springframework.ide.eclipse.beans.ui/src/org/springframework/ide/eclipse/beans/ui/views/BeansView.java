@@ -288,12 +288,13 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 
 	private boolean showResource(IResource resource) {
 		INode node = null;
-		if (resource instanceof IProject) {
-			node = getRootNode().getProject(resource.getName());
-		} else if (resource instanceof IJavaProject) {
-			node = getRootNode().getProject(resource.getName());
-		} else if (resource instanceof IFile) {
+		if (resource instanceof IFile) {
 			node = getRootNode().getConfig((IFile) resource);
+		} else if (resource instanceof IProject) {
+			node = getRootNode().getProject(resource.getName());
+		} else if (resource instanceof IAdaptable &&
+				((IAdaptable) resource).getAdapter(IJavaProject.class) != null) {
+			node = getRootNode().getProject(resource.getName());
 		}
 		if (node != null) {
 			treeViewer.setSelection(new StructuredSelection(node), true);
