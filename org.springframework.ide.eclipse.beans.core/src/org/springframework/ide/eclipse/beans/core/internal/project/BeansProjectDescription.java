@@ -47,7 +47,7 @@ public class BeansProjectDescription {
 		this.configSets = new HashMap();
 	}
 
-	public void setConfigNames(List configs) {
+	public void setConfigNames(Collection configs) {
 		this.configNames = new ArrayList(configs);
 	}
 
@@ -160,4 +160,5 @@ public class BeansProjectDescription {
 	public String toString() {
 		return "Configs=" + configNames + ", ConfigsSets=" + configSets.toString();
 	}
+
 }
