@@ -4,3 +4,4 @@ features/*
 features
 plugins
 *.zip
+logs
