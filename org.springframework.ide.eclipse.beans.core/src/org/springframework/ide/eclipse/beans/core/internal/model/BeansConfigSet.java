@@ -131,4 +131,14 @@ public class BeansConfigSet extends BeansModelElement implements IBeansConfigSet
 		}
 		return beansMap;
 	}
+
+    /* (non-Javadoc)
+     * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet#replaceConfig(org.eclipse.core.resources.IFile, org.eclipse.core.resources.IFile)
+     */
+    public void replaceConfig(String origFileName, String newFileName)
+    {
+        removeConfig(origFileName);
+        addConfig(newFileName);
+        
+    }
 }
