@@ -30,7 +30,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtil;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
@@ -75,7 +75,7 @@ public class OpenJavaType extends Action implements IEditorActionDelegate,
 		if (editor != null && file != null) {
 			String className = guessType();
 			if (className != null && className.length() > 0) {
-				IType type = BeansModelUtil.getJavaType(file.getProject(),
+				IType type = BeansModelUtils.getJavaType(file.getProject(),
 														className);
 				if (type != null) {
 					SpringUIUtils.openInEditor(type);

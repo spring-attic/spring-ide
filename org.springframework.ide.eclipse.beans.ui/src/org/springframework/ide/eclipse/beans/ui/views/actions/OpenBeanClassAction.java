@@ -20,7 +20,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtil;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
 import org.springframework.ide.eclipse.beans.ui.model.INode;
@@ -52,7 +52,7 @@ public class OpenBeanClassAction extends Action {
 			IProject project = ((BeanNode)
 							node).getConfigNode().getProjectNode().getProject();
 			String className = ((BeanNode) node).getClassName();
-			IType type = BeansModelUtil.getJavaType(project, className);
+			IType type = BeansModelUtils.getJavaType(project, className);
 			if (type != null) {
 				SpringUIUtils.openInEditor(type);
 			}

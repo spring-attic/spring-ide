@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2004 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ 
+
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.util.Iterator;
@@ -5,20 +21,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
+import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 
-public class BeansModelUtil {
+public class BeansModelUtils {
 
 	/**
 	 * Returns config for given name from specified project.
@@ -155,5 +178,49 @@ public class BeansModelUtil {
 			}
 		}
 		return null;
+	}
+
+	public static final void createProblemMarker(IBeansModelElement element,
+						String message, int severity, int line, int errorCode) {
+		createProblemMarker(element, message, severity, line, errorCode, null,
+							null);
+	}
+
+	public static final void createProblemMarker(IBeansModelElement element,
+						  String message, int severity, int line, int errorCode,
+						  String beanID, String errorData) {
+		IFile file;
+		if (element instanceof IBeansConfig) {
+			file = ((IBeansConfig) element).getConfigFile();
+		} else if (element instanceof IBean) {
+			file = ((IBean) element).getConfig().getConfigFile();
+		} else if (element instanceof IBeanProperty) {
+			IBean bean = (IBean) ((IBeanProperty) element).getElementParent();
+			file = bean.getConfig().getConfigFile();
+		} else if (element instanceof IBeanConstructorArgument) {
+			IBean bean = (IBean)
+						((IBeanConstructorArgument) element).getElementParent();
+			file = bean.getConfig().getConfigFile();
+		} else {
+			file = null;
+		}
+		if (file != null) {
+			BeansCoreUtils.createProblemMarker(file, message, severity, line,
+											   errorCode, beanID, errorData);
+		}
+	}
+
+	public static final void registerBeanDefinitions(IBeansConfig config,
+											 BeanDefinitionRegistry registry) {
+		Iterator beans = config.getBeans().iterator();
+		while (beans.hasNext()) {
+			Bean bean = (Bean) beans.next();
+			try {
+				BeanDefinitionReaderUtils.registerBeanDefinition(
+									 bean.getBeanDefinitionHolder(), registry);
+			} catch (BeansException e) {
+				// ignore - continue with next bean
+			}
+		}
 	}
 }
