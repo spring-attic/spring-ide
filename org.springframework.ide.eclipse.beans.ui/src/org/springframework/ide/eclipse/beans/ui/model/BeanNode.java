@@ -25,8 +25,7 @@ import java.util.Map;
 
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.ui.model.properties.ChildBeanProperties;
-import org.springframework.ide.eclipse.beans.ui.model.properties.RootBeanProperties;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 
 /**
  * Representation of a Spring bean.
@@ -348,13 +347,9 @@ public class BeanNode extends AbstractNode {
 
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPropertySource.class) {
-			if (isRootBean()) {
-				return new RootBeanProperties(bean);
-			} else {
-				return new ChildBeanProperties(bean);
-			}
+			return BeansUIUtils.getPropertySource(bean);
 		}
-		return null;
+		return super.getAdapter(adapter);
 	}
 
 	public String toString() {

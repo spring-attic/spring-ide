@@ -27,7 +27,7 @@ import org.eclipse.draw2d.graph.Node;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
-import org.springframework.ide.eclipse.beans.ui.model.properties.ConstructorArgumentProperties;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 
 public class ConstructorArgument extends Node implements IAdaptable {
 
@@ -95,8 +95,8 @@ public class ConstructorArgument extends Node implements IAdaptable {
 	}
 
 	public Object getAdapter(Class adapter) {
-		if (adapter == IPropertySource.class && carg != null) {
-			return new ConstructorArgumentProperties(carg);
+		if (adapter == IPropertySource.class) {
+			return BeansUIUtils.getPropertySource(carg);
 		}
 		return null;
 	}

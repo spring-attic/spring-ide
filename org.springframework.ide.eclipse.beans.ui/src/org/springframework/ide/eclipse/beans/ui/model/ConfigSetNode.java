@@ -24,7 +24,7 @@ import java.util.Map;
 
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
-import org.springframework.ide.eclipse.beans.ui.model.properties.ConfigSetProperties;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 
 /**
  * Representation of a Spring bean configuration set.
@@ -34,6 +34,7 @@ public class ConfigSetNode extends AbstractNode {
 	public static final int NAME = 1;
 	public static final int CONFIGS = 2;
 
+	private IBeansConfigSet configSet;
 	private List configs = new ArrayList();
 	private List beans = null;  // lazy initialized in getBeans() or getBean()
 	private Map beansMap;  // lazy initialized in getBean()
@@ -54,6 +55,7 @@ public class ConfigSetNode extends AbstractNode {
 	 */
 	public ConfigSetNode(ProjectNode project, IBeansConfigSet configSet) {
 		super(project, configSet.getElementName());
+		this.configSet = configSet;
 
 		isOverrideEnabled = configSet.isAllowBeanDefinitionOverriding();
 
@@ -239,9 +241,9 @@ public class ConfigSetNode extends AbstractNode {
 
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPropertySource.class) {
-			return new ConfigSetProperties(this);
+			return BeansUIUtils.getPropertySource(configSet);
 		}
-		return null;
+		return super.getAdapter(adapter);
 	}
 
 	public String toString() {

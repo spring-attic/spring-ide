@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
-import org.springframework.ide.eclipse.beans.ui.model.properties.ConstructorArgumentProperties;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 
 public class ConstructorArgumentNode extends AbstractNode {
 
@@ -88,9 +88,9 @@ public class ConstructorArgumentNode extends AbstractNode {
 
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPropertySource.class) {
-			return new ConstructorArgumentProperties(carg);
+			return BeansUIUtils.getPropertySource(carg);
 		}
-		return null;
+		return super.getAdapter(adapter);
 	}
 
 	public String toString() {

@@ -30,7 +30,7 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
-import org.springframework.ide.eclipse.beans.ui.model.properties.PropertyProperties;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 
 public class Property extends Node implements IAdaptable {
 
@@ -122,8 +122,8 @@ public class Property extends Node implements IAdaptable {
 	}
 
 	public Object getAdapter(Class adapter) {
-		if (adapter == IPropertySource.class && property != null) {
-			return new PropertyProperties(property);
+		if (adapter == IPropertySource.class) {
+			return BeansUIUtils.getPropertySource(property);
 		}
 		return null;
 	}

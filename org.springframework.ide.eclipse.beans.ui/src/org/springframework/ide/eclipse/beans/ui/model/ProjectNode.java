@@ -28,10 +28,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.util.ListenerList;
 import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.eclipse.ui.views.properties.ResourcePropertySource;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 
 /**
  * Representation of an Spring project.
@@ -219,9 +219,9 @@ public class ProjectNode extends AbstractNode {
 
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPropertySource.class) {
-			return new ResourcePropertySource(project.getElementResource());
+			return BeansUIUtils.getPropertySource(project);
 		}
-		return null;
+		return super.getAdapter(adapter);
 	}
 
 	public String toString() {

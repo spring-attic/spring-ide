@@ -26,8 +26,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
-import org.springframework.ide.eclipse.beans.ui.model.properties.ChildBeanProperties;
-import org.springframework.ide.eclipse.beans.ui.model.properties.RootBeanProperties;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 
 public class Bean extends Node implements IAdaptable {
 
@@ -102,12 +101,8 @@ public class Bean extends Node implements IAdaptable {
 	}
 
 	public Object getAdapter(Class adapter) {
-		if (adapter == IPropertySource.class && bean != null) {
-			if (bean.isRootBean()) {
-				return new RootBeanProperties(bean);
-			} else {
-				return new ChildBeanProperties(bean);
-			}
+		if (adapter == IPropertySource.class) {
+			return BeansUIUtils.getPropertySource(bean);
 		}
 		return null;
 	}
