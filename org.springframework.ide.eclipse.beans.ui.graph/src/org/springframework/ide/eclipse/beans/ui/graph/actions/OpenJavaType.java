@@ -30,7 +30,6 @@ import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditor;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
 import org.springframework.ide.eclipse.beans.ui.graph.parts.BeanPart;
-import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
 
 public class OpenJavaType extends EditorPartAction {
 
@@ -61,8 +60,7 @@ public class OpenJavaType extends EditorPartAction {
 		Bean bean = ((BeanPart) getFirstSelectedEditPart()).getBean();
 		String className = bean.getClassName();
 		if (className != null) {
-			IProject project = ((ProjectNode)
-								 bean.getConfigFile().getParent()).getProject();
+			IProject project = bean.getConfigFile().getProject();
 			IType type = BeansModelUtil.getJavaType(project, className);
 			if (type != null) {
 				BeansUIUtils.openInEditor(type);
