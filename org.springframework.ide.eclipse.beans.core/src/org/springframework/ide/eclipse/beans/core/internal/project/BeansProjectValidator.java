@@ -31,6 +31,8 @@ public class BeansProjectValidator extends BeansProjectBuilder {
 											file.getFullPath().toString()), 2);
 		BeansConfigValidator validator = new BeansConfigValidator(monitor);
 		validator.validate(file);
-		monitor.done();
+		if (!monitor.isCanceled()) {
+			monitor.done();
+		}
 	}
 }
