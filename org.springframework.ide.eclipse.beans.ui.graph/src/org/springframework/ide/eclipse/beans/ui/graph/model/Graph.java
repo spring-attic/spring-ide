@@ -101,14 +101,14 @@ public class Graph implements IAdaptable {
 	public void layout(Font font) {
 
 		// Connect all unreferenced beans with a temporary root bean
-		Bean root = new Bean(new BeanNode(null, "root"));
+		Bean root = new Bean(new BeanNode((ConfigNode) null, "root"));
 		graph.nodes.add(root);
 
 		// Iterate through all beans to calculate label width and add bean
 		// references to list of graph edges
-		Iterator iter = getBeans().iterator();
-		while (iter.hasNext()) {
-			Bean bean = (Bean) iter.next();
+		Iterator beans = getBeans().iterator();
+		while (beans.hasNext()) {
+			Bean bean = (Bean) beans.next();
 
 			// Calculate bean's dimension with a temporary bean figure 
 			BeanFigure dummy = new BeanFigure(bean);
@@ -128,15 +128,15 @@ public class Graph implements IAdaptable {
 				}
 			}
 
-			// Add all bean references in construcor arguments to list of graph
+			// Add all bean references in constructor arguments to list of graph
 			// edges
 			ConstructorArgument[] cargs = bean.getConstructorArguments();
 			for (int i = 0; i < cargs.length; i++) {
 				ConstructorArgument carg = cargs[i];
-				Iterator iter2 = carg.getBeanReferences().iterator();
-				while (iter2.hasNext()) {
+				Iterator iter = carg.getBeanReferences().iterator();
+				while (iter.hasNext()) {
 					RuntimeBeanReference beanRef = (RuntimeBeanReference)
-																   iter2.next();
+																	iter.next();
 					Bean targetBean = getBean(beanRef.getBeanName());
 					if (targetBean != null) {
 						graph.edges.add(new Reference(bean, targetBean,
@@ -149,10 +149,10 @@ public class Graph implements IAdaptable {
 			Property[] properties = bean.getProperties();
 			for (int i = 0; i < properties.length; i++) {
 				Property property = properties[i];
-				Iterator iter2 = property.getBeanReferences().iterator();
-				while (iter2.hasNext()) {
+				Iterator props = property.getBeanReferences().iterator();
+				while (props.hasNext()) {
 					RuntimeBeanReference beanRef = (RuntimeBeanReference)
-																   iter2.next();
+																   props.next();
 					Bean targetBean = getBean(beanRef.getBeanName());
 					if (targetBean != null) {
 						graph.edges.add(new Reference(bean, targetBean,
@@ -166,9 +166,9 @@ public class Graph implements IAdaptable {
 		// subgraph root beans
 		EdgeList rootEdges = new EdgeList();
 		List orphanBeans = new ArrayList();
-		iter = getBeans().iterator();
-		while (iter.hasNext()) {
-			Bean bean = (Bean) iter.next();
+		beans = getBeans().iterator();
+		while (beans.hasNext()) {
+			Bean bean = (Bean) beans.next();
 			if (bean.incoming.isEmpty()) {
 				if (bean.outgoing.isEmpty()) {
 					orphanBeans.add(bean);
@@ -182,9 +182,9 @@ public class Graph implements IAdaptable {
 		}
 
 		// Remove all subgraph root beans from graph
-		iter = orphanBeans.iterator();
-		while (iter.hasNext()) {
-			graph.nodes.remove(iter.next());
+		beans = orphanBeans.iterator();
+		while (beans.hasNext()) {
+			graph.nodes.remove(beans.next());
 		}
 
 		// Calculate position of all beans in graph
@@ -243,9 +243,9 @@ public class Graph implements IAdaptable {
 			maxX = MAX_ORPHAN_ROW_WIDTH;
 		}
 		maxY = 0;  // max height of all figures in current row
-		iter = orphanBeans.iterator();
-		while (iter.hasNext()) {
-			Bean bean = (Bean) iter.next();
+		beans = orphanBeans.iterator();
+		while (beans.hasNext()) {
+			Bean bean = (Bean) beans.next();
 
 			// If current row is filled then start new row
 			if ((x + bean.width) > maxX) {
