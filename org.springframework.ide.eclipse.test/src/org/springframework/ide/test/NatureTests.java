@@ -18,6 +18,9 @@ package org.springframework.ide.test;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.ui.internal.WorkbenchPlugin;
+import org.eclipse.ui.internal.decorators.DecoratorManager;
+import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
@@ -72,6 +75,8 @@ public class NatureTests extends AbstractSpringIdeTest {
 		
 		BeansProject proj = (BeansProject) model.getProject(eclipseProject);
 		assertNotNull(proj);
+		
+		assertTrue(hasBeansDecorator());
 
 		BeansCoreUtils.removeProjectNature(eclipseProject, BeansProjectNature.NATURE_ID);
 		project.waitForAutoBuild();
@@ -109,5 +114,17 @@ public class NatureTests extends AbstractSpringIdeTest {
 		}
 
 		return found;
+	}
+	
+
+	/**
+	 * 
+	 * @return true if the eclipse workbench knows about the
+	 * Spring Beans label decorator, false otherwise
+	 */
+	private boolean hasBeansDecorator() {
+		DecoratorManager decoratorManager = WorkbenchPlugin.getDefault().getDecoratorManager();
+        IBaseLabelProvider b = decoratorManager.getBaseLabelProvider("org.springframework.ide.eclipse.beans.ui.beansLabelDecorator");
+        return b != null;
 	}
 }
