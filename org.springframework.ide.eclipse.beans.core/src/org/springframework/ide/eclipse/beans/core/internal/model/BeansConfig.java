@@ -75,6 +75,16 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 		this.innerBeans = null;
 		this.beanClassesMap = null;
 		this.exception = null;
+
+		// Reset all config sets which contain this config
+		IBeansProject project = (IBeansProject) getElementParent();
+		Iterator configSets = project.getConfigSets().iterator();
+		while (configSets.hasNext()) {
+			BeansConfigSet configSet = (BeansConfigSet) configSets.next();
+			if (configSet.hasConfig(getElementName())) {
+				configSet.reset();
+			}
+		}
 	}
 
 	public boolean isReset() {
