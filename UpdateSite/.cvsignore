@@ -1,7 +1,0 @@
-plugins/*
-.sitebuild/build.log
-features/*
-features
-plugins
-*.zip
-logs
