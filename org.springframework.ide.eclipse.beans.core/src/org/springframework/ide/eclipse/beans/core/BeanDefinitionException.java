@@ -17,7 +17,7 @@
 package org.springframework.ide.eclipse.beans.core;
 
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.ide.eclipse.beans.core.internal.parser.LineNumberPreservingDOMParser;
+import org.springframework.ide.eclipse.core.io.xml.LineNumberPreservingDOMParser;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXParseException;
 

@@ -30,9 +30,9 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.BeansResourceChangeListener;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.IBeansResourceChangeEvents;
+import org.springframework.ide.eclipse.beans.core.internal.model.validator.BeansConfigValidator;
 import org.springframework.ide.eclipse.beans.core.model.BeansModelChangedEvent;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -41,6 +41,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelChangedListener;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
 /**
  * The <code>IBeansModel</code> manages instances of <code>IBeansProject</code>s.
@@ -236,7 +237,7 @@ public class BeansModel extends BeansModelElement implements IBeansModel {
 						 ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i = 0; i < projects.length; i++) {
 			IProject project = projects[i];
-			if (BeansCoreUtils.isBeansProject(project)) {
+			if (SpringCoreUtils.isSpringProject(project)) {
 				springProjects.add(project);
 			}
 		}
@@ -376,11 +377,11 @@ public class BeansModel extends BeansModelElement implements IBeansModel {
 			if (DEBUG) {
 				System.out.println("Bean class '" + className + "' changed");
 			}
-			BeansConfigValidator validator = new BeansConfigValidator(null);
+			BeansConfigValidator validator = new BeansConfigValidator();
 			Iterator iter = configs.iterator();
 			while (iter.hasNext()) {
 				IBeansConfig config = (IBeansConfig) iter.next();
-				validator.validate(config.getConfigFile());
+				validator.validate(config, null);
 			}
 		}
 	}
