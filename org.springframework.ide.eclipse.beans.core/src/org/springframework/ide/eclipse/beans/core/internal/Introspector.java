@@ -40,6 +40,20 @@ public class Introspector {
 		return constructors;
 	}
 
+	public static boolean hasConstructor(IType type, int numberOfParameters)
+													throws JavaModelException {
+		List constructors = new ArrayList();
+		IMethod[] methods = type.getMethods();
+		for (int i = 0; i < methods.length; i++) {
+			IMethod method = methods[i];
+			if (method.isConstructor() &&
+						method.getNumberOfParameters() == numberOfParameters) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public static boolean hasWritableProperty(IType type, String propertyName)
 													 throws JavaModelException {
 		if (propertyName == null || propertyName.length() == 0) {
