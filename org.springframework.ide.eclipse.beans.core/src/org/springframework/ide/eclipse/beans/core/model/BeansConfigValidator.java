@@ -32,34 +32,25 @@ import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtil;
-import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
-import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
-import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 
 public class BeansConfigValidator {
 
-	private IFile file;
+	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID +
+													   "/model/validator/debug";
+	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
+
 	private IProgressMonitor monitor;
 
-	public BeansConfigValidator(IFile file, IProgressMonitor monitor) {
-		this.file = file;
+	public BeansConfigValidator(IProgressMonitor monitor) {
 		this.monitor = monitor;
 	}
 
-	public void validate() {
+	public void validate(IFile file) {
+		if (monitor != null && monitor.isCanceled()) {
+			return;
+		}
 		if (file != null && file.isAccessible()) {
-			if (monitor != null) {
-				monitor.beginTask(BeansCorePlugin.getFormattedMessage(
-											"BeansConfigValidator.validateFile",
-											file.getFullPath().toString()), 3);
-			}
 			BeansCoreUtils.deleteProblemMarkers(file);
-			if (monitor != null) {
-				monitor.worked(1);
-			}
 			IBeansProject project = BeansCorePlugin.getModel().getProject(
 															 file.getProject());
 			IBeansConfig config = project.getConfig(file);
@@ -76,6 +67,9 @@ public class BeansConfigValidator {
 				validateConfig(config);
 				if (monitor != null) {
 					monitor.worked(1);
+					if (monitor.isCanceled()) {
+						return;
+					}
 				}
 	
 				// Finally validate the config file within all defined config sets
@@ -83,6 +77,9 @@ public class BeansConfigValidator {
 				if (configSets.size() > 0) {
 					Iterator iter = configSets.iterator();
 					while (iter.hasNext()) {
+						if (monitor != null && monitor.isCanceled()) {
+							return;
+						}
 						IBeansConfigSet configSet = (IBeansConfigSet)
 																	iter.next();
 						if (configSet.hasConfig(file)) {
@@ -94,13 +91,14 @@ public class BeansConfigValidator {
 					monitor.worked(1);
 				}
 			}
-			if (monitor != null) {
-				monitor.done();
-			}
 		}
 	}
 
 	protected void validateConfig(IBeansConfig config) {
+		if (DEBUG) {
+			System.out.println("Validating config '" + config.getElementName() +
+							   "'");
+		}
 		if (monitor != null) {
 			monitor.subTask(BeansCorePlugin.getFormattedMessage(
 										  "BeansConfigValidator.validateConfig",
@@ -110,6 +108,9 @@ public class BeansConfigValidator {
 		// Validate all beans
 		Iterator iter = config.getBeans().iterator();
 		while (iter.hasNext()) {
+			if (monitor != null && monitor.isCanceled()) {
+				return;
+			}
 			IBean bean = (IBean) iter.next();
 			validateBean(bean, config);
 		}
@@ -117,6 +118,9 @@ public class BeansConfigValidator {
 		// Validate all inner beans
 		iter = config.getInnerBeans().iterator();
 		while (iter.hasNext()) {
+			if (monitor != null && monitor.isCanceled()) {
+				return;
+			}
 			IBean bean = (IBean) iter.next();
 			validateBean(bean, config);
 		}
@@ -124,6 +128,10 @@ public class BeansConfigValidator {
 
 	protected void validateConfigSet(IBeansConfigSet configSet,
 									 IBeansConfig config) {
+		if (DEBUG) {
+			System.out.println("Validating config '" + config.getElementName() +
+							   "' in set '" + configSet.getElementName() + "'");
+		}
 		if (monitor != null) {
 			monitor.subTask(BeansCorePlugin.getFormattedMessage(
 									   "BeansConfigValidator.validateConfigSet",
@@ -139,11 +147,14 @@ public class BeansConfigValidator {
 				IBean bean = (IBean) beans.next();
 				Iterator configs = configSet.getConfigs().iterator();
 				while (configs.hasNext()) {
+					if (monitor != null && monitor.isCanceled()) {
+						return;
+					}
 					String configName = (String) configs.next();
 					if (configName.equals(config.getElementName())) {
 						break;
 					}
-					IBeansConfig cfg = getConfig(configName); 
+					IBeansConfig cfg = getConfig(project, configName); 
 					if (cfg != null && cfg.hasBean(bean.getElementName())) {
 						BeansCoreUtils.createProblemMarker(
 							config.getConfigFile(), "Overrides bean in " +
@@ -160,6 +171,9 @@ public class BeansConfigValidator {
 
 	protected void validateBean(IBean bean, IBeansConfig config) {
 		if (monitor != null) {
+			if (monitor.isCanceled()) {
+				return;
+			}
 			monitor.subTask(BeansCorePlugin.getFormattedMessage(
 				   "BeansConfigValidator.validateBean", bean.getElementName()));
 		}
@@ -220,6 +234,9 @@ public class BeansConfigValidator {
 				boolean found = false;
 				List cons = Introspector.getConstructors(type);
 				for (Iterator iter = cons.iterator(); iter.hasNext();) {
+					if (monitor.isCanceled()) {
+						return;
+					}
 					IMethod method = (IMethod) iter.next();
 					if (method.getNumberOfParameters() == cargs.size()) {
 						found = true;
@@ -250,6 +267,9 @@ public class BeansConfigValidator {
 		}
 		Iterator iter = bean.getProperties().iterator();
 		while (iter.hasNext()) {
+			if (monitor != null && monitor.isCanceled()) {
+				return;
+			}
 			IBeanProperty property = (IBeanProperty) iter.next();
 			String propertyName = property.getElementName();
 			boolean isWritableProperty = false;
@@ -270,15 +290,13 @@ public class BeansConfigValidator {
 		}
 	}
 
-	private IBeansConfig getConfig(String configName) {
-		IBeansModel model = BeansCorePlugin.getModel();
-		IBeansProject project;
+	private IBeansConfig getConfig(IBeansProject project, String configName) {
+
+		// For external project get the corresponding project from beans model 
 		if (configName.charAt(0) == '/') {
 			String projectName = configName.substring(0,
 													configName.indexOf('/', 1));
-			project = model.getProject(projectName);
-		} else {
-			project = model.getProject(file.getProject());
+			project = BeansCorePlugin.getModel().getProject(projectName);
 		}
 		return (project != null ? project.getConfig(configName) : null);
 	}

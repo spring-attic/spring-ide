@@ -26,6 +26,11 @@ public class BeansProjectValidator extends BeansProjectBuilder {
 	public static final String BUILDER_ID = BeansCorePlugin.PLUGIN_ID +
     														  ".beansvalidator";
 	protected void buildFile(IFile file, IProgressMonitor monitor) {
-		new BeansConfigValidator(file, monitor).validate();	
+		monitor.beginTask(BeansCorePlugin.getFormattedMessage(
+											"BeansConfigValidator.validateFile",
+											file.getFullPath().toString()), 2);
+		BeansConfigValidator validator = new BeansConfigValidator(monitor);
+		validator.validate(file);
+		monitor.done();
 	}
 }
