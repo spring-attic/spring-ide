@@ -10,7 +10,7 @@ Changes in version 1.1.0 (1.9.2004):
 
 * removed dependency to SAX API in public methods
 
-* beans project validator now checks constructor arguments too
+* beans project validator now checks constructor arguments and import tags too
 
 * config files are re-validated automatically if source code of corresponding bean
   classes has been modified
