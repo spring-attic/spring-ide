@@ -183,7 +183,7 @@ public class BeanNode extends AbstractNode {
 	}
 
 	public boolean isRootBean() {
-		return (bean != null ? bean.isRootBean() : false);
+		return (bean != null ? bean.isRootBean() : true);
 	}
 
 	public boolean isSingleton() {
