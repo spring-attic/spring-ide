@@ -70,28 +70,32 @@ public class ModelImageDescriptor extends CompositeImageDescriptor {
 		int y = 0;
 		ImageData data = null;
 		if ((flags & INode.FLAG_IS_EXTERNAL) != 0) {
-			x = 0;
 			data = BeansUIImages.DESC_OVR_EXTERNAL.getImageData();
+			x = getSize().x - data.width;
 			y = getSize().y - data.height;
 			drawImage(data, x, y);
 		}
 		if ((flags & INode.FLAG_HAS_ERRORS) != 0) {
-			x = getSize().x;
-			y = 0;
 			data = BeansUIImages.DESC_OVR_ERROR.getImageData();
-			x -= data.width;
+			x = 0;
+			y = getSize().y - data.height;
 			drawImage(data, x, y);
 		} else if ((flags & INode.FLAG_HAS_WARNINGS) != 0) {
-			x = getSize().x;
-			y = 0;
 			data = BeansUIImages.DESC_OVR_WARNING.getImageData();
-			x -= data.width;
+			x = 0;
+			y = getSize().y - data.height;
 			drawImage(data, x, y);
 		}
 		if ((flags & INode.FLAG_IS_PROTOTYPE) != 0) {
+			data = BeansUIImages.DESC_OVR_PROTOTYPE.getImageData();
 			x = 0;
 			y = 0;
-			data = BeansUIImages.DESC_OVR_PROTOTYPE.getImageData();
+			drawImage(data, x, y);
+		}
+		if ((flags & INode.FLAG_IS_ABSTRACT) != 0) {
+			data = BeansUIImages.DESC_OVR_ABSTRACT.getImageData();
+			x = getSize().x - data.width;
+			y = 0;
 			drawImage(data, x, y);
 		}
 	}

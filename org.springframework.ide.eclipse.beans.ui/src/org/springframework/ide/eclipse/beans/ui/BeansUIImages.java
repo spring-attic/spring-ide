@@ -121,6 +121,7 @@ public class BeansUIImages {
 	public static final ImageDescriptor DESC_OVR_WARNING = create(OVR, "warning_ovr.gif");
 	public static final ImageDescriptor DESC_OVR_PROTOTYPE = create(OVR, "prototype_ovr.gif");
 	public static final ImageDescriptor DESC_OVR_EXTERNAL = create(OVR, "external_ovr.gif");
+	public static final ImageDescriptor DESC_OVR_ABSTRACT = create(OVR, "abstract_ovr.gif");
 
 	/**
 	 * Returns the <code>Image<code> identified by the given key,
