@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.draw2d.graph.Node;
 import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConstructorArgumentNode;
+import org.springframework.ide.eclipse.beans.ui.model.INode;
 import org.springframework.ide.eclipse.beans.ui.model.PropertyNode;
 
 public class Bean extends Node implements IAdaptable {
@@ -84,6 +85,10 @@ public class Bean extends Node implements IAdaptable {
 
 	public boolean isRootBean() {
 		return node.isRootBean();
+	}
+
+	public boolean hasError() {
+		return (node.getFlags() & INode.FLAG_HAS_ERRORS) != 0;
 	}
 
 	public Object getAdapter(Class adapter) {
