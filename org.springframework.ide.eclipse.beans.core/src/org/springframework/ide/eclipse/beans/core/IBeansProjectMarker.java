@@ -60,4 +60,7 @@ public interface IBeansProjectMarker {
 	 public static final int ERROR_CODE_UNDEFINED_REFERENCE = 8;
 	 public static final int ERROR_CODE_INVALID_BEAN_DEFINITION = 9;
 	 public static final int ERROR_CODE_INVALID_BEAN_ALIAS = 10;
+	 public static final int ERROR_CODE_UNDEFINED_FACTORY_BEAN = 11;
+	 public static final int ERROR_CODE_INVALID_FACTORY_BEAN = 12;
+	 public static final int ERROR_CODE_UNDEFINED_FACTORY_BEAN_METHOD = 13;
 }

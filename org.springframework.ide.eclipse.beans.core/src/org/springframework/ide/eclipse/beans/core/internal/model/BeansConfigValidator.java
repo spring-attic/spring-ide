@@ -34,6 +34,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -229,11 +230,11 @@ public class BeansConfigValidator {
 	protected void validateBeanDefinitionHolder(IBean bean,
 											 BeanDefinitionRegistry registry) {
 		BeanDefinitionHolder bdHolder = ((Bean) bean).getBeanDefinitionHolder();
-
+		AbstractBeanDefinition bd = (AbstractBeanDefinition)
+												  bdHolder.getBeanDefinition();
 		// Validate bean name
 		try {
-			registry.registerBeanDefinition(bdHolder.getBeanName(),
-											bdHolder.getBeanDefinition());
+			registry.registerBeanDefinition(bdHolder.getBeanName(), bd);
 		} catch (BeanDefinitionStoreException e) {
 			BeansModelUtils.createProblemMarker(bean, e.getMessage(),
 							IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
@@ -257,15 +258,91 @@ public class BeansConfigValidator {
 				}
 			}
 		}
+
+		// Validate static factory method in this bean
+		if (bd.getBeanClassName() != null &&
+										   bd.getFactoryMethodName() != null &&
+										   bd.getFactoryBeanName() == null) {
+			validateFactoryMethod(bean, bd.getBeanClassName(),
+								  bd.getFactoryMethodName(), true, registry);
+		}
+	}
+
+	protected void validateFactoryBean(IBean bean, String beanName,
+						  String methodName, BeanDefinitionRegistry registry) {
+		try {
+			AbstractBeanDefinition factoryBd = (AbstractBeanDefinition)
+										  registry.getBeanDefinition(beanName);
+			if (factoryBd.isAbstract() ||
+										factoryBd.getBeanClassName() == null) {
+				BeansModelUtils.createProblemMarker(bean,
+						   "Invalid factory bean '" + beanName + "'",
+						   IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+					  	   IBeansProjectMarker.ERROR_CODE_INVALID_FACTORY_BEAN,
+						   bean.getElementName(), beanName);
+			} else {
+				validateFactoryMethod(bean, factoryBd.getBeanClassName(),
+									  methodName, false, registry);
+			}
+		} catch (NoSuchBeanDefinitionException e) {
+			if (e.getBeanName().equals(bean.getElementName())) {
+				BeansModelUtils.createProblemMarker(bean,
+						 "Bean name and factory bean name are the same",
+						 IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+						 IBeansProjectMarker.ERROR_CODE_UNDEFINED_PARENT_BEAN,
+						 bean.getElementName(), e.getBeanName());
+			} else {
+				BeansModelUtils.createProblemMarker(bean,
+						 "Factory bean '" + beanName + "' not found",
+						 IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+						 IBeansProjectMarker.ERROR_CODE_UNDEFINED_FACTORY_BEAN,
+						 bean.getElementName(), beanName);
+			}
+		}
+	}
+
+	protected void validateFactoryMethod(IBean bean, String className,
+										String methodName, boolean isStatic,
+										BeanDefinitionRegistry registry) {
+		IType type = BeansModelUtils.getJavaType(
+					 bean.getConfig().getConfigFile().getProject(), className);
+		if (type == null) {
+			BeansModelUtils.createProblemMarker(bean,
+							"Factory bean class '" + className + "' not found",
+							IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+							IBeansProjectMarker.ERROR_CODE_CLASS_NOT_FOUND,
+							bean.getElementName(), className);
+		} else {
+			try {
+				if (Introspector.findMethod(type, methodName, -1, true,
+											isStatic) == null) {
+					BeansModelUtils.createProblemMarker(bean,
+							(isStatic ? "Static" : "Instance") +
+							" factory method '" + methodName +
+							"' in factory bean class '" + className +
+							"' not found", IMarker.SEVERITY_ERROR,
+							bean.getElementStartLine(),
+							IBeansProjectMarker.ERROR_CODE_UNDEFINED_FACTORY_BEAN_METHOD,
+							bean.getElementName(), methodName);
+				}
+			} catch (JavaModelException e) {
+				BeansCorePlugin.log(e);
+			}
+		}
 	}
 
 	protected void validateConstructorArguments(IBean bean, IType type,
 									ConstructorArgumentValues argumentValues) {
 		monitor.subTask(BeansCorePlugin.getFormattedMessage(
-									"BeansConfigValidator.validateConstructors",
-									bean.getElementName()));
+						   "BeansConfigValidator.validateConstructorArguments",
+						   bean.getElementName()));
+		// Skip validation if default constructor or factory bean
 		int numArguments = argumentValues.getArgumentCount();
-		if (numArguments > 0) {
+		BeanDefinitionHolder bdHolder = ((Bean)
+											   bean).getBeanDefinitionHolder();
+		AbstractBeanDefinition bd = (AbstractBeanDefinition)
+												  bdHolder.getBeanDefinition();
+		if (numArguments > 0 && bd.getFactoryBeanName() == null) {
 			try {
 				if (!Introspector.hasConstructor(type, numArguments)) {
 					BeansModelUtils.createProblemMarker(bean,
@@ -333,6 +410,17 @@ public class BeansConfigValidator {
 			}
 			IBean bean = (IBean) beans.next();
 			validateRefBeansInBean(bean, registry);
+
+			// Validate non-static factory method in factory bean
+			BeanDefinitionHolder bdHolder = ((Bean)
+											   bean).getBeanDefinitionHolder();
+			AbstractBeanDefinition bd = (AbstractBeanDefinition)
+												  bdHolder.getBeanDefinition();
+			if (bd.getFactoryBeanName() != null &&
+										   bd.getFactoryMethodName() != null) {
+				validateFactoryBean(bean, bd.getFactoryBeanName(),
+									bd.getFactoryMethodName(), registry);
+			}
 		}
 
 		// Validate references of all inner beans
@@ -343,6 +431,17 @@ public class BeansConfigValidator {
 			}
 			IBean bean = (IBean) beans.next();
 			validateRefBeansInBean(bean, registry);
+
+			// Validate non-static factory method in factory bean
+			BeanDefinitionHolder bdHolder = ((Bean)
+											   bean).getBeanDefinitionHolder();
+			AbstractBeanDefinition bd = (AbstractBeanDefinition)
+												  bdHolder.getBeanDefinition();
+			if (bd.getFactoryBeanName() != null &&
+										   bd.getFactoryMethodName() != null) {
+				validateFactoryBean(bean, bd.getFactoryBeanName(),
+									bd.getFactoryMethodName(), registry);
+			}
 		}
 	}
 
@@ -410,14 +509,14 @@ public class BeansConfigValidator {
 				validateRefBeansInValue(element, prop.getValue(), registry);
 			}
 		} catch (NoSuchBeanDefinitionException e) {
+
+			// Ignore all exceptions but equal bean and parent names
 			if (e.getBeanName().equals(bean.getElementName())) {
 				BeansModelUtils.createProblemMarker(bean,
 						  "Bean name and parent bean name are the same",
 						  IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
 						  IBeansProjectMarker.ERROR_CODE_UNDEFINED_PARENT_BEAN,
 						  bean.getElementName(), e.getBeanName());
-			} else {
-				BeansCorePlugin.log(e);
 			}
 		}
 	}
