@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
@@ -154,30 +155,50 @@ public class BeansConfigSet extends BeansModelElement implements IBeansConfigSet
 			Iterator iter = configNames.iterator();
 			while (iter.hasNext()) {
 				String configName = (String) iter.next();
-				IBeansConfig config = project.getConfig(configName);
-
-				// Add beans to map
-				Iterator beans = config.getBeans().iterator();
-				while (beans.hasNext()) {
-					IBean bean = (IBean) beans.next();
-					if (allowBeanDefinitionOverriding ||
+				IBeansConfig config = getConfig(configName);
+				if (config != null) {
+	
+					// Add beans to map
+					Iterator beans = config.getBeans().iterator();
+					while (beans.hasNext()) {
+						IBean bean = (IBean) beans.next();
+						if (allowBeanDefinitionOverriding ||
 								 !beansMap.containsKey(bean.getElementName())) {
-						beansMap.put(bean.getElementName(), bean);
+							beansMap.put(bean.getElementName(), bean);
+						}
 					}
-				}
-
-				// Add inner beans to map
-				beans = config.getInnerBeans().iterator();
-				while (beans.hasNext()) {
-					IBean bean = (IBean) beans.next();
-					if (allowBeanDefinitionOverriding ||
+	
+					// Add inner beans to map
+					beans = config.getInnerBeans().iterator();
+					while (beans.hasNext()) {
+						IBean bean = (IBean) beans.next();
+						if (allowBeanDefinitionOverriding ||
 								 !beansMap.containsKey(bean.getElementName())) {
-						beansMap.put(bean.getElementName(), bean);
+							beansMap.put(bean.getElementName(), bean);
+						}
 					}
 				}
 			}
 		}
 		return beansMap;
+	}
+
+	private void addBeanToMap(IBean bean, Map beansMap) {
+
+		// Add bean name
+		String beanName = bean.getElementName();
+		if (allowBeanDefinitionOverriding || !beansMap.containsKey(beanName)) {
+			beansMap.put(beanName, bean);
+		}
+
+		// Add bean aliases
+		String[] aliases = bean.getAliases();
+		for (int i = 0; i < aliases.length; i++) {
+			String alias = aliases[i];
+			if (allowBeanDefinitionOverriding || !beansMap.containsKey(alias)) {
+				beansMap.put(alias, bean);
+			}
+		}
 	}
 
 	/**
@@ -202,5 +223,19 @@ public class BeansConfigSet extends BeansModelElement implements IBeansConfigSet
 			}
 		}
 		return beanClassesMap;
+	}
+
+	private IBeansConfig getConfig(String configName) {
+		IBeansProject project;
+
+		// For external project get the corresponding project from beans model 
+		if (configName.charAt(0) == '/') {
+			String projectName = configName.substring(0,
+													configName.indexOf('/', 1));
+			project = BeansCorePlugin.getModel().getProject(projectName);
+		} else {
+			project = (IBeansProject) getElementParent();
+		}
+		return (project != null ? project.getConfig(configName) : null);
 	}
 }
