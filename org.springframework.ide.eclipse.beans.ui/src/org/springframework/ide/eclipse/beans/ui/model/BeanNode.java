@@ -70,6 +70,7 @@ public class BeanNode extends AbstractNode {
 	 */
 	public BeanNode(ConfigSetNode configSet, BeanNode bean) {
 		super(configSet, bean.getName());
+		setFlags(bean.getFlags());
 		setStartLine(bean.getStartLine()); 
 		this.config = bean.getConfigNode(); 
 		this.bean = bean.getBean();
