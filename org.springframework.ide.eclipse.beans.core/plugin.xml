@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
 <plugin
    id="org.springframework.ide.eclipse.beans.core"
    name="%pluginName"
-   version="1.1.0"
+   version="1.2.0"
    provider-name="%providerName"
    class="org.springframework.ide.eclipse.beans.core.BeansCorePlugin">
 
@@ -11,59 +12,32 @@
          <export name="*"/>
          <packages prefixes="org.springframework.ide.eclipse.beans.core"/>
       </library>
-      <library name="spring-core.jar">
-         <export name="*"/>
-         <packages prefixes="org.springframework"/>
-      </library>
-      <library name="commons-logging.jar">
-         <packages prefixes="org.apache.commons.logging"/>
-      </library>
-      <library name="xmlParserAPIs.jar">
-         <packages prefixes="javax.xml,org.apache.xmlcommons,org.w3c.dom,org.xml.sax"/>
-      </library>
-      <library name="xercesImpl.jar">
-         <packages prefixes="org.apache,org.w3c.dom"/>
-      </library>
    </runtime>
    <requires>
       <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.springframework.ide.eclipse.core"/>
    </requires>
 
-   <extension
-         id="beansnature"
-         name="%beansNature"
-         point="org.eclipse.core.resources.natures">
-      <runtime>
-         <run
-               class="org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectNature">
-         </run>
-      </runtime>
-      <builder
-            id="org.springframework.ide.eclipse.beans.core.beansvalidator">
-      </builder>
-   </extension>
    <extension
          id="problemmarker"
          name="%beansProblemMarker"
          point="org.eclipse.core.resources.markers">
-      <super type="org.eclipse.core.resources.problemmarker"/>
-	  <super type="org.eclipse.core.resources.textmarker"/>
+      <super type="org.springframework.ide.eclipse.core.problemmarker"/>
       <persistent value="true"/>
       <attribute name="errorCode"/>
       <attribute name="beanID"/>
       <attribute name="errorData"/>
    </extension>
+
    <extension
          id="beansvalidator"
          name="%beansValidator"
-         point="org.eclipse.core.resources.builders">
-      <builder
-            hasNature="true">
-         <run
-               class="org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectValidator">
-         </run>
-      </builder>
+         point="org.springframework.ide.eclipse.core.builders">
+      <run
+            class="org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectValidator">
+      </run>
    </extension>
 
 </plugin>

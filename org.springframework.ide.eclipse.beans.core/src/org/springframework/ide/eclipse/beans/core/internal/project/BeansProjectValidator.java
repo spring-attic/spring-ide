@@ -17,16 +17,55 @@
 package org.springframework.ide.eclipse.beans.core.internal.project;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigValidator;
+import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
+import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
+import org.springframework.ide.eclipse.beans.core.internal.model.validator.BeansConfigValidator;
+import org.springframework.ide.eclipse.beans.core.internal.model.validator.BeansValidatorUtil;
+import org.springframework.ide.eclipse.beans.core.internal.model.validator.IBeansConfigValidator;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 
-public class BeansProjectValidator extends BeansProjectBuilder {
+public class BeansProjectValidator implements IProjectBuilder {
 
-	public static final String BUILDER_ID = BeansCorePlugin.PLUGIN_ID +
-    														  ".beansvalidator";
-	protected void buildFile(IFile file, IProgressMonitor monitor) {
-		BeansConfigValidator validator = new BeansConfigValidator(monitor);
-		validator.validate(file);
+	public void build(IFile file, IProgressMonitor monitor) {
+		if (BeansCoreUtils.isBeansConfig(file)) {
+			monitor.beginTask(BeansCorePlugin.getFormattedMessage(
+					  "BeansProjectValidator.validateFile",
+					  file.getFullPath().toString()), IProgressMonitor.UNKNOWN);
+			if (monitor.isCanceled()) {
+				throw new OperationCanceledException();
+			}
+
+			// Delete all problem markers created by Spring IDE
+			BeansCoreUtils.deleteProblemMarkers(file);
+
+			// Reset the corresponding config within the bean model to force
+			// re-reading the config file and updating the model
+			IBeansProject project = BeansCorePlugin.getModel().getProject(
+															 file.getProject());
+			BeansConfig config = (BeansConfig) project.getConfig(file);
+			config.reset();
+
+			// At first check if model was able to parse the config file 
+			BeanDefinitionException e = config.getException();
+			if (e != null) {
+				BeansValidatorUtil.createProblemMarker(config, e.getMessage(),
+								 IMarker.SEVERITY_ERROR, e.getLineNumber(),
+								 IBeansProjectMarker.ERROR_CODE_PARSING_FAILED);
+			} else {
+				// TODO implement extension point and maintain list of validators
+				
+				// Now validate the modified config file
+				IBeansConfigValidator validator = new BeansConfigValidator();
+				validator.validate(config, monitor);
+			}
+			monitor.done();
+		}
 	}
 }
