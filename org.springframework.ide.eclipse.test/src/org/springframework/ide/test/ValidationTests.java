@@ -29,22 +29,22 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtil;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
-import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectNature;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
+import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
 /**
  * this class tests the config file validator. The test
@@ -239,7 +239,7 @@ public class ValidationTests extends AbstractSpringIdeTest {
 
 	 private BeansProject createBeansProject() {
 		IProject eclipseProject = project.getProject();
-		BeansCoreUtils.addProjectNature(eclipseProject, BeansProjectNature.NATURE_ID);				
+		SpringCoreUtils.addProjectNature(eclipseProject, SpringCore.NATURE_ID);				
 		project.waitForAutoBuild();
 
 		IBeansModel model = BeansCorePlugin.getModel();

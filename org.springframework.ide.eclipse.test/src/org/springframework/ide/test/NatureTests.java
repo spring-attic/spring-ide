@@ -18,15 +18,15 @@ package org.springframework.ide.test;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.decorators.DecoratorManager;
-import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
-import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectNature;
-import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectValidator;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
+import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.core.internal.project.SpringProjectNature;
 
 /**
  * Test addition and removal of Spring Beans nature
@@ -63,11 +63,11 @@ public class NatureTests extends AbstractSpringIdeTest {
 		assertFalse(model.hasProject(eclipseProject));
 		assertFalse(hasBeansBuilder());
 
-		BeansCoreUtils.addProjectNature(eclipseProject, BeansProjectNature.NATURE_ID);
+		SpringCoreUtils.addProjectNature(eclipseProject, SpringCore.NATURE_ID);
 		project.waitForAutoBuild();
 		
-		assertNotNull (eclipseProject.getNature(BeansProjectNature.NATURE_ID));
-		assertTrue ( eclipseProject.getNature(BeansProjectNature.NATURE_ID) instanceof BeansProjectNature);
+		assertNotNull (eclipseProject.getNature(SpringCore.NATURE_ID));
+		assertTrue ( eclipseProject.getNature(SpringCore.NATURE_ID) instanceof SpringProjectNature);
 
 		assertTrue(hasBeansProjectNature());
 		assertTrue(model.hasProject(eclipseProject));
@@ -78,7 +78,7 @@ public class NatureTests extends AbstractSpringIdeTest {
 		
 		assertTrue(hasBeansDecorator());
 
-		BeansCoreUtils.removeProjectNature(eclipseProject, BeansProjectNature.NATURE_ID);
+		SpringCoreUtils.removeProjectNature(eclipseProject, SpringCore.NATURE_ID);
 		project.waitForAutoBuild();
 			
 		assertFalse(hasBeansProjectNature());
@@ -93,7 +93,7 @@ public class NatureTests extends AbstractSpringIdeTest {
 	 * @throws CoreException
 	 */
 	private boolean hasBeansProjectNature() throws CoreException {
-		return BeansCoreUtils.isBeansProject(project.getProject());
+		return SpringCoreUtils.isSpringProject(project.getProject());
 		// return project.getProject().hasNature(BeansProjectNature.NATURE_ID);
 	}
 	
@@ -109,7 +109,7 @@ public class NatureTests extends AbstractSpringIdeTest {
 
 		boolean found = false;
 		for (int i = 0; i < commands.length; ++i) {
-			if (commands[i].getBuilderName().equals(BeansProjectValidator.BUILDER_ID))
+			if (commands[i].getBuilderName().equals(SpringCore.BUILDER_ID))
 				found = true;
 		}
 
