@@ -18,17 +18,16 @@ package org.springframework.ide.eclipse.beans.core.internal.model.resources;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.springframework.core.io.AbstractResource;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
 
 /**
  * Resource implementation for Eclipse file handles.
@@ -37,15 +36,16 @@ import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
  */
 public class FileResource extends AbstractResource {
 
-	private final File file;
+	private File file;
 
 	/**
 	 * Create a new FileResource.
 	 * @param file a File handle
 	 */
 	public FileResource(IFile file) {
-	    if (file == null) throw new BeanDefinitionException("Null file");
-		this.file = file.getLocation().toFile();
+		if (file != null) {
+			this.file = file.getLocation().toFile();
+		}
 	}
 
 	/**
@@ -58,49 +58,44 @@ public class FileResource extends AbstractResource {
 											   "Eclipse workspace");
 		}
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		this.file = root.findMember(path).getFullPath().toFile();
+		IResource member = root.findMember(path);
+		if (member != null) {
+			file = member.getFullPath().toFile();
+		}
 	}
 
 	public boolean exists() {
-		return this.file.exists();
+		return (file != null && file.exists());
 	}
 
 	public InputStream getInputStream() throws IOException {
-			return new FileInputStream(this.file);
+		if (file == null) {
+			throw new FileNotFoundException("File not found");
+		}
+		return new FileInputStream(file);
 	}
 
 	public URL getURL() throws IOException {
-		return new URL(URL_PROTOCOL_FILE + ":" + this.file.getAbsolutePath());
+		if (file == null) {
+			throw new FileNotFoundException("File not found");
+		}
+		return new URL(URL_PROTOCOL_FILE + ":" + file.getAbsolutePath());
 	}
 
 	public File getFile() {
 		return file;
 	}
 
-	public Resource createRelative(String relativePath) {
-		File parent = this.file.getParentFile();
-		if (parent != null) {
-			return new FileSystemResource(new File(parent, relativePath));
-		}
-		else {
-			return new FileSystemResource(relativePath);
-		}
-	}
-
-	public String getFilename() {
-		return this.file.getName();
-	}
-
 	public String getDescription() {
-		return "file [" + this.file.getAbsolutePath() + "]";
+		return "file [" + (file != null ? file.getAbsolutePath() : "") + "]";
 	}
 
 	public boolean equals(Object obj) {
 		return (obj == this || (obj instanceof FileResource &&
-								  this.file.equals(((FileResource) obj).file)));
+									 (((FileResource) obj).file).equals(file)));
 	}
 
 	public int hashCode() {
-		return this.file.hashCode();
+		return (file != null ? file.hashCode() : 0);
 	}
 }
