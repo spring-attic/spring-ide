@@ -50,7 +50,7 @@ public class ConfigNode extends AbstractNode {
 	 */
 	public ConfigNode(ProjectNode project, String name) {
 		super(project, name);
-		setBeansConfig(name, project);
+		setBeansConfig(project);
 	}
 
 	/**
@@ -61,7 +61,15 @@ public class ConfigNode extends AbstractNode {
 	 */
 	public ConfigNode(ConfigSetNode configSet, String name) {
 		super(configSet, name);
-		setBeansConfig(name, configSet.getProjectNode());
+		setBeansConfig(configSet.getProjectNode());
+	}
+
+	public ProjectNode getProjectNode() {
+		Object parent = getParent();
+		if (parent instanceof ConfigSetNode) {
+			return ((ConfigSetNode) parent).getProjectNode();
+		}
+		return (ProjectNode) parent;
 	}
 
 	public IFile getConfigFile() {
@@ -140,7 +148,11 @@ public class ConfigNode extends AbstractNode {
 
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPropertySource.class) {
-			return new FilePropertySource(getConfigFile());
+			IFile file = getConfigFile();
+			if (file != null) {
+				return new FilePropertySource(getConfigFile());
+			}
+			return getName();
 		}
 		return null;
 	}
@@ -154,7 +166,8 @@ public class ConfigNode extends AbstractNode {
 		return text.toString();
 	}
 
-	private void setBeansConfig(String configName, ProjectNode project) {
+	private void setBeansConfig(ProjectNode project) {
+		String configName = getName();
 		if (configName.charAt(0) == '/') {
 			int configNamePos = configName.indexOf('/', 1);
 			String projectName = configName.substring(1, configNamePos);
@@ -179,7 +192,10 @@ public class ConfigNode extends AbstractNode {
 	private void createBeans() {
 		beans = new ArrayList();
 		if (config == null) {
-			setErrorMessage("Project not open", -1);
+			int configNamePos = getName().indexOf('/', 1);
+			String projectName = getName().substring(1, configNamePos);
+			setErrorMessage("Undefined Spring project '" + projectName + "'",
+							-1);
 		} else {
 			BeanDefinitionException exception = config.getException();
 			if (exception != null	) {
