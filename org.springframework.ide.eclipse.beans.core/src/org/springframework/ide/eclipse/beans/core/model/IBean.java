@@ -29,6 +29,8 @@ public interface IBean extends IBeansModelElement {
 
 	Collection getConstructorArguments();
 
+	IBeanProperty getProperty(String name);
+
 	Collection getProperties();
 
 	Collection getInnerBeans();

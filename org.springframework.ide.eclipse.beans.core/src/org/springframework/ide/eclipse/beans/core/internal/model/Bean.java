@@ -18,8 +18,10 @@ package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IResource;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -41,6 +43,7 @@ public class Bean extends BeansModelElement implements IBean {
 	private BeanDefinitionHolder beanDefinitionHolder;
 	private List constructorArguments;
 	private List properties;
+	private Map propertiesMap;
 	private List innerBeans;
 	private IBean outerBean;
 
@@ -48,6 +51,7 @@ public class Bean extends BeansModelElement implements IBean {
 		super(config, null);   // the name we get from the BeanDefinitionHolder
 		this.constructorArguments = new ArrayList();
 		this.properties = new ArrayList();
+		this.propertiesMap = new HashMap();
 		this.innerBeans = new ArrayList();
 	}
 
@@ -96,6 +100,14 @@ public class Bean extends BeansModelElement implements IBean {
 
 	public void addProperty(IBeanProperty property) {
 		properties.add(property);
+		propertiesMap.put(property.getElementName(), property);
+	}
+
+	public IBeanProperty getProperty(String name) {
+		if (name != null) {
+			return (IBeanProperty) propertiesMap.get(name);
+		}
+		return null;
 	}
 
 	public Collection getProperties() {
@@ -169,7 +181,7 @@ public class Bean extends BeansModelElement implements IBean {
 				beanNames.add(parentName);
 				bean = ((IBeansConfig) getElementParent()).getBean(parentName);
 				if (bean != null) {
-					BeansModelUtil.addReferencedBeanNamesForBean(bean,
+					BeansModelUtils.addReferencedBeanNamesForBean(bean,
 																 beanNames);
 				}
 			}
