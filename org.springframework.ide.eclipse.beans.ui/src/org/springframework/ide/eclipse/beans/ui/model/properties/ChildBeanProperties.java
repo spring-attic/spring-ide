@@ -26,6 +26,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
+import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
 
 public class ChildBeanProperties implements IPropertySource {
 
@@ -90,8 +91,12 @@ public class ChildBeanProperties implements IPropertySource {
 			return bean.getName();
 		}
 		if (P_ID_CONFIG.equals(id)) {
-			return new ConfigFilePropertySource(
-										  bean.getConfigNode().getConfigFile());
+			ConfigNode config = bean.getConfigNode();
+			IFile file = config.getConfigFile();
+			if (file != null) {
+				return new ConfigFilePropertySource(file);
+			}
+			return config.getName();
 		}
 		if (P_ID_PARENT.equals(id)) {
 			String parent = bean.getParentName();
