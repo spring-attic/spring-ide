@@ -29,6 +29,7 @@ import org.eclipse.draw2d.graph.DirectedGraphLayout;
 import org.eclipse.draw2d.graph.Edge;
 import org.eclipse.draw2d.graph.EdgeList;
 import org.eclipse.draw2d.graph.Node;
+import org.eclipse.draw2d.graph.NodeList;
 import org.eclipse.swt.graphics.Font;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput;
@@ -48,44 +49,20 @@ public class Graph implements IAdaptable {
 
 	public Graph(GraphEditorInput input) {
 		this.input = input;
-		this.graph = new DirectedGraph();
+		initGraph();
 	}
 
-	public Object getAdapter(Class adapter) {
-		return input.getAdapter(adapter);
-	}
+	/**
+	 * Initializes the embedded graph with nodes from GraphEditorInput's beans
+	 * and edges from GraphEditorInput's bean references.
+	 */
+	private void initGraph() {
+		graph = new DirectedGraph();
 
-	public Collection getBeans() {
-		return input.getBeans().values();
-	}
-
-	public Bean getBean(String name) {
-		return (Bean) input.getBeans().get(name);
-	}
-
-	public List getNodes() {
-		return graph.nodes;
-	}
-
-	public void layout(Font font) {
-
-		// Connect all unreferenced beans with a temporary root bean
-		Bean root = new Bean();
-		graph.nodes.add(root);
-
-		// Iterate through all beans to calculate label width and add bean
-		// references to list of graph edges
+		// Add all beans defined in GraphEditorInput as nodes to the graph
 		Iterator beans = getBeans().iterator();
 		while (beans.hasNext()) {
 			Bean bean = (Bean) beans.next();
-
-			// Calculate bean's dimension with a temporary bean figure 
-			BeanFigure dummy = new BeanFigure(bean);
-			dummy.setFont(font);
-			Dimension size = dummy.getPreferredSize();
-			bean.width = size.width;
-			bean.height = size.height;
-			bean.preferredHeight = size.height;
 			graph.nodes.add(bean);
 
 			// If child bean then add reference from parent bean to list of
@@ -130,9 +107,115 @@ public class Graph implements IAdaptable {
 				}
 			}
 		}
+	}
+
+	public Object getAdapter(Class adapter) {
+		return input.getAdapter(adapter);
+	}
+
+	protected Collection getBeans() {
+		return input.getBeans().values();
+	}
+
+	protected Bean getBean(String name) {
+		return (Bean) input.getBeans().get(name);
+	}
+
+	public List getNodes() {
+		return graph.nodes;
+	}
+
+	/**
+	 * Returns true if given graph contains cycles, false otherwise.
+	 * <p>
+	 * This code detects cycles in the graph via an implementation of the 
+	 * Greedy-Cycle-Removal algorithm. This algorithm determines which edges cause
+	 * the cycles.
+	 * <p>
+	 * This code is extracted from the GEF class
+	 * <code>org.eclipse.draw2d.internal.graph.BreakCycles</code>. 
+	 */
+	public boolean hasCycles() {
+
+		// Put all nodes in a list and initialize index
+		// Flag field indicates "presence". If true, the node has been removed
+		// from the list. 
+		NodeList graphNodes = new NodeList();
+		graphNodes.resetFlags();
+		for (int i = 0; i < graph.nodes.size(); i++) {
+			Node node = graph.nodes.getNode(i);
+			setIncomingCount(node, node.incoming.size());
+			graphNodes.add(node);
+		}
+
+		// Identify all initial nodes for removal
+		List noLefts = new ArrayList();
+		for (int i = 0; i < graphNodes.size(); i++) {
+			Node node = graphNodes.getNode(i);
+			if (getIncomingCount(node) == 0) {	
+				sortedInsert(noLefts, node);
+			}
+		}
+
+		while (noLefts.size() > 0) {
+			Node node = (Node) noLefts.remove(noLefts.size() - 1);
+			node.flag = true;
+			for (int i = 0; i < node.outgoing.size(); i++) {
+				Node right = node.outgoing.getEdge(i).target;
+				setIncomingCount(right, getIncomingCount(right) - 1);
+				if (getIncomingCount(right) == 0) {
+					sortedInsert(noLefts, right);
+				}
+			}
+		}
+		
+		// Check if all nodes are flagged
+		for (int i = 0; i < graphNodes.size(); i++) {
+			if (graphNodes.getNode(i).flag == false) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void setIncomingCount(Node n, int count) {
+		n.workingInts[0] = count;
+	}	
+	
+	private int getIncomingCount(Node n) {
+		return n.workingInts[0];
+	}	
+
+	private void sortedInsert(List list, Node node) {
+		int insert = 0;
+		while (insert < list.size() &&
+						 ((Node) list.get(insert)).sortValue > node.sortValue) {
+			insert++;
+		}
+		list.add(insert, node);
+	}
+
+	public void layout(Font font) {
+
+		// Iterate through all graph nodes (beans) to calculate label width
+		Iterator beans = graph.nodes.iterator();
+		while (beans.hasNext()) {
+			Bean bean = (Bean) beans.next();
+
+			// Calculate bean's dimension with a temporary bean figure 
+			BeanFigure dummy = new BeanFigure(bean);
+			dummy.setFont(font);
+			Dimension size = dummy.getPreferredSize();
+			bean.width = size.width;
+			bean.height = size.height;
+			bean.preferredHeight = size.height;
+		}
 
 		// Connect all unreferenced beans with a temporary root bean and collect
 		// subgraph root beans
+		Bean root = new Bean();
+		graph.nodes.add(root);
+
 		EdgeList rootEdges = new EdgeList();
 		List orphanBeans = new ArrayList();
 		beans = getBeans().iterator();
