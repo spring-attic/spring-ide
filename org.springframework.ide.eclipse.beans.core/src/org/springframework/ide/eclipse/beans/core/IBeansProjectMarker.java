@@ -58,4 +58,6 @@ public interface IBeansProjectMarker {
 	 public static final int ERROR_CODE_NO_CONSTRUCTOR = 6;
 	 public static final int ERROR_CODE_NO_SETTER = 7;
 	 public static final int ERROR_CODE_UNDEFINED_REFERENCE = 8;
+	 public static final int ERROR_CODE_INVALID_BEAN_DEFINITION = 9;
+	 public static final int ERROR_CODE_INVALID_BEAN_ALIAS = 10;
 }
