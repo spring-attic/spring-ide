@@ -22,8 +22,6 @@ import java.util.ResourceBundle;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
@@ -32,6 +30,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.BundleContext;
 
 /**
  * Central access point for the Spring Framework UI plug-in
@@ -42,23 +41,27 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 public class BeansUIPlugin extends AbstractUIPlugin {
 
 	/**
-	 * Plugin identifier for Spring UI (value
+	 * Plugin identifier for Spring Beans UI (value
 	 * <code>org.springframework.ide.eclipse.beans.ui</code>).
 	 */
 	public static final String PLUGIN_ID =
 									 "org.springframework.ide.eclipse.beans.ui";
 	private static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
 
-	//The shared instance.
+	/** The shared instance.*/
 	private static BeansUIPlugin plugin;
 
-	//Resource bundle.
 	private ResourceBundle resourceBundle;
 
 	private ImageDescriptorRegistry imageDescriptorRegistry;
 
-	public BeansUIPlugin(IPluginDescriptor descriptor) {
-		super(descriptor);
+	/**
+	 * Creates the Spring Beans UI plug-in.
+	 * <p>
+	 * The plug-in instance is created automatically by the Eclipse platform.
+	 * Clients must not call.
+	 */
+	public BeansUIPlugin() {
 		plugin = this;
 		try {
 			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);
@@ -68,11 +71,11 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 		}
 	}
 
-	public void shutdown() throws CoreException {
+	public void stop(BundleContext context) throws Exception {
 		if (imageDescriptorRegistry != null) {
 			imageDescriptorRegistry.dispose();
 		}
-		super.shutdown();
+		super.stop(context);
 	}
 
 	/* (non-Javadoc)
@@ -104,15 +107,15 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	public static IWorkspace getWorkspace() {
 		return ResourcesPlugin.getWorkspace();
 	}
-	
+
 	public static IWorkbenchWindow getActiveWorkbenchWindow() {
 		return getDefault().getWorkbench().getActiveWorkbenchWindow();
 	}
-	
+
 	public static Shell getActiveWorkbenchShell() {
 		return getActiveWorkbenchWindow().getShell();
 	}
-	
+
 	public static IWorkbenchPage getActiveWorkbenchPage() {
 		return getActiveWorkbenchWindow().getActivePage();
 	}
