@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.beans.ui.actions;
+package org.springframework.ide.eclipse.beans.ui.views.actions;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.Action;
