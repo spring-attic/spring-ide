@@ -58,7 +58,6 @@ import org.eclipse.ui.views.properties.FilePropertySource;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.ResourcePropertySource;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
