@@ -17,8 +17,10 @@
 package org.springframework.ide.eclipse.beans.ui.views;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -211,22 +213,33 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 	}
 
 	public boolean show(ShowInContext context) {
-		ISelection selection = context.getSelection();
-		if (selection != null && selection instanceof IStructuredSelection &&
-							   ((IStructuredSelection) selection).size() == 1) {
-			Object file = ((IStructuredSelection)selection).getFirstElement();
-			if (file instanceof IFile) {
-				return showConfig((IFile)file);
-			}
-		}
 
+		// First check input object for an instance of BeansViewLocation 
 		Object input = context.getInput();
 		if (input instanceof BeansViewLocation) {
 			showLocation((BeansViewLocation) input);
-		} else  if (input instanceof IAdaptable) {
-			Object file = ((IAdaptable) input).getAdapter(IFile.class);
-			if (file != null) {
-				return showConfig((IFile) file);
+		} else if (input instanceof IAdaptable) {
+			Object resource = ((IAdaptable) input).getAdapter(IResource.class);
+			if (resource != null) {
+				if (showResource((IResource) resource)) {
+					return true;
+				}
+			}
+		}
+
+		// Finally check selection object for an instance of IResource 
+		ISelection selection = context.getSelection();
+		if (selection != null && selection instanceof IStructuredSelection &&
+							   ((IStructuredSelection) selection).size() == 1) {
+			Object resource = ((IStructuredSelection)
+												   selection).getFirstElement();
+			if (resource instanceof IResource) {
+				return showResource((IResource) resource);
+			} else if (input instanceof IAdaptable) {
+				resource = ((IAdaptable) input).getAdapter(IResource.class);
+				if (resource != null) {
+					return showResource((IResource) resource);
+				}
 			}
 		}
 		return false;
@@ -266,10 +279,17 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 		return false;
 	}
 
-	private boolean showConfig(IFile file) {
-		ConfigNode config = getRootNode().getConfig(file);
-		if (config != null) {
-			treeViewer.setSelection(new StructuredSelection(config), true);
+	private boolean showResource(IResource resource) {
+		INode node = null;
+		if (resource instanceof IProject) {
+			node = getRootNode().getProject(resource.getName());
+		} else if (resource instanceof IJavaProject) {
+			node = getRootNode().getProject(resource.getName());
+		} else if (resource instanceof IFile) {
+			node = getRootNode().getConfig((IFile) resource);
+		}
+		if (node != null) {
+			treeViewer.setSelection(new StructuredSelection(node), true);
 			return true;
 		}
 		return false;
