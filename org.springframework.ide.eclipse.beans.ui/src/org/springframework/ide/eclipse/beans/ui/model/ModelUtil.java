@@ -27,24 +27,7 @@ public class ModelUtil {
 												  Object value, List refBeans) {
 		if (value instanceof RuntimeBeanReference) {
 			String beanName = ((RuntimeBeanReference) value).getBeanName();
-			BeanNode refBean;
-			if (beanParentNode instanceof ConfigSetNode) {
-				refBean = ((ConfigSetNode) beanParentNode).getBean(beanName);
-			} else {
-				refBean = ((ConfigNode) beanParentNode).getBean(beanName);
-			}
-			if (refBean != null) {
-				if (!refBeans.contains(refBean)) {
-					refBeans.add(refBean);
-				}
-				Iterator iter = refBean.getReferencedBeans().iterator();
-				while (iter.hasNext()) {
-					refBean = (BeanNode) iter.next();
-					if (!refBeans.contains(refBean)) {
-						refBeans.add(refBean);
-					}
-				}
-			}
+			addReferencedBeansForBean(beanParentNode, beanName, refBeans);
 		} else if (value instanceof List) {
 			List list = (List) value;
 			for (int i = 0; i < list.size(); i++) {
@@ -64,5 +47,44 @@ public class ModelUtil {
 										 refBeans);
 			}
 		}
+	}
+
+	/**
+	 * Adds all beans which are referenced by the specified bean to the given
+	 * list.
+	 * @param beanParentNode  config or config the specified bean belongs to
+	 */
+	public static void addReferencedBeansForBean(INode beanParentNode,
+											   String beanName, List refBeans) {
+		BeanNode refBean = getBean(beanParentNode, beanName);
+		if (refBean != null) {
+			if (!refBeans.contains(refBean)) {
+				refBeans.add(refBean);
+			}
+			Iterator iter = refBean.getReferencedBeans().iterator();
+			while (iter.hasNext()) {
+				refBean = (BeanNode) iter.next();
+				if (!refBeans.contains(refBean)) {
+					refBeans.add(refBean);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Returns the BeanNode for a given bean name from specified ConfigNode or
+	 * ConfigSet.
+	 * @return BeanNode or null if bean not defined
+	 */
+	public static final BeanNode getBean(INode node, String beanName) {
+		BeanNode bean = null;
+		if (node instanceof ConfigNode) {
+			bean = ((ConfigNode) node).getBean(beanName);
+		} else if (node instanceof ConfigSetNode) {
+			bean = ((ConfigSetNode) node).getBean(beanName);
+		} else if (node instanceof BeanNode) {
+			bean = getBean(node.getParent(), beanName);
+		}
+		return bean;
 	}
 }
