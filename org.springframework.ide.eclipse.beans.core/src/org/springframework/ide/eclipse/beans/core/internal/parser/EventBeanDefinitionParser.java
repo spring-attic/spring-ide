@@ -44,7 +44,7 @@ import org.w3c.dom.Element;
  * <li>Registering a bean
  * </ul>
  * Nested beans are supported too.
- * @see #setEventHandler(IBeanDefinitionEvents)
+ * @see org.springframework.ide.eclipse.beans.core.internal.parser.IBeanDefinitionEvents
  */
 public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 
@@ -55,7 +55,7 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 	/** Counter used to keep track of nested bean definitions (inner beans) */ 
 	private int nestedBeanCount;
 
-	public void setEventHandler(IBeanDefinitionEvents eventHandler) {
+	public EventBeanDefinitionParser(IBeanDefinitionEvents eventHandler) {
 		this.eventHandler = eventHandler;
 	}
 
@@ -112,8 +112,8 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 
 					// Inner beans are not registered with the bean definition
 					// registry - so we do this ourselves
-					// This way we get a unique name for the anonymous inner
-					// beans too - they are named
+					// This way our super method creates a unique name for
+					// anonymous inner beans too - they are named
 					// "<class name>[#<occurrence counter>]"
 					BeanDefinitionRegistry registry =
 									 getBeanDefinitionReader().getBeanFactory();
