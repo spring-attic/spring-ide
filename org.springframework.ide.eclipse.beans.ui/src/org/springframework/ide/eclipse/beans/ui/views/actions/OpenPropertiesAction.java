@@ -52,16 +52,16 @@ public class OpenPropertiesAction extends Action {
 		if (node instanceof ProjectNode) {
 			project = ((ProjectNode) node).getProject();
 		} else if (node instanceof ConfigNode) {
-			project = ((ConfigNode) node).getConfigFile().getProject();
+			project = ((ConfigNode) node).getProjectNode().getProject();
 		} else if (node instanceof ConfigSetNode) {
 			project = ((ConfigSetNode )node).getProjectNode().getProject();
 			block = 1;
 		} else if (node instanceof BeanNode) {
 			project = ((BeanNode)
-							 node).getConfigNode().getConfigFile().getProject();
+							node).getConfigNode().getProjectNode().getProject();
 		} else if (node instanceof PropertyNode) {
 			project = ((PropertyNode)
-							 node).getConfigNode().getConfigFile().getProject();
+							node).getConfigNode().getProjectNode().getProject();
 		}
 
 		// Show project's property page
