@@ -20,16 +20,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.ui.views.properties.FilePropertySource;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.eclipse.ui.views.properties.ResourcePropertySource;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtil;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
+import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
 
 public class RootBeanProperties implements IPropertySource {
 
@@ -94,14 +95,17 @@ public class RootBeanProperties implements IPropertySource {
 			return bean.getName();
 		}
 		if (P_ID_CONFIG.equals(id)) {
-			return new ConfigFilePropertySource(
-										  bean.getConfigNode().getConfigFile());
+			ConfigNode config = bean.getConfigNode();
+			IFile file = config.getConfigFile();
+			if (file != null) {
+				return new ConfigFilePropertySource(file);
+			}
+			return config.getName();
 		}
 		if (P_ID_CLASS.equals(id)) {
+			IProject project = bean.getConfigNode().getProjectNode().getProject();
 			String className = bean.getClassName();
-			IBeansProject project = BeansCorePlugin.getModel().getProject(
-							 bean.getConfigNode().getConfigFile().getProject());
-			IType type = project.getJavaType(className);
+			IType type = BeansModelUtil.getJavaType(project, className);
 
 			// Use type only it's not a BinaryType (resource == null)
 			if (type != null && type.getResource() != null) {
