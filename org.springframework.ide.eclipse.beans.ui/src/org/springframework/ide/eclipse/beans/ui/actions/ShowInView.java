@@ -30,6 +30,9 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IEditorActionDelegate;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -41,10 +44,25 @@ import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
 import org.springframework.ide.eclipse.beans.ui.model.PropertyNode;
 import org.springframework.ide.eclipse.beans.ui.views.BeansView;
 
-public class ShowInView extends Action implements IEditorActionDelegate {
-
+public class ShowInView extends Action implements IEditorActionDelegate,
+												IWorkbenchWindowActionDelegate {
     private ITextEditor editor;
     private IFile file;
+
+	public void init(IWorkbenchWindow window) {
+		IEditorPart editor;
+		IWorkbenchPage page = window.getActivePage();
+		if (page != null) {
+			editor = page.getActiveEditor();
+		} else {
+			editor = null;
+		}
+		setActiveEditor(this, editor);
+	}
+
+	public void dispose() {
+		// unused
+	}
 
 	public void setActiveEditor(IAction action, IEditorPart editor) {
 		if (editor instanceof ITextEditor) {
