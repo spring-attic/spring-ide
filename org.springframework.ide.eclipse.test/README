@@ -1,0 +1,13 @@
+This package contains tests for the Spring Eclipse IDE. The
+tests are more regression tests than unit tests, and are
+based on the methods presented in the book "Contributing to
+Eclipse: Principles, Patterns, and Plug-Ins", by Erich Gamma and
+Kent Beck.
+
+Running the tests
+
+The run the tests, add this package as a project to a workspace
+containing the spring-eclipse plugin versions to be tested. In
+the package explorer select either the package or one of the test
+classes. Then do Run > Run As ... > JUnit Plug-in Test. (You can
+also do this from the pop-up menu on the selected item.)

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location"><value>/WEB-INF/jdbc.properties</value></property>
+	</bean>
+
+	<bean id="absent" class="absent" >
+		<property name="moreStuff"><value>nothing</value></property>
+		<property name="stuff"><value>something</value></property>
+	</bean>
+	
+	<bean id="simple" class="pack1.SimpleBean" >
+		<property name="absentProperty"><value>none</value></property>
+	</bean>
+	
+	<bean id="child" parent="parent">
+	</bean>
+	
+		
+</beans>
