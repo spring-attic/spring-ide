@@ -18,18 +18,19 @@ package org.springframework.ide.eclipse.beans.ui.graph.actions;
 
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.ui.actions.EditorPartAction;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.ui.IEditorPart;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtil;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditor;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
 import org.springframework.ide.eclipse.beans.ui.graph.parts.BeanPart;
+import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
 
 public class OpenJavaType extends EditorPartAction {
 
@@ -59,14 +60,12 @@ public class OpenJavaType extends EditorPartAction {
 	public void run() {
 		Bean bean = ((BeanPart) getFirstSelectedEditPart()).getBean();
 		String className = bean.getClassName();
-		IBeansProject project = BeansCorePlugin.getModel().getProject(
-									 bean.getConfigFile().getProject());
-		IType type = project.getJavaType(className);
+		IProject project = ((ProjectNode)
+								 bean.getConfigFile().getParent()).getProject();
+		IType type = BeansModelUtil.getJavaType(project, className);
 		if (type != null) {
 			BeansUIUtils.openInEditor(type);
-			return;
 		}
-		BeansGraphPlugin.beep();
 	}
 
 	protected EditPart getFirstSelectedEditPart() {

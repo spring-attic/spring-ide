@@ -58,9 +58,7 @@ public class OpenConfigFile extends EditorPartAction {
 		IFile file = bean.getConfigFile();
 		if (file != null && file.exists()) {
 			BeansUIUtils.openInEditor(file, bean.getStartLine());
-			return;
 		}
-		BeansGraphPlugin.beep();
 	}
 
 	protected EditPart getFirstSelectedEditPart() {

@@ -21,7 +21,6 @@ import java.util.ResourceBundle;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -97,10 +96,6 @@ public class BeansGraphPlugin extends AbstractUIPlugin {
 	
 	public static IWorkbenchWindow getActiveWorkbenchWindow() {
 		return getDefault().getWorkbench().getActiveWorkbenchWindow();
-	}
-
-	public static void beep() {
-		getActiveWorkbenchWindow().getShell().getDisplay().beep();
 	}
 
 	public static void log(IStatus status) {
