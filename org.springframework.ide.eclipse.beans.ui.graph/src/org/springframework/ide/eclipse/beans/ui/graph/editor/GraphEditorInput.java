@@ -22,7 +22,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphImages;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
-import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
 import org.springframework.ide.eclipse.beans.ui.model.INode;
@@ -85,17 +84,7 @@ public class GraphEditorInput implements IEditorInput {
 	}
 
 	public ImageDescriptor getImageDescriptor() {
-		if (node instanceof ConfigNode) {
-			return BeansGraphImages.DESC_OBJS_CONFIG;
-		} else if (node instanceof ConfigSetNode) {
-			return BeansGraphImages.DESC_OBJS_CONFIG_SET;
-		} else {
-			if (((BeanNode) node).isRootBean()) {
-				return BeansGraphImages.DESC_OBJS_ROOT_BEAN;
-			} else {
-				return BeansGraphImages.DESC_OBJS_CHILD_BEAN;
-			}
-		}
+		return BeansGraphImages.DESC_OBJS_SPRING;
 	}
 
 	public IPersistableElement getPersistable() {
