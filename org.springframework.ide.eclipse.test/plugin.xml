@@ -18,6 +18,7 @@
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jdt.launching"/>
       <import plugin="org.springframework.ide.eclipse.beans.core"/>
+      <import plugin="org.springframework.ide.eclipse.beans.ui"/>
       <import plugin="org.eclipse.ui.workbench"/>
       <import plugin="org.eclipse.jface"/>
    </requires>
