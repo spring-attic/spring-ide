@@ -18,8 +18,10 @@ package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -140,25 +142,25 @@ public class BeansProject extends BeansModelElement implements IBeansProject {
 	}
 
 	public Collection getBeanClasses() {
-		List beanClasses = new ArrayList();
+		Set beanClasses = new HashSet();
 		Iterator configs = getDescription().getConfigs().iterator();
 		while (configs.hasNext()) {
 			IBeansConfig config = (IBeansConfig) configs.next();
-			beanClasses.add(config.getBeanClasses());
+			beanClasses.addAll(config.getBeanClasses());
 		}
 		return beanClasses;
 	}
 
 	public Collection getBeans(String className) {
-		List list = new ArrayList(); 
+		List beans = new ArrayList(); 
 		Iterator configs = getDescription().getConfigs().iterator();
 		while (configs.hasNext()) {
 			IBeansConfig config = (IBeansConfig) configs.next();
 			if (config.isBeanClass(className)) {
-				list.add(config.getBeans(className));
+				beans.addAll(config.getBeans(className));
 			}
 		}
-		return list;
+		return beans;
 	}
 
 	/**
