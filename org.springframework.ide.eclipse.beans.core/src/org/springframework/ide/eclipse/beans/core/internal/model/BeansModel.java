@@ -29,6 +29,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.BeansResourceChangeListener;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.IBeansResourceChangeEvents;
@@ -380,7 +381,7 @@ public class BeansModel extends BeansModelElement implements IBeansModel {
 			Iterator iter = configs.iterator();
 			while (iter.hasNext()) {
 				IBeansConfig config = (IBeansConfig) iter.next();
-				validator.validate(config, null);
+				validator.validate(config, new NullProgressMonitor());
 			}
 		}
 	}
