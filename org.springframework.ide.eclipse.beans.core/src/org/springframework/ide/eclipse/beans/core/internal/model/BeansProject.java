@@ -204,22 +204,30 @@ public class BeansProject extends BeansModelElement implements IBeansProject {
 	 * description is saved to disk.
 	 * @param configs  list of config names
 	 */
-	public void setConfigs(List configs) {
+	public void setConfigs(Collection configs) {
 		BeansProjectDescription description = getDescription();
 
 		// Look for removed config files and
 		// 1. delete all problem markers from them
 		// 2. remove config from any config set
+		ArrayList toBeRemoved = new ArrayList();
+		
 		Iterator iter = description.getConfigNames().iterator();
 		while (iter.hasNext()) {
 			String config = (String) iter.next();
 			if (!configs.contains(config)) {
 				IFile file = description.getConfigFile(config);
 				BeansCoreUtils.deleteProblemMarkers(file);
-				description.removeConfig(config);
+				toBeRemoved.add(config);
 			}
 		}
-
+		
+		for (int i = 0; i < toBeRemoved.size(); i++)
+		{
+		    String config = (String) toBeRemoved.get(i);
+		    description.removeConfig(config);
+		}
+		
 		description.setConfigNames(configs);
 		BeansProjectDescriptionWriter.write(project, description);
 	}
@@ -262,4 +270,5 @@ public class BeansProject extends BeansModelElement implements IBeansProject {
 		}
 		return description;
 	}
+
 }
