@@ -141,7 +141,7 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 							}
 							return false;
 						} else if ((flags & IResourceDelta.DESCRIPTION) != 0) {
-							IProject project = resource.getProject();
+							IProject project = (IProject) resource;
 							if (BeansCoreUtils.isBeansProject(project)) {
 								if (!events.isSpringProject(project)) {
 									events.springNatureAdded(project);
