@@ -38,11 +38,6 @@ public class ShowGraphAction extends Action implements IViewActionDelegate {
 
 	public void selectionChanged(IAction action, ISelection selection) {
 		node = (INode) ((IStructuredSelection) selection).getFirstElement();
-		if (node != null && (node.getFlags() & INode.FLAG_HAS_ERRORS) == 0) {
-			action.setEnabled(true);
-		} else {
-			action.setEnabled(false);
-		}
 	}
 
 	public void run(IAction action) {
