@@ -33,7 +33,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
-import org.springframework.ide.eclipse.beans.core.internal.parser.EventBeanFactory;
+import org.springframework.ide.eclipse.beans.core.internal.parser.EventBeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.internal.parser.IBeanDefinitionEvents;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
@@ -49,11 +49,23 @@ import org.w3c.dom.Element;
  */
 public class BeansConfig extends BeansModelElement implements IBeansConfig {
 
+	/** This bean's config file */
 	private IFile file;
+
+	/** List of bean names, in registration order */
 	private List beans;
+
+	/** Table of bean names mapped to beans */
 	private Map beansMap;
+
+	/** List of bean names, in registration order */
 	private List innerBeans;
+
+	/** Table of bean class names mapped to list of beans implementing the
+	 * corresponding class */
 	private Map beanClassesMap;
+
+	/** Exception which occured during reading the bean's config file */
 	private BeanDefinitionException exception;
 
 	public BeansConfig(IBeansProject project, String name) {
@@ -205,8 +217,17 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 			Iterator beans = getBeans().iterator();
 			while (beans.hasNext()) {
 				IBean bean = (IBean) beans.next();
-				if (bean.isRootBean()) {
-					String className = bean.getClassName();
+
+				// Get name of bean class - strip name of any inner class
+				String className = bean.getClassName();
+				if (className != null) {
+					int pos = className.indexOf('$');
+					if  (pos > 0) {
+						className = className.substring(0, pos);
+					}
+
+					// Maintain a list of bean names within every entry in the
+					// bean class map
 					List beanClassBeans = (List) beanClassesMap.get(className);
 					if (beanClassBeans == null) {
 						beanClassBeans = new ArrayList();
@@ -223,12 +244,11 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 		this.beans = new ArrayList();
 		this.beansMap = new HashMap();
 		this.innerBeans = new ArrayList();
-		this.beanClassesMap = new HashMap();
 
 		BeansConfigHandler handler = new BeansConfigHandler(this);
-		EventBeanFactory factory = new EventBeanFactory(handler);
+		EventBeanDefinitionRegistry registry = new EventBeanDefinitionRegistry(handler);
 		try {
-			factory.loadBeanDefinitions(new FileResource(file));
+			registry.loadBeanDefinitions(new FileResource(file));
 		} catch (BeanDefinitionException e) {
 			exception = e;
 		}
@@ -320,7 +340,6 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 		public void startProperty(Element element) {
 			BeanProperty property = new BeanProperty(currentBean);
 			setXmlTextRange(property, element);
-			currentBean.addProperty(property);
 			currentElement = property;
 		}
 	
@@ -329,6 +348,7 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 			property.setElementName(name);
 			Object value = pvs.getPropertyValue(name).getValue();
 			property.setValue(value);
+			currentBean.addProperty(property);
 		}
 	
 		/**
