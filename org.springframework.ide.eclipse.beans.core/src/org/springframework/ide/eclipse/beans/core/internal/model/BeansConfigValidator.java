@@ -185,44 +185,7 @@ public class BeansConfigValidator {
 			monitor.subTask(BeansCorePlugin.getFormattedMessage(
 				   "BeansConfigValidator.validateBean", bean.getElementName()));
 		}
-		IBeansProject project = (IBeansProject) config.getElementParent();
-		IType type = null;
-		if (bean.isRootBean()) {
-
-			// Validate root bean's class
-			String className = bean.getClassName();
-			if (className == null) {
-				BeansCoreUtils.createProblemMarker(config.getConfigFile(),
-					"Bean definition has neither 'class' nor 'parent'",
-					IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
-					IBeansProjectMarker.ERROR_CODE_BEAN_WITHOUT_CLASS_OR_PARENT,
-					bean.getElementName(), null);
-			} else {
-				type = BeansModelUtil.getJavaType(project.getProject(),
-												  className);
-				if (type == null) {
-					BeansCoreUtils.createProblemMarker(config.getConfigFile(),
-							"Class '" + className + "' not found",
-							IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
-							IBeansProjectMarker.ERROR_CODE_CLASS_NOT_FOUND,
-							bean.getElementName(), className);
-				}
-			}
-		} else {
-
-			// Validate child bean's parent root bean
-			IBean parent = getParentBean(bean);
-			if (parent != null) {
-				type = BeansModelUtil.getJavaType(project.getProject(),
-												  parent.getClassName());
-			} else {
-				BeansCoreUtils.createProblemMarker(config.getConfigFile(),
-					  "Undefined parent root bean", IMarker.SEVERITY_ERROR,
-					  bean.getElementStartLine(),
-					  IBeansProjectMarker.ERROR_CODE_UNDEFINED_PARENT_ROOT_BEAN,
-					  bean.getElementName(), null);
-			}
-		}
+		IType type = getBeanType(bean, config);
 		if (type != null) {
 			validateConstructorArguments(bean, type, config);
 			validateProperties(bean, type, config);
@@ -282,6 +245,8 @@ public class BeansConfigValidator {
 			}
 			IBeanProperty property = (IBeanProperty) iter.next();
 			String propertyName = property.getElementName();
+
+			// Check for setter in given type
 			boolean isWritableProperty = false;
 			try {
 				isWritableProperty = Introspector.hasWritableProperty(type,
@@ -291,11 +256,11 @@ public class BeansConfigValidator {
 			}
 			if (!isWritableProperty) {
 				BeansCoreUtils.createProblemMarker(config.getConfigFile(),
-					  "No setter for property '" + propertyName +
-					  "' found in class '" + type.getFullyQualifiedName() + "'",
-					  IMarker.SEVERITY_ERROR, property.getElementStartLine(),
-					  IBeansProjectMarker.ERROR_CODE_NO_SETTER,
-					  bean.getElementName(), property.getElementName());
+						 "No setter found for property '" + propertyName +
+						 "' in class '" + type.getFullyQualifiedName() + "'",
+						 IMarker.SEVERITY_ERROR, property.getElementStartLine(),
+						 IBeansProjectMarker.ERROR_CODE_NO_SETTER,
+						 bean.getElementName(), property.getElementName());
 			}
 		}
 	}
@@ -309,6 +274,45 @@ public class BeansConfigValidator {
 			project = BeansCorePlugin.getModel().getProject(projectName);
 		}
 		return (project != null ? project.getConfig(configName) : null);
+	}
+
+	/**
+	 * Returns the Java type of the given bean's class or (for child beans) the
+	 * parent's class.
+	 */
+	private IType getBeanType(IBean bean, IBeansConfig config) {
+		IType type = null;
+		IFile configFile = config.getConfigFile();
+		String className = bean.getClassName();
+		if (className != null) {
+			type = BeansModelUtil.getJavaType(configFile.getProject(),
+													className);
+			if (type == null) {
+				BeansCoreUtils.createProblemMarker(configFile,
+							"Class '" + className + "' not found",
+							IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+							IBeansProjectMarker.ERROR_CODE_CLASS_NOT_FOUND,
+							bean.getElementName(), className);
+			}
+		} else {
+
+			// Ignore abstract root beans
+			if (!bean.isRootBean()) {
+
+				// For child beans use parent's bean type
+				IBean parent = getParentBean(bean);
+				if (parent != null) {
+					type = getBeanType(parent, config);
+				}
+			} else if (!bean.isAbstract()) {
+				BeansCoreUtils.createProblemMarker(configFile,
+					"Bean definition has neither 'class' nor 'parent'",
+					IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+					IBeansProjectMarker.ERROR_CODE_BEAN_WITHOUT_CLASS_OR_PARENT,
+					bean.getElementName(), null);
+			}
+		}
+		return type;
 	}
 
 	private IBean getParentBean(IBean bean) {
