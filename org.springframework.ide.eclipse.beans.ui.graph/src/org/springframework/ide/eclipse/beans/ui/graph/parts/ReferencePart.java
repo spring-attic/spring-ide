@@ -56,7 +56,7 @@ public class ReferencePart extends AbstractConnectionEditPart {
 		} else {
 			Node node = getReference().getNode();
 			if (node instanceof ConstructorArgument) {
-				label.setText("ConstrutorArgument: " +
+				label.setText("ConstructorArgument: " +
 							  ((ConstructorArgument) node).getName());
 			} else {
 				label.setText("Property: " + ((Property) node).getName());
