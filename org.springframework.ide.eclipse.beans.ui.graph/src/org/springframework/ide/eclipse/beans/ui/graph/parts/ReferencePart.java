@@ -24,8 +24,8 @@ import org.eclipse.draw2d.BendpointConnectionRouter;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
-import org.eclipse.draw2d.PolygonDecoration;
 import org.eclipse.draw2d.PolylineConnection;
+import org.eclipse.draw2d.PolylineDecoration;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.draw2d.graph.Edge;
 import org.eclipse.draw2d.graph.Node;
@@ -96,7 +96,7 @@ public class ReferencePart extends AbstractConnectionEditPart {
 		}
 		conn.setRoutingConstraint(bends);
 
-		conn.setTargetDecoration(new PolygonDecoration());
+		conn.setTargetDecoration(new PolylineDecoration());
 		return conn;
 	}
 
