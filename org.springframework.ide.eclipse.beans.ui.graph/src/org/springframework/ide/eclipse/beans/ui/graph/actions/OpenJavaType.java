@@ -60,11 +60,13 @@ public class OpenJavaType extends EditorPartAction {
 	public void run() {
 		Bean bean = ((BeanPart) getFirstSelectedEditPart()).getBean();
 		String className = bean.getClassName();
-		IProject project = ((ProjectNode)
+		if (className != null) {
+			IProject project = ((ProjectNode)
 								 bean.getConfigFile().getParent()).getProject();
-		IType type = BeansModelUtil.getJavaType(project, className);
-		if (type != null) {
-			BeansUIUtils.openInEditor(type);
+			IType type = BeansModelUtil.getJavaType(project, className);
+			if (type != null) {
+				BeansUIUtils.openInEditor(type);
+			}
 		}
 	}
 

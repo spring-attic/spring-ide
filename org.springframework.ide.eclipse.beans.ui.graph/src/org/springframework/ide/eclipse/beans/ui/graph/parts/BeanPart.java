@@ -18,6 +18,7 @@ package org.springframework.ide.eclipse.beans.ui.graph.parts;
 
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.draw2d.Border;
 import org.eclipse.draw2d.ChopboxAnchor;
 import org.eclipse.draw2d.ConnectionAnchor;
@@ -105,8 +106,10 @@ public class BeanPart extends AbstractGraphicalEditPart implements NodeEditPart 
 	 */
 	public void performRequest(Request req) {
 		if (req.getType() == RequestConstants.REQ_OPEN) {
-			BeansUIUtils.openInEditor(getBean().getConfigFile(), 
-									  getBean().getStartLine());
+			IFile file = getBean().getConfigFile();
+			if (file != null && file.exists()) {
+				BeansUIUtils.openInEditor(file, getBean().getStartLine());
+			}
 		}
 		super.performRequest(req);
 	}

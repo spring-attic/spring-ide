@@ -62,14 +62,16 @@ public class ShowInView extends EditorPartAction {
 	public void run() {
 		Bean bean = ((BeanPart) getFirstSelectedEditPart()).getBean();
 		IFile file = bean.getConfigFile();
-		ProjectNode project = new ProjectNode(null,
-											  file.getProject().getName());
-		ConfigNode config = new ConfigNode(project,
+		if (file != null && file.exists()) {
+			ProjectNode project = new ProjectNode(null,
+												  file.getProject().getName());
+			ConfigNode config = new ConfigNode(project,
 									  file.getProjectRelativePath().toString());
-		BeanNode node = new BeanNode(config, bean.getName());
-
-		IViewPart view = BeansView.showView();
-		((IShowInTarget) view).show(new ShowInContext(node, null));
+			BeanNode node = new BeanNode(config, bean.getName());
+	
+			IViewPart view = BeansView.showView();
+			((IShowInTarget) view).show(new ShowInContext(node, null));
+		}
 	}
 
 	protected EditPart getFirstSelectedEditPart() {
