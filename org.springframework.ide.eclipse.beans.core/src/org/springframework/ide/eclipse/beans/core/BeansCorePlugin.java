@@ -16,21 +16,17 @@
 
 package org.springframework.ide.eclipse.beans.core;
 
-import java.net.URL;
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
+import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 
@@ -43,7 +39,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 public class BeansCorePlugin extends Plugin {
 
 	/**
-	 * Plugin identifier for Spring Core (value
+	 * Plugin identifier for Spring Beans Core (value
 	 * <code>org.springframework.ide.eclipse.beans.core</code>).
 	 */
 	public static final String PLUGIN_ID =
@@ -59,24 +55,29 @@ public class BeansCorePlugin extends Plugin {
 	/** Resource bundle */
 	private ResourceBundle resourceBundle;
 
-	public BeansCorePlugin(IPluginDescriptor descriptor) {
-		super(descriptor);
+	/**
+	 * Creates the Spring Beans Core plug-in.
+	 * <p>
+	 * The plug-in instance is created automatically by the Eclipse platform.
+	 * Clients must not call.
+	 */
+	public BeansCorePlugin() {
 		plugin = this;
 		try {
 			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);
-		} catch (MissingResourceException x) {
+		} catch (MissingResourceException e) {
 			resourceBundle = null;
 		}
 	}
 
-	public void startup() throws CoreException {
-		super.startup();
+	public void start(BundleContext context) throws Exception {
+		super.start(context);
 		BEANS_MODEL.startup();
 	}
 
-	public void shutdown() throws CoreException {
+	public void stop(BundleContext context) throws Exception {
 		BEANS_MODEL.shutdown();
-		super.shutdown();
+		super.stop(context);
 	}
 
 	/**
@@ -126,18 +127,6 @@ public class BeansCorePlugin extends Plugin {
 	public ResourceBundle getResourceBundle() {
 		return resourceBundle;
 	}
-	
-	public static String getPluginId() {
-		return getDefault().getDescriptor().getUniqueIdentifier();
-	}
-
-	public static IPath getInstallLocation() {
-		return new Path(getInstallURL().getFile());
-	}
-
-	public static URL getInstallURL() {
-		return getDefault().getDescriptor().getInstallURL();
-	}
 
 	public static boolean isDebug(String option) {
 		String value = Platform.getDebugOption(option);
@@ -171,7 +160,7 @@ public class BeansCorePlugin extends Plugin {
 		if (message == null) {
 			message = ""; 
 		}		
-		return new Status(Status.ERROR, getPluginId(), 0, message, exception);
+		return new Status(Status.ERROR, PLUGIN_ID, 0, message, exception);
 	}
 
 	public static String getFormattedMessage(String key, String arg) {
