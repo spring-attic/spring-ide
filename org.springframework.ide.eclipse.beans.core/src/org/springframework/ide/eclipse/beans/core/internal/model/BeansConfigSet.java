@@ -51,6 +51,15 @@ public class BeansConfigSet extends BeansModelElement implements IBeansConfigSet
 		this.configNames = new ArrayList(configNames); 
 	}
 
+	/**
+	 * Sets internal maps with <code>IBean</code>s and bean classes to
+	 * <code>null</code>.
+	 */
+	public void reset() {
+		this.beansMap = null;
+		this.beanClassesMap = null;
+	}
+
 	public int getElementType() {
 		return CONFIG_SET;
 	}
@@ -62,7 +71,7 @@ public class BeansConfigSet extends BeansModelElement implements IBeansConfigSet
 	public void setAllowBeanDefinitionOverriding(
 										boolean allowBeanDefinitionOverriding) {
 		this.allowBeanDefinitionOverriding = allowBeanDefinitionOverriding;
-		beansMap = null;
+		reset();
 	}
 
 	public boolean isAllowBeanDefinitionOverriding() {
@@ -72,7 +81,7 @@ public class BeansConfigSet extends BeansModelElement implements IBeansConfigSet
 	public void addConfig(String configName) {
 		if (configName.length() > 0 && !configNames.contains(configName)) {
 			configNames.add(configName);
-			beansMap = null;
+			reset();
 		}
 	}
 
@@ -86,6 +95,7 @@ public class BeansConfigSet extends BeansModelElement implements IBeansConfigSet
 
 	public void removeConfig(String configName) {
 		configNames.remove(configName);
+		reset();
 	}
 
 	public Collection getConfigs() {
@@ -100,9 +110,10 @@ public class BeansConfigSet extends BeansModelElement implements IBeansConfigSet
 		return (IBean) getBeansMap().get(name);
 	}
 
-    public void replaceConfig(String origFileName, String newFileName) {
-        removeConfig(origFileName);
-        addConfig(newFileName);
+	public void replaceConfig(String origFileName, String newFileName) {
+		removeConfig(origFileName);
+		addConfig(newFileName);
+		reset();
     }
 
 	public boolean isBeanClass(String className) {
