@@ -168,6 +168,8 @@ public class BeansUIUtils {
 	/**
 	 * Opens given file in associated editor and go to specified line
 	 * (if not -1).
+	 * TODO Obsolete with Eclipse 3: Use IDE.openEditor() with an instance of
+	 * IMarker holding the line number instead
 	 */
 	public static IEditorPart openInEditor(IFile file, int line) {
 		IEditorInput input = new FileEditorInput(file);
