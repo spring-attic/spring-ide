@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.springframework.ide.eclipse.beans"
+      label="%featureName"
+      version="1.1.0"
+      provider-name="%providerName">
+
+   <description>
+      %description
+   </description>
+
+   <copyright>
+      %copyright
+   </copyright>
+
+   <license url="%licenseURL">
+      %license
+   </license>
+
+   <url>
+      <update label="%updateSiteName"/>
+   </url>
+
+   <requires>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.jdt.ui"/>
+      <import plugin="org.eclipse.gef"/>
+      <import plugin="org.springframework.core"/>
+   </requires>
+
+   <plugin
+         id="org.springframework.ide.eclipse.beans"
+         download-size="8417"
+         install-size="16619"
+         version="1.1.0"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.beans.core"
+         download-size="1033364"
+         install-size="1192064"
+         version="1.1.0"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.beans.core.doc"
+         download-size="0"
+         install-size="0"
+         version="1.1.0"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.beans.ui"
+         download-size="107478"
+         install-size="124420"
+         version="1.1.0"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.beans.ui.graph"
+         download-size="44134"
+         install-size="52792"
+         version="1.1.0"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.beans.ui.doc"
+         download-size="0"
+         install-size="0"
+         version="1.1.0"/>
+
+</feature>

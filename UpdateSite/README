@@ -1,0 +1,36 @@
+SpringUI is now a sub-project of the Spring Framework
+-----------------------------------------------------
+
+SpringUI is now hosted as a sub-project of the Spring Framework.
+The project is now called "Spring IDE for Eclipse - Beans Configuration Support"
+and can be found here: http://www.springframework.org/spring-ide/eclipse/
+
+A new release (1.0.3) is available too. It provides the following new features:
+
+* updated to latest spring-core.jar (1.0.2)
+
+* updated Spring reference documentation (1.0.2)
+
+* to support Eclipse 3.0 (final) Spring IDE has to bring it's own version
+  of the Apache Xerces XML parser (Xerces is not shipped with the Eclipse
+  platform anymore)
+
+* config set properties page now supports external beans config files from
+  referenced Spring projects
+
+* new overlay indicator for beans in config sets which are defined in an
+  external config file
+
+* documention for Spring IDE is now provided as a new plugin which
+  leverages Eclipse's help system
+
+* both features (Spring Framework and Spring IDE) are providing now
+  information for Eclipse's about dialog
+
+* both features (Spring Framework and Spring IDE) are providing now a
+  welcome page with some Quick Start information (Eclipse 2.1.x only)
+
+* double-clicking a bean or a reference part in the beans graph now opens
+  the corresponding beans config file
+
+* beans graph now supports bean references in arrays and collections too
