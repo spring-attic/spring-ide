@@ -28,6 +28,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
 
 /**
  * Resource implementation for Eclipse file handles.
@@ -43,6 +44,7 @@ public class FileResource extends AbstractResource {
 	 * @param file a File handle
 	 */
 	public FileResource(IFile file) {
+	    if (file == null) throw new BeanDefinitionException("Null file");
 		this.file = file.getLocation().toFile();
 	}
 

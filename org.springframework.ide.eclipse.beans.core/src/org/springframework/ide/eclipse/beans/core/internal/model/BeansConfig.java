@@ -163,7 +163,7 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 		try {
 			reader.loadBeanDefinitions(new FileResource(file));
 		} catch (BeanDefinitionException e) {
-			exception = e;
+			exception = new BeanDefinitionException("Problem reading file: "+getElementName()+" - "+e.getMessage());
 		}
 		beans = handler.getBeans();
 		innerBeans = handler.getInnerBeans();
