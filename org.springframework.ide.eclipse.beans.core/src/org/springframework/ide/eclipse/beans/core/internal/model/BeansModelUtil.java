@@ -5,7 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
@@ -64,5 +70,48 @@ public class BeansModelUtil {
 										   refBeans);
 			}
 		}
+	}
+
+	/**
+	 * Returns the corresponding Java type for given full-qualified class name.
+	 * @param project  the JDT project the class belongs to
+	 * @param className  the full qualified class name of the requested Java
+	 * 					type
+	 * @return the requested Java type or null if the class is not defined or
+	 * 		   the project is not accessible
+	 */
+	public static IType getJavaType(IProject project, String className) {
+		if (className != null && project.isAccessible()) {
+			try {
+				// Find type in this project
+				if (project.hasNature(JavaCore.NATURE_ID)) {
+					IJavaProject javaProject = (IJavaProject)
+										  project.getNature(JavaCore.NATURE_ID);
+					IType type = javaProject.findType(className);
+					if (type != null) {
+						return type;
+					}
+				}
+	
+				// Find type in referenced Java projects
+				IProject[] projects = project.getReferencedProjects();
+				for (int i = 0; i < projects.length; i++) {
+					IProject refProject = projects[i];
+					if (refProject.isAccessible() &&
+									 refProject.hasNature(JavaCore.NATURE_ID)) {
+						IJavaProject javaProject = (IJavaProject)
+									   refProject.getNature(JavaCore.NATURE_ID);
+						IType type = javaProject.findType(className);
+						if (type != null) {
+							return type;
+						}
+					}
+	 			}
+			} catch (CoreException e) {
+				BeansCorePlugin.log("Error getting Java type '" + className +
+									"'", e); 
+			}
+		}
+		return null;
 	}
 }

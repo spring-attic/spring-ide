@@ -24,10 +24,6 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescription;
@@ -164,41 +160,6 @@ public class BeansProject extends BeansModelElement implements IBeansProject {
 		return list;
 	}
 
-	public IType getJavaType(String className) {
-		if (className != null && project.isAccessible()) {
-			try {
-				// Find type in this project
-				if (project.hasNature(JavaCore.NATURE_ID)) {
-					IJavaProject javaProject = (IJavaProject)
-										  project.getNature(JavaCore.NATURE_ID);
-					IType type = javaProject.findType(className);
-					if (type != null) {
-						return type;
-					}
-				}
-	
-				// Find type in referenced Java projects
-				IProject[] projects = project.getReferencedProjects();
-				for (int i = 0; i < projects.length; i++) {
-					IProject refProject = projects[i];
-					if (refProject.isAccessible() &&
-									 refProject.hasNature(JavaCore.NATURE_ID)) {
-						IJavaProject javaProject = (IJavaProject)
-									   refProject.getNature(JavaCore.NATURE_ID);
-						IType type = javaProject.findType(className);
-						if (type != null) {
-							return type;
-						}
-					}
-	 			}
-			} catch (CoreException e) {
-				BeansCorePlugin.log("Error getting Java type '" + className +
-									"'", e); 
-			}
-		}
-		return null;
-	}
-
 	/**
 	 * Updates the list of configs (by name) belonging to this project.
 	 * After deleting all problem markers from configs the modified project
@@ -272,12 +233,8 @@ public class BeansProject extends BeansModelElement implements IBeansProject {
 		return description;
 	}
 
-    /* (non-Javadoc)
-     * @see org.springframework.ide.eclipse.beans.core.model.IBeansProject#hasConfigSet(java.lang.String)
-     */
     public boolean hasConfigSet(String configSetName) {
         IBeansConfigSet configSet = getDescription().getConfigSet(configSetName);
         return configSet != null;
     }
-
 }

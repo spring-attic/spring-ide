@@ -27,9 +27,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IEditorActionDelegate;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtil;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 
 public class OpenJavaType extends Action implements IEditorActionDelegate {
@@ -56,12 +54,10 @@ public class OpenJavaType extends Action implements IEditorActionDelegate {
 	public void run(IAction action) {
 		String className = guessType();
 		if (className != null && className.length() > 0) {
-			IBeansProject project = BeansCorePlugin.getModel().getProject(
-															 file.getProject());
-			IType type = project.getJavaType(className);
+			IType type = BeansModelUtil.getJavaType(file.getProject(),
+													className);
 			if (type != null) {
 				BeansUIUtils.openInEditor(type);
-				return;
 			}
 		}
 	}
