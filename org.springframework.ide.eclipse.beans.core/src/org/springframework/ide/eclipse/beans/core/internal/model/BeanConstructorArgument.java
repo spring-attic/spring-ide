@@ -72,7 +72,7 @@ public class BeanConstructorArgument extends BeansModelElement
 	 */
 	public Collection getReferencedBeans() {
 		List beanNames = new ArrayList();
-		BeansModelUtil.addReferencedBeanNamesForValue(this, value, beanNames);
+		BeansModelUtils.addReferencedBeanNamesForValue(this, value, beanNames);
 		return beanNames;
 	}
 

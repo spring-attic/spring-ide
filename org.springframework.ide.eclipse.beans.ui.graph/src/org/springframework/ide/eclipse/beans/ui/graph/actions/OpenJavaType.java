@@ -24,7 +24,7 @@ import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.ui.actions.EditorPartAction;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.ui.IEditorPart;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtil;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditor;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
@@ -61,7 +61,7 @@ public class OpenJavaType extends EditorPartAction {
 		String className = bean.getClassName();
 		if (className != null) {
 			IProject project = bean.getConfigFile().getProject();
-			IType type = BeansModelUtil.getJavaType(project, className);
+			IType type = BeansModelUtils.getJavaType(project, className);
 			if (type != null) {
 				SpringUIUtils.openInEditor(type);
 			}

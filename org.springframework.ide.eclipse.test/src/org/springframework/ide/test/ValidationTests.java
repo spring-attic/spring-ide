@@ -39,7 +39,7 @@ import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtil;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
@@ -91,7 +91,7 @@ public class ValidationTests extends AbstractSpringIdeTest {
 	}
 
 	private void renameBeanClassProperty() throws Exception {
-	    IType type = BeansModelUtil.getJavaType(project.getProject(),
+	    IType type = BeansModelUtils.getJavaType(project.getProject(),
 	    		"pack1.SimpleBean");
 	    IMethod[] methods = type.getMethods();
 	    for (int i = 0; i < methods.length; i++) {

@@ -32,7 +32,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.BeansResourceChangeListener;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.IBeansResourceChangeEvents;
-import org.springframework.ide.eclipse.beans.core.internal.model.validator.BeansConfigValidator;
 import org.springframework.ide.eclipse.beans.core.model.BeansModelChangedEvent;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
