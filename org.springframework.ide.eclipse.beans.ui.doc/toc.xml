@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<toc label="Spring IDE Support" topic="index.html">
+   <topic label="Features" href="index.html#features"/>
+   <topic label="Requirements" href="index.html#requirements"/>
+   <topic label="Known Limitations" href="index.html#limitations"/>
+   <topic label="Installation" href="index.html#installation"/>
+   <topic label="Usage" href="index.html#usage">
+      <topic label="Migration from SpringUI" href="index.html#usage-migration"/>
+      <topic label="Fresh Installation" href="index.html#usage-fresh"/>
+   </topic>
+   <topic label="Resources" href="index.html#resources"/>
+</toc>
