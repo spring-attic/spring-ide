@@ -1,0 +1,265 @@
+/*
+ * Copyright 2002-2004 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ 
+
+package org.springframework.ide.eclipse.beans.core.internal.model;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
+import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescription;
+import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionReader;
+import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionWriter;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+
+public class BeansProject extends BeansModelElement implements IBeansProject {
+
+	private IProject project; 
+	private BeansProjectDescription description;
+
+	public BeansProject(IProject project) {
+		super(BeansCorePlugin.getModel(), project.getName());
+		this.project = project;
+	}
+
+	public int getElementType() {
+		return PROJECT;
+	}
+
+	public IResource getElementResource() {
+		return project;
+	}
+
+	public IProject getProject() {
+		return project;
+	}
+
+	/**
+	 * Sets internal <code>BeansProjectDescription</code> to <code>null</code>.
+	 * Any further access to the data of this instance of
+	 * <code>BeansProject</code> leads to reloading of this beans project's
+	 * config description file.
+	 */
+	public void reset() {
+		this.description = null;
+	}
+
+	public void addConfig(IFile file) {
+		getDescription().addConfig(file);
+	}
+
+	public void removeConfig(IFile file) {
+		getDescription().removeConfig(file);
+	}
+
+	public Collection getConfigNames() {
+		return getDescription().getConfigNames();
+	}
+
+	/**
+	 * Returns true if given file belongs to the list of Spring bean config
+	 * files which are stored in the project description. 
+	 */
+	public boolean hasConfig(IFile file) {
+		return getDescription().hasConfig(file);
+	}
+
+	/**
+	 * Returns true if given config name belongs to the list of Spring bean
+	 * config files which are stored in the project description. 
+	 */
+	public boolean hasConfig(String configName) {
+		return getDescription().hasConfig(configName);
+	}
+
+	/**
+	 * Returns <code>IBeansConfig</code> for given config file. 
+	 */
+	public IBeansConfig getConfig(IFile configFile) {
+		return getDescription().getConfig(configFile);
+	}
+
+	/**
+	 * Returns <code>IBeansConfig</code> of given name. 
+	 */
+	public IBeansConfig getConfig(String configName) {
+		return getDescription().getConfig(configName);
+	}
+
+	/**
+	 * Returns a collection of all BeansConfig defined in this project.
+	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfig
+	 */
+	public Collection getConfigs() {
+		return getDescription().getConfigs();
+	}
+
+	public IFile getConfigFile(String config) {
+		return getDescription().getConfigFile(config);
+	}
+
+	/**
+	 * Returns a list of <code>IBeansConfigSet</code> instances.
+	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet
+	 */
+	public Collection getConfigSets() {
+		return getDescription().getConfigSets();
+	}
+
+	public boolean isBeanClass(String className) {
+		Iterator configs = getDescription().getConfigs().iterator();
+		while (configs.hasNext()) {
+			IBeansConfig config = (IBeansConfig) configs.next();
+			if (config.isBeanClass(className)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public Collection getBeanClasses() {
+		List beanClasses = new ArrayList();
+		Iterator configs = getDescription().getConfigs().iterator();
+		while (configs.hasNext()) {
+			IBeansConfig config = (IBeansConfig) configs.next();
+			beanClasses.add(config.getBeanClasses());
+		}
+		return beanClasses;
+	}
+
+	public Collection getBeans(String className) {
+		List list = new ArrayList(); 
+		Iterator configs = getDescription().getConfigs().iterator();
+		while (configs.hasNext()) {
+			IBeansConfig config = (IBeansConfig) configs.next();
+			if (config.isBeanClass(className)) {
+				list.add(config.getBeans(className));
+			}
+		}
+		return list;
+	}
+
+	public IType getJavaType(String className) {
+		if (className != null && project.isAccessible()) {
+			try {
+				// Find type in this project
+				if (project.hasNature(JavaCore.NATURE_ID)) {
+					IJavaProject javaProject = (IJavaProject)
+										  project.getNature(JavaCore.NATURE_ID);
+					IType type = javaProject.findType(className);
+					if (type != null) {
+						return type;
+					}
+				}
+	
+				// Find type in referenced Java projects
+				IProject[] projects = project.getReferencedProjects();
+				for (int i = 0; i < projects.length; i++) {
+					IProject refProject = projects[i];
+					if (refProject.isAccessible() &&
+									 refProject.hasNature(JavaCore.NATURE_ID)) {
+						IJavaProject javaProject = (IJavaProject)
+									   refProject.getNature(JavaCore.NATURE_ID);
+						IType type = javaProject.findType(className);
+						if (type != null) {
+							return type;
+						}
+					}
+	 			}
+			} catch (CoreException e) {
+				BeansCorePlugin.log("Error getting Java type '" + className +
+									"'", e); 
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Updates the list of configs (by name) belonging to this project.
+	 * After deleting all problem markers from configs the modified project
+	 * description is saved to disk.
+	 * @param configs  list of config names
+	 */
+	public void setConfigs(List configs) {
+		BeansProjectDescription description = getDescription();
+
+		// Look for removed config files and
+		// 1. delete all problem markers from them
+		// 2. remove config from any config set
+		Iterator iter = description.getConfigNames().iterator();
+		while (iter.hasNext()) {
+			String config = (String) iter.next();
+			if (!configs.contains(config)) {
+				IFile file = description.getConfigFile(config);
+				BeansCoreUtils.deleteProblemMarkers(file);
+				description.removeConfig(config);
+			}
+		}
+
+		description.setConfigNames(configs);
+		BeansProjectDescriptionWriter.write(project, description);
+	}
+
+	/**
+	 * Updates the <code>BeansConfigSet</code>s defined within this project.
+	 * The modified project description is saved to disk.
+	 * @param configSets  list of BeansConfigSet instances
+	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet
+	 */
+	public void setConfigSets(List configSets) {
+		BeansProjectDescription description = getDescription();
+		description.setConfigSets(configSets);
+		BeansProjectDescriptionWriter.write(project, description);
+	}
+
+	/**
+	 * Deletes all problem markers from config files.
+	 */
+	public void deleteProblemMarkers() {
+		BeansProjectDescription description = getDescription();
+		Iterator iter = description.getConfigNames().iterator();
+		while (iter.hasNext()) {
+			IFile file = description.getConfigFile((String) iter.next());
+			BeansCoreUtils.deleteProblemMarkers(file);
+		}
+	}
+
+	public String toString() {
+		return getElementName();
+	}
+
+	/**
+	 * Returns lazily loaded project description.
+	 * <b>This nature's project has to be set first!!!</b> 
+	 */
+	private BeansProjectDescription getDescription() {
+		if (description == null) {
+			description = BeansProjectDescriptionReader.read(this);
+		}
+		return description;
+	}
+}

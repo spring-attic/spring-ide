@@ -1,0 +1,5 @@
+To build this plugin you have to copy the missing "xercesImpl.jar" and
+"xmlParserAPIs.jar" from the Apache Xerces distribution ino this directory.
+
+Additionally "spring-core.jar" and "commons-logging.jar" from the Spring
+Framework distribution are needed.

@@ -1,0 +1,184 @@
+/*
+ * Copyright 2002-2004 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ 
+
+package org.springframework.ide.eclipse.beans.core;
+
+import java.net.URL;
+import java.text.MessageFormat;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IPluginDescriptor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Plugin;
+import org.eclipse.core.runtime.Status;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
+
+/**
+ * Central access point for the Spring Framework Core plug-in
+ * (id <code>"org.springframework.ide.eclipse.beans.core"</code>).
+ *
+ * @author Torsten Juergeleit
+ */
+public class BeansCorePlugin extends Plugin {
+
+	/**
+	 * Plugin identifier for Spring Core (value
+	 * <code>org.springframework.ide.eclipse.beans.core</code>).
+	 */
+	public static final String PLUGIN_ID =
+								   "org.springframework.ide.eclipse.beans.core";
+	private static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
+
+	/** The shared instance */
+	private static BeansCorePlugin plugin;
+
+	/** The singleton beans model */
+	private final static BeansModel BEANS_MODEL = new BeansModel();
+
+	/** Resource bundle */
+	private ResourceBundle resourceBundle;
+
+	public BeansCorePlugin(IPluginDescriptor descriptor) {
+		super(descriptor);
+		plugin = this;
+		try {
+			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);
+		} catch (MissingResourceException x) {
+			resourceBundle = null;
+		}
+	}
+
+	public void startup() throws CoreException {
+		super.startup();
+		BEANS_MODEL.startup();
+	}
+
+	public void shutdown() throws CoreException {
+		BEANS_MODEL.shutdown();
+		super.shutdown();
+	}
+
+	/**
+	 * Returns the shared instance.
+	 */
+	public static BeansCorePlugin getDefault() {
+		return plugin;
+	}
+
+	/**
+	 * Returns the singleton <code>IBeansModel</code>.
+	 */
+	public static final IBeansModel getModel() {
+		return BEANS_MODEL;
+	}
+
+	/**
+	 * Returns the workspace instance.
+	 */
+	public static IWorkspace getWorkspace() {
+		return ResourcesPlugin.getWorkspace();
+	}
+
+	/**
+	 * Returns the string from the plugin's resource bundle,
+	 * or 'key' if not found.
+	 */
+	public static String getResourceString(String key) {
+	    String bundleString;
+		ResourceBundle bundle = getDefault().getResourceBundle();
+		if (bundle != null) {
+			try {
+				bundleString = bundle.getString(key);
+			} catch (MissingResourceException e) {
+			    log(e);
+				bundleString = "!" + key + "!";
+			}
+		} else {
+			bundleString = "!" + key + "!";
+		}
+		return bundleString;
+	}
+
+	/**
+	 * Returns the plugin's resource bundle,
+	 */
+	public ResourceBundle getResourceBundle() {
+		return resourceBundle;
+	}
+	
+	public static String getPluginId() {
+		return getDefault().getDescriptor().getUniqueIdentifier();
+	}
+
+	public static IPath getInstallLocation() {
+		return new Path(getInstallURL().getFile());
+	}
+
+	public static URL getInstallURL() {
+		return getDefault().getDescriptor().getInstallURL();
+	}
+
+	public static boolean isDebug(String option) {
+		String value = Platform.getDebugOption(option);
+		return (value != null && value.equalsIgnoreCase("true") ? true : false);
+	}
+
+	public static void log(IStatus status) {
+		getDefault().getLog().log(status);
+	}
+
+	/**
+	 * Writes the message to the plug-in's log
+	 * 
+	 * @param message the text to write to the log
+	 */
+	public static void log(String message, Throwable exception) {
+		IStatus status = createErrorStatus(message, exception);
+		getDefault().getLog().log(status);
+	}
+	
+	public static void log(Throwable exception) {
+		getDefault().getLog().log(createErrorStatus(
+						getResourceString("Plugin.internal_error"), exception));
+	}
+
+	/**
+	 * Returns a new <code>IStatus</code> with status "ERROR" for this plug-in.
+	 */
+	public static IStatus createErrorStatus(String message,
+											Throwable exception) {
+		if (message == null) {
+			message = ""; 
+		}		
+		return new Status(Status.ERROR, getPluginId(), 0, message, exception);
+	}
+
+	public static String getFormattedMessage(String key, String arg) {
+		return getFormattedMessage(key, new String[] { arg });
+	}
+
+	public static String getFormattedMessage(String key, String[] args) {
+		return MessageFormat.format(getResourceString(key), args);
+	}
+}

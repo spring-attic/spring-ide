@@ -1,0 +1,14 @@
+Changes in version 1.0.2 (10.6.2003):
+
+* to support Eclipse 3.0 (final) Spring IDE has to bring it's own version of
+  the Apache Xerces XML parser (Xerces is not shipped with the Eclipse platform
+  anymore)
+
+* external beans configs files (indicate by a full path - leading '/') are now
+  supported too
+
+* updated BeanDefinitionParser for spring-core.jar 1.0.2
+
+Changes in version 1.0.1 (18.5.2003):
+
+* interims version - not plublicly announced
