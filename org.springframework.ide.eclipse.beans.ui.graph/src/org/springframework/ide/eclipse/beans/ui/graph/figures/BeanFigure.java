@@ -55,7 +55,10 @@ public class BeanFigure extends Figure {
 	protected Label createLabel(Bean bean) {
 		Label label = new Label();
 		label.setText(bean.getName());
-		if (bean.isRootBean()) {
+		if (bean.hasError()) {
+			label.setIcon(BeansGraphImages.getImage(
+											  BeansGraphImages.IMG_OBJS_ERROR));
+		} else if (bean.isRootBean()) {
 			label.setIcon(BeansGraphImages.getImage(
 										  BeansGraphImages.IMG_OBJS_ROOT_BEAN));
 			label.setToolTip(new Label("Class: " + bean.getClassName()));
