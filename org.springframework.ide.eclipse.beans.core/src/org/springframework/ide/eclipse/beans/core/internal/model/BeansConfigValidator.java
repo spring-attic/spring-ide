@@ -296,20 +296,10 @@ public class BeansConfigValidator {
 			}
 		} else {
 
-			// Ignore abstract root beans
-			if (!bean.isRootBean()) {
-
-				// For child beans use parent's bean type
-				IBean parent = getParentBean(bean);
-				if (parent != null) {
-					type = getBeanType(parent, config);
-				}
-			} else if (!bean.isAbstract()) {
-				BeansCoreUtils.createProblemMarker(configFile,
-					"Bean definition has neither 'class' nor 'parent'",
-					IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
-					IBeansProjectMarker.ERROR_CODE_BEAN_WITHOUT_CLASS_OR_PARENT,
-					bean.getElementName(), null);
+			// For child beans use parent's bean type
+			IBean parent = getParentBean(bean);
+			if (parent != null) {
+				type = getBeanType(parent, config);
 			}
 		}
 		return type;
