@@ -18,6 +18,7 @@ package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
@@ -132,13 +137,14 @@ public class BeansConfigValidator {
 		}
 
 		// Validate all beans
+		Map aliasMap = new HashMap();
 		Iterator iter = config.getBeans().iterator();
 		while (iter.hasNext()) {
 			if (monitor != null && monitor.isCanceled()) {
 				return;
 			}
 			IBean bean = (IBean) iter.next();
-			validateBean(bean, configSet);
+			validateBean(bean, configSet, aliasMap);
 		}
 
 		// Validate all inner beans
@@ -148,7 +154,7 @@ public class BeansConfigValidator {
 				return;
 			}
 			IBean bean = (IBean) iter.next();
-			validateBean(bean, configSet);
+			validateBean(bean, configSet, null);
 		}
     	}
 
@@ -213,13 +219,49 @@ public class BeansConfigValidator {
 		}
 	}
 
-	protected void validateBean(IBean bean, IBeansConfigSet configSet) {
+	protected void validateBean(IBean bean, IBeansConfigSet configSet,
+								Map aliasMap) {
 		if (monitor != null) {
 			if (monitor.isCanceled()) {
 				return;
 			}
 			monitor.subTask(BeansCorePlugin.getFormattedMessage(
 				   "BeansConfigValidator.validateBean", bean.getElementName()));
+		}
+
+		// Validate bean definition
+		BeanDefinitionHolder bdHolder = ((Bean) bean).getBeanDefinitionHolder();
+		BeanDefinition def = bdHolder.getBeanDefinition();
+		if (def instanceof AbstractBeanDefinition) {
+			try {
+				((AbstractBeanDefinition) def).validate();
+			} catch (BeanDefinitionValidationException e) {
+				createProblemMarker(bean, "Invalid bean definition: " +
+						 e.getMessage(),
+						 IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+						 IBeansProjectMarker.ERROR_CODE_INVALID_BEAN_DEFINITION,
+						 bean.getElementName(), null);
+			}
+		}
+
+		// Validate bean aliases
+		if (aliasMap != null) {
+			String[] aliases = bdHolder.getAliases();
+			if (aliases != null) {
+				for (int i = 0; i < aliases.length; i++) {
+					Object registeredName = aliasMap.get(aliases[i]);
+					if (registeredName != null) {
+						createProblemMarker(bean, "Alias '" + aliases[i] +
+							  "' is already defined by bean '" +
+							  registeredName + "'", IMarker.SEVERITY_ERROR,
+							  bean.getElementStartLine(),
+						 	  IBeansProjectMarker.ERROR_CODE_INVALID_BEAN_ALIAS,
+							  bean.getElementName(), null);
+					} else {
+						aliasMap.put(aliases[i], bdHolder.getBeanName());
+					}
+				}
+			}
 		}
 
 		// Get Java type for given bean and validate bean's constructor
