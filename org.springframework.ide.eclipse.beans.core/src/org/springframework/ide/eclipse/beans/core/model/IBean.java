@@ -47,8 +47,6 @@ public interface IBean extends IBeansModelElement {
 
 	public boolean isInnerBean();
 
-	public IBean getOuterBean();
-
 	/**
 	 * Returns a collection with the names of all beans which are referenced
 	 * by this bean's parent bean (for child beans only), constructor arguments

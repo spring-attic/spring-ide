@@ -150,15 +150,7 @@ public class Bean extends BeansModelElement implements IBean {
 	}
 
 	public boolean isInnerBean() {
-		return (outerBean != null);
-	}
-
-	public void setOuterBean(IBean outerBean) {
-		this.outerBean = outerBean;
-	}
-
-	public IBean getOuterBean() {
-		return outerBean;
+		return (getElementParent() != null);
 	}
 
 	/**
