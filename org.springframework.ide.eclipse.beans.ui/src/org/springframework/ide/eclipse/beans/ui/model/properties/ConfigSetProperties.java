@@ -22,8 +22,8 @@ import java.util.List;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
 
 public class ConfigSetProperties implements IPropertySource {
 
@@ -51,9 +51,9 @@ public class ConfigSetProperties implements IPropertySource {
 		descriptors.add(descriptor);
 	}
 
-	private ConfigSetNode configSet;
+	private IBeansConfigSet configSet;
 
-	public ConfigSetProperties(ConfigSetNode configSet) {
+	public ConfigSetProperties(IBeansConfigSet configSet) {
 		this.configSet = configSet;
 	}
 
@@ -64,9 +64,9 @@ public class ConfigSetProperties implements IPropertySource {
 
 	public Object getPropertyValue(Object id) {
 		if (P_ID_NAME.equals(id)) {
-			return configSet.getName();
+			return configSet.getElementName();
 		} else if (P_ID_OVERRIDE.equals(id)) {
-			return new Boolean(configSet.isOverrideEnabled());
+			return new Boolean(configSet.isAllowBeanDefinitionOverriding());
 		}
 		return null;
 	}
