@@ -31,6 +31,7 @@ public class ConstructorArgumentNode extends AbstractNode {
 								   IBeanConstructorArgument carg) {
 		super(bean, null);
 		this.carg = carg;
+		setStartLine(carg.getElementStartLine());
 	}
 
 	public IBeanConstructorArgument getBeanConstructorArgument() {

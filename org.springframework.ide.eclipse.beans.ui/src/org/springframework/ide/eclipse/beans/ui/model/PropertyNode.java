@@ -30,6 +30,7 @@ public class PropertyNode extends AbstractNode {
 	public PropertyNode(BeanNode bean, IBeanProperty property) {
 		super(bean, property.getElementName());
 		this.property = property;
+		setStartLine(property.getElementStartLine());
 	}
 
 	public IBeanProperty getBeanProperty() {
