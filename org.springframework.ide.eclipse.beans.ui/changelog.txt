@@ -1,8 +1,10 @@
 Changes in version 1.1.0 (1.9.2004):
 
-* Beans project model refactored into core plugin
+* beans project model refactored into core plugin
 
-* Beans view now supports constructor arguments too
+* beans view now supports constructor arguments too
+
+* updated images to Eclipse 3.0 L&F
 
 * Java sources and classes which are used as Spring beans are decorated too
 

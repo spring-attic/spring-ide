@@ -1,12 +1,16 @@
 Changes in version 1.1.0 (1.9.2004):
 
-* spring-core.jar (updated to v1.1 RC2) now included in core
+* spring-core.jar (updated to v1.1) now included in core
 
-* Beans project model refactored from UI plugin into core
+* beans model refactored from UI plugin into core
 
-* Beans model now supports constructor arguments and bean classes too
+* beans model now supports constructor arguments and bean classes too
 
-* Beans project validator now checks construtor arguments too
+* refactored beans model to provide a public API
+
+* removed dependency to SAX API in public methods
+
+* beans project validator now checks constructor arguments too
 
 
 Changes in version 1.0.2 (10.6.2004):
