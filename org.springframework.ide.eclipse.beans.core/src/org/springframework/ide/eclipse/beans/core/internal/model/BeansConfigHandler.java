@@ -72,30 +72,41 @@ public class BeansConfigHandler implements IBeanDefinitionEvents {
 	}
 
 	public void startBean(Element element, boolean isNestedBean) {
-		int line = LineNumberPreservingDOMParser.getStartLineNumber(element);
 		if (isNestedBean) {
 			nestedBeans.push(currentBean);
 		}
 		currentBean = new Bean(config, "");
-		currentBean.setElementStartLine(line);
+		setXmlTextRange(currentBean, element);
+		
 	}
 
-	public void registerConstructorArgument(Element element, int index,
+	/**
+	 * sets the start and end lines on the given model element.
+     * @param currentBean2
+     * @param element
+     */
+    private void setXmlTextRange(BeansModelElement modelElement, Element xmlElement)
+    {
+		int startLine = LineNumberPreservingDOMParser.getStartLineNumber(xmlElement);
+		int endLine = LineNumberPreservingDOMParser.getEndLineNumber(xmlElement);
+		modelElement.setElementStartLine(startLine);
+		modelElement.setElementEndLine(endLine);
+    }
+
+    public void registerConstructorArgument(Element element, int index,
 										   Object value, String type) {
-		int line = LineNumberPreservingDOMParser.getStartLineNumber(element);
 		BeanConstructorArgument carg = new BeanConstructorArgument(currentBean, index,
 														   type, value);
-		carg.setElementStartLine(line);
 		currentBean.addConstructorArgument(carg);
+		setXmlTextRange(carg, element);
 	}
 
 	public void registerBeanProperty(Element element, String propertyName,
 									 PropertyValues pvs) {
-		int line = LineNumberPreservingDOMParser.getStartLineNumber(element);
 		BeanProperty property = new BeanProperty(currentBean, propertyName);
-		property.setElementStartLine(line);
 		property.setValue(pvs.getPropertyValue(propertyName).getValue());
 		currentBean.addProperty(property);
+		setXmlTextRange(property, element);
 	}
 
 	public void registerBean(BeanDefinitionHolder bdHolder,

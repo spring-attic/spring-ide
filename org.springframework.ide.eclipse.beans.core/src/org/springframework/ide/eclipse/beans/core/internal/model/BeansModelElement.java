@@ -23,6 +23,7 @@ public abstract class BeansModelElement implements IBeansModelElement {
 	private IBeansModelElement parent;
 	private String name;
 	private int startLine;
+    private int endLine;
 
 	protected BeansModelElement(IBeansModelElement parent, String name) {
 		this.parent = parent;
@@ -52,5 +53,20 @@ public abstract class BeansModelElement implements IBeansModelElement {
 
 	public final int getElementStartLine() {
 		return this.startLine;
+	}
+
+    /**
+     * @param endLine
+     */
+    public void setElementEndLine(int endLine)
+    {
+       	this.endLine = endLine;
+    }
+
+    /*
+     * @see BeansModelElement.getElementEndLine
+     */
+	public final int getElementEndLine() {
+	    return this.endLine;
 	}
 }

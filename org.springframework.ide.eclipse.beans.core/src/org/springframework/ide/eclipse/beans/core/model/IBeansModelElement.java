@@ -111,4 +111,28 @@ public interface IBeansModelElement {
 	 * @return line number with start of element's source code
 	 */
 	int getElementStartLine();
+	
+	/**
+	 * Returns the line number with the logical end of the element's source code, or 
+	 * -1 if it's a one liner.
+	 * 
+	 * e.g.
+	 * <pre>
+	 * (1) &lt;bean class="foo" id="bar"&gt;
+	 * (2)    &lt;property name="fred"&gt;&lt;value&gt;3&lt;/value&gt;&lt;/property&gt;
+	 * (3) &lt;/bean&gt; 
+	 * would return 2 (line 3 is not counted as it's just closing)
+	 *  
+	 * (1) &lt;bean class="foo" id="bar"/&gt;
+	 * would return -1 (one liner)
+	 * 
+	 * (1) &lt;bean class="foo" id="bar"&gt;
+	 * (2)    &lt;!-- comment -->
+	 * (3) &lt;/bean&gt;
+	 * would also return -1 as there's nothing logically 'interesting' in the tag
+	 * 
+	 * </pre>
+	 * @return line number with start of element's source code
+	 */
+	int getElementEndLine();
 }
