@@ -22,10 +22,10 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
-import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditor;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput;
 import org.springframework.ide.eclipse.beans.ui.model.INode;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class ShowGraphAction extends Action implements IViewActionDelegate {
 
@@ -42,6 +42,6 @@ public class ShowGraphAction extends Action implements IViewActionDelegate {
 
 	public void run(IAction action) {
 		GraphEditorInput input = new GraphEditorInput(node);
-		BeansUIUtils.openInEditor(input, GraphEditor.EDITOR_ID);
+		SpringUIUtils.openInEditor(input, GraphEditor.EDITOR_ID);
 	}
 }

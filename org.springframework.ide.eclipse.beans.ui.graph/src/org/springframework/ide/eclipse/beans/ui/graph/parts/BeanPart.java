@@ -34,9 +34,9 @@ import org.eclipse.gef.NodeEditPart;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
-import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.graph.figures.BeanFigure;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class BeanPart extends AbstractGraphicalEditPart implements NodeEditPart {
 
@@ -108,7 +108,7 @@ public class BeanPart extends AbstractGraphicalEditPart implements NodeEditPart 
 		if (req.getType() == RequestConstants.REQ_OPEN) {
 			IFile file = getBean().getConfigFile();
 			if (file != null && file.exists()) {
-				BeansUIUtils.openInEditor(file, getBean().getStartLine());
+				SpringUIUtils.openInEditor(file, getBean().getStartLine());
 			}
 		}
 		super.performRequest(req);

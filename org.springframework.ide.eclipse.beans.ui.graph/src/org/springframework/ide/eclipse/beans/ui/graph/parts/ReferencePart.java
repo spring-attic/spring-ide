@@ -34,11 +34,11 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.editparts.AbstractConnectionEditPart;
-import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
 import org.springframework.ide.eclipse.beans.ui.graph.model.ConstructorArgument;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Property;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Reference;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class ReferencePart extends AbstractConnectionEditPart {
 
@@ -117,7 +117,7 @@ public class ReferencePart extends AbstractConnectionEditPart {
 	 */
 	public void performRequest(Request req) {
 		if (req.getType() == RequestConstants.REQ_OPEN) {
-			BeansUIUtils.openInEditor(getReference().getConfigFile(),
+			SpringUIUtils.openInEditor(getReference().getConfigFile(),
 									  getReference().getStartLine());
 		}
 		super.performRequest(req);

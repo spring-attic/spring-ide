@@ -23,11 +23,11 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.ui.actions.EditorPartAction;
 import org.eclipse.ui.IEditorPart;
-import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditor;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
 import org.springframework.ide.eclipse.beans.ui.graph.parts.BeanPart;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class OpenConfigFile extends EditorPartAction {
 
@@ -57,7 +57,7 @@ public class OpenConfigFile extends EditorPartAction {
 		Bean bean = ((BeanPart) getFirstSelectedEditPart()).getBean();
 		IFile file = bean.getConfigFile();
 		if (file != null && file.exists()) {
-			BeansUIUtils.openInEditor(file, bean.getStartLine());
+			SpringUIUtils.openInEditor(file, bean.getStartLine());
 		}
 	}
 
