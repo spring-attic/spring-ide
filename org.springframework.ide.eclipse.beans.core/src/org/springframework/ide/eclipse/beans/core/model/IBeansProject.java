@@ -75,6 +75,14 @@ public interface IBeansProject extends IBeansModelElement {
 	Collection getConfigSets();
 
 	/**
+	 * Returns true if a config set with the given name is defined within this
+	 * project.
+	 * @param name
+	 * @return
+	 */
+	boolean hasConfigSet(String configSetName);
+	
+	/**
 	 * Returns <code>true</code> if given full qualified class name is a bean
 	 * class used within this Spring Beans project. 
 	 */

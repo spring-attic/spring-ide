@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectD
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionReader;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionWriter;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 
 public class BeansProject extends BeansModelElement implements IBeansProject {
@@ -270,5 +271,13 @@ public class BeansProject extends BeansModelElement implements IBeansProject {
 		}
 		return description;
 	}
+
+    /* (non-Javadoc)
+     * @see org.springframework.ide.eclipse.beans.core.model.IBeansProject#hasConfigSet(java.lang.String)
+     */
+    public boolean hasConfigSet(String configSetName) {
+        IBeansConfigSet configSet = getDescription().getConfigSet(configSetName);
+        return configSet != null;
+    }
 
 }
