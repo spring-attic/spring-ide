@@ -24,9 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -101,15 +98,6 @@ public class BeansProjectDescription {
 
 	public Collection getConfigs() {
 		return configs.values();
-	}
-
-	public IFile getConfigFile(String configName) {
-		if (configName.charAt(0) == '/') {
-			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-			return (IFile) root.findMember(configName);
-		}
-		return (IFile) ((IProject)
-						   project.getElementResource()).findMember(configName);
 	}
 
 	public void removeConfig(IFile file) {
