@@ -26,8 +26,6 @@
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.jdt.ui"/>
-      <import plugin="org.eclipse.gef"/>
-      <import plugin="org.springframework.core"/>
    </requires>
 
    <plugin
@@ -44,8 +42,8 @@
 
    <plugin
          id="org.springframework.ide.eclipse.beans.core.doc"
-         download-size="0"
-         install-size="0"
+         download-size="377427"
+         install-size="402314"
          version="1.1.0"/>
 
    <plugin
@@ -55,15 +53,15 @@
          version="1.1.0"/>
 
    <plugin
-         id="org.springframework.ide.eclipse.beans.ui.graph"
-         download-size="44134"
-         install-size="52792"
+         id="org.springframework.ide.eclipse.beans.ui.doc"
+         download-size="527628"
+         install-size="527865"
          version="1.1.0"/>
 
    <plugin
-         id="org.springframework.ide.eclipse.beans.ui.doc"
-         download-size="0"
-         install-size="0"
+         id="org.springframework.ide.eclipse.beans.ui.graph"
+         download-size="49284"
+         install-size="58203"
          version="1.1.0"/>
 
 </feature>
