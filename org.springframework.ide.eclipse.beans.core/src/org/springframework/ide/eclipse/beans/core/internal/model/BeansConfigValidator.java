@@ -233,7 +233,8 @@ public class BeansConfigValidator {
 									bean.getElementName()));
 		}
 		Collection cargs = bean.getConstructorArguments();
-		if (cargs.size() > 0) {
+		int numArguments = cargs.size();
+		if (numArguments > 0) {
 			try {
 				boolean found = false;
 				List cons = Introspector.getConstructors(type);
@@ -242,14 +243,15 @@ public class BeansConfigValidator {
 						return;
 					}
 					IMethod method = (IMethod) iter.next();
-					if (method.getNumberOfParameters() == cargs.size()) {
+					if (method.getNumberOfParameters() == numArguments) {
 						found = true;
 						break;
 					}
 				}
 				if (!found) {
 					BeansCoreUtils.createProblemMarker(config.getConfigFile(),
-						   "No constructor with " + cargs.size() +
+						   "No constructor with " + numArguments +
+						   (numArguments == 1 ? " argument" : " arguments") +
 						   " defined in class '" +
 						   type.getFullyQualifiedName() + "'",
 						   IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
