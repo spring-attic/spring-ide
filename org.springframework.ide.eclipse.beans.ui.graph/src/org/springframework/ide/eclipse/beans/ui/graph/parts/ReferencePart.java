@@ -80,8 +80,9 @@ public class ReferencePart extends AbstractConnectionEditPart {
 		// heigth calculated by DirectedGraphLayout
 		Bean source = (Bean) getReference().source;
 		if (source.height > source.preferredHeight) {
-			Rectangle rect = new Rectangle(source.x, source.y, source.width,
-										   source.height);
+			Rectangle rect = new Rectangle(source.x + GraphPart.MARGIN_SIZE,
+										   source.y + GraphPart.MARGIN_SIZE,
+										   source.width, source.height);
 			bends.add(new AbsoluteBendpoint(rect.getBottom()));
 		}
 
@@ -90,8 +91,10 @@ public class ReferencePart extends AbstractConnectionEditPart {
 		if (nodes != null) {
 			for (int i = 0; i < nodes.size(); i++) {
 				Node node = nodes.getNode(i);
-				bends.add(new AbsoluteBendpoint(node.x, node.y));
-				bends.add(new AbsoluteBendpoint(node.x, node.y + node.height));
+				bends.add(new AbsoluteBendpoint(node.x + GraphPart.MARGIN_SIZE,
+												node.y + GraphPart.MARGIN_SIZE));
+				bends.add(new AbsoluteBendpoint(node.x + GraphPart.MARGIN_SIZE,
+								 node.y + GraphPart.MARGIN_SIZE + node.height));
 			}
 		}
 		conn.setRoutingConstraint(bends);

@@ -25,16 +25,17 @@ import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.draw2d.ScalableFreeformLayeredPane;
 import org.eclipse.draw2d.XYLayout;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
-import org.springframework.ide.eclipse.beans.ui.graph.figures.ShadowedLineBorder;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Graph;
 
 public class GraphPart extends AbstractGraphicalEditPart {
+
+	public static final int MARGIN_SIZE = 10;
 
 	protected IFigure createFigure() {
 		Figure panel = new ScalableFreeformLayeredPane();
 		panel.setBackgroundColor(ColorConstants.listBackground);
 		panel.setLayoutManager(new XYLayout());
-		panel.setBorder(new MarginBorder(10));
+		panel.setBorder(new MarginBorder(MARGIN_SIZE));
 		return panel;
 	}
 
