@@ -18,19 +18,17 @@ package org.springframework.ide.eclipse.beans.core.internal.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionParser;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.core.io.FileResourceLoader;
+import org.springframework.ide.eclipse.core.io.xml.LineNumberPreservingDOMParser;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.xml.sax.ErrorHandler;
@@ -38,22 +36,41 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+/**
+ * Bean definition reader for XML bean definitions. Delegates the actual XML
+ * parsing to <code>EventBeanDefinitionParser</code> an implementation of the
+ * <code>XmlBeanDefinitionParser</code> interface.
+ * Applied by the <code>EventBeanFactory</code>.
+ *
+ * <p>This class loads a DOM document and applies the bean definition parser to it.
+ * The parser will register each bean definition with the given bean factory,
+ * relying on the latter's implementation of the
+ * <code>BeanDefinitionRegistry</code> interface.
+ *
+ * @see EventBeanFactory
+ * @see EventBeanDefinitionParser
+ * @see org.springframework.beans.factory.xml.XmlBeanDefinitionParser
+ * @see org.springframework.beans.factory.support.BeanDefinitionRegistry
+ */
 public class EventBeanDefinitionReader implements BeanDefinitionReader {
 
 	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID +
 																"/reader/debug";
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
 
-	private IBeanDefinitionEvents eventHandler;
 	private BeanDefinitionRegistry beanFactory;
+	private IBeanDefinitionEvents eventHandler;
+	private ResourceLoader resourceLoader;
 
-	public EventBeanDefinitionReader(IBeanDefinitionEvents eventHandler) {
+	public EventBeanDefinitionReader(BeanDefinitionRegistry beanFactory,
+									 IBeanDefinitionEvents eventHandler) {
+		this.beanFactory = beanFactory;
 		this.eventHandler = eventHandler;
-		beanFactory = new SimpleBeanDefinitionRegistry();
+		this.resourceLoader = new FileResourceLoader();
 	}
 
 	public BeanDefinitionRegistry getBeanFactory() {
-		return beanFactory;
+		return this.beanFactory;
 	}
 
 	/**
@@ -61,6 +78,22 @@ public class EventBeanDefinitionReader implements BeanDefinitionReader {
 	 */
 	public ClassLoader getBeanClassLoader() {
 		return null;
+	}
+
+	/**
+	 * Returns instance of <code>FileResourceLoader</code>.
+	 * @see FileResourceLoader 
+	 */
+	public ResourceLoader getResourceLoader() {
+		return this.resourceLoader;
+	}
+
+	public int loadBeanDefinitions(Resource[] resources) throws BeansException {
+		int counter = 0;
+		for (int i = 0; i < resources.length; i++) {
+			counter += loadBeanDefinitions(resources[i]);
+		}
+		return counter;
 	}
 
 	/**
@@ -108,18 +141,20 @@ public class EventBeanDefinitionReader implements BeanDefinitionReader {
 	/**
 	 * Register the bean definitions contained in the given DOM document.
 	 * Called by <code>loadBeanDefinitions</code>.
-	 * <p>Creates a new instance of the <code>EventBeanDefinitionParser</code>
-	 * and invokes <code>registerBeanDefinitions</code> on it.
+	 * <p>Creates a new instance of the parser class and invokes
+	 * <code>registerBeanDefinitions</code> on it.
 	 * @param doc the DOM document
 	 * @param resource the resource descriptor (for context information)
+	 * @return the number of bean definitions found
 	 * @throws BeansException in case of parsing errors
 	 * @see #loadBeanDefinitions
-	 * @see EventBeanDefinitionParser#registerBeanDefinitions
+	 * @see #setParserClass
+	 * @see XmlBeanDefinitionParser#registerBeanDefinitions
 	 */
-	protected int registerBeanDefinitions(Document doc, Resource resource)
-														 throws BeansException {
-		EventBeanDefinitionParser parser = new EventBeanDefinitionParser();
-		parser.setEventHandler(this.eventHandler);
+	public int registerBeanDefinitions(Document doc, Resource resource)
+														throws BeansException {
+		EventBeanDefinitionParser parser = new EventBeanDefinitionParser(
+															this.eventHandler);
 		return parser.registerBeanDefinitions(this, doc, resource);
 	}
 
@@ -138,55 +173,6 @@ public class EventBeanDefinitionReader implements BeanDefinitionReader {
 
 		public void warning(SAXParseException e) throws SAXException {
 			// ignore XML parse warnings
-		}
-	}
-
-	private static class SimpleBeanDefinitionRegistry
-											 implements BeanDefinitionRegistry {
-		/** Map of bean definition objects, keyed by bean name */
-		private final Map beanDefinitionMap = new HashMap();
-
-		/** List of bean definition names, in registration order */
-		private final List beanDefinitionNames = new LinkedList();
-
-		public int getBeanDefinitionCount() {
-			return beanDefinitionMap.size();
-		}
-
-		public String[] getBeanDefinitionNames() {
-			return (String[]) beanDefinitionNames.toArray(
-										new String[beanDefinitionNames.size()]);
-		}
-
-		public boolean containsBeanDefinition(String beanName) {
-			return beanDefinitionMap.containsKey(beanName);
-		}
-
-		public BeanDefinition getBeanDefinition(String beanName)
-														 throws BeansException {
-			BeanDefinition bd = (BeanDefinition)
-												beanDefinitionMap.get(beanName);
-			if (bd == null) {
-				throw new NoSuchBeanDefinitionException(beanName, toString());
-			}
-			return bd;
-		}
-
-		public void registerBeanDefinition(String beanName,
-						  BeanDefinition beanDefinition) throws BeansException {
-			if (!containsBeanDefinition(beanName)) {
-				beanDefinitionNames.add(beanName);
-			}
-			beanDefinitionMap.put(beanName, beanDefinition);
-		}
-
-		public String[] getAliases(String beanName)
-										  throws NoSuchBeanDefinitionException {
-			return new String[0];
-		}
-
-		public void registerAlias(String beanName,
-											String alias) throws BeansException {
 		}
 	}
 }
