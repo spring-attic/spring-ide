@@ -134,7 +134,7 @@ public class OpenJavaType extends Action implements IEditorActionDelegate,
 
 		int length = offset - start;
 		int max = line.length();
-		while (length < max) {
+		while (offset < max) {
 			char c = line.charAt(offset);
 			if (!Character.isJavaIdentifierPart(c) && c != '.') {
 				break;
