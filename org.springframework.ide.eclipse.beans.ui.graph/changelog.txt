@@ -1,3 +1,8 @@
+Changes in version 1.1.1 (1.12.2004):
+
+* error dialog is shown for graphs with cyclic dependencies
+
+
 Changes in version 1.1.0 (1.9.2004):
 
 * graph can be created from a single bean selected in the Beans view too
@@ -7,12 +12,10 @@ Changes in version 1.1.0 (1.9.2004):
 
 * graph is surrounded by a margin of 10 pixels
 
-* a bean's constructor arguments are shown in the graph too
+* bean constructor arguments are shown in the graph too
 
 * references to other beans are recognized in constructor arguments and inner
   beans too
-
-* error dialog is shown for graphs with cyclic dependencies
 
 
 Changes in version 1.0.0 (10.6.2004):

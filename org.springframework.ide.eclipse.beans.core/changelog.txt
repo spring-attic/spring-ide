@@ -1,3 +1,13 @@
+Changes in version 1.1.1 (1.12.2004):
+
+* spring-core.jar (updated to v1.1.2) now included in core
+
+* added support for incomplete config sets (are not validated regarding parent
+  beans and bean references)
+
+* added support for outer bean attribute to (inner) beans
+
+
 Changes in version 1.1.0 (1.9.2004):
 
 * spring-core.jar (updated to v1.1.1) now included in core
