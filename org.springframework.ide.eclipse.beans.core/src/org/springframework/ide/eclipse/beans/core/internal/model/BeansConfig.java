@@ -30,11 +30,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
+import org.springframework.ide.eclipse.beans.core.internal.model.resources.FileResource;
 import org.springframework.ide.eclipse.beans.core.internal.parser.EventBeanDefinitionReader;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.core.resources.FileResource;
 
 /**
  * This class defines a Spring beans configuration.
