@@ -36,6 +36,10 @@ public class Bean extends Node implements IAdaptable {
 		this.node = node;
 	}
 
+	public BeanNode getNode() {
+		return node;
+	}
+
 	public String getName() {
 		return node.getName();
 	}
