@@ -126,17 +126,17 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 	 * All relevant exceptions are catched and rethrown wrapped together with
 	 * the corresponding XML element.
 	 */
-	protected void parseConstructorArgElement(String beanName,
-								   ConstructorArgumentValues cargs, Element ele)
+	protected void parseConstructorArgElement(Element ele, String beanName,
+								   ConstructorArgumentValues cargs)
 								   throws DOMException, ClassNotFoundException {
 		try {
 			if (eventHandler != null) {
 				ConstructorArgumentValuesFilter filter =
 								new ConstructorArgumentValuesFilter(cargs, ele);
 				eventHandler.startConstructorArgument(ele);
-				super.parseConstructorArgElement(beanName, filter, ele);
+				super.parseConstructorArgElement(ele, beanName, filter);
 			} else {
-				super.parseConstructorArgElement(beanName, cargs, ele);
+				super.parseConstructorArgElement(ele, beanName, cargs);
 			}
 		} catch (DOMException e) {
 			throw new BeanDefinitionException(ele, e);
@@ -150,13 +150,13 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 	 * All relevant exceptions are catched and rethrown wrapped together with
 	 * the corresponding XML element.
 	 */
-	protected void parsePropertyElement(String beanName,
-				   MutablePropertyValues pvs, Element ele) throws DOMException {
+	protected void parsePropertyElement(Element ele, String beanName,
+								MutablePropertyValues pvs) throws DOMException {
 		try {
 			if (eventHandler != null) {
 				eventHandler.startProperty(ele);
 			}
-			super.parsePropertyElement(beanName, pvs, ele);
+			super.parsePropertyElement(ele, beanName, pvs);
 			if (eventHandler != null) {
 				String name = ele.getAttribute(NAME_ATTRIBUTE);
 				eventHandler.registerProperty(name, pvs);
