@@ -57,10 +57,8 @@ public class ModelUtil {
 	public static void addReferencedBeansForBean(INode beanParentNode,
 											   String beanName, List refBeans) {
 		BeanNode refBean = getBean(beanParentNode, beanName);
-		if (refBean != null) {
-			if (!refBeans.contains(refBean)) {
-				refBeans.add(refBean);
-			}
+		if (refBean != null && !refBeans.contains(refBean)) {
+			refBeans.add(refBean);
 			Iterator iter = refBean.getReferencedBeans().iterator();
 			while (iter.hasNext()) {
 				refBean = (BeanNode) iter.next();
