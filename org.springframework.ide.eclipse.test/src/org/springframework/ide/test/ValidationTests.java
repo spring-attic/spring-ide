@@ -29,6 +29,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -38,8 +39,12 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtil;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectNature;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 
 /**
  * this class tests the config file validator. The test
@@ -67,14 +72,26 @@ public class ValidationTests extends AbstractSpringIdeTest {
 	 * create the Java file(s) used by the tests
 	 * @throws Exception
 	 */
-	private void createJavaFiles() throws Exception {
+	private void createBeanClass() throws Exception {
 		IPackageFragment pack = project.createPackage("pack1");
 	    IType type = project.createType(pack, "SimpleBean.java",
 	      SimpleBeanText);
 	}
 
+	private void renameBeanClassProperty() throws Exception {
+	    IType type = BeansModelUtil.getJavaType(project.getProject(),
+	    		"pack1.SimpleBean");
+	    IMethod[] methods = type.getMethods();
+	    for (int i = 0; i < methods.length; i++) {
+			IMethod method = methods[i];
+			if ("setStuff".equals(method.getElementName())) {
+				method.rename("setStuf", false, null);
+			}
+		}
+	}
+
 	public void testValidationErrors() throws Exception {
-		createJavaFiles();
+		createBeanClass();
 		IFolder xmlFolder = project.createXmlFolder();		
 		IFile xmlFile = createEmptyFile(xmlFolder, xmlTestFileName);
 		
@@ -82,14 +99,20 @@ public class ValidationTests extends AbstractSpringIdeTest {
 		
 		IProject eclipseProject = project.getProject();
 		BeansCoreUtils.addProjectNature(eclipseProject, BeansProjectNature.NATURE_ID);				
-		// BeansProject beansProject = BeansCoreUtils.getBeansProject(eclipseProject);
-		BeansProject beansProject = (BeansProject)
-		 BeansCorePlugin.getModel().getProject(eclipseProject);
+		project.waitForAutoBuild();
+
+		IBeansModel model = BeansCorePlugin.getModel();
+		IBeansProject beansProject = model.getProject(eclipseProject);
+		assertNotNull("No sample project in model", beansProject);
 
 		List configs = new ArrayList();
 		String config = xmlFile.getProjectRelativePath().toString();
 		configs.add(config);
-		beansProject.setConfigs(configs);
+		((BeansProject) beansProject).setConfigs(configs);
+		project.waitForAutoBuild();
+
+		IBeansConfig beansConfig = beansProject.getConfig(xmlFile);
+		assertNotNull("No sample config in model", beansConfig);
 		
 		// there's an apparent bug whereby the validation
 		// of the xml file isn't done when the file is added
@@ -97,12 +120,10 @@ public class ValidationTests extends AbstractSpringIdeTest {
 		// file is modified. So we don't bother to put anything
 		// into the file until now.
 		updateTestFile(xmlFolder, xmlTestFileName);		
-		
 		project.waitForAutoBuild();
 		
 		IMarker[] markers = getFailureMarkers();
-		
-		assertEquals(4, markers.length);
+		assertEquals("Wrong number of validation errors (problem markers)", 4, markers.length);
 		
 		// test that we get an error for a bean class
 		// that isn't in the class path
@@ -137,13 +158,17 @@ public class ValidationTests extends AbstractSpringIdeTest {
 		// whose parent doesn't exist
 		marker = markers[3];
 		assertEquals(marker.getType(), IBeansProjectMarker.PROBLEM_MARKER);
-		assertEquals(19, marker.getAttribute(IMarker.LINE_NUMBER,0));
+		assertEquals(20, marker.getAttribute(IMarker.LINE_NUMBER,0));
 		assertEquals(
 				"Undefined parent root bean",
 				marker.getAttribute(IMarker.MESSAGE,""));		
 
+		renameBeanClassProperty();
+		project.waitForAutoBuild();
+
+		markers = getFailureMarkers();
+		assertEquals("Wrong number of validation errors (problem markers)", 5, markers.length);
 	}
-	
 	
 	/**
 	 * create an empty file with the indicated name in the indicated

@@ -14,6 +14,7 @@
 	
 	<bean id="simple" class="pack1.SimpleBean" >
 		<property name="absentProperty"><value>none</value></property>
+		<property name="stuff"><value>something</value></property>
 	</bean>
 	
 	<bean id="child" parent="parent">
