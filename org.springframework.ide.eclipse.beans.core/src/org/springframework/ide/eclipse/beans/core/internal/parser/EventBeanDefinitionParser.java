@@ -25,6 +25,7 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser;
 import org.springframework.core.io.Resource;
 import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
@@ -104,10 +105,20 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 					eventHandler.startBean(ele, false);
 				}
 			}
-			BeanDefinitionHolder bdHolder =  super.parseBeanDefinition(ele);
+			BeanDefinitionHolder bdHolder = super.parseBeanDefinition(ele);
 			if (eventHandler != null) {
 				if (nestedBeanCount > 1) {
 					eventHandler.registerBean(bdHolder, true);
+
+					// Inner beans are not registered with the bean definition
+					// registry - so we do this ourselves
+					// This way we get a unique name for the anonymous inner
+					// beans too - they are named
+					// "<class name>[#<occurrence counter>]"
+					BeanDefinitionRegistry registry =
+									 getBeanDefinitionReader().getBeanFactory();
+					registry.registerBeanDefinition(bdHolder.getBeanName(),
+												  bdHolder.getBeanDefinition());
 				} else {
 					eventHandler.registerBean(bdHolder, false);
 				}
