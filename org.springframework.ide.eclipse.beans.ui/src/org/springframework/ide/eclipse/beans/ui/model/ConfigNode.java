@@ -212,7 +212,6 @@ public class ConfigNode extends AbstractNode {
 
 	private void initBeanNode(BeanNode beanNode, IBean bean) {
 		beanNode.setBean(bean);
-		beanNode.setStartLine(bean.getElementStartLine());
 
 		// Add constructor arguments
 		Iterator cargs = bean.getConstructorArguments().iterator();
