@@ -31,14 +31,14 @@ import org.springframework.ide.eclipse.beans.ui.model.PropertyNode;
 import org.springframework.ide.eclipse.beans.ui.properties.ConfigurationPropertyPage;
 import org.springframework.ide.eclipse.beans.ui.views.BeansView;
 
-public class OpenProperties extends Action {
+public class OpenPropertiesAction extends Action {
 
 	private static final String PREFIX = "View.OpenPropertiesAction.";
 	private static final String TITLE = "PropertiesPage.title";
 
     private BeansView view;
 
-	public OpenProperties(BeansView view) {
+	public OpenPropertiesAction(BeansView view) {
 		super(BeansUIPlugin.getResourceString(PREFIX + "label"));
 		setToolTipText(BeansUIPlugin.getResourceString(PREFIX + "tooltip"));
 		this.view = view;

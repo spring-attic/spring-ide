@@ -57,7 +57,7 @@ import org.springframework.ide.eclipse.beans.ui.model.RootNode;
 import org.springframework.ide.eclipse.beans.ui.views.actions.CollapseAllAction;
 import org.springframework.ide.eclipse.beans.ui.views.actions.LexicalSortingAction;
 import org.springframework.ide.eclipse.beans.ui.views.actions.OpenBeanClassAction;
-import org.springframework.ide.eclipse.beans.ui.views.actions.OpenProperties;
+import org.springframework.ide.eclipse.beans.ui.views.actions.OpenPropertiesAction;
 import org.springframework.ide.eclipse.beans.ui.views.actions.PropertySheetAction;
 
 public class BeansView extends ViewPart implements IBeansView, IShowInSource,
@@ -70,7 +70,7 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 	private RootNode rootNode;
 
 	private OpenBeanClassAction openBeanClassAction;
-	private OpenProperties openPropertiesAction;
+	private OpenPropertiesAction openPropertiesAction;
 
 	public BeansView() {
 		this.rootNode = null;
@@ -97,7 +97,7 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 
 	private void initializeActions() {
 		openBeanClassAction = new OpenBeanClassAction(this);
-		openPropertiesAction = new OpenProperties(this);
+		openPropertiesAction = new OpenPropertiesAction(this);
 	}
 
 	private TreeViewer createViewer(Composite parent) {
