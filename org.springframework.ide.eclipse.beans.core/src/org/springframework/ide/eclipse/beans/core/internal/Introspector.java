@@ -51,20 +51,20 @@ public class Introspector {
 
     /**
      * Finds a target methodName with specific number of arguments on the type
-     * hierarchie of given type.
+     * hierarchy of given type.
      * 
      * @param type The Java type object on which to retrieve the method
      * @param methodName Name of the method
      * @param argCount Number of arguments for the desired method
      */
     public static IMethod findMethod(IType type, String methodName,
-    								 int argCount) throws JavaModelException {
+    								   int argCount) throws JavaModelException {
 	    	while (type != null) {
 	    		IMethod method = findPublicMethod(type, methodName, argCount);
 	    		if (method != null) {
 	    			return method;
 	    		}
-	   		type = getSuperClass(type);
+	   		type = getSuperType(type);
 	    	}
 	    	return null;
 	}
@@ -89,26 +89,42 @@ public class Introspector {
     }
 
 	/**
-	 * Returns super class of given type.
+	 * Returns super type of given type.
 	 */
-	protected static IType getSuperClass(IType type) {
-		try {
-			String name = type.getSuperclassName();
-			if (name != null) {
-				if (type.isBinary()) {
-					return type.getJavaProject().findType(name);
-				} else {
-					String[][] resolvedType = type.resolveType(name);
-					if (resolvedType != null) {
-						name = resolvedType[0][0] + "." + resolvedType[0][1];
-						return type.getJavaProject().findType(name);
-					}
+	protected static IType getSuperType(IType type) throws JavaModelException {
+		String name = type.getSuperclassName();
+		if (name != null) {
+			if (type.isBinary()) {
+				return type.getJavaProject().findType(name);
+			} else {
+				String[][] resolvedNames = type.resolveType(name);
+				if (resolvedNames != null && resolvedNames.length > 0) {
+					String resolvedName = concatenate(resolvedNames[0][0],
+													  resolvedNames[0][1], ".");
+					return type.getJavaProject().findType(resolvedName);
 				}
 			}
-		} catch (JavaModelException e) {
-			BeansCorePlugin.log(e);
 		}
 		return null;
+	}
+
+	/**
+	 * Returns concatenated text from given two texts delimited by given
+	 * delimiter. Both texts can be empty or <code>null</code>.
+	 */
+	protected static String concatenate(String text1, String text2,
+										String delimiter) {
+		StringBuffer buf = new StringBuffer();
+		if (text1 != null && text1.length() > 0) {
+			buf.append(text1);
+		}
+		if (text2 != null && text2.length() > 0) {
+			if (buf.length() > 0) {
+				buf.append(delimiter);
+			}
+			buf.append(text2);
+		}
+		return buf.toString();
 	}
 
 	/**
