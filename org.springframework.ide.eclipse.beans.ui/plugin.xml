@@ -178,7 +178,7 @@
             id="org.springframework.ide.eclipse.beans.ui.properties.ConfigurationPropertyPage">
          <filter
                name="nature"
-               value="org.springframework.ide.eclipse.beans.core.beansnature">
+               value="org.springframework.ide.eclipse.core.springnature">
          </filter>
       </page>
    </extension>
