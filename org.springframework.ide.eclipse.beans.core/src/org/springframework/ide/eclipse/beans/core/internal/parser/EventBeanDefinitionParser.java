@@ -20,6 +20,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser;
 import org.springframework.core.io.Resource;
@@ -140,6 +141,17 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 		} catch (BeansException e) {
 			throw new BeanDefinitionException(ele, e);
 		}
+	}
+
+	/**
+	 * Converts an idref into a bean reference.
+	 */
+	protected Object parsePropertySubelement(Element ele, String beanName) {
+		Object value = super.parsePropertySubelement(ele, beanName);
+		if (ele.getTagName().equals(IDREF_ELEMENT)) {
+			value = new RuntimeBeanReference((String) value);
+		}
+		return value;
 	}
 
 	private class ConstructorArgumentValuesFilter
