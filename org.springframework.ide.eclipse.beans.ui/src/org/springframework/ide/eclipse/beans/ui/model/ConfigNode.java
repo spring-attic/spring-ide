@@ -131,8 +131,8 @@ public class ConfigNode extends AbstractNode {
 	private void setErrorMessage(String errorMessage, int lineNumber) {
 		BeanNode bean = new BeanNode(this, errorMessage);
 		bean.setStartLine(lineNumber);
+		bean.setFlags(INode.FLAG_HAS_ERRORS);
 		addBean(bean);
-		setFlags(INode.FLAG_HAS_ERRORS);
 	}
 	
 	/**
