@@ -90,11 +90,17 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 	}
 
 	public boolean hasBean(String name) {
-		return getBeansMap().containsKey(name);
+		if (name != null) {
+			return getBeansMap().containsKey(name);
+		}
+		return false;
 	}
 
 	public IBean getBean(String name) {
-		return (IBean) getBeansMap().get(name);
+		if (name != null) {
+			return (IBean) getBeansMap().get(name);
+		}
+		return null;
 	}
 
 	public Collection getBeans() {
@@ -125,7 +131,10 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 	}
 
 	public boolean isBeanClass(String className) {
-		return getBeanClassesMap().containsKey(className);
+		if (className != null) {
+			return getBeanClassesMap().containsKey(className);
+		}
+		return false;
 	}
 
 	public Collection getBeanClasses() {
