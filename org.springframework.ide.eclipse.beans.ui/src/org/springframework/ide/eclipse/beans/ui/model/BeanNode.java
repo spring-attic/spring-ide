@@ -183,6 +183,10 @@ public class BeanNode extends AbstractNode {
 			if (bean.isAbstract()) {
 				setFlags(INode.FLAG_IS_ABSTRACT);
 			}
+			if (bean.isRootBean() && bean.getClassName() == null &&
+												 bean.getParentName() == null) {
+				setFlags(INode.FLAG_IS_ROOT_BEAN_WITHOUT_CLASS);
+			}
 			setStartLine(bean.getElementStartLine()); 
 		}
 	}

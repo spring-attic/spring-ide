@@ -20,15 +20,17 @@ import org.eclipse.core.runtime.IAdaptable;
 
 public interface INode extends IAdaptable {
 
-	int FLAG_IS_EXTERNAL = 0x01;
-	int FLAG_HAS_ERRORS = 0x02;
-	int FLAG_HAS_WARNINGS = 0x04;
-	int FLAG_IS_PROTOTYPE = 0x08;
-	int FLAG_IS_LAZY_INIT = 0x10;
-	int FLAG_IS_ABSTRACT = 0x20;
+	int FLAG_IS_EXTERNAL = 1 << 0;
+	int FLAG_HAS_ERRORS = 1 << 1;
+	int FLAG_HAS_WARNINGS = 1 << 2;
+	int FLAG_IS_PROTOTYPE = 1 << 3;
+	int FLAG_IS_LAZY_INIT = 1 << 4;
+	int FLAG_IS_ABSTRACT = 1 << 5;
+	int FLAG_IS_ROOT_BEAN_WITHOUT_CLASS = 1 << 6;
 
 	int NOT_PROPAGATED_FLAGS = (FLAG_IS_EXTERNAL | FLAG_IS_PROTOTYPE |
-								FLAG_IS_LAZY_INIT | FLAG_IS_ABSTRACT);
+								FLAG_IS_LAZY_INIT | FLAG_IS_ABSTRACT |
+								FLAG_IS_ROOT_BEAN_WITHOUT_CLASS);
 	/**
 	 * Returns this node's parent or <code>null</code> if none.
 	 * 

@@ -97,6 +97,11 @@ public class ModelImageDescriptor extends CompositeImageDescriptor {
 			x = getSize().x - data.width;
 			y = 0;
 			drawImage(data, x, y);
+		} else if ((flags & INode.FLAG_IS_ROOT_BEAN_WITHOUT_CLASS) != 0) {
+			data = BeansUIImages.DESC_OVR_NO_CLASS.getImageData();
+			x = getSize().x - data.width;
+			y = 0;
+			drawImage(data, x, y);
 		}
 	}
 

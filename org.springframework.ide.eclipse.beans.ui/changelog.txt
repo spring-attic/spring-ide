@@ -8,7 +8,8 @@ Changes in version 1.1.0 (1.9.2004):
 
 * added support for the bean attributes 'lazy-init' and 'abstract'
 
-* new overlay indicator for abstract beans
+* new overlay indicators in the right upper corner for abstract beans ('A') and
+  root beans without class + parent name ('C')
 
 * Java sources and classes which are used as Spring beans are decorated in resource
   navigator and JDT's package explorer in the same way as Spring projects

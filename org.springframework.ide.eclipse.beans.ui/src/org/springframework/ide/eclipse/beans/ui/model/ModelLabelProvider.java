@@ -35,12 +35,10 @@ public class ModelLabelProvider extends LabelProvider {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONFIG);
 		} else if (obj instanceof BeanNode) {
 			BeanNode bean = (BeanNode) obj;
-			if (bean.getClassName() != null) {
-				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
-			} else if (bean.getParentName() != null) {
+			if (bean.getParentName() != null) {
 				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CHILD_BEAN);
 			} else {
-				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ERROR);
+				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
 			}
 		} else if (obj instanceof ConstructorArgumentNode) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONSTRUCTOR);
