@@ -47,7 +47,7 @@ import org.xml.sax.SAXParseException;
  * relying on the latter's implementation of the
  * <code>BeanDefinitionRegistry</code> interface.
  *
- * @see EventBeanFactory
+ * @see EventBeanDefinitionRegistry
  * @see EventBeanDefinitionParser
  * @see org.springframework.beans.factory.xml.XmlBeanDefinitionParser
  * @see org.springframework.beans.factory.support.BeanDefinitionRegistry
@@ -96,11 +96,6 @@ public class EventBeanDefinitionReader implements BeanDefinitionReader {
 		return counter;
 	}
 
-	/**
-	 * Load bean definitions from the specified XML file.
-	 * @param resource the resource descriptor for the XML file
-	 * @throws BeansException in case of loading or parsing errors
-	 */
 	public int loadBeanDefinitions(Resource resource) throws BeansException {
 		if (DEBUG) {
 			System.out.println("Reading config from " + resource);
