@@ -19,7 +19,7 @@ package org.springframework.ide.eclipse.beans.core.internal.project;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.model.BeansConfigValidator;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigValidator;
 
 public class BeansProjectValidator extends BeansProjectBuilder {
 
