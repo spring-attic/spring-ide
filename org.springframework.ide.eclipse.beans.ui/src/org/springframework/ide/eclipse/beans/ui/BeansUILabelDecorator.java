@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.beans.core.model.BeansModelChangedEvent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelChangedListener;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
  * This decorator adds an overlay image to all projects with Spring Beans
@@ -116,7 +117,7 @@ public class BeansUILabelDecorator extends LabelProvider
 	}
 
 	public static final void update() {
-		BeansUIUtils.getStandardDisplay().asyncExec(new Runnable() {		
+		SpringUIUtils.getStandardDisplay().asyncExec(new Runnable() {		
 			public void run() {
 				IWorkbench workbench = PlatformUI.getWorkbench();
 				workbench.getDecoratorManager().update(DECORATOR_ID);
