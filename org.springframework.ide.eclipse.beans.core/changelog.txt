@@ -4,7 +4,7 @@ Changes in version 1.1.0 (1.9.2004):
 
 * beans model refactored from UI plugin into core
 
-* beans model now supports constructor arguments and bean classes too
+* beans model now supports inner beans, constructor arguments and bean classes
 
 * refactored beans model to provide a public API
 

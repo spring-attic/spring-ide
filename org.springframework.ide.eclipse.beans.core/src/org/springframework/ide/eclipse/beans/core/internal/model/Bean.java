@@ -18,13 +18,12 @@ package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.resources.IResource;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -38,16 +37,16 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
  */
 public class Bean extends BeansModelElement implements IBean {
 
-	private BeanDefinition beanDefinition;
-	private String[] aliases;
+	private BeanDefinitionHolder beanDefinitionHolder;
 	private List constructorArguments;
 	private List properties;
+	private List innerBeans;
 
-	public Bean(IBeansModelElement parent, String name) {
-		super(parent, name);
-		this.beanDefinition = null;
+	public Bean(IBeansConfig config) {
+		super(config, null);   // the name we get from the BeanDefinitionHolder
 		this.constructorArguments = new ArrayList();
 		this.properties = new ArrayList();
+		this.innerBeans = new ArrayList();
 	}
 
 	public int getElementType() {
@@ -69,16 +68,18 @@ public class Bean extends BeansModelElement implements IBean {
 										"IBeansConfig or IBean");
 	}
 
-	public void setBeanDefinition(BeanDefinition beanDefinition) {
-		this.beanDefinition = beanDefinition;
+	public void setBeanDefinitionHolder(
+									BeanDefinitionHolder beanDefinitionHolder) {
+		this.beanDefinitionHolder = beanDefinitionHolder;
+		setElementName(beanDefinitionHolder.getBeanName());
 	}
 
-	public void setAliases(String[] aliases) {
-		this.aliases = aliases;
+	public BeanDefinitionHolder getBeanDefinitionHolder() {
+		return beanDefinitionHolder;
 	}
 
 	public String[] getAliases() {
-		return aliases;
+		return beanDefinitionHolder.getAliases();
 	}
 
 	public void addConstructorArgument(IBeanConstructorArgument carg) {
@@ -89,76 +90,92 @@ public class Bean extends BeansModelElement implements IBean {
 		return constructorArguments;
 	}
 
-	public boolean hasConstructorArguments() {
-		return !constructorArguments.isEmpty();
-	}
-
 	public void addProperty(IBeanProperty property) {
 		properties.add(property);
-	}
-
-	public boolean hasProperties() {
-		return !properties.isEmpty();
 	}
 
 	public Collection getProperties() {
 		return properties;
 	}
 
+	public void addInnerBean(Bean bean) {
+		innerBeans.add(bean);
+	}
+
+	public Collection getInnerBeans() {
+		return innerBeans;
+	}
+
 	public String getClassName() {
-		if (beanDefinition instanceof RootBeanDefinition) {
-			return ((RootBeanDefinition) beanDefinition).getBeanClassName();
+		BeanDefinition beanDef = beanDefinitionHolder.getBeanDefinition();
+		if (beanDef instanceof RootBeanDefinition) {
+			return ((RootBeanDefinition) beanDef).getBeanClassName();
 		}
 		return null;
 	}
 
 	public String getParentName() {
-		if (beanDefinition instanceof ChildBeanDefinition) {
-			return ((ChildBeanDefinition) beanDefinition).getParentName();
+		BeanDefinition beanDef = beanDefinitionHolder.getBeanDefinition();
+		if (beanDef instanceof ChildBeanDefinition) {
+			return ((ChildBeanDefinition) beanDef).getParentName();
 		}
 		return null;
 	}
 
 	public boolean isRootBean() {
-		return (beanDefinition instanceof RootBeanDefinition);
+		return (beanDefinitionHolder.getBeanDefinition() instanceof
+															RootBeanDefinition);
 	}
 
 	public boolean isSingleton() {
-		if (beanDefinition != null) {
-			if (beanDefinition instanceof RootBeanDefinition) {
-				return ((RootBeanDefinition) beanDefinition).isSingleton();
-			} else {
-				return ((ChildBeanDefinition) beanDefinition).isSingleton();
-			}
+		BeanDefinition beanDef = beanDefinitionHolder.getBeanDefinition();
+		if (beanDef instanceof RootBeanDefinition) {
+			return ((RootBeanDefinition) beanDef).isSingleton();
+		} else if (beanDef instanceof ChildBeanDefinition){
+			return ((ChildBeanDefinition) beanDef).isSingleton();
 		}
 		return true;
 	}
 
 	public boolean isAbstract() {
-		return beanDefinition.isAbstract();
+		return beanDefinitionHolder.getBeanDefinition().isAbstract();
 	}
 
 	public boolean isLazyInit() {
-		return beanDefinition.isLazyInit();
+		return beanDefinitionHolder.getBeanDefinition().isLazyInit();
 	}
 
 	/**
-	 * Returns a collection of all <code>IBean</code>s which are referenced from
-	 * within this property's value.
+	 * Returns a collection with the names of all beans which are referenced
+	 * by this bean's parent bean (for child beans only), constructor arguments
+	 * or properties.
 	 */
 	public Collection getReferencedBeans() {
-		Map refBeans = new HashMap();
+		List beanNames = new ArrayList();
 
-		// Add referenced beans from constructor arguments
+		// For child beans add names of parent bean and (if available) all beans
+		// which are referenced by the parent bean
+		if (!isRootBean()) {
+			String parentName = getParentName();
+			beanNames.add(parentName);
+			IBean parentBean = ((IBeansConfig)
+										getElementParent()).getBean(parentName);
+			if (parentBean != null) {
+				BeansModelUtil.addReferencedBeanNamesForBean(parentBean,
+															 beanNames);
+			}
+		}
+
+		// Add names of referenced beans from constructor arguments
 		Iterator cargs = constructorArguments.iterator();
 		while (cargs.hasNext()) {
 			IBeanConstructorArgument carg = (IBeanConstructorArgument)
 																   cargs.next();
 			Iterator beans = carg.getReferencedBeans().iterator();
 			while (beans.hasNext()) {
-				IBean bean = (IBean) beans.next();
-				if (!refBeans.containsKey(bean.getElementName())) {
-					refBeans.put(bean.getElementName(), bean);
+				String beanName = (String) beans.next();
+				if (!beanNames.contains(beanName)) {
+					beanNames.add(beanName);
 				}
 			}
 		}
@@ -169,13 +186,13 @@ public class Bean extends BeansModelElement implements IBean {
 			IBeanProperty prop = (IBeanProperty) props.next();
 			Iterator beans = prop.getReferencedBeans().iterator();
 			while (beans.hasNext()) {
-				IBean bean = (IBean) beans.next();
-				if (!refBeans.containsKey(bean.getElementName())) {
-					refBeans.put(bean.getElementName(), bean);
+				String beanName = (String) beans.next();
+				if (!beanNames.contains(beanName)) {
+					beanNames.add(beanName);
 				}
 			}
 		}
-		return refBeans.values();
+		return beanNames;
 	}
 
 	public String toString() {

@@ -210,13 +210,19 @@ public class ConfigNode extends AbstractNode {
 
 	private void addBean(ConfigNode config, IBean bean) {
 		BeanNode beanNode = new BeanNode(config, bean.getElementName());
+		initBeanNode(beanNode, bean);
+		beans.add(beanNode);
+	}
+
+	private void initBeanNode(BeanNode beanNode, IBean bean) {
 		beanNode.setBean(bean);
 		beanNode.setStartLine(bean.getElementStartLine());
 
 		// Add constructor arguments
-		Iterator iter = bean.getConstructorArguments().iterator();
-		while (iter.hasNext()) {
-			IBeanConstructorArgument carg = (IBeanConstructorArgument) iter.next();
+		Iterator cargs = bean.getConstructorArguments().iterator();
+		while (cargs.hasNext()) {
+			IBeanConstructorArgument carg = (IBeanConstructorArgument)
+																   cargs.next();
 			ConstructorArgumentNode cargNode = new ConstructorArgumentNode(
 					beanNode, carg.getIndex(), carg.getType(), carg.getValue());
 			cargNode.setStartLine(carg.getElementStartLine());
@@ -224,15 +230,24 @@ public class ConfigNode extends AbstractNode {
 		}
 
 		// Add properties
-		iter = bean.getProperties().iterator();
-		while (iter.hasNext()) {
-			IBeanProperty prop = (IBeanProperty) iter.next();
+		Iterator props = bean.getProperties().iterator();
+		while (props.hasNext()) {
+			IBeanProperty prop = (IBeanProperty) props.next();
 			PropertyNode propNode = new PropertyNode(beanNode,
 													 prop.getElementName());
 			propNode.setValue(prop.getValue());
 			propNode.setStartLine(prop.getElementStartLine());
 			beanNode.addProperty(propNode);
 		}
-		beans.add(beanNode);
+
+		// Add inner beans
+		Iterator inner = bean.getInnerBeans().iterator();
+		while (inner.hasNext()) {
+			IBean innerBean = (IBean) inner.next();
+			BeanNode innerBeanNode = new BeanNode(beanNode,
+												  innerBean.getElementName());
+			initBeanNode(innerBeanNode, innerBean);
+			beanNode.addInnerBean(innerBeanNode);
+		}
 	}
 }

@@ -29,11 +29,9 @@ public interface IBean extends IBeansModelElement {
 
 	Collection getConstructorArguments();
 
-	boolean hasConstructorArguments();
-
-	boolean hasProperties();
-
 	Collection getProperties();
+
+	Collection getInnerBeans();
 
 	String getClassName();
 
@@ -48,8 +46,9 @@ public interface IBean extends IBeansModelElement {
 	public boolean isLazyInit();
 
 	/**
-	 * Returns a collection of all <code>IBean</code>s which are referenced from
-	 * within this property's value.
+	 * Returns a collection with the names of all beans which are referenced
+	 * by this bean's parent bean (for child beans only), constructor arguments
+	 * or properties.
 	 */
 	public Collection getReferencedBeans();
 }

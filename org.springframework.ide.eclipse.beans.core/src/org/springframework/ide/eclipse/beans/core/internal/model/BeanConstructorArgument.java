@@ -16,9 +16,9 @@
 
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -31,12 +31,8 @@ public class BeanConstructorArgument extends BeansModelElement
 	private Object value;
 	private int startLine;
 
-	public BeanConstructorArgument(IBean bean, int index, String type,
-							   Object value) {
-		super(bean, buildName(index, type,value));
-		this.index = index;
-		this.type = type;
-		this.value = value;
+	public BeanConstructorArgument(IBean bean) {
+		super(bean, null);
 	}
 
 	public int getElementType() {
@@ -47,40 +43,38 @@ public class BeanConstructorArgument extends BeansModelElement
 		return getElementParent().getElementResource();
 	}
 
+	public void setIndex(int index) {
+		this.index = index;
+	}
+
 	public int getIndex() {
 		return index;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 
 	public String getType() {
 		return type;
 	}
-	
+
+	public void setValue(Object value) {
+		this.value = value;
+	}
+
 	public Object getValue() {
 		return value;
 	}
 
 	/**
-	 * Returns a collection of all <code>Bean</code>s which are referenced from
-	 * within this constructor argument's value.
+	 * Returns a collection with the names of all beans which are referenced
+	 * by this constructor argument's value.
 	 */
 	public Collection getReferencedBeans() {
-		Map beans = new HashMap();
-		BeansModelUtil.addReferencedBeansForValue(this, value, beans);
-		return beans.values();
-	}
-
-	private static String buildName(int index, String type, Object value) {
-		StringBuffer name = new StringBuffer();
-		if (index != -1) {
-			name.append(index);
-			name.append(':');
-		}
-		if (type != null) {
-			name.append(type);
-			name.append(':');
-		}
-		name.append(value.toString());
-		return name.toString();
+		List beanNames = new ArrayList();
+		BeansModelUtil.addReferencedBeanNamesForValue(this, value, beanNames);
+		return beanNames;
 	}
 
 	public String toString() {

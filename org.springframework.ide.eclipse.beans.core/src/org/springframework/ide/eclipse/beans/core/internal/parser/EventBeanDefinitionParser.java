@@ -112,6 +112,7 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 			if (eventHandler != null) {
 				ConstructorArgumentValuesFilter filter =
 								new ConstructorArgumentValuesFilter(cargs, ele);
+				eventHandler.startConstructorArgument(ele);
 				super.parseConstructorArgElement(beanName, filter, ele);
 			} else {
 				super.parseConstructorArgElement(beanName, cargs, ele);
@@ -131,10 +132,13 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 	protected void parsePropertyElement(String beanName,
 				   MutablePropertyValues pvs, Element ele) throws DOMException {
 		try {
+			if (eventHandler != null) {
+				eventHandler.startProperty(ele);
+			}
 			super.parsePropertyElement(beanName, pvs, ele);
 			if (eventHandler != null) {
 				String name = ele.getAttribute(NAME_ATTRIBUTE);
-				eventHandler.registerBeanProperty(ele, name, pvs);
+				eventHandler.registerProperty(name, pvs);
 			}
 		} catch (DOMException e) {
 			throw new BeanDefinitionException(ele, e);
@@ -167,24 +171,22 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 
 		public void addIndexedArgumentValue(int index, Object value) {
 			this.cargs.addIndexedArgumentValue(index, value);
-			eventHandler.registerConstructorArgument(element, index, value,
-													 null);
+			eventHandler.registerConstructorArgument(index, value, null);
 		}
 
 		public void addIndexedArgumentValue(int index, Object value, String type) {
 			this.cargs.addIndexedArgumentValue(index, value, type);
-			eventHandler.registerConstructorArgument(element, index, value,
-													 type);
+			eventHandler.registerConstructorArgument(index, value, type);
 		}
 
 		public void addGenericArgumentValue(Object value) {
 			this.cargs.addGenericArgumentValue(value);
-			eventHandler.registerConstructorArgument(element, -1, value, null);
+			eventHandler.registerConstructorArgument(-1, value, null);
 		}
 
 		public void addGenericArgumentValue(Object value, String type) {
 			this.cargs.addGenericArgumentValue(value, type);
-			eventHandler.registerConstructorArgument(element, -1, value, type);
+			eventHandler.registerConstructorArgument(-1, value, type);
 		}
 	}
 }

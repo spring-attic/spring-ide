@@ -23,10 +23,7 @@ import java.util.Map;
 import java.util.Stack;
 
 import org.springframework.beans.PropertyValues;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.ChildBeanDefinition;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.internal.parser.IBeanDefinitionEvents;
 import org.springframework.ide.eclipse.beans.core.internal.parser.LineNumberPreservingDOMParser;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -44,14 +41,18 @@ public class BeansConfigHandler implements IBeanDefinitionEvents {
 	private IBeansConfig config;
 	private List beans;
 	private Map beansMap;
+    private Stack nestedElements;
+	private BeansModelElement currentElement;
 	private List innerBeans;
     private Stack nestedBeans;
 	private Bean currentBean;
+	private Bean outerBean;
 
 	public BeansConfigHandler(IBeansConfig config) {
 		this.config = config;
 		this.beans = new ArrayList();
 		this.beansMap = new HashMap();
+		this.nestedElements = new Stack();
 		this.innerBeans = new ArrayList();
 		this.nestedBeans = new Stack();
 	}
@@ -73,67 +74,82 @@ public class BeansConfigHandler implements IBeanDefinitionEvents {
 
 	public void startBean(Element element, boolean isNestedBean) {
 		if (isNestedBean) {
+			nestedElements.push(currentElement);
 			nestedBeans.push(currentBean);
 		}
-		currentBean = new Bean(config, "");
+		currentBean = new Bean(config);
 		setXmlTextRange(currentBean, element);
-		
+		if (!isNestedBean) {
+			outerBean = currentBean;
+		}
+	}
+
+	public void registerBean(BeanDefinitionHolder bdHolder,
+							 boolean isNestedBean) {
+		currentBean.setBeanDefinitionHolder(bdHolder);
+		if (isNestedBean) {
+
+			// Use current bean as an inner bean for the current constructor
+			// argument or property
+			currentElement = (BeansModelElement) nestedElements.pop();
+			currentBean.setElementParent(currentElement);
+			innerBeans.add(currentBean);
+			outerBean.addInnerBean(currentBean);
+			currentBean = (Bean) nestedBeans.pop();
+		} else {
+			beans.add(currentBean);
+			beansMap.put(bdHolder.getBeanName(), currentBean);
+		}
+	}
+
+	public void startConstructorArgument(Element element) {
+		BeanConstructorArgument carg = new BeanConstructorArgument(currentBean);
+		setXmlTextRange(carg, element);
+		currentBean.addConstructorArgument(carg);
+		currentElement = carg;
+	}
+
+	public void registerConstructorArgument(int index, Object value,
+											String type) {
+		BeanConstructorArgument carg = (BeanConstructorArgument) currentElement;
+		carg.setIndex(index);
+		carg.setValue(value);
+		carg.setType(type);
+		StringBuffer name = new StringBuffer();
+		if (index != -1) {
+			name.append(index);
+			name.append(':');
+		}
+		if (type != null) {
+			name.append(type);
+			name.append(':');
+		}
+		name.append(value.toString());
+		carg.setElementName(name.toString());
+	}
+
+	public void startProperty(Element element) {
+		BeanProperty property = new BeanProperty(currentBean);
+		setXmlTextRange(property, element);
+		currentBean.addProperty(property);
+		currentElement = property;
+	}
+
+	public void registerProperty(String name, PropertyValues pvs) {
+		BeanProperty property = (BeanProperty) currentElement;
+		property.setElementName(name);
+		Object value = pvs.getPropertyValue(name).getValue();
+		property.setValue(value);
 	}
 
 	/**
-	 * sets the start and end lines on the given model element.
-     * @param currentBean2
-     * @param element
+	 * Sets the start and end lines on the given model element.
      */
-    private void setXmlTextRange(BeansModelElement modelElement, Element xmlElement)
-    {
+	private void setXmlTextRange(BeansModelElement modelElement,
+								 Element xmlElement) {
 		int startLine = LineNumberPreservingDOMParser.getStartLineNumber(xmlElement);
 		int endLine = LineNumberPreservingDOMParser.getEndLineNumber(xmlElement);
 		modelElement.setElementStartLine(startLine);
 		modelElement.setElementEndLine(endLine);
     }
-
-    public void registerConstructorArgument(Element element, int index,
-										   Object value, String type) {
-		BeanConstructorArgument carg = new BeanConstructorArgument(currentBean, index,
-														   type, value);
-		currentBean.addConstructorArgument(carg);
-		setXmlTextRange(carg, element);
-	}
-
-	public void registerBeanProperty(Element element, String propertyName,
-									 PropertyValues pvs) {
-		BeanProperty property = new BeanProperty(currentBean, propertyName);
-		property.setValue(pvs.getPropertyValue(propertyName).getValue());
-		currentBean.addProperty(property);
-		setXmlTextRange(property, element);
-	}
-
-	public void registerBean(BeanDefinitionHolder bdHolder,
-							 boolean isNestedBean) {
-		BeanDefinition beanDef = bdHolder.getBeanDefinition();
-		String name;
-		if (isNestedBean) {
-			if (beanDef instanceof RootBeanDefinition) {
-				name = ((RootBeanDefinition) beanDef).getBeanClassName();
-			} else {
-				name = "Child bean with parent '" +
-						  ((ChildBeanDefinition) beanDef).getParentName() + "'";
-			}
-		} else {
-			name = bdHolder.getBeanName();
-		}
-		currentBean.setElementName(name);
-		currentBean.setBeanDefinition(beanDef);
-		currentBean.setAliases(bdHolder.getAliases());
-		if (isNestedBean) {
-			innerBeans.add(currentBean);
-			currentBean = (Bean) nestedBeans.pop();
-		} else {
-			beans.add(currentBean);
-			if (name != null && name.length() > 0) {
-				beansMap.put(name, currentBean);
-			}
-		}
-	}
 }

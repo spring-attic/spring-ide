@@ -27,9 +27,13 @@ public interface IBeanDefinitionEvents {
 
 	void startBean(Element element, boolean isNestedBean);
 
-	void registerConstructorArgument(Element element, int index, Object value,
-									 String type);
-	void registerBeanProperty(Element element, String propertyName,
-							  PropertyValues pvs);
 	void registerBean(BeanDefinitionHolder bdHolder, boolean isNestedBean);
+
+	void startConstructorArgument(Element element);
+
+	void registerConstructorArgument(int index, Object value, String type);
+
+	void startProperty(Element element);
+
+	void registerProperty(String propertyName, PropertyValues pvs);
 }

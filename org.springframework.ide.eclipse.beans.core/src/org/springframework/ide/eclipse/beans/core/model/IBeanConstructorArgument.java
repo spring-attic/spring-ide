@@ -30,8 +30,8 @@ public interface IBeanConstructorArgument extends IBeansModelElement {
 	Object getValue();
 
 	/**
-	 * Returns a collection of all <code>IBean</code>s which are referenced from
-	 * within this constructor argument's value.
+	 * Returns a collection with the names of all beans which are referenced
+	 * by this constructor argument's value.
 	 */
 	Collection getReferencedBeans();
 }

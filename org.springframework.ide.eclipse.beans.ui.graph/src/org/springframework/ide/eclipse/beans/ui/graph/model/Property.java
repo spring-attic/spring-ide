@@ -24,7 +24,11 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.draw2d.graph.Node;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.ui.model.PropertyNode;
 
 public class Property extends Node implements IAdaptable {
@@ -63,16 +67,40 @@ public class Property extends Node implements IAdaptable {
 	/**
 	 * Given a PropertyValue, adds any references to other beans
 	 * (RuntimeBeanReference). The value could be:
-	 * <li>A RuntimeBeanReference, which will be added.
-	 * <li>A List. This is a collection that may contain RuntimeBeanReferences which
+	 * <li>A BeanDefinitionHolder, a RuntimeBeanReference for the inner bean
 	 * will be added.
+	 * <li>A RuntimeBeanReference, which will be added.
+	 * <li>A List. This is a collection that may contain RuntimeBeanReferences
+	 * which will be added.
 	 * <li>A Set. May also contain RuntimeBeanReferences that will be added.
-	 * <li>A Map. In this case the value may be a RuntimeBeanReference that will be
-	 * added.
+	 * <li>A Map. In this case the value may be a RuntimeBeanReference that will
+	 * be added.
 	 * <li>An ordinary object or null, in which case it's ignored.
 	 */
 	private void addReferencesForValue(Object value, List references) {
-		if (value instanceof RuntimeBeanReference) {
+		if (value instanceof BeanDefinitionHolder) {
+			IBean modelBean = bean.getNode().getBean();
+			String  propertyName  = getName();
+			IBean innerBean = null;
+			Iterator innerBeans = modelBean.getInnerBeans().iterator();
+			while (innerBeans.hasNext()) {
+				IBean iBean = (IBean) innerBeans.next();
+				IBeansModelElement parent = iBean.getElementParent();
+				if (parent instanceof IBeanProperty &&
+								 parent.getElementName().equals(propertyName)) {
+					innerBean = iBean;
+					break;
+				}
+				
+			}
+			if (innerBean != null) {
+				Iterator beanNames = innerBean.getReferencedBeans().iterator();
+				while (beanNames.hasNext()) {
+					String beanName = (String) beanNames.next();
+					references.add(new RuntimeBeanReference(beanName));
+				}
+			}
+		} else if (value instanceof RuntimeBeanReference) {
 			references.add(value);
 		} else if (value instanceof List) {
 			List list = (List) value;

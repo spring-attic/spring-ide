@@ -30,46 +30,66 @@ public class BeansModelUtil {
 	 * be added.
 	 * <li>An ordinary object or null, in which case it's ignored.
 	 */
-	public static void addReferencedBeansForValue(IBeansModelElement element,
-												  Object value, Map refBeans) {
+	public static void addReferencedBeanNamesForValue(
+					 IBeansModelElement element, Object value, List beanNames) {
 		if (value instanceof RuntimeBeanReference) {
 			String beanName = ((RuntimeBeanReference) value).getBeanName();
-			IBeansModelElement parent = element.getElementParent().getElementParent();
-			IBean refBean = null;
-			if (parent instanceof IBeansConfig) {
-				refBean = ((IBeansConfig) parent).getBean(beanName);
-			} else if (parent instanceof IBeansConfigSet) {
-				refBean = ((IBeansConfigSet) parent).getBean(beanName);
+			if (!beanNames.contains(beanName)) {
+				beanNames.add(beanName);
 			}
-			if (refBean != null) {
-				if (!refBeans.containsKey(refBean.getElementName())) {
-					refBeans.put(refBean.getElementName(), refBean);
-				}
-				Iterator iter = refBean.getReferencedBeans().iterator();
-				while (iter.hasNext()) {
-					refBean = (IBean) iter.next();
-					if (!refBeans.containsKey(refBean.getElementName())) {
-						refBeans.put(refBean.getElementName(), refBean);
-					}
-				}
+			IBeansModelElement parent =
+								  element.getElementParent().getElementParent();
+			IBean bean = getBean(parent, beanName);
+			if (bean != null) {
+				addReferencedBeanNamesForBean(bean, beanNames);
 			}
 		} else if (value instanceof List) {
 			List list = (List) value;
 			for (int i = 0; i < list.size(); i++) {
-				addReferencedBeansForValue(element, list.get(i), refBeans);
+				addReferencedBeanNamesForValue(element, list.get(i), beanNames);
 			}
 		} else if (value instanceof Set) {
 			Set set = (Set) value;
 			for (Iterator iter = set.iterator(); iter.hasNext(); ) {
-				addReferencedBeansForValue(element, iter.next(), refBeans);
+				addReferencedBeanNamesForValue(element, iter.next(), beanNames);
 			}
 		} else if (value instanceof Map) {
 			Map map = (Map) value;
 			for (Iterator iter = map.keySet().iterator(); iter.hasNext(); ) {
-				addReferencedBeansForValue(element, map.get(iter.next()),
-										   refBeans);
+				addReferencedBeanNamesForValue(element, map.get(iter.next()),
+											   beanNames);
 			}
 		}
+	}
+
+	/**
+	 * Adds the names of all beans which are referenced by the specified bean to
+	 * the given list.
+	 */
+	public static void addReferencedBeanNamesForBean(IBean bean, List beanNames) {
+		Iterator iter = bean.getReferencedBeans().iterator();
+		while (iter.hasNext()) {
+			bean = (IBean) iter.next();
+			if (!beanNames.contains(bean.getElementName())) {
+				beanNames.add(bean.getElementName());
+			}
+		}
+	}
+
+	/**
+	 * Returns the IBean for a given bean name from specified Config or
+	 * ConfigSet element.
+	 * @return IBean or null if bean not defined
+	 */
+	public static final IBean getBean(IBeansModelElement element,
+									  String beanName) {
+		IBean bean = null;
+		if (element instanceof IBeansConfig) {
+			bean = ((IBeansConfig) element).getBean(beanName);
+		} else if (element instanceof IBeansConfigSet) {
+			bean = ((IBeansConfigSet) element).getBean(beanName);
+		}
+		return bean;
 	}
 
 	/**

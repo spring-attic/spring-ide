@@ -39,6 +39,7 @@ public class BeanNode extends AbstractNode {
 	private List constructorArguments;
 	private List properties;
 	private Map propertiesMap;	// lazily initialized in getProperty()
+	private List innerBeans;
 
 	/**
 	 * Creates a new bean node with the given name within the specified config.
@@ -52,11 +53,33 @@ public class BeanNode extends AbstractNode {
 		this.bean = null;
 		this.constructorArguments = new ArrayList();
 		this.properties = new ArrayList();
+		this.innerBeans = new ArrayList();
 		this.isOverride = false;
 
 		// copy external flag from config node
 		if (config != null &&
 							(config.getFlags() & INode.FLAG_IS_EXTERNAL) != 0) {
+			setFlags(INode.FLAG_IS_EXTERNAL);
+		}
+	}
+
+	/**
+	 * Creates a new inner bean node with the given name within the specified
+	 * bean.
+	 * 
+	 * @param bean the bean this inner bean belongs to
+	 * @param name the new bean's name
+	 */
+	public BeanNode(BeanNode bean, String name) {
+		super(bean, name);
+		this.bean = null;
+		this.constructorArguments = new ArrayList();
+		this.properties = new ArrayList();
+		this.innerBeans = new ArrayList();
+		this.isOverride = false;
+
+		// Copy external flag from config node
+		if (bean != null && (bean.getFlags() & INode.FLAG_IS_EXTERNAL) != 0) {
 			setFlags(INode.FLAG_IS_EXTERNAL);
 		}
 	}
@@ -75,7 +98,7 @@ public class BeanNode extends AbstractNode {
 		this.config = bean.getConfigNode(); 
 		this.bean = bean.getBean();
 
-		// clone contructor arguments
+		// Clone contructor arguments
 		this.constructorArguments = new ArrayList();
 		ConstructorArgumentNode[] cargs = bean.getConstructorArguments();
 		for (int i = 0; i < cargs.length; i++) {
@@ -83,12 +106,65 @@ public class BeanNode extends AbstractNode {
 																   cargs[i]));
 		}
 
-		// clone properties
+		// Clone properties
 		this.properties = new ArrayList();
 		PropertyNode[] props = bean.getProperties();
 		for (int i = 0; i < props.length; i++) {
 			this.properties.add(new PropertyNode(this, props[i]));
 		}
+
+		// Clone inner beans
+		this.innerBeans = new ArrayList();
+		BeanNode[] inner = bean.getInnerBeans();
+		for (int i = 0; i < inner.length; i++) {
+			this.innerBeans.add(new BeanNode(this, inner[i]));
+		}
+		
+		this.isOverride = false;
+
+		// copy external flag from config set node
+		if (this.config != null &&
+					   (this.config.getFlags() & INode.FLAG_IS_EXTERNAL) != 0) {
+			setFlags(INode.FLAG_IS_EXTERNAL);
+		}
+	}
+
+	/**
+	 * Creates a new bean node which is a clone of the given inner bean node
+	 * within the given bean.
+	 * 
+	 * @param innerBean the bean this inner bean belongs to
+	 * @param innerbean the inner bean which has to be cloned
+	 */
+	public BeanNode(BeanNode bean, BeanNode innerBean) {
+		super(bean, innerBean.getName());
+		setFlags(innerBean.getFlags());
+		setStartLine(innerBean.getStartLine()); 
+		this.config = innerBean.getConfigNode(); 
+		this.bean = innerBean.getBean();
+
+		// Clone contructor arguments
+		this.constructorArguments = new ArrayList();
+		ConstructorArgumentNode[] cargs = innerBean.getConstructorArguments();
+		for (int i = 0; i < cargs.length; i++) {
+			this.constructorArguments.add(new ConstructorArgumentNode(this,
+																   cargs[i]));
+		}
+
+		// Clone properties
+		this.properties = new ArrayList();
+		PropertyNode[] props = innerBean.getProperties();
+		for (int i = 0; i < props.length; i++) {
+			this.properties.add(new PropertyNode(this, props[i]));
+		}
+
+		// Clone inner beans
+		this.innerBeans = new ArrayList();
+		BeanNode[] inner = innerBean.getInnerBeans();
+		for (int i = 0; i < inner.length; i++) {
+			this.innerBeans.add(new BeanNode(this, inner[i]));
+		}
+		
 		this.isOverride = false;
 
 		// copy external flag from config set node
@@ -137,11 +213,6 @@ public class BeanNode extends AbstractNode {
 		return !constructorArguments.isEmpty();
 	}
 
-	/**
-	 * Adds the given property to this bean.
-	 * 
-	 * @param property the property to add
-	 */
 	public void addProperty(PropertyNode property) {
 		properties.add(property);
 	}
@@ -164,14 +235,17 @@ public class BeanNode extends AbstractNode {
 		return !properties.isEmpty();
 	}
 
-	/**
-	 * Returns the property nodes of this bean.
-	 * 
-	 * @return property nodes of this bean
-	 */
 	public PropertyNode[] getProperties() {
 		return (PropertyNode[]) properties.toArray(
 										   new PropertyNode[properties.size()]);
+	}
+
+	public void addInnerBean(BeanNode bean) {
+		innerBeans.add(bean);
+	}
+
+	public BeanNode[] getInnerBeans() {
+		return (BeanNode[]) innerBeans.toArray(new BeanNode[innerBeans.size()]);
 	}
 
 	public String getClassName() {
@@ -208,39 +282,63 @@ public class BeanNode extends AbstractNode {
 	}
 
 	/**
-	 * Returns list of beans which are referenced from within this bean's
-	 * constructor arguments or properties.
+	 * Returns list of beans which are referenced from within this bean's parent
+	 * bean (if this bean is a child bean), constructor arguments or properties.
 	 */
 	public Collection getReferencedBeans() {
-		Map refBeans = new HashMap();
+		List refBeans = new ArrayList();
+
+		// Add parent bean (if available)
+		if (!isRootBean()) {
+			String beanName = getParentName();
+			BeanNode parentBean = ModelUtil.getBean(getParent(), beanName);
+			if (parentBean != null) {
+				refBeans.add(parentBean);
+				ModelUtil.addReferencedBeansForBean(getParent(), beanName,
+													refBeans);
+			}
+		}
 
 		// Add referenced beans from constructor arguments
-		Iterator iter = constructorArguments.iterator();
-		while (iter.hasNext()) {
+		Iterator cargs = constructorArguments.iterator();
+		while (cargs.hasNext()) {
 			ConstructorArgumentNode carg = (ConstructorArgumentNode)
-																	iter.next();
+																   cargs.next();
 			Iterator beans = carg.getReferencedBeans().iterator();
 			while (beans.hasNext()) {
 				BeanNode bean = (BeanNode) beans.next();
-				if (!refBeans.containsKey(bean.getName())) {
-					refBeans.put(bean.getName(), bean);
+				if (!refBeans.contains(bean)) {
+					refBeans.add(bean);
 				}
 			}
 		}
 
 		// Add referenced beans from properties
-		iter = properties.iterator();
-		while (iter.hasNext()) {
-			PropertyNode property = (PropertyNode) iter.next();
+		Iterator props = properties.iterator();
+		while (props.hasNext()) {
+			PropertyNode property = (PropertyNode) props.next();
 			Iterator beans = property.getReferencedBeans().iterator();
 			while (beans.hasNext()) {
 				BeanNode bean = (BeanNode) beans.next();
-				if (!refBeans.containsKey(bean.getName())) {
-					refBeans.put(bean.getName(), bean);
+				if (!refBeans.contains(bean)) {
+					refBeans.add(bean);
 				}
 			}
 		}
-		return refBeans.values();
+
+		// Add referenced beans from inner beans
+		Iterator inner = innerBeans.iterator();
+		while (inner.hasNext()) {
+			BeanNode innerBean = (BeanNode) inner.next();
+			Iterator beans = innerBean.getReferencedBeans().iterator();
+			while (beans.hasNext()) {
+				BeanNode bean = (BeanNode) beans.next();
+				if (!refBeans.contains(bean)) {
+					refBeans.add(bean);
+				}
+			}
+		}
+		return refBeans;
 	}
 
 	public void remove(INode node) {

@@ -26,8 +26,8 @@ public interface IBeanProperty extends IBeansModelElement {
 	Object getValue();
 
 	/**
-	 * Returns collection of all <code>IBean</code>s which are referenced from
-	 * within this property's value.
+	 * Returns a collection with the names of all beans which are referenced
+	 * by this property's value.
 	 */
 	Collection getReferencedBeans();
 }

@@ -16,9 +16,9 @@
 
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -27,9 +27,10 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 public class BeanProperty extends BeansModelElement implements IBeanProperty {
 
 	private Object value;
+	private Bean innerBean;
 
-	public BeanProperty(IBean bean, String name) {
-		super(bean, name);
+	public BeanProperty(IBean bean) {
+		super(bean, null);
 	}
 
 	public int getElementType() {
@@ -49,13 +50,13 @@ public class BeanProperty extends BeansModelElement implements IBeanProperty {
 	}
 
 	/**
-	 * Returns collection of all <code>IBean</code>s which are referenced from
-	 * within this property's value.
+	 * Returns a collection with the names of all beans which are referenced
+	 * by this property's value.
 	 */
 	public Collection getReferencedBeans() {
-		Map beans = new HashMap();
-		BeansModelUtil.addReferencedBeansForValue(this, value, beans);
-		return beans.values();
+		List beanNames = new ArrayList();
+		BeansModelUtil.addReferencedBeanNamesForValue(this, value, beanNames);
+		return beanNames;
 	}
 
 	public String toString() {
