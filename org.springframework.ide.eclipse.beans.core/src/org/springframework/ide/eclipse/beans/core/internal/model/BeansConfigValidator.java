@@ -55,9 +55,13 @@ public class BeansConfigValidator {
 		}
 		if (file != null && file.isAccessible()) {
 			BeansCoreUtils.deleteProblemMarkers(file);
+
+			// Reset the corresponding config within the bean model to force
+			// re-reading the config file and updating the model
 			IBeansProject project = BeansCorePlugin.getModel().getProject(
 															 file.getProject());
-			IBeansConfig config = project.getConfig(file);
+			BeansConfig config = (BeansConfig) project.getConfig(file);
+			config.reset();
 
 			// At first check if model was able to parse the config file 
 			BeanDefinitionException e = config.getException();

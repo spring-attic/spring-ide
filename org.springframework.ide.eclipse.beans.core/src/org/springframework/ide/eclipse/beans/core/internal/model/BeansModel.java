@@ -351,7 +351,12 @@ public class BeansModel extends BeansModelElement implements IBeansModel {
 			IBeansProject project = (IBeansProject)
 												projects.get(file.getProject());
 			BeansConfig config = (BeansConfig) project.getConfig(file);
-			config.reset();
+
+			// There is no need to reset this config again if it's already done
+			// by the BeansConfigValidator
+			if (!config.isReset()) {
+				config.reset();
+			}
 			notifyListeners(config, BeansModelChangedEvent.CHANGED);
 		}
 	

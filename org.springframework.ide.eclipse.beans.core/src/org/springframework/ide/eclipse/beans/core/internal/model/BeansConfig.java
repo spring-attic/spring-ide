@@ -74,6 +74,10 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 		this.exception = null;
 	}
 
+	public boolean isReset() {
+		return (beans == null);
+	}
+
 	public IFile getConfigFile() {
 		return file;
 	}
