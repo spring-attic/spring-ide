@@ -57,4 +57,5 @@ public interface IBeansProjectMarker {
 	 public static final int ERROR_CODE_UNDEFINED_PARENT_ROOT_BEAN = 5;
 	 public static final int ERROR_CODE_NO_CONSTRUCTOR = 6;
 	 public static final int ERROR_CODE_NO_SETTER = 7;
+	 public static final int ERROR_CODE_UNDEFINED_REFERENCE = 8;
 }
