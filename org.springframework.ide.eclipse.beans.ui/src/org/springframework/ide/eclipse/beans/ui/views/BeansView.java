@@ -48,6 +48,7 @@ import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
@@ -217,7 +218,10 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 		// First check input object for an instance of BeansViewLocation 
 		Object input = context.getInput();
 		if (input instanceof BeansViewLocation) {
-			showLocation((BeansViewLocation) input);
+			return showLocation((BeansViewLocation) input);
+		} else if (input instanceof IBeansModelElement) {
+			return showLocation(BeansUIUtils.getBeansViewLocation(
+												   (IBeansModelElement) input));
 		} else if (input instanceof IAdaptable) {
 			Object resource = ((IAdaptable) input).getAdapter(IResource.class);
 			if (resource != null) {
@@ -231,14 +235,17 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 		ISelection selection = context.getSelection();
 		if (selection != null && selection instanceof IStructuredSelection &&
 							   ((IStructuredSelection) selection).size() == 1) {
-			Object resource = ((IStructuredSelection)
+			Object element = ((IStructuredSelection)
 												   selection).getFirstElement();
-			if (resource instanceof IResource) {
-				return showResource((IResource) resource);
+			if (element instanceof IBeansModelElement) {
+				return showLocation(BeansUIUtils.getBeansViewLocation(
+												 (IBeansModelElement) element));
+			} else if (element instanceof IResource) {
+				return showResource((IResource) element);
 			} else if (input instanceof IAdaptable) {
-				resource = ((IAdaptable) input).getAdapter(IResource.class);
-				if (resource != null) {
-					return showResource((IResource) resource);
+				element = ((IAdaptable) input).getAdapter(IResource.class);
+				if (element != null) {
+					return showResource((IResource) element);
 				}
 			}
 		}

@@ -16,7 +16,6 @@
 
 package org.springframework.ide.eclipse.beans.ui;
 
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -70,6 +69,7 @@ import org.springframework.ide.eclipse.beans.ui.model.properties.ConfigSetProper
 import org.springframework.ide.eclipse.beans.ui.model.properties.ConstructorArgumentProperties;
 import org.springframework.ide.eclipse.beans.ui.model.properties.PropertyProperties;
 import org.springframework.ide.eclipse.beans.ui.model.properties.RootBeanProperties;
+import org.springframework.ide.eclipse.beans.ui.views.BeansViewLocation;
 
 public class BeansUIUtils {
 
@@ -78,7 +78,7 @@ public class BeansUIUtils {
 	 * the thread calling this method has an associated display. If so, this
 	 * display is returned. Otherwise the method returns the default display.
 	 */
-	public static Display getStandardDisplay() {
+	public static final Display getStandardDisplay() {
 		Display display = Display.getCurrent();
 		if (display == null) {
 			display = Display.getDefault();
@@ -90,7 +90,7 @@ public class BeansUIUtils {
 	 * Returns a button with the given label, id, enablement and selection
 	 * listener.
 	 */
-	public static Button createButton(Composite parent, String label,
+	public static final Button createButton(Composite parent, String label,
 							boolean enabled, SelectionListener buttonListener) {
 		Button button = new Button(parent, SWT.PUSH);
 		button.setFont(parent.getFont());
@@ -114,7 +114,7 @@ public class BeansUIUtils {
 	/**
 	 * Returns the font metrics for given control.
 	 */
-	public static FontMetrics getFontMetrics(Control control) {
+	public static final FontMetrics getFontMetrics(Control control) {
 		FontMetrics fontMetrics = null;
 		GC gc = new GC(control);
 		try {
@@ -130,7 +130,7 @@ public class BeansUIUtils {
 	 * Displays specified preferences or property page and returns
 	 * <code>true</code> if <code>PreferenceDialog.OK</code> was selected.
 	 */
-	public static boolean showPreferencePage(String id, IPreferencePage page,
+	public static final boolean showPreferencePage(String id, IPreferencePage page,
 											 final String title) {
 		final IPreferenceNode targetNode = new PreferenceNode(id, page);
 		
@@ -153,7 +153,7 @@ public class BeansUIUtils {
 	/**
 	 * Returns edited file from given editor if it's a Spring bean config file.
 	 */
-	public static IFile getConfigFile(IEditorPart editor) {
+	public static final IFile getConfigFile(IEditorPart editor) {
 		if (editor != null) {
 			IEditorInput input = editor.getEditorInput();
 			if (input instanceof IFileEditorInput) {
@@ -168,7 +168,7 @@ public class BeansUIUtils {
 		return null;
 	}
 
-    public static IEditorPart getActiveEditor() {
+    public static final IEditorPart getActiveEditor() {
         IWorkbenchWindow window = BeansUIPlugin.getActiveWorkbenchWindow();
         if (window != null) {
             IWorkbenchPage page = window.getActivePage();
@@ -185,7 +185,7 @@ public class BeansUIUtils {
 	 * TODO Obsolete with Eclipse 3: Use IDE.openEditor() with an instance of
 	 * IMarker holding the line number instead
 	 */
-	public static IEditorPart openInEditor(IFile file, int line) {
+	public static final IEditorPart openInEditor(IFile file, int line) {
 		IEditorInput input = new FileEditorInput(file);
 		IEditorPart editPart = openInEditor(input);
 		if (editPart != null) {
@@ -206,11 +206,11 @@ public class BeansUIUtils {
 		return editPart;
 	}
 
-	public static IEditorPart openInEditor(IEditorInput input) {
+	public static final IEditorPart openInEditor(IEditorInput input) {
 		return openInEditor(input, getEditorID(input));
 	}
 
-	public static IEditorPart openInEditor(IEditorInput input,
+	public static final IEditorPart openInEditor(IEditorInput input,
 										   String editorId) {
 		IWorkbenchPage page = BeansUIPlugin.getActiveWorkbenchPage();
 		try {
@@ -225,7 +225,7 @@ public class BeansUIUtils {
 		return null;
 	}
 
-	public static IEditorPart openInEditor(IType type) {
+	public static final IEditorPart openInEditor(IType type) {
 		try {
 			return JavaUI.openInEditor(type);
 		} catch (PartInitException e) {
@@ -239,7 +239,7 @@ public class BeansUIUtils {
 	/**
 	 * Returns ID of editor which is associated with given editor input. 
 	 */
-	public static String getEditorID(IEditorInput input) {
+	public static final String getEditorID(IEditorInput input) {
 		IEditorRegistry reg = PlatformUI.getWorkbench().getEditorRegistry();
 		IEditorDescriptor desc = reg.getDefaultEditor(input.getName());
 		if (desc != null) {
@@ -248,7 +248,7 @@ public class BeansUIUtils {
 		return reg.getDefaultEditor().getId();
 	}
 
-	public static int getCaretOffset(ITextEditor editor) {
+	public static final int getCaretOffset(ITextEditor editor) {
 		ISelection selection = editor.getSelectionProvider().getSelection();
 		if (selection instanceof ITextSelection) {
 			return ((ITextSelection) selection).getOffset();
@@ -256,7 +256,7 @@ public class BeansUIUtils {
 		return -1;
 	}
 
-	public static String getSelectedText(ITextEditor editor) {
+	public static final String getSelectedText(ITextEditor editor) {
 		ISelection selection = editor.getSelectionProvider().getSelection();
 		if (selection instanceof ITextSelection) {
 			return ((ITextSelection) selection).getText().trim();
@@ -268,7 +268,7 @@ public class BeansUIUtils {
 	 * Returns a corresponding instance of <code>IPropertySource</code> for the
 	 * given <code>IBeansModelElement</code> or null.
 	 */
-	public static IPropertySource getPropertySource(
+	public static final IPropertySource getPropertySource(
 												   IBeansModelElement element) {
 		if (element instanceof IBeansProject) {
 			return new ResourcePropertySource(
@@ -295,5 +295,35 @@ public class BeansUIUtils {
 			return new PropertyProperties((IBeanProperty) element);
 		}
 		return null;
+	}
+
+	/**
+	 * Returns an instance of <code>BeansViewLocation</code> which is
+	 * initialized with information from the given core model element.
+	 */
+	public static final BeansViewLocation getBeansViewLocation(
+												   IBeansModelElement element) {
+		BeansViewLocation location = new BeansViewLocation();
+		if (element instanceof IBeansProject) {
+			location.setProjectName(element.getElementName());
+		} else if (element instanceof IBeansConfig) {
+			location.setProjectName(element.getElementParent().getElementName());
+			location.setConfigName(element.getElementName());
+		} else if (element instanceof IBeansConfigSet) {
+			location.setProjectName(element.getElementParent().getElementName());
+		} else if (element instanceof IBean) {
+			location.setProjectName(
+				element.getElementParent().getElementParent().getElementName());
+			location.setConfigName(element.getElementParent().getElementName());
+			location.setBeanName(element.getElementName());
+		} else if (element instanceof IBeanProperty) {
+			location.setProjectName(element.getElementParent().
+						getElementParent().getElementParent().getElementName());
+			location.setConfigName(element.getElementParent().
+										   getElementParent().getElementName());
+			location.setBeanName(element.getElementParent().getElementName());
+			location.setPropertyName(element.getElementName());
+		}
+		return location;
 	}
 }
