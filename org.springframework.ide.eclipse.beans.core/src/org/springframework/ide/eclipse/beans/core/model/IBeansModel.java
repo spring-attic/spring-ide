@@ -48,6 +48,13 @@ public interface IBeansModel extends IBeansModelElement {
 
 	IBeansConfig getConfig(IFile configFile);
 
+	/**
+	 * Returns a list of all <code>IBeanConfig</code>s which contain a bean with
+	 * given bean class.
+	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfig
+	 */
+	Collection getConfigs(String className);
+
 	void addChangeListener(IBeansModelChangedListener listener);
 
 	void removeChangeListener(IBeansModelChangedListener listener);

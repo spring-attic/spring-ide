@@ -31,16 +31,16 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
+import org.springframework.ide.eclipse.beans.core.internal.model.resources.BeansResourceChangeListener;
+import org.springframework.ide.eclipse.beans.core.internal.model.resources.IBeansResourceChangeEvents;
 import org.springframework.ide.eclipse.beans.core.model.BeansModelChangedEvent;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
-import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelChangedListener;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.core.resources.IBeansResourceChangeEvents;
-import org.springframework.ide.eclipse.beans.core.resources.BeansResourceChangeListener;
 
 /**
  * The <code>IBeansModel</code> manages instances of <code>IBeansProject</code>s.
@@ -57,14 +57,14 @@ public class BeansModel extends BeansModelElement implements IBeansModel {
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
 
 	private Map projects;
-	private List listeners;
-	private IResourceChangeListener listener;
+	private List modelListeners;
+	private IResourceChangeListener workspaceListener;
 
 	public BeansModel() {
 		super(null, "" /*model has empty name*/);
 		this.projects = new HashMap();
-		this.listeners = new ArrayList();
-		this.listener = new BeansResourceChangeListener(
+		this.modelListeners = new ArrayList();
+		this.workspaceListener = new BeansResourceChangeListener(
 											  new ResourceChangeEventHandler());
 	}
 
@@ -82,8 +82,8 @@ public class BeansModel extends BeansModelElement implements IBeansModel {
 		}
 		initialize();
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		workspace.addResourceChangeListener(listener,
-										 BeansResourceChangeListener.LISTENER_FLAGS);
+		workspace.addResourceChangeListener(workspaceListener,
+									BeansResourceChangeListener.LISTENER_FLAGS);
 	}
 
 	public void shutdown() {
@@ -91,7 +91,8 @@ public class BeansModel extends BeansModelElement implements IBeansModel {
 			System.out.println("Beans Model shutdown");
 		}
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		workspace.removeResourceChangeListener(listener);
+		workspace.removeResourceChangeListener(workspaceListener);
+		workspaceListener = null;
 		projects.clear();
 	}
 
@@ -145,12 +146,33 @@ public class BeansModel extends BeansModelElement implements IBeansModel {
 		return null;
 	}
 
+	/**
+	 * Returns a list of all <code>IBeanConfig</code>s from this model which
+	 * contain a bean with given bean class.
+	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfig
+	 */
+	public Collection getConfigs(String className) {
+		List configs = new ArrayList();
+		Iterator iter = getProjects().iterator();
+		while (iter.hasNext()) {
+			IBeansProject project = (IBeansProject) iter.next();
+			Iterator iter2 = project.getConfigs().iterator();
+			while (iter2.hasNext()) {
+				IBeansConfig config = (IBeansConfig) iter2.next();
+				if (config.isBeanClass(className)) {
+					configs.add(config);
+				}
+			}
+		}
+		return configs;
+	}
+
 	public void addChangeListener(IBeansModelChangedListener listener) {
-		listeners.add(listener);
+		modelListeners.add(listener);
 	}
 
 	public void removeChangeListener(IBeansModelChangedListener listener) {
-		listeners.remove(listener);
+		modelListeners.remove(listener);
 	}
 
 	public String toString() {
@@ -224,7 +246,7 @@ public class BeansModel extends BeansModelElement implements IBeansModel {
 	private void notifyListeners(IBeansModelElement element, int type) {
 		BeansModelChangedEvent event = new BeansModelChangedEvent(element,
 																  type);
-		Iterator iter = listeners.iterator();
+		Iterator iter = modelListeners.iterator();
 		while (iter.hasNext()) {
 			IBeansModelChangedListener listener =
 									   (IBeansModelChangedListener) iter.next();
@@ -344,6 +366,17 @@ public class BeansModel extends BeansModelElement implements IBeansModel {
 			project.removeConfig(file);
 			notifyListeners(config, BeansModelChangedEvent.REMOVED);
 		}
-	}
 
+		public void beanClassChanged(String className, Collection configs) {
+			if (DEBUG) {
+				System.out.println("Bean class '" + className + "' changed");
+			}
+			BeansConfigValidator validator = new BeansConfigValidator(null);
+			Iterator iter = configs.iterator();
+			while (iter.hasNext()) {
+				IBeansConfig config = (IBeansConfig) iter.next();
+				validator.validate(config.getConfigFile());
+			}
+		}
+	}
 }

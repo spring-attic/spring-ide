@@ -69,13 +69,6 @@ public interface IBeansProject extends IBeansModelElement, IBeanClassAware {
 	Collection getConfigs();
 
 	/**
-	 * Returns a list of all <code>IBeanConfig</code>s from this project which
-	 * contains a bean with given bean class.
-	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfig
-	 */
-	Collection getConfigs(String className);
-
-	/**
 	 * Returns a list of <code>IBeansConfigSet</code> instances.
 	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet
 	 */

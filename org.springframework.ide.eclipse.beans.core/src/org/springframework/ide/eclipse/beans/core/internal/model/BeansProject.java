@@ -128,23 +128,6 @@ public class BeansProject extends BeansModelElement implements IBeansProject {
 		return getDescription().getConfigSets();
 	}
 
-	/**
-	 * Returns a list of all <code>IBeanConfig</code>s from this project which
-	 * contains a bean with given bean class.
-	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfig
-	 */
-	public Collection getConfigs(String className) {
-		List configs = new ArrayList();
-		Iterator iter = getDescription().getConfigs().iterator();
-		while (iter.hasNext()) {
-			IBeansConfig config = (IBeansConfig) iter.next();
-			if (config.isBeanClass(className)) {
-				configs.add(config);
-			}
-		}
-		return configs;
-	}
-
 	public boolean isBeanClass(String className) {
 		Iterator configs = getDescription().getConfigs().iterator();
 		while (configs.hasNext()) {
