@@ -4,4 +4,3 @@ org.springframework.ide.eclipse.beans.core/reader/debug=true
 org.springframework.ide.eclipse.beans.core/project/debug=true
 org.springframework.ide.eclipse.beans.core/project/nature/debug=true
 org.springframework.ide.eclipse.beans.core/project/description/debug=true
-org.springframework.ide.eclipse.beans.core/project/validator/debug=true
