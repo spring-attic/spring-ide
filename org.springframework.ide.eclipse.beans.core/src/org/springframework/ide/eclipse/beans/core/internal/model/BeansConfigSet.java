@@ -155,7 +155,19 @@ public class BeansConfigSet extends BeansModelElement implements IBeansConfigSet
 			while (iter.hasNext()) {
 				String configName = (String) iter.next();
 				IBeansConfig config = project.getConfig(configName);
+
+				// Add beans to map
 				Iterator beans = config.getBeans().iterator();
+				while (beans.hasNext()) {
+					IBean bean = (IBean) beans.next();
+					if (allowBeanDefinitionOverriding ||
+								 !beansMap.containsKey(bean.getElementName())) {
+						beansMap.put(bean.getElementName(), bean);
+					}
+				}
+
+				// Add inner beans to map
+				beans = config.getInnerBeans().iterator();
 				while (beans.hasNext()) {
 					IBean bean = (IBean) beans.next();
 					if (allowBeanDefinitionOverriding ||

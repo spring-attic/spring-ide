@@ -197,9 +197,18 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 	private Map getBeansMap() {
 		if (beansMap == null) {
 			beansMap = new HashMap();
-			Iterator iter = getBeans().iterator();
-			while (iter.hasNext()) {
-				IBean bean = (IBean) iter.next();
+
+			// Add beans to map
+			Iterator beans = getBeans().iterator();
+			while (beans.hasNext()) {
+				IBean bean = (IBean) beans.next();
+				beansMap.put(bean.getElementName(), bean);
+			}
+
+			// Add inner beans to map
+			beans = getInnerBeans().iterator();
+			while (beans.hasNext()) {
+				IBean bean = (IBean) beans.next();
 				beansMap.put(bean.getElementName(), bean);
 			}
 		}
