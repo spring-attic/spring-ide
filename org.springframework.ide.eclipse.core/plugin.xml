@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin
+   id="org.springframework.ide.eclipse.core"
+   name="%pluginName"
+   version="1.2.0"
+   provider-name="%providerName"
+   class="org.springframework.ide.eclipse.core.SpringCore">
+
+   <runtime>
+      <library name="core.jar">
+         <packages prefixes="org.springframework.ide.eclipse.core"/>
+         <export name="*"/>
+      </library>
+      <library name="spring-core.jar">
+         <packages prefixes="org.springframework"/>
+         <export name="*"/>
+      </library>
+      <library name="commons-logging.jar">
+         <packages prefixes="org.apache.commons.logging"/>
+         <export name="*"/>
+      </library>
+      <library name="xmlParserAPIs.jar">
+         <packages prefixes="javax.xml,org.apache.xmlcommons,org.w3c.dom,org.xml.sax"/>
+         <export name="*"/>
+      </library>
+      <library name="xercesImpl.jar">
+         <packages prefixes="org.apache,org.w3c.dom"/>
+         <export name="*"/>
+      </library>
+   </runtime>
+
+   <requires>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.jdt.core"/>
+   </requires>
+
+   <extension-point id="builders" name="&amp;buildersName" schema="schema/builders.exsd"/>
+
+   <extension
+         id="springnature"
+         name="%springNature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="org.springframework.ide.eclipse.core.internal.project.SpringProjectNature">
+         </run>
+      </runtime>
+      <builder
+            id="org.springframework.ide.eclipse.core.springbuilder">
+      </builder>
+   </extension>
+
+   <extension
+         id="springbuilder"
+         name="%springBuilder"
+         point="org.eclipse.core.resources.builders">
+      <builder
+            hasNature="true">
+         <run
+               class="org.springframework.ide.eclipse.core.internal.project.SpringProjectBuilder">
+         </run>
+      </builder>
+   </extension>
+
+   <extension
+         id="problemmarker"
+         name="%springProblemMarker"
+         point="org.eclipse.core.resources.markers">
+      <super type="org.eclipse.core.resources.problemmarker"/>
+	  <super type="org.eclipse.core.resources.textmarker"/>
+   </extension>
+</plugin>

@@ -1,0 +1,4 @@
+org.springframework.ide.eclipse.core/debug=true
+org.springframework.ide.eclipse.core/project/debug=true
+org.springframework.ide.eclipse.core/project/nature/debug=true
+org.springframework.ide.eclipse.core/project/builder/debug=true
