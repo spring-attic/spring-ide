@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.springframework.ide.eclipse.beans"
+      id="org.springframework.ide.eclipse"
       label="%featureName"
-      version="1.1.0"
+      version="1.2.0"
       provider-name="%providerName">
 
    <description>
@@ -29,39 +29,51 @@
    </requires>
 
    <plugin
-         id="org.springframework.ide.eclipse.beans"
+         id="org.springframework.ide.eclipse"
          download-size="8417"
          install-size="16619"
-         version="1.1.0"/>
+         version="1.2.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.core"
          download-size="1033364"
          install-size="1192064"
-         version="1.1.0"/>
-
-   <plugin
-         id="org.springframework.ide.eclipse.beans.core.doc"
-         download-size="377427"
-         install-size="402314"
-         version="1.1.1"/>
+         version="1.2.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.ui"
          download-size="107478"
          install-size="124420"
-         version="1.1.0"/>
+         version="1.2.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.ui.doc"
          download-size="527628"
          install-size="527865"
-         version="1.1.0"/>
+         version="1.2.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.ui.graph"
          download-size="49284"
          install-size="58203"
-         version="1.1.0"/>
+         version="1.2.0"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.core"
+         download-size="0"
+         install-size="0"
+         version="1.2.0"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.core.doc"
+         download-size="377427"
+         install-size="402314"
+         version="1.1.5"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.ui"
+         download-size="0"
+         install-size="0"
+         version="1.2.0"/>
 
 </feature>
