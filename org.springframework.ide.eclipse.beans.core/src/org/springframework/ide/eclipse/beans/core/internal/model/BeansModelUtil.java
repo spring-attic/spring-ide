@@ -16,8 +16,23 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 
 public class BeansModelUtil {
+
+	/**
+	 * Returns config for given name from specified project.
+	 */
+	public static IBeansConfig getConfig(String configName,
+										 IBeansProject project) {
+		// For external project get the corresponding project from beans model 
+		if (configName.charAt(0) == '/') {
+			String projectName = configName.substring(0,
+													configName.indexOf('/', 1));
+			project = BeansCorePlugin.getModel().getProject(projectName);
+		}
+		return (project != null ? project.getConfig(configName) : null);
+	}
 
 	/**
 	 * Given a bean's property or constructor argument and it's value, adds any
