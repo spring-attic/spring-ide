@@ -28,10 +28,10 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 
 /**
  * Parser data for a Spring bean.
@@ -71,10 +71,6 @@ public class Bean extends BeansModelElement implements IBean {
 
 	public void setBeanDefinition(BeanDefinition beanDefinition) {
 		this.beanDefinition = beanDefinition;
-	}
-
-	public BeanDefinition getBeanDefinition() {
-		return beanDefinition;
 	}
 
 	public void setAliases(String[] aliases) {
@@ -138,24 +134,41 @@ public class Bean extends BeansModelElement implements IBean {
 		return true;
 	}
 
+	public boolean isAbstract() {
+		return beanDefinition.isAbstract();
+	}
+
+	public boolean isLazyInit() {
+		return beanDefinition.isLazyInit();
+	}
+
 	/**
 	 * Returns a collection of all <code>IBean</code>s which are referenced from
 	 * within this property's value.
 	 */
 	public Collection getReferencedBeans() {
 		Map refBeans = new HashMap();
-		for (Iterator cargs = constructorArguments.iterator(); cargs.hasNext();) {
-			IBeanConstructorArgument carg = (IBeanConstructorArgument) cargs.next();
-			for (Iterator beans = carg.getReferencedBeans().iterator();
-															 beans.hasNext();) {
+
+		// Add referenced beans from constructor arguments
+		Iterator cargs = constructorArguments.iterator();
+		while (cargs.hasNext()) {
+			IBeanConstructorArgument carg = (IBeanConstructorArgument)
+																   cargs.next();
+			Iterator beans = carg.getReferencedBeans().iterator();
+			while (beans.hasNext()) {
 				IBean bean = (IBean) beans.next();
-				refBeans.put(bean.getElementName(), bean);
+				if (!refBeans.containsKey(bean.getElementName())) {
+					refBeans.put(bean.getElementName(), bean);
+				}
 			}
 		}
-		for (Iterator props = properties.iterator(); props.hasNext();) {
+
+		// Add referenced beans from properties
+		Iterator props = properties.iterator();
+		while (props.hasNext()) {
 			IBeanProperty prop = (IBeanProperty) props.next();
-			for (Iterator beans = prop.getReferencedBeans().iterator();
-															 beans.hasNext();) {
+			Iterator beans = prop.getReferencedBeans().iterator();
+			while (beans.hasNext()) {
 				IBean bean = (IBean) beans.next();
 				if (!refBeans.containsKey(bean.getElementName())) {
 					refBeans.put(bean.getElementName(), bean);

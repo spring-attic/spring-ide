@@ -18,16 +18,12 @@ package org.springframework.ide.eclipse.beans.core.model;
 
 import java.util.Collection;
 
-import org.springframework.beans.factory.config.BeanDefinition;
-
 /**
  * Holds all data of a Spring bean.
  */
 public interface IBean extends IBeansModelElement {
 
 	IBeansConfig getConfig();
-
-	BeanDefinition getBeanDefinition();
 
 	String[] getAliases();
 
@@ -46,6 +42,10 @@ public interface IBean extends IBeansModelElement {
 	public boolean isRootBean();
 
 	public boolean isSingleton();
+
+	public boolean isAbstract();
+
+	public boolean isLazyInit();
 
 	/**
 	 * Returns a collection of all <code>IBean</code>s which are referenced from
