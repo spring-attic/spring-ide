@@ -102,6 +102,13 @@ public class BeansModelUtil {
 	 */
 	public static IType getJavaType(IProject project, String className) {
 		if (className != null && project.isAccessible()) {
+
+			// For inner classes replace '$' by '.'
+			int pos = className.lastIndexOf('$');
+			if (pos > 0 && pos < (className.length() - 1)) {
+				className = className.substring(0, pos) + '.' +
+							className.substring(pos + 1);
+			}
 			try {
 				// Find type in this project
 				if (project.hasNature(JavaCore.NATURE_ID)) {
