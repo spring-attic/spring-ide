@@ -44,7 +44,7 @@
          id="org.springframework.ide.eclipse.beans.core.doc"
          download-size="377427"
          install-size="402314"
-         version="1.1.0"/>
+         version="1.1.1"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.ui"
