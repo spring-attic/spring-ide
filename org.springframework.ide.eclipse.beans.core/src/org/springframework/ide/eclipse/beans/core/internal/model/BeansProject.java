@@ -26,6 +26,8 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescription;
@@ -117,9 +119,10 @@ public class BeansProject extends BeansModelElement implements IBeansProject {
 		return getDescription().getConfigs();
 	}
 
-	public IFile getConfigFile(String config) {
-		return getDescription().getConfigFile(config);
-	}
+    public boolean hasConfigSet(String configSetName) {
+        IBeansConfigSet configSet = getDescription().getConfigSet(configSetName);
+        return configSet != null;
+    }
 
 	/**
 	 * Returns a list of <code>IBeansConfigSet</code>s known defined within this
@@ -181,7 +184,7 @@ public class BeansProject extends BeansModelElement implements IBeansProject {
 		while (iter.hasNext()) {
 			String config = (String) iter.next();
 			if (!configs.contains(config)) {
-				IFile file = description.getConfigFile(config);
+				IFile file = getConfigFile(config);
 				BeansCoreUtils.deleteProblemMarkers(file);
 				toBeRemoved.add(config);
 			}
@@ -216,7 +219,7 @@ public class BeansProject extends BeansModelElement implements IBeansProject {
 		BeansProjectDescription description = getDescription();
 		Iterator iter = description.getConfigNames().iterator();
 		while (iter.hasNext()) {
-			IFile file = description.getConfigFile((String) iter.next());
+			IFile file = getConfigFile((String) iter.next());
 			BeansCoreUtils.deleteProblemMarkers(file);
 		}
 	}
@@ -236,8 +239,11 @@ public class BeansProject extends BeansModelElement implements IBeansProject {
 		return description;
 	}
 
-    public boolean hasConfigSet(String configSetName) {
-        IBeansConfigSet configSet = getDescription().getConfigSet(configSetName);
-        return configSet != null;
-    }
+	private IFile getConfigFile(String configName) {
+		if (configName.charAt(0) == '/') {
+			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+			return (IFile) root.findMember(configName);
+		}
+		return (IFile) project.findMember(configName);
+	}
 }
