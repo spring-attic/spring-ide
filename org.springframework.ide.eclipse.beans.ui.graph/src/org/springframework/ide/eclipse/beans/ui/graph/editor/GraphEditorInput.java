@@ -48,9 +48,17 @@ public class GraphEditorInput implements IEditorInput {
 		// Prepare name and tooltip for corresponding node type
 		if (node instanceof ConfigNode) {
 			IFile file = ((ConfigNode) node).getConfigFile();
-			name = file.getName();
-			toolTip = BeansGraphPlugin.getResourceString(
-				 "ShowGraphAction.name.config") + file.getFullPath().toString();
+			if (file != null) {
+				name = file.getName();
+				toolTip = BeansGraphPlugin.getResourceString(
+												"ShowGraphAction.name.config") +
+												file.getFullPath().toString();
+			} else {
+				name = BeansGraphPlugin.getResourceString(
+											  "ShowGraphAction.name.undefined");
+				toolTip = BeansGraphPlugin.getResourceString(
+										  "ShowGraphAction.name.config") + name;
+			}
 		} else if (node instanceof ConfigSetNode) {
 			ProjectNode project = ((ConfigSetNode) node).getProjectNode(); 
 			name = node.getName();
