@@ -80,8 +80,8 @@ public abstract class AbstractNode implements INode {
 	public void setFlags(int flags) {
 		this.flags |= flags;
 
-		// External and prototype flags are not propagated
-		flags &= ~(INode.FLAG_IS_EXTERNAL | INode.FLAG_IS_PROTOTYPE);
+		// Mask flags which are not propagated
+		flags &= ~NOT_PROPAGATED_FLAGS;
 
 		// Propagate modification of flags to parent
 		if (parent != null && parent instanceof AbstractNode) {

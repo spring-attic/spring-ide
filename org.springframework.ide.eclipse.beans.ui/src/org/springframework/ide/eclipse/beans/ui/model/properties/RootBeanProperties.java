@@ -40,6 +40,8 @@ public class RootBeanProperties implements IPropertySource {
 	public static final String P_ID_CONFIG = "RootBean.config";
 	public static final String P_ID_CLASS = "RootBean.class";
 	public static final String P_ID_SINGLETON = "RootBean.singleton";
+	public static final String P_ID_LAZY_INIT = "RootBean.lazyinit";
+	public static final String P_ID_ABSTRACT = "RootBean.abstract";
 	public static final String P_ID_OVERRIDE = "RootBean.override";
 
 	// Property descriptors
@@ -68,6 +70,18 @@ public class RootBeanProperties implements IPropertySource {
 
 		descriptor = new PropertyDescriptor(P_ID_SINGLETON,
 							   BeansUIPlugin.getResourceString(P_ID_SINGLETON));
+		descriptor.setAlwaysIncompatible(true);
+		descriptor.setCategory(BeansUIPlugin.getResourceString(P_CATEGORY));
+		descriptors.add(descriptor);
+
+		descriptor = new PropertyDescriptor(P_ID_LAZY_INIT,
+							   BeansUIPlugin.getResourceString(P_ID_LAZY_INIT));
+		descriptor.setAlwaysIncompatible(true);
+		descriptor.setCategory(BeansUIPlugin.getResourceString(P_CATEGORY));
+		descriptors.add(descriptor);
+
+		descriptor = new PropertyDescriptor(P_ID_ABSTRACT,
+								BeansUIPlugin.getResourceString(P_ID_ABSTRACT));
 		descriptor.setAlwaysIncompatible(true);
 		descriptor.setCategory(BeansUIPlugin.getResourceString(P_CATEGORY));
 		descriptors.add(descriptor);
@@ -116,6 +130,12 @@ public class RootBeanProperties implements IPropertySource {
 		}
 		if (P_ID_SINGLETON.equals(id)) {
 			return new Boolean(bean.isSingleton());
+		}
+		if (P_ID_LAZY_INIT.equals(id)) {
+			return new Boolean(bean.isLazyInit());
+		}
+		if (P_ID_ABSTRACT.equals(id)) {
+			return new Boolean(bean.isAbstract());
 		}
 		if (P_ID_OVERRIDE.equals(id)) {
 			return new Boolean(bean.isOverride());

@@ -24,7 +24,11 @@ public interface INode extends IAdaptable {
 	int FLAG_HAS_ERRORS = 0x02;
 	int FLAG_HAS_WARNINGS = 0x04;
 	int FLAG_IS_PROTOTYPE = 0x08;
+	int FLAG_IS_LAZY_INIT = 0x10;
+	int FLAG_IS_ABSTRACT = 0x20;
 
+	int NOT_PROPAGATED_FLAGS = (FLAG_IS_EXTERNAL | FLAG_IS_PROTOTYPE |
+								FLAG_IS_LAZY_INIT | FLAG_IS_ABSTRACT);
 	/**
 	 * Returns this node's parent or <code>null</code> if none.
 	 * 

@@ -103,6 +103,12 @@ public class BeanNode extends AbstractNode {
 		if (!bean.isSingleton()) {
 			setFlags(INode.FLAG_IS_PROTOTYPE);
 		}
+		if (bean.isLazyInit()) {
+			setFlags(INode.FLAG_IS_LAZY_INIT);
+		}
+		if (bean.isAbstract()) {
+			setFlags(INode.FLAG_IS_ABSTRACT);
+		}
 	}
 
 	public IBean getBean() {
@@ -182,6 +188,14 @@ public class BeanNode extends AbstractNode {
 
 	public boolean isSingleton() {
 		return (bean != null ? bean.isSingleton() : true);
+	}
+
+	public boolean isLazyInit() {
+		return (bean != null ? bean.isLazyInit() : false);
+	}
+
+	public boolean isAbstract() {
+		return (bean != null ? bean.isAbstract() : false);
 	}
 	
 	/**
