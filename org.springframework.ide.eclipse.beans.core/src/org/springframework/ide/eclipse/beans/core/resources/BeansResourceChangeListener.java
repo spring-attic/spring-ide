@@ -54,9 +54,10 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 	}
 
 	public void resourceChanged(IResourceChangeEvent event) {
-		if (event.getSource() instanceof IWorkspace) {
-			IProject project = (IProject)event.getResource();
-			switch(event.getType()) {
+		if (event.getSource() instanceof IWorkspace &&
+									  event.getResource() instanceof IProject) {
+			IProject project = (IProject) event.getResource();
+			switch (event.getType()) {
 				case IResourceChangeEvent.PRE_CLOSE :
 					if (BeansCoreUtils.isBeansProject(project)) {
 						events.projectClosed(project);
@@ -76,8 +77,8 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 							delta.accept(new BeansProjectVisitor(),
 										 VISITOR_FLAGS);
 						} catch (CoreException e) {
-							BeansCorePlugin.log("Error while " +
-										 "traversing resource change delta", e);
+							BeansCorePlugin.log("Error while traversing " +
+												"resource change delta", e);
 						}
 					}
 					break;
