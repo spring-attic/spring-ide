@@ -32,6 +32,27 @@ public abstract class BeansModelElement implements IBeansModelElement {
 		this.endLine = -1;
 	}
 
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj instanceof IBeansModelElement) {
+			IBeansModelElement element = (IBeansModelElement) obj;
+			if (getElementType() == element.getElementType() &&
+						   getElementName().equals(element.getElementName())) {
+				if (getElementType() == PROJECT) {
+					return true;
+				} if (getElementType() != MODEL) {
+					return getElementParent().equals(
+												   element.getElementParent());
+				}
+			}
+		}
+		return false;
+	}
+
+	public abstract int getElementType();
+
 	public final void setElementParent(IBeansModelElement parent) {
 		this.parent = parent;
 	}
