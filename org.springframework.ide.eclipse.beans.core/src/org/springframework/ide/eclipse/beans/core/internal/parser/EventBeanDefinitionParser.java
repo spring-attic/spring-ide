@@ -16,6 +16,8 @@
 
 package org.springframework.ide.eclipse.beans.core.internal.parser;
 
+import java.io.FileNotFoundException;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -53,6 +55,24 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 
 	public void setEventHandler(IBeanDefinitionEvents eventHandler) {
 		this.eventHandler = eventHandler;
+	}
+
+	/**
+	 * Checks if imported BeanDefinition resource exists. The BeanDefinition is
+	 * not validated yet. This is done if the imported BeanDefinition file is
+	 * modified and the validator is run on it.
+	 */
+	protected void importBeanDefinitionResource(Element ele) {
+		String location = ele.getAttribute(RESOURCE_ATTRIBUTE);
+		try {
+			Resource relativeResource = getResource().createRelative(location);
+			if (!relativeResource.exists()) {
+				throw new FileNotFoundException("Invalid relative resource " +
+												"location '" + location + "'");
+			}
+		} catch (Exception e) {
+			throw new BeanDefinitionException(ele, e);
+		}
 	}
 
 	/**
