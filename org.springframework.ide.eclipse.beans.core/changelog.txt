@@ -1,4 +1,15 @@
-Changes in version 1.0.2 (10.6.2003):
+Changes in version 1.1.0 (1.9.2004):
+
+* spring-core.jar (updated to v1.1 RC2) now included in core
+
+* Beans project model refactored from UI plugin into core
+
+* Beans model now supports constructor arguments and bean classes too
+
+* Beans project validator now checks construtor arguments too
+
+
+Changes in version 1.0.2 (10.6.2004):
 
 * to support Eclipse 3.0 (final) Spring IDE has to bring it's own version of
   the Apache Xerces XML parser (Xerces is not shipped with the Eclipse platform
@@ -9,6 +20,7 @@ Changes in version 1.0.2 (10.6.2003):
 
 * updated BeanDefinitionParser for spring-core.jar 1.0.2
 
-Changes in version 1.0.1 (18.5.2003):
+
+Changes in version 1.0.1 (18.5.2004):
 
 * interims version - not plublicly announced

@@ -1,4 +1,13 @@
-Changes in version 1.0.3 (10.6.2003):
+Changes in version 1.1.0 (1.9.2004):
+
+* Beans project model refactored into core plugin
+
+* Beans view now supports constructor arguments too
+
+* Java sources and classes which are used as Spring beans are decorated too
+
+
+Changes in version 1.0.3 (10.6.2004):
 
 * config set properties page now supports external beans config files from
   referenced Spring projects
@@ -6,11 +15,13 @@ Changes in version 1.0.3 (10.6.2003):
 * new overlay indicator for beans in config sets which are defined in an
   external config file
 
-Changes in version 1.0.2 (18.5.2003):
+
+Changes in version 1.0.2 (18.5.2004):
 
 * interims version - not plublicly announced
 
-Changes in version 1.0.1 (23.4.2003):
+
+Changes in version 1.0.1 (23.4.2004):
 
 * beans view now provides a context menu (with currently only one entry
   "properties" which opens the Spring project configuration property page)
