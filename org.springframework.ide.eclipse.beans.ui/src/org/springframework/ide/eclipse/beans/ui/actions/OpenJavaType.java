@@ -64,7 +64,6 @@ public class OpenJavaType extends Action implements IEditorActionDelegate {
 				return;
 			}
 		}
-		BeansUIPlugin.beep();
 	}
 
 	private String guessType() {

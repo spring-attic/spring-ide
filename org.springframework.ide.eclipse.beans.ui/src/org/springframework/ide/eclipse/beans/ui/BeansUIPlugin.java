@@ -117,10 +117,6 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 		return getActiveWorkbenchWindow().getActivePage();
 	}
 
-	public static void beep() {
-		getActiveWorkbenchWindow().getShell().getDisplay().beep();
-	}
-
 	/**
 	 * Returns the string from the plugin's resource bundle,
 	 * or 'key' if not found.

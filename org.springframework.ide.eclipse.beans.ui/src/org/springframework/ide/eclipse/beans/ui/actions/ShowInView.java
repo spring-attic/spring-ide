@@ -33,7 +33,6 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
@@ -70,7 +69,6 @@ public class ShowInView extends Action implements IEditorActionDelegate {
 			((IShowInTarget) view).show(new ShowInContext(node, null));
 			return;
 		}
-		BeansUIPlugin.beep();
 	}
 
 	private INode guessNode() {

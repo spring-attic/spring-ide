@@ -45,11 +45,12 @@ import org.eclipse.ui.part.ViewPart;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.actions.OpenProperties;
-import org.springframework.ide.eclipse.beans.ui.model.*;
 import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
+import org.springframework.ide.eclipse.beans.ui.model.ConstructorArgumentNode;
 import org.springframework.ide.eclipse.beans.ui.model.INode;
+import org.springframework.ide.eclipse.beans.ui.model.ModelLabelDecorator;
 import org.springframework.ide.eclipse.beans.ui.model.ModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
 import org.springframework.ide.eclipse.beans.ui.model.PropertyNode;
@@ -328,7 +329,6 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 		} catch (PartInitException e) {
 			BeansUIPlugin.log(e);
 		}
-		BeansUIPlugin.beep();
 		return null;
 	}
 }

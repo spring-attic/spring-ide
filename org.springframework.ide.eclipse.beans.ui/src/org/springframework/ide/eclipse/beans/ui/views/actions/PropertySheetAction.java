@@ -50,7 +50,6 @@ public class PropertySheetAction extends Action {
 			propertySheet.selectionChanged(view, viewer.getSelection());
 		} catch (PartInitException e) {
 			BeansUIPlugin.log(e);
-			BeansUIPlugin.beep();
 		}
 	}
 }
