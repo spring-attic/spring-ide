@@ -49,7 +49,6 @@ public class BeanNode extends AbstractNode {
 	public BeanNode(ConfigNode config, String name) {
 		super(config, name);
 		this.config = config; 
-		this.bean = null;
 		this.constructorArguments = new ArrayList();
 		this.properties = new ArrayList();
 		this.innerBeans = new ArrayList();
@@ -71,7 +70,6 @@ public class BeanNode extends AbstractNode {
 	 */
 	public BeanNode(BeanNode bean, String name) {
 		super(bean, name);
-		this.bean = null;
 		this.constructorArguments = new ArrayList();
 		this.properties = new ArrayList();
 		this.innerBeans = new ArrayList();
@@ -175,16 +173,18 @@ public class BeanNode extends AbstractNode {
 
 	public void setBean(IBean bean) {
 		this.bean = bean;
-		if (!bean.isSingleton()) {
-			setFlags(INode.FLAG_IS_PROTOTYPE);
+		if (bean != null) {
+			if (!bean.isSingleton()) {
+				setFlags(INode.FLAG_IS_PROTOTYPE);
+			}
+			if (bean.isLazyInit()) {
+				setFlags(INode.FLAG_IS_LAZY_INIT);
+			}
+			if (bean.isAbstract()) {
+				setFlags(INode.FLAG_IS_ABSTRACT);
+			}
+			setStartLine(bean.getElementStartLine()); 
 		}
-		if (bean.isLazyInit()) {
-			setFlags(INode.FLAG_IS_LAZY_INIT);
-		}
-		if (bean.isAbstract()) {
-			setFlags(INode.FLAG_IS_ABSTRACT);
-		}
-		setStartLine(bean.getElementStartLine()); 
 	}
 
 	public IBean getBean() {

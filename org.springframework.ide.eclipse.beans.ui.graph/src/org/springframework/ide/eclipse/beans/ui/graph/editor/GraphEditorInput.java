@@ -111,7 +111,11 @@ public class GraphEditorInput implements IEditorInput {
 		Iterator iter = list.iterator();
 		while (iter.hasNext()) {
 			BeanNode bean = (BeanNode) iter.next();
-			this.beans.put(bean.getName(), new Bean(bean.getBean()));
+
+			// Skip dummy beans node which are holding an error message only
+			if (bean.getBean() != null) {
+				this.beans.put(bean.getName(), new Bean(bean.getBean()));
+			}
 		}
 	}
 
