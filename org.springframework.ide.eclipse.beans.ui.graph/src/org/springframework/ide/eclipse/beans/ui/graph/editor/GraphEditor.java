@@ -117,8 +117,8 @@ public class GraphEditor extends EditorPart {
 	}
 
 	/**
-	 * Called to configure the graphical viewer before it receives its contents.  This is
-	 * where the root editpart should be configured.
+	 * Called to configure the graphical viewer before it receives its contents.
+	 * This is where the root editpart should be configured.
 	 */
 	protected void configureGraphicalViewer() {
 		ScalableFreeformRootEditPart root = new ScalableFreeformRootEditPart();
