@@ -20,8 +20,10 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionReader;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.io.Resource;
 import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
@@ -32,17 +34,29 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-public class EventBeanDefinitionReader extends XmlBeanDefinitionReader {
+public class EventBeanDefinitionReader implements BeanDefinitionReader {
 
 	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID +
 																"/reader/debug";
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
 
 	private IBeanDefinitionEvents eventHandler;
+	private BeanDefinitionRegistry beanFactory;
 
 	public EventBeanDefinitionReader(IBeanDefinitionEvents eventHandler) {
-		super(new DefaultListableBeanFactory());
 		this.eventHandler = eventHandler;
+		beanFactory = new NoOpRegistry();
+	}
+
+	public BeanDefinitionRegistry getBeanFactory() {
+		return beanFactory;
+	}
+
+	/**
+	 * Returns null to prevent class loading of bean classes. 
+	 */
+	public ClassLoader getBeanClassLoader() {
+		return null;
 	}
 
 	/**
@@ -65,7 +79,7 @@ public class EventBeanDefinitionReader extends XmlBeanDefinitionReader {
 			parser.setFeature(
 					 "http://apache.org/xml/features/validation/dynamic", true);
 			parser.setEntityResolver(new BeansDtdResolver());
-			parser.setErrorHandler(new BeanErrorHandler());
+			parser.setErrorHandler(new BeansErrorHandler());
 			parser.parse(inputSource);
 			return registerBeanDefinitions(parser.getDocument(), resource);
 		} catch (SAXException e) {
@@ -81,6 +95,7 @@ public class EventBeanDefinitionReader extends XmlBeanDefinitionReader {
 				try {
 					input.close();
 				} catch (IOException e) {
+					BeansCorePlugin.log("Could not close InputStream", e);
 				}
 			}
 		}
@@ -88,12 +103,16 @@ public class EventBeanDefinitionReader extends XmlBeanDefinitionReader {
 
 	/**
 	 * Register the bean definitions contained in the given DOM document.
-	 * All calls go through this.
+	 * Called by <code>loadBeanDefinitions</code>.
+	 * <p>Creates a new instance of the <code>EventBeanDefinitionParser</code>
+	 * and invokes <code>registerBeanDefinitions</code> on it.
 	 * @param doc the DOM document
 	 * @param resource the resource descriptor (for context information)
 	 * @throws BeansException in case of parsing errors
+	 * @see #loadBeanDefinitions
+	 * @see EventBeanDefinitionParser#registerBeanDefinitions
 	 */
-	public int registerBeanDefinitions(Document doc, Resource resource)
+	protected int registerBeanDefinitions(Document doc, Resource resource)
 														 throws BeansException {
 		EventBeanDefinitionParser parser = new EventBeanDefinitionParser();
 		parser.setEventHandler(this.eventHandler);
@@ -101,16 +120,9 @@ public class EventBeanDefinitionReader extends XmlBeanDefinitionReader {
 	}
 
 	/**
-	 * Returns null to prevent class loading of bean classes. 
-	 */
-	public ClassLoader getBeanClassLoader() {
-		return null;
-	}
-
-	/**
 	 * Private implementation of SAX ErrorHandler used when validating XML.
 	 */
-	private static class BeanErrorHandler implements ErrorHandler {
+	private static class BeansErrorHandler implements ErrorHandler {
 
 		public void error(SAXParseException e) throws SAXException {
 			throw e;
@@ -122,6 +134,35 @@ public class EventBeanDefinitionReader extends XmlBeanDefinitionReader {
 
 		public void warning(SAXParseException e) throws SAXException {
 			// ignore XML parse warnings
+		}
+	}
+
+	private static class NoOpRegistry implements BeanDefinitionRegistry {
+
+		public int getBeanDefinitionCount() {
+			return 0;
+		}
+
+		public String[] getBeanDefinitionNames() {
+			return null;
+		}
+
+		public boolean containsBeanDefinition(String name) {
+			return false;
+		}
+
+		public BeanDefinition getBeanDefinition(String name) throws BeansException {
+			return null;
+		}
+
+		public void registerBeanDefinition(String name, BeanDefinition beanDefinition) throws BeansException {
+		}
+
+		public String[] getAliases(String name) throws NoSuchBeanDefinitionException {
+			return null;
+		}
+
+		public void registerAlias(String name, String alias) throws BeansException {
 		}
 	}
 }
