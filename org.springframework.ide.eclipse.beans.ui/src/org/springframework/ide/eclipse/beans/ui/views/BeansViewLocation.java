@@ -35,7 +35,6 @@ public class BeansViewLocation {
 	private String projectName;
 	private String configName;
 	private String beanName;
-	private String constructorArgumentName;
 	private String propertyName;
 
 	public void setProjectName(String projectName) {

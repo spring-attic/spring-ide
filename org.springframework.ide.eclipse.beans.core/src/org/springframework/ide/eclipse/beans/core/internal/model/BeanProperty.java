@@ -27,7 +27,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 public class BeanProperty extends BeansModelElement implements IBeanProperty {
 
 	private Object value;
-	private Bean innerBean;
 
 	public BeanProperty(IBean bean) {
 		super(bean, null);

@@ -29,7 +29,6 @@ public class BeanConstructorArgument extends BeansModelElement
 	private int index;
 	private String type;
 	private Object value;
-	private int startLine;
 
 	public BeanConstructorArgument(IBean bean) {
 		super(bean, null);
