@@ -27,7 +27,7 @@ import org.eclipse.core.resources.IProject;
 public interface IBeansProject extends IBeansModelElement, IBeanClassAware {
 
 	/** File name of the Spring Beans project description */
-	public static final String DESCRIPTION_FILE = ".springBeansProject";
+	public static final String DESCRIPTION_FILE = ".springBeans";
 
 	/**
 	 * Returns corresponding Eclipse project. 
