@@ -8,7 +8,6 @@
 		<project>org.eclipse.jface.text</project>
 		<project>org.eclipse.text</project>
 		<project>org.eclipse.ui.editors</project>
-		<project>org.springframework.core</project>
 		<project>org.springframework.ide.eclipse.beans.core</project>
 	</projects>
 	<buildSpec>

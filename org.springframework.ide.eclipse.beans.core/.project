@@ -3,7 +3,6 @@
 	<name>org.springframework.ide.eclipse.beans.core</name>
 	<comment></comment>
 	<projects>
-		<project>org.springframework.core</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
