@@ -17,6 +17,7 @@
 package org.springframework.ide.eclipse.beans.core.internal.parser;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
@@ -70,7 +71,7 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 				throw new FileNotFoundException("Invalid relative resource " +
 												"location '" + location + "'");
 			}
-		} catch (Exception e) {
+		} catch (IOException e) {
 			throw new BeanDefinitionException(ele, e);
 		}
 	}
