@@ -86,9 +86,6 @@ public class BeansGraphImages {
 	/*
 	 * Available cached Images in the Java plugin image registry.
 	 */
-	public static final String IMG_OBJS_PROJECT = NAME_PREFIX + "project_obj.gif";
-	public static final String IMG_OBJS_CONFIG = NAME_PREFIX + "config_obj.gif";
-	public static final String IMG_OBJS_CONFIG_SET = NAME_PREFIX + "configset_obj.gif";
 	public static final String IMG_OBJS_ROOT_BEAN = NAME_PREFIX + "rootbean_obj.gif";
 	public static final String IMG_OBJS_CHILD_BEAN = NAME_PREFIX + "childbean_obj.gif";
 	public static final String IMG_OBJS_CONSTRUCTOR = NAME_PREFIX + "constructor_obj.gif";
@@ -103,23 +100,15 @@ public class BeansGraphImages {
 //	private final static String ELCL = "elcl16/"; //enabled - size 16x16
 	private final static String OBJECT = "obj16/"; //basic colors - size 16x16
 //	private final static String WIZBAN = "wizban/"; //basic colors - size 16x16
-	private final static String OVR = "ovr16/"; //basic colors - size 7x8
+//	private final static String OVR = "ovr16/"; //basic colors - size 7x8
 //	private final static String VIEW= "cview16/"; // views //$NON-NLS-1$
 
-	public static final ImageDescriptor DESC_OBJS_PROJECT = createManaged(OBJECT, IMG_OBJS_PROJECT);
-	public static final ImageDescriptor DESC_OBJS_CONFIG = createManaged(OBJECT, IMG_OBJS_CONFIG);
-	public static final ImageDescriptor DESC_OBJS_CONFIG_SET = createManaged(OBJECT, IMG_OBJS_CONFIG_SET);
 	public static final ImageDescriptor DESC_OBJS_ROOT_BEAN = createManaged(OBJECT, IMG_OBJS_ROOT_BEAN);
 	public static final ImageDescriptor DESC_OBJS_CHILD_BEAN = createManaged(OBJECT, IMG_OBJS_CHILD_BEAN);
 	public static final ImageDescriptor DESC_OBJS_CONSTRUCTOR = createManaged(OBJECT, IMG_OBJS_CONSTRUCTOR);
 	public static final ImageDescriptor DESC_OBJS_PROPERTY = createManaged(OBJECT, IMG_OBJS_PROPERTY);
 	public static final ImageDescriptor DESC_OBJS_SPRING = createManaged(OBJECT, IMG_OBJS_SPRING);
 	public static final ImageDescriptor DESC_OBJS_ERROR = createManaged(OBJECT, IMG_OBJS_ERROR);
-
-	public static final ImageDescriptor DESC_OVR_SPRING = create(OVR, "spring_ovr.gif");
-	public static final ImageDescriptor DESC_OVR_ERROR = create(OVR, "error_ovr.gif");
-	public static final ImageDescriptor DESC_OVR_WARNING = create(OVR, "warning_ovr.gif");
-	public static final ImageDescriptor DESC_OVR_PROTOTYPE = create(OVR, "prototype_ovr.gif");
 
 	/**
 	 * Returns the <code>Image<code> identified by the given key,
