@@ -168,19 +168,19 @@ public class BeanNode extends AbstractNode {
 	}
 
 	public String getClassName() {
-		return bean.getClassName();
+		return (bean != null ? bean.getClassName() : null);
 	}
 
 	public String getParentName() {
-		return bean.getParentName();
+		return (bean != null ? bean.getParentName() : null);
 	}
 
 	public boolean isRootBean() {
-		return bean.isRootBean();
+		return (bean != null ? bean.isRootBean() : false);
 	}
 
 	public boolean isSingleton() {
-		return bean.isSingleton();
+		return (bean != null ? bean.isSingleton() : true);
 	}
 	
 	/**
