@@ -25,9 +25,6 @@ import org.eclipse.ui.IViewPart;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditor;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput;
-import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
 import org.springframework.ide.eclipse.beans.ui.model.INode;
 
 public class ShowGraphAction extends Action implements IViewActionDelegate {
@@ -41,13 +38,15 @@ public class ShowGraphAction extends Action implements IViewActionDelegate {
 
 	public void selectionChanged(IAction action, ISelection selection) {
 		node = (INode) ((IStructuredSelection) selection).getFirstElement();
+		if (node != null && (node.getFlags() & INode.FLAG_HAS_ERRORS) == 0) {
+			action.setEnabled(true);
+		} else {
+			action.setEnabled(false);
+		}
 	}
 
 	public void run(IAction action) {
-		if (node != null && (node instanceof ConfigNode ||
-			 	   node instanceof ConfigSetNode || node instanceof BeanNode)) {
-			GraphEditorInput input = new GraphEditorInput(node);
-			BeansUIUtils.openInEditor(input, GraphEditor.EDITOR_ID);
-		}
+		GraphEditorInput input = new GraphEditorInput(node);
+		BeansUIUtils.openInEditor(input, GraphEditor.EDITOR_ID);
 	}
 }
