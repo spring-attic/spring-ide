@@ -16,15 +16,12 @@
          <packages prefixes="org.springframework"/>
       </library>
       <library name="commons-logging.jar">
-         <export name="*"/>
          <packages prefixes="org.apache.commons.logging"/>
       </library>
       <library name="xmlParserAPIs.jar">
-         <export name="*"/>
          <packages prefixes="javax.xml,org.apache.xmlcommons,org.w3c.dom,org.xml.sax"/>
       </library>
       <library name="xercesImpl.jar">
-         <export name="*"/>
          <packages prefixes="org.apache,org.w3c.dom"/>
       </library>
    </runtime>
@@ -32,7 +29,6 @@
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.jdt.core"/>
    </requires>
-
 
    <extension
          id="beansnature"
