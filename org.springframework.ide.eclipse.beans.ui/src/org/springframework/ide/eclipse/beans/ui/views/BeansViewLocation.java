@@ -93,6 +93,8 @@ public class BeansViewLocation {
 	 */
 	public void show() {
 		IViewPart view = BeansView.showView();	
-		((IShowInTarget) view).show(new ShowInContext(this, null));
+		if (view instanceof IShowInTarget) {
+			((IShowInTarget) view).show(new ShowInContext(this, null));
+		}
 	}
 }
