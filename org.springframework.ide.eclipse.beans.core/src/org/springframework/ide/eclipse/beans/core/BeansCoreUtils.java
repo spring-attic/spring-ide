@@ -16,6 +16,9 @@
 
 package org.springframework.ide.eclipse.beans.core;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -145,34 +148,53 @@ public class BeansCoreUtils {
 	}
 
 	public static void createProblemMarker(IFile file, String message,
-						   int severity, int line, int errorCode) {
+										int severity, int line, int errorCode) {
 		createProblemMarker(file, message, severity, line, errorCode, null,
 							null);
 	}
 
 	public static void createProblemMarker(IFile file, String message,
-						   int severity, int line, int errorCode, String beanID,
-						   String errorData) {
+										  int severity, int line, int errorCode,
+										  String beanID, String errorData) {
 		if (file != null && file.isAccessible()) {
 			try {
+
+				// First check if specified marker already exists
+				IMarker[] markers = file.findMarkers(
+									  IBeansProjectMarker.PROBLEM_MARKER, false,
+									  IResource.DEPTH_ZERO);
+				for (int i = 0; i < markers.length; i++) {
+					IMarker marker = markers[i];
+					int l = marker.getAttribute(IMarker.LINE_NUMBER, -1);
+					if (l == line) {
+						String msg = marker.getAttribute(IMarker.MESSAGE, "");
+						if (msg.equals(message)) {
+							return;
+						}
+					}
+				}
+
+				// Create new marker
 				IMarker marker = file.createMarker(
 											IBeansProjectMarker.PROBLEM_MARKER);
-				marker.setAttribute(IMarker.MESSAGE, message);
-				marker.setAttribute(IMarker.SEVERITY, severity);
+				Map attributes = new HashMap();
+				attributes.put(IMarker.MESSAGE, message);
+				attributes.put(IMarker.SEVERITY, new Integer(severity));
 				if (line > 0) {
-					marker.setAttribute(IMarker.LINE_NUMBER, line);
+					attributes.put(IMarker.LINE_NUMBER, new Integer(line));
 				}
 				if (errorCode != 0) {
-					marker.setAttribute(IBeansProjectMarker.ERROR_CODE,
-										errorCode);
+					attributes.put(IBeansProjectMarker.ERROR_CODE,
+								   new Integer(errorCode));
 				}
 				if (beanID != null) {
-					marker.setAttribute(IBeansProjectMarker.BEAN_ID, beanID);
+					attributes.put(IBeansProjectMarker.BEAN_ID, beanID);
 				}
 				if (errorData != null) {
-					marker.setAttribute(IBeansProjectMarker.ERROR_DATA,
+					attributes.put(IBeansProjectMarker.ERROR_DATA,
 										errorData);
 				}
+				marker.setAttributes(attributes);
 			} catch (CoreException e) {
 				BeansCorePlugin.log(e);
 			}
