@@ -54,8 +54,23 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.views.properties.FilePropertySource;
+import org.eclipse.ui.views.properties.IPropertySource;
+import org.eclipse.ui.views.properties.ResourcePropertySource;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeanProperty;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
+import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.ui.model.properties.ChildBeanProperties;
+import org.springframework.ide.eclipse.beans.ui.model.properties.ConfigSetProperties;
+import org.springframework.ide.eclipse.beans.ui.model.properties.ConstructorArgumentProperties;
+import org.springframework.ide.eclipse.beans.ui.model.properties.PropertyProperties;
+import org.springframework.ide.eclipse.beans.ui.model.properties.RootBeanProperties;
 
 public class BeansUIUtils {
 
@@ -246,6 +261,39 @@ public class BeansUIUtils {
 		ISelection selection = editor.getSelectionProvider().getSelection();
 		if (selection instanceof ITextSelection) {
 			return ((ITextSelection) selection).getText().trim();
+		}
+		return null;
+	}
+
+	/**
+	 * Returns a corresponding instance of <code>IPropertySource</code> for the
+	 * given <code>IBeansModelElement</code> or null.
+	 */
+	public static IPropertySource getPropertySource(
+												   IBeansModelElement element) {
+		if (element instanceof IBeansProject) {
+			return new ResourcePropertySource(
+										((IBeansProject) element).getProject());
+		} else if (element instanceof IBeansConfig) {
+			IFile file = ((IBeansConfig) element).getConfigFile();
+			if (file != null && file.exists()) {
+				return new FilePropertySource(file);
+			}
+		} else if (element instanceof IBeansConfigSet) {
+			return new ConfigSetProperties(((IBeansConfigSet) element));
+			
+		} else if (element instanceof IBean) {
+			IBean bean = ((IBean) element);
+			if (bean.isRootBean()) {
+				return new RootBeanProperties(bean);
+			} else {
+				return new ChildBeanProperties(bean);
+			}
+		} else if (element instanceof IBeanConstructorArgument) {
+			return new ConstructorArgumentProperties(
+											(IBeanConstructorArgument) element);
+		} else if (element instanceof IBeanProperty) {
+			return new PropertyProperties((IBeanProperty) element);
 		}
 		return null;
 	}
