@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -39,12 +39,12 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtil;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectNature;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
-import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 
 /**
  * this class tests the config file validator. The test
@@ -71,7 +71,7 @@ public class ValidationTests extends AbstractSpringIdeTest {
 	protected static String ConstructedBeanText =
 		"public class ConstructedBean {" +
 	    "private String stuff;" +
-		"public ConstructedBean(String stuff) { this.stuff = stuff;}" +
+		"public ConstructedBean(String stuff, String more, String evenMore) { this.stuff = stuff;}" +
 		"public String getStuff() {return stuff;}" +
 		"public void setStuff(String value) {this.stuff=value;}}";
 
@@ -104,10 +104,11 @@ public class ValidationTests extends AbstractSpringIdeTest {
 
 	public void testValidationErrors() throws Exception {
 		createBeanClasses();
-        IFile xmlFile = createXmlFile("sample.xml");
+		BeansProject beansProject = createBeansProject();
+        IFile xmlFile = createXmlFile("sample.xml", beansProject);
 		
 		IMarker[] markers = getFailureMarkers();
-		// assertEquals("Wrong number of validation errors (problem markers)", 6, markers.length);
+		assertEquals("Wrong number of validation errors (problem markers)", 7, markers.length);
 		
 		// test that we get an error for a bean class
 		// that isn't in the class path
@@ -157,24 +158,32 @@ public class ValidationTests extends AbstractSpringIdeTest {
 				marker.getAttribute(IMarker.MESSAGE,""));		
 
 		// test that we get an error for a bean
-		// that has no parent or class
+		// that calls the bean constructor with the wrong
+		// number of arguments.
 		marker = markers[5];
 		assertEquals(marker.getType(), IBeansProjectMarker.PROBLEM_MARKER);
 		assertEquals(25, marker.getAttribute(IMarker.LINE_NUMBER,0));
 		assertEquals(
-				"No constructor with 2 defined in class 'pack1.ConstructedBean'",
+				"No constructor with 1 argument defined in class 'pack1.ConstructedBean'",
+				marker.getAttribute(IMarker.MESSAGE,""));		
+
+		marker = markers[6];
+		assertEquals(marker.getType(), IBeansProjectMarker.PROBLEM_MARKER);
+		assertEquals(30, marker.getAttribute(IMarker.LINE_NUMBER,0));
+		assertEquals(
+				"No constructor with 2 arguments defined in class 'pack1.ConstructedBean'",
 				marker.getAttribute(IMarker.MESSAGE,""));		
 
 		renameBeanClassProperty();
 		project.waitForAutoBuild();
 
 		markers = getFailureMarkers();
-		assertEquals("Wrong number of validation errors (problem markers)", 7, markers.length);
+		assertEquals("Wrong number of validation errors (problem markers)", 8, markers.length);
 	}
 	
 	 public void testParseErrors() throws Exception {
-
-        IFile xmlFile = createXmlFile("parseError.xml");
+		BeansProject beansProject = createBeansProject();
+        IFile xmlFile = createXmlFile("parseError.xml", beansProject);
         
         IMarker[] markers = getFailureMarkers(xmlFile);
         
@@ -188,31 +197,68 @@ public class ValidationTests extends AbstractSpringIdeTest {
         assertEquals(
                         "Attribute \"undefinedAttribute\" must be declared for element type \"bean\".", 
                         marker.getAttribute(IMarker.MESSAGE,""));
-}
+	 }
+	 
+	 public void testValidateConfigSetErrors() throws Exception {
+	 	createBeanClasses();
+		BeansProject beansProject = createBeansProject();
+		IFolder xmlFolder = project.createXmlFolder();
+		//TODO: try to create the xml folder only once per test
+        IFile xmlFileA = createXmlFile("a.xml", beansProject);
+        IFile xmlFileB = createXmlFile("b.xml", beansProject);
+        
+        ArrayList configNames = new ArrayList();
+        configNames.add("xml/a.xml");
+        configNames.add("xml/b.xml");
+        BeansConfigSet b = new BeansConfigSet(beansProject,"configSet", configNames);
+        b.setAllowBeanDefinitionOverriding(false);
+        //TODO: really should run this test twice, with this flag set and unset
+        
+        Collection c = beansProject.getConfigSets();
+        ArrayList l = new ArrayList(c);
+        l.add(b);
+        beansProject.setConfigSets(l);
+        updateTestFile(xmlFolder,"b.xml");
+        project.waitForAutoBuild();
+       
+        IMarker[] markers = getFailureMarkers(xmlFileB);
+        
+        assertEquals(1, markers.length);
+        
+        // test that we get an error where one
+        // bean overrides another in a config set
+        IMarker marker = markers[0];
+        assertEquals(marker.getType(), IBeansProjectMarker.PROBLEM_MARKER);
+        assertEquals(6, marker.getAttribute(IMarker.LINE_NUMBER,0));
+        assertEquals(
+        	       "Overrides bean in config 'xml/a.xml' within config set 'configSet'", 
+                marker.getAttribute(IMarker.MESSAGE,""));
+ 	 	
+	 }
 
 
-
-	
-    private  IFile createXmlFile(String name) throws CoreException, Exception {
-		IFolder xmlFolder = project.createXmlFolder();		
-		IFile xmlFile = createEmptyFile(xmlFolder, name);
-		
-		assertTrue(xmlFile.getLocation().toFile().exists());
-		
+	 private BeansProject createBeansProject() {
 		IProject eclipseProject = project.getProject();
 		BeansCoreUtils.addProjectNature(eclipseProject, BeansProjectNature.NATURE_ID);				
 		project.waitForAutoBuild();
 
 		IBeansModel model = BeansCorePlugin.getModel();
-		IBeansProject beansProject = model.getProject(eclipseProject);
+		BeansProject beansProject = (BeansProject) model.getProject(eclipseProject);
 		assertNotNull("No sample project in model", beansProject);
-
-		List configs = new ArrayList();
-		String config = xmlFile.getProjectRelativePath().toString();
-		configs.add(config);
-		((BeansProject) beansProject).setConfigs(configs);
+		return beansProject;
+	 }
+	
+    private  IFile createXmlFile(String name, BeansProject beansProject) throws CoreException, Exception {
+    		// System.out.println("enter createXmlFile");
+		IFolder xmlFolder = project.createXmlFolder();		
+		IFile xmlFile = createEmptyFile(xmlFolder, name);
+		
+		assertTrue(xmlFile.getLocation().toFile().exists());
+				
+		// BeansProject beansProject = createBeansProject();		
+		beansProject.addConfig(xmlFile);
 		project.waitForAutoBuild();
-
+		
 		IBeansConfig beansConfig = beansProject.getConfig(xmlFile);
 		assertNotNull("No sample config in model", beansConfig);
 		

@@ -131,9 +131,11 @@ public class TestProject {
         
         IFolder createXmlFolder() throws CoreException {
             IFolder xmlFolder= project.getFolder("xml");
-            xmlFolder.create(false, true, null);
+            if (!xmlFolder.exists()) {
+            		xmlFolder.create(false, true, null);
+            }
             return xmlFolder;
-    }
+        }
        
 
         private void setJavaNature() throws CoreException {

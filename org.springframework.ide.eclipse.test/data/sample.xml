@@ -24,6 +24,11 @@
 	
 	<bean id="constructed" class="pack1.ConstructedBean" >
 		<constructor-arg><value>one</value></constructor-arg>
+	</bean>
+	
+	
+	<bean id="constructed2" class="pack1.ConstructedBean" >
+		<constructor-arg><value>one</value></constructor-arg>
 		<constructor-arg><value>two</value></constructor-arg>
 	</bean>
 	
