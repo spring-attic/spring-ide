@@ -18,6 +18,10 @@ package org.springframework.ide.eclipse.beans.core.internal.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -45,7 +49,7 @@ public class EventBeanDefinitionReader implements BeanDefinitionReader {
 
 	public EventBeanDefinitionReader(IBeanDefinitionEvents eventHandler) {
 		this.eventHandler = eventHandler;
-		beanFactory = new NoOpRegistry();
+		beanFactory = new SimpleBeanDefinitionRegistry();
 	}
 
 	public BeanDefinitionRegistry getBeanFactory() {
@@ -137,32 +141,52 @@ public class EventBeanDefinitionReader implements BeanDefinitionReader {
 		}
 	}
 
-	private static class NoOpRegistry implements BeanDefinitionRegistry {
+	private static class SimpleBeanDefinitionRegistry
+											 implements BeanDefinitionRegistry {
+		/** Map of bean definition objects, keyed by bean name */
+		private final Map beanDefinitionMap = new HashMap();
+
+		/** List of bean definition names, in registration order */
+		private final List beanDefinitionNames = new LinkedList();
 
 		public int getBeanDefinitionCount() {
-			return 0;
+			return beanDefinitionMap.size();
 		}
 
 		public String[] getBeanDefinitionNames() {
-			return null;
+			return (String[]) beanDefinitionNames.toArray(
+										new String[beanDefinitionNames.size()]);
 		}
 
-		public boolean containsBeanDefinition(String name) {
-			return false;
+		public boolean containsBeanDefinition(String beanName) {
+			return beanDefinitionMap.containsKey(beanName);
 		}
 
-		public BeanDefinition getBeanDefinition(String name) throws BeansException {
-			return null;
+		public BeanDefinition getBeanDefinition(String beanName)
+														 throws BeansException {
+			BeanDefinition bd = (BeanDefinition)
+												beanDefinitionMap.get(beanName);
+			if (bd == null) {
+				throw new NoSuchBeanDefinitionException(beanName, toString());
+			}
+			return bd;
 		}
 
-		public void registerBeanDefinition(String name, BeanDefinition beanDefinition) throws BeansException {
+		public void registerBeanDefinition(String beanName,
+						  BeanDefinition beanDefinition) throws BeansException {
+			if (!containsBeanDefinition(beanName)) {
+				beanDefinitionNames.add(beanName);
+			}
+			beanDefinitionMap.put(beanName, beanDefinition);
 		}
 
-		public String[] getAliases(String name) throws NoSuchBeanDefinitionException {
-			return null;
+		public String[] getAliases(String beanName)
+										  throws NoSuchBeanDefinitionException {
+			return new String[0];
 		}
 
-		public void registerAlias(String name, String alias) throws BeansException {
+		public void registerAlias(String beanName,
+											String alias) throws BeansException {
 		}
 	}
 }
