@@ -1,22 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
 <plugin
    id="org.springframework.ide.eclipse.beans.ui"
    name="%pluginName"
-   version="1.1.0"
+   version="1.2.0"
    provider-name="%providerName"
    class="org.springframework.ide.eclipse.beans.ui.BeansUIPlugin">
 
    <runtime>
       <library name="beans-ui.jar">
-         <export name="*"/>
          <packages prefixes="org.springframework.ide.eclipse.beans.ui"/>
+         <export name="*"/>
       </library>
    </runtime>
    <requires>
+      <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.ui.views"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.eclipse.ui.editors"/>
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jdt.ui"/>
+      <import plugin="org.springframework.ide.eclipse.core"/>
+      <import plugin="org.springframework.ide.eclipse.ui"/>
       <import plugin="org.springframework.ide.eclipse.beans.core"/>
    </requires>
 
@@ -34,6 +43,7 @@
             id="org.springframework.ide.eclipse.beans.ui.views.beansView">
       </view>
    </extension>
+
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension
@@ -49,20 +59,29 @@
          </showInPart>
       </perspectiveExtension>
    </extension>
+
    <extension
          point="org.eclipse.ui.popupMenus">
       <objectContribution
             objectClass="org.eclipse.core.resources.IProject"
             adaptable="true"
-            id="org.springframework.ide.eclipse.beans.ui.actions.nonBeansProject">
+            id="org.springframework.ide.eclipse.beans.ui.actions.nonSpringProject">
          <visibility>
             <and>
-               <not>
-                  <objectState
-                        name="nature"
-                        value="org.springframework.ide.eclipse.beans.core.beansnature">
-                  </objectState>
-               </not>
+               <and>
+                  <not>
+                     <objectState
+                           name="nature"
+                           value="org.springframework.ide.eclipse.core.springnature">
+                     </objectState>
+                  </not>
+                  <not>
+                     <objectState
+                           name="nature"
+                           value="org.springframework.ide.eclipse.beans.core.beansnature">
+                     </objectState>
+                  </not>
+               </and>
                <not>
                   <objectState
                         name="nature"
@@ -78,13 +97,14 @@
                id="org.springframework.ide.eclipse.beans.ui.actions.addNature">
          </action>
       </objectContribution>
+
       <objectContribution
             objectClass="org.eclipse.core.resources.IProject"
             adaptable="true"
-            id="org.springframework.ide.eclipse.beans.ui.actions.beansProject">
+            id="org.springframework.ide.eclipse.beans.ui.actions.springProject">
          <filter
                name="nature"
-               value="org.springframework.ide.eclipse.beans.core.beansnature">
+               value="org.springframework.ide.eclipse.core.springnature">
          </filter>
          <action
                label="%popupMenus.removeNature.label"
@@ -93,6 +113,23 @@
                id="org.springframework.ide.eclipse.beans.ui.actions.removeNature">
          </action>
       </objectContribution>
+
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IProject"
+            adaptable="true"
+            id="org.springframework.ide.eclipse.beans.ui.actions.springBeansProject">
+         <filter
+               name="nature"
+               value="org.springframework.ide.eclipse.beans.core.beansnature">
+         </filter>
+         <action
+               label="%popupMenus.migrateSpringBeans.label"
+               class="org.springframework.ide.eclipse.beans.ui.actions.MigrateSpringBeansProject"
+               enablesFor="+"
+               id="org.springframework.ide.eclipse.beans.ui.actions.migrateSpringBeans">
+         </action>
+      </objectContribution>
+
       <objectContribution
             objectClass="org.eclipse.core.resources.IProject"
             adaptable="true"
@@ -108,6 +145,7 @@
                id="org.springframework.ide.eclipse.beans.ui.actions.migrateSpringUI">
          </action>
       </objectContribution>
+
       <viewerContribution
             targetID="#TextEditorContext"
             id="org.springframework.ide.eclipse.beans.ui.actions.beansConfigFile">
@@ -129,6 +167,7 @@
          </action>
       </viewerContribution>
    </extension>
+
    <extension
          point="org.eclipse.ui.propertyPages">
       <page
@@ -143,6 +182,7 @@
          </filter>
       </page>
    </extension>
+
    <extension
          point="org.eclipse.ui.decorators">
       <decorator
@@ -159,20 +199,16 @@
          <enablement>
             <or>
                <objectClass
-                     name="org.eclipse.core.resources.IProject">
+                    name="org.eclipse.core.resources.IFile">
                </objectClass>
                <or>
-                  <objectClass
-                        name="org.eclipse.core.resources.IFile">
-                  </objectClass>
-                  <or>
-                     <objectClass name="org.eclipse.jdt.core.IJavaElement"/>
-                  </or>
-               </or>
+                  <objectClass name="org.eclipse.jdt.core.IJavaElement"/>
+              </or>
             </or>
          </enablement>
       </decorator>
    </extension>
+
    <extension
          point="org.eclipse.ui.actionSets">
       <actionSet
@@ -196,6 +232,7 @@
          </action>
       </actionSet>
    </extension>
+
    <extension
          point="org.eclipse.ui.commands">
       <category
