@@ -1,0 +1,3 @@
+org.springframework.ide.eclipse.beans.ui/debug=true
+org.springframework.ide.eclipse.beans.ui/contentProvider/debug=true
+org.springframework.ide.eclipse.beans.ui/configReader/debug=false

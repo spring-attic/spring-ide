@@ -1,0 +1,6 @@
+Changes in version 1.0.0 (10.6.2003):
+
+* double-clicking a bean or a reference part now opens the corresponding beans
+  config file
+
+* now references to other beans are recognized in arrays and collections too

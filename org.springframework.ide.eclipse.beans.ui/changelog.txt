@@ -1,0 +1,18 @@
+Changes in version 1.0.3 (10.6.2003):
+
+* config set properties page now supports external beans config files from
+  referenced Spring projects
+
+* new overlay indicator for beans in config sets which are defined in an
+  external config file
+
+Changes in version 1.0.2 (18.5.2003):
+
+* interims version - not plublicly announced
+
+Changes in version 1.0.1 (23.4.2003):
+
+* beans view now provides a context menu (with currently only one entry
+  "properties" which opens the Spring project configuration property page)
+
+* new toolbar button in beans view for opening Eclipse's properties sheet view

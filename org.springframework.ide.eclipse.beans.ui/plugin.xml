@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin
+   id="org.springframework.ide.eclipse.beans.ui"
+   name="%pluginName"
+   version="1.1.0"
+   provider-name="%providerName"
+   class="org.springframework.ide.eclipse.beans.ui.BeansUIPlugin">
+
+   <runtime>
+      <library name="beans-ui.jar">
+         <export name="*"/>
+         <packages prefixes="org.springframework.ide.eclipse.beans.ui"/>
+      </library>
+   </runtime>
+   <requires>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.jdt.ui"/>
+      <import plugin="org.springframework.ide.eclipse.beans.core"/>
+   </requires>
+
+
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            name="%categoryView.springIDE"
+            id="org.springframework.ide.eclipse.beans.ui.views">
+      </category>
+      <view
+            name="%view.beansView"
+            icon="icons/full/obj16/spring_obj.gif"
+            category="org.springframework.ide.eclipse.beans.ui.views"
+            class="org.springframework.ide.eclipse.beans.ui.views.BeansView"
+            id="org.springframework.ide.eclipse.beans.ui.views.beansView">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.ui.resourcePerspective">
+         <showInPart
+               id="org.springframework.ide.eclipse.beans.ui.views.beansView">
+         </showInPart>
+      </perspectiveExtension>
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <showInPart
+               id="org.springframework.ide.eclipse.beans.ui.views.beansView">
+         </showInPart>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IProject"
+            adaptable="true"
+            id="org.springframework.ide.eclipse.beans.ui.actions.nonBeansProject">
+         <visibility>
+            <and>
+               <not>
+                  <objectState
+                        name="nature"
+                        value="org.springframework.ide.eclipse.beans.core.beansnature">
+                  </objectState>
+               </not>
+               <not>
+                  <objectState
+                        name="nature"
+                        value="org.springframework.eclipse.core.springnature">
+                  </objectState>
+               </not>
+            </and>
+         </visibility>
+         <action
+               label="%popupMenus.addNature.label"
+               class="org.springframework.ide.eclipse.beans.ui.actions.AddRemoveNature"
+               enablesFor="+"
+               id="org.springframework.ide.eclipse.beans.ui.actions.addNature">
+         </action>
+      </objectContribution>
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IProject"
+            adaptable="true"
+            id="org.springframework.ide.eclipse.beans.ui.actions.beansProject">
+         <filter
+               name="nature"
+               value="org.springframework.ide.eclipse.beans.core.beansnature">
+         </filter>
+         <action
+               label="%popupMenus.removeNature.label"
+               class="org.springframework.ide.eclipse.beans.ui.actions.AddRemoveNature"
+               enablesFor="+"
+               id="org.springframework.ide.eclipse.beans.ui.actions.removeNature">
+         </action>
+      </objectContribution>
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IProject"
+            adaptable="true"
+            id="org.springframework.ide.eclipse.beans.ui.actions.springUIProject">
+         <filter
+               name="nature"
+               value="org.springframework.eclipse.core.springnature">
+         </filter>
+         <action
+               label="%popupMenus.migrateSpringUI.label"
+               class="org.springframework.ide.eclipse.beans.ui.actions.MigrateSpringUIProject"
+               enablesFor="+"
+               id="org.springframework.ide.eclipse.beans.ui.actions.migrateSpringUI">
+         </action>
+      </objectContribution>
+      <viewerContribution
+            targetID="#TextEditorContext"
+            id="org.springframework.ide.eclipse.beans.ui.actions.beansConfigFile">
+         <action
+               label="%popupMenus.openJavaType.label"
+               class="org.springframework.ide.eclipse.beans.ui.actions.OpenJavaType"
+               menubarPath="additions"
+               id="org.springframework.ide.eclipse.beans.ui.actions.openJavaType">
+         </action>
+         <action
+               label="%popupMenus.showInView.label"
+               class="org.springframework.ide.eclipse.beans.ui.actions.ShowInView"
+               menubarPath="additions"
+               id="org.springframework.ide.eclipse.beans.ui.actions.showInView">
+         </action>
+      </viewerContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            objectClass="org.eclipse.core.resources.IProject"
+            adaptable="true"
+            name="%configurationPropertyPage"
+            class="org.springframework.ide.eclipse.beans.ui.properties.ConfigurationPropertyPage"
+            id="org.springframework.ide.eclipse.beans.ui.properties.ConfigurationPropertyPage">
+         <filter
+               name="nature"
+               value="org.springframework.ide.eclipse.beans.core.beansnature">
+         </filter>
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.decorators">
+      <decorator
+            lightweight="true"
+            location="TOP_RIGHT"
+            adaptable="true"
+            label="%decorator.label"
+            state="true"
+            class="org.springframework.ide.eclipse.beans.ui.BeansUILabelDecorator"
+            id="org.springframework.ide.eclipse.beans.ui.beansLabelDecorator">
+         <description>
+            %decorator.description
+         </description>
+         <enablement>
+            <or>
+               <objectClass
+                     name="org.eclipse.core.resources.IProject">
+               </objectClass>
+               <or>
+                  <objectClass
+                        name="org.eclipse.core.resources.IFile">
+                  </objectClass>
+                  <or>
+                     <objectClass name="org.eclipse.jdt.core.IJavaElement"/>
+                  </or>
+               </or>
+            </or>
+         </enablement>
+      </decorator>
+   </extension>
+
+</plugin>
