@@ -18,6 +18,7 @@ package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -38,6 +39,7 @@ public class BeansConfigSet extends BeansModelElement implements IBeansConfigSet
 	private List configNames;
 	private boolean allowBeanDefinitionOverriding;
 	private Map beansMap;
+	private Map beanClassesMap;
 
 	public BeansConfigSet(IBeansProject project, String name) {
 		this(project, name, new ArrayList());
@@ -91,54 +93,82 @@ public class BeansConfigSet extends BeansModelElement implements IBeansConfigSet
 	}
 
 	public boolean hasBean(String name) {
-		if (beansMap == null) {
-
-			// Lazily initialization of beans map
-			beansMap = getBeansMap();
-		}
-		return beansMap.containsKey(name);
+		return getBeansMap().containsKey(name);
 	}
 
 	public IBean getBean(String name) {
-		if (beansMap == null) {
+		return (IBean) getBeansMap().get(name);
+	}
 
-			// Lazily initialization of beans map
-			beansMap = getBeansMap();
+    public void replaceConfig(String origFileName, String newFileName) {
+        removeConfig(origFileName);
+        addConfig(newFileName);
+    }
+
+	public boolean isBeanClass(String className) {
+		return getBeanClassesMap().containsKey(className);
+	}
+
+	public Collection getBeanClasses() {
+		return getBeanClassesMap().keySet();
+	}
+
+	public Collection getBeans(String className) {
+		if (isBeanClass(className)) {
+			return (Collection) getBeanClassesMap().get(className);
 		}
-		return (IBean) beansMap.get(name);
+		return Collections.EMPTY_LIST;
 	}
 
 	public String toString() {
 		return getElementName() + ": " + configNames.toString();
 	}
 
+	/**
+	 * Returns lazily initialized map with all beans defined in this config set.
+	 */
 	private Map getBeansMap() {
-		Map beansMap = new HashMap();
-		IBeansProject project = (IBeansProject) getElementParent();
-		Iterator iter = configNames.iterator();
-		while (iter.hasNext()) {
-			String configName = (String) iter.next();
-			IBeansConfig config = project.getConfig(configName);
-			for (Iterator beans = config.getBeans().iterator();
-															 beans.hasNext();) {
-				IBean bean = (IBean) beans.next();
-				if (allowBeanDefinitionOverriding ||
+		if (beansMap == null) {
+			beansMap = new HashMap();
+			IBeansProject project = (IBeansProject) getElementParent();
+			Iterator iter = configNames.iterator();
+			while (iter.hasNext()) {
+				String configName = (String) iter.next();
+				IBeansConfig config = project.getConfig(configName);
+				Iterator beans = config.getBeans().iterator();
+				while (beans.hasNext()) {
+					IBean bean = (IBean) beans.next();
+					if (allowBeanDefinitionOverriding ||
 								 !beansMap.containsKey(bean.getElementName())) {
-					beansMap.put(bean.getElementName(), bean);
+						beansMap.put(bean.getElementName(), bean);
+					}
 				}
-				
 			}
 		}
 		return beansMap;
 	}
 
-    /* (non-Javadoc)
-     * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet#replaceConfig(org.eclipse.core.resources.IFile, org.eclipse.core.resources.IFile)
-     */
-    public void replaceConfig(String origFileName, String newFileName)
-    {
-        removeConfig(origFileName);
-        addConfig(newFileName);
-        
-    }
+	/**
+	 * Returns lazily initialized map with all bean classes used in this config
+	 * set.
+	 */
+	private Map getBeanClassesMap() {
+		if (beanClassesMap == null) {
+			beanClassesMap = new HashMap();
+			Iterator beans = getBeansMap().values().iterator();
+			while (beans.hasNext()) {
+				IBean bean = (IBean) beans.next();
+				if (bean.isRootBean()) {
+					String className = bean.getClassName();
+					List beanClassBeans = (List) beanClassesMap.get(className);
+					if (beanClassBeans == null) {
+						beanClassBeans = new ArrayList();
+						beanClassesMap.put(className, beanClassBeans);
+					}
+					beanClassBeans.add(bean);
+				}
+			}
+		}
+		return beanClassesMap;
+	}
 }
