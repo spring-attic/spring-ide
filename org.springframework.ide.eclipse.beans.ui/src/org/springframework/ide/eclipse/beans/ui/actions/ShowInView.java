@@ -78,13 +78,16 @@ public class ShowInView extends Action implements IEditorActionDelegate,
 	}
 
 	public void selectionChanged(IAction action, ISelection selection) {
+		setActiveEditor(action, BeansUIUtils.getActiveEditor());
 	}
 
 	public void run(IAction action) {
-		INode node = guessNode();
-		if (node != null) {
-			IViewPart view = BeansView.showView();
-			((IShowInTarget) view).show(new ShowInContext(node, null));
+		if (editor != null && file != null) {
+			INode node = guessNode();
+			if (node != null) {
+				IViewPart view = BeansView.showView();
+				((IShowInTarget) view).show(new ShowInContext(node, null));
+			}
 		}
 	}
 

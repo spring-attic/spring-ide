@@ -67,15 +67,18 @@ public class OpenJavaType extends Action implements IEditorActionDelegate,
 	}
 
 	public void selectionChanged(IAction action, ISelection selection) {
+		setActiveEditor(action, BeansUIUtils.getActiveEditor());
 	}
 
 	public void run(IAction action) {
-		String className = guessType();
-		if (className != null && className.length() > 0) {
-			IType type = BeansModelUtil.getJavaType(file.getProject(),
-													className);
-			if (type != null) {
-				BeansUIUtils.openInEditor(type);
+		if (editor != null && file != null) {
+			String className = guessType();
+			if (className != null && className.length() > 0) {
+				IType type = BeansModelUtil.getJavaType(file.getProject(),
+														className);
+				if (type != null) {
+					BeansUIUtils.openInEditor(type);
+				}
 			}
 		}
 	}
