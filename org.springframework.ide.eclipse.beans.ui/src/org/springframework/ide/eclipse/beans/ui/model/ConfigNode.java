@@ -198,16 +198,13 @@ public class ConfigNode extends AbstractNode {
 				Iterator iter = config.getBeans().iterator();
 				while (iter.hasNext()) {
 					IBean bean = (IBean) iter.next();
-					addBean(this, bean);
+					BeanNode beanNode = new BeanNode(this,
+													 bean.getElementName());
+					initBeanNode(beanNode, bean);
+					beans.add(beanNode);
 				}
 			}
 		}
-	}
-
-	private void addBean(ConfigNode config, IBean bean) {
-		BeanNode beanNode = new BeanNode(config, bean.getElementName());
-		initBeanNode(beanNode, bean);
-		beans.add(beanNode);
 	}
 
 	private void initBeanNode(BeanNode beanNode, IBean bean) {
