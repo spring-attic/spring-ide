@@ -24,7 +24,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 
-public abstract class BeansProjectNature implements IProjectNature {
+public class BeansProjectNature implements IProjectNature {
 
     public static final String NATURE_ID = BeansCorePlugin.PLUGIN_ID +
     															 ".beansnature";
@@ -84,7 +84,7 @@ public abstract class BeansProjectNature implements IProjectNature {
 		BeansCoreUtils.removeProjectBuilder(project, BeansProjectValidator.BUILDER_ID);
     }
 
-	public abstract void deleteProblemMarkers();
+	//public abstract void deleteProblemMarkers();
 
     private ICommand getBuilderCommand(IProjectDescription description,
 									   String builderID) throws CoreException {
