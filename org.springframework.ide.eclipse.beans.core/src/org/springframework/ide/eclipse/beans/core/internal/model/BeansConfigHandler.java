@@ -79,7 +79,9 @@ public class BeansConfigHandler implements IBeanDefinitionEvents {
 		}
 		currentBean = new Bean(config);
 		setXmlTextRange(currentBean, element);
-		if (!isNestedBean) {
+		if (isNestedBean) {
+			currentBean.setOuterBean(outerBean);
+		} else {
 			outerBean = currentBean;
 		}
 	}

@@ -42,6 +42,7 @@ public class Bean extends BeansModelElement implements IBean {
 	private List constructorArguments;
 	private List properties;
 	private List innerBeans;
+	private IBean outerBean;
 
 	public Bean(IBeansConfig config) {
 		super(config, null);   // the name we get from the BeanDefinitionHolder
@@ -146,6 +147,18 @@ public class Bean extends BeansModelElement implements IBean {
 
 	public boolean isLazyInit() {
 		return beanDefinitionHolder.getBeanDefinition().isLazyInit();
+	}
+
+	public boolean isInnerBean() {
+		return (outerBean != null);
+	}
+
+	public void setOuterBean(IBean outerBean) {
+		this.outerBean = outerBean;
+	}
+
+	public IBean getOuterBean() {
+		return outerBean;
 	}
 
 	/**
