@@ -66,7 +66,8 @@ public class Reference extends Edge implements IAdaptable {
 	}
 
 	public boolean isParentReference() {
-		return !getSourceBean().isRootBean();
+		return (!getSourceBean().isRootBean() &&
+			 getSourceBean().getParentName().equals(getTargetBean().getName()));
 	}
 
 	public Object getAdapter(Class adapter) {
