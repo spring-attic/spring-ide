@@ -23,18 +23,26 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.springframework.beans.PropertyValues;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
-import org.springframework.ide.eclipse.beans.core.internal.model.resources.FileResource;
-import org.springframework.ide.eclipse.beans.core.internal.parser.EventBeanDefinitionReader;
+import org.springframework.ide.eclipse.beans.core.internal.parser.EventBeanFactory;
+import org.springframework.ide.eclipse.beans.core.internal.parser.IBeanDefinitionEvents;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
+import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.io.FileResource;
+import org.springframework.ide.eclipse.core.io.xml.LineNumberPreservingDOMParser;
+import org.w3c.dom.Element;
 
 /**
  * This class defines a Spring beans configuration.
@@ -178,39 +186,12 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 		return (IFile) container.findMember(name);
 	}
 
-	private void readConfig() {
-		BeansConfigHandler handler = new BeansConfigHandler(this);
-		EventBeanDefinitionReader reader = new EventBeanDefinitionReader(
-																   handler);
-		try {
-			reader.loadBeanDefinitions(new FileResource(file));
-		} catch (BeanDefinitionException e) {
-			exception = e;
-		}
-		beans = handler.getBeans();
-		innerBeans = handler.getInnerBeans();
-	}
-
 	/**
 	 * Returns lazily initialized map with all beans defined in this config.
 	 */
 	private Map getBeansMap() {
 		if (beansMap == null) {
-			beansMap = new HashMap();
-
-			// Add beans to map
-			Iterator beans = getBeans().iterator();
-			while (beans.hasNext()) {
-				IBean bean = (IBean) beans.next();
-				beansMap.put(bean.getElementName(), bean);
-			}
-
-			// Add inner beans to map
-			beans = getInnerBeans().iterator();
-			while (beans.hasNext()) {
-				IBean bean = (IBean) beans.next();
-				beansMap.put(bean.getElementName(), bean);
-			}
+			readConfig();
 		}
 		return beansMap;
 	}
@@ -236,5 +217,129 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 			}
 		}
 		return beanClassesMap;
+	}
+
+	private void readConfig() {
+		this.beans = new ArrayList();
+		this.beansMap = new HashMap();
+		this.innerBeans = new ArrayList();
+		this.beanClassesMap = new HashMap();
+
+		BeansConfigHandler handler = new BeansConfigHandler(this);
+		EventBeanFactory factory = new EventBeanFactory(handler);
+		try {
+			factory.loadBeanDefinitions(new FileResource(file));
+		} catch (BeanDefinitionException e) {
+			exception = e;
+		}
+	}
+
+	/**
+	 * Implementation of <code>IBeanDefinitionEvents</code> which populates an
+	 * instance of <code>IBeansConfig</code> with data from the the bean definition
+	 * events.
+	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfig
+	 */
+	private final class BeansConfigHandler implements IBeanDefinitionEvents {
+	
+		private IBeansConfig config;
+	    private Stack nestedElements;
+		private BeansModelElement currentElement;
+	    private Stack nestedBeans;
+		private Bean currentBean;
+	
+		public BeansConfigHandler(IBeansConfig config) {
+			this.config = config;
+			this.nestedElements = new Stack();
+			this.nestedBeans = new Stack();
+		}
+	
+		public void startBean(Element element, boolean isNestedBean) {
+			if (isNestedBean) {
+				nestedElements.push(currentElement);
+				nestedBeans.push(currentBean);
+			}
+			currentBean = new Bean(config);
+			setXmlTextRange(currentBean, element);
+		}
+	
+		public void registerBean(BeanDefinitionHolder bdHolder,
+								 boolean isNestedBean) {
+			currentBean.setBeanDefinitionHolder(bdHolder);
+			if (isNestedBean) {
+	
+				// Use current bean as an inner bean for the current constructor
+				// argument or property
+				currentElement = (BeansModelElement) nestedElements.pop();
+				currentBean.setElementParent(currentElement);
+				innerBeans.add(currentBean);
+	
+				// Add current bean as inner bean to outer bean
+				Bean outerBean;
+				if (currentElement instanceof BeanConstructorArgument) {
+					outerBean = (Bean) ((IBeanConstructorArgument)
+											currentElement).getElementParent();
+				} else {
+					outerBean = (Bean) ((IBeanProperty)
+											currentElement).getElementParent();
+				}
+				outerBean.addInnerBean(currentBean);
+				currentBean = (Bean) nestedBeans.pop();
+			} else {
+				beans.add(currentBean);
+				beansMap.put(bdHolder.getBeanName(), currentBean);
+			}
+		}
+	
+		public void startConstructorArgument(Element element) {
+			BeanConstructorArgument carg = new BeanConstructorArgument(currentBean);
+			setXmlTextRange(carg, element);
+			currentBean.addConstructorArgument(carg);
+			currentElement = carg;
+		}
+	
+		public void registerConstructorArgument(int index, Object value,
+												String type) {
+			BeanConstructorArgument carg = (BeanConstructorArgument) currentElement;
+			carg.setIndex(index);
+			carg.setValue(value);
+			carg.setType(type);
+			StringBuffer name = new StringBuffer();
+			if (index != -1) {
+				name.append(index);
+				name.append(':');
+			}
+			if (type != null) {
+				name.append(type);
+				name.append(':');
+			}
+			name.append(value.toString());
+			carg.setElementName(name.toString());
+		}
+	
+		public void startProperty(Element element) {
+			BeanProperty property = new BeanProperty(currentBean);
+			setXmlTextRange(property, element);
+			currentBean.addProperty(property);
+			currentElement = property;
+		}
+	
+		public void registerProperty(String name, PropertyValues pvs) {
+			BeanProperty property = (BeanProperty) currentElement;
+			property.setElementName(name);
+			Object value = pvs.getPropertyValue(name).getValue();
+			property.setValue(value);
+		}
+	
+		/**
+		 * Sets the start and end lines on the given model element.
+	     */
+		private void setXmlTextRange(BeansModelElement modelElement,
+									 Element xmlElement) {
+			int startLine = LineNumberPreservingDOMParser.getStartLineNumber(xmlElement);
+			int endLine = LineNumberPreservingDOMParser.getEndLineNumber(xmlElement);
+			modelElement.setElementStartLine(startLine);
+			modelElement.setElementEndLine(endLine);
+	    }
 	}
 }
