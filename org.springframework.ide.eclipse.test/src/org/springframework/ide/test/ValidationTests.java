@@ -92,35 +92,7 @@ public class ValidationTests extends AbstractSpringIdeTest {
 
 	public void testValidationErrors() throws Exception {
 		createBeanClass();
-		IFolder xmlFolder = project.createXmlFolder();		
-		IFile xmlFile = createEmptyFile(xmlFolder, xmlTestFileName);
-		
-		assertTrue(xmlFile.getLocation().toFile().exists());
-		
-		IProject eclipseProject = project.getProject();
-		BeansCoreUtils.addProjectNature(eclipseProject, BeansProjectNature.NATURE_ID);				
-		project.waitForAutoBuild();
-
-		IBeansModel model = BeansCorePlugin.getModel();
-		IBeansProject beansProject = model.getProject(eclipseProject);
-		assertNotNull("No sample project in model", beansProject);
-
-		List configs = new ArrayList();
-		String config = xmlFile.getProjectRelativePath().toString();
-		configs.add(config);
-		((BeansProject) beansProject).setConfigs(configs);
-		project.waitForAutoBuild();
-
-		IBeansConfig beansConfig = beansProject.getConfig(xmlFile);
-		assertNotNull("No sample config in model", beansConfig);
-		
-		// there's an apparent bug whereby the validation
-		// of the xml file isn't done when the file is added
-		// to the list of config files, but only after the
-		// file is modified. So we don't bother to put anything
-		// into the file until now.
-		updateTestFile(xmlFolder, xmlTestFileName);		
-		project.waitForAutoBuild();
+        IFile xmlFile = createXmlFile("sample.xml");
 		
 		IMarker[] markers = getFailureMarkers();
 		assertEquals("Wrong number of validation errors (problem markers)", 4, markers.length);
@@ -170,6 +142,60 @@ public class ValidationTests extends AbstractSpringIdeTest {
 		assertEquals("Wrong number of validation errors (problem markers)", 5, markers.length);
 	}
 	
+	 public void testParseErrors() throws Exception {
+
+        IFile xmlFile = createXmlFile("parseError.xml");
+        
+        IMarker[] markers = getFailureMarkers(xmlFile);
+        
+        assertEquals(1, markers.length);
+        
+        // test that we get an error for an XML
+        // parsing problem
+        IMarker marker = markers[0];
+        assertEquals(marker.getType(), IBeansProjectMarker.PROBLEM_MARKER);
+        assertEquals(6, marker.getAttribute(IMarker.LINE_NUMBER,0));
+        assertEquals(
+                        "Attribute \"undefinedAttribute\" must be declared for element type \"bean\".", 
+                        marker.getAttribute(IMarker.MESSAGE,""));
+}
+
+
+
+	
+    private  IFile createXmlFile(String name) throws CoreException, Exception {
+		IFolder xmlFolder = project.createXmlFolder();		
+		IFile xmlFile = createEmptyFile(xmlFolder, name);
+		
+		assertTrue(xmlFile.getLocation().toFile().exists());
+		
+		IProject eclipseProject = project.getProject();
+		BeansCoreUtils.addProjectNature(eclipseProject, BeansProjectNature.NATURE_ID);				
+		project.waitForAutoBuild();
+
+		IBeansModel model = BeansCorePlugin.getModel();
+		IBeansProject beansProject = model.getProject(eclipseProject);
+		assertNotNull("No sample project in model", beansProject);
+
+		List configs = new ArrayList();
+		String config = xmlFile.getProjectRelativePath().toString();
+		configs.add(config);
+		((BeansProject) beansProject).setConfigs(configs);
+		project.waitForAutoBuild();
+
+		IBeansConfig beansConfig = beansProject.getConfig(xmlFile);
+		assertNotNull("No sample config in model", beansConfig);
+		
+		// there's an apparent bug whereby the validation
+		// of the xml file isn't done when the file is added
+		// to the list of config files, but only after the
+		// file is modified. So we don't bother to put anything
+		// into the file until now.
+		updateTestFile(xmlFolder, name);		
+		project.waitForAutoBuild();
+		return xmlFile;
+    }
+    
 	/**
 	 * create an empty file with the indicated name in the indicated
 	 * folder
@@ -243,28 +269,16 @@ public class ValidationTests extends AbstractSpringIdeTest {
 		  IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		  return root.findMarkers(
 		  		null,
-		    false,
-		    IResource.DEPTH_INFINITE);
+				false,
+				IResource.DEPTH_INFINITE);
 		}
 	
-	/**
-	 * Wait for autobuild notification to occur, that is
-	 * for the autbuild to finish.
-	 */
-//	public void waitForAutoBuild() {
-//
-//		boolean wasInterrupted = false;
-//		do {
-//			try {
-//				Platform.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
-//				wasInterrupted = false;
-//			} catch (OperationCanceledException e) {
-//				throw(e);
-//			} catch (InterruptedException e) {
-//				wasInterrupted = true;
-//			}
-//		} while (wasInterrupted);
-//
-//	}	
+	 private IMarker[] getFailureMarkers(IResource resource) throws CoreException {
+        return resource.findMarkers(
+        			null,
+				false,
+				IResource.DEPTH_INFINITE);
+      }
+
 
 }
