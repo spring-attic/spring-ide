@@ -24,7 +24,7 @@ import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
 /**
  * This interface provides information for a Spring beans configuration.
  */
-public interface IBeansConfig extends IBeansModelElement {
+public interface IBeansConfig extends IBeansModelElement, IBeanClassAware {
 
 	IFile getConfigFile();
 
@@ -36,26 +36,7 @@ public interface IBeansConfig extends IBeansModelElement {
 
 	Collection getBeans();
 
-	/**
-	 * Returns a list of <code>IBean</code>s which are using the given class as
-	 * their bean class.
-	 * @param className  full qualified name of bean class
-	 */
-	Collection getBeans(String className);
-
 	Collection getInnerBeans();
-
-	/**
-	 * Returns <code>true</code> if given full qualified class name is a bean
-	 * class used within this Spring Beans config. 
-	 */
-	boolean isBeanClass(String className);
-
-	/**
-	 * Returns a list of full qualified class names of all bean classes used
-	 * within this Spring Beans config. 
-	 */
-	Collection getBeanClasses();
 
 	BeanDefinitionException getException();
 }

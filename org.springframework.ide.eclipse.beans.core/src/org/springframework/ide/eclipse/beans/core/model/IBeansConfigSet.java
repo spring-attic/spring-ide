@@ -24,7 +24,7 @@ import org.eclipse.core.resources.IFile;
  * This interface provides information for a Spring beans config set (a list of
  * beans config names).
  */
-public interface IBeansConfigSet extends IBeansModelElement {
+public interface IBeansConfigSet extends IBeansModelElement, IBeanClassAware {
 
 	boolean isAllowBeanDefinitionOverriding();
 
@@ -57,5 +57,4 @@ public interface IBeansConfigSet extends IBeansModelElement {
      * @param newFileName
      */
     void replaceConfig(String origFileName, String newFileName);
-
 }
