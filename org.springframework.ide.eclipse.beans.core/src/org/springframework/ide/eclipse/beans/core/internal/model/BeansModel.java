@@ -238,7 +238,7 @@ public class BeansModel extends BeansModelElement implements IBeansModel {
 	private class ResourceChangeEventHandler implements IBeansResourceChangeEvents {
 
 		public boolean isSpringProject(IProject project) {
-			return BeansCoreUtils.isBeansProject(project);
+			return hasProject(project);
 		}
 
 		public void springNatureAdded(IProject project) {
