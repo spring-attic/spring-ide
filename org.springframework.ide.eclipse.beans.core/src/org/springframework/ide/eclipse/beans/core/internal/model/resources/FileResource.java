@@ -28,6 +28,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.springframework.core.io.AbstractResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 
 /**
  * Resource implementation for Eclipse file handles.
@@ -54,8 +56,8 @@ public class FileResource extends AbstractResource {
 	 */
 	public FileResource(String path) {
 		if (path.charAt(0) != '/') {
-			throw new IllegalArgumentException("Path has to be relative to " +
-											   "Eclipse workspace");
+			throw new IllegalArgumentException("Path '" + path + "' has to " +
+										   " be relative to Eclipse workspace");
 		}
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IResource member = root.findMember(path);
@@ -84,6 +86,20 @@ public class FileResource extends AbstractResource {
 
 	public File getFile() {
 		return file;
+	}
+
+	public Resource createRelative(String relativePath) {
+		if (file != null) {
+			File parent = file.getParentFile();
+			if (parent != null) {
+				return new FileSystemResource(new File(parent, relativePath));
+			}
+		}
+		return new FileResource(relativePath);
+	}
+
+	public String getFilename() {
+		return file.getName();
 	}
 
 	public String getDescription() {
