@@ -64,9 +64,11 @@ public class Bean extends BeansModelElement implements IBean {
 			return (IBeansConfig) parent;
 		} else if (parent instanceof IBean) {
 			return ((IBean) parent).getConfig();
+		} else if (parent instanceof IBeanProperty) {
+			return ((IBean) parent.getElementParent()).getConfig();
 		}
 		throw new IllegalStateException("Bean can only have a parent of type " +
-										"IBeansConfig or IBean");
+			 "IBeansConfig, IBean or (in case of an inner bean) IBeanProperty");
 	}
 
 	public void setBeanDefinitionHolder(
