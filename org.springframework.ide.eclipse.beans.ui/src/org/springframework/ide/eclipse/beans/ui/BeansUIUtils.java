@@ -48,6 +48,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
@@ -152,6 +153,17 @@ public class BeansUIUtils {
 		}
 		return null;
 	}
+
+    public static IEditorPart getActiveEditor() {
+        IWorkbenchWindow window = BeansUIPlugin.getActiveWorkbenchWindow();
+        if (window != null) {
+            IWorkbenchPage page = window.getActivePage();
+            if (page != null) {
+                return page.getActiveEditor();
+            }
+        }
+        return null;
+    }    
 
 	/**
 	 * Opens given file in associated editor and go to specified line
