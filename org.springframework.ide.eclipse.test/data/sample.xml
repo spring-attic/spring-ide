@@ -20,5 +20,12 @@
 	<bean id="child" parent="parent">
 	</bean>
 	
+	<bean id="noparent"/>
+	
+	<bean id="constructed" class="pack1.ConstructedBean" >
+		<constructor-arg><value>one</value></constructor-arg>
+		<constructor-arg><value>two</value></constructor-arg>
+	</bean>
+	
 		
 </beans>

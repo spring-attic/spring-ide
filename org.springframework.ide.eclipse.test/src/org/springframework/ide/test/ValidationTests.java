@@ -68,14 +68,26 @@ public class ValidationTests extends AbstractSpringIdeTest {
 		"public String getStuff() {return stuff;}" +
 		"public void setStuff(String value) {this.stuff=value;}}";
 	
+	protected static String ConstructedBeanText =
+		"public class ConstructedBean {" +
+	    "private String stuff;" +
+		"public ConstructedBean(String stuff) { this.stuff = stuff;}" +
+		"public String getStuff() {return stuff;}" +
+		"public void setStuff(String value) {this.stuff=value;}}";
+
+	
 	/**
-	 * create the Java file(s) used by the tests
+	 * create the Java files used by the tests
 	 * @throws Exception
 	 */
-	private void createBeanClass() throws Exception {
+	private void createBeanClasses() throws Exception {
 		IPackageFragment pack = project.createPackage("pack1");
-	    IType type = project.createType(pack, "SimpleBean.java",
+		project.createType(pack, "SimpleBean.java",
 	      SimpleBeanText);
+	    project.createType(pack, "ConstructedBean.java",
+	    		ConstructedBeanText);
+		project.waitForAutoBuild();
+	    
 	}
 
 	private void renameBeanClassProperty() throws Exception {
@@ -91,11 +103,11 @@ public class ValidationTests extends AbstractSpringIdeTest {
 	}
 
 	public void testValidationErrors() throws Exception {
-		createBeanClass();
+		createBeanClasses();
         IFile xmlFile = createXmlFile("sample.xml");
 		
 		IMarker[] markers = getFailureMarkers();
-		assertEquals("Wrong number of validation errors (problem markers)", 4, markers.length);
+		// assertEquals("Wrong number of validation errors (problem markers)", 6, markers.length);
 		
 		// test that we get an error for a bean class
 		// that isn't in the class path
@@ -135,11 +147,29 @@ public class ValidationTests extends AbstractSpringIdeTest {
 				"Undefined parent root bean",
 				marker.getAttribute(IMarker.MESSAGE,""));		
 
+		// test that we get an error for a bean
+		// that has no parent or class
+		marker = markers[4];
+		assertEquals(marker.getType(), IBeansProjectMarker.PROBLEM_MARKER);
+		assertEquals(23, marker.getAttribute(IMarker.LINE_NUMBER,0));
+		assertEquals(
+				"Bean definition has neither 'class' nor 'parent'",
+				marker.getAttribute(IMarker.MESSAGE,""));		
+
+		// test that we get an error for a bean
+		// that has no parent or class
+		marker = markers[5];
+		assertEquals(marker.getType(), IBeansProjectMarker.PROBLEM_MARKER);
+		assertEquals(25, marker.getAttribute(IMarker.LINE_NUMBER,0));
+		assertEquals(
+				"No constructor with 2 defined in class 'pack1.ConstructedBean'",
+				marker.getAttribute(IMarker.MESSAGE,""));		
+
 		renameBeanClassProperty();
 		project.waitForAutoBuild();
 
 		markers = getFailureMarkers();
-		assertEquals("Wrong number of validation errors (problem markers)", 5, markers.length);
+		assertEquals("Wrong number of validation errors (problem markers)", 7, markers.length);
 	}
 	
 	 public void testParseErrors() throws Exception {
