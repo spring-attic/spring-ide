@@ -16,6 +16,7 @@
 
 package org.springframework.ide.eclipse.beans.ui.graph.editor;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
@@ -25,23 +26,49 @@ import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
 import org.springframework.ide.eclipse.beans.ui.model.INode;
+import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
 
 public class GraphEditorInput implements IEditorInput {
 
 	private INode node;
 	private String name;
+	private String toolTip;
 
 	public GraphEditorInput(INode node) {
 		this.node = node;
 		if (node instanceof ConfigNode) {
-			name = BeansGraphPlugin.getResourceString(
-								"ShowGraphAction.name.config") + node.getName();
+			IFile file = ((ConfigNode) node).getConfigFile();
+			name = file.getName();
+			toolTip = BeansGraphPlugin.getResourceString(
+				 "ShowGraphAction.name.config") + file.getFullPath().toString();
 		} else if (node instanceof ConfigSetNode) {
-			name = BeansGraphPlugin.getResourceString(
-							 "ShowGraphAction.name.configSet") + node.getName();
+			ProjectNode project = ((ConfigSetNode) node).getProjectNode(); 
+			name = node.getName();
+			toolTip = BeansGraphPlugin.getResourceString(
+						 "ShowGraphAction.name.configSet") + project.getName() +
+						 '/' + node.getName();
 		} else {
-			name = BeansGraphPlugin.getResourceString(
-								  "ShowGraphAction.name.bean") + node.getName();
+			name = node.getName();
+			StringBuffer buffer = new StringBuffer();
+			buffer.append(BeansGraphPlugin.getResourceString(
+												  "ShowGraphAction.name.bean"));
+			if (node.getParent() instanceof ConfigNode) {
+				ConfigNode config = (ConfigNode) node.getParent();
+				buffer.append(BeansGraphPlugin.getResourceString(
+												"ShowGraphAction.name.config"));
+				buffer.append(config.getName());
+				buffer.append(": ");
+			} else if (node.getParent() instanceof ConfigSetNode) {
+				ConfigSetNode configSet = (ConfigSetNode) node.getParent();
+				buffer.append(BeansGraphPlugin.getResourceString(
+											 "ShowGraphAction.name.configSet"));
+				buffer.append(configSet.getProjectNode().getName());
+				buffer.append('/');
+				buffer.append(configSet.getName());
+				buffer.append(": ");
+			}
+			buffer.append(node.getName());
+			toolTip = buffer.toString();
 		}
 	}
 
@@ -76,7 +103,7 @@ public class GraphEditorInput implements IEditorInput {
 	}
 
 	public String getToolTipText() {
-		return name;
+		return toolTip;
 	}
 
 	public Object getAdapter(Class adapter) {
