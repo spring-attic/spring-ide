@@ -87,7 +87,8 @@ public class ModelImageDescriptor extends CompositeImageDescriptor {
 			data = BeansUIImages.DESC_OVR_WARNING.getImageData();
 			x -= data.width;
 			drawImage(data, x, y);
-		} else if ((flags & INode.FLAG_IS_PROTOTYPE) != 0) {
+		}
+		if ((flags & INode.FLAG_IS_PROTOTYPE) != 0) {
 			x = 0;
 			y = 0;
 			data = BeansUIImages.DESC_OVR_PROTOTYPE.getImageData();
