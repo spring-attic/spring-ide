@@ -35,6 +35,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
 /**
  * Implementation of <code>IResourceChangeListener</code> which detects
@@ -49,8 +50,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 public class BeansResourceChangeListener implements IResourceChangeListener {
 
 	public static final int LISTENER_FLAGS = IResourceChangeEvent.PRE_CLOSE |
-										   IResourceChangeEvent.PRE_DELETE |
-										   IResourceChangeEvent.POST_AUTO_BUILD;
+											 IResourceChangeEvent.PRE_DELETE |
+											 IResourceChangeEvent.POST_BUILD;
 	private static final int VISITOR_FLAGS = IResourceDelta.ADDED |
 											 IResourceDelta.CHANGED |
 											 IResourceDelta.REMOVED;
@@ -66,18 +67,18 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 			IResourceDelta delta = event.getDelta();
 			switch (event.getType()) {
 				case IResourceChangeEvent.PRE_CLOSE :
-					if (BeansCoreUtils.isBeansProject(project)) {
+					if (SpringCoreUtils.isSpringProject(project)) {
 						events.projectClosed(project);
 					}
 					break;
 
 				case IResourceChangeEvent.PRE_DELETE :
-					if (BeansCoreUtils.isBeansProject(project)) {
+					if (SpringCoreUtils.isSpringProject(project)) {
 						events.projectDeleted(project);
 					}
 					break;
 
-				case IResourceChangeEvent.POST_AUTO_BUILD :
+				case IResourceChangeEvent.POST_BUILD :
 					if (delta != null) {
 						try {
 							delta.accept(new BeansProjectVisitor(),
@@ -102,7 +103,7 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 			switch (delta.getKind()) {
 				case IResourceDelta.ADDED :
 					if (resource instanceof IProject) {
-						if (BeansCoreUtils.isBeansProject((IProject)
+						if (SpringCoreUtils.isSpringProject((IProject)
 														  resource)) {
 							events.projectAdded((IProject) resource);
 						}
@@ -121,7 +122,7 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 				case IResourceDelta.OPEN :
 					if (resource instanceof IProject) {
 						IProject project = (IProject) resource; 
-						if (BeansCoreUtils.isBeansProject(project)) {
+						if (SpringCoreUtils.isSpringProject(project)) {
 							events.projectOpened(project);
 						}
 						return false;
@@ -145,13 +146,13 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 					} else if (resource instanceof IProject) {
 						if ((flags & IResourceDelta.OPEN) != 0) {
 							IProject project = (IProject) resource; 
-							if (BeansCoreUtils.isBeansProject(project)) {
+							if (SpringCoreUtils.isSpringProject(project)) {
 								events.projectOpened(project);
 							}
 							return false;
 						} else if ((flags & IResourceDelta.DESCRIPTION) != 0) {
 							IProject project = (IProject) resource;
-							if (BeansCoreUtils.isBeansProject(project)) {
+							if (SpringCoreUtils.isSpringProject(project)) {
 								if (!events.isSpringProject(project)) {
 									events.springNatureAdded(project);
 								}
