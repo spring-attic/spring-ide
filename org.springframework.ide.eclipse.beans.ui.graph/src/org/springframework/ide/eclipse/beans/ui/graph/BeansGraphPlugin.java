@@ -21,7 +21,6 @@ import java.util.ResourceBundle;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -49,8 +48,13 @@ public class BeansGraphPlugin extends AbstractUIPlugin {
 	//Resource bundle.
 	private ResourceBundle resourceBundle;
 	
-	public BeansGraphPlugin(IPluginDescriptor descriptor) {
-		super(descriptor);
+	/**
+	 * Creates the Spring Beans Graph plug-in.
+	 * <p>
+	 * The plug-in instance is created automatically by the Eclipse platform.
+	 * Clients must not call.
+	 */
+	public BeansGraphPlugin() {
 		plugin = this;
 		try {
 			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);

@@ -70,8 +70,8 @@ public class BeansGraphImages {
 	static {
 		try {
 			ICON_BASE_URL = new URL(
-				  BeansGraphPlugin.getDefault().getDescriptor().getInstallURL(),
-				  ICON_PATH_PREFIX);
+					   BeansGraphPlugin.getDefault().getBundle().getEntry("/"),
+					   ICON_PATH_PREFIX);
 		} catch (MalformedURLException e) {
 			BeansGraphPlugin.log(e);
 		}

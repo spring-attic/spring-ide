@@ -22,7 +22,7 @@ import org.eclipse.gef.ui.actions.ZoomComboContributionItem;
 import org.eclipse.gef.ui.actions.ZoomInRetargetAction;
 import org.eclipse.gef.ui.actions.ZoomOutRetargetAction;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.actions.ActionFactory;
 
 public class GraphActionBarContributor extends ActionBarContributor {
 
@@ -32,7 +32,7 @@ public class GraphActionBarContributor extends ActionBarContributor {
 	}
 
 	protected void declareGlobalActionKeys() {
-		addGlobalActionKey(IWorkbenchActionConstants.PRINT);
+		addGlobalActionKey(ActionFactory.PRINT.getId());
 	}
 
 	public void contributeToToolBar(IToolBarManager manager) {
