@@ -50,7 +50,10 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 
 	public BeansConfig(IBeansProject project, String name) {
 		super(project, name);
-		this.file = getFile(name);
+		file = getFile(name);
+		if (file == null) {
+			exception = new BeanDefinitionException("File not found");
+		}
 	}
 
 	public int getElementType() {
@@ -159,11 +162,11 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 	private void readConfig() {
 		BeansConfigHandler handler = new BeansConfigHandler(this);
 		EventBeanDefinitionReader reader = new EventBeanDefinitionReader(
-																	   handler);
+																   handler);
 		try {
 			reader.loadBeanDefinitions(new FileResource(file));
 		} catch (BeanDefinitionException e) {
-			exception = new BeanDefinitionException("Problem reading file: "+getElementName()+" - "+e.getMessage());
+			exception = e;
 		}
 		beans = handler.getBeans();
 		innerBeans = handler.getInnerBeans();
