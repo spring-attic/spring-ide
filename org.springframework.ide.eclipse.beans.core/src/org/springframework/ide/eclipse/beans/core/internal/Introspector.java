@@ -60,7 +60,7 @@ public class Introspector {
 			throw createException("bad property name");
 		}
 		String base = capitalize(propertyName);
-		return (findMethod(type, "set" + base, 1) != null);
+		return (findMethod(type, "set" + base, 1, true, false) != null);
 	}
 
     /**
@@ -70,37 +70,29 @@ public class Introspector {
      * @param type The Java type object on which to retrieve the method
      * @param methodName Name of the method
      * @param argCount Number of arguments for the desired method
+     * @param isPublic true if public method is requested
+     * @param isStatic true if static method is requested
      */
     public static IMethod findMethod(IType type, String methodName,
-    								   int argCount) throws JavaModelException {
+    								  int argCount, boolean isPublic,
+								  boolean isStatic) throws JavaModelException {
 	    	while (type != null) {
-	    		IMethod method = findPublicMethod(type, methodName, argCount);
-	    		if (method != null) {
-	    			return method;
+		    	IMethod[] methods = type.getMethods();
+		    	for (int i = 0; i < methods.length; i++) {
+				IMethod method = methods[i];
+				int flags = method.getFlags();
+				if (Flags.isPublic(flags) == isPublic &&
+								 Flags.isStatic(flags) == isStatic &&
+								 (argCount == -1 ||
+								 method.getNumberOfParameters() == argCount) &&
+								 methodName.equals(method.getElementName())) {
+					return method;
+				}
 	    		}
 	   		type = getSuperType(type);
 	    	}
 	    	return null;
 	}
-
-	/**
-	 * Returns first public method defined in given type with specified method
-	 * name and number of arguments.
-	 */
-    protected static IMethod findPublicMethod(IType type, String methodName,
-    								   int argCount) throws JavaModelException {
-	    	IMethod[] methods = type.getMethods();
-	    	for (int i = 0; i < methods.length; i++) {
-			IMethod method = methods[i];
-			int flags = method.getFlags();
-			if (Flags.isPublic(flags) && !Flags.isStatic(flags) &&
-								   method.getNumberOfParameters() == argCount &&
-								   methodName.equals(method.getElementName())) {
-				return method;
-			}
-		}
-		return null;
-    }
 
 	/**
 	 * Returns super type of given type.
