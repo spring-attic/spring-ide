@@ -24,6 +24,7 @@ import java.util.List;
 import org.eclipse.core.resources.IResource;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -108,8 +109,8 @@ public class Bean extends BeansModelElement implements IBean {
 
 	public String getClassName() {
 		BeanDefinition beanDef = beanDefinitionHolder.getBeanDefinition();
-		if (beanDef instanceof RootBeanDefinition) {
-			return ((RootBeanDefinition) beanDef).getBeanClassName();
+		if (beanDef instanceof AbstractBeanDefinition) {
+			return ((AbstractBeanDefinition) beanDef).getBeanClassName();
 		}
 		return null;
 	}
