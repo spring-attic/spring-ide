@@ -30,6 +30,15 @@ public interface IBeansConfigSet extends IBeansModelElement {
 
 	boolean hasConfig(String configName);
 
+	/**
+	 * Checks if the given file is registered within this config set.  
+	 * <b>NOTE:</b> the file must be in the same project that this
+	 * config set is defined in.  If it is not use the String
+	 * variant of this method and use a workspace relative path.
+	 * 
+	 * @param file
+	 * @return
+	 */
 	boolean hasConfig(IFile file);
 
 	Collection getConfigs();
@@ -37,4 +46,16 @@ public interface IBeansConfigSet extends IBeansModelElement {
 	boolean hasBean(String name);
 
 	IBean getBean(String name);
+	
+    /**
+     * Replace an existing config file with a new one.  
+     * Strings are used rather than <code>IFile<code>'s as 
+     * this allows the caller to determine whether they
+     * should be using project or workspace relative paths.
+     *
+     * @param origFileName
+     * @param newFileName
+     */
+    void replaceConfig(String origFileName, String newFileName);
+
 }
