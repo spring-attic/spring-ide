@@ -23,6 +23,8 @@ import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.ToolbarLayout;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.graphics.Color;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphImages;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
 import org.springframework.ide.eclipse.beans.ui.graph.model.ConstructorArgument;
@@ -76,13 +78,10 @@ public class BeanFigure extends Figure {
 		for (int i = 0; i < cargs.length; i++) {
 			ConstructorArgument carg = cargs[i];
 			Label label = new Label(carg.getName());
-//			if (carg.isBeanReference()) {
-				label.setIcon(BeansGraphImages.getImage(
+			label.setIcon(BeansGraphImages.getImage(
 										BeansGraphImages.IMG_OBJS_CONSTRUCTOR));
-				label.setToolTip(new Label("Value: " +
-										   carg.getNode().getValue()));
-//			} else {
-//			}
+			Object value = carg.getNode().getValue();
+			label.setToolTip(new Label(createToolTipForValue(value)));
 			figure.add(label);
 		}
 		return figure;
@@ -94,16 +93,29 @@ public class BeanFigure extends Figure {
 		for (int i = 0; i < props.length; i++) {
 			Property prop = props[i];
 			Label label = new Label(prop.getName());
-//			if (prop.isBeanReference()) {
-				label.setIcon(BeansGraphImages.getImage(
+			label.setIcon(BeansGraphImages.getImage(
 										   BeansGraphImages.IMG_OBJS_PROPERTY));
-				label.setToolTip(new Label("Value: " +
-												prop.getNode().getValue()));
-//			} else {
-//			}
+			Object value = prop.getNode().getValue();
+			label.setToolTip(new Label(createToolTipForValue(value)));
 			properties.add(label);
 		}
 		return properties;
+	}
+
+	private String createToolTipForValue(Object value) {
+		StringBuffer toolTip = new StringBuffer("Value: ");
+		if (value instanceof RuntimeBeanReference) {
+			toolTip.append('<');
+			toolTip.append(((RuntimeBeanReference) value).getBeanName());
+			toolTip.append('>');
+		} else if (value instanceof BeanDefinitionHolder) {
+			toolTip.append('{');
+			toolTip.append(((BeanDefinitionHolder) value).getBeanName());
+			toolTip.append('}');
+		} else {
+			toolTip.append(value.toString());
+		}
+		return toolTip.toString();
 	}
 
 	protected void paintFigure(Graphics graphics) {
