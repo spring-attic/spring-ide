@@ -21,9 +21,11 @@ import java.util.List;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.draw2d.ScalableFreeformLayeredPane;
 import org.eclipse.draw2d.XYLayout;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
+import org.springframework.ide.eclipse.beans.ui.graph.figures.ShadowedLineBorder;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Graph;
 
 public class GraphPart extends AbstractGraphicalEditPart {
@@ -32,6 +34,7 @@ public class GraphPart extends AbstractGraphicalEditPart {
 		Figure panel = new ScalableFreeformLayeredPane();
 		panel.setBackgroundColor(ColorConstants.listBackground);
 		panel.setLayoutManager(new XYLayout());
+		panel.setBorder(new MarginBorder(10));
 		return panel;
 	}
 
