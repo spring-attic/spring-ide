@@ -192,10 +192,7 @@ public class ConfigNode extends AbstractNode {
 	private void createBeans() {
 		beans = new ArrayList();
 		if (config == null) {
-			int configNamePos = getName().indexOf('/', 1);
-			String projectName = getName().substring(1, configNamePos);
-			setErrorMessage("Undefined Spring project '" + projectName + "'",
-							-1);
+			setErrorMessage("Undefined Spring config '" + getName() + "'", -1);
 		} else {
 			BeanDefinitionException exception = config.getException();
 			if (exception != null	) {
