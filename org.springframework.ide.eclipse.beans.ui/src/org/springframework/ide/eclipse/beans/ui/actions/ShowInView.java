@@ -37,12 +37,8 @@ import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
-import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
-import org.springframework.ide.eclipse.beans.ui.model.INode;
-import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
-import org.springframework.ide.eclipse.beans.ui.model.PropertyNode;
 import org.springframework.ide.eclipse.beans.ui.views.BeansView;
+import org.springframework.ide.eclipse.beans.ui.views.BeansViewLocation;
 
 public class ShowInView extends Action implements IEditorActionDelegate,
 												IWorkbenchWindowActionDelegate {
@@ -83,35 +79,34 @@ public class ShowInView extends Action implements IEditorActionDelegate,
 
 	public void run(IAction action) {
 		if (editor != null && file != null) {
-			INode node = guessNode();
-			if (node != null) {
+			BeansViewLocation location = guessBeansViewLocation();
+			if (location != null) {
 				IViewPart view = BeansView.showView();
-				((IShowInTarget) view).show(new ShowInContext(node, null));
+				((IShowInTarget) view).show(new ShowInContext(location, null));
 			}
 		}
 	}
 
-	private INode guessNode() {
+	private BeansViewLocation guessBeansViewLocation() {
 		int caretOffset = BeansUIUtils.getCaretOffset(editor);
 		IDocument doc = editor.getDocumentProvider().getDocument(
 													   editor.getEditorInput());
-		NodeGuesser guesser = new NodeGuesser(doc, caretOffset);
+		BeansViewLocationGuesser guesser = new BeansViewLocationGuesser(doc,
+																   caretOffset);
 		if (guesser.hasBeanName()) {
-			ProjectNode project = new ProjectNode(null,
-												  file.getProject().getName());
-			ConfigNode config = new ConfigNode(project,
-									  file.getProjectRelativePath().toString());
-			BeanNode bean = new BeanNode(config, guesser.getBeanName());
+			BeansViewLocation location = new BeansViewLocation();
+			location.setProjectName(file.getProject().getName());
+			location.setConfigName(file.getProjectRelativePath().toString());
+			location.setBeanName(guesser.getBeanName());
 			if (guesser.hasPropertyName()) {
-				return new PropertyNode(bean, guesser.getPropertyName());
-			} else {
-				return bean;
+				location.setPropertyName(guesser.getPropertyName());
 			}
+			return location;
 		}
 		return null;
 	}
 
-	private class NodeGuesser {
+	private class BeansViewLocationGuesser {
 
 		private IDocument doc;
 		private int caretOffset;
@@ -124,7 +119,7 @@ public class ShowInView extends Action implements IEditorActionDelegate,
 		private List propertyTokens;
 		private String propertyName;
 
-		public NodeGuesser(IDocument doc, int caretOffset) {
+		public BeansViewLocationGuesser(IDocument doc, int caretOffset) {
 			this.doc = doc;
 			this.caretOffset = caretOffset;
 			guessName();

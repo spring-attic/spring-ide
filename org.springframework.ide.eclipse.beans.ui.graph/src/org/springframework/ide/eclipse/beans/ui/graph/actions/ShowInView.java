@@ -30,10 +30,8 @@ import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditor;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
 import org.springframework.ide.eclipse.beans.ui.graph.parts.BeanPart;
-import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
-import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
 import org.springframework.ide.eclipse.beans.ui.views.BeansView;
+import org.springframework.ide.eclipse.beans.ui.views.BeansViewLocation;
 
 public class ShowInView extends EditorPartAction {
 
@@ -63,14 +61,13 @@ public class ShowInView extends EditorPartAction {
 		Bean bean = ((BeanPart) getFirstSelectedEditPart()).getBean();
 		IFile file = bean.getConfigFile();
 		if (file != null && file.exists()) {
-			ProjectNode project = new ProjectNode(null,
-												  file.getProject().getName());
-			ConfigNode config = new ConfigNode(project,
-									  file.getProjectRelativePath().toString());
-			BeanNode node = new BeanNode(config, bean.getName());
+			BeansViewLocation location = new BeansViewLocation();
+			location.setProjectName(file.getProject().getName());
+			location.setConfigName(file.getProjectRelativePath().toString());
+			location.setBeanName(bean.getName());
 	
 			IViewPart view = BeansView.showView();
-			((IShowInTarget) view).show(new ShowInContext(node, null));
+			((IShowInTarget) view).show(new ShowInContext(location, null));
 		}
 	}
 
