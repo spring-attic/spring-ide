@@ -40,13 +40,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.IPropertyListener;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
 import org.springframework.ide.eclipse.beans.ui.model.INode;
 import org.springframework.ide.eclipse.beans.ui.model.ModelLabelDecorator;
 import org.springframework.ide.eclipse.beans.ui.model.ModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class ConfigSetsBlock {
 
@@ -152,16 +152,16 @@ public class ConfigSetsBlock {
 		layout.marginWidth = 0;
 		buttonArea.setLayout(layout);
 		buttonArea.setLayoutData(new GridData(GridData.FILL_VERTICAL));
-		newButton = BeansUIUtils.createButton(buttonArea,
+		newButton = SpringUIUtils.createButton(buttonArea,
 			 BeansUIPlugin.getResourceString(NEW_BUTTON), true, buttonListener);
-		editButton = BeansUIUtils.createButton(buttonArea,
+		editButton = SpringUIUtils.createButton(buttonArea,
 			BeansUIPlugin.getResourceString(EDIT_BUTTON), true, buttonListener);
-		removeButton = BeansUIUtils.createButton(buttonArea,
+		removeButton = SpringUIUtils.createButton(buttonArea,
 		 				  BeansUIPlugin.getResourceString(REMOVE_BUTTON), false,
 		 				  buttonListener);
-		upButton = BeansUIUtils.createButton(buttonArea,
+		upButton = SpringUIUtils.createButton(buttonArea,
 			 BeansUIPlugin.getResourceString(UP_BUTTON), false, buttonListener);
-		downButton = BeansUIUtils.createButton(buttonArea,
+		downButton = SpringUIUtils.createButton(buttonArea,
 							BeansUIPlugin.getResourceString(DOWN_BUTTON), false,
 							buttonListener);
 		return composite;
@@ -225,7 +225,7 @@ public class ConfigSetsBlock {
 	 */
 	private void handleNewButtonPressed() {
 		ConfigSetDialog dialog = new ConfigSetDialog(
-							BeansUIUtils.getStandardDisplay().getActiveShell(),
+							SpringUIUtils.getStandardDisplay().getActiveShell(),
 							project, null);
 		if (dialog.open() == ConfigSetDialog.OK) {
 			hasUserMadeChanges = true;
@@ -260,7 +260,7 @@ public class ConfigSetsBlock {
 	private void handleEditButtonPressed() {
 		if (selectedNode != null && selectedNode instanceof ConfigSetNode) {
 			ConfigSetDialog dialog = new ConfigSetDialog(
-							BeansUIUtils.getStandardDisplay().getActiveShell(),
+							SpringUIUtils.getStandardDisplay().getActiveShell(),
 							project, selectedNode.getName());
 			if (dialog.open() == ConfigSetDialog.OK) {
 				hasUserMadeChanges = true;

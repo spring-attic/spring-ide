@@ -42,10 +42,10 @@ import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceSorter;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
 import org.springframework.ide.eclipse.beans.ui.model.ModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class ConfigFilesBlock {
 
@@ -136,10 +136,10 @@ public class ConfigFilesBlock {
 		layout.marginWidth = 0;
 		buttonArea.setLayout(layout);
 		buttonArea.setLayoutData(new GridData(GridData.FILL_VERTICAL));
-		addButton = BeansUIUtils.createButton(buttonArea,
+		addButton = SpringUIUtils.createButton(buttonArea,
 							  BeansUIPlugin.getResourceString(ADD_BUTTON), true,
 							  buttonListener);
-		removeButton = BeansUIUtils.createButton(buttonArea,
+		removeButton = SpringUIUtils.createButton(buttonArea,
 		 				  BeansUIPlugin.getResourceString(REMOVE_BUTTON), false,
 						  buttonListener);
 		return composite;
@@ -178,7 +178,7 @@ public class ConfigFilesBlock {
 	 */
 	private void handleAddButtonPressed() {
 		ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(
-				  BeansUIUtils.getStandardDisplay().getActiveShell(),
+				  SpringUIUtils.getStandardDisplay().getActiveShell(),
 				  new WorkbenchLabelProvider(), new WorkbenchContentProvider());
 		dialog.setTitle(BeansUIPlugin.getResourceString(DIALOG_TITLE));
 		dialog.setMessage(BeansUIPlugin.getResourceString(DIALOG_MESSAGE));

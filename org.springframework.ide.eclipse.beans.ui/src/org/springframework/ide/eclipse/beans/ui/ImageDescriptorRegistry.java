@@ -23,6 +23,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
  * A registry that maps <code>ImageDescriptor</code>s to <code>Image</code>.
@@ -37,7 +38,7 @@ public class ImageDescriptorRegistry {
 	 * display, respectively.
 	 */
 	public ImageDescriptorRegistry() {
-		this(BeansUIUtils.getStandardDisplay());
+		this(SpringUIUtils.getStandardDisplay());
 	}
 	
 	/**
@@ -70,7 +71,7 @@ public class ImageDescriptorRegistry {
 		if (result != null)
 			return result;
 	
-		Assert.isTrue(display == BeansUIUtils.getStandardDisplay(),
+		Assert.isTrue(display == SpringUIUtils.getStandardDisplay(),
 					  "Allocating image for wrong display.");
 		result = descriptor.createImage();
 		if (result != null)

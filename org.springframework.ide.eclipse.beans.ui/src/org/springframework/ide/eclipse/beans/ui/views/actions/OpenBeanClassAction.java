@@ -22,10 +22,10 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtil;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
 import org.springframework.ide.eclipse.beans.ui.model.INode;
 import org.springframework.ide.eclipse.beans.ui.views.BeansView;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class OpenBeanClassAction extends Action {
 
@@ -54,7 +54,7 @@ public class OpenBeanClassAction extends Action {
 			String className = ((BeanNode) node).getClassName();
 			IType type = BeansModelUtil.getJavaType(project, className);
 			if (type != null) {
-				BeansUIUtils.openInEditor(type);
+				SpringUIUtils.openInEditor(type);
 			}
 		}
 	}

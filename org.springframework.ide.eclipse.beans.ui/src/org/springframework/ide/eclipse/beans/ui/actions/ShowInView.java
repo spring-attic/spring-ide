@@ -35,6 +35,7 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.views.BeansViewLocation;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class ShowInView extends Action implements IEditorActionDelegate,
 												IWorkbenchWindowActionDelegate {
@@ -70,7 +71,7 @@ public class ShowInView extends Action implements IEditorActionDelegate,
 	}
 
 	public void selectionChanged(IAction action, ISelection selection) {
-		setActiveEditor(action, BeansUIUtils.getActiveEditor());
+		setActiveEditor(action, SpringUIUtils.getActiveEditor());
 	}
 
 	public void run(IAction action) {
@@ -83,7 +84,7 @@ public class ShowInView extends Action implements IEditorActionDelegate,
 	}
 
 	private BeansViewLocation guessBeansViewLocation() {
-		int caretOffset = BeansUIUtils.getCaretOffset(editor);
+		int caretOffset = SpringUIUtils.getCaretOffset(editor);
 		IDocument doc = editor.getDocumentProvider().getDocument(
 													   editor.getEditorInput());
 		BeansViewLocationGuesser guesser = new BeansViewLocationGuesser(doc,

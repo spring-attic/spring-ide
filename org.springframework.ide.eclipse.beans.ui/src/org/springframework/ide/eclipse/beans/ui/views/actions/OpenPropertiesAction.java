@@ -21,7 +21,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferencePage;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
@@ -30,6 +29,7 @@ import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
 import org.springframework.ide.eclipse.beans.ui.model.PropertyNode;
 import org.springframework.ide.eclipse.beans.ui.properties.ConfigurationPropertyPage;
 import org.springframework.ide.eclipse.beans.ui.views.BeansView;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class OpenPropertiesAction extends Action {
 
@@ -70,7 +70,7 @@ public class OpenPropertiesAction extends Action {
 															  project.getName();
 			IPreferencePage page = new ConfigurationPropertyPage(project,
 																 block);
-			BeansUIUtils.showPreferencePage(ConfigurationPropertyPage.ID, page,
+			SpringUIUtils.showPreferencePage(ConfigurationPropertyPage.ID, page,
 											title);
 		}
 	}

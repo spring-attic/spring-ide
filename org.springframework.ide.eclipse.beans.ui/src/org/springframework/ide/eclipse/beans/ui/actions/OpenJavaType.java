@@ -32,6 +32,7 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtil;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class OpenJavaType extends Action implements IEditorActionDelegate,
 												IWorkbenchWindowActionDelegate {
@@ -67,7 +68,7 @@ public class OpenJavaType extends Action implements IEditorActionDelegate,
 	}
 
 	public void selectionChanged(IAction action, ISelection selection) {
-		setActiveEditor(action, BeansUIUtils.getActiveEditor());
+		setActiveEditor(action, SpringUIUtils.getActiveEditor());
 	}
 
 	public void run(IAction action) {
@@ -77,18 +78,18 @@ public class OpenJavaType extends Action implements IEditorActionDelegate,
 				IType type = BeansModelUtil.getJavaType(file.getProject(),
 														className);
 				if (type != null) {
-					BeansUIUtils.openInEditor(type);
+					SpringUIUtils.openInEditor(type);
 				}
 			}
 		}
 	}
 
 	private String guessType() {
-		String selectedText = BeansUIUtils.getSelectedText(editor);
+		String selectedText = SpringUIUtils.getSelectedText(editor);
 		if (!isJavaType(selectedText)) {
 
 			// try to search around caret
-			int caretPosition = BeansUIUtils.getCaretOffset(editor);
+			int caretPosition = SpringUIUtils.getCaretOffset(editor);
 			IDocument doc =
 				editor.getDocumentProvider().getDocument(
 					editor.getEditorInput());

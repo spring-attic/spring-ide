@@ -66,6 +66,7 @@ import org.springframework.ide.eclipse.beans.ui.views.actions.LexicalSortingActi
 import org.springframework.ide.eclipse.beans.ui.views.actions.OpenBeanClassAction;
 import org.springframework.ide.eclipse.beans.ui.views.actions.OpenPropertiesAction;
 import org.springframework.ide.eclipse.beans.ui.views.actions.PropertySheetAction;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 																 IShowInTarget {
@@ -207,7 +208,7 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 				IResource resource = getSelectedResource(selection);
 				if (resource instanceof IFile && resource.exists()) {
 					int line = getStartLineFromSelectedNode(selection);
-					BeansUIUtils.openInEditor((IFile) resource, line);
+					SpringUIUtils.openInEditor((IFile) resource, line);
 				}
 			}
 		}
