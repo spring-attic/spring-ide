@@ -65,7 +65,9 @@ public class BeansCoreUtils {
 					if (nature.equals(BeansProjectNature.NATURE_ID)) {
 						BeansProject proj = (BeansProject)
 								 BeansCorePlugin.getModel().getProject(project);
-						proj.deleteProblemMarkers();
+						if (proj != null) {
+							proj.deleteProblemMarkers();
+						}
 					}
 
 					// now remove project nature

@@ -257,13 +257,15 @@ public class BeansProjectValidator extends BeansProjectBuilder {
 
 	private IBeansConfig getConfig(String configName) {
 		IBeansModel model = BeansCorePlugin.getModel();
+		IBeansProject project;
 		if (configName.charAt(0) == '/') {
 			String projectName = configName.substring(0,
 													configName.indexOf('/', 1));
-			return model.getProject(projectName).getConfig(configName);
+			project = model.getProject(projectName);
 		} else {
-			return model.getProject(getProject()).getConfig(configName);
+			project = model.getProject(getProject());
 		}
+		return (project != null ? project.getConfig(configName) : null);
 	}
 
 	private IBean getParentBean(IBean bean) {
