@@ -39,6 +39,7 @@ public class ConfigSetNode extends AbstractNode {
 	private List beans = null;  // lazy initialized in getBeans() or getBean()
 	private Map beansMap;  // lazy initialized in getBean()
 	private boolean isOverrideEnabled = false;
+	private boolean isIncomplete = false;
 
 	/**
 	 * Creates an empty node.
@@ -83,6 +84,14 @@ public class ConfigSetNode extends AbstractNode {
 
 	public boolean isOverrideEnabled() {
 		return isOverrideEnabled;
+	}
+
+	public void setIncomplete(boolean isIncomplete) {
+		this.isIncomplete = isIncomplete;
+	}
+
+	public boolean isIncomplete() {
+		return isIncomplete;
 	}
 
 	/**

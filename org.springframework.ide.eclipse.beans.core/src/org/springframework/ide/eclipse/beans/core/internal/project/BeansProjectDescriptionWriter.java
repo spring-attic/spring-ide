@@ -84,6 +84,8 @@ public class BeansProjectDescriptionWriter
 		writer.printSimpleTag(NAME, configSet.getElementName());
 		writer.printSimpleTag(OVERRIDING, new Boolean(
 					   configSet.isAllowBeanDefinitionOverriding()).toString());
+		writer.printSimpleTag(INCOMPLETE,
+							  new Boolean(configSet.isIncomplete()).toString());
 		write(CONFIGS, CONFIG, configSet.getConfigs(), writer);
 		writer.endTag(CONFIG_SET);
 	}

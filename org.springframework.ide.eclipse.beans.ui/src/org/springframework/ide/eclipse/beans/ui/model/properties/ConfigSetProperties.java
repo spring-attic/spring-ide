@@ -31,6 +31,7 @@ public class ConfigSetProperties implements IPropertySource {
 	public static final String P_CATEGORY = "ConfigSet";
 	public static final String P_ID_NAME = "ConfigSet.name";
 	public static final String P_ID_OVERRIDE = "ConfigSet.override";
+	public static final String P_ID_INCOMPLETE = "ConfigSet.incomplete";
 
 	// Property descriptors
 	private static List descriptors;
@@ -46,6 +47,12 @@ public class ConfigSetProperties implements IPropertySource {
 
 		descriptor = new PropertyDescriptor(P_ID_OVERRIDE,
 								BeansUIPlugin.getResourceString(P_ID_OVERRIDE));
+		descriptor.setAlwaysIncompatible(true);
+		descriptor.setCategory(BeansUIPlugin.getResourceString(P_CATEGORY));
+		descriptors.add(descriptor);
+
+		descriptor = new PropertyDescriptor(P_ID_INCOMPLETE,
+							  BeansUIPlugin.getResourceString(P_ID_INCOMPLETE));
 		descriptor.setAlwaysIncompatible(true);
 		descriptor.setCategory(BeansUIPlugin.getResourceString(P_CATEGORY));
 		descriptors.add(descriptor);
@@ -67,6 +74,8 @@ public class ConfigSetProperties implements IPropertySource {
 			return configSet.getElementName();
 		} else if (P_ID_OVERRIDE.equals(id)) {
 			return new Boolean(configSet.isAllowBeanDefinitionOverriding());
+		} else if (P_ID_INCOMPLETE.equals(id)) {
+			return new Boolean(configSet.isIncomplete());
 		}
 		return null;
 	}

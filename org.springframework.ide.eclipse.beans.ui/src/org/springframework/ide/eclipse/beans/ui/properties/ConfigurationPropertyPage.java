@@ -116,6 +116,7 @@ public class ConfigurationPropertyPage extends PropertyPage {
 										 node.getName(), node.getConfigNames());
 				configSet.setAllowBeanDefinitionOverriding(
 													  node.isOverrideEnabled());
+				configSet.setIncomplete(node.isIncomplete());
 				configSets.add(configSet);
 			}
 			project.setConfigSets(configSets);

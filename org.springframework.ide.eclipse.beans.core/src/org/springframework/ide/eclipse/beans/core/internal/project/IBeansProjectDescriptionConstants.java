@@ -23,6 +23,7 @@ public interface IBeansProjectDescriptionConstants {
 	String FILE = "file";
 	String CONFIG_SETS = "configSets";
 	String OVERRIDING = "allowBeanDefinitionOverriding";
+	String INCOMPLETE = "incomplete";
 	String CONFIG_SET = "configSet";
 	String NAME = "name";
 }

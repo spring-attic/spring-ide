@@ -28,6 +28,8 @@ public interface IBeansConfigSet extends IBeansModelElement, IBeanClassAware {
 
 	boolean isAllowBeanDefinitionOverriding();
 
+	boolean isIncomplete();
+
 	boolean hasConfig(String configName);
 
 	/**

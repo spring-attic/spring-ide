@@ -63,11 +63,14 @@ public class ConfigSetDialog extends Dialog {
 											   "ConfigSetDialog.nameText.label";
 	private static final String OVERRIDE_TEXT_LABEL =
 										   "ConfigSetDialog.overrideText.label";
+	private static final String INCOMPLETE_TEXT_LABEL =
+										   "ConfigSetDialog.incompleteText.label";
 	private static final int LIST_VIEWER_HEIGHT = 250;
 	private static final int LIST_VIEWER_WIDTH = 300;
 
 	private Text nameText;
 	private Button overrideButton;
+	private Button incompleteButton;
 	private CheckboxTableViewer configsViewer;
 	private Label errorLabel;
 	private Button okButton;
@@ -99,7 +102,7 @@ public class ConfigSetDialog extends Dialog {
 	}
 
 	protected Control createDialogArea(Composite parent) {
-		// create composite
+ 		// create composite    
 		Composite composite = (Composite) super.createDialogArea(parent);
 
 		// create labeled name text field
@@ -123,20 +126,17 @@ public class ConfigSetDialog extends Dialog {
 			}
 		);
 
-		// create override checkbox
-		Composite overrideGroup = new Composite(composite, SWT.NULL);
-		overrideGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		layout = new GridLayout();
-		layout.numColumns = 2;
-		layout.marginWidth = 0;
-		overrideGroup.setLayout(layout);
-
-		overrideButton = new Button(overrideGroup, SWT.CHECK);
+		// create group of labeled checkboxes
+		Composite checkboxGroup = new Composite(composite, SWT.NULL);
+		checkboxGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		overrideButton = createCheckBox(checkboxGroup,
+						  BeansUIPlugin.getResourceString(OVERRIDE_TEXT_LABEL));
 		overrideButton.setSelection(configSet.isOverrideEnabled());
 
-		Label overrideLabel = new Label(overrideGroup, SWT.NONE);
-		overrideLabel.setText(BeansUIPlugin.getResourceString(
-														  OVERRIDE_TEXT_LABEL));
+		incompleteButton = createCheckBox(checkboxGroup,
+						BeansUIPlugin.getResourceString(INCOMPLETE_TEXT_LABEL));
+		incompleteButton.setSelection(configSet.isIncomplete());
+
 		// config set list viewer
 		configsViewer = CheckboxTableViewer.newCheckList(composite, SWT.BORDER);
 		GridData gd = new GridData(GridData.FILL_BOTH);
@@ -157,6 +157,20 @@ public class ConfigSetDialog extends Dialog {
 											   GridData.HORIZONTAL_ALIGN_FILL));
 		applyDialogFont(composite);		
 		return composite;
+	}
+
+	protected Button createCheckBox(Composite group, String labelText) {
+		GridLayout layout = new GridLayout();
+		layout.numColumns = 2;
+		layout.marginWidth = 0;
+		group.setLayout(layout);
+
+		Button button = new Button(group, SWT.CHECK);
+
+		Label label = new Label(group, SWT.NONE);
+		label.setText(labelText);
+
+		return button;
 	}
 
 	protected void createButtonsForButtonBar(Composite parent) {
@@ -185,6 +199,7 @@ public class ConfigSetDialog extends Dialog {
 			configSet.clear();
 			configSet.setName(name);
 			configSet.setOverrideEnabled(overrideButton.getSelection());
+			configSet.setIncomplete(incompleteButton.getSelection());
 
 			// Add selected configs to config set
 			Object[] configs = configsViewer.getCheckedElements();
@@ -196,6 +211,7 @@ public class ConfigSetDialog extends Dialog {
 			if (configSetName == null) {
 				configSet.setParent(project);
 				configSet.setOverrideEnabled(overrideButton.getSelection());
+				configSet.setIncomplete(incompleteButton.getSelection());
 			} else if (!configSetName.equals(name)) {
 				project.removeConfigSet(configSetName);
 			}

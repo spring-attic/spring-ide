@@ -39,8 +39,9 @@ public class BeansProjectDescriptionHandler extends DefaultHandler
 	protected static final int S_CONFIG_SET = 5;
 	protected static final int S_CONFIG_SET_NAME = 6;
 	protected static final int S_CONFIG_SET_OVERRIDING = 7;
-	protected static final int S_CONFIG_SET_CONFIGS = 8;
-	protected static final int S_CONFIG_SET_CONFIG = 9;
+	protected static final int S_CONFIG_SET_INCOMPLETE = 8;
+	protected static final int S_CONFIG_SET_CONFIGS = 9;
+	protected static final int S_CONFIG_SET_CONFIG = 10;
 
 	protected IBeansProject project;
 	protected MultiStatus problems;
@@ -107,6 +108,8 @@ public class BeansProjectDescriptionHandler extends DefaultHandler
 					state = S_CONFIG_SET_NAME;
 				} else if (elementName.equals(OVERRIDING)) {
 					state = S_CONFIG_SET_OVERRIDING;
+				} else if (elementName.equals(INCOMPLETE)) {
+					state = S_CONFIG_SET_INCOMPLETE;
 				} else if (elementName.equals(CONFIGS)) {
 					state = S_CONFIG_SET_CONFIGS;
 				}
@@ -176,6 +179,15 @@ public class BeansProjectDescriptionHandler extends DefaultHandler
 					boolean override = Boolean.valueOf(
 								   charBuffer.toString().trim()).booleanValue();
 					configSet.setAllowBeanDefinitionOverriding(override);
+					state = S_CONFIG_SET;
+				}
+				break;
+
+			case S_CONFIG_SET_INCOMPLETE :
+				if (elementName.equals(INCOMPLETE)) {
+					boolean incomplete = Boolean.valueOf(
+								   charBuffer.toString().trim()).booleanValue();
+					configSet.setIncomplete(incomplete);
 					state = S_CONFIG_SET;
 				}
 				break;

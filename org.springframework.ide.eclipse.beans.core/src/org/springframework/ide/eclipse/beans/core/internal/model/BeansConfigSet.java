@@ -38,6 +38,7 @@ public class BeansConfigSet extends BeansModelElement implements IBeansConfigSet
 
 	private List configNames;
 	private boolean allowBeanDefinitionOverriding;
+	private boolean isIncomplete;
 	private Map beansMap;
 	private Map beanClassesMap;
 
@@ -76,6 +77,14 @@ public class BeansConfigSet extends BeansModelElement implements IBeansConfigSet
 
 	public boolean isAllowBeanDefinitionOverriding() {
 		return allowBeanDefinitionOverriding;
+	}
+
+	public void setIncomplete(boolean isIncomplete) {
+		this.isIncomplete = isIncomplete;
+	}
+
+	public boolean isIncomplete() {
+		return isIncomplete;
 	}
 
 	public void addConfig(String configName) {
