@@ -158,12 +158,14 @@ public class Bean extends BeansModelElement implements IBean {
 		// which are referenced by the parent bean
 		if (!isRootBean()) {
 			String parentName = getParentName();
-			beanNames.add(parentName);
-			IBean parentBean = ((IBeansConfig)
+			if (parentName != null) {
+				beanNames.add(parentName);
+				IBean parentBean = ((IBeansConfig)
 										getElementParent()).getBean(parentName);
-			if (parentBean != null) {
-				BeansModelUtil.addReferencedBeanNamesForBean(parentBean,
-															 beanNames);
+				if (parentBean != null) {
+					BeansModelUtil.addReferencedBeanNamesForBean(parentBean,
+																 beanNames);
+				}
 			}
 		}
 
