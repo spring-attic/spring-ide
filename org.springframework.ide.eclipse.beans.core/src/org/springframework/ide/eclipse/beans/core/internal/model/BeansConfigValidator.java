@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.beans.core.model;
+package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -31,7 +31,11 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtil;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 
 public class BeansConfigValidator {
 
@@ -96,13 +100,13 @@ public class BeansConfigValidator {
 
 	protected void validateConfig(IBeansConfig config) {
 		if (DEBUG) {
-			System.out.println("Validating config '" + config.getElementName() +
+			System.out.println("Validating config '" + config.getConfigPath() +
 							   "'");
 		}
 		if (monitor != null) {
 			monitor.subTask(BeansCorePlugin.getFormattedMessage(
 										  "BeansConfigValidator.validateConfig",
-										  config.getElementName()));
+										  config.getConfigPath()));
 		}
 
 		// Validate all beans
@@ -129,7 +133,7 @@ public class BeansConfigValidator {
 	protected void validateConfigSet(IBeansConfigSet configSet,
 									 IBeansConfig config) {
 		if (DEBUG) {
-			System.out.println("Validating config '" + config.getElementName() +
+			System.out.println("Validating config '" + config.getConfigPath() +
 							   "' in set '" + configSet.getElementName() + "'");
 		}
 		if (monitor != null) {
@@ -234,7 +238,7 @@ public class BeansConfigValidator {
 				boolean found = false;
 				List cons = Introspector.getConstructors(type);
 				for (Iterator iter = cons.iterator(); iter.hasNext();) {
-					if (monitor.isCanceled()) {
+					if (monitor != null && monitor.isCanceled()) {
 						return;
 					}
 					IMethod method = (IMethod) iter.next();

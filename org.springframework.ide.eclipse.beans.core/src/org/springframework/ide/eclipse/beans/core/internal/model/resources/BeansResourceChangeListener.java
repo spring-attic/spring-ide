@@ -14,7 +14,9 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.beans.core.resources;
+package org.springframework.ide.eclipse.beans.core.internal.model.resources;
+
+import java.util.Collection;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -25,8 +27,13 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 
 /**
@@ -41,9 +48,9 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
  */
 public class BeansResourceChangeListener implements IResourceChangeListener {
 
-	public static final int LISTENER_FLAGS = IResourceChangeEvent.POST_CHANGE |
-											  IResourceChangeEvent.PRE_CLOSE |
-											  IResourceChangeEvent.PRE_DELETE;
+	public static final int LISTENER_FLAGS = IResourceChangeEvent.PRE_CLOSE |
+										   IResourceChangeEvent.PRE_DELETE |
+										   IResourceChangeEvent.POST_AUTO_BUILD;
 	private static final int VISITOR_FLAGS = IResourceDelta.ADDED |
 											 IResourceDelta.CHANGED |
 											 IResourceDelta.REMOVED;
@@ -54,9 +61,9 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 	}
 
 	public void resourceChanged(IResourceChangeEvent event) {
-		if (event.getSource() instanceof IWorkspace &&
-									  event.getResource() instanceof IProject) {
+		if (event.getSource() instanceof IWorkspace) {
 			IProject project = (IProject) event.getResource();
+			IResourceDelta delta = event.getDelta();
 			switch (event.getType()) {
 				case IResourceChangeEvent.PRE_CLOSE :
 					if (BeansCoreUtils.isBeansProject(project)) {
@@ -70,8 +77,7 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 					}
 					break;
 
-				case IResourceChangeEvent.POST_CHANGE :
-					IResourceDelta delta = event.getDelta();
+				case IResourceChangeEvent.POST_AUTO_BUILD :
 					if (delta != null) {
 						try {
 							delta.accept(new BeansProjectVisitor(),
@@ -126,11 +132,13 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 					int flags = delta.getFlags();
 					if (resource instanceof IFile) {
 						if ((flags & IResourceDelta.CONTENT) != 0) {
+							IFile file = (IFile) resource;
 							if (isProjectDescriptionFile(resource)) {
-								events.projectDescriptionChanged((IFile)
-																 resource);
-							} else if (BeansCoreUtils.isBeansConfig(resource)) {
-								events.configChanged((IFile) resource);
+								events.projectDescriptionChanged(file);
+							} else if (BeansCoreUtils.isBeansConfig(file)) {
+								events.configChanged(file);
+							} else {
+								visitChangedFile(file);
 							}
 						}
 						return false;
@@ -172,6 +180,28 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 				   resource.getType() == IResource.FILE && 
 				   resource.getFullPath().segmentCount() == 2 &&
 				   resource.getName().equals(IBeansProject.DESCRIPTION_FILE);
+		}
+
+		private void visitChangedFile(IFile file) {
+			String ext = file.getFileExtension();
+			if (ext != null && "java".equals(ext)) {
+				ICompilationUnit cu = JavaCore.createCompilationUnitFrom(file);
+				if (cu != null && cu.exists()) {
+					try {
+						IBeansModel model = BeansCorePlugin.getModel();
+						IType[] types = cu.getTypes();
+						for (int i= 0; i < types.length; i++) {
+							String className = types[i].getFullyQualifiedName();
+							Collection configs = model.getConfigs(className);
+							if (!configs.isEmpty()) {
+								events.beanClassChanged(className, configs);
+							}
+						}
+					} catch (JavaModelException e) {
+						BeansCorePlugin.log(e);
+					}
+				}
+			}
 		}
 	}
 }

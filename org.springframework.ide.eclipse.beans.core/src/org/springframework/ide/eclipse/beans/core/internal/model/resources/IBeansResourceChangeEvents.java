@@ -14,7 +14,9 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.beans.core.resources;
+package org.springframework.ide.eclipse.beans.core.internal.model.resources;
+
+import java.util.Collection;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -47,4 +49,6 @@ public interface IBeansResourceChangeEvents {
 	void configChanged(IFile file);
 
 	void configRemoved(IFile file);
+
+	void beanClassChanged(String className, Collection configs);
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.beans.core.resources;
+package org.springframework.ide.eclipse.beans.core.internal.model.resources;
 
 import java.io.File;
 import java.io.FileInputStream;
