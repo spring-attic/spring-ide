@@ -12,6 +12,9 @@ Changes in version 1.1.0 (1.9.2004):
 
 * beans project validator now checks constructor arguments too
 
+* config files are re-validated automatically if source code of corresponding bean
+  classes has been modified
+
 
 Changes in version 1.0.2 (10.6.2004):
 
