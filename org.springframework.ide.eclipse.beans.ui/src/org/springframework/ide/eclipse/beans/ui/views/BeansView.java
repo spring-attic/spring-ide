@@ -44,7 +44,6 @@ import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
-import org.springframework.ide.eclipse.beans.ui.actions.OpenProperties;
 import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
@@ -57,6 +56,8 @@ import org.springframework.ide.eclipse.beans.ui.model.PropertyNode;
 import org.springframework.ide.eclipse.beans.ui.model.RootNode;
 import org.springframework.ide.eclipse.beans.ui.views.actions.CollapseAllAction;
 import org.springframework.ide.eclipse.beans.ui.views.actions.LexicalSortingAction;
+import org.springframework.ide.eclipse.beans.ui.views.actions.OpenBeanClassAction;
+import org.springframework.ide.eclipse.beans.ui.views.actions.OpenProperties;
 import org.springframework.ide.eclipse.beans.ui.views.actions.PropertySheetAction;
 
 public class BeansView extends ViewPart implements IBeansView, IShowInSource,
@@ -68,6 +69,7 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 	private TreeViewer treeViewer;
 	private RootNode rootNode;
 
+	private OpenBeanClassAction openBeanClassAction;
 	private OpenProperties openPropertiesAction;
 
 	public BeansView() {
@@ -94,6 +96,7 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 	}
 
 	private void initializeActions() {
+		openBeanClassAction = new OpenBeanClassAction(this);
 		openPropertiesAction = new OpenProperties(this);
 	}
 
@@ -145,6 +148,9 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 	}
 
 	private void fillContextMenu(IMenuManager menuMgr) {
+		if (openBeanClassAction.isEnabled()) {
+			menuMgr.add(openBeanClassAction);
+		}
 		menuMgr.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		menuMgr.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS +
 								  "-end"));
