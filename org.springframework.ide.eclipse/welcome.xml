@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<welcomePage title="Spring IDE" format="wrap">
+
+<intro><p>This page will help familiarize you with the Spring IDE plugin.
+To get started, read the sections below and
+click on the related links.</p></intro>
+
+<item><b>Setting up a Spring Beans Project</b>
+<p>To configure a project to leverage the Spring IDE, select the menu item
+"Add Spring Beans Project Nature" from the project's context menu, open the
+project properties and set the properties on the property
+"Spring Beans Project".</p></item>
+
+<item><b>Opening the Spring Beans view</b>
+<p>Select <action pluginId="org.springframework.ide.eclipse.beans.ui" class="org.springframework.ide.eclipse.beans.ui.actions.ShowView">Window->Show View->Other->Spring IDE->Beans View</action></p></item>
+
+<item><b>Learn More</b>
+<p>To learn more you can read the <topic id="/org.springframework.ide.eclipse.beans.ui.doc/toc.xml">Spring IDE User Guide</topic>.</p></item>
+
+</welcomePage>
