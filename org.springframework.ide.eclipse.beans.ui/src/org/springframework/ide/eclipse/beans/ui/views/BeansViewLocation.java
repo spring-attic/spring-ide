@@ -16,6 +16,10 @@
 
 package org.springframework.ide.eclipse.beans.ui.views;
 
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.part.IShowInTarget;
+import org.eclipse.ui.part.ShowInContext;
+
 /**
  * This class is used for selecting a specific node within the BeansView.
  * <p>
@@ -26,8 +30,7 @@ package org.springframework.ide.eclipse.beans.ui.views;
  * location.setConfigName("myconfig");
  * location.setBeanName("mybean");
  * location.setPropertyName("myproperty");
- * IViewPart view = BeansView.showView();
- * ((IShowInTarget) view).show(new ShowInContext(location, null));
+ * location.show();
  * </code>
  */
 public class BeansViewLocation {
@@ -83,5 +86,13 @@ public class BeansViewLocation {
 
 	public boolean hasPropertyName() {
 		return (propertyName != null && propertyName.length() > 0);
+	}
+
+	/**
+	 * Opens the BeansView and selects the node specified by this location. 
+	 */
+	public void show() {
+		IViewPart view = BeansView.showView();	
+		((IShowInTarget) view).show(new ShowInContext(this, null));
 	}
 }

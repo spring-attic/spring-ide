@@ -23,14 +23,10 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.ui.actions.EditorPartAction;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.part.IShowInTarget;
-import org.eclipse.ui.part.ShowInContext;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditor;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
 import org.springframework.ide.eclipse.beans.ui.graph.parts.BeanPart;
-import org.springframework.ide.eclipse.beans.ui.views.BeansView;
 import org.springframework.ide.eclipse.beans.ui.views.BeansViewLocation;
 
 public class ShowInView extends EditorPartAction {
@@ -65,9 +61,7 @@ public class ShowInView extends EditorPartAction {
 			location.setProjectName(file.getProject().getName());
 			location.setConfigName(file.getProjectRelativePath().toString());
 			location.setBeanName(bean.getName());
-	
-			IViewPart view = BeansView.showView();
-			((IShowInTarget) view).show(new ShowInContext(location, null));
+			location.show();
 		}
 	}
 

@@ -29,15 +29,11 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IEditorActionDelegate;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
-import org.eclipse.ui.part.IShowInTarget;
-import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
-import org.springframework.ide.eclipse.beans.ui.views.BeansView;
 import org.springframework.ide.eclipse.beans.ui.views.BeansViewLocation;
 
 public class ShowInView extends Action implements IEditorActionDelegate,
@@ -81,8 +77,7 @@ public class ShowInView extends Action implements IEditorActionDelegate,
 		if (editor != null && file != null) {
 			BeansViewLocation location = guessBeansViewLocation();
 			if (location != null) {
-				IViewPart view = BeansView.showView();
-				((IShowInTarget) view).show(new ShowInContext(location, null));
+				location.show();
 			}
 		}
 	}
