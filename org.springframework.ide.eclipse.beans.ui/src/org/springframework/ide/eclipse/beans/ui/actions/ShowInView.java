@@ -67,7 +67,6 @@ public class ShowInView extends Action implements IEditorActionDelegate {
 		if (node != null) {
 			IViewPart view = BeansView.showView();
 			((IShowInTarget) view).show(new ShowInContext(node, null));
-			return;
 		}
 	}
 
