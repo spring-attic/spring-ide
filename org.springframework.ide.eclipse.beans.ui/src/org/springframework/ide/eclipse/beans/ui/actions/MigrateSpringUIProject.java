@@ -39,14 +39,14 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescription;
-import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectNature;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionHandler;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionWriter;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUILabelDecorator;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
+import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -118,8 +118,8 @@ public class MigrateSpringUIProject implements IObjectActionDelegate {
 	private void migrateProject(IProject project) {
 
 		// remove SpringUI nature and buidler
-		BeansCoreUtils.removeProjectBuilder(project, SPRINGUI_BUILDER_ID);
-		BeansCoreUtils.removeProjectNature(project, SPRINGUI_NATURE_ID);
+		SpringCoreUtils.removeProjectBuilder(project, SPRINGUI_BUILDER_ID);
+		SpringCoreUtils.removeProjectNature(project, SPRINGUI_NATURE_ID);
 
 		// migrate SpringUI's project description
 		IFile file = project.getFile(new Path(SPRINGUI_PROJECT_DESCRIPTION));
@@ -137,7 +137,7 @@ public class MigrateSpringUIProject implements IObjectActionDelegate {
 		}
 
 		// finally add beans project nature
-		BeansCoreUtils.addProjectNature(project, BeansProjectNature.NATURE_ID);
+		SpringCoreUtils.addProjectNature(project, SpringCore.NATURE_ID);
 	}
 
 	private void deleteProblemMarkers(IProject project,
@@ -150,7 +150,7 @@ public class MigrateSpringUIProject implements IObjectActionDelegate {
 					file.deleteMarkers(SPRINGUI_MARKER_ID, false,
 									   IResource.DEPTH_ZERO);
 				} catch (CoreException e) {
-					BeansCorePlugin.log(e);
+					BeansUIPlugin.log(e);
 				}
 			}
 		}
@@ -179,19 +179,19 @@ public class MigrateSpringUIProject implements IObjectActionDelegate {
 			IStatus status = handler.getStatus(); 
 			switch (status.getSeverity()) {
 				case IStatus.ERROR :
-					BeansCorePlugin.log(status);
+					BeansUIPlugin.log(status);
 					return null;
 	
 				case IStatus.WARNING :
 				case IStatus.INFO :
-					BeansCorePlugin.log(status);
+					BeansUIPlugin.log(status);
 	
 				case IStatus.OK :
 				default :
 					return handler.getDescription();
 			}
 		} catch (CoreException e) {
-			BeansCorePlugin.log(e.getStatus());
+			BeansUIPlugin.log(e.getStatus());
 		} finally {
 			if (is != null) {
 				try {

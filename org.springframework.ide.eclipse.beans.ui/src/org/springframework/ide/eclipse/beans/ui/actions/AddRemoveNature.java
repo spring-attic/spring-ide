@@ -27,10 +27,9 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
-import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
-import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectNature;
 import org.springframework.ide.eclipse.beans.ui.BeansUILabelDecorator;
-
+import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
 public class AddRemoveNature implements IObjectActionDelegate {
     private IWorkbenchPart targetPart;
@@ -71,12 +70,12 @@ public class AddRemoveNature implements IObjectActionDelegate {
 		Iterator iter = selected.iterator();
 		while (iter.hasNext()) {
 			IProject project = (IProject) iter.next();
-			if (BeansCoreUtils.isBeansProject(project)) {
-				BeansCoreUtils.removeProjectNature(project,
-												  BeansProjectNature.NATURE_ID);
+			if (SpringCoreUtils.isSpringProject(project)) {
+				SpringCoreUtils.removeProjectNature(project,
+													SpringCore.NATURE_ID);
 			} else {
-				BeansCoreUtils.addProjectNature(project,
-												BeansProjectNature.NATURE_ID);
+				SpringCoreUtils.addProjectNature(project,
+												SpringCore.NATURE_ID);
 			}
 
 			// Refresh label decoration for Spring project and config files
