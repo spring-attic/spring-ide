@@ -99,13 +99,6 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 		return beans;
 	}
 
-	public Collection getBeans(String className) {
-		if (isBeanClass(className)) {
-			return (Collection) getBeanClassesMap().get(className);
-		}
-		return Collections.EMPTY_LIST;
-	}
-
 	public Collection getInnerBeans() {
 		if (innerBeans == null) {
 
@@ -113,6 +106,15 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 			readConfig();
 		}
 		return innerBeans;
+	}
+
+	public BeanDefinitionException getException() {
+		if (beans == null) {
+
+			// Lazily initialization of beans list
+			readConfig();
+		}
+		return exception;
 	}
 
 	public boolean isBeanClass(String className) {
@@ -123,13 +125,11 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 		return getBeanClassesMap().keySet();
 	}
 
-	public BeanDefinitionException getException() {
-		if (beans == null) {
-
-			// Lazily initialization of beans list
-			readConfig();
+	public Collection getBeans(String className) {
+		if (isBeanClass(className)) {
+			return (Collection) getBeanClassesMap().get(className);
 		}
-		return exception;
+		return Collections.EMPTY_LIST;
 	}
 
 	public String toString() {
@@ -170,7 +170,7 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 	 */
 	private Map getBeansMap() {
 		if (beansMap == null) {
-			Map beansMap = new HashMap();
+			beansMap = new HashMap();
 			Iterator iter = getBeans().iterator();
 			while (iter.hasNext()) {
 				IBean bean = (IBean) iter.next();
