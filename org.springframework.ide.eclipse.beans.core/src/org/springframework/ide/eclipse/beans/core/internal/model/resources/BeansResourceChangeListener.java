@@ -44,7 +44,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
  * An implementation of <code>IBeansResourceChangeEvents</code> has to be
  * provided. Here are callbacks defined for the different events. 
  * 
- * @see ISpringResourceChangeEvents
+ * @see IBeansResourceChangeEvents
  */
 public class BeansResourceChangeListener implements IResourceChangeListener {
 

@@ -22,9 +22,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 
 /**
- * Defines callbacks for the <code>SpringResourceChangeListener</code>.
+ * Defines callbacks for the <code>BeansResourceChangeListener</code>.
  * 
- * @see SpringResourceChangeListener
+ * @see BeansResourceChangeListener
  */
 public interface IBeansResourceChangeEvents {
 
