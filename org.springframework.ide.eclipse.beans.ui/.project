@@ -3,12 +3,6 @@
 	<name>org.springframework.ide.eclipse.beans.ui</name>
 	<comment></comment>
 	<projects>
-		<project>org.eclipse.jdt.ui</project>
-		<project>org.eclipse.jface</project>
-		<project>org.eclipse.jface.text</project>
-		<project>org.eclipse.text</project>
-		<project>org.eclipse.ui.editors</project>
-		<project>org.springframework.ide.eclipse.beans.core</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
