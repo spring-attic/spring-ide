@@ -37,7 +37,9 @@ import org.eclipse.draw2d.SWTGraphics;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.ContextMenuProvider;
 import org.eclipse.gef.DefaultEditDomain;
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GEFPlugin;
+import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.LayerConstants;
 import org.eclipse.gef.RootEditPart;
@@ -47,15 +49,18 @@ import org.eclipse.gef.editparts.ScalableFreeformRootEditPart;
 import org.eclipse.gef.editparts.ZoomManager;
 import org.eclipse.gef.ui.actions.ActionBarContributor;
 import org.eclipse.gef.ui.actions.ActionRegistry;
+import org.eclipse.gef.ui.actions.PrintAction;
 import org.eclipse.gef.ui.actions.UpdateAction;
 import org.eclipse.gef.ui.actions.ZoomInAction;
 import org.eclipse.gef.ui.actions.ZoomOutAction;
 import org.eclipse.gef.ui.parts.GraphicalViewerKeyHandler;
 import org.eclipse.gef.ui.parts.ScrollingGraphicalViewer;
+import org.eclipse.gef.ui.parts.SelectionSynchronizer;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.GC;
@@ -66,6 +71,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.ISelectionListener;
+import org.eclipse.ui.ISelectionService;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.SaveAsDialog;
@@ -77,12 +85,11 @@ import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.actions.GraphContextMenuProvider;
 import org.springframework.ide.eclipse.beans.ui.graph.actions.OpenConfigFile;
 import org.springframework.ide.eclipse.beans.ui.graph.actions.OpenJavaType;
-import org.springframework.ide.eclipse.beans.ui.graph.actions.PrintAction;
 import org.springframework.ide.eclipse.beans.ui.graph.actions.ShowInView;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Graph;
 import org.springframework.ide.eclipse.beans.ui.graph.parts.GraphicalPartFactory;
 
-public class GraphEditor extends EditorPart {
+public class GraphEditor extends EditorPart implements ISelectionListener {
 
 	public static final String EDITOR_ID = BeansGraphPlugin.PLUGIN_ID +
 																	  ".editor";
@@ -95,6 +102,9 @@ public class GraphEditor extends EditorPart {
 	private DefaultEditDomain editDomain;
 	private GraphicalViewer graphicalViewer;
 	private ActionRegistry actionRegistry;
+	private SelectionSynchronizer synchronizer;
+	private List selectionActions = new ArrayList();
+	private List propertyActions = new ArrayList();
 	private Graph graph;
 
 	public GraphEditor() {
@@ -106,7 +116,8 @@ public class GraphEditor extends EditorPart {
 		if (input instanceof GraphEditorInput) {
 			GraphEditorInput beansInput = (GraphEditorInput) input;
 			graph = new Graph(beansInput);
-			setTitle(beansInput.getName());
+			setPartName(beansInput.getName());
+			setContentDescription(beansInput.getToolTipText());
 		} else {
 			graph = null;
 		}
@@ -117,13 +128,15 @@ public class GraphEditor extends EditorPart {
 	 * @see #createGraphicalViewer(Composite)
 	 */
 	protected void initializeGraphicalViewer() {
-		if (graph.hasCycles()) {
-			MessageDialog.openError(getSite().getShell(),
+		if (graph != null) {
+			if (graph.hasCycles()) {
+				MessageDialog.openError(getSite().getShell(),
 						   BeansGraphPlugin.getResourceString(ERROR_TITLE),
 						   BeansGraphPlugin.getResourceString(ERROR_MSG_CYCLE));
-		} else {
-			graph.layout(getGraphicalViewer().getControl().getFont());
-			getGraphicalViewer().setContents(graph);
+			} else {
+				graph.layout(getGraphicalViewer().getControl().getFont());
+				getGraphicalViewer().setContents(graph);
+			}
 		}
 	}
 
@@ -171,6 +184,13 @@ public class GraphEditor extends EditorPart {
 		}
 		if (type == CommandStack.class) {
 			return getCommandStack();
+		}
+		if (type == EditPart.class && getGraphicalViewer() != null) {
+			return getGraphicalViewer().getRootEditPart();
+		}
+		if (type == IFigure.class && getGraphicalViewer() != null) {
+			return ((GraphicalEditPart)
+							getGraphicalViewer().getRootEditPart()).getFigure();
 		}
 		if (type == IContentOutlinePage.class) {
 			return getOutlinePage();
@@ -256,9 +276,18 @@ public class GraphEditor extends EditorPart {
 	 * @see org.eclipse.ui.IWorkbenchPart#dispose()
 	 */
 	public void dispose() {
+		getSite().getWorkbenchWindow().getSelectionService().removeSelectionListener(this);
 		getEditDomain().setActiveTool(null);
 		getActionRegistry().dispose();
 		super.dispose();
+	}
+
+	/**
+	 * @see org.eclipse.ui.part.WorkbenchPart#firePropertyChange(int)
+	 */
+	protected void firePropertyChange(int property) {
+		super.firePropertyChange(property);
+		updateActions(propertyActions);
 	}
 
 	/**
@@ -297,15 +326,70 @@ public class GraphEditor extends EditorPart {
 	}
 
 	/**
+	 * Returns the list of {@link IAction IActions} dependant on property changes in the
+	 * Editor.  These actions should implement the {@link UpdateAction} interface so that they
+	 * can be updated in response to property changes.  An example is the "Save" action.
+	 * @return the list of property-dependant actions
+	 */
+	protected List getPropertyActions() {
+		return propertyActions;
+	}
+	
+	/**
+	 * Returns the list of {@link IAction IActions} dependant on changes in the workbench's
+	 * {@link ISelectionService}. These actions should implement the {@link UpdateAction}
+	 * interface so that they can be updated in response to selection changes.  An example is
+	 * the Delete action.
+	 * @return the list of selection-dependant actions
+	 */
+	protected List getSelectionActions() {
+		return selectionActions;
+	}
+	
+	/**
+	 * Returns the selection syncronizer object. The synchronizer can be used to sync the
+	 * selection of 2 or more EditPartViewers.
+	 * @return the syncrhonizer
+	 */
+	protected SelectionSynchronizer getSelectionSynchronizer() {
+		if (synchronizer == null) {
+			synchronizer = new SelectionSynchronizer();
+		}
+		return synchronizer;
+	}
+
+	/**
+	 * Hooks the GraphicalViewer to the rest of the Editor. By default, the
+	 * viewer is added to the SelectionSynchronizer, which can be used to
+	 * keep 2 or more EditPartViewers in sync. The viewer is also registered as
+	 * the <code>ISelectionProvider</code> for the Editor's PartSite.
+	 */
+	protected void hookGraphicalViewer() {
+		getSelectionSynchronizer().addViewer(getGraphicalViewer());
+		getSite().setSelectionProvider(getGraphicalViewer());
+	}
+
+	/**
 	 * Sets the site and input for this editor then creates and initializes the
 	 * actions.
 	 * @see org.eclipse.ui.IEditorPart#init(IEditorSite, IEditorInput)
 	 */
 	public void init(IEditorSite site, IEditorInput input)
-		throws PartInitException {
+													  throws PartInitException {
 		setSite(site);
 		setInput(input);
+		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(this);
 		initializeActionRegistry();
+	}
+
+	/**
+	 * @see org.eclipse.ui.ISelectionListener#selectionChanged(IWorkbenchPart, ISelection)
+	 */
+	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+		// If not the active editor, ignore selection changed.
+		if (this.equals(getSite().getPage().getActiveEditor())) {
+			updateActions(selectionActions);
+		}
 	}
 
 	/**
@@ -317,6 +401,7 @@ public class GraphEditor extends EditorPart {
 	 */
 	protected void initializeActionRegistry() {
 		createActions();
+		updateActions(propertyActions);
 	}
 
 	/**
@@ -324,15 +409,15 @@ public class GraphEditor extends EditorPart {
 	 * @param registry the registry
 	 */
 	protected void setActionRegistry(ActionRegistry registry) {
-		actionRegistry = registry;
+		this.actionRegistry = registry;
 	}
 
 	/**
 	 * Sets the EditDomain for this EditorPart.
 	 * @param ed the domain
 	 */
-	protected void setEditDomain(DefaultEditDomain ed) {
-		this.editDomain = ed;
+	protected void setEditDomain(DefaultEditDomain editDomain) {
+		this.editDomain = editDomain;
 	}
 
 	/**
@@ -347,8 +432,8 @@ public class GraphEditor extends EditorPart {
 	 * @param viewer the graphical viewer
 	 */
 	protected void setGraphicalViewer(GraphicalViewer viewer) {
-		getEditDomain().addViewer(viewer);
 		this.graphicalViewer = viewer;
+		getEditDomain().addViewer(viewer);
 	}
 
 	/**
