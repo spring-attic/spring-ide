@@ -24,30 +24,32 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.draw2d.graph.Node;
+import org.eclipse.ui.views.properties.IPropertySource;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.ide.eclipse.beans.ui.model.ConstructorArgumentNode;
+import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
+import org.springframework.ide.eclipse.beans.ui.model.properties.ConstructorArgumentProperties;
 
 public class ConstructorArgument extends Node implements IAdaptable {
 
 	private Bean bean;
-	private ConstructorArgumentNode node;
+	private IBeanConstructorArgument carg;
 
-	public ConstructorArgument(Bean bean, ConstructorArgumentNode node) {
-		super(node.getName());
+	public ConstructorArgument(Bean bean, IBeanConstructorArgument carg) {
+		super(carg.getElementName());
 		this.bean = bean;
-		this.node = node;
+		this.carg = carg;
 	}
 
 	public Bean getBean() {
 		return bean;
 	}
 
-	public ConstructorArgumentNode getNode() {
-		return node;
+	public IBeanConstructorArgument getBeanConstructorArgument() {
+		return carg;
 	}
 
 	public String getName() {
-		return node.getName();
+		return carg.getElementName();
 	}
 
 	/**
@@ -56,7 +58,7 @@ public class ConstructorArgument extends Node implements IAdaptable {
 	 */
 	public List getBeanReferences() {
 		List references = new ArrayList();
-		addReferencesForValue(node.getValue(), references);
+		addReferencesForValue(carg.getValue(), references);
 		return references;
 	}
 
@@ -93,6 +95,9 @@ public class ConstructorArgument extends Node implements IAdaptable {
 	}
 
 	public Object getAdapter(Class adapter) {
-		return (node != null ? node.getAdapter(adapter) : null);
+		if (adapter == IPropertySource.class && carg != null) {
+			return new ConstructorArgumentProperties(carg);
+		}
+		return null;
 	}
 }

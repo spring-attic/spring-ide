@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.draw2d.graph.Edge;
 import org.eclipse.draw2d.graph.Node;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 
 public class Reference extends Edge implements IAdaptable {
 
@@ -48,19 +49,21 @@ public class Reference extends Edge implements IAdaptable {
 
 	public IFile getConfigFile() {
 		if (node instanceof Property) {
-			return ((Property) node).getNode().getConfigNode().getConfigFile();
+			IBean bean = ((Property) node).getBean().getBean();
+			return bean.getConfig().getConfigFile();
 		} else if (node instanceof ConstructorArgument) {
-			return ((ConstructorArgument)
-								node).getNode().getConfigNode().getConfigFile();
+			IBean bean = ((ConstructorArgument) node).getBean().getBean();
+			return bean.getConfig().getConfigFile();
 		}
 		return getSourceBean().getConfigFile();
 	}
 
 	public int getStartLine() {
 		if (node instanceof Property) {
-			return ((Property) node).getNode().getStartLine();
+			return ((Property) node).getBeanProperty().getElementStartLine();
 		} else if (node instanceof ConstructorArgument) {
-			return ((ConstructorArgument) node).getNode().getStartLine();
+			return ((ConstructorArgument)
+					   node).getBeanConstructorArgument().getElementStartLine();
 		}
 		return getSourceBean().getStartLine();
 	}

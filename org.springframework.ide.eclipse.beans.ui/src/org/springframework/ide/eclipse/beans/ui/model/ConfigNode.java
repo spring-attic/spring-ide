@@ -223,21 +223,15 @@ public class ConfigNode extends AbstractNode {
 		while (cargs.hasNext()) {
 			IBeanConstructorArgument carg = (IBeanConstructorArgument)
 																   cargs.next();
-			ConstructorArgumentNode cargNode = new ConstructorArgumentNode(
-					beanNode, carg.getIndex(), carg.getType(), carg.getValue());
-			cargNode.setStartLine(carg.getElementStartLine());
-			beanNode.addConstructorArgument(cargNode);
+			beanNode.addConstructorArgument(new ConstructorArgumentNode(
+																beanNode, carg));
 		}
 
 		// Add properties
 		Iterator props = bean.getProperties().iterator();
 		while (props.hasNext()) {
 			IBeanProperty prop = (IBeanProperty) props.next();
-			PropertyNode propNode = new PropertyNode(beanNode,
-													 prop.getElementName());
-			propNode.setValue(prop.getValue());
-			propNode.setStartLine(prop.getElementStartLine());
-			beanNode.addProperty(propNode);
+			beanNode.addProperty(new PropertyNode(beanNode, prop));
 		}
 
 		// Add inner beans

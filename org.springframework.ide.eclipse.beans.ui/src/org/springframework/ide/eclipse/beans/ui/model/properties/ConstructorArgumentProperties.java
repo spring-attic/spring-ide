@@ -22,9 +22,9 @@ import java.util.List;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
-import org.springframework.ide.eclipse.beans.ui.model.ConstructorArgumentNode;
 
 public class ConstructorArgumentProperties implements IPropertySource {
 
@@ -66,9 +66,9 @@ public class ConstructorArgumentProperties implements IPropertySource {
 		descriptors.add(descriptor);
 	}
 
-	private ConstructorArgumentNode constructorArg;
+	private IBeanConstructorArgument constructorArg;
 
-	public ConstructorArgumentProperties(ConstructorArgumentNode constructorArg) {
+	public ConstructorArgumentProperties(IBeanConstructorArgument constructorArg) {
 		this.constructorArg = constructorArg;
 	}
 
@@ -79,7 +79,7 @@ public class ConstructorArgumentProperties implements IPropertySource {
 
 	public Object getPropertyValue(Object id) {
 		if (P_ID_BEAN.equals(id)) {
-			BeanNode bean = (BeanNode) constructorArg.getParent();
+			IBean bean = (IBean) constructorArg.getElementParent();
 			if (bean.isRootBean()) {
 				return new RootBeanProperties(bean);
 			} else {

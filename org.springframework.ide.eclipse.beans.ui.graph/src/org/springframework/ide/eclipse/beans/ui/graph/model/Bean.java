@@ -17,86 +17,99 @@
 package org.springframework.ide.eclipse.beans.ui.graph.model;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.draw2d.graph.Node;
-import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
-import org.springframework.ide.eclipse.beans.ui.model.ConstructorArgumentNode;
-import org.springframework.ide.eclipse.beans.ui.model.INode;
-import org.springframework.ide.eclipse.beans.ui.model.PropertyNode;
+import org.eclipse.ui.views.properties.IPropertySource;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
+import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.ui.model.properties.ChildBeanProperties;
+import org.springframework.ide.eclipse.beans.ui.model.properties.RootBeanProperties;
 
 public class Bean extends Node implements IAdaptable {
 
 	public int preferredHeight;
-	private BeanNode node;
+	private IBean bean;
 
-	public Bean(BeanNode node) {
-		super(node.getName());
-		this.node = node;
+	public Bean() {
+		super("empty");
 	}
 
-	public BeanNode getNode() {
-		return node;
+	public Bean(IBean bean) {
+		super(bean.getElementName());
+		this.bean = bean;
+	}
+
+	public IBean getBean() {
+		return bean;
 	}
 
 	public String getName() {
-		return node.getName();
+		return bean.getElementName();
 	}
 
 	public String getClassName() {
-		return node.getClassName();
+		return bean.getClassName();
 	}
 
 	public String getParentName() {
-		return node.getParentName();
+		return bean.getParentName();
 	}
 
 	public IFile getConfigFile() {
-		return node.getConfigNode().getConfigFile();
+		return bean.getConfig().getConfigFile();
 	}
 
 	public int getStartLine() {
-		return node.getStartLine();
+		return bean.getElementStartLine();
 	}
 
 	public boolean hasConstructorArguments() {
-		return node.hasConstructorArguments();
+		return bean.getConstructorArguments().size() > 0;
 	}
 
 	public ConstructorArgument[] getConstructorArguments() {
-		ConstructorArgumentNode[] cargs = node.getConstructorArguments();
-		ArrayList list = new ArrayList(cargs.length);
-		for (int i = 0; i < cargs.length; i++) {
-			list.add(new ConstructorArgument(this, cargs[i]));
+		ArrayList list = new ArrayList();
+		Iterator cargs = bean.getConstructorArguments().iterator();
+		while (cargs.hasNext()) {
+			IBeanConstructorArgument carg = (IBeanConstructorArgument)
+																   cargs.next();
+			list.add(new ConstructorArgument(this, carg));
 		}
 		return (ConstructorArgument[])
 								list.toArray(new ConstructorArgument[list.size()]);
 	}
 
 	public boolean hasProperties() {
-		return node.hasProperties();
+		return bean.getProperties().size() > 0;
 	}
 
 	public Property[] getProperties() {
-		PropertyNode[] props = node.getProperties();
-		ArrayList list = new ArrayList(props.length);
-		for (int i = 0; i < props.length; i++) {
-			list.add(new Property(this, props[i]));
+		ArrayList list = new ArrayList();
+		Iterator props = bean.getProperties().iterator();
+		while (props.hasNext()) {
+			IBeanProperty prop = (IBeanProperty) props.next();
+			list.add(new Property(this, prop));
 		}
 		return (Property[]) list.toArray(new Property[list.size()]);
 	}
 
 	public boolean isRootBean() {
-		return node.isRootBean();
-	}
-
-	public boolean hasError() {
-		return (node.getFlags() & INode.FLAG_HAS_ERRORS) != 0;
+		return bean.isRootBean();
 	}
 
 	public Object getAdapter(Class adapter) {
-		return (node != null ? node.getAdapter(adapter) : null);
+		if (adapter == IPropertySource.class && bean != null) {
+			if (bean.isRootBean()) {
+				return new RootBeanProperties(bean);
+			} else {
+				return new ChildBeanProperties(bean);
+			}
+		}
+		return null;
 	}
 
 	public String toString() {

@@ -20,28 +20,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.ui.views.properties.IPropertySource;
+import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.ui.model.properties.PropertyProperties;
 
 public class PropertyNode extends AbstractNode {
 
-	private Object value;
+	private IBeanProperty property;
 
-	public PropertyNode(BeanNode bean, String name) {
-		super(bean, name);
+	public PropertyNode(BeanNode bean, IBeanProperty property) {
+		super(bean, property.getElementName());
+		this.property = property;
 	}
 
-	public PropertyNode(BeanNode bean, PropertyNode property) {
-		super(bean, property.getName());
-		setStartLine(property.getStartLine()); 
-		this.value = property.getValue();
+	public IBeanProperty getBeanProperty() {
+		return property;
 	}
 
-	public void setValue(Object value) {
-		this.value = value;
-	}
-	
 	public Object getValue() {
-		return value;
+		return property.getValue();
 	}
 
 	/**
@@ -49,8 +45,8 @@ public class PropertyNode extends AbstractNode {
 	 */
 	public List getReferencedBeans() {
 		List beans = new ArrayList();
-		ModelUtil.addReferencedBeansForValue(getParent().getParent(), value,
-										   beans);
+		ModelUtil.addReferencedBeansForValue(getParent().getParent(),
+											 getValue(), beans);
 		return beans;
 	}
 
@@ -68,7 +64,7 @@ public class PropertyNode extends AbstractNode {
 
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPropertySource.class) {
-			return new PropertyProperties(this);
+			return new PropertyProperties(property);
 		}
 		return null;
 	}
@@ -77,7 +73,7 @@ public class PropertyNode extends AbstractNode {
 		StringBuffer text = new StringBuffer();
 		text.append(getName());
 		text.append(": value=");
-		text.append(value);
+		text.append(getValue());
 		return text.toString();
 	}
 }

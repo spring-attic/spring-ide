@@ -28,9 +28,9 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.eclipse.ui.views.properties.ResourcePropertySource;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtil;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
 
 public class RootBeanProperties implements IPropertySource {
 
@@ -42,7 +42,6 @@ public class RootBeanProperties implements IPropertySource {
 	public static final String P_ID_SINGLETON = "RootBean.singleton";
 	public static final String P_ID_LAZY_INIT = "RootBean.lazyinit";
 	public static final String P_ID_ABSTRACT = "RootBean.abstract";
-	public static final String P_ID_OVERRIDE = "RootBean.override";
 
 	// Property descriptors
 	private static List descriptors;
@@ -85,17 +84,11 @@ public class RootBeanProperties implements IPropertySource {
 		descriptor.setAlwaysIncompatible(true);
 		descriptor.setCategory(BeansUIPlugin.getResourceString(P_CATEGORY));
 		descriptors.add(descriptor);
-
-		descriptor = new PropertyDescriptor(P_ID_OVERRIDE,
-								BeansUIPlugin.getResourceString(P_ID_OVERRIDE));
-		descriptor.setAlwaysIncompatible(true);
-		descriptor.setCategory(BeansUIPlugin.getResourceString(P_CATEGORY));
-		descriptors.add(descriptor);
 	}
 
-	private BeanNode bean;
+	private IBean bean;
 
-	public RootBeanProperties(BeanNode bean) {
+	public RootBeanProperties(IBean bean) {
 		this.bean = bean;
 	}
 
@@ -106,18 +99,18 @@ public class RootBeanProperties implements IPropertySource {
 
 	public Object getPropertyValue(Object id) {
 		if (P_ID_NAME.equals(id)) {
-			return bean.getName();
+			return bean.getElementName();
 		}
 		if (P_ID_CONFIG.equals(id)) {
-			ConfigNode config = bean.getConfigNode();
-			IFile file = config.getConfigFile();
+			IBeansConfig config = bean.getConfig();
+			IFile file = bean.getConfig().getConfigFile();
 			if (file != null) {
 				return new ConfigFilePropertySource(file);
 			}
-			return config.getName();
+			return config.getElementName();
 		}
 		if (P_ID_CLASS.equals(id)) {
-			IProject project = bean.getConfigNode().getProjectNode().getProject();
+			IProject project = bean.getConfig().getConfigFile().getProject();
 			String className = bean.getClassName();
 			IType type = BeansModelUtil.getJavaType(project, className);
 
@@ -137,9 +130,6 @@ public class RootBeanProperties implements IPropertySource {
 		if (P_ID_ABSTRACT.equals(id)) {
 			return new Boolean(bean.isAbstract());
 		}
-		if (P_ID_OVERRIDE.equals(id)) {
-			return new Boolean(bean.isOverride());
-		}
 		return null;
 	}
 
@@ -158,7 +148,7 @@ public class RootBeanProperties implements IPropertySource {
 	}
 
 	public String toString() {
-		return bean.getName();
+		return bean.getElementName();
 	}
 
 	private class ConfigFilePropertySource extends FilePropertySource {

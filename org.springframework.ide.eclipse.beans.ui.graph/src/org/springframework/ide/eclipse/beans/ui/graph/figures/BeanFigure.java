@@ -57,10 +57,7 @@ public class BeanFigure extends Figure {
 	protected Label createLabel(Bean bean) {
 		Label label = new Label();
 		label.setText(bean.getName());
-		if (bean.hasError()) {
-			label.setIcon(BeansGraphImages.getImage(
-											  BeansGraphImages.IMG_OBJS_ERROR));
-		} else if (bean.isRootBean()) {
+		if (bean.isRootBean()) {
 			label.setIcon(BeansGraphImages.getImage(
 										  BeansGraphImages.IMG_OBJS_ROOT_BEAN));
 			label.setToolTip(new Label("Class: " + bean.getClassName()));
@@ -80,7 +77,7 @@ public class BeanFigure extends Figure {
 			Label label = new Label(carg.getName());
 			label.setIcon(BeansGraphImages.getImage(
 										BeansGraphImages.IMG_OBJS_CONSTRUCTOR));
-			Object value = carg.getNode().getValue();
+			Object value = carg.getBeanConstructorArgument().getValue();
 			label.setToolTip(new Label(createToolTipForValue(value)));
 			figure.add(label);
 		}
@@ -95,7 +92,7 @@ public class BeanFigure extends Figure {
 			Label label = new Label(prop.getName());
 			label.setIcon(BeansGraphImages.getImage(
 										   BeansGraphImages.IMG_OBJS_PROPERTY));
-			Object value = prop.getNode().getValue();
+			Object value = prop.getBeanProperty().getValue();
 			label.setToolTip(new Label(createToolTipForValue(value)));
 			properties.add(label);
 		}

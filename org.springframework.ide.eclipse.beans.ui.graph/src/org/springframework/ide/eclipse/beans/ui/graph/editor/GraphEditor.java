@@ -45,6 +45,7 @@ import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.gef.editparts.LayerManager;
 import org.eclipse.gef.editparts.ScalableFreeformRootEditPart;
 import org.eclipse.gef.editparts.ZoomManager;
+import org.eclipse.gef.ui.actions.ActionBarContributor;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.gef.ui.actions.UpdateAction;
 import org.eclipse.gef.ui.actions.ZoomInAction;
@@ -100,7 +101,7 @@ public class GraphEditor extends EditorPart {
 		super.setInput(input);
 		if (input instanceof GraphEditorInput) {
 			GraphEditorInput beansInput = (GraphEditorInput) input;
-			graph = new Graph(beansInput.getNode());
+			graph = new Graph(beansInput);
 			setTitle(beansInput.getName());
 		} else {
 			graph = null;

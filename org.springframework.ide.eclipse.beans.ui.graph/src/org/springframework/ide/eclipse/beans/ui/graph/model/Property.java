@@ -24,34 +24,35 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.draw2d.graph.Node;
+import org.eclipse.ui.views.properties.IPropertySource;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
-import org.springframework.ide.eclipse.beans.ui.model.PropertyNode;
+import org.springframework.ide.eclipse.beans.ui.model.properties.PropertyProperties;
 
 public class Property extends Node implements IAdaptable {
 
 	private Bean bean;
-	private PropertyNode node;
+	private IBeanProperty property;
 
-	public Property(Bean bean, PropertyNode node) {
-		super(node.getName());
+	public Property(Bean bean, IBeanProperty property) {
+		super(property.getElementName());
 		this.bean = bean;
-		this.node = node;
+		this.property = property;
 	}
 
 	public Bean getBean() {
 		return bean;
 	}
 
-	public PropertyNode getNode() {
-		return node;
+	public IBeanProperty getBeanProperty() {
+		return property;
 	}
 
 	public String getName() {
-		return node.getName();
+		return property.getElementName();
 	}
 
 	/**
@@ -60,7 +61,7 @@ public class Property extends Node implements IAdaptable {
 	 */
 	public List getBeanReferences() {
 		List references = new ArrayList();
-		addReferencesForValue(node.getValue(), references);
+		addReferencesForValue(property.getValue(), references);
 		return references;
 	}
 
@@ -79,7 +80,7 @@ public class Property extends Node implements IAdaptable {
 	 */
 	private void addReferencesForValue(Object value, List references) {
 		if (value instanceof BeanDefinitionHolder) {
-			IBean modelBean = bean.getNode().getBean();
+			IBean modelBean = bean.getBean();
 			String  propertyName  = getName();
 			IBean innerBean = null;
 			Iterator innerBeans = modelBean.getInnerBeans().iterator();
@@ -121,6 +122,9 @@ public class Property extends Node implements IAdaptable {
 	}
 
 	public Object getAdapter(Class adapter) {
-		return (node != null ? node.getAdapter(adapter) : null);
+		if (adapter == IPropertySource.class && property != null) {
+			return new PropertyProperties(property);
+		}
+		return null;
 	}
 }

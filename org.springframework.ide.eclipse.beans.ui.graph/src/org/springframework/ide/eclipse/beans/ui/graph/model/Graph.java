@@ -17,10 +17,9 @@
 package org.springframework.ide.eclipse.beans.ui.graph.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.draw2d.geometry.Dimension;
@@ -32,11 +31,8 @@ import org.eclipse.draw2d.graph.EdgeList;
 import org.eclipse.draw2d.graph.Node;
 import org.eclipse.swt.graphics.Font;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput;
 import org.springframework.ide.eclipse.beans.ui.graph.figures.BeanFigure;
-import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
-import org.springframework.ide.eclipse.beans.ui.model.INode;
 
 public class Graph implements IAdaptable {
 
@@ -47,51 +43,24 @@ public class Graph implements IAdaptable {
 	/* Default amount of empty space to be left around a node */
 	private static final Insets DEFAULT_PADDING = new Insets(16);
 
-	private INode node;
-	private	List beans;
-	private Map beanNames;
+	private GraphEditorInput input;
 	private	DirectedGraph graph;
 
-	public Graph(INode node) {
-		this.node = node;
+	public Graph(GraphEditorInput input) {
+		this.input = input;
 		this.graph = new DirectedGraph();
-		createListOfBeans();
 	}
 
-	/**
-	 * Creates a list with all beans belonging to the graph's config / config
-	 * set or being referenced from the graph's node.
-	 */
-	protected void createListOfBeans() {
-		BeanNode[] nodes;
-		if (this.node instanceof ConfigNode) {
-			nodes = ((ConfigNode) this.node).getBeans(false);
-		} else if (this.node instanceof ConfigSetNode) {
-			nodes = ((ConfigSetNode) this.node).getBeans(false);
-		} else {
-			BeanNode bean = (BeanNode) this.node;
-			ArrayList list = new ArrayList();
-			list.add(this.node);
-			list.addAll(bean.getReferencedBeans());
-			nodes = (BeanNode[]) list.toArray(new BeanNode[list.size()]);
-		}
-
-		// Clone all beans found
-		this.beans = new ArrayList();
-		this.beanNames = new HashMap();
-		for (int i = 0; i < nodes.length; i++) {
-			Bean bean = new Bean(nodes[i]);
-			this.beans.add(bean);
-			this.beanNames.put(bean.getName(), bean);
-		}
+	public Object getAdapter(Class adapter) {
+		return input.getAdapter(adapter);
 	}
 
-	public List getBeans() {
-		return beans;
+	public Collection getBeans() {
+		return input.getBeans().values();
 	}
 
 	public Bean getBean(String name) {
-		return (Bean) beanNames.get(name);
+		return (Bean) input.getBeans().get(name);
 	}
 
 	public List getNodes() {
@@ -101,7 +70,7 @@ public class Graph implements IAdaptable {
 	public void layout(Font font) {
 
 		// Connect all unreferenced beans with a temporary root bean
-		Bean root = new Bean(new BeanNode((ConfigNode) null, "root"));
+		Bean root = new Bean();
 		graph.nodes.add(root);
 
 		// Iterate through all beans to calculate label width and add bean
@@ -262,9 +231,5 @@ public class Graph implements IAdaptable {
 			x += bean.width + DEFAULT_PADDING.getWidth();
 			graph.nodes.add(bean);
 		}
-	}
-
-	public Object getAdapter(Class adapter) {
-		return node.getAdapter(adapter);
 	}
 }

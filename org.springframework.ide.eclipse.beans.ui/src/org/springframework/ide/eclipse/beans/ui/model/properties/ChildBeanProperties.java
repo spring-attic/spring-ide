@@ -24,9 +24,9 @@ import org.eclipse.ui.views.properties.FilePropertySource;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
 
 public class ChildBeanProperties implements IPropertySource {
 
@@ -38,7 +38,6 @@ public class ChildBeanProperties implements IPropertySource {
 	public static final String P_ID_SINGLETON = "ChildBean.singleton";
 	public static final String P_ID_LAZY_INIT = "ChildBean.lazyinit";
 	public static final String P_ID_ABSTRACT = "ChildBean.abstract";
-	public static final String P_ID_OVERRIDE = "ChildBean.override";
 
 	// Property descriptors
 	private static List descriptors;
@@ -81,17 +80,11 @@ public class ChildBeanProperties implements IPropertySource {
 		descriptor.setAlwaysIncompatible(true);
 		descriptor.setCategory(BeansUIPlugin.getResourceString(P_CATEGORY));
 		descriptors.add(descriptor);
-
-		descriptor = new PropertyDescriptor(P_ID_OVERRIDE,
-								BeansUIPlugin.getResourceString(P_ID_OVERRIDE));
-		descriptor.setAlwaysIncompatible(true);
-		descriptor.setCategory(BeansUIPlugin.getResourceString(P_CATEGORY));
-		descriptors.add(descriptor);
 	}
 
-	private BeanNode bean;
+	private IBean bean;
 
-	public ChildBeanProperties(BeanNode bean) {
+	public ChildBeanProperties(IBean bean) {
 		this.bean = bean;
 	}
 
@@ -102,27 +95,27 @@ public class ChildBeanProperties implements IPropertySource {
 
 	public Object getPropertyValue(Object id) {
 		if (P_ID_NAME.equals(id)) {
-			return bean.getName();
+			return bean.getElementName();
 		}
 		if (P_ID_CONFIG.equals(id)) {
-			ConfigNode config = bean.getConfigNode();
+			IBeansConfig config = bean.getConfig();
 			IFile file = config.getConfigFile();
 			if (file != null) {
 				return new ConfigFilePropertySource(file);
 			}
-			return config.getName();
+			return config.getElementName();
 		}
 		if (P_ID_PARENT.equals(id)) {
-			String parent = bean.getParentName();
-			BeanNode beanNode = bean.getConfigNode().getBean(parent);
-			if (beanNode != null) {
-				if (beanNode.isRootBean()) {
-					return new RootBeanProperties(beanNode);
+			String parentName = bean.getParentName();
+			IBean parentBean = bean.getConfig().getBean(parentName);
+			if (parentBean != null) {
+				if (parentBean.isRootBean()) {
+					return new RootBeanProperties(parentBean);
 				} else {
-					return new ChildBeanProperties(beanNode);
+					return new ChildBeanProperties(parentBean);
 				}
 			}
-			return parent;
+			return parentName;
 		}
 		if (P_ID_SINGLETON.equals(id)) {
 			return new Boolean(bean.isSingleton());
@@ -132,9 +125,6 @@ public class ChildBeanProperties implements IPropertySource {
 		}
 		if (P_ID_ABSTRACT.equals(id)) {
 			return new Boolean(bean.isAbstract());
-		}
-		if (P_ID_OVERRIDE.equals(id)) {
-			return new Boolean(bean.isOverride());
 		}
 		return null;
 	}
@@ -154,7 +144,7 @@ public class ChildBeanProperties implements IPropertySource {
 	}
 
 	public String toString() {
-		return bean.getName();
+		return bean.getElementName();
 	}
 
 	private class ConfigFilePropertySource extends FilePropertySource {

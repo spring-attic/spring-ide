@@ -23,9 +23,9 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
-import org.springframework.ide.eclipse.beans.ui.model.PropertyNode;
 
 public class PropertyProperties implements IPropertySource {
 
@@ -67,9 +67,9 @@ public class PropertyProperties implements IPropertySource {
 		descriptors.add(descriptor);
 	}
 
-	private PropertyNode property;
+	private IBeanProperty property;
 
-	public PropertyProperties(PropertyNode property) {
+	public PropertyProperties(IBeanProperty property) {
 		this.property = property;
 	}
 
@@ -80,9 +80,9 @@ public class PropertyProperties implements IPropertySource {
 
 	public Object getPropertyValue(Object id) {
 		if (P_ID_NAME.equals(id)) {
-			return property.getName();
+			return property.getElementName();
 		} else if (P_ID_BEAN.equals(id)) {
-			BeanNode bean = (BeanNode) property.getParent();
+			IBean bean = (IBean) property.getElementParent();
 			if (bean.isRootBean()) {
 				return new RootBeanProperties(bean);
 			} else {

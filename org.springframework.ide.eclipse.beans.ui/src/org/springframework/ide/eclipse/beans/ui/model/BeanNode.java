@@ -93,24 +93,24 @@ public class BeanNode extends AbstractNode {
 	 */
 	public BeanNode(ConfigSetNode configSet, BeanNode bean) {
 		super(configSet, bean.getName());
-		setFlags(bean.getFlags());
-		setStartLine(bean.getStartLine()); 
 		this.config = bean.getConfigNode(); 
-		this.bean = bean.getBean();
+		setFlags(bean.getFlags());
+		setBean(bean.getBean());
 
 		// Clone contructor arguments
 		this.constructorArguments = new ArrayList();
 		ConstructorArgumentNode[] cargs = bean.getConstructorArguments();
 		for (int i = 0; i < cargs.length; i++) {
 			this.constructorArguments.add(new ConstructorArgumentNode(this,
-																   cargs[i]));
+										cargs[i].getBeanConstructorArgument()));
 		}
 
 		// Clone properties
 		this.properties = new ArrayList();
 		PropertyNode[] props = bean.getProperties();
 		for (int i = 0; i < props.length; i++) {
-			this.properties.add(new PropertyNode(this, props[i]));
+			this.properties.add(new PropertyNode(this,
+												 props[i].getBeanProperty()));
 		}
 
 		// Clone inner beans
@@ -138,24 +138,24 @@ public class BeanNode extends AbstractNode {
 	 */
 	public BeanNode(BeanNode bean, BeanNode innerBean) {
 		super(bean, innerBean.getName());
-		setFlags(innerBean.getFlags());
-		setStartLine(innerBean.getStartLine()); 
 		this.config = innerBean.getConfigNode(); 
-		this.bean = innerBean.getBean();
+		setFlags(innerBean.getFlags());
+		setBean(innerBean.getBean());
 
 		// Clone contructor arguments
 		this.constructorArguments = new ArrayList();
 		ConstructorArgumentNode[] cargs = innerBean.getConstructorArguments();
 		for (int i = 0; i < cargs.length; i++) {
 			this.constructorArguments.add(new ConstructorArgumentNode(this,
-																   cargs[i]));
+										cargs[i].getBeanConstructorArgument()));
 		}
 
 		// Clone properties
 		this.properties = new ArrayList();
 		PropertyNode[] props = innerBean.getProperties();
 		for (int i = 0; i < props.length; i++) {
-			this.properties.add(new PropertyNode(this, props[i]));
+			this.properties.add(new PropertyNode(this,
+												 props[i].getBeanProperty()));
 		}
 
 		// Clone inner beans
@@ -185,6 +185,7 @@ public class BeanNode extends AbstractNode {
 		if (bean.isAbstract()) {
 			setFlags(INode.FLAG_IS_ABSTRACT);
 		}
+		setStartLine(bean.getElementStartLine()); 
 	}
 
 	public IBean getBean() {
@@ -348,9 +349,9 @@ public class BeanNode extends AbstractNode {
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPropertySource.class) {
 			if (isRootBean()) {
-				return new RootBeanProperties(this);
+				return new RootBeanProperties(bean);
 			} else {
-				return new ChildBeanProperties(this);
+				return new ChildBeanProperties(bean);
 			}
 		}
 		return null;

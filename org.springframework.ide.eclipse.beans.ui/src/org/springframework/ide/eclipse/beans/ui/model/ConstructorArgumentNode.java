@@ -20,55 +20,47 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.ui.views.properties.IPropertySource;
+import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.ui.model.properties.ConstructorArgumentProperties;
 
 public class ConstructorArgumentNode extends AbstractNode {
 
-	private int index;
-	private String type;
-	private Object value;
-
-	public ConstructorArgumentNode(BeanNode bean, int index, String type,
-								 Object value) {
-		super(bean, null);
-		this.index = index;
-		this.type = type;
-		this.value = value;
-	}
+	private IBeanConstructorArgument carg;
 
 	public ConstructorArgumentNode(BeanNode bean,
-								 ConstructorArgumentNode carg) {
+								   IBeanConstructorArgument carg) {
 		super(bean, null);
-		setStartLine(carg.getStartLine()); 
-		this.index = carg.getIndex();
-		this.type = carg.getType();
-		this.value = carg.getValue();
+		this.carg = carg;
+	}
+
+	public IBeanConstructorArgument getBeanConstructorArgument() {
+		return carg;
 	}
 
 	public String getName() {
 		StringBuffer name = new StringBuffer();
-		if (index != -1) {
-			name.append(index);
+		if (getIndex() != -1) {
+			name.append(getIndex());
 			name.append(':');
 		}
-		if (type != null) {
-			name.append(type);
+		if (getType() != null) {
+			name.append(getType());
 			name.append(':');
 		}
-		name.append(value.toString());
+		name.append(getValue().toString());
 		return name.toString();
 	}
 
 	public int getIndex() {
-		return index;
+		return carg.getIndex();
 	}
 
 	public String getType() {
-		return type;
+		return carg.getType();
 	}
 	
 	public Object getValue() {
-		return value;
+		return carg.getValue();
 	}
 
 	/**
@@ -77,8 +69,8 @@ public class ConstructorArgumentNode extends AbstractNode {
 	 */
 	public List getReferencedBeans() {
 		List beans = new ArrayList();
-		ModelUtil.addReferencedBeansForValue(getParent().getParent(), value,
-										   beans);
+		ModelUtil.addReferencedBeansForValue(getParent().getParent(),
+											 carg.getValue(), beans);
 		return beans;
 	}
 
@@ -96,7 +88,7 @@ public class ConstructorArgumentNode extends AbstractNode {
 
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPropertySource.class) {
-			return new ConstructorArgumentProperties(this);
+			return new ConstructorArgumentProperties(carg);
 		}
 		return null;
 	}
@@ -105,11 +97,11 @@ public class ConstructorArgumentNode extends AbstractNode {
 		StringBuffer text = new StringBuffer();
 		text.append(getName());
 		text.append(": index=");
-		text.append(index);
+		text.append(getIndex());
 		text.append(", type=");
-		text.append(type);
+		text.append(getType());
 		text.append(": value=");
-		text.append(value);
+		text.append(getValue());
 		return text.toString();
 	}
 }

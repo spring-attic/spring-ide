@@ -16,12 +16,20 @@
 
 package org.springframework.ide.eclipse.beans.ui.graph.editor;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphImages;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
+import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
+import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
 import org.springframework.ide.eclipse.beans.ui.model.INode;
@@ -32,9 +40,12 @@ public class GraphEditorInput implements IEditorInput {
 	private INode node;
 	private String name;
 	private String toolTip;
+	private Map beans;
 
 	public GraphEditorInput(INode node) {
 		this.node = node;
+
+		// Prepare name and tooltip for corresponding node type
 		if (node instanceof ConfigNode) {
 			IFile file = ((ConfigNode) node).getConfigFile();
 			name = file.getName();
@@ -69,14 +80,47 @@ public class GraphEditorInput implements IEditorInput {
 			buffer.append(node.getName());
 			toolTip = buffer.toString();
 		}
+
+		createBeansMap(node);
+	}
+
+	/**
+	 * Creates a list with all beans belonging to the graph's config / config
+	 * set or being referenced from the graph's node.
+	 */
+	protected void createBeansMap(INode node) {
+		List list = new ArrayList();
+		if (node instanceof ConfigNode) {
+			BeanNode[] nodes = ((ConfigNode) node).getBeans(false);
+			for (int i = 0; i < nodes.length; i++) {
+				list.add(nodes[i]);
+			}
+		} else if (node instanceof ConfigSetNode) {
+			BeanNode[] nodes = ((ConfigSetNode) node).getBeans(false);
+			for (int i = 0; i < nodes.length; i++) {
+				list.add(nodes[i]);
+			}
+		} else if (node instanceof BeanNode) {
+			BeanNode bean = (BeanNode) node;
+			list.add(bean);
+			list.addAll(bean.getReferencedBeans());
+		}
+
+		// Wrap all beans found
+		this.beans = new HashMap();
+		Iterator iter = list.iterator();
+		while (iter.hasNext()) {
+			BeanNode bean = (BeanNode) iter.next();
+			this.beans.put(bean.getName(), new Bean(bean.getBean()));
+		}
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public INode getNode() {
-		return node;
+	public Map getBeans() {
+		return beans;
 	}
 
 	public boolean exists() {
