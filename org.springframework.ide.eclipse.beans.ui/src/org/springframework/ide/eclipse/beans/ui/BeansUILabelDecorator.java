@@ -17,7 +17,6 @@
 package org.springframework.ide.eclipse.beans.ui;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -36,11 +35,10 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
- * This decorator adds an overlay image to all projects with Spring Beans
- * project nature, Spring beans config files and Java source / class files which
- * are used as Spring bean classes. This decoration is refreshed on every
- * modification to the Spring Beans model. Therefore the decorator adds a
- * change listener to the beans model.
+ * This decorator adds an overlay image to all Spring beans config files and
+ * Java source / class files which are used as Spring bean classes.
+ * This decoration is refreshed on every modification to the Spring Beans model.
+ * Therefore the decorator adds a change listener to the beans model.
  * 
  * @author Torsten Juergeleit
  * @see org.springframework.ide.eclipse.beans.core.model.IBeansModelChangedListener
@@ -62,11 +60,7 @@ public class BeansUILabelDecorator extends LabelProvider
 
 	public void decorate(Object element, IDecoration decoration) {
 		IBeansModel model = BeansCorePlugin.getModel();
-		if (element instanceof IProject) {
-			if (model.hasProject((IProject) element)) {
-				decoration.addOverlay(BeansUIImages.DESC_OVR_SPRING);
-			}
-		} else if (element instanceof IFile) {
+		if (element instanceof IFile) {
 			if (model.getConfig((IFile) element) != null) {
 				decoration.addOverlay(BeansUIImages.DESC_OVR_SPRING);
 			}
@@ -79,6 +73,7 @@ public class BeansUILabelDecorator extends LabelProvider
 									 javaElement.getJavaProject().getProject());
 				if (project != null) {
 					try {
+						// Decorate Java source file
 						if (type == IJavaElement.COMPILATION_UNIT) {
 							IType[] javaTypes = ((ICompilationUnit)
 														javaElement).getTypes();
@@ -92,6 +87,7 @@ public class BeansUILabelDecorator extends LabelProvider
 								}
 							}
 						} else {
+							// Decorate Java binary file
 							IType javaType = ((IClassFile)
 														 javaElement).getType();
 							if (project.isBeanClass(
