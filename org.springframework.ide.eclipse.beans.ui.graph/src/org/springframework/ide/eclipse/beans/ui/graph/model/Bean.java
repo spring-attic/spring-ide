@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.draw2d.graph.Node;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConstructorArgumentNode;
 import org.springframework.ide.eclipse.beans.ui.model.PropertyNode;
@@ -46,10 +45,6 @@ public class Bean extends Node implements IAdaptable {
 
 	public String getParentName() {
 		return node.getParentName();
-	}
-
-	public BeanDefinition getDefinition() {
-		return node.getBeanDefinition();
 	}
 
 	public IFile getConfigFile() {

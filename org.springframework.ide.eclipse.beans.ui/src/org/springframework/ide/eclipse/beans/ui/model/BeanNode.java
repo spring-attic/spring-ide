@@ -17,15 +17,14 @@
 package org.springframework.ide.eclipse.beans.ui.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.ChildBeanDefinition;
-import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.model.properties.ChildBeanProperties;
 import org.springframework.ide.eclipse.beans.ui.model.properties.RootBeanProperties;
 
@@ -35,7 +34,7 @@ import org.springframework.ide.eclipse.beans.ui.model.properties.RootBeanPropert
 public class BeanNode extends AbstractNode {
 
 	private ConfigNode config;
-	private BeanDefinition beanDefinition;
+	private IBean bean;
 	private boolean isOverride;
 	private List constructorArguments;
 	private List properties;
@@ -50,7 +49,7 @@ public class BeanNode extends AbstractNode {
 	public BeanNode(ConfigNode config, String name) {
 		super(config, name);
 		this.config = config; 
-		this.beanDefinition = null;
+		this.bean = null;
 		this.constructorArguments = new ArrayList();
 		this.properties = new ArrayList();
 		this.isOverride = false;
@@ -73,7 +72,7 @@ public class BeanNode extends AbstractNode {
 		super(configSet, bean.getName());
 		setStartLine(bean.getStartLine()); 
 		this.config = bean.getConfigNode(); 
-		this.beanDefinition = bean.getBeanDefinition();
+		this.bean = bean.getBean();
 
 		// clone contructor arguments
 		this.constructorArguments = new ArrayList();
@@ -98,15 +97,15 @@ public class BeanNode extends AbstractNode {
 		}
 	}
 
-	public void setBeanDefinition(BeanDefinition beanDefinition) {
-		this.beanDefinition = beanDefinition;
-		if (!isSingleton()) {
+	public void setBean(IBean bean) {
+		this.bean = bean;
+		if (!bean.isSingleton()) {
 			setFlags(INode.FLAG_IS_PROTOTYPE);
 		}
 	}
 
-	public BeanDefinition getBeanDefinition() {
-		return beanDefinition;
+	public IBean getBean() {
+		return bean;
 	}
 
 	public void setIsOverride(boolean isOverridden) {
@@ -169,32 +168,19 @@ public class BeanNode extends AbstractNode {
 	}
 
 	public String getClassName() {
-		if (beanDefinition instanceof RootBeanDefinition) {
-			return ((RootBeanDefinition) beanDefinition).getBeanClassName();
-		}
-		return null;
+		return bean.getClassName();
 	}
 
 	public String getParentName() {
-		if (beanDefinition instanceof ChildBeanDefinition) {
-			return ((ChildBeanDefinition) beanDefinition).getParentName();
-		}
-		return null;
+		return bean.getParentName();
 	}
 
 	public boolean isRootBean() {
-		return (beanDefinition instanceof RootBeanDefinition);
+		return bean.isRootBean();
 	}
 
 	public boolean isSingleton() {
-		if (beanDefinition != null) {
-			if (beanDefinition instanceof RootBeanDefinition) {
-				return ((RootBeanDefinition) beanDefinition).isSingleton();
-			} else {
-				return ((ChildBeanDefinition) beanDefinition).isSingleton();
-			}
-		}
-		return true;
+		return bean.isSingleton();
 	}
 	
 	/**
@@ -210,24 +196,36 @@ public class BeanNode extends AbstractNode {
 	 * Returns list of beans which are referenced from within this bean's
 	 * constructor arguments or properties.
 	 */
-	public List getReferencedBeans() {
-		List beans = new ArrayList();
+	public Collection getReferencedBeans() {
+		Map refBeans = new HashMap();
 
 		// Add referenced beans from constructor arguments
 		Iterator iter = constructorArguments.iterator();
 		while (iter.hasNext()) {
-			ConstructorArgumentNode carg = (ConstructorArgumentNode) 
+			ConstructorArgumentNode carg = (ConstructorArgumentNode)
 																	iter.next();
-			beans.addAll(carg.getReferencedBeans());
+			Iterator beans = carg.getReferencedBeans().iterator();
+			while (beans.hasNext()) {
+				BeanNode bean = (BeanNode) beans.next();
+				if (!refBeans.containsKey(bean.getName())) {
+					refBeans.put(bean.getName(), bean);
+				}
+			}
 		}
 
 		// Add referenced beans from properties
 		iter = properties.iterator();
 		while (iter.hasNext()) {
 			PropertyNode property = (PropertyNode) iter.next();
-			beans.addAll(property.getReferencedBeans());
+			Iterator beans = property.getReferencedBeans().iterator();
+			while (beans.hasNext()) {
+				BeanNode bean = (BeanNode) beans.next();
+				if (!refBeans.containsKey(bean.getName())) {
+					refBeans.put(bean.getName(), bean);
+				}
+			}
 		}
-		return beans;
+		return refBeans.values();
 	}
 
 	public void remove(INode node) {

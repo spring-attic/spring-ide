@@ -31,9 +31,7 @@ import org.eclipse.draw2d.graph.Edge;
 import org.eclipse.draw2d.graph.EdgeList;
 import org.eclipse.draw2d.graph.Node;
 import org.eclipse.swt.graphics.Font;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.ide.eclipse.beans.ui.graph.figures.BeanFigure;
 import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
@@ -111,7 +109,6 @@ public class Graph implements IAdaptable {
 		Iterator iter = getBeans().iterator();
 		while (iter.hasNext()) {
 			Bean bean = (Bean) iter.next();
-			BeanDefinition beanDef = bean.getDefinition();
 
 			// Calculate bean's dimension with a temporary bean figure 
 			BeanFigure dummy = new BeanFigure(bean);
@@ -124,9 +121,8 @@ public class Graph implements IAdaptable {
 
 			// If child bean then add reference from parent bean to list of
 			// graph edges
-			if (beanDef instanceof ChildBeanDefinition) {
-				Bean parentBean = getBean(((ChildBeanDefinition)
-													  beanDef).getParentName());
+			if (!bean.isRootBean()) {
+				Bean parentBean = getBean(bean.getParentName());
 				if (parentBean != null) {
 					graph.edges.add(new Reference(bean, parentBean));
 				}
