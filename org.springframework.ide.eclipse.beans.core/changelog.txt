@@ -1,11 +1,18 @@
-Changes in version 1.1.1 (1.12.2004):
+Changes in version 1.2.0 (1.4.2005):
 
-* spring-core.jar (updated to v1.1.2) now included in core
+* ported to Eclipse 3
+
+* jars moved to separate plugin "org.springframework.ide.eclipse.core"
+
+* project nature and incremental builder refactored to separate plugin
+  "org.springframework.ide.eclipse.core"
+
+* updated to spring-core.jar v1.1.5
 
 * added support for incomplete config sets (are not validated regarding parent
   beans and bean references)
 
-* added support for outer bean attribute to (inner) beans
+* config validator now validates AbstractBeanDefinition and aliases too
 
 
 Changes in version 1.1.0 (1.9.2004):
@@ -20,7 +27,7 @@ Changes in version 1.1.0 (1.9.2004):
 
 * removed dependency to SAX API in public methods
 
-* beans project validator now checks constructor arguments and import tags too
+* beans config validator now checks constructor arguments and import tags too
 
 * config files are re-validated automatically if source code of corresponding bean
   classes has been modified
