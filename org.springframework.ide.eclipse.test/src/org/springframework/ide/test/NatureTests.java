@@ -74,6 +74,7 @@ public class NatureTests extends AbstractSpringIdeTest {
 		assertNotNull(proj);
 
 		BeansCoreUtils.removeProjectNature(eclipseProject, BeansProjectNature.NATURE_ID);
+		project.waitForAutoBuild();
 			
 		assertFalse(hasBeansProjectNature());
 		assertFalse(model.hasProject(eclipseProject));
