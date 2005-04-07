@@ -29,8 +29,8 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
-import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 
 public class Property extends Node implements IAdaptable {
 
@@ -86,7 +86,7 @@ public class Property extends Node implements IAdaptable {
 			Iterator innerBeans = modelBean.getInnerBeans().iterator();
 			while (innerBeans.hasNext()) {
 				IBean iBean = (IBean) innerBeans.next();
-				IBeansModelElement parent = iBean.getElementParent();
+				IModelElement parent = iBean.getElementParent();
 				if (parent instanceof IBeanProperty &&
 								 parent.getElementName().equals(propertyName)) {
 					innerBean = iBean;
