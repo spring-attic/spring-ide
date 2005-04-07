@@ -29,7 +29,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
-import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.model.properties.ChildBeanProperties;
 import org.springframework.ide.eclipse.beans.ui.model.properties.ConfigSetProperties;
@@ -37,6 +36,7 @@ import org.springframework.ide.eclipse.beans.ui.model.properties.ConstructorArgu
 import org.springframework.ide.eclipse.beans.ui.model.properties.PropertyProperties;
 import org.springframework.ide.eclipse.beans.ui.model.properties.RootBeanProperties;
 import org.springframework.ide.eclipse.beans.ui.views.BeansViewLocation;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 
 public class BeansUIUtils {
 
@@ -63,7 +63,7 @@ public class BeansUIUtils {
 	 * given <code>IBeansModelElement</code> or null.
 	 */
 	public static final IPropertySource getPropertySource(
-												   IBeansModelElement element) {
+													   IModelElement element) {
 		if (element instanceof IBeansProject) {
 			return new ResourcePropertySource(
 										((IBeansProject) element).getProject());
@@ -96,7 +96,7 @@ public class BeansUIUtils {
 	 * initialized with information from the given core model element.
 	 */
 	public static final BeansViewLocation getBeansViewLocation(
-												   IBeansModelElement element) {
+													   IModelElement element) {
 		BeansViewLocation location = new BeansViewLocation();
 		if (element instanceof IBeansProject) {
 			location.setProjectName(element.getElementName());

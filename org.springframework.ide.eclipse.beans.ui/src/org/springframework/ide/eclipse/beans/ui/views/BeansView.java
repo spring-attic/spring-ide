@@ -48,7 +48,6 @@ import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
-import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
@@ -66,6 +65,7 @@ import org.springframework.ide.eclipse.beans.ui.views.actions.LexicalSortingActi
 import org.springframework.ide.eclipse.beans.ui.views.actions.OpenBeanClassAction;
 import org.springframework.ide.eclipse.beans.ui.views.actions.OpenPropertiesAction;
 import org.springframework.ide.eclipse.beans.ui.views.actions.PropertySheetAction;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class BeansView extends ViewPart implements IBeansView, IShowInSource,
@@ -220,9 +220,9 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 		Object input = context.getInput();
 		if (input instanceof BeansViewLocation) {
 			return showLocation((BeansViewLocation) input);
-		} else if (input instanceof IBeansModelElement) {
+		} else if (input instanceof IModelElement) {
 			return showLocation(BeansUIUtils.getBeansViewLocation(
-												   (IBeansModelElement) input));
+													   (IModelElement) input));
 		} else if (input instanceof IAdaptable) {
 			Object resource = ((IAdaptable) input).getAdapter(IResource.class);
 			if (resource != null) {
@@ -238,9 +238,9 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 							   ((IStructuredSelection) selection).size() == 1) {
 			Object element = ((IStructuredSelection)
 												   selection).getFirstElement();
-			if (element instanceof IBeansModelElement) {
+			if (element instanceof IModelElement) {
 				return showLocation(BeansUIUtils.getBeansViewLocation(
-												 (IBeansModelElement) element));
+													 (IModelElement) element));
 			} else if (element instanceof IResource) {
 				return showResource((IResource) element);
 			} else if (input instanceof IAdaptable) {
