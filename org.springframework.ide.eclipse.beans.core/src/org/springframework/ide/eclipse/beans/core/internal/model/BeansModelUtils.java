@@ -38,8 +38,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
-import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 
 public class BeansModelUtils {
 
@@ -68,15 +68,15 @@ public class BeansModelUtils {
 	 * be added.
 	 * <li>An ordinary object or null, in which case it's ignored.
 	 */
-	public static void addReferencedBeanNamesForValue(
-					 IBeansModelElement element, Object value, List beanNames) {
+	public static void addReferencedBeanNamesForValue(IModelElement element,
+												Object value, List beanNames) {
 		if (value instanceof RuntimeBeanReference) {
 			String beanName = ((RuntimeBeanReference) value).getBeanName();
 			if (!beanNames.contains(beanName)) {
 				beanNames.add(beanName);
 			}
-			IBeansModelElement parent =
-								  element.getElementParent().getElementParent();
+			IModelElement parent =
+								 element.getElementParent().getElementParent();
 			IBean bean = getBean(parent, beanName);
 			if (bean != null) {
 				addReferencedBeanNamesForBean(bean, beanNames);
@@ -119,8 +119,7 @@ public class BeansModelUtils {
 	 * ConfigSet element.
 	 * @return IBean or null if bean not defined
 	 */
-	public static final IBean getBean(IBeansModelElement element,
-									  String beanName) {
+	public static final IBean getBean(IModelElement element, String beanName) {
 		IBean bean = null;
 		if (element instanceof IBeansConfig) {
 			bean = ((IBeansConfig) element).getBean(beanName);
@@ -180,13 +179,13 @@ public class BeansModelUtils {
 		return null;
 	}
 
-	public static final void createProblemMarker(IBeansModelElement element,
+	public static final void createProblemMarker(IModelElement element,
 						String message, int severity, int line, int errorCode) {
 		createProblemMarker(element, message, severity, line, errorCode, null,
 							null);
 	}
 
-	public static final void createProblemMarker(IBeansModelElement element,
+	public static final void createProblemMarker(IModelElement element,
 						  String message, int severity, int line, int errorCode,
 						  String beanID, String errorData) {
 		IFile file;

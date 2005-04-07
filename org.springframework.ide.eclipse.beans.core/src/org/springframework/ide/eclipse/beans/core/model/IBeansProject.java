@@ -20,11 +20,12 @@ import java.util.Collection;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.springframework.ide.eclipse.core.model.ILocatableModelElement;
 
 /**
  * This interface holds information for a Spring Beans project.
  */
-public interface IBeansProject extends IBeansModelElement, IBeanClassAware {
+public interface IBeansProject extends ILocatableModelElement, IBeanClassAware {
 
 	/** File name of the Spring Beans project description */
 	public static final String DESCRIPTION_FILE = ".springBeans";

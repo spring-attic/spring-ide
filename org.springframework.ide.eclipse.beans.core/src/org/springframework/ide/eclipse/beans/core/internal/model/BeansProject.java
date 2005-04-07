@@ -35,10 +35,14 @@ import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectD
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionWriter;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.model.AbstractLocatableModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 
-public class BeansProject extends BeansModelElement implements IBeansProject {
-
+public class BeansProject extends AbstractLocatableModelElement
+													 implements IBeansProject {
 	private IProject project; 
 	private BeansProjectDescription description;
 
@@ -48,11 +52,32 @@ public class BeansProject extends BeansModelElement implements IBeansProject {
 	}
 
 	public int getElementType() {
-		return PROJECT;
+		return IBeansModelElementTypes.PROJECT;
 	}
 
 	public IResource getElementResource() {
 		return project;
+	}
+
+	public void accept(IModelElementVisitor visitor) {
+
+		// First visit this project
+		if (visitor.visit(this)) {
+
+			// Now ask this project's configs
+			Iterator iter = description.getConfigs().iterator();
+			while (iter.hasNext()) {
+				IModelElement element = (IModelElement) iter.next();
+				element.accept(visitor);
+			}
+
+			// Finally ask this project's config sets
+			iter = description.getConfigSets().iterator();
+			while (iter.hasNext()) {
+				IModelElement element = (IModelElement) iter.next();
+				element.accept(visitor);
+			}
+		}
 	}
 
 	public IProject getProject() {

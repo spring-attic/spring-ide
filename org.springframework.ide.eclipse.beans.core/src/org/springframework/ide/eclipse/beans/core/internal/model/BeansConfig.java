@@ -39,16 +39,21 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.io.FileResource;
 import org.springframework.ide.eclipse.core.io.xml.LineNumberPreservingDOMParser;
+import org.springframework.ide.eclipse.core.model.AbstractLocatableModelElement;
+import org.springframework.ide.eclipse.core.model.ILocatableModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.w3c.dom.Element;
 
 /**
  * This class defines a Spring beans configuration.
  */
-public class BeansConfig extends BeansModelElement implements IBeansConfig {
-
+public class BeansConfig extends AbstractLocatableModelElement
+													  implements IBeansConfig {
 	/** This bean's config file */
 	private IFile file;
 
@@ -77,11 +82,25 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 	}
 
 	public int getElementType() {
-		return CONFIG;
+		return IBeansModelElementTypes.CONFIG;
 	}
 
 	public IResource getElementResource() {
 		return file;
+	}
+
+	public void accept(IModelElementVisitor visitor) {
+
+		// First visit this project
+		if (visitor.visit(this)) {
+
+			// Now ask this configs's beans
+			Iterator iter = beans.iterator();
+			while (iter.hasNext()) {
+				IModelElement element = (IModelElement) iter.next();
+				element.accept(visitor);
+			}
+		}
 	}
 
 	/**
@@ -193,7 +212,8 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 		if (name.charAt(0) == '/') {
 			container = ResourcesPlugin.getWorkspace().getRoot();
 		} else {
-			container = (IProject) getElementParent().getElementResource();
+			container = (IProject) ((ILocatableModelElement)
+									  getElementParent()).getElementResource();
 		}
 		return (IFile) container.findMember(name);
 	}
@@ -264,7 +284,7 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 	
 		private IBeansConfig config;
 	    private Stack nestedElements;
-		private BeansModelElement currentElement;
+		private ILocatableModelElement currentElement;
 	    private Stack nestedBeans;
 		private Bean currentBean;
 	
@@ -290,7 +310,7 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 	
 				// Use current bean as an inner bean for the current constructor
 				// argument or property
-				currentElement = (BeansModelElement) nestedElements.pop();
+				currentElement = (ILocatableModelElement) nestedElements.pop();
 				currentBean.setElementParent(currentElement);
 				innerBeans.add(currentBean);
 	
@@ -354,12 +374,14 @@ public class BeansConfig extends BeansModelElement implements IBeansConfig {
 		/**
 		 * Sets the start and end lines on the given model element.
 	     */
-		private void setXmlTextRange(BeansModelElement modelElement,
+		private void setXmlTextRange(ILocatableModelElement modelElement,
 									 Element xmlElement) {
 			int startLine = LineNumberPreservingDOMParser.getStartLineNumber(xmlElement);
 			int endLine = LineNumberPreservingDOMParser.getEndLineNumber(xmlElement);
-			modelElement.setElementStartLine(startLine);
-			modelElement.setElementEndLine(endLine);
+			((AbstractLocatableModelElement) modelElement).setElementStartLine(
+																	startLine);
+			((AbstractLocatableModelElement) modelElement).setElementEndLine(
+																	  endLine);
 	    }
 	}
 }

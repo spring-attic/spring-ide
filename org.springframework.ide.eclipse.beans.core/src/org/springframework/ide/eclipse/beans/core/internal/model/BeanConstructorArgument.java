@@ -23,9 +23,13 @@ import java.util.List;
 import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
+import org.springframework.ide.eclipse.core.model.AbstractLocatableModelElement;
+import org.springframework.ide.eclipse.core.model.ILocatableModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 
-public class BeanConstructorArgument extends BeansModelElement
-											   implements IBeanConstructorArgument {
+public class BeanConstructorArgument extends AbstractLocatableModelElement
+										  implements IBeanConstructorArgument {
 	private int index;
 	private String type;
 	private Object value;
@@ -35,11 +39,19 @@ public class BeanConstructorArgument extends BeansModelElement
 	}
 
 	public int getElementType() {
-		return CONSTRUCTOR_ARGUMENT;
+		return IBeansModelElementTypes.CONSTRUCTOR_ARGUMENT;
 	}
 
 	public IResource getElementResource() {
-		return getElementParent().getElementResource();
+		if (getElementParent() instanceof ILocatableModelElement) {
+			return ((ILocatableModelElement)
+									  getElementParent()).getElementResource();
+		}
+		return null;
+	}
+
+	public void accept(IModelElementVisitor visitor) {
+		visitor.visit(this);
 	}
 
 	public void setIndex(int index) {

@@ -20,6 +20,7 @@ import java.util.Collection;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * The <code>IBeansModel</code> manages instances of <code>IBeansProject</code>s.
@@ -29,7 +30,7 @@ import org.eclipse.core.resources.IProject;
  * The single instance of <code>IBeansModel</code> is available from
  * the static method <code>BeansCorePlugin.getModel()</code>.
  */
-public interface IBeansModel extends IBeansModelElement {
+public interface IBeansModel extends IModelElement {
 
 	boolean hasProject(IProject project);
 

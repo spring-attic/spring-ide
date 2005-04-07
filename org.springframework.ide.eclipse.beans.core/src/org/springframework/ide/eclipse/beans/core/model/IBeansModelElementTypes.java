@@ -16,12 +16,10 @@
 
 package org.springframework.ide.eclipse.beans.core.model;
 
-import org.eclipse.core.resources.IResource;
-
 /**
- * Common protocol for all elements provided by the Beans model.
+ * Constants for element types defined by the Beans model.
  */
-public interface IBeansModelElement {
+public interface IBeansModelElementTypes {
 
 	/**
 	 * Constant representing the Beans model (workspace level object).
@@ -71,68 +69,4 @@ public interface IBeansModelElement {
 	 * <code>ConstructorArgument</code>.
 	 */
 	int CONSTRUCTOR_ARGUMENT = 7;
-
-	/**
-	 * Returns the element directly containing this element,
-	 * or <code>null</code> if this element has no parent.
-	 *
-	 * @return the parent element, or <code>null</code> if this element has no
-	 *			 parent
-	 */
-	IBeansModelElement getElementParent();
-
-	/**
-	 * Returns the name of this element.
-	 *
-	 * @return the element's name
-	 */
-	String getElementName();
-
-	/**
-	 * Returns this element's kind encoded as an integer.
-	 * This is a handle-only method.
-	 *
-	 * @return the kind of element; one of the constants declared in
-	 *   <code>IBeansElement</code>
-	 * @see IBeansModelElement
-	 */
-	int getElementType();
-
-	/**
-	 * Returns the resource of the innermost resource enclosing this element. 
-	 * 
-	 * @return the resource of the innermost resource enclosing this element
-	 */
-	IResource getElementResource();
-
-	/**
-	 * Returns the line number with the start of the element's source code.
-	 *
-	 * @return line number with start of element's source code
-	 */
-	int getElementStartLine();
-	
-	/**
-	 * Returns the line number with the logical end of the element's source code, or 
-	 * -1 if it's a one liner.
-	 * 
-	 * e.g.
-	 * <pre>
-	 * (1) &lt;bean class="foo" id="bar"&gt;
-	 * (2)    &lt;property name="fred"&gt;&lt;value&gt;3&lt;/value&gt;&lt;/property&gt;
-	 * (3) &lt;/bean&gt; 
-	 * would return 2 (line 3 is not counted as it's just closing)
-	 *  
-	 * (1) &lt;bean class="foo" id="bar"/&gt;
-	 * would return -1 (one liner)
-	 * 
-	 * (1) &lt;bean class="foo" id="bar"&gt;
-	 * (2)    &lt;!-- comment -->
-	 * (3) &lt;/bean&gt;
-	 * would also return -1 as there's nothing logically 'interesting' in the tag
-	 * 
-	 * </pre>
-	 * @return line number with start of element's source code
-	 */
-	int getElementEndLine();
 }

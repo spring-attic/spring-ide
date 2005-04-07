@@ -30,13 +30,17 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.model.AbstractLocatableModelElement;
+import org.springframework.ide.eclipse.core.model.ILocatableModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 
 /**
  * This class defines a Spring beans config set (a list of beans config names).
  */
-public class BeansConfigSet extends BeansModelElement implements IBeansConfigSet {
-
+public class BeansConfigSet extends AbstractLocatableModelElement
+												   implements IBeansConfigSet {
 	private List configNames;
 	private boolean allowBeanDefinitionOverriding;
 	private boolean isIncomplete;
@@ -63,11 +67,18 @@ public class BeansConfigSet extends BeansModelElement implements IBeansConfigSet
 	}
 
 	public int getElementType() {
-		return CONFIG_SET;
+		return IBeansModelElementTypes.CONFIG_SET;
 	}
 
 	public IResource getElementResource() {
-		return getElementParent().getElementResource();
+		return (getElementParent() instanceof ILocatableModelElement ?
+					((ILocatableModelElement)
+							getElementParent()).getElementResource() :
+							null);
+	}
+
+	public void accept(IModelElementVisitor visitor) {
+		visitor.visit(this);
 	}
 
 	public void setAllowBeanDefinitionOverriding(

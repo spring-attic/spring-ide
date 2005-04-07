@@ -33,19 +33,22 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
+import org.springframework.ide.eclipse.core.model.AbstractLocatableModelElement;
+import org.springframework.ide.eclipse.core.model.ILocatableModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 
 /**
  * Parser data for a Spring bean.
  */
-public class Bean extends BeansModelElement implements IBean {
+public class Bean extends AbstractLocatableModelElement implements IBean {
 
 	private BeanDefinitionHolder beanDefinitionHolder;
 	private List constructorArguments;
 	private List properties;
 	private Map propertiesMap;
 	private List innerBeans;
-	private IBean outerBean;
 
 	public Bean(IBeansConfig config) {
 		super(config, null);   // the name we get from the BeanDefinitionHolder
@@ -56,15 +59,47 @@ public class Bean extends BeansModelElement implements IBean {
 	}
 
 	public int getElementType() {
-		return BEAN;
+		return IBeansModelElementTypes.BEAN;
 	}
 
 	public IResource getElementResource() {
-		return getElementParent().getElementResource();
+		if (getElementParent() instanceof ILocatableModelElement) {
+			return ((ILocatableModelElement)
+									  getElementParent()).getElementResource();
+		}
+		return null;
+	}
+
+	public void accept(IModelElementVisitor visitor) {
+
+		// First visit this bean
+		if (visitor.visit(this)) {
+
+			// Now ask this beans's constructor arguments
+			Iterator iter = constructorArguments.iterator();
+			while (iter.hasNext()) {
+				IModelElement element = (IModelElement) iter.next();
+				element.accept(visitor);
+			}
+
+			// The ask this beans's properties
+			iter = properties.iterator();
+			while (iter.hasNext()) {
+				IModelElement element = (IModelElement) iter.next();
+				element.accept(visitor);
+			}
+
+			// Finally ask this bean's inner beans
+			iter = innerBeans.iterator();
+			while (iter.hasNext()) {
+				IModelElement element = (IModelElement) iter.next();
+				element.accept(visitor);
+			}
+		}
 	}
 
 	public IBeansConfig getConfig() {
-		IBeansModelElement parent = getElementParent();
+		IModelElement parent = getElementParent();
 		if (parent instanceof IBeansConfig) {
 			return (IBeansConfig) parent;
 		} else if (parent instanceof IBean) {

@@ -25,7 +25,6 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -39,9 +38,12 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelChangedListener;
-import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.core.model.AbstractModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 
 /**
  * The <code>IBeansModel</code> manages instances of <code>IBeansProject</code>s.
@@ -51,7 +53,7 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
  * The single instance of <code>IBeansModel</code> is available from
  * the static method <code>BeansCorePlugin.getModel()</code>.
  */
-public class BeansModel extends BeansModelElement implements IBeansModel {
+public class BeansModel extends AbstractModelElement implements IBeansModel {
 
 	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID +
 																 "/model/debug";
@@ -62,7 +64,7 @@ public class BeansModel extends BeansModelElement implements IBeansModel {
 	private IResourceChangeListener workspaceListener;
 
 	public BeansModel() {
-		super(null, "" /*model has empty name*/);
+		super(null, "BeansModel");
 		this.projects = new HashMap();
 		this.modelListeners = new ArrayList();
 		this.workspaceListener = new BeansResourceChangeListener(
@@ -70,11 +72,17 @@ public class BeansModel extends BeansModelElement implements IBeansModel {
 	}
 
 	public int getElementType() {
-		return MODEL;
+		return IBeansModelElementTypes.MODEL;
 	}
 
-	public IResource getElementResource() {
-		return null;
+	public void accept(IModelElementVisitor visitor) {
+
+		// Ask this model's projects
+		Iterator iter = projects.values().iterator();
+		while (iter.hasNext()) {
+			IModelElement element = (IModelElement) iter.next();
+			element.accept(visitor);
+		}
 	}
 
 	public void startup() {
@@ -244,7 +252,7 @@ public class BeansModel extends BeansModelElement implements IBeansModel {
 		return springProjects;
 	}
 
-	private void notifyListeners(IBeansModelElement element, int type) {
+	private void notifyListeners(IModelElement element, int type) {
 		BeansModelChangedEvent event = new BeansModelChangedEvent(element,
 																  type);
 		Iterator iter = modelListeners.iterator();

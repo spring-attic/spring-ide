@@ -19,12 +19,13 @@ package org.springframework.ide.eclipse.beans.core.model;
 import java.util.Collection;
 
 import org.eclipse.core.resources.IFile;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * This interface provides information for a Spring beans config set (a list of
  * beans config names).
  */
-public interface IBeansConfigSet extends IBeansModelElement, IBeanClassAware {
+public interface IBeansConfigSet extends IModelElement, IBeanClassAware {
 
 	boolean isAllowBeanDefinitionOverriding();
 

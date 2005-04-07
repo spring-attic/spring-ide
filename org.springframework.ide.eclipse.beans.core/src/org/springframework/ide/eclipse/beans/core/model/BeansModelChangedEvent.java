@@ -2,6 +2,8 @@ package org.springframework.ide.eclipse.beans.core.model;
 
 import java.util.EventObject;
 
+import org.springframework.ide.eclipse.core.model.IModelElement;
+
 
 /**
  * An element changed event describes a change to an element of the bean model.
@@ -27,7 +29,7 @@ public class BeansModelChangedEvent extends EventObject {
 	 * @param type  the type of modification (ADDED, REMOVED, CHANGED) this
 	 * 				event contains
 	 */
-	public BeansModelChangedEvent(IBeansModelElement element, int type) {
+	public BeansModelChangedEvent(IModelElement element, int type) {
 		super(element);
 		this.type = type;
 	}
@@ -35,8 +37,8 @@ public class BeansModelChangedEvent extends EventObject {
 	/**
 	 * Returns the modified element.
 	 */
-	public IBeansModelElement getElement() {
-		return (IBeansModelElement) getSource();
+	public IModelElement getElement() {
+		return (IModelElement) getSource();
 	}
 
 	/**

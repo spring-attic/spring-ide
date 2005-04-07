@@ -23,21 +23,33 @@ import java.util.List;
 import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
+import org.springframework.ide.eclipse.core.model.AbstractLocatableModelElement;
+import org.springframework.ide.eclipse.core.model.ILocatableModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 
-public class BeanProperty extends BeansModelElement implements IBeanProperty {
-
+public class BeanProperty extends AbstractLocatableModelElement
+													 implements IBeanProperty {
 	private Object value;
 
 	public BeanProperty(IBean bean) {
 		super(bean, null);
 	}
 
+	public void accept(IModelElementVisitor visitor) {
+		visitor.visit(this);
+	}
+
 	public int getElementType() {
-		return PROPERTY;
+		return IBeansModelElementTypes.PROPERTY;
 	}
 
 	public IResource getElementResource() {
-		return getElementParent().getElementResource();
+		if (getElementParent() instanceof ILocatableModelElement) {
+			return ((ILocatableModelElement)
+									  getElementParent()).getElementResource();
+		}
+		return null;
 	}
 
 	public void setValue(Object value) {

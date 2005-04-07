@@ -46,9 +46,10 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
-import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.beans.DefaultBeanDefinitionRegistry;
+import org.springframework.ide.eclipse.core.model.ILocatableModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 
 public class BeansConfigValidator {
 
@@ -458,7 +459,7 @@ public class BeansConfigValidator {
 				int index = ((Integer) entry.getKey()).intValue();
 	
 				// Lookup corresponding model element (contructor argument) 
-				IBeansModelElement element = bean;
+				IModelElement element = bean;
 				Iterator cas = bean.getConstructorArguments().iterator();
 				while (cas.hasNext()) {
 					IBeanConstructorArgument	carg = (IBeanConstructorArgument)
@@ -480,7 +481,7 @@ public class BeansConfigValidator {
 						   (ConstructorArgumentValues.ValueHolder) iter.next();
 
 				// Lookup corresponding model element (contructor argument) 
-				IBeansModelElement element = bean;
+				IModelElement element = bean;
 				if (valueHolder.getType() != null) {
 					Iterator cas = bean.getConstructorArguments().iterator();
 					while (cas.hasNext()) {
@@ -502,7 +503,7 @@ public class BeansConfigValidator {
 				PropertyValue prop = props[i];
 	
 				// Lookup corresponding model element (prroperty) 
-				IBeansModelElement element = bean.getProperty(prop.getName());
+				IModelElement element = bean.getProperty(prop.getName());
 				if (element == null) {
 					element = bean;
 				}
@@ -521,7 +522,7 @@ public class BeansConfigValidator {
 		}
 	}
 
-	protected void validateRefBeansInValue(IBeansModelElement element,
+	protected void validateRefBeansInValue(IModelElement element,
 							   Object value, BeanDefinitionRegistry registry) {
 		if (value instanceof RuntimeBeanReference) {
 			String beanName = ((RuntimeBeanReference) value).getBeanName();
@@ -529,10 +530,11 @@ public class BeansConfigValidator {
 				registry.getBeanDefinition(beanName);
 			} catch (NoSuchBeanDefinitionException e) {
 				BeansModelUtils.createProblemMarker(element,
-						  "Referenced bean '" + beanName + "' not found",
-						  IMarker.SEVERITY_ERROR, element.getElementStartLine(),
-						  IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCE,
-						  element.getElementName(), beanName);
+					  "Referenced bean '" + beanName + "' not found",
+					  IMarker.SEVERITY_ERROR,
+					  ((ILocatableModelElement) element).getElementStartLine(),
+					  IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCE,
+					  element.getElementName(), beanName);
 			}
 		} else if (value instanceof List) {
 			List list = (List) value;
