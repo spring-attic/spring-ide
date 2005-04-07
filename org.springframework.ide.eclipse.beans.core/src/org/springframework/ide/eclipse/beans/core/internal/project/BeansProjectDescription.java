@@ -44,8 +44,15 @@ public class BeansProjectDescription {
 		this.configSets = new HashMap();
 	}
 
-	public void setConfigNames(Collection configs) {
-		this.configNames = new ArrayList(configs);
+	public void setConfigNames(Collection configNames) {
+		this.configNames = new ArrayList(configNames);
+		this.configs = new HashMap();
+		Iterator iter = this.configNames.iterator();
+		while (iter.hasNext()) {
+			String configName = (String) iter.next();
+			IBeansConfig config = new BeansConfig(project, configName);
+			configs.put(configName, config);
+		}
 	}
 
 	public Collection getConfigNames() {
