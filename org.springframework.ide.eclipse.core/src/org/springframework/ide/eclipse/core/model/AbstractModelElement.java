@@ -1,0 +1,73 @@
+/*
+ * Copyright 2002-2005 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ 
+
+package org.springframework.ide.eclipse.core.model;
+
+public abstract class AbstractModelElement implements IModelElement {
+
+	private IModelElement parent;
+	private String name;
+
+	protected AbstractModelElement(IModelElement parent, String name) {
+		this.parent = parent;
+		this.name = name;
+	}
+
+	/**
+	 * Checks for model element equality by comparing the element's unique IDs.
+	 */
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj instanceof IModelElement) {
+			return getElementID().equals(((IModelElement) obj).getElementID());
+		}
+		return false;
+	}
+
+	public final void setElementParent(IModelElement parent) {
+		this.parent = parent;
+	}
+
+	public final IModelElement getElementParent() {
+		return parent;
+	}
+
+	public final void setElementName(String name) {
+		this.name = name;
+	}
+
+	public final String getElementName() {
+		return this.name;
+	}
+
+	public String getElementID() {
+		StringBuffer id = new StringBuffer();
+		if (getElementParent() != null) {
+			id.append(getElementParent().getElementID());
+			id.append('/');
+		}
+		id.append(getElementType());
+		id.append(':');
+		if (getElementName() != null) {
+			id.append(getElementName());
+		} else {
+			id.append(this.hashCode());
+		}
+		return id.toString();
+	}
+}
