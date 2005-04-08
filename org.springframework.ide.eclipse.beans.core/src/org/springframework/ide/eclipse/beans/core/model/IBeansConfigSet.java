@@ -23,7 +23,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * This interface provides information for a Spring beans config set (a list of
- * beans config names).
+ * beans config <b>names</b>).
  */
 public interface IBeansConfigSet extends IModelElement, IBeanClassAware {
 
@@ -44,6 +44,9 @@ public interface IBeansConfigSet extends IModelElement, IBeanClassAware {
 	 */
 	boolean hasConfig(IFile file);
 
+	/**
+	 * Returns a list of all config <b>names</b> defined in this config set. 
+	 */
 	Collection getConfigs();
 
 	boolean hasBean(String name);
