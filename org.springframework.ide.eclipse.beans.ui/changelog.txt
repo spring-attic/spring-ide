@@ -2,7 +2,7 @@ Changes in version 1.1.1 (1.12.2004):
 
 * added support for incomplete config sets (are not validated regarding parent
   beans and bean references)
-
+ 
 
 Changes in version 1.1.0 (1.9.2004):
 
