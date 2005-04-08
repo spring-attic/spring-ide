@@ -46,6 +46,9 @@ public abstract class AbstractModelElement implements IModelElement {
 	public final IModelElement getElementParent() {
 		return parent;
 	}
+	public IModelElement[] getElementChildren() {
+		return NO_CHILDREN;
+	}
 
 	public final void setElementName(String name) {
 		this.name = name;
@@ -55,19 +58,55 @@ public abstract class AbstractModelElement implements IModelElement {
 		return this.name;
 	}
 
-	public String getElementID() {
+	public final String getElementID() {
 		StringBuffer id = new StringBuffer();
 		if (getElementParent() != null) {
 			id.append(getElementParent().getElementID());
-			id.append('/');
+			id.append(ID_DELIMITER);
 		}
 		id.append(getElementType());
-		id.append(':');
+		id.append(ID_SEPARATOR);
 		if (getElementName() != null) {
 			id.append(getElementName());
 		} else {
 			id.append(this.hashCode());
 		}
 		return id.toString();
+	}
+
+	public final IModelElement getElement(String id) {
+		int sepPos = id.indexOf(ID_SEPARATOR);
+		if (sepPos > 0) {
+			try {
+				int type = Integer.valueOf(id.substring(0, sepPos)).intValue();
+				if (type == getElementType()) {
+					int delPos = id.indexOf(ID_DELIMITER);
+					if (delPos > 0) {
+						String name = id.substring(sepPos + 1, delPos);
+						if (name.equals(getElementName())) {
+
+							// Ask all children for the remaining part of the id
+							id = id.substring(delPos + 1);
+							IModelElement[] children = getElementChildren();
+							for (int i = 0; i < children.length; i++) {
+								IModelElement child = children[i];
+								IModelElement element = child.getElement(id);
+								if (element != null) {
+									return element;
+								}
+							}
+						}
+					} else {
+						String name = id.substring(sepPos + 1);
+						if (name.equals(getElementName())) {
+							return this;
+						}
+					}
+				}
+			} catch (NumberFormatException e) {
+				// ignore
+			}
+		}
+		return null;
 	}
 }

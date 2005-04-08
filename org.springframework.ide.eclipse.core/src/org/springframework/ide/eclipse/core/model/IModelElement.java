@@ -22,6 +22,15 @@ package org.springframework.ide.eclipse.core.model;
  */
 public interface IModelElement {
 
+	/** Character used for delimiting nodes within an element's unique id */
+	char ID_DELIMITER = '|';
+
+	/** Character used separate an element's type and name within an element's
+	 *  unique id */
+	char ID_SEPARATOR = ':';
+
+	IModelElement[] NO_CHILDREN = new IModelElement[0];
+
 	/**
 	 * Returns the element directly containing this element,
 	 * or <code>null</code> if this element has no parent.
@@ -30,6 +39,13 @@ public interface IModelElement {
 	 *			 parent
 	 */
 	IModelElement getElementParent();
+
+	/**
+	 * Returns an array with all children of this element.
+	 *
+	 * @return an array with the children elements
+	 */
+	IModelElement[] getElementChildren();
 
 	/**
 	 * Returns the name of this element.
@@ -54,6 +70,13 @@ public interface IModelElement {
 	 * @return the element's unique ID
 	 */
 	String getElementID();
+
+	/**
+	 * Returns the element for the given element ID.
+	 *
+	 * @param id the element's unique ID
+	 */
+	IModelElement getElement(String id);
 
 	/**
 	 * Accepts the given visitor.
