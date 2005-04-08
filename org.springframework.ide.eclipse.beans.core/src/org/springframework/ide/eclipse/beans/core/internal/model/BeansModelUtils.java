@@ -50,8 +50,9 @@ public class BeansModelUtils {
 										 IBeansProject project) {
 		// For external project get the corresponding project from beans model 
 		if (configName.charAt(0) == '/') {
-			String projectName = configName.substring(0,
-													configName.indexOf('/', 1));
+			int pos = configName.indexOf('/', 1);
+			configName = configName.substring(pos + 1);
+			String projectName = configName.substring(0, pos);
 			project = BeansCorePlugin.getModel().getProject(projectName);
 		}
 		return (project != null ? project.getConfig(configName) : null);

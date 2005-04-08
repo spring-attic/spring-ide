@@ -83,8 +83,14 @@ public class BeansConfigValidator {
 					if (cfgName.equals(config.getElementName())) {
 						validateConfig(config, configSet, registry);
 					} else {
-						BeansModelUtils.registerBeanDefinitions(
-										 project.getConfig(cfgName), registry);
+						// Resolve config name (including support for external
+						// project references!!!)
+						IBeansConfig cfg = BeansModelUtils.getConfig(cfgName,
+																	 project);
+						if (cfg != null) {
+							BeansModelUtils.registerBeanDefinitions(cfg,
+																	registry);
+						}
 					}
 				}
 
