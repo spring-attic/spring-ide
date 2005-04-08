@@ -62,6 +62,14 @@ public class Bean extends AbstractLocatableModelElement implements IBean {
 		return IBeansModelElementTypes.BEAN;
 	}
 
+	public IModelElement[] getElementChildren() {
+		ArrayList children = new ArrayList(getConstructorArguments());
+		children.addAll(getProperties());
+		children.addAll(getInnerBeans());
+		return (IModelElement[]) children.toArray(
+										   new IModelElement[children.size()]);
+	}
+
 	public IResource getElementResource() {
 		if (getElementParent() instanceof ILocatableModelElement) {
 			return ((ILocatableModelElement)

@@ -55,6 +55,13 @@ public class BeansProject extends AbstractLocatableModelElement
 		return IBeansModelElementTypes.PROJECT;
 	}
 
+	public IModelElement[] getElementChildren() {
+		ArrayList children = new ArrayList(getDescription().getConfigs());
+		children.addAll(getDescription().getConfigSets());
+		return (IModelElement[]) children.toArray(
+										   new IModelElement[children.size()]);
+	}
+
 	public IResource getElementResource() {
 		return project;
 	}
@@ -137,7 +144,8 @@ public class BeansProject extends AbstractLocatableModelElement
 	}
 
 	/**
-	 * Returns a collection of all BeansConfig defined in this project.
+	 * Returns a collection of all <code>IBeansConfig</code>s defined in this
+	 * project.
 	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfig
 	 */
 	public Collection getConfigs() {

@@ -75,6 +75,11 @@ public class BeansModel extends AbstractModelElement implements IBeansModel {
 		return IBeansModelElementTypes.MODEL;
 	}
 
+	public IModelElement[] getElementChildren() {
+		return (IModelElement[]) getProjects().toArray(
+									  new IModelElement[getProjects().size()]);
+	}
+
 	public void accept(IModelElementVisitor visitor) {
 
 		// Ask this model's projects

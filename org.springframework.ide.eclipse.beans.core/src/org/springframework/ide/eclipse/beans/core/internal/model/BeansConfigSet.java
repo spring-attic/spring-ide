@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.model.AbstractLocatableModelElement;
 import org.springframework.ide.eclipse.core.model.ILocatableModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 
 /**
@@ -75,6 +76,11 @@ public class BeansConfigSet extends AbstractLocatableModelElement
 					((ILocatableModelElement)
 							getElementParent()).getElementResource() :
 							null);
+	}
+
+	public IModelElement[] getElementChildren() {
+		return (IModelElement[]) getConfigs().toArray(
+									   new IModelElement[getConfigs().size()]);
 	}
 
 	public void accept(IModelElementVisitor visitor) {

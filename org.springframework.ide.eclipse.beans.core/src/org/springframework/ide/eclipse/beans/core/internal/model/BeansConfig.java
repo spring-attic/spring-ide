@@ -85,6 +85,11 @@ public class BeansConfig extends AbstractLocatableModelElement
 		return IBeansModelElementTypes.CONFIG;
 	}
 
+	public IModelElement[] getElementChildren() {
+		return (IModelElement[]) getBeans().toArray(
+										 new IModelElement[getBeans().size()]);
+	}
+
 	public IResource getElementResource() {
 		return file;
 	}
