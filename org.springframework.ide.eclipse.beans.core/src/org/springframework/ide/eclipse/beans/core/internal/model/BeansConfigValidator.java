@@ -141,13 +141,6 @@ public class BeansConfigValidator {
 		while (beans.hasNext()) {
 			IBean bean = (IBean) beans.next();
 			validateBean(bean, configSet, registry);
-	
-			// Validate this bean's inner beans
-			Iterator innerBeans = bean.getInnerBeans().iterator();
-			while (innerBeans.hasNext()) {
-				IBean innerBean = (IBean) innerBeans.next();
-				validateBean(innerBean, configSet, registry);
-			}
 		}
     	}
 
@@ -231,6 +224,13 @@ public class BeansConfigValidator {
 					validateProperties(bean, type, bd.getPropertyValues());
 				}
 			}
+		}
+		
+		// Validate this bean's inner beans recursively
+		Iterator innerBeans = bean.getInnerBeans().iterator();
+		while (innerBeans.hasNext()) {
+			IBean innerBean = (IBean) innerBeans.next();
+			validateBean(innerBean, configSet, registry);
 		}
 	}
 
@@ -516,15 +516,7 @@ public class BeansConfigValidator {
 				validateRefBeansInValue(element, prop.getValue(), registry);
 			}
 		} catch (NoSuchBeanDefinitionException e) {
-
-			// Ignore all exceptions but equal bean and parent names
-			if (e.getBeanName().equals(bean.getElementName())) {
-				BeansModelUtils.createProblemMarker(bean,
-						  "Bean name and parent bean name are the same",
-						  IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
-						  IBeansProjectMarker.ERROR_CODE_UNDEFINED_PARENT_BEAN,
-						  bean.getElementName(), e.getBeanName());
-			}
+			// Ignore all exceptions
 		}
 	}
 
