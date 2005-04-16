@@ -97,7 +97,7 @@ public class BeansConfigValidator {
 				// If the config set is complete the check all bean references
 				// of given config
 				if (!configSet.isIncomplete()) {
-					validateReferences(config, registry);
+					validateReferences(config, configSet, registry);
 				}
 				isValidated = true;
 			}
@@ -109,7 +109,7 @@ public class BeansConfigValidator {
 									   new DefaultBeanDefinitionRegistry(null); 
 			registry.setAllowAliasOverriding(false);
 			validateConfig(config, null, registry);
-			validateReferences(config, registry);
+			validateReferences(config, null, registry);
 		}
 		monitor.worked(1);
 	}
@@ -166,27 +166,9 @@ public class BeansConfigValidator {
 		// Validate bean name and aliases
 		validateBeanDefinitionHolder(bean, registry);
 
-		// Get this bean's root definition from registry (if any)
-		BeanDefinition bd = null;
-		try {
-			bd = registry.getBeanDefinition(bean.getElementName());
-		} catch (NoSuchBeanDefinitionException e) {
-			if (e.getBeanName().equals(bean.getElementName())) {
-				BeansModelUtils.createProblemMarker(bean,
-						  "Bean name and parent bean name are the same",
-						  IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
-						  IBeansProjectMarker.ERROR_CODE_UNDEFINED_PARENT_BEAN,
-						  bean.getElementName(), e.getBeanName());
-			} else if (configSet != null && !configSet.isIncomplete()) {
-				BeansModelUtils.createProblemMarker(bean,
-						  "Parent bean '" + e.getBeanName() +
-						  "' not found in config set '" +
-						  configSet.getElementName() + "'",
-						  IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
-						  IBeansProjectMarker.ERROR_CODE_UNDEFINED_PARENT_BEAN,
-						  bean.getElementName(), e.getBeanName());
-			}
-		}
+		// Validate root bean
+		BeanDefinitionHolder bdHolder = ((Bean) bean).getBeanDefinitionHolder();
+		BeanDefinition bd = bdHolder.getBeanDefinition();
 		if (bd instanceof RootBeanDefinition) {
 	
 			// Validate bean definition
@@ -401,7 +383,7 @@ public class BeansConfigValidator {
 	}
 
 	protected void validateReferences(IBeansConfig config,
-				  					  BeanDefinitionRegistry registry) {
+				  IBeansConfigSet configSet, BeanDefinitionRegistry registry) {
 		if (DEBUG) {
 			System.out.println("Validating references of bean config '" +
 							   config.getConfigPath() + "'");
@@ -416,6 +398,29 @@ public class BeansConfigValidator {
 				throw new OperationCanceledException();
 			}
 			IBean bean = (IBean) beans.next();
+
+			// Validate parent bean reference (if any)
+			try {
+				registry.getBeanDefinition(bean.getElementName());
+			} catch (NoSuchBeanDefinitionException e) {
+				if (e.getBeanName().equals(bean.getElementName())) {
+					BeansModelUtils.createProblemMarker(bean,
+							  "Bean name and parent bean name are the same",
+							  IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+							  IBeansProjectMarker.ERROR_CODE_UNDEFINED_PARENT_BEAN,
+							  bean.getElementName(), e.getBeanName());
+				} else if (configSet != null && !configSet.isIncomplete()) {
+					BeansModelUtils.createProblemMarker(bean,
+							  "Parent bean '" + e.getBeanName() +
+							  "' not found in config set '" +
+							  configSet.getElementName() + "'",
+							  IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+							  IBeansProjectMarker.ERROR_CODE_UNDEFINED_PARENT_BEAN,
+							  bean.getElementName(), e.getBeanName());
+				}
+			}
+
+			// Validate bean references in this bean
 			validateRefBeansInBean(bean, registry);
 
 			// Validate non-static factory method in factory bean
