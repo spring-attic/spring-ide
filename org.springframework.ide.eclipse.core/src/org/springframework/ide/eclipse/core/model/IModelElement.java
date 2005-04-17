@@ -72,13 +72,6 @@ public interface IModelElement {
 	String getElementID();
 
 	/**
-	 * Returns the element for the given element ID.
-	 *
-	 * @param id the element's unique ID
-	 */
-	IModelElement getElement(String id);
-
-	/**
 	 * Accepts the given visitor.
 	 * The visitor's <code>visit</code> method is called with this model
 	 * element. If the visitor returns <code>true</code>, this method

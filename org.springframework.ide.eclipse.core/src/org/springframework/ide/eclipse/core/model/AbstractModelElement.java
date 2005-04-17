@@ -74,6 +74,11 @@ public abstract class AbstractModelElement implements IModelElement {
 		return id.toString();
 	}
 
+	/**
+	 * Returns the element for the given element ID.
+	 *
+	 * @param id the element's unique ID
+	 */
 	public final IModelElement getElement(String id) {
 		int sepPos = id.indexOf(ID_SEPARATOR);
 		if (sepPos > 0) {
@@ -90,9 +95,13 @@ public abstract class AbstractModelElement implements IModelElement {
 							IModelElement[] children = getElementChildren();
 							for (int i = 0; i < children.length; i++) {
 								IModelElement child = children[i];
-								IModelElement element = child.getElement(id);
-								if (element != null) {
-									return element;
+								if (child instanceof AbstractModelElement) {
+									IModelElement element =
+													((AbstractModelElement)
+														 child).getElement(id);
+									if (element != null) {
+										return element;
+									}
 								}
 							}
 						}
