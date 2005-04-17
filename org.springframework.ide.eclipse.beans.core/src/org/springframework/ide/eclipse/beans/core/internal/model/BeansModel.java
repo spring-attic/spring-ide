@@ -32,43 +32,43 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.BeansResourceChangeListener;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.IBeansResourceChangeEvents;
-import org.springframework.ide.eclipse.beans.core.model.BeansModelChangedEvent;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
-import org.springframework.ide.eclipse.beans.core.model.IBeansModelChangedListener;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
-import org.springframework.ide.eclipse.core.model.AbstractModelElement;
+import org.springframework.ide.eclipse.core.model.AbstractModel;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
+import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 
 /**
- * The <code>IBeansModel</code> manages instances of <code>IBeansProject</code>s.
- * <code>IBeansModelChangedListener</code>s register with the <code>IBeansModel</code>,
- * and receive <code>BeansModelChangedEvent</code>s for all changes.
+ * The <code>BeansModel</code> manages instances of <code>IBeansProject</code>s.
+ * <code>IModelChangeListener</code>s register with the <code>BeansModel</code>,
+ * and receive <code>ModelChangeEvent</code>s for all changes.
  * <p>
  * The single instance of <code>IBeansModel</code> is available from
  * the static method <code>BeansCorePlugin.getModel()</code>.
+ *
+ * @see org.springframework.ide.eclipse.core.model.IModelChangeListener
+ * @see org.springframework.ide.eclipse.core.model.ModelChangeEvent
  */
-public class BeansModel extends AbstractModelElement implements IBeansModel {
+public class BeansModel extends AbstractModel implements IBeansModel {
 
 	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID +
 																 "/model/debug";
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
 
 	private Map projects;
-	private List modelListeners;
 	private IResourceChangeListener workspaceListener;
 
 	public BeansModel() {
 		super(null, "BeansModel");
 		this.projects = new HashMap();
-		this.modelListeners = new ArrayList();
 		this.workspaceListener = new BeansResourceChangeListener(
-											  new ResourceChangeEventHandler());
+											 new ResourceChangeEventHandler());
 	}
 
 	public int getElementType() {
@@ -181,14 +181,6 @@ public class BeansModel extends AbstractModelElement implements IBeansModel {
 		return configs;
 	}
 
-	public void addChangeListener(IBeansModelChangedListener listener) {
-		modelListeners.add(listener);
-	}
-
-	public void removeChangeListener(IBeansModelChangedListener listener) {
-		modelListeners.remove(listener);
-	}
-
 	public String toString() {
 		StringBuffer text = new StringBuffer("Beans model:\n");
 		Iterator projs = projects.values().iterator();
@@ -257,17 +249,6 @@ public class BeansModel extends AbstractModelElement implements IBeansModel {
 		return springProjects;
 	}
 
-	private void notifyListeners(IModelElement element, int type) {
-		BeansModelChangedEvent event = new BeansModelChangedEvent(element,
-																  type);
-		Iterator iter = modelListeners.iterator();
-		while (iter.hasNext()) {
-			IBeansModelChangedListener listener =
-									   (IBeansModelChangedListener) iter.next();
-			listener.elementChanged(event);
-		}
-	}
-
 	/**
 	 * Internal resource change event handler.
 	 */
@@ -284,7 +265,7 @@ public class BeansModel extends AbstractModelElement implements IBeansModel {
 			}
 			BeansProject proj = new BeansProject(project);
 			projects.put(project, proj);
-			notifyListeners(proj, BeansModelChangedEvent.ADDED);
+			notifyListeners(proj, ModelChangeEvent.ADDED);
 		}
 
 		public void springNatureRemoved(IProject project) {
@@ -293,7 +274,7 @@ public class BeansModel extends AbstractModelElement implements IBeansModel {
 								   "project '" + project.getName() + "'");
 			}
 			IBeansProject proj = (IBeansProject) projects.remove(project);
-			notifyListeners(proj, BeansModelChangedEvent.REMOVED);
+			notifyListeners(proj, ModelChangeEvent.REMOVED);
 		}
 
 		public void projectAdded(IProject project) {
@@ -302,7 +283,7 @@ public class BeansModel extends AbstractModelElement implements IBeansModel {
 			}
 			BeansProject proj = new BeansProject(project);
 			projects.put(project, proj);
-			notifyListeners(proj, BeansModelChangedEvent.ADDED);
+			notifyListeners(proj, ModelChangeEvent.ADDED);
 		}
 	
 		public void projectOpened(IProject project) {
@@ -312,7 +293,7 @@ public class BeansModel extends AbstractModelElement implements IBeansModel {
 			}
 			BeansProject proj = new BeansProject(project);
 			projects.put(project, proj);
-			notifyListeners(proj, BeansModelChangedEvent.ADDED);
+			notifyListeners(proj, ModelChangeEvent.ADDED);
 		}
 	
 		public void projectClosed(IProject project) {
@@ -321,7 +302,7 @@ public class BeansModel extends AbstractModelElement implements IBeansModel {
 								   "' closed");
 			}
 			IBeansProject proj = (IBeansProject) projects.remove(project);
-			notifyListeners(proj, BeansModelChangedEvent.REMOVED);
+			notifyListeners(proj, ModelChangeEvent.REMOVED);
 		}
 	
 		public void projectDeleted(IProject project) {
@@ -330,7 +311,7 @@ public class BeansModel extends AbstractModelElement implements IBeansModel {
 								   "' deleted");
 			}
 			IBeansProject proj = (IBeansProject) projects.remove(project);
-			notifyListeners(proj, BeansModelChangedEvent.REMOVED);
+			notifyListeners(proj, ModelChangeEvent.REMOVED);
 		}
 	
 		public void projectDescriptionChanged(IFile file) {
@@ -342,7 +323,7 @@ public class BeansModel extends AbstractModelElement implements IBeansModel {
 			BeansProject project = (BeansProject)
 												projects.get(file.getProject());
 			project.reset();
-			notifyListeners(project, BeansModelChangedEvent.CHANGED);
+			notifyListeners(project, ModelChangeEvent.CHANGED);
 		}
 
 		public void configAdded(IFile file) {
@@ -354,7 +335,7 @@ public class BeansModel extends AbstractModelElement implements IBeansModel {
 												projects.get(file.getProject());
 			project.addConfig(file);
 			IBeansConfig config = project.getConfig(file);
-			notifyListeners(config, BeansModelChangedEvent.ADDED);
+			notifyListeners(config, ModelChangeEvent.ADDED);
 		}
 	
 		public void configChanged(IFile file) {
@@ -371,7 +352,7 @@ public class BeansModel extends AbstractModelElement implements IBeansModel {
 			if (!config.isReset()) {
 				config.reset();
 			}
-			notifyListeners(config, BeansModelChangedEvent.CHANGED);
+			notifyListeners(config, ModelChangeEvent.CHANGED);
 		}
 	
 		public void configRemoved(IFile file) {
@@ -383,7 +364,7 @@ public class BeansModel extends AbstractModelElement implements IBeansModel {
 												projects.get(file.getProject());
 			BeansConfig config = (BeansConfig) project.getConfig(file);
 			project.removeConfig(file);
-			notifyListeners(config, BeansModelChangedEvent.REMOVED);
+			notifyListeners(config, ModelChangeEvent.REMOVED);
 		}
 
 		public void beanClassChanged(String className, Collection configs) {

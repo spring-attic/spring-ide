@@ -20,7 +20,7 @@ import java.util.Collection;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModel;
 
 /**
  * The <code>IBeansModel</code> manages instances of <code>IBeansProject</code>s.
@@ -30,7 +30,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  * The single instance of <code>IBeansModel</code> is available from
  * the static method <code>BeansCorePlugin.getModel()</code>.
  */
-public interface IBeansModel extends IModelElement {
+public interface IBeansModel extends IModel {
 
 	boolean hasProject(IProject project);
 
@@ -55,8 +55,4 @@ public interface IBeansModel extends IModelElement {
 	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfig
 	 */
 	Collection getConfigs(String className);
-
-	void addChangeListener(IBeansModelChangedListener listener);
-
-	void removeChangeListener(IBeansModelChangedListener listener);
 }
