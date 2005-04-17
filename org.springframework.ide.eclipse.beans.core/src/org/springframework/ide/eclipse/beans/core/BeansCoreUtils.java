@@ -31,7 +31,7 @@ public class BeansCoreUtils {
 	 * Returns true if given resource is a Spring bean factory config file.
 	 */
 	public static boolean isBeansConfig(IResource resource) {
-		if (resource instanceof IFile && resource.isAccessible()) {
+		if (resource instanceof IFile) {
 			IBeansProject project = BeansCorePlugin.getModel().getProject(
 														 resource.getProject());
 			if (project != null) {

@@ -107,6 +107,7 @@ public class BeansProject extends AbstractLocatableModelElement
 
 	public void removeConfig(IFile file) {
 		getDescription().removeConfig(file);
+		BeansProjectDescriptionWriter.write(project, description);
 	}
 
 	public Collection getConfigNames() {
