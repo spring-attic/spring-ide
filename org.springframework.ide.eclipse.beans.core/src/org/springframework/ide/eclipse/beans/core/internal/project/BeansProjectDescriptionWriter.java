@@ -58,10 +58,10 @@ public class BeansProjectDescriptionWriter
 			}
 			if (!file.exists()) {
 				file.create(new ByteArrayInputStream(os.toByteArray()),
-													 IResource.NONE, null);
+													 IResource.FORCE, null);
 			} else {
 				file.setContents(new ByteArrayInputStream(os.toByteArray()),
-								 IResource.NONE, null);
+								 IResource.FORCE, null);
 			}
 		} catch (IOException e) {
 			BeansCorePlugin.log("Error writing " + file.getFullPath(), e);
