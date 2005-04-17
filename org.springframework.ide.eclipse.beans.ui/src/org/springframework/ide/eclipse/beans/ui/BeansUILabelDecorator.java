@@ -28,10 +28,10 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.model.BeansModelChangedEvent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
-import org.springframework.ide.eclipse.beans.core.model.IBeansModelChangedListener;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.model.IModelChangeListener;
+import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
@@ -47,11 +47,11 @@ public class BeansUILabelDecorator extends LabelProvider
 										 implements ILightweightLabelDecorator {
 	public static final String DECORATOR_ID = BeansUIPlugin.PLUGIN_ID +
 														 ".beansLabelDecorator";
-	private IBeansModelChangedListener listener;
+	private IModelChangeListener listener;
 
 	public BeansUILabelDecorator() {
-		listener = new IBeansModelChangedListener() {
-			public void elementChanged(BeansModelChangedEvent event) {
+		listener = new IModelChangeListener() {
+			public void elementChanged(ModelChangeEvent event) {
 				update();
 			}
 		};

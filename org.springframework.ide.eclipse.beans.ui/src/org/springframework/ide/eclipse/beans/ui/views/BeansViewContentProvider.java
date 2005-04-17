@@ -23,8 +23,6 @@ import java.util.List;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.model.BeansModelChangedEvent;
-import org.springframework.ide.eclipse.beans.core.model.IBeansModelChangedListener;
 import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
@@ -33,19 +31,21 @@ import org.springframework.ide.eclipse.beans.ui.model.INode;
 import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
 import org.springframework.ide.eclipse.beans.ui.model.PropertyNode;
 import org.springframework.ide.eclipse.beans.ui.model.RootNode;
+import org.springframework.ide.eclipse.core.model.IModelChangeListener;
+import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 
 class BeansViewContentProvider implements ITreeContentProvider {
 
 	protected static final Object[] NO_CHILDREN = new Object[0];
 
 	private IBeansView view;
-	private IBeansModelChangedListener listener;
+	private IModelChangeListener listener;
 	private RootNode rootNode;
 
 	public BeansViewContentProvider(final IBeansView view) {
 		this.view = view;
-		listener = new IBeansModelChangedListener() {
-			public void elementChanged(BeansModelChangedEvent event) {
+		listener = new IModelChangeListener() {
+			public void elementChanged(ModelChangeEvent event) {
 				if (rootNode != null) {
 					rootNode.reloadConfigs();
 					view.refresh();
