@@ -50,7 +50,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 public class SpringUIUtils {
@@ -112,8 +111,8 @@ public class SpringUIUtils {
 	 * Displays specified preferences or property page and returns
 	 * <code>true</code> if <code>PreferenceDialog.OK</code> was selected.
 	 */
-	public static final boolean showPreferencePage(String id, IPreferencePage page,
-											 final String title) {
+	public static final boolean showPreferencePage(String id,
+									IPreferencePage page, final String title) {
 		final IPreferenceNode targetNode = new PreferenceNode(id, page);
 		
 		PreferenceManager manager = new PreferenceManager();
@@ -144,17 +143,16 @@ public class SpringUIUtils {
     }    
 
 	/**
-	 * Opens given file in associated editor and go to specified line
-	 * (if > 0).
+	 * Opens given file in associated editor and go to specified line (if > 0).
 	 */
 	public static final IEditorPart openInEditor(IFile file, int line) {
 		IEditorInput input = new FileEditorInput(file);
 		IEditorPart editPart = openInEditor(input);
 		if (editPart != null) {
-			if (line > 0 && editPart instanceof AbstractTextEditor) {
+			if (line > 0 && editPart instanceof ITextEditor) {
 
 				// go to specified line
-				AbstractTextEditor editor = (AbstractTextEditor) editPart;
+				ITextEditor editor = (ITextEditor) editPart;
 				IDocument doc = editor.getDocumentProvider().getDocument(input);
 				if (doc != null) {
 					try {
@@ -174,7 +172,7 @@ public class SpringUIUtils {
 	}
 
 	public static final IEditorPart openInEditor(IEditorInput input,
-										   String editorId) {
+												 String editorId) {
 		IWorkbenchPage page = SpringUIPlugin.getActiveWorkbenchPage();
 		try {
 			IEditorPart editPart = page.openEditor(input, editorId);
