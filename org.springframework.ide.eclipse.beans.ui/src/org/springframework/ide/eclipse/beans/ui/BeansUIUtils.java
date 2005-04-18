@@ -60,6 +60,16 @@ public class BeansUIUtils {
 
 	/**
 	 * Returns a corresponding instance of <code>IPropertySource</code> for the
+	 * given model element ID or null.
+	 * @param id  the model element ID
+	 */
+	public static final IPropertySource getPropertySource(String id) {
+		IModelElement element = BeansCorePlugin.getModel().getElement(id);
+		return (element != null ? getPropertySource(element) : null);
+	}
+
+	/**
+	 * Returns a corresponding instance of <code>IPropertySource</code> for the
 	 * given <code>IBeansModelElement</code> or null.
 	 */
 	public static final IPropertySource getPropertySource(
