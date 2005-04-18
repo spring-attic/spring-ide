@@ -24,6 +24,13 @@ package org.springframework.ide.eclipse.core.model;
 public interface IModel extends IModelElement {
 
 	/**
+	 * Constant representing a model (workspace level object).
+	 * A model element with this type can be safely cast to
+	 * <code>IModel</code>.
+	 */
+	int MODEL_TYPE = 0;
+
+	/**
 	 * Returns the element for the given element ID.
 	 *
 	 * @param id the element's unique ID

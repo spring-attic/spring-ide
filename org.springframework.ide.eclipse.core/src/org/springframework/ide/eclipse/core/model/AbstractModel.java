@@ -29,6 +29,10 @@ public abstract class AbstractModel extends AbstractModelElement
 		this.listeners = new ArrayList();
 	}
 
+	public int getElementType() {
+		return MODEL_TYPE;
+	}
+
 	public final void addChangeListener(IModelChangeListener listener) {
 		listeners.add(listener);
 	}
