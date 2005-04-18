@@ -39,7 +39,7 @@ public class BeanConstructorArgument extends AbstractLocatableModelElement
 	}
 
 	public int getElementType() {
-		return IBeansModelElementTypes.CONSTRUCTOR_ARGUMENT;
+		return IBeansModelElementTypes.CONSTRUCTOR_ARGUMENT_TYPE;
 	}
 
 	public IResource getElementResource() {

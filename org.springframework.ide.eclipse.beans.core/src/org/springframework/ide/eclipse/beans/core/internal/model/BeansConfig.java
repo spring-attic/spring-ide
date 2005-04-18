@@ -82,7 +82,7 @@ public class BeansConfig extends AbstractLocatableModelElement
 	}
 
 	public int getElementType() {
-		return IBeansModelElementTypes.CONFIG;
+		return IBeansModelElementTypes.CONFIG_TYPE;
 	}
 
 	public IModelElement[] getElementChildren() {

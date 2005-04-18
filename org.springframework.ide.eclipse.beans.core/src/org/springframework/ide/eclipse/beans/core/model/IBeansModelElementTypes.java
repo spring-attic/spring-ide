@@ -22,51 +22,44 @@ package org.springframework.ide.eclipse.beans.core.model;
 public interface IBeansModelElementTypes {
 
 	/**
-	 * Constant representing the Beans model (workspace level object).
-	 * A Beans element with this type can be safely cast to
-	 * <code>BeansModel</code>.
-	 */
-	int MODEL = 1;
-
-	/**
 	 * Constant representing a Beans project.
 	 * A Beans element with this type can be safely cast to
 	 * <code>BeansProject</code>.
 	 */
-	int PROJECT = 2;
+	int PROJECT_TYPE = 2;
 
 	/**
 	 * Constant representing a Beans project's config.
 	 * A Beans element with this type can be safely cast to
 	 * <code>BeansConfig</code>.
 	 */
-	int CONFIG = 3;
+	int CONFIG_TYPE = 3;
 
 	/**
 	 * Constant representing a Beans project's config set.
 	 * A Beans element with this type can be safely cast to
 	 * <code>BeansConfigSet</code>.
 	 */
-	int CONFIG_SET = 4;
+	int CONFIG_SET_TYPE = 4;
 
 	/**
 	 * Constant representing a Beans project's bean.
 	 * A Beans element with this type can be safely cast to
 	 * <code>Bean</code>.
 	 */
-	int BEAN = 5;
+	int BEAN_TYPE = 5;
 
 	/**
 	 * Constant representing a Beans project bean's property.
 	 * A Beans element with this type can be safely cast to
 	 * <code>Property</code>.
 	 */
-	int PROPERTY = 6;
+	int PROPERTY_TYPE = 6;
 
 	/**
 	 * Constant representing a Beans project bean's constructor argument.
 	 * A Beans element with this type can be safely cast to
 	 * <code>ConstructorArgument</code>.
 	 */
-	int CONSTRUCTOR_ARGUMENT = 7;
+	int CONSTRUCTOR_ARGUMENT_TYPE = 7;
 }

@@ -59,7 +59,7 @@ public class Bean extends AbstractLocatableModelElement implements IBean {
 	}
 
 	public int getElementType() {
-		return IBeansModelElementTypes.BEAN;
+		return IBeansModelElementTypes.BEAN_TYPE;
 	}
 
 	public IModelElement[] getElementChildren() {

@@ -52,7 +52,7 @@ public class BeansProject extends AbstractLocatableModelElement
 	}
 
 	public int getElementType() {
-		return IBeansModelElementTypes.PROJECT;
+		return IBeansModelElementTypes.PROJECT_TYPE;
 	}
 
 	public IModelElement[] getElementChildren() {

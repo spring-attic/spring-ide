@@ -41,7 +41,7 @@ public class BeanProperty extends AbstractLocatableModelElement
 	}
 
 	public int getElementType() {
-		return IBeansModelElementTypes.PROPERTY;
+		return IBeansModelElementTypes.PROPERTY_TYPE;
 	}
 
 	public IResource getElementResource() {

@@ -68,7 +68,7 @@ public class BeansConfigSet extends AbstractLocatableModelElement
 	}
 
 	public int getElementType() {
-		return IBeansModelElementTypes.CONFIG_SET;
+		return IBeansModelElementTypes.CONFIG_SET_TYPE;
 	}
 
 	public IResource getElementResource() {

@@ -36,7 +36,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
-import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.AbstractModel;
@@ -69,10 +68,6 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		this.projects = new HashMap();
 		this.workspaceListener = new BeansResourceChangeListener(
 											 new ResourceChangeEventHandler());
-	}
-
-	public int getElementType() {
-		return IBeansModelElementTypes.MODEL;
 	}
 
 	public IModelElement[] getElementChildren() {
