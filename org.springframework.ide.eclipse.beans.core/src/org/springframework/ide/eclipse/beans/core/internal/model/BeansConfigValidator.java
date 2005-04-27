@@ -53,6 +53,10 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 
 public class BeansConfigValidator {
 
+    private static final String PROPERTY_PLACEHOLDER_PREFIX = "${";
+    
+    private static final String PROPERTY_PLACEHOLDER_SUFFIX = "}";
+    
 	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID +
 													  "/model/validator/debug";
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
@@ -513,7 +517,7 @@ public class BeansConfigValidator {
 			for (int i = 0; i < props.length; i++) {
 				PropertyValue prop = props[i];
 	
-				// Lookup corresponding model element (prroperty) 
+				// Lookup corresponding model element (property) 
 				IModelElement element = bean.getProperty(prop.getName());
 				if (element == null) {
 					element = bean;
@@ -532,12 +536,23 @@ public class BeansConfigValidator {
 			try {
 				registry.getBeanDefinition(beanName);
 			} catch (NoSuchBeanDefinitionException e) {
-				BeansModelUtils.createProblemMarker(element,
-					  "Referenced bean '" + beanName + "' not found",
-					  IMarker.SEVERITY_ERROR,
-					  ((ILocatableModelElement) element).getElementStartLine(),
-					  IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCE,
-					  element.getElementName(), beanName);
+                // Bean ref is property placeholder
+				if (isPropertyPlaceHolder(beanName)) {
+                    BeansModelUtils.createProblemMarker(element,
+    					  "Referenced bean '" + beanName + "' not found",
+    					  IMarker.SEVERITY_WARNING,
+    					  ((ILocatableModelElement) element).getElementStartLine(),
+    					  IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCE,
+    					  element.getElementName(), beanName);
+                }
+                else {
+                    BeansModelUtils.createProblemMarker(element,
+                          "Referenced bean '" + beanName + "' not found",
+                          IMarker.SEVERITY_ERROR,
+                          ((ILocatableModelElement) element).getElementStartLine(),
+                          IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCE,
+                          element.getElementName(), beanName);
+                }
 			}
 		} else if (value instanceof List) {
 			List list = (List) value;
@@ -557,4 +572,14 @@ public class BeansConfigValidator {
 			}
 		}
 	}
+    
+    /**
+     * Checks if the specified property value is a placeholder, e.g. <code>${beansRef}</code>
+     * @param property the property value
+     * @return true if property value is placeholder
+     */
+    private boolean isPropertyPlaceHolder(String property) {
+        return (property.startsWith(PROPERTY_PLACEHOLDER_PREFIX) 
+                && property.endsWith(PROPERTY_PLACEHOLDER_SUFFIX));
+    }
 }
