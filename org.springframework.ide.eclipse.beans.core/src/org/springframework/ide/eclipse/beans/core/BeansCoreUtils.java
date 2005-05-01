@@ -41,20 +41,20 @@ public class BeansCoreUtils {
 		return false;
 	}
 
-	public static void createProblemMarker(IFile file, String message,
+	public static void createProblemMarker(IResource resource, String message,
 										int severity, int line, int errorCode) {
-		createProblemMarker(file, message, severity, line, errorCode, null,
+		createProblemMarker(resource, message, severity, line, errorCode, null,
 							null);
 	}
 
-	public static void createProblemMarker(IFile file, String message,
+	public static void createProblemMarker(IResource resource, String message,
 										  int severity, int line, int errorCode,
 										  String beanID, String errorData) {
-		if (file != null && file.isAccessible()) {
+		if (resource != null && resource.isAccessible()) {
 			try {
 
 				// First check if specified marker already exists
-				IMarker[] markers = file.findMarkers(
+				IMarker[] markers = resource.findMarkers(
 									  IBeansProjectMarker.PROBLEM_MARKER, false,
 									  IResource.DEPTH_ZERO);
 				for (int i = 0; i < markers.length; i++) {
@@ -69,7 +69,7 @@ public class BeansCoreUtils {
 				}
 
 				// Create new marker
-				IMarker marker = file.createMarker(
+				IMarker marker = resource.createMarker(
 											IBeansProjectMarker.PROBLEM_MARKER);
 				Map attributes = new HashMap();
 				attributes.put(IMarker.MESSAGE, message);
@@ -95,11 +95,11 @@ public class BeansCoreUtils {
 		}
 	}
 
-	public static void deleteProblemMarkers(IFile file) {
-		if (file != null && file.isAccessible()) {
+	public static void deleteProblemMarkers(IResource resource) {
+		if (resource != null && resource.isAccessible()) {
 			try {
-				file.deleteMarkers(IBeansProjectMarker.PROBLEM_MARKER, false,
-								   IResource.DEPTH_ZERO);
+				resource.deleteMarkers(IBeansProjectMarker.PROBLEM_MARKER, false,
+									   IResource.DEPTH_ZERO);
 			} catch (CoreException e) {
 				BeansCorePlugin.log(e);
 			}
