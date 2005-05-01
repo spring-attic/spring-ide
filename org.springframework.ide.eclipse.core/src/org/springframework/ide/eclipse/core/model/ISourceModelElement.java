@@ -16,19 +16,10 @@
 
 package org.springframework.ide.eclipse.core.model;
 
-import org.eclipse.core.resources.IResource;
-
 /**
- * Common protocol for all model elements related to any code of source code.
+ * Common protocol for all model elements related to source code.
  */
-public interface ILocatableModelElement extends IModelElement {
-
-	/**
-	 * Returns the resource containing the element's source code. 
-	 * 
-	 * @return the resource containing the element's source code
-	 */
-	IResource getElementResource();
+public interface ISourceModelElement extends IResourceModelElement {
 
 	/**
 	 * Returns the line number with the start of the element's source code.

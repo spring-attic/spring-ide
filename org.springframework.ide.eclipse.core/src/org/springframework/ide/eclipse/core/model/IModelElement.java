@@ -16,7 +16,6 @@
 
 package org.springframework.ide.eclipse.core.model;
 
-
 /**
  * Common protocol for all elements provided by the model.
  */

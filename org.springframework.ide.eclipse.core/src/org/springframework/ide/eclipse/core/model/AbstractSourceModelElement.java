@@ -16,14 +16,12 @@
 
 package org.springframework.ide.eclipse.core.model;
 
-public abstract class AbstractLocatableModelElement
-			   extends AbstractModelElement implements ILocatableModelElement {
-
+public abstract class AbstractSourceModelElement extends AbstractModelElement
+											   implements ISourceModelElement {
 	private int startLine;
     private int endLine;
 
-	protected AbstractLocatableModelElement(IModelElement parent,
-											String name) {
+	protected AbstractSourceModelElement(IModelElement parent, String name) {
 		super(parent, name);
 		this.startLine = -1;
 		this.endLine = -1;
