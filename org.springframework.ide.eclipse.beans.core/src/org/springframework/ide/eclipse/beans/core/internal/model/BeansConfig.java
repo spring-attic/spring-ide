@@ -43,16 +43,16 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.io.FileResource;
 import org.springframework.ide.eclipse.core.io.xml.LineNumberPreservingDOMParser;
-import org.springframework.ide.eclipse.core.model.AbstractLocatableModelElement;
-import org.springframework.ide.eclipse.core.model.ILocatableModelElement;
+import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.w3c.dom.Element;
 
 /**
  * This class defines a Spring beans configuration.
  */
-public class BeansConfig extends AbstractLocatableModelElement
+public class BeansConfig extends AbstractSourceModelElement
 													  implements IBeansConfig {
 	/** This bean's config file */
 	private IFile file;
@@ -217,7 +217,7 @@ public class BeansConfig extends AbstractLocatableModelElement
 		if (name.charAt(0) == '/') {
 			container = ResourcesPlugin.getWorkspace().getRoot();
 		} else {
-			container = (IProject) ((ILocatableModelElement)
+			container = (IProject) ((ISourceModelElement)
 									  getElementParent()).getElementResource();
 		}
 		return (IFile) container.findMember(name);
@@ -289,7 +289,7 @@ public class BeansConfig extends AbstractLocatableModelElement
 	
 		private IBeansConfig config;
 	    private Stack nestedElements;
-		private ILocatableModelElement currentElement;
+		private ISourceModelElement currentElement;
 	    private Stack nestedBeans;
 		private Bean currentBean;
 	
@@ -315,7 +315,7 @@ public class BeansConfig extends AbstractLocatableModelElement
 	
 				// Use current bean as an inner bean for the current constructor
 				// argument or property
-				currentElement = (ILocatableModelElement) nestedElements.pop();
+				currentElement = (ISourceModelElement) nestedElements.pop();
 				currentBean.setElementParent(currentElement);
 				innerBeans.add(currentBean);
 	
@@ -379,13 +379,15 @@ public class BeansConfig extends AbstractLocatableModelElement
 		/**
 		 * Sets the start and end lines on the given model element.
 	     */
-		private void setXmlTextRange(ILocatableModelElement modelElement,
+		private void setXmlTextRange(ISourceModelElement modelElement,
 									 Element xmlElement) {
-			int startLine = LineNumberPreservingDOMParser.getStartLineNumber(xmlElement);
-			int endLine = LineNumberPreservingDOMParser.getEndLineNumber(xmlElement);
-			((AbstractLocatableModelElement) modelElement).setElementStartLine(
+			int startLine = LineNumberPreservingDOMParser.getStartLineNumber(
+																   xmlElement);
+			int endLine = LineNumberPreservingDOMParser.getEndLineNumber(
+																   xmlElement);
+			((AbstractSourceModelElement) modelElement).setElementStartLine(
 																	startLine);
-			((AbstractLocatableModelElement) modelElement).setElementEndLine(
+			((AbstractSourceModelElement) modelElement).setElementEndLine(
 																	  endLine);
 	    }
 	}

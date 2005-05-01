@@ -18,12 +18,12 @@ package org.springframework.ide.eclipse.beans.core.model;
 
 import java.util.Collection;
 
-import org.springframework.ide.eclipse.core.model.ILocatableModelElement;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
  * This interface provides information for a Spring Bean's constructor argument.
  */
-public interface IBeanConstructorArgument extends ILocatableModelElement {
+public interface IBeanConstructorArgument extends ISourceModelElement {
 
 	int getIndex();
 

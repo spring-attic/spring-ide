@@ -20,12 +20,12 @@ import java.util.Collection;
 
 import org.eclipse.core.resources.IFile;
 import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
-import org.springframework.ide.eclipse.core.model.ILocatableModelElement;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
  * This interface provides information for a Spring beans configuration.
  */
-public interface IBeansConfig extends ILocatableModelElement, IBeanClassAware {
+public interface IBeansConfig extends IResourceModelElement, IBeanClassAware {
 
 	IFile getConfigFile();
 

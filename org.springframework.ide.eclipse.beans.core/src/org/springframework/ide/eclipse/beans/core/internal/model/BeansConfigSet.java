@@ -32,15 +32,15 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.core.model.AbstractLocatableModelElement;
-import org.springframework.ide.eclipse.core.model.ILocatableModelElement;
+import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
  * This class defines a Spring beans config set (a list of beans config names).
  */
-public class BeansConfigSet extends AbstractLocatableModelElement
+public class BeansConfigSet extends AbstractSourceModelElement
 												   implements IBeansConfigSet {
 	private List configNames;
 	private boolean allowBeanDefinitionOverriding;
@@ -72,8 +72,8 @@ public class BeansConfigSet extends AbstractLocatableModelElement
 	}
 
 	public IResource getElementResource() {
-		return (getElementParent() instanceof ILocatableModelElement ?
-					((ILocatableModelElement)
+		return (getElementParent() instanceof IResourceModelElement ?
+					((IResourceModelElement)
 							getElementParent()).getElementResource() :
 							null);
 	}

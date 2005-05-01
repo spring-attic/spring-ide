@@ -24,11 +24,11 @@ import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
-import org.springframework.ide.eclipse.core.model.AbstractLocatableModelElement;
-import org.springframework.ide.eclipse.core.model.ILocatableModelElement;
+import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
-public class BeanProperty extends AbstractLocatableModelElement
+public class BeanProperty extends AbstractSourceModelElement
 													 implements IBeanProperty {
 	private Object value;
 
@@ -45,8 +45,8 @@ public class BeanProperty extends AbstractLocatableModelElement
 	}
 
 	public IResource getElementResource() {
-		if (getElementParent() instanceof ILocatableModelElement) {
-			return ((ILocatableModelElement)
+		if (getElementParent() instanceof IResourceModelElement) {
+			return ((IResourceModelElement)
 									  getElementParent()).getElementResource();
 		}
 		return null;

@@ -32,8 +32,6 @@ import org.springframework.ide.eclipse.core.model.IModel;
  */
 public interface IBeansModel extends IModel {
 
-	boolean hasProject(IProject project);
-
 	IBeansProject getProject(IProject project);
 
 	IBeansProject getProject(String name);
@@ -44,8 +42,6 @@ public interface IBeansModel extends IModel {
 	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansProject
 	 */
 	Collection getProjects();
-
-	boolean hasConfig(IFile configFile);
 
 	IBeansConfig getConfig(IFile configFile);
 

@@ -34,15 +34,15 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
-import org.springframework.ide.eclipse.core.model.AbstractLocatableModelElement;
-import org.springframework.ide.eclipse.core.model.ILocatableModelElement;
+import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
  * Parser data for a Spring bean.
  */
-public class Bean extends AbstractLocatableModelElement implements IBean {
+public class Bean extends AbstractSourceModelElement implements IBean {
 
 	private BeanDefinitionHolder beanDefinitionHolder;
 	private List constructorArguments;
@@ -71,8 +71,8 @@ public class Bean extends AbstractLocatableModelElement implements IBean {
 	}
 
 	public IResource getElementResource() {
-		if (getElementParent() instanceof ILocatableModelElement) {
-			return ((ILocatableModelElement)
+		if (getElementParent() instanceof IResourceModelElement) {
+			return ((IResourceModelElement)
 									  getElementParent()).getElementResource();
 		}
 		return null;

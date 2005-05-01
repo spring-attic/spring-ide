@@ -37,11 +37,11 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.core.model.AbstractLocatableModelElement;
+import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 
-public class BeansProject extends AbstractLocatableModelElement
+public class BeansProject extends AbstractSourceModelElement
 													 implements IBeansProject {
 	private IProject project; 
 	private BeansProjectDescription description;

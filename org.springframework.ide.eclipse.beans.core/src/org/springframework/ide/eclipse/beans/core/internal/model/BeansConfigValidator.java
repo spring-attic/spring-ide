@@ -48,7 +48,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.beans.DefaultBeanDefinitionRegistry;
-import org.springframework.ide.eclipse.core.model.ILocatableModelElement;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 public class BeansConfigValidator {
@@ -536,20 +536,20 @@ public class BeansConfigValidator {
 			try {
 				registry.getBeanDefinition(beanName);
 			} catch (NoSuchBeanDefinitionException e) {
-                // Bean ref is property placeholder
+
+				// Display a warning if the bean ref is a property placeholder
 				if (isPropertyPlaceHolder(beanName)) {
                     BeansModelUtils.createProblemMarker(element,
     					  "Referenced bean '" + beanName + "' not found",
     					  IMarker.SEVERITY_WARNING,
-    					  ((ILocatableModelElement) element).getElementStartLine(),
+    					  ((ISourceModelElement) element).getElementStartLine(),
     					  IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCE,
     					  element.getElementName(), beanName);
-                }
-                else {
+                } else {
                     BeansModelUtils.createProblemMarker(element,
                           "Referenced bean '" + beanName + "' not found",
                           IMarker.SEVERITY_ERROR,
-                          ((ILocatableModelElement) element).getElementStartLine(),
+                          ((ISourceModelElement) element).getElementStartLine(),
                           IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCE,
                           element.getElementName(), beanName);
                 }

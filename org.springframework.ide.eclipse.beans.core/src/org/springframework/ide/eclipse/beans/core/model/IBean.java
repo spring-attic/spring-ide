@@ -18,12 +18,12 @@ package org.springframework.ide.eclipse.beans.core.model;
 
 import java.util.Collection;
 
-import org.springframework.ide.eclipse.core.model.ILocatableModelElement;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
  * Holds all data of a Spring bean.
  */
-public interface IBean extends ILocatableModelElement {
+public interface IBean extends ISourceModelElement {
 
 	IBeansConfig getConfig();
 

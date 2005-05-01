@@ -18,10 +18,9 @@ package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -60,12 +59,14 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 																 "/model/debug";
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
 
-	private Map projects;
+	/** The table of Spring Beans projects (synchronized for concurrent
+	 * access) */
+	private Hashtable projects;
 	private IResourceChangeListener workspaceListener;
 
 	public BeansModel() {
 		super(null, "BeansModel");
-		this.projects = new HashMap();
+		this.projects = new Hashtable();
 		this.workspaceListener = new BeansResourceChangeListener(
 											 new ResourceChangeEventHandler());
 	}
@@ -78,10 +79,12 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	public void accept(IModelElementVisitor visitor) {
 
 		// Ask this model's projects
-		Iterator iter = projects.values().iterator();
-		while (iter.hasNext()) {
-			IModelElement element = (IModelElement) iter.next();
-			element.accept(visitor);
+		synchronized (projects) {
+			Iterator iter = projects.values().iterator();
+			while (iter.hasNext()) {
+				IModelElement element = (IModelElement) iter.next();
+				element.accept(visitor);
+			}
 		}
 	}
 
@@ -114,15 +117,12 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	}
 
 	public IBeansProject getProject(IProject project) {
-		if (hasProject(project)) {
-			return (IBeansProject) projects.get(project);
-		}
-		return null;
+		return (IBeansProject) projects.get(project);
 	}
 
 	public IBeansProject getProject(String name) {
-		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(
-																		  name);
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		IProject project = workspace.getRoot().getProject(name);
 		return getProject(project);
 	}
 
@@ -178,35 +178,38 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 
 	public String toString() {
 		StringBuffer text = new StringBuffer("Beans model:\n");
-		Iterator projs = projects.values().iterator();
-		while (projs.hasNext()) {
-			IBeansProject project = (IBeansProject) projs.next();
-			text.append(" Configs of project '");
-			text.append(project.getElementName());
-			text.append("':\n");
-			Iterator configs = project.getConfigs().iterator();
-			while (configs.hasNext()) {
-				IBeansConfig config = (IBeansConfig) configs.next();
-				text.append("  ");
-				text.append(config);
-				text.append('\n');
-				Iterator beans = config.getBeans().iterator();
-				while (beans.hasNext()) {
-					IBean bean = (IBean) beans.next();
-					text.append("   ");
-					text.append(bean);
+		synchronized (projects) {
+			Iterator projs = projects.values().iterator();
+			while (projs.hasNext()) {
+				IBeansProject project = (IBeansProject) projs.next();
+				text.append(" Configs of project '");
+				text.append(project.getElementName());
+				text.append("':\n");
+				Iterator configs = project.getConfigs().iterator();
+				while (configs.hasNext()) {
+					IBeansConfig config = (IBeansConfig) configs.next();
+					text.append("  ");
+					text.append(config);
+					text.append('\n');
+					Iterator beans = config.getBeans().iterator();
+					while (beans.hasNext()) {
+						IBean bean = (IBean) beans.next();
+						text.append("   ");
+						text.append(bean);
+						text.append('\n');
+					}
+				}
+				text.append(" Config sets of project '");
+				text.append(project.getElementName());
+				text.append("':\n");
+				Iterator configSets = project.getConfigSets().iterator();
+				while (configSets.hasNext()) {
+					IBeansConfigSet configSet = (IBeansConfigSet)
+															 configSets.next();
+					text.append("  ");
+					text.append(configSet);
 					text.append('\n');
 				}
-			}
-			text.append(" Config sets of project '");
-			text.append(project.getElementName());
-			text.append("':\n");
-			Iterator configSets = project.getConfigSets().iterator();
-			while (configSets.hasNext()) {
-				IBeansConfigSet configSet = (IBeansConfigSet) configSets.next();
-				text.append("  ");
-				text.append(configSet);
-				text.append('\n');
 			}
 		}
 		return text.toString();
@@ -216,13 +219,15 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		if (DEBUG) {
 			System.out.println("Initializing model - loading all projects");
 		}
-		this.projects.clear();
-		List projects = getBeansProjects();
-		if (!projects.isEmpty()) {
-			Iterator iter = projects.iterator();
-			while (iter.hasNext()) {
-				IProject project = (IProject) iter.next();
-				this.projects.put(project, new BeansProject(project));
+		synchronized (projects) {
+			this.projects.clear();
+			List projects = getBeansProjects();
+			if (!projects.isEmpty()) {
+				Iterator iter = projects.iterator();
+				while (iter.hasNext()) {
+					IProject project = (IProject) iter.next();
+					this.projects.put(project, new BeansProject(project));
+				}
 			}
 		}
 	}
@@ -250,7 +255,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	private class ResourceChangeEventHandler implements IBeansResourceChangeEvents {
 
 		public boolean isSpringProject(IProject project) {
-			return hasProject(project);
+			return getProject(project) != null;
 		}
 
 		public void springNatureAdded(IProject project) {

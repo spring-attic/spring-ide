@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
@@ -34,12 +34,11 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
-import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 public class BeansModelUtils {
 
@@ -189,24 +188,11 @@ public class BeansModelUtils {
 	public static final void createProblemMarker(IModelElement element,
 						  String message, int severity, int line, int errorCode,
 						  String beanID, String errorData) {
-		IFile file;
-		if (element instanceof IBeansConfig) {
-			file = ((IBeansConfig) element).getConfigFile();
-		} else if (element instanceof IBean) {
-			file = ((IBean) element).getConfig().getConfigFile();
-		} else if (element instanceof IBeanProperty) {
-			IBean bean = (IBean) ((IBeanProperty) element).getElementParent();
-			file = bean.getConfig().getConfigFile();
-		} else if (element instanceof IBeanConstructorArgument) {
-			IBean bean = (IBean)
-						((IBeanConstructorArgument) element).getElementParent();
-			file = bean.getConfig().getConfigFile();
-		} else {
-			file = null;
-		}
-		if (file != null) {
-			BeansCoreUtils.createProblemMarker(file, message, severity, line,
-											   errorCode, beanID, errorData);
+		if (element instanceof IResourceModelElement) {
+			IResource resource = ((IResourceModelElement)
+												 element).getElementResource();
+			BeansCoreUtils.createProblemMarker(resource, message, severity,
+										   line, errorCode, beanID, errorData);
 		}
 	}
 

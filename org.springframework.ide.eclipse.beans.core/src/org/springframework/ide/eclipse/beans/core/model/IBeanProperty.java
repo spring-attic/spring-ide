@@ -18,12 +18,12 @@ package org.springframework.ide.eclipse.beans.core.model;
 
 import java.util.Collection;
 
-import org.springframework.ide.eclipse.core.model.ILocatableModelElement;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
  * Holds an <code>IBean</code>'s properties.
  */
-public interface IBeanProperty extends ILocatableModelElement {
+public interface IBeanProperty extends ISourceModelElement {
 
 	Object getValue();
 
