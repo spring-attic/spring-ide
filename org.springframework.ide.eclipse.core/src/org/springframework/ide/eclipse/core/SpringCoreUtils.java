@@ -19,6 +19,7 @@ package org.springframework.ide.eclipse.core;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
 public class SpringCoreUtils {
@@ -126,14 +127,17 @@ public class SpringCoreUtils {
 		return false;
 	}
 
-//	public static void deleteProblemMarkers(IFile file) {
-//		if (file != null && file.isAccessible()) {
-//			try {
-//				file.deleteMarkers(IBeansProjectMarker.PROBLEM_MARKER, false,
-//								   IResource.DEPTH_ZERO);
-//			} catch (CoreException e) {
-//				CorePlugin.log(e);
-//			}
-//		}
-//	}
+	/**
+	 * Removes all Spring project problem markers from given resource.
+	 */
+	public static void deleteProblemMarkers(IResource resource) {
+		if (resource != null && resource.isAccessible()) {
+			try {
+				resource.deleteMarkers(ISpringProjectMarker.PROBLEM_MARKER,
+									   false, IResource.DEPTH_ZERO);
+			} catch (CoreException e) {
+				SpringCore.log(e);
+			}
+		}
+	}
 }
