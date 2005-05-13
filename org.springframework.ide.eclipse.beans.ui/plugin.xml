@@ -65,58 +65,6 @@
       <objectContribution
             objectClass="org.eclipse.core.resources.IProject"
             adaptable="true"
-            id="org.springframework.ide.eclipse.beans.ui.actions.nonSpringProject">
-         <visibility>
-            <and>
-               <and>
-                  <not>
-                     <objectState
-                           name="nature"
-                           value="org.springframework.ide.eclipse.core.springnature">
-                     </objectState>
-                  </not>
-                  <not>
-                     <objectState
-                           name="nature"
-                           value="org.springframework.ide.eclipse.beans.core.beansnature">
-                     </objectState>
-                  </not>
-               </and>
-               <not>
-                  <objectState
-                        name="nature"
-                        value="org.springframework.eclipse.core.springnature">
-                  </objectState>
-               </not>
-            </and>
-         </visibility>
-         <action
-               label="%popupMenus.addNature.label"
-               class="org.springframework.ide.eclipse.beans.ui.actions.AddRemoveNature"
-               enablesFor="+"
-               id="org.springframework.ide.eclipse.beans.ui.actions.addNature">
-         </action>
-      </objectContribution>
-
-      <objectContribution
-            objectClass="org.eclipse.core.resources.IProject"
-            adaptable="true"
-            id="org.springframework.ide.eclipse.beans.ui.actions.springProject">
-         <filter
-               name="nature"
-               value="org.springframework.ide.eclipse.core.springnature">
-         </filter>
-         <action
-               label="%popupMenus.removeNature.label"
-               class="org.springframework.ide.eclipse.beans.ui.actions.AddRemoveNature"
-               enablesFor="+"
-               id="org.springframework.ide.eclipse.beans.ui.actions.removeNature">
-         </action>
-      </objectContribution>
-
-      <objectContribution
-            objectClass="org.eclipse.core.resources.IProject"
-            adaptable="true"
             id="org.springframework.ide.eclipse.beans.ui.actions.springBeansProject">
          <filter
                name="nature"
