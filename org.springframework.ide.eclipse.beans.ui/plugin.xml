@@ -188,25 +188,23 @@
             id="org.springframework.ide.eclipse.beans.ui.commands">
       </category>
       <command
-            category="org.springframework.ide.eclipse.beans.ui.commands"
+            categoryId="org.springframework.ide.eclipse.beans.ui.commands"
             name="%commands.openJavaType.name"
             id="org.springframework.ide.eclipse.beans.ui.commands.openjavatype"/>
       <keyBinding
-            string="Ctrl+Alt+T"
-            scope="org.eclipse.ui.textEditorScope"
-            command="org.springframework.ide.eclipse.beans.ui.commands.openjavatype"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
+            commandId="org.springframework.ide.eclipse.beans.ui.commands.openjavatype"
+            keySequence="Ctrl+Alt+T"
+            contextId="org.eclipse.ui.textEditorScope"
+            keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <command
-            category="org.springframework.ide.eclipse.beans.ui.commands"
+            categoryId="org.springframework.ide.eclipse.beans.ui.commands"
             name="%commands.showInView.name"
             id="org.springframework.ide.eclipse.beans.ui.commands.showinview"/>
       <keyBinding
-            string="Ctrl+Alt+V"
-            scope="org.eclipse.ui.textEditorScope"
-            command="org.springframework.ide.eclipse.beans.ui.commands.showinview"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
+            commandId="org.springframework.ide.eclipse.beans.ui.commands.showinview"
+            keySequence="Ctrl+Alt+V"
+            contextId="org.eclipse.ui.textEditorScope"
+            keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
    </extension>
 
 </plugin>
