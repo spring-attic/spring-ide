@@ -10,7 +10,6 @@
    <runtime>
       <library name="beans-core.jar">
          <export name="*"/>
-         <packages prefixes="org.springframework.ide.eclipse.beans.core"/>
       </library>
    </runtime>
    <requires>

@@ -22,7 +22,6 @@ import java.io.InputStream;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionParser;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
