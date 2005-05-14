@@ -47,7 +47,7 @@ public class Bean extends Node implements IAdaptable {
 	}
 
 	public String getName() {
-		return bean.getElementName();
+		return (bean != null ? bean.getElementName() : "empty");
 	}
 
 	public String getClassName() {
