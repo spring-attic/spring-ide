@@ -60,7 +60,7 @@ public class NatureTests extends AbstractSpringIdeTest {
 		assertNotNull(model);
 		
 		assertFalse(hasBeansProjectNature());
-		assertFalse(model.hasProject(eclipseProject));
+		assertNull(model.getProject(eclipseProject));
 		assertFalse(hasBeansBuilder());
 
 		SpringCoreUtils.addProjectNature(eclipseProject, SpringCore.NATURE_ID);
@@ -70,7 +70,7 @@ public class NatureTests extends AbstractSpringIdeTest {
 		assertTrue ( eclipseProject.getNature(SpringCore.NATURE_ID) instanceof SpringProjectNature);
 
 		assertTrue(hasBeansProjectNature());
-		assertTrue(model.hasProject(eclipseProject));
+		assertNotNull(model.getProject(eclipseProject));
 		assertTrue(hasBeansBuilder());
 		
 		BeansProject proj = (BeansProject) model.getProject(eclipseProject);
@@ -82,7 +82,7 @@ public class NatureTests extends AbstractSpringIdeTest {
 		project.waitForAutoBuild();
 			
 		assertFalse(hasBeansProjectNature());
-		assertFalse(model.hasProject(eclipseProject));
+		assertNull(model.getProject(eclipseProject));
 		assertFalse(hasBeansBuilder());
 
 	}
