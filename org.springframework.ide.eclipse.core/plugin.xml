@@ -9,23 +9,21 @@
 
    <runtime>
       <library name="core.jar">
-         <packages prefixes="org.springframework.ide.eclipse.core"/>
          <export name="*"/>
       </library>
       <library name="spring-core.jar">
-         <packages prefixes="org.springframework"/>
+         <export name="*"/>
+      </library>
+      <library name="spring-beans.jar">
          <export name="*"/>
       </library>
       <library name="commons-logging.jar">
-         <packages prefixes="org.apache.commons.logging"/>
          <export name="*"/>
       </library>
       <library name="xmlParserAPIs.jar">
-         <packages prefixes="javax.xml,org.apache.xmlcommons,org.w3c.dom,org.xml.sax"/>
          <export name="*"/>
       </library>
       <library name="xercesImpl.jar">
-         <packages prefixes="org.apache,org.w3c.dom"/>
          <export name="*"/>
       </library>
    </runtime>
