@@ -17,6 +17,7 @@
 package org.springframework.ide.eclipse.core.io.xml;
 
 import org.apache.xerces.dom.NodeImpl;
+import org.apache.xerces.dom3.UserDataHandler;
 import org.apache.xerces.parsers.DOMParser;
 import org.apache.xerces.xni.Augmentations;
 import org.apache.xerces.xni.NamespaceContext;
@@ -95,7 +96,8 @@ public class LineNumberPreservingDOMParser extends DOMParser {
 			Node node = (Node) getProperty(CURRENT_ELEMENT_NODE);
 			if (node instanceof NodeImpl) {
 				((NodeImpl) node).setUserData(key,
-							String.valueOf(this.locator.getLineNumber()), null);
+								  String.valueOf(this.locator.getLineNumber()),
+								  (UserDataHandler) null);
 			}
 		} catch (SAXException e) {
 			throw new XNIException(e);
