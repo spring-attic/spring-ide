@@ -101,7 +101,9 @@ public class BeanFigure extends Figure {
 
 	private String createToolTipForValue(Object value) {
 		StringBuffer toolTip = new StringBuffer("Value: ");
-		if (value instanceof RuntimeBeanReference) {
+		if (value == null) {
+			toolTip.append("NULL");
+		} else if (value instanceof RuntimeBeanReference) {
 			toolTip.append('<');
 			toolTip.append(((RuntimeBeanReference) value).getBeanName());
 			toolTip.append('>');
