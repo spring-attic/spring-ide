@@ -10,7 +10,6 @@
    <runtime>
       <library name="beans-graph.jar">
          <export name="*"/>
-         <packages prefixes="org.springframework.ide.eclipse.beans.ui.graph"/>
       </library>
    </runtime>
    <requires>
