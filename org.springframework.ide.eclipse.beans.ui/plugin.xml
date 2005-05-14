@@ -9,7 +9,6 @@
 
    <runtime>
       <library name="beans-ui.jar">
-         <packages prefixes="org.springframework.ide.eclipse.beans.ui"/>
          <export name="*"/>
       </library>
    </runtime>
