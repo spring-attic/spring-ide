@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -95,7 +96,7 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 	 * All relevant exceptions are catched and rethrown wrapped together with
 	 * the corresponding XML element.
 	 */
-	protected BeanDefinitionHolder parseBeanDefinition(Element ele) {
+	protected BeanDefinitionHolder parseBeanDefinitionElement(Element ele) {
 		try {
 			nestedBeanCount++;
 			if (eventHandler != null) {
@@ -105,7 +106,8 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 					eventHandler.startBean(ele, false);
 				}
 			}
-			BeanDefinitionHolder bdHolder = super.parseBeanDefinition(ele);
+			BeanDefinitionHolder bdHolder = super.parseBeanDefinitionElement(
+																		  ele);
 			if (eventHandler != null) {
 				if (nestedBeanCount > 1) {
 					eventHandler.registerBean(bdHolder, true);
@@ -138,8 +140,8 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 	 * the corresponding XML element.
 	 */
 	protected void parseConstructorArgElement(Element ele, String beanName,
-								   ConstructorArgumentValues cargs)
-								   throws DOMException, ClassNotFoundException {
+										  ConstructorArgumentValues cargs)
+										  throws BeanDefinitionStoreException {
 		try {
 			if (eventHandler != null) {
 				ConstructorArgumentValuesFilter filter =
@@ -182,8 +184,8 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 	/**
 	 * Converts an idref into a bean reference.
 	 */
-	protected Object parsePropertySubelement(Element ele, String beanName) {
-		Object value = super.parsePropertySubelement(ele, beanName);
+	protected Object parsePropertySubElement(Element ele, String beanName) {
+		Object value = super.parsePropertySubElement(ele, beanName);
 		if (ele.getTagName().equals(IDREF_ELEMENT)) {
 			value = new RuntimeBeanReference((String) value);
 		}
