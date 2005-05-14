@@ -18,7 +18,7 @@
    </license>
 
    <url>
-      <update label="%updateSiteName"/>
+      <update label="%updateSiteName" url="%updateSiteURL"/>
    </url>
 
    <requires>
@@ -30,14 +30,14 @@
 
    <plugin
          id="org.springframework.ide.eclipse"
-         download-size="8417"
-         install-size="16619"
+         download-size="8153"
+         install-size="10619"
          version="1.2.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.core"
-         download-size="1033364"
-         install-size="1192064"
+         download-size="68775"
+         install-size="72463"
          version="1.2.0"/>
 
    <plugin
@@ -60,7 +60,7 @@
 
    <plugin
          id="org.springframework.ide.eclipse.core"
-         download-size="0"
+         download-size="1297488"
          install-size="0"
          version="1.2.0"/>
 
@@ -68,11 +68,11 @@
          id="org.springframework.ide.eclipse.core.doc"
          download-size="377427"
          install-size="402314"
-         version="1.1.5"/>
+         version="1.2.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.ui"
-         download-size="0"
+         download-size="120659"
          install-size="0"
          version="1.2.0"/>
 
