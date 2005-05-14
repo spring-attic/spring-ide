@@ -48,7 +48,11 @@ public class ConstructorArgumentNode extends AbstractNode {
 			name.append(getType());
 			name.append(':');
 		}
-		name.append(getValue().toString());
+		if (getValue() == null) {
+			name.append("NULL");
+		} else {
+			name.append(getValue().toString());
+		}
 		return name.toString();
 	}
 
@@ -102,7 +106,11 @@ public class ConstructorArgumentNode extends AbstractNode {
 		text.append(", type=");
 		text.append(getType());
 		text.append(": value=");
-		text.append(getValue());
+		if (getValue() == null) {
+			text.append("NULL");
+		} else {
+			text.append(getValue());
+		}
 		return text.toString();
 	}
 }
