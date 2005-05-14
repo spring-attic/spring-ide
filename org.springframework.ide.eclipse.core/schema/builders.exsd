@@ -19,7 +19,7 @@
             <annotation>
                <documentation>
                   The fully-qualified name of the extension point.
-That is &lt;samp&gt;org.springframework.ide.eclipse.core.builders&lt;samp&gt;.
+That is &lt;samp&gt;org.springframework.ide.eclipse.core.builders&lt;/samp&gt;.
                </documentation>
             </annotation>
          </attribute>

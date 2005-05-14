@@ -67,9 +67,9 @@ public class XMLWriter extends PrintWriter {
 		buffer.append("<");
 		buffer.append(name);
 		if (parameters != null) {
-			Enumeration enum = Collections.enumeration(parameters.keySet());
-			while (enum.hasMoreElements()) {
-				String key = (String) enum.nextElement();
+			Enumeration keys = Collections.enumeration(parameters.keySet());
+			while (keys.hasMoreElements()) {
+				String key = (String) keys.nextElement();
 				buffer.append(" ");
 				buffer.append(key);
 				buffer.append("=\"");
