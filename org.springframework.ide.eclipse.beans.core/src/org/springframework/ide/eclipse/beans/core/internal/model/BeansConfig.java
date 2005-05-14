@@ -358,7 +358,9 @@ public class BeansConfig extends AbstractSourceModelElement
 				name.append(type);
 				name.append(':');
 			}
-			name.append(value.toString());
+			if (value != null) {
+				name.append(value.toString());
+			}
 			carg.setElementName(name.toString());
 		}
 	
