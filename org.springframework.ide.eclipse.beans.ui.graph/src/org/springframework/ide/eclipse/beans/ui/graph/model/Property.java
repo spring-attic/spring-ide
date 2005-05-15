@@ -80,25 +80,29 @@ public class Property extends Node implements IAdaptable {
 	 */
 	private void addReferencesForValue(Object value, List references) {
 		if (value instanceof BeanDefinitionHolder) {
+			String beanName = ((BeanDefinitionHolder) value).getBeanName();
 			IBean modelBean = bean.getBean();
 			String  propertyName  = getName();
 			IBean innerBean = null;
 			Iterator innerBeans = modelBean.getInnerBeans().iterator();
 			while (innerBeans.hasNext()) {
 				IBean iBean = (IBean) innerBeans.next();
-				IModelElement parent = iBean.getElementParent();
-				if (parent instanceof IBeanProperty &&
+				if (iBean.getElementName().equals(beanName)) {
+					IModelElement parent = iBean.getElementParent();
+					if (parent instanceof IBeanProperty &&
 								 parent.getElementName().equals(propertyName)) {
-					innerBean = iBean;
-					break;
+						innerBean = iBean;
+						break;
+					}
 				}
 				
 			}
 			if (innerBean != null) {
-				Iterator beanNames = innerBean.getReferencedBeans().iterator();
-				while (beanNames.hasNext()) {
-					String beanName = (String) beanNames.next();
-					references.add(new RuntimeBeanReference(beanName));
+				Iterator innerBeanNames =
+									 innerBean.getReferencedBeans().iterator();
+				while (innerBeanNames.hasNext()) {
+					String innerBeanName = (String) innerBeanNames.next();
+					references.add(new RuntimeBeanReference(innerBeanName));
 				}
 			}
 		} else if (value instanceof RuntimeBeanReference) {
