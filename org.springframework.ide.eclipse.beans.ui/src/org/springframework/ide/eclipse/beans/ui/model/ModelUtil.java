@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 
 /**
@@ -27,6 +28,9 @@ public class ModelUtil {
 												  Object value, List refBeans) {
 		if (value instanceof RuntimeBeanReference) {
 			String beanName = ((RuntimeBeanReference) value).getBeanName();
+			addReferencedBeansForBean(beanParentNode, beanName, refBeans);
+		} else if (value instanceof BeanDefinitionHolder) {
+			String beanName = ((BeanDefinitionHolder) value).getBeanName();
 			addReferencedBeansForBean(beanParentNode, beanName, refBeans);
 		} else if (value instanceof List) {
 			List list = (List) value;
