@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.util.StringUtils;
 
 public class Introspector {
 
@@ -55,11 +56,11 @@ public class Introspector {
 	}
 
 	public static boolean hasWritableProperty(IType type, String propertyName)
-													 throws JavaModelException {
+											  throws JavaModelException {
 		if (propertyName == null || propertyName.length() == 0) {
 			throw createException("bad property name");
 		}
-		String base = capitalize(propertyName);
+		String base = StringUtils.capitalize(propertyName);
 		return (findMethod(type, "set" + base, 1, true, false) != null);
 	}
 
@@ -131,18 +132,6 @@ public class Introspector {
 			buf.append(text2);
 		}
 		return buf.toString();
-	}
-
-	/**
-	 * Returns given string with a leading uppercase character.
-	 */
-	protected static String capitalize(String s) {
-		if (s.length() == 0) {
-			return s;
-		}
-		char chars[] = s.toCharArray();
-		chars[0] = Character.toUpperCase(chars[0]);
-		return new String(chars);
 	}
 
 	protected static JavaModelException createException(String message) {

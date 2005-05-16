@@ -16,6 +16,7 @@
 
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -24,9 +25,11 @@ import java.util.Set;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -48,8 +51,9 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.beans.DefaultBeanDefinitionRegistry;
-import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
+import org.springframework.util.StringUtils;
 
 public class BeansConfigValidator {
 
@@ -367,18 +371,51 @@ public class BeansConfigValidator {
 			PropertyValue propValue = propValues[i];
 			String propertyName = propValue.getName();
 
-			// Check for setter in given type
+			// Check for property accessor in given type
 			try {
-				if (!Introspector.hasWritableProperty(type, propertyName)) {
-					IBeanProperty property = bean.getProperty(propertyName);
-					BeansModelUtils.createProblemMarker(bean,
-						 "No setter found for property '" + propertyName +
-						 "' in class '" + type.getFullyQualifiedName() + "'",
-						 IMarker.SEVERITY_ERROR, (property != null ?
+
+				// First check for nested property path
+				int pos = getNestedPropertySeparatorIndex(propertyName, false);
+				if (pos >= 0) {
+					String nestedPropertyName = propertyName.substring(0, pos);
+					PropertyTokenHolder tokens = getPropertyNameTokens(
+														   nestedPropertyName);
+					String getterName = "get" + StringUtils.capitalize(
+															tokens.actualName);
+					IMethod getter = Introspector.findMethod(type, getterName,
+															 0, true, false);
+					if (getter == null) {
+						IBeanProperty property = bean.getProperty(propertyName);
+						BeansModelUtils.createProblemMarker(bean,
+									"No getter found for nested property '" +
+							 		nestedPropertyName + "' in class '" +
+							 		type.getFullyQualifiedName() + "'",
+							 		IMarker.SEVERITY_ERROR, (property != null ?
+						 					   property.getElementStartLine() :
+						 					   bean.getElementStartLine()),
+						 IBeansProjectMarker.ERROR_CODE_NO_GETTER,
+						 bean.getElementName(), propertyName);
+					} else {
+
+						// Check getter's return type
+						if (tokens.keys != null) {
+							// TODO Check getter's return type for index or map
+							// type
+						}
+					}
+				} else {
+					if (!Introspector.hasWritableProperty(type, propertyName)) {
+						IBeanProperty property = bean.getProperty(propertyName);
+						BeansModelUtils.createProblemMarker(bean,
+									"No setter found for property '" +
+							 		propertyName + "' in class '" +
+							 		type.getFullyQualifiedName() + "'",
+							 		IMarker.SEVERITY_ERROR, (property != null ?
 						 					   property.getElementStartLine() :
 						 					   bean.getElementStartLine()),
 						 IBeansProjectMarker.ERROR_CODE_NO_SETTER,
 						 bean.getElementName(), propertyName);
+					}
 				}
 			} catch (JavaModelException e) {
 				BeansCorePlugin.log(e);
@@ -572,9 +609,10 @@ public class BeansConfigValidator {
 			}
 		}
 	}
-    
+
     /**
-     * Checks if the specified property value is a placeholder, e.g. <code>${beansRef}</code>
+     * Checks if the specified property value is a placeholder,
+     * e.g. <code>${beansRef}</code>
      * @param property the property value
      * @return true if property value is placeholder
      */
@@ -582,4 +620,87 @@ public class BeansConfigValidator {
         return (property.startsWith(PROPERTY_PLACEHOLDER_PREFIX) 
                 && property.endsWith(PROPERTY_PLACEHOLDER_SUFFIX));
     }
+
+	/**
+	 * Determine the first (or last) nested property separator in the given
+	 * property path, ignoring dots in keys (like "map[my.key]").
+	 * @param propertyPath the property path to check
+	 * @param last whether to return the last separator rather than the first
+	 * @return the index of the nested property separator, or -1 if none
+	 */
+	private int getNestedPropertySeparatorIndex(String propertyPath,
+												boolean last) {
+		boolean inKey = false;
+		int i = (last ? propertyPath.length() - 1 : 0);
+		while ((last && i >= 0) || i < propertyPath.length()) {
+			switch (propertyPath.charAt(i)) {
+				case PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR:
+				case PropertyAccessor.PROPERTY_KEY_SUFFIX_CHAR:
+					inKey = !inKey;
+					break;
+				case PropertyAccessor.NESTED_PROPERTY_SEPARATOR_CHAR:
+					if (!inKey) {
+						return i;
+					}
+			}
+			if (last) {
+				i--;
+			} else {
+				i++;
+			}
+		}
+		return -1;
+	}
+
+	private PropertyTokenHolder getPropertyNameTokens(String propertyName) {
+		PropertyTokenHolder tokens = new PropertyTokenHolder();
+		String actualName = null;
+		List keys = new ArrayList(2);
+		int searchIndex = 0;
+		while (searchIndex != -1) {
+			int keyStart = propertyName.indexOf(
+							PropertyAccessor.PROPERTY_KEY_PREFIX, searchIndex);
+			searchIndex = -1;
+			if (keyStart != -1) {
+				int keyEnd = propertyName.indexOf(
+							   PropertyAccessor.PROPERTY_KEY_SUFFIX, keyStart +
+							   PropertyAccessor.PROPERTY_KEY_PREFIX.length());
+				if (keyEnd != -1) {
+					if (actualName == null) {
+						actualName = propertyName.substring(0, keyStart);
+					}
+					String key = propertyName.substring(keyStart +
+						PropertyAccessor.PROPERTY_KEY_PREFIX.length(), keyEnd);
+					if (key.startsWith("'") && key.endsWith("'")) {
+						key = key.substring(1, key.length() - 1);
+					} else if (key.startsWith("\"") && key.endsWith("\"")) {
+						key = key.substring(1, key.length() - 1);
+					}
+					keys.add(key);
+					searchIndex = keyEnd +
+								 PropertyAccessor.PROPERTY_KEY_SUFFIX.length();
+				}
+			}
+		}
+		tokens.actualName = (actualName != null ? actualName : propertyName);
+		tokens.canonicalName = tokens.actualName;
+		if (!keys.isEmpty()) {
+			tokens.canonicalName += PropertyAccessor.PROPERTY_KEY_PREFIX +
+								  StringUtils.collectionToDelimitedString(keys,
+								  PropertyAccessor.PROPERTY_KEY_SUFFIX +
+								  PropertyAccessor.PROPERTY_KEY_PREFIX) +
+								  PropertyAccessor.PROPERTY_KEY_SUFFIX;
+			tokens.keys = (String[]) keys.toArray(new String[keys.size()]);
+		}
+		return tokens;
+	}
+
+	private static class PropertyTokenHolder {
+
+		private String canonicalName;
+
+		private String actualName;
+
+		private String[] keys;
+	}
 }
