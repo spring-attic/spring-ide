@@ -1,0 +1,10 @@
+Changes in version 1.2.0 (16.5.2005):
+
+* Spring jars updated to v1.2
+
+* alls jars moved here from plugin "org.springframework.ide.eclipse.beans.core"
+
+* all generic stuff (e.g. project nature, incremental project builder, ...)
+  moved here from plugin "org.springframework.ide.eclipse.beans.core"
+
+* generic model with change notification and visitor support
