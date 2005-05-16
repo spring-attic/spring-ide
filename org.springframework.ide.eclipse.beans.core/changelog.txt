@@ -1,18 +1,27 @@
-Changes in version 1.2.0 (1.4.2005):
+Changes in version 1.2.0 (16.5.2005):
 
-* ported to Eclipse 3
+* ported to Eclipse 3 with support for Eclipse 3.1
 
-* jars moved to separate plugin "org.springframework.ide.eclipse.core"
+* updated to Spring v1.2
 
-* project nature and incremental builder refactored to separate plugin
-  "org.springframework.ide.eclipse.core"
+* all jars moved to separate plugin "org.springframework.ide.eclipse.core"
+
+* all generic stuff (e.g. project nature, incremental project builder, ...)
+  refactored to separate plugin "org.springframework.ide.eclipse.core"
+
+* beans model now extens generic model defined in plugin
+ "org.springframework.ide.eclipse.beans.core"
+
+
+Changes in version 1.1.1 (12.4.2005):
 
 * updated to spring-core.jar v1.1.5
 
 * added support for incomplete config sets (are not validated regarding parent
   beans and bean references)
 
-* config validator now validates AbstractBeanDefinition and aliases too
+* config validator now validates AbstractBeanDefinition, factory methods,
+  nested properties, place holders in bean references and aliases too
 
 
 Changes in version 1.1.0 (1.9.2004):
