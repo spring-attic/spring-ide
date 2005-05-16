@@ -1,4 +1,9 @@
-Changes in version 1.1.1 (1.12.2004):
+Changes in version 1.2.0 (16.5.2005):
+
+* ported to Eclipse 3 with support for Eclipse 3.1
+
+
+Changes in version 1.1.1 (12.4.2005):
 
 * error dialog is shown for graphs with cyclic dependencies
 
