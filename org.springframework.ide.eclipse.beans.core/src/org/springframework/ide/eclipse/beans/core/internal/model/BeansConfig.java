@@ -360,6 +360,8 @@ public class BeansConfig extends AbstractSourceModelElement
 			}
 			if (value != null) {
 				name.append(value.toString());
+			} else {
+				name.append("NULL");
 			}
 			carg.setElementName(name.toString());
 		}
