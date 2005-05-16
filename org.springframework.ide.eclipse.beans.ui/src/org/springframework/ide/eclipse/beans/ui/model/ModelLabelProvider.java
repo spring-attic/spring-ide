@@ -69,7 +69,7 @@ public class ModelLabelProvider extends LabelProvider {
 					label.append(" \"");
 					label.append(value);
 					label.append('"');
-				} if (value instanceof BeanDefinitionHolder) {
+				} else if (value instanceof BeanDefinitionHolder) {
 					BeanDefinitionHolder bdHolder = (BeanDefinitionHolder)
 																		  value;
 					BeanDefinition beanDef = bdHolder.getBeanDefinition();
