@@ -16,9 +16,6 @@
 
 package org.springframework.ide.eclipse.beans.core.internal;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
@@ -29,32 +26,37 @@ import org.springframework.util.StringUtils;
 
 public class Introspector {
 
-	public static List getConstructors(IType type) throws JavaModelException {
-		List constructors = new ArrayList();
-		IMethod[] methods = type.getMethods();
-		for (int i = 0; i < methods.length; i++) {
-			IMethod method = methods[i];
-			if (method.isConstructor()) {
-				constructors.add(method);
-			}
-		}
-		return constructors;
-	}
-
-	public static boolean hasConstructor(IType type, int numberOfParameters)
+    /**
+     * Returns true if the given type has a public constructor with the
+     * specified number of arguments.
+     * 
+     * @param type The Java type object on which to retrieve the method
+     * @param argCount Number of arguments for the constructor
+     */
+	public static boolean hasConstructor(IType type, int argCount)
 													throws JavaModelException {
-		List constructors = new ArrayList();
 		IMethod[] methods = type.getMethods();
 		for (int i = 0; i < methods.length; i++) {
 			IMethod method = methods[i];
 			if (method.isConstructor() &&
-						method.getNumberOfParameters() == numberOfParameters) {
-				return true;
+								  method.getNumberOfParameters() == argCount) {
+				int flags = method.getFlags();
+				if (Flags.isPublic(flags)	) {
+					return true;
+				}
 			}
 		}
 		return false;
 	}
 
+    /**
+     * Returns true if the given type has a public setter (one-argument method
+     * named "set" + property name with an uppercase first character) for the
+     * specified property.
+     * 
+     * @param type The Java type object on which to retrieve the method
+     * @param propertyName Name of the property
+     */
 	public static boolean hasWritableProperty(IType type, String propertyName)
 											  throws JavaModelException {
 		if (propertyName == null || propertyName.length() == 0) {
