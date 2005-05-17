@@ -2,6 +2,8 @@ Changes in version 1.2.0 (16.5.2005):
 
 * ported to Eclipse 3 with support for Eclipse 3.1
 
+* Tickets fixed: #42, #44
+
 
 Changes in version 1.1.1 (12.4.2005):
 
