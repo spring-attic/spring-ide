@@ -339,11 +339,12 @@ public class BeansConfigValidator {
 											   bean).getBeanDefinitionHolder();
 		AbstractBeanDefinition bd = (AbstractBeanDefinition)
 												  bdHolder.getBeanDefinition();
-		if (numArguments > 0 && bd.getFactoryBeanName() == null) {
+		if (numArguments > 0 && bd.getFactoryBeanName() == null &&
+										   bd.getFactoryMethodName() == null) {
 			try {
 				if (!Introspector.hasConstructor(type, numArguments)) {
 					BeansModelUtils.createProblemMarker(bean,
-						"No constructor with " + numArguments +
+						"No public constructor with " + numArguments +
 						(numArguments == 1 ? " argument" : " arguments") +
 						" defined in class '" + type.getFullyQualifiedName() +
 						"'", IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
