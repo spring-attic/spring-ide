@@ -17,6 +17,7 @@
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -60,6 +62,10 @@ public class BeansConfigValidator {
     private static final String PROPERTY_PLACEHOLDER_PREFIX = "${";
     
     private static final String PROPERTY_PLACEHOLDER_SUFFIX = "}";
+    
+    private static final String FACTORY_BEAN_REFERENCE_PREFIX = "&";
+    
+    private static final String FACTORY_BEAN_REFERENCE_REGEXP = "[&]";
     
 	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID +
 													  "/model/validator/debug";
@@ -524,7 +530,7 @@ public class BeansConfigValidator {
 				}
 				ConstructorArgumentValues.ValueHolder valueHolder =
 					  (ConstructorArgumentValues.ValueHolder) entry.getValue();
-				validateRefBeansInValue(element, valueHolder.getValue(), registry);
+				validateRefBeansInValue(bean, element, valueHolder.getValue(), registry);
 			}
 
 			// Validate referenced beans in generic constructor argument values
@@ -546,7 +552,7 @@ public class BeansConfigValidator {
 						}
 					}
 				}
-				validateRefBeansInValue(element, valueHolder.getValue(),
+				validateRefBeansInValue(bean, element, valueHolder.getValue(),
 										registry);
 			}
 
@@ -560,21 +566,21 @@ public class BeansConfigValidator {
 				if (element == null) {
 					element = bean;
 				}
-				validateRefBeansInValue(element, prop.getValue(), registry);
+				validateRefBeansInValue(bean, element, prop.getValue(), registry);
 			}
 		} catch (NoSuchBeanDefinitionException e) {
 			// Ignore all exceptions
 		}
 	}
 
-	protected void validateRefBeansInValue(IModelElement element,
+	protected void validateRefBeansInValue(IBean bean, IModelElement element,
 							   Object value, BeanDefinitionRegistry registry) {
 		if (value instanceof RuntimeBeanReference) {
 			String beanName = ((RuntimeBeanReference) value).getBeanName();
 			try {
 				registry.getBeanDefinition(beanName);
 			} catch (NoSuchBeanDefinitionException e) {
-
+			    
 				// Display a warning if the bean ref is a property placeholder
 				if (isPropertyPlaceHolder(beanName)) {
                     BeansModelUtils.createProblemMarker(element,
@@ -583,7 +589,54 @@ public class BeansConfigValidator {
     					  ((ISourceModelElement) element).getElementStartLine(),
     					  IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCE,
     					  element.getElementName(), beanName);
-                } else {
+                // Handle factory bean references
+                } else if (isFactoryBeanReference(beanName)) {
+                    String tempBeanName = beanName.replaceFirst(FACTORY_BEAN_REFERENCE_REGEXP, "");
+                    try {
+                        BeanDefinition def = registry.getBeanDefinition(tempBeanName);
+                        String beanClassName = ((AbstractBeanDefinition) def).getBeanClassName();
+                        if (beanClassName != null) {
+                            IType type = BeansModelUtils.getJavaType(
+                                         bean.getConfig().getConfigFile().getProject(),
+                                         beanClassName);
+                            if (type != null) {
+                                try {
+                                    String[] interfaces = type.getSuperInterfaceNames();
+                                    if (interfaces != null && interfaces.length > 0) {
+                                        if (!Arrays.asList(interfaces).contains(FactoryBean.class.getName())) {
+                                            BeansModelUtils.createProblemMarker(element,
+                                                    "Referenced factory bean '" + tempBeanName + 
+                                                        "' does not implement the FactoryBean interface",
+                                                    IMarker.SEVERITY_ERROR,
+                                                    ((ISourceModelElement) element).getElementStartLine(),
+                                                    IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCE,
+                                                    element.getElementName(), beanName);
+                                        }
+                                    }
+                                } catch (JavaModelException me) {
+                                    BeansCorePlugin.log(e);
+                                }
+                            }
+                            else {
+                                BeansModelUtils.createProblemMarker(element,
+                                        "Referenced factory bean '" + tempBeanName + 
+                                            "' implementation class not found",
+                                        IMarker.SEVERITY_WARNING,
+                                        ((ISourceModelElement) element).getElementStartLine(),
+                                        IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCE,
+                                        element.getElementName(), beanName);
+                            }
+                        }
+                    } catch (NoSuchBeanDefinitionException be) {
+                        BeansModelUtils.createProblemMarker(element,
+                                "Referenced factory bean '" + tempBeanName + "' not found",
+                                IMarker.SEVERITY_ERROR,
+                                ((ISourceModelElement) element).getElementStartLine(),
+                                IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCE,
+                                element.getElementName(), beanName);
+                    }
+                }
+                else {
                     BeansModelUtils.createProblemMarker(element,
                           "Referenced bean '" + beanName + "' not found",
                           IMarker.SEVERITY_ERROR,
@@ -595,17 +648,17 @@ public class BeansConfigValidator {
 		} else if (value instanceof List) {
 			List list = (List) value;
 			for (int i = 0; i < list.size(); i++) {
-				validateRefBeansInValue(element, list.get(i), registry);
+				validateRefBeansInValue(bean, element, list.get(i), registry);
 			}
 		} else if (value instanceof Set) {
 			Set set = (Set) value;
 			for (Iterator iter = set.iterator(); iter.hasNext(); ) {
-				validateRefBeansInValue(element, iter.next(), registry);
+				validateRefBeansInValue(bean, element, iter.next(), registry);
 			}
 		} else if (value instanceof Map) {
 			Map map = (Map) value;
 			for (Iterator iter = map.keySet().iterator(); iter.hasNext(); ) {
-				validateRefBeansInValue(element, map.get(iter.next()),
+				validateRefBeansInValue(bean, element, map.get(iter.next()),
 										registry);
 			}
 		}
@@ -621,7 +674,17 @@ public class BeansConfigValidator {
         return (property.startsWith(PROPERTY_PLACEHOLDER_PREFIX) 
                 && property.endsWith(PROPERTY_PLACEHOLDER_SUFFIX));
     }
-
+    
+    /**
+     * Checks if the specified property value is a reference to a factory bean,
+     * e.g. <code>&factoryBean</code>
+     * @param property the property value
+     * @return true if property value is placeholder
+     */
+    private boolean isFactoryBeanReference(String property) {
+        return property.startsWith(FACTORY_BEAN_REFERENCE_PREFIX); 
+    }
+    
 	/**
 	 * Determine the first (or last) nested property separator in the given
 	 * property path, ignoring dots in keys (like "map[my.key]").
