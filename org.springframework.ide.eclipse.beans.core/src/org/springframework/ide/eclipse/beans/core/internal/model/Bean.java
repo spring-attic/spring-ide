@@ -112,11 +112,12 @@ public class Bean extends AbstractSourceModelElement implements IBean {
 			return (IBeansConfig) parent;
 		} else if (parent instanceof IBean) {
 			return ((IBean) parent).getConfig();
-		} else if (parent instanceof IBeanProperty) {
+		} else if (parent instanceof IBeanProperty ||
+								  parent instanceof IBeanConstructorArgument) {
 			return ((IBean) parent.getElementParent()).getConfig();
 		}
-		throw new IllegalStateException("Bean can only have a parent of type " +
-			 "IBeansConfig, IBean or (in case of an inner bean) IBeanProperty");
+		throw new IllegalStateException("Unsupported parent element in " +
+										"bean '" + getElementName() + "'");
 	}
 
 	public void setBeanDefinitionHolder(
