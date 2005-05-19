@@ -284,8 +284,14 @@ public class BeansConfigValidator {
 					  	   IBeansProjectMarker.ERROR_CODE_INVALID_FACTORY_BEAN,
 						   bean.getElementName(), beanName);
 			} else {
-				validateFactoryMethod(bean, factoryBd.getBeanClassName(),
-									  methodName, false, registry);
+
+				// Validate non-static factory method in factory bean
+				// Factory beans with factory methods can only be validated
+				// during runtime - so skip them
+				if (factoryBd.getFactoryMethodName() == null) {
+					validateFactoryMethod(bean, factoryBd.getBeanClassName(),
+										  methodName, false, registry);
+				}
 			}
 		} catch (NoSuchBeanDefinitionException e) {
 			if (e.getBeanName().equals(bean.getElementName())) {
@@ -516,21 +522,24 @@ public class BeansConfigValidator {
 			while (iter.hasNext()) {
 				Map.Entry entry = (Map.Entry) iter.next();
 				int index = ((Integer) entry.getKey()).intValue();
-	
-				// Lookup corresponding model element (contructor argument) 
-				IModelElement element = bean;
+
+				// Lookup corresponding model element (constructor argument) 
 				Iterator cas = bean.getConstructorArguments().iterator();
 				while (cas.hasNext()) {
 					IBeanConstructorArgument	carg = (IBeanConstructorArgument)
 																	cas.next();
 					if (carg.getIndex() == index) {
-						element = carg;
+						ConstructorArgumentValues.ValueHolder valueHolder =
+							  			(ConstructorArgumentValues.ValueHolder)
+							  			entry.getValue();
+						// Skip constructor arguments with null value
+						if (valueHolder.getValue() != null) {
+							validateRefBeansInValue(bean, carg,
+											 valueHolder.getValue(), registry);
+						}
 						break;
 					}
 				}
-				ConstructorArgumentValues.ValueHolder valueHolder =
-					  (ConstructorArgumentValues.ValueHolder) entry.getValue();
-				validateRefBeansInValue(bean, element, valueHolder.getValue(), registry);
 			}
 
 			// Validate referenced beans in generic constructor argument values
@@ -539,21 +548,21 @@ public class BeansConfigValidator {
 				ConstructorArgumentValues.ValueHolder valueHolder =
 						   (ConstructorArgumentValues.ValueHolder) iter.next();
 
-				// Lookup corresponding model element (contructor argument) 
-				IModelElement element = bean;
-				if (valueHolder.getType() != null) {
-					Iterator cas = bean.getConstructorArguments().iterator();
-					while (cas.hasNext()) {
-						IBeanConstructorArgument	carg =
-										 (IBeanConstructorArgument) cas.next();
-						if (carg.getType() == valueHolder.getType()) {
-							element = carg;
-							break;
+				// Lookup corresponding model element (constructor argument) 
+				Iterator cas = bean.getConstructorArguments().iterator();
+				while (cas.hasNext()) {
+					IBeanConstructorArgument	carg =
+									 (IBeanConstructorArgument) cas.next();
+					if (carg.getType() == valueHolder.getType() &&
+								   carg.getValue() == valueHolder.getValue()) {
+						// Skip constructor arguments with null value
+						if (valueHolder.getValue() != null) {
+							validateRefBeansInValue(bean, carg,
+											 valueHolder.getValue(), registry);
 						}
+						break;
 					}
 				}
-				validateRefBeansInValue(bean, element, valueHolder.getValue(),
-										registry);
 			}
 
 			// Validate referenced beans in bean properties
