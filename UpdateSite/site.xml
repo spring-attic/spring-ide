@@ -6,7 +6,7 @@
    <feature url="features/org.springframework.ide.eclipse.beans_1.1.0.jar" id="org.springframework.ide.eclipse.beans" version="1.1.0">
       <category name="spring-ide"/>
    </feature>
-   <feature url="features/org.springframework.ide.eclipse_1.1.1.jar" id="org.springframework.ide.eclipse" version="1.1.1">
+   <feature url="features/org.springframework.ide.eclipse.beans_1.1.1.jar" id="org.springframework.ide.eclipse.beans" version="1.1.1">
       <category name="spring-ide"/>
    </feature>
    <feature url="features/org.springframework.ide.eclipse_1.2.0.jar" id="org.springframework.ide.eclipse" version="1.2.0">
