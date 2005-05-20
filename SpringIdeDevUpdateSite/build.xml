@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<project name="Spring IDE Developer Update Site" default="dist" basedir=".">
+
+  <property name="version" value="0.0.1"/>
+  <property name="name" value="updatesite_dev"/>
+
+  <property name="dist.name" value="${name}_${version}"/>
+  <property name="dist.file" value="${dist.name}.zip"/>
+
+  <target name="dist" description="Create distribution ZIP file">
+    <zip zipfile="${dist.file}" filesonly="true">
+      <zipfileset dir="."
+                  includes="features/*, plugins/*, site.xml"/>
+    </zip>
+  </target>
+
+</project>

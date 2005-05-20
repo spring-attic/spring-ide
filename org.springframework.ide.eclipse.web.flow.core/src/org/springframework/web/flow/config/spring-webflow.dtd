@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+	Spring Web Flow DTD
+	Authors: Erwin Vervaet, Keith Donald
+	
+	This DTD defines the web flow XML syntax. Web flows capture the page flow
+	in (part of) a web application.
+
+	XML documents that conform to this DTD should declare the following doctype:
+
+	<!DOCTYPE webflow PUBLIC "-//SPRING//DTD WEBFLOW//EN"
+		"http://www.springframework.org/dtd/spring-webflow.dtd">
+-->
+
+<!--
+	Defines the root element for a web flow definition. Web flows
+	are composed of one or more states.
+-->
+<!ELEMENT webflow ( (action-state | view-state | decision-state | subflow-state | end-state | precondition )+ )>
+
+<!--
+	Unique identifier of the web flow; should be unique to all other web flows.
+-->
+<!ATTLIST webflow id ID #REQUIRED>
+
+<!--
+	Identifies the start state of the flow: the state where flow
+	execution will begin.
+-->
+<!ATTLIST webflow start-state IDREF #REQUIRED>
+
+<!--
+	Defines an action state: a state where an action is executed.
+	Transitions triggered by the action(s) lead on to other states.
+-->
+<!ELEMENT action-state ( action+, transition+, property*)>
+
+<!--
+	Unique identifier of an action state; must be unique to this flow.
+-->
+<!ATTLIST action-state id ID #REQUIRED>
+
+<!--
+	Defines a single action to be executed.
+-->
+<!ELEMENT action ( property* )>
+
+<!--
+	Identifier of the action implementation exported in the configured registry, typically
+	the Spring Bean Factory. This is similar to the <ref bean="myBean"/> notation of
+	the Spring beans DTD.
+-->
+<!ATTLIST action bean CDATA #IMPLIED>
+
+<!--
+	Fully qualified class of the Action implementation. An instance of the
+	class will be instantiated and possibly autowired depending on the value of the
+	autowire attribute.
+-->
+<!ATTLIST action class CDATA #IMPLIED>
+	
+<!--
+	Dependency (aka collaborator) autowiring options for use when instantiating the action 
+	implementation with the class attribute.
+-->
+<!ATTLIST action autowire (no | byName | byType | constructor | autodetect | default) "default">
+
+<!--
+	Fully qualified implementation class of the Action exported in the configured registry.
+	For this "by type" action lookup to work, there must be exactly one Action implementation
+	exported of that type.
+-->
+<!ATTLIST action classref CDATA #IMPLIED>
+
+<!--
+	Optional name qualifier for the action. When specified, the action will
+	qualify execution result event identifiers by this name. An action with
+	a name is ofter referred to as a "named action".
+-->
+<!ATTLIST action name CDATA #IMPLIED>
+
+<!--
+	Name of the target method to be invoked to execute this action.  The method's signature must
+	be of the form: 'public Event ${method}(RequestContext)'
+-->
+<!ATTLIST action method CDATA #IMPLIED>
+
+<!--
+	A property associated with an action in an action state. Properties are simple strings that 
+	allow you to annotate the action in the context of the state it is being linked with.
+	For example, the 'caption' property might serve a GUI tooltip or logging statement, and
+	the 'validatorMethod' property might specify a target method to invoke on a form action's
+	validator.
+-->
+<!ELEMENT property ( value? )>
+
+<!--
+	The name of the property.
+-->
+<!ATTLIST property name CDATA #REQUIRED>
+
+<!--
+	A short-cut alternative to an explicit child 'value' element.
+-->
+<!ATTLIST property value CDATA #IMPLIED>
+
+<!--
+	The value of the property.
+-->
+<!ELEMENT value ( #PCDATA )>
+
+<!--
+	Defines a transition from one state to another. Transitions define the supported 
+	paths through the flow.
+-->
+<!ELEMENT transition ( action* )>
+
+<!--
+	The identifier of the event that can trigger this transition. An event describes something
+	that happens e.g "submit", "back", "success", "error".
+	Note: in the future, custom transitional expressions will be definable from this element.
+-->
+<!ATTLIST transition on CDATA #REQUIRED>
+
+<!--
+	Target state of the transition.
+-->
+<!ATTLIST transition to IDREF #REQUIRED>
+
+<!--
+	A id of a configured transition execution criteria, tests if this transition, once matched
+	to an event in a request context, is allowed to execute.
+-->
+<!ATTLIST transition executionCriteria CDATA #IMPLIED>
+
+<!--
+	Defines a view state: a state where a view will be rendered.
+	Transitions triggered by the view lead on to other states.
+-->
+<!ELEMENT view-state ( transition+, property* )>
+
+<!--
+	Unique identifier of an view state; must be unique to this flow.
+-->
+<!ATTLIST view-state id ID #REQUIRED>
+
+<!--
+	Optional name of the view that will be rendered when the view state is entered.
+	When not present, this view state will be a marker view state.
+	A marker view state does not actually render a view, but just returns
+	control to the client. Use a marker view state when an action has
+	already generated the response.
+-->
+<!ATTLIST view-state view CDATA #IMPLIED>
+
+<!--
+	Defines a decision state: a state that will evaluate one or more expressions to
+	decide which state to go next (aka routing state.)
+-->
+<!ELEMENT decision-state ( if+, property* )>
+
+<!--
+	Unique identifier of this decision state; must be unique to this flow.
+-->
+<!ATTLIST decision-state id ID #REQUIRED>
+
+<!--
+	A transition specification that defines a criteria expression and a state to
+	transition to if the expression is true.  Optionally, this element may also 
+	define a 'else' state to transition to if the expression is false.
+	The form is:
+ 	    <if test="${criteria}" then="${toTrueState}" [else="(toFalseState)"]>
+-->
+<!ELEMENT if EMPTY>
+
+<!--
+	The transition criteria expression to be tested.
+-->
+<!ATTLIST if test CDATA #REQUIRED>
+
+<!--
+	The state to transition to if the expression is true.
+-->
+<!ATTLIST if then CDATA #REQUIRED>
+
+<!--
+	The state to transition to if the expression is false (optional).
+-->
+<!ATTLIST if else CDATA #IMPLIED>
+
+<!--
+	Defines a sub flow state: a state that spawns a sub flow when entered. When the
+	sub flow completes execution (reaches a end state), the result of subflow execution
+	will be used as grounds for a transition out of this state.
+-->
+<!ELEMENT subflow-state ( attribute-mapper?, transition+, property* )>
+
+<!--
+	Unique identifier of a subflow state; must be unique to this flow.
+-->
+<!ATTLIST subflow-state id ID #REQUIRED>
+
+<!--
+	Reference to the id of the web flow to be spawned when this subflow state is entered.
+-->
+<!ATTLIST subflow-state flow CDATA #REQUIRED>
+
+<!--
+	An optional mapper that will map attributes from the parent flow to/from the spawned subflow. 
+-->
+<!ELEMENT attribute-mapper EMPTY>
+
+<!--
+	Identifier of the flow attribute mapper implementation exported in the
+	configured registry, typically a Spring Bean Factory. This is similar
+	to the <ref bean="myBean"/> notation of the Spring beans DTD.
+-->
+<!ATTLIST attribute-mapper bean CDATA #IMPLIED>
+
+<!--
+	Fully qualified class of the flow attribute mapper implementation. An
+	instance of the class will be instantiated and possibly autowired
+	depending on the value of the autowire attribute.
+-->
+<!ATTLIST attribute-mapper class CDATA #IMPLIED>
+	
+<!--
+	Dependency (collaborator) autowiring options for use when instantiating the flow attribute mapper
+	implementation with the class attribute.
+-->
+<!ATTLIST attribute-mapper autowire (no | byName | byType | constructor | autodetect | default) "default">
+
+<!--
+	Fully qualified implementation class of the flow attribute mapper exported
+	in the configured registry. For this "by type" mapper lookup to work, there must
+	be exactly one mapper implementation exported of that type.
+-->
+<!ATTLIST attribute-mapper classref CDATA #IMPLIED>
+
+<!--
+	Defines an end state: a state that terminates the flow.
+-->
+<!ELEMENT end-state ( property* )>
+
+<!--
+	Unique identifier of an end state; must be unique to this flow.
+-->
+<!ATTLIST end-state id ID #REQUIRED>
+
+<!--
+	Optional name of the view that will be rendered when this state is reached
+	and when there is no parent flow to continue. When not present, this state will be a marker end state.
+	A marker end state does not actually render a view, but just returns control to the client.
+	Use a marker end state when another object is expected to generate the response.
+-->
+<!ATTLIST end-state view CDATA #IMPLIED>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin
+   id="org.springframework.ide.eclipse.web.flow.core"
+   name="%pluginName"
+   version="0.0.1"
+   provider-name="%providerName"
+   class="org.springframework.ide.eclipse.web.flow.core.WebFlowCorePlugin">
+
+   <runtime>
+      <library name="webflow-core.jar">
+         <export name="*"/>
+      </library>
+      <library name="ognl.jar">
+         <export name="*"/>
+      </library>
+   </runtime>
+
+   <requires>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.springframework.ide.eclipse.core"/>
+      <import plugin="org.springframework.ide.eclipse.beans.core"/>
+   </requires>
+</plugin>
