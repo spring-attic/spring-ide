@@ -345,14 +345,14 @@ public class BeansConfigValidator {
 		monitor.subTask(BeansCorePlugin.getFormattedMessage(
 						   "BeansConfigValidator.validateConstructorArguments",
 						   bean.getElementName()));
-		// Skip validation if default constructor or factory bean
-		int numArguments = argumentValues.getArgumentCount();
+		// Skip validation if a factory is involved
 		BeanDefinitionHolder bdHolder = ((Bean)
 											   bean).getBeanDefinitionHolder();
 		AbstractBeanDefinition bd = (AbstractBeanDefinition)
 												  bdHolder.getBeanDefinition();
-		if (numArguments > 0 && bd.getFactoryBeanName() == null &&
+		if (bd.getFactoryBeanName() == null &&
 										   bd.getFactoryMethodName() == null) {
+			int numArguments = argumentValues.getArgumentCount();
 			try {
 				if (!Introspector.hasConstructor(type, numArguments)) {
 					BeansModelUtils.createProblemMarker(bean,
