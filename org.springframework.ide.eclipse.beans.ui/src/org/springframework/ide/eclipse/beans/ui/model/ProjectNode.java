@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * Representation of an Spring project.
@@ -220,6 +221,8 @@ public class ProjectNode extends AbstractNode {
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPropertySource.class) {
 			return BeansUIUtils.getPropertySource(project);
+		} else if (adapter == IModelElement.class) {
+			return project;
 		}
 		return super.getAdapter(adapter);
 	}

@@ -28,6 +28,7 @@ import org.eclipse.ui.IPropertyListener;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.views.BeansView;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * The root node of an Spring view node tree.
@@ -167,6 +168,13 @@ public class RootNode extends AbstractNode {
 
 	public void refreshViewer() {
 		view.refresh();
+	}
+
+	public Object getAdapter(Class adapter) {
+		if (adapter == IModelElement.class) {
+			return BeansCorePlugin.getModel();
+		}
+		return super.getAdapter(adapter);
 	}
 
 	public String toString() {

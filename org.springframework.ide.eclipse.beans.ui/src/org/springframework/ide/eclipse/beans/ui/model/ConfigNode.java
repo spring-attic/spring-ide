@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * Representation of a Spring bean configuration.
@@ -149,6 +150,8 @@ public class ConfigNode extends AbstractNode {
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPropertySource.class) {
 			return BeansUIUtils.getPropertySource(config);
+		} else if (adapter == IModelElement.class) {
+			return config;
 		}
 		return super.getAdapter(adapter);
 	}

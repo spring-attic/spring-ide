@@ -26,6 +26,7 @@ import java.util.Map;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * Representation of a Spring bean.
@@ -352,6 +353,8 @@ public class BeanNode extends AbstractNode {
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPropertySource.class) {
 			return BeansUIUtils.getPropertySource(bean);
+		} else if (adapter == IModelElement.class) {
+			return bean;
 		}
 		return super.getAdapter(adapter);
 	}
