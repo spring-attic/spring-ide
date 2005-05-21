@@ -37,10 +37,11 @@ public class ModelLabelProvider extends LabelProvider {
         else if (obj instanceof IBeansConfigSet) {
             return WebFlowUIImages.getImage(WebFlowUIImages.IMG_OBJS_SPRING_BEANS);
         }
-        else {
+        else if (obj != null){
             return WebFlowUIImages
                     .getImage(WebFlowUIImages.IMG_OBJS_CONFIG_SET);
         }
+        return null;
     }
 
     public String getText(Object element) {
@@ -61,6 +62,9 @@ public class ModelLabelProvider extends LabelProvider {
             label.append(" [Beans Config Set]");
             return label.toString();
         }
-        return super.getText(element);
+        else if (element != null) {
+            return super.getText(element);
+        }
+        return null;
     }
 }

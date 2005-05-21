@@ -241,14 +241,17 @@ public class ConfigSetDialog extends Dialog {
             else if (!configSetName.equals(name)) {
                 project.removeConfigSet(configSetName);
             }
-
+            
+            project.addConfigSet(configSet);
+            
             Object[] beansConfigSet = beansConfigSetViewer.getCheckedElements();
             if (beansConfigSet.length > 0) {
                 configSet
                         .setBeansConfigSet((IBeansConfigSet) beansConfigSet[0]);
             }
-
-            project.addConfigSet(configSet);
+            else {
+                configSet.setBeansConfigSet(null);
+            }
         }
         super.buttonPressed(buttonId);
     }

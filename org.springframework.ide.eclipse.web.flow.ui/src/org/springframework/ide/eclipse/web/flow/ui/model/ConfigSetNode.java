@@ -40,6 +40,8 @@ public class ConfigSetNode extends AbstractNode {
     private List states = null; // lazy initialized in getBeans() or getBean()
 
     private Map statesMap; // lazy initialized in getBean()
+    
+    private IBeansConfigSet beansConfigSet;
 
     /**
      * Creates an empty node.
@@ -190,11 +192,17 @@ public class ConfigSetNode extends AbstractNode {
         if (this.configSet != null)
             return this.configSet.getBeansConfigSet();
         else
-            return null;
+            return this.beansConfigSet;
     }
 
     public void setBeansConfigSet(IBeansConfigSet beans) {
-        this.configSet.setBeansConfigSet(beans);
+        if (this.configSet != null) {
+            this.configSet.setBeansConfigSet(beans);
+            if (beans == null) {
+                this.configSet.setBeansConfigSetElementName(null);
+            }
+        }
+        this.beansConfigSet = beans;
     }
 
     public IWebFlowConfigSet getWebFlowConfigSet() {

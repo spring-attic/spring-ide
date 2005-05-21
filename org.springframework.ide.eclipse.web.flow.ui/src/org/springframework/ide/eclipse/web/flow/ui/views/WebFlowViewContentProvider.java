@@ -88,7 +88,9 @@ class WebFlowViewContentProvider implements ITreeContentProvider {
         }
         else if (parent instanceof ConfigSetNode) {
             List children = ((ConfigSetNode) parent).getConfigs();
-            children.add(((ConfigSetNode) parent).getBeansConfigSet());
+            if (((ConfigSetNode) parent).getBeansConfigSet() != null) {
+                children.add(((ConfigSetNode) parent).getBeansConfigSet());
+            }
             return children.toArray();
         }
         else if (parent instanceof ConfigNode) {
