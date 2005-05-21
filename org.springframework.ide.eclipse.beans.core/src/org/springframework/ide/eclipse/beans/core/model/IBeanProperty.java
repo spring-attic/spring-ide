@@ -16,8 +16,6 @@
 
 package org.springframework.ide.eclipse.beans.core.model;
 
-import java.util.Collection;
-
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
@@ -26,10 +24,4 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 public interface IBeanProperty extends ISourceModelElement {
 
 	Object getValue();
-
-	/**
-	 * Returns a collection with the names of all beans which are referenced
-	 * by this property's value.
-	 */
-	Collection getReferencedBeans();
 }

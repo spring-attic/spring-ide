@@ -209,57 +209,6 @@ public class Bean extends AbstractSourceModelElement implements IBean {
 		return (getElementParent() != null);
 	}
 
-	/**
-	 * Returns a collection with the names of all beans which are referenced
-	 * by this bean's parent bean (for child beans only), constructor arguments
-	 * or properties.
-	 */
-	public Collection getReferencedBeans() {
-		List beanNames = new ArrayList();
-
-		// For a child bean add the names of all parent beans and all beans
-		// which are referenced by the parent beans
-		for (IBean bean = this; bean != null && !bean.isRootBean(); ) {
-			String parentName = bean.getParentName();
-			if (parentName != null) {
-				beanNames.add(parentName);
-				bean = ((IBeansConfig) getElementParent()).getBean(parentName);
-				if (bean != null) {
-					BeansModelUtils.addReferencedBeanNamesForBean(bean,
-																 beanNames);
-				}
-			}
-		}
-
-		// Add names of referenced beans from constructor arguments
-		Iterator cargs = constructorArguments.iterator();
-		while (cargs.hasNext()) {
-			IBeanConstructorArgument carg = (IBeanConstructorArgument)
-																   cargs.next();
-			Iterator beans = carg.getReferencedBeans().iterator();
-			while (beans.hasNext()) {
-				String beanName = (String) beans.next();
-				if (!beanNames.contains(beanName)) {
-					beanNames.add(beanName);
-				}
-			}
-		}
-
-		// Add referenced beans from properties
-		Iterator props = properties.iterator();
-		while (props.hasNext()) {
-			IBeanProperty prop = (IBeanProperty) props.next();
-			Iterator beans = prop.getReferencedBeans().iterator();
-			while (beans.hasNext()) {
-				String beanName = (String) beans.next();
-				if (!beanNames.contains(beanName)) {
-					beanNames.add(beanName);
-				}
-			}
-		}
-		return beanNames;
-	}
-
 	public String toString() {
 		StringBuffer text = new StringBuffer();
 		text.append(getElementName());

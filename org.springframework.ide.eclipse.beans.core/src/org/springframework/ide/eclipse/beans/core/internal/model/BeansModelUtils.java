@@ -16,6 +16,8 @@
 
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -28,12 +30,15 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
+import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
@@ -43,23 +48,136 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 public class BeansModelUtils {
 
 	/**
-	 * Returns config for given name from specified project.
+	 * Returns config for given name from specified project or config set.
 	 */
-	public static IBeansConfig getConfig(String configName,
-										 IBeansProject project) {
+	public static final IBeansConfig getConfig(String configName,
+											   IModelElement element) {
 		// For external project get the corresponding project from beans model 
 		if (configName.charAt(0) == '/') {
 			int pos = configName.indexOf('/', 1);
 			configName = configName.substring(pos + 1);
 			String projectName = configName.substring(0, pos);
-			project = BeansCorePlugin.getModel().getProject(projectName);
+			IBeansProject project = BeansCorePlugin.getModel().getProject(
+																  projectName);
+			return project.getConfig(configName);
+		} else if (element instanceof IBeansProject) {
+			return ((IBeansProject) element).getConfig(configName);
+		} else if (element instanceof IBeansConfigSet) {
+			return ((IBeansProject) element.getElementParent()).getConfig(
+																   configName);
 		}
-		return (project != null ? project.getConfig(configName) : null);
+		return null;
 	}
 
 	/**
-	 * Given a bean's property or constructor argument and it's value, adds any
-	 * beans referenced by it's value. This value could be:
+	 * Returns a collection with all <code>IBean</code>s which are referenced
+	 * from given model element (<code>IBean</code>,
+	 * <code>IBeanConstructorArgument</code> or <code>IBeanProperty</code>).
+	 * For a bean it's parent bean (for child beans only), constructor argument
+	 * values and property values are checked.
+	 * <code>IBean</code> look-up is done from the <code>IBeanConfig</code>
+	 * the given model element belongs to.
+	 * @param bean  the to get all referenced beans from
+	 * @throws IllegalArgumentException if unsupported model element specified 
+	 */
+	public static final Collection getReferencedBeans(IModelElement element) {
+		IModelElement context;
+		if (element instanceof IBean) {
+			context = element.getElementParent();
+		} else if (element instanceof IBeanConstructorArgument ||
+											element instanceof IBeanProperty) {
+			context = element.getElementParent().getElementParent();
+		} else {
+			throw new IllegalArgumentException("Unsupported model element " +
+											   element);
+		}
+		return getReferencedBeans(element, context);
+	}
+
+	/**
+	 * Returns a collection with all <code>IBean</code>s which are referenced
+	 * from given model element (<code>IBean</code>,
+	 * <code>IBeanConstructorArgument</code> or <code>IBeanProperty</code>).
+	 * For a bean it's parent bean (for child beans only), constructor argument
+	 * values and property values are checked.
+	 * <code>IBean</code> look-up is done from the specified
+	 * <code>IBeanConfig</code> or <code>IBeanConfigSet</code>.
+	 * @param bean  the to get all referenced beans from
+	 * @param context  the context (<code>IBeanConfig</code> or
+	 * 		  <code>IBeanConfigSet</code>) the referenced beans are looked-up
+	 * @throws IllegalArgumentException if unsupported model element specified 
+	 */
+	public static final Collection getReferencedBeans(IModelElement element,
+													  IModelElement context) {
+		List referencedBeans = new ArrayList();
+		if (element instanceof IBean) {
+			IBean bean = (IBean) element;
+
+			// For a child bean add the names of all parent beans and all beans
+			// which are referenced by the parent beans
+			for (IBean parentBean = bean; parentBean != null &&
+												  !parentBean.isRootBean(); ) {
+				String parentName = parentBean.getParentName();
+				if (parentName != null) {
+					parentBean = getBean(parentName, context);
+					if (parentBean != null) {
+						referencedBeans.add(parentBean);
+						addReferencedBeansForElement(parentBean, context,
+															  referencedBeans);
+					}
+				}
+			}
+
+			// Add names of referenced beans from constructor arguments
+			Iterator cargs = bean.getConstructorArguments().iterator();
+			while (cargs.hasNext()) {
+				IBeanConstructorArgument carg = (IBeanConstructorArgument)
+																   cargs.next();
+				addReferencedBeansForValue(carg.getValue(), context,
+										   referencedBeans);
+			}
+
+			// Add referenced beans from properties
+			Iterator properties = bean.getProperties().iterator();
+			while (properties.hasNext()) {
+				IBeanProperty property = (IBeanProperty) properties.next();
+				addReferencedBeansForValue(property.getValue(), context,
+										   referencedBeans);
+			}
+		} else if (element instanceof IBeanConstructorArgument) {
+			IBeanConstructorArgument carg  = (IBeanConstructorArgument) element;
+			addReferencedBeansForValue(carg.getValue(), context,
+									   referencedBeans);
+		} else if (element instanceof IBeanProperty) {
+			IBeanProperty property  = (IBeanProperty) element;
+			addReferencedBeansForValue(property.getValue(), context,
+									   referencedBeans);
+			
+		} else {
+			throw new IllegalArgumentException("Unsupported model element " +
+											   element);
+		}
+		return referencedBeans;
+	}
+
+	/**
+	 * Adds the all <code>IBean</code>s which are referenced by the specified
+	 * model element to the given list.
+	 */
+	public static final void addReferencedBeansForElement(IModelElement element,
+								 IModelElement context, List referencedBeans) {
+		Iterator beans = getReferencedBeans(element, context).iterator();
+		while (beans.hasNext()) {
+			IBean bean = (IBean) beans.next();
+			if (!referencedBeans.contains(bean)) {
+				referencedBeans.add(bean);
+			}
+		}
+	}
+
+	/**
+	 * Given a bean property's or constructor argument's value, adds any
+	 * beans referenced by this value. This value could be:
 	 * <li>A RuntimeBeanReference, which bean will be added.
 	 * <li>A List. This is a collection that may contain RuntimeBeanReferences
 	 * which will be added.
@@ -68,65 +186,98 @@ public class BeansModelUtils {
 	 * be added.
 	 * <li>An ordinary object or null, in which case it's ignored.
 	 */
-	public static void addReferencedBeanNamesForValue(IModelElement element,
-												Object value, List beanNames) {
+	public static final void addReferencedBeansForValue(Object value,
+								 IModelElement context, List referencedBeans) {
 		if (value instanceof RuntimeBeanReference) {
 			String beanName = ((RuntimeBeanReference) value).getBeanName();
-			if (!beanNames.contains(beanName)) {
-				beanNames.add(beanName);
+			IBean bean = getBean(beanName, context);
+			if (bean != null && !referencedBeans.contains(bean)) {
+				referencedBeans.add(bean);
+				addReferencedBeansForElement(bean, context, referencedBeans);
 			}
-			IModelElement parent =
-								 element.getElementParent().getElementParent();
-			IBean bean = getBean(parent, beanName);
-			if (bean != null) {
-				addReferencedBeanNamesForBean(bean, beanNames);
+		} else if (value instanceof BeanDefinitionHolder) {
+			String beanName = ((BeanDefinitionHolder) value).getBeanName();
+			IBean bean = getInnerBean(beanName, context);
+			if (bean != null && !referencedBeans.contains(bean)) {
+
+				// TODO howto handle inner beans - currently we don't add them
+				// referencedBeans.add(bean);
+				addReferencedBeansForElement(bean, context, referencedBeans);
 			}
 		} else if (value instanceof List) {
 			List list = (List) value;
 			for (int i = 0; i < list.size(); i++) {
-				addReferencedBeanNamesForValue(element, list.get(i), beanNames);
+				addReferencedBeansForValue(list.get(i), context,
+										   referencedBeans);
 			}
 		} else if (value instanceof Set) {
 			Set set = (Set) value;
 			for (Iterator iter = set.iterator(); iter.hasNext(); ) {
-				addReferencedBeanNamesForValue(element, iter.next(), beanNames);
+				addReferencedBeansForValue(iter.next(), context,
+										   referencedBeans);
 			}
 		} else if (value instanceof Map) {
 			Map map = (Map) value;
 			for (Iterator iter = map.keySet().iterator(); iter.hasNext(); ) {
-				addReferencedBeanNamesForValue(element, map.get(iter.next()),
-											   beanNames);
+				addReferencedBeansForValue(map.get(iter.next()), context,
+										   referencedBeans);
 			}
 		}
 	}
 
 	/**
-	 * Adds the names of all beans which are referenced by the specified bean to
-	 * the given list.
+	 * Returns the IBean for a given bean name from specified context
+	 * (<code>IBeansConfig</code> or <code>IBeansConfigSet</code>).
+	 * @return IBean or null if bean not defined in the context
+	 * @throws IllegalArgumentException if unsupported context specified 
 	 */
-	public static void addReferencedBeanNamesForBean(IBean bean, List beanNames) {
-		Iterator iter = bean.getReferencedBeans().iterator();
-		while (iter.hasNext()) {
-			bean = (IBean) iter.next();
-			if (!beanNames.contains(bean.getElementName())) {
-				beanNames.add(bean.getElementName());
-			}
+	public static final IBean getBean(String beanName, IModelElement context) {
+		if (context instanceof IBeansConfig) {
+			return ((IBeansConfig) context).getBean(beanName);
+		} else if (context instanceof IBeansConfigSet) {
+			return ((IBeansConfigSet) context).getBean(beanName);
+		} else {
+			throw new IllegalArgumentException("Unsupported context " +
+											   context);
 		}
 	}
 
 	/**
-	 * Returns the IBean for a given bean name from specified Config or
-	 * ConfigSet element.
+	 * Returns the inner IBean for a given bean name from specified context
+	 * (<code>IBeansConfig</code> or <code>IBeansConfigSet</code>).
 	 * @return IBean or null if bean not defined
+	 * @throws IllegalArgumentException if unsupported context specified 
 	 */
-	public static final IBean getBean(IModelElement element, String beanName) {
-		IBean bean = null;
-		if (element instanceof IBeansConfig) {
-			bean = ((IBeansConfig) element).getBean(beanName);
-		} else if (element instanceof IBeansConfigSet) {
-			bean = ((IBeansConfigSet) element).getBean(beanName);
+	public static final IBean getInnerBean(String beanName,
+										   IModelElement context) {
+		if (context instanceof IBeansConfig) {
+			Iterator beans = ((IBeansConfig)
+										   context).getInnerBeans().iterator();
+			while (beans.hasNext()) {
+				IBean bean = (IBean) beans.next();
+				if (beanName.equals(bean.getElementName())) {
+					return bean;
+				}
+			}
+			return null;
+		} else if (context instanceof IBeansConfigSet) {
+			Iterator configs = ((IBeansConfigSet)
+					   						  context).getConfigs().iterator();
+			while (configs.hasNext()) {
+				IBeansConfig config = (IBeansConfig) configs.next();
+				Iterator beans = config.getInnerBeans().iterator();
+				while (beans.hasNext()) {
+					IBean bean = (IBean) beans.next();
+					if (beanName.equals(bean.getElementName())) {
+						return bean;
+					}
+				}
+			}
+			return ((IBeansConfigSet) context).getBean(beanName);
+		} else {
+			throw new IllegalArgumentException("Unsupported context " +
+											   context);
 		}
-		return bean;
 	}
 
 	/**
@@ -137,7 +288,7 @@ public class BeansModelUtils {
 	 * @return the requested Java type or null if the class is not defined or
 	 * 		   the project is not accessible
 	 */
-	public static IType getJavaType(IProject project, String className) {
+	public static final IType getJavaType(IProject project, String className) {
 		if (className != null && project.isAccessible()) {
 
 			// For inner classes replace '$' by '.'

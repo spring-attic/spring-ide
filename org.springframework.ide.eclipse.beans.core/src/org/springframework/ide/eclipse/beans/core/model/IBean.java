@@ -39,6 +39,10 @@ public interface IBean extends ISourceModelElement {
 
 	String getClassName();
 
+	/**
+	 * Returns the name of the parent bean (in case of a child bean) or null
+	 * (in case of a root bean).
+	 */
 	String getParentName();
 
 	public boolean isRootBean();
@@ -50,11 +54,4 @@ public interface IBean extends ISourceModelElement {
 	public boolean isLazyInit();
 
 	public boolean isInnerBean();
-
-	/**
-	 * Returns a collection with the names of all beans which are referenced
-	 * by this bean's parent bean (for child beans only), constructor arguments
-	 * or properties.
-	 */
-	public Collection getReferencedBeans();
 }

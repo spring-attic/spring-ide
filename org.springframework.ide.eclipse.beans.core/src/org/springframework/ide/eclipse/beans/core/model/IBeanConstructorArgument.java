@@ -16,8 +16,6 @@
 
 package org.springframework.ide.eclipse.beans.core.model;
 
-import java.util.Collection;
-
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
@@ -30,10 +28,4 @@ public interface IBeanConstructorArgument extends ISourceModelElement {
 	String getType();
 
 	Object getValue();
-
-	/**
-	 * Returns a collection with the names of all beans which are referenced
-	 * by this constructor argument's value.
-	 */
-	Collection getReferencedBeans();
 }
