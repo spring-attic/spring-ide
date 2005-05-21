@@ -32,7 +32,7 @@ import org.eclipse.gef.commands.CommandStackListener;
 import org.eclipse.gef.editpolicies.RootComponentEditPolicy;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
-import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUIUtils;
+import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
 import org.springframework.ide.eclipse.web.flow.ui.editor.policies.StateContainerEditPolicy;
 import org.springframework.ide.eclipse.web.flow.ui.editor.policies.WebFlowStateLayoutEditPolicy;
 
@@ -126,7 +126,7 @@ public class WebFlowPart extends ChildrenStatePart implements
 
     public Object getAdapter(Class key) {
         if (IPropertySource.class == key) {
-            return WebFlowUIUtils.getPropertySource(getState());
+            return WebFlowUtils.getPropertySource(getState());
         }
         return super.getAdapter(key);
     }

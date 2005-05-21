@@ -23,7 +23,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.springframework.ide.eclipse.web.flow.core.model.IIfTransition;
-import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUIUtils;
+import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
 
 public class IfTransitionProperties implements IPropertySource {
 
@@ -68,11 +68,11 @@ public class IfTransitionProperties implements IPropertySource {
             return new Boolean(property.isThen());
         }
         else if (T_TO.equals(id)) {
-            return WebFlowUIUtils.returnNotNullOnString(property.getToState()
+            return WebFlowUtils.returnNotNullOnString(property.getToState()
                     .getId());
         }
         else if (T_FROM.equals(id)) {
-            return WebFlowUIUtils.returnNotNullOnString(property.getFromIf()
+            return WebFlowUtils.returnNotNullOnString(property.getFromIf()
                     .getTest());
         }
         return null;

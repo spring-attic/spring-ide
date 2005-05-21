@@ -35,7 +35,7 @@ import org.springframework.ide.eclipse.web.flow.core.model.IState;
 import org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
-import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUIUtils;
+import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
 import org.springframework.ide.eclipse.web.flow.ui.editor.model.WebFlowModelLabelDecorator;
 import org.springframework.ide.eclipse.web.flow.ui.editor.model.WebFlowModelLabelProvider;
 import org.springframework.ide.eclipse.web.flow.ui.editor.policies.StateEditPolicy;
@@ -71,7 +71,7 @@ public class StateTreeEditPart extends
 
     public Object getAdapter(Class key) {
         if (IPropertySource.class == key) {
-            return WebFlowUIUtils.getPropertySource(getModel());
+            return WebFlowUtils.getPropertySource(getModel());
         }
 
         return super.getAdapter(key);

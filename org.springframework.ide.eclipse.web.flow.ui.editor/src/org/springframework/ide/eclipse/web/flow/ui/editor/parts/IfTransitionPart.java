@@ -41,7 +41,7 @@ import org.springframework.ide.eclipse.web.flow.core.model.IIfTransition;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
-import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUIUtils;
+import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
 import org.springframework.ide.eclipse.web.flow.ui.editor.policies.TransitionEditPolicy;
 
 public class IfTransitionPart extends AbstractConnectionEditPart implements
@@ -150,7 +150,7 @@ public class IfTransitionPart extends AbstractConnectionEditPart implements
 
     public Object getAdapter(Class key) {
         if (IPropertySource.class == key) {
-            return WebFlowUIUtils.getPropertySource(getTransitionModel());
+            return WebFlowUtils.getPropertySource(getTransitionModel());
         }
         return super.getAdapter(key);
     }

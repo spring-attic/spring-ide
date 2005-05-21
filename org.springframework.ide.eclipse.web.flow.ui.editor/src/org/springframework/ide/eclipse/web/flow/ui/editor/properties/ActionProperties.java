@@ -25,7 +25,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.springframework.ide.eclipse.web.flow.core.model.IAction;
-import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUIUtils;
+import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
 
 public class ActionProperties implements IPropertySource {
 
@@ -67,26 +67,26 @@ public class ActionProperties implements IPropertySource {
             return property.getBean();
         }
         else if (A_AUTOWIRE.equals(id)) {
-            String autowire = WebFlowUIUtils.returnNotNullOnString(property
+            String autowire = WebFlowUtils.returnNotNullOnString(property
                     .getAutowire());
             List list = Arrays.asList(AUTOWIRE_VALUES);
             int i = list.indexOf(autowire);
             return new Integer(i);
         }
         else if (A_BEAN.equals(id)) {
-            return WebFlowUIUtils.returnNotNullOnString(property.getBean());
+            return WebFlowUtils.returnNotNullOnString(property.getBean());
         }
         else if (A_CLASS.equals(id)) {
-            return WebFlowUIUtils.returnNotNullOnString(property.getBeanClass());
+            return WebFlowUtils.returnNotNullOnString(property.getBeanClass());
         }
         else if (A_CLASSREF.equals(id)) {
-            return WebFlowUIUtils.returnNotNullOnString(property.getClassRef());
+            return WebFlowUtils.returnNotNullOnString(property.getClassRef());
         }
         else if (A_METHOD.equals(id)) {
-            return WebFlowUIUtils.returnNotNullOnString(property.getMethod());
+            return WebFlowUtils.returnNotNullOnString(property.getMethod());
         }
         else if (A_NAME.equals(id)) {
-            return WebFlowUIUtils.returnNotNullOnString(property.getName());
+            return WebFlowUtils.returnNotNullOnString(property.getName());
         }
         return null;
     }

@@ -23,7 +23,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState;
-import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUIUtils;
+import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
 
 public class SubFlowStateProperties implements IPropertySource {
 
@@ -57,7 +57,7 @@ public class SubFlowStateProperties implements IPropertySource {
 
     public Object getPropertyValue(Object id) {
         if (S_ID.equals(id)) {
-            return WebFlowUIUtils.returnNotNullOnString(property.getId());
+            return WebFlowUtils.returnNotNullOnString(property.getId());
         }
         return null;
     }

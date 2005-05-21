@@ -37,7 +37,7 @@ import org.springframework.ide.eclipse.web.flow.ui.editor.properties.SubFlowStat
 import org.springframework.ide.eclipse.web.flow.ui.editor.properties.ViewStateProperties;
 import org.springframework.ide.eclipse.web.flow.ui.editor.properties.WebFlowStateProperties;
 
-public abstract class WebFlowUIUtils {
+public abstract class WebFlowUtils {
 
     public static final IPropertySource getPropertySource(Object state) {
         if (state instanceof IActionState) {

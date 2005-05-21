@@ -27,6 +27,8 @@ import org.eclipse.ui.IEditorPart;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowEditor;
+import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowEditorInput;
+import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
 import org.springframework.ide.eclipse.web.flow.ui.editor.parts.AbstractStatePart;
 import org.springframework.ide.eclipse.web.flow.ui.editor.parts.StateTransitionPart;
 
@@ -42,7 +44,7 @@ public class OpenConfigFileAction extends EditorPartAction {
 
     protected void init() {
         setId(OpenConfigFileAction.OPEN_FILE);
-        setText("Open");
+        setText("Open Config File");
         setToolTipText("Open element in config file");
     }
 
@@ -63,7 +65,8 @@ public class OpenConfigFileAction extends EditorPartAction {
         Object flowModelElement = getFirstSelectedEditPart().getModel();
         if (flowModelElement instanceof IWebFlowModelElement) {
             IWebFlowModelElement element = (IWebFlowModelElement) flowModelElement;
-            IResource file = element.getElementResource();
+            WebFlowEditorInput input = WebFlowUtils.getActiveFlowEditorInput();
+            IResource file = input.getFile();
             if (file != null && file.exists()) {
                 SpringUIUtils.openInEditor((IFile) file, element
                         .getElementStartLine());

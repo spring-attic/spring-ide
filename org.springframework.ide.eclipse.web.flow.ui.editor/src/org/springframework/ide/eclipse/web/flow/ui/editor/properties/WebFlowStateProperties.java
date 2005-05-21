@@ -26,7 +26,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
-import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUIUtils;
+import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
 
 public class WebFlowStateProperties implements IPropertySource {
 
@@ -71,10 +71,10 @@ public class WebFlowStateProperties implements IPropertySource {
 
     public Object getPropertyValue(Object id) {
         if (W_ID.equals(id)) {
-            return WebFlowUIUtils.returnNotNullOnString(property.getId());
+            return WebFlowUtils.returnNotNullOnString(property.getId());
         }
         else if (W_STARTSTATE.equals(id)) {
-            return WebFlowUIUtils
+            return WebFlowUtils
                     .returnNotNullOnString((property.getStartState() != null ? property
                             .getStartState().getId()
                             : null));

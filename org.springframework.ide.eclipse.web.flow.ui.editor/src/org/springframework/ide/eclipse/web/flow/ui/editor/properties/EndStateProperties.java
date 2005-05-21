@@ -23,7 +23,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.springframework.ide.eclipse.web.flow.core.model.IEndState;
-import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUIUtils;
+import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
 
 public class EndStateProperties implements IPropertySource {
 
@@ -63,10 +63,10 @@ public class EndStateProperties implements IPropertySource {
 
     public Object getPropertyValue(Object id) {
         if (E_ID.equals(id)) {
-            return WebFlowUIUtils.returnNotNullOnString(property.getId());
+            return WebFlowUtils.returnNotNullOnString(property.getId());
         }
         else if (E_VIEW.equals(id)) {
-            return WebFlowUIUtils.returnNotNullOnString(property.getView());
+            return WebFlowUtils.returnNotNullOnString(property.getView());
         }
         return null;
     }

@@ -24,7 +24,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 import org.springframework.ide.eclipse.web.flow.core.model.IStateTransition;
-import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUIUtils;
+import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
 
 public class TransitionProperties implements IPropertySource {
 
@@ -68,14 +68,14 @@ public class TransitionProperties implements IPropertySource {
 
     public Object getPropertyValue(Object id) {
         if (T_ON.equals(id)) {
-            return WebFlowUIUtils.returnNotNullOnString(property.getOn());
+            return WebFlowUtils.returnNotNullOnString(property.getOn());
         }
         else if (T_TO.equals(id)) {
-            return WebFlowUIUtils.returnNotNullOnString(property.getToState()
+            return WebFlowUtils.returnNotNullOnString(property.getToState()
                     .getId());
         }
         else if (T_FROM.equals(id)) {
-            return WebFlowUIUtils.returnNotNullOnString(property.getFromState()
+            return WebFlowUtils.returnNotNullOnString(property.getFromState()
                     .getId());
         }
         return null;

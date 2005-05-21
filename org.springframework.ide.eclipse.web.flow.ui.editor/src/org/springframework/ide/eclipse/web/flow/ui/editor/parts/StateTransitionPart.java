@@ -43,7 +43,7 @@ import org.springframework.ide.eclipse.web.flow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
-import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUIUtils;
+import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
 import org.springframework.ide.eclipse.web.flow.ui.editor.policies.TransitionEditPolicy;
 
 public class StateTransitionPart extends AbstractConnectionEditPart implements
@@ -152,7 +152,7 @@ public class StateTransitionPart extends AbstractConnectionEditPart implements
 
     public Object getAdapter(Class key) {
         if (IPropertySource.class == key) {
-            return WebFlowUIUtils.getPropertySource(getTransitionModel());
+            return WebFlowUtils.getPropertySource(getTransitionModel());
         }
         return super.getAdapter(key);
     }

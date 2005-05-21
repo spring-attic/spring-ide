@@ -69,7 +69,7 @@ import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowEditorInput;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
-import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUIUtils;
+import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
 import org.springframework.ide.eclipse.web.flow.ui.editor.model.WebFlowModelLabelDecorator;
 import org.springframework.ide.eclipse.web.flow.ui.editor.model.WebFlowModelLabelProvider;
 
@@ -150,7 +150,7 @@ public class ActionPropertiesDialog extends TitleAreaDialog {
         this.actionClone = (IAction) ((ICloneableModelElement) this.action)
                 .cloneModelElement();
 
-        WebFlowEditorInput input = WebFlowUIUtils.getActiveFlowEditorInput();
+        WebFlowEditorInput input = WebFlowUtils.getActiveFlowEditorInput();
         beansConfig = input.getBeansConfigSet();
     }
 
@@ -603,7 +603,7 @@ public class ActionPropertiesDialog extends TitleAreaDialog {
     private void handleButtonPressed(Button button) {
 
         if (button.equals(browseBeanButton)) {
-            WebFlowEditorInput input = WebFlowUIUtils.getActiveFlowEditorInput();
+            WebFlowEditorInput input = WebFlowUtils.getActiveFlowEditorInput();
             IBeansConfigSet beansConfig = input.getBeansConfigSet();
             ElementListSelectionDialog dialog = new ElementListSelectionDialog(
                     getShell(), new DecoratingLabelProvider(
