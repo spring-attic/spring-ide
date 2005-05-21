@@ -26,6 +26,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -44,6 +45,8 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  * values and property values are checked.
  * <code>IBean</code> look-up is done from the specified context
  * (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>).
+ * This list of beans is accessible via <code<>getBeans()</code>.
+ * This context used for bean look-up is accessible via <code<>getContext()</code>.
  */
 public class GraphEditorInput implements IEditorInput {
 
@@ -54,19 +57,53 @@ public class GraphEditorInput implements IEditorInput {
 	private Map beans;
 
 	/**
-	 * Creates a list with all <code>IBean</code>s which are referenced
-	 * from given model element (<code>IBean</code>,
-	 * <code>IBeanConfig</code> or <code>IBeanConfigSet</code>).
-	 * For a bean it's parent bean (for child beans only), constructor argument
-	 * values and property values are checked.
-	 * <code>IBean</code> look-up is done from the specified context
-	 * (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>).
-	 * This list is accessible via <code<>getBeans()</code>.
-	 * @param bean  the to build a list of all referenced beans from
-	 * @param context  the context (<code>IBeanConfig</code> or
-	 * 		  <code>IBeanConfigSet</code>) the referenced beans are looked-up
-	 * @throws IllegalArgumentException if unsupported model element or context
-	 * 				 is specified 
+	 * Creates a list with all beans which are referenced from the model
+	 * element defined by given ID.
+	 * @param elementID  the model element's ID
+	 * @throws IllegalArgumentException  if unsupported model element is
+	 * 				 					specified 
+	 */
+	public GraphEditorInput(String elementID) {
+		this(BeansCorePlugin.getModel().getElement(elementID),
+			BeansCorePlugin.getModel().getElement(elementID) instanceof IBean ?
+			BeansCorePlugin.getModel().getElement(elementID).getElementParent()
+																	   : null);
+	}
+
+	/**
+	 * Creates a list with all beans which are referenced from the model
+	 * element defined by given ID.
+	 * @param elementID  the model element's ID
+	 * @param contextID  the context's ID
+	 * @throws IllegalArgumentException  if unsupported model element or
+	 * 									context is specified 
+	 */
+	public GraphEditorInput(String elementID, String contextID) {
+		this(BeansCorePlugin.getModel().getElement(elementID),
+			 BeansCorePlugin.getModel().getElement(contextID));
+	}
+
+	/**
+	 * Creates a list with all beans which are referenced from given model
+	 * element.
+	 * @param element  the model element to build a list of all referenced
+	 * 					 beans from
+	 * @throws IllegalArgumentException  if unsupported model element is
+	 * 				 					specified 
+	 */
+	public GraphEditorInput(IModelElement element) {
+		this(element, element instanceof IBean ?
+											element.getElementParent() : null);
+	}
+
+	/**
+	 * Creates a list with all beans which are referenced from given model
+	 * element. Bean look-up is done from the specified context.
+	 * @param element  the model element to build a list of all referenced
+	 * 					 beans from
+	 * @param context  the context the referenced beans are looked-up
+	 * @throws IllegalArgumentException  if unsupported model element or
+	 * 									context is specified
 	 */
 	public GraphEditorInput(IModelElement element, IModelElement context) {
 		this.element = element;
@@ -139,9 +176,8 @@ public class GraphEditorInput implements IEditorInput {
 				list.add(bean);
 			}
 		} else if (element instanceof IBean) {
-			IBean bean = (IBean) element;
-			list.add(bean);
-			list.addAll(BeansModelUtils.getReferencedBeans(bean, context));
+			list.add(element);
+			list.addAll(BeansModelUtils.getReferencedBeans(element, context));
 		}
 
 		// Marshall all beans into a graph bean node
