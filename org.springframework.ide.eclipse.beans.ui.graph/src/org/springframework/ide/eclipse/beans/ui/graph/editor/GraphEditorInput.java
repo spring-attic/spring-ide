@@ -26,28 +26,55 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphImages;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
-import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
-import org.springframework.ide.eclipse.beans.ui.model.INode;
-import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 
+/**
+ * This editor input is used to specify the list of <code>IBean</code>s which
+ * should be displayed in the beans graph editor.
+ * Therefore a source model model element (<code>IBean</code>,
+ * <code>IBeanConfig</code> or <code>IBeanConfigSet</code>) has to be specified.
+ * For a given bean it's parent bean (for child beans only), constructor argument
+ * values and property values are checked.
+ * <code>IBean</code> look-up is done from the specified context
+ * (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>).
+ */
 public class GraphEditorInput implements IEditorInput {
 
-	private INode node;
+	private IModelElement element;
+	private IModelElement context;
 	private String name;
 	private String toolTip;
 	private Map beans;
 
-	public GraphEditorInput(INode node) {
-		this.node = node;
+	/**
+	 * Creates a list with all <code>IBean</code>s which are referenced
+	 * from given model element (<code>IBean</code>,
+	 * <code>IBeanConfig</code> or <code>IBeanConfigSet</code>).
+	 * For a bean it's parent bean (for child beans only), constructor argument
+	 * values and property values are checked.
+	 * <code>IBean</code> look-up is done from the specified context
+	 * (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>).
+	 * This list is accessible via <code<>getBeans()</code>.
+	 * @param bean  the to build a list of all referenced beans from
+	 * @param context  the context (<code>IBeanConfig</code> or
+	 * 		  <code>IBeanConfigSet</code>) the referenced beans are looked-up
+	 * @throws IllegalArgumentException if unsupported model element or context
+	 * 				 is specified 
+	 */
+	public GraphEditorInput(IModelElement element, IModelElement context) {
+		this.element = element;
+		this.context = context;
 
-		// Prepare name and tooltip for corresponding node type
-		if (node instanceof ConfigNode) {
-			IFile file = ((ConfigNode) node).getConfigFile();
+		// Prepare name and tooltip for given element and context
+		if (element instanceof IBeansConfig) {
+			IFile file = ((IBeansConfig) element).getConfigFile();
 			if (file != null) {
 				name = file.getName();
 				toolTip = BeansGraphPlugin.getResourceString(
@@ -59,76 +86,83 @@ public class GraphEditorInput implements IEditorInput {
 				toolTip = BeansGraphPlugin.getResourceString(
 										  "ShowGraphAction.name.config") + name;
 			}
-		} else if (node instanceof ConfigSetNode) {
-			ProjectNode project = ((ConfigSetNode) node).getProjectNode(); 
-			name = node.getName();
+		} else if (element instanceof IBeansConfigSet) {
+			IModelElement parent = ((IBeansConfigSet) element).getElementParent(); 
+			name = element.getElementName();
 			toolTip = BeansGraphPlugin.getResourceString(
-						 "ShowGraphAction.name.configSet") + project.getName() +
-						 '/' + node.getName();
-		} else {
-			name = node.getName();
+				  "ShowGraphAction.name.configSet") + parent.getElementName() +
+				  '/' + element.getElementName();
+		} else if (element instanceof IBean){
+			name = element.getElementName();
 			StringBuffer buffer = new StringBuffer();
 			buffer.append(BeansGraphPlugin.getResourceString(
 												  "ShowGraphAction.name.bean"));
-			if (node.getParent() instanceof ConfigNode) {
-				ConfigNode config = (ConfigNode) node.getParent();
+			if (context instanceof IBeansConfig) {
 				buffer.append(BeansGraphPlugin.getResourceString(
 												"ShowGraphAction.name.config"));
-				buffer.append(config.getName());
+				buffer.append(context.getElementName());
 				buffer.append(": ");
-			} else if (node.getParent() instanceof ConfigSetNode) {
-				ConfigSetNode configSet = (ConfigSetNode) node.getParent();
+			} else if (context instanceof IBeansConfigSet) {
 				buffer.append(BeansGraphPlugin.getResourceString(
 											 "ShowGraphAction.name.configSet"));
-				buffer.append(configSet.getProjectNode().getName());
+				buffer.append(context.getElementParent().getElementName());
 				buffer.append('/');
-				buffer.append(configSet.getName());
+				buffer.append(context.getElementName());
 				buffer.append(": ");
 			}
-			buffer.append(node.getName());
+			buffer.append(element.getElementName());
 			toolTip = buffer.toString();
+		} else {
+			throw new IllegalArgumentException("Unsupported model element " +
+											   element);
 		}
 
-		createBeansMap(node);
+		createBeansMap();
 	}
 
 	/**
-	 * Creates a list with all beans belonging to the graph's config / config
-	 * set or being referenced from the graph's node.
+	 * Creates a list with all beans belonging to the specified config / config
+	 * set or being referenced from the specified bean.
 	 */
-	protected void createBeansMap(INode node) {
+	protected void createBeansMap() {
 		List list = new ArrayList();
-		if (node instanceof ConfigNode) {
-			BeanNode[] nodes = ((ConfigNode) node).getBeans(false);
-			for (int i = 0; i < nodes.length; i++) {
-				list.add(nodes[i]);
+		if (element instanceof IBeansConfig) {
+			Iterator beans = ((IBeansConfig) element).getBeans().iterator();
+			while (beans.hasNext()) {
+				IBean bean = (IBean) beans.next();
+				list.add(bean);
 			}
-		} else if (node instanceof ConfigSetNode) {
-			BeanNode[] nodes = ((ConfigSetNode) node).getBeans(false);
-			for (int i = 0; i < nodes.length; i++) {
-				list.add(nodes[i]);
+		} else if (element instanceof IBeansConfigSet) {
+			Iterator beans = ((IBeansConfigSet) element).getBeans().iterator();
+			while (beans.hasNext()) {
+				IBean bean = (IBean) beans.next();
+				list.add(bean);
 			}
-		} else if (node instanceof BeanNode) {
-			BeanNode bean = (BeanNode) node;
+		} else if (element instanceof IBean) {
+			IBean bean = (IBean) element;
 			list.add(bean);
-			list.addAll(bean.getReferencedBeans());
+			list.addAll(BeansModelUtils.getReferencedBeans(bean, context));
 		}
 
-		// Wrap all beans found
+		// Marshall all beans into a graph bean node
 		this.beans = new HashMap();
 		Iterator iter = list.iterator();
 		while (iter.hasNext()) {
-			BeanNode bean = (BeanNode) iter.next();
-
-			// Skip dummy beans node which are holding an error message only
-			if (bean.getBean() != null) {
-				this.beans.put(bean.getName(), new Bean(bean.getBean()));
-			}
+			IBean bean = (IBean) iter.next();
+			this.beans.put(bean.getElementName(), new Bean(bean));
 		}
 	}
 
 	public String getName() {
 		return name;
+	}
+
+	public IModelElement getElement() {
+		return element;
+	}
+	
+	public IModelElement getContext() {
+		return context;
 	}
 
 	public Map getBeans() {
@@ -152,6 +186,6 @@ public class GraphEditorInput implements IEditorInput {
 	}
 
 	public Object getAdapter(Class adapter) {
-		return node.getAdapter(adapter);
+		return null;
 	}
 }

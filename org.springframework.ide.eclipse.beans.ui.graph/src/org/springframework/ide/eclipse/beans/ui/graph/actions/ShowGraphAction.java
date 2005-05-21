@@ -25,6 +25,7 @@ import org.eclipse.ui.IViewPart;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditor;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput;
 import org.springframework.ide.eclipse.beans.ui.model.INode;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class ShowGraphAction extends Action implements IViewActionDelegate {
@@ -41,7 +42,11 @@ public class ShowGraphAction extends Action implements IViewActionDelegate {
 	}
 
 	public void run(IAction action) {
-		GraphEditorInput input = new GraphEditorInput(node);
+		IModelElement element = (IModelElement)
+										  node.getAdapter(IModelElement.class);
+		IModelElement parent = (IModelElement)
+							  node.getParent().getAdapter(IModelElement.class);
+		GraphEditorInput input = new GraphEditorInput(element, parent);
 		SpringUIUtils.openInEditor(input, GraphEditor.EDITOR_ID);
 	}
 }
