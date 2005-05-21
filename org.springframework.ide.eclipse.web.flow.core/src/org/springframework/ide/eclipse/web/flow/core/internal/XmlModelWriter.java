@@ -16,10 +16,16 @@
 
 package org.springframework.ide.eclipse.web.flow.core.internal;
 
+import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
+import org.apache.xerces.parsers.DOMParser;
+import org.apache.xml.serialize.OutputFormat;
+import org.apache.xml.serialize.XMLSerializer;
+import org.springframework.ide.eclipse.web.flow.core.internal.parser.WebFlowDtdResolver;
 import org.springframework.ide.eclipse.web.flow.core.model.IAction;
 import org.springframework.ide.eclipse.web.flow.core.model.IActionState;
 import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
@@ -33,6 +39,8 @@ import org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState;
 import org.springframework.ide.eclipse.web.flow.core.model.IViewState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
 /**
  * Xml Implementation of saving Spring Web Flow definition files to xml
@@ -103,9 +111,17 @@ public class XmlModelWriter implements IModelWriter {
 
     XmlWriter writer = null;
 
+    OutputStream stream = null;
+
+    ByteArrayOutputStream tempStream = null;
+
     public XmlModelWriter(OutputStream stream)
             throws UnsupportedEncodingException {
-        writer = new XmlWriter(stream);
+        this.stream = stream;
+
+        tempStream = new ByteArrayOutputStream();
+
+        writer = new XmlWriter(tempStream);
         writer.println(COMMENT);
         writer.println(FLOW_DTD);
     }
@@ -345,9 +361,34 @@ public class XmlModelWriter implements IModelWriter {
 
     }
 
-    public void close() {
+    public void close() throws Exception {
         writer.flush();
+        String output = tempStream.toString();
         writer.close();
+
+        StringReader reader = new StringReader(output);
+
+        InputSource inputSource = new InputSource(reader);
+        DOMParser parser = new DOMParser();
+        parser.setFeature("http://xml.org/sax/features/validation", false);
+        parser.setFeature("http://apache.org/xml/features/validation/dynamic",
+                false);
+        parser.setEntityResolver(new WebFlowDtdResolver());
+        parser.parse(inputSource);
+
+        Document doc = parser.getDocument();
+
+        OutputFormat format = new OutputFormat(doc);
+        format.setLineWidth(80);
+        format.setIndenting(true);
+        format.setIndent(4);
+        format.setEncoding("UTF-8");
+        format.setPreserveEmptyAttributes(false);
+        XMLSerializer serializer = new XMLSerializer(stream, format);
+        serializer.serialize(doc);
+
+        stream.flush();
+        stream.close();
     }
 
 }
