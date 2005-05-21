@@ -108,6 +108,11 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 			}
 			BeanDefinitionHolder bdHolder = super.parseBeanDefinitionElement(
 																		  ele);
+			// Replace Spring's BeanDefinitionHolder with our own version with
+			// overwritten toString()
+			if (bdHolder != null) {
+				bdHolder = new ExtendedBeanDefinitionHolder(bdHolder);
+			}
 			if (eventHandler != null) {
 				if (nestedBeanCount > 1) {
 					eventHandler.registerBean(bdHolder, true);
