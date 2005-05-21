@@ -84,22 +84,22 @@ public class ShowInView extends Action implements IEditorActionDelegate,
 	}
 
 	private BeansViewLocation guessBeansViewLocation() {
+		BeansViewLocation location = new BeansViewLocation();
+		location.setProjectName(file.getProject().getName());
+		location.setConfigName(file.getProjectRelativePath().toString());
+
 		int caretOffset = SpringUIUtils.getCaretOffset(editor);
 		IDocument doc = editor.getDocumentProvider().getDocument(
 													   editor.getEditorInput());
 		BeansViewLocationGuesser guesser = new BeansViewLocationGuesser(doc,
 																   caretOffset);
 		if (guesser.hasBeanName()) {
-			BeansViewLocation location = new BeansViewLocation();
-			location.setProjectName(file.getProject().getName());
-			location.setConfigName(file.getProjectRelativePath().toString());
 			location.setBeanName(guesser.getBeanName());
 			if (guesser.hasPropertyName()) {
 				location.setPropertyName(guesser.getPropertyName());
 			}
-			return location;
 		}
-		return null;
+		return location;
 	}
 
 	private class BeansViewLocationGuesser {
