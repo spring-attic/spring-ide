@@ -52,8 +52,13 @@ public interface IBeansConfigSet extends IModelElement, IBeanClassAware {
 	boolean hasBean(String name);
 
 	IBean getBean(String name);
-	
-    /**
+
+	/**
+	 * Returns a list of all <code>IBean</code>s defined in this config set. 
+	 */
+	public Collection getBeans();	
+
+	/**
      * Replace an existing config file with a new one.  
      * Strings are used rather than <code>IFile<code>'s as 
      * this allows the caller to determine whether they

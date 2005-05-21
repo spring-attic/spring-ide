@@ -137,6 +137,10 @@ public class BeansConfigSet extends AbstractSourceModelElement
 		return (IBean) getBeansMap().get(name);
 	}
 
+	public Collection getBeans() {
+		return getBeansMap().values();
+	}
+
 	public void replaceConfig(String origFileName, String newFileName) {
 		removeConfig(origFileName);
 		addConfig(newFileName);
