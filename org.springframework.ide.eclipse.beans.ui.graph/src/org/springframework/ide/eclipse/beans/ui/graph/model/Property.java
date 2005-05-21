@@ -27,6 +27,7 @@ import org.eclipse.draw2d.graph.Node;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
@@ -98,11 +99,12 @@ public class Property extends Node implements IAdaptable {
 				
 			}
 			if (innerBean != null) {
-				Iterator innerBeanNames =
-									 innerBean.getReferencedBeans().iterator();
-				while (innerBeanNames.hasNext()) {
-					String innerBeanName = (String) innerBeanNames.next();
-					references.add(new RuntimeBeanReference(innerBeanName));
+				Iterator refBeans = BeansModelUtils.getReferencedBeans(
+								  innerBean, innerBean.getConfig()).iterator();
+				while (refBeans.hasNext()) {
+					String refBeanName = ((IBean)
+											 refBeans.next()).getElementName();
+					references.add(new RuntimeBeanReference(refBeanName));
 				}
 			}
 		} else if (value instanceof RuntimeBeanReference) {
