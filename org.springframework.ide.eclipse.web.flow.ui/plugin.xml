@@ -74,7 +74,7 @@
         <action
               class="org.springframework.ide.eclipse.web.flow.ui.views.actions.ShowGraphAction"
               id="org.springframework.ide.eclipse.web.flow.ui.action1"
-              label="Show Beans Graph"
+              label="Open Beans Graph"
               menubarPath="additions"/>
      </viewerContribution>
      <viewerContribution
@@ -88,7 +88,7 @@
         <action
               class="org.springframework.ide.eclipse.web.flow.ui.views.actions.ShowInView"
               id="org.springframework.ide.eclipse.web.flow.ui.action2"
-              label="Show in Beans View"
+              label="Open Beans View"
               menubarPath="additions"/>
      </viewerContribution>
   </extension>
