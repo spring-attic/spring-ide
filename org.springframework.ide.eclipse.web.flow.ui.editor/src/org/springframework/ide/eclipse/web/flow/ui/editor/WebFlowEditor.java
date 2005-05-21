@@ -510,7 +510,7 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
      *            the base output stream
      * @throws IOException
      */
-    protected void createOutputStream(OutputStream os) throws IOException {
+    protected void createOutputStream(OutputStream os) throws Exception {
         XmlModelWriter writer = new XmlModelWriter(os);
         ((IPersistableModelElement) diagram).save(writer);
         writer.close();
