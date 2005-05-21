@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.model.properties.ChildBeanProperties;
 import org.springframework.ide.eclipse.beans.ui.model.properties.ConfigSetProperties;
@@ -103,6 +104,17 @@ public class BeansUIUtils {
 
 	/**
 	 * Returns an instance of <code>BeansViewLocation</code> which is
+	 * initialized with information from the model element identified by the
+	 * given element ID.
+	 */
+	public static final BeansViewLocation getBeansViewLocation(
+															String elementID) {
+		IBeansModel model = BeansCorePlugin.getModel();
+		return getBeansViewLocation(model.getElement(elementID));
+	}
+
+	/**
+	 * Returns an instance of <code>BeansViewLocation</code> which is
 	 * initialized with information from the given core model element.
 	 */
 	public static final BeansViewLocation getBeansViewLocation(
@@ -110,11 +122,12 @@ public class BeansUIUtils {
 		BeansViewLocation location = new BeansViewLocation();
 		if (element instanceof IBeansProject) {
 			location.setProjectName(element.getElementName());
+		} else if (element instanceof IBeansConfigSet) {
+			location.setProjectName(element.getElementParent().getElementName());
+			location.setConfigSetName(element.getElementName());
 		} else if (element instanceof IBeansConfig) {
 			location.setProjectName(element.getElementParent().getElementName());
 			location.setConfigName(element.getElementName());
-		} else if (element instanceof IBeansConfigSet) {
-			location.setProjectName(element.getElementParent().getElementName());
 		} else if (element instanceof IBean) {
 			location.setProjectName(
 				element.getElementParent().getElementParent().getElementName());

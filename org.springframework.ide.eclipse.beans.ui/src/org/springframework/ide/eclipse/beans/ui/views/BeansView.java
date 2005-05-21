@@ -277,7 +277,27 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 									}
 								}
 							}
-						} 
+						}
+					}
+				} else if (location.hasConfigSetName()) {
+					ConfigSetNode configSet = project.getConfigSet(
+												  location.getConfigSetName());
+					if (configSet != null) {
+						node = configSet;
+						if (location.hasBeanName()) {;
+							BeanNode bean = configSet.getBean(
+													   location.getBeanName());
+							if (bean != null) {
+								node = bean;
+								if (location.hasPropertyName()) {
+									PropertyNode property = bean.getProperty(
+												   location.getPropertyName());
+									if (property != null) {
+										node = property;
+									}
+								}
+							}
+						}
 					}
 				}
 				treeViewer.setSelection(new StructuredSelection(node), true);

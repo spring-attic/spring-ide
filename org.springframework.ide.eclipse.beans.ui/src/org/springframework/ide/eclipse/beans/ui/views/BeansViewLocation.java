@@ -23,19 +23,28 @@ import org.eclipse.ui.part.ShowInContext;
 /**
  * This class is used for selecting a specific node within the BeansView.
  * <p>
- * Sample:
- * <code>
+ * <b>Sample 1: Navigate to a bean property in a config by using element names</b>
+ * <pre>
  * BeansViewLocation location = new BeansViewLocation();
  * location.setProjectName("myproject");
  * location.setConfigName("myconfig");
  * location.setBeanName("mybean");
  * location.setPropertyName("myproperty");
  * location.show();
- * </code>
+ * </pre>
+ * <p>
+ * <b>Sample 2: Navigate to a bean property in a config set by element ID and names</b>
+ * <pre>
+ * BeansViewLocation location = BeansUIUtils.getBeansViewLocation(configSetID);
+ * location.setBeanName("mybean");
+ * location.setPropertyName("myproperty");
+ * location.show();
+ * </pre>
  */
 public class BeansViewLocation {
 
 	private String projectName;
+	private String configSetName;
 	private String configName;
 	private String beanName;
 	private String propertyName;
@@ -50,6 +59,18 @@ public class BeansViewLocation {
 
 	public boolean hasProjectName() {
 		return (projectName != null && projectName.length() > 0);
+	}
+
+	public void setConfigSetName(String configSetName) {
+		this.configSetName = configSetName;
+	}
+
+	public String getConfigSetName() {
+		return configSetName;
+	}
+
+	public boolean hasConfigSetName() {
+		return (configSetName != null && configSetName.length() > 0);
 	}
 
 	public void setConfigName(String configName) {
