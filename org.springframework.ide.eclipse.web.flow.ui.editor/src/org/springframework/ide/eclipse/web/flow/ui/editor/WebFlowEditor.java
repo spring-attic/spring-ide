@@ -98,6 +98,8 @@ import org.springframework.ide.eclipse.web.flow.core.model.IPersistableModelElem
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
 import org.springframework.ide.eclipse.web.flow.ui.editor.actions.EditPropertiesAction;
 import org.springframework.ide.eclipse.web.flow.ui.editor.actions.ExportAction;
+import org.springframework.ide.eclipse.web.flow.ui.editor.actions.OpenBeansGraphAction;
+import org.springframework.ide.eclipse.web.flow.ui.editor.actions.OpenBeansViewAction;
 import org.springframework.ide.eclipse.web.flow.ui.editor.actions.WebFlowContextMenuProvider;
 import org.springframework.ide.eclipse.web.flow.ui.editor.actions.OpenConfigFileAction;
 import org.springframework.ide.eclipse.web.flow.ui.editor.actions.SetAsStartStateAction;
@@ -487,6 +489,14 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
         getSelectionActions().add(action.getId());
 
         action = new OpenConfigFileAction(this);
+        registry.registerAction(action);
+        getSelectionActions().add(action.getId());
+        
+        action = new OpenBeansGraphAction(this);
+        registry.registerAction(action);
+        getSelectionActions().add(action.getId());
+        
+        action = new OpenBeansViewAction(this);
         registry.registerAction(action);
         getSelectionActions().add(action.getId());
 

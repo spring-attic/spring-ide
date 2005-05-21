@@ -22,6 +22,7 @@ import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.gef.ui.actions.GEFActionConstants;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.swt.internal.win32.OPENFILENAME;
 import org.eclipse.ui.actions.ActionFactory;
 
 public class WebFlowContextMenuProvider extends ContextMenuProvider {
@@ -63,6 +64,14 @@ public class WebFlowContextMenuProvider extends ContextMenuProvider {
         if (action.isEnabled())
             menu.appendToGroup(GEFActionConstants.GROUP_UNDO, action);
 
+        action = getActionRegistry().getAction(OpenBeansGraphAction.OPEN_FILE);
+        if (action.isEnabled())
+            menu.appendToGroup(GEFActionConstants.GROUP_UNDO, action);
+        
+        action = getActionRegistry().getAction(OpenBeansViewAction.OPEN_FILE);
+        if (action.isEnabled())
+            menu.appendToGroup(GEFActionConstants.GROUP_UNDO, action);
+        
         action = getActionRegistry().getAction(ActionFactory.DELETE.getId());
         if (action.isEnabled())
             menu.appendToGroup(GEFActionConstants.GROUP_EDIT, action);
