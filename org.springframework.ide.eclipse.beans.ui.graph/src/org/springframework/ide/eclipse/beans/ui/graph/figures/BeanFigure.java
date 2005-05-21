@@ -60,7 +60,12 @@ public class BeanFigure extends Figure {
 		if (bean.isRootBean()) {
 			label.setIcon(BeansGraphImages.getImage(
 										  BeansGraphImages.IMG_OBJS_ROOT_BEAN));
-			label.setToolTip(new Label("Class: " + bean.getClassName()));
+			if (bean.getClassName() != null) {
+				label.setToolTip(new Label("Class: " + bean.getClassName()));
+			} else {
+				// TODO set tooltip for abstract beans, bean factories, ...
+				label.setToolTip(new Label("Class: <no class specified>"));
+			}
 		} else {
 			label.setIcon(BeansGraphImages.getImage(
 										 BeansGraphImages.IMG_OBJS_CHILD_BEAN));
