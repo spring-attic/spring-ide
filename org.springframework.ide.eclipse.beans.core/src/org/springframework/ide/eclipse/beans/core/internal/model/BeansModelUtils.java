@@ -48,10 +48,16 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 public class BeansModelUtils {
 
 	/**
-	 * Returns config for given name from specified project or config set.
+	 * Returns config for given name from specified context
+	 * (<code>IBeansProject</code> or <code>IBeansConfigSet</code>).
+	 * Externally referenced configs (config name starts with '/') are
+	 * recognized too.
+	 * @param configName  the name of the config to look for
+	 * @param context  the context used for config look-up
+	 * @throws IllegalArgumentException if unsupported context specified 
 	 */
 	public static final IBeansConfig getConfig(String configName,
-											   IModelElement element) {
+											   IModelElement context) {
 		// For external project get the corresponding project from beans model 
 		if (configName.charAt(0) == '/') {
 			int pos = configName.indexOf('/', 1);
@@ -60,13 +66,32 @@ public class BeansModelUtils {
 			IBeansProject project = BeansCorePlugin.getModel().getProject(
 																  projectName);
 			return project.getConfig(configName);
-		} else if (element instanceof IBeansProject) {
-			return ((IBeansProject) element).getConfig(configName);
-		} else if (element instanceof IBeansConfigSet) {
-			return ((IBeansProject) element.getElementParent()).getConfig(
+		} else if (context instanceof IBeansProject) {
+			return ((IBeansProject) context).getConfig(configName);
+		} else if (context instanceof IBeansConfigSet) {
+			return ((IBeansProject) context.getElementParent()).getConfig(
 																   configName);
 		}
 		return null;
+	}
+
+	/**
+	 * Returns the <code>IBeanConfig</code> the given model element
+	 * (<code>IBean</code>, <code>IBeanConstructorArgument</code> or
+	 * <code>IBeanProperty</code>) belongs to.
+	 * @param element  the model element to get the beans config for
+	 * @throws IllegalArgumentException if unsupported model element specified 
+	 */
+	public static final IBeansConfig getConfig(IModelElement element) {
+		if (element instanceof IBean) {
+			return (IBeansConfig) element.getElementParent();
+		} else if (element instanceof IBeanConstructorArgument ||
+											element instanceof IBeanProperty) {
+			return (IBeansConfig) element.getElementParent().getElementParent();
+		} else {
+			throw new IllegalArgumentException("Unsupported model element " +
+											   element);
+		}
 	}
 
 	/**
@@ -77,21 +102,11 @@ public class BeansModelUtils {
 	 * values and property values are checked.
 	 * <code>IBean</code> look-up is done from the <code>IBeanConfig</code>
 	 * the given model element belongs to.
-	 * @param bean  the to get all referenced beans from
+	 * @param element  the element to get all referenced beans from
 	 * @throws IllegalArgumentException if unsupported model element specified 
 	 */
 	public static final Collection getReferencedBeans(IModelElement element) {
-		IModelElement context;
-		if (element instanceof IBean) {
-			context = element.getElementParent();
-		} else if (element instanceof IBeanConstructorArgument ||
-											element instanceof IBeanProperty) {
-			context = element.getElementParent().getElementParent();
-		} else {
-			throw new IllegalArgumentException("Unsupported model element " +
-											   element);
-		}
-		return getReferencedBeans(element, context);
+		return getReferencedBeans(element, getConfig(element));
 	}
 
 	/**
@@ -102,7 +117,7 @@ public class BeansModelUtils {
 	 * values and property values are checked.
 	 * <code>IBean</code> look-up is done from the specified
 	 * <code>IBeanConfig</code> or <code>IBeanConfigSet</code>.
-	 * @param bean  the to get all referenced beans from
+	 * @param element  the element to get all referenced beans from
 	 * @param context  the context (<code>IBeanConfig</code> or
 	 * 		  <code>IBeanConfigSet</code>) the referenced beans are looked-up
 	 * @throws IllegalArgumentException if unsupported model element specified 
