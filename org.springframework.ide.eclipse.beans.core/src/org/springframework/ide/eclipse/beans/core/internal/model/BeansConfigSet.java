@@ -26,7 +26,6 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
@@ -176,7 +175,7 @@ public class BeansConfigSet extends AbstractSourceModelElement
 			Iterator iter = configNames.iterator();
 			while (iter.hasNext()) {
 				String configName = (String) iter.next();
-				IBeansConfig config = getConfig(configName);
+				IBeansConfig config = BeansModelUtils.getConfig(configName, this);
 				if (config != null) {
 	
 					// Add beans to map
@@ -244,19 +243,5 @@ public class BeansConfigSet extends AbstractSourceModelElement
 			}
 		}
 		return beanClassesMap;
-	}
-
-	private IBeansConfig getConfig(String configName) {
-		IBeansProject project;
-
-		// For external project get the corresponding project from beans model 
-		if (configName.charAt(0) == '/') {
-			String projectName = configName.substring(0,
-													configName.indexOf('/', 1));
-			project = BeansCorePlugin.getModel().getProject(projectName);
-		} else {
-			project = (IBeansProject) getElementParent();
-		}
-		return (project != null ? project.getConfig(configName) : null);
 	}
 }
