@@ -16,9 +16,6 @@
 
 package org.springframework.ide.eclipse.beans.ui.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
@@ -67,17 +64,6 @@ public class ConstructorArgumentNode extends AbstractNode {
 	
 	public Object getValue() {
 		return carg.getValue();
-	}
-
-	/**
-	 * Returns list of beans which are referenced from within this constructor
-	 * argument.
-	 */
-	public List getReferencedBeans() {
-		List beans = new ArrayList();
-		ModelUtil.addReferencedBeansForValue(getParent().getParent(),
-											 carg.getValue(), beans);
-		return beans;
 	}
 
 	/**

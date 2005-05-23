@@ -17,7 +17,6 @@
 package org.springframework.ide.eclipse.beans.ui.model;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -284,66 +283,6 @@ public class BeanNode extends AbstractNode {
 	 */
 	public ConfigNode getConfigNode() {
 		return config;
-	}
-
-	/**
-	 * Returns list of beans which are referenced from within this bean's parent
-	 * bean (if this bean is a child bean), constructor arguments or properties.
-	 */
-	public Collection getReferencedBeans() {
-		List refBeans = new ArrayList();
-
-		// Add parent bean (if available)
-		if (!isRootBean()) {
-			String beanName = getParentName();
-			BeanNode parentBean = ModelUtil.getBean(getParent(), beanName);
-			if (parentBean != null) {
-				refBeans.add(parentBean);
-				ModelUtil.addReferencedBeansForBean(getParent(), beanName,
-													refBeans);
-			}
-		}
-
-		// Add referenced beans from constructor arguments
-		Iterator cargs = constructorArguments.iterator();
-		while (cargs.hasNext()) {
-			ConstructorArgumentNode carg = (ConstructorArgumentNode)
-																   cargs.next();
-			Iterator beans = carg.getReferencedBeans().iterator();
-			while (beans.hasNext()) {
-				BeanNode bean = (BeanNode) beans.next();
-				if (!refBeans.contains(bean)) {
-					refBeans.add(bean);
-				}
-			}
-		}
-
-		// Add referenced beans from properties
-		Iterator props = properties.iterator();
-		while (props.hasNext()) {
-			PropertyNode property = (PropertyNode) props.next();
-			Iterator beans = property.getReferencedBeans().iterator();
-			while (beans.hasNext()) {
-				BeanNode bean = (BeanNode) beans.next();
-				if (!refBeans.contains(bean)) {
-					refBeans.add(bean);
-				}
-			}
-		}
-
-		// Add referenced beans from inner beans
-		Iterator inner = innerBeans.iterator();
-		while (inner.hasNext()) {
-			BeanNode innerBean = (BeanNode) inner.next();
-			Iterator beans = innerBean.getReferencedBeans().iterator();
-			while (beans.hasNext()) {
-				BeanNode bean = (BeanNode) beans.next();
-				if (!refBeans.contains(bean)) {
-					refBeans.add(bean);
-				}
-			}
-		}
-		return refBeans;
 	}
 
 	public void remove(INode node) {
