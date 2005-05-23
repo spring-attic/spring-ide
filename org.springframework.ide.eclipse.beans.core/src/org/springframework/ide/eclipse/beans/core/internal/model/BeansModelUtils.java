@@ -48,6 +48,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
+import org.springframework.util.Assert;
 
 public class BeansModelUtils {
 
@@ -96,6 +97,31 @@ public class BeansModelUtils {
 		} else if (element instanceof IBeanConstructorArgument ||
 											element instanceof IBeanProperty) {
 			return (IBeansConfig) element.getElementParent().getElementParent();
+		} else {
+			throw new IllegalArgumentException("Unsupported model element " +
+											   element);
+		}
+	}
+
+	/**
+	 * Returns the <code>IBeansProject</code> the given model element belongs
+	 * to.
+	 * @param element  the model element to get the beans project for
+	 * @throws IllegalArgumentException if unsupported model element specified 
+	 */
+	public static final IBeansProject getProject(IModelElement element) {
+		if (element instanceof IBeansProject) {
+			return (IBeansProject) element;
+		} else if (element instanceof IBeansConfig ||
+										  element instanceof IBeansConfigSet) {
+			return (IBeansProject) element.getElementParent();
+		} else if (element instanceof IBean) {
+			return (IBeansProject)
+								 element.getElementParent().getElementParent();
+		} else if (element instanceof IBeanConstructorArgument ||
+											element instanceof IBeanProperty) {
+			return (IBeansProject) element.getElementParent()
+										.getElementParent().getElementParent();
 		} else {
 			throw new IllegalArgumentException("Unsupported model element " +
 											   element);
@@ -236,8 +262,39 @@ public class BeansModelUtils {
 			Iterator properties = bean.getProperties().iterator();
 			while (properties.hasNext()) {
 				IBeanProperty property = (IBeanProperty) properties.next();
-				addReferencedBeansForValue(property.getValue(), context,
-										   referencedBeans, recursive);
+				Object value = property.getValue();
+
+				// Add bean's interceptors
+				if (value instanceof List &&
+						"interceptorNames".equals(property.getElementName())) {
+					IType type = getBeanType(bean, context);
+					if (type != null) {
+						if ("org.springframework.aop.framework.ProxyFactoryBean"
+									   .equals(type.getFullyQualifiedName())) {
+							Iterator names = ((List) value).iterator();
+							while (names.hasNext()) {
+								Object name = (Object) names.next();
+								if (name instanceof String) {
+									IBean interceptor = getBean((String) name,
+																context);
+									if (interceptor != null &&
+													 !referencedBeans.contains(
+																interceptor)) {
+										referencedBeans.add(interceptor);
+										if (recursive) {
+											addReferencedBeansForElement(
+												   interceptor, context,
+												   referencedBeans, recursive);
+										}
+									}
+								}
+							}
+						}
+					}
+				} else {
+					addReferencedBeansForValue(value, context, referencedBeans,
+											   recursive);
+				}
 			}
 		} else if (element instanceof IBeanConstructorArgument) {
 
@@ -262,6 +319,8 @@ public class BeansModelUtils {
 	/**
 	 * Adds the all <code>IBean</code>s which are referenced by the specified
 	 * model element to the given list.
+	 * @param context  the context (<code>IBeanConfig</code> or
+	 * 		  <code>IBeanConfigSet</code>) the referenced beans are looked-up
 	 */
 	public static final void addReferencedBeansForElement(IModelElement element,
 			  IModelElement context, List referencedBeans, boolean recursive) {
@@ -285,6 +344,8 @@ public class BeansModelUtils {
 	 * <li>A Map. In this case the value may be a RuntimeBeanReference that will
 	 * be added.
 	 * <li>An ordinary object or null, in which case it's ignored.
+	 * @param context  the context (<code>IBeanConfig</code> or
+	 * 		  <code>IBeanConfigSet</code>) the referenced beans are looked-up
 	 */
 	public static final void addReferencedBeansForValue(Object value,
 			  IModelElement context, List referencedBeans, boolean recursive) {
@@ -334,6 +395,8 @@ public class BeansModelUtils {
 	/**
 	 * Returns the IBean for a given bean name from specified context
 	 * (<code>IBeansConfig</code> or <code>IBeansConfigSet</code>).
+	 * @param context  the context (<code>IBeanConfig</code> or
+	 * 		  <code>IBeanConfigSet</code>) the beans are looked-up
 	 * @return IBean or null if bean not defined in the context
 	 * @throws IllegalArgumentException if unsupported context specified 
 	 */
@@ -351,6 +414,8 @@ public class BeansModelUtils {
 	/**
 	 * Returns the inner IBean for a given bean name from specified context
 	 * (<code>IBeansConfig</code> or <code>IBeansConfigSet</code>).
+	 * @param context  the context (<code>IBeanConfig</code> or
+	 * 		  <code>IBeanConfigSet</code>) the beans are looked-up
 	 * @return IBean or null if bean not defined
 	 * @throws IllegalArgumentException if unsupported context specified 
 	 */
@@ -432,6 +497,50 @@ public class BeansModelUtils {
 				BeansCorePlugin.log("Error getting Java type '" + className +
 									"'", e); 
 			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the given bean's class name.
+	 * @param bean  the bean to lookup the bean class name for
+	 * @param context  the context (<code>IBeanConfig</code> or
+	 * 		  <code>IBeanConfigSet</code>) the beans are looked-up
+	 */
+	public static final String getBeanClass(IBean bean, IModelElement context) {
+		Assert.notNull(bean);
+		if (bean.isRootBean()) {
+			return bean.getClassName();
+		} else {
+			if (context == null) {
+				context = bean.getElementParent();
+			}
+			do {
+				String parentName = bean.getParentName();
+				if (parentName != null) {
+					bean = getBean(parentName, context);
+					if (bean != null && bean.isRootBean()) {
+						return bean.getClassName();
+					}
+				}
+			} while (bean != null);
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the corresponding Java type for given bean's class.
+	 * @param bean  the bean to lookup the bean class' Java type
+	 * @param context  the context (<code>IBeanConfig</code> or
+	 * 		  <code>IBeanConfigSet</code>) the beans are looked-up
+	 * @param context  the context (<code>IBeanConfig</code> or
+	 * 		  <code>IBeanConfigSet</code>) the beans are looked-up
+	 */
+	public static final IType getBeanType(IBean bean, IModelElement context) {
+		Assert.notNull(bean);
+		String className = getBeanClass(bean, context);
+		if (className != null) {
+			return getJavaType(getProject(bean).getProject(), className);
 		}
 		return null;
 	}
