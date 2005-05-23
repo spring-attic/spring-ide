@@ -29,6 +29,8 @@ import org.eclipse.ui.IPersistableElement;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
+import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphImages;
@@ -92,8 +94,17 @@ public class GraphEditorInput implements IEditorInput {
 	 * 				 					specified 
 	 */
 	public GraphEditorInput(IModelElement element) {
-		this(element, element instanceof IBean ?
-											element.getElementParent() : null);
+		this(element, getContext(element));
+	}
+
+	private static IModelElement getContext(IModelElement element) {
+		if (element instanceof IBean) {
+			return element.getElementParent();
+		} else if (element instanceof IBeanConstructorArgument ||
+											element instanceof IBeanProperty) {
+			return element.getElementParent().getElementParent();
+		}
+		return element;
 	}
 
 	/**
@@ -177,7 +188,8 @@ public class GraphEditorInput implements IEditorInput {
 			}
 		} else if (element instanceof IBean) {
 			list.add(element);
-			list.addAll(BeansModelUtils.getReferencedBeans(element, context));
+			list.addAll(BeansModelUtils.getReferencedBeans(element, context,
+														   true));
 		}
 
 		// Marshall all beans into a graph bean node

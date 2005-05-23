@@ -22,6 +22,8 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditor;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput;
 import org.springframework.ide.eclipse.beans.ui.model.INode;
@@ -44,9 +46,15 @@ public class ShowGraphAction extends Action implements IViewActionDelegate {
 	public void run(IAction action) {
 		IModelElement element = (IModelElement)
 										  node.getAdapter(IModelElement.class);
-		IModelElement parent = (IModelElement)
+		GraphEditorInput input;
+		if (element instanceof IBeansConfig ||
+										  element instanceof IBeansConfigSet) {
+			input = new GraphEditorInput(element);
+		} else {
+			IModelElement parent = (IModelElement)
 							  node.getParent().getAdapter(IModelElement.class);
-		GraphEditorInput input = new GraphEditorInput(element, parent);
+			input = new GraphEditorInput(element, parent);
+		}
 		SpringUIUtils.openInEditor(input, GraphEditor.EDITOR_ID);
 	}
 }

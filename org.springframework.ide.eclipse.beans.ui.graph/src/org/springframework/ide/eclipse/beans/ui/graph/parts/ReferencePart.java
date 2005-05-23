@@ -58,8 +58,10 @@ public class ReferencePart extends AbstractConnectionEditPart {
 			if (node instanceof ConstructorArgument) {
 				label.setText("ConstructorArgument: " +
 							  ((ConstructorArgument) node).getName());
-			} else {
+			} else if (node instanceof Property) {
 				label.setText("Property: " + ((Property) node).getName());
+			} else {
+				label.setText("Factory or depends-on bean");
 			}
 		}
 		conn.setToolTip(label);

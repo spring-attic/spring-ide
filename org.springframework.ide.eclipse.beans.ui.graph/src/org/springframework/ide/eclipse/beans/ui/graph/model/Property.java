@@ -100,7 +100,7 @@ public class Property extends Node implements IAdaptable {
 			}
 			if (innerBean != null) {
 				Iterator refBeans = BeansModelUtils.getReferencedBeans(
-								  innerBean, innerBean.getConfig()).iterator();
+						   innerBean, innerBean.getConfig(), false).iterator();
 				while (refBeans.hasNext()) {
 					String refBeanName = ((IBean)
 											 refBeans.next()).getElementName();

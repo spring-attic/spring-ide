@@ -31,7 +31,8 @@ import org.eclipse.draw2d.graph.EdgeList;
 import org.eclipse.draw2d.graph.Node;
 import org.eclipse.draw2d.graph.NodeList;
 import org.eclipse.swt.graphics.Font;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput;
 import org.springframework.ide.eclipse.beans.ui.graph.figures.BeanFigure;
 
@@ -65,25 +66,31 @@ public class Graph implements IAdaptable {
 			Bean bean = (Bean) beans.next();
 			graph.nodes.add(bean);
 
-			// If child bean then add reference from parent bean to list of
-			// graph edges
-			if (!bean.isRootBean()) {
-				Bean parentBean = getBean(bean.getParentName());
-				if (parentBean != null) {
-					graph.edges.add(new Reference(bean, parentBean));
+			// Add all beans references from bean (parent, factory or
+			// depends-on beans) to list of graph edges
+			Iterator beanRefs = BeansModelUtils.getReferencedBeans(
+						 bean.getBean(), input.getContext(), false).iterator();
+			while (beanRefs.hasNext()) {
+				IBean refBean = (IBean) beanRefs.next();
+				Bean targetBean = getBean(refBean.getElementName());
+				if (targetBean != null) {
+					graph.edges.add(new Reference(bean, targetBean));
 				}
 			}
 
-			// Add all bean references in constructor arguments to list of graph
-			// edges
+			// Add all bean references in bean's constructor arguments to list
+			// of graph edges
 			ConstructorArgument[] cargs = bean.getConstructorArguments();
 			for (int i = 0; i < cargs.length; i++) {
 				ConstructorArgument carg = cargs[i];
-				Iterator iter = carg.getBeanReferences().iterator();
-				while (iter.hasNext()) {
-					RuntimeBeanReference beanRef = (RuntimeBeanReference)
-																	iter.next();
-					Bean targetBean = getBean(beanRef.getBeanName());
+				List refBeans = new ArrayList();
+				BeansModelUtils.addReferencedBeansForValue(
+								  carg.getBeanConstructorArgument().getValue(),
+								  input.getContext(), refBeans, false);
+				Iterator cargRefs = refBeans.iterator();
+				while (cargRefs.hasNext()) {
+					IBean refBean = (IBean) cargRefs.next();
+					Bean targetBean = getBean(refBean.getElementName());
 					if (targetBean != null) {
 						graph.edges.add(new Reference(bean, targetBean,
 													  carg));
@@ -95,11 +102,14 @@ public class Graph implements IAdaptable {
 			Property[] properties = bean.getProperties();
 			for (int i = 0; i < properties.length; i++) {
 				Property property = properties[i];
-				Iterator props = property.getBeanReferences().iterator();
-				while (props.hasNext()) {
-					RuntimeBeanReference beanRef = (RuntimeBeanReference)
-																   props.next();
-					Bean targetBean = getBean(beanRef.getBeanName());
+				List refBeans = new ArrayList();
+				BeansModelUtils.addReferencedBeansForValue(
+										 property.getBeanProperty().getValue(),
+										 input.getContext(), refBeans, false);
+				Iterator cargRefs = refBeans.iterator();
+				while (cargRefs.hasNext()) {
+					IBean refBean = (IBean) cargRefs.next();
+					Bean targetBean = getBean(refBean.getElementName());
 					if (targetBean != null) {
 						graph.edges.add(new Reference(bean, targetBean,
 													  property));
