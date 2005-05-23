@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.web.flow.core.model.IEndState;
 import org.springframework.ide.eclipse.web.flow.core.model.IIf;
 import org.springframework.ide.eclipse.web.flow.core.model.IInput;
 import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
+import org.springframework.ide.eclipse.web.flow.core.model.IOutput;
 import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
 import org.springframework.ide.eclipse.web.flow.core.model.ISetup;
 import org.springframework.ide.eclipse.web.flow.core.model.IStateTransition;
@@ -353,10 +354,11 @@ public class XmlModelWriter implements IModelWriter {
         parameters.put(BEAN_ATTRIBUTE, state.getBean());
         parameters.put(CLASS_ATTRIBUTE, state.getBeanClass());
         parameters.put(CLASSREF_ATTRIBUTE, state.getClassRef());
-        writer.printTag(ATTRIBUTE_MAPPER_ELEMENT, parameters, true, true, true);
+        writer.startTag(ATTRIBUTE_MAPPER_ELEMENT, parameters);
     }
 
     private void doEndAttributeMapper(IWebFlowModelElement element) {
+        writer.endTag(ATTRIBUTE_MAPPER_ELEMENT);
     }
 
     private void doStartProperty(IWebFlowModelElement element) {
@@ -387,7 +389,7 @@ public class XmlModelWriter implements IModelWriter {
     }
     
     private void doStartOutput(IWebFlowModelElement element) {
-        IInput state = (IInput) element;
+        IOutput state = (IOutput) element;
         HashMap parameters = new HashMap();
         parameters.put(NAME_ATTRIBUTE, state.getName());
         parameters.put(TYPE_ATTRIBUTE, state.getType());

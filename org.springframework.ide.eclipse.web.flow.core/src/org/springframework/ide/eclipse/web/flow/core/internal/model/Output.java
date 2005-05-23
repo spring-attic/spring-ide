@@ -48,7 +48,7 @@ public class Output extends WebFlowModelElement implements IOutput,
      * @see org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement#getElementType()
      */
     public int getElementType() {
-        return IWebFlowModelElement.INPUT;
+        return IWebFlowModelElement.OUTPUT;
     }
 
     /*
@@ -169,6 +169,7 @@ public class Output extends WebFlowModelElement implements IOutput,
     public ICloneableModelElement cloneModelElement() {
         Output output = new Output();
         output.setElementName(getElementName());
+        output.setElementParent(getElementParent());
         output.setAs(getAs());
         output.setName(getName());
         output.setType(getType());

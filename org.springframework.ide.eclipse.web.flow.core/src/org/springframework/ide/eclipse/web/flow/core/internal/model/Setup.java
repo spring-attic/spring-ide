@@ -113,6 +113,8 @@ public class Setup extends AbstractModelElement implements ISetup, IPersistableM
      */
     public ICloneableModelElement cloneModelElement() {
         Setup setup = new Setup();
+        setup.setElementName(getElementName());
+        setup.setElementParent(getElementParent());
         setup.setAutowire(getAutowire());
         setup.setBean(getBean());
         setup.setBeanClass(getBeanClass());

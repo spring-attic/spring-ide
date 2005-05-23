@@ -60,6 +60,7 @@ public class Input extends WebFlowModelElement implements IInput, IPersistableMo
     public ICloneableModelElement cloneModelElement() {
         Input input = new Input();
         input.setElementName(getElementName());
+        input.setElementParent(getElementParent());
         input.setAs(getAs());
         input.setName(getName());
         input.setType(getType());

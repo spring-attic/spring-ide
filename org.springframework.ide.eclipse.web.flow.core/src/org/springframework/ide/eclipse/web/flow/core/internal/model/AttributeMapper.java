@@ -79,7 +79,7 @@ public class AttributeMapper extends AbstractModelElement implements
             mapper.addInput((Input) input.cloneModelElement());
         }
         for (int i = 0; i < this.getOutputs().size(); i++) {
-            Output input = (Output) this.getInputs().get(i);
+            Output input = (Output) this.getOutputs().get(i);
             mapper.addOutput((Output) input.cloneModelElement());
         }
         return mapper;
@@ -148,7 +148,7 @@ public class AttributeMapper extends AbstractModelElement implements
     public void addOutput(IOutput output) {
         if (!this.outputs.contains(output)) {
             output.setElementParent(this);
-            this.inputs.add(output);
+            this.outputs.add(output);
             super.firePropertyChange(ADD_CHILDREN, new Integer(this.outputs
                     .indexOf(output)), output);
         }
