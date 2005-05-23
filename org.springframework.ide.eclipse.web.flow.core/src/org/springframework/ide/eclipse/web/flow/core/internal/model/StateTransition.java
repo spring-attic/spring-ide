@@ -24,6 +24,7 @@ import org.springframework.ide.eclipse.web.flow.core.model.IAction;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
 import org.springframework.ide.eclipse.web.flow.core.model.IPersistableModelElement;
+import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
 import org.springframework.ide.eclipse.web.flow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.web.flow.core.model.ITransitionableFrom;
 import org.springframework.ide.eclipse.web.flow.core.model.ITransitionableTo;
@@ -140,6 +141,13 @@ public class StateTransition extends Transition implements IStateTransition,
                 ((IPersistableModelElement) element).save(writer);
             }
         }
+        iter = this.getProperties().iterator();
+        while (iter.hasNext()) {
+            IWebFlowModelElement element = (IWebFlowModelElement) iter.next();
+            if (element instanceof IPersistableModelElement) {
+                ((IPersistableModelElement) element).save(writer);
+            }
+        }
         writer.doEnd(this);
     }
 
@@ -184,9 +192,17 @@ public class StateTransition extends Transition implements IStateTransition,
         StateTransition transition = new StateTransition();
         transition.setOn(getOn());
         transition.setElementName(getElementName());
+        transition.setAutowire(getAutowire());
+        transition.setBean(getBean());
+        transition.setBeanClass(getBeanClass());
+        transition.setClassRef(getClassRef());
         for (int i = 0; i < this.getActions().size(); i++) {
             transition.addAction((IAction) ((ICloneableModelElement) this
                     .getActions().get(i)).cloneModelElement());
+        }
+        for (int i = 0; i < super.getProperties().size(); i++) {
+            Property property = (Property) super.getProperties().get(i);
+            transition.addProperty((IProperty) property.cloneModelElement());
         }
         return transition;
     }
@@ -198,6 +214,10 @@ public class StateTransition extends Transition implements IStateTransition,
         if (element instanceof StateTransition) {
             StateTransition transition = (StateTransition) element;
             setOn(transition.getOn());
+            setAutowire(transition.getAutowire());
+            setBean(transition.getBean());
+            setBeanClass(transition.getBeanClass());
+            setClassRef(transition.getClassRef());
             Action[] actions = (Action[]) this.getActions().toArray(
                     new Action[this.getActions().size()]);
             for (int i = 0; i < actions.length; i++) {
@@ -205,6 +225,14 @@ public class StateTransition extends Transition implements IStateTransition,
             }
             for (int i = 0; i < transition.getActions().size(); i++) {
                 addAction((IAction) transition.getActions().get(i));
+            }
+            Property[] props = (Property[]) this.getProperties().toArray(
+                    new Property[this.getProperties().size()]);
+            for (int i = 0; i < props.length; i++) {
+                removeProperty(props[i]);
+            }
+            for (int i = 0; i < transition.getProperties().size(); i++) {
+                addProperty((IProperty) transition.getProperties().get(i));
             }
         }
     }

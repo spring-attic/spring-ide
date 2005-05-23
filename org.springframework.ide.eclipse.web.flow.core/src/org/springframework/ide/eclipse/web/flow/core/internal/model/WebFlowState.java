@@ -20,16 +20,18 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
 import org.springframework.ide.eclipse.web.flow.core.model.IPersistableModelElement;
+import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
 import org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
 
 public class WebFlowState extends AbstractTransitionableFrom implements
-        IWebFlowState, IPersistableModelElement {
+        IWebFlowState, IPersistableModelElement, ICloneableModelElement {
 
     private List states;
 
@@ -41,6 +43,10 @@ public class WebFlowState extends AbstractTransitionableFrom implements
         if (parent instanceof ISubFlowState) {
             ((ISubFlowState) parent).addState(this);
         }
+    }
+    
+    public WebFlowState() {
+        this(null, null);
     }
 
     /*
@@ -194,5 +200,45 @@ public class WebFlowState extends AbstractTransitionableFrom implements
             }
         }
         writer.doEnd(this);
+    }
+
+    /* (non-Javadoc)
+     * @see org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement#cloneModelElement()
+     */
+    public ICloneableModelElement cloneModelElement() {
+        WebFlowState state = new WebFlowState();
+        state.setId(getId());        
+        state.setAutowire(getAutowire());
+        state.setBean(getBean());
+        state.setBeanClass(getBeanClass());
+        state.setClassRef(getClassRef());
+        state.setElementName(getElementName());
+        for (int i = 0; i < super.getProperties().size(); i++) {
+            Property property = (Property) super.getProperties().get(i);
+            state.addProperty((IProperty) property.cloneModelElement());
+        }
+        return state;
+    }
+
+    /* (non-Javadoc)
+     * @see org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement#applyCloneValues(org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement)
+     */
+    public void applyCloneValues(ICloneableModelElement element) {
+        if (element instanceof WebFlowState) {
+            WebFlowState state = (WebFlowState) element;
+            setId(state.getId());        
+            setAutowire(state.getAutowire());
+            setBean(state.getBean());
+            setBeanClass(state.getBeanClass());
+            setClassRef(state.getClassRef());
+            Property[] props = (Property[]) this.getProperties().toArray(
+                    new Property[this.getProperties().size()]);
+            for (int i = 0; i < props.length; i++) {
+                removeProperty(props[i]);
+            }
+            for (int i = 0; i < state.getProperties().size(); i++) {
+                addProperty((IProperty) state.getProperties().get(i));
+            }
+        }
     }
 }

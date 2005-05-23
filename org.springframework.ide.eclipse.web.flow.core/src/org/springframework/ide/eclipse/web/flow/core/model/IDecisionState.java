@@ -18,7 +18,7 @@ package org.springframework.ide.eclipse.web.flow.core.model;
 
 import java.util.List;
 
-public interface IDecisionState extends IState {
+public interface IDecisionState extends ITransitionableTo {
 
     List getIfs();
 

@@ -16,93 +16,34 @@
 
 package org.springframework.ide.eclipse.web.flow.core.internal.model;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
+import org.springframework.ide.eclipse.web.flow.core.model.IInput;
+import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
+import org.springframework.ide.eclipse.web.flow.core.model.IOutput;
 import org.springframework.ide.eclipse.web.flow.core.model.IPersistableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 
-public class AttributeMapper extends WebFlowModelElement implements
+public class AttributeMapper extends AbstractModelElement implements
         IAttributeMapper, IPersistableModelElement, ICloneableModelElement {
-
-    private String autowire;
-
-    private String bean;
-
-    private String beanClass;
-
-    private String classRef;
-
-    private String name;
-
-    private String method;
-
+    
+    private List inputs;
+    
+    private List outputs;
+    
     public AttributeMapper(IWebFlowModelElement parent, String id) {
         super(parent, id);
+        this.inputs = new ArrayList();
+        this.outputs = new ArrayList();
     }
 
     public AttributeMapper() {
-        super(null, null);
-    }
-
-    /**
-     * @return Returns the autowire.
-     */
-    public String getAutowire() {
-        return autowire;
-    }
-
-    /**
-     * @param autowire
-     *            The autowire to set.
-     */
-    public void setAutowire(String autowire) {
-        this.autowire = autowire;
-    }
-
-    /**
-     * @return Returns the bean.
-     */
-    public String getBean() {
-        return bean;
-    }
-
-    /**
-     * @param bean
-     *            The bean to set.
-     */
-    public void setBean(String bean) {
-        this.bean = bean;
-    }
-
-    /**
-     * @return Returns the beanClass.
-     */
-    public String getBeanClass() {
-        return beanClass;
-    }
-
-    /**
-     * @param beanClass
-     *            The beanClass to set.
-     */
-    public void setBeanClass(String beanClass) {
-        this.beanClass = beanClass;
-    }
-
-    /**
-     * @return Returns the classRef.
-     */
-    public String getClassRef() {
-        return classRef;
-    }
-
-    /**
-     * @param classRef
-     *            The classRef to set.
-     */
-    public void setClassRef(String classRef) {
-        this.classRef = classRef;
+        this(null, null);
     }
 
     /*
@@ -123,48 +64,7 @@ public class AttributeMapper extends WebFlowModelElement implements
         return super.getElementParent().getElementResource();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.ide.eclipse.web.flow.core.model.IAction#getMethod()
-     */
-    public String getMethod() {
-        return this.method;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.ide.eclipse.web.flow.core.model.IAction#getName()
-     */
-    public String getName() {
-        return this.name;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.ide.eclipse.web.flow.core.model.IAction#setMethod(java.lang.String)
-     */
-    public void setMethod(String method) {
-        String oldValue = this.method;
-        this.method = method;
-        super.firePropertyChange(PROPS, oldValue, method);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.ide.eclipse.web.flow.core.model.IAction#setName(java.lang.String)
-     */
-    public void setName(String name) {
-        String oldValue = this.name;
-        this.name = name;
-        super.firePropertyChange(PROPS, oldValue, name);
-    }
-
-    /*
-     * (non-Javadoc)
+    /* (non-Javadoc)
      * 
      * @see org.springframework.ide.eclipse.web.flow.core.model.IConeableModelElement#cloneModelElement()
      */
@@ -174,8 +74,14 @@ public class AttributeMapper extends WebFlowModelElement implements
         mapper.setBean(getBean());
         mapper.setBeanClass(getBeanClass());
         mapper.setClassRef(getClassRef());
-        mapper.setMethod(getMethod());
-        mapper.setName(getName());
+        for (int i = 0; i < this.getInputs().size(); i++) {
+            Input input = (Input) this.getInputs().get(i);
+            mapper.addInput((Input) input.cloneModelElement());
+        }
+        for (int i = 0; i < this.getOutputs().size(); i++) {
+            Output input = (Output) this.getInputs().get(i);
+            mapper.addOutput((Output) input.cloneModelElement());
+        }
         return mapper;
     }
 
@@ -191,8 +97,99 @@ public class AttributeMapper extends WebFlowModelElement implements
             setBean(mapper.getBean());
             setBeanClass(mapper.getBeanClass());
             setClassRef(mapper.getClassRef());
-            setMethod(mapper.getMethod());
-            setName(mapper.getName());
+            Input[] inputs = (Input[]) this.getInputs().toArray(
+                    new Input[this.getInputs().size()]);
+            for (int i = 0; i < inputs.length; i++) {
+                removeInput(inputs[i]);
+            }
+            for (int i = 0; i < mapper.getInputs().size(); i++) {
+                addInput((Input) mapper.getInputs().get(i));
+            }
+            Output[] props = (Output[]) this.getOutputs().toArray(
+                    new Output[this.getOutputs().size()]);
+            for (int i = 0; i < props.length; i++) {
+                removeOutput(props[i]);
+            }
+            for (int i = 0; i < mapper.getOutputs().size(); i++) {
+                addOutput((Output) mapper.getOutputs().get(i));
+            }
         }
+    }
+
+    /* (non-Javadoc)
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper#getInputs()
+     */
+    public List getInputs() {
+        return this.inputs;
+    }
+
+    /* (non-Javadoc)
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper#getOutputs()
+     */
+    public List getOutputs() {
+        return this.outputs;
+    }
+
+    /* (non-Javadoc)
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper#addInput(org.springframework.ide.eclipse.web.flow.core.model.IInput)
+     */
+    public void addInput(IInput input) {
+        if (!this.inputs.contains(input)) {
+            input.setElementParent(this);
+            this.inputs.add(input);
+            super.firePropertyChange(ADD_CHILDREN, new Integer(this.inputs
+                    .indexOf(input)), input);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper#addOutput(org.springframework.ide.eclipse.web.flow.core.model.IOutput)
+     */
+    public void addOutput(IOutput output) {
+        if (!this.outputs.contains(output)) {
+            output.setElementParent(this);
+            this.inputs.add(output);
+            super.firePropertyChange(ADD_CHILDREN, new Integer(this.outputs
+                    .indexOf(output)), output);
+        }
+    }
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IPersistable#save(org.springframework.ide.eclipse.web.flow.core.model.IModelWriter)
+     */
+    public void save(IModelWriter writer) {
+        writer.doStart(this);
+        Iterator iter = this.inputs.iterator();
+        while (iter.hasNext()) {
+            ((IPersistableModelElement) iter.next()).save(writer);
+        }
+        iter = this.outputs.iterator();
+        while (iter.hasNext()) {
+            ((IPersistableModelElement) iter.next()).save(writer);
+        }
+        writer.doEnd(this);
+    }
+
+    /* (non-Javadoc)
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper#removeInput(org.springframework.ide.eclipse.web.flow.core.model.IInput)
+     */
+    public void removeInput(IInput input) {
+        if (this.inputs.contains(input)) {
+            this.inputs.remove(input);
+            super.fireStructureChange(REMOVE_CHILDREN, input);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper#removeOutput(org.springframework.ide.eclipse.web.flow.core.model.IOutput)
+     */
+    public void removeOutput(IOutput output) {
+        if (this.outputs.contains(output)) {
+            this.outputs.remove(output);
+            super.fireStructureChange(REMOVE_CHILDREN, output);
+        }
+        
     }
 }

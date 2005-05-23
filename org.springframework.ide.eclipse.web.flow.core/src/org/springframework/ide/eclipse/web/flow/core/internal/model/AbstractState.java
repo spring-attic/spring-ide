@@ -16,89 +16,22 @@
 
 package org.springframework.ide.eclipse.web.flow.core.internal.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.web.flow.core.model.IAction;
-import org.springframework.ide.eclipse.web.flow.core.model.IPersistableModelElement;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowConfig;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 
-public abstract class AbstractState extends WebFlowModelElement implements
-        IState, IPersistableModelElement {
+public abstract class AbstractState extends AbstractModelElement implements
+        IState {
 
     private boolean isStartState = false;
 
     private String id;
-
-    private List properties = new ArrayList();
-
+    
     public AbstractState(IWebFlowModelElement parent, String id) {
         super(parent, id);
         this.id = id;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.ide.eclipse.web.flow.core.model.IAction#addProperty(org.springframework.ide.eclipse.web.flow.core.model.IProperty)
-     */
-    public void addProperty(IProperty property) {
-        if (!this.properties.contains(property)) {
-            property.setElementParent(this);
-            this.properties.add(property);
-            super.firePropertyChange(ADD_CHILDREN, new Integer(this.properties
-                    .indexOf(property)), property);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.ide.eclipse.web.flow.core.model.IAction#addProperty(org.springframework.ide.eclipse.web.flow.core.model.IProperty)
-     */
-    public void addProperty(IProperty property, int index) {
-        if (!this.properties.contains(property)) {
-            property.setElementParent(this);
-            this.properties.add(index, property);
-            super
-                    .firePropertyChange(ADD_CHILDREN, new Integer(index),
-                            property);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.ide.eclipse.web.flow.core.model.IAction#getProperties()
-     */
-    public List getProperties() {
-        return this.properties;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.ide.eclipse.web.flow.core.model.IAction#removeProperty(org.springframework.ide.eclipse.web.flow.core.model.IProperty)
-     */
-    public void removeProperty(IProperty property) {
-        if (this.properties.contains(property)) {
-            this.properties.remove(property);
-            super.fireStructureChange(REMOVE_CHILDREN, property);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.ide.eclipse.web.flow.core.model.IAction#addProperty(java.lang.String,
-     *      java.lang.String)
-     */
-    public void addProperty(String name, String value) {
-        IProperty property = new Property(this, name, value);
     }
 
     /**

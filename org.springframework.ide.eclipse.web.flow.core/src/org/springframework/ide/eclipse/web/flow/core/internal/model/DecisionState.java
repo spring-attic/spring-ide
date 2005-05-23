@@ -105,12 +105,19 @@ public class DecisionState extends AbstractTransitionableFrom implements
 
     public void save(IModelWriter writer) {
         writer.doStart(this);
-        super.save(writer);
         Iterator iter = this.ifs.iterator();
         while (iter.hasNext()) {
             IPersistableModelElement element = (IPersistableModelElement) iter
                     .next();
             element.save(writer);
+        }
+        //super.save(writer);
+        iter = this.getProperties().iterator();
+        while (iter.hasNext()) {
+            IWebFlowModelElement element = (IWebFlowModelElement) iter.next();
+            if (element instanceof IPersistableModelElement) {
+                ((IPersistableModelElement) element).save(writer);
+            }
         }
         writer.doEnd(this);
     }
@@ -125,6 +132,10 @@ public class DecisionState extends AbstractTransitionableFrom implements
         state.setId(getId());
         state.setElementName(getElementName());
         state.setElementParent(getElementParent());
+        state.setAutowire(getAutowire());
+        state.setBean(getBean());
+        state.setBeanClass(getBeanClass());
+        state.setClassRef(getClassRef());
         for (int i = 0; i < this.getIfs().size(); i++) {
             state.addIf((IIf) ((ICloneableModelElement) this.getIfs().get(i))
                     .cloneModelElement());
@@ -145,6 +156,10 @@ public class DecisionState extends AbstractTransitionableFrom implements
         if (element instanceof IDecisionState) {
             DecisionState state = (DecisionState) element;
             setId(state.getId());
+            setAutowire(state.getAutowire());
+            setBean(state.getBean());
+            setBeanClass(state.getBeanClass());
+            setClassRef(state.getClassRef());
             for (int i = 0; i < state.getIfs().size(); i++) {
                 ((ICloneableModelElement) this.getIfs().get(i))
                         .applyCloneValues((ICloneableModelElement) state

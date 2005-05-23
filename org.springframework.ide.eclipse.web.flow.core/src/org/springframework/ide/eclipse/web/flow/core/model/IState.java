@@ -16,9 +16,7 @@
 
 package org.springframework.ide.eclipse.web.flow.core.model;
 
-import java.util.List;
-
-public interface IState extends IWebFlowModelElement {
+public interface IState extends IBeanReference {
 
     IWebFlowConfig getConfig();
 
@@ -32,13 +30,4 @@ public interface IState extends IWebFlowModelElement {
 
     String getParentName();
 
-    void addProperty(IProperty property);
-
-    void addProperty(IProperty property, int index);
-
-    void removeProperty(IProperty property);
-
-    void addProperty(String name, String value);
-
-    List getProperties();
 }

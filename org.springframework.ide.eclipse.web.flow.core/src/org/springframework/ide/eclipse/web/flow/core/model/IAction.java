@@ -16,41 +16,13 @@
 
 package org.springframework.ide.eclipse.web.flow.core.model;
 
-import java.util.List;
-
-public interface IAction extends IWebFlowModelElement {
-
-    String getBean();
-
-    String getBeanClass();
-
-    String getAutowire();
-
-    String getClassRef();
+public interface IAction extends IBeanReference {
 
     String getMethod();
 
     String getName();
 
-    void setBean(String bean);
-
-    void setBeanClass(String beanClass);
-
-    void setAutowire(String autowire);
-
-    void setClassRef(String classRef);
-
     void setMethod(String method);
 
     void setName(String name);
-
-    void addProperty(IProperty property);
-
-    void addProperty(IProperty property, int index);
-
-    void removeProperty(IProperty property);
-
-    void addProperty(String name, String value);
-
-    List getProperties();
 }

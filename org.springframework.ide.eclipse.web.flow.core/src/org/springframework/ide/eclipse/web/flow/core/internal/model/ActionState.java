@@ -136,6 +136,7 @@ public class ActionState extends AbstractTransitionableFrom implements
                 ((IPersistableModelElement) element).save(writer);
             }
         }
+        super.save(writer);
         iter = this.getProperties().iterator();
         while (iter.hasNext()) {
             IWebFlowModelElement element = (IWebFlowModelElement) iter.next();
@@ -143,7 +144,6 @@ public class ActionState extends AbstractTransitionableFrom implements
                 ((IPersistableModelElement) element).save(writer);
             }
         }
-        super.save(writer);
         writer.doEnd(this);
     }
 
@@ -156,6 +156,10 @@ public class ActionState extends AbstractTransitionableFrom implements
         ActionState state = new ActionState();
         state.setId(getId());
         state.setElementName(getElementName());
+        state.setAutowire(getAutowire());
+        state.setBean(getBean());
+        state.setBeanClass(getBeanClass());
+        state.setClassRef(getClassRef());
         for (int i = 0; i < this.getActions().size(); i++) {
             state.addAction((IAction) ((ICloneableModelElement) this
                     .getActions().get(i)).cloneModelElement());
@@ -176,6 +180,10 @@ public class ActionState extends AbstractTransitionableFrom implements
         if (element instanceof IActionState) {
             ActionState action = (ActionState) element;
             setId(action.getId());
+            setAutowire(action.getAutowire());
+            setBean(action.getBean());
+            setBeanClass(action.getBeanClass());
+            setClassRef(action.getClassRef());
             Action[] actions = (Action[]) this.getActions().toArray(
                     new Action[this.getActions().size()]);
             for (int i = 0; i < actions.length; i++) {

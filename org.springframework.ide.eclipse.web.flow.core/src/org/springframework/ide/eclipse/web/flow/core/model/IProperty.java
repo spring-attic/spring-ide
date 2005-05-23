@@ -21,9 +21,13 @@ public interface IProperty extends IWebFlowModelElement {
     void setName(String name);
 
     void setValue(String value);
+    
+    void setType(String type);
 
     String getName();
 
     String getValue();
+    
+    String getType();
 
 }

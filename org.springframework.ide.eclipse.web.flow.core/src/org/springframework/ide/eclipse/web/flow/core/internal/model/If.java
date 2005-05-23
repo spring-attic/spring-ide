@@ -21,6 +21,7 @@ import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElemen
 import org.springframework.ide.eclipse.web.flow.core.model.IDecisionState;
 import org.springframework.ide.eclipse.web.flow.core.model.IIf;
 import org.springframework.ide.eclipse.web.flow.core.model.IIfTransition;
+import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
 import org.springframework.ide.eclipse.web.flow.core.model.IPersistableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 
@@ -171,5 +172,15 @@ public class If extends WebFlowModelElement implements IIf,
         IIfTransition oldValue = this.thenTransition;
         this.thenTransition = null;
         super.firePropertyChange(OUTPUTS, oldValue, null);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IPersistable#save(org.springframework.ide.eclipse.web.flow.core.model.IModelWriter)
+     */
+    public void save(IModelWriter writer) {
+        writer.doStart(this);
+        writer.doEnd(this);
     }
 }

@@ -20,7 +20,6 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 import org.springframework.ide.eclipse.web.flow.core.model.IModelElementVisitor;
-import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 
 public abstract class WebFlowModelElement implements IWebFlowModelElement {
@@ -104,15 +103,5 @@ public abstract class WebFlowModelElement implements IWebFlowModelElement {
      */
     public void accept(IModelElementVisitor visitor) {
         visitor.visit(this);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.ide.eclipse.web.flow.core.model.IPersistable#save(org.springframework.ide.eclipse.web.flow.core.model.IModelWriter)
-     */
-    public void save(IModelWriter writer) {
-        writer.doStart(this);
-        writer.doEnd(this);
     }
 }

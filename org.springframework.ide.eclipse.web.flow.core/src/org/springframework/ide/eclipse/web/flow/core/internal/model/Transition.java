@@ -20,13 +20,13 @@ import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.web.flow.core.model.ITransition;
 import org.springframework.ide.eclipse.web.flow.core.model.ITransitionableTo;
 
-public abstract class Transition extends WebFlowModelElement implements
+public abstract class Transition extends AbstractModelElement implements
         ITransition {
 
     protected ITransitionableTo toState;
 
     private String toStateId;
-
+    
     public Transition() {
         super(null, null);
     }

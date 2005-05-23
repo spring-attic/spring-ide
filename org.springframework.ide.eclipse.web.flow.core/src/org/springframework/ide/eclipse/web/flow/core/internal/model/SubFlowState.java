@@ -148,6 +148,10 @@ public class SubFlowState extends WebFlowState implements ISubFlowState,
         SubFlowState state = new SubFlowState();
         state.setId(getId());
         state.setFlow(getFlow());
+        state.setAutowire(getAutowire());
+        state.setBean(getBean());
+        state.setBeanClass(getBeanClass());
+        state.setClassRef(getClassRef());
         state.setElementName(getElementName());
         if (this.attributeMapper != null) {
             state
@@ -171,6 +175,10 @@ public class SubFlowState extends WebFlowState implements ISubFlowState,
             ISubFlowState state = (ISubFlowState) element;
             setId(state.getId());
             setFlow(state.getFlow());
+            setAutowire(state.getAutowire());
+            setBean(state.getBean());
+            setBeanClass(state.getBeanClass());
+            setClassRef(state.getClassRef());
             if (state.getAttributeMapper() != null) {
                 if (this.attributeMapper != null) {
                     ((ICloneableModelElement) this.attributeMapper)

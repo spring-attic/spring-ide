@@ -16,9 +16,21 @@
 
 package org.springframework.ide.eclipse.web.flow.core.model;
 
-public interface ITransition extends IBeanReference {
+public interface IBeanReference extends IPropertyEnabled {
+    
+    String getBean();
 
-    ITransitionableTo getToState();
+    String getBeanClass();
 
-    void setToState(ITransitionableTo toState);
+    String getAutowire();
+
+    String getClassRef();
+    
+    void setBean(String bean);
+
+    void setBeanClass(String beanClass);
+
+    void setAutowire(String autowire);
+
+    void setClassRef(String classRef);
 }

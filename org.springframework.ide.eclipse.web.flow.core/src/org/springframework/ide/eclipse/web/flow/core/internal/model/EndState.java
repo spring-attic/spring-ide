@@ -82,6 +82,10 @@ public class EndState extends AbstractTransitionableTo implements IEndState,
         EndState state = new EndState();
         state.setId(getId());
         state.setView(getView());
+        state.setAutowire(getAutowire());
+        state.setBean(getBean());
+        state.setBeanClass(getBeanClass());
+        state.setClassRef(getClassRef());
         state.setElementName(getElementName());
         for (int i = 0; i < this.getProperties().size(); i++) {
             Property property = (Property) this.getProperties().get(i);
@@ -100,6 +104,10 @@ public class EndState extends AbstractTransitionableTo implements IEndState,
             IEndState state = (IEndState) element;
             setView(state.getView());
             setId(state.getId());
+            setAutowire(state.getAutowire());
+            setBean(state.getBean());
+            setBeanClass(state.getBeanClass());
+            setClassRef(state.getClassRef());
             Property[] props = (Property[]) this.getProperties().toArray(
                     new Property[this.getProperties().size()]);
             for (int i = 0; i < props.length; i++) {

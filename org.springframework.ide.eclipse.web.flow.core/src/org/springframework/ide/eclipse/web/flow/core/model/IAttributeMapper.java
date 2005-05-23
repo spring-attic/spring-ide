@@ -16,29 +16,20 @@
 
 package org.springframework.ide.eclipse.web.flow.core.model;
 
-public interface IAttributeMapper extends IWebFlowModelElement {
+import java.util.List;
 
-    String getBean();
-
-    String getBeanClass();
-
-    String getAutowire();
-
-    String getClassRef();
-
-    String getMethod();
-
-    String getName();
-
-    void setBean(String bean);
-
-    void setBeanClass(String beanClass);
-
-    void setAutowire(String autowire);
-
-    void setClassRef(String classRef);
-
-    void setMethod(String method);
-
-    void setName(String name);
+public interface IAttributeMapper extends IBeanReference {
+    
+    List getInputs();
+    
+    List getOutputs();
+    
+    void removeInput(IInput input);
+    
+    void removeOutput(IOutput input);
+    
+    void addInput(IInput input);
+    
+    void addOutput(IOutput output);
+    
 }

@@ -32,8 +32,10 @@ import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.web.flow.core.model.IDecisionState;
 import org.springframework.ide.eclipse.web.flow.core.model.IEndState;
 import org.springframework.ide.eclipse.web.flow.core.model.IIf;
+import org.springframework.ide.eclipse.web.flow.core.model.IInput;
 import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
 import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
+import org.springframework.ide.eclipse.web.flow.core.model.ISetup;
 import org.springframework.ide.eclipse.web.flow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState;
 import org.springframework.ide.eclipse.web.flow.core.model.IViewState;
@@ -94,6 +96,8 @@ public class XmlModelWriter implements IModelWriter {
     private static final String TO_ATTRIBUTE = "to";
 
     private static final String PROPERTY_ELEMENT = "property";
+    
+    private static final String TYPE_ATTRIBUTE = "type";
 
     private static final String VALUE_ELEMENT = "value";
 
@@ -108,6 +112,16 @@ public class XmlModelWriter implements IModelWriter {
     private static final String THEN_ATTRIBUTE = "then";
 
     private static final String ELSE_ATTRIBUTE = "else";
+    
+    private static final String SETUP_ELEMENT = "setup";
+    
+    private static final String ONERROR_ATTRIBUTE = "on-error";
+    
+    private static final String INPUT_ELEMENT = "input";
+    
+    private static final String AS_ATTRIBUTE = "as";
+    
+    private static final String OUTPUT_ELEMENT = "output";
 
     XmlWriter writer = null;
 
@@ -167,6 +181,15 @@ public class XmlModelWriter implements IModelWriter {
             case IWebFlowModelElement.IF:
                 doStartIf(element);
                 break;
+            case IWebFlowModelElement.SETUP:
+                doStartSetup(element);
+                break;
+            case IWebFlowModelElement.INPUT:
+                doStartInput(element);
+                break;
+            case IWebFlowModelElement.OUTPUT:
+                doStartOutput(element);
+                break;                      
             default:
                 break;
         }
@@ -213,6 +236,15 @@ public class XmlModelWriter implements IModelWriter {
             case IWebFlowModelElement.IF:
                 doEndIf(element);
                 break;
+            case IWebFlowModelElement.SETUP:
+                doEndSetup(element);
+                break; 
+            case IWebFlowModelElement.INPUT:
+                doEndInput(element);
+                break;
+            case IWebFlowModelElement.OUTPUT:
+                doEndOutput(element);
+                break;                  
             default:
                 break;
         }
@@ -224,6 +256,10 @@ public class XmlModelWriter implements IModelWriter {
         parameters.put(ID_ATTRIBUTE, state.getId());
         parameters.put(START_STATE_ELEMENT_ATTRIBUTE, state.getStartState()
                 .getId());
+        parameters.put(AUTOWIRE_ATTRIBUTE, state.getAutowire());
+        parameters.put(BEAN_ATTRIBUTE, state.getBean());
+        parameters.put(CLASS_ATTRIBUTE, state.getBeanClass());
+        parameters.put(CLASSREF_ATTRIBUTE, state.getClassRef());
         writer.startTag(FLOW_ELEMENT, parameters);
     }
 
@@ -235,6 +271,10 @@ public class XmlModelWriter implements IModelWriter {
         IActionState state = (IActionState) element;
         HashMap parameters = new HashMap();
         parameters.put(ID_ATTRIBUTE, state.getId());
+        parameters.put(AUTOWIRE_ATTRIBUTE, state.getAutowire());
+        parameters.put(BEAN_ATTRIBUTE, state.getBean());
+        parameters.put(CLASS_ATTRIBUTE, state.getBeanClass());
+        parameters.put(CLASSREF_ATTRIBUTE, state.getClassRef());
         writer.startTag(ACTION_STATE_ELEMENT, parameters);
     }
 
@@ -263,6 +303,10 @@ public class XmlModelWriter implements IModelWriter {
         HashMap parameters = new HashMap();
         parameters.put(ID_ATTRIBUTE, state.getId());
         parameters.put(VIEW_ATTRIBUTE, state.getView());
+        parameters.put(AUTOWIRE_ATTRIBUTE, state.getAutowire());
+        parameters.put(BEAN_ATTRIBUTE, state.getBean());
+        parameters.put(CLASS_ATTRIBUTE, state.getBeanClass());
+        parameters.put(CLASSREF_ATTRIBUTE, state.getClassRef());
         writer.startTag(VIEW_STATE_ELEMENT, parameters);
     }
 
@@ -275,6 +319,10 @@ public class XmlModelWriter implements IModelWriter {
         HashMap parameters = new HashMap();
         parameters.put(ID_ATTRIBUTE, state.getId());
         parameters.put(FLOW_ATTRIBUTE, state.getFlow());
+        parameters.put(AUTOWIRE_ATTRIBUTE, state.getAutowire());
+        parameters.put(BEAN_ATTRIBUTE, state.getBean());
+        parameters.put(CLASS_ATTRIBUTE, state.getBeanClass());
+        parameters.put(CLASSREF_ATTRIBUTE, state.getClassRef());
         writer.startTag(SUBFLOW_STATE_ELEMENT, parameters);
     }
 
@@ -287,6 +335,10 @@ public class XmlModelWriter implements IModelWriter {
         HashMap parameters = new HashMap();
         parameters.put(ID_ATTRIBUTE, state.getId());
         parameters.put(VIEW_ATTRIBUTE, state.getView());
+        parameters.put(AUTOWIRE_ATTRIBUTE, state.getAutowire());
+        parameters.put(BEAN_ATTRIBUTE, state.getBean());
+        parameters.put(CLASS_ATTRIBUTE, state.getBeanClass());
+        parameters.put(CLASSREF_ATTRIBUTE, state.getClassRef());
         writer.startTag(END_STATE_ELEMENT, parameters, true);
     }
 
@@ -301,8 +353,6 @@ public class XmlModelWriter implements IModelWriter {
         parameters.put(BEAN_ATTRIBUTE, state.getBean());
         parameters.put(CLASS_ATTRIBUTE, state.getBeanClass());
         parameters.put(CLASSREF_ATTRIBUTE, state.getClassRef());
-        parameters.put(METHOD_ATTRIBUTE, state.getMethod());
-        parameters.put(NAME_ATTRIBUTE, state.getName());
         writer.printTag(ATTRIBUTE_MAPPER_ELEMENT, parameters, true, true, true);
     }
 
@@ -313,6 +363,7 @@ public class XmlModelWriter implements IModelWriter {
         IProperty state = (IProperty) element;
         HashMap parameters = new HashMap();
         parameters.put(NAME_ATTRIBUTE, state.getName());
+        parameters.put(TYPE_ATTRIBUTE, state.getType());
         writer.startTag(PROPERTY_ELEMENT, parameters);
         writer.printSimpleTag(VALUE_ELEMENT, state.getValue());
     }
@@ -320,12 +371,44 @@ public class XmlModelWriter implements IModelWriter {
     private void doEndProperty(IWebFlowModelElement element) {
         writer.endTag(PROPERTY_ELEMENT);
     }
+    
+    private void doStartInput(IWebFlowModelElement element) {
+        IInput state = (IInput) element;
+        HashMap parameters = new HashMap();
+        parameters.put(NAME_ATTRIBUTE, state.getName());
+        parameters.put(TYPE_ATTRIBUTE, state.getType());
+        parameters.put(AS_ATTRIBUTE, state.getAs());
+        parameters.put(VALUE_ATTRIBUTE, state.getValue());
+        writer.startTag(INPUT_ELEMENT, parameters);
+    }
+
+    private void doEndInput(IWebFlowModelElement element) {
+        writer.endTag(INPUT_ELEMENT);
+    }
+    
+    private void doStartOutput(IWebFlowModelElement element) {
+        IInput state = (IInput) element;
+        HashMap parameters = new HashMap();
+        parameters.put(NAME_ATTRIBUTE, state.getName());
+        parameters.put(TYPE_ATTRIBUTE, state.getType());
+        parameters.put(AS_ATTRIBUTE, state.getAs());
+        parameters.put(VALUE_ATTRIBUTE, state.getValue());
+        writer.startTag(OUTPUT_ELEMENT, parameters);
+    }
+
+    private void doEndOutput(IWebFlowModelElement element) {
+        writer.endTag(OUTPUT_ELEMENT);
+    }
 
     private void doStartStateTransition(IWebFlowModelElement element) {
         IStateTransition state = (IStateTransition) element;
         HashMap parameters = new HashMap();
         parameters.put(EVENT_ATTRIBUTE, state.getOn());
         parameters.put(TO_ATTRIBUTE, state.getToState().getId());
+        parameters.put(AUTOWIRE_ATTRIBUTE, state.getAutowire());
+        parameters.put(BEAN_ATTRIBUTE, state.getBean());
+        parameters.put(CLASS_ATTRIBUTE, state.getBeanClass());
+        parameters.put(CLASSREF_ATTRIBUTE, state.getClassRef());
         writer.startTag(TRANSITION_ELEMENT, parameters, true);
     }
 
@@ -337,7 +420,29 @@ public class XmlModelWriter implements IModelWriter {
         IDecisionState state = (IDecisionState) element;
         HashMap parameters = new HashMap();
         parameters.put(ID_ATTRIBUTE, state.getId());
+        parameters.put(AUTOWIRE_ATTRIBUTE, state.getAutowire());
+        parameters.put(BEAN_ATTRIBUTE, state.getBean());
+        parameters.put(CLASS_ATTRIBUTE, state.getBeanClass());
+        parameters.put(CLASSREF_ATTRIBUTE, state.getClassRef());
         writer.startTag(DECISION_STATE_ELEMENT, parameters, true);
+    }
+    
+    private void doStartSetup(IWebFlowModelElement element) {
+        ISetup state = (ISetup) element;
+        HashMap parameters = new HashMap();
+        parameters.put(AUTOWIRE_ATTRIBUTE, state.getAutowire());
+        parameters.put(BEAN_ATTRIBUTE, state.getBean());
+        parameters.put(CLASS_ATTRIBUTE, state.getBeanClass());
+        parameters.put(CLASSREF_ATTRIBUTE, state.getClassRef());
+        parameters.put(METHOD_ATTRIBUTE, state.getMethod());
+        if (state.getOnError() != null) {
+            parameters.put(ONERROR_ATTRIBUTE, state.getOnError().getId());
+        }
+        writer.startTag(DECISION_STATE_ELEMENT, parameters, true);
+    }
+    
+    private void doEndSetup(IWebFlowModelElement element) {
+        writer.endTag(SETUP_ELEMENT);
     }
 
     private void doStartIf(IWebFlowModelElement element) {

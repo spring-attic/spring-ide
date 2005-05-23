@@ -18,6 +18,7 @@ package org.springframework.ide.eclipse.web.flow.core.internal.model;
 
 import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
+import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
 import org.springframework.ide.eclipse.web.flow.core.model.IPersistableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
@@ -27,8 +28,14 @@ public class Property extends WebFlowModelElement implements IProperty,
         IPersistableModelElement, ICloneableModelElement {
 
     private String name;
+    
+    private String type;
 
     private String value;
+
+    public Property() {
+        super(null, null);
+    }
 
     public Property(IWebFlowModelElement parent, String name, String value) {
         super(parent, name);
@@ -42,66 +49,17 @@ public class Property extends WebFlowModelElement implements IProperty,
         }
     }
 
-    public Property() {
-        super(null, null);
-    }
-
     /*
      * (non-Javadoc)
      * 
-     * @see org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement#getElementType()
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IConeableModelElement#applyCloneValues(org.springframework.ide.eclipse.web.flow.core.model.IConeableModelElement)
      */
-    public int getElementType() {
-        return IWebFlowModelElement.PROPERTY;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.ide.eclipse.web.flow.core.model.IProperty#setName()
-     */
-    public void setName(String name) {
-        String oldValue = this.name;
-        this.name = name;
-        super.firePropertyChange(PROPS, oldValue, name);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.ide.eclipse.web.flow.core.model.IProperty#setValue()
-     */
-    public void setValue(String value) {
-        String oldValue = this.name;
-        this.value = value;
-        super.firePropertyChange(PROPS, oldValue, value);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.ide.eclipse.web.flow.core.model.IProperty#getName()
-     */
-    public String getName() {
-        return this.name;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.ide.eclipse.web.flow.core.model.IProperty#getValue()
-     */
-    public String getValue() {
-        return this.value;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement#getElementResource()
-     */
-    public IResource getElementResource() {
-        return super.getElementParent().getElementResource();
+    public void applyCloneValues(ICloneableModelElement element) {
+        if (element instanceof Property) {
+            Property property = (Property) element;
+            setName(property.getName());
+            setValue(property.getValue());
+        }
     }
 
     /*
@@ -119,13 +77,85 @@ public class Property extends WebFlowModelElement implements IProperty,
     /*
      * (non-Javadoc)
      * 
-     * @see org.springframework.ide.eclipse.web.flow.core.model.IConeableModelElement#applyCloneValues(org.springframework.ide.eclipse.web.flow.core.model.IConeableModelElement)
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement#getElementResource()
      */
-    public void applyCloneValues(ICloneableModelElement element) {
-        if (element instanceof Property) {
-            Property property = (Property) element;
-            setName(property.getName());
-            setValue(property.getValue());
-        }
+    public IResource getElementResource() {
+        return super.getElementParent().getElementResource();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement#getElementType()
+     */
+    public int getElementType() {
+        return IWebFlowModelElement.PROPERTY;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IProperty#getName()
+     */
+    public String getName() {
+        return this.name;
+    }
+    
+    /**
+     * @return Returns the type.
+     */
+    public String getType() {
+        return type;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IProperty#getValue()
+     */
+    public String getValue() {
+        return this.value;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IProperty#setName()
+     */
+    public void setName(String name) {
+        String oldValue = this.name;
+        this.name = name;
+        super.firePropertyChange(PROPS, oldValue, name);
+    }
+    
+    /**
+     * @param type The type to set.
+     */
+    public void setType(String type) {
+        String oldValue = this.name;
+        this.type = type;
+        super.firePropertyChange(PROPS, oldValue, name);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IProperty#setValue()
+     */
+    public void setValue(String value) {
+        String oldValue = this.name;
+        this.value = value;
+        super.firePropertyChange(PROPS, oldValue, value);
+    }
+    
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IPersistable#save(org.springframework.ide.eclipse.web.flow.core.model.IModelWriter)
+     */
+    public void save(IModelWriter writer) {
+        writer.doStart(this);
+        writer.doEnd(this);
     }
 }

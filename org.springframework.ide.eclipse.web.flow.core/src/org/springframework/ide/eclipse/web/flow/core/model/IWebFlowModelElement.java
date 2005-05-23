@@ -55,6 +55,12 @@ public interface IWebFlowModelElement {
     int END_STATE = 54;
 
     int IF = 10;
+    
+    int SETUP = 11;
+    
+    int INPUT = 12;
+    
+    int OUTPUT = 13;
 
     int IF_TRANSITION = 81;
 

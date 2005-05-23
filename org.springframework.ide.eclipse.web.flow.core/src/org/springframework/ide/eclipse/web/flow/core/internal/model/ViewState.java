@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElemen
 import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
 import org.springframework.ide.eclipse.web.flow.core.model.IPersistableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
+import org.springframework.ide.eclipse.web.flow.core.model.ISetup;
 import org.springframework.ide.eclipse.web.flow.core.model.IViewState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
@@ -30,6 +31,8 @@ public class ViewState extends AbstractTransitionableFrom implements
         IViewState, IPersistableModelElement, ICloneableModelElement {
 
     private String view;
+    
+    private ISetup setup;
 
     public ViewState(IWebFlowModelElement parent, String id, String viewName) {
         super(parent, id);
@@ -82,14 +85,18 @@ public class ViewState extends AbstractTransitionableFrom implements
      */
     public void save(IModelWriter writer) {
         writer.doStart(this);
+
+        if (this.setup != null) {
+            ((IPersistableModelElement) this.setup).save(writer);
+        }
+        super.save(writer);
         Iterator iter = this.getProperties().iterator();
         while (iter.hasNext()) {
             IWebFlowModelElement element = (IWebFlowModelElement) iter.next();
             if (element instanceof IPersistableModelElement) {
                 ((IPersistableModelElement) element).save(writer);
             }
-        }
-        super.save(writer);
+        }         
         writer.doEnd(this);
     }
 
@@ -102,6 +109,10 @@ public class ViewState extends AbstractTransitionableFrom implements
         ViewState state = new ViewState();
         state.setId(getId());
         state.setView(getView());
+        state.setAutowire(getAutowire());
+        state.setBean(getBean());
+        state.setBeanClass(getBeanClass());
+        state.setClassRef(getClassRef());
         state.setElementName(getElementName());
         for (int i = 0; i < this.getProperties().size(); i++) {
             Property property = (Property) this.getProperties().get(i);
@@ -120,6 +131,10 @@ public class ViewState extends AbstractTransitionableFrom implements
             IViewState state = (IViewState) element;
             setView(state.getView());
             setId(state.getId());
+            setAutowire(state.getAutowire());
+            setBean(state.getBean());
+            setBeanClass(state.getBeanClass());
+            setClassRef(state.getClassRef());
             Property[] props = (Property[]) this.getProperties().toArray(
                     new Property[this.getProperties().size()]);
             for (int i = 0; i < props.length; i++) {
@@ -130,5 +145,21 @@ public class ViewState extends AbstractTransitionableFrom implements
             }
         }
 
+    }
+
+    /* (non-Javadoc)
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IViewState#getSetup()
+     */
+    public ISetup getSetup() {
+        return this.setup;
+    }
+
+    /* (non-Javadoc)
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IViewState#setSetup(org.springframework.ide.eclipse.web.flow.core.model.ISetup)
+     */
+    public void setSetup(ISetup setup) {
+        ISetup oldValue = this.setup;
+        this.setup = setup;
+        super.firePropertyChange(PROPS, oldValue, setup);
     }
 }
