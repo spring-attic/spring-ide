@@ -48,9 +48,7 @@ public class ShowGraphAction
     }
 
     public void run(IAction action) {
-        IModel model = BeansCorePlugin.getModel();
-        IModelElement element = model.getElement(elementId);
-        GraphEditorInput input = new GraphEditorInput(element, null);
+        GraphEditorInput input = new GraphEditorInput(elementId);
         SpringUIUtils.openInEditor(input, GraphEditor.EDITOR_ID);
     }
 }

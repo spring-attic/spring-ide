@@ -20,13 +20,9 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.part.IShowInTarget;
-import org.eclipse.ui.part.ShowInContext;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
-import org.springframework.ide.eclipse.beans.ui.views.BeansView;
-import org.springframework.ide.eclipse.core.model.IModel;
-import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
+import org.springframework.ide.eclipse.beans.ui.views.BeansViewLocation;
 
 public class ShowInView
         extends Action implements IViewActionDelegate {
@@ -48,11 +44,7 @@ public class ShowInView
     }
 
     public void run(IAction action) {
-        IModel model = BeansCorePlugin.getModel();
-        IModelElement element = model.getElement(elementId);
-        IViewPart view = BeansView.showView();  
-        if (view instanceof IShowInTarget) {
-            ((IShowInTarget) view).show(new ShowInContext(element, null));
-        }
+        BeansViewLocation location = BeansUIUtils.getBeansViewLocation(elementId);
+        location.show();
     }
 }
