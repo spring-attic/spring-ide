@@ -30,6 +30,7 @@
       <import plugin="org.springframework.ide.eclipse.core"/>
       <import plugin="org.springframework.ide.eclipse.beans.ui.graph"/>
       <import plugin="org.springframework.ide.eclipse.beans.ui"/>
+      <import plugin="org.eclipse.ui"/>
    </requires>
    <extension
          point="org.eclipse.ui.editors">
@@ -61,5 +62,11 @@
                id="org.springframework.ide.eclipse.web.flow.ui.actions.showGraph">
          </action>
       </viewerContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.elementFactories">
+      <factory
+            class="org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowEditorInputFactory"
+            id="org.springframework.ide.eclipse.web.flow.ui.editor.webFlowEditorInputFactory"/>
    </extension>
 </plugin>

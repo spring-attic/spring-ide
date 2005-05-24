@@ -23,6 +23,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.springframework.ide.eclipse.web.flow.core.model.IAction;
+import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 
@@ -33,7 +34,7 @@ class PropertiesContentProvider implements IStructuredContentProvider,
 
     private TableViewer viewer;
 
-    public PropertiesContentProvider(IAction project, TableViewer viewer) {
+    public PropertiesContentProvider(IPropertyEnabled project, TableViewer viewer) {
         this.project = project;
         this.viewer = viewer;
     }

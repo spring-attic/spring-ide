@@ -1,17 +1,17 @@
 /*
  * Copyright 2002-2005 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package org.springframework.ide.eclipse.web.flow.ui.editor;
@@ -19,8 +19,12 @@ package org.springframework.ide.eclipse.web.flow.ui.editor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.core.model.IModel;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.web.flow.core.WebFlowCorePlugin;
 import org.springframework.ide.eclipse.web.flow.core.WebFlowDefinitionException;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowConfig;
@@ -31,7 +35,9 @@ import org.springframework.ide.eclipse.web.flow.ui.model.ConfigNode;
 import org.springframework.ide.eclipse.web.flow.ui.model.ConfigSetNode;
 import org.springframework.ide.eclipse.web.flow.ui.model.INode;
 
-public class WebFlowEditorInput implements IEditorInput {
+public class WebFlowEditorInput implements IEditorInput, IPersistableElement {
+
+    private String elementId;
 
     private IFile file;
 
@@ -44,7 +50,12 @@ public class WebFlowEditorInput implements IEditorInput {
     private String toolTip;
 
     public WebFlowEditorInput(IFile node) {
+        this(node, null);
+    }
+    
+    public WebFlowEditorInput(IFile node, String elementId) {
         this.file = node;
+        this.elementId = elementId;
     }
 
     public WebFlowEditorInput(INode node) {
@@ -55,6 +66,13 @@ public class WebFlowEditorInput implements IEditorInput {
             toolTip = node.getName();
             file = ((ConfigNode) node).getConfigFile();
             parent = ((ConfigNode) node).getParent();
+
+            if (this.getWebFlowConfigSet() != null
+                    && this.getWebFlowConfigSet().getBeansConfigSet() != null) {
+                this.elementId = this.getWebFlowConfigSet().getBeansConfigSet()
+                        .getElementID();
+            }
+
         }
     }
 
@@ -77,11 +95,25 @@ public class WebFlowEditorInput implements IEditorInput {
     }
 
     public IBeansConfigSet getBeansConfigSet() {
-        IWebFlowConfigSet configSet = this.getWebFlowConfigSet();
-        if (configSet != null) {
-            return configSet.getBeansConfigSet();
+        if (this.elementId != null) {
+            IModel model = BeansCorePlugin.getModel(); 
+            IModelElement element = model.getElement(elementId);
+            return (IBeansConfigSet) element;
         }
         return null;
+    }
+    
+    public String getBeansConfigSetElementId() {
+        return this.elementId;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.ui.IPersistableElement#getFactoryId()
+     */
+    public String getFactoryId() {
+        return WebFlowEditorInputFactory.getFactoryId();
     }
 
     public IFile getFile() {
@@ -97,7 +129,7 @@ public class WebFlowEditorInput implements IEditorInput {
     }
 
     public IPersistableElement getPersistable() {
-        return null;
+        return this;
     }
 
     public IWebFlowState getRootState() throws WebFlowDefinitionException {
@@ -125,5 +157,14 @@ public class WebFlowEditorInput implements IEditorInput {
 
     public int hashCode() {
         return this.getFile().hashCode();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.ui.IPersistableElement#saveState(org.eclipse.ui.IMemento)
+     */
+    public void saveState(IMemento memento) {
+        WebFlowEditorInputFactory.saveState(memento, this);
     }
 }
