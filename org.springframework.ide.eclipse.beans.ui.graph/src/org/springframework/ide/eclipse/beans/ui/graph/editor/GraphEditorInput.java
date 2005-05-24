@@ -66,10 +66,7 @@ public class GraphEditorInput implements IEditorInput {
 	 * 				 					specified 
 	 */
 	public GraphEditorInput(String elementID) {
-		this(BeansCorePlugin.getModel().getElement(elementID),
-			BeansCorePlugin.getModel().getElement(elementID) instanceof IBean ?
-			BeansCorePlugin.getModel().getElement(elementID).getElementParent()
-																	   : null);
+		this(BeansCorePlugin.getModel().getElement(elementID), getContext(elementID));
 	}
 
 	/**
@@ -107,6 +104,11 @@ public class GraphEditorInput implements IEditorInput {
 		return element;
 	}
 
+    private static IModelElement getContext(String elementId) {
+        IModelElement element = BeansCorePlugin.getModel().getElement(elementId);
+        return getContext(element);
+    }
+    
 	/**
 	 * Creates a list with all beans which are referenced from given model
 	 * element. Bean look-up is done from the specified context.
