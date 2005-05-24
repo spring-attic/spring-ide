@@ -125,7 +125,8 @@ public class WebFlowConfigSet extends WebFlowModelElement implements
      * @see org.springframework.ide.eclipse.web.flow.core.model.IWebFlowConfigSet#getBeanConfigSet()
      */
     public IBeansConfigSet getBeansConfigSet() {
-        if (this.beansConfigSet == null && this.beansConfigSetName != null) {
+        if (this.beansConfigSetName != null) {
+            this.beansConfigSet = null;
             IBeansProject beansProject = BeansCorePlugin.getModel().getProject(
                     this.getElementResource().getProject());
             Collection configSets = beansProject.getConfigSets();
