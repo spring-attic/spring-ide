@@ -24,7 +24,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.views.BeansViewLocation;
 
-public class ShowInView
+public class ShowInViewAction
         extends Action implements IViewActionDelegate {
 
     private IViewPart view;
