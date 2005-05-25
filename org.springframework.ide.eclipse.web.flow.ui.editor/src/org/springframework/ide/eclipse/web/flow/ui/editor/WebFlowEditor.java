@@ -1,17 +1,17 @@
 /*
  * Copyright 2002-2005 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package org.springframework.ide.eclipse.web.flow.ui.editor;
@@ -107,6 +107,8 @@ import org.springframework.ide.eclipse.web.flow.ui.editor.parts.StatePartFactory
 import org.springframework.ide.eclipse.web.flow.ui.editor.parts.StateTreeEditPartFactory;
 
 public class WebFlowEditor extends GraphicalEditorWithPalette {
+    
+    private boolean isCurrentlySaving = false;
 
     private class OutlinePage extends ContentOutlinePage implements IAdaptable {
 
@@ -148,7 +150,8 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
                     showPage(ID_OUTLINE);
                 }
             };
-            showOutlineAction.setImageDescriptor(WebFlowImages.DESC_OBJS_OUTLINE); //$NON-NLS-1$
+            showOutlineAction
+                    .setImageDescriptor(WebFlowImages.DESC_OBJS_OUTLINE); //$NON-NLS-1$
             showOutlineAction.setToolTipText("Show tree outline");
             tbm.add(showOutlineAction);
             showOverviewAction = new Action() {
@@ -252,8 +255,7 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
                 pageBook.showPage(outline);
                 if (thumbnail != null)
                     thumbnail.setVisible(false);
-            }
-            else if (id == ID_OVERVIEW) {
+            } else if (id == ID_OVERVIEW) {
                 if (thumbnail == null)
                     initializeOverview();
                 showOutlineAction.setChecked(false);
@@ -279,8 +281,7 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
             try {
                 if (delta != null)
                     delta.accept(this);
-            }
-            catch (CoreException exception) {
+            } catch (CoreException exception) {
                 // What should be done here?
             }
         }
@@ -309,8 +310,7 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
                                 closeEditor(false);
                         }
                     });
-                }
-                else { // else if it was moved or renamed
+                } else { // else if it was moved or renamed
                     final IFile newFile = ResourcesPlugin.getWorkspace()
                             .getRoot().getFile(delta.getMovedToPath());
                     display.asyncExec(new Runnable() {
@@ -320,12 +320,25 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
                         }
                     });
                 }
-            }
-            else if (delta.getKind() == IResourceDelta.CHANGED) {
-                if (!isDirty()
+            } else if (delta.getKind() == IResourceDelta.CHANGED) {
+                if (!isDirty() || isCurrentlySaving) {
+                    final IFile newFile = ResourcesPlugin.getWorkspace()
+                            .getRoot().getFile(delta.getFullPath());
+                    Display display = getSite().getShell().getDisplay();
+                    display.asyncExec(new Runnable() {
+
+                        public void run() {
+                            setInput(new WebFlowEditorInput(newFile));
+                            getCommandStack().flush();
+                            initializeGraphicalViewer();
+                            outlinePage.initializeOutlineViewer();
+                        }
+                    });
+                } else if (isDirty()
                         && MessageDialog
                                 .openQuestion(
-                                        WebFlowPlugin.getActiveWorkbenchWindow()
+                                        WebFlowPlugin
+                                                .getActiveWorkbenchWindow()
                                                 .getShell(),
                                         "File Changed",
                                         "The file has been changed on the file system. Do you want to load the changes?")) {
@@ -371,8 +384,7 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
                 if (dialog.open() == 0) {
                     if (!performSaveAs())
                         partActivated(part);
-                }
-                else {
+                } else {
                     closeEditor(false);
                 }
             }
@@ -419,8 +431,7 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
                 setSavePreviouslyNeeded(true);
                 firePropertyChange(IEditorPart.PROP_DIRTY);
             }
-        }
-        else {
+        } else {
             setSavePreviouslyNeeded(false);
             firePropertyChange(IEditorPart.PROP_DIRTY);
         }
@@ -458,9 +469,10 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
         ContextMenuProvider provider = new WebFlowContextMenuProvider(
                 getGraphicalViewer(), getActionRegistry());
         getGraphicalViewer().setContextMenu(provider);
-        getSite().registerContextMenu(
-                "org.springframework.ide.eclipse.web.flow.ui.editor.contextmenu", //$NON-NLS-1$
-                provider, getGraphicalViewer());
+        getSite()
+                .registerContextMenu(
+                        "org.springframework.ide.eclipse.web.flow.ui.editor.contextmenu", //$NON-NLS-1$
+                        provider, getGraphicalViewer());
 
     }
 
@@ -491,11 +503,11 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
         action = new OpenConfigFileAction(this);
         registry.registerAction(action);
         getSelectionActions().add(action.getId());
-        
+
         action = new OpenBeansGraphAction(this);
         registry.registerAction(action);
         getSelectionActions().add(action.getId());
-        
+
         action = new OpenBeansViewAction(this);
         registry.registerAction(action);
         getSelectionActions().add(action.getId());
@@ -531,7 +543,7 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
      */
     public void doSave(IProgressMonitor monitor) {
         try {
-
+            this.isCurrentlySaving = true;
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             createOutputStream(out);
             IFile file = ((WebFlowEditorInput) getEditorInput()).getFile();
@@ -539,8 +551,8 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
                     false, monitor);
             out.close();
             getCommandStack().markSaveLocation();
-        }
-        catch (Exception e) {
+            this.isCurrentlySaving = false;
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -640,10 +652,13 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
     public boolean performSaveAs() {
         SaveAsDialog dialog = new SaveAsDialog(getSite().getWorkbenchWindow()
                 .getShell());
-        dialog.setOriginalFile(((WebFlowEditorInput) getEditorInput()).getFile());
+        dialog.setOriginalFile(((WebFlowEditorInput) getEditorInput())
+                .getFile());
         dialog.open();
         IPath path = dialog.getResult();
-
+        
+        this.isCurrentlySaving = true;
+        
         if (path == null)
             return false;
 
@@ -660,8 +675,8 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
                     file.create(new ByteArrayInputStream(out.toByteArray()),
                             true, monitor);
                     out.close();
-                }
-                catch (Exception e) {
+                    isCurrentlySaving = false;
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -672,16 +687,14 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
                     .run(false, true, op);
             setInput(new WebFlowEditorInput((IFile) file));
             getCommandStack().markSaveLocation();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         try {
             superSetInput(new WebFlowEditorInput(file));
             getCommandStack().markSaveLocation();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -701,8 +714,7 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
         setPartName(this.file.getName());
         try {
             diagram = ((WebFlowEditorInput) input).getRootState();
-        }
-        catch (WebFlowDefinitionException e) {
+        } catch (WebFlowDefinitionException e) {
             diagram = new WebFlowState(null, null);
             MessageDialog.openError(WebFlowPlugin.getActiveWorkbenchWindow()
                     .getShell(), "Error opening Spring Web Flow config file", e
