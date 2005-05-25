@@ -42,7 +42,7 @@ public class WebFlowCorePlugin extends Plugin {
      * Plugin identifier for Spring Web Flow Core (value
      * <code>org.springframework.ide.web.flow.core</code>).
      */
-    public static final String PLUGIN_ID = "org.springframework.ide.web.flow.core";
+    public static final String PLUGIN_ID = "org.springframework.ide.eclipse.web.flow.core";
 
     private static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
 

@@ -22,6 +22,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXParseException;
 
 public class WebFlowDtdResolver implements EntityResolver {
 
@@ -30,7 +31,7 @@ public class WebFlowDtdResolver implements EntityResolver {
     private static final String SEARCH_PACKAGE = "/org/springframework/web/flow/config/";
 
     public InputSource resolveEntity(String publicId, String systemId)
-            throws IOException {
+            throws SAXParseException {
         if (systemId != null
                 && systemId.indexOf(DTD_NAME) > systemId.lastIndexOf("/")) {
             String dtdFile = systemId.substring(systemId.indexOf(DTD_NAME));
@@ -43,10 +44,10 @@ public class WebFlowDtdResolver implements EntityResolver {
                 return source;
             }
             catch (IOException ex) {
-                throw new IOException("Web Flow Dtd not found");
+                throw new SAXParseException("Spring WebFlow Dtd not found", publicId, systemId, 1, 1);
             }
         }
-        throw new IOException("Spring Web Flow Dtd not declared");
+        throw new SAXParseException("Spring WebFlow Dtd not declared", publicId, systemId, 1, 1);
     }
 
 }

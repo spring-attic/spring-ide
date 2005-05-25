@@ -23,4 +23,22 @@
       <import plugin="org.springframework.ide.eclipse.core"/>
       <import plugin="org.springframework.ide.eclipse.beans.core"/>
    </requires>
+
+   <extension
+         id="problemmarker"
+         name="%webflowProblemMarker"
+         point="org.eclipse.core.resources.markers">
+      <super type="org.springframework.ide.eclipse.core.problemmarker"/>
+      <persistent value="true"/>
+      <attribute name="errorCode"/>
+      <attribute name="beanID"/>
+      <attribute name="errorData"/>
+   </extension>
+
+   <extension
+	     id="webflowvalidator"
+         name="%webflowValidator"
+         point="org.springframework.ide.eclipse.core.builders">
+      <run class="org.springframework.ide.eclipse.web.flow.core.internal.project.WebFlowProjectValidator"/>
+   </extension>
 </plugin>
