@@ -32,8 +32,19 @@ import org.springframework.ide.eclipse.core.model.IModel;
  */
 public interface IBeansModel extends IModel {
 
+	/**
+	 * Returns the beans project for given project.
+	 * @param project  the project a beans project is requested for
+	 */
 	IBeansProject getProject(IProject project);
 
+	/**
+	 * Returns the beans project for given project name or full-qualified
+	 * config file name (including project name).
+	 * <br>
+	 * External config files (with a leading '/') are handled too.  
+	 * @param name  the name of a project or a full-qualified config file name
+	 */
 	IBeansProject getProject(String name);
 
 	/**
@@ -43,7 +54,20 @@ public interface IBeansModel extends IModel {
 	 */
 	Collection getProjects();
 
+	/**
+	 * Returns the beans config for given config file.
+	 * @param configFile  the config file a beans config is requested for
+	 */
 	IBeansConfig getConfig(IFile configFile);
+
+	/**
+	 * Returns the beans config for given full-qualified config file name
+	 * (including project name).
+	 * <br>
+	 * External config files (with a leading '/') are handled too.  
+	 * @param name  the name of a config file a beans config is requested for
+	 */
+	IBeansConfig getConfig(String configName);
 
 	/**
 	 * Returns a list of all <code>IBeanConfig</code>s which contain a bean with

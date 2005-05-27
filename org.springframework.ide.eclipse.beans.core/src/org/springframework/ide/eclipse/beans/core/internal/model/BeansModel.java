@@ -121,6 +121,13 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	}
 
 	public IBeansProject getProject(String name) {
+
+		// If a config name given then extract project name
+		// External config files (with a leading '/') are handled too
+		int configNamePos = name.indexOf('/', (name.charAt(0) == '/' ? 1 : 0));
+		if (configNamePos > 0) {
+			name = name.substring(0, configNamePos);
+		}
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IProject project = workspace.getRoot().getProject(name);
 		return getProject(project);
@@ -150,6 +157,24 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			IBeansProject project = getProject(configFile.getProject());
 			if (project != null) {
 				return project.getConfig(configFile);
+			}
+		}
+		return null;
+	}
+
+	public IBeansConfig getConfig(String configName) {
+
+		// Extract config name from given full-qualified name
+		// External config files (with a leading '/') are handled too
+		int configNamePos = configName.indexOf('/',
+										(configName.charAt(0) == '/' ? 1 : 0));
+		if (configNamePos > 0) {
+			String projectName = configName.substring(1, configNamePos);
+			configName = configName.substring(configNamePos + 1);
+			IBeansProject project = BeansCorePlugin.getModel().getProject(
+																  projectName);
+			if (project != null) {
+				return project.getConfig(configName);
 			}
 		}
 		return null;

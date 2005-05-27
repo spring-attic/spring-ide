@@ -218,7 +218,7 @@ public class BeansProject extends AbstractSourceModelElement
 		while (iter.hasNext()) {
 			String config = (String) iter.next();
 			if (!configs.contains(config)) {
-				IFile file = getConfigFile(config);
+				IFile file = getConfig(config).getConfigFile();
 				BeansCoreUtils.deleteProblemMarkers(file);
 				toBeRemoved.add(config);
 			}
@@ -244,18 +244,6 @@ public class BeansProject extends AbstractSourceModelElement
 		BeansProjectDescription description = getDescription();
 		description.setConfigSets(configSets);
 		BeansProjectDescriptionWriter.write(project, description);
-	}
-
-	/**
-	 * Deletes all problem markers from config files.
-	 */
-	public void deleteProblemMarkers() {
-		BeansProjectDescription description = getDescription();
-		Iterator iter = description.getConfigNames().iterator();
-		while (iter.hasNext()) {
-			IFile file = getConfigFile((String) iter.next());
-			BeansCoreUtils.deleteProblemMarkers(file);
-		}
 	}
 
 	public String toString() {
