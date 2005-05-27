@@ -25,6 +25,7 @@ import java.util.Map;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -50,7 +51,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  * This list of beans is accessible via <code<>getBeans()</code>.
  * This context used for bean look-up is accessible via <code<>getContext()</code>.
  */
-public class GraphEditorInput implements IEditorInput {
+public class GraphEditorInput implements IEditorInput, IPersistableElement {
 
 	private IModelElement element;
 	private IModelElement context;
@@ -166,7 +167,6 @@ public class GraphEditorInput implements IEditorInput {
 			throw new IllegalArgumentException("Unsupported model element " +
 											   element);
 		}
-
 		createBeansMap();
 	}
 
@@ -219,6 +219,13 @@ public class GraphEditorInput implements IEditorInput {
 		return beans;
 	}
 
+	public Object getAdapter(Class adapter) {
+		if (adapter == IModelElement.class) {
+			return getElement();
+		}
+		return null;
+	}
+
 	public boolean exists() {
 		return false;
 	}
@@ -228,14 +235,46 @@ public class GraphEditorInput implements IEditorInput {
 	}
 
 	public IPersistableElement getPersistable() {
-		return null;
+		return this;
 	}
 
 	public String getToolTipText() {
 		return toolTip;
 	}
 
-	public Object getAdapter(Class adapter) {
-		return null;
+	public String getFactoryId() {
+		return GraphEditorInputFactory.getFactoryId();
 	}
+
+	public void saveState(IMemento memento) {
+		GraphEditorInputFactory.saveState(memento, this);
+	}
+
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        } else if (obj instanceof GraphEditorInput) {
+			GraphEditorInput input = (GraphEditorInput) obj;
+			IModelElement element = getElement();
+			IModelElement context = getContext();
+			if (input.getElement() == element &&
+											   input.getContext() == context) {
+				return true;
+			} else if (input.getElement().equals(element)) {
+				if (input.getContext() == context ||
+										(input.getContext() != null &&
+										 input.getContext().equals(context))) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+    public int hashCode() {
+        Object element = getElement();
+        Object context = getContext();
+        return (element == null ? 0 : element.hashCode()) ^
+               (context == null ? 0 : context.hashCode());
+    }
 }

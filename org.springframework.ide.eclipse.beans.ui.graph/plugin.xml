@@ -67,4 +67,11 @@
       </viewerContribution>
    </extension>
 
+   <extension
+         point="org.eclipse.ui.elementFactories">
+      <factory
+            class="org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInputFactory"
+            id="org.springframework.ide.eclipse.beans.ui.graph.editor.inputfactory"/>
+   </extension>
+
 </plugin>
