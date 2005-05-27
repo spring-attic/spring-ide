@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<toc label="Spring IDE Support" topic="index.html">
+<toc label="Spring IDE" topic="index.html">
    <topic label="Features" href="index.html#features"/>
    <topic label="Requirements" href="index.html#requirements"/>
    <topic label="Known Limitations" href="index.html#limitations"/>
