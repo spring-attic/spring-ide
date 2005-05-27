@@ -30,7 +30,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
@@ -168,14 +167,7 @@ public class ConfigNode extends AbstractNode {
 	private void setBeansConfig(ProjectNode project) {
 		String configName = getName();
 		if (configName.charAt(0) == '/') {
-			int configNamePos = configName.indexOf('/', 1);
-			String projectName = configName.substring(1, configNamePos);
-			IBeansProject proj = BeansCorePlugin.getModel().getProject(
-																   projectName);
-			configName  = configName.substring(configNamePos + 1);
-			if (proj != null) { 
-				config = proj.getConfig(configName);
-			}
+			config = BeansCorePlugin.getModel().getConfig(configName);
 			setFlags(INode.FLAG_IS_EXTERNAL);
 		} else {
 			config = project.getBeansProject().getConfig(configName);
