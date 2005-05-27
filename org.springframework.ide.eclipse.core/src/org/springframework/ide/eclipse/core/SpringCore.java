@@ -43,7 +43,7 @@ public class SpringCore extends Plugin {
 										"org.springframework.ide.eclipse.core";
 	/**
 	 * The identifier for the Spring project builder
-	 * (value <code>"org.eclipse.jdt.core.springbuilder"</code>).
+	 * (value <code>"org.springframework.ide.eclipse.core.springbuilder"</code>).
 	 */
 	public static final String BUILDER_ID = PLUGIN_ID + ".springbuilder";
 
@@ -56,6 +56,12 @@ public class SpringCore extends Plugin {
 	 * @see org.eclipse.core.resources.IProject#hasNature(java.lang.String)
 	 */
 	public static final String NATURE_ID = PLUGIN_ID + ".springnature";
+
+	/**
+	 * The identifier for the Spring problem marker
+	 * (value <code>"org.springframework.ide.eclipse.core.problemmarker"</code>).
+	 */
+	public static final String MARKER_ID = PLUGIN_ID + ".problemmarker";
 
 	private static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
 

@@ -54,17 +54,13 @@ public class SpringCoreUtils {
 	public static void removeProjectNature(IProject project, String nature) {
 		if (project != null && nature != null) {
 			try {
-				if (project.hasNature(nature)) {
+				if (project.exists() && project.hasNature(nature)) {
 
-					// first remove problem markers from Spring beans project
+					// first remove all problem markers (including the
+					// inherited ones) from Spring beans project
 					if (nature.equals(SpringCore.NATURE_ID)) {
-// TODO find a way to remove all problem markers which are inherited from core's
-// problem marker
-//						SpringProject proj = (SpringProject)
-//								 CorePlugin.getModel().getProject(project);
-//						if (proj != null) {
-//							proj.deleteProblemMarkers();
-//						}
+						project.deleteMarkers(SpringCore.MARKER_ID, true,
+											  IResource.DEPTH_INFINITE);
 					}
 
 					// now remove project nature
