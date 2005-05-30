@@ -33,4 +33,8 @@ public interface IBeanReference extends IPropertyEnabled {
     void setAutowire(String autowire);
 
     void setClassRef(String classRef);
+    
+    void setMethod(String method);
+    
+    String getMethod();
 }

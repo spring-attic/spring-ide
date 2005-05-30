@@ -18,7 +18,9 @@ public abstract class AbstractModelElement extends WebFlowModelElement {
     private String beanClass;
 
     private String classRef;
-
+    
+    private String method;
+    
     private List properties = new ArrayList();
     
     protected AbstractModelElement(IWebFlowModelElement parent, String name) {
@@ -92,6 +94,13 @@ public abstract class AbstractModelElement extends WebFlowModelElement {
         return classRef;
     }
 
+    /**
+     * @return Returns the method.
+     */
+    public String getMethod() {
+        return method;
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -151,6 +160,14 @@ public abstract class AbstractModelElement extends WebFlowModelElement {
         String oldValue = this.classRef;
         this.classRef = classRef;
         super.firePropertyChange(PROPS, oldValue, classRef);
+    }
+    /**
+     * @param method The method to set.
+     */
+    public void setMethod(String method) {
+        String oldValue = this.method;
+        this.method = method;
+        super.firePropertyChange(PROPS, oldValue, method);
     }
 }
 

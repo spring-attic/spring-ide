@@ -21,6 +21,7 @@ import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElemen
 import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
 import org.springframework.ide.eclipse.web.flow.core.model.IPersistableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
+import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 
@@ -41,11 +42,8 @@ public class Property extends WebFlowModelElement implements IProperty,
         super(parent, name);
         this.value = value;
         this.name = name;
-        if (parent instanceof Action) {
-            ((Action) parent).addProperty(this);
-        }
-        else if (parent instanceof IState) {
-            ((IState) parent).addProperty(this);
+        if (parent instanceof IPropertyEnabled) {
+            ((IPropertyEnabled) parent).addProperty(this);
         }
     }
 

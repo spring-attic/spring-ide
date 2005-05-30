@@ -212,6 +212,7 @@ public class WebFlowState extends AbstractTransitionableFrom implements
         state.setBean(getBean());
         state.setBeanClass(getBeanClass());
         state.setClassRef(getClassRef());
+        //state.setStartState((IState) ((ICloneableModelElement) this.startState));
         state.setElementName(getElementName());
         for (int i = 0; i < super.getProperties().size(); i++) {
             Property property = (Property) super.getProperties().get(i);
