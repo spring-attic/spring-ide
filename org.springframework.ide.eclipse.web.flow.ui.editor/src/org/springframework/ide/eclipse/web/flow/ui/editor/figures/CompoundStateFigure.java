@@ -45,7 +45,12 @@ public class CompoundStateFigure extends SubgraphFigure {
         g.fillRectangle(r.x, r.y, 5, r.height);
         g.fillRectangle(r.right() - 5, r.y, 5, r.height);
         g.fillRectangle(r.x, r.bottom() - 5, r.width, 5);
-        g.fillRectangle(r.x, r.y, r.width, 20);
+        if (getHeader().getPreferredSize().height < 20) {
+            g.fillRectangle(r.x, r.y, r.width, 20);
+        }
+        else {
+            g.fillRectangle(r.x, r.y, r.width, 30);
+        }
         Rectangle tempRect = new Rectangle();
         tempRect.setBounds(this.getBounds());
         tempRect.width--;

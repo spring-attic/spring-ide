@@ -19,11 +19,9 @@ package org.springframework.ide.eclipse.web.flow.ui.editor.dialogs;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -40,20 +38,22 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.web.flow.core.WebFlowCoreUtils;
-import org.springframework.ide.eclipse.web.flow.core.internal.model.Property;
+import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IDecisionState;
 import org.springframework.ide.eclipse.web.flow.core.model.IIf;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
+import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
 import org.springframework.ide.eclipse.web.flow.ui.editor.model.WebFlowModelLabelProvider;
 
-public class DecisionStatePropertiesDialog extends TitleAreaDialog {
+public class DecisionStatePropertiesDialog extends TitleAreaDialog implements
+        IDialogValidator {
 
     private class IfContentProvider implements IStructuredContentProvider {
 
@@ -74,7 +74,7 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog {
         }
     }
 
-    private Button addButton;
+    private BeanReferencePropertiesComposite beanProperties;
 
     private SelectionListener buttonListener = new SelectionAdapter() {
 
@@ -83,11 +83,11 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog {
         }
     };
 
-    private TableViewer configsViewer2;
-
     private IDecisionState decisionState;
 
     private IDecisionState decisionStateClone;
+
+    private Button editButton;
 
     private int LABEL_WIDTH = 70;
 
@@ -99,7 +99,9 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog {
 
     private IWebFlowModelElement parent;
 
-    private Button removeButton;
+    private PropertiesComposite properties;
+
+    private TableViewer configsViewer;
 
     public DecisionStatePropertiesDialog(Shell parentShell,
             IWebFlowModelElement parent, IDecisionState state) {
@@ -113,6 +115,36 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog {
     protected void buttonPressed(int buttonId) {
         if (buttonId == IDialogConstants.OK_ID) {
             this.decisionStateClone.setId(trimString(getId()));
+            if (this.beanProperties.useBeanReference()) {
+                if (this.beanProperties.getRadioBeanRef()) {
+                    this.decisionStateClone.setBean(this.beanProperties
+                            .getBeanText());
+                    this.decisionStateClone.setBeanClass(null);
+                    this.decisionStateClone.setAutowire(null);
+                    this.decisionStateClone.setClassRef(null);
+                } else if (this.beanProperties.getRadioClass()) {
+                    this.decisionStateClone.setBean(null);
+                    this.decisionStateClone
+                            .setBeanClass(trimString(this.beanProperties
+                                    .getClassText()));
+                    this.decisionStateClone
+                            .setAutowire(trimString(this.beanProperties
+                                    .getAutowireText()));
+                    this.decisionStateClone.setClassRef(null);
+                } else if (this.beanProperties.getRadioClassRef()) {
+                    this.decisionStateClone.setBean(null);
+                    this.decisionStateClone.setBeanClass(null);
+                    this.decisionStateClone.setAutowire(null);
+                    this.decisionStateClone.setClassRef(this.beanProperties
+                            .getClassRefText());
+                }
+            } else {
+                this.decisionStateClone.setBean(null);
+                this.decisionStateClone.setBeanClass(null);
+                this.decisionStateClone.setAutowire(null);
+                this.decisionStateClone.setClassRef(null);
+            }
+
             ((ICloneableModelElement) this.decisionState)
                     .applyCloneValues((ICloneableModelElement) this.decisionStateClone);
         }
@@ -136,8 +168,7 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog {
         nameText.setFocus();
         if (this.decisionState != null && this.decisionState.getId() != null) {
             okButton.setEnabled(true);
-        }
-        else {
+        } else {
             okButton.setEnabled(false);
         }
     }
@@ -158,7 +189,17 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog {
         composite.setLayout(layout);
         composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-        Composite nameGroup = new Composite(composite, SWT.NULL);
+        TabFolder folder = new TabFolder(composite, SWT.NULL);
+        TabItem item1 = new TabItem(folder, SWT.NULL);
+        item1.setText("General");
+        item1.setImage(getImage());
+        TabItem item2 = new TabItem(folder, SWT.NULL);
+        item2.setText("If Criteria");
+        item2.setImage(WebFlowImages.getImage(WebFlowImages.IMG_OBJS_IF));
+        TabItem item3 = new TabItem(folder, SWT.NULL);
+        TabItem item4 = new TabItem(folder, SWT.NULL);
+
+        Composite nameGroup = new Composite(folder, SWT.NULL);
         nameGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         GridLayout layout1 = new GridLayout();
         layout1.numColumns = 2;
@@ -178,7 +219,9 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog {
             }
         });
 
-        Group groupActionType = new Group(composite, SWT.NULL);
+        item1.setControl(nameGroup);
+
+        Group groupActionType = new Group(folder, SWT.NULL);
         GridLayout layoutAttMap = new GridLayout();
         layoutAttMap.marginWidth = 3;
         layoutAttMap.marginHeight = 3;
@@ -206,7 +249,8 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog {
                 handleTableSelectionChanged();
             }
         });
-        final TableViewer configsViewer = new TableViewer(configsTable);
+
+        configsViewer = new TableViewer(configsTable);
         configsViewer.setContentProvider(new IfContentProvider(
                 this.decisionStateClone));
         configsViewer.setLabelProvider(new WebFlowModelLabelProvider());
@@ -218,7 +262,7 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog {
         layout.marginWidth = 0;
         buttonArea.setLayout(layout);
         buttonArea.setLayoutData(new GridData(GridData.FILL_VERTICAL));
-        Button editButton = new Button(buttonArea, SWT.PUSH);
+        editButton = new Button(buttonArea, SWT.PUSH);
         editButton.setText("Edit");
         GridData data1 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
         data1.widthHint = 40;
@@ -241,99 +285,15 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog {
             }
         });
 
-        Group groupPropertyType = new Group(composite, SWT.NULL);
-        GridLayout layoutPropMap = new GridLayout();
-        layoutPropMap.marginWidth = 3;
-        layoutPropMap.marginHeight = 3;
-        groupPropertyType.setLayout(layoutPropMap);
-        groupPropertyType.setText(" Properties ");
-        groupPropertyType.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        item2.setControl(groupActionType);
 
-        Composite tableAndButtons2 = new Composite(groupPropertyType, SWT.NONE);
-        tableAndButtons2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        GridLayout layout3 = new GridLayout();
-        layout3.marginHeight = 0;
-        layout3.marginWidth = 0;
-        layout3.numColumns = 2;
-        tableAndButtons2.setLayout(layout3);
+        beanProperties = new BeanReferencePropertiesComposite(this, item3,
+                getShell(), (IBeanReference) this.decisionStateClone, false);
+        item3.setControl(beanProperties.createDialogArea(folder));
 
-        Table configsTable2 = new Table(tableAndButtons2, SWT.MULTI
-                | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
-        GridData data2 = new GridData(GridData.FILL_BOTH);
-        //data.widthHint = 250;
-        data2.heightHint = 50;
-        configsTable2.setLayoutData(data2);
-        TableColumn columnName = new TableColumn(configsTable2, SWT.NONE);
-        columnName.setText("Name");
-        columnName.setWidth(150);
-        TableColumn columnValue = new TableColumn(configsTable2, SWT.NONE);
-        columnValue.setText("Value");
-        columnValue.setWidth(220);
-        configsTable2.setHeaderVisible(true);
-
-        configsViewer2 = new TableViewer(configsTable2);
-        String[] columnNames = new String[] { "Name", "Value" };
-        configsViewer2.setColumnProperties(columnNames);
-        configsViewer2.setContentProvider(new PropertiesContentProvider(
-                this.decisionStateClone, configsViewer2));
-        CellEditor[] editors = new CellEditor[2];
-        TextCellEditor textEditor = new TextCellEditor(configsViewer2
-                .getTable());
-        TextCellEditor textEditor1 = new TextCellEditor(configsViewer2
-                .getTable());
-        editors[0] = textEditor;
-        editors[1] = textEditor1;
-        configsViewer2.setCellEditors(editors);
-        configsViewer2.setLabelProvider(new ModelTableLabelProvider());
-        configsViewer2.setCellModifier(new TableCellModifier());
-        configsViewer2.setInput(this.decisionStateClone);
-        configsTable2.addSelectionListener(new SelectionAdapter() {
-
-            public void widgetSelected(SelectionEvent e) {
-                handleTableSelectionChanged();
-            }
-        });
-        Composite buttonArea2 = new Composite(tableAndButtons2, SWT.NONE);
-        GridLayout layout4 = new GridLayout();
-        layout4.marginHeight = 0;
-        layout4.marginWidth = 0;
-        buttonArea2.setLayout(layout4);
-        buttonArea2.setLayoutData(new GridData(GridData.FILL_VERTICAL));
-        GridData data3 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-        data3.widthHint = 40;
-
-        addButton = new Button(buttonArea2, SWT.PUSH);
-        addButton.setText("Add");
-
-        addButton.setLayoutData(data3);
-        addButton.addSelectionListener(new SelectionAdapter() {
-
-            public void widgetSelected(SelectionEvent e) {
-                new Property(decisionStateClone, "name", "value");
-            }
-        });
-
-        GridData data4 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-        data4.widthHint = 40;
-        removeButton = new Button(buttonArea2, SWT.PUSH);
-        removeButton.setText("Delete");
-        removeButton.setLayoutData(data4);
-
-        removeButton.addSelectionListener(new SelectionAdapter() {
-
-            public void widgetSelected(SelectionEvent e) {
-                IStructuredSelection selection = (IStructuredSelection) configsViewer2
-                        .getSelection();
-                if (selection.getFirstElement() != null) {
-                    if (selection.getFirstElement() instanceof IProperty) {
-                        decisionStateClone.removeProperty((IProperty) selection
-                                .getFirstElement());
-                    }
-                }
-            }
-        });
-
-        removeButton.setEnabled(false);
+        properties = new PropertiesComposite(this, item4, getShell(),
+                (IPropertyEnabled) this.decisionStateClone);
+        item4.setControl(properties.createDialogArea(folder));
 
         applyDialogFont(parentComposite);
 
@@ -377,13 +337,12 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog {
      *  
      */
     protected void handleTableSelectionChanged() {
-        IStructuredSelection selection = (IStructuredSelection) configsViewer2
+        IStructuredSelection selection = (IStructuredSelection) configsViewer
                 .getSelection();
         if (selection.isEmpty()) {
-            removeButton.setEnabled(false);
-        }
-        else {
-            removeButton.setEnabled(true);
+            editButton.setEnabled(false);
+        } else {
+            editButton.setEnabled(true);
         }
 
     }
@@ -399,15 +358,15 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog {
         return string;
     }
 
-    protected void validateInput() {
+    public void validateInput() {
         String id = this.nameText.getText();
         boolean error = false;
         StringBuffer errorMessage = new StringBuffer();
+        error = this.beanProperties.validateInput(errorMessage);
         if (id == null || "".equals(id)) {
             errorMessage.append("A valid id attribute is required. ");
             error = true;
-        }
-        else {
+        } else {
             if (WebFlowCoreUtils.isIdAlreadyChoosenByAnotherState(parent,
                     decisionState, id)) {
                 errorMessage
@@ -418,8 +377,7 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog {
         if (error) {
             getButton(OK).setEnabled(false);
             setErrorMessage(errorMessage.toString());
-        }
-        else {
+        } else {
             getButton(OK).setEnabled(true);
             setErrorMessage(null);
         }

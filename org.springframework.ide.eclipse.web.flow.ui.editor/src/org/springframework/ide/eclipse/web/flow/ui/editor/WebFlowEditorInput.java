@@ -52,10 +52,11 @@ public class WebFlowEditorInput implements IEditorInput, IPersistableElement {
     public WebFlowEditorInput(IFile node) {
         this(node, null);
     }
-    
+     
     public WebFlowEditorInput(IFile node, String elementId) {
         this.file = node;
         this.elementId = elementId;
+        this.toolTip = file.getFullPath().makeRelative().toString();
     }
 
     public WebFlowEditorInput(INode node) {
@@ -65,6 +66,7 @@ public class WebFlowEditorInput implements IEditorInput, IPersistableElement {
             name = node.getName();
             toolTip = node.getName();
             file = ((ConfigNode) node).getConfigFile();
+            this.toolTip = file.getFullPath().makeRelative().toString();
             parent = ((ConfigNode) node).getParent();
 
             if (this.getWebFlowConfigSet() != null
@@ -166,5 +168,12 @@ public class WebFlowEditorInput implements IEditorInput, IPersistableElement {
      */
     public void saveState(IMemento memento) {
         WebFlowEditorInputFactory.saveState(memento, this);
+    }
+    
+    /**
+     * @return Returns the elementId.
+     */
+    public String getElementId() {
+        return elementId;
     }
 }

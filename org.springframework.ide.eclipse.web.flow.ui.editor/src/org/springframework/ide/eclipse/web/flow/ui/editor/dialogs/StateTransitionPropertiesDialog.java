@@ -42,15 +42,21 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.web.flow.core.model.IAction;
+import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
+import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
+import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
 import org.springframework.ide.eclipse.web.flow.ui.editor.model.WebFlowModelLabelProvider;
 
-public class StateTransitionPropertiesDialog extends TitleAreaDialog {
+public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
+        IDialogValidator {
 
     private class ActionContentProvider implements IStructuredContentProvider {
 
@@ -94,6 +100,10 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog {
 
     private IStateTransition transitionClone;
 
+    private BeanReferencePropertiesComposite beanProperties;
+
+    private PropertiesComposite properties;
+
     public StateTransitionPropertiesDialog(Shell parentShell,
             IWebFlowModelElement parent, IStateTransition state) {
         super(parentShell);
@@ -108,6 +118,36 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog {
         if (buttonId == IDialogConstants.OK_ID) {
             this.transitionClone.setOn(trimString(getOn()));
             this.transitionClone.getActions().removeAll(markedForDeletion);
+            if (this.beanProperties.useBeanReference()) {
+                if (this.beanProperties.getRadioBeanRef()) {
+                    this.transitionClone.setBean(this.beanProperties
+                            .getBeanText());
+                    this.transitionClone.setBeanClass(null);
+                    this.transitionClone.setAutowire(null);
+                    this.transitionClone.setClassRef(null);
+                } else if (this.beanProperties.getRadioClass()) {
+                    this.transitionClone.setBean(null);
+                    this.transitionClone
+                            .setBeanClass(trimString(this.beanProperties
+                                    .getClassText()));
+                    this.transitionClone
+                            .setAutowire(trimString(this.beanProperties
+                                    .getAutowireText()));
+                    this.transitionClone.setClassRef(null);
+                } else if (this.beanProperties.getRadioClassRef()) {
+                    this.transitionClone.setBean(null);
+                    this.transitionClone.setBeanClass(null);
+                    this.transitionClone.setAutowire(null);
+                    this.transitionClone.setClassRef(this.beanProperties
+                            .getClassRefText());
+                }
+            } else {
+                this.transitionClone.setBean(null);
+                this.transitionClone.setBeanClass(null);
+                this.transitionClone.setAutowire(null);
+                this.transitionClone.setClassRef(null);
+            }
+
             ((ICloneableModelElement) this.transition)
                     .applyCloneValues((ICloneableModelElement) this.transitionClone);
         }
@@ -130,8 +170,7 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog {
         onText.setFocus();
         if (this.transition != null && this.transition.getOn() != null) {
             okButton.setEnabled(true);
-        }
-        else {
+        } else {
             okButton.setEnabled(false);
         }
     }
@@ -152,7 +191,18 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog {
         composite.setLayout(layout);
         composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-        Composite nameGroup = new Composite(composite, SWT.NULL);
+        TabFolder folder = new TabFolder(composite, SWT.NULL);
+        TabItem item1 = new TabItem(folder, SWT.NULL);
+        item1.setText("General");
+        item1.setImage(WebFlowImages
+                .getImage(WebFlowImages.IMG_OBJS_CONNECTION));
+        TabItem item2 = new TabItem(folder, SWT.NULL);
+        item2.setText("Actions");
+        item2.setImage(WebFlowImages.getImage(WebFlowImages.IMG_OBJS_ACTION));
+        TabItem item3 = new TabItem(folder, SWT.NULL);
+        TabItem item4 = new TabItem(folder, SWT.NULL);
+
+        Composite nameGroup = new Composite(folder, SWT.NULL);
         nameGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         GridLayout layout1 = new GridLayout();
         layout1.numColumns = 2;
@@ -183,7 +233,9 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog {
             }
         });
 
-        Group groupActionType = new Group(composite, SWT.NULL);
+        item1.setControl(nameGroup);
+
+        Group groupActionType = new Group(folder, SWT.NULL);
         GridLayout layoutAttMap = new GridLayout();
         layoutAttMap.marginWidth = 3;
         layoutAttMap.marginHeight = 3;
@@ -264,7 +316,19 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog {
                 }
             }
         });
+
+        item2.setControl(groupActionType);
+
+        beanProperties = new BeanReferencePropertiesComposite(this, item3,
+                getShell(), (IBeanReference) this.transitionClone, false);
+        item3.setControl(beanProperties.createDialogArea(folder));
+
+        properties = new PropertiesComposite(this, item4, getShell(),
+                (IPropertyEnabled) this.transitionClone);
+        item4.setControl(properties.createDialogArea(folder));
+
         applyDialogFont(parentComposite);
+
         return parentComposite;
     }
 
@@ -314,36 +378,35 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog {
         return string;
     }
 
-    protected void validateInput() {
+    public void validateInput() {
         String id = this.onText.getText();
         boolean error = false;
-        String errorMessage = null;
+        StringBuffer errorMessage = new StringBuffer();
         if (id == null || "".equals(id)) {
-            errorMessage = "A valid id attribute is required. ";
+            errorMessage.append("A valid id attribute is required. ");
             error = true;
         }
         if (this.ognlButton.getSelection()) {
             if (!id.startsWith(EXPRESSION_PREFIX)
                     || !id.endsWith(EXPRESSION_SUFFIX)) {
-                errorMessage = "A valid OGNL expression needs to start with '${' and ends with '}'. ";
+                errorMessage
+                        .append("A valid OGNL expression needs to start with '${' and ends with '}'. ");
                 error = true;
-            }
-            else {
+            } else {
                 try {
 
                     Object obj = Ognl.parseExpression(this.cutExpression(id));
-                }
-                catch (OgnlException e) {
-                    errorMessage = "Malformed OGNL expression. ";
+                } catch (OgnlException e) {
+                    errorMessage.append("Malformed OGNL expression. ");
                     error = true;
                 }
             }
         }
+        error = this.beanProperties.validateInput(errorMessage);
         if (error) {
             getButton(OK).setEnabled(false);
-            setErrorMessage(errorMessage);
-        }
-        else {
+            setErrorMessage(errorMessage.toString());
+        } else {
             getButton(OK).setEnabled(true);
             setErrorMessage(null);
         }

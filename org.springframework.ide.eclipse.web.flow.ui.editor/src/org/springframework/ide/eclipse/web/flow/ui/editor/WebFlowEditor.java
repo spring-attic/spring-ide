@@ -83,6 +83,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.actions.ActionFactory;
@@ -91,6 +92,7 @@ import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 import org.springframework.ide.eclipse.web.flow.core.WebFlowDefinitionException;
 import org.springframework.ide.eclipse.web.flow.core.internal.XmlModelWriter;
 import org.springframework.ide.eclipse.web.flow.core.internal.model.WebFlowState;
@@ -316,7 +318,7 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
                     display.asyncExec(new Runnable() {
 
                         public void run() {
-                            superSetInput(new WebFlowEditorInput(newFile));
+                            superSetInput(new WebFlowEditorInput(newFile, ((WebFlowEditorInput) getEditorInput()).getElementId()));
                         }
                     });
                 }
@@ -328,7 +330,7 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
                     display.asyncExec(new Runnable() {
 
                         public void run() {
-                            setInput(new WebFlowEditorInput(newFile));
+                            setInput(new WebFlowEditorInput(newFile,((WebFlowEditorInput) getEditorInput()).getElementId()));
                             getCommandStack().flush();
                             initializeGraphicalViewer();
                             outlinePage.initializeOutlineViewer();
@@ -348,7 +350,7 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
                     display.asyncExec(new Runnable() {
 
                         public void run() {
-                            setInput(new WebFlowEditorInput(newFile));
+                            setInput(new WebFlowEditorInput(newFile, ((WebFlowEditorInput) getEditorInput()).getElementId()));
                             getCommandStack().flush();
                             initializeGraphicalViewer();
                             outlinePage.initializeOutlineViewer();
@@ -419,7 +421,7 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
     }
 
     protected void closeEditor(boolean save) {
-        getSite().getPage().closeEditor(WebFlowEditor.this, save);
+        getSite().getPage().closeEditor(this, save);
     }
 
     /**
@@ -607,6 +609,7 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
     }
 
     public void gotoMarker(IMarker marker) {
+        System.out.println("");
     }
 
     /**
@@ -685,14 +688,14 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
         try {
             new ProgressMonitorDialog(getSite().getWorkbenchWindow().getShell())
                     .run(false, true, op);
-            setInput(new WebFlowEditorInput((IFile) file));
+            setInput(new WebFlowEditorInput( (IFile) file,  ((WebFlowEditorInput) this.getEditorInput()).getElementId()));
             getCommandStack().markSaveLocation();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         try {
-            superSetInput(new WebFlowEditorInput(file));
+            superSetInput(new WebFlowEditorInput(file, ((WebFlowEditorInput) this.getEditorInput()).getElementId()));
             getCommandStack().markSaveLocation();
         } catch (Exception e) {
             e.printStackTrace();

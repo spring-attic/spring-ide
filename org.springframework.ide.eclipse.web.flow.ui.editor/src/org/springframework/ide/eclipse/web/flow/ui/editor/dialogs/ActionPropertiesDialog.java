@@ -18,7 +18,6 @@ package org.springframework.ide.eclipse.web.flow.ui.editor.dialogs;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -26,7 +25,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -34,21 +32,21 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.web.flow.core.model.IAction;
 import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
-import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowEditorInput;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
-import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
 
-public class ActionPropertiesDialog extends TitleAreaDialog implements IDialogValidator {
+public class ActionPropertiesDialog extends TitleAreaDialog implements
+        IDialogValidator {
 
     private IAction action;
 
     private IAction actionClone;
+
+    private BeanReferencePropertiesComposite beanProperties;
 
     private int LABEL_WIDTH = 70;
 
@@ -60,6 +58,8 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements IDialogVa
 
     private IWebFlowModelElement parent;
 
+    private PropertiesComposite properties;
+
     public ActionPropertiesDialog(Shell parentShell,
             IWebFlowModelElement parent, IAction state) {
         super(parentShell);
@@ -70,26 +70,44 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements IDialogVa
 
     }
 
+    private String trimString(String string) {
+        if (string != null && string == "") {
+            string = null;
+        }
+        return string;
+    }
+
     protected void buttonPressed(int buttonId) {
         if (buttonId == IDialogConstants.OK_ID) {
             this.actionClone.setName(trimString(getName()));
-            if (this.radioBeanRef.getSelection()) {
-                this.actionClone.setBean(trimString(getBean()));
+            if (this.beanProperties.useBeanReference()) {
+                if (this.beanProperties.getRadioBeanRef()) {
+                    this.actionClone.setBean(this.beanProperties.getBeanText());
+                    this.actionClone.setBeanClass(null);
+                    this.actionClone.setAutowire(null);
+                    this.actionClone.setClassRef(null);
+                } else if (this.beanProperties.getRadioClass()) {
+                    this.actionClone.setBean(null);
+                    this.actionClone
+                            .setBeanClass(trimString(this.beanProperties
+                                    .getClassText()));
+                    this.actionClone.setAutowire(trimString(this.beanProperties
+                            .getAutowireText()));
+                    this.actionClone.setClassRef(null);
+                } else if (this.beanProperties.getRadioClassRef()) {
+                    this.actionClone.setBean(null);
+                    this.actionClone.setBeanClass(null);
+                    this.actionClone.setAutowire(null);
+                    this.actionClone.setClassRef(this.beanProperties
+                            .getClassRefText());
+                }
+            } else {
+                this.actionClone.setBean(null);
                 this.actionClone.setBeanClass(null);
                 this.actionClone.setAutowire(null);
                 this.actionClone.setClassRef(null);
-            } else if (this.radioClass.getSelection()) {
-                this.actionClone.setBean(null);
-                this.actionClone.setBeanClass(trimString(getBeanClass()));
-                this.actionClone.setAutowire(trimString(getAutowire()));
-                this.actionClone.setClassRef(null);
-            } else if (this.radioClassRef.getSelection()) {
-                this.actionClone.setBean(null);
-                this.actionClone.setBeanClass(null);
-                this.actionClone.setAutowire(null);
-                this.actionClone.setClassRef(trimString(getClassRef()));
             }
-            this.actionClone.setMethod(trimString(getMethod()));
+            this.actionClone.setMethod(this.beanProperties.getMethodText());
             ((ICloneableModelElement) this.action)
                     .applyCloneValues((ICloneableModelElement) this.actionClone);
         }
@@ -116,6 +134,8 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements IDialogVa
         } else {
             okButton.setEnabled(false);
         }
+
+        this.validateInput();
     }
 
     protected Control createContents(Composite parent) {
@@ -137,6 +157,8 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements IDialogVa
 
         TabFolder folder = new TabFolder(composite, SWT.NULL);
         TabItem item1 = new TabItem(folder, SWT.NULL);
+        item1.setText("General");
+        item1.setImage(getImage());
         TabItem item2 = new TabItem(folder, SWT.NULL);
         TabItem item3 = new TabItem(folder, SWT.NULL);
 
@@ -163,15 +185,16 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements IDialogVa
         });
 
         item1.setControl(nameGroup);
-        BeanReferencePropertiesComposite bean = new BeanReferencePropertiesComposite(
-                this, item2, getShell(), (IBeanReference) this.action, true);
-        item2.setControl(bean.createDialogArea(folder));
+        beanProperties = new BeanReferencePropertiesComposite(this, item2,
+                getShell(), (IBeanReference) this.actionClone, true);
+        item2.setControl(beanProperties.createDialogArea(folder));
 
-        PropertiesComposite properties = new PropertiesComposite(this, item3,
-                getShell(), (IPropertyEnabled) this.action);
+        properties = new PropertiesComposite(this, item3, getShell(),
+                (IPropertyEnabled) this.actionClone);
         item3.setControl(properties.createDialogArea(folder));
 
         applyDialogFont(parentComposite);
+
         return parentComposite;
     }
 
@@ -199,42 +222,10 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements IDialogVa
         super.setErrorMessage(error);
     }
 
-    public String trimString(String string) {
-        if (string != null && string == "") {
-            string = null;
-        }
-        return string;
-    }
-
     public void validateInput() {
-        String bean = this.beanText.getText();
-        String clazz = this.classText.getText();
-        String autowire = this.autowireText.getText();
-        String classRef = this.classRefText.getText();
         boolean error = false;
         StringBuffer errorMessage = new StringBuffer();
-        if (this.radioBeanRef.getSelection()
-                && (bean == null || "".equals(bean))) {
-            errorMessage
-                    .append("A valid bean reference attribute is required. ");
-            error = true;
-        }
-        if (this.radioClass.getSelection()
-                && (clazz == null || "".equals(clazz) || clazz.indexOf(".") == -1)) {
-            errorMessage.append("A valid bean class name is required. ");
-            error = true;
-        }
-        if (this.radioClass.getSelection()
-                && (autowire == null || "".equals(autowire))) {
-            errorMessage.append("Please select an autowire type. ");
-            error = true;
-        }
-        if (this.radioClassRef.getSelection()
-                && (classRef == null || "".equals(classRef) || classRef
-                        .indexOf(".") == -1)) {
-            errorMessage.append("A valid bean class reference is required. ");
-            error = true;
-        }
+        error = this.beanProperties.validateInput(errorMessage);
         if (error) {
             getButton(OK).setEnabled(false);
             setErrorMessage(errorMessage.toString());

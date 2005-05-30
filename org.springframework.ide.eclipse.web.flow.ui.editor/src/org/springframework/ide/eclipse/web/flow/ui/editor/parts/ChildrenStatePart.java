@@ -13,16 +13,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
- 
+
 package org.springframework.ide.eclipse.web.flow.ui.editor.parts;
 
 import java.util.Map;
 
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
+import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.geometry.Insets;
 import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.draw2d.graph.CompoundDirectedGraph;
+import org.eclipse.draw2d.graph.Node;
 import org.eclipse.draw2d.graph.Subgraph;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.NodeEditPart;
@@ -31,7 +34,7 @@ import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.requests.DirectEditRequest;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.TextCellEditor;
+import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
 import org.springframework.ide.eclipse.web.flow.ui.editor.figures.CompoundStateFigure;
 import org.springframework.ide.eclipse.web.flow.ui.editor.figures.SubgraphFigure;
 import org.springframework.ide.eclipse.web.flow.ui.editor.model.WebFlowModelLabelDecorator;
@@ -66,7 +69,14 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
     }
 
     protected void applyOwnResults(CompoundDirectedGraph graph, Map map) {
-        super.applyGraphResults(graph, map);
+        Node n = (Node) map.get(this);
+        getFigure().setBounds(new Rectangle(n.x, n.y, n.width, n.height));
+
+        for (int i = 0; i < getSourceConnections().size(); i++) {
+            StateTransitionPart trans = (StateTransitionPart) getSourceConnections()
+                    .get(i);
+            trans.applyGraphResults(graph, map);
+        }
     }
 
     public void contributeNodesToGraph(CompoundDirectedGraph graph, Subgraph s,
@@ -82,7 +92,8 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 
             int tagHeight = ((SubgraphFigure) fig).getHeader()
                     .getPreferredSize().height;
-            me.insets.top = 20; //tagHeight;
+            me.insets.top = ((CompoundStateFigure) getFigure()).getHeader()
+                    .getPreferredSize().height + 5;
             me.insets.left = 5;
             me.insets.right = 5;
             me.insets.bottom = 5;
@@ -116,6 +127,7 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
         CompoundStateFigure figure = new CompoundStateFigure();
         ((Label) figure.getHeader())
                 .setIcon(labelProvider.getImage(getModel()));
+        ((Label) figure.getHeader()).setIconAlignment(PositionConstants.TOP);
         return figure;
     }
 
@@ -134,12 +146,12 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
     }
 
     protected void performDirectEdit() {
-        if (manager == null) {
+        /*if (manager == null) {
             Label l = ((Label) ((SubgraphFigure) getFigure()).getHeader());
             manager = new StateDirectEditManager(this, TextCellEditor.class,
                     new StateCellEditorLocator(l), l);
         }
-        manager.show();
+        manager.show();*/
     }
 
     public void performRequest(Request request) {
@@ -153,15 +165,18 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
     }
 
     protected void refreshVisuals() {
-        ((Label) ((SubgraphFigure) getFigure()).getHeader()).setText(getState()
-                .getId());
+        ((Label) ((SubgraphFigure) getFigure()).getHeader())
+                .setText(labelProvider.getText(getModel()));
         ((Label) ((SubgraphFigure) getFigure()).getHeader())
                 .setIcon(labelProvider.getImage(getModel()));
+        getFigure().repaint();
     }
 
     public void setSelected(int value) {
         super.setSelected(value);
-        SubgraphFigure sf = (SubgraphFigure) getFigure();
-        sf.setSelected(value != SELECTED_NONE);
+        if (!(getModel() instanceof IWebFlowState)) {
+            SubgraphFigure sf = (SubgraphFigure) getFigure();
+            sf.setSelected(value != SELECTED_NONE);
+        }
     }
 }

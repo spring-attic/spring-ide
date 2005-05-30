@@ -23,10 +23,7 @@ import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -39,21 +36,21 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.web.flow.core.WebFlowCoreUtils;
-import org.springframework.ide.eclipse.web.flow.core.internal.model.Property;
+import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
+import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IViewState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
 
-public class ViewStatePropertiesDialog extends TitleAreaDialog {
+public class ViewStatePropertiesDialog extends TitleAreaDialog implements
+        IDialogValidator {
 
     private Button addButton;
 
@@ -80,6 +77,10 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog {
 
     private Text viewText;
 
+    private BeanReferencePropertiesComposite beanProperties;
+
+    private PropertiesComposite properties;
+
     public ViewStatePropertiesDialog(Shell parentShell,
             IWebFlowModelElement parent, IViewState state) {
         super(parentShell);
@@ -93,6 +94,35 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog {
         if (buttonId == IDialogConstants.OK_ID) {
             this.viewStateClone.setId(trimString(getId()));
             this.viewStateClone.setView(trimString(getView()));
+            if (this.beanProperties.useBeanReference()) {
+                if (this.beanProperties.getRadioBeanRef()) {
+                    this.viewStateClone.setBean(this.beanProperties
+                            .getBeanText());
+                    this.viewStateClone.setBeanClass(null);
+                    this.viewStateClone.setAutowire(null);
+                    this.viewStateClone.setClassRef(null);
+                } else if (this.beanProperties.getRadioClass()) {
+                    this.viewStateClone.setBean(null);
+                    this.viewStateClone
+                            .setBeanClass(trimString(this.beanProperties
+                                    .getClassText()));
+                    this.viewStateClone
+                            .setAutowire(trimString(this.beanProperties
+                                    .getAutowireText()));
+                    this.viewStateClone.setClassRef(null);
+                } else if (this.beanProperties.getRadioClassRef()) {
+                    this.viewStateClone.setBean(null);
+                    this.viewStateClone.setBeanClass(null);
+                    this.viewStateClone.setAutowire(null);
+                    this.viewStateClone.setClassRef(this.beanProperties
+                            .getClassRefText());
+                }
+            } else {
+                this.viewStateClone.setBean(null);
+                this.viewStateClone.setBeanClass(null);
+                this.viewStateClone.setAutowire(null);
+                this.viewStateClone.setClassRef(null);
+            }
             ((ICloneableModelElement) this.viewState)
                     .applyCloneValues((ICloneableModelElement) this.viewStateClone);
         }
@@ -116,8 +146,7 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog {
         nameText.setFocus();
         if (this.viewState != null && this.viewState.getId() != null) {
             okButton.setEnabled(true);
-        }
-        else {
+        } else {
             okButton.setEnabled(false);
         }
     }
@@ -139,7 +168,14 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog {
         composite.setLayout(layout);
         composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-        Composite nameGroup = new Composite(composite, SWT.NULL);
+        TabFolder folder = new TabFolder(composite, SWT.NULL);
+        TabItem item1 = new TabItem(folder, SWT.NULL);
+        item1.setText("General");
+        item1.setImage(getImage());
+        TabItem item2 = new TabItem(folder, SWT.NULL);
+        TabItem item3 = new TabItem(folder, SWT.NULL);
+
+        Composite nameGroup = new Composite(folder, SWT.NULL);
         nameGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         GridLayout layout1 = new GridLayout();
         layout1.numColumns = 2;
@@ -174,99 +210,15 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog {
             }
         });
 
-        Group groupPropertyType = new Group(composite, SWT.NULL);
-        GridLayout layoutPropMap = new GridLayout();
-        layoutPropMap.marginWidth = 3;
-        layoutPropMap.marginHeight = 3;
-        groupPropertyType.setLayout(layoutPropMap);
-        groupPropertyType.setText(" Properties ");
-        groupPropertyType.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        item1.setControl(nameGroup);
 
-        Composite tableAndButtons2 = new Composite(groupPropertyType, SWT.NONE);
-        tableAndButtons2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        GridLayout layout3 = new GridLayout();
-        layout3.marginHeight = 0;
-        layout3.marginWidth = 0;
-        layout3.numColumns = 2;
-        tableAndButtons2.setLayout(layout3);
+        beanProperties = new BeanReferencePropertiesComposite(this, item2,
+                getShell(), (IBeanReference) this.viewStateClone, false);
+        item2.setControl(beanProperties.createDialogArea(folder));
 
-        Table configsTable2 = new Table(tableAndButtons2, SWT.MULTI
-                | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
-        GridData data2 = new GridData(GridData.FILL_BOTH);
-        //data.widthHint = 250;
-        data2.heightHint = 50;
-        configsTable2.setLayoutData(data2);
-        TableColumn columnName = new TableColumn(configsTable2, SWT.NONE);
-        columnName.setText("Name");
-        columnName.setWidth(150);
-        TableColumn columnValue = new TableColumn(configsTable2, SWT.NONE);
-        columnValue.setText("Value");
-        columnValue.setWidth(220);
-        configsTable2.setHeaderVisible(true);
-
-        configsViewer2 = new TableViewer(configsTable2);
-        String[] columnNames = new String[] { "Name", "Value" };
-        configsViewer2.setColumnProperties(columnNames);
-        configsViewer2.setContentProvider(new PropertiesContentProvider(
-                this.viewStateClone, configsViewer2));
-        CellEditor[] editors = new CellEditor[2];
-        TextCellEditor textEditor = new TextCellEditor(configsViewer2
-                .getTable());
-        TextCellEditor textEditor1 = new TextCellEditor(configsViewer2
-                .getTable());
-        editors[0] = textEditor;
-        editors[1] = textEditor1;
-        configsViewer2.setCellEditors(editors);
-        configsViewer2.setLabelProvider(new ModelTableLabelProvider());
-        configsViewer2.setCellModifier(new TableCellModifier());
-        configsViewer2.setInput(this.viewStateClone);
-        configsTable2.addSelectionListener(new SelectionAdapter() {
-
-            public void widgetSelected(SelectionEvent e) {
-                handleTableSelectionChanged();
-            }
-        });
-        Composite buttonArea2 = new Composite(tableAndButtons2, SWT.NONE);
-        GridLayout layout4 = new GridLayout();
-        layout4.marginHeight = 0;
-        layout4.marginWidth = 0;
-        buttonArea2.setLayout(layout4);
-        buttonArea2.setLayoutData(new GridData(GridData.FILL_VERTICAL));
-        GridData data3 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-        data3.widthHint = 40;
-
-        addButton = new Button(buttonArea2, SWT.PUSH);
-        addButton.setText("Add");
-
-        addButton.setLayoutData(data3);
-        addButton.addSelectionListener(new SelectionAdapter() {
-
-            public void widgetSelected(SelectionEvent e) {
-                new Property(viewStateClone, "name", "value");
-            }
-        });
-
-        GridData data4 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-        data4.widthHint = 40;
-        removeButton = new Button(buttonArea2, SWT.PUSH);
-        removeButton.setText("Delete");
-        removeButton.setLayoutData(data4);
-
-        removeButton.addSelectionListener(new SelectionAdapter() {
-
-            public void widgetSelected(SelectionEvent e) {
-                IStructuredSelection selection = (IStructuredSelection) configsViewer2
-                        .getSelection();
-                if (selection.getFirstElement() != null) {
-                    if (selection.getFirstElement() instanceof IProperty) {
-                        viewStateClone.removeProperty((IProperty) selection
-                                .getFirstElement());
-                    }
-                }
-            }
-        });
-
-        removeButton.setEnabled(false);
+        properties = new PropertiesComposite(this, item3, getShell(),
+                (IPropertyEnabled) this.viewStateClone);
+        item3.setControl(properties.createDialogArea(folder));
 
         applyDialogFont(parentComposite);
         return parentComposite;
@@ -300,32 +252,21 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog {
      * One of the buttons has been pressed, act accordingly.
      */
     private void handleButtonPressed(Button button) {
-        /*TypeSelectionDialog2 dialog= new TypeSelectionDialog2(getShell(), false, 
-                new ProgressMonitorDialog(getShell()), SearchEngine.createWorkspaceScope(),  IJavaSearchConstants.TYPE);
-        dialog.setMessage(JavaUIMessages.JavaUI_defaultDialogMessage);*/ 
+        /*
+         * TypeSelectionDialog2 dialog= new TypeSelectionDialog2(getShell(),
+         * false, new ProgressMonitorDialog(getShell()),
+         * SearchEngine.createWorkspaceScope(), IJavaSearchConstants.TYPE);
+         * dialog.setMessage(JavaUIMessages.JavaUI_defaultDialogMessage);
+         */
 
         TypeSelectionDialog dialog = new TypeSelectionDialog(getShell(),
                 new ProgressMonitorDialog(getShell()),
                 IJavaSearchConstants.CLASS, SearchEngine.createWorkspaceScope());
-        dialog.setMessage(JavaUIMessages.getString("JavaUI.defaultDialogMessage"));
+        dialog.setMessage(JavaUIMessages
+                .getString("JavaUI.defaultDialogMessage"));
         dialog.setBlockOnOpen(true);
         dialog.setFilter("*Action*");
         dialog.open();
-
-    }
-
-    /**
-     *  
-     */
-    protected void handleTableSelectionChanged() {
-        IStructuredSelection selection = (IStructuredSelection) configsViewer2
-                .getSelection();
-        if (selection.isEmpty()) {
-            removeButton.setEnabled(false);
-        }
-        else {
-            removeButton.setEnabled(true);
-        }
 
     }
 
@@ -340,26 +281,26 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog {
         return string;
     }
 
-    protected void validateInput() {
+    public void validateInput() {
         String id = this.nameText.getText();
         boolean error = false;
-        String errorMessage = null;
+        StringBuffer errorMessage = new StringBuffer();
+        error = this.beanProperties.validateInput(errorMessage);
         if (id == null || "".equals(id)) {
-            errorMessage = "A valid id attribute is required.";
+            errorMessage.append("A valid id attribute is required. ");
             error = true;
-        }
-        else {
+        } else {
             if (WebFlowCoreUtils.isIdAlreadyChoosenByAnotherState(parent,
                     viewState, id)) {
-                errorMessage = "The entered id attribute must be unique within a single web flow.";
+                errorMessage
+                        .append("The entered id attribute must be unique within a single web flow. ");
                 error = true;
             }
         }
         if (error) {
             getButton(OK).setEnabled(false);
-            setErrorMessage(errorMessage);
-        }
-        else {
+            setErrorMessage(errorMessage.toString());
+        } else {
             getButton(OK).setEnabled(true);
             setErrorMessage(null);
         }

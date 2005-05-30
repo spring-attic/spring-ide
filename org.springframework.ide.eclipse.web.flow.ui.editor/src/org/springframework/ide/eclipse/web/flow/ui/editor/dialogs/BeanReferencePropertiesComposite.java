@@ -54,10 +54,7 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.web.flow.core.model.IAction;
 import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
-import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
-import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowEditorInput;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
@@ -119,22 +116,22 @@ public class BeanReferencePropertiesComposite {
 
     private IBeanReference state;
 
-    private IBeanReference stateClone;
-
     private IDialogValidator validator;
-    
-    public BeanReferencePropertiesComposite(IDialogValidator validator, TabItem item, Shell parentShell, IBeanReference state,
+
+    private Button beanReferenceButton;
+
+    public BeanReferencePropertiesComposite(IDialogValidator validator,
+            TabItem item, Shell parentShell, IBeanReference state,
             boolean showMethod) {
         this.state = state;
-        this.stateClone = (IAction) ((ICloneableModelElement) this.state)
-                .cloneModelElement();
         this.showMethod = showMethod;
         WebFlowEditorInput input = WebFlowUtils.getActiveFlowEditorInput();
         beansConfig = input.getBeansConfigSet();
         this.parentShell = parentShell;
         this.validator = validator;
         item.setText("Bean Reference");
-        item.setToolTipText("Define bean reference as exported in the bean registry");
+        item
+                .setToolTipText("Define bean reference as exported in the bean registry");
         item.setImage(WebFlowImages.getImage(WebFlowImages.IMG_OBJS_JAVABEAN));
     }
 
@@ -149,6 +146,22 @@ public class BeanReferencePropertiesComposite {
         groupActionType.setText(" Bean Reference ");
         groupActionType.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
+        //      Create the radio button for no attribute mapper.
+        beanReferenceButton = new Button(groupActionType, SWT.CHECK);
+        if (this.state.getBean() != null || this.state.getBeanClass() != null
+                || this.state.getClassRef() != null) {
+            beanReferenceButton.setSelection(true);
+        }
+        beanReferenceButton.setLayoutData(new GridData(
+                GridData.FILL_HORIZONTAL));
+        beanReferenceButton.setText("Use Bean Reference");
+        beanReferenceButton.setToolTipText("Enable to use bean reference");
+        beanReferenceButton.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                setActionImplementation();
+            }
+        });
+
         if (showMethod) {
             Composite methodComposite = new Composite(groupActionType, SWT.NONE);
             methodComposite
@@ -160,17 +173,17 @@ public class BeanReferencePropertiesComposite {
             methodComposite.setLayout(layout3);
 
             Label methodLabel = new Label(methodComposite, SWT.NONE);
-            gridData = new GridData(
-                    GridData.HORIZONTAL_ALIGN_BEGINNING);
+            gridData = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
             gridData.widthHint = LABEL_WIDTH;
             methodLabel.setLayoutData(gridData);
             methodLabel.setText("Method");
 
             methodText = new Text(methodComposite, SWT.SINGLE | SWT.BORDER);
-            /*
-             * if (this.action != null && this.action.getMethod() != null) {
-             * methodText.setText(this.action.getMethod()); }
-             */
+
+            if (this.state != null && this.state.getMethod() != null) {
+                methodText.setText(this.state.getMethod());
+            }
+
             methodText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
             methodText.addModifyListener(new ModifyListener() {
 
@@ -179,7 +192,7 @@ public class BeanReferencePropertiesComposite {
                 }
             });
         }
-        
+
         // Create the radio button for no attribute mapper.
         radioBeanRef = new Button(groupActionType, SWT.RADIO);
         if (this.state != null && this.state.getBean() != null
@@ -192,6 +205,7 @@ public class BeanReferencePropertiesComposite {
 
             public void widgetSelected(SelectionEvent e) {
                 setActionImplementationChoice(RADIOBEANREF_CHOICE);
+                validator.validateInput();
             }
         });
         // Inset composite for classname.
@@ -238,6 +252,7 @@ public class BeanReferencePropertiesComposite {
 
             public void widgetSelected(SelectionEvent e) {
                 setActionImplementationChoice(RADIOCLASSREF_CHOICE);
+                validator.validateInput();
             }
         });
 
@@ -286,6 +301,7 @@ public class BeanReferencePropertiesComposite {
 
             public void widgetSelected(SelectionEvent e) {
                 setActionImplementationChoice(RADIOCLASS_CHOICE);
+                validator.validateInput();
             }
         });
 
@@ -348,8 +364,72 @@ public class BeanReferencePropertiesComposite {
         });
         
         setActionImplementationEnabled();
-        
+        setActionImplementation();
+
         return groupActionType;
+    }
+
+    /**
+     * @return Returns the autowireText.
+     */
+    public String getAutowireText() {
+        return trimString(autowireText.getText());
+    }
+
+    /**
+     * @return Returns the beanText.
+     */
+    public String getBeanText() {
+        return trimString(beanText.getText());
+    }
+
+    /**
+     * @return Returns the classRefText.
+     */
+    public String getClassRefText() {
+        return trimString(classRefText.getText());
+    }
+
+    /**
+     * @return Returns the classText.
+     */
+    public String getClassText() {
+        return trimString(classText.getText());
+    }
+
+    /**
+     * @return Returns the methodText.
+     */
+    public String getMethodText() {
+        return trimString(methodText.getText());
+    }
+
+    /**
+     * @return Returns the radioBeanRef.
+     */
+    public boolean getRadioBeanRef() {
+        return radioBeanRef.getSelection();
+    }
+
+    /**
+     * @return Returns the radioClass.
+     */
+    public boolean getRadioClass() {
+        return radioClass.getSelection();
+    }
+
+    /**
+     * @return Returns the radioClassRef.
+     */
+    public boolean getRadioClassRef() {
+        return radioClassRef.getSelection();
+    }
+
+    private String trimString(String string) {
+        if (string != null && string == "") {
+            string = null;
+        }
+        return string;
     }
 
     /**
@@ -385,6 +465,34 @@ public class BeanReferencePropertiesComposite {
                 this.setActionImplementationChoice(RADIOBEANREF_CHOICE);
             }
 
+        } else if (button.equals(browseClassRefButton)) {
+
+            WebFlowEditorInput input = WebFlowUtils.getActiveFlowEditorInput();
+            IBeansConfigSet beansConfig = input.getBeansConfigSet();
+            ElementListSelectionDialog dialog = new ElementListSelectionDialog(
+                    parentShell, new DecoratingLabelProvider(
+                            new WebFlowModelLabelProvider(),
+                            new WebFlowModelLabelDecorator()));
+            dialog.setBlockOnOpen(true);
+            List elements = new ArrayList();
+            Iterator iter = beansConfig.getConfigs().iterator();
+            IBeansProject parent = (IBeansProject) beansConfig
+                    .getElementParent();
+            while (iter.hasNext()) {
+                String config = (String) iter.next();
+                elements.addAll(parent.getConfig(config).getBeans());
+            }
+            dialog.setSize(100, 20);
+            dialog.setElements(elements.toArray());
+            dialog.setEmptySelectionMessage("Select a class reference");
+            dialog.setTitle("Class reference");
+            dialog.setMessage("Please select a class reference");
+            dialog.setMultipleSelection(false);
+            if (Dialog.OK == dialog.open()) {
+                this.classRefText.setText(((IBean) dialog.getFirstResult())
+                        .getClassName());
+                this.setActionImplementationChoice(RADIOCLASSREF_CHOICE);
+            }
         } else {
             IProject project = WebFlowUtils.getActiveFlowEditorInput()
                     .getFile().getProject();
@@ -427,7 +535,6 @@ public class BeanReferencePropertiesComposite {
                 }
             }
         }
-        validator.validateInput();
 
     }
 
@@ -524,6 +631,55 @@ public class BeanReferencePropertiesComposite {
             this.setActionImplementationChoice(RADIOCLASS_CHOICE);
         } else if (this.state.getClassRef() != null) {
             this.setActionImplementationChoice(RADIOCLASSREF_CHOICE);
+        } else {
+            this.setActionImplementationChoice(-4);
         }
+    }
+    
+    protected void setActionImplementation() {
+        if (this.beanReferenceButton.getSelection()) {
+            this.setActionImplementationEnabled();
+        }
+        else {
+            this.radioBeanRef.setEnabled(false);
+            this.radioClass.setEnabled(false);
+            this.radioClassRef.setEnabled(false);
+            this.setActionImplementationChoice(-4);
+        }
+    }
+
+    public boolean validateInput(StringBuffer errorMessage) {
+        String bean = this.getBeanText();
+        String clazz = this.getClassText();
+        String autowire = this.getAutowireText();
+        String classRef = this.getClassRefText();
+        boolean error = false;
+        if (this.radioBeanRef.getSelection()
+                && (bean == null || "".equals(bean))) {
+            errorMessage
+                    .append("A valid bean reference attribute is required. ");
+            error = true;
+        }
+        if (this.radioClass.getSelection()
+                && (clazz == null || "".equals(clazz) || clazz.indexOf(".") == -1)) {
+            errorMessage.append("A valid bean class name is required. ");
+            error = true;
+        }
+        if (this.radioClass.getSelection()
+                && (autowire == null || "".equals(autowire))) {
+            errorMessage.append("Please select an autowire type. ");
+            error = true;
+        }
+        if (this.radioClassRef.getSelection()
+                && (classRef == null || "".equals(classRef) || classRef
+                        .indexOf(".") == -1)) {
+            errorMessage.append("A valid bean class reference is required. ");
+            error = true;
+        }
+        return error;
+    }
+    
+    public boolean useBeanReference() {
+        return this.beanReferenceButton.getSelection();
     }
 }

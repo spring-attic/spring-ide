@@ -22,7 +22,6 @@ import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.gef.ui.actions.GEFActionConstants;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.swt.internal.win32.OPENFILENAME;
 import org.eclipse.ui.actions.ActionFactory;
 
 public class WebFlowContextMenuProvider extends ContextMenuProvider {

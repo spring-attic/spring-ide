@@ -34,6 +34,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
 import org.springframework.ide.eclipse.web.flow.ui.editor.policies.StateContainerEditPolicy;
+import org.springframework.ide.eclipse.web.flow.ui.editor.policies.WebFlowEditPolicy;
 import org.springframework.ide.eclipse.web.flow.ui.editor.policies.WebFlowStateLayoutEditPolicy;
 
 /**
@@ -79,7 +80,7 @@ public class WebFlowPart extends ChildrenStatePart implements
         installEditPolicy(EditPolicy.GRAPHICAL_NODE_ROLE, null);
         installEditPolicy(EditPolicy.SELECTION_FEEDBACK_ROLE, null);
         installEditPolicy(EditPolicy.COMPONENT_ROLE,
-                new RootComponentEditPolicy());
+                new WebFlowEditPolicy());
         installEditPolicy(EditPolicy.LAYOUT_ROLE,
                 new WebFlowStateLayoutEditPolicy());
         installEditPolicy(EditPolicy.CONTAINER_ROLE,
@@ -144,7 +145,7 @@ public class WebFlowPart extends ChildrenStatePart implements
      * @see org.eclipse.gef.editparts.AbstractEditPart#isSelectable()
      */
     public boolean isSelectable() {
-        return false;
+        return true;
     }
 
     /**

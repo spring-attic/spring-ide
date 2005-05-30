@@ -22,7 +22,6 @@ import java.beans.PropertyChangeListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.springframework.ide.eclipse.web.flow.core.model.IAction;
 import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
@@ -49,13 +48,11 @@ class PropertiesContentProvider implements IStructuredContentProvider,
     }
 
     public Object[] getElements(Object obj) {
-        if (project instanceof IAction) {
-            return ((IAction) project).getProperties().toArray();
+        if (project instanceof IPropertyEnabled) {
+            return ((IPropertyEnabled) project).getProperties().toArray();
         }
-        else if (project instanceof IState) {
-            return ((IState) project).getProperties().toArray();
-        }
-        return null;
+        else 
+            return null;
     }
 
     public void inputChanged(Viewer v, Object oldInput, Object newInput) {

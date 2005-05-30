@@ -30,8 +30,7 @@ import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditor;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
-import org.springframework.ide.eclipse.web.flow.core.model.IAction;
-import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
+import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowEditor;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowEditorInput;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
@@ -57,21 +56,18 @@ public class OpenBeansGraphAction extends EditorPartAction {
     }
 
     public boolean isEnabled() {
-        Object flowModelElement = getFirstSelectedEditPart().getModel();
-        WebFlowEditorInput input = WebFlowUtils.getActiveFlowEditorInput();
-        IBeansConfigSet beansConfig = input.getBeansConfigSet();
-        if (beansConfig != null) {
-            if (flowModelElement instanceof IAction) {
-                IAction action = (IAction) flowModelElement;
-                if (action.getBean() != null || action.getBeanClass() != null) {
-                    return true;
-                }
-            }
-            else if (flowModelElement instanceof IAttributeMapper) {
-                IAttributeMapper mapper = (IAttributeMapper) flowModelElement;
-                if (mapper.getBean() != null || mapper.getBeanClass() != null) {
-                    return true;
-                }
+        if (getFirstSelectedEditPart() != null) {
+            Object flowModelElement = getFirstSelectedEditPart().getModel();
+            WebFlowEditorInput input = WebFlowUtils.getActiveFlowEditorInput();
+            IBeansConfigSet beansConfig = input.getBeansConfigSet();
+            if (beansConfig != null) {
+                if (flowModelElement instanceof IBeanReference) {
+                    IBeanReference action = (IBeanReference) flowModelElement;
+                    if (action.getBean() != null
+                            || action.getBeanClass() != null) {
+                        return true;
+                    }
+                } 
             }
         }
         return false;
@@ -82,38 +78,23 @@ public class OpenBeansGraphAction extends EditorPartAction {
         WebFlowEditorInput input = WebFlowUtils.getActiveFlowEditorInput();
         IBeansConfigSet beansConfig = input.getBeansConfigSet();
         IModelElement bean = null;
-        if (flowModelElement instanceof IAction) {
-            IAction action = (IAction) flowModelElement;
+        if (flowModelElement instanceof IBeanReference) {
+            IBeanReference action = (IBeanReference) flowModelElement;
             if (action.getBean() != null) {
                 bean = beansConfig.getBean(action.getBean());
-            }
-            else if (action.getBeanClass() != null) {
+            } else if (action.getBeanClass() != null) {
                 Collection beans = beansConfig.getBeans(action.getBeanClass());
                 if (beans != null && beans.size() > 0) {
                     bean = (IBean) beans.toArray()[0];
                 }
             }
 
-        }
-        else if (flowModelElement instanceof IAttributeMapper) {
-            IAttributeMapper mapper = (IAttributeMapper) flowModelElement;
-            if (mapper.getBean() != null) {
-                bean = beansConfig.getBean(mapper.getBean());
-            }
-            else if (mapper.getBeanClass() != null) {
-                Collection beans = beansConfig.getBeans(mapper.getBeanClass());
-                if (beans != null && beans.size() > 0) {
-                    bean = (IBean) beans.toArray()[0];
-                }
-            }
-
-        }
+        } 
         if (bean != null) {
             GraphEditorInput graphEditorInput = new GraphEditorInput(bean,
                     beansConfig);
             SpringUIUtils.openInEditor(graphEditorInput, GraphEditor.EDITOR_ID);
-        }
-        else {
+        } else {
             MessageDialog.openError(getWorkbenchPart().getSite().getShell(),
                     "Error opening Beans Graph",
                     "The referenced bean cannot be located in Beans ConfigSet '"

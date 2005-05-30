@@ -37,21 +37,21 @@ import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.web.flow.core.WebFlowCoreUtils;
 import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
-import org.springframework.ide.eclipse.web.flow.core.model.IEndState;
 import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
+import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
 
-public class EndStatePropertiesDialog extends TitleAreaDialog implements
+public class WebFlowStatePropertiesDialog extends TitleAreaDialog implements
         IDialogValidator {
 
     private Button addButton;
 
     private TableViewer configsViewer2;
 
-    private IEndState endState;
+    private IWebFlowState webflowState;
 
-    private IEndState endStateClone;
+    private IWebFlowState webflowStateClone;
 
     private Text nameText;
 
@@ -61,57 +61,54 @@ public class EndStatePropertiesDialog extends TitleAreaDialog implements
 
     private Button removeButton;
 
-    private Text viewText;
-
     private BeanReferencePropertiesComposite beanProperties;
 
     private PropertiesComposite properties;
 
-    public EndStatePropertiesDialog(Shell parentShell,
-            IWebFlowModelElement parent, IEndState state) {
+    public WebFlowStatePropertiesDialog(Shell parentShell,
+            IWebFlowModelElement parent, IWebFlowState state) {
         super(parentShell);
-        this.endState = state;
+        this.webflowState = state;
         this.parent = parent;
-        this.endStateClone = (IEndState) ((ICloneableModelElement) state)
+        this.webflowStateClone = (IWebFlowState) ((ICloneableModelElement) state)
                 .cloneModelElement();
     }
 
     protected void buttonPressed(int buttonId) {
         if (buttonId == IDialogConstants.OK_ID) {
-            this.endStateClone.setId(trimString(getId()));
-            this.endStateClone.setView(trimString(getView()));
+            this.webflowStateClone.setId(trimString(getId()));
             if (this.beanProperties.useBeanReference()) {
                 if (this.beanProperties.getRadioBeanRef()) {
-                    this.endStateClone.setBean(this.beanProperties
+                    this.webflowStateClone.setBean(this.beanProperties
                             .getBeanText());
-                    this.endStateClone.setBeanClass(null);
-                    this.endStateClone.setAutowire(null);
-                    this.endStateClone.setClassRef(null);
+                    this.webflowStateClone.setBeanClass(null);
+                    this.webflowStateClone.setAutowire(null);
+                    this.webflowStateClone.setClassRef(null);
                 } else if (this.beanProperties.getRadioClass()) {
-                    this.endStateClone.setBean(null);
-                    this.endStateClone
+                    this.webflowStateClone.setBean(null);
+                    this.webflowStateClone
                             .setBeanClass(trimString(this.beanProperties
                                     .getClassText()));
-                    this.endStateClone
+                    this.webflowStateClone
                             .setAutowire(trimString(this.beanProperties
                                     .getAutowireText()));
-                    this.endStateClone.setClassRef(null);
+                    this.webflowStateClone.setClassRef(null);
                 } else if (this.beanProperties.getRadioClassRef()) {
-                    this.endStateClone.setBean(null);
-                    this.endStateClone.setBeanClass(null);
-                    this.endStateClone.setAutowire(null);
-                    this.endStateClone.setClassRef(this.beanProperties
+                    this.webflowStateClone.setBean(null);
+                    this.webflowStateClone.setBeanClass(null);
+                    this.webflowStateClone.setAutowire(null);
+                    this.webflowStateClone.setClassRef(this.beanProperties
                             .getClassRefText());
                 }
             } else {
-                this.endStateClone.setBean(null);
-                this.endStateClone.setBeanClass(null);
-                this.endStateClone.setAutowire(null);
-                this.endStateClone.setClassRef(null);
+                this.webflowStateClone.setBean(null);
+                this.webflowStateClone.setBeanClass(null);
+                this.webflowStateClone.setAutowire(null);
+                this.webflowStateClone.setClassRef(null);
             }
 
-            ((ICloneableModelElement) this.endState)
-                    .applyCloneValues((ICloneableModelElement) this.endStateClone);
+            ((ICloneableModelElement) this.webflowState)
+                    .applyCloneValues((ICloneableModelElement) this.webflowStateClone);
         }
         super.buttonPressed(buttonId);
     }
@@ -131,7 +128,7 @@ public class EndStatePropertiesDialog extends TitleAreaDialog implements
         // do this here because setting the text will set enablement on the
         // ok button
         nameText.setFocus();
-        if (this.endState != null && this.endState.getId() != null) {
+        if (this.webflowState != null && this.webflowState.getId() != null) {
             okButton.setEnabled(true);
         } else {
             okButton.setEnabled(false);
@@ -173,8 +170,8 @@ public class EndStatePropertiesDialog extends TitleAreaDialog implements
         Label nameLabel = new Label(nameGroup, SWT.NONE);
         nameLabel.setText("Id");
         nameText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
-        if (this.endState != null && this.endState.getId() != null) {
-            this.nameText.setText(this.endState.getId());
+        if (this.webflowState != null && this.webflowState.getId() != null) {
+            this.nameText.setText(this.webflowState.getId());
         }
         nameText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         nameText.addModifyListener(new ModifyListener() {
@@ -184,29 +181,21 @@ public class EndStatePropertiesDialog extends TitleAreaDialog implements
             }
         });
 
-        Label viewLabel = new Label(nameGroup, SWT.NONE);
-        viewLabel.setText("View");
-
-        viewText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
-        if (this.endState != null && this.endState.getView() != null) {
-            this.viewText.setText(this.endState.getView());
-        }
-        viewText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        viewText.addModifyListener(new ModifyListener() {
-
-            public void modifyText(ModifyEvent e) {
-                validateInput();
-            }
-        });
-
+        /*Label startState = new Label(nameGroup, SWT.NONE);
+        startState.setText("Start State");
+        Text startStateText = new Text(nameGroup,  SWT.SINGLE | SWT.BORDER);
+        startStateText.setEditable(false);
+        startStateText.setText(this.webflowState.getStartState().getId());
+        startStateText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));*/
+        
         item1.setControl(nameGroup);
 
         beanProperties = new BeanReferencePropertiesComposite(this, item2,
-                getShell(), (IBeanReference) this.endStateClone, false);
+                getShell(), (IBeanReference) this.webflowStateClone, false);
         item2.setControl(beanProperties.createDialogArea(folder));
 
         properties = new PropertiesComposite(this, item3, getShell(),
-                (IPropertyEnabled) this.endStateClone);
+                (IPropertyEnabled) this.webflowStateClone);
         item3.setControl(properties.createDialogArea(folder));
 
         applyDialogFont(parentComposite);
@@ -218,23 +207,19 @@ public class EndStatePropertiesDialog extends TitleAreaDialog implements
     }
 
     protected Image getImage() {
-        return WebFlowImages.getImage(WebFlowImages.IMG_OBJS_END_STATE);
+        return WebFlowImages.getImage(WebFlowImages.IMG_OBJS_SPRING);
     }
 
     protected String getMessage() {
-        return "Enter the details for the end state";
+        return "Enter the details for the web flow";
     }
 
     protected String getShellTitle() {
-        return "End State";
+        return "WebFlow";
     }
 
     protected String getTitle() {
-        return "End State properties";
-    }
-
-    public String getView() {
-        return this.viewText.getText();
+        return "WebFlow properties";
     }
 
     /**
@@ -273,7 +258,7 @@ public class EndStatePropertiesDialog extends TitleAreaDialog implements
             error = true;
         } else {
             if (WebFlowCoreUtils.isIdAlreadyChoosenByAnotherState(parent,
-                    endState, id)) {
+                    webflowState, id)) {
                 errorMessage
                         .append("The entered id attribute must be unique within a single web flow. ");
                 error = true;

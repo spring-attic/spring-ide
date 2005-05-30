@@ -34,8 +34,6 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.springframework.ide.eclipse.web.flow.core.internal.model.Property;
-import org.springframework.ide.eclipse.web.flow.core.model.IAction;
-import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
 import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
@@ -44,8 +42,6 @@ public class PropertiesComposite {
     
     private IPropertyEnabled state;
 
-    private IPropertyEnabled stateClone;
-    
     private Button removeButton;
     
     private Button addButton;
@@ -56,8 +52,6 @@ public class PropertiesComposite {
     
     public PropertiesComposite(IDialogValidator validator, TabItem item, Shell parentShell,IPropertyEnabled state) {
         this.state = state;
-        this.stateClone = (IAction) ((ICloneableModelElement) this.state)
-                .cloneModelElement();
         item.setText("Properties");
         item.setToolTipText("Define element properties");
         item.setImage(WebFlowImages.getImage(WebFlowImages.IMG_OBJS_PROPERTIES));
@@ -99,7 +93,7 @@ public class PropertiesComposite {
         String[] columnNames = new String[] { "Name", "Value" };
         configsViewer.setColumnProperties(columnNames);
         configsViewer.setContentProvider(new PropertiesContentProvider(
-                this.stateClone, configsViewer));
+                this.state, configsViewer));
         CellEditor[] editors = new CellEditor[2];
         TextCellEditor textEditor = new TextCellEditor(configsViewer.getTable());
         TextCellEditor textEditor1 = new TextCellEditor(configsViewer
@@ -109,7 +103,7 @@ public class PropertiesComposite {
         configsViewer.setCellEditors(editors);
         configsViewer.setLabelProvider(new ModelTableLabelProvider());
         configsViewer.setCellModifier(new TableCellModifier());
-        configsViewer.setInput(this.stateClone);
+        configsViewer.setInput(this.state);
         configsTable.addSelectionListener(new SelectionAdapter() {
 
             public void widgetSelected(SelectionEvent e) {
@@ -131,7 +125,7 @@ public class PropertiesComposite {
 
             // Add a task to the ExampleTaskList and refresh the view
             public void widgetSelected(SelectionEvent e) {
-                new Property(stateClone, "name", "value");
+                new Property(state, "<name>", "<value>");
             }
         });
 
@@ -147,7 +141,7 @@ public class PropertiesComposite {
                         .getSelection();
                 if (selection.getFirstElement() != null) {
                     if (selection.getFirstElement() instanceof IProperty) {
-                        stateClone.removeProperty((IProperty) selection
+                        state.removeProperty((IProperty) selection
                                 .getFirstElement());
                     }
                 }

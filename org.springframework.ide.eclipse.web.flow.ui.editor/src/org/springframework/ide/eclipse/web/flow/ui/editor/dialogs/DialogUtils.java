@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.web.flow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState;
 import org.springframework.ide.eclipse.web.flow.core.model.IViewState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
+import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowPlugin;
 
 public class DialogUtils {
@@ -73,6 +74,11 @@ public class DialogUtils {
             dialog = new IfPropertiesDialog(WebFlowPlugin
                     .getActiveWorkbenchWindow().getShell(), parent,
                     (IIf) element, newMode);
+        }
+        else if (element instanceof IWebFlowState) {
+            dialog = new WebFlowStatePropertiesDialog(WebFlowPlugin
+                    .getActiveWorkbenchWindow().getShell(), parent,
+                    (IWebFlowState) element);
         }
         if (dialog != null) {
             dialog.setBlockOnOpen(true);

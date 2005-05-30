@@ -76,6 +76,13 @@ public class WebFlowModelImageDescriptor extends CompositeImageDescriptor {
             data = WebFlowImages.DESC_OBJS_START_STATE.getImageData();
             drawImage(data, x, y);
         }
+        /*if (this.state instanceof IBeanReference) {
+            IBeanReference beanReference = (IBeanReference) this.state;
+            if (beanReference.getBean() != null || beanReference.getBeanClass() != null || beanReference.getClassRef() != null) {
+                data = WebFlowImages.DESC_OBJS_JAVABEAN.getImageData();
+                drawImage(data, x, y);
+            }
+        }*/
     }
 
     protected void setSize(Point size) {

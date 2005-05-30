@@ -90,7 +90,7 @@ public abstract class AbstractStatePart extends AbstractGraphicalEditPart
 
     protected void applyGraphResults(CompoundDirectedGraph graph, Map map) {
         Node n = (Node) map.get(this);
-        getFigure().setBounds(new Rectangle(n.x, n.y, n.width, n.height));
+        getFigure().setBounds(new Rectangle(n.x, n.y, getFigure().getPreferredSize().width, getFigure().getPreferredSize().height));
 
         for (int i = 0; i < getSourceConnections().size(); i++) {
             StateTransitionPart trans = (StateTransitionPart) getSourceConnections()

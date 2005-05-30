@@ -34,11 +34,9 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -55,8 +53,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -64,10 +62,10 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.web.flow.core.WebFlowCoreUtils;
 import org.springframework.ide.eclipse.web.flow.core.internal.model.AttributeMapper;
-import org.springframework.ide.eclipse.web.flow.core.internal.model.Property;
 import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
+import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
+import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowEditorInput;
@@ -76,7 +74,8 @@ import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
 import org.springframework.ide.eclipse.web.flow.ui.editor.model.WebFlowModelLabelDecorator;
 import org.springframework.ide.eclipse.web.flow.ui.editor.model.WebFlowModelLabelProvider;
 
-public class SubFlowStatePropertiesDialog extends TitleAreaDialog {
+public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
+        IDialogValidator {
 
     private static int RADIOBEANREF_CHOICE = 0;
 
@@ -147,6 +146,10 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog {
 
     private Label viewLabel;
 
+    private BeanReferencePropertiesComposite beanProperties;
+
+    private PropertiesComposite properties;
+
     public SubFlowStatePropertiesDialog(Shell parentShell,
             IWebFlowModelElement parent, ISubFlowState state) {
         super(parentShell);
@@ -175,23 +178,50 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog {
                     mapper.setBeanClass(null);
                     mapper.setAutowire(null);
                     mapper.setClassRef(null);
-                }
-                else if (this.radioClass.getSelection()) {
+                } else if (this.radioClass.getSelection()) {
                     mapper.setBean(null);
                     mapper.setBeanClass(trimString(getBeanClass()));
                     mapper.setAutowire(trimString(getAutowire()));
                     mapper.setClassRef(null);
-                }
-                else if (this.radioClassRef.getSelection()) {
+                } else if (this.radioClassRef.getSelection()) {
                     mapper.setBean(null);
                     mapper.setBeanClass(null);
                     mapper.setAutowire(null);
                     mapper.setClassRef(trimString(getClassRef()));
                 }
-            }
-            else {
+            } else {
                 this.subFlowStateClone.removeAttributeMapper();
             }
+            if (this.beanProperties.useBeanReference()) {
+                if (this.beanProperties.getRadioBeanRef()) {
+                    this.subFlowStateClone.setBean(this.beanProperties
+                            .getBeanText());
+                    this.subFlowStateClone.setBeanClass(null);
+                    this.subFlowStateClone.setAutowire(null);
+                    this.subFlowStateClone.setClassRef(null);
+                } else if (this.beanProperties.getRadioClass()) {
+                    this.subFlowStateClone.setBean(null);
+                    this.subFlowStateClone
+                            .setBeanClass(trimString(this.beanProperties
+                                    .getClassText()));
+                    this.subFlowStateClone
+                            .setAutowire(trimString(this.beanProperties
+                                    .getAutowireText()));
+                    this.subFlowStateClone.setClassRef(null);
+                } else if (this.beanProperties.getRadioClassRef()) {
+                    this.subFlowStateClone.setBean(null);
+                    this.subFlowStateClone.setBeanClass(null);
+                    this.subFlowStateClone.setAutowire(null);
+                    this.subFlowStateClone.setClassRef(this.beanProperties
+                            .getClassRefText());
+                }
+            } else {
+                this.subFlowStateClone.setBean(null);
+                this.subFlowStateClone.setBeanClass(null);
+                this.subFlowStateClone.setAutowire(null);
+                this.subFlowStateClone.setClassRef(null);
+            }
+
             ((ICloneableModelElement) this.subFlowState)
                     .applyCloneValues((ICloneableModelElement) this.subFlowStateClone);
         }
@@ -215,8 +245,7 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog {
         nameText.setFocus();
         if (this.subFlowState != null && this.subFlowState.getId() != null) {
             okButton.setEnabled(true);
-        }
-        else {
+        } else {
             okButton.setEnabled(false);
         }
     }
@@ -237,8 +266,18 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog {
         //layout.verticalSpacing = 10;
         composite.setLayout(layout);
         composite.setLayoutData(new GridData(GridData.FILL_BOTH));
+        TabFolder folder = new TabFolder(composite, SWT.NULL);
+        TabItem item1 = new TabItem(folder, SWT.NULL);
+        item1.setText("General");
+        item1.setImage(getImage());
+        TabItem item2 = new TabItem(folder, SWT.NULL);
+        item2.setText("Attribute Mapper");
+        item2.setImage(WebFlowImages
+                .getImage(WebFlowImages.IMG_OBJS_ATTRIBUTE_MAPPER));
+        TabItem item3 = new TabItem(folder, SWT.NULL);
+        TabItem item4 = new TabItem(folder, SWT.NULL);
 
-        Composite nameGroup = new Composite(composite, SWT.NULL);
+        Composite nameGroup = new Composite(folder, SWT.NULL);
         nameGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         GridLayout layout1 = new GridLayout();
         layout1.numColumns = 2;
@@ -273,8 +312,10 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog {
             }
         });
 
+        item1.setControl(nameGroup);
+
         //Group for attribute mapper settings.
-        Group groupActionType = new Group(composite, SWT.NULL);
+        Group groupActionType = new Group(folder, SWT.NULL);
         GridLayout layoutAttMap = new GridLayout();
         layoutAttMap.marginWidth = 3;
         layoutAttMap.marginHeight = 3;
@@ -345,12 +386,64 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog {
                 GridData.HORIZONTAL_ALIGN_END));
         browseBeanButton.addSelectionListener(buttonListener);
 
+        radioClassRef = new Button(groupActionType, SWT.RADIO);
+        if (this.subFlowState != null
+                && this.subFlowState.getAttributeMapper() != null
+                && this.subFlowState.getAttributeMapper().getClassRef() != null) {
+            radioClassRef.setSelection(true);
+        }
+        radioClassRef.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        radioClassRef.setText("Locate attribute mapper by class reference");
+        radioClassRef.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                setAttributeMapperChoice(RADIOCLASSREF_CHOICE);
+            }
+        });
+
+        // Inset composite for classname.
+        Composite inset3 = new Composite(groupActionType, SWT.NULL);
+        GridLayout inset3Layout = new GridLayout();
+        inset3Layout.numColumns = 3;
+        inset3Layout.marginWidth = 20;
+        inset3Layout.marginHeight = 2;
+        inset3.setLayout(inset3Layout);
+        inset3.setLayoutData(new GridData(GridData.FILL_BOTH));
+
+        //      Label field.
+        classRefLabel = new Label(inset3, SWT.NONE);
+        classRefLabel.setText("Classref");
+        gridData = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+        gridData.widthHint = LABEL_WIDTH;
+        classRefLabel.setLayoutData(gridData);
+
+        // Add the text box for action classname.
+        classRefText = new Text(inset3, SWT.SINGLE | SWT.BORDER);
+        if (this.subFlowState != null
+                && this.subFlowState.getAttributeMapper() != null
+                && this.subFlowState.getAttributeMapper().getClassRef() != null) {
+            classRefText.setText(this.subFlowState.getAttributeMapper()
+                    .getClassRef());
+        }
+        classRefText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        classRefText.addModifyListener(new ModifyListener() {
+            public void modifyText(ModifyEvent e) {
+                validateInput();
+            }
+        });
+        // Add the button for browsing types.
+        browseClassRefButton = new Button(inset3, SWT.PUSH);
+        browseClassRefButton.setText("...");
+        browseClassRefButton.setLayoutData(new GridData(
+                GridData.HORIZONTAL_ALIGN_END));
+        browseClassRefButton.addSelectionListener(buttonListener);
+
         radioClass = new Button(groupActionType, SWT.RADIO);
         if (this.subFlowState != null
                 && this.subFlowState.getAttributeMapper() != null
                 && this.subFlowState.getAttributeMapper().getBeanClass() != null) {
             radioClass.setSelection(true);
         }
+
         radioClass.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         radioClass.setText("Locate attribute mapper by class");
         radioClass.addSelectionListener(new SelectionAdapter() {
@@ -420,150 +513,16 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog {
                 validateInput();
             }
         });
-        radioClassRef = new Button(groupActionType, SWT.RADIO);
-        if (this.subFlowState != null
-                && this.subFlowState.getAttributeMapper() != null
-                && this.subFlowState.getAttributeMapper().getClassRef() != null) {
-            radioClassRef.setSelection(true);
-        }
-        radioClassRef.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        radioClassRef.setText("Locate attribute mapper by class reference");
-        radioClassRef.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                setAttributeMapperChoice(RADIOCLASSREF_CHOICE);
-            }
-        });
 
-        // Inset composite for classname.
-        Composite inset3 = new Composite(groupActionType, SWT.NULL);
-        GridLayout inset3Layout = new GridLayout();
-        inset3Layout.numColumns = 3;
-        inset3Layout.marginWidth = 20;
-        inset3Layout.marginHeight = 2;
-        inset3.setLayout(inset3Layout);
-        inset3.setLayoutData(new GridData(GridData.FILL_BOTH));
+        item2.setControl(groupActionType);
 
-        //      Label field.
-        classRefLabel = new Label(inset3, SWT.NONE);
-        classRefLabel.setText("Classref");
-        gridData = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-        gridData.widthHint = LABEL_WIDTH;
-        classRefLabel.setLayoutData(gridData);
+        beanProperties = new BeanReferencePropertiesComposite(this, item3,
+                getShell(), (IBeanReference) this.subFlowStateClone, false);
+        item3.setControl(beanProperties.createDialogArea(folder));
 
-        // Add the text box for action classname.
-        classRefText = new Text(inset3, SWT.SINGLE | SWT.BORDER);
-        if (this.subFlowState != null
-                && this.subFlowState.getAttributeMapper() != null
-                && this.subFlowState.getAttributeMapper().getClassRef() != null) {
-            classRefText.setText(this.subFlowState.getAttributeMapper()
-                    .getClassRef());
-        }
-        classRefText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        classRefText.addModifyListener(new ModifyListener() {
-            public void modifyText(ModifyEvent e) {
-                validateInput();
-            }
-        });
-        // Add the button for browsing types.
-        browseClassRefButton = new Button(inset3, SWT.PUSH);
-        browseClassRefButton.setText("...");
-        browseClassRefButton.setLayoutData(new GridData(
-                GridData.HORIZONTAL_ALIGN_END));
-        browseClassRefButton.addSelectionListener(buttonListener);
-
-        Group groupPropertyType = new Group(composite, SWT.NULL);
-        GridLayout layoutPropMap = new GridLayout();
-        layoutPropMap.marginWidth = 3;
-        layoutPropMap.marginHeight = 3;
-        groupPropertyType.setLayout(layoutPropMap);
-        groupPropertyType.setText(" Properties ");
-        groupPropertyType.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-        Composite tableAndButtons2 = new Composite(groupPropertyType, SWT.NONE);
-        tableAndButtons2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        GridLayout layout3 = new GridLayout();
-        layout3.marginHeight = 0;
-        layout3.marginWidth = 0;
-        layout3.numColumns = 2;
-        tableAndButtons2.setLayout(layout3);
-
-        Table configsTable2 = new Table(tableAndButtons2, SWT.MULTI
-                | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
-        GridData data2 = new GridData(GridData.FILL_BOTH);
-        //data.widthHint = 250;
-        data2.heightHint = 50;
-        configsTable2.setLayoutData(data2);
-        TableColumn columnName = new TableColumn(configsTable2, SWT.NONE);
-        columnName.setText("Name");
-        columnName.setWidth(150);
-        TableColumn columnValue = new TableColumn(configsTable2, SWT.NONE);
-        columnValue.setText("Value");
-        columnValue.setWidth(220);
-        configsTable2.setHeaderVisible(true);
-
-        configsViewer2 = new TableViewer(configsTable2);
-        String[] columnNames = new String[] { "Name", "Value" };
-        configsViewer2.setColumnProperties(columnNames);
-        configsViewer2.setContentProvider(new PropertiesContentProvider(
-                this.subFlowStateClone, configsViewer2));
-        CellEditor[] editors = new CellEditor[2];
-        TextCellEditor textEditor = new TextCellEditor(configsViewer2
-                .getTable());
-        TextCellEditor textEditor1 = new TextCellEditor(configsViewer2
-                .getTable());
-        editors[0] = textEditor;
-        editors[1] = textEditor1;
-        configsViewer2.setCellEditors(editors);
-        configsViewer2.setLabelProvider(new ModelTableLabelProvider());
-        configsViewer2.setCellModifier(new TableCellModifier());
-        configsViewer2.setInput(this.subFlowStateClone);
-        configsTable2.addSelectionListener(new SelectionAdapter() {
-
-            public void widgetSelected(SelectionEvent e) {
-                handleTableSelectionChanged();
-            }
-        });
-        Composite buttonArea2 = new Composite(tableAndButtons2, SWT.NONE);
-        GridLayout layout4 = new GridLayout();
-        layout4.marginHeight = 0;
-        layout4.marginWidth = 0;
-        buttonArea2.setLayout(layout4);
-        buttonArea2.setLayoutData(new GridData(GridData.FILL_VERTICAL));
-        GridData data3 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-        data3.widthHint = 40;
-
-        addButton = new Button(buttonArea2, SWT.PUSH);
-        addButton.setText("Add");
-
-        addButton.setLayoutData(data3);
-        addButton.addSelectionListener(new SelectionAdapter() {
-
-            public void widgetSelected(SelectionEvent e) {
-                new Property(subFlowStateClone, "name", "value");
-            }
-        });
-
-        GridData data4 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-        data4.widthHint = 40;
-        removeButton = new Button(buttonArea2, SWT.PUSH);
-        removeButton.setText("Delete");
-        removeButton.setLayoutData(data4);
-
-        removeButton.addSelectionListener(new SelectionAdapter() {
-
-            public void widgetSelected(SelectionEvent e) {
-                IStructuredSelection selection = (IStructuredSelection) configsViewer2
-                        .getSelection();
-                if (selection.getFirstElement() != null) {
-                    if (selection.getFirstElement() instanceof IProperty) {
-                        subFlowStateClone.removeProperty((IProperty) selection
-                                .getFirstElement());
-                    }
-                }
-            }
-        });
-
-        removeButton.setEnabled(false);
+        properties = new PropertiesComposite(this, item4, getShell(),
+                (IPropertyEnabled) this.subFlowStateClone);
+        item4.setControl(properties.createDialogArea(folder));
 
         applyDialogFont(parentComposite);
 
@@ -660,8 +619,7 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog {
                 this.setAttributeMapperChoice(RADIOBEANREF_CHOICE);
             }
 
-        }
-        else {
+        } else {
             IProject project = this.parent.getElementResource().getProject();
             IJavaSearchScope searchScope = SearchEngine.createWorkspaceScope();
             try {
@@ -674,13 +632,13 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog {
                         searchScope = SearchEngine.createHierarchyScope(type);
                     }
                 }
+            } catch (JavaModelException e) {
+            } catch (CoreException e) {
             }
-            catch (JavaModelException e) {
-            }
-            catch (CoreException e) {
-            }
-            //TypeSelectionDialog2 dialog= new TypeSelectionDialog2(getShell(), false, 
-            //        new ProgressMonitorDialog(getShell()), searchScope,  IJavaSearchConstants.TYPE);
+            //TypeSelectionDialog2 dialog= new TypeSelectionDialog2(getShell(),
+            // false,
+            //        new ProgressMonitorDialog(getShell()), searchScope,
+            // IJavaSearchConstants.TYPE);
             TypeSelectionDialog dialog = new TypeSelectionDialog(getShell(),
                     new ProgressMonitorDialog(getShell()),
                     IJavaSearchConstants.CLASS, searchScope);
@@ -694,8 +652,7 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog {
                 if (button.equals(browseClassButton)) {
                     this.classText.setText(obj.getFullyQualifiedName());
                     this.setAttributeMapperChoice(RADIOCLASS_CHOICE);
-                }
-                else if (button.equals(browseClassRefButton)) {
+                } else if (button.equals(browseClassRefButton)) {
                     this.classRefText.setText(obj.getFullyQualifiedName());
                     this.setAttributeMapperChoice(RADIOCLASSREF_CHOICE);
                 }
@@ -713,8 +670,7 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog {
                 .getSelection();
         if (selection.isEmpty()) {
             removeButton.setEnabled(false);
-        }
-        else {
+        } else {
             removeButton.setEnabled(true);
         }
 
@@ -739,8 +695,7 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog {
             this.classRefText.setEnabled(false);
             this.browseClassRefButton.setEnabled(false);
             this.classRefLabel.setEnabled(false);
-        }
-        else if (RADIOCLASS_CHOICE == choice) {
+        } else if (RADIOCLASS_CHOICE == choice) {
             this.radioBeanRef.setSelection(false);
             this.radioClass.setSelection(true);
             this.radioClassRef.setSelection(false);
@@ -758,8 +713,7 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog {
             this.classRefText.setEnabled(false);
             this.browseClassRefButton.setEnabled(false);
             this.classRefLabel.setEnabled(false);
-        }
-        else if (RADIOCLASSREF_CHOICE == choice) {
+        } else if (RADIOCLASSREF_CHOICE == choice) {
             this.radioBeanRef.setSelection(false);
             this.radioClass.setSelection(false);
             this.radioClassRef.setSelection(true);
@@ -777,8 +731,7 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog {
             this.classRefText.setEnabled(true);
             this.browseClassRefButton.setEnabled(true);
             this.classRefLabel.setEnabled(true);
-        }
-        else {
+        } else {
             this.radioBeanRef.setSelection(false);
             this.radioClass.setSelection(false);
             this.radioClassRef.setSelection(false);
@@ -828,8 +781,7 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog {
             this.classRefText.setEnabled(false);
             this.browseClassRefButton.setEnabled(false);
             this.classRefLabel.setEnabled(false);
-        }
-        else {
+        } else {
             setAttributeMapperChoice(RADIOBEANREF_CHOICE);
             this.radioBeanRef.setEnabled(true);
             this.radioClass.setEnabled(true);
@@ -838,11 +790,10 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog {
             if (this.subFlowState.getAttributeMapper() != null) {
                 if (this.subFlowState.getAttributeMapper().getBean() != null) {
                     this.setAttributeMapperChoice(RADIOBEANREF_CHOICE);
-                }
-                else if (this.subFlowState.getAttributeMapper().getBeanClass() != null) {
+                } else if (this.subFlowState.getAttributeMapper()
+                        .getBeanClass() != null) {
                     this.setAttributeMapperChoice(RADIOCLASS_CHOICE);
-                }
-                else if (this.subFlowState.getAttributeMapper().getClassRef() != null) {
+                } else if (this.subFlowState.getAttributeMapper().getClassRef() != null) {
                     this.setAttributeMapperChoice(RADIOCLASSREF_CHOICE);
                 }
             }
@@ -860,7 +811,7 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog {
         return string;
     }
 
-    protected void validateInput() {
+    public void validateInput() {
         String id = this.nameText.getText();
         String flow = this.flowText.getText();
         String bean = this.beanText.getText();
@@ -869,11 +820,11 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog {
         String classRef = this.classRefLabel.getText();
         boolean error = false;
         StringBuffer errorMessage = new StringBuffer();
+
         if (id == null || "".equals(id)) {
             errorMessage.append("A valid id attribute is required. ");
             error = true;
-        }
-        else {
+        } else {
             if (WebFlowCoreUtils.isIdAlreadyChoosenByAnotherState(parent,
                     subFlowState, id)) {
                 errorMessage
@@ -885,6 +836,7 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog {
             errorMessage.append("A valid flow attribute is required. ");
             error = true;
         }
+        error = this.beanProperties.validateInput(errorMessage);
         if (this.radioBeanRef.getSelection()
                 && (bean == null || "".equals(bean))) {
             errorMessage
@@ -910,8 +862,7 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog {
         if (error) {
             getButton(OK).setEnabled(false);
             setErrorMessage(errorMessage.toString());
-        }
-        else {
+        } else {
             getButton(OK).setEnabled(true);
             setErrorMessage(null);
         }

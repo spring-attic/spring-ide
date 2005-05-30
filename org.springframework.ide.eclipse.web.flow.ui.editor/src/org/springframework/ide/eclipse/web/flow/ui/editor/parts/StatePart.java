@@ -67,6 +67,7 @@ public class StatePart extends AbstractStatePart {
         l.setBackgroundColor(COLOR);
         l.setLabelAlignment(PositionConstants.LEFT);
         l.setIcon(labelProvider.getImage(getModel()));
+        l.setIconAlignment(PositionConstants.TOP);
         l.setBorder(new LineBorder());
         return l;
     }
