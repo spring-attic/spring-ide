@@ -22,7 +22,6 @@ import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
 import org.springframework.ide.eclipse.web.flow.core.model.IPersistableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
 import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
-import org.springframework.ide.eclipse.web.flow.core.model.IState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 
 public class Property extends WebFlowModelElement implements IProperty,
@@ -57,6 +56,7 @@ public class Property extends WebFlowModelElement implements IProperty,
             Property property = (Property) element;
             setName(property.getName());
             setValue(property.getValue());
+            setType(property.getType());
         }
     }
 
@@ -69,6 +69,7 @@ public class Property extends WebFlowModelElement implements IProperty,
         Property property = new Property();
         property.setName(getName());
         property.setValue(getValue());
+        property.setType(getType());
         return property;
     }
 

@@ -11,17 +11,17 @@ import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 
 public abstract class AbstractModelElement extends WebFlowModelElement {
     
-    private String autowire;
+    protected String autowire;
 
-    private String bean;
+    protected String bean;
 
-    private String beanClass;
+    protected String beanClass;
 
-    private String classRef;
+    protected String classRef;
     
-    private String method;
+    protected String method;
     
-    private List properties = new ArrayList();
+    protected List properties = new ArrayList();
     
     protected AbstractModelElement(IWebFlowModelElement parent, String name) {
         super(parent, name);

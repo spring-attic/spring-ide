@@ -191,7 +191,9 @@ public class SubFlowState extends WebFlowState implements ISubFlowState,
                 }
             }
             else {
-                removeAttributeMapper();
+                if (this.attributeMapper != null) {
+                    removeAttributeMapper();
+                }
             }
             Property[] props = (Property[]) this.getProperties().toArray(
                     new Property[this.getProperties().size()]);

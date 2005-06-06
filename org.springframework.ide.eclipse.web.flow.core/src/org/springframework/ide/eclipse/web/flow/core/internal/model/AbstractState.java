@@ -27,7 +27,7 @@ public abstract class AbstractState extends AbstractModelElement implements
 
     private boolean isStartState = false;
 
-    private String id;
+    protected String id;
     
     public AbstractState(IWebFlowModelElement parent, String id) {
         super(parent, id);

@@ -227,18 +227,18 @@ public class WebFlowState extends AbstractTransitionableFrom implements
     public void applyCloneValues(ICloneableModelElement element) {
         if (element instanceof WebFlowState) {
             WebFlowState state = (WebFlowState) element;
-            setId(state.getId());        
-            setAutowire(state.getAutowire());
-            setBean(state.getBean());
-            setBeanClass(state.getBeanClass());
-            setClassRef(state.getClassRef());
+            this.id = state.getId();        
+            this.autowire = state.getAutowire();
+            this.bean = state.getBean();
+            this.beanClass = state.getBeanClass();
+            this.classRef = state.getClassRef();
             Property[] props = (Property[]) this.getProperties().toArray(
                     new Property[this.getProperties().size()]);
             for (int i = 0; i < props.length; i++) {
-                removeProperty(props[i]);
+                this.properties.remove(props[i]);
             }
             for (int i = 0; i < state.getProperties().size(); i++) {
-                addProperty((IProperty) state.getProperties().get(i));
+                this.properties.add((IProperty) state.getProperties().get(i));
             }
         }
     }
