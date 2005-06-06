@@ -37,8 +37,14 @@ public class ModelTableLabelProvider implements ITableLabelProvider {
         if (element instanceof IProperty) {
             if (columnIndex == 0)
                 return ((IProperty) element).getName();
-            else
+            else if (columnIndex == 1)
                 return ((IProperty) element).getValue();
+            else if (columnIndex == 2) {
+                if (((IProperty) element).getType() != null)
+                    return ((IProperty) element).getType();
+                else 
+                    return "";  
+            }
         }
         return "";
     }

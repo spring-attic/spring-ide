@@ -190,7 +190,9 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
                     mapper.setClassRef(trimString(getClassRef()));
                 }
             } else {
-                this.subFlowStateClone.removeAttributeMapper();
+                if (this.subFlowStateClone.getAttributeMapper() != null) {
+                    this.subFlowStateClone.removeAttributeMapper();
+                }
             }
             if (this.beanProperties.useBeanReference()) {
                 if (this.beanProperties.getRadioBeanRef()) {
@@ -820,7 +822,7 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
         String classRef = this.classRefLabel.getText();
         boolean error = false;
         StringBuffer errorMessage = new StringBuffer();
-
+        error = this.beanProperties.validateInput(errorMessage);
         if (id == null || "".equals(id)) {
             errorMessage.append("A valid id attribute is required. ");
             error = true;
@@ -836,7 +838,6 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
             errorMessage.append("A valid flow attribute is required. ");
             error = true;
         }
-        error = this.beanProperties.validateInput(errorMessage);
         if (this.radioBeanRef.getSelection()
                 && (bean == null || "".equals(bean))) {
             errorMessage

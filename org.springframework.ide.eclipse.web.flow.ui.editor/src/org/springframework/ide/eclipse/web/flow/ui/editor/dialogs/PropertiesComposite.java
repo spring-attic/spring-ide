@@ -16,10 +16,8 @@
 
 package org.springframework.ide.eclipse.web.flow.ui.editor.dialogs;
 
-import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -39,25 +37,32 @@ import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
 
 public class PropertiesComposite {
-    
+
     private IPropertyEnabled state;
 
     private Button removeButton;
-    
+
     private Button addButton;
-    
+
+    private Button editButton;
+
     private TableViewer configsViewer;
-    
+
     private IDialogValidator validator;
-    
-    public PropertiesComposite(IDialogValidator validator, TabItem item, Shell parentShell,IPropertyEnabled state) {
+
+    private Shell parentShell;
+
+    public PropertiesComposite(IDialogValidator validator, TabItem item,
+            Shell parentShell, IPropertyEnabled state) {
         this.state = state;
         item.setText("Properties");
         item.setToolTipText("Define element properties");
-        item.setImage(WebFlowImages.getImage(WebFlowImages.IMG_OBJS_PROPERTIES));
+        item
+                .setImage(WebFlowImages
+                        .getImage(WebFlowImages.IMG_OBJS_PROPERTIES));
+        this.parentShell = parentShell;
     }
-    
-    
+
     protected Control createDialogArea(Composite parent) {
         Group groupPropertyType = new Group(parent, SWT.NULL);
         GridLayout layoutPropMap = new GridLayout();
@@ -86,21 +91,25 @@ public class PropertiesComposite {
         columnName.setWidth(150);
         TableColumn columnValue = new TableColumn(configsTable, SWT.NONE);
         columnValue.setText("Value");
-        columnValue.setWidth(220);
+        columnValue.setWidth(120);
+        TableColumn columnType = new TableColumn(configsTable, SWT.NONE);
+        columnType.setText("Type");
+        columnType.setWidth(80);
         configsTable.setHeaderVisible(true);
 
         configsViewer = new TableViewer(configsTable);
-        String[] columnNames = new String[] { "Name", "Value" };
+        String[] columnNames = new String[] { "Name", "Value", "Type" };
         configsViewer.setColumnProperties(columnNames);
         configsViewer.setContentProvider(new PropertiesContentProvider(
                 this.state, configsViewer));
-        CellEditor[] editors = new CellEditor[2];
-        TextCellEditor textEditor = new TextCellEditor(configsViewer.getTable());
-        TextCellEditor textEditor1 = new TextCellEditor(configsViewer
-                .getTable());
-        editors[0] = textEditor;
-        editors[1] = textEditor1;
-        configsViewer.setCellEditors(editors);
+        //CellEditor[] editors = new CellEditor[2];
+        //TextCellEditor textEditor = new
+        // TextCellEditor(configsViewer.getTable());
+        //TextCellEditor textEditor1 = new TextCellEditor(configsViewer
+        //        .getTable());
+        //editors[0] = textEditor;
+        //editors[1] = textEditor1;
+        //configsViewer.setCellEditors(editors);
         configsViewer.setLabelProvider(new ModelTableLabelProvider());
         configsViewer.setCellModifier(new TableCellModifier());
         configsViewer.setInput(this.state);
@@ -125,7 +134,31 @@ public class PropertiesComposite {
 
             // Add a task to the ExampleTaskList and refresh the view
             public void widgetSelected(SelectionEvent e) {
-                new Property(state, "<name>", "<value>");
+                IProperty property = new Property(state, "<name>", "<value>");
+                PropertyEditorDialog dialog = new PropertyEditorDialog(parentShell, property);
+                dialog.open();
+                configsViewer.refresh(true);
+            }
+        });
+        editButton = new Button(buttonArea, SWT.PUSH);
+        editButton.setText("Edit");
+        data1 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+        data1.widthHint = 40;
+        editButton.setLayoutData(data1);
+        editButton.addSelectionListener(new SelectionAdapter() {
+
+            // Add a task to the ExampleTaskList and refresh the view
+            public void widgetSelected(SelectionEvent e) {
+                IStructuredSelection selection = (IStructuredSelection) configsViewer
+                        .getSelection();
+                if (selection.getFirstElement() != null) {
+                    if (selection.getFirstElement() instanceof IProperty) {
+                        PropertyEditorDialog dialog = new PropertyEditorDialog(parentShell, (IProperty) selection
+                                .getFirstElement());
+                        dialog.open();
+                        configsViewer.refresh(true);
+                    }
+                }
             }
         });
 
@@ -148,10 +181,11 @@ public class PropertiesComposite {
             }
         });
         removeButton.setEnabled(false);
-        
+        editButton.setEnabled(false);
+
         return groupPropertyType;
     }
-    
+
     /**
      * The user has selected a different configuration in table. Update button
      * enablement.
@@ -161,8 +195,10 @@ public class PropertiesComposite {
                 .getSelection();
         if (selection.isEmpty()) {
             removeButton.setEnabled(false);
+            editButton.setEnabled(false);
         } else {
             removeButton.setEnabled(true);
+            editButton.setEnabled(true);
         }
     }
 }

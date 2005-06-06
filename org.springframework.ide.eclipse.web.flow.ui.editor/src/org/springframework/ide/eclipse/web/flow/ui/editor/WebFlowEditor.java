@@ -109,7 +109,7 @@ import org.springframework.ide.eclipse.web.flow.ui.editor.parts.StatePartFactory
 import org.springframework.ide.eclipse.web.flow.ui.editor.parts.StateTreeEditPartFactory;
 
 public class WebFlowEditor extends GraphicalEditorWithPalette {
-    
+
     private boolean isCurrentlySaving = false;
 
     private class OutlinePage extends ContentOutlinePage implements IAdaptable {
@@ -318,7 +318,9 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
                     display.asyncExec(new Runnable() {
 
                         public void run() {
-                            superSetInput(new WebFlowEditorInput(newFile, ((WebFlowEditorInput) getEditorInput()).getElementId()));
+                            superSetInput(new WebFlowEditorInput(newFile,
+                                    ((WebFlowEditorInput) getEditorInput())
+                                            .getElementId()));
                         }
                     });
                 }
@@ -330,7 +332,9 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
                     display.asyncExec(new Runnable() {
 
                         public void run() {
-                            setInput(new WebFlowEditorInput(newFile,((WebFlowEditorInput) getEditorInput()).getElementId()));
+                            setInput(new WebFlowEditorInput(newFile,
+                                    ((WebFlowEditorInput) getEditorInput())
+                                            .getElementId()));
                             getCommandStack().flush();
                             initializeGraphicalViewer();
                             outlinePage.initializeOutlineViewer();
@@ -350,7 +354,9 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
                     display.asyncExec(new Runnable() {
 
                         public void run() {
-                            setInput(new WebFlowEditorInput(newFile, ((WebFlowEditorInput) getEditorInput()).getElementId()));
+                            setInput(new WebFlowEditorInput(newFile,
+                                    ((WebFlowEditorInput) getEditorInput())
+                                            .getElementId()));
                             getCommandStack().flush();
                             initializeGraphicalViewer();
                             outlinePage.initializeOutlineViewer();
@@ -659,9 +665,9 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
                 .getFile());
         dialog.open();
         IPath path = dialog.getResult();
-        
+
         this.isCurrentlySaving = true;
-        
+
         if (path == null)
             return false;
 
@@ -688,14 +694,16 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
         try {
             new ProgressMonitorDialog(getSite().getWorkbenchWindow().getShell())
                     .run(false, true, op);
-            setInput(new WebFlowEditorInput( (IFile) file,  ((WebFlowEditorInput) this.getEditorInput()).getElementId()));
+            setInput(new WebFlowEditorInput((IFile) file,
+                    ((WebFlowEditorInput) this.getEditorInput()).getElementId()));
             getCommandStack().markSaveLocation();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         try {
-            superSetInput(new WebFlowEditorInput(file, ((WebFlowEditorInput) this.getEditorInput()).getElementId()));
+            superSetInput(new WebFlowEditorInput(file,
+                    ((WebFlowEditorInput) this.getEditorInput()).getElementId()));
             getCommandStack().markSaveLocation();
         } catch (Exception e) {
             e.printStackTrace();

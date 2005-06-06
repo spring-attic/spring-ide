@@ -34,6 +34,7 @@ import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.requests.DirectEditRequest;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
 import org.springframework.ide.eclipse.web.flow.ui.editor.figures.CompoundStateFigure;
 import org.springframework.ide.eclipse.web.flow.ui.editor.figures.SubgraphFigure;
@@ -132,10 +133,10 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
     }
 
     private boolean directEditHitTest(Point requestLoc) {
-        IFigure header = ((SubgraphFigure) getFigure()).getHeader();
+        /*IFigure header = ((SubgraphFigure) getFigure()).getHeader();
         header.translateToRelative(requestLoc);
         if (header.containsPoint(requestLoc))
-            return true;
+            return true;*/
         return false;
     }
 
@@ -174,7 +175,7 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 
     public void setSelected(int value) {
         super.setSelected(value);
-        if (!(getModel() instanceof IWebFlowState)) {
+        if (!(getModel() instanceof IWebFlowState) || getModel() instanceof ISubFlowState) {
             SubgraphFigure sf = (SubgraphFigure) getFigure();
             sf.setSelected(value != SELECTED_NONE);
         }
