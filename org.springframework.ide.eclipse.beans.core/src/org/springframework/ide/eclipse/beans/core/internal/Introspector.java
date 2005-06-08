@@ -27,26 +27,33 @@ import org.springframework.util.StringUtils;
 public class Introspector {
 
     /**
-     * Returns true if the given type has a public constructor with the
-     * specified number of arguments.
+     * Returns <code>true</code> if the given type has a public constructor
+     * with the specified number of arguments. If a constructor with no
+     * arguments is requested then the absence of a constructor (the JVM adds
+     * an implicit constructor here) results in <code>true</code>.
      * 
      * @param type The Java type object on which to retrieve the method
      * @param argCount Number of arguments for the constructor
      */
 	public static boolean hasConstructor(IType type, int argCount)
 													throws JavaModelException {
+		boolean hasImplicitConstructor = (argCount == 0);
 		IMethod[] methods = type.getMethods();
 		for (int i = 0; i < methods.length; i++) {
 			IMethod method = methods[i];
-			if (method.isConstructor() &&
-								  method.getNumberOfParameters() == argCount) {
-				int flags = method.getFlags();
-				if (Flags.isPublic(flags)	) {
-					return true;
+			if (method.isConstructor()) {
+				if (method.getNumberOfParameters() == argCount) {
+					int flags = method.getFlags();
+					if (Flags.isPublic(flags)	) {
+						return true;
+					}
+				}
+				if (hasImplicitConstructor) {
+					return false;
 				}
 			}
 		}
-		return false;
+		return hasImplicitConstructor;
 	}
 
     /**
