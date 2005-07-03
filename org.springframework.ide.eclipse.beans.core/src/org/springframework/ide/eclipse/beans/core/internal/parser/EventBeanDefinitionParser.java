@@ -30,6 +30,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser;
 import org.springframework.core.io.Resource;
 import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
+import org.springframework.util.ResourceUtils;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -67,14 +68,19 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 	 */
 	protected void importBeanDefinitionResource(Element ele) {
 		String location = ele.getAttribute(RESOURCE_ATTRIBUTE);
-		try {
-			Resource relativeResource = getResource().createRelative(location);
-			if (!relativeResource.exists()) {
-				throw new FileNotFoundException("Invalid relative resource " +
-												"location '" + location + "'");
+
+		// Skip locations which are specified as URL
+		if (!ResourceUtils.isUrl(location)) {
+			try {
+				Resource relativeResource = getResource().createRelative(
+																	 location);
+				if (!relativeResource.exists()) {
+					throw new FileNotFoundException("Invalid relative " +
+									   "resource location '" + location + "'");
+				}
+			} catch (IOException e) {
+				throw new BeanDefinitionException(ele, e);
 			}
-		} catch (IOException e) {
-			throw new BeanDefinitionException(ele, e);
 		}
 	}
 
@@ -200,12 +206,10 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 	private class ConstructorArgumentValuesFilter
 											 extends ConstructorArgumentValues {
 		private ConstructorArgumentValues cargs;
-		private Element element;
 
 		public ConstructorArgumentValuesFilter(
 							 ConstructorArgumentValues cargs, Element element) {
 			this.cargs = cargs;
-			this.element = element;
 		}
 
 		public void addIndexedArgumentValue(int index, Object value) {
