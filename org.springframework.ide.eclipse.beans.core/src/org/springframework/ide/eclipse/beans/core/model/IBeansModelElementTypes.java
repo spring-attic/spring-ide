@@ -26,7 +26,7 @@ public interface IBeansModelElementTypes {
 	 * A Beans element with this type can be safely cast to
 	 * <code>BeansProject</code>.
 	 */
-	int PROJECT_TYPE = 2;
+	int PROJECT_TYPE = 2; // starts with 2 because 1 is reserved for the model
 
 	/**
 	 * Constant representing a Beans project's config.
@@ -52,14 +52,14 @@ public interface IBeansModelElementTypes {
 	/**
 	 * Constant representing a Beans project bean's property.
 	 * A Beans element with this type can be safely cast to
-	 * <code>Property</code>.
+	 * <code>BeanProperty</code>.
 	 */
 	int PROPERTY_TYPE = 6;
 
 	/**
 	 * Constant representing a Beans project bean's constructor argument.
 	 * A Beans element with this type can be safely cast to
-	 * <code>ConstructorArgument</code>.
+	 * <code>BeanConstructorArgument</code>.
 	 */
 	int CONSTRUCTOR_ARGUMENT_TYPE = 7;
 }
