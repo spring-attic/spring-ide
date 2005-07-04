@@ -26,8 +26,6 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescription;
@@ -259,13 +257,5 @@ public class BeansProject extends AbstractSourceModelElement
 			description = BeansProjectDescriptionReader.read(this);
 		}
 		return description;
-	}
-
-	private IFile getConfigFile(String configName) {
-		if (configName.charAt(0) == '/') {
-			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-			return (IFile) root.findMember(configName);
-		}
-		return (IFile) project.findMember(configName);
 	}
 }

@@ -21,7 +21,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
-import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 public class BeanConstructorArgument extends AbstractSourceModelElement
@@ -44,10 +43,6 @@ public class BeanConstructorArgument extends AbstractSourceModelElement
 									  getElementParent()).getElementResource();
 		}
 		return null;
-	}
-
-	public void accept(IModelElementVisitor visitor) {
-		visitor.visit(this);
 	}
 
 	public void setIndex(int index) {

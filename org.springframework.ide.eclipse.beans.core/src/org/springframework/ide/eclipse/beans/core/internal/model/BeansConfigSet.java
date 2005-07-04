@@ -33,7 +33,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
@@ -80,10 +79,6 @@ public class BeansConfigSet extends AbstractSourceModelElement
 	public IModelElement[] getElementChildren() {
 		return (IModelElement[]) getConfigs().toArray(
 									   new IModelElement[getConfigs().size()]);
-	}
-
-	public void accept(IModelElementVisitor visitor) {
-		visitor.visit(this);
 	}
 
 	public void setAllowBeanDefinitionOverriding(
@@ -171,7 +166,6 @@ public class BeansConfigSet extends AbstractSourceModelElement
 	private Map getBeansMap() {
 		if (beansMap == null) {
 			beansMap = new HashMap();
-			IBeansProject project = (IBeansProject) getElementParent();
 			Iterator iter = configNames.iterator();
 			while (iter.hasNext()) {
 				String configName = (String) iter.next();
@@ -201,24 +195,6 @@ public class BeansConfigSet extends AbstractSourceModelElement
 			}
 		}
 		return beansMap;
-	}
-
-	private void addBeanToMap(IBean bean, Map beansMap) {
-
-		// Add bean name
-		String beanName = bean.getElementName();
-		if (allowBeanDefinitionOverriding || !beansMap.containsKey(beanName)) {
-			beansMap.put(beanName, bean);
-		}
-
-		// Add bean aliases
-		String[] aliases = bean.getAliases();
-		for (int i = 0; i < aliases.length; i++) {
-			String alias = aliases[i];
-			if (allowBeanDefinitionOverriding || !beansMap.containsKey(alias)) {
-				beansMap.put(alias, bean);
-			}
-		}
 	}
 
 	/**

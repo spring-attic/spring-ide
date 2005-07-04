@@ -21,7 +21,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
-import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 public class BeanProperty extends AbstractSourceModelElement
@@ -30,10 +29,6 @@ public class BeanProperty extends AbstractSourceModelElement
 
 	public BeanProperty(IBean bean) {
 		super(bean, null);
-	}
-
-	public void accept(IModelElementVisitor visitor) {
-		visitor.visit(this);
 	}
 
 	public int getElementType() {
