@@ -58,8 +58,8 @@ public interface IModelElement {
 	 * This is a handle-only method.
 	 *
 	 * @return the kind of element; e.g. one of the constants declared in
-	 *   <code>IBeansModelElement</code>
-	 * @see IBeansModelElement
+	 *			<code>IBeansModelElementTypes</code>
+	 * @see IBeansModelElementTypes
 	 */
 	int getElementType();
 

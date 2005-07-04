@@ -74,6 +74,10 @@ public abstract class AbstractModelElement implements IModelElement {
 		return id.toString();
 	}
 
+	public void accept(IModelElementVisitor visitor) {
+		visitor.visit(this);
+	}
+
 	/**
 	 * Returns the element for the given element ID.
 	 *
