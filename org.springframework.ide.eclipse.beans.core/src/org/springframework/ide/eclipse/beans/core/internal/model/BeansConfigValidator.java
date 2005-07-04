@@ -111,7 +111,7 @@ public class BeansConfigValidator {
 				// If the config set is complete the check all bean references
 				// of given config
 				if (!configSet.isIncomplete()) {
-					validateReferences(config, configSet, registry);
+					validateConfigReferences(config, configSet, registry);
 				}
 				isValidated = true;
 			}
@@ -123,7 +123,7 @@ public class BeansConfigValidator {
 									   new DefaultBeanDefinitionRegistry(null); 
 			registry.setAllowAliasOverriding(false);
 			validateConfig(config, null, registry);
-			validateReferences(config, null, registry);
+			validateConfigReferences(config, null, registry);
 		}
 		monitor.worked(1);
 	}
@@ -176,18 +176,29 @@ public class BeansConfigValidator {
 						IBeansProjectMarker.ERROR_CODE_BEAN_OVERRIDE,
 						bean.getElementName(), configSet.getElementName());
 		}
-		
+
+		// Get bean's standard and merged bean definition
+		AbstractBeanDefinition bd = (AbstractBeanDefinition)
+									   BeansModelUtils.getBeanDefinition(bean);
+		AbstractBeanDefinition mergedBd;
+		if (configSet == null) {
+			mergedBd = (AbstractBeanDefinition)
+					  BeansModelUtils.getMergedBeanDefinition(bean,
+					  						  BeansModelUtils.getConfig(bean));
+		} else {
+			mergedBd = (AbstractBeanDefinition)
+					  BeansModelUtils.getMergedBeanDefinition(bean, configSet);
+		}
+
 		// Validate bean name and aliases
 		validateBeanDefinitionHolder(bean, registry);
 
 		// Validate root bean
-		BeanDefinitionHolder bdHolder = ((Bean) bean).getBeanDefinitionHolder();
-		BeanDefinition bd = bdHolder.getBeanDefinition();
 		if (bd instanceof RootBeanDefinition) {
-	
+
 			// Validate bean definition
 			try {
-				((RootBeanDefinition) bd).validate();
+				bd.validate();
 			} catch (BeanDefinitionValidationException e) {
 				BeansModelUtils.createProblemMarker(bean,
 						"Invalid bean definition: " + e.getMessage(),
@@ -198,7 +209,7 @@ public class BeansConfigValidator {
 
 			// If bean's Java type available then valdiate bean's constructor
 			// arguments and properties
-			String className = ((RootBeanDefinition) bd).getBeanClassName();
+			String className = bd.getBeanClassName();
 			if (className != null) {
 				IType type = BeansModelUtils.getJavaType(
 							 bean.getConfig().getConfigFile().getProject(),
@@ -212,12 +223,28 @@ public class BeansConfigValidator {
 							 bean.getElementName(), className);
 					}
 				} else {
+
 					// Only validate constructor arguments of non-abstract beans
 					if (!bean.isAbstract()) {
 						validateConstructorArguments(bean, type,
 											bd.getConstructorArgumentValues());
 					}
-					validateProperties(bean, type, bd.getPropertyValues());
+				}
+			}
+		}
+
+		// Validate bean's properties and static factory method
+		String className = mergedBd.getBeanClassName();
+		if (className != null) {
+			IType type = BeansModelUtils.getJavaType(
+							 bean.getConfig().getConfigFile().getProject(),
+							 className);
+			if (type != null) {
+				validateProperties(bean, type, bd.getPropertyValues());
+				if (bd.getFactoryMethodName() != null &&
+											 bd.getFactoryBeanName() == null) {
+					validateFactoryMethod(bean, className,
+										  bd.getFactoryMethodName(), true);
 				}
 			}
 		}
@@ -231,13 +258,13 @@ public class BeansConfigValidator {
 	}
 
 	protected void validateBeanDefinitionHolder(IBean bean,
-											 BeanDefinitionRegistry registry) {
+					 						 BeanDefinitionRegistry registry) {
 		BeanDefinitionHolder bdHolder = ((Bean) bean).getBeanDefinitionHolder();
-		AbstractBeanDefinition bd = (AbstractBeanDefinition)
-												  bdHolder.getBeanDefinition();
+
 		// Validate bean name
 		try {
-			registry.registerBeanDefinition(bdHolder.getBeanName(), bd);
+			registry.registerBeanDefinition(bdHolder.getBeanName(),
+											bdHolder.getBeanDefinition());
 		} catch (BeanDefinitionStoreException e) {
 			BeansModelUtils.createProblemMarker(bean, e.getMessage(),
 							IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
@@ -261,83 +288,6 @@ public class BeansConfigValidator {
 				}
 			}
 		}
-
-		// Validate static factory method in this bean
-		if (bd.getBeanClassName() != null &&
-										   bd.getFactoryMethodName() != null &&
-										   bd.getFactoryBeanName() == null) {
-			validateFactoryMethod(bean, bd.getBeanClassName(),
-								  bd.getFactoryMethodName(), true, registry);
-		}
-	}
-
-	protected void validateFactoryBean(IBean bean, String beanName,
-						  String methodName, BeanDefinitionRegistry registry) {
-		try {
-			AbstractBeanDefinition factoryBd = (AbstractBeanDefinition)
-										  registry.getBeanDefinition(beanName);
-			if (factoryBd.isAbstract() ||
-										factoryBd.getBeanClassName() == null) {
-				BeansModelUtils.createProblemMarker(bean,
-						   "Invalid factory bean '" + beanName + "'",
-						   IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
-					  	   IBeansProjectMarker.ERROR_CODE_INVALID_FACTORY_BEAN,
-						   bean.getElementName(), beanName);
-			} else {
-
-				// Validate non-static factory method in factory bean
-				// Factory beans with factory methods can only be validated
-				// during runtime - so skip them
-				if (factoryBd.getFactoryMethodName() == null) {
-					validateFactoryMethod(bean, factoryBd.getBeanClassName(),
-										  methodName, false, registry);
-				}
-			}
-		} catch (NoSuchBeanDefinitionException e) {
-			if (e.getBeanName().equals(bean.getElementName())) {
-				BeansModelUtils.createProblemMarker(bean,
-						 "Bean name and factory bean name are the same",
-						 IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
-						 IBeansProjectMarker.ERROR_CODE_UNDEFINED_PARENT_BEAN,
-						 bean.getElementName(), e.getBeanName());
-			} else {
-				BeansModelUtils.createProblemMarker(bean,
-						 "Factory bean '" + beanName + "' not found",
-						 IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
-						 IBeansProjectMarker.ERROR_CODE_UNDEFINED_FACTORY_BEAN,
-						 bean.getElementName(), beanName);
-			}
-		}
-	}
-
-	protected void validateFactoryMethod(IBean bean, String className,
-										String methodName, boolean isStatic,
-										BeanDefinitionRegistry registry) {
-		IType type = BeansModelUtils.getJavaType(
-					 bean.getConfig().getConfigFile().getProject(), className);
-		if (type == null) {
-			BeansModelUtils.createProblemMarker(bean,
-							"Factory bean class '" + className + "' not found",
-							IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
-							IBeansProjectMarker.ERROR_CODE_CLASS_NOT_FOUND,
-							bean.getElementName(), className);
-		} else {
-			try {
-				if (Introspector.findMethod(type, methodName, -1, true,
-											isStatic) == null) {
-					BeansModelUtils.createProblemMarker(bean,
-							(isStatic ? "Static" : "Instance") +
-							" factory method '" + methodName +
-							"' in factory bean class '" + className +
-							"' not found", IMarker.SEVERITY_ERROR,
-							bean.getElementStartLine(),
-							IBeansProjectMarker.ERROR_CODE_UNDEFINED_FACTORY_BEAN_METHOD,
-							bean.getElementName(), methodName);
-				}
-			} catch (JavaModelException e) {
-				BeansCorePlugin.log(e);
-			}
-		}
 	}
 
 	protected void validateConstructorArguments(IBean bean, IType type,
@@ -346,10 +296,8 @@ public class BeansConfigValidator {
 						   "BeansConfigValidator.validateConstructorArguments",
 						   bean.getElementName()));
 		// Skip validation if a factory is involved
-		BeanDefinitionHolder bdHolder = ((Bean)
-											   bean).getBeanDefinitionHolder();
 		AbstractBeanDefinition bd = (AbstractBeanDefinition)
-												  bdHolder.getBeanDefinition();
+									   BeansModelUtils.getBeanDefinition(bean);
 		if (bd.getFactoryBeanName() == null &&
 										   bd.getFactoryMethodName() == null) {
 			int numArguments = argumentValues.getArgumentCount();
@@ -436,7 +384,7 @@ public class BeansConfigValidator {
 		}
 	}
 
-	protected void validateReferences(IBeansConfig config,
+	protected void validateConfigReferences(IBeansConfig config,
 				  IBeansConfigSet configSet, BeanDefinitionRegistry registry) {
 		if (DEBUG) {
 			System.out.println("Validating references of bean config '" +
@@ -474,19 +422,7 @@ public class BeansConfigValidator {
 				}
 			}
 
-			// Validate bean references in this bean
-			validateRefBeansInBean(bean, registry);
-
-			// Validate non-static factory method in factory bean
-			BeanDefinitionHolder bdHolder = ((Bean)
-											   bean).getBeanDefinitionHolder();
-			AbstractBeanDefinition bd = (AbstractBeanDefinition)
-												  bdHolder.getBeanDefinition();
-			if (bd.getFactoryBeanName() != null &&
-										   bd.getFactoryMethodName() != null) {
-				validateFactoryBean(bean, bd.getFactoryBeanName(),
-									bd.getFactoryMethodName(), registry);
-			}
+			validateBeanReferences(bean, registry);
 		}
 
 		// Validate references of all inner beans
@@ -496,26 +432,16 @@ public class BeansConfigValidator {
 				throw new OperationCanceledException();
 			}
 			IBean bean = (IBean) beans.next();
-			validateRefBeansInBean(bean, registry);
-
-			// Validate non-static factory method in factory bean
-			BeanDefinitionHolder bdHolder = ((Bean)
-											   bean).getBeanDefinitionHolder();
-			AbstractBeanDefinition bd = (AbstractBeanDefinition)
-												  bdHolder.getBeanDefinition();
-			if (bd.getFactoryBeanName() != null &&
-										   bd.getFactoryMethodName() != null) {
-				validateFactoryBean(bean, bd.getFactoryBeanName(),
-									bd.getFactoryMethodName(), registry);
-			}
+			validateBeanReferences(bean, registry);
 		}
 	}
 
-	protected void validateRefBeansInBean(IBean bean,
+	protected void validateBeanReferences(IBean bean,
 										  BeanDefinitionRegistry registry) {
 		try {
-			BeanDefinition bd = registry.getBeanDefinition(
-														bean.getElementName());
+			AbstractBeanDefinition bd = (AbstractBeanDefinition)
+							 registry.getBeanDefinition(bean.getElementName());
+
 			// Validate referenced beans in indexed constructor argument values
 			ConstructorArgumentValues cargs = bd.getConstructorArgumentValues();
 			Iterator iter = cargs.getIndexedArgumentValues().entrySet().iterator();
@@ -534,7 +460,7 @@ public class BeansConfigValidator {
 							  			entry.getValue();
 						// Skip constructor arguments with null value
 						if (valueHolder.getValue() != null) {
-							validateRefBeansInValue(bean, carg,
+							validateBeanReferencesInValue(bean, carg,
 											 valueHolder.getValue(), registry);
 						}
 						break;
@@ -557,7 +483,7 @@ public class BeansConfigValidator {
 								   carg.getValue() == valueHolder.getValue()) {
 						// Skip constructor arguments with null value
 						if (valueHolder.getValue() != null) {
-							validateRefBeansInValue(bean, carg,
+							validateBeanReferencesInValue(bean, carg,
 											 valueHolder.getValue(), registry);
 						}
 						break;
@@ -575,15 +501,33 @@ public class BeansConfigValidator {
 				if (element == null) {
 					element = bean;
 				}
-				validateRefBeansInValue(bean, element, prop.getValue(), registry);
+				validateBeanReferencesInValue(bean, element, prop.getValue(),
+											  registry);
+			}
+
+			// Validate non-static factory method in factory bean
+			if (bd.getFactoryBeanName() != null &&
+										   bd.getFactoryMethodName() != null) {
+				validateFactoryBean(bean, bd.getFactoryBeanName(),
+									bd.getFactoryMethodName(), registry);
+			}
+
+			// Validate depends-on beans
+			if (bd.getDependsOn() != null) {
+				String[] beanNames = bd.getDependsOn();
+				for (int i = 0; i < beanNames.length; i++) {
+					String beanName = beanNames[i];
+					validateDependsOnBean(bean, beanName, registry);
+				}
 			}
 		} catch (NoSuchBeanDefinitionException e) {
 			// Ignore all exceptions
 		}
 	}
 
-	protected void validateRefBeansInValue(IBean bean, IModelElement element,
-							   Object value, BeanDefinitionRegistry registry) {
+	protected void validateBeanReferencesInValue(IBean bean,
+										   IModelElement element, Object value,
+										   BeanDefinitionRegistry registry) {
 		if (value instanceof RuntimeBeanReference) {
 			String beanName = ((RuntimeBeanReference) value).getBeanName();
 			try {
@@ -657,18 +601,101 @@ public class BeansConfigValidator {
 		} else if (value instanceof List) {
 			List list = (List) value;
 			for (int i = 0; i < list.size(); i++) {
-				validateRefBeansInValue(bean, element, list.get(i), registry);
+				validateBeanReferencesInValue(bean, element, list.get(i),
+											  registry);
 			}
 		} else if (value instanceof Set) {
 			Set set = (Set) value;
 			for (Iterator iter = set.iterator(); iter.hasNext(); ) {
-				validateRefBeansInValue(bean, element, iter.next(), registry);
+				validateBeanReferencesInValue(bean, element, iter.next(),
+											  registry);
 			}
 		} else if (value instanceof Map) {
 			Map map = (Map) value;
 			for (Iterator iter = map.keySet().iterator(); iter.hasNext(); ) {
-				validateRefBeansInValue(bean, element, map.get(iter.next()),
-										registry);
+				validateBeanReferencesInValue(bean, element,
+											  map.get(iter.next()), registry);
+			}
+		}
+	}
+
+	protected void validateFactoryBean(IBean bean, String beanName,
+						  String methodName, BeanDefinitionRegistry registry) {
+		try {
+			AbstractBeanDefinition factoryBd = (AbstractBeanDefinition)
+										  registry.getBeanDefinition(beanName);
+			if (factoryBd.isAbstract() ||
+										factoryBd.getBeanClassName() == null) {
+				BeansModelUtils.createProblemMarker(bean,
+						   "Invalid factory bean '" + beanName + "'",
+						   IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+					  	   IBeansProjectMarker.ERROR_CODE_INVALID_FACTORY_BEAN,
+						   bean.getElementName(), beanName);
+			} else {
+
+				// Validate non-static factory method in factory bean
+				// Factory beans with factory methods can only be validated
+				// during runtime - so skip them
+				if (factoryBd.getFactoryMethodName() == null) {
+					validateFactoryMethod(bean, factoryBd.getBeanClassName(),
+										  methodName, false);
+				}
+			}
+		} catch (NoSuchBeanDefinitionException e) {
+
+			// Skip error "parent name is equal to bean name"
+			if (!e.getBeanName().equals(bean.getElementName())) {
+				BeansModelUtils.createProblemMarker(bean,
+						 "Factory bean '" + beanName + "' not found",
+						 IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+						 IBeansProjectMarker.ERROR_CODE_UNDEFINED_FACTORY_BEAN,
+						 bean.getElementName(), beanName);
+			}
+		}
+	}
+
+	protected void validateFactoryMethod(IBean bean, String className,
+										 String methodName, boolean isStatic) {
+		IType type = BeansModelUtils.getJavaType(
+					 bean.getConfig().getConfigFile().getProject(), className);
+		if (type == null) {
+			BeansModelUtils.createProblemMarker(bean,
+							"Factory bean class '" + className + "' not found",
+							IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+							IBeansProjectMarker.ERROR_CODE_CLASS_NOT_FOUND,
+							bean.getElementName(), className);
+		} else {
+			try {
+				if (Introspector.findMethod(type, methodName, -1, true,
+											isStatic) == null) {
+					BeansModelUtils.createProblemMarker(bean,
+							(isStatic ? "Static" : "Instance") +
+							" factory method '" + methodName +
+							"' in factory bean class '" + className +
+							"' not found", IMarker.SEVERITY_ERROR,
+							bean.getElementStartLine(),
+							IBeansProjectMarker.ERROR_CODE_UNDEFINED_FACTORY_BEAN_METHOD,
+							bean.getElementName(), methodName);
+				}
+			} catch (JavaModelException e) {
+				BeansCorePlugin.log(e);
+			}
+		}
+	}
+
+	protected void validateDependsOnBean(IBean bean, String beanName,
+										 BeanDefinitionRegistry registry) {
+		try {
+			registry.getBeanDefinition(beanName);
+		} catch (NoSuchBeanDefinitionException e) {
+
+			// Skip error "parent name is equal to bean name"
+			if (!e.getBeanName().equals(bean.getElementName())) {
+				BeansModelUtils.createProblemMarker(bean, "Depends-on bean '" +
+						beanName + "' not found", IMarker.SEVERITY_ERROR,
+						bean.getElementStartLine(),
+						IBeansProjectMarker.ERROR_CODE_UNDEFINED_DEPENDS_ON_BEAN,
+						bean.getElementName(), beanName);
 			}
 		}
 	}
