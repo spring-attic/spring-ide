@@ -34,6 +34,7 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.editparts.AbstractConnectionEditPart;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
 import org.springframework.ide.eclipse.beans.ui.graph.model.ConstructorArgument;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Property;
@@ -49,20 +50,42 @@ public class ReferencePart extends AbstractConnectionEditPart {
 	protected IFigure createFigure() {
 		PolylineConnection conn = createConnection(getReference());
 		Label label = new Label();
-		if (getReference().isParentReference()) {
-			conn.setLineStyle(Graphics.LINE_DOT);
-			label.setText("Parent bean: " +
-						  getReference().getTargetBean().getName());
-		} else {
-			Node node = getReference().getNode();
-			if (node instanceof ConstructorArgument) {
-				label.setText("ConstructorArgument: " +
-							  ((ConstructorArgument) node).getName());
-			} else if (node instanceof Property) {
-				label.setText("Property: " + ((Property) node).getName());
-			} else {
-				label.setText("Factory or depends-on bean");
-			}
+		switch (getReference().getType()) {
+			case BeanReference.PARENT_BEAN_TYPE :
+				conn.setLineStyle(Graphics.LINE_DOT);
+				label.setText("Parent bean: " +
+							  getReference().getTargetBean().getName());
+				break;
+
+			case BeanReference.FACTORY_BEAN_TYPE :
+				conn.setLineStyle(Graphics.LINE_DASH);
+				label.setText("Factory bean");
+				break;
+
+			case BeanReference.DEPENDS_ON_BEAN_TYPE :
+				conn.setLineStyle(Graphics.LINE_DASH);
+				label.setText("Depends-on bean");
+				break;
+
+			case BeanReference.METHOD_OVERRIDE_BEAN_TYPE :
+				conn.setLineStyle(Graphics.LINE_DOT);
+				label.setText("Method-override bean");
+				break;
+
+			case BeanReference.INTERCEPTOR_BEAN_TYPE :
+				conn.setLineStyle(Graphics.LINE_DASHDOT);
+				label.setText("Interceptor bean");
+				break;
+
+			default :
+				Node node = getReference().getNode();
+				if (node instanceof ConstructorArgument) {
+					label.setText("ConstructorArgument: " +
+								  ((ConstructorArgument) node).getName());
+				} else if (node instanceof Property) {
+					label.setText("Property: " + ((Property) node).getName());
+				}
+				break;
 		}
 		conn.setToolTip(label);
 		return conn;

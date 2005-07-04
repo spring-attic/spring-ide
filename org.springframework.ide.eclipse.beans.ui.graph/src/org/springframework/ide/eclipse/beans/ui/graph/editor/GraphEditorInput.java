@@ -28,6 +28,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
@@ -190,8 +191,12 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 			}
 		} else if (element instanceof IBean) {
 			list.add(element);
-			list.addAll(BeansModelUtils.getReferencedBeans(element, context,
-														   true));
+			Iterator beanRefs = BeansModelUtils.getBeanReferences(element,
+													 context, true).iterator();
+			while (beanRefs.hasNext()) {
+				BeanReference beanRef = (BeanReference) beanRefs.next();
+				list.add(beanRef.getTarget());
+			}
 		}
 
 		// Marshall all beans into a graph bean node

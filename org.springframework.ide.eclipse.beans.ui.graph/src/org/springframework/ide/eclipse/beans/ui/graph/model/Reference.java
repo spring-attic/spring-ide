@@ -20,19 +20,30 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.draw2d.graph.Edge;
 import org.eclipse.draw2d.graph.Node;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 
 public class Reference extends Edge implements IAdaptable {
 
+	private int type;
 	private Node node;
 
 	public Reference(Bean source, Bean target) {
-		super(source, target);
+		this(BeanReference.STANDARD_BEAN_TYPE, source, target, null);
 	}
 
-	public Reference(Bean source, Bean target, Node node) {
+	public Reference(int type, Bean source, Bean target) {
+		this(type, source, target, null);
+	}
+
+	public Reference(int type, Bean source, Bean target, Node node) {
 		super(source, target);
+		this.type = type;
 		this.node = node;
+	}
+
+	public int getType() {
+		return type;
 	}
 
 	public Bean getSourceBean() {
@@ -66,11 +77,6 @@ public class Reference extends Edge implements IAdaptable {
 					   node).getBeanConstructorArgument().getElementStartLine();
 		}
 		return getSourceBean().getStartLine();
-	}
-
-	public boolean isParentReference() {
-		return (!getSourceBean().isRootBean() &&
-			 getSourceBean().getParentName().equals(getTargetBean().getName()));
 	}
 
 	public Object getAdapter(Class adapter) {

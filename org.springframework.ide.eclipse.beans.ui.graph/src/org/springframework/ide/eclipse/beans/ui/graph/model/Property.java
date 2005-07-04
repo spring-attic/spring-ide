@@ -99,7 +99,7 @@ public class Property extends Node implements IAdaptable {
 				
 			}
 			if (innerBean != null) {
-				Iterator refBeans = BeansModelUtils.getReferencedBeans(
+				Iterator refBeans = BeansModelUtils.getBeanReferences(
 						   innerBean, innerBean.getConfig(), false).iterator();
 				while (refBeans.hasNext()) {
 					String refBeanName = ((IBean)
