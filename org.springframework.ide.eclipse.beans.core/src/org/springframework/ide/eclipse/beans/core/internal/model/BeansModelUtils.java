@@ -18,11 +18,13 @@ package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -30,6 +32,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -38,6 +41,8 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MethodOverride;
 import org.springframework.beans.factory.support.ReplaceOverride;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -92,15 +97,18 @@ public class BeansModelUtils {
 	 * @throws IllegalArgumentException if unsupported model element specified 
 	 */
 	public static final IBeansConfig getConfig(IModelElement element) {
+		IModelElement parent;
 		if (element instanceof IBean) {
-			return (IBeansConfig) element.getElementParent();
+			parent = element.getElementParent();
 		} else if (element instanceof IBeanConstructorArgument ||
 											element instanceof IBeanProperty) {
-			return (IBeansConfig) element.getElementParent().getElementParent();
+			parent = element.getElementParent().getElementParent();
 		} else {
 			throw new IllegalArgumentException("Unsupported model element " +
 											   element);
 		}
+		return (parent instanceof IBeansConfig ? (IBeansConfig) parent :
+															getConfig(parent));
 	}
 
 	/**
@@ -141,59 +149,68 @@ public class BeansModelUtils {
 	 */
 	public static final Collection getReferencedBeans(IModelElement element,
 													  boolean recursive) {
-		return getReferencedBeans(element, getConfig(element), recursive);
+		return getBeanReferences(element, getConfig(element), recursive);
 	}
 
 	/**
-	 * Returns a collection with all <code>IBean</code>s which are referenced
-	 * from given model element (<code>IBean</code>,
-	 * <code>IBeanConstructorArgument</code> or <code>IBeanProperty</code>).
+	 * Returns a collection of <code>BeanReference</code>s holding all
+	 * <code>IBean</code>s which are referenced from given model element.
 	 * For a bean it's parent bean (for child beans only), constructor argument
 	 * values and property values are checked.
 	 * <code>IBean</code> look-up is done from the specified
 	 * <code>IBeanConfig</code> or <code>IBeanConfigSet</code>.
-	 * @param element  the element to get all referenced beans from
+	 * @param element  the element (<code>IBean</code>,
+	 *	   <code>IBeanConstructorArgument</code> or <code>IBeanProperty</code>)
+	 *     to get all referenced beans from
 	 * @param context  the context (<code>IBeanConfig</code> or
 	 * 		  <code>IBeanConfigSet</code>) the referenced beans are looked-up
 	 * @throws IllegalArgumentException if unsupported model element specified 
 	 */
-	public static final Collection getReferencedBeans(IModelElement element,
+	public static final Collection getBeanReferences(IModelElement element,
 									IModelElement context, boolean recursive) {
-		List referencedBeans = new ArrayList();
+		List references = new ArrayList();
 		if (element instanceof Bean) {
 
 			// Add referenced beans from bean element
 			Bean bean = (Bean) element;
-			AbstractBeanDefinition bd = (AbstractBeanDefinition)
-							bean.getBeanDefinitionHolder().getBeanDefinition();
+
 			// For a child bean add all parent beans and all beans which are
 			// referenced by the parent beans
+			Set beanNames = new HashSet();  // used to detect a cycle
+			beanNames.add(bean.getElementName());
 			for (IBean parentBean = bean; parentBean != null &&
 												  !parentBean.isRootBean(); ) {
 				String parentName = parentBean.getParentName();
-				if (parentName != null) {
-					parentBean = getBean(parentName, context);
-					if (parentBean != null &&
-									   !referencedBeans.contains(parentBean)) {
-						referencedBeans.add(parentBean);
-						if (recursive) {
-							addReferencedBeansForElement(parentBean, context,
-												   referencedBeans, recursive);
-						}
-					}
+				if (beanNames.contains(parentName)) {
+					// break from cycle
+					break;
 				}
+				beanNames.add(parentName);
+				parentBean = getBean(parentName, context);
+				if (addBeanReference(BeanReference.PARENT_BEAN_TYPE, bean,
+									 parentBean, references) && recursive) {
+					addBeanReferencesForElement(parentBean, context,
+												references, recursive);
+				}
+
+			}
+
+			// Get bean's merged or standard bean definition
+			AbstractBeanDefinition bd;
+			if (recursive) {
+				bd = (AbstractBeanDefinition) getMergedBeanDefinition(bean,
+																	  context);
+			} else {
+				bd = (AbstractBeanDefinition) getBeanDefinition(bean);
 			}
 
 			// Add bean's factoy bean
 			if (bd.getFactoryBeanName() != null) {
 				IBean factoryBean = getBean(bd.getFactoryBeanName(), context);
-				if (factoryBean != null &&
-									  !referencedBeans.contains(factoryBean)) {
-					referencedBeans.add(factoryBean);
-					if (recursive) {
-						addReferencedBeansForElement(factoryBean, context,
-												   referencedBeans, recursive);
-					}
+				if (addBeanReference(BeanReference.FACTORY_BEAN_TYPE, bean,
+									 factoryBean, references) && recursive) {
+					addBeanReferencesForElement(factoryBean, context,
+												references, recursive);
 				}
 			}
 
@@ -201,15 +218,11 @@ public class BeansModelUtils {
 			if (bd.getDependsOn() != null) {
 				String[] dependsOnBeans = bd.getDependsOn();
 				for (int i = 0; i < dependsOnBeans.length; i++) {
-					String beanName = dependsOnBeans[i];
-					IBean dependsOnBean = getBean(beanName, context);
-					if (dependsOnBean != null &&
-									!referencedBeans.contains(dependsOnBean)) {
-						referencedBeans.add(dependsOnBean);
-						if (recursive) {
-							addReferencedBeansForElement(dependsOnBean,
-										  context, referencedBeans, recursive);
-						}
+					IBean dependsOnBean = getBean(dependsOnBeans[i], context);
+					if (addBeanReference(BeanReference.DEPENDS_ON_BEAN_TYPE,
+							   bean, dependsOnBean, references) && recursive) {
+						addBeanReferencesForElement(dependsOnBean, context,
+													references, recursive);
 					}
 				}
 			}
@@ -225,25 +238,21 @@ public class BeansModelUtils {
 						String beanName = ((LookupOverride)
 												 methodOverride).getBeanName();
 						IBean overrideBean = getBean(beanName, context);
-						if (overrideBean != null &&
-									 !referencedBeans.contains(overrideBean)) {
-							referencedBeans.add(overrideBean);
-							if (recursive) {
-								addReferencedBeansForElement(overrideBean,
-										  context, referencedBeans, recursive);
-							}
+						if (addBeanReference(
+								 BeanReference.METHOD_OVERRIDE_BEAN_TYPE, bean,
+								 overrideBean, references) && recursive) {
+							addBeanReferencesForElement(overrideBean, context,
+														references, recursive);
 						}
-					} if (methodOverride instanceof ReplaceOverride) {
+					} else if (methodOverride instanceof ReplaceOverride) {
 						String beanName = ((ReplaceOverride)
 								 methodOverride).getMethodReplacerBeanName();
 						IBean overrideBean = getBean(beanName, context);
-						if (overrideBean != null &&
-									 !referencedBeans.contains(overrideBean)) {
-							referencedBeans.add(overrideBean);
-							if (recursive) {
-								addReferencedBeansForElement(overrideBean,
-										  context, referencedBeans, recursive);
-							}
+						if (addBeanReference(
+								 BeanReference.METHOD_OVERRIDE_BEAN_TYPE, bean,
+								 overrideBean, references) && recursive) {
+							addBeanReferencesForElement(overrideBean, context,
+														references, recursive);
 						}
 					}
 				}
@@ -253,83 +262,65 @@ public class BeansModelUtils {
 			Iterator cargs = bean.getConstructorArguments().iterator();
 			while (cargs.hasNext()) {
 				IBeanConstructorArgument carg = (IBeanConstructorArgument)
-																   cargs.next();
-				addReferencedBeansForValue(carg.getValue(), context,
-										   referencedBeans, recursive);
+																  cargs.next();
+				addBeanReferencesForValue(bean, carg.getValue(), context,
+										  references, recursive);
 			}
 
 			// Add referenced beans from bean's properties
 			Iterator properties = bean.getProperties().iterator();
 			while (properties.hasNext()) {
 				IBeanProperty property = (IBeanProperty) properties.next();
-				Object value = property.getValue();
-
-				// Add bean's interceptors
-				if (value instanceof List &&
-						"interceptorNames".equals(property.getElementName())) {
-					IType type = getBeanType(bean, context);
-					if (type != null) {
-						if ("org.springframework.aop.framework.ProxyFactoryBean"
-									   .equals(type.getFullyQualifiedName())) {
-							Iterator names = ((List) value).iterator();
-							while (names.hasNext()) {
-								Object name = (Object) names.next();
-								if (name instanceof String) {
-									IBean interceptor = getBean((String) name,
-																context);
-									if (interceptor != null &&
-													 !referencedBeans.contains(
-																interceptor)) {
-										referencedBeans.add(interceptor);
-										if (recursive) {
-											addReferencedBeansForElement(
-												   interceptor, context,
-												   referencedBeans, recursive);
-										}
-									}
-								}
-							}
-						}
-					}
-				} else {
-					addReferencedBeansForValue(value, context, referencedBeans,
-											   recursive);
-				}
+				addBeanReferencesForValue(property, property.getValue(), context,
+										  references, recursive);
 			}
 		} else if (element instanceof IBeanConstructorArgument) {
 
 			// Add referenced beans from constructor arguments element
-			IBeanConstructorArgument carg  = (IBeanConstructorArgument) element;
-			addReferencedBeansForValue(carg.getValue(), context,
-									   referencedBeans, recursive);
+			IBeanConstructorArgument carg = (IBeanConstructorArgument) element;
+			addBeanReferencesForValue(carg, carg.getValue(), context,
+									  references, recursive);
 		} else if (element instanceof IBeanProperty) {
 
 			// Add referenced beans from property element
-			IBeanProperty property  = (IBeanProperty) element;
-			addReferencedBeansForValue(property.getValue(), context,
-									   referencedBeans, recursive);
+			IBeanProperty property = (IBeanProperty) element;
+			addBeanReferencesForValue(property, property.getValue(), context,
+									  references, recursive);
 			
 		} else {
 			throw new IllegalArgumentException("Unsupported model element " +
 											   element);
 		}
-		return referencedBeans;
+		return references;
+	}
+
+	private static boolean addBeanReference(int type, IModelElement source,
+											IBean target, List references) {
+		if (target != null) {
+			BeanReference ref = new BeanReference(type, source, target); 
+			if (!references.contains(ref)) {
+				references.add(ref);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
 	 * Adds the all <code>IBean</code>s which are referenced by the specified
-	 * model element to the given list.
+	 * model element to the given list as an instance of
+	 * <code>BeanReference</code>.
 	 * @param context  the context (<code>IBeanConfig</code> or
 	 * 		  <code>IBeanConfigSet</code>) the referenced beans are looked-up
 	 */
-	public static final void addReferencedBeansForElement(IModelElement element,
-			  IModelElement context, List referencedBeans, boolean recursive) {
-		Iterator beans = getReferencedBeans(element, context,
+	private static final void addBeanReferencesForElement(IModelElement element,
+				   IModelElement context, List references, boolean recursive) {
+		Iterator refs = getBeanReferences(element, context,
 											recursive).iterator();
-		while (beans.hasNext()) {
-			IBean bean = (IBean) beans.next();
-			if (!referencedBeans.contains(bean)) {
-				referencedBeans.add(bean);
+		while (refs.hasNext()) {
+			BeanReference ref = (BeanReference) refs.next();
+			if (!references.contains(ref)) {
+				references.add(ref);
 			}
 		}
 	}
@@ -338,6 +329,8 @@ public class BeansModelUtils {
 	 * Given a bean property's or constructor argument's value, adds any
 	 * beans referenced by this value. This value could be:
 	 * <li>A RuntimeBeanReference, which bean will be added.
+	 * <li>A BeanDefinitionHolder. This is an inner bean that may contain
+	 * RuntimeBeanReferences which will be added.
 	 * <li>A List. This is a collection that may contain RuntimeBeanReferences
 	 * which will be added.
 	 * <li>A Set. May also contain RuntimeBeanReferences that will be added.
@@ -347,47 +340,141 @@ public class BeansModelUtils {
 	 * @param context  the context (<code>IBeanConfig</code> or
 	 * 		  <code>IBeanConfigSet</code>) the referenced beans are looked-up
 	 */
-	public static final void addReferencedBeansForValue(Object value,
-			  IModelElement context, List referencedBeans, boolean recursive) {
+	private static final void addBeanReferencesForValue(IModelElement element,
+						  Object value, IModelElement context, List references,
+						  boolean recursive) {
 		if (value instanceof RuntimeBeanReference) {
 			String beanName = ((RuntimeBeanReference) value).getBeanName();
 			IBean bean = getBean(beanName, context);
-			if (bean != null && !referencedBeans.contains(bean)) {
-				referencedBeans.add(bean);
-				if (recursive) {
-					addReferencedBeansForElement(bean, context,
-												 referencedBeans, recursive);
-				}
+			if (addBeanReference(BeanReference.STANDARD_BEAN_TYPE, element,
+								 bean, references) && recursive) {
+				addBeanReferencesForElement(bean, context, references,
+											recursive);
 			}
 		} else if (value instanceof BeanDefinitionHolder) {
-			if (recursive) {
-				String beanName = ((BeanDefinitionHolder) value).getBeanName();
-				IBean bean = getInnerBean(beanName, context);
-				if (bean != null && !referencedBeans.contains(bean)) {
-	
-					// TODO howto handle inner beans - currently we don't add
-					// them referencedBeans.add(bean);
-					addReferencedBeansForElement(bean, context,
-												 referencedBeans, recursive);
-				}
-			}
+			String beanName = ((BeanDefinitionHolder) value).getBeanName();
+			IBean bean = getInnerBean(beanName, context);
+			addBeanReferencesForElement(bean, context, references, recursive);
 		} else if (value instanceof List) {
-			List list = (List) value;
-			for (int i = 0; i < list.size(); i++) {
-				addReferencedBeansForValue(list.get(i), context,
-										   referencedBeans, recursive);
+
+			// Add bean property's interceptors
+			if (element instanceof IBeanProperty &&
+						 element.getElementName().equals("interceptorNames")) {
+				IType type = getBeanType((IBean) element.getElementParent(),
+										 context);
+				if (type != null) {
+					if (type.getFullyQualifiedName().equals(
+						"org.springframework.aop.framework.ProxyFactoryBean")) {
+						Iterator names = ((List) value).iterator();
+						while (names.hasNext()) {
+							Object name = (Object) names.next();
+							if (name instanceof String) {
+								IBean interceptor = getBean((String) name,
+															context);
+								if (addBeanReference(
+										   BeanReference.INTERCEPTOR_BEAN_TYPE,
+										   element, interceptor,
+										   references) && recursive) {
+									addBeanReferencesForElement(interceptor,
+											   context, references, recursive);
+								}
+							}
+						}
+					}
+				}
+			} else {
+				List list = (List) value;
+				for (int i = 0; i < list.size(); i++) {
+					addBeanReferencesForValue(element, list.get(i), context,
+											   references, recursive);
+				}
 			}
 		} else if (value instanceof Set) {
 			Set set = (Set) value;
 			for (Iterator iter = set.iterator(); iter.hasNext(); ) {
-				addReferencedBeansForValue(iter.next(), context,
-										   referencedBeans, recursive);
+				addBeanReferencesForValue(element, iter.next(), context,
+										   references, recursive);
 			}
 		} else if (value instanceof Map) {
 			Map map = (Map) value;
 			for (Iterator iter = map.keySet().iterator(); iter.hasNext(); ) {
-				addReferencedBeansForValue(map.get(iter.next()), context,
-										   referencedBeans, recursive);
+				addBeanReferencesForValue(element, map.get(iter.next()), context,
+										   references, recursive);
+			}
+		}
+	}
+
+	/**
+	 * Returns the bean definition for a given bean.
+	 * @param bean  the bean the bean definition is requested for
+	 * @return given bean's bean definition 
+	 */
+	public static final BeanDefinition getBeanDefinition(IBean bean) {
+		return ((Bean) bean).getBeanDefinitionHolder().getBeanDefinition();
+}
+
+	/**
+	 * Returns the merged bean definition for a given bean from specified
+	 * context (<code>IBeansConfig</code> or <code>IBeansConfigSet</code>).
+	 * @param bean  the bean the merged bean definition is requested for
+	 * @param context  the context (<code>IBeanConfig</code> or
+	 * 		  <code>IBeanConfigSet</code>) the beans are looked-up
+	 * @return given bean's merged bean definition 
+	 * @throws IllegalArgumentException if unsupported context specified 
+	 */
+	public static final BeanDefinition getMergedBeanDefinition(IBean bean,
+													   IModelElement context) {
+		BeanDefinition bd = getBeanDefinition(bean);
+		if (!bean.isRootBean()) {
+
+			// Fill a set with all bean definitions belonging to the
+			// hierarchy of the requested bean definition 
+			List beanDefinitions = new ArrayList();  // used to detect a cycle
+			beanDefinitions.add(bd);
+			addBeanDefinition(bean, context, beanDefinitions);
+
+			// Merge the bean definition hierarchy to a single bean
+			// definition
+			RootBeanDefinition rbd = null;
+			int bdCount = beanDefinitions.size();
+			for (int i = bdCount - 1; i >= 0; i--) {
+				AbstractBeanDefinition abd = (AbstractBeanDefinition)
+														beanDefinitions.get(i);
+				if (rbd != null) {
+					rbd.overrideFrom(abd);
+				} else {
+					if (abd instanceof RootBeanDefinition) {
+						rbd = new RootBeanDefinition((RootBeanDefinition) abd);
+					} else {
+
+						// root of hierarchy is not a root bean definition
+						break;
+					}
+				}
+			}
+			if (rbd != null) {
+				return rbd;
+			}
+		}
+		return bd;
+	}
+
+	private static final void addBeanDefinition(IBean bean,
+			   					 IModelElement context, List beanDefinitions) {
+		String parentName = bean.getParentName();
+		Bean parentBean = (Bean) getBean(parentName, context);
+		if (parentBean != null) {
+			BeanDefinition parentBd =
+					  parentBean.getBeanDefinitionHolder().getBeanDefinition();
+			if (parentName.equals(bean.getElementName()) ||
+										  beanDefinitions.contains(parentBd)) {
+				throw new BeanDefinitionException("Cyclic references are " +
+												  "not supported");
+			} else {
+				beanDefinitions.add(parentBd);
+				if (!parentBean.isRootBean()) {
+					addBeanDefinition(parentBean, context, beanDefinitions);
+				}
 			}
 		}
 	}
@@ -410,7 +497,7 @@ public class BeansModelUtils {
 											   context);
 		}
 	}
-
+	
 	/**
 	 * Returns the inner IBean for a given bean name from specified context
 	 * (<code>IBeansConfig</code> or <code>IBeansConfigSet</code>).
@@ -435,7 +522,9 @@ public class BeansModelUtils {
 			Iterator configs = ((IBeansConfigSet)
 					   						  context).getConfigs().iterator();
 			while (configs.hasNext()) {
-				IBeansConfig config = (IBeansConfig) configs.next();
+				String configName = (String) configs.next();
+				IBeansConfig config = BeansModelUtils.getConfig(configName,
+																context);
 				Iterator beans = config.getInnerBeans().iterator();
 				while (beans.hasNext()) {
 					IBean bean = (IBean) beans.next();
@@ -559,6 +648,20 @@ public class BeansModelUtils {
 												 element).getElementResource();
 			BeansCoreUtils.createProblemMarker(resource, message, severity,
 										   line, errorCode, beanID, errorData);
+		}
+	}
+
+	public static final void removeProblemMarkers(IModelElement element) {
+		if (element instanceof IBeansConfig) {
+			IFile file = ((IBeansConfig) element).getConfigFile();
+			BeansCoreUtils.deleteProblemMarkers(file);
+		} else if (element instanceof IBeansProject) {
+			Iterator configs = ((IBeansProject)
+											  element).getConfigs().iterator();
+			while (configs.hasNext()) {
+				IBeansConfig config = (IBeansConfig) configs.next();
+				removeProblemMarkers(config);
+			}
 		}
 	}
 
