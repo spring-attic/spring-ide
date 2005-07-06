@@ -32,11 +32,9 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
 public class AddRemoveNature implements IObjectActionDelegate {
 
-    private IWorkbenchPart targetPart;
 	private List selected = new ArrayList();
 
     public void setActivePart(IAction action, IWorkbenchPart targetPart) {
-		this.targetPart = targetPart;
     }
 
 	public void selectionChanged(IAction action, ISelection selection) {
