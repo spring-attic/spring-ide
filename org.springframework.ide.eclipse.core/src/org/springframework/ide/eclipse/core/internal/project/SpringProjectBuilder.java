@@ -98,7 +98,6 @@ public class SpringProjectBuilder extends IncrementalProjectBuilder {
 
 	private class Visitor implements IResourceVisitor {
 		private IProgressMonitor monitor;
-		private List builders;
 		
 		public Visitor(IProgressMonitor monitor) {
 			this.monitor = monitor;
