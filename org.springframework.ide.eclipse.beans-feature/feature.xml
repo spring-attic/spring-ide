@@ -2,7 +2,7 @@
 <feature
       id="org.springframework.ide.eclipse"
       label="%featureName"
-      version="1.2.0"
+      version="1.2.1"
       provider-name="%providerName">
 
    <description>
@@ -13,12 +13,12 @@
       %copyright
    </copyright>
 
-   <license url="%licenseURL">
+   <license url="http://www.apache.org/licenses/LICENSE-2.0">
       %license
    </license>
 
    <url>
-      <update label="%updateSiteName" url="%updateSiteURL"/>
+      <update url="http://springide.org/updatesite/" label="%updateSiteName"/>
    </url>
 
    <requires>
@@ -32,48 +32,48 @@
          id="org.springframework.ide.eclipse"
          download-size="8153"
          install-size="10619"
-         version="1.2.0"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.core"
          download-size="68775"
          install-size="72463"
-         version="1.2.0"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.ui"
          download-size="107478"
          install-size="124420"
-         version="1.2.0"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.ui.doc"
          download-size="527628"
          install-size="527865"
-         version="1.2.0"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.ui.graph"
          download-size="49284"
          install-size="58203"
-         version="1.2.0"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.core"
          download-size="1297488"
          install-size="0"
-         version="1.2.0"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.core.doc"
          download-size="377427"
          install-size="402314"
-         version="1.2.0"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.ui"
          download-size="120659"
          install-size="0"
-         version="1.2.0"/>
+         version="0.0.0"/>
 
 </feature>
