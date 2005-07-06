@@ -32,11 +32,9 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class ShowGraphAction extends Action implements IViewActionDelegate {
 
-    private IViewPart view;
 	private INode node;
 
 	public void init(IViewPart view) {
-		this.view = view;
     }
 
 	public void selectionChanged(IAction action, ISelection selection) {
