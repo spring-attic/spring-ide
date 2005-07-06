@@ -64,7 +64,6 @@ public class ConfigSetsBlock {
 	private static final String DOWN_BUTTON =
 						   "ConfigurationPropertyPage.tabConfigSets.downButton";
 	private ProjectNode project;
-	private IAdaptable element;
 	private List configSets;
 	private Tree configSetsTree;
 	private TreeViewer configSetsViewer;
@@ -87,8 +86,6 @@ public class ConfigSetsBlock {
 
 	public ConfigSetsBlock(ProjectNode project, IAdaptable element) {
 		this.project = project;
-		this.element = element;
-
 		this.project.addPropertyListener(propertyListener);
 	}
 

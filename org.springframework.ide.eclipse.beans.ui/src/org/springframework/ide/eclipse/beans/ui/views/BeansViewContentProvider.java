@@ -38,12 +38,10 @@ class BeansViewContentProvider implements ITreeContentProvider {
 
 	protected static final Object[] NO_CHILDREN = new Object[0];
 
-	private IBeansView view;
 	private IModelChangeListener listener;
 	private RootNode rootNode;
 
 	public BeansViewContentProvider(final IBeansView view) {
-		this.view = view;
 		listener = new IModelChangeListener() {
 			public void elementChanged(ModelChangeEvent event) {
 				if (rootNode != null) {
