@@ -137,22 +137,6 @@ public class BeansModelUtils {
 	}
 
 	/**
-	 * Returns a collection with all <code>IBean</code>s which are referenced
-	 * from given model element (<code>IBean</code>,
-	 * <code>IBeanConstructorArgument</code> or <code>IBeanProperty</code>).
-	 * For a bean it's parent bean (for child beans only), constructor argument
-	 * values and property values are checked.
-	 * <code>IBean</code> look-up is done from the <code>IBeanConfig</code>
-	 * the given model element belongs to.
-	 * @param element  the element to get all referenced beans from
-	 * @throws IllegalArgumentException if unsupported model element specified 
-	 */
-	public static final Collection getReferencedBeans(IModelElement element,
-													  boolean recursive) {
-		return getBeanReferences(element, getConfig(element), recursive);
-	}
-
-	/**
 	 * Returns a collection of <code>BeanReference</code>s holding all
 	 * <code>IBean</code>s which are referenced from given model element.
 	 * For a bean it's parent bean (for child beans only), constructor argument
