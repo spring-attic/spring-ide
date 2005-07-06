@@ -29,7 +29,6 @@ import org.eclipse.draw2d.graph.DirectedGraphLayout;
 import org.eclipse.draw2d.graph.Edge;
 import org.eclipse.draw2d.graph.EdgeList;
 import org.eclipse.draw2d.graph.Node;
-import org.eclipse.draw2d.graph.NodeList;
 import org.eclipse.swt.graphics.Font;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -135,76 +134,6 @@ public class Graph implements IAdaptable {
 		return graph.nodes;
 	}
 
-	/**
-	 * Returns true if given graph contains cycles, false otherwise.
-	 * <p>
-	 * This code detects cycles in the graph via an implementation of the 
-	 * Greedy-Cycle-Removal algorithm. This algorithm determines which edges cause
-	 * the cycles.
-	 * <p>
-	 * This code is extracted from the GEF class
-	 * <code>org.eclipse.draw2d.internal.graph.BreakCycles</code>. 
-	 */
-	public boolean hasCycles() {
-
-		// Put all nodes in a list and initialize index
-		// Flag field indicates "presence". If true, the node has been removed
-		// from the list. 
-		NodeList graphNodes = new NodeList();
-		graphNodes.resetFlags();
-		for (int i = 0; i < graph.nodes.size(); i++) {
-			Node node = graph.nodes.getNode(i);
-			setIncomingCount(node, node.incoming.size());
-			graphNodes.add(node);
-		}
-
-		// Identify all initial nodes for removal
-		List noLefts = new ArrayList();
-		for (int i = 0; i < graphNodes.size(); i++) {
-			Node node = graphNodes.getNode(i);
-			if (getIncomingCount(node) == 0) {	
-				sortedInsert(noLefts, node);
-			}
-		}
-
-		while (noLefts.size() > 0) {
-			Node node = (Node) noLefts.remove(noLefts.size() - 1);
-			node.flag = true;
-			for (int i = 0; i < node.outgoing.size(); i++) {
-				Node right = node.outgoing.getEdge(i).target;
-				setIncomingCount(right, getIncomingCount(right) - 1);
-				if (getIncomingCount(right) == 0) {
-					sortedInsert(noLefts, right);
-				}
-			}
-		}
-		
-		// Check if all nodes are flagged
-		for (int i = 0; i < graphNodes.size(); i++) {
-			if (graphNodes.getNode(i).flag == false) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private void setIncomingCount(Node n, int count) {
-		n.workingInts[0] = count;
-	}	
-	
-	private int getIncomingCount(Node n) {
-		return n.workingInts[0];
-	}	
-
-	private void sortedInsert(List list, Node node) {
-		int insert = 0;
-		while (insert < list.size() &&
-						 ((Node) list.get(insert)).sortValue > node.sortValue) {
-			insert++;
-		}
-		list.add(insert, node);
-	}
-
 	public void layout(Font font) {
 
 		// Iterate through all graph nodes (beans) to calculate label width
@@ -251,6 +180,14 @@ public class Graph implements IAdaptable {
 
 		// Calculate position of all beans in graph
 		new DirectedGraphLayout().visit(graph);
+
+		// Re-invert edges inverted while breaking cycles
+		for (int i = 0; i < graph.edges.size(); i++) {
+			Edge e = graph.edges.getEdge(i);
+			if (e.isFeedback) {
+				e.invert();
+			}
+		}
 
 		// Remove temporary root and root edges
 		for (int i = 0; i < rootEdges.size(); i++) {

@@ -58,7 +58,6 @@ import org.eclipse.gef.ui.parts.ScrollingGraphicalViewer;
 import org.eclipse.gef.ui.parts.SelectionSynchronizer;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.SWT;
@@ -95,9 +94,6 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 																	  ".editor";
 	public static final String CONTEXT_MENU_ID = EDITOR_ID + ".contextmenu";
 
-	private static final String ERROR_TITLE = "GraphEditor.error.title";
-	private static final String ERROR_MSG_CYCLE = "GraphEditor.error.msg.cycle";
-
 	private GraphOutlinePage outlinePage;
 	private DefaultEditDomain editDomain;
 	private GraphicalViewer graphicalViewer;
@@ -129,14 +125,8 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	 */
 	protected void initializeGraphicalViewer() {
 		if (graph != null) {
-			if (graph.hasCycles()) {
-				MessageDialog.openError(getSite().getShell(),
-						   BeansGraphPlugin.getResourceString(ERROR_TITLE),
-						   BeansGraphPlugin.getResourceString(ERROR_MSG_CYCLE));
-			} else {
-				graph.layout(getGraphicalViewer().getControl().getFont());
-				getGraphicalViewer().setContents(graph);
-			}
+			graph.layout(getGraphicalViewer().getControl().getFont());
+			getGraphicalViewer().setContents(graph);
 		}
 	}
 

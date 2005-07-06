@@ -1,3 +1,8 @@
+Changes in version 1.2.0 (5.6.2005):
+
+* added support for cyclic dependencies, removed error dialog introduced in v1.1.1
+
+
 Changes in version 1.2.0 (16.5.2005):
 
 * ported to Eclipse 3 with support for Eclipse 3.1

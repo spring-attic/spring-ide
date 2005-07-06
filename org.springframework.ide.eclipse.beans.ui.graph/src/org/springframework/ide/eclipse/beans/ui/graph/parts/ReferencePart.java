@@ -111,15 +111,28 @@ public class ReferencePart extends AbstractConnectionEditPart {
 			bends.add(new AbsoluteBendpoint(rect.getBottom()));
 		}
 
-		// Create bend points from edge's virtual nodes (if any)
+		// Create bend points for edge's virtual nodes (if any)
 		NodeList nodes = edge.vNodes;
 		if (nodes != null) {
 			for (int i = 0; i < nodes.size(); i++) {
 				Node node = nodes.getNode(i);
-				bends.add(new AbsoluteBendpoint(node.x + GraphPart.MARGIN_SIZE,
-												node.y + GraphPart.MARGIN_SIZE));
-				bends.add(new AbsoluteBendpoint(node.x + GraphPart.MARGIN_SIZE,
-								 node.y + GraphPart.MARGIN_SIZE + node.height));
+
+				// Check if edge was inverted (due to broken cycle)
+				if (edge.isFeedback) {
+					bends.add(new AbsoluteBendpoint(
+								node.x + GraphPart.MARGIN_SIZE,
+								node.y + GraphPart.MARGIN_SIZE + node.height));
+					bends.add(new AbsoluteBendpoint(
+											  node.x + GraphPart.MARGIN_SIZE,
+											  node.y + GraphPart.MARGIN_SIZE));
+				} else {
+					bends.add(new AbsoluteBendpoint(
+											  node.x + GraphPart.MARGIN_SIZE,
+											  node.y + GraphPart.MARGIN_SIZE));
+					bends.add(new AbsoluteBendpoint(
+								node.x + GraphPart.MARGIN_SIZE,
+								node.y + GraphPart.MARGIN_SIZE + node.height));
+				}
 			}
 		}
 		conn.setRoutingConstraint(bends);
