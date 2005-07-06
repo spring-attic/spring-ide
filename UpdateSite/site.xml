@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <description url="http://www.springide.org/">
+   <description url="http://www.springide.org/updatesite/">
       This site provides plugins supporting the Spring Framework (http://www.springframework.org/) within the Eclipse platform.
    </description>
    <feature url="features/org.springframework.ide.eclipse.beans_1.1.0.jar" id="org.springframework.ide.eclipse.beans" version="1.1.0">
@@ -10,6 +10,9 @@
       <category name="spring-ide"/>
    </feature>
    <feature url="features/org.springframework.ide.eclipse_1.2.0.jar" id="org.springframework.ide.eclipse" version="1.2.0">
+      <category name="spring-ide"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse_1.2.1.jar" id="org.springframework.ide.eclipse" version="1.2.1">
       <category name="spring-ide"/>
    </feature>
    <category-def name="spring-ide" label="Spring IDE">
