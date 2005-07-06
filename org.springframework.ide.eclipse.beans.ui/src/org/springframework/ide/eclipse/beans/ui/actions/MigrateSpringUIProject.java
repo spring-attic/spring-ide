@@ -64,11 +64,9 @@ public class MigrateSpringUIProject implements IObjectActionDelegate {
 															   ".problemmarker";
 	private static final String SPRINGUI_PROJECT_DESCRIPTION = ".springProject";
 
-	private IWorkbenchPart targetPart;
 	private List selected = new ArrayList();
 
     public void setActivePart(IAction action, IWorkbenchPart targetPart) {
-		this.targetPart = targetPart;
     }
 
 	public void selectionChanged(IAction action, ISelection selection) {

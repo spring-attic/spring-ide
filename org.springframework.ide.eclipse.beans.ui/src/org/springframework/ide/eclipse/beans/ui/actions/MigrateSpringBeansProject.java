@@ -16,21 +16,13 @@
 
 package org.springframework.ide.eclipse.beans.ui.actions;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.action.IAction;
@@ -38,18 +30,11 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescription;
-import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionHandler;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUILabelDecorator;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 public class MigrateSpringBeansProject implements IObjectActionDelegate {
 
@@ -59,15 +44,11 @@ public class MigrateSpringBeansProject implements IObjectActionDelegate {
 																".beansnature";
 	private static final String BEANS_BUILDER_ID = BEANS_CORE_PLUGIN_ID +
 															 ".beansvalidator";
-	private static final String BEANS_MARKER_ID = BEANS_CORE_PLUGIN_ID +
-															   ".problemmarker";
 	private static final String BEANS_PROJECT_DESCRIPTION = ".springBeansProject";
 
-	private IWorkbenchPart targetPart;
 	private List selected = new ArrayList();
 
     public void setActivePart(IAction action, IWorkbenchPart targetPart) {
-		this.targetPart = targetPart;
     }
 
 	public void selectionChanged(IAction action, ISelection selection) {
@@ -132,98 +113,5 @@ public class MigrateSpringBeansProject implements IObjectActionDelegate {
 
 		// finally add beans project nature
 		SpringCoreUtils.addProjectNature(project, SpringCore.NATURE_ID);
-	}
-
-	private void deleteProblemMarkers(IProject project,
-									  BeansProjectDescription description) {
-		Iterator iter = description.getConfigNames().iterator();
-		while (iter.hasNext()) {
-			IFile file = project.getFile(new Path((String) iter.next()));
-			if (file.isAccessible()) {
-				try {
-					file.deleteMarkers(BEANS_MARKER_ID, false,
-									   IResource.DEPTH_ZERO);
-				} catch (CoreException e) {
-					BeansUIPlugin.log(e);
-				}
-			}
-		}
-	}
-
-	private BeansProjectDescription read(IFile file)  {
-		BufferedInputStream is = null;
-		try {
-			IBeansProject project = BeansCorePlugin.getModel().getProject(
-															 file.getProject());
-			BeansProjectDescriptionHandler handler =
-								 new SpringUIProjectDescriptionHandler(project);
-			is = new BufferedInputStream(file.getContents());
-			try {
-				SAXParserFactory factory = SAXParserFactory.newInstance();
-				factory.setNamespaceAware(true);
-				SAXParser parser = factory.newSAXParser();
-				parser.parse(new InputSource(is), handler);
-			} catch (ParserConfigurationException e) {
-				handler.log(IStatus.ERROR, e);
-			} catch (SAXException e) {
-				handler.log(IStatus.WARNING, e);
-			} catch (IOException e) {
-				handler.log(IStatus.WARNING, e);
-			}
-			IStatus status = handler.getStatus(); 
-			switch (status.getSeverity()) {
-				case IStatus.ERROR :
-					BeansUIPlugin.log(status);
-					return null;
-	
-				case IStatus.WARNING :
-				case IStatus.INFO :
-					BeansUIPlugin.log(status);
-	
-				case IStatus.OK :
-				default :
-					return handler.getDescription();
-			}
-		} catch (CoreException e) {
-			BeansUIPlugin.log(e.getStatus());
-		} finally {
-			if (is != null) {
-				try {
-					is.close();
-				} catch (IOException e) {
-				}
-			}
-		}
-		return null;
-	}
-
-	private class SpringUIProjectDescriptionHandler
-										extends BeansProjectDescriptionHandler {
-		public String PROJECT_DESCRIPTION = "springProjectDescription";
-		
-		public SpringUIProjectDescriptionHandler(IBeansProject project) {
-			super(project);
-		}
-
-		public void startElement(String uri, String elementName, String qname,
-								 Attributes attributes) throws SAXException {
-			//clear the character buffer at the start of every element
-			charBuffer.setLength(0);
-			switch (state) {
-				case S_INITIAL :
-					if (elementName.equals(PROJECT_DESCRIPTION)) {
-						state = S_PROJECT_DESC;
-						description = new BeansProjectDescription(project);
-					} else {
-						throw new SAXParseException("No Spring project description",
-													locator);
-					}
-					break;
-
-				default :
-					super.startElement(uri, elementName, qname, attributes);
-					break;
-			}
-		}
 	}
 }
