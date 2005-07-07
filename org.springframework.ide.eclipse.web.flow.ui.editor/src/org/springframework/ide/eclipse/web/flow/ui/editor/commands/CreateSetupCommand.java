@@ -13,43 +13,38 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package org.springframework.ide.eclipse.web.flow.ui.editor.commands;
 
 import org.eclipse.gef.commands.Command;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
-import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
+import org.springframework.ide.eclipse.web.flow.core.model.ISetup;
+import org.springframework.ide.eclipse.web.flow.core.model.IViewState;
 
-public class DeleteStatePropertyCommand extends Command {
+public class CreateSetupCommand extends Command {
 
-    private IProperty child;
+    private ISetup child;
 
-    private int index = -1;
+    private boolean isMove = false;
 
-    private IPropertyEnabled parent;
+    private IViewState parent;
 
     public void execute() {
-        primExecute();
+        child.setElementParent(parent);
+        parent.setSetup(child);
     }
 
-    protected void primExecute() {
-        index = parent.getProperties().indexOf(child);
-        parent.removeProperty(child);
+    public void setChild(ISetup action) {
+        child = action;
     }
 
-    public void redo() {
-        primExecute();
+    public void setMove(boolean isMove) {
+        this.isMove = isMove;
     }
 
-    public void setChild(IProperty a) {
-        child = a;
-    }
-
-    public void setParent(IPropertyEnabled sa) {
+    public void setParent(IViewState sa) {
         parent = sa;
     }
 
     public void undo() {
-        parent.addProperty(child, index);
+        parent.removeSetup();
     }
 }

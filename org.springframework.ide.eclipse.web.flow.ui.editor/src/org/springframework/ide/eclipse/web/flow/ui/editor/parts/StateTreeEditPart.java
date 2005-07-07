@@ -28,10 +28,12 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.springframework.ide.eclipse.web.flow.core.model.IActionState;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.web.flow.core.model.IDecisionState;
 import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
 import org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState;
+import org.springframework.ide.eclipse.web.flow.core.model.IViewState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
@@ -86,7 +88,6 @@ public class StateTreeEditPart extends
                 children.addAll(properties.getProperties());
             }
         }
-        
         if (getModel() instanceof IActionState) {
             if (((IActionState) getState()).getActions() != null) {
                 children.addAll(((IActionState) getState()).getActions());
@@ -103,6 +104,19 @@ public class StateTreeEditPart extends
         else if (getModel() instanceof IDecisionState) {
             if (((IDecisionState) getModel()).getIfs() != null) {
                 children.addAll(((IDecisionState) getModel()).getIfs());
+            }
+        }
+        else if (getModel() instanceof IAttributeMapper) {
+            if (((IAttributeMapper) getModel()).getInputs() != null) {
+                children.addAll(((IAttributeMapper) getModel()).getInputs());
+            }
+            if (((IAttributeMapper) getModel()).getOutputs() != null) {
+                children.addAll(((IAttributeMapper) getModel()).getOutputs());
+            }
+        }
+        else if (getModel() instanceof IViewState) {
+            if (((IViewState) getModel()).getSetup() != null) {
+                children.add(((IViewState) getModel()).getSetup());
             }
         }
         

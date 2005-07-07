@@ -27,16 +27,20 @@ import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElemen
 import org.springframework.ide.eclipse.web.flow.core.model.IDecisionState;
 import org.springframework.ide.eclipse.web.flow.core.model.IIf;
 import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
+import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
+import org.springframework.ide.eclipse.web.flow.core.model.ISetup;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
 import org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState;
+import org.springframework.ide.eclipse.web.flow.core.model.IViewState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
 import org.springframework.ide.eclipse.web.flow.ui.editor.actions.EditPropertiesAction;
 import org.springframework.ide.eclipse.web.flow.ui.editor.actions.SetAsStartStateAction;
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.DeleteActionCommand;
-import org.springframework.ide.eclipse.web.flow.ui.editor.commands.DeleteActionPropertyCommand;
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.DeleteAttributeMapperCommand;
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.DeleteCommand;
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.DeleteIfCommand;
+import org.springframework.ide.eclipse.web.flow.ui.editor.commands.DeleteInputOutputCommand;
+import org.springframework.ide.eclipse.web.flow.ui.editor.commands.DeleteSetupCommand;
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.DeleteStatePropertyCommand;
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.EditPropertiesCommand;
 
@@ -44,27 +48,35 @@ public class StateEditPolicy extends ComponentEditPolicy {
 
     protected Command createDeleteCommand(GroupRequest deleteRequest) {
         if (getHost().getModel() instanceof IProperty
-                && getHost().getParent().getModel() instanceof IState) {
-            IState parent = (IState) (getHost().getParent().getModel());
+                && getHost().getParent().getModel() instanceof IPropertyEnabled) {
+            IPropertyEnabled parent = (IPropertyEnabled) (getHost().getParent().getModel());
             DeleteStatePropertyCommand deleteCmd = new DeleteStatePropertyCommand();
             deleteCmd.setParent(parent);
             deleteCmd.setChild((IProperty) (getHost().getModel()));
             return deleteCmd;
         }
-        else if (getHost().getModel() instanceof IProperty
-                && getHost().getParent().getModel() instanceof IAction) {
-            IAction parent = (IAction) (getHost().getParent().getModel());
-            DeleteActionPropertyCommand deleteCmd = new DeleteActionPropertyCommand();
-            deleteCmd.setParent(parent);
-            deleteCmd.setChild((IProperty) (getHost().getModel()));
-            return deleteCmd;
-        }
-        if (getHost().getParent().getModel() instanceof ISubFlowState) {
+        else if (getHost().getParent().getModel() instanceof ISubFlowState) {
             ISubFlowState parent = (ISubFlowState) (getHost().getParent()
                     .getModel());
             DeleteAttributeMapperCommand deleteCmd = new DeleteAttributeMapperCommand();
             deleteCmd.setParent(parent);
             deleteCmd.setChild((IAttributeMapper) (getHost().getModel()));
+            return deleteCmd;
+        }
+        else if (getHost().getParent().getModel() instanceof IAttributeMapper) {
+            IAttributeMapper parent = (IAttributeMapper) (getHost().getParent()
+                    .getModel());
+            DeleteInputOutputCommand deleteCmd = new DeleteInputOutputCommand();
+            deleteCmd.setParent(parent);
+            deleteCmd.setChild(getHost().getModel());
+            return deleteCmd;
+        }
+        else if (getHost().getParent().getModel() instanceof IViewState) {
+            IViewState parent = (IViewState) (getHost().getParent()
+                    .getModel());
+            DeleteSetupCommand deleteCmd = new DeleteSetupCommand();
+            deleteCmd.setParent(parent);
+            deleteCmd.setChild((ISetup) getHost().getModel());
             return deleteCmd;
         }
         else if (getHost().getParent().getModel() instanceof IWebFlowState) {

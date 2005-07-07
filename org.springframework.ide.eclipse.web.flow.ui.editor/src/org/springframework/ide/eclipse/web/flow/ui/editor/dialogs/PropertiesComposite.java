@@ -102,14 +102,7 @@ public class PropertiesComposite {
         configsViewer.setColumnProperties(columnNames);
         configsViewer.setContentProvider(new PropertiesContentProvider(
                 this.state, configsViewer));
-        //CellEditor[] editors = new CellEditor[2];
-        //TextCellEditor textEditor = new
-        // TextCellEditor(configsViewer.getTable());
-        //TextCellEditor textEditor1 = new TextCellEditor(configsViewer
-        //        .getTable());
-        //editors[0] = textEditor;
-        //editors[1] = textEditor1;
-        //configsViewer.setCellEditors(editors);
+        
         configsViewer.setLabelProvider(new ModelTableLabelProvider());
         configsViewer.setCellModifier(new TableCellModifier());
         configsViewer.setInput(this.state);

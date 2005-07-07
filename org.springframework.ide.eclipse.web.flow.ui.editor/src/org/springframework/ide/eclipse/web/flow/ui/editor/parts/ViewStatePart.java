@@ -30,7 +30,7 @@ import org.springframework.ide.eclipse.web.flow.core.model.IAction;
 import org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState;
 import org.springframework.ide.eclipse.web.flow.core.model.IViewState;
 
-public class SubFlowStatePart extends ChildrenStatePart {
+public class ViewStatePart extends ChildrenStatePart {
 
     protected void applyChildrenResults(CompoundDirectedGraph graph, Map map) {
         for (int i = 0; i < getChildren().size(); i++) {
@@ -70,10 +70,11 @@ public class SubFlowStatePart extends ChildrenStatePart {
     }
 
     protected List getModelChildren() {
-        if (getModel() instanceof ISubFlowState) {
+        if (getModel() instanceof IViewState) {
             List child = new ArrayList();
-            if (((ISubFlowState) getModel()).getAttributeMapper() != null)
-                child.add(((ISubFlowState) getModel()).getAttributeMapper());
+            if (((IViewState) getModel()).getSetup() != null) {
+                child.add(((IViewState) getModel()).getSetup());
+            }
             return child;
         }
         else {

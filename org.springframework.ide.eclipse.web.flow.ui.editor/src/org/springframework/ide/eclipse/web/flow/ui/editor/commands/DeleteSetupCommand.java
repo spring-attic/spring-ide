@@ -17,39 +17,36 @@
 package org.springframework.ide.eclipse.web.flow.ui.editor.commands;
 
 import org.eclipse.gef.commands.Command;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
-import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
+import org.springframework.ide.eclipse.web.flow.core.model.ISetup;
+import org.springframework.ide.eclipse.web.flow.core.model.IViewState;
 
-public class DeleteStatePropertyCommand extends Command {
+public class DeleteSetupCommand extends Command {
 
-    private IProperty child;
+    private ISetup child;
 
-    private int index = -1;
-
-    private IPropertyEnabled parent;
+    private IViewState parent;
 
     public void execute() {
         primExecute();
     }
 
     protected void primExecute() {
-        index = parent.getProperties().indexOf(child);
-        parent.removeProperty(child);
+        parent.removeSetup();
     }
 
     public void redo() {
         primExecute();
     }
 
-    public void setChild(IProperty a) {
+    public void setChild(ISetup a) {
         child = a;
     }
 
-    public void setParent(IPropertyEnabled sa) {
+    public void setParent(IViewState sa) {
         parent = sa;
     }
 
     public void undo() {
-        parent.addProperty(child, index);
+        parent.setSetup(child);
     }
 }

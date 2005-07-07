@@ -33,9 +33,10 @@ public class StatePartFactory implements EditPartFactory {
 
     public EditPart createEditPart(EditPart context, Object model) {
         EditPart part = null;
-        if (model instanceof ISubFlowState)
-            part = new SubFlowStatePart();
-        else if (model instanceof IWebFlowState)
+        //if (model instanceof ISubFlowState)
+        //    part = new SubFlowStatePart();
+        //else 
+        if (model instanceof IWebFlowState && !(model instanceof ISubFlowState))
             part = new WebFlowPart();
         else if (model instanceof IActionState)
             part = new ActionStatePart();

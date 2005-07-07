@@ -62,8 +62,7 @@ public class WebFlowImages {
         try {
             ICON_BASE_URL = new URL(WebFlowPlugin.getDefault().getBundle()
                     .getEntry("/"), ICON_PATH_PREFIX);
-        }
-        catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
             WebFlowPlugin.log(e);
         }
     }
@@ -121,15 +120,18 @@ public class WebFlowImages {
     public static final String IMG_OBJS_ELSE_CONNECTION = NAME_PREFIX
             + "connection_d16.gif";
 
-    public static final String IMG_OBJS_OUTLINE = NAME_PREFIX
-            + "outline.gif";
+    public static final String IMG_OBJS_OUTLINE = NAME_PREFIX + "outline.gif";
+
+    public static final String IMG_OBJS_OVERVIEW = NAME_PREFIX + "overview.gif";
+
+    public static final String IMG_OBJS_JAVABEAN = NAME_PREFIX + "javabean.gif";
+
+    public static final String IMG_OBJS_INPUT = NAME_PREFIX + "input_obj.gif";
     
-    public static final String IMG_OBJS_OVERVIEW = NAME_PREFIX
-            + "overview.gif";
+    public static final String IMG_OBJS_OUTPUT = NAME_PREFIX + "output_obj.gif";
     
-    public static final String IMG_OBJS_JAVABEAN = NAME_PREFIX
-            + "javabean.gif";
-    
+    public static final String IMG_OBJS_SETUP = NAME_PREFIX + "setup_obj.gif";
+
     // Use IPath and toOSString to build the names to ensure they have the
     // slashes correct
     //      private final static String CTOOL = "ctool16/"; //basic colors - size
@@ -184,22 +186,31 @@ public class WebFlowImages {
 
     public static final ImageDescriptor DESC_OBJS_IF = createManaged(OBJECT,
             IMG_OBJS_IF);
-    
-    public static final ImageDescriptor DESC_OBJS_CONNECTION = createManaged(OBJECT,
-            IMG_OBJS_CONNECTION);
-    
-    public static final ImageDescriptor DESC_OBJS_ELSE_CONNECTION = createManaged(OBJECT,
-            IMG_OBJS_ELSE_CONNECTION);
 
-    public static final ImageDescriptor DESC_OBJS_OUTLINE = createManaged(OBJECT,
-            IMG_OBJS_OUTLINE);
+    public static final ImageDescriptor DESC_OBJS_CONNECTION = createManaged(
+            OBJECT, IMG_OBJS_CONNECTION);
+
+    public static final ImageDescriptor DESC_OBJS_ELSE_CONNECTION = createManaged(
+            OBJECT, IMG_OBJS_ELSE_CONNECTION);
+
+    public static final ImageDescriptor DESC_OBJS_OUTLINE = createManaged(
+            OBJECT, IMG_OBJS_OUTLINE);
+
+    public static final ImageDescriptor DESC_OBJS_OVERVIEW = createManaged(
+            OBJECT, IMG_OBJS_OVERVIEW);
+
+    public static final ImageDescriptor DESC_OBJS_JAVABEAN = createManaged(
+            OBJECT, IMG_OBJS_JAVABEAN);
     
-    public static final ImageDescriptor DESC_OBJS_OVERVIEW = createManaged(OBJECT,
-            IMG_OBJS_OVERVIEW);
+    public static final ImageDescriptor DESC_OBJS_INPUT = createManaged(
+            OBJECT, IMG_OBJS_INPUT);
     
-    public static final ImageDescriptor DESC_OBJS_JAVABEAN = createManaged(OBJECT,
-            IMG_OBJS_JAVABEAN);
+    public static final ImageDescriptor DESC_OBJS_OUTPUT = createManaged(
+            OBJECT, IMG_OBJS_OUTPUT);
     
+    public static final ImageDescriptor DESC_OBJS_SETUP = createManaged(
+            OBJECT, IMG_OBJS_SETUP);
+
     /**
      * Returns the <code>Image<code> identified by the given key,
      * or <code>null</code> if it does not exist.
@@ -252,8 +263,7 @@ public class WebFlowImages {
             if (id != null) {
                 action.setDisabledImageDescriptor(id);
             }
-        }
-        catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
             WebFlowPlugin.log(e);
         }
         /*
@@ -278,8 +288,7 @@ public class WebFlowImages {
                 WebFlowPlugin.log("Image registry already defined", null);
             }
             return result;
-        }
-        catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
             WebFlowPlugin.log(e);
             return ImageDescriptor.getMissingImageDescriptor();
         }
@@ -288,8 +297,7 @@ public class WebFlowImages {
     private static ImageDescriptor create(String prefix, String name) {
         try {
             return ImageDescriptor.createFromURL(makeIconFileURL(prefix, name));
-        }
-        catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
             WebFlowPlugin.log(e);
             return ImageDescriptor.getMissingImageDescriptor();
         }

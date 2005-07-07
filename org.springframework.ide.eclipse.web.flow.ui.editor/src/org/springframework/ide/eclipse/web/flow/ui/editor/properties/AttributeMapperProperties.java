@@ -77,11 +77,6 @@ public class AttributeMapperProperties implements IPropertySource {
         descriptor.setAlwaysIncompatible(true);
         descriptor.setCategory("Attribute Mapper");
         descriptors.add(descriptor);
-        descriptor = new PropertyDescriptor(A_NAME, "name");
-        descriptor.setValidator(CellEditorValidator.getInstance());
-        descriptor.setAlwaysIncompatible(true);
-        descriptor.setCategory("Attribute Mapper");
-        descriptors.add(descriptor);
     }
 
     private IAttributeMapper property;
@@ -118,9 +113,6 @@ public class AttributeMapperProperties implements IPropertySource {
         else if (A_METHOD.equals(id)) {
             return WebFlowUtils.returnNotNullOnString(property.getMethod());
         }
-        else if (A_NAME.equals(id)) {
-            return WebFlowUtils.returnNotNullOnString(property.getName());
-        }
         return null;
     }
 
@@ -154,9 +146,6 @@ public class AttributeMapperProperties implements IPropertySource {
         }
         else if (A_METHOD.equals(id)) {
             property.setMethod((String) value);
-        }
-        else if (A_NAME.equals(id)) {
-            property.setName((String) value);
         }
     }
 }

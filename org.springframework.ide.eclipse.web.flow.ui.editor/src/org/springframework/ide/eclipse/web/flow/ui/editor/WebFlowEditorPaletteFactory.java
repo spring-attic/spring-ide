@@ -149,12 +149,12 @@ public class WebFlowEditorPaletteFactory {
                 WebFlowImages.DESC_OBJS_ACTION, WebFlowImages.DESC_OBJS_ACTION);
         entries.add(combined);
 
-        combined = new CombinedTemplateCreationEntry("Attribute Mapper",
-                "Create an Attribute Mapper", AttributeMapper.class,
-                new SimpleFactory(AttributeMapper.class),
-                WebFlowImages.DESC_OBJS_ATTRIBUTE_MAPPER,
-                WebFlowImages.DESC_OBJS_ATTRIBUTE_MAPPER);
-        entries.add(combined);
+//        combined = new CombinedTemplateCreationEntry("Attribute Mapper",
+//                "Create an Attribute Mapper", AttributeMapper.class,
+//                new SimpleFactory(AttributeMapper.class),
+//                WebFlowImages.DESC_OBJS_ATTRIBUTE_MAPPER,
+//                WebFlowImages.DESC_OBJS_ATTRIBUTE_MAPPER);
+//        entries.add(combined);
 
         combined = new CombinedTemplateCreationEntry("If", "Create an If",
                 If.class, new SimpleFactory(If.class), WebFlowImages.DESC_OBJS_IF,

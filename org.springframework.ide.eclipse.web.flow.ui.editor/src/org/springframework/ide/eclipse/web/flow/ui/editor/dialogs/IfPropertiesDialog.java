@@ -250,8 +250,11 @@ public class IfPropertiesDialog extends TitleAreaDialog {
             gridData.widthHint = LABEL_WIDTH;
             thenLabel.setLayoutData(gridData);
             thenLabel.setText("Then");
+            
 
             thenText = new Text(methodComposite, SWT.SINGLE | SWT.BORDER);
+            thenText.setEditable(false);
+            
             if (this.theIf != null && this.theIf.getThenTransition() != null
                     && this.theIf.getThenTransition().getToState() != null) {
                 thenText.setText(this.theIf.getThenTransition().getToState()
@@ -273,7 +276,6 @@ public class IfPropertiesDialog extends TitleAreaDialog {
 
             // Label field.
             Label elseLabel = new Label(methodComposite, SWT.NONE);
-            elseLabel.setText("Else");
             gridData = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
             gridData.widthHint = LABEL_WIDTH;
             elseLabel.setLayoutData(gridData);

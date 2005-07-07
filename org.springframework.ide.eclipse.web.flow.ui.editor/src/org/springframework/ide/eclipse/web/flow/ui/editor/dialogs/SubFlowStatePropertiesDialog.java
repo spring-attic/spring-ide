@@ -55,6 +55,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -62,9 +64,13 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.web.flow.core.WebFlowCoreUtils;
 import org.springframework.ide.eclipse.web.flow.core.internal.model.AttributeMapper;
+import org.springframework.ide.eclipse.web.flow.core.internal.model.Input;
+import org.springframework.ide.eclipse.web.flow.core.internal.model.Output;
 import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
+import org.springframework.ide.eclipse.web.flow.core.model.IInput;
+import org.springframework.ide.eclipse.web.flow.core.model.IOutput;
 import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
@@ -83,7 +89,13 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
 
     private static int RADIOCLASSREF_CHOICE = 2;
 
-    private Button addButton;
+    private Button inputAddButton;
+
+    private Button inputEditButton;
+
+    private Button inputAddButtonOutput;
+
+    private Button inputEditButtonOutput;
 
     private Button attributeMapperButton;
 
@@ -140,6 +152,8 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
 
     private Button removeButton;
 
+    private Button removeButtonOutput;
+
     private ISubFlowState subFlowState;
 
     private ISubFlowState subFlowStateClone;
@@ -150,14 +164,34 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
 
     private PropertiesComposite properties;
 
+    private TableViewer inputViewer;
+
+    private TableViewer inputViewerOutput;
+
+    private Shell parentShell;
+
+    private Group groupInputType;
+
+    private Group groupOutputType;
+
+    private Table configsTableOutput;
+
+    private Table configsTable;
+    
+    private IAttributeMapper mapper;
+
     public SubFlowStatePropertiesDialog(Shell parentShell,
             IWebFlowModelElement parent, ISubFlowState state) {
         super(parentShell);
         this.subFlowState = state;
         this.parent = parent;
+        this.parentShell = parentShell;
         this.subFlowStateClone = (ISubFlowState) ((ICloneableModelElement) state)
                 .cloneModelElement();
-
+        this.mapper = this.subFlowStateClone.getAttributeMapper();
+        if (this.mapper == null) {
+            this.mapper = new AttributeMapper();
+        }
         WebFlowEditorInput input = WebFlowUtils.getActiveFlowEditorInput();
         beansConfig = input.getBeansConfigSet();
     }
@@ -167,10 +201,7 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
             this.subFlowStateClone.setId(trimString(getId()));
             this.subFlowStateClone.setFlow(trimString(getView()));
             if (this.attributeMapperButton.getSelection()) {
-                IAttributeMapper mapper = this.subFlowStateClone
-                        .getAttributeMapper();
-                if (mapper == null) {
-                    mapper = new AttributeMapper();
+                if (this.subFlowStateClone.getAttributeMapper() == null) {
                     this.subFlowStateClone.setAttributeMapper(mapper);
                 }
                 if (this.radioBeanRef.getSelection()) {
@@ -516,6 +547,249 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
             }
         });
 
+        //--- inputs
+        groupInputType = new Group(groupActionType, SWT.NULL);
+        GridLayout layoutPropMap = new GridLayout();
+        layoutPropMap.marginWidth = 3;
+        layoutPropMap.marginHeight = 3;
+        groupInputType.setLayout(layoutPropMap);
+        groupInputType.setText(" Inputs ");
+        groupInputType.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+        Composite tableAndButtons = new Composite(groupInputType, SWT.NONE);
+        tableAndButtons.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        GridLayout layout2 = new GridLayout();
+        layout2.marginHeight = 0;
+        layout2.marginWidth = 0;
+        layout2.numColumns = 2;
+        tableAndButtons.setLayout(layout2);
+
+        configsTable = new Table(tableAndButtons, SWT.MULTI | SWT.H_SCROLL
+                | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
+        GridData data = new GridData(GridData.FILL_BOTH);
+        //data.widthHint = 250;
+        data.heightHint = 50;
+        configsTable.setLayoutData(data);
+        TableColumn columnName = new TableColumn(configsTable, SWT.NONE);
+        columnName.setText("Name");
+        columnName.setWidth(150);
+        TableColumn columnValue = new TableColumn(configsTable, SWT.NONE);
+        columnValue.setText("Value");
+        columnValue.setWidth(70);
+        TableColumn columnAs = new TableColumn(configsTable, SWT.NONE);
+        columnAs.setText("As");
+        columnAs.setWidth(50);
+        TableColumn columnType = new TableColumn(configsTable, SWT.NONE);
+        columnType.setText("Type");
+        columnType.setWidth(80);
+        configsTable.setHeaderVisible(true);
+
+        inputViewer = new TableViewer(configsTable);
+        String[] columnNames = new String[] { "Name", "Value", "As", "Type" };
+        inputViewer.setColumnProperties(columnNames);
+        inputViewer.setContentProvider(new InputOutputContentProvider(
+                this.mapper, inputViewer));
+
+        inputViewer.setLabelProvider(new ModelTableLabelProvider());
+        inputViewer.setCellModifier(new TableCellModifier());
+        inputViewer.setInput(this.mapper);
+        configsTable.addSelectionListener(new SelectionAdapter() {
+
+            public void widgetSelected(SelectionEvent e) {
+                handleTableSelectionChanged();
+            }
+        });
+        Composite buttonArea = new Composite(tableAndButtons, SWT.NONE);
+        GridLayout layout8 = new GridLayout();
+        layout8.marginHeight = 0;
+        layout8.marginWidth = 0;
+        buttonArea.setLayout(layout8);
+        buttonArea.setLayoutData(new GridData(GridData.FILL_VERTICAL));
+        inputAddButton = new Button(buttonArea, SWT.PUSH);
+        inputAddButton.setText("Add");
+        GridData data1 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+        data1.widthHint = 40;
+        inputAddButton.setLayoutData(data1);
+        inputAddButton.addSelectionListener(new SelectionAdapter() {
+
+            // Add a task to the ExampleTaskList and refresh the view
+            public void widgetSelected(SelectionEvent e) {
+                IInput input = new Input(
+                        mapper, "<name>",
+                        "<value>");
+                InputOutputEditorDialog dialog = new InputOutputEditorDialog(
+                        parentShell, input, true);
+                dialog.open();
+                inputViewer.refresh(true);
+            }
+        });
+        inputEditButton = new Button(buttonArea, SWT.PUSH);
+        inputEditButton.setText("Edit");
+        data1 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+        data1.widthHint = 40;
+        inputEditButton.setLayoutData(data1);
+        inputEditButton.addSelectionListener(new SelectionAdapter() {
+
+            // Add a task to the ExampleTaskList and refresh the view
+            public void widgetSelected(SelectionEvent e) {
+                IStructuredSelection selection = (IStructuredSelection) inputViewer
+                        .getSelection();
+                if (selection.getFirstElement() != null) {
+                    if (selection.getFirstElement() instanceof IInput) {
+                        InputOutputEditorDialog dialog = new InputOutputEditorDialog(
+                                parentShell, selection.getFirstElement(), true);
+                        dialog.open();
+                        inputViewer.refresh(true);
+                    }
+                }
+            }
+        });
+
+        removeButton = new Button(buttonArea, SWT.PUSH);
+        removeButton.setText("Delete");
+        GridData data2 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+        data1.widthHint = 40;
+        removeButton.setLayoutData(data2);
+        removeButton.addSelectionListener(new SelectionAdapter() {
+
+            public void widgetSelected(SelectionEvent e) {
+                IStructuredSelection selection = (IStructuredSelection) inputViewer
+                        .getSelection();
+                if (selection.getFirstElement() != null) {
+                    if (selection.getFirstElement() instanceof IInput) {
+                        mapper.removeInput(
+                                (IInput) selection.getFirstElement());
+                    }
+                }
+            }
+        });
+        removeButton.setEnabled(false);
+        inputEditButton.setEnabled(false);
+
+        // --- outputs
+        groupOutputType = new Group(groupActionType, SWT.NULL);
+        GridLayout layoutPropOutputMap = new GridLayout();
+        layoutPropOutputMap.marginWidth = 3;
+        layoutPropOutputMap.marginHeight = 3;
+        groupOutputType.setLayout(layoutPropOutputMap);
+        groupOutputType.setText(" Outputs ");
+        groupOutputType.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+        Composite tableAndButtonsOutput = new Composite(groupOutputType,
+                SWT.NONE);
+        tableAndButtons.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        GridLayout layout6 = new GridLayout();
+        layout6.marginHeight = 0;
+        layout6.marginWidth = 0;
+        layout6.numColumns = 2;
+        tableAndButtonsOutput.setLayout(layout6);
+
+        configsTableOutput = new Table(tableAndButtonsOutput, SWT.MULTI
+                | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
+        //data.widthHint = 250;
+        data.heightHint = 50;
+        configsTableOutput.setLayoutData(data);
+        TableColumn columnNameOutput = new TableColumn(configsTableOutput,
+                SWT.NONE);
+        columnNameOutput.setText("Name");
+        columnNameOutput.setWidth(150);
+        TableColumn columnValueOutput = new TableColumn(configsTableOutput,
+                SWT.NONE);
+        columnValueOutput.setText("Value");
+        columnValueOutput.setWidth(70);
+        TableColumn columnAsOutput = new TableColumn(configsTableOutput,
+                SWT.NONE);
+        columnAsOutput.setText("As");
+        columnAsOutput.setWidth(50);
+        TableColumn columnTypeOutput = new TableColumn(configsTableOutput,
+                SWT.NONE);
+        columnTypeOutput.setText("Type");
+        columnTypeOutput.setWidth(80);
+        configsTableOutput.setHeaderVisible(true);
+
+        inputViewerOutput = new TableViewer(configsTableOutput);
+        String[] columnNamesOutput = new String[] { "Name", "Value", "As",
+                "Type" };
+        inputViewerOutput.setColumnProperties(columnNames);
+        inputViewerOutput.setContentProvider(new InputOutputContentProvider(
+                this.mapper, inputViewerOutput,
+                false));
+
+        inputViewerOutput.setLabelProvider(new ModelTableLabelProvider());
+        inputViewerOutput.setCellModifier(new TableCellModifier());
+        inputViewerOutput.setInput(this.mapper);
+        configsTableOutput.addSelectionListener(new SelectionAdapter() {
+
+            public void widgetSelected(SelectionEvent e) {
+                handleTableSelectionChanged();
+            }
+        });
+        Composite buttonAreaOutput = new Composite(tableAndButtonsOutput,
+                SWT.NONE);
+        GridLayout layout9 = new GridLayout();
+        layout9.marginHeight = 0;
+        layout9.marginWidth = 0;
+        buttonAreaOutput.setLayout(layout8);
+        buttonAreaOutput.setLayoutData(new GridData(GridData.FILL_VERTICAL));
+        inputAddButtonOutput = new Button(buttonAreaOutput, SWT.PUSH);
+        inputAddButtonOutput.setText("Add");
+        GridData data20 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+        data20.widthHint = 40;
+        inputAddButtonOutput.setLayoutData(data20);
+        inputAddButtonOutput.addSelectionListener(new SelectionAdapter() {
+
+            // Add a task to the ExampleTaskList and refresh the view
+            public void widgetSelected(SelectionEvent e) {
+                IOutput output = new Output(mapper, "<name>", "<value>");
+                InputOutputEditorDialog dialog = new InputOutputEditorDialog(
+                        parentShell, output, false);
+                dialog.open();
+                inputViewerOutput.refresh(true);
+            }
+        });
+        inputEditButtonOutput = new Button(buttonAreaOutput, SWT.PUSH);
+        inputEditButtonOutput.setText("Edit");
+        data1 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+        data1.widthHint = 40;
+        inputEditButtonOutput.setLayoutData(data1);
+        inputEditButtonOutput.addSelectionListener(new SelectionAdapter() {
+
+            // Add a task to the ExampleTaskList and refresh the view
+            public void widgetSelected(SelectionEvent e) {
+                IStructuredSelection selection = (IStructuredSelection) inputViewerOutput
+                        .getSelection();
+                if (selection.getFirstElement() != null) {
+                    if (selection.getFirstElement() instanceof IOutput) {
+                        InputOutputEditorDialog dialog = new InputOutputEditorDialog(
+                                parentShell, selection.getFirstElement(), false);
+                        dialog.open();
+                        inputViewerOutput.refresh(true);
+                    }
+                }
+            }
+        });
+
+        removeButtonOutput = new Button(buttonAreaOutput, SWT.PUSH);
+        removeButtonOutput.setText("Delete");
+        GridData data6 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+        data1.widthHint = 40;
+        removeButtonOutput.setLayoutData(data6);
+        removeButtonOutput.addSelectionListener(new SelectionAdapter() {
+
+            public void widgetSelected(SelectionEvent e) {
+                IStructuredSelection selection = (IStructuredSelection) inputViewerOutput
+                        .getSelection();
+                if (selection.getFirstElement() != null) {
+                    if (selection.getFirstElement() instanceof IOutput) {
+                        mapper.removeOutput(
+                                (IOutput) selection.getFirstElement());
+                    }
+                }
+            }
+        });
+        removeButtonOutput.setEnabled(false);
+        inputEditButtonOutput.setEnabled(false);
+
         item2.setControl(groupActionType);
 
         beanProperties = new BeanReferencePropertiesComposite(this, item3,
@@ -668,13 +942,12 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
      *  
      */
     protected void handleTableSelectionChanged() {
-        IStructuredSelection selection = (IStructuredSelection) configsViewer2
-                .getSelection();
-        if (selection.isEmpty()) {
-            removeButton.setEnabled(false);
-        } else {
-            removeButton.setEnabled(true);
-        }
+        /*
+         * IStructuredSelection selection = (IStructuredSelection)
+         * configsViewer2 .getSelection(); if (selection.isEmpty()) {
+         * removeButton.setEnabled(false); } else {
+         * removeButton.setEnabled(true); }
+         */
 
     }
 
@@ -783,11 +1056,34 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
             this.classRefText.setEnabled(false);
             this.browseClassRefButton.setEnabled(false);
             this.classRefLabel.setEnabled(false);
+
+            this.groupInputType.setEnabled(false);
+            this.configsTable.setEnabled(false);
+            this.removeButton.setEnabled(false);
+            this.inputEditButton.setEnabled(false);
+            this.inputAddButton.setEnabled(false);
+            this.groupOutputType.setEnabled(false);
+            this.configsTableOutput.setEnabled(false);
+            this.removeButtonOutput.setEnabled(false);
+            this.inputEditButtonOutput.setEnabled(false);
+            this.inputAddButtonOutput.setEnabled(false);
+
         } else {
             setAttributeMapperChoice(RADIOBEANREF_CHOICE);
             this.radioBeanRef.setEnabled(true);
             this.radioClass.setEnabled(true);
             this.radioClassRef.setEnabled(true);
+
+            this.groupInputType.setEnabled(true);
+            this.configsTable.setEnabled(true);
+            this.removeButton.setEnabled(true);
+            this.inputEditButton.setEnabled(true);
+            this.inputAddButton.setEnabled(true);
+            this.groupOutputType.setEnabled(true);
+            this.configsTableOutput.setEnabled(true);
+            this.removeButtonOutput.setEnabled(true);
+            this.inputEditButtonOutput.setEnabled(true);
+            this.inputAddButtonOutput.setEnabled(true);
 
             if (this.subFlowState.getAttributeMapper() != null) {
                 if (this.subFlowState.getAttributeMapper().getBean() != null) {

@@ -17,39 +17,47 @@
 package org.springframework.ide.eclipse.web.flow.ui.editor.commands;
 
 import org.eclipse.gef.commands.Command;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
-import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
+import org.springframework.ide.eclipse.web.flow.core.model.IInput;
+import org.springframework.ide.eclipse.web.flow.core.model.IOutput;
 
-public class DeleteStatePropertyCommand extends Command {
+public class DeleteInputOutputCommand extends Command {
 
-    private IProperty child;
+    private Object child;
 
-    private int index = -1;
-
-    private IPropertyEnabled parent;
+    private IAttributeMapper parent;
 
     public void execute() {
         primExecute();
     }
 
     protected void primExecute() {
-        index = parent.getProperties().indexOf(child);
-        parent.removeProperty(child);
+        if (child instanceof IInput) {
+            parent.removeInput((IInput) child);
+        }
+        else if (child instanceof IOutput) {
+            parent.removeOutput((IOutput) child);
+        } 
     }
 
     public void redo() {
         primExecute();
     }
 
-    public void setChild(IProperty a) {
+    public void setChild(Object a) {
         child = a;
     }
 
-    public void setParent(IPropertyEnabled sa) {
+    public void setParent(IAttributeMapper sa) {
         parent = sa;
     }
 
     public void undo() {
-        parent.addProperty(child, index);
+        if (child instanceof IInput) {
+            parent.addInput((IInput) child);
+        }
+        else if (child instanceof IOutput) {
+            parent.addOutput((IOutput) child);
+        } 
     }
 }

@@ -19,6 +19,8 @@ package org.springframework.ide.eclipse.web.flow.ui.editor.dialogs;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
+import org.springframework.ide.eclipse.web.flow.core.model.IInput;
+import org.springframework.ide.eclipse.web.flow.core.model.IOutput;
 import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
 
 public class ModelTableLabelProvider implements ITableLabelProvider {
@@ -42,6 +44,46 @@ public class ModelTableLabelProvider implements ITableLabelProvider {
             else if (columnIndex == 2) {
                 if (((IProperty) element).getType() != null)
                     return ((IProperty) element).getType();
+                else 
+                    return "";  
+            }
+        }
+        else if (element instanceof IInput) {
+            if (columnIndex == 0) {
+                return ((IInput) element).getName();
+            }
+            else if (columnIndex == 1) {
+                return ((IInput) element).getValue();
+            }
+            else if (columnIndex == 2) {
+                if (((IInput) element).getAs() != null)
+                    return ((IInput) element).getAs();
+                else 
+                    return "";  
+            }
+            else if (columnIndex == 3) {
+                if (((IInput) element).getType() != null)
+                    return ((IInput) element).getType();
+                else 
+                    return "";  
+            }
+        }
+        else if (element instanceof IOutput) {
+            if (columnIndex == 0) {
+                return ((IOutput) element).getName();
+            }
+            else if (columnIndex == 1) {
+                return ((IOutput) element).getValue();
+            }
+            else if (columnIndex == 2) {
+                if (((IOutput) element).getAs() != null)
+                    return ((IOutput) element).getAs();
+                else 
+                    return "";  
+            }
+            else if (columnIndex == 3) {
+                if (((IOutput) element).getType() != null)
+                    return ((IOutput) element).getType();
                 else 
                     return "";  
             }

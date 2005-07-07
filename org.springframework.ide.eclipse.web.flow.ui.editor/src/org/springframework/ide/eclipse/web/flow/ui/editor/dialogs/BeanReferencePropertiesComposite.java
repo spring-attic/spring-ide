@@ -144,7 +144,8 @@ public class BeanReferencePropertiesComposite {
         layoutAttMap.marginHeight = 3;
         groupActionType.setLayout(layoutAttMap);
         groupActionType.setText(" Bean Reference ");
-        groupActionType.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        GridData grid = new GridData();
+        groupActionType.setLayoutData(grid);
 
         //      Create the radio button for no attribute mapper.
         beanReferenceButton = new Button(groupActionType, SWT.CHECK);
@@ -152,8 +153,8 @@ public class BeanReferencePropertiesComposite {
                 || this.state.getClassRef() != null) {
             beanReferenceButton.setSelection(true);
         }
-        beanReferenceButton.setLayoutData(new GridData(
-                GridData.FILL_HORIZONTAL));
+        //beanReferenceButton.setLayoutData(new GridData(
+        //        GridData.FILL_HORIZONTAL));
         beanReferenceButton.setText("Use Bean Reference");
         beanReferenceButton.setToolTipText("Enable to use bean reference");
         beanReferenceButton.addSelectionListener(new SelectionAdapter() {
@@ -215,7 +216,7 @@ public class BeanReferencePropertiesComposite {
         inset1Layout.marginWidth = 20;
         inset1Layout.marginHeight = 2;
         inset1.setLayout(inset1Layout);
-        inset1.setLayoutData(new GridData(GridData.FILL_BOTH));
+        inset1.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
         // Label field.
         beanLabel = new Label(inset1, SWT.NONE);
@@ -263,7 +264,7 @@ public class BeanReferencePropertiesComposite {
         inset3Layout.marginWidth = 20;
         inset3Layout.marginHeight = 2;
         inset3.setLayout(inset3Layout);
-        inset3.setLayoutData(new GridData(GridData.FILL_BOTH));
+        inset3.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
         //      Label field.
         classRefLabel = new Label(inset3, SWT.NONE);
@@ -312,7 +313,7 @@ public class BeanReferencePropertiesComposite {
         inset2Layout.marginWidth = 20;
         inset2Layout.marginHeight = 2;
         inset2.setLayout(inset2Layout);
-        inset2.setLayoutData(new GridData(GridData.FILL_BOTH));
+        inset2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
         // Label field.
         classLabel = new Label(inset2, SWT.NONE);
