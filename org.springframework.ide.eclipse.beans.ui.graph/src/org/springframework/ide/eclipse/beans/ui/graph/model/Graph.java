@@ -29,10 +29,12 @@ import org.eclipse.draw2d.graph.DirectedGraphLayout;
 import org.eclipse.draw2d.graph.Edge;
 import org.eclipse.draw2d.graph.EdgeList;
 import org.eclipse.draw2d.graph.Node;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Font;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput;
 import org.springframework.ide.eclipse.beans.ui.graph.figures.BeanFigure;
 
@@ -44,6 +46,8 @@ public class Graph implements IAdaptable {
 
 	/* Default amount of empty space to be left around a node */
 	private static final Insets DEFAULT_PADDING = new Insets(16);
+
+	private static final String ERROR_TITLE = "Graph.error.title";
 
 	private GraphEditorInput input;
 	private	DirectedGraph graph;
@@ -179,87 +183,98 @@ public class Graph implements IAdaptable {
 		}
 
 		// Calculate position of all beans in graph
-		new DirectedGraphLayout().visit(graph);
+		try {
+			new DirectedGraphLayout().visit(graph);
 
-		// Re-invert edges inverted while breaking cycles
-		for (int i = 0; i < graph.edges.size(); i++) {
-			Edge e = graph.edges.getEdge(i);
-			if (e.isFeedback) {
-				e.invert();
-			}
-		}
-
-		// Remove temporary root and root edges
-		for (int i = 0; i < rootEdges.size(); i++) {
-			Edge e = (Edge) rootEdges.getEdge(i);
-			e.source.outgoing.remove(e);
-			e.target.incoming.remove(e);
-			graph.edges.remove(e);
-		}
-		graph.nodes.remove(root);
-
-		// Re-align nodes and edges' bend points topmost vertical position
-		int maxY = 0;  // max height of graph
-		int maxX = 0;  // max width of graph
-		int ranks = graph.ranks.size();
-		if (ranks > 1) {
-			int deltaY = graph.ranks.getRank(1).getNode(0).y;
-			Iterator nodes = graph.nodes.iterator();
-			while (nodes.hasNext()) {
-				Bean node = (Bean) nodes.next();
-
-				// Move node vertically and update max height 
-				node.y -= deltaY;
-				if ((node.y + node.height) > maxY) {
-					maxY =  node.y + node.height;
-				}
-
-				// Update max width
-				if ((node.x + node.width) > maxX) {
-					maxX =  node.x + node.width;
+			// Re-invert edges inverted while breaking cycles
+			for (int i = 0; i < graph.edges.size(); i++) {
+				Edge e = graph.edges.getEdge(i);
+				if (e.isFeedback) {
+					e.invert();
 				}
 			}
-			Iterator edges = graph.edges.iterator();
-			while (edges.hasNext()) {
-				Edge edge = (Edge) edges.next();
-				if (edge.vNodes != null) {
-					Iterator points = edge.vNodes.iterator();
-					while (points.hasNext()) {
-						Node node = (Node) points.next();
-						node.y -= deltaY;
+	
+			// Remove temporary root and root edges
+			for (int i = 0; i < rootEdges.size(); i++) {
+				Edge e = (Edge) rootEdges.getEdge(i);
+				e.source.outgoing.remove(e);
+				e.target.incoming.remove(e);
+				graph.edges.remove(e);
+			}
+			graph.nodes.remove(root);
+	
+			// Re-align nodes and edges' bend points topmost vertical position
+			int maxY = 0;  // max height of graph
+			int maxX = 0;  // max width of graph
+			int ranks = graph.ranks.size();
+			if (ranks > 1) {
+				int deltaY = graph.ranks.getRank(1).getNode(0).y;
+				Iterator nodes = graph.nodes.iterator();
+				while (nodes.hasNext()) {
+					Bean node = (Bean) nodes.next();
+	
+					// Move node vertically and update max height 
+					node.y -= deltaY;
+					if ((node.y + node.height) > maxY) {
+						maxY =  node.y + node.height;
+					}
+	
+					// Update max width
+					if ((node.x + node.width) > maxX) {
+						maxX =  node.x + node.width;
+					}
+				}
+				Iterator edges = graph.edges.iterator();
+				while (edges.hasNext()) {
+					Edge edge = (Edge) edges.next();
+					if (edge.vNodes != null) {
+						Iterator points = edge.vNodes.iterator();
+						while (points.hasNext()) {
+							Node node = (Node) points.next();
+							node.y -= deltaY;
+						}
 					}
 				}
 			}
-		}
-
-		// Re-add all unconnected beans to the bottom of the graph
-		int x = 0;   // current horizontal position in current row
-		int y = maxY;  // current row
-		if (maxY > 0) {
-			y += DEFAULT_PADDING.getHeight();
-		}
-		if (maxX < MAX_ORPHAN_ROW_WIDTH) {
-			maxX = MAX_ORPHAN_ROW_WIDTH;
-		}
-		maxY = 0;  // max height of all figures in current row
-		beans = orphanBeans.iterator();
-		while (beans.hasNext()) {
-			Bean bean = (Bean) beans.next();
-
-			// If current row is filled then start new row
-			if ((x + bean.width) > maxX) {
-				bean.x = x = 0;
-				bean.y = y += maxY + DEFAULT_PADDING.getHeight();
-				maxY = bean.height; 
-			} else {
-				bean.y = y;
-				bean.x = x;
-				if (bean.height > maxY) {
-					maxY = bean.height;
-				}
+	
+			// Re-add all unconnected beans to the bottom of the graph
+			int x = 0;   // current horizontal position in current row
+			int y = maxY;  // current row
+			if (maxY > 0) {
+				y += DEFAULT_PADDING.getHeight();
 			}
-			x += bean.width + DEFAULT_PADDING.getWidth();
-			graph.nodes.add(bean);
+			if (maxX < MAX_ORPHAN_ROW_WIDTH) {
+				maxX = MAX_ORPHAN_ROW_WIDTH;
+			}
+			maxY = 0;  // max height of all figures in current row
+			beans = orphanBeans.iterator();
+			while (beans.hasNext()) {
+				Bean bean = (Bean) beans.next();
+	
+				// If current row is filled then start new row
+				if ((x + bean.width) > maxX) {
+					bean.x = x = 0;
+					bean.y = y += maxY + DEFAULT_PADDING.getHeight();
+					maxY = bean.height; 
+				} else {
+					bean.y = y;
+					bean.x = x;
+					if (bean.height > maxY) {
+						maxY = bean.height;
+					}
+				}
+				x += bean.width + DEFAULT_PADDING.getWidth();
+				graph.nodes.add(bean);
+			}
+		} catch (RuntimeException e) {
+
+			// Show empty graph on error during layouting
+			// (graph contains cylces, graph not fully connected, ...) 
+			graph = new DirectedGraph();
+			MessageDialog.openError(
+						BeansGraphPlugin.getActiveWorkbenchWindow().getShell(),
+						BeansGraphPlugin.getResourceString(ERROR_TITLE),
+						e.getMessage());
 		}
 	}
 }
