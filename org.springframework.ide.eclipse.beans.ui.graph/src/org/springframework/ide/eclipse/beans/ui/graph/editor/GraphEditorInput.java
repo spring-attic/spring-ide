@@ -59,6 +59,7 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 	private String name;
 	private String toolTip;
 	private Map beans;
+	private boolean hasError;
 
 	/**
 	 * Creates a list with all beans which are referenced from the model
@@ -224,6 +225,10 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 		return beans;
 	}
 
+	public void setHasError(boolean hasError) {
+		this.hasError = hasError;
+	}
+
 	public Object getAdapter(Class adapter) {
 		if (adapter == IModelElement.class) {
 			return getElement();
@@ -240,7 +245,7 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 	}
 
 	public IPersistableElement getPersistable() {
-		return this;
+		return (hasError ? null : this);
 	}
 
 	public String getToolTipText() {

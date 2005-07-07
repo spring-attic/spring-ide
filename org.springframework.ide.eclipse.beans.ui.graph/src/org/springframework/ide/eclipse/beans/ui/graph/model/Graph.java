@@ -268,13 +268,18 @@ public class Graph implements IAdaptable {
 			}
 		} catch (RuntimeException e) {
 
-			// Show empty graph on error during layouting
-			// (graph contains cylces, graph not fully connected, ...) 
+			// If an error occured during layouting (graph contains cylces,
+			// graph not fully connected, ...) then clear graph, invalidate
+			// editor input (not saved when Eclipse is closed) and display an
+			// error message
 			graph = new DirectedGraph();
+			input.setHasError(true);
+
 			MessageDialog.openError(
-						BeansGraphPlugin.getActiveWorkbenchWindow().getShell(),
-						BeansGraphPlugin.getResourceString(ERROR_TITLE),
-						e.getMessage());
+					BeansGraphPlugin.getActiveWorkbenchWindow().getShell(),
+					BeansGraphPlugin.getResourceString(ERROR_TITLE),
+					e.getMessage());
+
 		}
 	}
 }
