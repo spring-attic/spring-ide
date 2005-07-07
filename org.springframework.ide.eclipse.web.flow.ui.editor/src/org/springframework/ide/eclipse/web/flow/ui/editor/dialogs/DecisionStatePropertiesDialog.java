@@ -46,6 +46,7 @@ import org.springframework.ide.eclipse.web.flow.core.WebFlowCoreUtils;
 import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IDecisionState;
+import org.springframework.ide.eclipse.web.flow.core.model.IDescriptionEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IIf;
 import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
@@ -102,6 +103,8 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog implements
     private PropertiesComposite properties;
 
     private TableViewer configsViewer;
+    
+    private DescriptionComposite description;
 
     public DecisionStatePropertiesDialog(Shell parentShell,
             IWebFlowModelElement parent, IDecisionState state) {
@@ -145,6 +148,11 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog implements
                 this.decisionStateClone.setClassRef(null);
             }
 
+            if (this.decisionStateClone instanceof IDescriptionEnabled) {
+                ((IDescriptionEnabled) this.decisionStateClone)
+                        .setDescription(description.getDescription());
+            }
+            
             ((ICloneableModelElement) this.decisionState)
                     .applyCloneValues((ICloneableModelElement) this.decisionStateClone);
         }
@@ -198,6 +206,7 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog implements
         item2.setImage(WebFlowImages.getImage(WebFlowImages.IMG_OBJS_IF));
         TabItem item3 = new TabItem(folder, SWT.NULL);
         TabItem item4 = new TabItem(folder, SWT.NULL);
+        TabItem item5 = new TabItem(folder, SWT.NULL);
 
         Composite nameGroup = new Composite(folder, SWT.NULL);
         nameGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -295,6 +304,10 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog implements
                 (IPropertyEnabled) this.decisionStateClone);
         item4.setControl(properties.createDialogArea(folder));
 
+        description = new DescriptionComposite(this, item5, getShell(),
+                (IDescriptionEnabled) this.decisionStateClone);
+        item5.setControl(description.createDialogArea(folder));
+        
         applyDialogFont(parentComposite);
 
         return parentComposite;

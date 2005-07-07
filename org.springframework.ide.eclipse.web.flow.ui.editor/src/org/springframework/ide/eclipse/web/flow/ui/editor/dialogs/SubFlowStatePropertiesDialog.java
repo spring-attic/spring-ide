@@ -69,6 +69,7 @@ import org.springframework.ide.eclipse.web.flow.core.internal.model.Output;
 import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
+import org.springframework.ide.eclipse.web.flow.core.model.IDescriptionEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IInput;
 import org.springframework.ide.eclipse.web.flow.core.model.IOutput;
 import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
@@ -89,14 +90,6 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
 
     private static int RADIOCLASSREF_CHOICE = 2;
 
-    private Button inputAddButton;
-
-    private Button inputEditButton;
-
-    private Button inputAddButtonOutput;
-
-    private Button inputEditButtonOutput;
-
     private Button attributeMapperButton;
 
     private Label autowireLabel;
@@ -104,6 +97,8 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
     private Combo autowireText;
 
     private Label beanLabel;
+
+    private BeanReferencePropertiesComposite beanProperties;
 
     private IBeansConfigSet beansConfig;
 
@@ -130,11 +125,35 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
 
     private Text classText;
 
+    private Table configsTable;
+
+    private Table configsTableOutput;
+
     private TableViewer configsViewer2;
+    
+    private DescriptionComposite description;
 
     private Text flowText;
 
+    private Group groupInputType;
+
+    private Group groupOutputType;
+
+    private Button inputAddButton;
+
+    private Button inputAddButtonOutput;
+
+    private Button inputEditButton;
+
+    private Button inputEditButtonOutput;
+
+    private TableViewer inputViewer;
+
+    private TableViewer inputViewerOutput;
+
     private int LABEL_WIDTH = 70;
+    
+    private IAttributeMapper mapper;
 
     private Label nameLabel;
 
@@ -143,6 +162,10 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
     private Button okButton;
 
     private IWebFlowModelElement parent;
+
+    private Shell parentShell;
+
+    private PropertiesComposite properties;
 
     private Button radioBeanRef;
 
@@ -159,26 +182,6 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
     private ISubFlowState subFlowStateClone;
 
     private Label viewLabel;
-
-    private BeanReferencePropertiesComposite beanProperties;
-
-    private PropertiesComposite properties;
-
-    private TableViewer inputViewer;
-
-    private TableViewer inputViewerOutput;
-
-    private Shell parentShell;
-
-    private Group groupInputType;
-
-    private Group groupOutputType;
-
-    private Table configsTableOutput;
-
-    private Table configsTable;
-    
-    private IAttributeMapper mapper;
 
     public SubFlowStatePropertiesDialog(Shell parentShell,
             IWebFlowModelElement parent, ISubFlowState state) {
@@ -254,6 +257,11 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
                 this.subFlowStateClone.setAutowire(null);
                 this.subFlowStateClone.setClassRef(null);
             }
+            
+            if (this.subFlowStateClone instanceof IDescriptionEnabled) {
+                ((IDescriptionEnabled) this.subFlowStateClone)
+                        .setDescription(description.getDescription());
+            }
 
             ((ICloneableModelElement) this.subFlowState)
                     .applyCloneValues((ICloneableModelElement) this.subFlowStateClone);
@@ -309,6 +317,7 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
                 .getImage(WebFlowImages.IMG_OBJS_ATTRIBUTE_MAPPER));
         TabItem item3 = new TabItem(folder, SWT.NULL);
         TabItem item4 = new TabItem(folder, SWT.NULL);
+        TabItem item5 = new TabItem(folder, SWT.NULL);
 
         Composite nameGroup = new Composite(folder, SWT.NULL);
         nameGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -677,7 +686,7 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
 
         Composite tableAndButtonsOutput = new Composite(groupOutputType,
                 SWT.NONE);
-        tableAndButtons.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        tableAndButtonsOutput.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         GridLayout layout6 = new GridLayout();
         layout6.marginHeight = 0;
         layout6.marginWidth = 0;
@@ -799,6 +808,10 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
         properties = new PropertiesComposite(this, item4, getShell(),
                 (IPropertyEnabled) this.subFlowStateClone);
         item4.setControl(properties.createDialogArea(folder));
+        
+        description = new DescriptionComposite(this, item5, getShell(),
+                (IDescriptionEnabled) this.subFlowStateClone);
+        item5.setControl(description.createDialogArea(folder));
 
         applyDialogFont(parentComposite);
 

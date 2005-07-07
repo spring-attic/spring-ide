@@ -47,6 +47,7 @@ import org.springframework.ide.eclipse.web.flow.core.model.IAction;
 import org.springframework.ide.eclipse.web.flow.core.model.IActionState;
 import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
+import org.springframework.ide.eclipse.web.flow.core.model.IDescriptionEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
@@ -105,6 +106,8 @@ public class ActionStatePropertiesDialog extends TitleAreaDialog implements
 
     private PropertiesComposite properties;
 
+    private DescriptionComposite description;
+
     public ActionStatePropertiesDialog(Shell parentShell,
             IWebFlowModelElement parent, IActionState state) {
         super(parentShell);
@@ -145,6 +148,11 @@ public class ActionStatePropertiesDialog extends TitleAreaDialog implements
                 this.actionStateClone.setBeanClass(null);
                 this.actionStateClone.setAutowire(null);
                 this.actionStateClone.setClassRef(null);
+            }
+
+            if (this.actionStateClone instanceof IDescriptionEnabled) {
+                ((IDescriptionEnabled) this.actionStateClone)
+                        .setDescription(description.getDescription());
             }
 
             ((ICloneableModelElement) this.actionState)
@@ -200,6 +208,7 @@ public class ActionStatePropertiesDialog extends TitleAreaDialog implements
         item2.setImage(WebFlowImages.getImage(WebFlowImages.IMG_OBJS_ACTION));
         TabItem item3 = new TabItem(folder, SWT.NULL);
         TabItem item4 = new TabItem(folder, SWT.NULL);
+        TabItem item5 = new TabItem(folder, SWT.NULL);
 
         Composite nameGroup = new Composite(folder, SWT.NULL);
         nameGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -296,6 +305,10 @@ public class ActionStatePropertiesDialog extends TitleAreaDialog implements
                 (IPropertyEnabled) this.actionStateClone);
         item4.setControl(properties.createDialogArea(folder));
 
+        description = new DescriptionComposite(this, item5, getShell(),
+                (IDescriptionEnabled) this.actionStateClone);
+        item5.setControl(description.createDialogArea(folder));
+
         applyDialogFont(parentComposite);
 
         return parentComposite;
@@ -375,6 +388,7 @@ public class ActionStatePropertiesDialog extends TitleAreaDialog implements
                 error = true;
             }
         }
+
         if (error) {
             getButton(OK).setEnabled(false);
             setErrorMessage(errorMessage.toString());

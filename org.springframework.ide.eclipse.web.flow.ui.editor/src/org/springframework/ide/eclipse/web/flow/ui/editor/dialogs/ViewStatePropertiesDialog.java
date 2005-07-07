@@ -69,6 +69,7 @@ import org.springframework.ide.eclipse.web.flow.core.internal.model.Property;
 import org.springframework.ide.eclipse.web.flow.core.internal.model.Setup;
 import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
+import org.springframework.ide.eclipse.web.flow.core.model.IDescriptionEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
 import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.ISetup;
@@ -125,10 +126,6 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
     private IBeansConfigSet beansConfig;
 
     private Text beanText;
-    
-    private Text onerrorText;
-    
-    private Button browseOnerrorButton;
 
     private Button browseBeanButton;
 
@@ -136,7 +133,7 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 
     private Button browseClassRefButton;
     
-    private Label onerrorLabel;
+    private Button browseOnerrorButton;
 
     private SelectionListener buttonListener = new SelectionAdapter() {
 
@@ -156,6 +153,8 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
     private Table configsTable;
     
     private TableViewer configsViewer;
+    
+    private DescriptionComposite description;
 
     private Button editButton;
     
@@ -168,6 +167,10 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
     private Text nameText;
 
     private Button okButton;
+    
+    private Label onerrorLabel;
+    
+    private Text onerrorText;
 
     private IWebFlowModelElement parent;
     
@@ -273,6 +276,11 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
                 }
             }
             
+            if (this.viewStateClone instanceof IDescriptionEnabled) {
+                ((IDescriptionEnabled) this.viewStateClone)
+                        .setDescription(description.getDescription());
+            }
+            
             ((ICloneableModelElement) this.viewState)
                     .applyCloneValues((ICloneableModelElement) this.viewStateClone);
         }
@@ -327,6 +335,7 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
         item4.setImage(WebFlowImages.getImage(WebFlowImages.IMG_OBJS_SETUP));
         TabItem item2 = new TabItem(folder, SWT.NULL);
         TabItem item3 = new TabItem(folder, SWT.NULL);
+        TabItem item5 = new TabItem(folder, SWT.NULL);
 
         Composite nameGroup = new Composite(folder, SWT.NULL);
         nameGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -748,6 +757,10 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
                 (IPropertyEnabled) this.viewStateClone);
         item3.setControl(properties.createDialogArea(folder));
 
+        description = new DescriptionComposite(this, item5, getShell(),
+                (IDescriptionEnabled) this.viewStateClone);
+        item5.setControl(description.createDialogArea(folder));
+        
         this.setSetupEnabled();
         
         applyDialogFont(parentComposite);

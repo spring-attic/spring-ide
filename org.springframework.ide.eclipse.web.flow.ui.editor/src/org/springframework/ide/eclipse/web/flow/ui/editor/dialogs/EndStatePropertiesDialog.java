@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.web.flow.core.WebFlowCoreUtils;
 import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
+import org.springframework.ide.eclipse.web.flow.core.model.IDescriptionEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IEndState;
 import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
@@ -66,6 +67,8 @@ public class EndStatePropertiesDialog extends TitleAreaDialog implements
     private BeanReferencePropertiesComposite beanProperties;
 
     private PropertiesComposite properties;
+    
+    private DescriptionComposite description;
 
     public EndStatePropertiesDialog(Shell parentShell,
             IWebFlowModelElement parent, IEndState state) {
@@ -108,6 +111,11 @@ public class EndStatePropertiesDialog extends TitleAreaDialog implements
                 this.endStateClone.setBeanClass(null);
                 this.endStateClone.setAutowire(null);
                 this.endStateClone.setClassRef(null);
+            }
+            
+            if (this.endStateClone instanceof IDescriptionEnabled) {
+                ((IDescriptionEnabled) this.endStateClone)
+                        .setDescription(description.getDescription());
             }
 
             ((ICloneableModelElement) this.endState)
@@ -161,6 +169,7 @@ public class EndStatePropertiesDialog extends TitleAreaDialog implements
         item1.setImage(getImage());
         TabItem item2 = new TabItem(folder, SWT.NULL);
         TabItem item3 = new TabItem(folder, SWT.NULL);
+        TabItem item4 = new TabItem(folder, SWT.NULL);
 
         Composite nameGroup = new Composite(folder, SWT.NULL);
         nameGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -208,6 +217,10 @@ public class EndStatePropertiesDialog extends TitleAreaDialog implements
         properties = new PropertiesComposite(this, item3, getShell(),
                 (IPropertyEnabled) this.endStateClone);
         item3.setControl(properties.createDialogArea(folder));
+        
+        description = new DescriptionComposite(this, item4, getShell(),
+                (IDescriptionEnabled) this.endStateClone);
+        item4.setControl(description.createDialogArea(folder));
 
         applyDialogFont(parentComposite);
         return parentComposite;
