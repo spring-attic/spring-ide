@@ -17,6 +17,7 @@
 package org.springframework.ide.eclipse.web.flow.core.internal.model;
 
 import org.eclipse.core.resources.IResource;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
 import org.springframework.ide.eclipse.web.flow.core.model.IOutput;
@@ -40,6 +41,15 @@ public class Output extends WebFlowModelElement implements IOutput,
     
     public Output() {
         this(null, null);
+    }
+    
+    public Output(IWebFlowModelElement parent, String name, String value) {
+        super(parent, name);
+        this.value = value;
+        this.name = name;
+        if (parent instanceof IAttributeMapper) {
+            ((IAttributeMapper) parent).addOutput(this);
+        }
     }
 
     /*

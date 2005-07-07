@@ -49,6 +49,7 @@ import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowConfig;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -220,6 +221,10 @@ public class XmlFlowParser {
                     states.put(state.getId(), state);
                 }
             }
+            else if (node instanceof Comment) {
+                Comment comment = (Comment) node;
+                System.out.println(node.getNodeValue().trim());
+            }
         }
 
         linkTransitions(transitions, states);
@@ -341,6 +346,12 @@ public class XmlFlowParser {
                 state.setAutowire(autowire);
             }
         }
+        
+        ISetup setup = this.parseSetup(element, state);
+        if (setup != null) {
+            state.setSetup(setup);
+        }
+        
         List transitions = parseTransitions(element, state);
         transitionList.addAll(transitions);
         state.getProperties().addAll(parseProperties(state, element));
@@ -624,6 +635,7 @@ public class XmlFlowParser {
             Element element) {
         String name = element.getAttribute(NAME_ATTRIBUTE);
         Property property = new Property();
+        property.setElementParent(parent);
         if (StringUtils.hasText(name)) {
             property.setName(name);
         }
@@ -753,6 +765,7 @@ public class XmlFlowParser {
                         setup.setOnErrorId(onError);
                     }
                     setup.getProperties().addAll(parseProperties(setup, childElement));
+                    return setup;
                 }
             }
         }

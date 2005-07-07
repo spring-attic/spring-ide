@@ -17,6 +17,7 @@
 package org.springframework.ide.eclipse.web.flow.core.internal.model;
 
 import org.eclipse.core.resources.IResource;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IInput;
 import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
@@ -39,6 +40,15 @@ public class Input extends WebFlowModelElement implements IInput, IPersistableMo
     
     public Input() {
         super(null, null);
+    }
+    
+    public Input(IWebFlowModelElement parent, String name, String value) {
+        super(parent, name);
+        this.value = value;
+        this.name = name;
+        if (parent instanceof IAttributeMapper) {
+            ((IAttributeMapper) parent).addInput(this);
+        }
     }
 
     /* (non-Javadoc)

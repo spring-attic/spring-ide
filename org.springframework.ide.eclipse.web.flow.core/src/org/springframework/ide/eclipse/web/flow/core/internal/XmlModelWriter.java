@@ -437,10 +437,10 @@ public class XmlModelWriter implements IModelWriter {
         parameters.put(CLASS_ATTRIBUTE, state.getBeanClass());
         parameters.put(CLASSREF_ATTRIBUTE, state.getClassRef());
         parameters.put(METHOD_ATTRIBUTE, state.getMethod());
-        if (state.getOnError() != null) {
-            parameters.put(ONERROR_ATTRIBUTE, state.getOnError().getId());
+        if (state.getOnErrorId() != null) {
+            parameters.put(ONERROR_ATTRIBUTE, state.getOnErrorId());
         }
-        writer.startTag(DECISION_STATE_ELEMENT, parameters, true);
+        writer.startTag(SETUP_ELEMENT, parameters, true);
     }
     
     private void doEndSetup(IWebFlowModelElement element) {

@@ -30,6 +30,9 @@ public interface IAttributeMapper extends IBeanReference {
     
     void addInput(IInput input);
     
+    void addInput(IInput input, int index);
+    
     void addOutput(IOutput output);
     
+    void addOutput(IOutput output, int index);
 }

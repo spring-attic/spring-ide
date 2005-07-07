@@ -3,6 +3,8 @@
  */
 package org.springframework.ide.eclipse.web.flow.core.internal.model;
 
+import java.util.Iterator;
+
 import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
@@ -105,6 +107,13 @@ public class Setup extends AbstractModelElement implements ISetup, IPersistableM
      */
     public void save(IModelWriter writer) {
         writer.doStart(this);
+        Iterator iter = this.getProperties().iterator();
+        while (iter.hasNext()) {
+            IWebFlowModelElement element = (IWebFlowModelElement) iter.next();
+            if (element instanceof IPersistableModelElement) {
+                ((IPersistableModelElement) element).save(writer);
+            }
+        }  
         writer.doEnd(this);
     }
 
@@ -139,6 +148,7 @@ public class Setup extends AbstractModelElement implements ISetup, IPersistableM
             setBeanClass(setup.getBeanClass());
             setClassRef(setup.getClassRef());
             setMethod(setup.getMethod());
+            setOnErrorId(setup.getOnErrorId());
             Property[] props = (Property[]) this.getProperties().toArray(
                     new Property[this.getProperties().size()]);
             for (int i = 0; i < props.length; i++) {

@@ -192,4 +192,28 @@ public class AttributeMapper extends AbstractModelElement implements
         }
         
     }
+
+    /* (non-Javadoc)
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper#addInput(org.springframework.ide.eclipse.web.flow.core.model.IInput, int)
+     */
+    public void addInput(IInput input, int index) {
+        if (!this.inputs.contains(input)) {
+            input.setElementParent(this);
+            this.inputs.add(index, input);
+            super.firePropertyChange(ADD_CHILDREN, new Integer(this.inputs
+                    .indexOf(input)), input);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper#addOutput(org.springframework.ide.eclipse.web.flow.core.model.IOutput, int)
+     */
+    public void addOutput(IOutput output, int index) {
+        if (!this.outputs.contains(output)) {
+            output.setElementParent(this);
+            this.outputs.add(index, output);
+            super.firePropertyChange(ADD_CHILDREN, new Integer(this.outputs
+                    .indexOf(output)), output);
+        }        
+    }
 }

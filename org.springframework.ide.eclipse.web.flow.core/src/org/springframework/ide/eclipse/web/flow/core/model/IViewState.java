@@ -25,4 +25,6 @@ public interface IViewState extends ITransitionableFrom {
     ISetup getSetup();
     
     void setSetup(ISetup setup);
+    
+    void removeSetup();
 }

@@ -18,6 +18,7 @@ package org.springframework.ide.eclipse.web.flow.core.internal.model;
 
 import java.util.Iterator;
 
+import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
 import org.springframework.ide.eclipse.web.flow.core.model.IPersistableModelElement;
@@ -118,6 +119,11 @@ public class ViewState extends AbstractTransitionableFrom implements
             Property property = (Property) this.getProperties().get(i);
             state.addProperty((IProperty) property.cloneModelElement());
         }
+        if (this.setup != null) {
+            state
+                    .setSetup((ISetup) ((ICloneableModelElement) this.setup)
+                            .cloneModelElement());
+        }
         return state;
     }
 
@@ -143,8 +149,23 @@ public class ViewState extends AbstractTransitionableFrom implements
             for (int i = 0; i < state.getProperties().size(); i++) {
                 addProperty((IProperty) state.getProperties().get(i));
             }
+            if (state.getSetup() != null) {
+                if (this.setup != null) {
+                    ((ICloneableModelElement) this.setup)
+                            .applyCloneValues((ICloneableModelElement) state
+                                    .getSetup());
+                }
+                else {
+                    setSetup(state.getSetup());
+                    getSetup().setElementParent(this);
+                }
+            }
+            else {
+                if (this.setup != null) {
+                    removeSetup();
+                }
+            }
         }
-
     }
 
     /* (non-Javadoc)
@@ -158,8 +179,20 @@ public class ViewState extends AbstractTransitionableFrom implements
      * @see org.springframework.ide.eclipse.web.flow.core.model.IViewState#setSetup(org.springframework.ide.eclipse.web.flow.core.model.ISetup)
      */
     public void setSetup(ISetup setup) {
-        ISetup oldValue = this.setup;
+        //if (this.getSetup() != null) {
+        //    this.removeSetup();
+        //}
         this.setup = setup;
-        super.firePropertyChange(PROPS, oldValue, setup);
+        super.firePropertyChange(ADD_CHILDREN, new Integer(0), setup);
+    }
+
+    /* (non-Javadoc)
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IViewState#removeSetup()
+     */
+    public void removeSetup() {
+        ISetup oldValue = this.setup;
+        this.setup = null;
+        super.firePropertyChange(REMOVE_CHILDREN, setup, oldValue);
+        
     }
 }
