@@ -87,6 +87,7 @@ public class EndState extends AbstractTransitionableTo implements IEndState,
         state.setBeanClass(getBeanClass());
         state.setClassRef(getClassRef());
         state.setElementName(getElementName());
+        state.setDescription(getDescription());
         for (int i = 0; i < this.getProperties().size(); i++) {
             Property property = (Property) this.getProperties().get(i);
             state.addProperty((IProperty) property.cloneModelElement());
@@ -100,14 +101,15 @@ public class EndState extends AbstractTransitionableTo implements IEndState,
      * @see org.springframework.ide.eclipse.web.flow.core.model.IConeableModelElement#applyCloneValues(org.springframework.ide.eclipse.web.flow.core.model.IConeableModelElement)
      */
     public void applyCloneValues(ICloneableModelElement element) {
-        if (element instanceof IEndState) {
-            IEndState state = (IEndState) element;
+        if (element instanceof EndState) {
+            EndState state = (EndState) element;
             setView(state.getView());
             setId(state.getId());
             setAutowire(state.getAutowire());
             setBean(state.getBean());
             setBeanClass(state.getBeanClass());
             setClassRef(state.getClassRef());
+            setDescription(state.getDescription());
             Property[] props = (Property[]) this.getProperties().toArray(
                     new Property[this.getProperties().size()]);
             for (int i = 0; i < props.length; i++) {

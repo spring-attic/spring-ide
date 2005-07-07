@@ -40,6 +40,7 @@ import org.springframework.ide.eclipse.web.flow.core.internal.model.SubFlowState
 import org.springframework.ide.eclipse.web.flow.core.internal.model.Transition;
 import org.springframework.ide.eclipse.web.flow.core.internal.model.ViewState;
 import org.springframework.ide.eclipse.web.flow.core.internal.model.WebFlowState;
+import org.springframework.ide.eclipse.web.flow.core.model.IDescriptionEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IIf;
 import org.springframework.ide.eclipse.web.flow.core.model.ISetup;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
@@ -191,6 +192,8 @@ public class XmlFlowParser {
         // get the flow under construction
         NodeList nodeList = root.getChildNodes();
         Map states = new HashMap();
+        // save comments
+        String commentString = null;
         
         List transitions = new ArrayList();
         for (int i = 0; i < nodeList.getLength(); i++) {
@@ -219,11 +222,19 @@ public class XmlFlowParser {
                 }
                 if (state != null) {
                     states.put(state.getId(), state);
+                    if (commentString != null) {
+                        if (state instanceof IDescriptionEnabled) {
+                            ((IDescriptionEnabled) state).setDescription(commentString);
+                        }
+                        commentString = null;
+                    }
                 }
             }
             else if (node instanceof Comment) {
                 Comment comment = (Comment) node;
-                System.out.println(node.getNodeValue().trim());
+                commentString = comment.getNodeValue().trim();
+                commentString = StringUtils.replace(commentString, "\n", " ");
+                commentString = StringUtils.replace(commentString, "\t", " ");
             }
         }
 

@@ -160,6 +160,7 @@ public class ActionState extends AbstractTransitionableFrom implements
         state.setBean(getBean());
         state.setBeanClass(getBeanClass());
         state.setClassRef(getClassRef());
+        state.setDescription(getDescription());
         for (int i = 0; i < this.getActions().size(); i++) {
             state.addAction((IAction) ((ICloneableModelElement) this
                     .getActions().get(i)).cloneModelElement());
@@ -184,6 +185,7 @@ public class ActionState extends AbstractTransitionableFrom implements
             setBean(action.getBean());
             setBeanClass(action.getBeanClass());
             setClassRef(action.getClassRef());
+            setDescription(action.getDescription());
             Action[] actions = (Action[]) this.getActions().toArray(
                     new Action[this.getActions().size()]);
             for (int i = 0; i < actions.length; i++) {

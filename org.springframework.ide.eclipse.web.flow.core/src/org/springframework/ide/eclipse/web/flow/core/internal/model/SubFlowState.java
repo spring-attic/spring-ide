@@ -153,6 +153,7 @@ public class SubFlowState extends WebFlowState implements ISubFlowState,
         state.setBeanClass(getBeanClass());
         state.setClassRef(getClassRef());
         state.setElementName(getElementName());
+        state.setDescription(getDescription());
         if (this.attributeMapper != null) {
             state
                     .setAttributeMapper((IAttributeMapper) ((ICloneableModelElement) this.attributeMapper)
@@ -171,14 +172,15 @@ public class SubFlowState extends WebFlowState implements ISubFlowState,
      * @see org.springframework.ide.eclipse.web.flow.core.model.IConeableModelElement#applyCloneValues(org.springframework.ide.eclipse.web.flow.core.model.IConeableModelElement)
      */
     public void applyCloneValues(ICloneableModelElement element) {
-        if (element instanceof ISubFlowState) {
-            ISubFlowState state = (ISubFlowState) element;
+        if (element instanceof SubFlowState) {
+            SubFlowState state = (SubFlowState) element;
             setId(state.getId());
             setFlow(state.getFlow());
             setAutowire(state.getAutowire());
             setBean(state.getBean());
             setBeanClass(state.getBeanClass());
             setClassRef(state.getClassRef());
+            setDescription(state.getDescription());
             if (state.getAttributeMapper() != null) {
                 if (this.attributeMapper != null) {
                     ((ICloneableModelElement) this.attributeMapper)

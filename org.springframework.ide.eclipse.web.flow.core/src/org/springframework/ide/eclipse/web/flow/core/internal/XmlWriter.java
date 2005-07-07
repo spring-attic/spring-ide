@@ -52,6 +52,12 @@ public class XmlWriter extends PrintWriter {
         }
     }
 
+    public void printComment(String name) {
+        print("<!-- ");
+        print(getEscaped(name));
+        print(" -->");
+    }
+
     public void printSimpleTag(String name, HashMap parameters, Object value) {
         if (value != null) {
             printTag(name, parameters, true, false, false);
@@ -90,8 +96,7 @@ public class XmlWriter extends PrintWriter {
         }
         if (!endTag) {
             buffer.append(">");
-        }
-        else {
+        } else {
             buffer.append("/>");
         }
         if (tab) {
@@ -99,8 +104,7 @@ public class XmlWriter extends PrintWriter {
         }
         if (newLine) {
             println(buffer.toString());
-        }
-        else {
+        } else {
             print(buffer.toString());
         }
     }
@@ -120,8 +124,7 @@ public class XmlWriter extends PrintWriter {
             buffer.append('&');
             buffer.append(replacement);
             buffer.append(';');
-        }
-        else {
+        } else {
             buffer.append(c);
         }
     }
@@ -138,16 +141,16 @@ public class XmlWriter extends PrintWriter {
         // references.
         // These five are defined by default for all XML documents.
         switch (c) {
-            case '<':
-                return "lt"; //$NON-NLS-1$
-            case '>':
-                return "gt"; //$NON-NLS-1$
-            case '"':
-                return "quot"; //$NON-NLS-1$
-            case '\'':
-                return "apos"; //$NON-NLS-1$
-            case '&':
-                return "amp"; //$NON-NLS-1$
+        case '<':
+            return "lt"; //$NON-NLS-1$
+        case '>':
+            return "gt"; //$NON-NLS-1$
+        case '"':
+            return "quot"; //$NON-NLS-1$
+        case '\'':
+            return "apos"; //$NON-NLS-1$
+        case '&':
+            return "amp"; //$NON-NLS-1$
         }
         return null;
     }

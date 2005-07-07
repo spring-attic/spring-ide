@@ -30,6 +30,7 @@ import org.springframework.ide.eclipse.web.flow.core.model.IAction;
 import org.springframework.ide.eclipse.web.flow.core.model.IActionState;
 import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.web.flow.core.model.IDecisionState;
+import org.springframework.ide.eclipse.web.flow.core.model.IDescriptionEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IEndState;
 import org.springframework.ide.eclipse.web.flow.core.model.IIf;
 import org.springframework.ide.eclipse.web.flow.core.model.IInput;
@@ -97,7 +98,7 @@ public class XmlModelWriter implements IModelWriter {
     private static final String TO_ATTRIBUTE = "to";
 
     private static final String PROPERTY_ELEMENT = "property";
-    
+
     private static final String TYPE_ATTRIBUTE = "type";
 
     private static final String VALUE_ELEMENT = "value";
@@ -113,15 +114,15 @@ public class XmlModelWriter implements IModelWriter {
     private static final String THEN_ATTRIBUTE = "then";
 
     private static final String ELSE_ATTRIBUTE = "else";
-    
+
     private static final String SETUP_ELEMENT = "setup";
-    
+
     private static final String ONERROR_ATTRIBUTE = "on-error";
-    
+
     private static final String INPUT_ELEMENT = "input";
-    
+
     private static final String AS_ATTRIBUTE = "as";
-    
+
     private static final String OUTPUT_ELEMENT = "output";
 
     XmlWriter writer = null;
@@ -149,50 +150,50 @@ public class XmlModelWriter implements IModelWriter {
     public void doStart(IWebFlowModelElement element) {
         int type = element.getElementType();
         switch (type) {
-            case IWebFlowModelElement.WEBFLOW_STATE:
-                doStartWebFlow(element);
-                break;
-            case IWebFlowModelElement.ACTION_STATE:
-                doStartActionState(element);
-                break;
-            case IWebFlowModelElement.ACTION:
-                doStartAction(element);
-                break;
-            case IWebFlowModelElement.PROPERTY:
-                doStartProperty(element);
-                break;
-            case IWebFlowModelElement.VIEW_STATE:
-                doStartViewState(element);
-                break;
-            case IWebFlowModelElement.SUBFLOW_STATE:
-                doStartSubFlowState(element);
-                break;
-            case IWebFlowModelElement.END_STATE:
-                doStartEndState(element);
-                break;
-            case IWebFlowModelElement.ATTRIBUTEMAPPER:
-                doStartAttributeMapper(element);
-                break;
-            case IWebFlowModelElement.STATE_TRANSITION:
-                doStartStateTransition(element);
-                break;
-            case IWebFlowModelElement.DECISION_STATE:
-                doStartDecisionState(element);
-                break;
-            case IWebFlowModelElement.IF:
-                doStartIf(element);
-                break;
-            case IWebFlowModelElement.SETUP:
-                doStartSetup(element);
-                break;
-            case IWebFlowModelElement.INPUT:
-                doStartInput(element);
-                break;
-            case IWebFlowModelElement.OUTPUT:
-                doStartOutput(element);
-                break;                      
-            default:
-                break;
+        case IWebFlowModelElement.WEBFLOW_STATE:
+            doStartWebFlow(element);
+            break;
+        case IWebFlowModelElement.ACTION_STATE:
+            doStartActionState(element);
+            break;
+        case IWebFlowModelElement.ACTION:
+            doStartAction(element);
+            break;
+        case IWebFlowModelElement.PROPERTY:
+            doStartProperty(element);
+            break;
+        case IWebFlowModelElement.VIEW_STATE:
+            doStartViewState(element);
+            break;
+        case IWebFlowModelElement.SUBFLOW_STATE:
+            doStartSubFlowState(element);
+            break;
+        case IWebFlowModelElement.END_STATE:
+            doStartEndState(element);
+            break;
+        case IWebFlowModelElement.ATTRIBUTEMAPPER:
+            doStartAttributeMapper(element);
+            break;
+        case IWebFlowModelElement.STATE_TRANSITION:
+            doStartStateTransition(element);
+            break;
+        case IWebFlowModelElement.DECISION_STATE:
+            doStartDecisionState(element);
+            break;
+        case IWebFlowModelElement.IF:
+            doStartIf(element);
+            break;
+        case IWebFlowModelElement.SETUP:
+            doStartSetup(element);
+            break;
+        case IWebFlowModelElement.INPUT:
+            doStartInput(element);
+            break;
+        case IWebFlowModelElement.OUTPUT:
+            doStartOutput(element);
+            break;
+        default:
+            break;
         }
     }
 
@@ -204,50 +205,50 @@ public class XmlModelWriter implements IModelWriter {
     public void doEnd(IWebFlowModelElement element) {
         int type = element.getElementType();
         switch (type) {
-            case IWebFlowModelElement.WEBFLOW_STATE:
-                doEndWebFlow(element);
-                break;
-            case IWebFlowModelElement.ACTION_STATE:
-                doEndActionState(element);
-                break;
-            case IWebFlowModelElement.ACTION:
-                doEndAction(element);
-                break;
-            case IWebFlowModelElement.PROPERTY:
-                doEndProperty(element);
-                break;
-            case IWebFlowModelElement.VIEW_STATE:
-                doEndViewState(element);
-                break;
-            case IWebFlowModelElement.SUBFLOW_STATE:
-                doEndSubFlowState(element);
-                break;
-            case IWebFlowModelElement.END_STATE:
-                doEndEndState(element);
-                break;
-            case IWebFlowModelElement.ATTRIBUTEMAPPER:
-                doEndAttributeMapper(element);
-                break;
-            case IWebFlowModelElement.DECISION_STATE:
-                doEndDecisionState(element);
-                break;
-            case IWebFlowModelElement.STATE_TRANSITION:
-                doEndStateTransition(element);
-                break;
-            case IWebFlowModelElement.IF:
-                doEndIf(element);
-                break;
-            case IWebFlowModelElement.SETUP:
-                doEndSetup(element);
-                break; 
-            case IWebFlowModelElement.INPUT:
-                doEndInput(element);
-                break;
-            case IWebFlowModelElement.OUTPUT:
-                doEndOutput(element);
-                break;                  
-            default:
-                break;
+        case IWebFlowModelElement.WEBFLOW_STATE:
+            doEndWebFlow(element);
+            break;
+        case IWebFlowModelElement.ACTION_STATE:
+            doEndActionState(element);
+            break;
+        case IWebFlowModelElement.ACTION:
+            doEndAction(element);
+            break;
+        case IWebFlowModelElement.PROPERTY:
+            doEndProperty(element);
+            break;
+        case IWebFlowModelElement.VIEW_STATE:
+            doEndViewState(element);
+            break;
+        case IWebFlowModelElement.SUBFLOW_STATE:
+            doEndSubFlowState(element);
+            break;
+        case IWebFlowModelElement.END_STATE:
+            doEndEndState(element);
+            break;
+        case IWebFlowModelElement.ATTRIBUTEMAPPER:
+            doEndAttributeMapper(element);
+            break;
+        case IWebFlowModelElement.DECISION_STATE:
+            doEndDecisionState(element);
+            break;
+        case IWebFlowModelElement.STATE_TRANSITION:
+            doEndStateTransition(element);
+            break;
+        case IWebFlowModelElement.IF:
+            doEndIf(element);
+            break;
+        case IWebFlowModelElement.SETUP:
+            doEndSetup(element);
+            break;
+        case IWebFlowModelElement.INPUT:
+            doEndInput(element);
+            break;
+        case IWebFlowModelElement.OUTPUT:
+            doEndOutput(element);
+            break;
+        default:
+            break;
         }
     }
 
@@ -269,6 +270,9 @@ public class XmlModelWriter implements IModelWriter {
     }
 
     private void doStartActionState(IWebFlowModelElement element) {
+
+        doComment(element);
+        
         IActionState state = (IActionState) element;
         HashMap parameters = new HashMap();
         parameters.put(ID_ATTRIBUTE, state.getId());
@@ -277,6 +281,17 @@ public class XmlModelWriter implements IModelWriter {
         parameters.put(CLASS_ATTRIBUTE, state.getBeanClass());
         parameters.put(CLASSREF_ATTRIBUTE, state.getClassRef());
         writer.startTag(ACTION_STATE_ELEMENT, parameters);
+    }
+
+    /**
+     * @param element
+     */
+    private void doComment(IWebFlowModelElement element) {
+        if (element instanceof IDescriptionEnabled
+                && ((IDescriptionEnabled) element).hasDescription()) {
+            writer.printComment(((IDescriptionEnabled) element)
+                    .getDescription());
+        }
     }
 
     private void doEndActionState(IWebFlowModelElement element) {
@@ -300,6 +315,9 @@ public class XmlModelWriter implements IModelWriter {
     }
 
     private void doStartViewState(IWebFlowModelElement element) {
+        
+        doComment(element);
+        
         IViewState state = (IViewState) element;
         HashMap parameters = new HashMap();
         parameters.put(ID_ATTRIBUTE, state.getId());
@@ -316,6 +334,9 @@ public class XmlModelWriter implements IModelWriter {
     }
 
     private void doStartSubFlowState(IWebFlowModelElement element) {
+        
+        doComment(element);
+        
         ISubFlowState state = (ISubFlowState) element;
         HashMap parameters = new HashMap();
         parameters.put(ID_ATTRIBUTE, state.getId());
@@ -332,6 +353,9 @@ public class XmlModelWriter implements IModelWriter {
     }
 
     private void doStartEndState(IWebFlowModelElement element) {
+        
+        doComment(element);
+        
         IEndState state = (IEndState) element;
         HashMap parameters = new HashMap();
         parameters.put(ID_ATTRIBUTE, state.getId());
@@ -373,7 +397,7 @@ public class XmlModelWriter implements IModelWriter {
     private void doEndProperty(IWebFlowModelElement element) {
         writer.endTag(PROPERTY_ELEMENT);
     }
-    
+
     private void doStartInput(IWebFlowModelElement element) {
         IInput state = (IInput) element;
         HashMap parameters = new HashMap();
@@ -387,7 +411,7 @@ public class XmlModelWriter implements IModelWriter {
     private void doEndInput(IWebFlowModelElement element) {
         writer.endTag(INPUT_ELEMENT);
     }
-    
+
     private void doStartOutput(IWebFlowModelElement element) {
         IOutput state = (IOutput) element;
         HashMap parameters = new HashMap();
@@ -419,6 +443,9 @@ public class XmlModelWriter implements IModelWriter {
     }
 
     private void doStartDecisionState(IWebFlowModelElement element) {
+        
+        doComment(element);
+        
         IDecisionState state = (IDecisionState) element;
         HashMap parameters = new HashMap();
         parameters.put(ID_ATTRIBUTE, state.getId());
@@ -428,7 +455,7 @@ public class XmlModelWriter implements IModelWriter {
         parameters.put(CLASSREF_ATTRIBUTE, state.getClassRef());
         writer.startTag(DECISION_STATE_ELEMENT, parameters, true);
     }
-    
+
     private void doStartSetup(IWebFlowModelElement element) {
         ISetup state = (ISetup) element;
         HashMap parameters = new HashMap();
@@ -442,7 +469,7 @@ public class XmlModelWriter implements IModelWriter {
         }
         writer.startTag(SETUP_ELEMENT, parameters, true);
     }
-    
+
     private void doEndSetup(IWebFlowModelElement element) {
         writer.endTag(SETUP_ELEMENT);
     }
@@ -491,6 +518,7 @@ public class XmlModelWriter implements IModelWriter {
         format.setIndent(4);
         format.setEncoding("UTF-8");
         format.setPreserveEmptyAttributes(false);
+        format.setOmitComments(false);
         XMLSerializer serializer = new XMLSerializer(stream, format);
         serializer.serialize(doc);
 

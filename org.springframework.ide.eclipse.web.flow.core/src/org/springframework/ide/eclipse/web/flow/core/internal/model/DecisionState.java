@@ -136,6 +136,7 @@ public class DecisionState extends AbstractTransitionableFrom implements
         state.setBean(getBean());
         state.setBeanClass(getBeanClass());
         state.setClassRef(getClassRef());
+        state.setDescription(getDescription());
         for (int i = 0; i < this.getIfs().size(); i++) {
             state.addIf((IIf) ((ICloneableModelElement) this.getIfs().get(i))
                     .cloneModelElement());
@@ -160,6 +161,7 @@ public class DecisionState extends AbstractTransitionableFrom implements
             setBean(state.getBean());
             setBeanClass(state.getBeanClass());
             setClassRef(state.getClassRef());
+            setDescription(state.getDescription());
             for (int i = 0; i < state.getIfs().size(); i++) {
                 ((ICloneableModelElement) this.getIfs().get(i))
                         .applyCloneValues((ICloneableModelElement) state

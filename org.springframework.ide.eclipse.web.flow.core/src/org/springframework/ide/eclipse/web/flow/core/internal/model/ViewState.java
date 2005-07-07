@@ -18,7 +18,6 @@ package org.springframework.ide.eclipse.web.flow.core.internal.model;
 
 import java.util.Iterator;
 
-import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
 import org.springframework.ide.eclipse.web.flow.core.model.IPersistableModelElement;
@@ -115,6 +114,7 @@ public class ViewState extends AbstractTransitionableFrom implements
         state.setBeanClass(getBeanClass());
         state.setClassRef(getClassRef());
         state.setElementName(getElementName());
+        state.setDescription(getDescription());
         for (int i = 0; i < this.getProperties().size(); i++) {
             Property property = (Property) this.getProperties().get(i);
             state.addProperty((IProperty) property.cloneModelElement());
@@ -133,14 +133,15 @@ public class ViewState extends AbstractTransitionableFrom implements
      * @see org.springframework.ide.eclipse.web.flow.core.model.IConeableModelElement#applyCloneValues(org.springframework.ide.eclipse.web.flow.core.model.IConeableModelElement)
      */
     public void applyCloneValues(ICloneableModelElement element) {
-        if (element instanceof IViewState) {
-            IViewState state = (IViewState) element;
+        if (element instanceof ViewState) {
+            ViewState state = (ViewState) element;
             setView(state.getView());
             setId(state.getId());
             setAutowire(state.getAutowire());
             setBean(state.getBean());
             setBeanClass(state.getBeanClass());
             setClassRef(state.getClassRef());
+            setDescription(state.getDescription());
             Property[] props = (Property[]) this.getProperties().toArray(
                     new Property[this.getProperties().size()]);
             for (int i = 0; i < props.length; i++) {

@@ -18,14 +18,17 @@ package org.springframework.ide.eclipse.web.flow.core.internal.model;
 
 import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.web.flow.core.model.IAction;
+import org.springframework.ide.eclipse.web.flow.core.model.IDescriptionEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowConfig;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 
 public abstract class AbstractState extends AbstractModelElement implements
-        IState {
+        IState, IDescriptionEnabled {
 
     private boolean isStartState = false;
+    
+    private String description;
 
     protected String id;
     
@@ -95,5 +98,19 @@ public abstract class AbstractState extends AbstractModelElement implements
     public String getParentName() {
         return (super.getElementParent() != null ? super.getElementParent()
                 .getElementName() : null);
+    }
+    
+    public void setDescription(String desc) {
+        String oldValue = this.description;
+        this.description = desc;
+        super.firePropertyChange(PROPS, oldValue, this.description);
+    }
+    
+    public boolean hasDescription() {
+        return (this.description != null && !"".equals(this.description));
+    }
+    
+    public String getDescription() {
+        return this.description;
     }
 }
