@@ -42,8 +42,6 @@ public interface IWebFlowConfigSet extends IWebFlowModelElement {
 
     Collection getConfigs();
 
-    IWebFlowConfig getConfig(IFile file);
-
     //boolean hasState(String name);
 
     //IState getState(String name);

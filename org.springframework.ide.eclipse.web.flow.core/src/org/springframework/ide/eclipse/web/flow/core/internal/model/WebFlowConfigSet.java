@@ -83,14 +83,6 @@ public class WebFlowConfigSet extends WebFlowModelElement implements
         return configNames.contains(file.getProjectRelativePath().toString());
     }
 
-    public IWebFlowConfig getConfig(IFile file) {
-        int i = configNames.indexOf(file.getProjectRelativePath().toString());
-        if (i >= 0)
-            return (IWebFlowConfig) configNames.get(i);
-        else
-            return null;
-    }
-
     public void removeConfig(String configName) {
         configNames.remove(configName);
         reset();

@@ -23,6 +23,7 @@
       <import plugin="org.springframework.ide.eclipse.core"/>
       <import plugin="org.springframework.ide.eclipse.beans.core"/>
    </requires>
+   <extension-point id="validators" name="&amp;validatorsName" schema="schema/validators.exsd"/>
 
    <extension
          id="problemmarker"
@@ -39,6 +40,12 @@
 	     id="webflowvalidator"
          name="%webflowValidator"
          point="org.springframework.ide.eclipse.core.builders">
-      <run class="org.springframework.ide.eclipse.web.flow.core.internal.project.WebFlowProjectValidator"/>
+      <run class="org.springframework.ide.eclipse.web.flow.core.validation.WebFlowProjectValidator"/>
+   </extension>
+   <extension
+         id="test"
+         name="test"
+         point="org.springframework.ide.eclipse.web.flow.core.validators">
+      <run class="org.springframework.ide.eclipse.web.flow.core.validation.SubFlowReferenceValidator"/>
    </extension>
 </plugin>

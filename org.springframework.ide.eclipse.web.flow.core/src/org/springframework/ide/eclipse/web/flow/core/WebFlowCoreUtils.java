@@ -21,11 +21,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.internal.resources.File;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
+import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowConfig;
+import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowConfigSet;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowProject;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;

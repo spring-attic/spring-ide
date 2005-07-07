@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.ide.eclipse.web.flow.core.internal.project;
+package org.springframework.ide.eclipse.web.flow.core.validation;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -64,8 +64,8 @@ public class WebFlowProjectValidator implements IProjectBuilder {
                 }
 
                 // Now validate the modified config file
-                //WebFlowConfigValidator validator = new WebFlowConfigValidator();
-                //validator.validate(config, monitor);
+                WebFlowConfigValidator validator = new WebFlowConfigValidator();
+                validator.validate(config, monitor);
             }
             monitor.done();
         }

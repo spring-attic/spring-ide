@@ -41,6 +41,7 @@ import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelChangedL
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowProject;
 import org.springframework.ide.eclipse.web.flow.core.model.WebFlowModelChangedEvent;
+import org.springframework.ide.eclipse.web.flow.core.validation.WebFlowConfigValidator;
 
 public class WebFlowModel extends WebFlowModelElement implements IWebFlowModel {
 
