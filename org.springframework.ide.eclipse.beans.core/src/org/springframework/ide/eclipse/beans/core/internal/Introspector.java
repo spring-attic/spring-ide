@@ -37,8 +37,14 @@ public class Introspector {
      */
 	public static boolean hasConstructor(IType type, int argCount)
 													throws JavaModelException {
-		boolean hasImplicitConstructor = (argCount == 0);
 		IMethod[] methods = type.getMethods();
+
+		// First check for implicit constructor
+		if (argCount == 0 && methods.length == 0) {
+			return true;
+		}
+
+		// Now look for appropriate constructor
 		for (int i = 0; i < methods.length; i++) {
 			IMethod method = methods[i];
 			if (method.isConstructor()) {
@@ -48,12 +54,9 @@ public class Introspector {
 						return true;
 					}
 				}
-				if (hasImplicitConstructor) {
-					return false;
-				}
 			}
 		}
-		return hasImplicitConstructor;
+		return false;
 	}
 
     /**
