@@ -21,11 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -498,19 +494,19 @@ public class BeanReferencePropertiesComposite {
             IProject project = WebFlowUtils.getActiveFlowEditorInput()
                     .getFile().getProject();
             IJavaSearchScope searchScope = SearchEngine.createWorkspaceScope();
-            try {
-                if (project.hasNature(JavaCore.NATURE_ID)) {
-                    IJavaProject javaProject = (IJavaProject) project
-                            .getNature(JavaCore.NATURE_ID);
-                    IType type = javaProject
-                            .findType("org.springframework.web.flow.Action");
-                    if (type != null) {
-                        searchScope = SearchEngine.createHierarchyScope(type);
-                    }
-                }
-            } catch (JavaModelException e) {
-            } catch (CoreException e) {
-            }
+//            try {
+//                if (project.hasNature(JavaCore.NATURE_ID)) {
+//                    IJavaProject javaProject = (IJavaProject) project
+//                            .getNature(JavaCore.NATURE_ID);
+//                    IType type = javaProject
+//                            .findType("org.springframework.webflow.Action");
+//                    if (type != null) {
+//                        searchScope = SearchEngine.createHierarchyScope(type);
+//                    }
+//                }
+//            } catch (JavaModelException e) {
+//            } catch (CoreException e) {
+//            }
             /*
              * TypeSelectionDialog2 dialog= new TypeSelectionDialog2(getShell(),
              * false, new ProgressMonitorDialog(getShell()), searchScope,

@@ -322,12 +322,18 @@ public class InputOutputEditorDialog extends TitleAreaDialog implements
     }
 
     public void validateInput() {
-        String id = this.nameText.getText();
+        String name = this.nameText.getText();
+        String as = this.asText.getText();
+        String value = this.valueText.getText();
         boolean error = false;
         StringBuffer errorMessage = new StringBuffer();
 
-        if (id == null || "".equals(id)) {
-            errorMessage.append("A valid name is required. ");
+        if (name != null && !"".equals(name) && value != null && !"".equals(value)) {
+            errorMessage.append("Use either name or value. ");
+            error = true;
+        }
+        if (value != null && !"".equals(value) && (as == null || "".equals(as))) {
+            errorMessage.append("Please specify as if you use value. ");
             error = true;
         }
 

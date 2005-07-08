@@ -26,7 +26,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.web.flow.core.model.IDescriptionEnabled;
-import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
 
 public class DescriptionComposite {
 
@@ -43,9 +42,9 @@ public class DescriptionComposite {
         this.state = state;
         item.setText("Description");
         item.setToolTipText("Define element's description");
-        item
+        /*item
                 .setImage(WebFlowImages
-                        .getImage(WebFlowImages.IMG_OBJS_PROPERTIES));
+                        .getImage(WebFlowImages.IMG_OBJS_PROPERTIES));*/
         this.parentShell = parentShell;
     }
 

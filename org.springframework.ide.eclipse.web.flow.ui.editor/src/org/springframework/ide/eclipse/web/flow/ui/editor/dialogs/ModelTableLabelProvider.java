@@ -50,10 +50,16 @@ public class ModelTableLabelProvider implements ITableLabelProvider {
         }
         else if (element instanceof IInput) {
             if (columnIndex == 0) {
-                return ((IInput) element).getName();
+                if (((IInput) element).getName() != null)
+                    return ((IInput) element).getName();
+                else 
+                    return ""; 
             }
             else if (columnIndex == 1) {
-                return ((IInput) element).getValue();
+                if (((IInput) element).getValue() != null)
+                    return ((IInput) element).getValue();
+                else 
+                    return ""; 
             }
             else if (columnIndex == 2) {
                 if (((IInput) element).getAs() != null)
@@ -70,10 +76,16 @@ public class ModelTableLabelProvider implements ITableLabelProvider {
         }
         else if (element instanceof IOutput) {
             if (columnIndex == 0) {
-                return ((IOutput) element).getName();
+                if (((IOutput) element).getName() != null)
+                    return ((IOutput) element).getName();
+                else 
+                    return ""; 
             }
             else if (columnIndex == 1) {
-                return ((IOutput) element).getValue();
+                if (((IOutput) element).getValue() != null)
+                    return ((IOutput) element).getValue();
+                else 
+                    return ""; 
             }
             else if (columnIndex == 2) {
                 if (((IOutput) element).getAs() != null)
