@@ -37,4 +37,6 @@ public interface IBeanReference extends IPropertyEnabled {
     void setMethod(String method);
     
     String getMethod();
+    
+    boolean hasBeanReference();
 }

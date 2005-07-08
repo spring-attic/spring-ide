@@ -317,4 +317,9 @@ public class Action extends WebFlowModelElement implements IAction,
         this.name = name;
         super.firePropertyChange(PROPS, oldValue, name);
     }
+    
+    public boolean hasBeanReference() {
+        return (this.bean != null || this.beanClass != null
+                || this.classRef != null || this.autowire != null || this.method != null);
+    }
 }

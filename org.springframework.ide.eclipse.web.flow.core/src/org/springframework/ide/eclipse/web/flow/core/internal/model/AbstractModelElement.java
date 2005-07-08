@@ -10,7 +10,7 @@ import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 
 public abstract class AbstractModelElement extends WebFlowModelElement {
-    
+
     protected String autowire;
 
     protected String bean;
@@ -18,11 +18,11 @@ public abstract class AbstractModelElement extends WebFlowModelElement {
     protected String beanClass;
 
     protected String classRef;
-    
+
     protected String method;
-    
+
     protected List properties = new ArrayList();
-    
+
     protected AbstractModelElement(IWebFlowModelElement parent, String name) {
         super(parent, name);
     }
@@ -65,7 +65,7 @@ public abstract class AbstractModelElement extends WebFlowModelElement {
     public void addProperty(String name, String value) {
         IProperty property = new Property(this, name, value);
     }
-    
+
     /**
      * @return Returns the autowire.
      */
@@ -121,7 +121,7 @@ public abstract class AbstractModelElement extends WebFlowModelElement {
             super.fireStructureChange(REMOVE_CHILDREN, property);
         }
     }
-    
+
     /**
      * @param autowire
      *            The autowire to set.
@@ -161,13 +161,19 @@ public abstract class AbstractModelElement extends WebFlowModelElement {
         this.classRef = classRef;
         super.firePropertyChange(PROPS, oldValue, classRef);
     }
+
     /**
-     * @param method The method to set.
+     * @param method
+     *            The method to set.
      */
     public void setMethod(String method) {
         String oldValue = this.method;
         this.method = method;
         super.firePropertyChange(PROPS, oldValue, method);
     }
-}
 
+    public boolean hasBeanReference() {
+        return (this.bean != null || this.beanClass != null
+                || this.classRef != null || this.autowire != null || this.method != null);
+    }
+}

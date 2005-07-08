@@ -681,26 +681,23 @@ public class XmlFlowParser {
      * Parse given action definition and return a corresponding Action object.
      */
     protected Action parseAction(IWebFlowModelElement parent, Element element) {
-        String actionId = element.getAttribute(BEAN_ATTRIBUTE);
         String name = element.getAttribute(NAME_ATTRIBUTE);
         String method = element.getAttribute(METHOD_ATTRIBUTE);
         Action action = new Action(parent, null);
-        if (StringUtils.hasText(actionId)) {
-            action.setBean(actionId);
+        String bean = element.getAttribute(BEAN_ATTRIBUTE);
+        String classref = element.getAttribute(CLASSREF_ATTRIBUTE);
+        String beanClass = element.getAttribute(CLASS_ATTRIBUTE);
+        String autowire = element.getAttribute(AUTOWIRE_ATTRIBUTE);
+        if (bean != null && !"".equals(bean)) {
+            action.setBean(bean);
         }
-        else {
-            String actionClassName = element.getAttribute(CLASS_ATTRIBUTE);
-            if (StringUtils.hasText(actionClassName)) {
-                String autowireLabel = element.getAttribute(AUTOWIRE_ATTRIBUTE);
-                action.setAutowire(autowireLabel);
-                action.setBeanClass(actionClassName);
-            }
-            else {
-                actionClassName = element.getAttribute(CLASSREF_ATTRIBUTE);
-                Assert.hasText(actionClassName,
-                        "Exactly one of the action id, class, or classref attributes "
-                                + "are required for this action definition");
-                action.setClassRef(actionClassName);
+        if (classref != null && !"".equals(classref)) {
+            action.setClassRef(classref);
+        }
+        if (beanClass != null && !"".equals(beanClass)) {
+            action.setBeanClass(beanClass);
+            if (autowire != null && !"".equals(autowire)) {
+                action.setAutowire(autowire);
             }
         }
         if (!"".equals(name)) {

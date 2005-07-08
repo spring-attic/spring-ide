@@ -47,5 +47,7 @@
          name="test"
          point="org.springframework.ide.eclipse.web.flow.core.validators">
       <run class="org.springframework.ide.eclipse.web.flow.core.validation.SubFlowReferenceValidator"/>
+      <run class="org.springframework.ide.eclipse.web.flow.core.validation.BeanReferenceValidator"/>
+      <run class="org.springframework.ide.eclipse.web.flow.core.validation.ActionTypeValidator"/>
    </extension>
 </plugin>

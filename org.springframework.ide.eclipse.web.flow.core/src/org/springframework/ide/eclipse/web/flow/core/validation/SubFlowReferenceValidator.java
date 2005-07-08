@@ -71,7 +71,7 @@ public class SubFlowReferenceValidator implements IWebFlowConfigValidator {
                         WebFlowModelUtils
                                 .createProblemMarker(
                                         config,
-                                        "Sub Flow reference '"
+                                        "Sub Flow Reference '"
                                                 + subFlow
                                                 + "' is not valid within the WebFlow ConfigSet '"
                                                 + configSet.getElementName()
