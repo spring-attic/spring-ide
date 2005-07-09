@@ -32,6 +32,8 @@ import org.springframework.ide.eclipse.core.model.IModel;
  */
 public interface IBeansModel extends IModel {
 
+	String ELEMENT_NAME = "BeansModel";
+
 	/**
 	 * Returns the beans project for given project.
 	 * @param project  the project a beans project is requested for

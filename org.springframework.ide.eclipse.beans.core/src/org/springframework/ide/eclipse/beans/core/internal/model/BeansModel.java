@@ -66,7 +66,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	private IResourceChangeListener workspaceListener;
 
 	public BeansModel() {
-		super(null, "BeansModel");
+		super(null, IBeansModel.ELEMENT_NAME);
 		this.projects = new Hashtable();
 		this.workspaceListener = new BeansResourceChangeListener(
 											 new ResourceChangeEventHandler());
