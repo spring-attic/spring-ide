@@ -45,7 +45,7 @@ public class BeanReference {
 		this.source = source;
 		this.target = target;
 	}
-	
+
 	public final int getType() {
 		return type;
 	}
@@ -59,10 +59,28 @@ public class BeanReference {
 	}
 
 	/**
+	 * Returns the unique ID of this bean references. The ID is built from the
+	 * type, the source's ID and the target's ID delimited by '|'.
+	 */
+	public final String getID() {
+		StringBuffer id = new StringBuffer();
+		id.append(id);
+		id.append('|');
+		if (source != null) {
+			id.append(source);
+		}
+		id.append('|');
+		if (target != null) {
+			id.append(target);
+		}
+		return id.toString();
+	}
+
+	/**
 	 * Checks for model element equality by comparing the types, the sources
 	 * and the targets.
 	 */
-	public boolean equals(Object obj) {
+	public final boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -72,5 +90,22 @@ public class BeanReference {
 				   ((BeanReference) obj).getTarget().equals(target);
 		}
 		return false;
+	}
+
+	/**
+	 * Returns the hash code of this bean references's ID.
+	 */
+	public final int hashCode() {
+		return getID().hashCode();
+	}
+
+	public String toString() {
+		StringBuffer text = new StringBuffer();
+		text.append(type);
+		text.append(": ");
+		text.append(source);
+		text.append(" -> ");
+		text.append(target);
+		return super.toString();
 	}
 }
