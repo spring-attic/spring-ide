@@ -29,7 +29,7 @@ public abstract class AbstractModelElement implements IModelElement {
 	/**
 	 * Checks for model element equality by comparing the element's unique IDs.
 	 */
-	public boolean equals(Object obj) {
+	public final boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -37,6 +37,13 @@ public abstract class AbstractModelElement implements IModelElement {
 			return getElementID().equals(((IModelElement) obj).getElementID());
 		}
 		return false;
+	}
+
+	/**
+	 * Returns the hash code of this element's ID.
+	 */
+	public final int hashCode() {
+		return getElementID().hashCode();
 	}
 
 	public final void setElementParent(IModelElement parent) {
