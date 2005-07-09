@@ -31,6 +31,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser;
 
 /**
  * Default implementation of the <code>BeanDefinitionRegistry</code>
@@ -145,6 +146,10 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory
 										  throws BeanDefinitionStoreException {
 		try {
 			super.registerAlias(beanName, alias);
+		} catch (IllegalArgumentException e) {
+			throw new BeanDefinitionStoreException(
+								  DefaultXmlBeanDefinitionParser.ALIAS_ELEMENT,
+								  beanName, e.getMessage());
 		} catch (BeanDefinitionStoreException e) {
 			if (!allowAliasOverriding) {
 				throw e;
