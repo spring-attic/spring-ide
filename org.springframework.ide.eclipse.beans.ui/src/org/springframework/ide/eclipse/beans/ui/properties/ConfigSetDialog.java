@@ -237,7 +237,8 @@ public class ConfigSetDialog extends Dialog {
 		// Add all configs from referenced projects
 		IBeansModel model = BeansCorePlugin.getModel();
 		try {
-			IProject[] projects = project.getProject().getReferencedProjects();
+			IProject[] projects = project.getProject().getProject().
+													   getReferencedProjects();
 			for (int i = 0; i < projects.length; i++) {
 				IBeansProject project = model.getProject(projects[i]);
 				if (project != null) {

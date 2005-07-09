@@ -23,20 +23,17 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 
 public class PropertyNode extends AbstractNode {
 
-	private IBeanProperty property;
-
 	public PropertyNode(BeanNode bean, IBeanProperty property) {
 		super(bean, property.getElementName());
-		this.property = property;
-		setStartLine(property.getElementStartLine());
+		setElement(property);
 	}
 
-	public IBeanProperty getBeanProperty() {
-		return property;
+	public IBeanProperty getProperty() {
+		return (IBeanProperty) getElement();
 	}
 
 	public Object getValue() {
-		return property.getValue();
+		return getProperty().getValue();
 	}
 
 	/**
@@ -53,9 +50,9 @@ public class PropertyNode extends AbstractNode {
 
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPropertySource.class) {
-			return BeansUIUtils.getPropertySource(property);
+			return BeansUIUtils.getPropertySource(getProperty());
 		} else if (adapter == IModelElement.class) {
-			return property;
+			return getProperty();
 		}
 		return super.getAdapter(adapter);
 	}

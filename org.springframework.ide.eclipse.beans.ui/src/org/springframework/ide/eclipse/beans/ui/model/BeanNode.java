@@ -33,7 +33,6 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 public class BeanNode extends AbstractNode {
 
 	private ConfigNode config;
-	private IBean bean;
 	private boolean isOverride;
 	private List constructorArguments;
 	private List properties;
@@ -91,15 +90,15 @@ public class BeanNode extends AbstractNode {
 	public BeanNode(ConfigSetNode configSet, BeanNode bean) {
 		super(configSet, bean.getName());
 		this.config = bean.getConfigNode(); 
+		setElement(bean.getElement());
 		setFlags(bean.getFlags());
-		setBean(bean.getBean());
 
 		// Clone contructor arguments
 		this.constructorArguments = new ArrayList();
 		ConstructorArgumentNode[] cargs = bean.getConstructorArguments();
 		for (int i = 0; i < cargs.length; i++) {
 			this.constructorArguments.add(new ConstructorArgumentNode(this,
-										cargs[i].getBeanConstructorArgument()));
+										  cargs[i].getConstructorArgument()));
 		}
 
 		// Clone properties
@@ -107,7 +106,7 @@ public class BeanNode extends AbstractNode {
 		PropertyNode[] props = bean.getProperties();
 		for (int i = 0; i < props.length; i++) {
 			this.properties.add(new PropertyNode(this,
-												 props[i].getBeanProperty()));
+												 props[i].getProperty()));
 		}
 
 		// Clone inner beans
@@ -136,15 +135,15 @@ public class BeanNode extends AbstractNode {
 	public BeanNode(BeanNode bean, BeanNode innerBean) {
 		super(bean, innerBean.getName());
 		this.config = innerBean.getConfigNode(); 
+		setElement(innerBean.getElement());
 		setFlags(innerBean.getFlags());
-		setBean(innerBean.getBean());
 
 		// Clone contructor arguments
 		this.constructorArguments = new ArrayList();
 		ConstructorArgumentNode[] cargs = innerBean.getConstructorArguments();
 		for (int i = 0; i < cargs.length; i++) {
 			this.constructorArguments.add(new ConstructorArgumentNode(this,
-										cargs[i].getBeanConstructorArgument()));
+										  cargs[i].getConstructorArgument()));
 		}
 
 		// Clone properties
@@ -152,7 +151,7 @@ public class BeanNode extends AbstractNode {
 		PropertyNode[] props = innerBean.getProperties();
 		for (int i = 0; i < props.length; i++) {
 			this.properties.add(new PropertyNode(this,
-												 props[i].getBeanProperty()));
+												 props[i].getProperty()));
 		}
 
 		// Clone inner beans
@@ -172,7 +171,7 @@ public class BeanNode extends AbstractNode {
 	}
 
 	public void setBean(IBean bean) {
-		this.bean = bean;
+		setElement(bean);
 		if (bean != null) {
 			if (!bean.isSingleton()) {
 				setFlags(INode.FLAG_IS_PROTOTYPE);
@@ -187,12 +186,11 @@ public class BeanNode extends AbstractNode {
 												 bean.getParentName() == null) {
 				setFlags(INode.FLAG_IS_ROOT_BEAN_WITHOUT_CLASS);
 			}
-			setStartLine(bean.getElementStartLine()); 
 		}
 	}
 
 	public IBean getBean() {
-		return bean;
+		return (IBean) getElement();
 	}
 
 	public void setIsOverride(boolean isOverridden) {
@@ -253,27 +251,27 @@ public class BeanNode extends AbstractNode {
 	}
 
 	public String getClassName() {
-		return (bean != null ? bean.getClassName() : null);
+		return (getBean() != null ? getBean().getClassName() : null);
 	}
 
 	public String getParentName() {
-		return (bean != null ? bean.getParentName() : null);
+		return (getBean() != null ? getBean().getParentName() : null);
 	}
 
 	public boolean isRootBean() {
-		return (bean != null ? bean.isRootBean() : true);
+		return (getBean() != null ? getBean().isRootBean() : true);
 	}
 
 	public boolean isSingleton() {
-		return (bean != null ? bean.isSingleton() : true);
+		return (getBean() != null ? getBean().isSingleton() : true);
 	}
 
 	public boolean isLazyInit() {
-		return (bean != null ? bean.isLazyInit() : false);
+		return (getBean() != null ? getBean().isLazyInit() : false);
 	}
 
 	public boolean isAbstract() {
-		return (bean != null ? bean.isAbstract() : false);
+		return (getBean() != null ? getBean().isAbstract() : false);
 	}
 	
 	/**
@@ -291,9 +289,9 @@ public class BeanNode extends AbstractNode {
 
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPropertySource.class) {
-			return BeansUIUtils.getPropertySource(bean);
+			return BeansUIUtils.getPropertySource(getBean());
 		} else if (adapter == IModelElement.class) {
-			return bean;
+			return getBean();
 		}
 		return super.getAdapter(adapter);
 	}

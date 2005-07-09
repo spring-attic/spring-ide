@@ -26,6 +26,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.util.ListenerList;
 import org.eclipse.ui.IPropertyListener;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.views.BeansView;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -42,7 +43,8 @@ public class RootNode extends AbstractNode {
 	private ListenerList listeners;
 
 	public RootNode(BeansView view) {
-		super(null);
+		super(IBeansModel.ELEMENT_NAME);
+		setElement(BeansCorePlugin.getModel());
 		this.view = view;
 		projects = new HashMap();
 		listeners = new ListenerList();

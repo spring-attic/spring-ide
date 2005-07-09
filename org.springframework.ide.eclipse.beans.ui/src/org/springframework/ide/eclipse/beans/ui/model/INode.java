@@ -17,8 +17,11 @@
 package org.springframework.ide.eclipse.beans.ui.model;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 
 public interface INode extends IAdaptable {
+
+	INode[] NO_CHILDREN = new INode[] {};
 
 	int FLAG_IS_EXTERNAL = 1 << 0;
 	int FLAG_HAS_ERRORS = 1 << 1;
@@ -36,7 +39,26 @@ public interface INode extends IAdaptable {
 	 * 
 	 * @return this node's parent node
 	 */
-	public INode getParent();
+	INode getParent();
+
+	/**
+	 * Returns this node's children.
+	 * @return this node's children
+	 */
+	INode[] getChildren();
+
+	/**
+	 * Returns true if this node has children.
+	 * @return true if this node has children
+	 */
+	boolean hasChildren();
+
+	/**
+	 * Returns the unique ID of this node.
+	 *
+	 * @return the node's unique ID
+	 */
+	String getID();
 
 	/**
 	 * Returns this node's name or <code>null</code> if none.
@@ -44,14 +66,22 @@ public interface INode extends IAdaptable {
 	 * @return this node's name or <code>null</code> if the name attribute is
 	 * 		   optional for this node
 	 */
-	public String getName();
+	String getName();
+
+	/**
+	 * Returns the model element associated with this node or <code>null</code>
+	 * if none.
+	 *
+	 * @return this node's model element
+	 */
+	IModelElement getElement();
 
 	/**
 	 * Returns this node's flags.
 	 * 
 	 * @return this node's flags
 	 */
-	public int getFlags();
+	int getFlags();
 
 	/**
 	 * Returns this node's location within config file.
@@ -59,5 +89,5 @@ public interface INode extends IAdaptable {
 	 * @return this node's location within config file or -1 if location is
 	 * 		   unknown 
 	 */
-	public int getStartLine();
+	int getStartLine();
 }

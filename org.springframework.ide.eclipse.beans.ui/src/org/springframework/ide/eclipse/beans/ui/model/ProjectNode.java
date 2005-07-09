@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.util.ListenerList;
 import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -42,7 +41,6 @@ public class ProjectNode extends AbstractNode {
 	public static final int CONFIGS = 1;
 	public static final int CONFIG_SETS = 2;
 
-	private IBeansProject project;
 	private Map configs;
 	private Map configSets;
 	private ListenerList listeners;
@@ -54,18 +52,15 @@ public class ProjectNode extends AbstractNode {
 	 */
 	public ProjectNode(INode parent, String name) {
 		super(parent, name);
-		this.project = BeansCorePlugin.getModel().getProject(name);
+		setElement(BeansCorePlugin.getModel().getProject(name));
+
 		this.configs = new HashMap();
 		this.configSets = new HashMap();
 		this.listeners = new ListenerList();
 	}
 
-	public IBeansProject getBeansProject() {
-		return project;
-	}
-
-	public IProject getProject() {
-		return project.getProject();
+	public IBeansProject getProject() {
+		return (IBeansProject) getElement();
 	}
 
 	public void addPropertyListener(IPropertyListener listener) {
@@ -220,9 +215,9 @@ public class ProjectNode extends AbstractNode {
 
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPropertySource.class) {
-			return BeansUIUtils.getPropertySource(project);
+			return BeansUIUtils.getPropertySource(getProject());
 		} else if (adapter == IModelElement.class) {
-			return project;
+			return getProject();
 		}
 		return super.getAdapter(adapter);
 	}

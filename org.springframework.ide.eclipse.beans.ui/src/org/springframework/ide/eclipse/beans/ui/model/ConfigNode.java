@@ -38,7 +38,6 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  */
 public class ConfigNode extends AbstractNode {
 
-	private IBeansConfig config;
 	private List beans;  // lazily initialized in getBeans() or getBean()
 	private Map beansMap;  // lazily initialized in getBean()
 
@@ -50,7 +49,7 @@ public class ConfigNode extends AbstractNode {
 	 */
 	public ConfigNode(ProjectNode project, String name) {
 		super(project, name);
-		setBeansConfig(project);
+		setConfig(project);
 	}
 
 	/**
@@ -61,7 +60,7 @@ public class ConfigNode extends AbstractNode {
 	 */
 	public ConfigNode(ConfigSetNode configSet, String name) {
 		super(configSet, name);
-		setBeansConfig(configSet.getProjectNode());
+		setConfig(configSet.getProjectNode());
 	}
 
 	public ProjectNode getProjectNode() {
@@ -72,8 +71,12 @@ public class ConfigNode extends AbstractNode {
 		return (ProjectNode) parent;
 	}
 
+	public IBeansConfig getConfig() {
+		return (IBeansConfig) getElement();
+	}
+
 	public IFile getConfigFile() {
-		return (config != null ? config.getConfigFile() : null);
+		return (getConfig() != null ? getConfig().getConfigFile() : null);
 	}
 
 	public BeanNode getBean(String name) {
@@ -148,29 +151,29 @@ public class ConfigNode extends AbstractNode {
 
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPropertySource.class) {
-			return BeansUIUtils.getPropertySource(config);
+			return BeansUIUtils.getPropertySource(getConfig());
 		} else if (adapter == IModelElement.class) {
-			return config;
+			return getConfig();
 		}
 		return super.getAdapter(adapter);
 	}
 
 	public String toString() {
 		StringBuffer text = new StringBuffer(getName());
-		if (config != null) {
+		if (getConfig() != null) {
 			text.append(": ");
-			text.append(config.toString());
+			text.append(getConfig().toString());
 		}
 		return text.toString();
 	}
 
-	private void setBeansConfig(ProjectNode project) {
+	private void setConfig(ProjectNode project) {
 		String configName = getName();
 		if (configName.charAt(0) == '/') {
-			config = BeansCorePlugin.getModel().getConfig(configName);
+			setElement(BeansCorePlugin.getModel().getConfig(configName));
 			setFlags(INode.FLAG_IS_EXTERNAL);
 		} else {
-			config = project.getBeansProject().getConfig(configName);
+			setElement(project.getProject().getConfig(configName));
 		}
 	}
 
@@ -182,15 +185,15 @@ public class ConfigNode extends AbstractNode {
 	 */
 	private void createBeans() {
 		beans = new ArrayList();
-		if (config == null) {
+		if (getConfig() == null) {
 			setErrorMessage("Undefined Spring config '" + getName() + "'", -1);
 		} else {
-			BeanDefinitionException exception = config.getException();
+			BeanDefinitionException exception = getConfig().getException();
 			if (exception != null	) {
 				setErrorMessage(exception.getMessage(),
 								exception.getLineNumber());
 			} else {
-				Iterator iter = config.getBeans().iterator();
+				Iterator iter = getConfig().getBeans().iterator();
 				while (iter.hasNext()) {
 					IBean bean = (IBean) iter.next();
 					BeanNode beanNode = new BeanNode(this,

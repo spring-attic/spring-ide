@@ -35,7 +35,6 @@ public class ConfigSetNode extends AbstractNode {
 	public static final int NAME = 1;
 	public static final int CONFIGS = 2;
 
-	private IBeansConfigSet configSet;
 	private List configs = new ArrayList();
 	private List beans = null;  // lazy initialized in getBeans() or getBean()
 	private Map beansMap;  // lazy initialized in getBean()
@@ -57,7 +56,7 @@ public class ConfigSetNode extends AbstractNode {
 	 */
 	public ConfigSetNode(ProjectNode project, IBeansConfigSet configSet) {
 		super(project, configSet.getElementName());
-		this.configSet = configSet;
+		setElement(configSet);
 
 		isOverrideEnabled = configSet.isAllowBeanDefinitionOverriding();
 
@@ -77,6 +76,10 @@ public class ConfigSetNode extends AbstractNode {
 	public void setName(String name) {
 		super.setName(name);
 		propertyChanged(this, NAME);
+	}
+
+	public IBeansConfigSet getConfigSet() {
+		return (IBeansConfigSet) getElement();
 	}
 
 	public void setOverrideEnabled(boolean isOverrideEnabled) {
@@ -251,9 +254,9 @@ public class ConfigSetNode extends AbstractNode {
 
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPropertySource.class) {
-			return BeansUIUtils.getPropertySource(configSet);
+			return BeansUIUtils.getPropertySource(getConfigSet());
 		} else if (adapter == IModelElement.class) {
-			return configSet;
+			return getConfigSet();
 		}
 		return super.getAdapter(adapter);
 	}

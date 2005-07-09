@@ -16,10 +16,18 @@
 
 package org.springframework.ide.eclipse.beans.ui.model;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
+
 public abstract class AbstractNode implements INode {
 
 	private INode parent;
 	private String name;
+	private IModelElement element;
 	private int flags;
 	private int startLine;
 
@@ -60,8 +68,51 @@ public abstract class AbstractNode implements INode {
 	 * 
 	 * @param parent the parent node
 	 */
-	public void setParent(INode parent) {
+	public final void setParent(INode parent) {
 		this.parent = parent;
+	}
+
+	public final INode[] getChildren() {
+		if (this instanceof RootNode) {
+			return ((RootNode) this).getProjects();
+		} else if (this instanceof ProjectNode) {
+			ProjectNode project = (ProjectNode) this;
+			List nodes = project.getConfigs();
+			nodes.addAll(project.getConfigSets());
+			return (INode[]) nodes.toArray(new INode[nodes.size()]);
+		} else if (this instanceof ConfigSetNode) {
+			return ((ConfigSetNode) this).getBeans(true);
+		} else if (this instanceof ConfigNode) {
+			return ((ConfigNode) this).getBeans(true);
+		} else if (this instanceof BeanNode) {
+			BeanNode bean = (BeanNode) this;
+			List nodes = new ArrayList(Arrays.asList(
+											   bean.getConstructorArguments()));
+			nodes.addAll(Arrays.asList(bean.getProperties()));
+			return (INode[]) nodes.toArray(new INode[nodes.size()]);
+		}
+		return NO_CHILDREN;
+	}
+
+	public final boolean hasChildren() {
+		return !(this instanceof PropertyNode ||
+				this instanceof ConstructorArgumentNode);
+	}
+
+	public final String getID() {
+		StringBuffer id = new StringBuffer();
+		if (getParent() != null) {
+			id.append(getParent().getID());
+			id.append(IModelElement.ID_DELIMITER);
+		}
+		id.append(getElement().getElementType());
+		id.append(IModelElement.ID_SEPARATOR);
+		if (getName() != null) {
+			id.append(getName());
+		} else {
+			id.append(this.hashCode());
+		}
+		return id.toString();
 	}
 
 	/**
@@ -77,7 +128,23 @@ public abstract class AbstractNode implements INode {
 		return name;
 	}
 
-	public void setFlags(int flags) {
+	/**
+	 * Sets this node's model element and start line (retrieved from model
+	 * element).
+	 * 
+	 * @param element  the model element associated with this node
+	 */
+	public final void setElement(IModelElement element) {
+		this.element = element;
+		this.startLine = (element instanceof ISourceModelElement ?
+				   ((ISourceModelElement) element).getElementStartLine() : -1);
+	}
+
+	public final IModelElement getElement() {
+		return element;
+	}
+
+	public final void setFlags(int flags) {
 		this.flags |= flags;
 
 		// Mask flags which are not propagated
@@ -89,7 +156,7 @@ public abstract class AbstractNode implements INode {
 		}
 	}
 
-	public void clearFlags(int flags) {
+	public final void clearFlags(int flags) {
 		this.flags &= ~flags;
 
 		// Propagate modification of flags to parent
@@ -98,16 +165,62 @@ public abstract class AbstractNode implements INode {
 		}
 	}
 
-	public int getFlags() {
+	public final int getFlags() {
 		return flags;
 	}
 
-	public void setStartLine(int line) {
-		startLine = line;
+	/**
+	 * Sets this node's start line.
+	 * 
+	 * @param startLine  the start line of this node
+	 */
+	public final void setStartLine(int startLine) {
+		this.startLine = startLine;
 	}
 
-	public int getStartLine() {
+	public final int getStartLine() {
 		return startLine;
+	}
+
+	public final INode getNode(String id) {
+		IModelElement element = getElement();
+		int sepPos = id.indexOf(IModelElement.ID_SEPARATOR);
+		if (element != null && sepPos > 0) {
+			try {
+				int type = Integer.valueOf(id.substring(0, sepPos)).intValue();
+				if (type == element.getElementType()) {
+					int delPos = id.indexOf(IModelElement.ID_DELIMITER);
+					if (delPos > 0) {
+						String name = id.substring(sepPos + 1, delPos);
+						if (name.equals(element.getElementName())) {
+
+							// Ask all children for the remaining part of the
+							// element ID
+							id = id.substring(delPos + 1);
+							INode[] children = getChildren();
+							for (int i = 0; i < children.length; i++) {
+								INode child = children[i];
+								if (child instanceof AbstractNode) {
+									INode node = ((AbstractNode)
+															child).getNode(id);
+									if (node != null) {
+										return node;
+									}
+								}
+							}
+						}
+					} else {
+						String name = id.substring(sepPos + 1);
+						if (name.equals(element.getElementName())) {
+							return this;
+						}
+					}
+				}
+			} catch (NumberFormatException e) {
+				// ignore
+			}
+		}
+		return null;
 	}
 
 	public void propertyChanged(INode node, int propertyId) {

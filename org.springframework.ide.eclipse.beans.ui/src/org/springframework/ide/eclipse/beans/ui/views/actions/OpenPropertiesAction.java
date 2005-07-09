@@ -50,18 +50,20 @@ public class OpenPropertiesAction extends Action {
 		INode node = (INode) ((IStructuredSelection)
 							 view.getViewer().getSelection()).getFirstElement();
 		if (node instanceof ProjectNode) {
-			project = ((ProjectNode) node).getProject();
+			project = ((ProjectNode) node).getProject().getProject();
 		} else if (node instanceof ConfigNode) {
-			project = ((ConfigNode) node).getProjectNode().getProject();
+			project = ((ConfigNode)
+							  node).getProjectNode().getProject().getProject();
 		} else if (node instanceof ConfigSetNode) {
-			project = ((ConfigSetNode )node).getProjectNode().getProject();
+			project = ((ConfigSetNode)
+							  node).getProjectNode().getProject().getProject();
 			block = 1;
 		} else if (node instanceof BeanNode) {
-			project = ((BeanNode)
-							node).getConfigNode().getProjectNode().getProject();
+			project = ((BeanNode) node).getConfigNode().getProjectNode().
+													 getProject().getProject();
 		} else if (node instanceof PropertyNode) {
-			project = ((PropertyNode)
-							node).getConfigNode().getProjectNode().getProject();
+			project = ((PropertyNode) node).getConfigNode().getProjectNode().
+													 getProject().getProject();
 		}
 
 		// Show project's property page

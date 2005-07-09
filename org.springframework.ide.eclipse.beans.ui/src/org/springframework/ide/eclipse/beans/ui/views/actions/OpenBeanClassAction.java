@@ -49,8 +49,8 @@ public class OpenBeanClassAction extends Action {
 		INode node = (INode) ((IStructuredSelection)
 							 view.getViewer().getSelection()).getFirstElement();
 		if (node instanceof BeanNode) {
-			IProject project = ((BeanNode)
-							node).getConfigNode().getProjectNode().getProject();
+			IProject project = ((BeanNode) node).getConfigNode().
+									getProjectNode().getProject().getProject();
 			String className = ((BeanNode) node).getClassName();
 			IType type = BeansModelUtils.getJavaType(project, className);
 			if (type != null) {

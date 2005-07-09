@@ -16,6 +16,10 @@
 
 package org.springframework.ide.eclipse.beans.ui.views;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -336,9 +340,71 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 	public void refresh() {
 		treeViewer.getControl().getDisplay().asyncExec(new Runnable() {		
 			public void run() {
+				BeansViewState state = getState();
 				treeViewer.refresh();
+				setState(state);
 			}
 		});
+	}
+
+	private BeansViewState getState() {
+		BeansViewState state = new BeansViewState();
+
+		// Save state of expanded elements
+		Object[] expandedElements = treeViewer.getExpandedElements();
+		for (int i = 0; i < expandedElements.length; i++) {
+			INode node = (INode) expandedElements[i];
+			state.expandedElements.add(node.getElement().getElementID());
+		}
+
+		// Save state of selected elements
+		ISelection selection = treeViewer.getSelection();
+		if (selection instanceof IStructuredSelection) {
+			Iterator selectedElements = ((IStructuredSelection)
+														 selection).iterator();
+			while (selectedElements.hasNext()) {
+				INode node = (INode) selectedElements.next();
+				state.selectedElements.add(node.getID());
+			}
+		}
+		return state;
+	}
+
+	private void setState(BeansViewState state) {
+
+		// Restore state of expanded elements
+		List expandedElements = new ArrayList();
+		Iterator expandedElementIDs = state.expandedElements.iterator();
+		while (expandedElementIDs.hasNext()) {
+			String elementID = (String) expandedElementIDs.next();
+			INode node = getRootNode().getNode(elementID);
+			if (node != null) {
+				expandedElements.add(node);
+			}
+		}
+		if (!expandedElements.isEmpty()) {
+			treeViewer.setExpandedElements(expandedElements.toArray(
+										  new INode[expandedElements.size()]));
+		}
+
+		// Restore state of selected elements
+		List selectedElements = new ArrayList();
+		Iterator selectedElementIDs = state.selectedElements.iterator();
+		while (selectedElementIDs.hasNext()) {
+			String elementID = (String) selectedElementIDs.next();
+			INode node = getRootNode().getNode(elementID);
+			if (node != null) {
+				selectedElements.add(node);
+			}
+		}
+		if (!selectedElements.isEmpty()) {
+			treeViewer.setSelection(new StructuredSelection(selectedElements));
+		}
+	}
+
+	private static class  BeansViewState {
+		public List expandedElements = new ArrayList();
+		public List selectedElements = new ArrayList();
 	}
 
 	private IResource getSelectedResource(ISelection selection) {
@@ -346,7 +412,7 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 								((IStructuredSelection)selection).size() == 1) {
 			Object elem = ((IStructuredSelection) selection).getFirstElement();
 			if (elem instanceof ProjectNode) {
-				return ((ProjectNode) elem).getProject();
+				return ((ProjectNode) elem).getProject().getProject();
 			} else if (elem instanceof ConfigNode) {
 				return ((ConfigNode) elem).getConfigFile();
 			} else if (elem instanceof BeanNode) {

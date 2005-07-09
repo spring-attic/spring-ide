@@ -23,17 +23,14 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 
 public class ConstructorArgumentNode extends AbstractNode {
 
-	private IBeanConstructorArgument carg;
-
 	public ConstructorArgumentNode(BeanNode bean,
 								   IBeanConstructorArgument carg) {
 		super(bean, null);
-		this.carg = carg;
-		setStartLine(carg.getElementStartLine());
+		setElement(carg);
 	}
 
-	public IBeanConstructorArgument getBeanConstructorArgument() {
-		return carg;
+	public IBeanConstructorArgument getConstructorArgument() {
+		return (IBeanConstructorArgument) getElement();
 	}
 
 	public String getName() {
@@ -55,15 +52,15 @@ public class ConstructorArgumentNode extends AbstractNode {
 	}
 
 	public int getIndex() {
-		return carg.getIndex();
+		return getConstructorArgument().getIndex();
 	}
 
 	public String getType() {
-		return carg.getType();
+		return getConstructorArgument().getType();
 	}
 	
 	public Object getValue() {
-		return carg.getValue();
+		return getConstructorArgument().getValue();
 	}
 
 	/**
@@ -80,9 +77,9 @@ public class ConstructorArgumentNode extends AbstractNode {
 
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPropertySource.class) {
-			return BeansUIUtils.getPropertySource(carg);
+			return BeansUIUtils.getPropertySource(getConstructorArgument());
 		} else if (adapter == IModelElement.class) {
-			return carg;
+			return getConstructorArgument();
 		}
 		return super.getAdapter(adapter);
 	}
