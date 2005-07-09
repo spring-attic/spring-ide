@@ -18,14 +18,15 @@ public class BeansModelHandler extends AbstractModelHandler
 	 * Needs to match what's in plugin registry. In fact, can be overwritten
 	 * at run time with what's in registry! (so should never be 'final')
 	 */
-	private static String associatedContentTypeID =
-						  BeansEditorPlugin.PLUGIN_ID + ".content.beansConfig";
+	private static String modelHandlerID = BeansEditorPlugin.PLUGIN_ID +
+																".beansConfig";
 	/**
 	 * Needs to match what's in plugin registry. In fact, can be overwritten
 	 * at run time with what's in registry! (so should never be 'final')
 	 */
-	private static String modelHandlerID = BeansEditorPlugin.PLUGIN_ID +
-														".handler.beansConfig";
+	private static String associatedContentTypeID =
+								  BeansEditorPlugin.PLUGIN_ID + ".beansConfig";
+
 	public BeansModelHandler() {
 		setId(modelHandlerID);
 		setAssociatedContentTypeId(associatedContentTypeID);

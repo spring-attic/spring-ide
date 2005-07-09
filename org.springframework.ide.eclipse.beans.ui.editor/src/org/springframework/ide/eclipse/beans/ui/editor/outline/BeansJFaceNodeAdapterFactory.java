@@ -3,6 +3,7 @@ package org.springframework.ide.eclipse.beans.ui.editor.outline;
 import org.eclipse.wst.sse.core.internal.provisional.INodeAdapter;
 import org.eclipse.wst.sse.core.internal.provisional.INodeAdapterFactory;
 import org.eclipse.wst.sse.core.internal.provisional.INodeNotifier;
+import org.eclipse.wst.sse.ui.internal.contentoutline.IJFaceNodeAdapter;
 import org.eclipse.wst.xml.core.internal.contentmodel.modelquery.ModelQuery;
 import org.eclipse.wst.xml.core.internal.ssemodelquery.ModelQueryAdapter;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeAdapterFactory;
@@ -16,7 +17,7 @@ public class BeansJFaceNodeAdapterFactory extends JFaceNodeAdapterFactory {
 	protected BeansJFaceNodeAdapter singletonAdapter;
 
 	public BeansJFaceNodeAdapterFactory() {
-		this(BeansJFaceNodeAdapterFactory.class, true);
+		this(IJFaceNodeAdapter.class, true);
 	}
 
 	public BeansJFaceNodeAdapterFactory(Object adapterKey,

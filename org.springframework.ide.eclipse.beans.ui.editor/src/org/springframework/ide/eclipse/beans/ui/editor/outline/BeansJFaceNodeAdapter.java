@@ -20,31 +20,36 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 
 	public Object[] getChildren(Object object) {
 		Node node = (Node) object;
-		
 		if (node.getNodeType() == Node.DOCUMENT_NODE) {
-			ArrayList v = new ArrayList(node.getChildNodes().getLength());
 			for (Node child = node.getFirstChild(); child != null;
 											  child = child.getNextSibling()) {
-				Node n = child;
-
-				if (n.getNodeType() == Node.ELEMENT_NODE &&
-											  "bean".equals(n.getNodeName())) {
-					v.add(n);
+				if (child.getNodeType() == Node.ELEMENT_NODE &&
+										 "beans".equals(child.getNodeName())) {
+					ArrayList children = new ArrayList();
+					for (Node n = child.getFirstChild(); n != null;
+													  n = n.getNextSibling()) {
+						if (n.getNodeType() == Node.ELEMENT_NODE) {
+							String nodeName = n.getNodeName();
+							if ("alias".equals(nodeName) ||
+												   "import".equals(nodeName) ||
+												   "bean".equals(nodeName)) {
+								children.add(n);
+							}
+						}
+					}
+					return children.toArray();
 				}
 			}
-			return v.toArray();
-		} else if ("description".equals(node.getNodeName())) {
-			return new Object[0];
 		}
-		ArrayList v = new ArrayList(node.getChildNodes().getLength());
+		ArrayList children = new ArrayList();
 		for (Node child = node.getFirstChild(); child != null;
 											  child = child.getNextSibling()) {
 			Node n = child;
 			if (n.getNodeType() != Node.TEXT_NODE) {
-				v.add(n);
+				children.add(n);
 			}
 		}
-		return v.toArray();
+		return children.toArray();
 	}
 
 	/**
@@ -57,34 +62,73 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 	private String getNodeName(Object object) {
 		Node node = (Node) object;
 		String nodeName = node.getNodeName();
+
+		// Root elements (alias, import and bean)
+		if ("alias".equals(nodeName)) {
+			Node aliasNode = node.getAttributes().getNamedItem("alias");
+			String alias = "";
+			if (aliasNode != null) {
+				alias = " \"" + aliasNode.getNodeValue() + "\"";
+			}
+			Node nameNode = node.getAttributes().getNamedItem("name");
+			String name = "";
+			if (nameNode != null) {
+				name = " <" + nameNode.getNodeValue() + ">";
+			}
+			return "Alias" + alias + name;
+		}
+		if ("import".equals(nodeName)) {
+			Node resourceNode = node.getAttributes().getNamedItem("resource");
+			String resource = "";
+			if (resourceNode != null) {
+				resource = " \"" + resourceNode.getNodeValue() + "\"";
+			}
+			return "Import" + resource;
+		}
 		if ("bean".equals(nodeName)) {
-			Node titleNode = node.getAttributes().getNamedItem("title");
-			String title = "";
-			if (titleNode != null) {
-				title = titleNode.getNodeValue();
+			Node idNode = node.getAttributes().getNamedItem("id");
+			String id;
+			if (idNode != null) {
+				id = " \"" + idNode.getNodeValue()+ "\"";
+			} else {
+				id = "";
 			}
-			return "Title:" + title;
+			Node clazzNode = node.getAttributes().getNamedItem("class");
+			String clazz;
+			if (clazzNode != null) {
+				clazz = " [" + clazzNode.getNodeValue() + "]";
+			} else {
+				clazz = "";
+			}
+			return "Bean" + id + clazz;
 		}
-		if ("item".equals(nodeName)) {
-			Node titleNode = node.getAttributes().getNamedItem("title");
-			String title = "";
-			if (titleNode != null) {
-				title = titleNode.getNodeValue();
+
+		// Bean elements
+		if ("property".equals(nodeName)) {
+			Node nameNode = node.getAttributes().getNamedItem("name");
+			String name = "";
+			if (nameNode != null) {
+				name = " \"" + nameNode.getNodeValue()+ "\"";
 			}
-			return "Title:" + title;
+			Node valueNode = node.getAttributes().getNamedItem("value");
+			String value = "";
+			if (valueNode != null) {
+				value = " [" + valueNode.getNodeValue() + "]";
+			}
+			return "Property" + name + value;
 		}
-		if ("action".equals(nodeName)) {
-			Node classNode = node.getAttributes().getNamedItem("class");
-			String className = "";
-			if (classNode != null) {
-				className = classNode.getNodeValue();
-				int index = className.lastIndexOf(".");
-				
-				if (index != -1) {
-					className = className.substring(index + 1);
-				}
+
+		// Misc elements
+		if ("ref".equals(nodeName)) {
+			Node beanNode = node.getAttributes().getNamedItem("bean");
+			if (beanNode == null) {
+				beanNode = node.getAttributes().getNamedItem("local");
 			}
-			return "Action:" + className;
+			String bean = "";
+			if (beanNode != null) {
+				bean = " <" + beanNode.getNodeValue() + ">";
+			}
+			return "Ref" + bean;
 		}
 		return nodeName;
 	}
@@ -96,9 +140,6 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 
 	public boolean hasChildren(Object object) {
 		Node node = (Node) object;
-		if ("description".equals(node.getNodeName())) {
-			return false;
-		}
 		for (Node child = node.getFirstChild(); child != null;
 											  child = child.getNextSibling()) {
 			if (child.getNodeType() != Node.TEXT_NODE)
