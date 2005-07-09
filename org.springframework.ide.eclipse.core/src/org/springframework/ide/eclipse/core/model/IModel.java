@@ -28,7 +28,7 @@ public interface IModel extends IModelElement {
 	 * A model element with this type can be safely cast to
 	 * <code>IModel</code>.
 	 */
-	int MODEL_TYPE = 0;
+	int MODEL_TYPE = 1;
 
 	/**
 	 * Returns the element for the given element ID.
