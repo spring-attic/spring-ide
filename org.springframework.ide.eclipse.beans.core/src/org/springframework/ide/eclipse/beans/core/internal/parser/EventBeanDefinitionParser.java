@@ -34,6 +34,8 @@ import org.springframework.util.ResourceUtils;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Extension to Spring's <code>DefaultXmlBeanDefinitionParser</code> which
@@ -95,6 +97,30 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 									   "found in " + resource.getDescription());
 		}
 		return super.registerBeanDefinitions(reader, doc, resource);
+	}
+
+	protected int parseBeanDefinitions(Element root)
+										  throws BeanDefinitionStoreException {
+		try {
+			return super.parseBeanDefinitions(root);
+		} catch (BeanDefinitionStoreException e) {
+
+			// Lookup the invalid root element via the resource description
+			String elementName = e.getResourceDescription();
+			if (elementName != null) {
+				NodeList nl = root.getChildNodes();
+				for (int i = 0; i < nl.getLength(); i++) {
+					Node node = nl.item(i);
+					if (node instanceof Element) {
+						Element ele = (Element) node;
+						if (elementName.equals(node.getNodeName())) {
+							throw new BeanDefinitionException(ele, e);
+						}
+					}
+				}
+			}
+			throw new BeanDefinitionException(root, e);
+		}
 	}
 
 	/**
