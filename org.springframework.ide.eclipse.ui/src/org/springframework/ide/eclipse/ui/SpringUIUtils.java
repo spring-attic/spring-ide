@@ -17,6 +17,8 @@
 package org.springframework.ide.eclipse.ui;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
@@ -27,8 +29,6 @@ import org.eclipse.jface.preference.IPreferencePage;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.jface.preference.PreferenceNode;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.SWT;
@@ -49,7 +49,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 public class SpringUIUtils {
@@ -146,29 +146,20 @@ public class SpringUIUtils {
 	 * Opens given file in associated editor and go to specified line (if > 0).
 	 */
 	public static final IEditorPart openInEditor(IFile file, int line) {
-		IEditorInput input = new FileEditorInput(file);
-		IEditorPart editPart = openInEditor(input);
-		if (editPart != null) {
-			if (line > 0 && editPart instanceof ITextEditor) {
-
-				// go to specified line
-				ITextEditor editor = (ITextEditor) editPart;
-				IDocument doc = editor.getDocumentProvider().getDocument(input);
-				if (doc != null) {
-					try {
-						int start = doc.getLineOffset(line - 1);
-						editor.selectAndReveal(start, 0);
-					} catch (BadLocationException e) {
-						SpringUIPlugin.log(e);
-					}
-				}
+		IEditorPart editor = null;
+		IWorkbenchPage page = SpringUIPlugin.getActiveWorkbenchPage();
+		try {
+			if (line > 0) {
+				IMarker marker = file.createMarker(IMarker.TEXT);
+				marker.setAttribute(IMarker.LINE_NUMBER, line);
+				editor = IDE.openEditor(page, marker);
+			} else {
+				editor = IDE.openEditor(page, file);
 			}
+		} catch (CoreException e) {
+			SpringUIPlugin.log(e);
 		}
-		return editPart;
-	}
-
-	public static final IEditorPart openInEditor(IEditorInput input) {
-		return openInEditor(input, getEditorID(input));
+	    return editor;
 	}
 
 	public static final IEditorPart openInEditor(IEditorInput input,
@@ -195,18 +186,6 @@ public class SpringUIUtils {
 			SpringUIPlugin.log(e);
 		}
 		return null;
-	}
-
-	/**
-	 * Returns ID of editor which is associated with given editor input. 
-	 */
-	public static final String getEditorID(IEditorInput input) {
-		IEditorRegistry reg = PlatformUI.getWorkbench().getEditorRegistry();
-		IEditorDescriptor desc = reg.getDefaultEditor(input.getName());
-		if (desc != null) {
-			return desc.getId();
-		}
-		return reg.findEditor(IEditorRegistry.SYSTEM_EXTERNAL_EDITOR_ID).getId();
 	}
 
 	public static final int getCaretOffset(ITextEditor editor) {
