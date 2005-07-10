@@ -18,8 +18,8 @@ public class BeansModelHandler extends AbstractModelHandler
 	 * Needs to match what's in plugin registry. In fact, can be overwritten
 	 * at run time with what's in registry! (so should never be 'final')
 	 */
-	private static String modelHandlerID = BeansEditorPlugin.PLUGIN_ID +
-																".beansConfig";
+	private static String modelHandlerID =
+								"org.eclipse.wst.sse.core.handler.beansConfig";
 	/**
 	 * Needs to match what's in plugin registry. In fact, can be overwritten
 	 * at run time with what's in registry! (so should never be 'final')

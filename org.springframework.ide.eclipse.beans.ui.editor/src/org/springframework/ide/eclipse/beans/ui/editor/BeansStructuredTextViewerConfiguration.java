@@ -15,13 +15,15 @@ public class BeansStructuredTextViewerConfiguration
 		IContentAssistant ca = super.getContentAssistant(sourceViewer);
 		if (ca != null && ca instanceof ContentAssistant) {
 			ContentAssistant contentAssistant = (ContentAssistant) ca;
+			contentAssistant.enableAutoActivation(true);
+			contentAssistant.enableAutoInsert(true);
 			IContentAssistProcessor caProcessor =
 							  new BeansContentAssistProcessor(getEditorPart());
-			IContentAssistProcessor noRegionProcessor = new NoRegionContentAssistProcessor();
 			setContentAssistProcessor(contentAssistant, caProcessor,
 								  IStructuredPartitionTypes.DEFAULT_PARTITION);
 			setContentAssistProcessor(contentAssistant, caProcessor,
 									  IXMLPartitions.XML_DEFAULT);
+			IContentAssistProcessor noRegionProcessor = new NoRegionContentAssistProcessor();
 			setContentAssistProcessor(contentAssistant, noRegionProcessor,
 								  IStructuredPartitionTypes.UNKNOWN_PARTITION);
 		}

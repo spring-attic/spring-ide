@@ -1,14 +1,20 @@
 package org.springframework.ide.eclipse.beans.ui.editor;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.ui.ISharedImages;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorPart;
@@ -28,10 +34,13 @@ import org.eclipse.wst.xml.ui.internal.editor.XMLEditorPluginImages;
 public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 										   implements IPropertyChangeListener {
 	private IEditorPart editor;
-	private IType[] cachedClasses;
-	
+
 	public BeansContentAssistProcessor(IEditorPart editor) {
 		this.editor = editor;
+	}
+
+	public char[] getCompletionProposalAutoActivationCharacters() {
+		return new char[] { '.' };
 	}
 
 	protected void addAttributeValueProposals(
@@ -39,7 +48,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 		IDOMNode node = (IDOMNode) request.getNode();
 
 		// Find the attribute region and name for which this position should
-		//have a value proposed
+		// have a value proposed
 		IStructuredDocumentRegion open =
 									   node.getFirstStructuredDocumentRegion();
 		ITextRegionList openRegions = open.getRegions();
@@ -68,9 +77,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 		// the name region is REQUIRED to do anything useful
 		if (nameRegion != null) {
 			String attributeName = open.getText(nameRegion);
-			String proposedInfo = "info";
-			
-			if ("action".equals(node.getNodeName())) {
+			if ("bean".equals(node.getNodeName())) {
 				if ("pluginId".equals(attributeName)) {
 
 					// get all registered plugin ids
@@ -86,53 +93,84 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 								 "\"", request.getReplacementBeginPosition(),
 								 request.getReplacementLength(),
 								 pluginId.length() + 1, image, "\""+ pluginId +
-								 "\"", null, proposedInfo,
+								 "\"", null, null,
 								 XMLRelevanceConstants.R_XML_ATTRIBUTE_VALUE);
 							request.addProposal(proposal);
 						}
 					}
 				} else if ("class".equals(attributeName)) {
-
-					// get all classes
-					if (editor.getEditorInput() instanceof IFileEditorInput) {
-						IFile file = ((IFileEditorInput) editor.getEditorInput()).getFile();
-						IJavaProject project = JavaCore.create(file.getProject());
-
-						try {
-							IType cheatsheetInterface = project.findType(
-									"org.eclipse.jface.action.IAction");
-							if (cheatsheetInterface != null) {
-								ITypeHierarchy hier = cheatsheetInterface.newTypeHierarchy(project, new NullProgressMonitor());
-								IType[] classes = hier.getAllSubtypes(cheatsheetInterface);
-							
-								if (classes.length == 0) {
-									// nothing has changed, use cached instance instead
-									classes = cachedClasses;
-								} else {
-									cachedClasses = classes;
-								}
-								for (int j = 0; j < classes.length; j++) {
-									IType type = classes[j];
-									if (!Flags.isAbstract(type.getFlags())) {
-										String name = type.getFullyQualifiedName();
-										if (name.startsWith(matchString)) {
-											CustomCompletionProposal proposal = new CustomCompletionProposal("\"" + name + "\"", //$NON-NLS-2$//$NON-NLS-1$
-													request.getReplacementBeginPosition(), request.getReplacementLength(), name.length() + 1, XMLEditorPluginImageHelper.getInstance().getImage(XMLEditorPluginImages.IMG_OBJ_ATTRIBUTE),
-													"\"" + name + "\"", null, proposedInfo, XMLRelevanceConstants.R_XML_ATTRIBUTE_VALUE);
-											request.addProposal(proposal);
-										}
-									}
-								}
-							}
-						} catch (CoreException e) {
-							BeansEditorPlugin.log(e);
-						}
-					}
+					addClassAttributeValueProposals(request, matchString);
 				}
 			}
 			if (request == null) {
 				super.addAttributeValueProposals(request);
 			}
 		}
+	}
+
+	private void addClassAttributeValueProposals(ContentAssistRequest request,
+												 String prefix) {
+		if (prefix.length() > 0) {
+			Map types = getJavaTypes(prefix);
+			Iterator names = types.keySet().iterator();
+			while (names.hasNext()) {
+				String name = (String) names.next();
+				CustomCompletionProposal proposal =
+							 new CustomCompletionProposal(name,
+							 request.getReplacementBeginPosition() + 1,
+							 request.getReplacementLength() - 2, name.length(),
+							 (Image) types.get(name), name, null, null,
+							 XMLRelevanceConstants.R_XML_ATTRIBUTE_VALUE);
+				request.addProposal(proposal);
+			}
+		} else {
+			setErrorMessage("Prefix too short");
+			
+		}
+	}
+
+	private Map getJavaTypes(String prefix) {
+		Map types = new HashMap();
+		if (editor.getEditorInput() instanceof IFileEditorInput) {
+			try {
+				IFile file = ((IFileEditorInput)
+											editor.getEditorInput()).getFile();
+				IJavaProject project = JavaCore.create(file.getProject());
+						IJavaElement[] packages = project.getPackageFragments();
+						for (int j = 0; j < packages.length; j++) {
+							IPackageFragment pkg = (IPackageFragment) packages[j];
+							if (pkg.exists()) {
+								String name = pkg.getElementName();
+								if (name.startsWith(prefix)) {
+//									if (name.length() > 0  && !types.containsKey(name)) {
+//									types.put(name, JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_PACKAGE));
+//									}
+								IJavaElement[] children = pkg.getChildren();
+								for (int k = 0; k < children.length; k++) {
+									IJavaElement element = children[k];
+									if (element.exists()) {
+										String n = "";
+										Image image = null;
+										if (element instanceof ICompilationUnit) {
+ 											n = ((ICompilationUnit) element).getTypes()[0].getFullyQualifiedName();
+ 											image = JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_CUNIT);
+										} else if (element instanceof IClassFile) {
+ 											n = ((IClassFile) element).getType().getFullyQualifiedName();
+ 											image = JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_CLASS);
+										}
+								if (n.startsWith(prefix) &&
+													!types.containsKey(n)) {
+									types.put(n, image);
+								}
+									}
+								}
+								}
+							}
+				}
+			} catch (JavaModelException e) {
+				// nothing to do
+			}
+		}
+		return types;
 	}
 }

@@ -68,7 +68,7 @@ public class BeansJFaceNodeAdapterFactory extends JFaceNodeAdapterFactory {
 
 
 	public INodeAdapterFactory copy() {
-		return new BeansJFaceNodeAdapterFactory(adapterKey,
-												shouldRegisterAdapter);
+		return new BeansJFaceNodeAdapterFactory(this.adapterKey,
+												this.shouldRegisterAdapter);
 	}
 }

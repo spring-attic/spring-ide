@@ -22,10 +22,12 @@
       <import plugin="org.eclipse.ui.editors"/>
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
       <import plugin="org.eclipse.jdt.core" />
+      <import plugin="org.eclipse.jdt.ui" />
       <import plugin="org.eclipse.wst.sse.core" />
       <import plugin="org.eclipse.wst.sse.ui" />
       <import plugin="org.eclipse.wst.xml.core" />
       <import plugin="org.eclipse.wst.xml.ui" />
+      <import plugin="org.springframework.ide.eclipse.beans.ui" />
    </requires>
 
 	<extension point="org.eclipse.core.runtime.contentTypes">
@@ -33,6 +35,7 @@
 			name="%contentTypeName"
 			base-type="org.eclipse.core.runtime.xml"
 			file-extensions="xml"
+			priority="low"
 			default-charset="UTF-8">
 			<describer
 				class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber">
@@ -43,7 +46,7 @@
 
 	<extension point="org.eclipse.wst.sse.core.modelHandler">
 		<modelHandler
-			id="org.springframework.ide.eclipse.beans.ui.editor.beansConfig"
+			id="org.eclipse.wst.sse.core.handler.beansConfig"
 			default="false"
 			associatedContentTypeId="org.springframework.ide.eclipse.beans.ui.editor.beansConfig"
 			class="org.springframework.ide.eclipse.beans.ui.editor.BeansModelHandler">
