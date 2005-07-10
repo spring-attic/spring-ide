@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.ISharedImages;
@@ -32,7 +33,7 @@ import org.eclipse.wst.xml.ui.internal.editor.XMLEditorPluginImageHelper;
 import org.eclipse.wst.xml.ui.internal.editor.XMLEditorPluginImages;
 
 public class BeansContentAssistProcessor extends XMLContentAssistProcessor
-										   implements IPropertyChangeListener {
+		implements IPropertyChangeListener {
 	private IEditorPart editor;
 
 	public BeansContentAssistProcessor(IEditorPart editor) {
@@ -43,14 +44,13 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 		return new char[] { '.' };
 	}
 
-	protected void addAttributeValueProposals(
-								   ContentAssistRequest request) {
+	protected void addAttributeValueProposals(ContentAssistRequest request) {
 		IDOMNode node = (IDOMNode) request.getNode();
 
 		// Find the attribute region and name for which this position should
 		// have a value proposed
-		IStructuredDocumentRegion open =
-									   node.getFirstStructuredDocumentRegion();
+		IStructuredDocumentRegion open = node
+				.getFirstStructuredDocumentRegion();
 		ITextRegionList openRegions = open.getRegions();
 		int i = openRegions.indexOf(request.getRegion());
 		if (i < 0) {
@@ -59,8 +59,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 		ITextRegion nameRegion = null;
 		while (i >= 0) {
 			nameRegion = openRegions.get(i--);
-			if (nameRegion.getType() ==
-									 DOMRegionContext.XML_TAG_ATTRIBUTE_NAME) {
+			if (nameRegion.getType() == DOMRegionContext.XML_TAG_ATTRIBUTE_NAME) {
 				break;
 			}
 		}
@@ -69,8 +68,8 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 		if (matchString == null) {
 			matchString = "";
 		}
-		if (matchString.length() > 0 && (matchString.startsWith("\"") ||
-												matchString.startsWith("'"))) {
+		if (matchString.length() > 0
+				&& (matchString.startsWith("\"") || matchString.startsWith("'"))) {
 			matchString = matchString.substring(1);
 		}
 
@@ -81,20 +80,20 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 				if ("pluginId".equals(attributeName)) {
 
 					// get all registered plugin ids
-					String[] ns = Platform.getExtensionRegistry().
-															   getNamespaces();
-					Image image = XMLEditorPluginImageHelper.getInstance().
-							 getImage(XMLEditorPluginImages.IMG_OBJ_ATTRIBUTE);
+					String[] ns = Platform.getExtensionRegistry()
+							.getNamespaces();
+					Image image = XMLEditorPluginImageHelper.getInstance()
+							.getImage(XMLEditorPluginImages.IMG_OBJ_ATTRIBUTE);
 					for (int j = 0; j < ns.length; j++) {
 						String pluginId = ns[j];
 						if (pluginId.startsWith(matchString)) {
-							CustomCompletionProposal proposal =
-								 new CustomCompletionProposal("\"" + pluginId +
-								 "\"", request.getReplacementBeginPosition(),
-								 request.getReplacementLength(),
-								 pluginId.length() + 1, image, "\""+ pluginId +
-								 "\"", null, null,
-								 XMLRelevanceConstants.R_XML_ATTRIBUTE_VALUE);
+							CustomCompletionProposal proposal = new CustomCompletionProposal(
+									"\"" + pluginId + "\"", request
+											.getReplacementBeginPosition(),
+									request.getReplacementLength(), pluginId
+											.length() + 1, image, "\""
+											+ pluginId + "\"", null, null,
+									XMLRelevanceConstants.R_XML_ATTRIBUTE_VALUE);
 							request.addProposal(proposal);
 						}
 					}
@@ -109,23 +108,25 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 	}
 
 	private void addClassAttributeValueProposals(ContentAssistRequest request,
-												 String prefix) {
+			String prefix) {
 		if (prefix.length() > 0) {
 			Map types = getJavaTypes(prefix);
 			Iterator names = types.keySet().iterator();
 			while (names.hasNext()) {
 				String name = (String) names.next();
-				CustomCompletionProposal proposal =
-							 new CustomCompletionProposal(name,
-							 request.getReplacementBeginPosition() + 1,
-							 request.getReplacementLength() - 2, name.length(),
-							 (Image) types.get(name), name, null, null,
-							 XMLRelevanceConstants.R_XML_ATTRIBUTE_VALUE);
+				TypeProposal typePropsal = (TypeProposal) types.get(name);
+				CustomCompletionProposal proposal = new CustomCompletionProposal(
+						typePropsal.getReplacement(), request
+								.getReplacementBeginPosition() + 1, request
+								.getReplacementLength() - 2, typePropsal
+								.getReplacement().length(), typePropsal
+								.getImage(), typePropsal.getName(), null, null,
+						typePropsal.getRelevence());
 				request.addProposal(proposal);
 			}
 		} else {
 			setErrorMessage("Prefix too short");
-			
+
 		}
 	}
 
@@ -133,44 +134,159 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 		Map types = new HashMap();
 		if (editor.getEditorInput() instanceof IFileEditorInput) {
 			try {
-				IFile file = ((IFileEditorInput)
-											editor.getEditorInput()).getFile();
+				IFile file = ((IFileEditorInput) editor.getEditorInput())
+						.getFile();
 				IJavaProject project = JavaCore.create(file.getProject());
-						IJavaElement[] packages = project.getPackageFragments();
-						for (int j = 0; j < packages.length; j++) {
-							IPackageFragment pkg = (IPackageFragment) packages[j];
-							if (pkg.exists()) {
-								String name = pkg.getElementName();
-								if (name.startsWith(prefix)) {
-//									if (name.length() > 0  && !types.containsKey(name)) {
-//									types.put(name, JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_PACKAGE));
-//									}
+				IJavaElement[] packages = project.getPackageFragments();
+				for (int j = 0; j < packages.length; j++) {
+					IPackageFragment pkg = (IPackageFragment) packages[j];
+					if (pkg.exists()) {
+						String name = pkg.getElementName();
+						String prefixTemp = prefix;
+						// handle case where package is last in the structure
+						if (prefix.endsWith(".")) {
+							prefixTemp = prefix.substring(0,
+									prefix.length() - 1);
+						}
+						if (name.startsWith(prefixTemp)) {
+							if (name.startsWith(prefix) && name.length() > 0
+									&& !types.containsKey(name)) {
+								TypeProposal proposal = new TypeProposal(name,
+										name + ".",
+										JavaUI.getSharedImages().getImage(
+												ISharedImages.IMG_OBJS_PACKAGE), TypeProposal.PACKAGE_RELEVANCE);
+								types.put(proposal.getName(), proposal);
+							}
+
+							if (prefix.endsWith(".")) {
 								IJavaElement[] children = pkg.getChildren();
 								for (int k = 0; k < children.length; k++) {
 									IJavaElement element = children[k];
 									if (element.exists()) {
 										String n = "";
+										String r = "";
+										String p = "";
 										Image image = null;
 										if (element instanceof ICompilationUnit) {
- 											n = ((ICompilationUnit) element).getTypes()[0].getFullyQualifiedName();
- 											image = JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_CUNIT);
+											IType type = ((ICompilationUnit) element)
+													.getTypes()[0];
+											p = this.extractPackageName(type);
+											n = type.getTypeQualifiedName()
+													+ " - " + p;
+											r = type.getFullyQualifiedName();
+											image = JavaUI
+													.getSharedImages()
+													.getImage(
+															ISharedImages.IMG_OBJS_CUNIT);
 										} else if (element instanceof IClassFile) {
- 											n = ((IClassFile) element).getType().getFullyQualifiedName();
- 											image = JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_CLASS);
+											IType type = ((IClassFile) element)
+													.getType();
+											p = this.extractPackageName(type);
+											n = type.getTypeQualifiedName()
+													+ " - " + p;
+											r = type.getFullyQualifiedName();
+											image = JavaUI
+													.getSharedImages()
+													.getImage(
+															ISharedImages.IMG_OBJS_CLASS);
 										}
-								if (n.startsWith(prefix) &&
-													!types.containsKey(n)) {
-									types.put(n, image);
-								}
+										if (!types.containsKey(n) && prefixTemp.equals(p)) {
+											TypeProposal proposal = new TypeProposal(
+													n, r, image, TypeProposal.TYPE_RELEVANCE);
+											types.put(n, proposal);
+										}
 									}
 								}
-								}
 							}
+						}
+					}
 				}
 			} catch (JavaModelException e) {
 				// nothing to do
 			}
 		}
 		return types;
+	}
+
+	protected class TypeProposal {
+
+		public static final int PACKAGE_RELEVANCE = 10;
+		
+		public static final int TYPE_RELEVANCE = 20;
+		
+		private String name;
+
+		private String replacement;
+
+		private Image image;
+		
+		private int relevence;
+
+		public TypeProposal(String name, Image image, int type) {
+			this.name = name;
+			this.replacement = name;
+			this.image = image;
+			this.relevence = type;
+		}
+
+		public TypeProposal(String name, String replacement, Image image, int type) {
+			this.name = name;
+			this.replacement = replacement;
+			this.image = image;
+			this.relevence = type;
+		}
+
+		public Image getImage() {
+			return image;
+		}
+
+		public void setImage(Image image) {
+			this.image = image;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getReplacement() {
+			return replacement;
+		}
+
+		public void setReplacement(String replacement) {
+			this.replacement = replacement;
+		}
+
+		public boolean equals(Object obj) {
+			if (obj instanceof TypeProposal) {
+				TypeProposal secondObj = (TypeProposal) obj;
+				return this.name.equals(secondObj.getName());
+			}
+			return false;
+		}
+
+		public int hashCode() {
+			return this.name.hashCode();
+		}
+
+		public int getRelevence() {
+			return relevence;
+		}
+
+		public void setRelevence(int relevence) {
+			this.relevence = relevence;
+		}
+	}
+
+	private String extractPackageName(IType type) {
+		String packageName = type.getFullyQualifiedName();
+		int index = packageName.lastIndexOf(".");
+		if (index >= 0) {
+			packageName = packageName.substring(0, index);
+		}
+		return packageName;
 	}
 }
