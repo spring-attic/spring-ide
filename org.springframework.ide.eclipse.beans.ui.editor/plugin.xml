@@ -67,5 +67,14 @@
 			class="org.springframework.ide.eclipse.beans.ui.editor.BeansStructuredTextViewerConfiguration"/>
 		<!-- nothing special is supplied for other configurations, so nothing else needs to be declared -->
 	</extension>
+ <extension
+       point="org.eclipse.wst.xml.core.catalogContributions">
+    <catalogContribution>
+       <public
+             publicId="-//SPRING//DTD BEAN//EN"
+             uri="dtds/spring-beans.dtd"
+             webURL="http://www.springframework.org/dtd/spring-beans.dtd"/>
+    </catalogContribution>
+ </extension>
 
 </plugin>
