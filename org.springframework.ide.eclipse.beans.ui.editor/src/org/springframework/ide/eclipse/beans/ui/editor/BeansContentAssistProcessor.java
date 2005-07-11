@@ -1,16 +1,19 @@
 package org.springframework.ide.eclipse.beans.ui.editor;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -36,214 +39,230 @@ import org.eclipse.wst.xml.ui.internal.contentassist.XMLRelevanceConstants;
 import org.eclipse.wst.xml.ui.internal.editor.XMLEditorPluginImageHelper;
 import org.eclipse.wst.xml.ui.internal.editor.XMLEditorPluginImages;
 
-public class BeansContentAssistProcessor extends XMLContentAssistProcessor
-										   implements IPropertyChangeListener {
-	private IEditorPart editor;
+public class BeansContentAssistProcessor
+        extends XMLContentAssistProcessor implements IPropertyChangeListener {
 
-	public BeansContentAssistProcessor(IEditorPart editor) {
-		this.editor = editor;
-	}
+    final class TypeSearchRequestor
+            extends SearchRequestor {
 
-	public char[] getCompletionProposalAutoActivationCharacters() {
-		return new char[] { '.' };
-	}
+        public static final int CLASS_RELEVANCE = 90;
 
-	protected void addAttributeValueProposals(
-								   ContentAssistRequest request) {
-		IDOMNode node = (IDOMNode) request.getNode();
+        public static final int INTERFACE_RELEVANCE = 90;
 
-		// Find the attribute region and name for which this position should
-		// have a value proposed
-		IStructuredDocumentRegion open =
-									   node.getFirstStructuredDocumentRegion();
-		ITextRegionList openRegions = open.getRegions();
-		int i = openRegions.indexOf(request.getRegion());
-		if (i < 0) {
-			return;
-		}
-		ITextRegion nameRegion = null;
-		while (i >= 0) {
-			nameRegion = openRegions.get(i--);
-			if (nameRegion.getType() ==
-									 DOMRegionContext.XML_TAG_ATTRIBUTE_NAME) {
-				break;
-			}
-		}
+        public static final int PACKAGE_RELEVANCE = 10;
 
-		String matchString = request.getMatchString();
-		if (matchString == null) {
-			matchString = "";
-		}
-		if (matchString.length() > 0 && (matchString.startsWith("\"") ||
-												matchString.startsWith("'"))) {
-			matchString = matchString.substring(1);
-		}
+        private ContentAssistRequest request;
 
-		// the name region is REQUIRED to do anything useful
-		if (nameRegion != null) {
-			String attributeName = open.getText(nameRegion);
-			if ("bean".equals(node.getNodeName())) {
-				if ("pluginId".equals(attributeName)) {
+        private Map types;
 
-					// get all registered plugin ids
-					String[] ns = Platform.getExtensionRegistry().
-															   getNamespaces();
-					Image image = XMLEditorPluginImageHelper.getInstance().
-							 getImage(XMLEditorPluginImages.IMG_OBJ_ATTRIBUTE);
-					for (int j = 0; j < ns.length; j++) {
-						String pluginId = ns[j];
-						if (pluginId.startsWith(matchString)) {
-							CustomCompletionProposal proposal =
-								 new CustomCompletionProposal("\"" + pluginId +
-								 "\"", request.getReplacementBeginPosition(),
-								 request.getReplacementLength(),
-								 pluginId.length() + 1, image, "\""+ pluginId +
-								 "\"", null, null,
-								 XMLRelevanceConstants.R_XML_ATTRIBUTE_VALUE);
-							request.addProposal(proposal);
-						}
-					}
-				} else if ("class".equals(attributeName)) {
-					addClassAttributeValueProposals(request, matchString);
-				}
-			}
-			if (request == null) {
-				super.addAttributeValueProposals(request);
-			}
-		}
-	}
+        private boolean invertOrder = false;
 
-//	private void addClassAttributeValueProposals(ContentAssistRequest request,
-//												 String prefix) {
-//		if (prefix.length() > 0) {
-//			Map types = getJavaTypes(prefix);
-//			Iterator names = types.keySet().iterator();
-//			while (names.hasNext()) {
-//				String name = (String) names.next();
-//				CustomCompletionProposal proposal =
-//							 new CustomCompletionProposal(name,
-//							 request.getReplacementBeginPosition() + 1,
-//							 request.getReplacementLength() - 2, name.length(),
-//							 (Image) types.get(name), name, null, null,
-//							 XMLRelevanceConstants.R_XML_ATTRIBUTE_VALUE);
-//				request.addProposal(proposal);
-//			}
-//		} else {
-//			setErrorMessage("Prefix too short");
-//			
-//		}
-//	}
+        public TypeSearchRequestor(ContentAssistRequest request, boolean invertOrder) {
+            this.request = request;
+            this.types = new HashMap();
+            this.invertOrder = invertOrder;
+        }
 
-	private void addClassAttributeValueProposals(ContentAssistRequest request,
-												 String prefix) {
-		if (editor.getEditorInput() instanceof IFileEditorInput) {
-			IFile file = ((IFileEditorInput)
-											editor.getEditorInput()).getFile();
-			IJavaProject project = JavaCore.create(file.getProject());
-			IJavaSearchScope scope = SearchEngine.createJavaSearchScope(
-					new IJavaElement[] { project }, true);
-			SearchPattern pattern = SearchPattern.createPattern(prefix,
-					IJavaSearchConstants.TYPE,
-					IJavaSearchConstants.DECLARATIONS,
-					SearchPattern.R_PREFIX_MATCH);
-			TypeSearchRequestor requestor = new TypeSearchRequestor();
-			SearchEngine engine = new SearchEngine();
-			try {
-				engine.search(pattern, new SearchParticipant[] {
-						SearchEngine.getDefaultSearchParticipant() },
-						scope, requestor, null);
-				ISharedImages images = JavaUI.getSharedImages();
-				Map types = requestor.getTypes();
-				Iterator iter = types.keySet().iterator();
-				while (iter.hasNext()) {
-					String name = (String) iter.next();
-					IType type = (IType) types.get(name);
-					String displayText = name + " - " + type.getPackageFragment().getElementName();
-					String replaceText = type.getFullyQualifiedName();
-					Image image = null;
-					if (type.getElementType() == IJavaElement.COMPILATION_UNIT) {
-						image = images.getImage(ISharedImages.IMG_OBJS_CUNIT);
-					} else {
-	 					image = JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_CLASS);
-					}
-					CustomCompletionProposal proposal =
-							 new CustomCompletionProposal(replaceText,
-							 request.getReplacementBeginPosition() + 1,
-							 request.getReplacementLength() - 2, replaceText.length(),
-							 image, displayText, null, null,
-							 XMLRelevanceConstants.R_XML_ATTRIBUTE_VALUE);
-					request.addProposal(proposal);
-				}
-			} catch (CoreException e) {
-				// nothing to do
-			}
-		}
-	}
+        public void acceptSearchMatch(SearchMatch match) throws CoreException {
+            if (match.getElement() instanceof IType) {
+                IType type = (IType) match.getElement();
+                if (type.exists()) {
+                    this.createTypeProposal(type);
+                }
+            }
+            else if (match.getElement() instanceof IPackageFragment) {
+                IPackageFragment packageFragment = (IPackageFragment) match.getElement();
+                if (packageFragment.exists()) {
+                    this.createPackageProposal(packageFragment);
+                }
+            }
+        }
 
-//	private Map getJavaTypes(String prefix) {
-//		Map types = new HashMap();
-//		if (editor.getEditorInput() instanceof IFileEditorInput) {
-//			try {
-//				IFile file = ((IFileEditorInput)
-//											editor.getEditorInput()).getFile();
-//				IJavaProject project = JavaCore.create(file.getProject());
-//						IJavaElement[] packages = project.getPackageFragments();
-//						for (int j = 0; j < packages.length; j++) {
-//							IPackageFragment pkg = (IPackageFragment) packages[j];
-//							if (pkg.exists()) {
-//								String name = pkg.getElementName();
-//								if (name.startsWith(prefix)) {
-////									if (name.length() > 0  && !types.containsKey(name)) {
-////									types.put(name, JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_PACKAGE));
-////									}
-//								IJavaElement[] children = pkg.getChildren();
-//								for (int k = 0; k < children.length; k++) {
-//									IJavaElement element = children[k];
-//									if (element.exists()) {
-//										String n = "";
-//										Image image = null;
-//										if (element instanceof ICompilationUnit) {
-// 											n = ((ICompilationUnit) element).getTypes()[0].getFullyQualifiedName();
-// 											image = JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_CUNIT);
-//										} else if (element instanceof IClassFile) {
-// 											n = ((IClassFile) element).getType().getFullyQualifiedName();
-// 											image = JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_CLASS);
-//										}
-//								if (n.startsWith(prefix) &&
-//													!types.containsKey(n)) {
-//									types.put(n, image);
-//								}
-//									}
-//								}
-//								}
-//							}
-//				}
-//			} catch (JavaModelException e) {
-//				// nothing to do
-//			}
-//		}
-//		return types;
-//	}
+        private void createPackageProposal(IPackageFragment pkg) {
+            String displayText = pkg.getElementName();
+            if (!this.types.containsKey(displayText)) {
+                Image image = JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_PACKAGE);
+                int relevance = TypeSearchRequestor.PACKAGE_RELEVANCE;
+                if (this.invertOrder) {
+                    relevance = TypeSearchRequestor.PACKAGE_RELEVANCE * -1;
+                }
 
-	final class TypeSearchRequestor extends SearchRequestor {
+                CustomCompletionProposal proposal = new CustomCompletionProposal(displayText,
+                        request.getReplacementBeginPosition() + 1,
+                        request.getReplacementLength() - 2, displayText.length(), image,
+                        displayText, null, null, relevance);
+                this.request.addProposal(proposal);
+                this.types.put(displayText, proposal);
+            }
+        }
 
-		private Map types;
+        private void createTypeProposal(IType type) {
+            try {
+                String displayText = type.getElementName() + " - "
+                        + type.getPackageFragment().getElementName();
+                if (!this.types.containsKey(displayText)) {
+                    String replaceText = type.getFullyQualifiedName();
+                    Image image = null;
+                    int relevance = -1;
+                    if (type.isInterface()) {
+                        image = JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_INTERFACE);
+                        relevance = TypeSearchRequestor.INTERFACE_RELEVANCE;
+                        if (this.invertOrder) {
+                            relevance = TypeSearchRequestor.INTERFACE_RELEVANCE * -1;
+                        }
+                    }
+                    else {
+                        image = JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_CLASS);
+                        relevance = TypeSearchRequestor.CLASS_RELEVANCE;
+                        if (this.invertOrder) {
+                            relevance = TypeSearchRequestor.CLASS_RELEVANCE * -1;
+                        }
+                    }
+                    
+                    CustomCompletionProposal proposal = new CustomCompletionProposal(replaceText,
+                            request.getReplacementBeginPosition() + 1, request
+                                    .getReplacementLength() - 2, replaceText.length(), image,
+                            displayText, null, null, relevance);
+                    this.request.addProposal(proposal);
+                    this.types.put(displayText, proposal);
+                }
+            }
+            catch (JavaModelException e) {
 
-		public TypeSearchRequestor() {
-			types = new HashMap();
-		}
+            }
+        }
+    }
 
-		public void acceptSearchMatch(SearchMatch match) throws CoreException {
-			if (match.getElement() instanceof IType) {
-				IType type = (IType) match.getElement(); 
-				if (type.exists()) {
-					types.put(type.getElementName(), type);
-				}
-			}
-		}
+    private IEditorPart editor;
 
-		public Map getTypes() {
-			return types;
-		}
-	}
+    public BeansContentAssistProcessor(IEditorPart editor) {
+        this.editor = editor;
+    }
+
+    protected void addAttributeValueProposals(ContentAssistRequest request) {
+        IDOMNode node = (IDOMNode) request.getNode();
+
+        // Find the attribute region and name for which this position should
+        // have a value proposed
+        IStructuredDocumentRegion open = node.getFirstStructuredDocumentRegion();
+        ITextRegionList openRegions = open.getRegions();
+        int i = openRegions.indexOf(request.getRegion());
+        if (i < 0) {
+            return;
+        }
+        ITextRegion nameRegion = null;
+        while (i >= 0) {
+            nameRegion = openRegions.get(i--);
+            if (nameRegion.getType() == DOMRegionContext.XML_TAG_ATTRIBUTE_NAME) {
+                break;
+            }
+        }
+
+        String matchString = request.getMatchString();
+        if (matchString == null) {
+            matchString = "";
+        }
+        if (matchString.length() > 0
+                && (matchString.startsWith("\"") || matchString.startsWith("'"))) {
+            matchString = matchString.substring(1);
+        }
+
+        // the name region is REQUIRED to do anything useful
+        if (nameRegion != null) {
+            String attributeName = open.getText(nameRegion);
+            if ("bean".equals(node.getNodeName())) {
+                if ("pluginId".equals(attributeName)) {
+
+                    // get all registered plugin ids
+                    String[] ns = Platform.getExtensionRegistry().getNamespaces();
+                    Image image = XMLEditorPluginImageHelper.getInstance().getImage(
+                            XMLEditorPluginImages.IMG_OBJ_ATTRIBUTE);
+                    for (int j = 0; j < ns.length; j++) {
+                        String pluginId = ns[j];
+                        if (pluginId.startsWith(matchString)) {
+                            CustomCompletionProposal proposal = new CustomCompletionProposal("\""
+                                    + pluginId + "\"", request.getReplacementBeginPosition(),
+                                    request.getReplacementLength(), pluginId.length() + 1, image,
+                                    "\"" + pluginId + "\"", null, null,
+                                    XMLRelevanceConstants.R_XML_ATTRIBUTE_VALUE);
+                            request.addProposal(proposal);
+                        }
+                    }
+                }
+                else if ("class".equals(attributeName)) {
+                    addClassAttributeValueProposals(request, matchString);
+                }
+            }
+            if (request != null && request.getProposals() != null
+                    && request.getProposals().size() == 0) {
+                super.addAttributeValueProposals(request);
+            }
+        }
+    }
+
+    private void addClassAttributeValueProposals(ContentAssistRequest request, String prefix) {
+        if (editor.getEditorInput() instanceof IFileEditorInput) {
+            if (prefix != null && prefix.length() > 0) {
+                String prefixTemp = prefix;
+                if (!prefixTemp.endsWith("*")) {
+                    prefixTemp = prefixTemp + "*";
+                }
+                IFile file = ((IFileEditorInput) editor.getEditorInput()).getFile();
+                IJavaProject project = JavaCore.create(file.getProject());
+                IJavaSearchScope scope = SearchEngine.createJavaSearchScope(
+                        new IJavaElement[] { project }, true);
+                SearchPattern packagePattern = SearchPattern.createPattern(prefixTemp,
+                        IJavaSearchConstants.PACKAGE, IJavaSearchConstants.DECLARATIONS,
+                        SearchPattern.R_PATTERN_MATCH);
+                SearchPattern typePattern = SearchPattern.createPattern(prefixTemp,
+                        IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS,
+                        SearchPattern.R_PATTERN_MATCH);
+                SearchPattern pattern = SearchPattern.createOrPattern(packagePattern, typePattern);
+                TypeSearchRequestor requestor = new TypeSearchRequestor(request, this
+                        .isUpperCaseSearch(prefixTemp));
+                SearchEngine engine = new SearchEngine();
+
+                try {
+                    engine.search(pattern, new SearchParticipant[] { SearchEngine
+                            .getDefaultSearchParticipant() }, scope, requestor, this
+                            .getProgressMonitor());
+                }
+                catch (CoreException e) {
+                    // nothing to do
+                }
+            }
+        }
+        else {
+            setErrorMessage("Prefix too short");
+        }
+    }
+
+    public char[] getCompletionProposalAutoActivationCharacters() {
+        return new char[] { '.' };
+    }
+
+    private IProgressMonitor getProgressMonitor() {
+        if (this.editor != null
+                && this.editor.getEditorSite() != null
+                && this.editor.getEditorSite().getActionBars() != null
+                && this.editor.getEditorSite().getActionBars().getStatusLineManager() != null
+                && this.editor.getEditorSite().getActionBars().getStatusLineManager()
+                        .getProgressMonitor() != null) {
+            return this.editor.getEditorSite().getActionBars().getStatusLineManager()
+                    .getProgressMonitor();
+        }
+        else {
+            return new NullProgressMonitor();
+        }
+    }
+
+    private boolean isUpperCaseSearch(String prefix) {
+        if (prefix != null) {
+            char c = prefix.charAt(0);
+            return !Character.isUpperCase(c);
+        }
+        else {
+            return false;
+        }
+    }
 }
