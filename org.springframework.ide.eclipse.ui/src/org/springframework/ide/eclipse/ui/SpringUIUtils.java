@@ -19,6 +19,7 @@ package org.springframework.ide.eclipse.ui;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
@@ -41,14 +42,11 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -141,6 +139,20 @@ public class SpringUIUtils {
         }
         return null;
     }    
+
+    /**
+     * Returns the <code>ItextEditor</code> instance for given
+     * <code>IEditorPart</code> or <code>null</code> for any non text editor.
+     */
+    public static final ITextEditor getTextEditor(IEditorPart part) {
+		if (part instanceof ITextEditor) {
+			return (ITextEditor) part;
+		} else if (part instanceof IAdaptable) {
+			return (ITextEditor)
+							 ((IAdaptable) part).getAdapter(ITextEditor.class);
+		}
+		return null;
+    }
 
 	/**
 	 * Opens given file in associated editor and go to specified line (if > 0).
