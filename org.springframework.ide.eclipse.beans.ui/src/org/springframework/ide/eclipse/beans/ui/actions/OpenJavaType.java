@@ -54,13 +54,13 @@ public class OpenJavaType extends Action implements IEditorActionDelegate,
 		// unused
 	}
 
-	public void setActiveEditor(IAction action, IEditorPart editor) {
-		if (editor instanceof ITextEditor) {
-			this.editor = (ITextEditor) editor;
-			this.file = BeansUIUtils.getConfigFile(editor);
+	public void setActiveEditor(IAction action, IEditorPart part) {
+		editor = SpringUIUtils.getTextEditor(part);
+		if (editor != null) {
+			file = BeansUIUtils.getConfigFile(editor);
 		} else {
-			this.editor = null;
-			this.file = null;
+			editor = null;
+			file = null;
 		}
 
 		// Disable action if not a Spring config file is currently edited 
