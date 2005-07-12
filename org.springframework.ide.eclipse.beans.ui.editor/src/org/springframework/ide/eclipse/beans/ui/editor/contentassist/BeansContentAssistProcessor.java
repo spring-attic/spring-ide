@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2004 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ 
+
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
 import java.util.HashMap;
@@ -7,7 +23,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -24,15 +39,12 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
-import org.eclipse.jdt.internal.ui.JavaElementAdapterFactory;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.refactoring.contentassist.CUPositionCompletionProcessor;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorPart;
@@ -40,17 +52,13 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegionList;
-import org.eclipse.wst.sse.core.internal.util.StringUtils;
 import org.eclipse.wst.sse.ui.internal.contentassist.CustomCompletionProposal;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.core.internal.regions.DOMRegionContext;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
-import org.eclipse.wst.xml.ui.internal.contentassist.XMLRelevanceConstants;
-import org.eclipse.wst.xml.ui.internal.editor.XMLEditorPluginImageHelper;
-import org.eclipse.wst.xml.ui.internal.editor.XMLEditorPluginImages;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springframework.ide.eclipse.core.StringUtils;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
@@ -91,12 +99,15 @@ public class BeansContentAssistProcessor
             try {
                 String[] parameterNames = method.getParameterNames();
                 String[] parameterTypes = this.getParameterTypes(method);
-                String displayText = method.getElementName() + "(" + parameterTypes[0] + " "
-                        + parameterNames[0] + ") void - " + method.getParent().getElementName();
-                if (!this.methods.containsKey(method.getSignature())) {
-                    Image image = this.imageProvider.getImageLabel(method, method.getFlags()
-                            | JavaElementImageProvider.SMALL_ICONS);
-                    String replaceText = this.getPropertyNameFromMethodName(method);
+                String key = method.getElementName() + method.getSignature();
+                if (!this.methods.containsKey(key)) {
+                	   String replaceText = this.getPropertyNameFromMethodName(method);
+                	   String displayText = replaceText + " - " +
+                	   			method.getParent().getElementName() + "." +
+                	   			method.getElementName() + "(" +
+                	   			parameterTypes[0] + " " + parameterNames[0] + ")";
+                    Image image = this.imageProvider.getImageLabel(method,
+                    			method.getFlags() | JavaElementImageProvider.SMALL_ICONS);
                     CustomCompletionProposal proposal = new CustomCompletionProposal(replaceText,
                             request.getReplacementBeginPosition() + 1, request
                                     .getReplacementLength() - 2, replaceText.length(), image,
@@ -357,8 +368,8 @@ public class BeansContentAssistProcessor
                                 SearchPattern.R_PATTERN_MATCH);
                         SearchPattern pattern = SearchPattern.createOrPattern(packagePattern,
                                 typePattern);
-                        TypeSearchRequestor requestor = new TypeSearchRequestor(request, this
-                                .isUpperCaseSearch(prefixTemp));
+                        TypeSearchRequestor requestor = new TypeSearchRequestor(request,
+                        							StringUtils.isCapitalized(prefixTemp));
                         SearchEngine engine = new SearchEngine();
 
                         engine.search(pattern, new SearchParticipant[] { SearchEngine
@@ -395,16 +406,6 @@ public class BeansContentAssistProcessor
         }
         else {
             return new NullProgressMonitor();
-        }
-    }
-
-    private boolean isUpperCaseSearch(String prefix) {
-        if (prefix != null) {
-            char c = prefix.charAt(0);
-            return !Character.isUpperCase(c);
-        }
-        else {
-            return false;
         }
     }
 }
