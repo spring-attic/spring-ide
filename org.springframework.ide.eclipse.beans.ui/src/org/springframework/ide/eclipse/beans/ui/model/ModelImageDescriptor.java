@@ -17,7 +17,7 @@
 package org.springframework.ide.eclipse.beans.ui.model;
 
 import org.eclipse.jface.resource.CompositeImageDescriptor;
-import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
@@ -29,7 +29,7 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
  */
 public class ModelImageDescriptor extends CompositeImageDescriptor {
 
-	private ImageDescriptor baseImage;
+	private Image baseImage;
 	private int flags;
 	private Point size;
 	
@@ -40,7 +40,7 @@ public class ModelImageDescriptor extends CompositeImageDescriptor {
 	 * @param node  a node which adornments are to be rendered
 	 * 
 	 */
-	public ModelImageDescriptor(ImageDescriptor baseImage, int flags) {
+	public ModelImageDescriptor(Image baseImage, int flags) {
 		this.baseImage = baseImage;
 		this.flags = flags;
 	}

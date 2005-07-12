@@ -21,7 +21,6 @@ import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.ImageImageDescriptor;
 
 public class ModelLabelDecorator implements ILabelDecorator {
 
@@ -31,8 +30,7 @@ public class ModelLabelDecorator implements ILabelDecorator {
 	public Image decorateImage(Image image, Object element) {
 		int flags = ((INode) element).getFlags();
 		if (flags != 0) {
-			ImageDescriptor descriptor = new ModelImageDescriptor(
-										new ImageImageDescriptor(image), flags);
+			ImageDescriptor descriptor = new ModelImageDescriptor(image, flags);
 			image = BeansUIPlugin.getImageDescriptorRegistry().get(descriptor);
 		}
 		return image;
