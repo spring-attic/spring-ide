@@ -344,7 +344,7 @@ public class BeansConfigValidator {
 					String getterName = "get" + StringUtils.capitalize(
 															tokens.actualName);
 					IMethod getter = Introspector.findMethod(type, getterName,
-															 0, true, false);
+															 0, true, Introspector.STATIC_NO);
 					if (getter == null) {
 						IBeanProperty property = bean.getProperty(propertyName);
 						BeansModelUtils.createProblemMarker(bean,
@@ -667,7 +667,7 @@ public class BeansConfigValidator {
 		} else {
 			try {
 				if (Introspector.findMethod(type, methodName, -1, true,
-											isStatic) == null) {
+											(isStatic ? Introspector.STATIC_YES : Introspector.STATIC_NO)) == null) {
 					BeansModelUtils.createProblemMarker(bean,
 							(isStatic ? "Static" : "Instance") +
 							" factory method '" + methodName +
