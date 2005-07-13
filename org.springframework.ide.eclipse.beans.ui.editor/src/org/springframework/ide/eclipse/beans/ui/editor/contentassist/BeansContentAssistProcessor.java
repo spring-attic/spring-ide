@@ -1,22 +1,22 @@
 /*
  * Copyright 2002-2004 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */ 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -57,57 +57,60 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.core.internal.regions.DOMRegionContext;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
+import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.core.StringUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 public class BeansContentAssistProcessor
         extends XMLContentAssistProcessor implements IPropertyChangeListener {
 
-    final class PropertyNameSearchRequestor
-            extends SearchRequestor {
+    class VoidMethodSearchRequestor
+            extends PropertyNameSearchRequestor {
 
-        public static final int METHOD_RELEVANCE = 10;
-
-        private ContentAssistRequest request;
-
-        private Map methods;
-
-        private JavaElementImageProvider imageProvider;
-
-        public PropertyNameSearchRequestor(ContentAssistRequest request) {
-            this.request = request;
-            this.methods = new HashMap();
-            this.imageProvider = new JavaElementImageProvider();
+        public VoidMethodSearchRequestor(ContentAssistRequest request) {
+            super(request);
         }
 
-        public void acceptSearchMatch(SearchMatch match) throws CoreException {
-            if (match.getElement() instanceof IMethod) {
-                IMethod method = (IMethod) match.getElement();
-                int parameterCount = method.getNumberOfParameters();
-                String returnType = method.getReturnType();
-                if (Flags.isPublic(method.getFlags()) && !Flags.isInterface(method.getFlags())
-                        && parameterCount == 1 && "V".equals(returnType) && method.exists()
-                        && ((IType) method.getParent()).isClass()) {
-                    this.createMethodProposal(method);
-                }
+        public void acceptSearchMatch(IMethod method) throws CoreException {
+            String returnType = method.getReturnType();
+            if (Flags.isPublic(method.getFlags()) && !Flags.isInterface(method.getFlags())
+                    && "V".equals(returnType) && method.exists()
+                    && ((IType) method.getParent()).isClass()) {
+                this.createMethodProposal(method);
             }
         }
 
-        private void createMethodProposal(IMethod method) {
+        protected void createMethodProposal(IMethod method) {
             try {
                 String[] parameterNames = method.getParameterNames();
                 String[] parameterTypes = this.getParameterTypes(method);
                 String key = method.getElementName() + method.getSignature();
                 if (!this.methods.containsKey(key)) {
-                	   String replaceText = this.getPropertyNameFromMethodName(method);
-                	   String displayText = replaceText + " - " +
-                	   			method.getParent().getElementName() + "." +
-                	   			method.getElementName() + "(" +
-                	   			parameterTypes[0] + " " + parameterNames[0] + ")";
-                    Image image = this.imageProvider.getImageLabel(method,
-                    			method.getFlags() | JavaElementImageProvider.SMALL_ICONS);
+                    String replaceText = method.getElementName();
+                    String displayText = null;
+                    if (parameterTypes.length > 0 && parameterNames.length > 0) {
+                        StringBuffer buf = new StringBuffer();
+                        buf.append(replaceText + "(");
+                        for (int i = 0; i < parameterTypes.length; i++) {
+                            buf.append(parameterTypes[0] + " " + parameterNames[0]);
+                            if (i < (parameterTypes.length - 1)) {
+                                buf.append(", ");
+                            }
+                        }
+                        buf.append(") void - ");
+                        buf.append(method.getParent().getElementName());
+                        displayText = buf.toString();
+                    }
+                    else {
+                        displayText = replaceText + " () void - "
+                                + method.getParent().getElementName();
+                    }
+                    Image image = imageProvider.getImageLabel(method, method.getFlags()
+                            | JavaElementImageProvider.SMALL_ICONS);
                     CustomCompletionProposal proposal = new CustomCompletionProposal(replaceText,
                             request.getReplacementBeginPosition() + 1, request
                                     .getReplacementLength() - 2, replaceText.length(), image,
@@ -121,7 +124,60 @@ public class BeansContentAssistProcessor
             }
         }
 
-        private String getPropertyNameFromMethodName(IMethod method) {
+    }
+
+    class PropertyNameSearchRequestor {
+
+        public static final int METHOD_RELEVANCE = 10;
+
+        protected ContentAssistRequest request;
+
+        protected Map methods;
+
+        protected JavaElementImageProvider imageProvider;
+
+        public PropertyNameSearchRequestor(ContentAssistRequest request) {
+            this.request = request;
+            this.methods = new HashMap();
+            this.imageProvider = new JavaElementImageProvider();
+        }
+
+        public void acceptSearchMatch(IMethod method) throws CoreException {
+            int parameterCount = method.getNumberOfParameters();
+            String returnType = method.getReturnType();
+            if (Flags.isPublic(method.getFlags()) && !Flags.isInterface(method.getFlags())
+                    && parameterCount == 1 && "V".equals(returnType) && method.exists()
+                    && ((IType) method.getParent()).isClass()) {
+                this.createMethodProposal(method);
+            }
+        }
+
+        protected void createMethodProposal(IMethod method) {
+            try {
+                String[] parameterNames = method.getParameterNames();
+                String[] parameterTypes = this.getParameterTypes(method);
+                String key = method.getElementName() + method.getSignature();
+                if (!this.methods.containsKey(key)) {
+                    String replaceText = this.getPropertyNameFromMethodName(method);
+                    String displayText = replaceText + " - " + method.getParent().getElementName()
+                            + "." + method.getElementName() + "(" + parameterTypes[0] + " "
+                            + parameterNames[0] + ")";
+                    Image image = this.imageProvider.getImageLabel(method, method.getFlags()
+                            | JavaElementImageProvider.SMALL_ICONS);
+                    CustomCompletionProposal proposal = new CustomCompletionProposal(replaceText,
+                            request.getReplacementBeginPosition() + 1, request
+                                    .getReplacementLength() - 2, replaceText.length(), image,
+                            displayText, null, null, PropertyNameSearchRequestor.METHOD_RELEVANCE);
+                    this.request.addProposal(proposal);
+                    this.methods.put(method.getSignature(), proposal);
+                }
+            }
+            catch (JavaModelException e) {
+                // do nothing
+            }
+        }
+
+        protected String getPropertyNameFromMethodName(IMethod method) {
             String replaceText = method.getElementName().substring("set".length(),
                     method.getElementName().length());
             if (replaceText != null) {
@@ -132,7 +188,7 @@ public class BeansContentAssistProcessor
             return replaceText;
         }
 
-        private String[] getParameterTypes(IMethod method) {
+        protected String[] getParameterTypes(IMethod method) {
             try {
                 String[] parameterQualifiedTypes = Signature.getParameterTypes(method
                         .getSignature());
@@ -293,6 +349,36 @@ public class BeansContentAssistProcessor
                 if ("class".equals(attributeName)) {
                     addClassAttributeValueProposals(request, matchString);
                 }
+                else if ("init-method".equals(attributeName)
+                        || "destroy-method".equals(attributeName)) {
+                    NamedNodeMap attributes = node.getAttributes();
+                    String className = attributes.getNamedItem("class").getNodeValue();
+                    if (className != null) {
+                        addInitDestroyAttributeValueProposals(request, matchString, className);
+                    }
+                }
+                else if ("factory-method".equals(attributeName)) {
+                    NamedNodeMap attributes = node.getAttributes();
+                    Node factoryBean = attributes.getNamedItem("factory-bean");
+                    String className = null;
+                    if (factoryBean != null) {
+                        String factoryBeanId = factoryBean.getNodeValue();
+                        // TODO add factoryBean support for beans defined outside of the current 
+                        // xml file
+                        Document doc = node.getOwnerDocument();
+                        Element bean = doc.getElementById(factoryBeanId);
+                        if (bean != null && bean instanceof Node) {
+                            NamedNodeMap attr = ((Node) bean).getAttributes();
+                            className = attr.getNamedItem("class").getNodeValue();
+                        }
+                    }
+                    else {
+                        className = attributes.getNamedItem("class").getNodeValue();
+                    }
+                    if (className != null) {
+                        addFactoryMethodAttributeValueProposals(request, matchString, className);
+                    }
+                }
             }
             else if ("property".equals(node.getNodeName())) {
                 Node parentNode = node.getParentNode();
@@ -316,32 +402,75 @@ public class BeansContentAssistProcessor
             IFile file = ((IFileEditorInput) this.editor.getEditorInput()).getFile();
             IType type = BeansModelUtils.getJavaType(file.getProject(), className);
             if (type != null) {
-                String prefixTemp = prefix;
-                if (!prefixTemp.endsWith("*")) {
-                    prefixTemp = prefixTemp + "*";
-                }
-                if (!prefixTemp.startsWith("set")) {
-                    prefixTemp = "set" + prefixTemp;
-                }
                 try {
-                    IJavaSearchScope scope = SearchEngine.createHierarchyScope(type);
-                    SearchPattern methodPattern = SearchPattern.createPattern(prefixTemp,
-                            IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS,
-                            SearchPattern.R_PATTERN_MATCH);
-                    PropertyNameSearchRequestor requestor = new PropertyNameSearchRequestor(request);
-                    SearchEngine engine = new SearchEngine();
-
-                    try {
-                        engine.search(methodPattern, new SearchParticipant[] { SearchEngine
-                                .getDefaultSearchParticipant() }, scope, requestor, this
-                                .getProgressMonitor());
-                    }
-                    catch (CoreException e) {
-                        // do nothing
+                    Collection methods = Introspector.findWritableProperties(type, prefix);
+                    if (methods != null && methods.size() > 0) {
+                        PropertyNameSearchRequestor requestor = new PropertyNameSearchRequestor(
+                                request);
+                        Iterator iterator = methods.iterator();
+                        while (iterator.hasNext()) {
+                            requestor.acceptSearchMatch((IMethod) iterator.next());
+                        }
                     }
                 }
                 catch (JavaModelException e1) {
                     // do nothing
+                }
+                catch (CoreException e) {
+                    // // do nothing
+                }
+            }
+        }
+    }
+
+    private void addFactoryMethodAttributeValueProposals(ContentAssistRequest request,
+            String prefix, String className) {
+        if (editor.getEditorInput() instanceof IFileEditorInput) {
+            IFile file = ((IFileEditorInput) this.editor.getEditorInput()).getFile();
+            IType type = BeansModelUtils.getJavaType(file.getProject(), className);
+            if (type != null) {
+                try {
+                    Collection methods = Introspector.findAllMethods(type, prefix, -1, true,
+                            Introspector.STATIC_YES);
+                    if (methods != null && methods.size() > 0) {
+                        VoidMethodSearchRequestor requestor = new VoidMethodSearchRequestor(request);
+                        Iterator iterator = methods.iterator();
+                        while (iterator.hasNext()) {
+                            requestor.acceptSearchMatch((IMethod) iterator.next());
+                        }
+                    }
+                }
+                catch (JavaModelException e1) {
+                    // do nothing
+                }
+                catch (CoreException e) {
+                    // // do nothing
+                }
+            }
+        }
+    }
+
+    private void addInitDestroyAttributeValueProposals(ContentAssistRequest request, String prefix,
+            String className) {
+        if (editor.getEditorInput() instanceof IFileEditorInput) {
+            IFile file = ((IFileEditorInput) this.editor.getEditorInput()).getFile();
+            IType type = BeansModelUtils.getJavaType(file.getProject(), className);
+            if (type != null) {
+                try {
+                    Collection methods = Introspector.findAllNoParameterMethods(type, prefix);
+                    if (methods != null && methods.size() > 0) {
+                        VoidMethodSearchRequestor requestor = new VoidMethodSearchRequestor(request);
+                        Iterator iterator = methods.iterator();
+                        while (iterator.hasNext()) {
+                            requestor.acceptSearchMatch((IMethod) iterator.next());
+                        }
+                    }
+                }
+                catch (JavaModelException e1) {
+                    // do nothing
+                }
+                catch (CoreException e) {
+                    // // do nothing
                 }
             }
         }
@@ -369,7 +498,7 @@ public class BeansContentAssistProcessor
                         SearchPattern pattern = SearchPattern.createOrPattern(packagePattern,
                                 typePattern);
                         TypeSearchRequestor requestor = new TypeSearchRequestor(request,
-                        							StringUtils.isCapitalized(prefixTemp));
+                                StringUtils.isCapitalized(prefixTemp));
                         SearchEngine engine = new SearchEngine();
 
                         engine.search(pattern, new SearchParticipant[] { SearchEngine

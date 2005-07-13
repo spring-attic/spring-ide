@@ -1,13 +1,11 @@
 package org.springframework.ide.eclipse.beans.ui.editor.hyperlink;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.ui.PartInitException;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
  * Java element hyperlink.
@@ -16,14 +14,14 @@ public class JavaElementHyperlink implements IHyperlink {
 
     private final IRegion region;
 
-    private final IJavaElement[] element;
+    private final IJavaElement[] elements;
 
     /**
      * Creates a new Java element hyperlink.
      */
     public JavaElementHyperlink(IRegion region, IJavaElement element) {
         this.region = region;
-        this.element = new IJavaElement[] { element };
+        this.elements = new IJavaElement[] { element };
     }
 
     /**
@@ -31,22 +29,23 @@ public class JavaElementHyperlink implements IHyperlink {
      */
     public JavaElementHyperlink(IRegion region, IJavaElement[] element) {
         this.region = region;
-        this.element = element;
+        this.elements = element;
     }
 
     public IRegion getHyperlinkRegion() {
         return this.region;
     }
-
+    
+    /**
+     * opens the standard Java Editor for the given IJavaElement
+     */
     public void open() {
-        if (element != null && element.length > 0) {
-            if (element[0] instanceof IType) {
-                SpringUIUtils.openInEditor((IType) element[0]);
-            }
-            else if (element[0] instanceof IJavaElement) {
+        // TODO display selection dialog if element.length > 1
+        if (elements != null && elements.length > 0) {
+            if (elements[0] instanceof IJavaElement) {
+                IJavaElement element = (IJavaElement) elements[0];
                 try {
-                    JavaUI.revealInEditor(JavaUI.openInEditor((IJavaElement) element[0]),
-                            (IJavaElement) element[0]);
+                    JavaUI.revealInEditor(JavaUI.openInEditor(element), element);
                 }
                 catch (PartInitException e) {
                 }
@@ -54,14 +53,13 @@ public class JavaElementHyperlink implements IHyperlink {
                 }
             }
         }
+
     }
 
-   
     public String getTypeLabel() {
         return null;
     }
 
-    
     public String getHyperlinkText() {
         return null;
     }
