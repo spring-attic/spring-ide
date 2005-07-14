@@ -3,7 +3,7 @@
 <plugin
    id="org.springframework.ide.eclipse.web.flow.ui"
    name="%pluginName"
-   version="0.0.1"
+   version="0.0.2"
    provider-name="%providerName"
    class="org.springframework.ide.eclipse.web.flow.ui.WebFlowUIPlugin">
 
@@ -24,12 +24,12 @@
       <import plugin="org.eclipse.ui.editors"/>
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jdt.ui"/>
-      <import plugin="org.springframework.ide.eclipse.core"/>
-      <import plugin="org.springframework.ide.eclipse.ui"/>
+      <import plugin="org.springframework.ide.eclipse.core" version="1.2.1" match="greaterOrEqual"/>
+      <import plugin="org.springframework.ide.eclipse.ui" version="1.2.1" match="greaterOrEqual"/>
       <import plugin="org.springframework.ide.eclipse.web.flow.core"/>
-      <import plugin="org.springframework.ide.eclipse.beans.core"/>
-      <import plugin="org.springframework.ide.eclipse.beans.ui.graph"/>
-      <import plugin="org.springframework.ide.eclipse.beans.ui"/>
+      <import plugin="org.springframework.ide.eclipse.beans.core" version="1.2.1" match="greaterOrEqual"/>
+      <import plugin="org.springframework.ide.eclipse.beans.ui.graph" version="1.2.1" match="greaterOrEqual"/>
+      <import plugin="org.springframework.ide.eclipse.beans.ui" version="1.2.1" match="greaterOrEqual"/>
    </requires>
    
    <extension
