@@ -41,8 +41,9 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 /**
- * Detects hyperlinks in XML tags. Includes detection in DOCTYPE and attribute values. Resolves
- * references to schemas, dtds, etc using the Common URI Resolver.
+ * Detects hyperlinks in XML tags. Includes detection of bean classes and bean
+ * properties in attribute values. Resolves bean references (including
+ * references to parent beans or factory beans).
  */
 public class BeansHyperLinkDetector implements IHyperlinkDetector {
 
