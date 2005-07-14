@@ -4,4 +4,5 @@
       scrub-output="false"
       use-console="true">
    <feature id="org.springframework.ide.eclipse.web.flow" version="0.0.1"/>
+   <feature id="org.springframework.ide.eclipse.web.flow" version="0.0.2"/>
 </site-build>

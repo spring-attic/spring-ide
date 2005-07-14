@@ -7,6 +7,9 @@
    <feature url="features/org.springframework.ide.eclipse.web.flow_0.0.1.jar" id="org.springframework.ide.eclipse.web.flow" version="0.0.1">
       <category name="spring-ide-webflow"/>
    </feature>
+   <feature url="features/org.springframework.ide.eclipse.web.flow_0.0.2.jar" id="org.springframework.ide.eclipse.web.flow" version="0.0.2">
+      <category name="spring-ide-webflow"/>
+   </feature>
    <category-def name="spring-ide-webflow" label="Spring IDE WebFlow">
       <description>
          Plugins which are providing support for the Spring framework within the Eclipse IDE
