@@ -3,7 +3,7 @@
 <plugin
    id="org.springframework.ide.eclipse.web.flow.core"
    name="%pluginName"
-   version="0.0.1"
+   version="0.0.2"
    provider-name="%providerName"
    class="org.springframework.ide.eclipse.web.flow.core.WebFlowCorePlugin">
 
@@ -20,8 +20,8 @@
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.jdt.core"/>
-      <import plugin="org.springframework.ide.eclipse.core"/>
-      <import plugin="org.springframework.ide.eclipse.beans.core"/>
+      <import plugin="org.springframework.ide.eclipse.core" version="1.2.1" match="greaterOrEqual"/>
+      <import plugin="org.springframework.ide.eclipse.beans.core" version="1.2.1" match="greaterOrEqual"/>
    </requires>
    <extension-point id="validators" name="&amp;validatorsName" schema="schema/validators.exsd"/>
 
