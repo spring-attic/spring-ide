@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
@@ -33,14 +34,22 @@ import org.springframework.ide.eclipse.web.flow.core.internal.model.WebFlowModel
 import org.springframework.ide.eclipse.web.flow.core.model.IAction;
 import org.springframework.ide.eclipse.web.flow.core.model.IActionState;
 import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
+import org.springframework.ide.eclipse.web.flow.core.model.ISetup;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
 import org.springframework.ide.eclipse.web.flow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.web.flow.core.model.ITransition;
 import org.springframework.ide.eclipse.web.flow.core.model.ITransitionableFrom;
+import org.springframework.ide.eclipse.web.flow.core.model.IViewState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowConfig;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowConfigSet;
 
 public class ActionTypeValidator implements IWebFlowConfigValidator {
+
+    private static final String ACTION_INTERFACE = "org.springframework.webflow.Action";
+
+    private static final String EVENT_CLASS = "org.springframework.webflow.Event";
+
+    private static final String REQUEST_CONTEXT_INTERFACE = "org.springframework.webflow.RequestContext";
 
     /*
      * (non-Javadoc)
@@ -62,6 +71,12 @@ public class ActionTypeValidator implements IWebFlowConfigValidator {
                     if (state instanceof IActionState) {
                         List actions = ((IActionState) state).getActions();
                         this.validateActions(actions, config, configSet);
+                    } else if (state instanceof IViewState) {
+                        ISetup setup = ((IViewState) state).getSetup();
+                        if (setup != null) {
+                            this.validateAction((IBeanReference) setup, config,
+                                    configSet);
+                        }
                     }
 
                     if (state instanceof ITransitionableFrom) {
@@ -128,6 +143,11 @@ public class ActionTypeValidator implements IWebFlowConfigValidator {
                     this.validateActionClass(reference, className, config,
                             configSet);
                 }
+
+                if (method != null) {
+                    this.validateActionMethod(reference, className, method,
+                            config, configSet);
+                }
             }
         }
     }
@@ -140,13 +160,72 @@ public class ActionTypeValidator implements IWebFlowConfigValidator {
 
             List interfaces = new ArrayList();
             this.getAllInterfaces(type, interfaces);
-            if (!interfaces.contains("org.springframework.webflow.Action")) {
+            if (!interfaces.contains(ACTION_INTERFACE)) {
                 WebFlowModelUtils.createProblemMarker(config,
                         "Referenced Bean or class '" + className
                                 + "' does not implement Action Interface",
                         IMarker.SEVERITY_ERROR,
                         reference.getElementStartLine(),
                         IWebFlowProjectMarker.ERROR_CODE_PARSING_FAILED);
+            }
+        }
+    }
+
+    private void validateActionMethod(IBeanReference reference,
+            String className, String methodName, IWebFlowConfig config,
+            IWebFlowConfigSet configSet) {
+        IType type = BeansModelUtils.getJavaType(config.getConfigFile()
+                .getProject(), className);
+        if (type != null) {
+            try {
+                IMethod method = this.findMethod(type, methodName, 1, true);
+                if (method == null) {
+                    WebFlowModelUtils.createProblemMarker(config,
+                            "Referenced method '" + methodName
+                                    + "' in bean or class '" + className
+                                    + "' does not exist",
+                            IMarker.SEVERITY_ERROR, reference
+                                    .getElementStartLine(),
+                            IWebFlowProjectMarker.ERROR_CODE_PARSING_FAILED);
+                } else {
+                    String returnTypeString = Signature.toString(
+                            method.getReturnType()).replace('$', '.');
+                    String parameterTypeString = Signature.toString(
+                            method.getParameterTypes()[0]).replace('$', '.');
+                    IType returnType = BeansModelUtils.getJavaType(config
+                            .getConfigFile().getProject(), resolveClassName(
+                            returnTypeString, type));
+                    IType parameterType = BeansModelUtils.getJavaType(config
+                            .getConfigFile().getProject(), resolveClassName(
+                            parameterTypeString, type));
+                    if (returnType != null && parameterType != null) {
+                        List interfaces = new ArrayList();
+                        this.getAllInterfaces(parameterType, interfaces);
+                        List superClasses = new ArrayList();
+                        this.getAllSuperTypes(returnType, superClasses);
+                        if ((!interfaces.contains(REQUEST_CONTEXT_INTERFACE) && !REQUEST_CONTEXT_INTERFACE
+                                .equals(parameterType.getFullyQualifiedName()))
+                                || (!superClasses.contains(EVENT_CLASS) && (!EVENT_CLASS
+                                        .equals(returnType
+                                                .getFullyQualifiedName())))) {
+                            WebFlowModelUtils
+                                    .createProblemMarker(
+                                            config,
+                                            "Referenced method '"
+                                                    + methodName
+                                                    + "' in bean or class '"
+                                                    + className
+                                                    + "' does not have correct signature",
+                                            IMarker.SEVERITY_ERROR,
+                                            reference.getElementStartLine(),
+                                            IWebFlowProjectMarker.ERROR_CODE_PARSING_FAILED);
+                        }
+
+                    }
+
+                }
+            } catch (JavaModelException e) {
+                // do nothing
             }
         }
     }
@@ -164,6 +243,25 @@ public class ActionTypeValidator implements IWebFlowConfigValidator {
                 IType supertype = this.getSuperType(type);
                 if (supertype != null) {
                     this.getAllInterfaces(supertype, interfaces);
+                }
+            } catch (JavaModelException e) {
+
+            }
+        }
+    }
+
+    private void getAllSuperTypes(IType type, List interfaces) {
+        if (type != null) {
+
+            try {
+                if (type.getSuperclassName() != null) {
+                    String superClass = type.getSuperclassName();
+                    interfaces.add(this.resolveClassName(superClass, type));
+
+                }
+                IType supertype = this.getSuperType(type);
+                if (supertype != null) {
+                    this.getAllSuperTypes(supertype, interfaces);
                 }
             } catch (JavaModelException e) {
 
@@ -225,14 +323,13 @@ public class ActionTypeValidator implements IWebFlowConfigValidator {
      *            true if static method is requested
      */
     public IMethod findMethod(IType type, String methodName, int argCount,
-            boolean isPublic, boolean isStatic) throws JavaModelException {
+            boolean isPublic) throws JavaModelException {
         while (type != null) {
             IMethod[] methods = type.getMethods();
             for (int i = 0; i < methods.length; i++) {
                 IMethod method = methods[i];
                 int flags = method.getFlags();
                 if (Flags.isPublic(flags) == isPublic
-                        && Flags.isStatic(flags) == isStatic
                         && (argCount == -1 || method.getNumberOfParameters() == argCount)
                         && methodName.equals(method.getElementName())) {
                     return method;
@@ -252,6 +349,6 @@ public class ActionTypeValidator implements IWebFlowConfigValidator {
         } catch (JavaModelException e) {
         }
 
-        return null;
+        return className;
     }
 }
