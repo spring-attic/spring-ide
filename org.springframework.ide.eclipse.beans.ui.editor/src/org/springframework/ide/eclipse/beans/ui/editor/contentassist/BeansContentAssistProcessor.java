@@ -1,11 +1,11 @@
 /*
  * Copyright 2002-2004 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -14,9 +14,11 @@
 
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -45,6 +47,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorPart;
@@ -57,8 +60,11 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.core.internal.regions.DOMRegionContext;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
+import org.eclipse.wst.xml.ui.internal.templates.TemplateContextTypeIdsXML;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateCompletionProcessor;
+import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextTypeIdsXML;
 import org.springframework.ide.eclipse.core.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -106,7 +112,7 @@ public class BeansContentAssistProcessor
                         displayText = buf.toString();
                     }
                     else {
-                        displayText = replaceText + " () void - "
+                        displayText = replaceText + "() void - "
                                 + method.getParent().getElementName();
                     }
                     Image image = imageProvider.getImageLabel(method, method.getFlags()
@@ -123,7 +129,6 @@ public class BeansContentAssistProcessor
                 // do nothing
             }
         }
-
     }
 
     class PropertyNameSearchRequestor {
@@ -169,7 +174,7 @@ public class BeansContentAssistProcessor
                                     .getReplacementLength() - 2, replaceText.length(), image,
                             displayText, null, null, PropertyNameSearchRequestor.METHOD_RELEVANCE);
                     this.request.addProposal(proposal);
-                    this.methods.put(method.getSignature(), proposal);
+                    this.methods.put(key, method);
                 }
             }
             catch (JavaModelException e) {
@@ -363,7 +368,7 @@ public class BeansContentAssistProcessor
                     String className = null;
                     if (factoryBean != null) {
                         String factoryBeanId = factoryBean.getNodeValue();
-                        // TODO add factoryBean support for beans defined outside of the current 
+                        // TODO add factoryBean support for beans defined outside of the current
                         // xml file
                         Document doc = node.getOwnerDocument();
                         Element bean = doc.getElementById(factoryBeanId);
@@ -393,6 +398,7 @@ public class BeansContentAssistProcessor
                     && request.getProposals().size() == 0) {
                 super.addAttributeValueProposals(request);
             }
+            addTemplates(request, BeansTemplateContextTypeIdsXML.ALL);
         }
     }
 
@@ -536,5 +542,43 @@ public class BeansContentAssistProcessor
         else {
             return new NullProgressMonitor();
         }
+    }
+    
+    /**
+     * Adds templates to the list of proposals
+     * 
+     * @param contentAssistRequest
+     * @param context
+     */
+    private void addTemplates(ContentAssistRequest contentAssistRequest, String context) {
+        if (contentAssistRequest == null)
+            return;
+
+        // if already adding template proposals for a certain context type, do
+        // not add again
+        //if (!fTemplateContexts.contains(context)) {
+            //fTemplateContexts.add(context);
+            boolean useProposalList = !contentAssistRequest.shouldSeparate();
+
+            if (getTemplateCompletionProcessor() != null) {
+                getTemplateCompletionProcessor().setContextType(context);
+                ICompletionProposal[] proposals = getTemplateCompletionProcessor().computeCompletionProposals(fTextViewer, contentAssistRequest.getReplacementBeginPosition());
+                for (int i = 0; i < proposals.length; ++i) {
+                    if (useProposalList)
+                        contentAssistRequest.addProposal(proposals[i]);
+                    else
+                        contentAssistRequest.addMacro(proposals[i]);
+                }
+            }
+        //}
+    }
+    
+    private BeansTemplateCompletionProcessor fTemplateProcessor = null;
+    private List fTemplateContexts = new ArrayList();
+    private BeansTemplateCompletionProcessor getTemplateCompletionProcessor() {
+        if (fTemplateProcessor == null) {
+            fTemplateProcessor = new BeansTemplateCompletionProcessor();
+        }
+        return fTemplateProcessor;
     }
 }

@@ -80,5 +80,13 @@
              webURL="http://www.springframework.org/dtd/spring-beans.dtd"/>
     </catalogContribution>
  </extension>
-
+ 
+ <extension point="org.eclipse.ui.editors.templates">
+		<contextType
+			name="spring_all"
+			class="org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextType"
+			id="spring_all">
+		</contextType>
+  		<include file="templates/templates.xml"/>
+	</extension>
 </plugin>

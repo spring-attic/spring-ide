@@ -26,6 +26,7 @@ import org.eclipse.wst.xml.ui.internal.JobStatusLineHelper;
 import org.eclipse.wst.xml.ui.internal.preferences.XMLUIPreferenceNames;
 import org.eclipse.wst.xml.ui.internal.templates.TemplateContextTypeIdsXML;
 import org.osgi.framework.BundleContext;
+import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextTypeIdsXML;
 
 /**
  * The main plugin class to be used in the desktop.
@@ -115,6 +116,7 @@ public class BeansEditorPlugin extends AbstractUIPlugin {
 			registry.addContextType(TemplateContextTypeIdsXML.TAG);
 			registry.addContextType(TemplateContextTypeIdsXML.ATTRIBUTE);
 			registry.addContextType(TemplateContextTypeIdsXML.ATTRIBUTE_VALUE);
+            registry.addContextType(BeansTemplateContextTypeIdsXML.ALL);
 			contextTypeRegistry = registry;
 		}
 		return contextTypeRegistry;

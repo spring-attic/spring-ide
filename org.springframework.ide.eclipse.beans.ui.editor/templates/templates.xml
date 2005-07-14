@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+	<template name="TestName" description="TestDescription" id="123"
+		context="spring_all" enabled="true">
+		test
+	</template>
+</templates>
