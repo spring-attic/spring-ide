@@ -2,7 +2,7 @@
 <feature
       id="org.springframework.ide.eclipse.web.flow"
       label="%featureName"
-      version="0.0.1"
+      version="0.0.2"
       provider-name="%providerName">
 
    <install-handler/>
@@ -27,6 +27,8 @@
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.springframework.ide.eclipse.core" version="1.2.1"/>
+      <import plugin="org.springframework.ide.eclipse.beans.core" version="1.2.1"/>
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.ui.ide"/>
@@ -34,29 +36,31 @@
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
       <import plugin="org.eclipse.ui.editors"/>
       <import plugin="org.eclipse.jdt.ui"/>
+      <import plugin="org.springframework.ide.eclipse.ui" version="1.2.1"/>
+      <import plugin="org.springframework.ide.eclipse.beans.ui.graph" version="1.2.1"/>
+      <import plugin="org.springframework.ide.eclipse.beans.ui" version="1.2.1"/>
       <import plugin="org.eclipse.ui.workbench"/>
       <import plugin="org.eclipse.jface"/>
       <import plugin="org.eclipse.draw2d"/>
       <import plugin="org.eclipse.gef"/>
-      <import feature="org.springframework.ide.eclipse" version="1.2.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
          id="org.springframework.ide.eclipse.web.flow.core"
          download-size="0"
          install-size="0"
-         version="0.0.1"/>
+         version="0.0.2"/>
 
    <plugin
          id="org.springframework.ide.eclipse.web.flow.ui"
          download-size="0"
          install-size="0"
-         version="0.0.1"/>
+         version="0.0.2"/>
 
    <plugin
          id="org.springframework.ide.eclipse.web.flow.ui.editor"
          download-size="0"
          install-size="0"
-         version="0.0.1"/>
+         version="0.0.2"/>
 
 </feature>
