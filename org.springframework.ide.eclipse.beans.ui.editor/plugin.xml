@@ -46,7 +46,7 @@
 			</describer>
 		</content-type>
 	</extension>
-
+	
 	<extension point="org.eclipse.wst.sse.core.modelHandler">
 		<modelHandler
 			id="org.eclipse.wst.sse.core.handler.beansConfig"
@@ -68,7 +68,6 @@
 			type="textviewerconfiguration"
 			target="org.springframework.ide.eclipse.beans.ui.editor.beansConfig"
 			class="org.springframework.ide.eclipse.beans.ui.editor.BeansStructuredTextViewerConfiguration"/>
-		<!-- nothing special is supplied for other configurations, so nothing else needs to be declared -->
 	</extension>
 
  <extension
@@ -83,10 +82,31 @@
  
  <extension point="org.eclipse.ui.editors.templates">
 		<contextType
-			name="spring_all"
+			name="Bean"
+			class="org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextType"
+			id="spring_bean">
+		</contextType>
+		<contextType
+			name="Spring XML"
 			class="org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextType"
 			id="spring_all">
 		</contextType>
-  		<include file="templates/templates.xml"/>
+				<contextType
+			name="Property"
+			class="org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextType"
+			id="spring_property">
+		</contextType>
+  		<include
+          file="templates/templates.xml"
+          translations="templates/templates.properties"/>
+	</extension>
+	
+	<extension point="org.eclipse.ui.preferencePages">
+		<page
+			name="Spring Beans XML Templates"
+			category="org.eclipse.wst.sse.ui.preferences.xml"
+			class="org.springframework.ide.eclipse.beans.ui.editor.templates.BeanTemplatePreferencePage"
+			id="org.springframework.ide.eclipse.beans.ui.editor.templates">
+		</page>
 	</extension>
 </plugin>
