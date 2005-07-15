@@ -4,7 +4,6 @@
       label="%featureName"
       version="0.0.2"
       provider-name="%providerName">
-
    <install-handler/>
 
    <description>
@@ -20,7 +19,7 @@
    </license>
 
    <url>
-      <update label="%updateSiteName"/>
+      <update label="%updateSiteName" url="http://springide.org/updatesite"/>
    </url>
 
    <requires>
