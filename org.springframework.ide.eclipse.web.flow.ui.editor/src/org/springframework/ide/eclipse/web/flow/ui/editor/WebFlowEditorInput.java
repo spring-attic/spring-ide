@@ -48,6 +48,8 @@ public class WebFlowEditorInput implements IEditorInput, IPersistableElement {
     private INode parent;
 
     private String toolTip;
+    
+    private boolean isValid = true;
 
     public WebFlowEditorInput(IFile node) {
         this(node, null);
@@ -57,6 +59,7 @@ public class WebFlowEditorInput implements IEditorInput, IPersistableElement {
         this.file = node;
         this.elementId = elementId;
         this.toolTip = file.getFullPath().makeRelative().toString();
+        this.name = file.getFullPath().makeRelative().toString();
     }
 
     public WebFlowEditorInput(INode node) {
@@ -167,7 +170,9 @@ public class WebFlowEditorInput implements IEditorInput, IPersistableElement {
      * @see org.eclipse.ui.IPersistableElement#saveState(org.eclipse.ui.IMemento)
      */
     public void saveState(IMemento memento) {
-        WebFlowEditorInputFactory.saveState(memento, this);
+        if (this.isValid) {
+            WebFlowEditorInputFactory.saveState(memento, this);
+        }
     }
     
     /**
@@ -175,5 +180,13 @@ public class WebFlowEditorInput implements IEditorInput, IPersistableElement {
      */
     public String getElementId() {
         return elementId;
+    }
+
+    public boolean isValid() {
+        return isValid;
+    }
+
+    public void setValid(boolean isValid) {
+        this.isValid = isValid;
     }
 }

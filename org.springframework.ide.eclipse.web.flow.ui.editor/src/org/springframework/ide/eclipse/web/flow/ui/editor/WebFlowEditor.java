@@ -727,6 +727,7 @@ public class WebFlowEditor extends GraphicalEditorWithPalette {
             diagram = ((WebFlowEditorInput) input).getRootState();
         } catch (WebFlowDefinitionException e) {
             diagram = new WebFlowState(null, null);
+            ((WebFlowEditorInput) input).setValid(false);
             MessageDialog.openError(WebFlowPlugin.getActiveWorkbenchWindow()
                     .getShell(), "Error opening Spring Web Flow config file", e
                     .getMessage());
