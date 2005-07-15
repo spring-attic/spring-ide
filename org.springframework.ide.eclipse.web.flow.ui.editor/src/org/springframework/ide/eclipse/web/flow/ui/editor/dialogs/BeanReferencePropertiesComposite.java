@@ -25,7 +25,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
@@ -491,8 +491,7 @@ public class BeanReferencePropertiesComposite {
                 this.setActionImplementationChoice(RADIOCLASSREF_CHOICE);
             }
         } else {
-            IProject project = WebFlowUtils.getActiveFlowEditorInput()
-                    .getFile().getProject();
+            
             IJavaSearchScope searchScope = SearchEngine.createWorkspaceScope();
 //            try {
 //                if (project.hasNature(JavaCore.NATURE_ID)) {
@@ -507,16 +506,10 @@ public class BeanReferencePropertiesComposite {
 //            } catch (JavaModelException e) {
 //            } catch (CoreException e) {
 //            }
-            /*
-             * TypeSelectionDialog2 dialog= new TypeSelectionDialog2(getShell(),
-             * false, new ProgressMonitorDialog(getShell()), searchScope,
-             * IJavaSearchConstants.TYPE);
-             * dialog.setMessage(JavaUIMessages.JavaUI_defaultDialogMessage);
-             */
 
-            TypeSelectionDialog dialog = new TypeSelectionDialog(parentShell,
-                    new ProgressMonitorDialog(parentShell),
-                    IJavaSearchConstants.CLASS, searchScope);
+            TypeSelectionDialog2 dialog = new TypeSelectionDialog2(parentShell,
+                    false, new ProgressMonitorDialog(parentShell),
+                    searchScope, IJavaSearchConstants.CLASS);
             dialog.setMessage("Select an action implementation class"); //$NON-NLS-1$
             dialog.setBlockOnOpen(true);
             dialog.setTitle("Action Class");

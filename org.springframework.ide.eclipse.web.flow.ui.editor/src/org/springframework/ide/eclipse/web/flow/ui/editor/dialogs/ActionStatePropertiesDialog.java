@@ -81,20 +81,9 @@ public class ActionStatePropertiesDialog extends TitleAreaDialog implements
 
     private BeanReferencePropertiesComposite beanProperties;
 
-    private SelectionListener buttonListener = new SelectionAdapter() {
-
-        public void widgetSelected(SelectionEvent e) {
-            handleButtonPressed((Button) e.widget);
-        }
-    };
-
     private TableViewer configsViewer;
 
-    private TableViewer configsViewer2;
-
     private Button editButton;
-
-    private int LABEL_WIDTH = 70;
 
     private Label nameLabel;
 
@@ -192,7 +181,6 @@ public class ActionStatePropertiesDialog extends TitleAreaDialog implements
 
     protected Control createDialogArea(Composite parent) {
         Composite parentComposite = (Composite) super.createDialogArea(parent);
-        GridData gridData = null;
         Composite composite = new Composite(parentComposite, SWT.NULL);
         GridLayout layout = new GridLayout();
         layout.numColumns = 1;
@@ -336,15 +324,6 @@ public class ActionStatePropertiesDialog extends TitleAreaDialog implements
 
     protected String getTitle() {
         return "Action State properties";
-    }
-
-    /**
-     * One of the buttons has been pressed, act accordingly.
-     */
-    private void handleButtonPressed(Button button) {
-
-        this.validateInput();
-
     }
 
     /**

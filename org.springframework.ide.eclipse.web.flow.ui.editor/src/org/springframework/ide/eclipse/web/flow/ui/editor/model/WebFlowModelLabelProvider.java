@@ -37,8 +37,6 @@ import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
 
 public class WebFlowModelLabelProvider extends LabelProvider {
 
-    private boolean longDescription = false;
-
     public Image getImage(Object obj) {
         if (obj instanceof IActionState) {
             return WebFlowImages.getImage(WebFlowImages.IMG_OBJS_ACTION_STATE);

@@ -80,7 +80,6 @@ public class StateTreeEditPart extends
 
     protected List getModelChildren() {
         List children = new ArrayList();
-        Object test = getModel();
         
         if (getModel() instanceof IPropertyEnabled) {
             IPropertyEnabled properties = (IPropertyEnabled) getModel();

@@ -91,8 +91,6 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
             me.width = fig.getPreferredSize(me.width, me.height).width;
             me.height = fig.getPreferredSize().height;
 
-            int tagHeight = ((SubgraphFigure) fig).getHeader()
-                    .getPreferredSize().height;
             me.insets.top = ((CompoundStateFigure) getFigure()).getHeader()
                     .getPreferredSize().height + 5;
             me.insets.left = 5;

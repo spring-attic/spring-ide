@@ -48,15 +48,11 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 
     private BeanReferencePropertiesComposite beanProperties;
 
-    private int LABEL_WIDTH = 70;
-
     private Label nameLabel;
 
     private Text nameText;
 
     private Button okButton;
-
-    private IWebFlowModelElement parent;
 
     private PropertiesComposite properties;
 
@@ -64,7 +60,6 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
             IWebFlowModelElement parent, IAction state) {
         super(parentShell);
         this.action = state;
-        this.parent = parent;
         this.actionClone = (IAction) ((ICloneableModelElement) this.action)
                 .cloneModelElement();
 
@@ -147,7 +142,6 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 
     protected Control createDialogArea(Composite parent) {
         Composite parentComposite = (Composite) super.createDialogArea(parent);
-        GridData gridData = null;
         Composite composite = new Composite(parent, SWT.NULL);
         GridLayout layout = new GridLayout();
         layout.numColumns = 1;

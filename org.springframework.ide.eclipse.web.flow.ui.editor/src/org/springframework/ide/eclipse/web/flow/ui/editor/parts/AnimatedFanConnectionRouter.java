@@ -17,6 +17,7 @@
 package org.springframework.ide.eclipse.web.flow.ui.editor.parts;
 
 import org.eclipse.draw2d.Connection;
+import org.eclipse.draw2d.FanRouter;
 
 public class AnimatedFanConnectionRouter extends FanRouter {
 

@@ -1,16 +1,14 @@
 /*
  * Copyright 2002-2005 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 
@@ -29,7 +27,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -82,9 +80,9 @@ import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
 import org.springframework.ide.eclipse.web.flow.ui.editor.model.WebFlowModelLabelDecorator;
 import org.springframework.ide.eclipse.web.flow.ui.editor.model.WebFlowModelLabelProvider;
 
-public class ViewStatePropertiesDialog extends TitleAreaDialog implements
-        IDialogValidator {
-    
+public class ViewStatePropertiesDialog
+        extends TitleAreaDialog implements IDialogValidator {
+
     private class SetupContentProvider implements IStructuredContentProvider {
 
         private IViewState project;
@@ -98,21 +96,21 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 
         public Object[] getElements(Object obj) {
             if (project.getSetup() != null)
-                return new Object[] {project.getSetup() };
-            else 
+                return new Object[] { project.getSetup() };
+            else
                 return null;
         }
 
         public void inputChanged(Viewer arg0, Object arg1, Object arg2) {
         }
     }
-    
+
     private static int RADIOBEANREF_CHOICE = 0;
 
     private static int RADIOCLASS_CHOICE = 1;
 
     private static int RADIOCLASSREF_CHOICE = 2;
-    
+
     private Button addButton;
 
     private Label autowireLabel;
@@ -122,7 +120,7 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
     private Label beanLabel;
 
     private BeanReferencePropertiesComposite beanProperties;
-    
+
     private IBeansConfigSet beansConfig;
 
     private Text beanText;
@@ -132,7 +130,7 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
     private Button browseClassButton;
 
     private Button browseClassRefButton;
-    
+
     private Button browseOnerrorButton;
 
     private SelectionListener buttonListener = new SelectionAdapter() {
@@ -149,31 +147,31 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
     private Text classRefText;
 
     private Text classText;
-    
+
     private Table configsTable;
-    
+
     private TableViewer configsViewer;
-    
+
     private DescriptionComposite description;
 
     private Button editButton;
-    
+
     private int LABEL_WIDTH = 70;
-    
+
     private Label methodLabel;
-    
+
     private Text methodText;
 
     private Text nameText;
 
     private Button okButton;
-    
+
     private Label onerrorLabel;
-    
+
     private Text onerrorText;
 
     private IWebFlowModelElement parent;
-    
+
     private Shell parentShell;
 
     private PropertiesComposite properties;
@@ -185,9 +183,9 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
     private Button radioClassRef;
 
     private Button removeButton;
-    
+
     private Button setupButton;
-    
+
     private ISetup setupClone;
 
     private IViewState viewState;
@@ -196,13 +194,12 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 
     private Text viewText;
 
-    public ViewStatePropertiesDialog(Shell parentShell,
-            IWebFlowModelElement parent, IViewState state) {
+    public ViewStatePropertiesDialog(Shell parentShell, IWebFlowModelElement parent,
+            IViewState state) {
         super(parentShell);
         this.viewState = state;
         this.parent = parent;
-        this.viewStateClone = (IViewState) ((ICloneableModelElement) state)
-                .cloneModelElement();
+        this.viewStateClone = (IViewState) ((ICloneableModelElement) state).cloneModelElement();
         this.setupClone = this.viewStateClone.getSetup();
         if (this.setupClone == null) {
             this.setupClone = new Setup();
@@ -218,28 +215,27 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
             this.viewStateClone.setView(trimString(getView()));
             if (this.beanProperties.useBeanReference()) {
                 if (this.beanProperties.getRadioBeanRef()) {
-                    this.viewStateClone.setBean(this.beanProperties
-                            .getBeanText());
+                    this.viewStateClone.setBean(this.beanProperties.getBeanText());
                     this.viewStateClone.setBeanClass(null);
                     this.viewStateClone.setAutowire(null);
                     this.viewStateClone.setClassRef(null);
-                } else if (this.beanProperties.getRadioClass()) {
-                    this.viewStateClone.setBean(null);
-                    this.viewStateClone
-                            .setBeanClass(trimString(this.beanProperties
-                                    .getClassText()));
-                    this.viewStateClone
-                            .setAutowire(trimString(this.beanProperties
-                                    .getAutowireText()));
-                    this.viewStateClone.setClassRef(null);
-                } else if (this.beanProperties.getRadioClassRef()) {
-                    this.viewStateClone.setBean(null);
-                    this.viewStateClone.setBeanClass(null);
-                    this.viewStateClone.setAutowire(null);
-                    this.viewStateClone.setClassRef(this.beanProperties
-                            .getClassRefText());
                 }
-            } else {
+                else if (this.beanProperties.getRadioClass()) {
+                    this.viewStateClone.setBean(null);
+                    this.viewStateClone
+                            .setBeanClass(trimString(this.beanProperties.getClassText()));
+                    this.viewStateClone.setAutowire(trimString(this.beanProperties
+                            .getAutowireText()));
+                    this.viewStateClone.setClassRef(null);
+                }
+                else if (this.beanProperties.getRadioClassRef()) {
+                    this.viewStateClone.setBean(null);
+                    this.viewStateClone.setBeanClass(null);
+                    this.viewStateClone.setAutowire(null);
+                    this.viewStateClone.setClassRef(this.beanProperties.getClassRefText());
+                }
+            }
+            else {
                 this.viewStateClone.setBean(null);
                 this.viewStateClone.setBeanClass(null);
                 this.viewStateClone.setAutowire(null);
@@ -251,14 +247,14 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
                     this.setupClone.setBeanClass(null);
                     this.setupClone.setAutowire(null);
                     this.setupClone.setClassRef(null);
-                } else if (this.radioClass.getSelection()) {
+                }
+                else if (this.radioClass.getSelection()) {
                     this.setupClone.setBean(null);
-                    this.setupClone
-                            .setBeanClass(trimString(this.classText.getText()));
-                    this.setupClone
-                            .setAutowire(trimString(this.autowireText.getText()));
+                    this.setupClone.setBeanClass(trimString(this.classText.getText()));
+                    this.setupClone.setAutowire(trimString(this.autowireText.getText()));
                     this.setupClone.setClassRef(null);
-                } else if (this.radioClassRef.getSelection()) {
+                }
+                else if (this.radioClassRef.getSelection()) {
                     this.setupClone.setBean(null);
                     this.setupClone.setBeanClass(null);
                     this.setupClone.setAutowire(null);
@@ -275,12 +271,12 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
                     this.viewStateClone.removeSetup();
                 }
             }
-            
+
             if (this.viewStateClone instanceof IDescriptionEnabled) {
-                ((IDescriptionEnabled) this.viewStateClone)
-                        .setDescription(description.getDescription());
+                ((IDescriptionEnabled) this.viewStateClone).setDescription(description
+                        .getDescription());
             }
-            
+
             ((ICloneableModelElement) this.viewState)
                     .applyCloneValues((ICloneableModelElement) this.viewStateClone);
         }
@@ -295,16 +291,15 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 
     protected void createButtonsForButtonBar(Composite parent) {
         // create OK and Cancel buttons by default
-        okButton = createButton(parent, IDialogConstants.OK_ID,
-                IDialogConstants.OK_LABEL, true);
-        createButton(parent, IDialogConstants.CANCEL_ID,
-                IDialogConstants.CANCEL_LABEL, false);
+        okButton = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+        createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
         // do this here because setting the text will set enablement on the
         // ok button
         nameText.setFocus();
         if (this.viewState != null && this.viewState.getId() != null) {
             okButton.setEnabled(true);
-        } else {
+        }
+        else {
             okButton.setEnabled(false);
         }
     }
@@ -373,8 +368,8 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
         });
 
         item1.setControl(nameGroup);
-        
-//      Group for attribute mapper settings.
+
+        // Group for attribute mapper settings.
         Group groupActionType = new Group(folder, SWT.NULL);
         GridLayout layoutAttMap = new GridLayout();
         layoutAttMap.marginWidth = 3;
@@ -385,12 +380,10 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 
         // Create the radio button for no attribute mapper.
         setupButton = new Button(groupActionType, SWT.CHECK);
-        if (this.viewState != null
-                && this.viewState.getSetup() != null) {
+        if (this.viewState != null && this.viewState.getSetup() != null) {
             setupButton.setSelection(true);
         }
-        setupButton.setLayoutData(new GridData(
-                GridData.FILL_HORIZONTAL));
+        setupButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         setupButton.setText("Use Setup");
         setupButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent e) {
@@ -398,19 +391,17 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
                 validateInput();
             }
         });
-        
+
         Composite methodComposite = new Composite(groupActionType, SWT.NONE);
-        methodComposite
-                .setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        methodComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         GridLayout layout3 = new GridLayout();
         layout3.marginHeight = 3;
         layout3.marginWidth = 20;
         layout3.numColumns = 3;
         methodComposite.setLayout(layout3);
-        
+
         onerrorLabel = new Label(methodComposite, SWT.NONE);
-        GridData gridData1 = new GridData(
-                GridData.HORIZONTAL_ALIGN_BEGINNING);
+        GridData gridData1 = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
         gridData1.widthHint = LABEL_WIDTH;
         onerrorLabel.setLayoutData(gridData1);
         onerrorLabel.setText("On Error");
@@ -429,11 +420,8 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 
         browseOnerrorButton = new Button(methodComposite, SWT.PUSH);
         browseOnerrorButton.setText("...");
-        browseOnerrorButton.setLayoutData(new GridData(
-                GridData.HORIZONTAL_ALIGN_END));
+        browseOnerrorButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
         browseOnerrorButton.addSelectionListener(buttonListener);
-        
-        
 
         methodLabel = new Label(methodComposite, SWT.NONE);
         gridData = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
@@ -443,7 +431,8 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 
         methodText = new Text(methodComposite, SWT.SINGLE | SWT.BORDER);
 
-        if (this.viewState != null && this.viewState.getSetup() != null && this.viewState.getSetup().getMethod() != null) {
+        if (this.viewState != null && this.viewState.getSetup() != null
+                && this.viewState.getSetup().getMethod() != null) {
             methodText.setText(this.viewState.getSetup().getMethod());
         }
 
@@ -454,11 +443,10 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
                 validateInput();
             }
         });
-        
-        //        // Create the radio button for no attribute mapper.
+
+        // // Create the radio button for no attribute mapper.
         radioBeanRef = new Button(groupActionType, SWT.RADIO);
-        if (this.viewState != null
-                && this.viewState.getSetup() != null
+        if (this.viewState != null && this.viewState.getSetup() != null
                 && this.viewState.getSetup().getBean() != null) {
             radioBeanRef.setSelection(true);
         }
@@ -488,8 +476,7 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 
         // Add the text box for action classname.
         beanText = new Text(inset1, SWT.SINGLE | SWT.BORDER);
-        if (this.viewState != null
-                && this.viewState.getSetup() != null
+        if (this.viewState != null && this.viewState.getSetup() != null
                 && this.viewState.getSetup().getBean() != null) {
             beanText.setText(this.viewState.getSetup().getBean());
         }
@@ -501,13 +488,11 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
         });
         browseBeanButton = new Button(inset1, SWT.PUSH);
         browseBeanButton.setText("...");
-        browseBeanButton.setLayoutData(new GridData(
-                GridData.HORIZONTAL_ALIGN_END));
+        browseBeanButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
         browseBeanButton.addSelectionListener(buttonListener);
 
         radioClassRef = new Button(groupActionType, SWT.RADIO);
-        if (this.viewState != null
-                && this.viewState.getSetup() != null
+        if (this.viewState != null && this.viewState.getSetup() != null
                 && this.viewState.getSetup().getClassRef() != null) {
             radioClassRef.setSelection(true);
         }
@@ -529,7 +514,7 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
         inset3.setLayout(inset3Layout);
         inset3.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-        //      Label field.
+        // Label field.
         classRefLabel = new Label(inset3, SWT.NONE);
         classRefLabel.setText("Classref");
         gridData = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
@@ -538,11 +523,9 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 
         // Add the text box for action classname.
         classRefText = new Text(inset3, SWT.SINGLE | SWT.BORDER);
-        if (this.viewState != null
-                && this.viewState.getSetup() != null
+        if (this.viewState != null && this.viewState.getSetup() != null
                 && this.viewState.getSetup().getClassRef() != null) {
-            classRefText.setText(this.viewState.getSetup()
-                    .getClassRef());
+            classRefText.setText(this.viewState.getSetup().getClassRef());
         }
         classRefText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         classRefText.addModifyListener(new ModifyListener() {
@@ -553,13 +536,11 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
         // Add the button for browsing types.
         browseClassRefButton = new Button(inset3, SWT.PUSH);
         browseClassRefButton.setText("...");
-        browseClassRefButton.setLayoutData(new GridData(
-                GridData.HORIZONTAL_ALIGN_END));
+        browseClassRefButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
         browseClassRefButton.addSelectionListener(buttonListener);
 
         radioClass = new Button(groupActionType, SWT.RADIO);
-        if (this.viewState != null
-                && this.viewState.getSetup() != null
+        if (this.viewState != null && this.viewState.getSetup() != null
                 && this.viewState.getSetup().getBeanClass() != null) {
             radioClass.setSelection(true);
         }
@@ -591,11 +572,9 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 
         // Add the text box for action classname.
         classText = new Text(inset2, SWT.SINGLE | SWT.BORDER);
-        if (this.viewState != null
-                && this.viewState.getSetup() != null
+        if (this.viewState != null && this.viewState.getSetup() != null
                 && this.viewState.getSetup().getBeanClass() != null) {
-            classText.setText(this.viewState.getSetup()
-                    .getBeanClass());
+            classText.setText(this.viewState.getSetup().getBeanClass());
         }
         classText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         classText.addModifyListener(new ModifyListener() {
@@ -606,11 +585,10 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
         // Add the button for browsing types.
         browseClassButton = new Button(inset2, SWT.PUSH);
         browseClassButton.setText("...");
-        browseClassButton.setLayoutData(new GridData(
-                GridData.HORIZONTAL_ALIGN_END));
+        browseClassButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
         browseClassButton.addSelectionListener(buttonListener);
 
-        //      Label field.
+        // Label field.
         autowireLabel = new Label(inset2, SWT.NONE);
         autowireLabel.setText("Autowire");
         gridData = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
@@ -621,13 +599,11 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
 
         autowireText = new Combo(inset2, SWT.READ_ONLY);
         autowireText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        autowireText.setItems(new String[] { "no", "byName", "byType",
-                "constructor", "autodetect", "default" });
-        if (this.viewState != null
-                && this.viewState.getSetup() != null
+        autowireText.setItems(new String[] { "no", "byName", "byType", "constructor", "autodetect",
+                "default" });
+        if (this.viewState != null && this.viewState.getSetup() != null
                 && this.viewState.getSetup().getAutowire() != null) {
-            autowireText.setText(this.viewState.getSetup()
-                    .getAutowire());
+            autowireText.setText(this.viewState.getSetup().getAutowire());
         }
         autowireText.addModifyListener(new ModifyListener() {
             public void modifyText(ModifyEvent e) {
@@ -651,10 +627,10 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
         layout2.numColumns = 2;
         tableAndButtons.setLayout(layout2);
 
-        configsTable = new Table(tableAndButtons, SWT.MULTI
-                | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
+        configsTable = new Table(tableAndButtons, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL
+                | SWT.FULL_SELECTION | SWT.BORDER);
         GridData data = new GridData(GridData.FILL_BOTH);
-        //data.widthHint = 250;
+        // data.widthHint = 250;
         data.heightHint = 50;
         configsTable.setLayoutData(data);
         TableColumn columnName = new TableColumn(configsTable, SWT.NONE);
@@ -671,9 +647,8 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
         configsViewer = new TableViewer(configsTable);
         String[] columnNames = new String[] { "Name", "Value", "Type" };
         configsViewer.setColumnProperties(columnNames);
-        configsViewer.setContentProvider(new PropertiesContentProvider(
-                setupClone, configsViewer));
-        
+        configsViewer.setContentProvider(new PropertiesContentProvider(setupClone, configsViewer));
+
         configsViewer.setLabelProvider(new ModelTableLabelProvider());
         configsViewer.setCellModifier(new TableCellModifier());
         configsViewer.setInput(this.setupClone);
@@ -717,8 +692,8 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
                         .getSelection();
                 if (selection.getFirstElement() != null) {
                     if (selection.getFirstElement() instanceof IProperty) {
-                        PropertyEditorDialog dialog = new PropertyEditorDialog(parentShell, (IProperty) selection
-                                .getFirstElement());
+                        PropertyEditorDialog dialog = new PropertyEditorDialog(parentShell,
+                                (IProperty) selection.getFirstElement());
                         dialog.open();
                         configsViewer.refresh(true);
                     }
@@ -738,19 +713,18 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
                         .getSelection();
                 if (selection.getFirstElement() != null) {
                     if (selection.getFirstElement() instanceof IProperty) {
-                        setupClone.removeProperty((IProperty) selection
-                                .getFirstElement());
+                        setupClone.removeProperty((IProperty) selection.getFirstElement());
                     }
                 }
             }
         });
         removeButton.setEnabled(false);
         editButton.setEnabled(false);
-        
+
         item4.setControl(groupActionType);
 
-        beanProperties = new BeanReferencePropertiesComposite(this, item2,
-                getShell(), (IBeanReference) this.viewStateClone, false);
+        beanProperties = new BeanReferencePropertiesComposite(this, item2, getShell(),
+                (IBeanReference) this.viewStateClone, false);
         item2.setControl(beanProperties.createDialogArea(folder));
 
         properties = new PropertiesComposite(this, item3, getShell(),
@@ -760,11 +734,11 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
         description = new DescriptionComposite(this, item5, getShell(),
                 (IDescriptionEnabled) this.viewStateClone);
         item5.setControl(description.createDialogArea(folder));
-        
+
         this.setSetupEnabled();
-        
+
         applyDialogFont(parentComposite);
-        
+
         return parentComposite;
     }
 
@@ -779,7 +753,7 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
     protected String getMessage() {
         return "Enter the details for the view state";
     }
-    
+
     public IWebFlowModelElement getModelElementParent() {
         return this.parent;
     }
@@ -804,15 +778,13 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
         if (button.equals(browseBeanButton)) {
             WebFlowEditorInput input = WebFlowUtils.getActiveFlowEditorInput();
             IBeansConfigSet beansConfig = input.getBeansConfigSet();
-            ElementListSelectionDialog dialog = new ElementListSelectionDialog(
-                    getShell(), new DecoratingLabelProvider(
-                            new WebFlowModelLabelProvider(),
+            ElementListSelectionDialog dialog = new ElementListSelectionDialog(getShell(),
+                    new DecoratingLabelProvider(new WebFlowModelLabelProvider(),
                             new WebFlowModelLabelDecorator()));
             dialog.setBlockOnOpen(true);
             List elements = new ArrayList();
             Iterator iter = beansConfig.getConfigs().iterator();
-            IBeansProject parent = (IBeansProject) beansConfig
-                    .getElementParent();
+            IBeansProject parent = (IBeansProject) beansConfig.getElementParent();
             while (iter.hasNext()) {
                 String config = (String) iter.next();
                 elements.addAll(parent.getConfig(config).getBeans());
@@ -823,27 +795,23 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
             dialog.setMessage("Please select a bean reference");
             dialog.setMultipleSelection(false);
             if (Dialog.OK == dialog.open()) {
-                this.beanText.setText(((IBean) dialog.getFirstResult())
-                        .getElementName());
+                this.beanText.setText(((IBean) dialog.getFirstResult()).getElementName());
                 this.setSetupChoice(RADIOBEANREF_CHOICE);
             }
 
-        } 
-        else  if (button.equals(browseOnerrorButton)) {
-            ElementListSelectionDialog dialog = new ElementListSelectionDialog(
-                    getShell(), new DecoratingLabelProvider(
-                            new WebFlowModelLabelProvider(),
+        }
+        else if (button.equals(browseOnerrorButton)) {
+            ElementListSelectionDialog dialog = new ElementListSelectionDialog(getShell(),
+                    new DecoratingLabelProvider(new WebFlowModelLabelProvider(),
                             new WebFlowModelLabelDecorator()));
             dialog.setBlockOnOpen(true);
-            dialog.setElements(WebFlowCoreUtils.getStatesWithoutParent(
-                    this.parent).toArray());
+            dialog.setElements(WebFlowCoreUtils.getStatesWithoutParent(this.parent).toArray());
             dialog.setEmptySelectionMessage("Enter a valid state id");
             dialog.setTitle("State reference");
             dialog.setMessage("Please select a state reference");
             dialog.setMultipleSelection(false);
             if (Dialog.OK == dialog.open()) {
-                this.onerrorText.setText(((IState) dialog.getFirstResult())
-                        .getId());
+                this.onerrorText.setText(((IState) dialog.getFirstResult()).getId());
             }
         }
         else {
@@ -851,35 +819,31 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
             IJavaSearchScope searchScope = SearchEngine.createWorkspaceScope();
             try {
                 if (project.hasNature(JavaCore.NATURE_ID)) {
-                    IJavaProject javaProject = (IJavaProject) project
-                            .getNature(JavaCore.NATURE_ID);
+                    IJavaProject javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
                     IType type = javaProject
                             .findType("org.springframework.binding.AttributeMapper");
                     if (type != null) {
                         searchScope = SearchEngine.createHierarchyScope(type);
                     }
                 }
-            } catch (JavaModelException e) {
-            } catch (CoreException e) {
             }
-            //TypeSelectionDialog2 dialog= new TypeSelectionDialog2(getShell(),
-            // false,
-            //        new ProgressMonitorDialog(getShell()), searchScope,
-            // IJavaSearchConstants.TYPE);
-            TypeSelectionDialog dialog = new TypeSelectionDialog(getShell(),
-                    new ProgressMonitorDialog(getShell()),
-                    IJavaSearchConstants.CLASS, searchScope);
-            dialog
-                    .setMessage("Select an setup implementation class"); //$NON-NLS-1$
+            catch (JavaModelException e) {
+            }
+            catch (CoreException e) {
+            }
+            TypeSelectionDialog2 dialog = new TypeSelectionDialog2(getShell(), false,
+                    new ProgressMonitorDialog(getShell()), searchScope, IJavaSearchConstants.TYPE);
+            dialog.setMessage("Select an setup implementation class"); //$NON-NLS-1$
             dialog.setBlockOnOpen(true);
             dialog.setTitle("Setup Class");
-            //dialog.setFilter("*");
+            // dialog.setFilter("*");
             if (Dialog.OK == dialog.open()) {
                 IType obj = (IType) dialog.getFirstResult();
                 if (button.equals(browseClassButton)) {
                     this.classText.setText(obj.getFullyQualifiedName());
                     this.setSetupChoice(RADIOCLASS_CHOICE);
-                } else if (button.equals(browseClassRefButton)) {
+                }
+                else if (button.equals(browseClassRefButton)) {
                     this.classRefText.setText(obj.getFullyQualifiedName());
                     this.setSetupChoice(RADIOCLASSREF_CHOICE);
                 }
@@ -888,17 +852,17 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
         this.validateInput();
 
     }
-    
+
     protected void handleTableSelectionChanged() {
-        IStructuredSelection selection = (IStructuredSelection) configsViewer
-                .getSelection();
+        IStructuredSelection selection = (IStructuredSelection) configsViewer.getSelection();
         if (selection.isEmpty()) {
             this.editButton.setEnabled(false);
-        } else {
+        }
+        else {
             this.editButton.setEnabled(true);
         }
     }
-    
+
     protected void setSetupChoice(int choice) {
         if (RADIOBEANREF_CHOICE == choice) {
             this.radioBeanRef.setSelection(true);
@@ -918,7 +882,8 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
             this.classRefText.setEnabled(false);
             this.browseClassRefButton.setEnabled(false);
             this.classRefLabel.setEnabled(false);
-        } else if (RADIOCLASS_CHOICE == choice) {
+        }
+        else if (RADIOCLASS_CHOICE == choice) {
             this.radioBeanRef.setSelection(false);
             this.radioClass.setSelection(true);
             this.radioClassRef.setSelection(false);
@@ -936,7 +901,8 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
             this.classRefText.setEnabled(false);
             this.browseClassRefButton.setEnabled(false);
             this.classRefLabel.setEnabled(false);
-        } else if (RADIOCLASSREF_CHOICE == choice) {
+        }
+        else if (RADIOCLASSREF_CHOICE == choice) {
             this.radioBeanRef.setSelection(false);
             this.radioClass.setSelection(false);
             this.radioClassRef.setSelection(true);
@@ -954,7 +920,8 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
             this.classRefText.setEnabled(true);
             this.browseClassRefButton.setEnabled(true);
             this.classRefLabel.setEnabled(true);
-        } else {
+        }
+        else {
             this.radioBeanRef.setSelection(false);
             this.radioClass.setSelection(false);
             this.radioClassRef.setSelection(false);
@@ -985,7 +952,7 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
         if (!this.setupButton.getSelection()) {
             this.methodLabel.setEnabled(false);
             this.methodText.setEnabled(false);
-            
+
             this.radioBeanRef.setEnabled(false);
             this.radioClass.setEnabled(false);
             this.radioClassRef.setEnabled(false);
@@ -1007,30 +974,31 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
             this.classRefText.setEnabled(false);
             this.browseClassRefButton.setEnabled(false);
             this.classRefLabel.setEnabled(false);
-            
+
             this.configsTable.setEnabled(false);
             this.addButton.setEnabled(false);
             this.editButton.setEnabled(false);
             this.removeButton.setEnabled(false);
-             
+
             this.onerrorText.setEnabled(false);
             this.onerrorLabel.setEnabled(false);
             this.browseOnerrorButton.setEnabled(false);
 
-        } else {
+        }
+        else {
             setSetupChoice(RADIOBEANREF_CHOICE);
             this.radioBeanRef.setEnabled(true);
             this.radioClass.setEnabled(true);
             this.radioClassRef.setEnabled(true);
-            
+
             this.methodLabel.setEnabled(true);
             this.methodText.setEnabled(true);
-            
+
             this.configsTable.setEnabled(true);
             this.addButton.setEnabled(true);
             this.editButton.setEnabled(true);
             this.removeButton.setEnabled(true);
-            
+
             this.onerrorText.setEnabled(true);
             this.onerrorLabel.setEnabled(true);
             this.browseOnerrorButton.setEnabled(true);
@@ -1038,10 +1006,11 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
             if (this.viewState.getSetup() != null) {
                 if (this.viewState.getSetup().getBean() != null) {
                     this.setSetupChoice(RADIOBEANREF_CHOICE);
-                } else if (this.viewState.getSetup()
-                        .getBeanClass() != null) {
+                }
+                else if (this.viewState.getSetup().getBeanClass() != null) {
                     this.setSetupChoice(RADIOCLASS_CHOICE);
-                } else if (this.viewState.getSetup().getClassRef() != null) {
+                }
+                else if (this.viewState.getSetup().getClassRef() != null) {
                     this.setSetupChoice(RADIOCLASSREF_CHOICE);
                 }
             }
@@ -1071,18 +1040,16 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
         if (id == null || "".equals(id)) {
             errorMessage.append("A valid id attribute is required. ");
             error = true;
-        } else {
-            if (WebFlowCoreUtils.isIdAlreadyChoosenByAnotherState(parent,
-                    viewState, id)) {
+        }
+        else {
+            if (WebFlowCoreUtils.isIdAlreadyChoosenByAnotherState(parent, viewState, id)) {
                 errorMessage
                         .append("The entered id attribute must be unique within a single web flow. ");
                 error = true;
             }
         }
-        if (this.radioBeanRef.getSelection()
-                && (bean == null || "".equals(bean))) {
-            errorMessage
-                    .append("A valid bean reference attribute is required. ");
+        if (this.radioBeanRef.getSelection() && (bean == null || "".equals(bean))) {
+            errorMessage.append("A valid bean reference attribute is required. ");
             error = true;
         }
         if (this.radioClass.getSelection()
@@ -1090,22 +1057,21 @@ public class ViewStatePropertiesDialog extends TitleAreaDialog implements
             errorMessage.append("A valid bean class name is required. ");
             error = true;
         }
-        if (this.radioClass.getSelection()
-                && (autowire == null || "".equals(autowire))) {
+        if (this.radioClass.getSelection() && (autowire == null || "".equals(autowire))) {
             errorMessage.append("Please select an autowire type. ");
             error = true;
         }
         if (this.radioClassRef.getSelection()
-                && (classRef == null || "".equals(classRef) || classRef
-                        .indexOf(".") == -1)) {
+                && (classRef == null || "".equals(classRef) || classRef.indexOf(".") == -1)) {
             errorMessage.append("A valid bean class reference is required. ");
             error = true;
         }
-                
+
         if (error) {
             getButton(OK).setEnabled(false);
             setErrorMessage(errorMessage.toString());
-        } else {
+        }
+        else {
             getButton(OK).setEnabled(true);
             setErrorMessage(null);
         }

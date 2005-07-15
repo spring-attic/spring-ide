@@ -1,16 +1,14 @@
 /*
  * Copyright 2002-2005 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 
@@ -21,7 +19,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -46,8 +44,8 @@ import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
 
-public class PropertyEditorDialog extends TitleAreaDialog implements
-        IDialogValidator {
+public class PropertyEditorDialog
+        extends TitleAreaDialog implements IDialogValidator {
 
     private IProperty property;
 
@@ -57,8 +55,6 @@ public class PropertyEditorDialog extends TitleAreaDialog implements
             handleButtonPressed((Button) e.widget);
         }
     };
-
-    private int LABEL_WIDTH = 70;
 
     private Label nameLabel;
 
@@ -96,20 +92,19 @@ public class PropertyEditorDialog extends TitleAreaDialog implements
 
     protected void createButtonsForButtonBar(Composite parent) {
         // create OK and Cancel buttons by default
-        okButton = createButton(parent, IDialogConstants.OK_ID,
-                IDialogConstants.OK_LABEL, true);
-        createButton(parent, IDialogConstants.CANCEL_ID,
-                IDialogConstants.CANCEL_LABEL, false);
+        okButton = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+        createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
         // do this here because setting the text will set enablement on the
         // ok button
         nameText.setFocus();
         if (this.property != null && this.property.getName() != null
                 && this.property.getValue() != null) {
             okButton.setEnabled(true);
-        } else {
+        }
+        else {
             okButton.setEnabled(false);
         }
-        
+
         this.validateInput();
     }
 
@@ -122,7 +117,6 @@ public class PropertyEditorDialog extends TitleAreaDialog implements
 
     protected Control createDialogArea(Composite parent) {
         Composite parentComposite = (Composite) super.createDialogArea(parent);
-        GridData gridData = null;
         Composite composite = new Composite(parentComposite, SWT.NULL);
         GridLayout layout = new GridLayout();
         layout.numColumns = 1;
@@ -170,8 +164,8 @@ public class PropertyEditorDialog extends TitleAreaDialog implements
         typeLabel = new Label(nameGroup, SWT.NONE);
         typeLabel.setText("Type");
         typeText = new Combo(nameGroup, SWT.DROP_DOWN);
-        typeText.setItems(new String[] { "char", "byte", "short", "int",
-                "long", "float", "double", "boolean" });
+        typeText.setItems(new String[] { "char", "byte", "short", "int", "long", "float", "double",
+                "boolean" });
         if (this.property != null && this.property.getType() != null) {
             this.typeText.setText(this.property.getType());
         }
@@ -218,24 +212,14 @@ public class PropertyEditorDialog extends TitleAreaDialog implements
      */
     private void handleButtonPressed(Button button) {
 
-        IProject project = WebFlowUtils.getActiveFlowEditorInput().getFile()
-                .getProject();
         IJavaSearchScope searchScope = SearchEngine.createWorkspaceScope();
+        TypeSelectionDialog2 dialog = new TypeSelectionDialog2(getShell(), false,
+                new ProgressMonitorDialog(getShell()), searchScope, IJavaSearchConstants.CLASS);
 
-        /*
-         * TypeSelectionDialog2 dialog= new TypeSelectionDialog2(getShell(),
-         * false, new ProgressMonitorDialog(getShell()), searchScope,
-         * IJavaSearchConstants.TYPE);
-         * dialog.setMessage(JavaUIMessages.JavaUI_defaultDialogMessage);
-         */
-
-        TypeSelectionDialog dialog = new TypeSelectionDialog(getShell(),
-                new ProgressMonitorDialog(getShell()),
-                IJavaSearchConstants.CLASS, searchScope);
         dialog.setMessage("Select an type"); //$NON-NLS-1$
         dialog.setBlockOnOpen(true);
         dialog.setTitle("Type Selection");
-        //dialog.setFilter("*");
+        // dialog.setFilter("*");
         if (Dialog.OK == dialog.open()) {
             IType obj = (IType) dialog.getFirstResult();
             this.typeText.setText(obj.getFullyQualifiedName());
@@ -269,7 +253,8 @@ public class PropertyEditorDialog extends TitleAreaDialog implements
         if (error) {
             getButton(OK).setEnabled(false);
             setErrorMessage(errorMessage.toString());
-        } else {
+        }
+        else {
             getButton(OK).setEnabled(true);
             setErrorMessage(null);
         }

@@ -25,11 +25,11 @@ import java.util.Map;
 import org.eclipse.draw2d.ConnectionLayer;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.ShortestPathConnectionRouter;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.draw2d.graph.CompoundDirectedGraph;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.commands.CommandStackListener;
-import org.eclipse.gef.editpolicies.RootComponentEditPolicy;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
@@ -107,7 +107,7 @@ public class WebFlowPart extends ChildrenStatePart implements
                 bounds.width = rect.width;
                 bounds.height = rect.height;
                 if (resize || translate) {
-                    fireMoved();
+                    fireFigureMoved();
                     repaint();
                 }
             }
@@ -161,8 +161,5 @@ public class WebFlowPart extends ChildrenStatePart implements
         }
         fanRouter.setNextRouter(router);
         cLayer.setConnectionRouter(fanRouter);
-        getFigure().setLayoutManager(
-                new ShortestPathConnectionRouter.LayoutWrapper(getFigure()
-                        .getLayoutManager(), router));
     }
 }

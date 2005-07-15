@@ -30,7 +30,6 @@ import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.draw2d.graph.CompoundDirectedGraph;
 import org.eclipse.draw2d.graph.Edge;
 import org.eclipse.draw2d.graph.Node;
-import org.eclipse.draw2d.graph.NodeList;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.GraphicalEditPart;
@@ -55,8 +54,6 @@ public class StateTransitionPart extends AbstractConnectionEditPart implements
 
     private Label label;
 
-    private boolean swapped = false;
-
     public void activate() {
         super.activate();
         ((IWebFlowModelElement) getModel()).addPropertyChangeListener(this);
@@ -64,7 +61,6 @@ public class StateTransitionPart extends AbstractConnectionEditPart implements
 
     protected void applyGraphResults(CompoundDirectedGraph graph, Map map) {
         Edge e = (Edge) map.get(this);
-        NodeList nodes = e.vNodes;
         conn = (PolylineConnection) getConnectionFigure();
         conn.setTargetDecoration(new PolygonDecoration());
     }
@@ -81,7 +77,6 @@ public class StateTransitionPart extends AbstractConnectionEditPart implements
             IState targetState = ((AbstractStatePart) target.data).getState();
             if (startState.getId().equals(targetState.getId())) {
                 e = new Edge(this, target, source);
-                this.swapped = true;
             }
             else {
                 List children = ((IWebFlowState) ((AbstractStatePart) target.data)
@@ -90,11 +85,9 @@ public class StateTransitionPart extends AbstractConnectionEditPart implements
                 int targetIndex = children.indexOf(targetState);
                 if (targetIndex < sourceIndex) {
                     e = new Edge(this, target, source);
-                    this.swapped = true;
                 }
                 else {
                     e = new Edge(this, source, target);
-                    this.swapped = false;
                 }
             }
         }
@@ -105,11 +98,9 @@ public class StateTransitionPart extends AbstractConnectionEditPart implements
             int targetIndex = children.indexOf(target);
             if (targetIndex < sourceIndex) {
                 e = new Edge(this, target, source);
-                this.swapped = true;
             }
             else {
                 e = new Edge(this, source, target);
-                this.swapped = false;
             }
         }
         if (getTransitionModel().getActions().size() > 0) {

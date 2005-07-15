@@ -57,8 +57,6 @@ public abstract class AbstractStatePart extends AbstractGraphicalEditPart
 
         public static final int TARGET_ANCHOR = 1;
 
-        private int anchor = 0;
-
         private int offset;
 
         TopOrBottomAnchor(IFigure source, int offset) {

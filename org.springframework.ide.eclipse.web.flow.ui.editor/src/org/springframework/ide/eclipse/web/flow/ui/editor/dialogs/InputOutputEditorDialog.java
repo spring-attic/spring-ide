@@ -1,27 +1,24 @@
 /*
  * Copyright 2002-2005 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 
 package org.springframework.ide.eclipse.web.flow.ui.editor.dialogs;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -45,10 +42,9 @@ import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.web.flow.core.model.IInput;
 import org.springframework.ide.eclipse.web.flow.core.model.IOutput;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
-import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
 
-public class InputOutputEditorDialog extends TitleAreaDialog implements
-        IDialogValidator {
+public class InputOutputEditorDialog
+        extends TitleAreaDialog implements IDialogValidator {
 
     private SelectionListener buttonListener = new SelectionAdapter() {
 
@@ -81,13 +77,13 @@ public class InputOutputEditorDialog extends TitleAreaDialog implements
 
     private boolean isInput;
 
-    public InputOutputEditorDialog(Shell parentShell, Object state,
-            boolean isInput) {
+    public InputOutputEditorDialog(Shell parentShell, Object state, boolean isInput) {
         super(parentShell);
         this.isInput = isInput;
         if (isInput) {
             this.input = (IInput) state;
-        } else {
+        }
+        else {
             this.output = (IOutput) state;
         }
     }
@@ -99,7 +95,8 @@ public class InputOutputEditorDialog extends TitleAreaDialog implements
                 this.input.setValue(trimString(this.valueText.getText()));
                 this.input.setType(trimString(this.typeText.getText()));
                 this.input.setAs(trimString(this.asText.getText()));
-            } else {
+            }
+            else {
                 this.output.setName(trimString(this.nameText.getText()));
                 this.output.setValue(trimString(this.valueText.getText()));
                 this.output.setType(trimString(this.typeText.getText()));
@@ -117,17 +114,15 @@ public class InputOutputEditorDialog extends TitleAreaDialog implements
 
     protected void createButtonsForButtonBar(Composite parent) {
         // create OK and Cancel buttons by default
-        okButton = createButton(parent, IDialogConstants.OK_ID,
-                IDialogConstants.OK_LABEL, true);
-        createButton(parent, IDialogConstants.CANCEL_ID,
-                IDialogConstants.CANCEL_LABEL, false);
+        okButton = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+        createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
         // do this here because setting the text will set enablement on the
         // ok button
         nameText.setFocus();
         /*
-         * if (this.isInput && (this.input != null && this.input.getName() !=
-         * null && this.input.getValue() != null)) { okButton.setEnabled(true); }
-         * else { okButton.setEnabled(false); }
+         * if (this.isInput && (this.input != null && this.input.getName() != null &&
+         * this.input.getValue() != null)) { okButton.setEnabled(true); } else {
+         * okButton.setEnabled(false); }
          */
 
         this.validateInput();
@@ -160,8 +155,8 @@ public class InputOutputEditorDialog extends TitleAreaDialog implements
         nameText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
         if (this.isInput && this.input != null && this.input.getName() != null) {
             this.nameText.setText(this.input.getName());
-        } else if (!this.isInput && this.output != null
-                && this.output.getName() != null) {
+        }
+        else if (!this.isInput && this.output != null && this.output.getName() != null) {
             this.nameText.setText(this.output.getName());
         }
         nameText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -179,8 +174,8 @@ public class InputOutputEditorDialog extends TitleAreaDialog implements
         valueText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
         if (this.isInput && this.input != null && this.input.getValue() != null) {
             this.valueText.setText(this.input.getValue());
-        } else if (!this.isInput && this.output != null
-                && this.output.getValue() != null) {
+        }
+        else if (!this.isInput && this.output != null && this.output.getValue() != null) {
             this.valueText.setText(this.output.getValue());
         }
         valueText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -198,8 +193,8 @@ public class InputOutputEditorDialog extends TitleAreaDialog implements
         asText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
         if (this.isInput && this.input != null && this.input.getAs() != null) {
             this.asText.setText(this.input.getAs());
-        } else if (!this.isInput && this.output != null
-                && this.output.getAs() != null) {
+        }
+        else if (!this.isInput && this.output != null && this.output.getAs() != null) {
             this.asText.setText(this.output.getAs());
         }
         asText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -211,16 +206,16 @@ public class InputOutputEditorDialog extends TitleAreaDialog implements
         });
 
         Label dummy2 = new Label(nameGroup, SWT.NONE);
-        
+
         typeLabel = new Label(nameGroup, SWT.NONE);
         typeLabel.setText("Type");
         typeText = new Combo(nameGroup, SWT.DROP_DOWN);
-        typeText.setItems(new String[] { "char", "byte", "short", "int",
-                "long", "float", "double", "boolean" });
+        typeText.setItems(new String[] { "char", "byte", "short", "int", "long", "float", "double",
+                "boolean" });
         if (this.isInput && this.input != null && this.input.getType() != null) {
             this.typeText.setText(this.input.getType());
-        } else if (!this.isInput && this.output != null
-                && this.output.getType() != null) {
+        }
+        else if (!this.isInput && this.output != null && this.output.getType() != null) {
             this.typeText.setText(this.output.getType());
         }
         typeText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -248,16 +243,18 @@ public class InputOutputEditorDialog extends TitleAreaDialog implements
     protected Image getImage() {
         if (this.isInput) {
             return WebFlowImages.getImage(WebFlowImages.IMG_OBJS_INPUT);
-        } else {
+        }
+        else {
             return WebFlowImages.getImage(WebFlowImages.IMG_OBJS_OUTPUT);
         }
-        
+
     }
 
     protected String getMessage() {
         if (this.isInput) {
             return "Enter the details for the input";
-        } else {
+        }
+        else {
             return "Enter the details for the output";
         }
     }
@@ -265,7 +262,8 @@ public class InputOutputEditorDialog extends TitleAreaDialog implements
     protected String getShellTitle() {
         if (this.isInput) {
             return "Input";
-        } else {
+        }
+        else {
             return "Output";
         }
     }
@@ -273,7 +271,8 @@ public class InputOutputEditorDialog extends TitleAreaDialog implements
     protected String getTitle() {
         if (this.isInput) {
             return "Input properties";
-        } else {
+        }
+        else {
             return "Output properties";
         }
     }
@@ -283,24 +282,14 @@ public class InputOutputEditorDialog extends TitleAreaDialog implements
      */
     private void handleButtonPressed(Button button) {
 
-        IProject project = WebFlowUtils.getActiveFlowEditorInput().getFile()
-                .getProject();
         IJavaSearchScope searchScope = SearchEngine.createWorkspaceScope();
 
-        /*
-         * TypeSelectionDialog2 dialog= new TypeSelectionDialog2(getShell(),
-         * false, new ProgressMonitorDialog(getShell()), searchScope,
-         * IJavaSearchConstants.TYPE);
-         * dialog.setMessage(JavaUIMessages.JavaUI_defaultDialogMessage);
-         */
-
-        TypeSelectionDialog dialog = new TypeSelectionDialog(getShell(),
-                new ProgressMonitorDialog(getShell()),
-                IJavaSearchConstants.CLASS, searchScope);
+        TypeSelectionDialog2 dialog = new TypeSelectionDialog2(getShell(), false,
+                new ProgressMonitorDialog(getShell()), searchScope, IJavaSearchConstants.TYPE);
         dialog.setMessage("Select an type"); //$NON-NLS-1$
         dialog.setBlockOnOpen(true);
         dialog.setTitle("Type Selection");
-        //dialog.setFilter("*");
+        // dialog.setFilter("*");
         if (Dialog.OK == dialog.open()) {
             IType obj = (IType) dialog.getFirstResult();
             this.typeText.setText(obj.getFullyQualifiedName());
@@ -340,7 +329,8 @@ public class InputOutputEditorDialog extends TitleAreaDialog implements
         if (error) {
             getButton(OK).setEnabled(false);
             setErrorMessage(errorMessage.toString());
-        } else {
+        }
+        else {
             getButton(OK).setEnabled(true);
             setErrorMessage(null);
         }
