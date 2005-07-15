@@ -25,8 +25,6 @@ import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.wst.xml.ui.internal.editor.XMLEditorPluginImageHelper;
-import org.eclipse.wst.xml.ui.internal.editor.XMLEditorPluginImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin;
 
