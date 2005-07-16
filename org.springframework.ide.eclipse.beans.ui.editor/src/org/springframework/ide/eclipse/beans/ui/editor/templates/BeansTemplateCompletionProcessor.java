@@ -1,4 +1,3 @@
-package org.springframework.ide.eclipse.beans.ui.editor.templates;
 /*
  * Copyright 2002-2005 the original author or authors.
  * 
@@ -15,6 +14,8 @@ package org.springframework.ide.eclipse.beans.ui.editor.templates;
  * limitations under the License.
  */ 
 
+package org.springframework.ide.eclipse.beans.ui.editor.templates;
+
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -28,29 +29,30 @@ import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin;
 
-
 /**
- * Completion processor for XML Templates. Most of the work is already done
- * by the XML Content Assist processor, so by the time the
- * XMLTemplateCompletionProcessor is asked for content assist proposals, the
- * XML content assist processor has already set the context type for
- * templates.
+ * Completion processor for Spring beans config templates. Most of the work is
+ * already done by the <code>BeansContentAssistProcessor</code>, so by the
+ * time the <code>BeansTemplateCompletionProcessor</code> is asked for content
+ * assist proposals, the <code>BeansContentAssistProcessor</code> has already
+ * set the context type for templates.
  */
 public class BeansTemplateCompletionProcessor extends TemplateCompletionProcessor {
-    private String fContextTypeId = null;
 
-    protected ICompletionProposal createProposal(Template template, TemplateContext context, IRegion region, int relevance) {
-        return new BeansCustomTemplateProposal(template, context, region, getImage(template), relevance);
+    private String contextTypeId = null;
+
+    protected ICompletionProposal createProposal(Template template,
+    				  TemplateContext context, IRegion region, int relevance) {
+        return new BeansCustomTemplateProposal(template, context, region,
+        										getImage(template), relevance);
     }
 
-    protected TemplateContextType getContextType(ITextViewer viewer, IRegion region) {
-        TemplateContextType type = null;
-
+    protected TemplateContextType getContextType(ITextViewer viewer,
+    											 IRegion region) {
         ContextTypeRegistry registry = getTemplateContextRegistry();
-        if (registry != null)
-            type = registry.getContextType(fContextTypeId);
-
-        return type;
+        if (registry != null) {
+            return registry.getContextType(contextTypeId);
+        }
+        return null;
     }
 
     protected Image getImage(Template template) {
@@ -63,13 +65,11 @@ public class BeansTemplateCompletionProcessor extends TemplateCompletionProcesso
     }
 
     protected Template[] getTemplates(String contextTypeId) {
-        Template templates[] = null;
-
         TemplateStore store = getTemplateStore();
-        if (store != null)
-            templates = store.getTemplates(contextTypeId);
-
-        return templates;
+        if (store != null) {
+            return store.getTemplates(contextTypeId);
+        }
+        return null;
     }
 
     private TemplateStore getTemplateStore() {
@@ -77,6 +77,6 @@ public class BeansTemplateCompletionProcessor extends TemplateCompletionProcesso
     }
 
     public void setContextType(String contextTypeId) {
-        fContextTypeId = contextTypeId;
+        this.contextTypeId = contextTypeId;
     }
 }

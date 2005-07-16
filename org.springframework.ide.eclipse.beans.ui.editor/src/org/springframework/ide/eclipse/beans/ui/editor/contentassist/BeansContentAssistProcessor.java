@@ -59,12 +59,11 @@ import org.eclipse.wst.xml.core.internal.regions.DOMRegionContext;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansJavaDocUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateCompletionProcessor;
-import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextTypeIdsXML;
+import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextTypeIds;
 import org.springframework.ide.eclipse.core.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -467,14 +466,14 @@ public class BeansContentAssistProcessor
         if (node != null && node.getParentNode() != null) {
             Node parentNode = node.getParentNode();
             if ("bean".equals(parentNode.getNodeName())) {
-                this.addTemplates(request, BeansTemplateContextTypeIdsXML.BEAN);
+                this.addTemplates(request, BeansTemplateContextTypeIds.BEAN);
             }
             else if ("beans".equals(parentNode.getNodeName())) {
-                this.addTemplates(request, BeansTemplateContextTypeIdsXML.ALL);
+                this.addTemplates(request, BeansTemplateContextTypeIds.ALL);
             }
             else if ("property".equals(parentNode.getNodeName())) {
-                this.addTemplates(request, BeansTemplateContextTypeIdsXML.PROPERTY);
-                this.addTemplates(request, BeansTemplateContextTypeIdsXML.ALL);
+                this.addTemplates(request, BeansTemplateContextTypeIds.PROPERTY);
+                this.addTemplates(request, BeansTemplateContextTypeIds.ALL);
             }
         }
         super.addTagInsertionProposals(request, childPosition);

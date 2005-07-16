@@ -37,11 +37,9 @@ import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.wst.sse.ui.internal.provisional.registry.AdapterFactoryRegistry;
 import org.eclipse.wst.sse.ui.internal.provisional.registry.AdapterFactoryRegistryImpl;
-import org.eclipse.wst.sse.ui.internal.provisional.registry.embedded.EmbeddedAdapterFactoryRegistryImpl;
 import org.eclipse.wst.xml.ui.internal.JobStatusLineHelper;
-import org.eclipse.wst.xml.ui.internal.preferences.XMLUIPreferenceNames;
 import org.osgi.framework.BundleContext;
-import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextTypeIdsXML;
+import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextTypeIds;
 
 /**
  * The main plugin class
@@ -56,7 +54,10 @@ public class BeansEditorPlugin extends AbstractUIPlugin {
 							 "org.springframework.ide.eclipse.beans.ui.editor";
 	private static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
 
-	/** The shared instance.*/
+	/** Key to store our templates. */
+	private static final String TEMPLATES_KEY = PLUGIN_ID + ".templates";
+
+	/** The shared instance. */
 	private static BeansEditorPlugin plugin;
 
 	private ResourceBundle resourceBundle;
@@ -113,38 +114,33 @@ public class BeansEditorPlugin extends AbstractUIPlugin {
 
 	}
 
-	public AdapterFactoryRegistry getEmbeddedAdapterFactoryRegistry() {
-		return EmbeddedAdapterFactoryRegistryImpl.getInstance();
-
-	}
-
 	/**
-	 * Returns the template context type registry for the xml plugin.
+	 * Returns the template context type registry for the Spring beans editor.
 	 * 
-	 * @return the template context type registry for the xml plugin
+	 * @return the template context type registry for the Spring beans editor
 	 */
 	public ContextTypeRegistry getTemplateContextRegistry() {
 		if (contextTypeRegistry == null) {
 			ContributionContextTypeRegistry registry =
 										 new ContributionContextTypeRegistry();
-            registry.addContextType(BeansTemplateContextTypeIdsXML.ALL);
-            registry.addContextType(BeansTemplateContextTypeIdsXML.PROPERTY);
-            registry.addContextType(BeansTemplateContextTypeIdsXML.BEAN);
+			registry.addContextType(BeansTemplateContextTypeIds.ALL);
+			registry.addContextType(BeansTemplateContextTypeIds.PROPERTY);
+			registry.addContextType(BeansTemplateContextTypeIds.BEAN);
 			contextTypeRegistry = registry;
 		}
 		return contextTypeRegistry;
 	}
 
 	/**
-	 * Returns the template store for the xml editor templates.
+	 * Returns the template store for the Spring beans editor.
 	 * 
-	 * @return the template store for the xml editor templates
+	 * @return the template store for the Spring beans editor
 	 */
 	public TemplateStore getTemplateStore() {
 		if (templateStore == null) {
 			templateStore = new ContributionTemplateStore(
 							getTemplateContextRegistry(), getPreferenceStore(),
-							XMLUIPreferenceNames.TEMPLATES_KEY);
+							TEMPLATES_KEY);
 			try {
 				templateStore.load();
 			} catch (IOException e) {
@@ -155,10 +151,9 @@ public class BeansEditorPlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Returns an image descriptor for the image file at the given
-	 * plug-in relative path.
-	 *
-	 * @param path the path
+	 * Returns an image descriptor for the image file at the given plug-in
+	 * relative path.
+	 * @param path  the path of the image file
 	 * @return the image descriptor
 	 */
 	public static ImageDescriptor getImageDescriptor(String path) {

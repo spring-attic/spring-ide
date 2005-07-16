@@ -1,55 +1,52 @@
+/*
+ * Copyright 2002-2005 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.ide.eclipse.beans.ui.editor.templates;
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.templates.TemplatePreferencePage;
-import org.eclipse.wst.xml.ui.internal.XMLUIPlugin;
-import org.eclipse.wst.xml.ui.internal.editor.IHelpContextIds;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin;
 
-
 /**
- * Preference page for XML templates
+ * Preference page for Spring beans config templates.
  */
 public class BeanTemplatePreferencePage extends TemplatePreferencePage {
 
     public BeanTemplatePreferencePage() {
-        BeansEditorPlugin xmlEditorPlugin = BeansEditorPlugin.getDefault();
+        BeansEditorPlugin plugin = BeansEditorPlugin.getDefault();
 
-        setPreferenceStore(xmlEditorPlugin.getPreferenceStore());
-        setTemplateStore(xmlEditorPlugin.getTemplateStore());
-        setContextTypeRegistry(xmlEditorPlugin.getTemplateContextRegistry());
+        setPreferenceStore(plugin.getPreferenceStore());
+        setTemplateStore(plugin.getTemplateStore());
+        setContextTypeRegistry(plugin.getTemplateContextRegistry());
         
-        setMessage("Spring Beans XML Templates");
+        setMessage(BeansEditorPlugin.getResourceString("preferences.message"));
     }
+//
+//	protected Control createContents(Composite ancestor) {
+//		IWorkbenchHelpSystem helpSystem = BeansEditorPlugin.getDefault()
+//				.getWorkbench().getHelpSystem();
+//		Control c = super.createContents(ancestor);
+//		helpSystem.setHelp(c, IHelpContextIds.XML_PREFWEBX_TEMPLATES_HELPID);
+//		return c;
+//	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.jface.preference.PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
-     */
-    protected Control createContents(Composite ancestor) {
-        Control c = super.createContents(ancestor);
-        WorkbenchHelp.setHelp(c, IHelpContextIds.XML_PREFWEBX_TEMPLATES_HELPID);
-        return c;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.ui.texteditor.templates.TemplatePreferencePage#isShowFormatterSetting()
-     */
     protected boolean isShowFormatterSetting() {
         // template formatting has not been implemented
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.jface.preference.IPreferencePage#performOk()
-     */
     public boolean performOk() {
         boolean ok = super.performOk();
         BeansEditorPlugin.getDefault().savePluginPreferences();

@@ -20,13 +20,12 @@ import org.eclipse.jface.text.templates.GlobalTemplateVariables;
 import org.eclipse.jface.text.templates.TemplateContextType;
 
 /**
- * Base class for XML template context types. Templates of this context type
- * apply to any place within XML content type.
+ * Base class for Spring beans config template context types. Templates of this
+ * context type apply to any place within Spring beans config content type.
  */
 public class BeansTemplateContextType extends TemplateContextType {
 
     public BeansTemplateContextType() {
-        super();
         addResolver(new GlobalTemplateVariables.Cursor());
         addResolver(new GlobalTemplateVariables.Date());
         addResolver(new GlobalTemplateVariables.Dollar());

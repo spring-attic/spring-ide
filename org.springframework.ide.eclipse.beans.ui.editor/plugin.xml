@@ -82,19 +82,19 @@
  
  <extension point="org.eclipse.ui.editors.templates">
 		<contextType
-			name="Bean"
+			name="%templatesContextTypeAllName"
 			class="org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextType"
-			id="spring_bean">
+			id="org.springframework.ide.eclipse.beans.ui.editor.templates.contextType.all">
 		</contextType>
 		<contextType
-			name="Spring XML"
+			name="%templatesContextTypeBeanName"
 			class="org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextType"
-			id="spring_all">
+			id="org.springframework.ide.eclipse.beans.ui.editor.templates.contextType.bean">
 		</contextType>
-				<contextType
-			name="Property"
+		<contextType
+			name="%templatesContextTypePropertyName"
 			class="org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextType"
-			id="spring_property">
+			id="org.springframework.ide.eclipse.beans.ui.editor.templates.contextType.property">
 		</contextType>
   		<include
           file="templates/templates.xml"
@@ -103,7 +103,7 @@
 	
 	<extension point="org.eclipse.ui.preferencePages">
 		<page
-			name="Spring Beans XML Templates"
+			name="%templatesPreferencesPageName"
 			category="org.eclipse.wst.sse.ui.preferences.xml"
 			class="org.springframework.ide.eclipse.beans.ui.editor.templates.BeanTemplatePreferencePage"
 			id="org.springframework.ide.eclipse.beans.ui.editor.templates">
