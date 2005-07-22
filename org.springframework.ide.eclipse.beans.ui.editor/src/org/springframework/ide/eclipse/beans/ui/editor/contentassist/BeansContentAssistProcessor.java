@@ -72,7 +72,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * Main entry point for the xml editor's content assist 
+ * Main entry point for the xml editor's content assist. 
  */
 public class BeansContentAssistProcessor
         extends XMLContentAssistProcessor implements IPropertyChangeListener {
