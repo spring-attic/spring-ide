@@ -2,7 +2,7 @@
 <feature
       id="org.springframework.ide.eclipse"
       label="%featureName"
-      version="1.2.1"
+      version="1.2.2"
       provider-name="%providerName">
 
    <description>
@@ -18,7 +18,7 @@
    </license>
 
    <url>
-      <update url="http://springide.org/updatesite/" label="%updateSiteName"/>
+      <update label="%updateSiteName" url="http://springide.org/updatesite/"/>
    </url>
 
    <requires>
