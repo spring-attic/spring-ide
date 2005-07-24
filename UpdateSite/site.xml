@@ -9,6 +9,9 @@
    <feature url="features/org.springframework.ide.eclipse_1.2.1.jar" id="org.springframework.ide.eclipse" version="1.2.1">
       <category name="spring-ide"/>
    </feature>
+   <feature url="features/org.springframework.ide.eclipse_1.2.2.jar" id="org.springframework.ide.eclipse" version="1.2.2">
+      <category name="spring-ide"/>
+   </feature>
    <category-def name="spring-ide" label="Spring IDE">
       <description>
          Plugins which are providing support for the Spring framework within the Eclipse IDE
