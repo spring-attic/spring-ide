@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 	private IBeanDefinitionEvents eventHandler;
 
 	/** Counter used to keep track of nested bean definitions (inner beans) */ 
-	private int nestedBeanCount;
+//	private int nestedBeanCount;
 
 	public EventBeanDefinitionParser(IBeanDefinitionEvents eventHandler) {
 		this.eventHandler = eventHandler;
@@ -128,25 +128,28 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 	 * All relevant exceptions are catched and rethrown wrapped together with
 	 * the corresponding XML element.
 	 */
-	protected BeanDefinitionHolder parseBeanDefinitionElement(Element ele) {
+	protected BeanDefinitionHolder parseBeanDefinitionElement(Element ele,
+														 boolean isInnerBean) {
 		try {
-			nestedBeanCount++;
-			if (eventHandler != null) {
-				if (nestedBeanCount > 1) {
+//			nestedBeanCount++;
+//			if (eventHandler != null) {
+//				if (nestedBeanCount > 1) {
+				if (isInnerBean) {
 					eventHandler.startBean(ele, true);
 				} else {
 					eventHandler.startBean(ele, false);
 				}
-			}
+//			}
 			BeanDefinitionHolder bdHolder = super.parseBeanDefinitionElement(
-																		  ele);
+															 ele, isInnerBean);
 			// Replace Spring's BeanDefinitionHolder with our own version with
 			// overwritten toString()
 			if (bdHolder != null) {
 				bdHolder = new ExtendedBeanDefinitionHolder(bdHolder);
 			}
 			if (eventHandler != null) {
-				if (nestedBeanCount > 1) {
+//				if (nestedBeanCount > 1) {
+				if (isInnerBean) {
 					eventHandler.registerBean(bdHolder, true);
 
 					// Inner beans are not registered with the bean definition
@@ -162,7 +165,7 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 					eventHandler.registerBean(bdHolder, false);
 				}
 			}
-			nestedBeanCount--;
+//			nestedBeanCount--;
 			return bdHolder;
 		} catch (DOMException e) {
 			throw new BeanDefinitionException(ele, e);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,48 @@ package org.springframework.ide.eclipse.beans.core.internal.parser;
 
 import java.io.IOException;
 
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 
-public class BeansDtdResolver extends
-						org.springframework.beans.factory.xml.BeansDtdResolver {
-	public InputSource resolveEntity(String publicId, String systemId)
-														    throws IOException {
-		InputSource input = super.resolveEntity(publicId, systemId);
-		if (input == null) {
-			throw new IOException("Unsupported DTD [" + systemId + ']');
+/**
+ * EntityResolver implementation for the Spring beans DTD,
+ * to load the DTD from the Spring class path (or JAR file).
+ *
+ * <p>Fetches "spring-beans.dtd" from the class path resource
+ * "/org/springframework/beans/factory/xml/spring-beans.dtd",
+ * no matter whether specified as some local URL that includes "spring-beans"
+ * in the DTD name or as "http://www.springframework.org/dtd/spring-beans.dtd".
+ *
+ * @see org.springframework.beans.factory.xml.ResourceEntityResolver
+ */
+public class BeansDtdResolver implements EntityResolver {
+
+	private static final String DTD_NAME = "spring-beans";
+
+	private static final String SEARCH_PACKAGE =
+									 "/org/springframework/beans/factory/xml/";
+
+	public InputSource resolveEntity(String publicId,
+									 String systemId) throws IOException {
+		if (systemId != null &&
+					  systemId.indexOf(DTD_NAME) > systemId.lastIndexOf("/")) {
+			String dtdFile = systemId.substring(systemId.indexOf(DTD_NAME));
+			try {
+				Resource resource = new ClassPathResource(SEARCH_PACKAGE +
+														  dtdFile, getClass());
+				InputSource source = new InputSource(resource.getInputStream());
+				source.setPublicId(publicId);
+				source.setSystemId(systemId);
+				return source;
+			} catch (IOException e) {
+				BeansCorePlugin.log("Could not resolve beans DTD [" +
+								   systemId + "]: not found in class path", e);
+			}
 		}
-		return input;
+		// Use the default behavior -> download from website or wherever.
+		return null;
 	}
 }

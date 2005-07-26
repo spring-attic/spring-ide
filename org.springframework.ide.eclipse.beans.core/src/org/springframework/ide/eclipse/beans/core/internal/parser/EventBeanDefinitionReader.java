@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,12 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.core.io.FileResourceLoader;
@@ -129,6 +131,33 @@ public class EventBeanDefinitionReader implements BeanDefinitionReader {
 					BeansCorePlugin.log("Could not close InputStream", e);
 				}
 			}
+		}
+	}
+
+	public int loadBeanDefinitions(String location)
+										  throws BeanDefinitionStoreException {
+		ResourceLoader resourceLoader = getResourceLoader();
+		if (resourceLoader == null) {
+			throw new BeanDefinitionStoreException("Cannot import bean " +
+									 "definitions from location [" + location +
+									 "]: no ResourceLoader available");
+		}
+		if (resourceLoader instanceof ResourcePatternResolver) {
+
+			// Resource pattern matching available.
+			try {
+				Resource[] resources = ((ResourcePatternResolver)
+										resourceLoader).getResources(location);
+				int loadCount = loadBeanDefinitions(resources);
+				return loadCount;
+			} catch (IOException e) {
+				throw new BeanDefinitionStoreException("Could not resolve " +
+					 "bean definition resource pattern [" + location + "]", e);
+			}
+		} else {
+			// Can only load single resources by absolute URL.
+			Resource resource = resourceLoader.getResource(location);
+			return loadBeanDefinitions(resource);
 		}
 	}
 
