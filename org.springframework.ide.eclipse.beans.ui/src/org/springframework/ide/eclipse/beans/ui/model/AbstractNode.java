@@ -105,7 +105,9 @@ public abstract class AbstractNode implements INode {
 			id.append(getParent().getID());
 			id.append(IModelElement.ID_DELIMITER);
 		}
-		id.append(getElement().getElementType());
+		if (getElement() != null) {
+			id.append(getElement().getElementType());
+		}
 		id.append(IModelElement.ID_SEPARATOR);
 		if (getName() != null) {
 			id.append(getName());
