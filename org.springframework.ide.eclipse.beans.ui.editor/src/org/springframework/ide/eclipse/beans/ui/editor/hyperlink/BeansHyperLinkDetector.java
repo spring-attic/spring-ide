@@ -1,20 +1,20 @@
 /*
  * Copyright 2002-2005 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */ 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor.hyperlink;
+
+import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IMethod;
@@ -35,6 +35,8 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMAttr;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.StringUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -43,9 +45,9 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 /**
- * Detects hyperlinks in XML tags. Includes detection of bean classes and bean
- * properties in attribute values. Resolves bean references (including
- * references to parent beans or factory beans).
+ * Detects hyperlinks in XML tags. Includes detection of bean classes and bean properties in
+ * attribute values. Resolves bean references (including references to parent beans or factory
+ * beans).
  */
 public class BeansHyperLinkDetector implements IHyperlinkDetector {
 
@@ -194,6 +196,9 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
         else if ("depends-on".equals(attrName)) {
             return true;
         }
+        else if ("local".equals(attrName) || "bean".equals(attrName)) {
+            return true;
+        }
 
         return false;
     }
@@ -307,9 +312,7 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
                 }
             }
             else if ("factory-bean".equals(name) || "depends-on".equals(name)
-                    || "parent".equals(name)) {
-                // TODO add factoryBean support for beans defined outside of the current
-                // xml file
+                    || "parent".equals(name) || "local".equals(name) || "bean".equals(name)) {
                 Document doc = node.getOwnerDocument();
                 Element bean = doc.getElementById(target);
                 if (bean != null) {
@@ -317,7 +320,15 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
                     link = new NodeElementHyperlink(hyperlinkRegion, region, textViewer);
                 }
                 else {
-                    // TODO handle external lookup
+                    IFile file = ((IFileEditorInput) this.editor.getEditorInput()).getFile();
+                    // assume this is an external reference
+                    Iterator beans = BeansEditorUtils.getBeansFromConfigSets(file).iterator();
+                    while (beans.hasNext()) {
+                        IBean modelBean = (IBean) beans.next();
+                        if (modelBean.getElementName().equals(target)) {
+                            link = new ExternalBeanHyperlink(modelBean, hyperlinkRegion);
+                        }
+                    }
                 }
             }
         }
