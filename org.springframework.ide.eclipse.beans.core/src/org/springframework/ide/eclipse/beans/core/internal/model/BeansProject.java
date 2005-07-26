@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,7 +157,7 @@ public class BeansProject extends AbstractSourceModelElement
     }
 
 	/**
-	 * Returns a list of <code>IBeansConfigSet</code>s known defined within this
+	 * Returns a list of <code>IBeansConfigSet</code>s defined within this
 	 * project.
 	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet
 	 */
