@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -242,27 +242,36 @@ public class BeansConfig extends AbstractSourceModelElement
 			Iterator beans = getBeans().iterator();
 			while (beans.hasNext()) {
 				IBean bean = (IBean) beans.next();
-
-				// Get name of bean class - strip name of any inner class
-				String className = bean.getClassName();
-				if (className != null) {
-					int pos = className.indexOf('$');
-					if  (pos > 0) {
-						className = className.substring(0, pos);
-					}
-
-					// Maintain a list of bean names within every entry in the
-					// bean class map
-					List beanClassBeans = (List) beanClassesMap.get(className);
-					if (beanClassBeans == null) {
-						beanClassBeans = new ArrayList();
-						beanClassesMap.put(className, beanClassBeans);
-					}
-					beanClassBeans.add(bean);
-				}
+				addBeanClassToMap(bean);
+			}
+			beans = getInnerBeans().iterator();
+			while (beans.hasNext()) {
+				IBean bean = (IBean) beans.next();
+				addBeanClassToMap(bean);
 			}
 		}
 		return beanClassesMap;
+	}
+
+	private void addBeanClassToMap(IBean bean) {
+
+		// Get name of bean class - strip name of any inner class
+		String className = bean.getClassName();
+		if (className != null) {
+			int pos = className.indexOf('$');
+			if  (pos > 0) {
+				className = className.substring(0, pos);
+			}
+
+			// Maintain a list of bean names within every entry in the
+			// bean class map
+			List beanClassBeans = (List) beanClassesMap.get(className);
+			if (beanClassBeans == null) {
+				beanClassBeans = new ArrayList();
+				beanClassesMap.put(className, beanClassBeans);
+			}
+			beanClassBeans.add(bean);
+		}
 	}
 
 	private void readConfig() {
