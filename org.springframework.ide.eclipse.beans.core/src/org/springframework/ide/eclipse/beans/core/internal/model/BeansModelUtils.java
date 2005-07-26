@@ -293,7 +293,6 @@ public class BeansModelUtils {
 			if (!references.contains(ref)) {
 				references.add(ref);
 				if (!referencedBeans.contains(target)) {
-					referencedBeans.add(target);
 					return true;
 				}
 			}
@@ -321,6 +320,7 @@ public class BeansModelUtils {
 					references.add(ref);
 				}
 			}
+			referencedBeans.add(element);
 		}
 	}
 

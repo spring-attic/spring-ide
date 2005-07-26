@@ -106,6 +106,6 @@ public class BeanReference {
 		text.append(source);
 		text.append(" -> ");
 		text.append(target);
-		return super.toString();
+		return text.toString();
 	}
 }
