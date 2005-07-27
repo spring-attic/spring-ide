@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.graphics.Image;
@@ -62,10 +63,13 @@ import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
+import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansJavaDocUtils;
+import org.springframework.ide.eclipse.beans.ui.editor.BeansModelImageDescriptor;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateCompletionProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextTypeIds;
+import org.springframework.ide.eclipse.beans.ui.model.ModelImageDescriptor;
 import org.springframework.ide.eclipse.core.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -84,7 +88,7 @@ public class BeansContentAssistProcessor
         public static final int LOCAL_BEAN_RELEVANCE = 20;
 
         public static final int EXTERNAL_BEAN_RELEVANCE = 10;
-
+        
         protected ContentAssistRequest request;
 
         protected Map beans;
@@ -113,22 +117,14 @@ public class BeansContentAssistProcessor
                             buf.append(attributes.getNamedItem("class").getNodeValue());
                             buf.append("]");
                         }
-                        buf.append(" - ");
-                        buf.append(relFileName);
-                        Image image = null;
-                        if (beanNode.getParentNode() != null
-                                && "beans".equals(beanNode.getParentNode().getNodeName())) {
-                            image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
-                        }
-                        else {
-                            image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CHILD_BEAN);
-                        }
+                        Image image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
 
                         CustomCompletionProposal proposal = new CustomCompletionProposal(
                                 replaceText, request.getReplacementBeginPosition() + 1, request
                                         .getReplacementLength() - 2, replaceText.length(), image,
                                 buf.toString(), null, null,
                                 BeanReferenceSearchRequestor.LOCAL_BEAN_RELEVANCE);
+                        
                         this.request.addProposal(proposal);
                         this.beans.put(key, proposal);
                     }
@@ -153,13 +149,16 @@ public class BeansContentAssistProcessor
                     }
                     buf.append(" - ");
                     buf.append(relFileName);
-                    Image image = image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
+                    Image image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
+                    ImageDescriptor descriptor = new BeansModelImageDescriptor(image, BeansModelImageDescriptor.FLAG_IS_EXTERNAL);
+        			image = BeansUIPlugin.getImageDescriptorRegistry().get(descriptor);
 
                     CustomCompletionProposal proposal = new CustomCompletionProposal(replaceText,
                             request.getReplacementBeginPosition() + 1, request
                                     .getReplacementLength() - 2, replaceText.length(), image, buf
                                     .toString(), null, null,
                             BeanReferenceSearchRequestor.EXTERNAL_BEAN_RELEVANCE);
+                    
                     this.request.addProposal(proposal);
                     this.beans.put(key, proposal);
                 }
