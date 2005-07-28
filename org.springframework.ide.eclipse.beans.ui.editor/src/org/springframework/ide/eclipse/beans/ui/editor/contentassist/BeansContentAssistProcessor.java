@@ -493,14 +493,17 @@ public class BeansContentAssistProcessor
                             relevance = TypeSearchRequestor.CLASS_RELEVANCE * -1;
                         }
                     }
-
+                    
+                    BeansJavaDocUtils utils = new BeansJavaDocUtils(type);
+                    String javadoc = utils.getJavaDoc();
+                    
                     image = this.imageProvider.getImageLabel(type, type.getFlags()
                             | JavaElementImageProvider.SMALL_ICONS);
 
                     CustomCompletionProposal proposal = new CustomCompletionProposal(replaceText,
                             request.getReplacementBeginPosition() + 1, request
                                     .getReplacementLength() - 2, replaceText.length(), image,
-                            displayText, null, null, relevance);
+                            displayText, null, javadoc, relevance);
                     this.request.addProposal(proposal);
                     this.types.put(displayText, proposal);
                 }
