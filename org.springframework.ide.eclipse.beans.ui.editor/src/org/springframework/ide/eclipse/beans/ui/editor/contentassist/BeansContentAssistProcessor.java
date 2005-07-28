@@ -49,15 +49,11 @@ import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.editors.text.FileDocumentProvider;
-import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegionList;
@@ -73,11 +69,11 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansJavaDocUtils;
+import org.springframework.ide.eclipse.beans.ui.editor.BeansLablelProvider;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansModelImageDescriptor;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateCompletionProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextTypeIds;
 import org.springframework.ide.eclipse.core.StringUtils;
-import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -130,7 +126,7 @@ public class BeansContentAssistProcessor
                         CustomCompletionProposal proposal = new CustomCompletionProposal(
                                 replaceText, request.getReplacementBeginPosition() + 1, request
                                         .getReplacementLength() - 2, replaceText.length(), image,
-                                buf.toString(), null, createAdditionalProposalInfo(beanNode, file),
+                                buf.toString(), null, BeansLablelProvider.createAdditionalProposalInfo(beanNode, file),
                                 BeanReferenceSearchRequestor.LOCAL_BEAN_RELEVANCE);
 
                         this.request.addProposal(proposal);
@@ -166,7 +162,7 @@ public class BeansContentAssistProcessor
                     CustomCompletionProposal proposal = new CustomCompletionProposal(replaceText,
                             request.getReplacementBeginPosition() + 1, request
                                     .getReplacementLength() - 2, replaceText.length(), image, buf
-                                    .toString(), null, createAdditionalProposalInfo(bean),
+                                    .toString(), null, BeansLablelProvider.createAdditionalProposalInfo(bean),
                             BeanReferenceSearchRequestor.EXTERNAL_BEAN_RELEVANCE);
 
                     this.request.addProposal(proposal);
@@ -190,74 +186,6 @@ public class BeansContentAssistProcessor
                 flags |= BeansModelImageDescriptor.FLAG_IS_ROOT_BEAN_WITHOUT_CLASS;
             }
             return flags;
-        }
-        
-        private String createAdditionalProposalInfo(Node bean, IFile file) {
-            NamedNodeMap attributes = bean.getAttributes();
-            StringBuffer buf = new StringBuffer();
-            buf.append("<b>id: </b>");
-            if (attributes.getNamedItem("id") != null) {
-                buf.append(attributes.getNamedItem("id").getNodeValue());
-            }
-            if (attributes.getNamedItem("name") != null) {
-                buf.append("<br><b>alias: </b>");
-                buf.append(attributes.getNamedItem("name").getNodeValue());
-            }
-            buf.append("<br><b>class: </b>");
-            if (attributes.getNamedItem("class") != null) {
-                buf.append(attributes.getNamedItem("class").getNodeValue());
-            }
-            buf.append("<br><b>singleton: </b>");
-            if (attributes.getNamedItem("singleton") != null) {
-                buf.append(attributes.getNamedItem("singleton").getNodeValue());
-            }
-            else {
-                buf.append("true");
-            }
-            buf.append("<br><b>abstract: </b>");
-            if (attributes.getNamedItem("abstract") != null) {
-                buf.append(attributes.getNamedItem("abstract").getNodeValue());
-            }
-            else {
-                buf.append("false");
-            }
-            buf.append("<br><b>lazy-init: </b>");
-            if (attributes.getNamedItem("lazy-init") != null) {
-                buf.append(attributes.getNamedItem("lazy-init").getNodeValue());
-            }
-            else {
-                buf.append("default");
-            }
-            buf.append("<br><b>filename: </b>");
-            buf.append(file.getProjectRelativePath());
-            return buf.toString();
-        }
-
-
-        private String createAdditionalProposalInfo(IBean bean) {
-            StringBuffer buf = new StringBuffer();
-            buf.append("<b>id: </b>");
-            buf.append(bean.getElementName());
-            if (bean.getAliases() != null && bean.getAliases().length > 0) {
-                buf.append("<br><b>alias: </b>");
-                for (int i = 0; i < bean.getAliases().length; i++) {
-                    buf.append(bean.getAliases()[i]);
-                    if (i < bean.getAliases().length - 1) {
-                        buf.append(", ");
-                    }
-                }
-            }
-            buf.append("<br><b>class: </b>");
-            buf.append(bean.getClassName());
-            buf.append("<br><b>singleton: </b>");
-            buf.append(bean.isSingleton());
-            buf.append("<br><b>abstract: </b>");
-            buf.append(bean.isAbstract());
-            buf.append("<br><b>lazy-init: </b>");
-            buf.append(bean.isLazyInit());
-            buf.append("<br><b>filename: </b>");
-            buf.append(bean.getElementResource().getProjectRelativePath());
-            return buf.toString();
         }
 
         public String getText(IFile file) {
@@ -670,6 +598,7 @@ public class BeansContentAssistProcessor
                 }
                 else if ("init-method".equals(attributeName)
                         || "destroy-method".equals(attributeName)) {
+                    // TODO add support for parent bean
                     NamedNodeMap attributes = node.getAttributes();
                     String className = attributes.getNamedItem("class").getNodeValue();
                     if (className != null) {
@@ -677,6 +606,7 @@ public class BeansContentAssistProcessor
                     }
                 }
                 else if ("factory-method".equals(attributeName)) {
+                    // TODO add support for parent bean
                     NamedNodeMap attributes = node.getAttributes();
                     Node factoryBean = attributes.getNamedItem("factory-bean");
                     String className = null;
@@ -724,6 +654,7 @@ public class BeansContentAssistProcessor
                 }
             }
             else if ("property".equals(node.getNodeName())) {
+                // TODO add support for parent bean
                 Node parentNode = node.getParentNode();
                 NamedNodeMap attributes = parentNode.getAttributes();
                 if ("name".equals(attributeName) && attributes != null
