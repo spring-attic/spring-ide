@@ -31,6 +31,12 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 public class BeansModelImageDescriptor extends CompositeImageDescriptor {
 
     public static final int FLAG_IS_EXTERNAL = 1 << 0;
+    public static final int FLAG_HAS_ERRORS = 1 << 1;
+    public static final int FLAG_HAS_WARNINGS = 1 << 2;
+    public static final int FLAG_IS_PROTOTYPE = 1 << 3;
+    public static final int FLAG_IS_LAZY_INIT = 1 << 4;
+    public static final int FLAG_IS_ABSTRACT = 1 << 5;
+    public static final int FLAG_IS_ROOT_BEAN_WITHOUT_CLASS = 1 << 6;
 	
 	private Image baseImage;
 	private int flags;
@@ -73,11 +79,39 @@ public class BeansModelImageDescriptor extends CompositeImageDescriptor {
 		int y = 0;
 		ImageData data = null;
 		if ((flags & FLAG_IS_EXTERNAL) != 0) {
-			data = BeansUIImages.DESC_OVR_EXTERNAL.getImageData();
-			x = getSize().x - data.width;
-			y = getSize().y - data.height;
-			drawImage(data, x, y);
-		}
+            data = BeansUIImages.DESC_OVR_EXTERNAL.getImageData();
+            x = getSize().x - data.width;
+            y = getSize().y - data.height;
+            drawImage(data, x, y);
+        }
+        if ((flags & FLAG_HAS_ERRORS) != 0) {
+            data = BeansUIImages.DESC_OVR_ERROR.getImageData();
+            x = 0;
+            y = getSize().y - data.height;
+            drawImage(data, x, y);
+        } else if ((flags & FLAG_HAS_WARNINGS) != 0) {
+            data = BeansUIImages.DESC_OVR_WARNING.getImageData();
+            x = 0;
+            y = getSize().y - data.height;
+            drawImage(data, x, y);
+        }
+        if ((flags & FLAG_IS_PROTOTYPE) != 0) {
+            data = BeansUIImages.DESC_OVR_PROTOTYPE.getImageData();
+            x = 0;
+            y = 0;
+            drawImage(data, x, y);
+        }
+        if ((flags & FLAG_IS_ABSTRACT) != 0) {
+            data = BeansUIImages.DESC_OVR_ABSTRACT.getImageData();
+            x = getSize().x - data.width;
+            y = 0;
+            drawImage(data, x, y);
+        } else if ((flags & FLAG_IS_ROOT_BEAN_WITHOUT_CLASS) != 0) {
+            data = BeansUIImages.DESC_OVR_NO_CLASS.getImageData();
+            x = getSize().x - data.width;
+            y = 0;
+            drawImage(data, x, y);
+        }
 	}
 
 	protected void setSize(Point size) {

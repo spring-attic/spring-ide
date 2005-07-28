@@ -69,6 +69,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.BeansJavaDocUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansModelImageDescriptor;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateCompletionProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextTypeIds;
+import org.springframework.ide.eclipse.beans.ui.model.INode;
 import org.springframework.ide.eclipse.beans.ui.model.ModelImageDescriptor;
 import org.springframework.ide.eclipse.core.StringUtils;
 import org.w3c.dom.Document;
@@ -150,7 +151,7 @@ public class BeansContentAssistProcessor
                     buf.append(" - ");
                     buf.append(relFileName);
                     Image image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
-                    ImageDescriptor descriptor = new BeansModelImageDescriptor(image, BeansModelImageDescriptor.FLAG_IS_EXTERNAL);
+                    ImageDescriptor descriptor = new BeansModelImageDescriptor(image, getBeanFlags(bean));
         			image = BeansUIPlugin.getImageDescriptorRegistry().get(descriptor);
 
                     CustomCompletionProposal proposal = new CustomCompletionProposal(replaceText,
@@ -163,6 +164,24 @@ public class BeansContentAssistProcessor
                     this.beans.put(key, proposal);
                 }
             }
+        }
+        
+        private int getBeanFlags(IBean bean) {
+            int flags = BeansModelImageDescriptor.FLAG_IS_EXTERNAL;
+            if (!bean.isSingleton()) {
+                flags |= BeansModelImageDescriptor.FLAG_IS_PROTOTYPE;
+            }
+            if (bean.isAbstract()) {
+                flags |= BeansModelImageDescriptor.FLAG_IS_ABSTRACT;
+            }
+            if (bean.isLazyInit()) {
+                flags |= BeansModelImageDescriptor.FLAG_IS_LAZY_INIT;
+            }
+            if (bean.isRootBean() && bean.getClassName() == null &&
+                                                 bean.getParentName() == null) {
+               flags |= BeansModelImageDescriptor.FLAG_IS_ROOT_BEAN_WITHOUT_CLASS;
+            }
+            return flags;
         }
     }
 
