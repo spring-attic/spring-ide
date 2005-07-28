@@ -222,4 +222,20 @@ public class Introspector {
         String base = StringUtils.capitalize(propertyName);
         return (findMethod(type, "set" + base, 1, true, Introspector.STATIC_NO) != null);
     }
+    
+        /**
+     * Returns true if the given type has a public setter (one-argument method named "set" +
+     * property name with an uppercase first character) for the specified property.
+     * 
+     * @param type The Java type object on which to retrieve the method
+     * @param propertyName Name of the property
+     */
+    public static IMethod getWritableProperty(IType type, String propertyName)
+            throws JavaModelException {
+        if (propertyName == null || propertyName.length() == 0) {
+            throw createException("bad property name");
+        }
+        String base = StringUtils.capitalize(propertyName);
+        return findMethod(type, "set" + base, 1, true, Introspector.STATIC_NO);
+    }
 }
