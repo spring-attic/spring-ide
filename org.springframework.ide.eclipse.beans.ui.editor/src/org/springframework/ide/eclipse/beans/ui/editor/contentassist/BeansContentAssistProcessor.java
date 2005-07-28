@@ -14,6 +14,9 @@
 
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,11 +49,15 @@ import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.editors.text.FileDocumentProvider;
+import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegionList;
@@ -69,9 +76,8 @@ import org.springframework.ide.eclipse.beans.ui.editor.BeansJavaDocUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansModelImageDescriptor;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateCompletionProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextTypeIds;
-import org.springframework.ide.eclipse.beans.ui.model.INode;
-import org.springframework.ide.eclipse.beans.ui.model.ModelImageDescriptor;
 import org.springframework.ide.eclipse.core.StringUtils;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -89,7 +95,7 @@ public class BeansContentAssistProcessor
         public static final int LOCAL_BEAN_RELEVANCE = 20;
 
         public static final int EXTERNAL_BEAN_RELEVANCE = 10;
-        
+
         protected ContentAssistRequest request;
 
         protected Map beans;
@@ -114,8 +120,9 @@ public class BeansContentAssistProcessor
                         StringBuffer buf = new StringBuffer();
                         buf.append(replaceText);
                         if (attributes.getNamedItem("class") != null) {
+                            String className = attributes.getNamedItem("class").getNodeValue();
                             buf.append(" [");
-                            buf.append(attributes.getNamedItem("class").getNodeValue());
+                            buf.append(Signature.getSimpleName(className));
                             buf.append("]");
                         }
                         Image image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
@@ -123,9 +130,9 @@ public class BeansContentAssistProcessor
                         CustomCompletionProposal proposal = new CustomCompletionProposal(
                                 replaceText, request.getReplacementBeginPosition() + 1, request
                                         .getReplacementLength() - 2, replaceText.length(), image,
-                                buf.toString(), null, null,
+                                buf.toString(), null, createAdditionalProposalInfo(beanNode, file),
                                 BeanReferenceSearchRequestor.LOCAL_BEAN_RELEVANCE);
-                        
+
                         this.request.addProposal(proposal);
                         this.beans.put(key, proposal);
                     }
@@ -144,28 +151,30 @@ public class BeansContentAssistProcessor
                     StringBuffer buf = new StringBuffer();
                     buf.append(replaceText);
                     if (bean.getClassName() != null) {
+                        String className = bean.getClassName();
                         buf.append(" [");
-                        buf.append(bean.getClassName());
+                        buf.append(Signature.getSimpleName(className));
                         buf.append("]");
                     }
                     buf.append(" - ");
                     buf.append(relFileName);
                     Image image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
-                    ImageDescriptor descriptor = new BeansModelImageDescriptor(image, getBeanFlags(bean));
-        			image = BeansUIPlugin.getImageDescriptorRegistry().get(descriptor);
+                    ImageDescriptor descriptor = new BeansModelImageDescriptor(image,
+                            getBeanFlags(bean));
+                    image = BeansUIPlugin.getImageDescriptorRegistry().get(descriptor);
 
                     CustomCompletionProposal proposal = new CustomCompletionProposal(replaceText,
                             request.getReplacementBeginPosition() + 1, request
                                     .getReplacementLength() - 2, replaceText.length(), image, buf
-                                    .toString(), null, null,
+                                    .toString(), null, createAdditionalProposalInfo(bean),
                             BeanReferenceSearchRequestor.EXTERNAL_BEAN_RELEVANCE);
-                    
+
                     this.request.addProposal(proposal);
                     this.beans.put(key, proposal);
                 }
             }
         }
-        
+
         private int getBeanFlags(IBean bean) {
             int flags = BeansModelImageDescriptor.FLAG_IS_EXTERNAL;
             if (!bean.isSingleton()) {
@@ -177,11 +186,97 @@ public class BeansContentAssistProcessor
             if (bean.isLazyInit()) {
                 flags |= BeansModelImageDescriptor.FLAG_IS_LAZY_INIT;
             }
-            if (bean.isRootBean() && bean.getClassName() == null &&
-                                                 bean.getParentName() == null) {
-               flags |= BeansModelImageDescriptor.FLAG_IS_ROOT_BEAN_WITHOUT_CLASS;
+            if (bean.isRootBean() && bean.getClassName() == null && bean.getParentName() == null) {
+                flags |= BeansModelImageDescriptor.FLAG_IS_ROOT_BEAN_WITHOUT_CLASS;
             }
             return flags;
+        }
+        
+        private String createAdditionalProposalInfo(Node bean, IFile file) {
+            NamedNodeMap attributes = bean.getAttributes();
+            StringBuffer buf = new StringBuffer();
+            buf.append("<b>id: </b>");
+            if (attributes.getNamedItem("id") != null) {
+                buf.append(attributes.getNamedItem("id").getNodeValue());
+            }
+            if (attributes.getNamedItem("name") != null) {
+                buf.append("<br><b>alias: </b>");
+                buf.append(attributes.getNamedItem("name").getNodeValue());
+            }
+            buf.append("<br><b>class: </b>");
+            if (attributes.getNamedItem("class") != null) {
+                buf.append(attributes.getNamedItem("class").getNodeValue());
+            }
+            buf.append("<br><b>singleton: </b>");
+            if (attributes.getNamedItem("singleton") != null) {
+                buf.append(attributes.getNamedItem("singleton").getNodeValue());
+            }
+            else {
+                buf.append("true");
+            }
+            buf.append("<br><b>abstract: </b>");
+            if (attributes.getNamedItem("abstract") != null) {
+                buf.append(attributes.getNamedItem("abstract").getNodeValue());
+            }
+            else {
+                buf.append("false");
+            }
+            buf.append("<br><b>lazy-init: </b>");
+            if (attributes.getNamedItem("lazy-init") != null) {
+                buf.append(attributes.getNamedItem("lazy-init").getNodeValue());
+            }
+            else {
+                buf.append("default");
+            }
+            buf.append("<br><b>filename: </b>");
+            buf.append(file.getProjectRelativePath());
+            return buf.toString();
+        }
+
+
+        private String createAdditionalProposalInfo(IBean bean) {
+            StringBuffer buf = new StringBuffer();
+            buf.append("<b>id: </b>");
+            buf.append(bean.getElementName());
+            if (bean.getAliases() != null && bean.getAliases().length > 0) {
+                buf.append("<br><b>alias: </b>");
+                for (int i = 0; i < bean.getAliases().length; i++) {
+                    buf.append(bean.getAliases()[i]);
+                    if (i < bean.getAliases().length - 1) {
+                        buf.append(", ");
+                    }
+                }
+            }
+            buf.append("<br><b>class: </b>");
+            buf.append(bean.getClassName());
+            buf.append("<br><b>singleton: </b>");
+            buf.append(bean.isSingleton());
+            buf.append("<br><b>abstract: </b>");
+            buf.append(bean.isAbstract());
+            buf.append("<br><b>lazy-init: </b>");
+            buf.append(bean.isLazyInit());
+            buf.append("<br><b>filename: </b>");
+            buf.append(bean.getElementResource().getProjectRelativePath());
+            return buf.toString();
+        }
+
+        public String getText(IFile file) {
+            try {
+                InputStream in = file.getContents();
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                byte[] buf = new byte[1024];
+                int read = in.read(buf);
+                while (read > 0) {
+                    out.write(buf, 0, read);
+                    read = in.read(buf);
+                }
+                return out.toString();
+            }
+            catch (CoreException e) {
+            }
+            catch (IOException e) {
+            }
+            return "";
         }
     }
 
@@ -493,10 +588,10 @@ public class BeansContentAssistProcessor
                             relevance = TypeSearchRequestor.CLASS_RELEVANCE * -1;
                         }
                     }
-                    
+
                     BeansJavaDocUtils utils = new BeansJavaDocUtils(type);
                     String javadoc = utils.getJavaDoc();
-                    
+
                     image = this.imageProvider.getImageLabel(type, type.getFlags()
                             | JavaElementImageProvider.SMALL_ICONS);
 
@@ -599,7 +694,8 @@ public class BeansContentAssistProcessor
                                 IFile file = ((IFileEditorInput) this.editor.getEditorInput())
                                         .getFile();
                                 // assume this is an external reference
-                                Iterator beans = BeansEditorUtils.getBeansFromConfigSets(file).iterator();
+                                Iterator beans = BeansEditorUtils.getBeansFromConfigSets(file)
+                                        .iterator();
                                 while (beans.hasNext()) {
                                     IBean modelBean = (IBean) beans.next();
                                     if (modelBean.getElementName().equals(factoryBeanId)) {
