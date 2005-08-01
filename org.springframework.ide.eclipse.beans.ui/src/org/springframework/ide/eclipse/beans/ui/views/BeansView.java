@@ -41,6 +41,8 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IPageLayout;
@@ -52,6 +54,7 @@ import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
@@ -110,14 +113,13 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 	}
 
 	public void createPartControl(Composite parent) {
-		TreeViewer viewer = createViewer(parent);
-		this.treeViewer = viewer;
+		treeViewer = createViewer(parent);
 
 		initializeActions();
-		createContextMenu(viewer);
+		createContextMenu(treeViewer);
 		fillToolBar();
 	
-		getSite().setSelectionProvider(viewer);
+		getSite().setSelectionProvider(treeViewer);
 	}
 
 	private void initializeActions() {
@@ -137,14 +139,15 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 				return e1.toString().compareToIgnoreCase(e2.toString());
 			}
 		});
-
 		viewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
 				handleDoubleClick(event);
 			}
 		});
-
-		getViewSite().setSelectionProvider(viewer);
+        viewer.addDropSupport(DND.DROP_MOVE | DND.DROP_COPY,
+        			   new Transfer[] { LocalSelectionTransfer.getInstance() },
+        			   new BeansViewDropAdapter(viewer));
+        getViewSite().setSelectionProvider(viewer);
 		return viewer;
 	}
 
