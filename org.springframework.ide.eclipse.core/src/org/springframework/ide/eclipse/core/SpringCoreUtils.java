@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.JavaCore;
 
 public class SpringCoreUtils {
 
@@ -107,6 +108,20 @@ public class SpringCoreUtils {
 				SpringCore.log(e);
 			}
 		}
+	}
+
+	/**
+	 * Returns true if given project has a Java project nature.
+	 */
+	public static boolean isJavaProject(IProject project) {
+		if (project != null && project.isAccessible()) {
+			try {
+				return project.hasNature(JavaCore.NATURE_ID);
+			} catch (CoreException e) {
+				SpringCore.log(e);
+			}
+		}
+		return false;
 	}
 
 	/**
