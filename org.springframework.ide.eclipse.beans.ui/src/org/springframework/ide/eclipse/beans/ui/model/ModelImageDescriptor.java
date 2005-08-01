@@ -34,7 +34,7 @@ public class ModelImageDescriptor extends CompositeImageDescriptor {
 	private Point size;
 	
 	/**
-	 * Create a new BeansUIImageDescriptor.
+	 * Create a new CompositeImageDescriptor.
 	 * 
 	 * @param baseImage  an image descriptor used as the base image
 	 * @param node  a node which adornments are to be rendered
