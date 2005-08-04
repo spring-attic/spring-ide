@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.views;
 
@@ -147,6 +147,9 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
         viewer.addDropSupport(DND.DROP_MOVE | DND.DROP_COPY,
         			   new Transfer[] { LocalSelectionTransfer.getInstance() },
         			   new BeansViewDropAdapter(viewer));
+        viewer.addDragSupport(DND.DROP_MOVE | DND.DROP_COPY,
+ 			   new Transfer[] { LocalSelectionTransfer.getInstance() },
+ 			   new BeansViewDragAdapter(viewer));
         getViewSite().setSelectionProvider(viewer);
 		return viewer;
 	}
