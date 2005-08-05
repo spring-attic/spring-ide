@@ -78,6 +78,7 @@ public class BeansViewDragAdapter extends DragSourceAdapter implements TransferD
 			}
 		}
 		LocalSelectionTransfer.getInstance().setSelection(selection);
+		LocalSelectionTransfer.getInstance().setSelectionSetTime(event.time & 0xFFFFFFFFL);
 		event.doit = true;
 	}
 
