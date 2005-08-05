@@ -152,7 +152,7 @@ public class ConfigSetsBlock {
 		newButton = SpringUIUtils.createButton(buttonArea,
 			 BeansUIPlugin.getResourceString(NEW_BUTTON), true, buttonListener);
 		editButton = SpringUIUtils.createButton(buttonArea,
-			BeansUIPlugin.getResourceString(EDIT_BUTTON), true, buttonListener);
+			BeansUIPlugin.getResourceString(EDIT_BUTTON), false, buttonListener);
 		removeButton = SpringUIUtils.createButton(buttonArea,
 		 				  BeansUIPlugin.getResourceString(REMOVE_BUTTON), false,
 		 				  buttonListener);
