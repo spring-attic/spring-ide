@@ -211,23 +211,34 @@ public class BeansConfigValidator {
 			// arguments and properties
 			String className = bd.getBeanClassName();
 			if (className != null) {
-				IType type = BeansModelUtils.getJavaType(
+
+				// If factory bean specified then bean class is not allowed
+				if (bd.getFactoryBeanName() != null) {
+					BeansModelUtils.createProblemMarker(bean, "If factory " +
+						  "bean specified then class attribute is not allowed",
+						  IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+						  IBeansProjectMarker.ERROR_CODE_CLASS_NOT_ALLOWED,
+						  bean.getElementName(), null);
+				} else {
+					IType type = BeansModelUtils.getJavaType(
 							 bean.getConfig().getConfigFile().getProject(),
 							 className);
-				if (type == null) {
-					if (!bean.isAbstract()) {
-						BeansModelUtils.createProblemMarker(bean,
-							 "Class '" + className + "' not found",
-							 IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
-							 IBeansProjectMarker.ERROR_CODE_CLASS_NOT_FOUND,
-							 bean.getElementName(), className);
-					}
-				} else {
+					if (type == null) {
+						if (!bean.isAbstract()) {
+							BeansModelUtils.createProblemMarker(bean,
+								"Class '" + className + "' not found",
+								IMarker.SEVERITY_ERROR,
+								bean.getElementStartLine(),
+							 	IBeansProjectMarker.ERROR_CODE_CLASS_NOT_FOUND,
+							 	bean.getElementName(), className);
+						}
+					} else {
 
-					// Only validate constructor arguments of non-abstract beans
-					if (!bean.isAbstract()) {
-						validateConstructorArguments(bean, type,
+						// Only validate constructor args of non-abstract beans
+						if (!bean.isAbstract()) {
+							validateConstructorArguments(bean, type,
 											bd.getConstructorArgumentValues());
+						}
 					}
 				}
 			}
@@ -505,11 +516,18 @@ public class BeansConfigValidator {
 											  registry);
 			}
 
-			// Validate non-static factory method in factory bean
-			if (bd.getFactoryBeanName() != null &&
-										   bd.getFactoryMethodName() != null) {
-				validateFactoryBean(bean, bd.getFactoryBeanName(),
-									bd.getFactoryMethodName(), registry);
+			// Validate factory bean and it's non-static factory method
+			if (bd.getFactoryBeanName() != null) {
+				if (bd.getFactoryMethodName() == null) {
+					BeansModelUtils.createProblemMarker(bean,
+							"A factory bean requires a factory method",
+							IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+							IBeansProjectMarker.ERROR_CODE_NO_FACTORY_METHOD,
+							bean.getElementName(), bd.getFactoryBeanName());
+				} else {
+					validateFactoryBean(bean, bd.getFactoryBeanName(),
+										bd.getFactoryMethodName(), registry);
+				}
 			}
 
 			// Validate depends-on beans
@@ -624,8 +642,7 @@ public class BeansConfigValidator {
 		try {
 			AbstractBeanDefinition factoryBd = (AbstractBeanDefinition)
 										  registry.getBeanDefinition(beanName);
-			if (factoryBd.isAbstract() ||
-										factoryBd.getBeanClassName() == null) {
+			if (factoryBd.isAbstract()) {
 				BeansModelUtils.createProblemMarker(bean,
 						   "Invalid factory bean '" + beanName + "'",
 						   IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
@@ -636,7 +653,8 @@ public class BeansConfigValidator {
 				// Validate non-static factory method in factory bean
 				// Factory beans with factory methods can only be validated
 				// during runtime - so skip them
-				if (factoryBd.getFactoryMethodName() == null) {
+				if (factoryBd instanceof RootBeanDefinition &&
+									factoryBd.getFactoryMethodName() == null) {
 					validateFactoryMethod(bean, factoryBd.getBeanClassName(),
 										  methodName, false);
 				}
@@ -667,9 +685,10 @@ public class BeansConfigValidator {
 		} else {
 			try {
 				if (Introspector.findMethod(type, methodName, -1, true,
-											(isStatic ? Introspector.STATIC_YES : Introspector.STATIC_NO)) == null) {
+										  (isStatic ? Introspector.STATIC_YES :
+											Introspector.STATIC_NO)) == null) {
 					BeansModelUtils.createProblemMarker(bean,
-							(isStatic ? "Static" : "Instance") +
+							(isStatic ? "Static" : "Non-static") +
 							" factory method '" + methodName +
 							"' in factory bean class '" + className +
 							"' not found", IMarker.SEVERITY_ERROR,

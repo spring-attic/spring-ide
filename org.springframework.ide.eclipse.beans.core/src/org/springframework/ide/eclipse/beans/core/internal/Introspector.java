@@ -120,8 +120,8 @@ public class Introspector {
                 int flags = method.getFlags();
                 if (Flags.isPublic(flags) == isPublic
                         && (staticFlag == Introspector.STATIC_IRRELVANT
-                                || (staticFlag == Introspector.STATIC_YES && Flags.isStatic(flags)) || (staticFlag == Introspector.STATIC_NO && !Flags
-                                .isStatic(flags)))
+                            || (staticFlag == Introspector.STATIC_YES && Flags.isStatic(flags))
+                                || (staticFlag == Introspector.STATIC_NO && !Flags.isStatic(flags)))
                         && (argCount == -1 || method.getNumberOfParameters() == argCount)
                         && methodName.equals(method.getElementName())) {
                     return method;

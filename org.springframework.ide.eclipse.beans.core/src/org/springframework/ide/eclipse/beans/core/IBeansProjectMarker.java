@@ -36,33 +36,35 @@ public interface IBeansProjectMarker {
 	/**
 	 * Error code marker attribute (value <code>"errorCode"</code>).
 	 */
-	 public static final String ERROR_CODE = "errorCode";
+	public static final String ERROR_CODE = "errorCode";
 
 	/**
 	 * Bean ID marker attribute (value <code>"beanID"</code>).
 	 */
-	 public static final String BEAN_ID = "beanID";
+	public static final String BEAN_ID = "beanID";
 
 	/**
 	 * Error data marker attribute (value <code>"errorData"</code>).
 	 */
-	 public static final String ERROR_DATA = "errorData";
+	public static final String ERROR_DATA = "errorData";
 
-	 // Codes used for attribute 'ERROR_CODE'
-	 public static final int ERROR_CODE_NONE = 0;
-	 public static final int ERROR_CODE_PARSING_FAILED = 1;
-	 public static final int ERROR_CODE_BEAN_OVERRIDE = 2;
-	 public static final int ERROR_CODE_BEAN_WITHOUT_CLASS_OR_PARENT = 3;
-	 public static final int ERROR_CODE_CLASS_NOT_FOUND = 4;
-	 public static final int ERROR_CODE_UNDEFINED_PARENT_BEAN = 5;
-	 public static final int ERROR_CODE_NO_CONSTRUCTOR = 6;
-	 public static final int ERROR_CODE_NO_SETTER = 7;
-	 public static final int ERROR_CODE_UNDEFINED_REFERENCE = 8;
-	 public static final int ERROR_CODE_INVALID_BEAN_DEFINITION = 9;
-	 public static final int ERROR_CODE_INVALID_BEAN_ALIAS = 10;
-	 public static final int ERROR_CODE_UNDEFINED_DEPENDS_ON_BEAN = 11;
-	 public static final int ERROR_CODE_UNDEFINED_FACTORY_BEAN = 12;
-	 public static final int ERROR_CODE_INVALID_FACTORY_BEAN = 13;
-	 public static final int ERROR_CODE_UNDEFINED_FACTORY_BEAN_METHOD = 14;
-	 public static final int ERROR_CODE_NO_GETTER = 15;
+	// Codes used for attribute 'ERROR_CODE'
+	public static final int ERROR_CODE_NONE = 0;
+	public static final int ERROR_CODE_PARSING_FAILED = 1;
+	public static final int ERROR_CODE_BEAN_OVERRIDE = 2;
+	public static final int ERROR_CODE_BEAN_WITHOUT_CLASS_OR_PARENT = 3;
+	public static final int ERROR_CODE_CLASS_NOT_FOUND = 4;
+	public static final int ERROR_CODE_UNDEFINED_PARENT_BEAN = 5;
+	public static final int ERROR_CODE_NO_CONSTRUCTOR = 6;
+	public static final int ERROR_CODE_NO_SETTER = 7;
+	public static final int ERROR_CODE_UNDEFINED_REFERENCE = 8;
+	public static final int ERROR_CODE_INVALID_BEAN_DEFINITION = 9;
+	public static final int ERROR_CODE_INVALID_BEAN_ALIAS = 10;
+	public static final int ERROR_CODE_UNDEFINED_DEPENDS_ON_BEAN = 11;
+	public static final int ERROR_CODE_UNDEFINED_FACTORY_BEAN = 12;
+	public static final int ERROR_CODE_INVALID_FACTORY_BEAN = 13;
+	public static final int ERROR_CODE_UNDEFINED_FACTORY_BEAN_METHOD = 14;
+	public static final int ERROR_CODE_NO_GETTER = 15;
+	public static final int ERROR_CODE_CLASS_NOT_ALLOWED = 16;
+	public static final int ERROR_CODE_NO_FACTORY_METHOD = 17;
 }
