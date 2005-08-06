@@ -601,7 +601,7 @@ public class BeansConfigValidator {
                     } catch (NoSuchBeanDefinitionException be) {
                         BeansModelUtils.createProblemMarker(element,
                                 "Referenced factory bean '" + tempBeanName + "' not found",
-                                IMarker.SEVERITY_ERROR,
+                                IMarker.SEVERITY_WARNING,
                                 ((ISourceModelElement) element).getElementStartLine(),
                                 IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCE,
                                 element.getElementName(), beanName);
@@ -610,7 +610,7 @@ public class BeansConfigValidator {
                 else {
                     BeansModelUtils.createProblemMarker(element,
                           "Referenced bean '" + beanName + "' not found",
-                          IMarker.SEVERITY_ERROR,
+                          IMarker.SEVERITY_WARNING,
                           ((ISourceModelElement) element).getElementStartLine(),
                           IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCE,
                           element.getElementName(), beanName);
