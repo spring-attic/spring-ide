@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <project name="Spring IDE Update Site" default="dist" basedir=".">
 
-  <property name="version" value="1.2.2"/>
+  <property name="version" value="1.2.3"/>
   <property name="name" value="updatesite"/>
 
   <property name="dist.name" value="${name}_${version}"/>
