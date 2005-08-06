@@ -110,7 +110,8 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory
 	}
 
 	public boolean containsBeanDefinition(String beanName) {
-		return beanDefinitionMap.containsKey(beanName);
+		String transformedBeanName = transformedBeanName(beanName);
+		return beanDefinitionMap.containsKey(transformedBeanName);
 	}
 
 	/**
@@ -121,11 +122,13 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory
 	 */
 	public BeanDefinition getBeanDefinition(String beanName)
 														throws BeansException {
-		BeanDefinition bd = (BeanDefinition) beanDefinitionMap.get(beanName);
+		String transformedBeanName = transformedBeanName(beanName);
+		BeanDefinition bd = (BeanDefinition)
+									beanDefinitionMap.get(transformedBeanName);
 		if (bd == null) {
 			throw new NoSuchBeanDefinitionException(beanName, toString());
 		}
-		return getMergedBeanDefinition(beanName, bd);
+		return getMergedBeanDefinition(transformedBeanName, bd);
 	}
 
 	public void registerBeanDefinition(String beanName,
