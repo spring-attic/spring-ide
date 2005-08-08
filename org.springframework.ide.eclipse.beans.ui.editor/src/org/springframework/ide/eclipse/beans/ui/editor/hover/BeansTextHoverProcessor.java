@@ -40,7 +40,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansJavaDocUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansLablelProvider;
-import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.ExternalBeanHyperlink;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;

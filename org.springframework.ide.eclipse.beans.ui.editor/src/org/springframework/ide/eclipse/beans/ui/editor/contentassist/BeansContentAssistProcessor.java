@@ -17,7 +17,6 @@ package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -878,8 +877,6 @@ public class BeansContentAssistProcessor
     }
 
     private BeansTemplateCompletionProcessor fTemplateProcessor = null;
-
-    private List fTemplateContexts = new ArrayList();
 
     private BeansTemplateCompletionProcessor getTemplateCompletionProcessor() {
         if (fTemplateProcessor == null) {
