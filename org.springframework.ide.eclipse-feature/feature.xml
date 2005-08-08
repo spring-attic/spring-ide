@@ -22,57 +22,63 @@
    </url>
 
    <requires>
-      <import plugin="org.eclipse.core.resources"/>
-      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.core.resources" version="3.0.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jdt.ui"/>
    </requires>
 
    <plugin
          id="org.springframework.ide.eclipse"
-         download-size="8153"
-         install-size="10619"
+         download-size="8193"
+         install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.core"
-         download-size="68775"
-         install-size="72463"
+         download-size="77524"
+         install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.ui"
-         download-size="107478"
-         install-size="124420"
+         download-size="128766"
+         install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.ui.doc"
-         download-size="527628"
-         install-size="527865"
+         download-size="1220704"
+         install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.ui.graph"
-         download-size="49284"
-         install-size="58203"
+         download-size="54210"
+         install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.core"
-         download-size="1297488"
+         download-size="1339484"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.core.doc"
-         download-size="377427"
-         install-size="402314"
+         download-size="449609"
+         install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.ui"
-         download-size="120659"
+         download-size="9319"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.beans.ui.editor"
+         download-size="57469"
          install-size="0"
          version="0.0.0"/>
 
