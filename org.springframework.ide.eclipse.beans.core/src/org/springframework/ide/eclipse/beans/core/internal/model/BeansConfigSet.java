@@ -181,16 +181,6 @@ public class BeansConfigSet extends AbstractSourceModelElement
 							beansMap.put(bean.getElementName(), bean);
 						}
 					}
-	
-					// Add inner beans to map
-					beans = config.getInnerBeans().iterator();
-					while (beans.hasNext()) {
-						IBean bean = (IBean) beans.next();
-						if (allowBeanDefinitionOverriding ||
-								 !beansMap.containsKey(bean.getElementName())) {
-							beansMap.put(bean.getElementName(), bean);
-						}
-					}
 				}
 			}
 		}
@@ -207,17 +197,35 @@ public class BeansConfigSet extends AbstractSourceModelElement
 			Iterator beans = getBeansMap().values().iterator();
 			while (beans.hasNext()) {
 				IBean bean = (IBean) beans.next();
-				if (bean.isRootBean()) {
-					String className = bean.getClassName();
-					List beanClassBeans = (List) beanClassesMap.get(className);
-					if (beanClassBeans == null) {
-						beanClassBeans = new ArrayList();
-						beanClassesMap.put(className, beanClassBeans);
-					}
-					beanClassBeans.add(bean);
+				addBeanClassToMap(bean);
+				Iterator innerBeans = bean.getInnerBeans().iterator();
+				while (innerBeans.hasNext()) {
+					IBean innerBean = (IBean) innerBeans.next();
+					addBeanClassToMap(innerBean);
 				}
 			}
 		}
 		return beanClassesMap;
+	}
+
+	private void addBeanClassToMap(IBean bean) {
+
+		// Get name of bean class - strip name of any inner class
+		String className = bean.getClassName();
+		if (className != null) {
+			int pos = className.indexOf('$');
+			if  (pos > 0) {
+				className = className.substring(0, pos);
+			}
+
+			// Maintain a list of bean names within every entry in the
+			// bean class map
+			List beanClassBeans = (List) beanClassesMap.get(className);
+			if (beanClassBeans == null) {
+				beanClassBeans = new ArrayList();
+				beanClassesMap.put(className, beanClassBeans);
+			}
+			beanClassBeans.add(bean);
+		}
 	}
 }
