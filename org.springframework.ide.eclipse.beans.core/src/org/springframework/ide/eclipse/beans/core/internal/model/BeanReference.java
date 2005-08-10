@@ -31,6 +31,7 @@ public class BeanReference {
 	public static final int DEPENDS_ON_BEAN_TYPE = 4;
 	public static final int METHOD_OVERRIDE_BEAN_TYPE = 5;
 	public static final int INTERCEPTOR_BEAN_TYPE = 6;
+	public static final int INNER_BEAN_TYPE = 7;
 
 	private IModelElement source;
 	private IBean target;

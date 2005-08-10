@@ -353,6 +353,8 @@ public class BeansModelUtils {
 		} else if (value instanceof BeanDefinitionHolder) {
 			String beanName = ((BeanDefinitionHolder) value).getBeanName();
 			IBean bean = getInnerBean(beanName, context);
+			addBeanReference(BeanReference.INNER_BEAN_TYPE,
+				   bean.getElementParent(), bean, references, referencedBeans);
 			addBeanReferencesForElement(bean, context, references,
 										referencedBeans, recursive);
 		} else if (value instanceof List) {
