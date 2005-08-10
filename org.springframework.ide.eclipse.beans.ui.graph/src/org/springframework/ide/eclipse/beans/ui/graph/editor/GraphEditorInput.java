@@ -196,7 +196,9 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 													 context, true).iterator();
 			while (beanRefs.hasNext()) {
 				BeanReference beanRef = (BeanReference) beanRefs.next();
-				list.add(beanRef.getTarget());
+				if (beanRef.getType() != BeanReference.INNER_BEAN_TYPE) {
+					list.add(beanRef.getTarget());
+				}
 			}
 		}
 
