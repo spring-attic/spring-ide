@@ -45,7 +45,7 @@
 		<antcall target="gather.bin.parts">
 			<param name="destination.temp.folder" value="${temp.folder}/"/>
 		</antcall>
-		<zip destfile="${plugin.destination}/org.springframework.ide.eclipse_1.2.1.jar" basedir="${temp.folder}/org.springframework.ide.eclipse_1.2.1" filesonly="false" whenempty="skip" update="false"/>
+		<zip destfile="${plugin.destination}/org.springframework.ide.eclipse_1.2.3.jar" basedir="${temp.folder}/org.springframework.ide.eclipse_1.2.3" filesonly="false" whenempty="skip" update="false"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
@@ -56,9 +56,9 @@
 	</target>
 
 	<target name="gather.bin.parts" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/org.springframework.ide.eclipse_1.2.1"/>
-		<copy todir="${destination.temp.folder}/org.springframework.ide.eclipse_1.2.1" failonerror="true" overwrite="false">
-			<fileset dir="${basedir}" includes="spring_logo.png,welcome.xml,plugin.properties,plugin.xml,about.properties,about.ini,about.html,license.txt"			/>
+		<mkdir dir="${destination.temp.folder}/org.springframework.ide.eclipse_1.2.3"/>
+		<copy todir="${destination.temp.folder}/org.springframework.ide.eclipse_1.2.3" failonerror="true" overwrite="false">
+			<fileset dir="${basedir}" includes="springide_logo_small.png,welcome.xml,plugin.properties,plugin.xml,about.properties,about.ini,about.html,license.txt"			/>
 		</copy>
 	</target>
 
@@ -66,8 +66,8 @@
 	</target>
 
 	<target name="gather.sources" depends="init" if="destination.temp.folder">
-		<copy todir="${destination.temp.folder}/org.springframework.ide.eclipse_1.2.1" failonerror="false" overwrite="false">
-			<fileset dir="${basedir}" includes=".project,build.properties,spring_logo.png,welcome.xml,about.html,about.ini,about.properties,plugin.properties,plugin.xml,license.txt"			/>
+		<copy todir="${destination.temp.folder}/org.springframework.ide.eclipse_1.2.3" failonerror="false" overwrite="false">
+			<fileset dir="${basedir}" includes=".project,build.properties,springide_logo_small.png,welcome.xml,about.html,about.ini,about.properties,plugin.properties,plugin.xml,license.txt"			/>
 		</copy>
 	</target>
 
@@ -75,13 +75,13 @@
 	</target>
 
 	<target name="clean" depends="init" description="Clean the plug-in: org.springframework.ide.eclipse of all the zips, jars and logs created.">
-		<delete file="${plugin.destination}/org.springframework.ide.eclipse_1.2.1.jar"/>
-		<delete file="${plugin.destination}/org.springframework.ide.eclipse_1.2.1.zip"/>
+		<delete file="${plugin.destination}/org.springframework.ide.eclipse_1.2.3.jar"/>
+		<delete file="${plugin.destination}/org.springframework.ide.eclipse_1.2.3.zip"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
 	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
-		<eclipse.convertPath fileSystemPath="D:/tools/eclipse-SDK-3.1-win32/eclipse/workspace/org.springframework.ide.eclipse" property="resourcePath"/>
+		<eclipse.convertPath fileSystemPath="D:/tools/eclipse3.1-springide/eclipse/workspace/org.springframework.ide.eclipse" property="resourcePath"/>
 		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"/>
 	</target>
 
@@ -99,7 +99,7 @@
 		<delete>
 			<fileset dir="${temp.folder}" includes="**/*.bin.log"			/>
 		</delete>
-		<zip destfile="${plugin.destination}/org.springframework.ide.eclipse_1.2.1.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
+		<zip destfile="${plugin.destination}/org.springframework.ide.eclipse_1.2.3.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
