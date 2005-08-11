@@ -45,7 +45,7 @@
 		<antcall target="gather.bin.parts">
 			<param name="destination.temp.folder" value="${temp.folder}/"/>
 		</antcall>
-		<zip destfile="${plugin.destination}/org.springframework.ide.eclipse.core_1.2.1.jar" basedir="${temp.folder}/org.springframework.ide.eclipse.core_1.2.1" filesonly="false" whenempty="skip" update="false"/>
+		<zip destfile="${plugin.destination}/org.springframework.ide.eclipse.core_1.2.3.jar" basedir="${temp.folder}/org.springframework.ide.eclipse.core_1.2.3" filesonly="false" whenempty="skip" update="false"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
@@ -108,12 +108,12 @@
 	</target>
 
 	<target name="gather.bin.parts" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/org.springframework.ide.eclipse.core_1.2.1"/>
-		<copy todir="${destination.temp.folder}/org.springframework.ide.eclipse.core_1.2.1" failonerror="true" overwrite="false">
+		<mkdir dir="${destination.temp.folder}/org.springframework.ide.eclipse.core_1.2.3"/>
+		<copy todir="${destination.temp.folder}/org.springframework.ide.eclipse.core_1.2.3" failonerror="true" overwrite="false">
 			<fileset dir="${build.result.folder}" includes="core.jar"			/>
 		</copy>
-		<copy todir="${destination.temp.folder}/org.springframework.ide.eclipse.core_1.2.1" failonerror="true" overwrite="false">
-			<fileset dir="${basedir}" includes="plugin.xml,core.jar,commons-logging.jar,plugin.properties,schema/,spring-core.jar,xmlParserAPIs.jar,xercesImpl.jar,spring-beans.jar,changelog.txt"			/>
+		<copy todir="${destination.temp.folder}/org.springframework.ide.eclipse.core_1.2.3" failonerror="true" overwrite="false">
+			<fileset dir="${basedir}" includes="plugin.xml,core.jar,commons-logging.jar,plugin.properties,spring-core.jar,xmlParserAPIs.jar,xercesImpl.jar,spring-beans.jar"			/>
 		</copy>
 	</target>
 
@@ -121,28 +121,28 @@
 	</target>
 
 	<target name="gather.sources" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/org.springframework.ide.eclipse.core_1.2.1"/>
-		<copy file="${build.result.folder}/coresrc.zip" todir="${destination.temp.folder}/org.springframework.ide.eclipse.core_1.2.1" failonerror="false" overwrite="false"/>
-		<copy todir="${destination.temp.folder}/org.springframework.ide.eclipse.core_1.2.1" failonerror="false" overwrite="false">
-			<fileset dir="${basedir}" includes="schema/,src/,.options,.project,build.properties,plugin.properties,plugin.xml,spring-core.jar,commons-logging.jar,xercesImpl.jar,xmlParserAPIs.jar,spring-beans.jar,.classpath,changelog.txt"			/>
+		<mkdir dir="${destination.temp.folder}/org.springframework.ide.eclipse.core_1.2.3"/>
+		<copy file="${build.result.folder}/coresrc.zip" todir="${destination.temp.folder}/org.springframework.ide.eclipse.core_1.2.3" failonerror="false" overwrite="false"/>
+		<copy todir="${destination.temp.folder}/org.springframework.ide.eclipse.core_1.2.3" failonerror="false" overwrite="false">
+			<fileset dir="${basedir}" includes="schema/,src/,.options,.project,build.properties,plugin.properties,plugin.xml,spring-core.jar,commons-logging.jar,xercesImpl.jar,xmlParserAPIs.jar,spring-beans.jar,.classpath"			/>
 		</copy>
 	</target>
 
 	<target name="gather.logs" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/org.springframework.ide.eclipse.core_1.2.1"/>
-		<copy file="${temp.folder}/core.jar.bin.log" todir="${destination.temp.folder}/org.springframework.ide.eclipse.core_1.2.1" failonerror="false" overwrite="false"/>
+		<mkdir dir="${destination.temp.folder}/org.springframework.ide.eclipse.core_1.2.3"/>
+		<copy file="${temp.folder}/core.jar.bin.log" todir="${destination.temp.folder}/org.springframework.ide.eclipse.core_1.2.3" failonerror="false" overwrite="false"/>
 	</target>
 
 	<target name="clean" depends="init" description="Clean the plug-in: org.springframework.ide.eclipse.core of all the zips, jars and logs created.">
 		<delete file="${build.result.folder}/core.jar"/>
 		<delete file="${build.result.folder}/coresrc.zip"/>
-		<delete file="${plugin.destination}/org.springframework.ide.eclipse.core_1.2.1.jar"/>
-		<delete file="${plugin.destination}/org.springframework.ide.eclipse.core_1.2.1.zip"/>
+		<delete file="${plugin.destination}/org.springframework.ide.eclipse.core_1.2.3.jar"/>
+		<delete file="${plugin.destination}/org.springframework.ide.eclipse.core_1.2.3.zip"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
 	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
-		<eclipse.convertPath fileSystemPath="D:/tools/eclipse-SDK-3.1-win32/eclipse/workspace/org.springframework.ide.eclipse.core" property="resourcePath"/>
+		<eclipse.convertPath fileSystemPath="D:/tools/eclipse3.1-springide/eclipse/workspace/org.springframework.ide.eclipse.core" property="resourcePath"/>
 		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"/>
 	</target>
 
@@ -160,7 +160,7 @@
 		<delete>
 			<fileset dir="${temp.folder}" includes="**/*.bin.log"			/>
 		</delete>
-		<zip destfile="${plugin.destination}/org.springframework.ide.eclipse.core_1.2.1.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
+		<zip destfile="${plugin.destination}/org.springframework.ide.eclipse.core_1.2.3.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
