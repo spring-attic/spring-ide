@@ -45,7 +45,7 @@
 		<antcall target="gather.bin.parts">
 			<param name="destination.temp.folder" value="${temp.folder}/"/>
 		</antcall>
-		<zip destfile="${plugin.destination}/org.springframework.ide.eclipse.ui_1.2.1.jar" basedir="${temp.folder}/org.springframework.ide.eclipse.ui_1.2.1" filesonly="false" whenempty="skip" update="false"/>
+		<zip destfile="${plugin.destination}/org.springframework.ide.eclipse.ui_1.2.2.jar" basedir="${temp.folder}/org.springframework.ide.eclipse.ui_1.2.2" filesonly="false" whenempty="skip" update="false"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
@@ -104,11 +104,11 @@
 				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.core/bin/"/>
 				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.core/core.jar"/>
 				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.core/bin"/>
+				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.core/spring-core.jar"/>
+				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.core/spring-beans.jar"/>
+				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.core/commons-logging.jar"/>
 				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.core/xmlParserAPIs.jar"/>
 				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.core/xercesImpl.jar"/>
-				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.core/spring-beans.jar"/>
-				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.core/spring-core.jar"/>
-				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.core/commons-logging.jar"/>
 				<pathelement path="../org.springframework.ide.eclipse.core/spring-core.jar"/>
 				<pathelement path="../org.springframework.ide.eclipse.core/spring-beans.jar"/>
 				<pathelement path="../org.springframework.ide.eclipse.core/commons-logging.jar"/>
@@ -144,12 +144,12 @@
 	</target>
 
 	<target name="gather.bin.parts" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/org.springframework.ide.eclipse.ui_1.2.1"/>
-		<copy todir="${destination.temp.folder}/org.springframework.ide.eclipse.ui_1.2.1" failonerror="true" overwrite="false">
+		<mkdir dir="${destination.temp.folder}/org.springframework.ide.eclipse.ui_1.2.2"/>
+		<copy todir="${destination.temp.folder}/org.springframework.ide.eclipse.ui_1.2.2" failonerror="true" overwrite="false">
 			<fileset dir="${build.result.folder}" includes="ui.jar"			/>
 		</copy>
-		<copy todir="${destination.temp.folder}/org.springframework.ide.eclipse.ui_1.2.1" failonerror="true" overwrite="false">
-			<fileset dir="${basedir}" includes="plugin.xml,ui.jar,plugin.properties,icons/,changelog.txt"			/>
+		<copy todir="${destination.temp.folder}/org.springframework.ide.eclipse.ui_1.2.2" failonerror="true" overwrite="false">
+			<fileset dir="${basedir}" includes="plugin.xml,ui.jar,plugin.properties,icons/"			/>
 		</copy>
 	</target>
 
@@ -157,28 +157,28 @@
 	</target>
 
 	<target name="gather.sources" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/org.springframework.ide.eclipse.ui_1.2.1"/>
-		<copy file="${build.result.folder}/uisrc.zip" todir="${destination.temp.folder}/org.springframework.ide.eclipse.ui_1.2.1" failonerror="false" overwrite="false"/>
-		<copy todir="${destination.temp.folder}/org.springframework.ide.eclipse.ui_1.2.1" failonerror="false" overwrite="false">
-			<fileset dir="${basedir}" includes=".classpath,.project,build.properties,icons/,plugin.properties,plugin.xml,src/,changelog.txt"			/>
+		<mkdir dir="${destination.temp.folder}/org.springframework.ide.eclipse.ui_1.2.2"/>
+		<copy file="${build.result.folder}/uisrc.zip" todir="${destination.temp.folder}/org.springframework.ide.eclipse.ui_1.2.2" failonerror="false" overwrite="false"/>
+		<copy todir="${destination.temp.folder}/org.springframework.ide.eclipse.ui_1.2.2" failonerror="false" overwrite="false">
+			<fileset dir="${basedir}" includes=".classpath,.project,build.properties,icons/,plugin.properties,plugin.xml,src/"			/>
 		</copy>
 	</target>
 
 	<target name="gather.logs" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/org.springframework.ide.eclipse.ui_1.2.1"/>
-		<copy file="${temp.folder}/ui.jar.bin.log" todir="${destination.temp.folder}/org.springframework.ide.eclipse.ui_1.2.1" failonerror="false" overwrite="false"/>
+		<mkdir dir="${destination.temp.folder}/org.springframework.ide.eclipse.ui_1.2.2"/>
+		<copy file="${temp.folder}/ui.jar.bin.log" todir="${destination.temp.folder}/org.springframework.ide.eclipse.ui_1.2.2" failonerror="false" overwrite="false"/>
 	</target>
 
 	<target name="clean" depends="init" description="Clean the plug-in: org.springframework.ide.eclipse.ui of all the zips, jars and logs created.">
 		<delete file="${build.result.folder}/ui.jar"/>
 		<delete file="${build.result.folder}/uisrc.zip"/>
-		<delete file="${plugin.destination}/org.springframework.ide.eclipse.ui_1.2.1.jar"/>
-		<delete file="${plugin.destination}/org.springframework.ide.eclipse.ui_1.2.1.zip"/>
+		<delete file="${plugin.destination}/org.springframework.ide.eclipse.ui_1.2.2.jar"/>
+		<delete file="${plugin.destination}/org.springframework.ide.eclipse.ui_1.2.2.zip"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
 	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
-		<eclipse.convertPath fileSystemPath="D:/tools/eclipse-SDK-3.1-win32/eclipse/workspace/org.springframework.ide.eclipse.ui" property="resourcePath"/>
+		<eclipse.convertPath fileSystemPath="D:/tools/eclipse3.1-springide/eclipse/workspace/org.springframework.ide.eclipse.ui" property="resourcePath"/>
 		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"/>
 	</target>
 
@@ -196,7 +196,7 @@
 		<delete>
 			<fileset dir="${temp.folder}" includes="**/*.bin.log"			/>
 		</delete>
-		<zip destfile="${plugin.destination}/org.springframework.ide.eclipse.ui_1.2.1.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
+		<zip destfile="${plugin.destination}/org.springframework.ide.eclipse.ui_1.2.2.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
