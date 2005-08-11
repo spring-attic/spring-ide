@@ -94,11 +94,11 @@
 				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.core/bin/"/>
 				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.core/core.jar"/>
 				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.core/bin"/>
+				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.core/spring-core.jar"/>
+				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.core/spring-beans.jar"/>
+				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.core/commons-logging.jar"/>
 				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.core/xmlParserAPIs.jar"/>
 				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.core/xercesImpl.jar"/>
-				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.core/spring-beans.jar"/>
-				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.core/spring-core.jar"/>
-				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.core/commons-logging.jar"/>
 				<pathelement path="../org.springframework.ide.eclipse.core/spring-core.jar"/>
 				<pathelement path="../org.springframework.ide.eclipse.core/spring-beans.jar"/>
 				<pathelement path="../org.springframework.ide.eclipse.core/commons-logging.jar"/>
@@ -119,16 +119,8 @@
 				<pathelement path="..\..\plugins\org.eclipse.ltk.core.refactoring_3.1.0.jar"/>
 				<pathelement path="..\..\plugins\org.eclipse.ltk.ui.refactoring_3.1.0.jar"/>
 				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.beans.core/bin"/>
-				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.beans.core/org.springframework.ide.eclipse.core/xercesImpl.jar"/>
-				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.beans.core//org.springframework.ide.eclipse.core/xercesImpl.jar"/>
-				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.beans.core/org.springframework.ide.eclipse.core/spring-beans.jar"/>
-				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.beans.core//org.springframework.ide.eclipse.core/spring-beans.jar"/>
-				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.beans.core/org.springframework.ide.eclipse.core/spring-core.jar"/>
-				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.beans.core//org.springframework.ide.eclipse.core/spring-core.jar"/>
 				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.beans.core/beans-core.jar"/>
 				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.beans.ui/bin"/>
-				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.beans.ui/org.springframework.ide.eclipse.core/spring-beans.jar"/>
-				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.beans.ui//org.springframework.ide.eclipse.core/spring-beans.jar"/>
 				<pathelement path="${build.result.folder}/../org.springframework.ide.eclipse.beans.ui/beans-ui.jar"/>
 			</classpath>
 			<src path="src/"			/>
@@ -165,7 +157,7 @@
 			<fileset dir="${build.result.folder}" includes="beans-graph.jar"			/>
 		</copy>
 		<copy todir="${destination.temp.folder}/org.springframework.ide.eclipse.beans.ui.graph_1.2.1" failonerror="true" overwrite="false">
-			<fileset dir="${basedir}" includes="beans-graph.jar,icons/,changelog.txt,plugin.properties,plugin.xml"			/>
+			<fileset dir="${basedir}" includes="beans-graph.jar,icons/,plugin.properties,plugin.xml"			/>
 		</copy>
 	</target>
 
@@ -176,7 +168,7 @@
 		<mkdir dir="${destination.temp.folder}/org.springframework.ide.eclipse.beans.ui.graph_1.2.1"/>
 		<copy file="${build.result.folder}/beans-graphsrc.zip" todir="${destination.temp.folder}/org.springframework.ide.eclipse.beans.ui.graph_1.2.1" failonerror="false" overwrite="false"/>
 		<copy todir="${destination.temp.folder}/org.springframework.ide.eclipse.beans.ui.graph_1.2.1" failonerror="false" overwrite="false">
-			<fileset dir="${basedir}" includes=".cvsignore,.options,.project,build.properties,changelog.txt,icons/,src/,plugin.properties,plugin.xml,.classpath"			/>
+			<fileset dir="${basedir}" includes=".options,.project,build.properties,icons/,src/,plugin.properties,plugin.xml,.classpath"			/>
 		</copy>
 	</target>
 
@@ -194,7 +186,7 @@
 	</target>
 
 	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
-		<eclipse.convertPath fileSystemPath="D:/tools/eclipse-SDK-3.1-win32/eclipse/workspace/org.springframework.ide.eclipse.beans.ui.graph" property="resourcePath"/>
+		<eclipse.convertPath fileSystemPath="D:/tools/eclipse3.1-springide/eclipse/workspace/org.springframework.ide.eclipse.beans.ui.graph" property="resourcePath"/>
 		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"/>
 	</target>
 
