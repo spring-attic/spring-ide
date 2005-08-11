@@ -81,7 +81,7 @@
 	</target>
 
 	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
-		<eclipse.convertPath fileSystemPath="D:/tools/eclipse-SDK-3.1-win32/eclipse/workspace/org.springframework.ide.eclipse.beans.ui.doc" property="resourcePath"/>
+		<eclipse.convertPath fileSystemPath="D:/tools/eclipse3.1-springide/eclipse/workspace/org.springframework.ide.eclipse.beans.ui.doc" property="resourcePath"/>
 		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"/>
 	</target>
 
