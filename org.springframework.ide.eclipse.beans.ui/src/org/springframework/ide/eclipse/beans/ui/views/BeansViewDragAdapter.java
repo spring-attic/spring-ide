@@ -27,12 +27,12 @@ import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
-import org.springframework.ide.eclipse.beans.ui.model.INode;
+import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
 
 /**
  * Adapter for DND support in beans view.
  * 
- * @author Pierre-Antoine Grégoire
+ * @author Pierre-Antoine Gr√©goire
  */
 public class BeansViewDragAdapter extends DragSourceAdapter implements TransferDragSourceListener {
 
@@ -70,7 +70,7 @@ public class BeansViewDragAdapter extends DragSourceAdapter implements TransferD
 				event.doit = false;
 				return;
 			} else {
-				if (!(next instanceof INode)) {
+				if (!(next instanceof ConfigNode)) {
 					event.doit = false;
 					return;
 				}
