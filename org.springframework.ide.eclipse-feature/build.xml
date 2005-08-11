@@ -7,11 +7,11 @@
 	</target>
 
 	<target name="all.plugins" depends="init">
-		<ant antfile="build.xml" dir="../org.springframework.ide.eclipse.core.doc" target="${target}">
-		</ant>
 		<ant antfile="build.xml" dir="../org.springframework.ide.eclipse.beans.ui.doc" target="${target}">
 		</ant>
 		<ant antfile="build.xml" dir="../org.springframework.ide.eclipse" target="${target}">
+		</ant>
+		<ant antfile="build.xml" dir="../org.springframework.ide.eclipse.core.doc" target="${target}">
 		</ant>
 		<ant antfile="build.xml" dir="../org.springframework.ide.eclipse.core" target="${target}">
 		</ant>
@@ -20,6 +20,8 @@
 		<ant antfile="build.xml" dir="../org.springframework.ide.eclipse.ui" target="${target}">
 		</ant>
 		<ant antfile="build.xml" dir="../org.springframework.ide.eclipse.beans.ui" target="${target}">
+		</ant>
+		<ant antfile="build.xml" dir="../org.springframework.ide.eclipse.beans.ui.editor" target="${target}">
 		</ant>
 		<ant antfile="build.xml" dir="../org.springframework.ide.eclipse.beans.ui.graph" target="${target}">
 		</ant>
@@ -68,7 +70,7 @@
 			<param name="os" value="*"/>
 			<param name="feature.base" value="${feature.temp.folder}"/>
 		</antcall>
-		<jar destfile="${feature.destination}/org.springframework.ide.eclipse_1.2.1.jar" basedir="${feature.temp.folder}/features/org.springframework.ide.eclipse_1.2.1"/>
+		<jar destfile="${feature.destination}/org.springframework.ide.eclipse_1.2.3.jar" basedir="${feature.temp.folder}/features/org.springframework.ide.eclipse_1.2.3"/>
 		<delete dir="${feature.temp.folder}"/>
 	</target>
 
@@ -77,11 +79,11 @@
 			<param name="destination.temp.folder" value="${feature.base}/plugins"/>
 			<param name="target" value="gather.bin.parts"/>
 		</antcall>
-		<mkdir dir="${feature.base}/features/org.springframework.ide.eclipse_1.2.1"/>
-		<copy todir="${feature.base}/features/org.springframework.ide.eclipse_1.2.1" failonerror="true" overwrite="false">
+		<mkdir dir="${feature.base}/features/org.springframework.ide.eclipse_1.2.3"/>
+		<copy todir="${feature.base}/features/org.springframework.ide.eclipse_1.2.3" failonerror="true" overwrite="false">
 			<fileset dir="${basedir}" includes="feature.properties,feature.xml"			/>
 		</copy>
-		<eclipse.idReplacer featureFilePath="${feature.base}/features/org.springframework.ide.eclipse_1.2.1/feature.xml"  selfVersion="1.2.1" featureIds="" pluginIds="org.springframework.ide.eclipse,1.2.1,org.springframework.ide.eclipse.beans.core,1.2.1,org.springframework.ide.eclipse.beans.ui,1.2.1,org.springframework.ide.eclipse.beans.ui.doc,1.2.1,org.springframework.ide.eclipse.beans.ui.graph,1.2.1,org.springframework.ide.eclipse.core,1.2.1,org.springframework.ide.eclipse.core.doc,1.2.1,org.springframework.ide.eclipse.ui,1.2.1,"/>
+		<eclipse.idReplacer featureFilePath="${feature.base}/features/org.springframework.ide.eclipse_1.2.3/feature.xml"  selfVersion="1.2.3" featureIds="" pluginIds="org.springframework.ide.eclipse,1.2.3,org.springframework.ide.eclipse.beans.core,1.2.3,org.springframework.ide.eclipse.beans.ui,1.2.3,org.springframework.ide.eclipse.beans.ui.doc,1.2.1,org.springframework.ide.eclipse.beans.ui.graph,1.2.1,org.springframework.ide.eclipse.core,1.2.3,org.springframework.ide.eclipse.core.doc,1.2.3,org.springframework.ide.eclipse.ui,1.2.2,org.springframework.ide.eclipse.beans.ui.editor,0.7.0,"/>
 		<antcall target="rootFiles${os}_${ws}_${arch}"/>
 	</target>
 	<target name="rootFiles*_*_*">
@@ -98,7 +100,7 @@
 			<param name="feature.base" value="${feature.temp.folder}"/>
 			<param name="os" value="*"/>
 		</antcall>
-		<zip destfile="${feature.destination}/org.springframework.ide.eclipse_1.2.1.bin.dist.zip" basedir="${feature.temp.folder}" filesonly="false" whenempty="skip" update="false"/>
+		<zip destfile="${feature.destination}/org.springframework.ide.eclipse_1.2.3.bin.dist.zip" basedir="${feature.temp.folder}" filesonly="false" whenempty="skip" update="false"/>
 		<delete dir="${feature.temp.folder}"/>
 	</target>
 
@@ -106,11 +108,11 @@
 		<delete dir="${feature.temp.folder}"/>
 		<mkdir dir="${feature.temp.folder}"/>
 		<antcall target="all.children">
-			<param name="destination.temp.folder" value="${feature.temp.folder}/plugins/org.springframework.ide.eclipse.source_1.2.1/src"/>
+			<param name="destination.temp.folder" value="${feature.temp.folder}/plugins/org.springframework.ide.eclipse.source_1.2.3/src"/>
 			<param name="include.children" value="true"/>
 			<param name="target" value="gather.sources"/>
 		</antcall>
-		<zip destfile="${feature.destination}/org.springframework.ide.eclipse_1.2.1.src.zip" basedir="${feature.temp.folder}" filesonly="true" whenempty="skip" update="false"/>
+		<zip destfile="${feature.destination}/org.springframework.ide.eclipse_1.2.3.src.zip" basedir="${feature.temp.folder}" filesonly="true" whenempty="skip" update="false"/>
 		<delete dir="${feature.temp.folder}"/>
 	</target>
 
@@ -122,15 +124,15 @@
 			<param name="include.children" value="true"/>
 			<param name="target" value="gather.logs"/>
 		</antcall>
-		<zip destfile="${feature.destination}/org.springframework.ide.eclipse_1.2.1.log.zip" basedir="${feature.temp.folder}" filesonly="true" whenempty="skip" update="false"/>
+		<zip destfile="${feature.destination}/org.springframework.ide.eclipse_1.2.3.log.zip" basedir="${feature.temp.folder}" filesonly="true" whenempty="skip" update="false"/>
 		<delete dir="${feature.temp.folder}"/>
 	</target>
 
 	<target name="clean" depends="init" description="Clean the feature: org.springframework.ide.eclipse of all the zips, jars and logs created.">
-		<delete file="${feature.destination}/org.springframework.ide.eclipse_1.2.1.jar"/>
-		<delete file="${feature.destination}/org.springframework.ide.eclipse_1.2.1.bin.dist.zip"/>
-		<delete file="${feature.destination}/org.springframework.ide.eclipse_1.2.1.log.zip"/>
-		<delete file="${feature.destination}/org.springframework.ide.eclipse_1.2.1.src.zip"/>
+		<delete file="${feature.destination}/org.springframework.ide.eclipse_1.2.3.jar"/>
+		<delete file="${feature.destination}/org.springframework.ide.eclipse_1.2.3.bin.dist.zip"/>
+		<delete file="${feature.destination}/org.springframework.ide.eclipse_1.2.3.log.zip"/>
+		<delete file="${feature.destination}/org.springframework.ide.eclipse_1.2.3.src.zip"/>
 		<delete dir="${feature.temp.folder}"/>
 		<antcall target="all.children">
 			<param name="target" value="clean"/>
@@ -138,7 +140,7 @@
 	</target>
 
 	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
-		<eclipse.convertPath fileSystemPath="D:/tools/eclipse-SDK-3.1-win32/eclipse/workspace/org.springframework.ide.eclipse-feature/" property="resourcePath"/>
+		<eclipse.convertPath fileSystemPath="D:/tools/eclipse3.1-springide/eclipse/workspace/org.springframework.ide.eclipse-feature/" property="resourcePath"/>
 		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"/>
 		<antcall target="all.children">
 			<param name="target" value="refresh"/>
@@ -146,7 +148,7 @@
 	</target>
 	<target name="gather.sources">
 		<antcall target="children">
-			<param name="destination.temp.folder" value="${feature.temp.folder}/plugins/org.springframework.ide.eclipse.source_1.2.1/src"/>
+			<param name="destination.temp.folder" value="${feature.temp.folder}/plugins/org.springframework.ide.eclipse.source_1.2.3/src"/>
 			<param name="target" value="gather.sources"/>
 		</antcall>
 	</target>
