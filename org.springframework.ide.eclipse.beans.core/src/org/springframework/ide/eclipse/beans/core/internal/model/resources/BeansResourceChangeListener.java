@@ -103,8 +103,7 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 			switch (delta.getKind()) {
 				case IResourceDelta.ADDED :
 					if (resource instanceof IProject) {
-						if (SpringCoreUtils.isSpringProject((IProject)
-														  resource)) {
+						if (SpringCoreUtils.isSpringProject(resource)) {
 							events.projectAdded((IProject) resource);
 						}
 						return false;
@@ -121,9 +120,8 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 
 				case IResourceDelta.OPEN :
 					if (resource instanceof IProject) {
-						IProject project = (IProject) resource; 
-						if (SpringCoreUtils.isSpringProject(project)) {
-							events.projectOpened(project);
+						if (SpringCoreUtils.isSpringProject(resource)) {
+							events.projectOpened((IProject) resource);
 						}
 						return false;
 					}
@@ -145,15 +143,14 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 						return false;
 					} else if (resource instanceof IProject) {
 						if ((flags & IResourceDelta.OPEN) != 0) {
-							IProject project = (IProject) resource; 
-							if (SpringCoreUtils.isSpringProject(project)) {
-								events.projectOpened(project);
+							if (SpringCoreUtils.isSpringProject(resource)) {
+								events.projectOpened((IProject) resource);
 							}
 							return false;
 						} else if ((flags & IResourceDelta.DESCRIPTION) != 0) {
 							IProject project = (IProject) resource;
 							if (SpringCoreUtils.isSpringProject(project)) {
-								if (!events.isSpringProject(project)) {
+								if (!events.isSpringProject((IProject) resource)) {
 									events.springNatureAdded(project);
 								}
 							} else if (events.isSpringProject(project)) {
