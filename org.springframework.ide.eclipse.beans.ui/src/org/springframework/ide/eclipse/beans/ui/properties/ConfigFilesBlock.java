@@ -41,6 +41,7 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceSorter;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
 import org.springframework.ide.eclipse.beans.ui.model.ModelLabelProvider;
@@ -182,7 +183,8 @@ public class ConfigFilesBlock {
 				  new WorkbenchLabelProvider(), new WorkbenchContentProvider());
 		dialog.setTitle(BeansUIPlugin.getResourceString(DIALOG_TITLE));
 		dialog.setMessage(BeansUIPlugin.getResourceString(DIALOG_MESSAGE));
-		dialog.addFilter(new FileFilter(new String[] { "xml" }));
+		dialog.addFilter(new FileFilter(new String[] {
+									   IBeansConfig.DEFAULT_FILE_EXTENSION }));
 		dialog.setValidator(new FileSelectionValidator(true));
 		dialog.setInput(element);
 		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
@@ -30,6 +31,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.BeansUILabelDecorator;
 import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
@@ -140,8 +142,8 @@ public final class BeansViewUtils {
 			RootNode rootNode) {
 		ProjectNode[] projectNodes = new ProjectNode[resources.length];
 		for (int i = 0; i < resources.length; i++) {
-			IProject project = resources[i].getProject();
-			if (!SpringCoreUtils.isSpringProject(project)) {
+			if (!SpringCoreUtils.isSpringProject(resources[i])) {
+				IProject project = (IProject) resources[i];
 				ProjectNode projectNode = new ProjectNode(rootNode, project
 						.getName());
 				BeansProject beansProject = new BeansProject(project);
@@ -282,8 +284,8 @@ public final class BeansViewUtils {
 			if (result != IResource.NONE && resource.getType() != result) {
 				result = IResource.NONE;
 				break;
-			}else{
-				result=resource.getType();
+			} else {
+				result = resource.getType();
 			}
 		}
 		return result;
@@ -291,75 +293,59 @@ public final class BeansViewUtils {
 
 	public static final boolean areResourcesFromTheSameProject(
 			IResource[] resources) {
-		boolean result = true;
 		String projectId = null;
 		for (int i = 0; i < resources.length; i++) {
 			IResource resource = resources[i];
 			if (projectId != null
 					&& !(resource.getProject().getName().equals(projectId))) {
-				result = false;
-				break;
+				return false;
 			}
 		}
-		return result;
+		return true;
 	}
 
 	public static final boolean areAllResourcesJavaProjects(
 			IResource[] resources) {
-		boolean result = true;
 		for (int i = 0; i < resources.length; i++) {
-			if (!isJavaProject(resources[i])) {
-				result = false;
-				break;
+			if (!SpringCoreUtils.isJavaProject(resources[i])) {
+				return false;
 			}
 		}
-		return result;
+		return true;
 	}
 
 	public static final boolean areAllResourcesCompilationUnits(
 			IResource[] resources) {
-		boolean result = true;
 		for (int i = 0; i < resources.length; i++) {
 			if (!isCompilationUnit(resources[i])) {
-				result = false;
-				break;
+				return false;
 			}
 		}
-		return result;
+		return true;
 	}
 
 	public static final boolean areAllResourcesXmlFiles(IResource[] resources) {
-		boolean result = true;
 		for (int i = 0; i < resources.length; i++) {
 			if (!isXmlFile(resources[i])) {
-				result = false;
-				break;
+				return false;
 			}
 		}
-		return result;
-	}
-
-	public static final boolean isJavaProject(IResource resource) {
-		boolean result = false;
-		if (resource instanceof IProject) {
-			result = SpringCoreUtils.isJavaProject((IProject) resource);
-		}
-		return result;
+		return true;
 	}
 
 	public static final boolean isCompilationUnit(IResource resource) {
-		boolean result = false;
 		if (resource.getAdapter(ICompilationUnit.class) != null) {
-			result = true;
+			return true;
 		}
-		return result;
+		return false;
 	}
 
 	public static final boolean isXmlFile(IResource resource) {
-		boolean result = false;
-		if (resource.getName().toLowerCase().trim().endsWith(".xml")) {
-			result = true;
+		if (resource instanceof IFile &&
+					IBeansConfig.DEFAULT_FILE_EXTENSION.equalsIgnoreCase(
+							((IFile) resource).getFileExtension())) {
+			return true;
 		}
-		return result;
+		return false;
 	}
 }
