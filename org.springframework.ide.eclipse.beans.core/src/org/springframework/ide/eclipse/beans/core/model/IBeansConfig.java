@@ -27,6 +27,8 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
  */
 public interface IBeansConfig extends IResourceModelElement, IBeanClassAware {
 
+	String DEFAULT_FILE_EXTENSION = "xml";  
+
 	IFile getConfigFile();
 
 	String getConfigPath();
