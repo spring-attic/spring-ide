@@ -30,6 +30,7 @@ import org.springframework.ide.eclipse.beans.ui.model.INode;
 import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
 import org.springframework.ide.eclipse.beans.ui.model.PropertyNode;
 import org.springframework.ide.eclipse.beans.ui.model.RootNode;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
 /**
  * Adapter for DND support in beans view.
@@ -277,7 +278,7 @@ public class BeansViewDropAdapter extends ViewerDropAdapter {
 						break;
 					case IResource.FILE:
 						if (allResourcesfromSameProject
-								&& BeansViewUtils.isJavaProject(resources[0]
+								&& SpringCoreUtils.isJavaProject(resources[0]
 										.getProject())) {
 							if (BeansViewUtils
 									.areAllResourcesCompilationUnits(resources)) {
