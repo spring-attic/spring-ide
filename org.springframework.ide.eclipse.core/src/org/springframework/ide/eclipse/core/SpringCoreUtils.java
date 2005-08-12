@@ -111,12 +111,12 @@ public class SpringCoreUtils {
 	}
 
 	/**
-	 * Returns true if given project has a Java project nature.
+	 * Returns true if given resource is a Java project.
 	 */
-	public static boolean isJavaProject(IProject project) {
-		if (project != null && project.isAccessible()) {
+	public static boolean isJavaProject(IResource resource) {
+		if (resource instanceof IProject && resource.isAccessible()) {
 			try {
-				return project.hasNature(JavaCore.NATURE_ID);
+				return ((IProject) resource).hasNature(JavaCore.NATURE_ID);
 			} catch (CoreException e) {
 				SpringCore.log(e);
 			}
@@ -125,12 +125,12 @@ public class SpringCoreUtils {
 	}
 
 	/**
-	 * Returns true if given project has an Spring project nature.
+	 * Returns true if given resource is a Spring project.
 	 */
-	public static boolean isSpringProject(IProject project) {
-		if (project != null && project.isAccessible()) {
+	public static boolean isSpringProject(IResource resource) {
+		if (resource instanceof IProject && resource.isAccessible()) {
 			try {
-				return project.hasNature(SpringCore.NATURE_ID);
+				return ((IProject) resource).hasNature(SpringCore.NATURE_ID);
 			} catch (CoreException e) {
 				SpringCore.log(e);
 			}
