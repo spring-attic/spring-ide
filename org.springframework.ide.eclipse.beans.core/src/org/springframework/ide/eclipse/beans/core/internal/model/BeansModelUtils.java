@@ -288,7 +288,7 @@ public class BeansModelUtils {
 
 	private static boolean addBeanReference(int type, IModelElement source,
 						 IBean target, List references, List referencedBeans) {
-		if (target != null) {
+		if (target != null && target  != source) {
 			BeanReference ref = new BeanReference(type, source, target); 
 			if (!references.contains(ref)) {
 				references.add(ref);
