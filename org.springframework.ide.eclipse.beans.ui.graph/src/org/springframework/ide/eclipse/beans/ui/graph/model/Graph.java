@@ -276,10 +276,4 @@ public class Graph implements IAdaptable {
 
 		}
 	}
-//
-//	private static final boolean isConnectedWithRoot(Bean bean, Bean root) {
-//		Bean.ComparingNodeVisitor visitor = new Bean.ComparingNodeVisitor(root);
-//		bean.accept(visitor);
-//		return visitor.isFound();
-//	}
 }
