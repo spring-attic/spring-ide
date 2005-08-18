@@ -28,10 +28,12 @@ public class BeansEditorUtils {
                 while (configs.hasNext()) {
                     String beansConfigName = (String) configs.next();
                     IBeansConfig beansConfig = project.getConfig(beansConfigName);
-                    IResource resource = beansConfig.getElementResource();
-                    if (!configsMap.containsKey(resource.getName()) && !resource.getFullPath().equals(file.getFullPath())
-                           ) {
-                        configsMap.put(resource.getName(), beansConfig);
+                    if (beansConfig != null) {
+	                    IResource resource = beansConfig.getElementResource();
+	                    if (!configsMap.containsKey(resource.getName()) &&
+	                    		!resource.getFullPath().equals(file.getFullPath())) {
+	                        configsMap.put(resource.getName(), beansConfig);
+	                    }
                     }
                 }
             }
