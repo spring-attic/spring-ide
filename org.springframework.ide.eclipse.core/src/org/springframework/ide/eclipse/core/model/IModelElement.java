@@ -78,7 +78,6 @@ public interface IModelElement {
 	 *
 	 * @param visitor the visitor
 	 * @see IModelElementVisitor#visit(IModelElement)
-	 * @see #accept(IModelElementVisitor)
 	 */
 	void accept(IModelElementVisitor visitor);
 }
