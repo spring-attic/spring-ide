@@ -77,7 +77,8 @@ public class Graph implements IAdaptable {
 			while (beanRefs.hasNext()) {
 				BeanReference beanRef = (BeanReference) beanRefs.next();
 				Bean targetBean = getBean(beanRef.getTarget().getElementName());
-				if (targetBean != null && beanRef.getSource() instanceof IBean) {
+				if (targetBean != null && targetBean != bean &&
+										beanRef.getSource() instanceof IBean) {
 					graph.edges.add(new Reference(beanRef.getType(), bean,
 												  targetBean));
 				}
@@ -95,7 +96,7 @@ public class Graph implements IAdaptable {
 					BeanReference beanRef = (BeanReference) cargRefs.next();
 					Bean targetBean = getBean(
 										 beanRef.getTarget().getElementName());
-					if (targetBean != null) {
+					if (targetBean != null && targetBean != bean) {
 						graph.edges.add(new Reference(beanRef.getType(), bean,
 													  targetBean, carg));
 					}
@@ -113,7 +114,7 @@ public class Graph implements IAdaptable {
 					BeanReference beanRef = (BeanReference) propRefs.next();
 					Bean targetBean = getBean(
 										 beanRef.getTarget().getElementName());
-					if (targetBean != null) {
+					if (targetBean != null && targetBean != bean) {
 						graph.edges.add(new Reference(beanRef.getType(), bean,
 													  targetBean, property));
 					}
@@ -154,8 +155,8 @@ public class Graph implements IAdaptable {
 			bean.preferredHeight = size.height;
 		}
 
-		// Connect all unreferenced beans with a temporary root bean and collect
-		// subgraph root beans
+		// Remove all unreferenced single beans and connect all unreferenced
+		// subgraphs with a temporary root bean
 		Bean root = new Bean();
 		graph.nodes.add(root);
 
@@ -164,22 +165,15 @@ public class Graph implements IAdaptable {
 		beans = getBeans().iterator();
 		while (beans.hasNext()) {
 			Bean bean = (Bean) beans.next();
-			if (bean.incoming.isEmpty()) {
-				if (bean.outgoing.isEmpty()) {
-					orphanBeans.add(bean);
-				} else {
-					Reference reference = new Reference(root, bean);
-					reference.weight = 0;
-					rootEdges.add(reference);
-					graph.edges.add(reference);
-				}
+			if (bean.incoming.isEmpty() && bean.outgoing.isEmpty()) {
+				orphanBeans.add(bean);
+				graph.nodes.remove(bean);
+			} else {
+				Reference reference = new Reference(root, bean);
+				reference.weight = 0;
+				rootEdges.add(reference);
+				graph.edges.add(reference);
 			}
-		}
-
-		// Remove all subgraph root beans from graph
-		beans = orphanBeans.iterator();
-		while (beans.hasNext()) {
-			graph.nodes.remove(beans.next());
 		}
 
 		// Calculate position of all beans in graph
@@ -282,4 +276,10 @@ public class Graph implements IAdaptable {
 
 		}
 	}
+//
+//	private static final boolean isConnectedWithRoot(Bean bean, Bean root) {
+//		Bean.ComparingNodeVisitor visitor = new Bean.ComparingNodeVisitor(root);
+//		bean.accept(visitor);
+//		return visitor.isFound();
+//	}
 }
