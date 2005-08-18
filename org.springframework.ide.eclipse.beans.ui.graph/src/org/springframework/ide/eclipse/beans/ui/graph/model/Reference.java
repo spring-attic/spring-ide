@@ -87,4 +87,9 @@ public class Reference extends Edge implements IAdaptable {
 		}
 		return getSourceBean().getAdapter(adapter);
 	}
+
+	public String toString() {
+		return "Reference from '" + ((Bean) source).getName() + "' to '" +
+											   ((Bean) target).getName() + "'";
+	}
 }
