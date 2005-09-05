@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,4 +67,5 @@ public interface IBeansProjectMarker {
 	public static final int ERROR_CODE_NO_GETTER = 15;
 	public static final int ERROR_CODE_CLASS_NOT_ALLOWED = 16;
 	public static final int ERROR_CODE_NO_FACTORY_METHOD = 17;
+	public static final int ERROR_CODE_ALIAS_OVERRIDE = 18;
 }

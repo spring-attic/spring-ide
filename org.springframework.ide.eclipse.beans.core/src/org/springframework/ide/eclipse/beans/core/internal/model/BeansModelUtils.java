@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -98,7 +99,7 @@ public class BeansModelUtils {
 	 */
 	public static final IBeansConfig getConfig(IModelElement element) {
 		IModelElement parent;
-		if (element instanceof IBean) {
+		if (element instanceof IBean || element instanceof IBeanAlias) {
 			parent = element.getElementParent();
 		} else if (element instanceof IBeanConstructorArgument ||
 											element instanceof IBeanProperty) {
@@ -123,13 +124,11 @@ public class BeansModelUtils {
 		} else if (element instanceof IBeansConfig ||
 										  element instanceof IBeansConfigSet) {
 			return (IBeansProject) element.getElementParent();
-		} else if (element instanceof IBean) {
-			return (IBeansProject)
-								 element.getElementParent().getElementParent();
+		} else if (element instanceof IBean || element instanceof IBeanAlias) {
+			return getProject(element.getElementParent());
 		} else if (element instanceof IBeanConstructorArgument ||
 											element instanceof IBeanProperty) {
-			return (IBeansProject) element.getElementParent()
-										.getElementParent().getElementParent();
+			return getProject(element.getElementParent().getElementParent());
 		} else {
 			throw new IllegalArgumentException("Unsupported model element " +
 											   element);

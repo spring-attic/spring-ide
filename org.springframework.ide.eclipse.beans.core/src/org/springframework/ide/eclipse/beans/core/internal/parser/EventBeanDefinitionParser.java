@@ -56,9 +56,6 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 
 	private IBeanDefinitionEvents eventHandler;
 
-	/** Counter used to keep track of nested bean definitions (inner beans) */ 
-//	private int nestedBeanCount;
-
 	public EventBeanDefinitionParser(IBeanDefinitionEvents eventHandler) {
 		this.eventHandler = eventHandler;
 	}
@@ -101,6 +98,20 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 
 	protected int parseBeanDefinitions(Element root)
 										  throws BeanDefinitionStoreException {
+		NodeList nl = root.getChildNodes();
+
+		// First register all all aliases
+		for (int i = 0; i < nl.getLength(); i++) {
+			Node node = nl.item(i);
+			if (node instanceof Element) {
+				Element ele = (Element) node;
+				if (ALIAS_ELEMENT.equals(node.getNodeName())) {
+					String name = ele.getAttribute(NAME_ATTRIBUTE);
+					String alias = ele.getAttribute(ALIAS_ATTRIBUTE);
+					eventHandler.registerAlias(ele, name, alias);
+				}
+			}
+		}
 		try {
 			return super.parseBeanDefinitions(root);
 		} catch (BeanDefinitionStoreException e) {
@@ -108,7 +119,6 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 			// Lookup the invalid root element via the resource description
 			String elementName = e.getResourceDescription();
 			if (elementName != null) {
-				NodeList nl = root.getChildNodes();
 				for (int i = 0; i < nl.getLength(); i++) {
 					Node node = nl.item(i);
 					if (node instanceof Element) {
@@ -131,15 +141,11 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 	protected BeanDefinitionHolder parseBeanDefinitionElement(Element ele,
 														 boolean isInnerBean) {
 		try {
-//			nestedBeanCount++;
-//			if (eventHandler != null) {
-//				if (nestedBeanCount > 1) {
-				if (isInnerBean) {
-					eventHandler.startBean(ele, true);
-				} else {
-					eventHandler.startBean(ele, false);
-				}
-//			}
+			if (isInnerBean) {
+				eventHandler.startBean(ele, true);
+			} else {
+				eventHandler.startBean(ele, false);
+			}
 			BeanDefinitionHolder bdHolder = super.parseBeanDefinitionElement(
 															 ele, isInnerBean);
 			// Replace Spring's BeanDefinitionHolder with our own version with
@@ -148,7 +154,6 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 				bdHolder = new ExtendedBeanDefinitionHolder(bdHolder);
 			}
 			if (eventHandler != null) {
-//				if (nestedBeanCount > 1) {
 				if (isInnerBean) {
 					eventHandler.registerBean(bdHolder, true);
 
@@ -165,7 +170,6 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 					eventHandler.registerBean(bdHolder, false);
 				}
 			}
-//			nestedBeanCount--;
 			return bdHolder;
 		} catch (DOMException e) {
 			throw new BeanDefinitionException(ele, e);
@@ -232,7 +236,7 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 		return value;
 	}
 
-	private class ConstructorArgumentValuesFilter
+	private final class ConstructorArgumentValuesFilter
 											 extends ConstructorArgumentValues {
 		private ConstructorArgumentValues cargs;
 

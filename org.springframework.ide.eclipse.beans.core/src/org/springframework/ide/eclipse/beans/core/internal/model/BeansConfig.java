@@ -36,6 +36,7 @@ import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
 import org.springframework.ide.eclipse.beans.core.internal.parser.EventBeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.internal.parser.IBeanDefinitionEvents;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -56,6 +57,12 @@ public class BeansConfig extends AbstractSourceModelElement
 													  implements IBeansConfig {
 	/** This bean's config file */
 	private IFile file;
+
+	/** List of bean aliases, in registration order */
+	private List aliases;
+
+	/** Table of alias names mapped to aliases */
+	private Map aliasesMap;
 
 	/** List of bean names, in registration order */
 	private List beans;
@@ -114,11 +121,13 @@ public class BeansConfig extends AbstractSourceModelElement
 	 * <code>IBeansConfig</code> leads to reloading of this beans config file.
 	 */
 	public void reset() {
-		this.beans = null;
-		this.beansMap = null;
-		this.innerBeans = null;
-		this.beanClassesMap = null;
-		this.exception = null;
+		aliases = null;
+		aliasesMap = null;
+		beans = null;
+		beansMap = null;
+		innerBeans = null;
+		beanClassesMap = null;
+		exception = null;
 
 		// Reset all config sets which contain this config
 		IBeansProject project = (IBeansProject) getElementParent();
@@ -143,6 +152,17 @@ public class BeansConfig extends AbstractSourceModelElement
 		return (file != null ? file.getFullPath().toString() : null);
 	}
 
+	public Collection getAliases() {
+		return Collections.unmodifiableCollection(aliases);
+	}
+
+	public IBeanAlias getAlias(String name) {
+		if (name != null) {
+			return (IBeanAlias) aliasesMap.get(name);
+		}
+		return null;
+	}
+
 	public boolean hasBean(String name) {
 		if (name != null) {
 			return getBeansMap().containsKey(name);
@@ -163,7 +183,7 @@ public class BeansConfig extends AbstractSourceModelElement
 			// Lazily initialization of beans list
 			readConfig();
 		}
-		return beans;
+		return Collections.unmodifiableCollection(beans);
 	}
 
 	public Collection getInnerBeans() {
@@ -172,7 +192,7 @@ public class BeansConfig extends AbstractSourceModelElement
 			// Lazily initialization of inner beans list
 			readConfig();
 		}
-		return innerBeans;
+		return Collections.unmodifiableCollection(innerBeans);
 	}
 
 	public BeanDefinitionException getException() {
@@ -192,12 +212,14 @@ public class BeansConfig extends AbstractSourceModelElement
 	}
 
 	public Collection getBeanClasses() {
-		return getBeanClassesMap().keySet();
+		return Collections.unmodifiableCollection(
+												 getBeanClassesMap().keySet());
 	}
 
 	public Collection getBeans(String className) {
 		if (isBeanClass(className)) {
-			return (Collection) getBeanClassesMap().get(className);
+			return Collections.unmodifiableCollection((Collection)
+										   getBeanClassesMap().get(className));
 		}
 		return Collections.EMPTY_LIST;
 	}
@@ -275,6 +297,8 @@ public class BeansConfig extends AbstractSourceModelElement
 	}
 
 	private void readConfig() {
+		this.aliases = new ArrayList();
+		this.aliasesMap = new HashMap();
 		this.beans = new ArrayList();
 		this.beansMap = new HashMap();
 		this.innerBeans = new ArrayList();
@@ -295,19 +319,26 @@ public class BeansConfig extends AbstractSourceModelElement
 	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfig
 	 */
 	private final class BeansConfigHandler implements IBeanDefinitionEvents {
-	
+
 		private IBeansConfig config;
 	    private Stack nestedElements;
 		private ISourceModelElement currentElement;
 	    private Stack nestedBeans;
 		private Bean currentBean;
-	
+
 		public BeansConfigHandler(IBeansConfig config) {
 			this.config = config;
 			this.nestedElements = new Stack();
 			this.nestedBeans = new Stack();
 		}
-	
+
+		public void registerAlias(Element element, String name, String alias) {
+			IBeanAlias al = new BeanAlias(config, name, alias);
+			setXmlTextRange(al, element);
+			aliases.add(al);
+			aliasesMap.put(name, al);
+		}
+
 		public void startBean(Element element, boolean isNestedBean) {
 			if (isNestedBean) {
 				nestedElements.push(currentElement);
@@ -316,7 +347,7 @@ public class BeansConfig extends AbstractSourceModelElement
 			currentBean = new Bean(config);
 			setXmlTextRange(currentBean, element);
 		}
-	
+
 		public void registerBean(BeanDefinitionHolder bdHolder,
 								 boolean isNestedBean) {
 			currentBean.setBeanDefinitionHolder(bdHolder);

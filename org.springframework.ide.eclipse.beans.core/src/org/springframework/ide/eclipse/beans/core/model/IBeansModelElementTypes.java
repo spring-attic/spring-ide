@@ -62,4 +62,11 @@ public interface IBeansModelElementTypes {
 	 * <code>BeanConstructorArgument</code>.
 	 */
 	int CONSTRUCTOR_ARGUMENT_TYPE = 7;
+
+	/**
+	 * Constant representing a Beans project bean's alias.
+	 * A Beans element with this type can be safely cast to
+	 * <code>BeanAlias</code>.
+	 */
+	int ALIAS_TYPE = 8;
 }

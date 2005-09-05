@@ -16,34 +16,12 @@
 
 package org.springframework.ide.eclipse.beans.core.model;
 
-import java.util.Collection;
-
-import org.eclipse.core.resources.IFile;
-import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
-import org.springframework.ide.eclipse.core.model.IResourceModelElement;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
- * This interface provides information for a Spring beans configuration.
+ * Holds an <code>IBean</code>'s alias.
  */
-public interface IBeansConfig extends IResourceModelElement, IBeanClassAware {
+public interface IBeanAlias extends ISourceModelElement {
 
-	String DEFAULT_FILE_EXTENSION = "xml";  
-
-	IFile getConfigFile();
-
-	String getConfigPath();
-
-	Collection getAliases();
-
-	IBeanAlias getAlias(String name);
-
-	boolean hasBean(String name);
-
-	IBean getBean(String name);
-
-	Collection getBeans();
-
-	Collection getInnerBeans();
-
-	BeanDefinitionException getException();
+	String getAlias();
 }
