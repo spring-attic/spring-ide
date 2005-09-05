@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,15 +102,15 @@ public class RootBeanProperties implements IPropertySource {
 			return bean.getElementName();
 		}
 		if (P_ID_CONFIG.equals(id)) {
-			IBeansConfig config = bean.getConfig();
-			IFile file = bean.getConfig().getConfigFile();
+			IBeansConfig config = BeansModelUtils.getConfig(bean);
+			IFile file = BeansModelUtils.getConfig(bean).getConfigFile();
 			if (file != null) {
 				return new ConfigFilePropertySource(file);
 			}
 			return config.getElementName();
 		}
 		if (P_ID_CLASS.equals(id)) {
-			IProject project = bean.getConfig().getConfigFile().getProject();
+			IProject project = BeansModelUtils.getProject(bean).getProject();
 			String className = bean.getClassName();
 			IType type = BeansModelUtils.getJavaType(project, className);
 

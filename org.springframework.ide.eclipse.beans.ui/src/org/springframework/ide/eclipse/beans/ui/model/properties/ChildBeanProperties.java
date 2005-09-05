@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.eclipse.ui.views.properties.FilePropertySource;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
@@ -98,7 +99,7 @@ public class ChildBeanProperties implements IPropertySource {
 			return bean.getElementName();
 		}
 		if (P_ID_CONFIG.equals(id)) {
-			IBeansConfig config = bean.getConfig();
+			IBeansConfig config = BeansModelUtils.getConfig(bean);
 			IFile file = config.getConfigFile();
 			if (file != null) {
 				return new ConfigFilePropertySource(file);
@@ -107,7 +108,8 @@ public class ChildBeanProperties implements IPropertySource {
 		}
 		if (P_ID_PARENT.equals(id)) {
 			String parentName = bean.getParentName();
-			IBean parentBean = bean.getConfig().getBean(parentName);
+			IBean parentBean = BeansModelUtils.getConfig(bean).getBean(
+																   parentName);
 			if (parentBean != null) {
 				if (parentBean.isRootBean()) {
 					return new RootBeanProperties(parentBean);
