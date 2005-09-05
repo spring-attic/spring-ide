@@ -25,8 +25,6 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  */
 public interface IBean extends ISourceModelElement {
 
-	IBeansConfig getConfig();
-
 	String[] getAliases();
 
 	Collection getConstructorArguments();
