@@ -122,10 +122,17 @@ public class BeansContentAssistProcessor
                         }
                         Image image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
 
+                        int replacementLength = request.getReplacementLength();
+                        int replacementBegin = request.getReplacementBeginPosition();
+                        if (replacementLength != 0) {
+                            replacementLength = replacementLength - 2;
+                            replacementBegin++;
+                        }
+
                         CustomCompletionProposal proposal = new CustomCompletionProposal(
-                                replaceText, request.getReplacementBeginPosition() + 1, request
-                                        .getReplacementLength() - 2, replaceText.length(), image,
-                                buf.toString(), null, BeansLablelProvider.createAdditionalProposalInfo(beanNode, file),
+                                replaceText, replacementBegin, replacementLength, replaceText
+                                        .length(), image, buf.toString(), null, BeansLablelProvider
+                                        .createAdditionalProposalInfo(beanNode, file),
                                 BeanReferenceSearchRequestor.LOCAL_BEAN_RELEVANCE);
 
                         this.request.addProposal(proposal);
@@ -158,10 +165,17 @@ public class BeansContentAssistProcessor
                             getBeanFlags(bean));
                     image = BeansUIPlugin.getImageDescriptorRegistry().get(descriptor);
 
+                    int replacementLength = request.getReplacementLength();
+                    int replacementBegin = request.getReplacementBeginPosition();
+                    if (replacementLength != 0) {
+                        replacementLength = replacementLength - 2;
+                        replacementBegin++;
+                    }
+
                     CustomCompletionProposal proposal = new CustomCompletionProposal(replaceText,
-                            request.getReplacementBeginPosition() + 1, request
-                                    .getReplacementLength() - 2, replaceText.length(), image, buf
-                                    .toString(), null, BeansLablelProvider.createAdditionalProposalInfo(bean),
+                            replacementBegin, replacementLength, replaceText.length(), image, buf
+                                    .toString(), null, BeansLablelProvider
+                                    .createAdditionalProposalInfo(bean),
                             BeanReferenceSearchRequestor.EXTERNAL_BEAN_RELEVANCE);
 
                     this.request.addProposal(proposal);
@@ -252,9 +266,16 @@ public class BeansContentAssistProcessor
                             | JavaElementImageProvider.SMALL_ICONS);
                     BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
                     String javadoc = utils.getJavaDoc();
+
+                    int replacementLength = request.getReplacementLength();
+                    int replacementBegin = request.getReplacementBeginPosition();
+                    if (replacementLength != 0) {
+                        replacementLength = replacementLength - 2;
+                        replacementBegin++;
+                    }
+
                     CustomCompletionProposal proposal = new CustomCompletionProposal(replaceText,
-                            request.getReplacementBeginPosition() + 1, request
-                                    .getReplacementLength() - 2, replaceText.length(), image,
+                            replacementBegin, replacementLength, replaceText.length(), image,
                             displayText, null, javadoc,
                             PropertyNameSearchRequestor.METHOD_RELEVANCE);
                     this.request.addProposal(proposal);
@@ -319,9 +340,16 @@ public class BeansContentAssistProcessor
                             | JavaElementImageProvider.SMALL_ICONS);
                     BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
                     String javadoc = utils.getJavaDoc();
+
+                    int replacementLength = request.getReplacementLength();
+                    int replacementBegin = request.getReplacementBeginPosition();
+                    if (replacementLength != 0) {
+                        replacementLength = replacementLength - 2;
+                        replacementBegin++;
+                    }
+
                     CustomCompletionProposal proposal = new CustomCompletionProposal(replaceText,
-                            request.getReplacementBeginPosition() + 1, request
-                                    .getReplacementLength() - 2, replaceText.length(), image,
+                            replacementBegin, replacementLength, replaceText.length(), image,
                             displayText, null, javadoc,
                             PropertyNameSearchRequestor.METHOD_RELEVANCE);
                     this.request.addProposal(proposal);
@@ -374,9 +402,16 @@ public class BeansContentAssistProcessor
                             | JavaElementImageProvider.SMALL_ICONS);
                     BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
                     String javadoc = utils.getJavaDoc();
+
+                    int replacementLength = request.getReplacementLength();
+                    int replacementBegin = request.getReplacementBeginPosition();
+                    if (replacementLength != 0) {
+                        replacementLength = replacementLength - 2;
+                        replacementBegin++;
+                    }
+
                     CustomCompletionProposal proposal = new CustomCompletionProposal(replaceText,
-                            request.getReplacementBeginPosition() + 1, request
-                                    .getReplacementLength() - 2, replaceText.length(), image,
+                            replacementBegin, replacementLength, replaceText.length(), image,
                             displayText, null, javadoc,
                             PropertyNameSearchRequestor.METHOD_RELEVANCE);
                     this.request.addProposal(proposal);
@@ -486,9 +521,15 @@ public class BeansContentAssistProcessor
                     relevance = TypeSearchRequestor.PACKAGE_RELEVANCE * -1;
                 }
 
+                int replacementLength = request.getReplacementLength();
+                int replacementBegin = request.getReplacementBeginPosition();
+                if (replacementLength != 0) {
+                    replacementLength = replacementLength - 2;
+                    replacementBegin++;
+                }
+
                 CustomCompletionProposal proposal = new CustomCompletionProposal(displayText,
-                        request.getReplacementBeginPosition() + 1,
-                        request.getReplacementLength() - 2, displayText.length(), image,
+                        replacementBegin, replacementLength, displayText.length(), image,
                         displayText, null, null, relevance);
                 this.request.addProposal(proposal);
                 this.types.put(displayText, proposal);
@@ -522,9 +563,15 @@ public class BeansContentAssistProcessor
                     image = this.imageProvider.getImageLabel(type, type.getFlags()
                             | JavaElementImageProvider.SMALL_ICONS);
 
+                    int replacementLength = request.getReplacementLength();
+                    int replacementBegin = request.getReplacementBeginPosition();
+                    if (replacementLength != 0) {
+                        replacementLength = replacementLength - 2;
+                        replacementBegin++;
+                    }
+
                     CustomCompletionProposal proposal = new CustomCompletionProposal(replaceText,
-                            request.getReplacementBeginPosition() + 1, request
-                                    .getReplacementLength() - 2, replaceText.length(), image,
+                            replacementBegin, replacementLength, replaceText.length(), image,
                             displayText, null, javadoc, relevance);
                     this.request.addProposal(proposal);
                     this.types.put(displayText, proposal);
@@ -560,6 +607,43 @@ public class BeansContentAssistProcessor
         super.addTagInsertionProposals(request, childPosition);
     }
 
+    protected void addTagCloseProposals(ContentAssistRequest request) {
+        IDOMNode node = (IDOMNode) request.getNode();
+
+        // Find the attribute region and name for which this position should
+        // have a value proposed
+        IStructuredDocumentRegion open = node.getFirstStructuredDocumentRegion();
+        ITextRegionList openRegions = open.getRegions();
+        int i = openRegions.indexOf(request.getRegion());
+        if (i < 0) {
+            return;
+        }
+        ITextRegion nameRegion = null;
+        while (i >= 0) {
+            nameRegion = openRegions.get(i--);
+            if (nameRegion.getType() == DOMRegionContext.XML_TAG_ATTRIBUTE_NAME) {
+                break;
+            }
+        }
+
+        String matchString = request.getMatchString();
+        if (matchString == null) {
+            matchString = "";
+        }
+        if (matchString.length() > 0
+                && (matchString.startsWith("\"") || matchString.startsWith("'"))) {
+            matchString = matchString.substring(1);
+        }
+
+        // the name region is REQUIRED to do anything useful
+        if (nameRegion != null && !matchString.endsWith("\"")) {
+            String attributeName = open.getText(nameRegion);
+            computeAttributeValueProposals(request, node, matchString, attributeName);
+        }
+
+        super.addTagCloseProposals(request);
+    }
+
     protected void addAttributeValueProposals(ContentAssistRequest request) {
         IDOMNode node = (IDOMNode) request.getNode();
 
@@ -591,88 +675,93 @@ public class BeansContentAssistProcessor
         // the name region is REQUIRED to do anything useful
         if (nameRegion != null) {
             String attributeName = open.getText(nameRegion);
-            if ("bean".equals(node.getNodeName())) {
-                if ("class".equals(attributeName)) {
-                    addClassAttributeValueProposals(request, matchString);
+            computeAttributeValueProposals(request, node, matchString, attributeName);
+            if (request != null && request.getProposals() != null
+                    && request.getProposals().size() == 0) {
+                super.addAttributeValueProposals(request);
+            }
+        }
+    }
+
+    private void computeAttributeValueProposals(ContentAssistRequest request, IDOMNode node,
+            String matchString, String attributeName) {
+
+        if ("bean".equals(node.getNodeName())) {
+            if ("class".equals(attributeName)) {
+                addClassAttributeValueProposals(request, matchString);
+            }
+            else if ("init-method".equals(attributeName) || "destroy-method".equals(attributeName)) {
+                // TODO add support for parent bean
+                NamedNodeMap attributes = node.getAttributes();
+                String className = attributes.getNamedItem("class").getNodeValue();
+                if (className != null) {
+                    addInitDestroyAttributeValueProposals(request, matchString, className);
                 }
-                else if ("init-method".equals(attributeName)
-                        || "destroy-method".equals(attributeName)) {
-                    // TODO add support for parent bean
-                    NamedNodeMap attributes = node.getAttributes();
-                    String className = attributes.getNamedItem("class").getNodeValue();
-                    if (className != null) {
-                        addInitDestroyAttributeValueProposals(request, matchString, className);
+            }
+            else if ("factory-method".equals(attributeName)) {
+                // TODO add support for parent bean
+                NamedNodeMap attributes = node.getAttributes();
+                Node factoryBean = attributes.getNamedItem("factory-bean");
+                String className = null;
+                String factoryClassName = null;
+                if (factoryBean != null) {
+                    String factoryBeanId = factoryBean.getNodeValue();
+                    Document doc = node.getOwnerDocument();
+                    Element bean = doc.getElementById(factoryBeanId);
+                    if (bean != null && bean instanceof Node) {
+                        NamedNodeMap attr = ((Node) bean).getAttributes();
+                        className = attr.getNamedItem("class").getNodeValue();
                     }
-                }
-                else if ("factory-method".equals(attributeName)) {
-                    // TODO add support for parent bean
-                    NamedNodeMap attributes = node.getAttributes();
-                    Node factoryBean = attributes.getNamedItem("factory-bean");
-                    String className = null;
-                    String factoryClassName = null;
-                    if (factoryBean != null) {
-                        String factoryBeanId = factoryBean.getNodeValue();
-                        Document doc = node.getOwnerDocument();
-                        Element bean = doc.getElementById(factoryBeanId);
-                        if (bean != null && bean instanceof Node) {
-                            NamedNodeMap attr = ((Node) bean).getAttributes();
-                            className = attr.getNamedItem("class").getNodeValue();
-                        }
-                        else {
-                            if (editor.getEditorInput() instanceof IFileEditorInput) {
-                                IFile file = ((IFileEditorInput) this.editor.getEditorInput())
-                                        .getFile();
-                                // assume this is an external reference
-                                Iterator beans = BeansEditorUtils.getBeansFromConfigSets(file)
-                                        .iterator();
-                                while (beans.hasNext()) {
-                                    IBean modelBean = (IBean) beans.next();
-                                    if (modelBean.getElementName().equals(factoryBeanId)) {
-                                        className = modelBean.getClassName();
-                                    }
+                    else {
+                        if (editor.getEditorInput() instanceof IFileEditorInput) {
+                            IFile file = ((IFileEditorInput) this.editor.getEditorInput())
+                                    .getFile();
+                            // assume this is an external reference
+                            Iterator beans = BeansEditorUtils.getBeansFromConfigSets(file)
+                                    .iterator();
+                            while (beans.hasNext()) {
+                                IBean modelBean = (IBean) beans.next();
+                                if (modelBean.getElementName().equals(factoryBeanId)) {
+                                    className = modelBean.getClassName();
                                 }
                             }
                         }
                     }
-                    else {
-                        if (attributes.getNamedItem("class") != null) {
-                            className = attributes.getNamedItem("class").getNodeValue();
-                        }
-                    }
+                }
+                else {
                     if (attributes.getNamedItem("class") != null) {
-                        factoryClassName = attributes.getNamedItem("class").getNodeValue();
-                    }
-                    if (className != null && factoryClassName != null) {
-                        addFactoryMethodAttributeValueProposals(request, matchString, className,
-                                factoryClassName);
+                        className = attributes.getNamedItem("class").getNodeValue();
                     }
                 }
-                else if ("parent".equals(attributeName) || "depends-on".equals(attributeName)
-                        || "factory-bean".equals(attributeName)) {
-                    addBeanReferenceProposals(request, matchString, node.getOwnerDocument(), true);
+                if (attributes.getNamedItem("class") != null) {
+                    factoryClassName = attributes.getNamedItem("class").getNodeValue();
+                }
+                if (className != null && factoryClassName != null) {
+                    addFactoryMethodAttributeValueProposals(request, matchString, className,
+                            factoryClassName);
                 }
             }
-            else if ("property".equals(node.getNodeName())) {
-                // TODO add support for parent bean
-                Node parentNode = node.getParentNode();
-                NamedNodeMap attributes = parentNode.getAttributes();
-                if ("name".equals(attributeName) && attributes != null
-                        && attributes.getNamedItem("class") != null) {
-                    String className = attributes.getNamedItem("class").getNodeValue();
-                    addPropertyNameAttributeValueProposals(request, matchString, className);
-                }
+            else if ("parent".equals(attributeName) || "depends-on".equals(attributeName)
+                    || "factory-bean".equals(attributeName)) {
+                addBeanReferenceProposals(request, matchString, node.getOwnerDocument(), true);
             }
-            else if ("ref".equals(node.getNodeName())) {
-                if ("local".equals(attributeName)) {
-                    addBeanReferenceProposals(request, matchString, node.getOwnerDocument(), false);
-                }
-                else if ("bean".equals(attributeName)) {
-                    addBeanReferenceProposals(request, matchString, node.getOwnerDocument(), true);
-                }
+        }
+        else if ("property".equals(node.getNodeName())) {
+            // TODO add support for parent bean
+            Node parentNode = node.getParentNode();
+            NamedNodeMap attributes = parentNode.getAttributes();
+            if ("name".equals(attributeName) && attributes != null
+                    && attributes.getNamedItem("class") != null) {
+                String className = attributes.getNamedItem("class").getNodeValue();
+                addPropertyNameAttributeValueProposals(request, matchString, className);
             }
-            if (request != null && request.getProposals() != null
-                    && request.getProposals().size() == 0) {
-                super.addAttributeValueProposals(request);
+        }
+        else if ("ref".equals(node.getNodeName())) {
+            if ("local".equals(attributeName)) {
+                addBeanReferenceProposals(request, matchString, node.getOwnerDocument(), false);
+            }
+            else if ("bean".equals(attributeName)) {
+                addBeanReferenceProposals(request, matchString, node.getOwnerDocument(), true);
             }
         }
     }
