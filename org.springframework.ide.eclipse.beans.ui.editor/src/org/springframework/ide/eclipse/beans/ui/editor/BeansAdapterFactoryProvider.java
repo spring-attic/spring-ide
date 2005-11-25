@@ -23,7 +23,6 @@ import org.eclipse.wst.sse.core.internal.model.FactoryRegistry;
 import org.eclipse.wst.sse.core.internal.provisional.INodeAdapterFactory;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.ui.internal.contentoutline.IJFaceNodeAdapter;
-import org.eclipse.wst.xml.ui.internal.properties.XMLPropertySourceAdapterFactory;
 import org.eclipse.wst.xml.ui.internal.registry.AdapterFactoryProviderForXML;
 import org.springframework.ide.eclipse.beans.ui.editor.outline.BeansJFaceNodeAdapterFactory;
 
@@ -34,10 +33,10 @@ public class BeansAdapterFactoryProvider extends AdapterFactoryProviderForXML {
 		Assert.isNotNull(factoryRegistry, "No factory registered");
 		INodeAdapterFactory factory = factoryRegistry.getFactoryFor(
 														IPropertySource.class);
-		if (factory == null) {
+		/*if (factory == null) {
 			factory = new XMLPropertySourceAdapterFactory();
 			factoryRegistry.addFactory(factory);
-		}
+		}*/
 		factory = factoryRegistry.getFactoryFor(IJFaceNodeAdapter.class);
 		if (factory == null) {
 			factory = new BeansJFaceNodeAdapterFactory();

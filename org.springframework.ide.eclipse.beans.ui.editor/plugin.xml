@@ -32,8 +32,8 @@
       <import plugin="org.springframework.ide.eclipse.beans.core" />
       <import plugin="org.springframework.ide.eclipse.beans.ui" />
    </requires>
-
-	<extension point="org.eclipse.core.runtime.contentTypes">
+ 
+   <extension point="org.eclipse.core.runtime.contentTypes">
 		<content-type id="beansConfig"
 			name="%contentTypeName"
 			base-type="org.eclipse.core.runtime.xml"
@@ -46,10 +46,16 @@
 			</describer>
 		</content-type>
 	</extension>
+
+	<extension point="org.eclipse.wst.sse.ui.editorConfiguration">
+		<sourceViewerConfiguration
+			class="org.springframework.ide.eclipse.beans.ui.editor.BeansStructuredTextViewerConfiguration"
+			target="org.springframework.ide.eclipse.beans.ui.editor.beansConfig" />
+	</extension>
 	
 	<extension point="org.eclipse.wst.sse.core.modelHandler">
 		<modelHandler
-			id="org.eclipse.wst.sse.core.handler.beansConfig"
+			id="org.springframework.ide.eclipse.beans.ui.editor.handler.beansConfig"
 			default="false"
 			associatedContentTypeId="org.springframework.ide.eclipse.beans.ui.editor.beansConfig"
 			class="org.springframework.ide.eclipse.beans.ui.editor.BeansModelHandler">
@@ -63,12 +69,6 @@
 		</adapterFactoryDescription>
 	</extension>
 
-	<extension point="org.eclipse.wst.sse.ui.extendedconfiguration">
-		<configuration
-			type="textviewerconfiguration"
-			target="org.springframework.ide.eclipse.beans.ui.editor.beansConfig"
-			class="org.springframework.ide.eclipse.beans.ui.editor.BeansStructuredTextViewerConfiguration"/>
-	</extension>
 
  <extension
        point="org.eclipse.wst.xml.core.catalogContributions">

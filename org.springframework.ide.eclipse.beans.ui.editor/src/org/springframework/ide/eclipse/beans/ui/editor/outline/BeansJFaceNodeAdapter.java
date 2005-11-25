@@ -22,6 +22,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.sse.core.internal.provisional.INodeAdapterFactory;
 import org.eclipse.wst.sse.ui.internal.contentoutline.IJFaceNodeAdapter;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeAdapter;
+import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeAdapterFactory;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.w3c.dom.Node;
 
@@ -32,7 +33,7 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 
 	public static final Class ADAPTER_KEY = IJFaceNodeAdapter.class;
 
-	public BeansJFaceNodeAdapter(INodeAdapterFactory adapterFactory) {
+	public BeansJFaceNodeAdapter(JFaceNodeAdapterFactory adapterFactory) {
 		super(adapterFactory);
 	}
 

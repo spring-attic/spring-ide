@@ -37,7 +37,6 @@ import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.wst.sse.ui.internal.provisional.registry.AdapterFactoryRegistry;
 import org.eclipse.wst.sse.ui.internal.provisional.registry.AdapterFactoryRegistryImpl;
-import org.eclipse.wst.xml.ui.internal.JobStatusLineHelper;
 import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextTypeIds;
 
@@ -72,7 +71,6 @@ public class BeansEditorPlugin extends AbstractUIPlugin {
 	 */
 	public BeansEditorPlugin() {
 		plugin = this;
-		JobStatusLineHelper.init();
 
 		try {
 			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);

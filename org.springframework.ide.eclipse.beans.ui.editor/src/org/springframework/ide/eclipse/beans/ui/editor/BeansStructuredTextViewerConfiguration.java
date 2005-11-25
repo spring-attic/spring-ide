@@ -29,71 +29,78 @@ import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredPartitionTy
 import org.eclipse.wst.sse.ui.internal.taginfo.TextHoverManager;
 import org.eclipse.wst.sse.ui.internal.util.EditorUtility;
 import org.eclipse.wst.xml.core.internal.provisional.text.IXMLPartitions;
+import org.eclipse.wst.xml.ui.StructuredTextViewerConfigurationXML;
 import org.eclipse.wst.xml.ui.internal.contentassist.NoRegionContentAssistProcessor;
-import org.eclipse.wst.xml.ui.internal.provisional.StructuredTextViewerConfigurationXML;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.hover.BeansTextHoverProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.BeansHyperLinkDetector;
 
-public class BeansStructuredTextViewerConfiguration
-        extends StructuredTextViewerConfigurationXML {
+public class BeansStructuredTextViewerConfiguration extends
+		StructuredTextViewerConfigurationXML {
 
-    public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
+	public IContentAssistProcessor[] getContentAssistProcessors(
+			ISourceViewer sourceViewer, String partitionType) {
 
-        IContentAssistant ca = super.getContentAssistant(sourceViewer);
-        if (ca != null && ca instanceof ContentAssistant) {
-            ContentAssistant contentAssistant = (ContentAssistant) ca;
-            contentAssistant.enableAutoActivation(true);
-            contentAssistant.enableAutoInsert(true);
-            contentAssistant.setAutoActivationDelay(0);
-            contentAssistant.setProposalSelectorBackground(new Color(BeansEditorPlugin
-                    .getActiveWorkbenchShell().getDisplay(), new RGB(255, 255, 255)));
-            contentAssistant.setRestoreCompletionProposalSize(BeansEditorPlugin.getDefault()
-                    .getDialogSettings());
-            IContentAssistProcessor caProcessor = new BeansContentAssistProcessor(getEditorPart());
+		IContentAssistProcessor[] processors = null;
 
-            setContentAssistProcessor(contentAssistant, caProcessor,
-                    IStructuredPartitionTypes.DEFAULT_PARTITION);
-            setContentAssistProcessor(contentAssistant, caProcessor, IXMLPartitions.XML_DEFAULT);
-            IContentAssistProcessor noRegionProcessor = new NoRegionContentAssistProcessor();
-            setContentAssistProcessor(contentAssistant, noRegionProcessor,
-                    IStructuredPartitionTypes.UNKNOWN_PARTITION);
-        }
-        return ca;
-    }
+		if ((partitionType == IStructuredPartitionTypes.DEFAULT_PARTITION)
+				|| (partitionType == IXMLPartitions.XML_DEFAULT)) {
+			processors = new IContentAssistProcessor[] { new BeansContentAssistProcessor() };
+		}
+		// ISSUE: this should be unneeded, right? Just supplied by super class?
+		else if (partitionType == IStructuredPartitionTypes.UNKNOWN_PARTITION) {
+			processors = new IContentAssistProcessor[] { new NoRegionContentAssistProcessor() };
+		}
 
-    public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
-        List allDetectors = new ArrayList(0);
-        allDetectors.add(new BeansHyperLinkDetector(getEditorPart()));
+		IContentAssistant ca = super.getContentAssistant(sourceViewer);
+		if (ca != null && ca instanceof ContentAssistant) {
+			ContentAssistant contentAssistant = (ContentAssistant) ca;
+			contentAssistant.enableAutoActivation(true);
+			contentAssistant.enableAutoInsert(true);
+			contentAssistant.setAutoActivationDelay(0);
+			contentAssistant.setProposalSelectorBackground(new Color(
+					BeansEditorPlugin.getActiveWorkbenchShell().getDisplay(),
+					new RGB(255, 255, 255)));
+			contentAssistant.setRestoreCompletionProposalSize(BeansEditorPlugin
+					.getDefault().getDialogSettings());
+		}
+		return processors;
+	}
 
-        IHyperlinkDetector[] superDetectors = super.getHyperlinkDetectors(sourceViewer);
-        for (int m = 0; m < superDetectors.length; m++) {
-            IHyperlinkDetector detector = superDetectors[m];
-            if (!allDetectors.contains(detector)) {
-                allDetectors.add(detector);
-            }
-        }
-        return (IHyperlinkDetector[]) allDetectors.toArray(new IHyperlinkDetector[0]);
-    }
+	public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
+		List allDetectors = new ArrayList(0);
+		allDetectors.add(new BeansHyperLinkDetector());
+		IHyperlinkDetector[] superDetectors = super
+				.getHyperlinkDetectors(sourceViewer);
+		for (int m = 0; m < superDetectors.length; m++) {
+			IHyperlinkDetector detector = superDetectors[m];
+			if (!allDetectors.contains(detector)) {
+				allDetectors.add(detector);
+			}
+		}
+		return (IHyperlinkDetector[]) allDetectors
+				.toArray(new IHyperlinkDetector[0]);
+	}
 
-    public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
-        // look for appropriate text hover processor to return based on
-        // content type and state mask
-        if ((contentType == IStructuredPartitionTypes.DEFAULT_PARTITION)
-                || (contentType == IXMLPartitions.XML_DEFAULT)) {
-            // check which of xml's text hover is handling stateMask
-            TextHoverManager.TextHoverDescriptor[] hoverDescs = getTextHovers();
-            int i = 0;
-            while (i < hoverDescs.length) {
-                if (hoverDescs[i].isEnabled()
-                        && EditorUtility.computeStateMask(hoverDescs[i].getModifierString()) == stateMask) {
-                    String hoverType = hoverDescs[i].getId();
-                    if (TextHoverManager.COMBINATION_HOVER.equalsIgnoreCase(hoverType))
-                        return new BeansTextHoverProcessor(this.editorPart);
-                }
-                i++;
-            }
-        }
-        return super.getTextHover(sourceViewer, contentType, stateMask);
-    }
+	public ITextHover getTextHover(ISourceViewer sourceViewer,
+			String contentType, int stateMask) {
+		if ((contentType == IStructuredPartitionTypes.DEFAULT_PARTITION)
+				|| (contentType == IXMLPartitions.XML_DEFAULT)) {
+			/*hoverDescs = super.get
+			int i = 0;
+			while (i < hoverDescs.length) {
+				if (hoverDescs[i].isEnabled()
+						&& EditorUtility.computeStateMask(hoverDescs[i]
+								.getModifierString()) == stateMask) {
+					String hoverType = hoverDescs[i].getId();
+					if (TextHoverManager.COMBINATION_HOVER
+							.equalsIgnoreCase(hoverType))
+						return new BeansTextHoverProcessor(this.editorPart);
+				}
+				i++;
+			}*/
+			return new BeansTextHoverProcessor();
+		}
+		return super.getTextHover(sourceViewer, contentType, stateMask);
+	}
 }
