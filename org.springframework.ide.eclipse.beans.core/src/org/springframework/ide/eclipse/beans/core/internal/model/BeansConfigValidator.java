@@ -282,46 +282,46 @@ public class BeansConfigValidator {
 						IBeansProjectMarker.ERROR_CODE_INVALID_BEAN_DEFINITION,
 						bean.getElementName(), null);
 			}
+		}
+		// If bean's Java type available then valdiate bean's constructor
+		// arguments and properties
+		String className = bd.getBeanClassName();
+		if (className != null) {
 
-			// If bean's Java type available then valdiate bean's constructor
-			// arguments and properties
-			String className = bd.getBeanClassName();
-			if (className != null) {
-
-				// If factory bean specified then bean class is not allowed
-				if (bd.getFactoryBeanName() != null) {
-					BeansModelUtils.createProblemMarker(bean, "If factory " +
-						  "bean specified then class attribute is not allowed",
-						  IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
-						  IBeansProjectMarker.ERROR_CODE_CLASS_NOT_ALLOWED,
-						  bean.getElementName(), null);
+			// If factory bean specified then bean class is not allowed
+			// TODO I don't think that using factory-bean does not allow the use of the class atrribute
+			if (bd.getFactoryBeanName() != null) {
+				BeansModelUtils.createProblemMarker(bean, "If factory " +
+					  "bean specified then class attribute is not allowed",
+					  IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+					  IBeansProjectMarker.ERROR_CODE_CLASS_NOT_ALLOWED,
+					  bean.getElementName(), null);
+			} else {
+				IType type = BeansModelUtils.getJavaType(
+						 	 BeansModelUtils.getProject(bean).getProject(),
+						 	 className);
+				if (type == null) {
+					if (!bean.isAbstract()) {
+						BeansModelUtils.createProblemMarker(bean,
+							"Class '" + className + "' not found",
+							IMarker.SEVERITY_ERROR,
+							bean.getElementStartLine(),
+						 	IBeansProjectMarker.ERROR_CODE_CLASS_NOT_FOUND,
+						 	bean.getElementName(), className);
+					}
 				} else {
-					IType type = BeansModelUtils.getJavaType(
-							 	 BeansModelUtils.getProject(bean).getProject(),
-							 	 className);
-					if (type == null) {
-						if (!bean.isAbstract()) {
-							BeansModelUtils.createProblemMarker(bean,
-								"Class '" + className + "' not found",
-								IMarker.SEVERITY_ERROR,
-								bean.getElementStartLine(),
-							 	IBeansProjectMarker.ERROR_CODE_CLASS_NOT_FOUND,
-							 	bean.getElementName(), className);
-						}
-					} else {
 
-						// Only validate constructor args of non-abstract beans
-						if (!bean.isAbstract()) {
-							validateConstructorArguments(bean, type,
-											bd.getConstructorArgumentValues());
-						}
+					// Only validate constructor args of non-abstract beans
+					if (!bean.isAbstract()) {
+						validateConstructorArguments(bean, type,
+										bd.getConstructorArgumentValues());
 					}
 				}
 			}
 		}
 
 		// Validate bean's properties and static factory method
-		String className = mergedBd.getBeanClassName();
+		className = mergedBd.getBeanClassName();
 		if (className != null) {
 			IType type = BeansModelUtils.getJavaType(
 								 BeansModelUtils.getProject(bean).getProject(),
