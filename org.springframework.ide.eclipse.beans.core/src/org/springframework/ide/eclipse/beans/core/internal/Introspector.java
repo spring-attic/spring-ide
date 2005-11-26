@@ -196,10 +196,14 @@ public class Introspector {
             IMethod method = methods[i];
             if (method.isConstructor()) {
                 if (method.getNumberOfParameters() == argCount) {
-                    int flags = method.getFlags();
-                    if (Flags.isPublic(flags)) {
+                    /* Refer to http://springide.org/project/ticket/166
+                     * the following plubic contructor check is removed
+                     * 
+                	    * int flags = method.getFlags();
+                     * if (Flags.isPublic(flags)) {*/
+                     
                         return true;
-                    }
+                    // }
                 }
             }
         }

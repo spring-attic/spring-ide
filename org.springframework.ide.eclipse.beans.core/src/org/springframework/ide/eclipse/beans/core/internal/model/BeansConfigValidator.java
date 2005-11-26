@@ -401,7 +401,7 @@ public class BeansConfigValidator {
 			try {
 				if (!Introspector.hasConstructor(type, numArguments)) {
 					BeansModelUtils.createProblemMarker(bean,
-						"No public constructor with " + numArguments +
+						"No constructor with " + numArguments +
 						(numArguments == 1 ? " argument" : " arguments") +
 						" defined in class '" + type.getFullyQualifiedName() +
 						"'", IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
