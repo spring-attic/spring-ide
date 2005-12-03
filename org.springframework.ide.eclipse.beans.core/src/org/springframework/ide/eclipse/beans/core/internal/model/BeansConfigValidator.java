@@ -399,7 +399,7 @@ public class BeansConfigValidator {
 										   bd.getFactoryMethodName() == null) {
 			int numArguments = argumentValues.getArgumentCount();
 			try {
-				if (!Introspector.hasConstructor(type, numArguments)) {
+				if (!Introspector.hasConstructor(type, numArguments, true)) {
 					BeansModelUtils.createProblemMarker(bean,
 						"No constructor with " + numArguments +
 						(numArguments == 1 ? " argument" : " arguments") +

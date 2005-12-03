@@ -166,19 +166,24 @@ public class Introspector {
     }
 
     /**
-     * Returns <code>true</code> if the given type has a public constructor with the specified
-     * number of arguments. If a constructor with no arguments is requested then the absence of a
-     * constructor (the JVM adds an implicit constructor here) results in <code>true</code>.
+     * Returns <code>true</code> if the given type has a public constructor
+     * with the specified number of arguments. If a constructor with no
+     * arguments is requested then the absence of a constructor (the JVM adds
+     * an implicit constructor here) results in <code>true</code>.
      * 
      * @param type The Java type object on which to retrieve the method
      * @param argCount Number of arguments for the constructor
+     * @param isNonPublicAllowed Set to <code>true</code> if non-public
+     * 			 constructurs are recognized too
      */
-    public static boolean hasConstructor(IType type, int argCount) throws JavaModelException {
+    public static boolean hasConstructor(IType type, int argCount,
+    					boolean isNonPublicAllowed) throws JavaModelException {
         IMethod[] methods = type.getMethods();
                 
         // First check for implicit constructor
         if (argCount == 0) {
-            // check if the methods do contain constuctors
+
+            // Check if the methods do contain constuctors
             boolean hasExplicitConstructor = false;
             for (int i = 0; i < methods.length; i++) {
                 IMethod method = methods[i];
@@ -196,14 +201,10 @@ public class Introspector {
             IMethod method = methods[i];
             if (method.isConstructor()) {
                 if (method.getNumberOfParameters() == argCount) {
-                    /* Refer to http://springide.org/project/ticket/166
-                     * the following plubic contructor check is removed
-                     * 
-                	    * int flags = method.getFlags();
-                     * if (Flags.isPublic(flags)) {*/
-                     
+                    if (isNonPublicAllowed ||
+                    					   Flags.isPublic(method.getFlags())) {
                         return true;
-                    // }
+                    }
                 }
             }
         }
