@@ -626,6 +626,8 @@ public class BeansModelUtils {
 	 * 		  <code>IBeanConfigSet</code>) the beans are looked-up
 	 * @param context  the context (<code>IBeanConfig</code> or
 	 * 		  <code>IBeanConfigSet</code>) the beans are looked-up
+	 * @return the Java type of givern bean's class or <code>null</code> if
+	 *			no bean class defined or type not found
 	 */
 	public static final IType getBeanType(IBean bean, IModelElement context) {
 		Assert.notNull(bean);
@@ -634,6 +636,27 @@ public class BeansModelUtils {
 			return getJavaType(getProject(bean).getProject(), className);
 		}
 		return null;
+	}
+
+	/**
+	 * Returns the first constructor argument defined for given bean.
+	 * @param bean  the bean to lookup the first constructor argument
+	 * @return the first constructor argument or <code>null</code> if no
+	 * 			constructor argument is defined
+	 */
+	public static final IBeanConstructorArgument getFirstConstructorArgument(
+																  IBean bean) {
+		IBeanConstructorArgument firstCarg = null;
+		int firstCargStartLine = Integer.MAX_VALUE;
+		Iterator cargs = bean.getConstructorArguments().iterator();
+		while (cargs.hasNext()) {
+			IBeanConstructorArgument carg = (IBeanConstructorArgument) cargs.next();
+			if (carg.getElementStartLine() < firstCargStartLine) {
+				firstCarg = carg;
+				firstCargStartLine = carg.getElementStartLine();
+			}
+		}
+		return firstCarg;
 	}
 
 	public static final void createProblemMarker(IModelElement element,

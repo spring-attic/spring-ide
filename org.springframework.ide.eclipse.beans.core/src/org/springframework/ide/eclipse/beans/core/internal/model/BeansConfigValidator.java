@@ -397,14 +397,23 @@ public class BeansConfigValidator {
 									   BeansModelUtils.getBeanDefinition(bean);
 		if (bd.getFactoryBeanName() == null &&
 										   bd.getFactoryMethodName() == null) {
-			int numArguments = argumentValues.getArgumentCount();
+			// Check for default constructor if no constructor arguments are
+			// available
+			int numArguments = (argumentValues == null ? 0 :
+											argumentValues.getArgumentCount());
 			try {
 				if (!Introspector.hasConstructor(type, numArguments, true)) {
+					ISourceModelElement element =
+							 BeansModelUtils.getFirstConstructorArgument(bean);
+					if (element == null) {
+						element = bean;
+					}
 					BeansModelUtils.createProblemMarker(bean,
 						"No constructor with " + numArguments +
 						(numArguments == 1 ? " argument" : " arguments") +
 						" defined in class '" + type.getFullyQualifiedName() +
-						"'", IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+						"'", IMarker.SEVERITY_ERROR,
+						element.getElementStartLine(),
 						IBeansProjectMarker.ERROR_CODE_NO_CONSTRUCTOR,
 						bean.getElementName(), type.getFullyQualifiedName());
 				}
