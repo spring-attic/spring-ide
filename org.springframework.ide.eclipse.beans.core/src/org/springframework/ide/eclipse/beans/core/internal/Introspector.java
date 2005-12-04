@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2005 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.util.StringUtils;
 
 public class Introspector {
@@ -40,10 +38,11 @@ public class Introspector {
     public static int STATIC_YES = 1;
 
     /**
-     * Returns concatenated text from given two texts delimited by given delimiter. Both texts can
-     * be empty or <code>null</code>.
+     * Returns concatenated text from given two texts delimited by given
+     * delimiter. Both texts can be empty or <code>null</code>.
      */
-    protected static String concatenate(String text1, String text2, String delimiter) {
+    protected static final String concatenate(String text1, String text2,
+    										  String delimiter) {
         StringBuffer buf = new StringBuffer();
         if (text1 != null && text1.length() > 0) {
             buf.append(text1);
@@ -57,13 +56,13 @@ public class Introspector {
         return buf.toString();
     }
 
-    protected static JavaModelException createException(String message) {
-        return new JavaModelException(new CoreException(BeansCorePlugin.createErrorStatus(message,
-                null)));
-    }
-
-    public static Collection findAllMethods(IType type, String methodPrefix, int argCount,
-            boolean isPublic, int staticFlag) throws JavaModelException {
+    /**
+     * Returns a map of method name + <code>IMethod</code> for all setters with
+     * specified features.
+     */
+    public static final Collection findAllMethods(IType type,
+    					   String methodPrefix, int argCount, boolean isPublic,
+    					   int staticFlag) throws JavaModelException {
         Map allMethods = new HashMap();
         while (type != null) {
             IMethod[] methods = type.getMethods();
@@ -74,36 +73,37 @@ public class Introspector {
                 if (!allMethods.containsKey(key)
                         && Flags.isPublic(flags) == isPublic
                         && (staticFlag == Introspector.STATIC_IRRELVANT
-                                || (staticFlag == Introspector.STATIC_YES && Flags.isStatic(flags)) || (staticFlag == Introspector.STATIC_NO && !Flags
-                                .isStatic(flags)))
-                        && (argCount == -1 || method.getNumberOfParameters() == argCount)
+                                || (staticFlag == Introspector.STATIC_YES &&
+                                		Flags.isStatic(flags))
+                                || (staticFlag == Introspector.STATIC_NO &&
+                                		!Flags.isStatic(flags)))
+                        && (argCount == -1 ||
+                        			method.getNumberOfParameters() == argCount)
                         && method.getElementName().startsWith(methodPrefix)) {
                     allMethods.put(key, method);
                 }
             }
             type = getSuperType(type);
         }
-
         return allMethods.values();
     }
 
     /**
-     * 
-     * @param type
-     * @return
-     * @throws JavaModelException
+     * Returns a map of method name + <code>IMethod</code> for all setters with
+     * given prefix and no arguments.
      */
-    public static Collection findAllNoParameterMethods(IType type, String prefix)
-            throws JavaModelException {
+    public static final Collection findAllNoParameterMethods(IType type,
+    								 String prefix) throws JavaModelException {
         if (prefix == null) {
             prefix = "";
         }
-        return findAllMethods(type, prefix, 0, true, Introspector.STATIC_IRRELVANT);
+        return findAllMethods(type, prefix, 0, true,
+        						  Introspector.STATIC_IRRELVANT);
     }
 
     /**
-     * Finds a target methodName with specific number of arguments on the type hierarchy of given
-     * type.
+     * Finds a target methodName with specific number of arguments on the type
+     * hierarchy of given type.
      * 
      * @param type The Java type object on which to retrieve the method
      * @param methodName Name of the method
@@ -111,8 +111,9 @@ public class Introspector {
      * @param isPublic true if public method is requested
      * @param isStatic true if static method is requested
      */
-    public static IMethod findMethod(IType type, String methodName, int argCount, boolean isPublic,
-            int staticFlag) throws JavaModelException {
+    public static final IMethod findMethod(IType type, String methodName,
+    							int argCount, boolean isPublic, int staticFlag)
+    							throws JavaModelException {
         while (type != null) {
             IMethod[] methods = type.getMethods();
             for (int i = 0; i < methods.length; i++) {
@@ -133,22 +134,21 @@ public class Introspector {
     }
 
     /**
-     * 
-     * @param type
-     * @param methodPrefix
-     * @return
-     * @throws JavaModelException
+     * Returns a map of method name + <code>IMethod</code> for all setters with
+     * the given prefix.
      */
-    public static Collection findWritableProperties(IType type, String methodPrefix)
-            throws JavaModelException {
+    public static final Collection findWritableProperties(IType type,
+    						   String methodPrefix) throws JavaModelException {
         String base = StringUtils.capitalize(methodPrefix);
-        return findAllMethods(type, "set" + base, 1, true, Introspector.STATIC_NO);
+        return findAllMethods(type, "set" + base, 1, true,
+        						  Introspector.STATIC_NO);
     }
 
     /**
      * Returns super type of given type.
      */
-    protected static IType getSuperType(IType type) throws JavaModelException {
+    protected static final IType getSuperType(IType type)
+    												throws JavaModelException {
         String name = type.getSuperclassName();
         if (name != null) {
             if (type.isBinary()) {
@@ -157,7 +157,8 @@ public class Introspector {
             else {
                 String[][] resolvedNames = type.resolveType(name);
                 if (resolvedNames != null && resolvedNames.length > 0) {
-                    String resolvedName = concatenate(resolvedNames[0][0], resolvedNames[0][1], ".");
+                    String resolvedName = concatenate(resolvedNames[0][0],
+                    								 resolvedNames[0][1], ".");
                     return type.getJavaProject().findType(resolvedName);
                 }
             }
@@ -176,7 +177,7 @@ public class Introspector {
      * @param isNonPublicAllowed Set to <code>true</code> if non-public
      * 			 constructurs are recognized too
      */
-    public static boolean hasConstructor(IType type, int argCount,
+    public static final boolean hasConstructor(IType type, int argCount,
     					boolean isNonPublicAllowed) throws JavaModelException {
         IMethod[] methods = type.getMethods();
                 
@@ -208,7 +209,6 @@ public class Introspector {
                 }
             }
         }
-        
         return false;
     }
 
@@ -219,28 +219,50 @@ public class Introspector {
      * @param type The Java type object on which to retrieve the method
      * @param propertyName Name of the property
      */
-    public static boolean hasWritableProperty(IType type, String propertyName)
-            throws JavaModelException {
-        if (propertyName == null || propertyName.length() == 0) {
-            throw createException("bad property name");
-        }
+    public static final boolean hasWritableProperty(IType type,
+    						   String propertyName) throws JavaModelException {
         String base = StringUtils.capitalize(propertyName);
         return (findMethod(type, "set" + base, 1, true, Introspector.STATIC_NO) != null);
     }
     
-        /**
+    /**
      * Returns true if the given type has a public setter (one-argument method named "set" +
      * property name with an uppercase first character) for the specified property.
      * 
      * @param type The Java type object on which to retrieve the method
      * @param propertyName Name of the property
      */
-    public static IMethod getWritableProperty(IType type, String propertyName)
-            throws JavaModelException {
-        if (propertyName == null || propertyName.length() == 0) {
-            throw createException("bad property name");
-        }
+    public static final IMethod getWritableProperty(IType type,
+    						   String propertyName) throws JavaModelException {
         String base = StringUtils.capitalize(propertyName);
         return findMethod(type, "set" + base, 1, true, Introspector.STATIC_NO);
+    }
+
+    /**
+     * Returns <code>true</code> if the given name is a valid JavaBeans
+     * property name. This normally means that a property name starts with a
+     * lower case character, but in the (unusual) special case when there is
+     * more than one character and both the first and second characters are
+     * upper case, then an upper case character is valid too.
+     * <p>
+     * Thus "fooBah" corresponds to "FooBah" and "x" to "X", but "URL" stays
+     * the same as "URL".
+     * <p>
+     * This conforms to section "8.8 Capitalization of inferred names" of the
+     * JavaBeans specs.
+     * @param  name The name to be checked.
+     */
+    public static final boolean isValidPropertyName(String name) {
+        if (name == null || name.length() == 0) {
+        		return false;
+        }
+        	if (	name.length() == 1 && Character.isUpperCase(name.charAt(0))) {
+        		return false;
+        	}
+        	if (name.length() > 1 && Character.isUpperCase(name.charAt(0)) &&
+        							   Character.isLowerCase(name.charAt(1))) {
+        		return false;
+        	}
+        	return true;
     }
 }

@@ -68,4 +68,5 @@ public interface IBeansProjectMarker {
 	public static final int ERROR_CODE_CLASS_NOT_ALLOWED = 16;
 	public static final int ERROR_CODE_NO_FACTORY_METHOD = 17;
 	public static final int ERROR_CODE_ALIAS_OVERRIDE = 18;
+	public static final int ERROR_CODE_INVALID_PROPERTY_NAME = 19;
 }

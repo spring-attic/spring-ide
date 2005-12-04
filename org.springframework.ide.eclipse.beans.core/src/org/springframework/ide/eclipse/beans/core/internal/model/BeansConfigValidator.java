@@ -481,8 +481,18 @@ public class BeansConfigValidator {
 						}
 					}
 				} else {
-					if (!Introspector.hasWritableProperty(type, propertyName)) {
-						IBeanProperty property = bean.getProperty(propertyName);
+					IBeanProperty property = bean.getProperty(propertyName);
+					if (!Introspector.isValidPropertyName(propertyName)) {
+						BeansModelUtils.createProblemMarker(bean,
+								   "Invalid property name '" +
+								   propertyName + "' - not JavaBean compliant",
+								   IMarker.SEVERITY_ERROR, (property != null ?
+						 					   property.getElementStartLine() :
+						 					   bean.getElementStartLine()),
+						 IBeansProjectMarker.ERROR_CODE_INVALID_PROPERTY_NAME,
+						 bean.getElementName(), propertyName);
+					} else if (!Introspector.hasWritableProperty(type,
+															   propertyName)) {
 						BeansModelUtils.createProblemMarker(bean,
 									"No setter found for property '" +
 							 		propertyName + "' in class '" +
