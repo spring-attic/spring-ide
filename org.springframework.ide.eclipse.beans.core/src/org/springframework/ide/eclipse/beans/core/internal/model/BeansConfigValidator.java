@@ -336,8 +336,13 @@ public class BeansConfigValidator {
 						bean.getElementName(), null);
 				}
 			} else {
+
+				// Use constructor argument values of root bean as arguments
+				// for static factory method
+				int argCount = (bd instanceof RootBeanDefinition ?
+					bd.getConstructorArgumentValues().getArgumentCount() : -1);
 				validateFactoryMethod(bean, mergedClassName,
-									  bd.getFactoryMethodName(), true);
+								   bd.getFactoryMethodName(), argCount, true);
 			}
 		}
 
@@ -516,15 +521,15 @@ public class BeansConfigValidator {
 			try {
 				registry.getBeanDefinition(bean.getElementName());
 			} catch (BeansException e) {
-				String beanName;
+				String beanName = "<NA>";
 				if (e instanceof NoSuchBeanDefinitionException) {
 					beanName = ((NoSuchBeanDefinitionException)
 															  e).getBeanName();
 				} else if (e instanceof BeanDefinitionStoreException) {
-					beanName = ((BeanDefinitionStoreException)
-															  e).getBeanName();
-				} else {
-					beanName = "<NA>";
+					if (e.getCause() instanceof NoSuchBeanDefinitionException) {
+						beanName = ((NoSuchBeanDefinitionException)
+												   e.getCause()).getBeanName();
+					}
 				}
 				if (beanName.equals(bean.getElementName())) {
 					BeansModelUtils.createProblemMarker(bean,
@@ -766,7 +771,7 @@ public class BeansConfigValidator {
 				if (factoryBd instanceof RootBeanDefinition &&
 									factoryBd.getFactoryMethodName() == null) {
 					validateFactoryMethod(bean, factoryBd.getBeanClassName(),
-										  methodName, false);
+										  methodName, -1, false);
 				}
 			}
 		} catch (NoSuchBeanDefinitionException e) {
@@ -783,7 +788,7 @@ public class BeansConfigValidator {
 	}
 
 	protected void validateFactoryMethod(IBean bean, String className,
-										 String methodName, boolean isStatic) {
+						   String methodName, int argCount, boolean isStatic) {
 		IType type = BeansModelUtils.getJavaType(
 					 BeansModelUtils.getProject(bean).getProject(), className);
 		if (type == null) {
@@ -794,14 +799,17 @@ public class BeansConfigValidator {
 							bean.getElementName(), className);
 		} else {
 			try {
-				if (Introspector.findMethod(type, methodName, -1, true,
+				if (Introspector.findMethod(type, methodName, argCount, true,
 										  (isStatic ? Introspector.STATIC_YES :
 											Introspector.STATIC_NO)) == null) {
 					BeansModelUtils.createProblemMarker(bean,
 							(isStatic ? "Static" : "Non-static") +
 							" factory method '" + methodName +
-							"' in factory bean class '" + className +
-							"' not found", IMarker.SEVERITY_ERROR,
+							"' " +
+							(argCount != -1 ? "with " + argCount +
+									" arguments " : "") + 
+							"not found in factory bean class '" + className +
+							"'", IMarker.SEVERITY_ERROR,
 							bean.getElementStartLine(),
 							IBeansProjectMarker.ERROR_CODE_UNDEFINED_FACTORY_BEAN_METHOD,
 							bean.getElementName(), methodName);
