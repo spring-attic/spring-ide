@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.PropertyValue;
@@ -42,6 +43,7 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
+import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
@@ -253,18 +255,22 @@ public class BeansConfigValidator {
 		monitor.subTask(BeansCorePlugin.getFormattedMessage(
 				   "BeansConfigValidator.validateBean", bean.getElementName()));
 
-		// Get bean's standard and merged bean definition
+		// Get bean's standard bean definition and class name
 		AbstractBeanDefinition bd = (AbstractBeanDefinition)
 									   BeansModelUtils.getBeanDefinition(bean);
+		String className = bd.getBeanClassName();
+
+		// Get bean's merged bean definition and class name
 		AbstractBeanDefinition mergedBd;
 		if (configSet == null) {
 			mergedBd = (AbstractBeanDefinition)
 					  BeansModelUtils.getMergedBeanDefinition(bean,
-					  						  BeansModelUtils.getConfig(bean));
+				  						  BeansModelUtils.getConfig(bean));
 		} else {
 			mergedBd = (AbstractBeanDefinition)
-					  BeansModelUtils.getMergedBeanDefinition(bean, configSet);
+				  BeansModelUtils.getMergedBeanDefinition(bean, configSet);
 		}
+		String mergedClassName = mergedBd.getBeanClassName();
 
 		// Validate bean name and aliases
 		validateBeanDefinitionHolder(bean, configSet, registry);
@@ -283,59 +289,58 @@ public class BeansConfigValidator {
 						bean.getElementName(), null);
 			}
 		}
-		// If bean's Java type available then valdiate bean's constructor
-		// arguments and properties
-		String className = bd.getBeanClassName();
-		if (className != null) {
 
-			// If factory bean specified then bean class is not allowed
-			// TODO I don't think that using factory-bean does not allow the use of the class atrribute
-			if (bd.getFactoryBeanName() != null) {
-				BeansModelUtils.createProblemMarker(bean, "If factory " +
-					  "bean specified then class attribute is not allowed",
-					  IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
-					  IBeansProjectMarker.ERROR_CODE_CLASS_NOT_ALLOWED,
-					  bean.getElementName(), null);
-			} else {
-				IType type = BeansModelUtils.getJavaType(
-						 	 BeansModelUtils.getProject(bean).getProject(),
-						 	 className);
-				if (type == null) {
-					if (!bean.isAbstract()) {
-						BeansModelUtils.createProblemMarker(bean,
-							"Class '" + className + "' not found",
-							IMarker.SEVERITY_ERROR,
-							bean.getElementStartLine(),
-						 	IBeansProjectMarker.ERROR_CODE_CLASS_NOT_FOUND,
-						 	bean.getElementName(), className);
-					}
-				} else {
-
-					// Only validate constructor args of non-abstract beans
-					if (!bean.isAbstract()) {
-						validateConstructorArguments(bean, type,
-										bd.getConstructorArgumentValues());
-					}
-				}
-			}
-		}
-
-		// Validate bean's properties and static factory method
-		className = mergedBd.getBeanClassName();
+		// Validate bean's constructor arguments with bean class from
+		// non-merged bean definition 
 		if (className != null) {
 			IType type = BeansModelUtils.getJavaType(
-								 BeansModelUtils.getProject(bean).getProject(),
-								 className);
-			if (type != null) {
-				validateProperties(bean, type, bd.getPropertyValues());
-				if (bd.getFactoryMethodName() != null &&
-											 bd.getFactoryBeanName() == null) {
-					validateFactoryMethod(bean, className,
-										  bd.getFactoryMethodName(), true);
+					BeansModelUtils.getProject(bean).getProject(), className);
+			if (type == null) {
+				BeansModelUtils.createProblemMarker(bean,
+								"Class '" + className + "' not found",
+								IMarker.SEVERITY_ERROR,
+								bean.getElementStartLine(),
+								IBeansProjectMarker.ERROR_CODE_CLASS_NOT_FOUND,
+								bean.getElementName(), className);
+			} else {
+
+				// Only validate constructor args of non-abstract beans
+				if (!bean.isAbstract()) {
+					validateConstructorArguments(bean, type,
+										bd.getConstructorArgumentValues());
 				}
 			}
 		}
-		
+
+		// Validate bean's properties with bean class from merged bean
+		// definition
+		if (mergedClassName != null) {
+			IType type = BeansModelUtils.getJavaType(
+								 BeansModelUtils.getProject(bean).getProject(),
+								 mergedClassName);
+			if (type != null) {
+				validateProperties(bean, type, bd.getPropertyValues());
+			}
+		}
+
+		// Validate bean's static factory method with bean class from merged
+		// bean definition
+		if (bd.getFactoryMethodName() != null) {
+			if (mergedClassName == null) {
+				if (bd.getFactoryBeanName() == null &&
+										!(bd instanceof ChildBeanDefinition)) {
+					BeansModelUtils.createProblemMarker(bean,
+						"Factory method needs class from root or parent bean",
+						IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+						IBeansProjectMarker.ERROR_CODE_BEAN_WITHOUT_CLASS_OR_PARENT,
+						bean.getElementName(), null);
+				}
+			} else {
+				validateFactoryMethod(bean, mergedClassName,
+									  bd.getFactoryMethodName(), true);
+			}
+		}
+
 		// Validate this bean's inner beans recursively
 		Iterator innerBeans = bean.getInnerBeans().iterator();
 		while (innerBeans.hasNext()) {
@@ -510,21 +515,31 @@ public class BeansConfigValidator {
 			// Validate parent bean reference (if any)
 			try {
 				registry.getBeanDefinition(bean.getElementName());
-			} catch (NoSuchBeanDefinitionException e) {
-				if (e.getBeanName().equals(bean.getElementName())) {
+			} catch (BeansException e) {
+				String beanName;
+				if (e instanceof NoSuchBeanDefinitionException) {
+					beanName = ((NoSuchBeanDefinitionException)
+															  e).getBeanName();
+				} else if (e instanceof BeanDefinitionStoreException) {
+					beanName = ((BeanDefinitionStoreException)
+															  e).getBeanName();
+				} else {
+					beanName = "<NA>";
+				}
+				if (beanName.equals(bean.getElementName())) {
 					BeansModelUtils.createProblemMarker(bean,
-							  "Bean name and parent bean name are the same",
-							  IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
-							  IBeansProjectMarker.ERROR_CODE_UNDEFINED_PARENT_BEAN,
-							  bean.getElementName(), e.getBeanName());
+						  "Bean name and parent bean name are the same",
+						  IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+						  IBeansProjectMarker.ERROR_CODE_UNDEFINED_PARENT_BEAN,
+						  bean.getElementName(), beanName);
 				} else if (configSet != null && !configSet.isIncomplete()) {
 					BeansModelUtils.createProblemMarker(bean,
-							  "Parent bean '" + e.getBeanName() +
-							  "' not found in config set '" +
-							  configSet.getElementName() + "'",
-							  IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
-							  IBeansProjectMarker.ERROR_CODE_UNDEFINED_PARENT_BEAN,
-							  bean.getElementName(), e.getBeanName());
+						  "Parent bean '" + beanName +
+						  "' not found in config set '" +
+						  configSet.getElementName() + "'",
+						  IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+						  IBeansProjectMarker.ERROR_CODE_UNDEFINED_PARENT_BEAN,
+						  bean.getElementName(), beanName);
 				}
 			}
 
@@ -633,7 +648,7 @@ public class BeansConfigValidator {
 					validateDependsOnBean(bean, beanName, registry);
 				}
 			}
-		} catch (NoSuchBeanDefinitionException e) {
+		} catch (BeansException e) {
 			// Ignore all exceptions
 		}
 	}

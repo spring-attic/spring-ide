@@ -42,7 +42,6 @@ import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MethodOverride;
 import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -413,16 +412,17 @@ public class BeansModelUtils {
 	 */
 	public static final BeanDefinition getBeanDefinition(IBean bean) {
 		return ((Bean) bean).getBeanDefinitionHolder().getBeanDefinition();
-}
+	}
 
 	/**
 	 * Returns the merged bean definition for a given bean from specified
 	 * context (<code>IBeansConfig</code> or <code>IBeansConfigSet</code>).
+	 * Any cyclic-references are ignored.
 	 * @param bean  the bean the merged bean definition is requested for
 	 * @param context  the context (<code>IBeanConfig</code> or
 	 * 		  <code>IBeanConfigSet</code>) the beans are looked-up
 	 * @return given bean's merged bean definition 
-	 * @throws IllegalArgumentException if unsupported context specified 
+	 * @throws IllegalArgumentException if unsupported context specified
 	 */
 	public static final BeanDefinition getMergedBeanDefinition(IBean bean,
 													   IModelElement context) {
@@ -468,11 +468,9 @@ public class BeansModelUtils {
 		if (parentBean != null) {
 			BeanDefinition parentBd =
 					  parentBean.getBeanDefinitionHolder().getBeanDefinition();
-			if (parentName.equals(bean.getElementName()) ||
-										  beanDefinitions.contains(parentBd)) {
-				throw new BeanDefinitionException("Cyclic references are " +
-												  "not supported");
-			} else {
+			// Break cyclic references
+			if (!parentName.equals(bean.getElementName()) &&
+										 !beanDefinitions.contains(parentBd)) {
 				beanDefinitions.add(parentBd);
 				if (!parentBean.isRootBean()) {
 					addBeanDefinition(parentBean, context, beanDefinitions);
