@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-
    <description url="http://springide.org/updatesite_dev">
       This site provides plugins supporting the Spring Framework (http://www.springframework.org/) within the Eclipse platform.
    </description>
@@ -8,6 +7,9 @@
       <category name="spring-ide-webflow"/>
    </feature>
    <feature url="features/org.springframework.ide.eclipse.web.flow_0.0.2.jar" id="org.springframework.ide.eclipse.web.flow" version="0.0.2">
+      <category name="spring-ide-webflow"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.web.flow_0.0.3.jar" id="org.springframework.ide.eclipse.web.flow" version="0.0.3">
       <category name="spring-ide-webflow"/>
    </feature>
    <category-def name="spring-ide-webflow" label="Spring IDE WebFlow">
