@@ -17,6 +17,7 @@ package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -33,6 +34,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -48,17 +51,20 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
+import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
+import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
@@ -92,6 +98,8 @@ import org.w3c.dom.NodeList;
  */
 public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 		implements IPropertyChangeListener {
+
+	private CompletionProposalComparator fComparator;
 
 	class BeanReferenceSearchRequestor {
 
@@ -520,123 +528,8 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 		}
 	}
 
-	final class TypeSearchRequestor extends SearchRequestor {
-
-		public static final int CLASS_RELEVANCE = 90;
-
-		public static final int INTERFACE_RELEVANCE = 90;
-
-		public static final int PACKAGE_RELEVANCE = 10;
-
-		private ContentAssistRequest request;
-
-		private Map types;
-
-		private boolean invertOrder = false;
-
-		private JavaElementImageProvider imageProvider;
-
-		public TypeSearchRequestor(ContentAssistRequest request,
-				boolean invertOrder) {
-			this.request = request;
-			this.types = new HashMap();
-			this.invertOrder = invertOrder;
-			this.imageProvider = new JavaElementImageProvider();
-		}
-
-		public void acceptSearchMatch(SearchMatch match) throws CoreException {
-			if (match.getElement() instanceof IType) {
-				IType type = (IType) match.getElement();
-				if (type.exists()) {
-					this.createTypeProposal(type);
-				}
-			} else if (match.getElement() instanceof IPackageFragment) {
-				IPackageFragment packageFragment = (IPackageFragment) match
-						.getElement();
-				if (packageFragment.exists()) {
-					this.createPackageProposal(packageFragment);
-				}
-			}
-		}
-
-		private void createPackageProposal(IPackageFragment pkg) {
-			String displayText = pkg.getElementName();
-			if (!this.types.containsKey(displayText)) {
-				Image image = JavaUI.getSharedImages().getImage(
-						ISharedImages.IMG_OBJS_PACKAGE);
-				int relevance = TypeSearchRequestor.PACKAGE_RELEVANCE;
-				if (this.invertOrder) {
-					relevance = TypeSearchRequestor.PACKAGE_RELEVANCE * -1;
-				}
-
-				int replacementLength = request.getReplacementLength();
-				int replacementBegin = request.getReplacementBeginPosition();
-				if (replacementLength != 0) {
-					replacementLength = replacementLength - 2;
-					replacementBegin++;
-				}
-
-				CustomCompletionProposal proposal = new CustomCompletionProposal(
-						displayText, replacementBegin, replacementLength,
-						displayText.length(), image, displayText, null, null,
-						relevance);
-				this.request.addProposal(proposal);
-				this.types.put(displayText, proposal);
-			}
-		}
-
-		private void createTypeProposal(IType type) {
-			try {
-				String displayText = type.getElementName() + " - "
-						+ type.getPackageFragment().getElementName();
-				if (!this.types.containsKey(displayText)) {
-					String replaceText = type.getFullyQualifiedName();
-					Image image = null;
-					int relevance = -1;
-					if (type.isInterface()) {
-						relevance = TypeSearchRequestor.INTERFACE_RELEVANCE;
-						if (this.invertOrder) {
-							relevance = TypeSearchRequestor.INTERFACE_RELEVANCE
-									* -1;
-						}
-					} else {
-						relevance = TypeSearchRequestor.CLASS_RELEVANCE;
-						if (this.invertOrder) {
-							relevance = TypeSearchRequestor.CLASS_RELEVANCE
-									* -1;
-						}
-					}
-
-					BeansJavaDocUtils utils = new BeansJavaDocUtils(type);
-					String javadoc = utils.getJavaDoc();
-
-					image = this.imageProvider.getImageLabel(type, type
-							.getFlags()
-							| JavaElementImageProvider.SMALL_ICONS);
-
-					int replacementLength = request.getReplacementLength();
-					int replacementBegin = request
-							.getReplacementBeginPosition();
-					if (replacementLength != 0) {
-						replacementLength = replacementLength - 2;
-						replacementBegin++;
-					}
-
-					CustomCompletionProposal proposal = new CustomCompletionProposal(
-							replaceText, replacementBegin, replacementLength,
-							replaceText.length(), image, displayText, null,
-							javadoc, relevance);
-					this.request.addProposal(proposal);
-					this.types.put(displayText, proposal);
-				}
-			} catch (JavaModelException e) {
-
-			}
-		}
-	}
-
 	public BeansContentAssistProcessor() {
-
+		this.fComparator = new CompletionProposalComparator();
 	}
 
 	protected void addTagInsertionProposals(ContentAssistRequest request,
@@ -911,7 +804,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 	private void addInitDestroyAttributeValueProposals(
 			ContentAssistRequest request, String prefix, String className) {
 		if (getResource(request) instanceof IFile) {
-            IFile file = (IFile) getResource(request);
+			IFile file = (IFile) getResource(request);
 			IType type = BeansModelUtils.getJavaType(file.getProject(),
 					className);
 			if (type != null) {
@@ -938,47 +831,70 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 
 	private void addClassAttributeValueProposals(ContentAssistRequest request,
 			String prefix) {
-		if (getResource(request) instanceof IFile) {
-            IFile file = (IFile) getResource(request);
-			if (prefix != null && prefix.length() > 0) {
-				String prefixTemp = prefix;
-				if (!prefixTemp.endsWith("*")) {
-					prefixTemp = prefixTemp + "*";
-				}
-				try {
-					if (file.getProject().hasNature(JavaCore.NATURE_ID)) {
-						IJavaProject project = JavaCore.create(file
-								.getProject());
-						IJavaSearchScope scope = SearchEngine
-								.createJavaSearchScope(
-										new IJavaElement[] { project }, true);
-						SearchPattern packagePattern = SearchPattern
-								.createPattern(prefixTemp,
-										IJavaSearchConstants.PACKAGE,
-										IJavaSearchConstants.DECLARATIONS,
-										SearchPattern.R_PATTERN_MATCH);
-						SearchPattern typePattern = SearchPattern
-								.createPattern(prefixTemp,
-										IJavaSearchConstants.TYPE,
-										IJavaSearchConstants.DECLARATIONS,
-										SearchPattern.R_PATTERN_MATCH);
-						SearchPattern pattern = SearchPattern.createOrPattern(
-								packagePattern, typePattern);
-						TypeSearchRequestor requestor = new TypeSearchRequestor(
-								request, StringUtils.isCapitalized(prefixTemp));
-						SearchEngine engine = new SearchEngine();
 
-						engine.search(pattern,
-								new SearchParticipant[] { SearchEngine
-										.getDefaultSearchParticipant() },
-								scope, requestor, this.getProgressMonitor());
-					}
-				} catch (CoreException e) {
-					// do nothing
+		String contents = "public class _xxx {\n"
+				+ "    public void main(String[] args) {\n" + "        ";
+		String contents_end = "\n" + "    }\n" + "}";
+
+		try {
+			IFile file1 = (IFile) getResource(request);
+			IJavaProject project1 = JavaCore.create(file1.getProject());
+			IPackageFragment root = project1.getPackageFragments()[0];
+			ICompilationUnit unit = root.getCompilationUnit("_xxx.java")
+					.getWorkingCopy(
+							CompilationUnitHelper.getInstance()
+									.getWorkingCopyOwner(),
+							CompilationUnitHelper.getInstance()
+									.getProblemRequestor(),
+							getProgressMonitor());
+			String source = contents + prefix + contents_end;
+			setContents(unit, source);
+
+			CompletionProposalCollector collector = new CompletionProposalCollector(
+					unit);
+			unit.codeComplete(66 + prefix.length(), collector,
+					DefaultWorkingCopyOwner.PRIMARY);
+
+			IJavaCompletionProposal[] props = collector
+					.getJavaCompletionProposals();
+
+			ICompletionProposal[] proposals = order(props);
+
+			int replacementLength = request.getReplacementLength();
+			int replacementBegin = request.getReplacementBeginPosition();
+			if (replacementLength != 0) {
+				replacementLength = replacementLength - 2;
+				replacementBegin++;
+			}
+
+			for (int i = 0; i < proposals.length; i++) {
+				if (proposals[i] instanceof JavaCompletionProposal) {
+					JavaCompletionProposal prop = (JavaCompletionProposal) proposals[i];
+					BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
+							prop.getReplacementString(), replacementBegin,
+							replacementLength, prop.getReplacementString()
+									.length(), prop.getImage(), prop
+									.getDisplayString(), null, prop
+									.getAdditionalProposalInfo(), prop
+									.getRelevance());
+
+					request.addProposal(proposal);
+				} else if (proposals[i] instanceof LazyJavaTypeCompletionProposal) {
+					LazyJavaTypeCompletionProposal prop = (LazyJavaTypeCompletionProposal) proposals[i];
+					BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
+							prop.getReplacementString(), replacementBegin,
+							replacementLength, prop.getReplacementString()
+									.length(), prop.getImage(), prop
+									.getDisplayString(), null, prop
+									.getAdditionalProposalInfo(), prop
+									.getRelevance());
+
+					request.addProposal(proposal);
 				}
 			}
-		} else {
-			setErrorMessage("Prefix too short");
+
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -987,21 +903,19 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 	}
 
 	private IProgressMonitor getProgressMonitor() {
-		/*if (this.editor != null
-				&& this.editor.getEditorSite() != null
-				&& this.editor.getEditorSite().getActionBars() != null
-				&& this.editor.getEditorSite().getActionBars()
-						.getStatusLineManager() != null
-				&& this.editor.getEditorSite().getActionBars()
-						.getStatusLineManager().getProgressMonitor() != null) {
-			IStatusLineManager manager = this.editor.getEditorSite()
-					.getActionBars().getStatusLineManager();
-			IProgressMonitor monitor = manager.getProgressMonitor();
-			manager.setMessage("Processing completion proposals");
-			return monitor;
-		} else {*/
-			return new NullProgressMonitor();
-		//}
+		/*
+		 * if (this.editor != null && this.editor.getEditorSite() != null &&
+		 * this.editor.getEditorSite().getActionBars() != null &&
+		 * this.editor.getEditorSite().getActionBars() .getStatusLineManager() !=
+		 * null && this.editor.getEditorSite().getActionBars()
+		 * .getStatusLineManager().getProgressMonitor() != null) {
+		 * IStatusLineManager manager = this.editor.getEditorSite()
+		 * .getActionBars().getStatusLineManager(); IProgressMonitor monitor =
+		 * manager.getProgressMonitor(); manager.setMessage("Processing
+		 * completion proposals"); return monitor; } else {
+		 */
+		return new NullProgressMonitor();
+		// }
 	}
 
 	/**
@@ -1082,5 +996,38 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 			}
 		}
 		return resource;
+	}
+
+	/**
+	 * Set contents of the compilation unit to the translated jsp text.
+	 * 
+	 * @param the
+	 *            ICompilationUnit on which to set the buffer contents
+	 */
+	private void setContents(ICompilationUnit cu, String source) {
+		if (cu == null)
+			return;
+
+		synchronized (cu) {
+			IBuffer buffer;
+			try {
+
+				buffer = cu.getBuffer();
+			} catch (JavaModelException e) {
+				e.printStackTrace();
+				buffer = null;
+			}
+
+			if (buffer != null)
+				buffer.setContents(source);
+		}
+	}
+
+	/**
+	 * Order the given proposals.
+	 */
+	private ICompletionProposal[] order(ICompletionProposal[] proposals) {
+		Arrays.sort(proposals, fComparator);
+		return proposals;
 	}
 }
