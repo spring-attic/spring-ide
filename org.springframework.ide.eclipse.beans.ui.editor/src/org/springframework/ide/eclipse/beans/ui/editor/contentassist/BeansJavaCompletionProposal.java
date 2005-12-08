@@ -296,13 +296,14 @@ public class BeansJavaCompletionProposal implements ICompletionProposal, IComple
         if (offset < fReplacementOffset)
             return false;
         boolean validated = startsWith(document, offset, fReplacementString);
+        boolean validatedClass = startsWith(document, offset, fDisplayString);
         // CMVC 269884
         if (fUpdateLengthOnValidate) {
             int newLength = offset - getReplacementOffset();
             int delta = newLength - fOriginalReplacementLength;
             fReplacementLength = delta + fOriginalReplacementLength;
         }
-        return validated;
+        return validated || validatedClass;
     }
     
     /**
