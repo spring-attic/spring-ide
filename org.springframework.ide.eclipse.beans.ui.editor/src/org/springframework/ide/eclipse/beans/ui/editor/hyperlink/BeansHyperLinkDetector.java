@@ -17,7 +17,6 @@ package org.springframework.ide.eclipse.beans.ui.editor.hyperlink;
 import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
@@ -31,15 +30,11 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.core.internal.provisional.StructuredModelManager;
-import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMAttr;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
-import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -76,7 +71,19 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 						.getOffset());
 				if (currentAttr != null && this.isLinkableAttr(currentAttr)) {
 					IRegion hyperlinkRegion = getHyperlinkRegion(currentAttr);
-					IHyperlink hyperLink = createHyperlink(currentAttr,
+					IHyperlink hyperLink = createHyperlink(currentAttr.getName(), currentAttr.getNodeValue(), currentNode.getParentNode(),
+							hyperlinkRegion, document, currentNode, textViewer);
+					if (hyperLink != null) {
+						return new IHyperlink[] { hyperLink };
+					}
+				}
+			} else if (nodeType == Node.TEXT_NODE) {
+				IRegion hyperlinkRegion = getHyperlinkRegion(currentNode);
+				Node parentNode = currentNode.getParentNode();
+				if (parentNode != null) {
+					String name = parentNode.getNodeName();
+					String target = currentNode.getNodeValue();
+					IHyperlink hyperLink = createHyperlink(name, target, parentNode,
 							hyperlinkRegion, document, currentNode, textViewer);
 					if (hyperLink != null) {
 						return new IHyperlink[] { hyperLink };
@@ -144,7 +151,7 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 		if (node != null) {
 			short nodeType = node.getNodeType();
 			if (nodeType == Node.DOCUMENT_TYPE_NODE
-					|| nodeType == Node.ELEMENT_NODE) {
+					|| nodeType == Node.ELEMENT_NODE || nodeType == Node.TEXT_NODE) {
 				// handle doc type node
 				IDOMNode docNode = (IDOMNode) node;
 				hyperRegion = new Region(docNode.getStartOffset(), docNode
@@ -196,6 +203,8 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 			return true;
 		} else if ("local".equals(attrName) || "bean".equals(attrName)) {
 			return true;
+		} else if ("value".equals(attrName)) {
+			return true;
 		}
 
 		return false;
@@ -204,19 +213,16 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 	/**
 	 * Create the appropriate hyperlink
 	 */
-	private IHyperlink createHyperlink(Attr attr, IRegion hyperlinkRegion,
+	private IHyperlink createHyperlink(String name, String target, Node parentNode, IRegion hyperlinkRegion,
 			IDocument document, Node node, ITextViewer textViewer) {
 		IHyperlink link = null;
 
-		if (attr != null) {
-			String name = attr.getName();
-			String target = attr.getNodeValue();
-			Node parentNode = attr.getOwnerElement();
+		if (name != null) {
 			String parentName = null;
 			if (parentNode != null) {
 				parentName = parentNode.getNodeName();
 			}
-			if ("class".equals(name)) {
+			if ("class".equals(name) || "value".equals(name)) {
 				IFile file = this.getResource(document);
 				IType type = BeansModelUtils.getJavaType(file.getProject(),
 						target);
@@ -375,7 +381,6 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 		}
 
 		if (baselocation != null) {
-			// copied from JSPTranslationAdapter#getJavaProject
 			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 			IPath filePath = new Path(baselocation);
 			if (filePath.segmentCount() > 0) {
