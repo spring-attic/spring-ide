@@ -62,9 +62,9 @@ import org.springframework.util.StringUtils;
 
 public class BeansConfigValidator {
 
-    private static final String PROPERTY_PLACEHOLDER_PREFIX = "${";
+    private static final String PLACEHOLDER_PREFIX = "${";
     
-    private static final String PROPERTY_PLACEHOLDER_SUFFIX = "}";
+    private static final String PLACEHOLDER_SUFFIX = "}";
     
     private static final String FACTORY_BEAN_REFERENCE_PREFIX = "&";
     
@@ -291,8 +291,8 @@ public class BeansConfigValidator {
 		}
 
 		// Validate bean's constructor arguments with bean class from
-		// non-merged bean definition 
-		if (className != null) {
+		// non-merged bean definition - skip class names with placeholders
+		if (className != null && !hasPlaceHolder(className)) {
 			IType type = BeansModelUtils.getJavaType(
 					BeansModelUtils.getProject(bean).getProject(), className);
 			if (type == null) {
@@ -313,8 +313,8 @@ public class BeansConfigValidator {
 		}
 
 		// Validate bean's properties with bean class from merged bean
-		// definition
-		if (mergedClassName != null) {
+		// definition - skip class names with placeholders
+		if (mergedClassName != null && !hasPlaceHolder(mergedClassName)) {
 			IType type = BeansModelUtils.getJavaType(
 								 BeansModelUtils.getProject(bean).getProject(),
 								 mergedClassName);
@@ -324,8 +324,9 @@ public class BeansConfigValidator {
 		}
 
 		// Validate bean's static factory method with bean class from merged
-		// bean definition
-		if (bd.getFactoryMethodName() != null) {
+		// bean definition - skip factory methods with placeholders
+		String methodName = bd.getFactoryMethodName();
+		if (methodName != null && !hasPlaceHolder(methodName)) {
 			if (mergedClassName == null) {
 				if (bd.getFactoryBeanName() == null &&
 										!(bd instanceof ChildBeanDefinition)) {
@@ -341,8 +342,8 @@ public class BeansConfigValidator {
 				// for static factory method
 				int argCount = (bd instanceof RootBeanDefinition ?
 					bd.getConstructorArgumentValues().getArgumentCount() : -1);
-				validateFactoryMethod(bean, mergedClassName,
-								   bd.getFactoryMethodName(), argCount, true);
+				validateFactoryMethod(bean, mergedClassName, methodName,
+									  argCount, true);
 			}
 		}
 
@@ -449,6 +450,11 @@ public class BeansConfigValidator {
 			PropertyValue propValue = propValues[i];
 			String propertyName = propValue.getName();
 
+			// Skip properties with placeholders
+			if (hasPlaceHolder(propertyName)) {
+				continue;
+			}
+
 			// Check for property accessor in given type
 			try {
 
@@ -461,7 +467,7 @@ public class BeansConfigValidator {
 					String getterName = "get" + StringUtils.capitalize(
 															tokens.actualName);
 					IMethod getter = Introspector.findMethod(type, getterName,
-															 0, true, Introspector.STATIC_NO);
+											  0, true, Introspector.STATIC_NO);
 					if (getter == null) {
 						IBeanProperty property = bean.getProperty(propertyName);
 						BeansModelUtils.createProblemMarker(bean,
@@ -678,8 +684,8 @@ public class BeansConfigValidator {
 				registry.getBeanDefinition(beanName);
 			} catch (NoSuchBeanDefinitionException e) {
 			    
-				// Display a warning if the bean ref is a property placeholder
-				if (isPropertyPlaceHolder(beanName)) {
+				// Display a warning if the bean ref contains a placeholder
+				if (hasPlaceHolder(beanName)) {
                     BeansModelUtils.createProblemMarker(element,
     					  "Referenced bean '" + beanName + "' not found",
     					  IMarker.SEVERITY_WARNING,
@@ -765,55 +771,59 @@ public class BeansConfigValidator {
 
 	protected void validateFactoryBean(IBean bean, String beanName,
 						  String methodName, BeanDefinitionRegistry registry) {
-		try {
-			AbstractBeanDefinition factoryBd = (AbstractBeanDefinition)
+		if (beanName != null && !hasPlaceHolder(beanName)) {
+			try {
+				AbstractBeanDefinition factoryBd = (AbstractBeanDefinition)
 										  registry.getBeanDefinition(beanName);
-			if (factoryBd.isAbstract()) {
-				BeansModelUtils.createProblemMarker(bean,
+				if (factoryBd.isAbstract()) {
+					BeansModelUtils.createProblemMarker(bean,
 						   "Invalid factory bean '" + beanName + "'",
 						   IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
 					  	   IBeansProjectMarker.ERROR_CODE_INVALID_FACTORY_BEAN,
 						   bean.getElementName(), beanName);
-			} else {
+				} else {
 
-				// Validate non-static factory method in factory bean
-				// Factory beans with factory methods can only be validated
-				// during runtime - so skip them
-				if (factoryBd instanceof RootBeanDefinition &&
+					// Validate non-static factory method in factory bean
+					// Factory beans with factory methods can only be validated
+					// during runtime - so skip them
+					if (factoryBd instanceof RootBeanDefinition &&
 									factoryBd.getFactoryMethodName() == null) {
-					validateFactoryMethod(bean, factoryBd.getBeanClassName(),
-										  methodName, -1, false);
+						validateFactoryMethod(bean,
+											  factoryBd.getBeanClassName(),
+											  methodName, -1, false);
+					}
 				}
-			}
-		} catch (NoSuchBeanDefinitionException e) {
+			} catch (NoSuchBeanDefinitionException e) {
 
-			// Skip error "parent name is equal to bean name"
-			if (!e.getBeanName().equals(bean.getElementName())) {
-				BeansModelUtils.createProblemMarker(bean,
+				// Skip error "parent name is equal to bean name"
+				if (!e.getBeanName().equals(bean.getElementName())) {
+					BeansModelUtils.createProblemMarker(bean,
 						 "Factory bean '" + beanName + "' not found",
 						 IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
 						 IBeansProjectMarker.ERROR_CODE_UNDEFINED_FACTORY_BEAN,
 						 bean.getElementName(), beanName);
+				}
 			}
 		}
 	}
 
 	protected void validateFactoryMethod(IBean bean, String className,
 						   String methodName, int argCount, boolean isStatic) {
-		IType type = BeansModelUtils.getJavaType(
+		if (className != null && !hasPlaceHolder(className)) {
+			IType type = BeansModelUtils.getJavaType(
 					 BeansModelUtils.getProject(bean).getProject(), className);
-		if (type == null) {
-			BeansModelUtils.createProblemMarker(bean,
+			if (type == null) {
+				BeansModelUtils.createProblemMarker(bean,
 							"Factory bean class '" + className + "' not found",
 							IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
 							IBeansProjectMarker.ERROR_CODE_CLASS_NOT_FOUND,
 							bean.getElementName(), className);
-		} else {
-			try {
-				if (Introspector.findMethod(type, methodName, argCount, true,
-										  (isStatic ? Introspector.STATIC_YES :
+			} else {
+				try {
+					if (Introspector.findMethod(type, methodName, argCount,
+									true, (isStatic ? Introspector.STATIC_YES :
 											Introspector.STATIC_NO)) == null) {
-					BeansModelUtils.createProblemMarker(bean,
+						BeansModelUtils.createProblemMarker(bean,
 							(isStatic ? "Static" : "Non-static") +
 							" factory method '" + methodName +
 							"' " +
@@ -824,50 +834,50 @@ public class BeansConfigValidator {
 							bean.getElementStartLine(),
 							IBeansProjectMarker.ERROR_CODE_UNDEFINED_FACTORY_BEAN_METHOD,
 							bean.getElementName(), methodName);
+					}
+				} catch (JavaModelException e) {
+					BeansCorePlugin.log(e);
 				}
-			} catch (JavaModelException e) {
-				BeansCorePlugin.log(e);
 			}
 		}
 	}
 
 	protected void validateDependsOnBean(IBean bean, String beanName,
 										 BeanDefinitionRegistry registry) {
-		try {
-			registry.getBeanDefinition(beanName);
-		} catch (NoSuchBeanDefinitionException e) {
+		if (beanName != null && !hasPlaceHolder(beanName)) {
+			try {
+				registry.getBeanDefinition(beanName);
+			} catch (NoSuchBeanDefinitionException e) {
 
-			// Skip error "parent name is equal to bean name"
-			if (!e.getBeanName().equals(bean.getElementName())) {
-				BeansModelUtils.createProblemMarker(bean, "Depends-on bean '" +
+				// Skip error "parent name is equal to bean name"
+				if (!e.getBeanName().equals(bean.getElementName())) {
+					BeansModelUtils.createProblemMarker(bean,
+						"Depends-on bean '" +
 						beanName + "' not found", IMarker.SEVERITY_ERROR,
 						bean.getElementStartLine(),
 						IBeansProjectMarker.ERROR_CODE_UNDEFINED_DEPENDS_ON_BEAN,
 						bean.getElementName(), beanName);
+				}
 			}
 		}
 	}
 
-    /**
-     * Checks if the specified property value is a placeholder,
-     * e.g. <code>${beansRef}</code>
-     * @param property the property value
-     * @return true if property value is placeholder
-     */
-    private boolean isPropertyPlaceHolder(String property) {
-        return (property.startsWith(PROPERTY_PLACEHOLDER_PREFIX) 
-                && property.endsWith(PROPERTY_PLACEHOLDER_SUFFIX));
-    }
-    
-    /**
-     * Checks if the specified property value is a reference to a factory bean,
-     * e.g. <code>&factoryBean</code>
-     * @param property the property value
-     * @return true if property value is placeholder
-     */
-    private boolean isFactoryBeanReference(String property) {
-        return property.startsWith(FACTORY_BEAN_REFERENCE_PREFIX); 
-    }
+	/**
+	 * Returns <code>true</code> if given text contains a placeholder, e.g.
+	 * <code>${beansRef}</code>.
+	 */
+	private boolean hasPlaceHolder(String text) {
+		int pos = text.indexOf(PLACEHOLDER_PREFIX);
+		return (pos != -1 && text.indexOf(PLACEHOLDER_SUFFIX, pos) != -1);
+	}
+
+	/**
+	 * Returns <code>true</code> if the specified text is a reference to a
+	 * factory bean, e.g. <code>&factoryBean</code>.
+	 */
+	private boolean isFactoryBeanReference(String property) {
+		return property.startsWith(FACTORY_BEAN_REFERENCE_PREFIX);
+	}
     
 	/**
 	 * Determine the first (or last) nested property separator in the given
