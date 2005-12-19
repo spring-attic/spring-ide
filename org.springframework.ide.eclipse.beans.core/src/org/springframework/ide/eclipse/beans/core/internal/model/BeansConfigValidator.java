@@ -402,10 +402,11 @@ public class BeansConfigValidator {
 		monitor.subTask(BeansCorePlugin.getFormattedMessage(
 						   "BeansConfigValidator.validateConstructorArguments",
 						   bean.getElementName()));
-		// Skip validation if a factory is involved
+		// Skip validation if auto-wiring or a factory are involved
 		AbstractBeanDefinition bd = (AbstractBeanDefinition)
 									   BeansModelUtils.getBeanDefinition(bean);
-		if (bd.getFactoryBeanName() == null &&
+		if (bd.getAutowireMode() == AbstractBeanDefinition.AUTOWIRE_NO &&
+										   bd.getFactoryBeanName() == null &&
 										   bd.getFactoryMethodName() == null) {
 			// Check for default constructor if no constructor arguments are
 			// available
