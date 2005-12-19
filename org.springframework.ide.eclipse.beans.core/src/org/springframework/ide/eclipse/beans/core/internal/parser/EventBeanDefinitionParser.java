@@ -96,27 +96,36 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 		return super.registerBeanDefinitions(reader, doc, resource);
 	}
 
+	/**
+	 * Parses the given DOM tree as a Spring beans config file and registers
+	 * all defined aliases.
+	 * @throws BeanDefinitionException if DOM tree is not a valid Spring beans
+	 * 			 config
+	 */
 	protected int parseBeanDefinitions(Element root)
 										  throws BeanDefinitionStoreException {
 		NodeList nl = root.getChildNodes();
+		try {
+			// Try to parse the given DOM tree as beans config
+			int beanCount = super.parseBeanDefinitions(root);
 
-		// First register all all aliases
-		for (int i = 0; i < nl.getLength(); i++) {
-			Node node = nl.item(i);
-			if (node instanceof Element) {
-				Element ele = (Element) node;
-				if (ALIAS_ELEMENT.equals(node.getNodeName())) {
-					String name = ele.getAttribute(NAME_ATTRIBUTE);
-					String alias = ele.getAttribute(ALIAS_ATTRIBUTE);
-					eventHandler.registerAlias(ele, name, alias);
+			// Finally register all aliases
+			for (int i = 0; i < nl.getLength(); i++) {
+				Node node = nl.item(i);
+				if (node instanceof Element) {
+					Element ele = (Element) node;
+					if (ALIAS_ELEMENT.equals(node.getNodeName())) {
+						String name = ele.getAttribute(NAME_ATTRIBUTE);
+						String alias = ele.getAttribute(ALIAS_ATTRIBUTE);
+						eventHandler.registerAlias(ele, name, alias);
+					}
 				}
 			}
-		}
-		try {
-			return super.parseBeanDefinitions(root);
+			return beanCount;
 		} catch (BeanDefinitionStoreException e) {
 
-			// Lookup the invalid root element via the resource description
+			// If parsing fails then lookup the invalid element via the
+			// resource description
 			String elementName = e.getResourceDescription();
 			if (elementName != null) {
 				for (int i = 0; i < nl.getLength(); i++) {
