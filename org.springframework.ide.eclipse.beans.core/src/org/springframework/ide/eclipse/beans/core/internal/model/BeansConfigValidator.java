@@ -62,14 +62,16 @@ import org.springframework.util.StringUtils;
 
 public class BeansConfigValidator {
 
-    private static final String PLACEHOLDER_PREFIX = "${";
-    
-    private static final String PLACEHOLDER_SUFFIX = "}";
-    
-    private static final String FACTORY_BEAN_REFERENCE_PREFIX = "&";
-    
-    private static final String FACTORY_BEAN_REFERENCE_REGEXP = "[&]";
-    
+	private static final String PLACEHOLDER_PREFIX = "${";
+	private static final String PLACEHOLDER_SUFFIX = "}";
+
+	private static final String FACTORY_BEAN_REFERENCE_PREFIX = "&";
+	private static final String FACTORY_BEAN_REFERENCE_REGEXP = "[&]";
+
+	private static final int METHOD_TYPE_FACTORY = 1;
+	private static final int METHOD_TYPE_INIT = 2;
+	private static final int METHOD_TYPE_DESTROY = 3;
+
 	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID +
 													  "/model/validator/debug";
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
@@ -290,35 +292,18 @@ public class BeansConfigValidator {
 			}
 		}
 
-		// Validate bean's constructor arguments with bean class from
-		// non-merged bean definition - skip class names with placeholders
-		if (className != null && !hasPlaceHolder(className)) {
-			IType type = BeansModelUtils.getJavaType(
-					BeansModelUtils.getProject(bean).getProject(), className);
-			if (type == null) {
-				BeansModelUtils.createProblemMarker(bean,
-								"Class '" + className + "' not found",
-								IMarker.SEVERITY_ERROR,
-								bean.getElementStartLine(),
-								IBeansProjectMarker.ERROR_CODE_CLASS_NOT_FOUND,
-								bean.getElementName(), className);
-			} else {
-
-				// Only validate constructor args of non-abstract beans
-				if (!bean.isAbstract()) {
-					validateConstructorArguments(bean, type,
-										bd.getConstructorArgumentValues());
-				}
-			}
-		}
-
-		// Validate bean's properties with bean class from merged bean
-		// definition - skip class names with placeholders
+		// Validate bean's init-method, destroy-method and properties with bean
+		// class from merged bean definition - skip class names with
+		// placeholders
 		if (mergedClassName != null && !hasPlaceHolder(mergedClassName)) {
 			IType type = BeansModelUtils.getJavaType(
 								 BeansModelUtils.getProject(bean).getProject(),
 								 mergedClassName);
 			if (type != null) {
+				validateMethod(bean, type, METHOD_TYPE_INIT,
+							   bd.getInitMethodName(), 0, false);
+				validateMethod(bean, type, METHOD_TYPE_DESTROY,
+							   bd.getDestroyMethodName(), 0, false);
 				validateProperties(bean, type, bd.getPropertyValues());
 			}
 		}
@@ -347,6 +332,28 @@ public class BeansConfigValidator {
 			}
 		}
 
+		// Validate bean's constructor arguments with bean class from
+		// non-merged bean definition - skip class names with placeholders
+		if (className != null && !hasPlaceHolder(className)) {
+			IType type = BeansModelUtils.getJavaType(
+					BeansModelUtils.getProject(bean).getProject(), className);
+			if (type == null) {
+				BeansModelUtils.createProblemMarker(bean,
+								"Class '" + className + "' not found",
+								IMarker.SEVERITY_ERROR,
+								bean.getElementStartLine(),
+								IBeansProjectMarker.ERROR_CODE_CLASS_NOT_FOUND,
+								bean.getElementName(), className);
+			} else {
+
+				// Only validate constructor args of non-abstract beans
+				if (!bean.isAbstract()) {
+					validateConstructorArguments(bean, type,
+										bd.getConstructorArgumentValues());
+				}
+			}
+		}
+		
 		// Validate this bean's inner beans recursively
 		Iterator innerBeans = bean.getInnerBeans().iterator();
 		while (innerBeans.hasNext()) {
@@ -440,7 +447,6 @@ public class BeansConfigValidator {
 		monitor.subTask(BeansCorePlugin.getFormattedMessage(
 									  "BeansConfigValidator.validateProperties",
 									  bean.getElementName()));
-
 		// Validate all properties defined in given property values instance
 		PropertyValue[] propValues = propertyValues.getPropertyValues();
 		for (int i = 0; i < propValues.length; i++) {
@@ -769,6 +775,54 @@ public class BeansConfigValidator {
 		}
 	}
 
+	protected void validateMethod(IBean bean, IType type, int methodType,
+						   String methodName, int argCount, boolean isStatic) {
+		if (methodName != null &&  !hasPlaceHolder(methodName)) {
+			try {
+				if (Introspector.findMethod(type, methodName, argCount, true,
+									(isStatic ? Introspector.STATIC_YES :
+											Introspector.STATIC_NO)) == null) {
+					switch (methodType) {
+						case METHOD_TYPE_FACTORY :
+							BeansModelUtils.createProblemMarker(bean,
+									(isStatic ? "Static" : "Non-static") +
+									" factory method '" + methodName + "' " +
+									(argCount != -1 ? "with " + argCount +
+											" arguments " : "") +
+									"not found in factory bean class",
+									IMarker.SEVERITY_ERROR,
+									bean.getElementStartLine(),
+									IBeansProjectMarker.ERROR_CODE_UNDEFINED_FACTORY_BEAN_METHOD,
+									bean.getElementName(), methodName);
+							break;
+
+						case METHOD_TYPE_INIT :
+							BeansModelUtils.createProblemMarker(bean,
+									"Init-method '" + methodName +
+									"' not found in bean class",
+									IMarker.SEVERITY_ERROR,
+									bean.getElementStartLine(),
+									IBeansProjectMarker.ERROR_CODE_UNDEFINED_INIT_METHOD,
+									bean.getElementName(), methodName);
+							break;
+
+						case METHOD_TYPE_DESTROY :
+							BeansModelUtils.createProblemMarker(bean,
+									"Destroy-method '" + methodName +
+									"' not found in bean class",
+									IMarker.SEVERITY_ERROR,
+									bean.getElementStartLine(),
+									IBeansProjectMarker.ERROR_CODE_UNDEFINED_DESTROY_METHOD,
+									bean.getElementName(), methodName);
+							break;
+					}
+				}
+			} catch (JavaModelException e) {
+				BeansCorePlugin.log(e);
+			}
+		}
+	}
+
 	protected void validateFactoryBean(IBean bean, String beanName,
 						  String methodName, BeanDefinitionRegistry registry) {
 		if (beanName != null && !hasPlaceHolder(beanName)) {
@@ -819,25 +873,8 @@ public class BeansConfigValidator {
 							IBeansProjectMarker.ERROR_CODE_CLASS_NOT_FOUND,
 							bean.getElementName(), className);
 			} else {
-				try {
-					if (Introspector.findMethod(type, methodName, argCount,
-									true, (isStatic ? Introspector.STATIC_YES :
-											Introspector.STATIC_NO)) == null) {
-						BeansModelUtils.createProblemMarker(bean,
-							(isStatic ? "Static" : "Non-static") +
-							" factory method '" + methodName +
-							"' " +
-							(argCount != -1 ? "with " + argCount +
-									" arguments " : "") + 
-							"not found in factory bean class '" + className +
-							"'", IMarker.SEVERITY_ERROR,
-							bean.getElementStartLine(),
-							IBeansProjectMarker.ERROR_CODE_UNDEFINED_FACTORY_BEAN_METHOD,
-							bean.getElementName(), methodName);
-					}
-				} catch (JavaModelException e) {
-					BeansCorePlugin.log(e);
-				}
+				validateMethod(bean, type, METHOD_TYPE_FACTORY, methodName,
+							   argCount, isStatic);
 			}
 		}
 	}

@@ -69,4 +69,6 @@ public interface IBeansProjectMarker {
 	public static final int ERROR_CODE_NO_FACTORY_METHOD = 17;
 	public static final int ERROR_CODE_ALIAS_OVERRIDE = 18;
 	public static final int ERROR_CODE_INVALID_PROPERTY_NAME = 19;
+	public static final int ERROR_CODE_UNDEFINED_INIT_METHOD = 20;
+	public static final int ERROR_CODE_UNDEFINED_DESTROY_METHOD = 21;
 }
