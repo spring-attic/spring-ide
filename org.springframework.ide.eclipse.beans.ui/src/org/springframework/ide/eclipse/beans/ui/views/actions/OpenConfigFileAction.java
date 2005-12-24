@@ -16,43 +16,35 @@
 
 package org.springframework.ide.eclipse.beans.ui.views.actions;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.jdt.core.IType;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.action.Action;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
-import org.springframework.ide.eclipse.beans.ui.model.INode;
 import org.springframework.ide.eclipse.beans.ui.views.BeansView;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
-public class OpenBeanClassAction extends Action {
+public class OpenConfigFileAction extends Action {
 
-	private static final String PREFIX = "View.OpenBeanClassAction.";
+	private static final String PREFIX = "View.OpenConfigFileAction.";
 
     private BeansView view;
 
-	public OpenBeanClassAction(BeansView view) {
+	public OpenConfigFileAction(BeansView view) {
 		super(BeansUIPlugin.getResourceString(PREFIX + "label"));
 		setToolTipText(BeansUIPlugin.getResourceString(PREFIX + "tooltip"));
 		this.view = view;
     }
 
 	public boolean isEnabled() {
-		INode node = view.getSelectedNode();
-		return (node instanceof BeanNode);
+		IResource resource = view.getResourceFromSelectedNode();
+		return (resource instanceof IFile && resource.exists());
 	}
 
 	public void run() {
-		INode node = view.getSelectedNode();
-		if (node instanceof BeanNode) {
-			IProject project = ((BeanNode) node).getConfigNode().
-									getProjectNode().getProject().getProject();
-			String className = ((BeanNode) node).getClassName();
-			IType type = BeansModelUtils.getJavaType(project, className);
-			if (type != null) {
-				SpringUIUtils.openInEditor(type);
-			}
+		IResource resource = view.getResourceFromSelectedNode();
+		if (resource instanceof IFile && resource.exists()) {
+			int line = view.getStartLineFromSelectedNode();
+			SpringUIUtils.openInEditor((IFile) resource, line);
 		}
 	}
 }

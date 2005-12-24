@@ -70,6 +70,7 @@ import org.springframework.ide.eclipse.beans.ui.model.RootNode;
 import org.springframework.ide.eclipse.beans.ui.views.actions.CollapseAllAction;
 import org.springframework.ide.eclipse.beans.ui.views.actions.LexicalSortingAction;
 import org.springframework.ide.eclipse.beans.ui.views.actions.OpenBeanClassAction;
+import org.springframework.ide.eclipse.beans.ui.views.actions.OpenConfigFileAction;
 import org.springframework.ide.eclipse.beans.ui.views.actions.OpenPropertiesAction;
 import org.springframework.ide.eclipse.beans.ui.views.actions.PropertySheetAction;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -84,6 +85,7 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 	private TreeViewer treeViewer;
 	private RootNode rootNode;
 
+	private OpenConfigFileAction openConfigFileAction;
 	private OpenBeanClassAction openBeanClassAction;
 	private OpenPropertiesAction openPropertiesAction;
 
@@ -123,6 +125,7 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 	}
 
 	private void initializeActions() {
+		openConfigFileAction = new OpenConfigFileAction(this);
 		openBeanClassAction = new OpenBeanClassAction(this);
 		openPropertiesAction = new OpenPropertiesAction(this);
 	}
@@ -179,6 +182,9 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 	}
 
 	private void fillContextMenu(IMenuManager menuMgr) {
+		if (openConfigFileAction.isEnabled()) {
+			menuMgr.add(openConfigFileAction);
+		}
 		if (openBeanClassAction.isEnabled()) {
 			menuMgr.add(openBeanClassAction);
 		}
@@ -200,26 +206,22 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 	}
 
 	private void handleDoubleClick(DoubleClickEvent event) {
-		ISelection selection = event.getSelection();
-		if (selection instanceof IStructuredSelection &&
-								((IStructuredSelection)selection).size() == 1) {
-			Object elem = ((IStructuredSelection) selection).getFirstElement();
-			if (elem instanceof ProjectNode || elem instanceof ConfigSetNode) {
+		INode node = getSelectedNode();
+		if (node instanceof ProjectNode || node instanceof ConfigSetNode) {
 
-				// expand or collapse selected project or config set
-				if (treeViewer.getExpandedState(elem)) {
-					treeViewer.collapseToLevel(elem, TreeViewer.ALL_LEVELS);
-				} else {
-					treeViewer.expandToLevel(elem, 1);
-				}
+			// Expand or collapse selected project or config set
+			if (treeViewer.getExpandedState(node)) {
+				treeViewer.collapseToLevel(node, TreeViewer.ALL_LEVELS);
 			} else {
+				treeViewer.expandToLevel(node, 1);
+			}
+		} else {
 
-				// open selected config/bean/constructor/property in editor
-				IResource resource = getSelectedResource(selection);
-				if (resource instanceof IFile && resource.exists()) {
-					int line = getStartLineFromSelectedNode(selection);
-					SpringUIUtils.openInEditor((IFile) resource, line);
-				}
+			// Open selected config/bean/constructor/property in editor
+			IResource resource = getResourceFromSelectedNode();
+			if (resource instanceof IFile && resource.exists()) {
+				int line = getStartLineFromSelectedNode();
+				SpringUIUtils.openInEditor((IFile) resource, line);
 			}
 		}
 	}
@@ -335,7 +337,7 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 	}
 
 	public ShowInContext getShowInContext() {
-		IResource resource = getSelectedResource(getViewer().getSelection());
+		IResource resource = getResourceFromSelectedNode();
 		if (resource != null && resource.exists()) {
 			ISelection selection = new StructuredSelection(resource);
 			return new ShowInContext(null, selection);
@@ -410,42 +412,48 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 		}
 	}
 
-	private static class  BeansViewState {
+	private static class BeansViewState {
 		public List expandedElements = new ArrayList();
 		public List selectedElements = new ArrayList();
 	}
 
-	private IResource getSelectedResource(ISelection selection) {
+	public INode getSelectedNode() {
+		ISelection selection = getViewer().getSelection();
 		if (selection instanceof IStructuredSelection &&
 								((IStructuredSelection)selection).size() == 1) {
 			Object elem = ((IStructuredSelection) selection).getFirstElement();
-			if (elem instanceof ProjectNode) {
-				return ((ProjectNode) elem).getProject().getProject();
-			} else if (elem instanceof ConfigNode) {
-				return ((ConfigNode) elem).getConfigFile();
-			} else if (elem instanceof BeanNode) {
-				return ((BeanNode) elem).getConfigNode().getConfigFile();
-			} else if (elem instanceof ConstructorArgumentNode) {
-				return ((ConstructorArgumentNode)
-										  elem).getConfigNode().getConfigFile();
-			} else if (elem instanceof PropertyNode) {
-				return ((PropertyNode) elem).getConfigNode().getConfigFile();
+			if (elem instanceof INode) {
+				return (INode) elem;
 			}
 		}
 		return null;
 	}
 
-	private int getStartLineFromSelectedNode(ISelection selection) {
-		if (selection instanceof IStructuredSelection &&
-								((IStructuredSelection)selection).size() == 1) {
-			Object elem = ((IStructuredSelection)selection).getFirstElement();
-			if (elem instanceof BeanNode) {
-				return ((BeanNode) elem).getStartLine();
-			} else if (elem instanceof ConstructorArgumentNode) {
-				return ((ConstructorArgumentNode) elem).getStartLine();
-			} else if (elem instanceof PropertyNode) {
-				return ((PropertyNode) elem).getStartLine();
-			}
+	public IResource getResourceFromSelectedNode() {
+		INode node = getSelectedNode();
+		if (node instanceof ProjectNode) {
+			return ((ProjectNode) node).getProject().getProject();
+		} else if (node instanceof ConfigNode) {
+			return ((ConfigNode) node).getConfigFile();
+		} else if (node instanceof BeanNode) {
+			return ((BeanNode) node).getConfigNode().getConfigFile();
+		} else if (node instanceof ConstructorArgumentNode) {
+			return ((ConstructorArgumentNode)
+										  node).getConfigNode().getConfigFile();
+		} else if (node instanceof PropertyNode) {
+			return ((PropertyNode) node).getConfigNode().getConfigFile();
+		}
+		return null;
+	}
+
+	public int getStartLineFromSelectedNode() {
+		INode node = getSelectedNode();
+		if (node instanceof BeanNode) {
+			return ((BeanNode) node).getStartLine();
+		} else if (node instanceof ConstructorArgumentNode) {
+			return ((ConstructorArgumentNode) node).getStartLine();
+		} else if (node instanceof PropertyNode) {
+			return ((PropertyNode) node).getStartLine();
 		}
 		return -1;
 	}
