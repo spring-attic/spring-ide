@@ -28,8 +28,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.core.internal.provisional.StructuredModelManager;
@@ -65,7 +63,7 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 	}
 
 	/**
-	 * Retreives documentation to display in the hover help popup.
+	 * Retrieves documentation to display in the hover help popup.
 	 * 
 	 * @return String any documentation information to display <code>null</code>
 	 *         if there is nothing to display.
