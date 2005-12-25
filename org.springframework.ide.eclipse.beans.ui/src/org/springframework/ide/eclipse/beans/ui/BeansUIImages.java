@@ -91,6 +91,7 @@ public class BeansUIImages {
 	public static final String IMG_OBJS_CONFIG_SET = NAME_PREFIX + "configset_obj.gif";
 	public static final String IMG_OBJS_ROOT_BEAN = NAME_PREFIX + "rootbean_obj.gif";
 	public static final String IMG_OBJS_CHILD_BEAN = NAME_PREFIX + "childbean_obj.gif";
+	public static final String IMG_OBJS_BEAN_REF = NAME_PREFIX + "beanref_obj.gif";
 	public static final String IMG_OBJS_CONSTRUCTOR = NAME_PREFIX + "constructor_obj.gif";
 	public static final String IMG_OBJS_PROPERTY = NAME_PREFIX + "property_obj.gif";
 	public static final String IMG_OBJS_SPRING = NAME_PREFIX + "spring_obj.gif";
@@ -111,6 +112,7 @@ public class BeansUIImages {
 	public static final ImageDescriptor DESC_OBJS_CONFIG_SET = createManaged(OBJECT, IMG_OBJS_CONFIG_SET);
 	public static final ImageDescriptor DESC_OBJS_ROOT_BEAN = createManaged(OBJECT, IMG_OBJS_ROOT_BEAN);
 	public static final ImageDescriptor DESC_OBJS_CHILD_BEAN = createManaged(OBJECT, IMG_OBJS_CHILD_BEAN);
+	public static final ImageDescriptor DESC_OBJS_BEAN_REF = createManaged(OBJECT, IMG_OBJS_BEAN_REF);
 	public static final ImageDescriptor DESC_OBJS_CONSTRUCTOR = createManaged(OBJECT, IMG_OBJS_CONSTRUCTOR);
 	public static final ImageDescriptor DESC_OBJS_PROPERTY = createManaged(OBJECT, IMG_OBJS_PROPERTY);
 	public static final ImageDescriptor DESC_OBJS_SPRING = createManaged(OBJECT, IMG_OBJS_SPRING);
