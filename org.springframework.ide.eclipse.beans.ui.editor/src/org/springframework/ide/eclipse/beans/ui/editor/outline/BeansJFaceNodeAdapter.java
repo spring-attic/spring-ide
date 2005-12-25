@@ -19,7 +19,6 @@ package org.springframework.ide.eclipse.beans.ui.editor.outline;
 import java.util.ArrayList;
 
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.wst.sse.core.internal.provisional.INodeAdapterFactory;
 import org.eclipse.wst.sse.ui.internal.contentoutline.IJFaceNodeAdapter;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeAdapter;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeAdapterFactory;
@@ -93,7 +92,12 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 //			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
 		}
 		if ("bean".equals(nodeName)) {
-			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
+			Node parentNode = node.getAttributes().getNamedItem("parent");
+			if (parentNode != null) {
+				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CHILD_BEAN);
+			} else {
+				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
+			}
 		}
 
 		// Bean elements
@@ -109,7 +113,7 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 //			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
 		}
 		if ("ref".equals(nodeName)) {
-//			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_BEAN_REF);
 		}
 		if ("description".equals(nodeName)) {
 //			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
@@ -147,7 +151,7 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 			Node idNode = node.getAttributes().getNamedItem("id");
 			String id;
 			if (idNode != null) {
-				id = " \"" + idNode.getNodeValue()+ "\"";
+				id = idNode.getNodeValue();
 			} else {
 				id = "";
 			}
@@ -158,7 +162,14 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 			} else {
 				clazz = "";
 			}
-			return "Bean" + id + clazz;
+			Node parentNode = node.getAttributes().getNamedItem("parent");
+			String parent;
+			if (parentNode != null) {
+				parent = " <" + parentNode.getNodeValue() + ">";
+			} else {
+				parent = "";
+			}
+			return id + clazz + parent;
 		}
 
 		// Bean elements
@@ -166,14 +177,9 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 			Node nameNode = node.getAttributes().getNamedItem("name");
 			String name = "";
 			if (nameNode != null) {
-				name = " \"" + nameNode.getNodeValue()+ "\"";
+				name = nameNode.getNodeValue();
 			}
-			Node valueNode = node.getAttributes().getNamedItem("value");
-			String value = "";
-			if (valueNode != null) {
-				value = " [" + valueNode.getNodeValue() + "]";
-			}
-			return "Property" + name + value;
+			return name;
 		}
 
 		// Misc elements
@@ -198,9 +204,9 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 			}
 			String bean = "";
 			if (beanNode != null) {
-				bean = " <" + beanNode.getNodeValue() + ">";
+				bean = beanNode.getNodeValue();
 			}
-			return "Ref" + bean;
+			return bean;
 		}
 		if ("description".equals(nodeName)) {
 			Node valueNode = node.getFirstChild();
