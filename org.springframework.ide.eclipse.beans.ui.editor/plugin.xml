@@ -51,6 +51,9 @@
 		<sourceViewerConfiguration
 			class="org.springframework.ide.eclipse.beans.ui.editor.BeansStructuredTextViewerConfiguration"
 			target="org.springframework.ide.eclipse.beans.ui.editor.beansConfig" />
+		<contentOutlineConfiguration
+			class="org.springframework.ide.eclipse.beans.ui.editor.outline.BeansContentOutlineConfiguration"
+			target="org.springframework.ide.eclipse.beans.ui.editor.beansConfig"/>
 	</extension>
 	
 	<extension point="org.eclipse.wst.sse.core.modelHandler">
