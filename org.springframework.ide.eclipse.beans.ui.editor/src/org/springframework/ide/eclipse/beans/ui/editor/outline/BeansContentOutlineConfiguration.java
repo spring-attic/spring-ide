@@ -14,6 +14,8 @@
 
 package org.springframework.ide.eclipse.beans.ui.editor.outline;
 
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -22,11 +24,16 @@ import org.eclipse.wst.sse.ui.views.contentoutline.ContentOutlineConfiguration;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeContentProvider;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin;
+import org.springframework.ide.eclipse.beans.ui.editor.actions.LexicalSortingAction;
 
 public class BeansContentOutlineConfiguration
 										  extends ContentOutlineConfiguration {
 	private IContentProvider contentProvider = null;
 	private ILabelProvider labelProvider;
+	
+	protected IPreferenceStore getPreferenceStore() {
+		return BeansEditorPlugin.getDefault().getPreferenceStore();
+	}
 
 	public IContentProvider getContentProvider(TreeViewer viewer) {
 		if (contentProvider == null) {
@@ -42,7 +49,20 @@ public class BeansContentOutlineConfiguration
 		return labelProvider;
 	}
 
-	protected IPreferenceStore getPreferenceStore() {
-		return BeansEditorPlugin.getDefault().getPreferenceStore();
+	protected IContributionItem[] createToolbarContributions(
+														   TreeViewer viewer) {
+		IContributionItem sortItem = new ActionContributionItem(
+											 new LexicalSortingAction(viewer));
+		IContributionItem[] items = super.createToolbarContributions(viewer);
+		if (items == null) {
+			items = new IContributionItem[] { sortItem };
+		} else {
+			IContributionItem[] combinedItems = new IContributionItem[
+			                                                 items.length + 1];
+			System.arraycopy(items, 0, combinedItems, 0, items.length);
+			combinedItems[items.length] = sortItem;
+			items = combinedItems;
+		}
+		return items;
 	}
 }
