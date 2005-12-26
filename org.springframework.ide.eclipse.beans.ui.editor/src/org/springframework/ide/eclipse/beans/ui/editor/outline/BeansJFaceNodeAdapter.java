@@ -73,55 +73,7 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 	/**
 	 * Fetches the label text specific to this object instance.
 	 */
-	public String getLabelText(Object node) {
-		return getNodeName(node);
-	}
-
-	/**
-	 * Fetches the label image specific to this object instance.
-	 */
-	public Image getLabelImage(Object object) {
-		Node node = (Node) object;
-		String nodeName = node.getNodeName();
-
-		// Root elements (alias, import and bean)
-		if ("alias".equals(nodeName)) {
-//			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
-		}
-		if ("import".equals(nodeName)) {
-//			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
-		}
-		if ("bean".equals(nodeName)) {
-			Node parentNode = node.getAttributes().getNamedItem("parent");
-			if (parentNode != null) {
-				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CHILD_BEAN);
-			} else {
-				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
-			}
-		}
-
-		// Bean elements
-		if ("constructor-arg".equals(nodeName)) {
-			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONSTRUCTOR);
-		}
-		if ("property".equals(nodeName)) {
-			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_PROPERTY);
-		}
-
-		// Misc elements
-		if ("value".equals(nodeName)) {
-//			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
-		}
-		if ("ref".equals(nodeName)) {
-			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_BEAN_REF);
-		}
-		if ("description".equals(nodeName)) {
-//			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
-		}
-		return super.getLabelImage(node);
-	}
-
-	private String getNodeName(Object object) {
+	public String getLabelText(Object object) {
 		Node node = (Node) object;
 		String nodeName = node.getNodeName();
 
@@ -130,22 +82,22 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 			Node aliasNode = node.getAttributes().getNamedItem("alias");
 			String alias = "";
 			if (aliasNode != null) {
-				alias = " \"" + aliasNode.getNodeValue() + "\"";
+				alias = aliasNode.getNodeValue();
 			}
 			Node nameNode = node.getAttributes().getNamedItem("name");
 			String name = "";
 			if (nameNode != null) {
-				name = " <" + nameNode.getNodeValue() + ">";
+				name = nameNode.getNodeValue();
 			}
-			return "Alias" + alias + name;
+			return alias + "=" + name;
 		}
 		if ("import".equals(nodeName)) {
 			Node resourceNode = node.getAttributes().getNamedItem("resource");
 			String resource = "";
 			if (resourceNode != null) {
-				resource = " \"" + resourceNode.getNodeValue() + "\"";
+				resource = resourceNode.getNodeValue();
 			}
-			return "Import" + resource;
+			return resource;
 		}
 		if ("bean".equals(nodeName)) {
 			Node idNode = node.getAttributes().getNamedItem("id");
@@ -195,7 +147,28 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 								   valueNode.getNodeType() == Node.TEXT_NODE) {
 				value = " \"" + valueNode.getNodeValue() + "\"";
 			}
-			return "Value" + type + value;
+			return type + value;
+		}
+		if ("entry".equals(nodeName)) {
+			Node keyNode = node.getAttributes().getNamedItem("key");
+			String key = "";
+			if (keyNode != null) {
+				key = " \"" + keyNode.getNodeValue() + "\"";
+			} else {
+				keyNode = node.getAttributes().getNamedItem("key-ref");
+				if (keyNode != null) {
+					key = " <" + keyNode.getNodeValue() + ">";
+				}
+			}
+			return "entry" + key;
+		}
+		if ("prop".equals(nodeName)) {
+			Node keyNode = node.getAttributes().getNamedItem("key");
+			String key = "";
+			if (keyNode != null) {
+				key = " \"" + keyNode.getNodeValue() + "\"";
+			}
+			return "prop" + key;
 		}
 		if ("ref".equals(nodeName)) {
 			Node beanNode = node.getAttributes().getNamedItem("bean");
@@ -218,6 +191,52 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 			return "Description" + value;
 		}
 		return nodeName;
+	}
+
+	/**
+	 * Fetches the label image specific to this object instance.
+	 */
+	public Image getLabelImage(Object object) {
+		Node node = (Node) object;
+		String nodeName = node.getNodeName();
+
+		// Root elements (alias, import and bean)
+		if ("alias".equals(nodeName)) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ALIAS);
+		}
+		if ("import".equals(nodeName)) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_IMPORT);
+		}
+		if ("bean".equals(nodeName)) {
+			Node parentNode = node.getAttributes().getNamedItem("parent");
+			if (parentNode != null) {
+				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CHILD_BEAN);
+			} else {
+				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
+			}
+		}
+
+		// Bean elements
+		if ("constructor-arg".equals(nodeName)) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONSTRUCTOR);
+		}
+		if ("property".equals(nodeName)) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_PROPERTY);
+		}
+
+		// Misc elements
+		if ("list".equals(nodeName) || "set".equals(nodeName) ||
+						  "map".equals(nodeName) || "props".equals(nodeName) ||
+						  "entry".equals(nodeName) || "key".equals(nodeName)) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_COLLECTION);
+		}
+		if ("ref".equals(nodeName)) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_BEAN_REF);
+		}
+		if ("description".equals(nodeName)) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_DESCRIPTION);
+		}
+		return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_VALUE);
 	}
 
 	public Object getParent(Object object) {
