@@ -37,8 +37,7 @@
 		<content-type id="beansConfig"
 			name="%contentTypeName"
 			base-type="org.eclipse.core.runtime.xml"
-			file-extensions="xml"
-			priority="low"
+			priority="high"
 			default-charset="UTF-8">
 			<describer
 				class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber">
