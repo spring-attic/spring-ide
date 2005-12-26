@@ -89,11 +89,16 @@ public class BeansUIImages {
 	public static final String IMG_OBJS_PROJECT = NAME_PREFIX + "project_obj.gif";
 	public static final String IMG_OBJS_CONFIG = NAME_PREFIX + "config_obj.gif";
 	public static final String IMG_OBJS_CONFIG_SET = NAME_PREFIX + "configset_obj.gif";
+	public static final String IMG_OBJS_IMPORT = NAME_PREFIX + "import_obj.gif";
+	public static final String IMG_OBJS_ALIAS = NAME_PREFIX + "alias_obj.gif";
+	public static final String IMG_OBJS_DESCRIPTION = NAME_PREFIX + "description_obj.gif";
 	public static final String IMG_OBJS_ROOT_BEAN = NAME_PREFIX + "rootbean_obj.gif";
 	public static final String IMG_OBJS_CHILD_BEAN = NAME_PREFIX + "childbean_obj.gif";
 	public static final String IMG_OBJS_BEAN_REF = NAME_PREFIX + "beanref_obj.gif";
 	public static final String IMG_OBJS_CONSTRUCTOR = NAME_PREFIX + "constructor_obj.gif";
 	public static final String IMG_OBJS_PROPERTY = NAME_PREFIX + "property_obj.gif";
+	public static final String IMG_OBJS_VALUE = NAME_PREFIX + "value_obj.gif";
+	public static final String IMG_OBJS_COLLECTION = NAME_PREFIX + "collection_obj.gif";
 	public static final String IMG_OBJS_SPRING = NAME_PREFIX + "spring_obj.gif";
 	public static final String IMG_OBJS_ERROR = NAME_PREFIX + "error_obj.gif";
 
@@ -110,11 +115,16 @@ public class BeansUIImages {
 	public static final ImageDescriptor DESC_OBJS_PROJECT = createManaged(OBJECT, IMG_OBJS_PROJECT);
 	public static final ImageDescriptor DESC_OBJS_CONFIG = createManaged(OBJECT, IMG_OBJS_CONFIG);
 	public static final ImageDescriptor DESC_OBJS_CONFIG_SET = createManaged(OBJECT, IMG_OBJS_CONFIG_SET);
+	public static final ImageDescriptor DESC_OBJS_IMPORT = createManaged(OBJECT, IMG_OBJS_IMPORT);
+	public static final ImageDescriptor DESC_OBJS_ALIAS = createManaged(OBJECT, IMG_OBJS_ALIAS);
+	public static final ImageDescriptor DESC_OBJS_DESCRIPTION = createManaged(OBJECT, IMG_OBJS_DESCRIPTION);
 	public static final ImageDescriptor DESC_OBJS_ROOT_BEAN = createManaged(OBJECT, IMG_OBJS_ROOT_BEAN);
 	public static final ImageDescriptor DESC_OBJS_CHILD_BEAN = createManaged(OBJECT, IMG_OBJS_CHILD_BEAN);
 	public static final ImageDescriptor DESC_OBJS_BEAN_REF = createManaged(OBJECT, IMG_OBJS_BEAN_REF);
 	public static final ImageDescriptor DESC_OBJS_CONSTRUCTOR = createManaged(OBJECT, IMG_OBJS_CONSTRUCTOR);
 	public static final ImageDescriptor DESC_OBJS_PROPERTY = createManaged(OBJECT, IMG_OBJS_PROPERTY);
+	public static final ImageDescriptor DESC_OBJS_VALUE = createManaged(OBJECT, IMG_OBJS_VALUE);
+	public static final ImageDescriptor DESC_OBJS_COLLECTION = createManaged(OBJECT, IMG_OBJS_COLLECTION);
 	public static final ImageDescriptor DESC_OBJS_SPRING = createManaged(OBJECT, IMG_OBJS_SPRING);
 	public static final ImageDescriptor DESC_OBJS_ERROR = createManaged(OBJECT, IMG_OBJS_ERROR);
 
