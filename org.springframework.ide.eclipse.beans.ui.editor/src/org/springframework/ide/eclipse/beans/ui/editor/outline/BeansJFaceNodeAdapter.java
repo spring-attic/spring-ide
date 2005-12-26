@@ -142,7 +142,7 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 				type = " [" + typeNode.getNodeValue() + "]";
 			}
 			Node valueNode = node.getFirstChild();
-			String value = "";
+			String value = "\"\"";
 			if (valueNode != null &&
 								   valueNode.getNodeType() == Node.TEXT_NODE) {
 				value = " \"" + valueNode.getNodeValue() + "\"";
@@ -180,15 +180,6 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 				bean = beanNode.getNodeValue();
 			}
 			return bean;
-		}
-		if ("description".equals(nodeName)) {
-			Node valueNode = node.getFirstChild();
-			String value = "";
-			if (valueNode != null &&
-								   valueNode.getNodeType() == Node.TEXT_NODE) {
-				value = " \"" + valueNode.getNodeValue() + "\"";
-			}
-			return "Description" + value;
 		}
 		return nodeName;
 	}
