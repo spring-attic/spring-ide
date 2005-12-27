@@ -17,7 +17,6 @@
 package org.springframework.ide.eclipse.core.io.xml;
 
 import org.apache.xerces.dom.NodeImpl;
-import org.apache.xerces.dom3.UserDataHandler;
 import org.apache.xerces.parsers.DOMParser;
 import org.apache.xerces.xni.Augmentations;
 import org.apache.xerces.xni.NamespaceContext;
@@ -26,6 +25,7 @@ import org.apache.xerces.xni.XMLAttributes;
 import org.apache.xerces.xni.XMLLocator;
 import org.apache.xerces.xni.XNIException;
 import org.w3c.dom.Node;
+import org.w3c.dom.UserDataHandler;
 import org.xml.sax.SAXException;
 
 /**

@@ -20,7 +20,7 @@
       <library name="commons-logging.jar">
          <export name="*"/>
       </library>
-      <library name="xmlParserAPIs.jar">
+      <library name="xml-apis.jar">
          <export name="*"/>
       </library>
       <library name="xercesImpl.jar">
