@@ -7,6 +7,6 @@
 	<classpathentry kind="lib" path="/org.springframework.ide.eclipse.core/spring-beans.jar"/>
 	<classpathentry kind="lib" path="/org.springframework.ide.eclipse.core/spring-core.jar"/>
 	<classpathentry kind="lib" path="/org.springframework.ide.eclipse.core/xercesImpl.jar"/>
-	<classpathentry kind="lib" path="/org.springframework.ide.eclipse.core/xmlParserAPIs.jar"/>
+	<classpathentry kind="lib" path="/org.springframework.ide.eclipse.core/xml-apis.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
