@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="xmlParserAPIs.jar"/>
 	<classpathentry kind="lib" path="xercesImpl.jar"/>
 	<classpathentry kind="lib" path="spring-beans.jar"/>
 	<classpathentry kind="lib" path="spring-core.jar"/>
 	<classpathentry kind="lib" path="commons-logging.jar"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="xml-apis.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
