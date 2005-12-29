@@ -540,45 +540,6 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 		super.addTagInsertionProposals(request, childPosition);
 	}
 
-	protected void addTagCloseProposals(ContentAssistRequest request) {
-		IDOMNode node = (IDOMNode) request.getNode();
-
-		// Find the attribute region and name for which this position should
-		// have a value proposed
-		IStructuredDocumentRegion open = node
-				.getFirstStructuredDocumentRegion();
-		ITextRegionList openRegions = open.getRegions();
-		int i = openRegions.indexOf(request.getRegion());
-		if (i < 0) {
-			return;
-		}
-		ITextRegion nameRegion = null;
-		while (i >= 0) {
-			nameRegion = openRegions.get(i--);
-			if (nameRegion.getType() == DOMRegionContext.XML_TAG_ATTRIBUTE_NAME) {
-				break;
-			}
-		}
-
-		String matchString = request.getMatchString();
-		if (matchString == null) {
-			matchString = "";
-		}
-		if (matchString.length() > 0
-				&& (matchString.startsWith("\"") || matchString.startsWith("'"))) {
-			matchString = matchString.substring(1);
-		}
-
-		// the name region is REQUIRED to do anything useful
-		if (nameRegion != null && !matchString.endsWith("\"")) {
-			String attributeName = open.getText(nameRegion);
-			computeAttributeValueProposals(request, node, matchString,
-					attributeName);
-		}
-
-		super.addTagCloseProposals(request);
-	}
-
 	protected void addAttributeValueProposals(ContentAssistRequest request) {
 		IDOMNode node = (IDOMNode) request.getNode();
 
