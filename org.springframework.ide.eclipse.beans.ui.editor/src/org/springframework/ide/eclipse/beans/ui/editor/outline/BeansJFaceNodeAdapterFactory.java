@@ -28,8 +28,6 @@ import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeAdapterFactory;
  */
 public class BeansJFaceNodeAdapterFactory extends JFaceNodeAdapterFactory {
 
-	protected BeansJFaceNodeAdapter singletonAdapter;
-
 	public BeansJFaceNodeAdapterFactory() {
 		this(IJFaceNodeAdapter.class, true);
 	}
@@ -38,14 +36,11 @@ public class BeansJFaceNodeAdapterFactory extends JFaceNodeAdapterFactory {
 		super(adapterKey, registerAdapters);
 	}
 
-
 	/**
-	 * Create a new JFace adapter for the DOM node passed in
+	 * Create a new JFace adapter for the DOM node passed in.
 	 */
 	protected INodeAdapter createAdapter(INodeNotifier node) {
 		if (singletonAdapter == null) {
-
-			// create the JFaceNodeAdapter
 			singletonAdapter = new BeansJFaceNodeAdapter(this);
 			initAdapter(singletonAdapter, node);
 		}

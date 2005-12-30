@@ -72,7 +72,6 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansJavaDocUtils;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansLablelProvider;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansModelImageDescriptor;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateCompletionProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextTypeIds;
@@ -83,7 +82,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * Main entry point for the xml editor's content assist.
+ * Main entry point for the Spring beans xml editor's content assist.
  */
 public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 		implements IPropertyChangeListener {
@@ -149,7 +148,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 								image,
 								buf.toString(),
 								null,
-								BeansLablelProvider
+								BeansEditorUtils
 										.createAdditionalProposalInfo(beanNode,
 												file),
 								BeanReferenceSearchRequestor.LOCAL_BEAN_RELEVANCE);
@@ -204,7 +203,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 							image,
 							buf.toString(),
 							null,
-							BeansLablelProvider
+							BeansEditorUtils
 									.createAdditionalProposalInfo(bean),
 							BeanReferenceSearchRequestor.EXTERNAL_BEAN_RELEVANCE);
 

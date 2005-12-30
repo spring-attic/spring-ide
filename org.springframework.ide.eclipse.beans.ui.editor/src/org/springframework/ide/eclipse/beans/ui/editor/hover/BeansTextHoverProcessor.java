@@ -44,7 +44,6 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansJavaDocUtils;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansLablelProvider;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -179,7 +178,7 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 				&& attributes.getNamedItem(attName) != null) {
 			Element ref = xmlnode.getOwnerDocument().getElementById(
 					attributes.getNamedItem(attName).getNodeValue());
-			result = BeansLablelProvider
+			result = BeansEditorUtils
 					.createAdditionalProposalInfo(ref, file);
 		} else if ("bean".equals(attName)
 				&& attributes.getNamedItem(attName) != null) {
@@ -190,7 +189,7 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 			while (beans.hasNext()) {
 				IBean modelBean = (IBean) beans.next();
 				if (modelBean.getElementName().equals(target)) {
-					result = BeansLablelProvider
+					result = BeansEditorUtils
 							.createAdditionalProposalInfo(modelBean);
 				}
 			}
@@ -200,7 +199,7 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 			Element ref = xmlnode.getOwnerDocument().getElementById(
 					attributes.getNamedItem(attName).getNodeValue());
 			if (ref != null) {
-				result = BeansLablelProvider.createAdditionalProposalInfo(ref,
+				result = BeansEditorUtils.createAdditionalProposalInfo(ref,
 						file);
 			} else {
 				String target = attributes.getNamedItem(attName).getNodeValue();
@@ -210,7 +209,7 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 				while (beans.hasNext()) {
 					IBean modelBean = (IBean) beans.next();
 					if (modelBean.getElementName().equals(target)) {
-						result = BeansLablelProvider
+						result = BeansEditorUtils
 								.createAdditionalProposalInfo(modelBean);
 					}
 				}

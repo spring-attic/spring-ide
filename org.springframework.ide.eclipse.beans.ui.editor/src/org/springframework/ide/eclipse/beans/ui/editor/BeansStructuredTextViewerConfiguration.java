@@ -28,7 +28,6 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredPartitionTypes;
 import org.eclipse.wst.xml.core.internal.provisional.text.IXMLPartitions;
 import org.eclipse.wst.xml.ui.StructuredTextViewerConfigurationXML;
-import org.eclipse.wst.xml.ui.internal.contentassist.NoRegionContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.hover.BeansTextHoverProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.BeansHyperLinkDetector;
@@ -39,22 +38,21 @@ public class BeansStructuredTextViewerConfiguration extends
 	public IContentAssistProcessor[] getContentAssistProcessors(
 			ISourceViewer sourceViewer, String partitionType) {
 
-		IContentAssistProcessor[] processors = null;
+		IContentAssistProcessor[] processors;
 
-		if ((partitionType == IStructuredPartitionTypes.DEFAULT_PARTITION)
-				|| (partitionType == IXMLPartitions.XML_DEFAULT)) {
+		if (partitionType == IStructuredPartitionTypes.DEFAULT_PARTITION
+				|| partitionType == IXMLPartitions.XML_DEFAULT) {
 			processors = new IContentAssistProcessor[] { new BeansContentAssistProcessor() };
-		}
-		// ISSUE: this should be unneeded, right? Just supplied by super class?
-		else if (partitionType == IStructuredPartitionTypes.UNKNOWN_PARTITION) {
-			processors = new IContentAssistProcessor[] { new NoRegionContentAssistProcessor() };
+		} else {
+			processors = super.getContentAssistProcessors(sourceViewer, partitionType);
 		}
 
+		// Modify the behaviour of this configuration's content assist
+		// TODO Is this the right approach?
 		IContentAssistant ca = super.getContentAssistant(sourceViewer);
 		if (ca != null && ca instanceof ContentAssistant) {
 			ContentAssistant contentAssistant = (ContentAssistant) ca;
 			contentAssistant.enableAutoActivation(true);
-			contentAssistant.enableAutoInsert(true);
 			contentAssistant.setAutoActivationDelay(0);
 			contentAssistant.setProposalSelectorBackground(new Color(
 					BeansEditorPlugin.getActiveWorkbenchShell().getDisplay(),

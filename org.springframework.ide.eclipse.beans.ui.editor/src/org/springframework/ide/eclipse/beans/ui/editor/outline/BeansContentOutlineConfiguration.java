@@ -17,40 +17,47 @@ package org.springframework.ide.eclipse.beans.ui.editor.outline;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.wst.sse.ui.views.contentoutline.ContentOutlineConfiguration;
-import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeContentProvider;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider;
+import org.eclipse.wst.xml.ui.views.contentoutline.XMLContentOutlineConfiguration;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin;
+import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.actions.LexicalSortingAction;
+import org.springframework.ide.eclipse.beans.ui.editor.actions.OutlineStyleAction;
 
 public class BeansContentOutlineConfiguration
-										  extends ContentOutlineConfiguration {
-	private IContentProvider contentProvider = null;
-	private ILabelProvider labelProvider;
-	
+									   extends XMLContentOutlineConfiguration {
+	/**
+	 * Returns the bean editor plugin's preference store.
+	 */
 	protected IPreferenceStore getPreferenceStore() {
 		return BeansEditorPlugin.getDefault().getPreferenceStore();
 	}
 
-	public IContentProvider getContentProvider(TreeViewer viewer) {
-		if (contentProvider == null) {
-			contentProvider = new JFaceNodeContentProvider();
+	/**
+	 * Adds the outline style toggle to the context menu.
+	 */
+	protected IContributionItem[] createMenuContributions(TreeViewer viewer) {
+		IContributionItem styleItem = new ActionContributionItem(
+				new OutlineStyleAction(viewer));
+		IContributionItem[] items = super.createMenuContributions(viewer);
+		if (items == null) {
+			items = new IContributionItem[] { styleItem };
+		} else {
+			IContributionItem[] combinedItems = new IContributionItem[
+			                                                 items.length + 1];
+			System.arraycopy(items, 0, combinedItems, 0, items.length);
+			combinedItems[items.length] = styleItem;
+			items = combinedItems;
 		}
-		return contentProvider;
+		return items;
 	}
 
-	public ILabelProvider getLabelProvider(TreeViewer viewer) {
-		if (labelProvider == null) {
-			labelProvider = new JFaceNodeLabelProvider();
-		}
-		return labelProvider;
-	}
-
-	protected IContributionItem[] createToolbarContributions(
-														   TreeViewer viewer) {
+	/**
+	 * Adds the sort toggle to the toolbar.
+	 */
+	protected IContributionItem[] createToolbarContributions(TreeViewer viewer) {
 		IContributionItem sortItem = new ActionContributionItem(
 											 new LexicalSortingAction(viewer));
 		IContributionItem[] items = super.createToolbarContributions(viewer);
@@ -64,5 +71,32 @@ public class BeansContentOutlineConfiguration
 			items = combinedItems;
 		}
 		return items;
+	}
+
+	/**
+	 * Returns the wrapped original XML outline content provider which is only
+	 * used if the outline view is non-spring style. This way the XML outline's
+	 * "Show First Attribute" feature doesn't interfer with a non-spring style
+	 * outline view.
+	 * @see BeansOutlineLabelProvider
+	 */
+	public ILabelProvider getLabelProvider(TreeViewer viewer) {
+		return new BeansOutlineLabelProvider(super.getLabelProvider(viewer));
+	}
+
+	private final static class BeansOutlineLabelProvider extends JFaceNodeLabelProvider {
+
+		private ILabelProvider xmlProvider;
+
+		public BeansOutlineLabelProvider(ILabelProvider superProvider) {
+			this.xmlProvider = superProvider;
+		}
+
+		public String getText(Object o) {
+			if (BeansEditorUtils.isSpringStyleOutline()) {
+				return super.getText(o);
+			}
+			return xmlProvider.getText(o);
+		}
 	}
 }
