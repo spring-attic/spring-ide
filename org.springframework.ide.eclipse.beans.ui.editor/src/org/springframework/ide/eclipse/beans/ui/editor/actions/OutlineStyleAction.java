@@ -19,8 +19,10 @@ package org.springframework.ide.eclipse.beans.ui.editor.actions;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin;
 import org.springframework.ide.eclipse.beans.ui.editor.IPreferencesConstants;
+import org.springframework.ide.eclipse.beans.ui.editor.outline.OutlineSorter;
 
 public class OutlineStyleAction extends Action {
 
@@ -29,30 +31,39 @@ public class OutlineStyleAction extends Action {
 	private TreeViewer viewer;
 
 	public OutlineStyleAction(TreeViewer viewer) {
-		super(BeansEditorPlugin.getResourceString(PREFIX + "label"), AS_CHECK_BOX);
+		super(BeansEditorPlugin.getResourceString(PREFIX + "label"),
+				AS_CHECK_BOX);
 		this.viewer = viewer;
-		Preferences prefs = BeansEditorPlugin.getDefault().getPluginPreferences();
-		boolean checked = prefs.getBoolean(IPreferencesConstants.OUTLINE_SPRING);
-		valueChanged(checked, false);
+		Preferences prefs = BeansEditorPlugin.getDefault()
+				.getPluginPreferences();
+		boolean checked = prefs
+				.getBoolean(IPreferencesConstants.OUTLINE_SPRING);
+		update(checked, false);
+		setImageDescriptor(BeansUIImages.DESC_OBJS_SPRING);
 	}
 
 	public void run() {
-      valueChanged(isChecked(), true);
-    }
+		update(isChecked(), true);
+	}
 
-    private void valueChanged(boolean value, boolean doStore) {
-        setChecked(value);
-        setToolTipText(value ?
-			BeansEditorPlugin.getResourceString(PREFIX + "tooltip.checked") :
-			BeansEditorPlugin.getResourceString(PREFIX + "tooltip.unchecked"));
-        setDescription(value ?
-			BeansEditorPlugin.getResourceString(PREFIX + "description.checked") :
-			BeansEditorPlugin.getResourceString(PREFIX + "description.unchecked"));
-        if (doStore) {
-	        Preferences prefs = BeansEditorPlugin.getDefault().getPluginPreferences();
-	        prefs.setValue(IPreferencesConstants.OUTLINE_SPRING, value);
-	        BeansEditorPlugin.getDefault().savePluginPreferences();
-	        viewer.refresh();
-        }
-    }
+	public void update(boolean value, boolean doStore) {
+		setChecked(value);
+		Preferences prefs = BeansEditorPlugin.getDefault()
+				.getPluginPreferences();
+		boolean sort = prefs.getBoolean(IPreferencesConstants.OUTLINE_SORT);
+		if (sort) {
+			viewer.setSorter(value ? new OutlineSorter() : null);
+		}
+		setToolTipText(value ? BeansEditorPlugin.getResourceString(PREFIX
+				+ "tooltip.checked") : BeansEditorPlugin
+				.getResourceString(PREFIX + "tooltip.unchecked"));
+		setDescription(value ? BeansEditorPlugin.getResourceString(PREFIX
+				+ "description.checked") : BeansEditorPlugin
+				.getResourceString(PREFIX + "description.unchecked"));
+		if (doStore) {
+			prefs.setValue(IPreferencesConstants.OUTLINE_SPRING, value);
+			BeansEditorPlugin.getDefault().savePluginPreferences();
+			viewer.refresh();
+		}
+	}
 }

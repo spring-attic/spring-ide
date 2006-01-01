@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor.actions;
 
@@ -34,28 +34,33 @@ public class LexicalSortingAction extends Action {
 		this.viewer = viewer;
 		setText(BeansEditorPlugin.getResourceString(PREFIX + "label"));
 		BeansUIImages.setLocalImageDescriptors(this, "alphab_sort_co.gif");
-		Preferences prefs = BeansEditorPlugin.getDefault().getPluginPreferences();
+		Preferences prefs = BeansEditorPlugin.getDefault()
+				.getPluginPreferences();
 		boolean checked = prefs.getBoolean(IPreferencesConstants.OUTLINE_SORT);
-		valueChanged(checked, false);
+		update(checked, false);
 	}
 
-    public void run() {
-        valueChanged(isChecked(), true);
-    }
+	public void run() {
+		update(isChecked(), true);
+	}
 
-    private void valueChanged(boolean value, boolean doStore) {
-        setChecked(value);
-        viewer.setSorter(value ? new OutlineSorter() : null);
-        setToolTipText(value ?
-			BeansEditorPlugin.getResourceString(PREFIX + "tooltip.checked") :
-			BeansEditorPlugin.getResourceString(PREFIX + "tooltip.unchecked"));
-        setDescription(value ?
-			BeansEditorPlugin.getResourceString(PREFIX + "description.checked") :
-			BeansEditorPlugin.getResourceString(PREFIX + "description.unchecked"));
-        if (doStore) {
-	        Preferences prefs = BeansEditorPlugin.getDefault().getPluginPreferences();
-	        prefs.setValue(IPreferencesConstants.OUTLINE_SORT, value);
-	        BeansEditorPlugin.getDefault().savePluginPreferences();
-        }
-    }
+	public void update(boolean value, boolean doStore) {
+		setChecked(value);
+		Preferences prefs = BeansEditorPlugin.getDefault()
+				.getPluginPreferences();
+		boolean spring = prefs.getBoolean(IPreferencesConstants.OUTLINE_SPRING);
+		if (spring) {
+			viewer.setSorter(value ? new OutlineSorter() : null);
+		}
+		setToolTipText(value ? BeansEditorPlugin.getResourceString(PREFIX
+				+ "tooltip.checked") : BeansEditorPlugin
+				.getResourceString(PREFIX + "tooltip.unchecked"));
+		setDescription(value ? BeansEditorPlugin.getResourceString(PREFIX
+				+ "description.checked") : BeansEditorPlugin
+				.getResourceString(PREFIX + "description.unchecked"));
+		if (doStore) {
+			prefs.setValue(IPreferencesConstants.OUTLINE_SORT, value);
+			BeansEditorPlugin.getDefault().savePluginPreferences();
+		}
+	}
 }
