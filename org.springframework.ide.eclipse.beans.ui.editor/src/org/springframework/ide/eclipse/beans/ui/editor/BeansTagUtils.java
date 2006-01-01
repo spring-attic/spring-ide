@@ -37,27 +37,27 @@ public final class BeansTagUtils {
 
 	private static Map tags = new HashMap();
 	static {
-		tags.put("description", Integer.valueOf(DESCRIPTION));
-		tags.put("import", Integer.valueOf(IMPORT));
-		tags.put("alias", Integer.valueOf(ALIAS));
-		tags.put("beans", Integer.valueOf(BEANS));
-		tags.put("bean", Integer.valueOf(BEAN));
-		tags.put("constructor-arg", Integer.valueOf(CONSTRUCTOR_ARG));
-		tags.put("lookup-method", Integer.valueOf(LOOKUP_METHOD));
-		tags.put("replace-method", Integer.valueOf(REPLACE_METHOD));
-		tags.put("property", Integer.valueOf(PROPERTY));
-		tags.put("ref", Integer.valueOf(REF));
-		tags.put("idref", Integer.valueOf(IDREF));
-		tags.put("value", Integer.valueOf(VALUE));
-		tags.put("null", Integer.valueOf(NULL));
-		tags.put("list", Integer.valueOf(LIST));
-		tags.put("set", Integer.valueOf(SET));
-		tags.put("map", Integer.valueOf(MAP));
-		tags.put("props", Integer.valueOf(PROPS));
-		tags.put("entry", Integer.valueOf(ENTRY));
-		tags.put("key", Integer.valueOf(KEY));
-		tags.put("prop", Integer.valueOf(PROP));
-		tags.put("arg-type", Integer.valueOf(ARG_TYPE));
+		tags.put("description", new Integer(DESCRIPTION));
+		tags.put("import", new Integer(IMPORT));
+		tags.put("alias", new Integer(ALIAS));
+		tags.put("beans", new Integer(BEANS));
+		tags.put("bean", new Integer(BEAN));
+		tags.put("constructor-arg", new Integer(CONSTRUCTOR_ARG));
+		tags.put("lookup-method", new Integer(LOOKUP_METHOD));
+		tags.put("replace-method", new Integer(REPLACE_METHOD));
+		tags.put("property", new Integer(PROPERTY));
+		tags.put("ref", new Integer(REF));
+		tags.put("idref", new Integer(IDREF));
+		tags.put("value", new Integer(VALUE));
+		tags.put("null", new Integer(NULL));
+		tags.put("list", new Integer(LIST));
+		tags.put("set", new Integer(SET));
+		tags.put("map", new Integer(MAP));
+		tags.put("props", new Integer(PROPS));
+		tags.put("entry", new Integer(ENTRY));
+		tags.put("key", new Integer(KEY));
+		tags.put("prop", new Integer(PROP));
+		tags.put("arg-type", new Integer(ARG_TYPE));
 	}
 
 	public static int getTag(Node node) {
