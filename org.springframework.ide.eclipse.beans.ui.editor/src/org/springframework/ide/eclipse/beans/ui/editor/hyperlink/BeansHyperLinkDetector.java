@@ -201,7 +201,9 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 			return true;
 		} else if ("depends-on".equals(attrName)) {
 			return true;
-		} else if ("local".equals(attrName) || "bean".equals(attrName)) {
+		} else if ("bean".equals(attrName) || "local".equals(attrName) ||
+				"parent".equals(attrName) || "ref".equals(attrName) ||
+				"alias".equals(attrName)) {
 			return true;
 		} else if ("value".equals(attrName)) {
 			return true;
@@ -229,10 +231,9 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 				if (type != null) {
 					link = new JavaElementHyperlink(hyperlinkRegion, type);
 				}
-			} else if ("name".equals(name) && "property".equals(parentName)) {
-				Node parentParentNode = parentNode.getParentNode();
-				if ("bean".equals(parentParentNode.getNodeName())) {
-					NamedNodeMap attributes = parentParentNode.getAttributes();
+			} else if ("name".equals(name) && "property".equals(node.getNodeName())) {
+				if ("bean".equals(parentName)) {
+					NamedNodeMap attributes = parentNode.getAttributes();
 					if (attributes != null
 							&& attributes.getNamedItem("class") != null) {
 
@@ -275,7 +276,7 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 				}
 			} else if ("init-method".equals(name)
 					|| "destroy-method".equals(name)) {
-				NamedNodeMap attributes = parentNode.getAttributes();
+				NamedNodeMap attributes = node.getAttributes();
 				if (attributes != null
 						&& attributes.getNamedItem("class") != null) {
 					String className = attributes.getNamedItem("class")
@@ -295,7 +296,7 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 					}
 				}
 			} else if ("factory-method".equals(name)) {
-				NamedNodeMap attributes = parentNode.getAttributes();
+				NamedNodeMap attributes = node.getAttributes();
 				String className = null;
 				if (attributes != null
 						&& attributes.getNamedItem("factory-bean") != null) {
@@ -330,8 +331,9 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 				} catch (JavaModelException e) {
 				}
 			} else if ("factory-bean".equals(name) || "depends-on".equals(name)
-					|| "parent".equals(name) || "local".equals(name)
-					|| "bean".equals(name)) {
+					|| "bean".equals(name) || "local".equals(name)
+					|| "parent".equals(name) || "ref".equals(name)
+					|| "alias".equals(name)) {
 				Document doc = node.getOwnerDocument();
 				Element bean = doc.getElementById(target);
 				if (bean != null) {
