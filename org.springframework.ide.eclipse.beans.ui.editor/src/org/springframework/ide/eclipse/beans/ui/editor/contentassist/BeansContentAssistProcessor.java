@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -14,9 +14,6 @@
 
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -87,16 +84,14 @@ import org.w3c.dom.NodeList;
 public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 		implements IPropertyChangeListener {
 
-	private CompletionProposalComparator fComparator;
+	private CompletionProposalComparator comparator;
 
-	private static class BeanReferenceSearchRequestor {
+	protected static class BeanReferenceSearchRequestor {
 
 		public static final int LOCAL_BEAN_RELEVANCE = 20;
-
 		public static final int EXTERNAL_BEAN_RELEVANCE = 10;
 
 		protected ContentAssistRequest request;
-
 		protected Map beans;
 
 		public BeanReferenceSearchRequestor(ContentAssistRequest request) {
@@ -106,22 +101,19 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 
 		public void acceptSearchMatch(Node beanNode, IFile file, String prefix) {
 			NamedNodeMap attributes = beanNode.getAttributes();
-			if (attributes.getNamedItem("id") != null
-					&& attributes.getNamedItem("id").getNodeValue() != null
-					&& attributes.getNamedItem("id").getNodeValue().startsWith(
-							prefix)) {
+			Node idAttribute = attributes.getNamedItem("id");
+			if (idAttribute != null && idAttribute.getNodeValue() != null
+					&& idAttribute.getNodeValue().startsWith(prefix)) {
 				if (beanNode.getParentNode() != null
 						&& "beans".equals(beanNode.getParentNode()
 								.getNodeName())) {
-					String replaceText = attributes.getNamedItem("id")
-							.getNodeValue();
-					String relFileName = file.getProjectRelativePath()
-							.toString();
-					String key = replaceText + relFileName;
-					if (!this.beans.containsKey(key)) {
-
+					String beanName = idAttribute.getNodeValue();
+					String replaceText = "\"" + beanName + "\"";
+					String fileName = file.getProjectRelativePath().toString();
+					String key = beanName + fileName;
+					if (!beans.containsKey(key)) {
 						StringBuffer buf = new StringBuffer();
-						buf.append(replaceText);
+						buf.append(beanName);
 						if (attributes.getNamedItem("class") != null) {
 							String className = attributes.getNamedItem("class")
 									.getNodeValue();
@@ -129,32 +121,24 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 							buf.append(Signature.getSimpleName(className));
 							buf.append("]");
 						}
+						String displayText = buf.toString();
 						Image image = BeansUIImages
 								.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
 
-						int replacementLength = request.getReplacementLength();
-						int replacementBegin = request
-								.getReplacementBeginPosition();
-						if (replacementLength != 0) {
-							replacementLength = replacementLength - 2;
-							replacementBegin++;
-						}
-
 						CustomCompletionProposal proposal = new CustomCompletionProposal(
 								replaceText,
-								replacementBegin,
-								replacementLength,
+								request.getReplacementBeginPosition(),
+								request.getReplacementLength(),
 								replaceText.length(),
 								image,
-								buf.toString(),
+								displayText,
 								null,
-								BeansEditorUtils
-										.createAdditionalProposalInfo(beanNode,
-												file),
+								BeansEditorUtils.createAdditionalProposalInfo(
+										beanNode, file),
 								BeanReferenceSearchRequestor.LOCAL_BEAN_RELEVANCE);
 
-						this.request.addProposal(proposal);
-						this.beans.put(key, proposal);
+						request.addProposal(proposal);
+						beans.put(key, proposal);
 					}
 				}
 			}
@@ -163,15 +147,14 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 		public void acceptSearchMatch(IBean bean, IFile file, String prefix) {
 			if (bean.getElementName() != null
 					&& bean.getElementName().startsWith(prefix)) {
-
-				String replaceText = bean.getElementName();
-				String relFileName = bean.getElementResource()
+				String beanName = bean.getElementName();
+				String replaceText = "\"" + beanName + "\"";
+				String fileName = bean.getElementResource()
 						.getProjectRelativePath().toString();
-				String key = replaceText + relFileName;
-				if (!this.beans.containsKey(key)) {
-
+				String key = beanName + fileName;
+				if (!beans.containsKey(key)) {
 					StringBuffer buf = new StringBuffer();
-					buf.append(replaceText);
+					buf.append(beanName);
 					if (bean.getClassName() != null) {
 						String className = bean.getClassName();
 						buf.append(" [");
@@ -179,7 +162,8 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 						buf.append("]");
 					}
 					buf.append(" - ");
-					buf.append(relFileName);
+					buf.append(fileName);
+					String displayText = buf.toString();
 					Image image = BeansUIImages
 							.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
 					ImageDescriptor descriptor = new BeansModelImageDescriptor(
@@ -187,28 +171,19 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 					image = BeansUIPlugin.getImageDescriptorRegistry().get(
 							descriptor);
 
-					int replacementLength = request.getReplacementLength();
-					int replacementBegin = request
-							.getReplacementBeginPosition();
-					if (replacementLength != 0) {
-						replacementLength = replacementLength - 2;
-						replacementBegin++;
-					}
-
 					CustomCompletionProposal proposal = new CustomCompletionProposal(
 							replaceText,
-							replacementBegin,
-							replacementLength,
+							request.getReplacementBeginPosition(),
+							request.getReplacementLength(),
 							replaceText.length(),
 							image,
-							buf.toString(),
+							displayText,
 							null,
-							BeansEditorUtils
-									.createAdditionalProposalInfo(bean),
+							BeansEditorUtils.createAdditionalProposalInfo(bean),
 							BeanReferenceSearchRequestor.EXTERNAL_BEAN_RELEVANCE);
 
-					this.request.addProposal(proposal);
-					this.beans.put(key, proposal);
+					request.addProposal(proposal);
+					beans.put(key, proposal);
 				}
 			}
 		}
@@ -230,26 +205,10 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 			}
 			return flags;
 		}
-
-		public String getText(IFile file) {
-			try {
-				InputStream in = file.getContents();
-				ByteArrayOutputStream out = new ByteArrayOutputStream();
-				byte[] buf = new byte[1024];
-				int read = in.read(buf);
-				while (read > 0) {
-					out.write(buf, 0, read);
-					read = in.read(buf);
-				}
-				return out.toString();
-			} catch (CoreException e) {
-			} catch (IOException e) {
-			}
-			return "";
-		}
 	}
 
-	class VoidMethodSearchRequestor extends PropertyNameSearchRequestor {
+	protected static class VoidMethodSearchRequestor extends
+			PropertyNameSearchRequestor {
 
 		public VoidMethodSearchRequestor(ContentAssistRequest request) {
 			super(request);
@@ -262,56 +221,52 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 					&& "V".equals(returnType) && method.exists()
 					&& ((IType) method.getParent()).isClass()
 					&& !method.isConstructor()) {
-				this.createMethodProposal(method);
+				createMethodProposal(method);
 			}
 		}
 
 		protected void createMethodProposal(IMethod method) {
 			try {
 				String[] parameterNames = method.getParameterNames();
-				String[] parameterTypes = this.getParameterTypes(method);
+				String[] parameterTypes = getParameterTypes(method);
 				String key = method.getElementName() + method.getSignature();
-				if (!this.methods.containsKey(key)) {
-					String replaceText = method.getElementName();
-					String displayText = null;
+				if (!methods.containsKey(key)) {
+					String methodName = method.getElementName();
+					String replaceText = "\"" + methodName + "\"";
+					StringBuffer buf = new StringBuffer();
 					if (parameterTypes.length > 0 && parameterNames.length > 0) {
-						StringBuffer buf = new StringBuffer();
 						buf.append(replaceText + "(");
 						for (int i = 0; i < parameterTypes.length; i++) {
-							buf.append(parameterTypes[0] + " "
-									+ parameterNames[0]);
+							buf.append(parameterTypes[0]);
+							buf.append(' ');
+							buf.append(parameterNames[0]);
 							if (i < (parameterTypes.length - 1)) {
 								buf.append(", ");
 							}
 						}
 						buf.append(") void - ");
 						buf.append(method.getParent().getElementName());
-						displayText = buf.toString();
 					} else {
-						displayText = replaceText + "() void - "
-								+ method.getParent().getElementName();
+						buf.append(replaceText);
+						buf.append("() void - ");
+						buf.append(method.getParent().getElementName());
 					}
+					String displayText = buf.toString();
 					Image image = imageProvider.getImageLabel(method, method
 							.getFlags()
 							| JavaElementImageProvider.SMALL_ICONS);
 					BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
 					String javadoc = utils.getJavaDoc();
 
-					int replacementLength = request.getReplacementLength();
-					int replacementBegin = request
-							.getReplacementBeginPosition();
-					if (replacementLength != 0) {
-						replacementLength = replacementLength - 2;
-						replacementBegin++;
-					}
-
 					CustomCompletionProposal proposal = new CustomCompletionProposal(
-							replaceText, replacementBegin, replacementLength,
-							replaceText.length(), image, displayText, null,
+							replaceText, request.getReplacementBeginPosition(),
+							request.getReplacementLength(), replaceText
+									.length(), image, displayText, null,
 							javadoc,
 							PropertyNameSearchRequestor.METHOD_RELEVANCE);
-					this.request.addProposal(proposal);
-					this.methods.put(method.getSignature(), proposal);
+
+					request.addProposal(proposal);
+					methods.put(method.getSignature(), proposal);
 				}
 			} catch (JavaModelException e) {
 				// do nothing
@@ -319,14 +274,15 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 		}
 	}
 
-	class FactoryMethodSearchRequestor extends VoidMethodSearchRequestor {
+	protected static class FactoryMethodSearchRequestor extends
+			VoidMethodSearchRequestor {
 
-		private String factoryClassName;
+		private String className;
 
 		public FactoryMethodSearchRequestor(ContentAssistRequest request,
 				String className) {
 			super(request);
-			this.factoryClassName = className;
+			this.className = className;
 		}
 
 		public void acceptSearchMatch(IMethod method) throws CoreException {
@@ -334,9 +290,8 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 			if (Flags.isPublic(method.getFlags())
 					&& !Flags.isInterface(method.getFlags()) && method.exists()
 					&& ((IType) method.getParent()).isClass()
-					&& factoryClassName.equals(returnType)
-					&& !method.isConstructor()) {
-				this.createMethodProposal(method);
+					&& className.equals(returnType) && !method.isConstructor()) {
+				createMethodProposal(method);
 			}
 		}
 
@@ -347,15 +302,16 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 				String returnType = super.getReturnType(method);
 				returnType = Signature.getSimpleName(returnType);
 				String key = method.getElementName() + method.getSignature();
-				if (!this.methods.containsKey(key)) {
-					String replaceText = method.getElementName();
-					String displayText = null;
+				if (!methods.containsKey(key)) {
+					String methodName = method.getElementName();
+					String replaceText = "\"" + methodName + "\"";
+					StringBuffer buf = new StringBuffer();
 					if (parameterTypes.length > 0 && parameterNames.length > 0) {
-						StringBuffer buf = new StringBuffer();
 						buf.append(replaceText + "(");
 						for (int i = 0; i < parameterTypes.length; i++) {
-							buf.append(parameterTypes[0] + " "
-									+ parameterNames[0]);
+							buf.append(parameterTypes[0]);
+							buf.append(' ');
+							buf.append(parameterNames[0]);
 							if (i < (parameterTypes.length - 1)) {
 								buf.append(", ");
 							}
@@ -364,32 +320,29 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 						buf.append(returnType);
 						buf.append(" - ");
 						buf.append(method.getParent().getElementName());
-						displayText = buf.toString();
 					} else {
-						displayText = replaceText + "() " + returnType + " - "
-								+ method.getParent().getElementName();
+						buf.append(replaceText);
+						buf.append("() ");
+						buf.append(returnType);
+						buf.append(" - ");
+						buf.append(method.getParent().getElementName());
 					}
+					String displayText = buf.toString();
 					Image image = imageProvider.getImageLabel(method, method
 							.getFlags()
 							| JavaElementImageProvider.SMALL_ICONS);
 					BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
 					String javadoc = utils.getJavaDoc();
 
-					int replacementLength = request.getReplacementLength();
-					int replacementBegin = request
-							.getReplacementBeginPosition();
-					if (replacementLength != 0) {
-						replacementLength = replacementLength - 2;
-						replacementBegin++;
-					}
-
 					CustomCompletionProposal proposal = new CustomCompletionProposal(
-							replaceText, replacementBegin, replacementLength,
-							replaceText.length(), image, displayText, null,
+							replaceText, request.getReplacementBeginPosition(),
+							request.getReplacementLength(), replaceText
+									.length(), image, displayText, null,
 							javadoc,
 							PropertyNameSearchRequestor.METHOD_RELEVANCE);
-					this.request.addProposal(proposal);
-					this.methods.put(method.getSignature(), proposal);
+
+					request.addProposal(proposal);
+					methods.put(method.getSignature(), proposal);
 				}
 			} catch (JavaModelException e) {
 				// do nothing
@@ -397,7 +350,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 		}
 	}
 
-	class PropertyNameSearchRequestor {
+	protected static class PropertyNameSearchRequestor {
 
 		public static final int METHOD_RELEVANCE = 10;
 
@@ -422,43 +375,45 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 					&& method.exists()
 					&& ((IType) method.getParent()).isClass()
 					&& !method.isConstructor()) {
-				this.createMethodProposal(method);
+				createMethodProposal(method);
 			}
 		}
 
 		protected void createMethodProposal(IMethod method) {
 			try {
 				String[] parameterNames = method.getParameterNames();
-				String[] parameterTypes = this.getParameterTypes(method);
+				String[] parameterTypes = getParameterTypes(method);
 				String key = method.getElementName() + method.getSignature();
-				if (!this.methods.containsKey(key)) {
-					String replaceText = this
-							.getPropertyNameFromMethodName(method);
-					String displayText = replaceText + " - "
-							+ method.getParent().getElementName() + "."
-							+ method.getElementName() + "(" + parameterTypes[0]
-							+ " " + parameterNames[0] + ")";
-					Image image = this.imageProvider.getImageLabel(method,
-							method.getFlags()
-									| JavaElementImageProvider.SMALL_ICONS);
+				if (!methods.containsKey(key)) {
+					String propertyName = getPropertyNameFromMethodName(method);
+					String replaceText = "\"" + propertyName + "\"";
+					StringBuffer buf = new StringBuffer();
+					buf.append(propertyName);
+					buf.append(" - ");
+					buf.append(method.getParent().getElementName());
+					buf.append('.');
+					buf.append(method.getElementName());
+					buf.append('(');
+					buf.append(parameterTypes[0]);
+					buf.append(' ');
+					buf.append(parameterNames[0]);
+					buf.append(')');
+					String displayText = buf.toString();
+					Image image = imageProvider.getImageLabel(method, method
+							.getFlags()
+							| JavaElementImageProvider.SMALL_ICONS);
 					BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
 					String javadoc = utils.getJavaDoc();
 
-					int replacementLength = request.getReplacementLength();
-					int replacementBegin = request
-							.getReplacementBeginPosition();
-					if (replacementLength != 0) {
-						replacementLength = replacementLength - 2;
-						replacementBegin++;
-					}
-
 					CustomCompletionProposal proposal = new CustomCompletionProposal(
-							replaceText, replacementBegin, replacementLength,
+							replaceText, request.getReplacementBeginPosition(),
+							request.getReplacementLength(),
 							replaceText.length(), image, displayText, null,
 							javadoc,
 							PropertyNameSearchRequestor.METHOD_RELEVANCE);
-					this.request.addProposal(proposal);
-					this.methods.put(key, method);
+
+					request.addProposal(proposal);
+					methods.put(key, method);
 				}
 			} catch (JavaModelException e) {
 				// do nothing
@@ -517,7 +472,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 	}
 
 	public BeansContentAssistProcessor() {
-		this.fComparator = new CompletionProposalComparator();
+		comparator = new CompletionProposalComparator();
 	}
 
 	protected void addTagInsertionProposals(ContentAssistRequest request,
@@ -526,14 +481,12 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 		if (node != null && node.getParentNode() != null) {
 			Node parentNode = node.getParentNode();
 			if ("bean".equals(parentNode.getNodeName())) {
-				this.addTemplates(request, BeansTemplateContextTypeIds.BEAN);
+				addTemplates(request, BeansTemplateContextTypeIds.BEAN);
 			} else if ("beans".equals(parentNode.getNodeName())) {
-				this.addTemplates(request, BeansTemplateContextTypeIds.ALL);
+				addTemplates(request, BeansTemplateContextTypeIds.ALL);
 			} else if ("property".equals(parentNode.getNodeName())) {
-				this
-						.addTemplates(request,
-								BeansTemplateContextTypeIds.PROPERTY);
-				this.addTemplates(request, BeansTemplateContextTypeIds.ALL);
+				addTemplates(request, BeansTemplateContextTypeIds.PROPERTY);
+				addTemplates(request, BeansTemplateContextTypeIds.ALL);
 			}
 		}
 		super.addTagInsertionProposals(request, childPosition);
@@ -573,8 +526,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 			String attributeName = open.getText(nameRegion);
 			computeAttributeValueProposals(request, node, matchString,
 					attributeName);
-			if (request != null && request.getProposals() != null
-					&& request.getProposals().size() == 0) {
+			if (request != null) {
 				super.addAttributeValueProposals(request);
 			}
 		}
@@ -646,21 +598,33 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 						.getOwnerDocument(), true);
 			}
 		} else if ("property".equals(node.getNodeName())) {
-			// TODO add support for parent bean
 			Node parentNode = node.getParentNode();
-			NamedNodeMap attributes = parentNode.getAttributes();
-			if ("name".equals(attributeName) && attributes != null
-					&& attributes.getNamedItem("class") != null) {
-				String className = attributes.getNamedItem("class")
+			NamedNodeMap parentAttributes = parentNode.getAttributes();
+			if ("name".equals(attributeName) && parentAttributes != null
+					&& parentAttributes.getNamedItem("class") != null) {
+				String className = parentAttributes.getNamedItem("class")
 						.getNodeValue();
 				addPropertyNameAttributeValueProposals(request, matchString,
 						className);
+			} else if ("ref".equals(attributeName)) {
+				addBeanReferenceProposals(request, matchString, node
+						.getOwnerDocument(), true);
 			}
-		} else if ("ref".equals(node.getNodeName())) {
+		} else if ("ref".equals(node.getNodeName())
+				|| "idref".equals(node.getNodeName())) {
 			if ("local".equals(attributeName)) {
 				addBeanReferenceProposals(request, matchString, node
 						.getOwnerDocument(), false);
 			} else if ("bean".equals(attributeName)) {
+				addBeanReferenceProposals(request, matchString, node
+						.getOwnerDocument(), true);
+			}
+		} else if ("constructor-arg".equals(node.getNodeName())) {
+			if ("type".equals(attributeName)) {
+				addClassAttributeValueProposals(request, matchString);
+			}
+		} else if ("alias".equals(node.getNodeName())) {
+			if ("alias".equals(attributeName)) {
 				addBeanReferenceProposals(request, matchString, node
 						.getOwnerDocument(), true);
 			}
@@ -778,17 +742,20 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 		}
 	}
 
+	private static final String CLASS_SOURCE_START =
+		  "public class _xxx {\n"
+		+ "    public void main(String[] args) {\n"
+		+ "        ";
+	private static final String CLASS_SOURCE_END = "\n"
+		+ "    }\n"
+		+ "}";
+
 	private void addClassAttributeValueProposals(ContentAssistRequest request,
 			String prefix) {
-
-		String contents = "public class _xxx {\n"
-				+ "    public void main(String[] args) {\n" + "        ";
-		String contents_end = "\n" + "    }\n" + "}";
-
 		try {
-			IFile file1 = (IFile) getResource(request);
-			IJavaProject project1 = JavaCore.create(file1.getProject());
-			IPackageFragment root = project1.getPackageFragments()[0];
+			IFile file = (IFile) getResource(request);
+			IJavaProject project = JavaCore.create(file.getProject());
+			IPackageFragment root = project.getPackageFragments()[0];
 			ICompilationUnit unit = root.getCompilationUnit("_xxx.java")
 					.getWorkingCopy(
 							CompilationUnitHelper.getInstance()
@@ -796,54 +763,48 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 							CompilationUnitHelper.getInstance()
 									.getProblemRequestor(),
 							getProgressMonitor());
-			String source = contents + prefix + contents_end;
+			String source = CLASS_SOURCE_START + prefix + CLASS_SOURCE_END;
 			setContents(unit, source);
 
 			CompletionProposalCollector collector = new CompletionProposalCollector(
 					unit);
-			unit.codeComplete(66 + prefix.length(), collector,
-					DefaultWorkingCopyOwner.PRIMARY);
+			unit.codeComplete(CLASS_SOURCE_START.length() + prefix.length(),
+					collector, DefaultWorkingCopyOwner.PRIMARY);
 
 			IJavaCompletionProposal[] props = collector
 					.getJavaCompletionProposals();
 
 			ICompletionProposal[] proposals = order(props);
 
-			int replacementLength = request.getReplacementLength();
-			int replacementBegin = request.getReplacementBeginPosition();
-			if (replacementLength != 0) {
-				replacementLength = replacementLength - 2;
-				replacementBegin++;
-			}
-
 			for (int i = 0; i < proposals.length; i++) {
 				if (proposals[i] instanceof JavaCompletionProposal) {
 					JavaCompletionProposal prop = (JavaCompletionProposal) proposals[i];
 					BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-							prop.getReplacementString(), replacementBegin,
-							replacementLength, prop.getReplacementString()
-									.length(), prop.getImage(), prop
-									.getDisplayString(), null, prop
-									.getAdditionalProposalInfo(), prop
-									.getRelevance());
+							"\"" + prop.getReplacementString() + "\"",
+							request.getReplacementBeginPosition(),
+							request.getReplacementLength(),
+							prop.getReplacementString().length() + 2,
+							prop.getImage(), prop.getDisplayString(), null,
+							prop.getAdditionalProposalInfo(),
+							prop.getRelevance());
 
 					request.addProposal(proposal);
 				} else if (proposals[i] instanceof LazyJavaTypeCompletionProposal) {
 					LazyJavaTypeCompletionProposal prop = (LazyJavaTypeCompletionProposal) proposals[i];
 					BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-							prop.getReplacementString(), replacementBegin,
-							replacementLength, prop.getReplacementString()
-									.length(), prop.getImage(), prop
-									.getDisplayString(), null, prop
-									.getAdditionalProposalInfo(), prop
-									.getRelevance());
+							"\"" + prop.getReplacementString() + "\"",
+							request.getReplacementBeginPosition(),
+							request.getReplacementLength(),
+							prop.getReplacementString().length() + 2,
+							prop.getImage(), prop.getDisplayString(), null,
+							prop.getAdditionalProposalInfo(),
+							prop.getRelevance());
 
 					request.addProposal(proposal);
 				}
 			}
-
 		} catch (Exception e) {
-			e.printStackTrace();
+			// do nothing
 		}
 	}
 
@@ -864,7 +825,6 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 		 * completion proposals"); return monitor; } else {
 		 */
 		return new NullProgressMonitor();
-		// }
 	}
 
 	/**
@@ -896,16 +856,15 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 					contentAssistRequest.addMacro(proposals[i]);
 			}
 		}
-		// }
 	}
 
-	private BeansTemplateCompletionProcessor fTemplateProcessor = null;
+	private BeansTemplateCompletionProcessor templateProcessor = null;
 
 	private BeansTemplateCompletionProcessor getTemplateCompletionProcessor() {
-		if (fTemplateProcessor == null) {
-			fTemplateProcessor = new BeansTemplateCompletionProcessor();
+		if (templateProcessor == null) {
+			templateProcessor = new BeansTemplateCompletionProcessor();
 		}
-		return fTemplateProcessor;
+		return templateProcessor;
 	}
 
 	/**
@@ -930,8 +889,9 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 						baselocation = model.getBaseLocation();
 					}
 				} finally {
-					if (model != null)
+					if (model != null) {
 						model.releaseFromRead();
+					}
 				}
 			}
 		}
@@ -976,7 +936,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 	 * Order the given proposals.
 	 */
 	private ICompletionProposal[] order(ICompletionProposal[] proposals) {
-		Arrays.sort(proposals, fComparator);
+		Arrays.sort(proposals, comparator);
 		return proposals;
 	}
 }
