@@ -120,6 +120,13 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 							buf.append(Signature.getSimpleName(className));
 							buf.append("]");
 						}
+						if (attributes.getNamedItem("parent") != null) {
+							String parentName = attributes.getNamedItem("parent")
+									.getNodeValue();
+							buf.append(" <");
+							buf.append(parentName);
+							buf.append(">");
+						}
 						String displayText = buf.toString();
 						Image image = BeansUIImages
 								.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
@@ -159,6 +166,11 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 						buf.append(" [");
 						buf.append(Signature.getSimpleName(className));
 						buf.append("]");
+					}
+					if (bean.getParentName() != null) {
+						buf.append(" <");
+						buf.append(bean.getParentName());
+						buf.append(">");
 					}
 					buf.append(" - ");
 					buf.append(fileName);
