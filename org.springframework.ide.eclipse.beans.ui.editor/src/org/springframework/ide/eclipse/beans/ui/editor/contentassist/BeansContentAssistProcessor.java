@@ -57,7 +57,6 @@ import org.eclipse.wst.sse.core.internal.provisional.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegionList;
-import org.eclipse.wst.sse.ui.internal.contentassist.CustomCompletionProposal;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.core.internal.regions.DOMRegionContext;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
@@ -125,7 +124,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 						Image image = BeansUIImages
 								.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
 
-						CustomCompletionProposal proposal = new CustomCompletionProposal(
+						BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
 								replaceText,
 								request.getReplacementBeginPosition(),
 								request.getReplacementLength(),
@@ -171,7 +170,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 					image = BeansUIPlugin.getImageDescriptorRegistry().get(
 							descriptor);
 
-					CustomCompletionProposal proposal = new CustomCompletionProposal(
+					BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
 							replaceText,
 							request.getReplacementBeginPosition(),
 							request.getReplacementLength(),
@@ -258,7 +257,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 					BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
 					String javadoc = utils.getJavaDoc();
 
-					CustomCompletionProposal proposal = new CustomCompletionProposal(
+					BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
 							replaceText, request.getReplacementBeginPosition(),
 							request.getReplacementLength(), replaceText
 									.length(), image, displayText, null,
@@ -334,7 +333,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 					BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
 					String javadoc = utils.getJavaDoc();
 
-					CustomCompletionProposal proposal = new CustomCompletionProposal(
+					BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
 							replaceText, request.getReplacementBeginPosition(),
 							request.getReplacementLength(), replaceText
 									.length(), image, displayText, null,
@@ -405,7 +404,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 					BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
 					String javadoc = utils.getJavaDoc();
 
-					CustomCompletionProposal proposal = new CustomCompletionProposal(
+					BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
 							replaceText, request.getReplacementBeginPosition(),
 							request.getReplacementLength(),
 							replaceText.length(), image, displayText, null,
@@ -526,9 +525,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 			String attributeName = open.getText(nameRegion);
 			computeAttributeValueProposals(request, node, matchString,
 					attributeName);
-			if (request != null) {
-				super.addAttributeValueProposals(request);
-			}
+			super.addAttributeValueProposals(request);
 		}
 	}
 
