@@ -70,18 +70,16 @@ public class ModelLabelProvider extends LabelProvider {
 					label.append(value);
 					label.append('"');
 				} else if (value instanceof BeanDefinitionHolder) {
-					BeanDefinitionHolder bdHolder = (BeanDefinitionHolder)
-																		  value;
-					BeanDefinition beanDef = bdHolder.getBeanDefinition();
+					BeanDefinition beanDef = ((BeanDefinitionHolder) value)
+							.getBeanDefinition();
 					label.append(" {");
-					label.append(bdHolder.getBeanName());
 					if (beanDef instanceof RootBeanDefinition) {
-						label.append(" [");
+						label.append('[');
 						label.append(((RootBeanDefinition)
 												   beanDef).getBeanClassName());
 						label.append(']');
 					} else {
-						label.append(" <");
+						label.append('<');
 						label.append(((ChildBeanDefinition)
 													  beanDef).getParentName());
 						label.append('>');
