@@ -256,13 +256,13 @@ public class BeansConfigValidator {
 		}
 		monitor.subTask(BeansCorePlugin.getFormattedMessage(
 				   "BeansConfigValidator.validateBean", bean.getElementName()));
+		
+		// Validate bean's name and aliases
+		validateBeanDefinitionHolder(bean, configSet, registry);
 
-		// Get bean's standard bean definition and class name
+		// Get bean's definition and the one merged with it's parent bean(s)
 		AbstractBeanDefinition bd = (AbstractBeanDefinition)
 									   BeansModelUtils.getBeanDefinition(bean);
-		String className = bd.getBeanClassName();
-
-		// Get bean's merged bean definition and class name
 		AbstractBeanDefinition mergedBd;
 		if (configSet == null) {
 			mergedBd = (AbstractBeanDefinition)
@@ -272,34 +272,61 @@ public class BeansConfigValidator {
 			mergedBd = (AbstractBeanDefinition)
 				  BeansModelUtils.getMergedBeanDefinition(bean, configSet);
 		}
-		String mergedClassName = mergedBd.getBeanClassName();
 
-		// Validate bean name and aliases
-		validateBeanDefinitionHolder(bean, configSet, registry);
-
-		// Validate root bean
-		if (bd instanceof RootBeanDefinition) {
-
-			// Validate bean definition
-			try {
-				bd.validate();
-			} catch (BeanDefinitionValidationException e) {
-				BeansModelUtils.createProblemMarker(bean,
+		// Validate bean definition
+		try {
+			bd.validate();
+		} catch (BeanDefinitionValidationException e) {
+			BeansModelUtils.createProblemMarker(bean,
 						"Invalid bean definition: " + e.getMessage(),
 						IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
 						IBeansProjectMarker.ERROR_CODE_INVALID_BEAN_DEFINITION,
 						bean.getElementName(), null);
-			}
 		}
 
-		// Validate bean's init-method, destroy-method and properties with bean
-		// class from merged bean definition - skip class names with
-		// placeholders
+		// Get bean's merged bean definition and class name
+		String className = bd.getBeanClassName();
+		String mergedClassName = mergedBd.getBeanClassName();
+
+		// Validate bean class and constructor arguments - skip child beans and
+		// class names with placeholders
+		if (className != null && !hasPlaceHolder(className)) {
+			IType type = BeansModelUtils.getJavaType(
+					BeansModelUtils.getProject(bean).getProject(), className);
+			if (type == null) {
+				BeansModelUtils.createProblemMarker(bean,
+								"Class '" + className + "' not found",
+								IMarker.SEVERITY_ERROR,
+								bean.getElementStartLine(),
+								IBeansProjectMarker.ERROR_CODE_CLASS_NOT_FOUND,
+								bean.getElementName(), className);
+			} else {
+
+				// Validate merged constructor args of non-abstract beans only
+				if (!bean.isAbstract()) {
+					validateConstructorArguments(bean, type,
+									  mergedBd.getConstructorArgumentValues());
+				}
+			}
+		}
+		
+		// Validate bean's constructor arguments, init-method, destroy-method
+		// and properties with bean class from merged bean definition - skip
+		// class names with placeholders
 		if (mergedClassName != null && !hasPlaceHolder(mergedClassName)) {
 			IType type = BeansModelUtils.getJavaType(
 								 BeansModelUtils.getProject(bean).getProject(),
 								 mergedClassName);
 			if (type != null) {
+
+				// Validate merged constructor args of non-abstract beans but
+				// only if this bean has constructor args too
+				if (bd.hasConstructorArgumentValues() && !bean.isAbstract()) {
+					validateConstructorArguments(bean, type,
+									  mergedBd.getConstructorArgumentValues());
+				}
+
+				// Validate bean's init-method, destroy-method and properties
 				validateMethod(bean, type, METHOD_TYPE_INIT,
 							   bd.getInitMethodName(), 0, false);
 				validateMethod(bean, type, METHOD_TYPE_DESTROY,
@@ -329,28 +356,6 @@ public class BeansConfigValidator {
 					bd.getConstructorArgumentValues().getArgumentCount() : -1);
 				validateFactoryMethod(bean, mergedClassName, methodName,
 									  argCount, true);
-			}
-		}
-
-		// Validate bean's constructor arguments with bean class from
-		// non-merged bean definition - skip class names with placeholders
-		if (className != null && !hasPlaceHolder(className)) {
-			IType type = BeansModelUtils.getJavaType(
-					BeansModelUtils.getProject(bean).getProject(), className);
-			if (type == null) {
-				BeansModelUtils.createProblemMarker(bean,
-								"Class '" + className + "' not found",
-								IMarker.SEVERITY_ERROR,
-								bean.getElementStartLine(),
-								IBeansProjectMarker.ERROR_CODE_CLASS_NOT_FOUND,
-								bean.getElementName(), className);
-			} else {
-
-				// Only validate constructor args of non-abstract beans
-				if (!bean.isAbstract()) {
-					validateConstructorArguments(bean, type,
-										bd.getConstructorArgumentValues());
-				}
 			}
 		}
 		
