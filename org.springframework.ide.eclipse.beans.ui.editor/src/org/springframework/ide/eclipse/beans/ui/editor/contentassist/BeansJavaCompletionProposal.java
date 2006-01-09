@@ -34,285 +34,333 @@ import org.eclipse.wst.sse.ui.internal.contentassist.IRelevanceConstants;
  * An implementation of ICompletionProposal whose values can be read after
  * creation.
  */
-public class BeansJavaCompletionProposal implements ICompletionProposal, ICompletionProposalExtension,
-        ICompletionProposalExtension2, IRelevanceCompletionProposal {
-    
-    private String fAdditionalProposalInfo;
+public class BeansJavaCompletionProposal implements ICompletionProposal,
+		ICompletionProposalExtension, ICompletionProposalExtension2,
+		IRelevanceCompletionProposal {
 
-    private IContextInformation fContextInformation;
+	private String fAdditionalProposalInfo;
 
-    private int fCursorPosition = 0;
+	private IContextInformation fContextInformation;
 
-    private String fDisplayString;
+	private int fCursorPosition = 0;
 
-    private Image fImage;
+	private String fDisplayString;
 
-    private int fOriginalReplacementLength;
+	private Image fImage;
 
-    private int fRelevance = IRelevanceConstants.R_NONE;
+	private int fOriginalReplacementLength;
 
-    private int fReplacementLength = 0;
+	private int fRelevance = IRelevanceConstants.R_NONE;
 
-    private int fReplacementOffset = 0;
+	private int fReplacementLength = 0;
 
-    private String fReplacementString = null;
+	private int fReplacementOffset = 0;
 
-    private boolean fUpdateLengthOnValidate;
+	private String fReplacementString = null;
 
-    private char[] fTriggers;
+	private boolean fUpdateLengthOnValidate;
 
-    /**
-     * Constructor with relevance and replacement length update flag.
-     * 
-     * If the <code>updateReplacementLengthOnValidate</code> flag is true,
-     * then when the user types, the replacement length will be incremented by
-     * the number of new characters inserted from the original position.
-     * Otherwise the replacement length will not change on validate.
-     * 
-     * ex.
-     * 
-     * <tag |name="attr"> - the replacement length is 4 <tag i|name="attr"> -
-     * the replacement length is now 5 <tag id|name="attr"> - the replacement
-     * length is now 6 <tag |name="attr"> - the replacementlength is now 4 again
-     * <tag |name="attr"> - the replacment length remains 4
-     * 
-     */
-    public BeansJavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, int cursorPosition, Image image, String displayString,
-            IContextInformation contextInformation, String additionalProposalInfo, int relevance, boolean updateReplacementLengthOnValidate) {
-        fReplacementString = "\"" + replacementString;
-        fReplacementOffset = replacementOffset;
-        fReplacementLength = replacementLength;
-        fCursorPosition = cursorPosition + 1;
-        fImage = image;
-        fDisplayString = displayString;
-        fContextInformation = contextInformation;
-        fAdditionalProposalInfo = additionalProposalInfo;
-        fRelevance = relevance;
-        fUpdateLengthOnValidate = updateReplacementLengthOnValidate;
-        fOriginalReplacementLength = fReplacementLength;
-    }
+	private char[] fTriggers;
 
-    public BeansJavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, int cursorPosition, Image image, String displayString,
-            IContextInformation contextInformation, String additionalProposalInfo, int relevance) {
-        this(replacementString, replacementOffset, replacementLength, cursorPosition, image, displayString, contextInformation, additionalProposalInfo, relevance, true);
-    }
+	/**
+	 * Constructor with relevance and replacement length update flag.
+	 * 
+	 * If the <code>updateReplacementLengthOnValidate</code> flag is true,
+	 * then when the user types, the replacement length will be incremented by
+	 * the number of new characters inserted from the original position.
+	 * Otherwise the replacement length will not change on validate.
+	 * 
+	 * ex.
+	 * 
+	 * <tag |name="attr"> - the replacement length is 4 <tag i|name="attr"> -
+	 * the replacement length is now 5 <tag id|name="attr"> - the replacement
+	 * length is now 6 <tag |name="attr"> - the replacementlength is now 4 again
+	 * <tag |name="attr"> - the replacment length remains 4
+	 * 
+	 */
+	public BeansJavaCompletionProposal(String replacementString,
+			int replacementOffset, int replacementLength, int cursorPosition,
+			Image image, String displayString,
+			IContextInformation contextInformation,
+			String additionalProposalInfo, int relevance,
+			boolean updateReplacementLengthOnValidate) {
+		fReplacementString = "\"" + replacementString;
+		fReplacementOffset = replacementOffset;
+		fReplacementLength = replacementLength;
+		fCursorPosition = cursorPosition + 1;
+		fImage = image;
+		fDisplayString = displayString;
+		fContextInformation = contextInformation;
+		fAdditionalProposalInfo = additionalProposalInfo;
+		fRelevance = relevance;
+		fUpdateLengthOnValidate = updateReplacementLengthOnValidate;
+		fOriginalReplacementLength = fReplacementLength;
+	}
 
-    public void apply(IDocument document) {
-        CompletionProposal proposal = new CompletionProposal(getReplacementString() + "\"", getReplacementOffset(), getReplacementLength(), getCursorPosition(), getImage(), getDisplayString(),
-                getContextInformation(), getAdditionalProposalInfo());
-        proposal.apply(document);
-    }
+	public BeansJavaCompletionProposal(String replacementString,
+			int replacementOffset, int replacementLength, int cursorPosition,
+			Image image, String displayString,
+			IContextInformation contextInformation,
+			String additionalProposalInfo, int relevance) {
+		this(replacementString, replacementOffset, replacementLength,
+				cursorPosition, image, displayString, contextInformation,
+				additionalProposalInfo, relevance, true);
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension#apply(org.eclipse.jface.text.IDocument,
-     *      char, int)
-     */
-    public void apply(IDocument document, char trigger, int offset) {
-        CompletionProposal proposal = new CompletionProposal(getReplacementString() + "\"", getReplacementOffset(), getReplacementLength(), getCursorPosition(), getImage(), getDisplayString(),
-                getContextInformation(), getAdditionalProposalInfo());
-        proposal.apply(document);
-        // we want to ContextInformationPresenter.updatePresentation() here
-    }
+	public void apply(IDocument document) {
+		CompletionProposal proposal = new CompletionProposal(
+				getReplacementString() + "\"", getReplacementOffset(),
+				getReplacementLength(), getCursorPosition() + 1, getImage(),
+				getDisplayString(), getContextInformation(),
+				getAdditionalProposalInfo());
+		proposal.apply(document);
+	}
 
-    public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
-        IDocument document = viewer.getDocument();
-        // CMVC 252634 to compensate for "invisible" initial region
-        int caretOffset = viewer.getTextWidget().getCaretOffset();
-        if (viewer instanceof ITextViewerExtension5) {
-            ITextViewerExtension5 extension = (ITextViewerExtension5) viewer;
-            caretOffset = extension.widgetOffset2ModelOffset(caretOffset);
-        } else {
-            caretOffset = viewer.getTextWidget().getCaretOffset() + viewer.getVisibleRegion().getOffset();
-        }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension#apply(org.eclipse.jface.text.IDocument,
+	 *      char, int)
+	 */
+	public void apply(IDocument document, char trigger, int offset) {
+		CompletionProposal proposal = new CompletionProposal(
+				getReplacementString() + "\"", getReplacementOffset(),
+				getReplacementLength(), getCursorPosition() + 1, getImage(),
+				getDisplayString(), getContextInformation(),
+				getAdditionalProposalInfo());
+		proposal.apply(document);
+		// we want to ContextInformationPresenter.updatePresentation() here
+	}
 
-        if (caretOffset == getReplacementOffset()) {
-            apply(document);
-        } else {
-            // replace the text without affecting the caret Position as this
-            // causes the cursor to move on its own
-            try {
-                int endOffsetOfChanges = getReplacementString().length() + getReplacementOffset();
-                // Insert the portion of the new text that comes after the
-                // current caret position
-                if (endOffsetOfChanges >= caretOffset) {
-                    int postCaretReplacementLength = getReplacementOffset() + getReplacementLength() - caretOffset;
-                    int preCaretReplacementLength = getReplacementString().length() - (endOffsetOfChanges - caretOffset);
-                    if (postCaretReplacementLength < 0) {
-                        if (Debug.displayWarnings) {
-                            System.out.println("** postCaretReplacementLength was negative: " + postCaretReplacementLength); //$NON-NLS-1$
-                        }
-                        // This is just a quick fix while I figure out what
-                        // replacement length is supposed to be
-                        // in each case, otherwise we'll get negative
-                        // replacment length sometimes
-                        postCaretReplacementLength = 0;
-                    }
-                    document.replace(caretOffset, postCaretReplacementLength, getReplacementString().substring(preCaretReplacementLength) + "\"");
-                }
-                // Insert the portion of the new text that comes before the
-                // current caret position
-                // Done second since offsets would change for the post text
-                // otherwise
-                // Outright insertions are handled here
-                if (caretOffset > getReplacementOffset()) {
-                    int preCaretTextLength = caretOffset - getReplacementOffset();
-                    document.replace(getReplacementOffset(), preCaretTextLength, getReplacementString().substring(0, preCaretTextLength));
-                }
-            } catch (BadLocationException x) {
-                apply(document);
-            } catch (StringIndexOutOfBoundsException e) {
-                apply(document);
-            }
-        }
-    }
+	public void apply(ITextViewer viewer, char trigger, int stateMask,
+			int offset) {
+		IDocument document = viewer.getDocument();
+		// CMVC 252634 to compensate for "invisible" initial region
+		int caretOffset = viewer.getTextWidget().getCaretOffset();
+		if (viewer instanceof ITextViewerExtension5) {
+			ITextViewerExtension5 extension = (ITextViewerExtension5) viewer;
+			caretOffset = extension.widgetOffset2ModelOffset(caretOffset);
+		} else {
+			caretOffset = viewer.getTextWidget().getCaretOffset()
+					+ viewer.getVisibleRegion().getOffset();
+		}
 
-    public String getAdditionalProposalInfo() {
-        // return fProposal.getAdditionalProposalInfo();
-        return fAdditionalProposalInfo;
-    }
+		if (caretOffset == getReplacementOffset()) {
+			apply(document);
+		} else {
+			// replace the text without affecting the caret Position as this
+			// causes the cursor to move on its own
+			try {
+				int endOffsetOfChanges = getReplacementString().length()
+						+ getReplacementOffset();
+				// Insert the portion of the new text that comes after the
+				// current caret position
+				if (endOffsetOfChanges >= caretOffset) {
+					int postCaretReplacementLength = getReplacementOffset()
+							+ getReplacementLength() - caretOffset;
+					int preCaretReplacementLength = getReplacementString()
+							.length()
+							- (endOffsetOfChanges - caretOffset);
+					if (postCaretReplacementLength < 0) {
+						if (Debug.displayWarnings) {
+							System.out
+									.println("** postCaretReplacementLength was negative: " + postCaretReplacementLength); //$NON-NLS-1$
+						}
+						// This is just a quick fix while I figure out what
+						// replacement length is supposed to be
+						// in each case, otherwise we'll get negative
+						// replacment length sometimes
+						postCaretReplacementLength = 0;
+					}
 
-    public IContextInformation getContextInformation() {
-        // return fProposal.getContextInformation();
-        return fContextInformation;
-    }
+					String charAfterCursor = document.get(caretOffset, 1);
+					if ("\"".equals(charAfterCursor)) {
+						document.replace(caretOffset,
+								postCaretReplacementLength - 1,
+								getReplacementString().substring(
+										preCaretReplacementLength));
+					} else {
+						document.replace(caretOffset,
+								postCaretReplacementLength,
+								getReplacementString().substring(
+										preCaretReplacementLength)
+										+ "\"");
+					}
 
-    public void setContextInformation(IContextInformation contextInfo) {
-        fContextInformation = contextInfo;
-    }
+				}
+				// Insert the portion of the new text that comes before the
+				// current caret position
+				// Done second since offsets would change for the post text
+				// otherwise
+				// Outright insertions are handled here
+				if (caretOffset > getReplacementOffset()) {
+					int preCaretTextLength = caretOffset
+							- getReplacementOffset();
+					document.replace(getReplacementOffset(),
+							preCaretTextLength, getReplacementString()
+									.substring(0, preCaretTextLength));
+				}
+			} catch (BadLocationException x) {
+				apply(document);
+			} catch (StringIndexOutOfBoundsException e) {
+				apply(document);
+			}
+		}
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension#getContextInformationPosition()
-     */
-    public int getContextInformationPosition() {
-        return getCursorPosition();
-    }
+	public String getAdditionalProposalInfo() {
+		// return fProposal.getAdditionalProposalInfo();
+		return fAdditionalProposalInfo;
+	}
 
-    public int getCursorPosition() {
-        return fCursorPosition;
-    }
+	public IContextInformation getContextInformation() {
+		// return fProposal.getContextInformation();
+		return fContextInformation;
+	}
 
-    public void setCursorPosition(int pos) {
-        fCursorPosition = pos;
-    }
+	public void setContextInformation(IContextInformation contextInfo) {
+		fContextInformation = contextInfo;
+	}
 
-    public String getDisplayString() {
-        // return fProposal.getDisplayString();
-        return fDisplayString;
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension#getContextInformationPosition()
+	 */
+	public int getContextInformationPosition() {
+		return getCursorPosition();
+	}
 
-    public Image getImage() {
-        // return fProposal.getImage();
-        return fImage;
-    }
+	public int getCursorPosition() {
+		return fCursorPosition;
+	}
 
-    public int getRelevance() {
-        return fRelevance;
-    }
+	public void setCursorPosition(int pos) {
+		fCursorPosition = pos;
+	}
 
-    public int getReplacementLength() {
-        return fReplacementLength;
-    }
+	public String getDisplayString() {
+		// return fProposal.getDisplayString();
+		return fDisplayString;
+	}
 
-    public int getReplacementOffset() {
-        return fReplacementOffset;
-    }
+	public Image getImage() {
+		// return fProposal.getImage();
+		return fImage;
+	}
 
-    public String getReplacementString() {
-        return fReplacementString;
-    }
+	public int getRelevance() {
+		return fRelevance;
+	}
 
-    public Point getSelection(IDocument document) {
-        // return fProposal.getSelection(document);
-        CompletionProposal proposal = new CompletionProposal(getReplacementString(), getReplacementOffset(), getReplacementLength(), getCursorPosition(), getImage(), getDisplayString(),
-                getContextInformation(), getAdditionalProposalInfo());
-        return proposal.getSelection(document);
-    }
+	public int getReplacementLength() {
+		return fReplacementLength;
+	}
 
-    /**
-     * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension#getTriggerCharacters()
-     */
+	public int getReplacementOffset() {
+		return fReplacementOffset;
+	}
 
-    public char[] getTriggerCharacters() {
-        return fTriggers;
-    }
+	public String getReplacementString() {
+		return fReplacementString;
+	}
 
-    public void setTriggerCharacters(char[] triggers) {
-        fTriggers = triggers;
-    }
+	public Point getSelection(IDocument document) {
+		// return fProposal.getSelection(document);
+		CompletionProposal proposal = new CompletionProposal(
+				getReplacementString(), getReplacementOffset(),
+				getReplacementLength(), getCursorPosition(), getImage(),
+				getDisplayString(), getContextInformation(),
+				getAdditionalProposalInfo());
+		return proposal.getSelection(document);
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension#isValidFor(org.eclipse.jface.text.IDocument,
-     *      int)
-     */
-    public boolean isValidFor(IDocument document, int offset) {
-        return validate(document, offset, null);
-    }
+	/**
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension#getTriggerCharacters()
+	 */
 
-    /**
-     * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#selected(org.eclipse.jface.text.ITextViewer,
-     *      boolean)
-     */
-    public void selected(ITextViewer viewer, boolean smartToggle) {
-    }
+	public char[] getTriggerCharacters() {
+		return fTriggers;
+	}
 
-    // code is borrowed from JavaCompletionProposal
-    protected boolean startsWith(IDocument document, int offset, String word) {
-        int wordLength = word == null ? 0 : word.length();
-        if (offset > fReplacementOffset + wordLength)
-            return false;
+	public void setTriggerCharacters(char[] triggers) {
+		fTriggers = triggers;
+	}
 
-        try {
-            int length = offset - fReplacementOffset;
-            String start = document.get(fReplacementOffset, length);
-            return word.substring(0, length).equalsIgnoreCase(start);
-        } catch (BadLocationException x) {
-        }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension#isValidFor(org.eclipse.jface.text.IDocument,
+	 *      int)
+	 */
+	public boolean isValidFor(IDocument document, int offset) {
+		return validate(document, offset, null);
+	}
 
-        return false;
-    }
+	/**
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#selected(org.eclipse.jface.text.ITextViewer,
+	 *      boolean)
+	 */
+	public void selected(ITextViewer viewer, boolean smartToggle) {
+	}
 
-    /**
-     * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#unselected(org.eclipse.jface.text.ITextViewer)
-     */
-    public void unselected(ITextViewer viewer) {
-    }
+	// code is borrowed from JavaCompletionProposal
+	protected boolean startsWith(IDocument document, int offset, String word) {
+		int wordLength = word == null ? 0 : word.length();
+		if (offset > fReplacementOffset + wordLength)
+			return false;
 
-    /**
-     * borrowed from JavaCompletionProposal
-     * 
-     * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#validate(org.eclipse.jface.text.IDocument,
-     *      int, org.eclipse.jface.text.DocumentEvent)
-     */
-    public boolean validate(IDocument document, int offset, DocumentEvent event) {
-        if (offset < fReplacementOffset)
-            return false;
-        boolean validated = startsWith(document, offset, fReplacementString);
-        boolean validatedClass = startsWith(document, offset, fDisplayString);
-        // CMVC 269884
-        if (fUpdateLengthOnValidate) {
-            int newLength = offset - getReplacementOffset();
-            int delta = newLength - fOriginalReplacementLength;
-            fReplacementLength = delta + fOriginalReplacementLength;
-        }
-        return validated || validatedClass;
-    }
-    
-    /**
-     * @param replacementOffset The fReplacementOffset to set.
-     */
-    public void setReplacementOffset(int replacementOffset) {
-        fReplacementOffset = replacementOffset;
-    }
-    /**
-     * @param replacementString The fReplacementString to set.
-     */
-    public void setReplacementString(String replacementString) {
-        fReplacementString = replacementString;
-    }
+		try {
+			int length = offset - fReplacementOffset;
+			String start = document.get(fReplacementOffset, length);
+			return word.substring(0, length).equalsIgnoreCase(start);
+		} catch (BadLocationException x) {
+		}
+
+		return false;
+	}
+
+	/**
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#unselected(org.eclipse.jface.text.ITextViewer)
+	 */
+	public void unselected(ITextViewer viewer) {
+	}
+
+	/**
+	 * borrowed from JavaCompletionProposal
+	 * 
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#validate(org.eclipse.jface.text.IDocument,
+	 *      int, org.eclipse.jface.text.DocumentEvent)
+	 */
+	public boolean validate(IDocument document, int offset, DocumentEvent event) {
+		if (offset < fReplacementOffset)
+			return false;
+		boolean validated = startsWith(document, offset, "\""
+				+ fReplacementString);
+		boolean validatedClass = startsWith(document, offset, "\""
+				+ fDisplayString);
+		// CMVC 269884
+		if (fUpdateLengthOnValidate) {
+			int newLength = offset - getReplacementOffset();
+			int delta = newLength - fOriginalReplacementLength;
+			fReplacementLength = delta + fOriginalReplacementLength;
+		}
+		return validated || validatedClass;
+	}
+
+	/**
+	 * @param replacementOffset
+	 *            The fReplacementOffset to set.
+	 */
+	public void setReplacementOffset(int replacementOffset) {
+		fReplacementOffset = replacementOffset;
+	}
+
+	/**
+	 * @param replacementString
+	 *            The fReplacementString to set.
+	 */
+	public void setReplacementString(String replacementString) {
+		fReplacementString = replacementString;
+	}
 }
