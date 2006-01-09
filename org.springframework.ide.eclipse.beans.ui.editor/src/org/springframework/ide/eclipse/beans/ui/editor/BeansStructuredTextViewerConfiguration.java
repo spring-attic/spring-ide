@@ -47,13 +47,11 @@ public class BeansStructuredTextViewerConfiguration extends
 			processors = super.getContentAssistProcessors(sourceViewer, partitionType);
 		}
 
-		// Modify the behaviour of this configuration's content assist
-		// TODO Is this the right approach?
 		IContentAssistant ca = super.getContentAssistant(sourceViewer);
 		if (ca != null && ca instanceof ContentAssistant) {
 			ContentAssistant contentAssistant = (ContentAssistant) ca;
 			contentAssistant.enableAutoActivation(true);
-			contentAssistant.setAutoActivationDelay(0);
+			contentAssistant.setAutoActivationDelay(50);
 			contentAssistant.setProposalSelectorBackground(new Color(
 					BeansEditorPlugin.getActiveWorkbenchShell().getDisplay(),
 					new RGB(255, 255, 255)));

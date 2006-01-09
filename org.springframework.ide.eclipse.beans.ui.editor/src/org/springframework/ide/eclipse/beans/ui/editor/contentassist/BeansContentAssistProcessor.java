@@ -825,7 +825,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 	}
 
 	public char[] getCompletionProposalAutoActivationCharacters() {
-		return new char[] { '.' };
+		return new char[] { '.', '=', '\"', '<' };
 	}
 
 	private IProgressMonitor getProgressMonitor() {
