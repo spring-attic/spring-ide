@@ -755,12 +755,19 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 		  "public class _xxx {\n"
 		+ "    public void main(String[] args) {\n"
 		+ "        ";
+	
 	private static final String CLASS_SOURCE_END = "\n"
 		+ "    }\n"
 		+ "}";
 
 	private void addClassAttributeValueProposals(ContentAssistRequest request,
 			String prefix) {
+		
+		if (prefix == null || prefix.length() == 0) {
+			setErrorMessage("Prefix too short for class content assist");
+			return;
+		}
+		
 		try {
 			IFile file = (IFile) getResource(request);
 			IJavaProject project = JavaCore.create(file.getProject());
