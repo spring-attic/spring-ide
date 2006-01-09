@@ -107,7 +107,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 						&& "beans".equals(beanNode.getParentNode()
 								.getNodeName())) {
 					String beanName = idAttribute.getNodeValue();
-					String replaceText = "\"" + beanName + "\"";
+					String replaceText = beanName;
 					String fileName = file.getProjectRelativePath().toString();
 					String key = beanName + fileName;
 					if (!beans.containsKey(key)) {
@@ -154,7 +154,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 			if (bean.getElementName() != null
 					&& bean.getElementName().startsWith(prefix)) {
 				String beanName = bean.getElementName();
-				String replaceText = "\"" + beanName + "\"";
+				String replaceText = beanName;
 				String fileName = bean.getElementResource()
 						.getProjectRelativePath().toString();
 				String key = beanName + fileName;
@@ -243,7 +243,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 				String key = method.getElementName() + method.getSignature();
 				if (!methods.containsKey(key)) {
 					String methodName = method.getElementName();
-					String replaceText = "\"" + methodName + "\"";
+					String replaceText = methodName;
 					StringBuffer buf = new StringBuffer();
 					if (parameterTypes.length > 0 && parameterNames.length > 0) {
 						buf.append(replaceText + "(");
@@ -315,7 +315,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 				String key = method.getElementName() + method.getSignature();
 				if (!methods.containsKey(key)) {
 					String methodName = method.getElementName();
-					String replaceText = "\"" + methodName + "\"";
+					String replaceText = methodName;
 					StringBuffer buf = new StringBuffer();
 					if (parameterTypes.length > 0 && parameterNames.length > 0) {
 						buf.append(replaceText + "(");
@@ -397,7 +397,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 				String key = method.getElementName() + method.getSignature();
 				if (!methods.containsKey(key)) {
 					String propertyName = getPropertyNameFromMethodName(method);
-					String replaceText = "\"" + propertyName + "\"";
+					String replaceText = propertyName;
 					StringBuffer buf = new StringBuffer();
 					buf.append(propertyName);
 					buf.append(" - ");
@@ -796,10 +796,10 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 				if (proposals[i] instanceof JavaCompletionProposal) {
 					JavaCompletionProposal prop = (JavaCompletionProposal) proposals[i];
 					BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-							"\"" + prop.getReplacementString() + "\"",
+							prop.getReplacementString(),
 							request.getReplacementBeginPosition(),
 							request.getReplacementLength(),
-							prop.getReplacementString().length() + 2,
+							prop.getReplacementString().length(),
 							prop.getImage(), prop.getDisplayString(), null,
 							prop.getAdditionalProposalInfo(),
 							prop.getRelevance());
@@ -808,10 +808,10 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 				} else if (proposals[i] instanceof LazyJavaTypeCompletionProposal) {
 					LazyJavaTypeCompletionProposal prop = (LazyJavaTypeCompletionProposal) proposals[i];
 					BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-							"\"" + prop.getReplacementString() + "\"",
+							prop.getReplacementString(),
 							request.getReplacementBeginPosition(),
 							request.getReplacementLength(),
-							prop.getReplacementString().length() + 2,
+							prop.getReplacementString().length(),
 							prop.getImage(), prop.getDisplayString(), null,
 							prop.getAdditionalProposalInfo(),
 							prop.getRelevance());

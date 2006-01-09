@@ -79,10 +79,10 @@ public class BeansJavaCompletionProposal implements ICompletionProposal, IComple
      */
     public BeansJavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, int cursorPosition, Image image, String displayString,
             IContextInformation contextInformation, String additionalProposalInfo, int relevance, boolean updateReplacementLengthOnValidate) {
-        fReplacementString = replacementString;
+        fReplacementString = "\"" + replacementString;
         fReplacementOffset = replacementOffset;
         fReplacementLength = replacementLength;
-        fCursorPosition = cursorPosition;
+        fCursorPosition = cursorPosition + 1;
         fImage = image;
         fDisplayString = displayString;
         fContextInformation = contextInformation;
@@ -98,7 +98,7 @@ public class BeansJavaCompletionProposal implements ICompletionProposal, IComple
     }
 
     public void apply(IDocument document) {
-        CompletionProposal proposal = new CompletionProposal(getReplacementString(), getReplacementOffset(), getReplacementLength(), getCursorPosition(), getImage(), getDisplayString(),
+        CompletionProposal proposal = new CompletionProposal(getReplacementString() + "\"", getReplacementOffset(), getReplacementLength(), getCursorPosition(), getImage(), getDisplayString(),
                 getContextInformation(), getAdditionalProposalInfo());
         proposal.apply(document);
     }
@@ -110,11 +110,8 @@ public class BeansJavaCompletionProposal implements ICompletionProposal, IComple
      *      char, int)
      */
     public void apply(IDocument document, char trigger, int offset) {
-        CompletionProposal proposal = new CompletionProposal(getReplacementString(), getReplacementOffset(), getReplacementLength(), getCursorPosition(), getImage(), getDisplayString(),
+        CompletionProposal proposal = new CompletionProposal(getReplacementString() + "\"", getReplacementOffset(), getReplacementLength(), getCursorPosition(), getImage(), getDisplayString(),
                 getContextInformation(), getAdditionalProposalInfo());
-        // we currently don't do anything special for which character
-        // selected the proposal, and where the cursor offset is
-        // but we might in the future...
         proposal.apply(document);
         // we want to ContextInformationPresenter.updatePresentation() here
     }
@@ -152,7 +149,7 @@ public class BeansJavaCompletionProposal implements ICompletionProposal, IComple
                         // replacment length sometimes
                         postCaretReplacementLength = 0;
                     }
-                    document.replace(caretOffset, postCaretReplacementLength, getReplacementString().substring(preCaretReplacementLength));
+                    document.replace(caretOffset, postCaretReplacementLength, getReplacementString().substring(preCaretReplacementLength) + "\"");
                 }
                 // Insert the portion of the new text that comes before the
                 // current caret position
