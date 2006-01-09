@@ -632,6 +632,10 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 			if ("type".equals(attributeName)) {
 				addClassAttributeValueProposals(request, matchString);
 			}
+			else if ("ref".equals(attributeName)) {
+				addBeanReferenceProposals(request, matchString, node
+						.getOwnerDocument(), true);
+			}
 		} else if ("alias".equals(node.getNodeName())) {
 			if ("alias".equals(attributeName)) {
 				addBeanReferenceProposals(request, matchString, node
