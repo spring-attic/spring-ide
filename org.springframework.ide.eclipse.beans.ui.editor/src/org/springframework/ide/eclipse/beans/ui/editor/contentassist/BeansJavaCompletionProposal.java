@@ -84,6 +84,7 @@ public class BeansJavaCompletionProposal implements ICompletionProposal,
 			IContextInformation contextInformation,
 			String additionalProposalInfo, int relevance,
 			boolean updateReplacementLengthOnValidate) {
+		
 		fReplacementString = "\"" + replacementString;
 		fReplacementOffset = replacementOffset;
 		fReplacementLength = replacementLength;
@@ -108,12 +109,33 @@ public class BeansJavaCompletionProposal implements ICompletionProposal,
 	}
 
 	public void apply(IDocument document) {
-		CompletionProposal proposal = new CompletionProposal(
-				getReplacementString() + "\"", getReplacementOffset(),
-				getReplacementLength(), getCursorPosition() + 1, getImage(),
-				getDisplayString(), getContextInformation(),
-				getAdditionalProposalInfo());
-		proposal.apply(document);
+		
+		String charBeforeCursor = "";
+		try {
+			charBeforeCursor = document.get(getReplacementOffset() - 1, 1);
+		} catch (BadLocationException e) {
+			// do nothinh
+		}
+		
+		if ("\"".equals(charBeforeCursor)) {
+			CompletionProposal proposal = new CompletionProposal(
+					getReplacementString(), getReplacementOffset() - 1,
+					getReplacementLength(), getCursorPosition() + 1, getImage(),
+					getDisplayString(), getContextInformation(),
+					getAdditionalProposalInfo());
+			proposal.apply(document);
+			
+		}
+		else {
+			CompletionProposal proposal = new CompletionProposal(
+					getReplacementString() + "\"", getReplacementOffset(),
+					getReplacementLength(), getCursorPosition() + 1, getImage(),
+					getDisplayString(), getContextInformation(),
+					getAdditionalProposalInfo());
+			proposal.apply(document);
+			
+		}
+		
 	}
 
 	/*
@@ -123,6 +145,11 @@ public class BeansJavaCompletionProposal implements ICompletionProposal,
 	 *      char, int)
 	 */
 	public void apply(IDocument document, char trigger, int offset) {
+		try {
+			String charBeforeCursor = document.get(getReplacementOffset(), 1);
+			System.out.println(charBeforeCursor);
+		} catch (BadLocationException e) {
+		}
 		CompletionProposal proposal = new CompletionProposal(
 				getReplacementString() + "\"", getReplacementOffset(),
 				getReplacementLength(), getCursorPosition() + 1, getImage(),
