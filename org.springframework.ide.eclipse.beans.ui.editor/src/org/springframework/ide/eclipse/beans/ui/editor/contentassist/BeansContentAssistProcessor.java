@@ -14,7 +14,6 @@
 
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -77,8 +76,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import com.sun.org.apache.xalan.internal.xsltc.runtime.Attributes;
 
 /**
  * Main entry point for the Spring beans xml editor's content assist.
