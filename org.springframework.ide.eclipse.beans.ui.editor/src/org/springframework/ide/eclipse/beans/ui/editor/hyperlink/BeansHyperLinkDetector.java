@@ -15,6 +15,7 @@
 package org.springframework.ide.eclipse.beans.ui.editor.hyperlink;
 
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -47,348 +48,323 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 /**
- * Detects hyperlinks in XML tags. Includes detection of bean classes and bean
- * properties in attribute values. Resolves bean references (including
- * references to parent beans or factory beans).
+ * Detects hyperlinks in XML tags. Includes detection of bean classes and bean properties in
+ * attribute values. Resolves bean references (including references to parent beans or factory
+ * beans).
  */
 public class BeansHyperLinkDetector implements IHyperlinkDetector {
 
-	public IHyperlink[] detectHyperlinks(ITextViewer textViewer,
-			IRegion region, boolean canShowMultipleHyperlinks) {
-		if (region == null || textViewer == null) {
-			return null;
-		}
+    public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region,
+            boolean canShowMultipleHyperlinks) {
+        if (region == null || textViewer == null) {
+            return null;
+        }
 
-		IDocument document = textViewer.getDocument();
-		Node currentNode = getCurrentNode(document, region.getOffset());
-		if (currentNode != null) {
-			short nodeType = currentNode.getNodeType();
-			if (nodeType == Node.DOCUMENT_TYPE_NODE) {
-				// nothing to do
-			} else if (nodeType == Node.ELEMENT_NODE) {
-				// element nodes
-				Attr currentAttr = getCurrentAttrNode(currentNode, region
-						.getOffset());
-				if (currentAttr != null && this.isLinkableAttr(currentAttr)) {
-					IRegion hyperlinkRegion = getHyperlinkRegion(currentAttr);
-					IHyperlink hyperLink = createHyperlink(currentAttr.getName(), currentAttr.getNodeValue(), currentNode.getParentNode(),
-							hyperlinkRegion, document, currentNode, textViewer);
-					if (hyperLink != null) {
-						return new IHyperlink[] { hyperLink };
-					}
-				}
-			} else if (nodeType == Node.TEXT_NODE) {
-				IRegion hyperlinkRegion = getHyperlinkRegion(currentNode);
-				Node parentNode = currentNode.getParentNode();
-				if (parentNode != null) {
-					String name = parentNode.getNodeName();
-					String target = currentNode.getNodeValue();
-					IHyperlink hyperLink = createHyperlink(name, target, parentNode,
-							hyperlinkRegion, document, currentNode, textViewer);
-					if (hyperLink != null) {
-						return new IHyperlink[] { hyperLink };
-					}
-				}
-			}
-		}
-		return null;
-	}
+        IDocument document = textViewer.getDocument();
+        Node currentNode = getCurrentNode(document, region.getOffset());
+        if (currentNode != null) {
+            short nodeType = currentNode.getNodeType();
+            if (nodeType == Node.DOCUMENT_TYPE_NODE) {
+                // nothing to do
+            }
+            else if (nodeType == Node.ELEMENT_NODE) {
+                // element nodes
+                Attr currentAttr = getCurrentAttrNode(currentNode, region.getOffset());
+                if (currentAttr != null && this.isLinkableAttr(currentAttr)) {
+                    IRegion hyperlinkRegion = getHyperlinkRegion(currentAttr);
+                    IHyperlink hyperLink = createHyperlink(currentAttr.getName(), currentAttr
+                            .getNodeValue(), currentNode.getParentNode(), hyperlinkRegion,
+                            document, currentNode, textViewer);
+                    if (hyperLink != null) {
+                        return new IHyperlink[] { hyperLink };
+                    }
+                }
+            }
+            else if (nodeType == Node.TEXT_NODE) {
+                IRegion hyperlinkRegion = getHyperlinkRegion(currentNode);
+                Node parentNode = currentNode.getParentNode();
+                if (parentNode != null) {
+                    String name = parentNode.getNodeName();
+                    String target = currentNode.getNodeValue();
+                    IHyperlink hyperLink = createHyperlink(name, target, parentNode,
+                            hyperlinkRegion, document, currentNode, textViewer);
+                    if (hyperLink != null) {
+                        return new IHyperlink[] { hyperLink };
+                    }
+                }
+            }
+        }
+        return null;
+    }
 
-	/**
-	 * Returns the attribute node within node at offset
-	 */
-	private Attr getCurrentAttrNode(Node node, int offset) {
-		if ((node instanceof IndexedRegion)
-				&& ((IndexedRegion) node).contains(offset)
-				&& (node.hasAttributes())) {
-			NamedNodeMap attrs = node.getAttributes();
-			// go through each attribute in node and if attribute contains
-			// offset, return that attribute
-			for (int i = 0; i < attrs.getLength(); ++i) {
-				// assumption that if parent node is of type IndexedRegion,
-				// then its attributes will also be of type IndexedRegion
-				IndexedRegion attRegion = (IndexedRegion) attrs.item(i);
-				if (attRegion.contains(offset)) {
-					return (Attr) attrs.item(i);
-				}
-			}
-		}
-		return null;
-	}
+    /**
+     * Returns the attribute node within node at offset
+     */
+    private Attr getCurrentAttrNode(Node node, int offset) {
+        if ((node instanceof IndexedRegion) && ((IndexedRegion) node).contains(offset)
+                && (node.hasAttributes())) {
+            NamedNodeMap attrs = node.getAttributes();
+            // go through each attribute in node and if attribute contains
+            // offset, return that attribute
+            for (int i = 0; i < attrs.getLength(); ++i) {
+                // assumption that if parent node is of type IndexedRegion,
+                // then its attributes will also be of type IndexedRegion
+                IndexedRegion attRegion = (IndexedRegion) attrs.item(i);
+                if (attRegion.contains(offset)) {
+                    return (Attr) attrs.item(i);
+                }
+            }
+        }
+        return null;
+    }
 
-	/**
-	 * Returns the node the cursor is currently on in the document. null if no
-	 * node is selected
-	 * 
-	 * @param offset
-	 * @return Node either element, doctype, text, or null
-	 */
-	private Node getCurrentNode(IDocument document, int offset) {
-		// get the current node at the offset (returns either: element,
-		// doctype, text)
-		IndexedRegion inode = null;
-		IStructuredModel sModel = null;
-		try {
-			sModel = StructuredModelManager.getModelManager()
-					.getExistingModelForRead(document);
-			inode = sModel.getIndexedRegion(offset);
-			if (inode == null)
-				inode = sModel.getIndexedRegion(offset - 1);
-		} finally {
-			if (sModel != null)
-				sModel.releaseFromRead();
-		}
+    /**
+     * Returns the node the cursor is currently on in the document. null if no node is selected
+     * 
+     * @param offset
+     * @return Node either element, doctype, text, or null
+     */
+    private Node getCurrentNode(IDocument document, int offset) {
+        // get the current node at the offset (returns either: element,
+        // doctype, text)
+        IndexedRegion inode = null;
+        IStructuredModel sModel = null;
+        try {
+            sModel = StructuredModelManager.getModelManager().getExistingModelForRead(document);
+            inode = sModel.getIndexedRegion(offset);
+            if (inode == null)
+                inode = sModel.getIndexedRegion(offset - 1);
+        }
+        finally {
+            if (sModel != null)
+                sModel.releaseFromRead();
+        }
 
-		if (inode instanceof Node) {
-			return (Node) inode;
-		}
-		return null;
-	}
+        if (inode instanceof Node) {
+            return (Node) inode;
+        }
+        return null;
+    }
 
-	private IRegion getHyperlinkRegion(Node node) {
-		IRegion hyperRegion = null;
+    private IRegion getHyperlinkRegion(Node node) {
+        IRegion hyperRegion = null;
 
-		if (node != null) {
-			short nodeType = node.getNodeType();
-			if (nodeType == Node.DOCUMENT_TYPE_NODE
-					|| nodeType == Node.ELEMENT_NODE || nodeType == Node.TEXT_NODE) {
-				// handle doc type node
-				IDOMNode docNode = (IDOMNode) node;
-				hyperRegion = new Region(docNode.getStartOffset(), docNode
-						.getEndOffset()
-						- docNode.getStartOffset());
-			} else if (nodeType == Node.ATTRIBUTE_NODE) {
-				// handle attribute nodes
-				IDOMAttr att = (IDOMAttr) node;
-				// do not include quotes in attribute value region
-				int regOffset = att.getValueRegionStartOffset();
-				int regLength = att.getValueRegionText().length();
-				String attValue = att.getValueRegionText();
-				if (StringUtils.isQuoted(attValue)) {
-					regOffset = ++regOffset;
-					regLength = regLength - 2;
-				}
-				hyperRegion = new Region(regOffset, regLength);
-			}
-		}
-		return hyperRegion;
-	}
+        if (node != null) {
+            short nodeType = node.getNodeType();
+            if (nodeType == Node.DOCUMENT_TYPE_NODE || nodeType == Node.ELEMENT_NODE
+                    || nodeType == Node.TEXT_NODE) {
+                // handle doc type node
+                IDOMNode docNode = (IDOMNode) node;
+                hyperRegion = new Region(docNode.getStartOffset(), docNode.getEndOffset()
+                        - docNode.getStartOffset());
+            }
+            else if (nodeType == Node.ATTRIBUTE_NODE) {
+                // handle attribute nodes
+                IDOMAttr att = (IDOMAttr) node;
+                // do not include quotes in attribute value region
+                int regOffset = att.getValueRegionStartOffset();
+                int regLength = att.getValueRegionText().length();
+                String attValue = att.getValueRegionText();
+                if (StringUtils.isQuoted(attValue)) {
+                    regOffset = ++regOffset;
+                    regLength = regLength - 2;
+                }
+                hyperRegion = new Region(regOffset, regLength);
+            }
+        }
+        return hyperRegion;
+    }
 
-	/**
-	 * Checks to see if the given attribute is openable. Attribute is openable
-	 * if it is a namespace declaration attribute or if the attribute value is
-	 * of type URI.
-	 * 
-	 * @return true if this attribute is "openOn-able" false otherwise
-	 */
-	private boolean isLinkableAttr(Attr attr) {
-		String attrName = attr.getName();
+    /**
+     * Checks to see if the given attribute is openable. Attribute is openable if it is a namespace
+     * declaration attribute or if the attribute value is of type URI.
+     * 
+     * @return true if this attribute is "openOn-able" false otherwise
+     */
+    private boolean isLinkableAttr(Attr attr) {
+        String attrName = attr.getName();
 
-		if ("class".equals(attrName)) {
-			return true;
-		} else if ("name".equals(attrName)
-				&& "property".equals(attr.getOwnerElement().getNodeName())) {
-			return true;
-		} else if ("init-method".equals(attrName)) {
-			return true;
-		} else if ("destroy-method".equals(attrName)) {
-			return true;
-		} else if ("factory-method".equals(attrName)) {
-			return true;
-		} else if ("factory-bean".equals(attrName)) {
-			return true;
-		} else if ("parent".equals(attrName)) {
-			return true;
-		} else if ("depends-on".equals(attrName)) {
-			return true;
-		} else if ("bean".equals(attrName) || "local".equals(attrName) ||
-				"parent".equals(attrName) || "ref".equals(attrName) ||
-				"alias".equals(attrName)) {
-			return true;
-		} else if ("value".equals(attrName)) {
-			return true;
-		}
+        if ("class".equals(attrName)) {
+            return true;
+        }
+        else if ("name".equals(attrName) && "property".equals(attr.getOwnerElement().getNodeName())) {
+            return true;
+        }
+        else if ("init-method".equals(attrName)) {
+            return true;
+        }
+        else if ("destroy-method".equals(attrName)) {
+            return true;
+        }
+        else if ("factory-method".equals(attrName)) {
+            return true;
+        }
+        else if ("factory-bean".equals(attrName)) {
+            return true;
+        }
+        else if ("parent".equals(attrName)) {
+            return true;
+        }
+        else if ("depends-on".equals(attrName)) {
+            return true;
+        }
+        else if ("bean".equals(attrName) || "local".equals(attrName) || "parent".equals(attrName)
+                || "ref".equals(attrName) || "alias".equals(attrName)) {
+            return true;
+        }
+        else if ("value".equals(attrName)) {
+            return true;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	/**
-	 * Create the appropriate hyperlink
-	 */
-	private IHyperlink createHyperlink(String name, String target, Node parentNode, IRegion hyperlinkRegion,
-			IDocument document, Node node, ITextViewer textViewer) {
-		IHyperlink link = null;
+    /**
+     * Create the appropriate hyperlink
+     */
+    private IHyperlink createHyperlink(String name, String target, Node parentNode,
+            IRegion hyperlinkRegion, IDocument document, Node node, ITextViewer textViewer) {
+        IHyperlink link = null;
 
-		if (name != null) {
-			String parentName = null;
-			if (parentNode != null) {
-				parentName = parentNode.getNodeName();
-			}
-			if ("class".equals(name) || "value".equals(name)) {
-				IFile file = this.getResource(document);
-				IType type = BeansModelUtils.getJavaType(file.getProject(),
-						target);
-				if (type != null) {
-					link = new JavaElementHyperlink(hyperlinkRegion, type);
-				}
-			} else if ("name".equals(name) && "property".equals(node.getNodeName())) {
-				if ("bean".equals(parentName)) {
-					NamedNodeMap attributes = parentNode.getAttributes();
-					if (attributes != null
-							&& attributes.getNamedItem("class") != null) {
+        if (name != null) {
+            String parentName = null;
+            if (parentNode != null) {
+                parentName = parentNode.getNodeName();
+            }
+            if ("class".equals(name) || "value".equals(name)) {
+                IFile file = this.getResource(document);
+                IType type = BeansModelUtils.getJavaType(file.getProject(), target);
+                if (type != null) {
+                    link = new JavaElementHyperlink(hyperlinkRegion, type);
+                }
+            }
+            else if ("name".equals(name) && "property".equals(node.getNodeName())) {
+                if ("bean".equals(parentName)) {
+                    List classNames = BeansEditorUtils.getClassNamesOfBean(this
+                            .getResource(document), parentNode);
+                    String methodName = "set" + StringUtils.capitalize(target);
+                    for (int i = 0; i < classNames.size(); i++) {
 
-						String className = attributes.getNamedItem("class")
-								.getNodeValue();
-						IFile file = this.getResource(document);
-						IType type = BeansModelUtils.getJavaType(file
-								.getProject(), className);
-						if (type != null) {
+                        try {
+                            IMethod method = Introspector.findMethod((IType) classNames.get(i), methodName, 1, true,
+                                    Introspector.STATIC_NO);
+                            if (method != null) {
+                                link = new JavaElementHyperlink(hyperlinkRegion, method);
+                                break;
+                            }
+                        }
+                        catch (JavaModelException e) {
+                        }
+                    }
+                }
+            }
+            else if ("init-method".equals(name) || "destroy-method".equals(name)) {
+                NamedNodeMap attributes = node.getAttributes();
+                if (attributes != null && attributes.getNamedItem("class") != null) {
+                    String className = attributes.getNamedItem("class").getNodeValue();
+                    IFile file = this.getResource(document);
+                    IType type = BeansModelUtils.getJavaType(file.getProject(), className);
 
-							// TODO Add support for nested nested property
-							// paths, e.g.
-							// "stuff1[0].stuff2"
-							// From "BeansConfigValidator.java":
-							// PropertyTokenHolder tokens =
-							// getPropertyNameTokens(
-							// nestedPropertyName);
-							// String getterName = "get" +
-							// StringUtils.capitalize(
-							// tokens.actualName);
-							// IMethod getter = Introspector.findMethod(type,
-							// getterName,
-							// 0, true, false);
-							// if (getter != null) {
+                    try {
+                        IMethod method = Introspector.findMethod(type, target, 0, true,
+                                Introspector.STATIC_IRRELVANT);
+                        if (method != null) {
+                            link = new JavaElementHyperlink(hyperlinkRegion, method);
+                        }
+                    }
+                    catch (JavaModelException e) {
+                    }
+                }
+            }
+            else if ("factory-method".equals(name)) {
+                NamedNodeMap attributes = node.getAttributes();
+                String className = null;
+                if (attributes != null && attributes.getNamedItem("factory-bean") != null) {
+                    Node factoryBean = attributes.getNamedItem("factory-bean");
+                    if (factoryBean != null) {
+                        String factoryBeanId = factoryBean.getNodeValue();
+                        // TODO add factoryBean support for beans defined
+                        // outside of the current
+                        // xml file
+                        Document doc = node.getOwnerDocument();
+                        Element bean = doc.getElementById(factoryBeanId);
+                        if (bean != null && bean instanceof Node) {
+                            NamedNodeMap attribute = ((Node) bean).getAttributes();
+                            className = attribute.getNamedItem("class").getNodeValue();
+                        }
+                    }
+                }
+                else if (attributes != null && attributes.getNamedItem("class") != null) {
+                    className = attributes.getNamedItem("class").getNodeValue();
+                }
+                try {
+                    IFile file = this.getResource(document);
+                    IType type = BeansModelUtils.getJavaType(file.getProject(), className);
+                    IMethod method = Introspector.findMethod(type, target, -1, true,
+                            Introspector.STATIC_YES);
+                    if (method != null) {
+                        link = new JavaElementHyperlink(hyperlinkRegion, method);
+                    }
+                }
+                catch (JavaModelException e) {
+                }
+            }
+            else if ("factory-bean".equals(name) || "depends-on".equals(name)
+                    || "bean".equals(name) || "local".equals(name) || "parent".equals(name)
+                    || "ref".equals(name) || "alias".equals(name)) {
+                Document doc = node.getOwnerDocument();
+                Element bean = doc.getElementById(target);
+                if (bean != null) {
+                    IRegion region = getHyperlinkRegion(bean);
+                    link = new NodeElementHyperlink(hyperlinkRegion, region, textViewer);
+                }
+                else {
+                    IFile file = this.getResource(document);
+                    // assume this is an external reference
+                    Iterator beans = BeansEditorUtils.getBeansFromConfigSets(file).iterator();
+                    while (beans.hasNext()) {
+                        IBean modelBean = (IBean) beans.next();
+                        if (modelBean.getElementName().equals(target)) {
+                            link = new ExternalBeanHyperlink(modelBean, hyperlinkRegion);
+                        }
+                    }
+                }
+            }
+        }
+        return link;
+    }
 
-							String methodName = "set"
-									+ StringUtils.capitalize(target);
-							try {
-								IMethod method = Introspector.findMethod(type,
-										methodName, 1, true,
-										Introspector.STATIC_NO);
-								if (method != null) {
-									link = new JavaElementHyperlink(
-											hyperlinkRegion, method);
-								}
-							} catch (JavaModelException e) {
-							}
-						}
-					}
-				}
-			} else if ("init-method".equals(name)
-					|| "destroy-method".equals(name)) {
-				NamedNodeMap attributes = node.getAttributes();
-				if (attributes != null
-						&& attributes.getNamedItem("class") != null) {
-					String className = attributes.getNamedItem("class")
-							.getNodeValue();
-					IFile file = this.getResource(document);
-					IType type = BeansModelUtils.getJavaType(file.getProject(),
-							className);
+    /**
+     * Returns project request is in
+     * 
+     * @param request
+     * @return
+     */
+    private IFile getResource(IDocument document) {
+        IFile resource = null;
+        String baselocation = null;
 
-					try {
-						IMethod method = Introspector.findMethod(type, target,
-								0, true, Introspector.STATIC_IRRELVANT);
-						if (method != null) {
-							link = new JavaElementHyperlink(hyperlinkRegion,
-									method);
-						}
-					} catch (JavaModelException e) {
-					}
-				}
-			} else if ("factory-method".equals(name)) {
-				NamedNodeMap attributes = node.getAttributes();
-				String className = null;
-				if (attributes != null
-						&& attributes.getNamedItem("factory-bean") != null) {
-					Node factoryBean = attributes.getNamedItem("factory-bean");
-					if (factoryBean != null) {
-						String factoryBeanId = factoryBean.getNodeValue();
-						// TODO add factoryBean support for beans defined
-						// outside of the current
-						// xml file
-						Document doc = node.getOwnerDocument();
-						Element bean = doc.getElementById(factoryBeanId);
-						if (bean != null && bean instanceof Node) {
-							NamedNodeMap attribute = ((Node) bean)
-									.getAttributes();
-							className = attribute.getNamedItem("class")
-									.getNodeValue();
-						}
-					}
-				} else if (attributes != null
-						&& attributes.getNamedItem("class") != null) {
-					className = attributes.getNamedItem("class").getNodeValue();
-				}
-				try {
-					IFile file = this.getResource(document);
-					IType type = BeansModelUtils.getJavaType(file.getProject(),
-							className);
-					IMethod method = Introspector.findMethod(type, target, -1,
-							true, Introspector.STATIC_YES);
-					if (method != null) {
-						link = new JavaElementHyperlink(hyperlinkRegion, method);
-					}
-				} catch (JavaModelException e) {
-				}
-			} else if ("factory-bean".equals(name) || "depends-on".equals(name)
-					|| "bean".equals(name) || "local".equals(name)
-					|| "parent".equals(name) || "ref".equals(name)
-					|| "alias".equals(name)) {
-				Document doc = node.getOwnerDocument();
-				Element bean = doc.getElementById(target);
-				if (bean != null) {
-					IRegion region = getHyperlinkRegion(bean);
-					link = new NodeElementHyperlink(hyperlinkRegion, region,
-							textViewer);
-				} else {
-					IFile file = this.getResource(document);
-					// assume this is an external reference
-					Iterator beans = BeansEditorUtils.getBeansFromConfigSets(
-							file).iterator();
-					while (beans.hasNext()) {
-						IBean modelBean = (IBean) beans.next();
-						if (modelBean.getElementName().equals(target)) {
-							link = new ExternalBeanHyperlink(modelBean,
-									hyperlinkRegion);
-						}
-					}
-				}
-			}
-		}
-		return link;
-	}
+        if (document != null) {
+            IStructuredModel model = null;
+            try {
+                model = StructuredModelManager.getModelManager().getExistingModelForRead(document);
+                if (model != null) {
+                    baselocation = model.getBaseLocation();
+                }
+            }
+            finally {
+                if (model != null)
+                    model.releaseFromRead();
+            }
+        }
 
-	/**
-	 * Returns project request is in
-	 * 
-	 * @param request
-	 * @return
-	 */
-	private IFile getResource(IDocument document) {
-		IFile resource = null;
-		String baselocation = null;
-
-		if (document != null) {
-			IStructuredModel model = null;
-			try {
-				model = StructuredModelManager.getModelManager()
-						.getExistingModelForRead(document);
-				if (model != null) {
-					baselocation = model.getBaseLocation();
-				}
-			} finally {
-				if (model != null)
-					model.releaseFromRead();
-			}
-		}
-
-		if (baselocation != null) {
-			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-			IPath filePath = new Path(baselocation);
-			if (filePath.segmentCount() > 0) {
-				resource = root.getFile(filePath);
-			}
-		}
-		return resource;
-	}
+        if (baselocation != null) {
+            IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+            IPath filePath = new Path(baselocation);
+            if (filePath.segmentCount() > 0) {
+                resource = root.getFile(filePath);
+            }
+        }
+        return resource;
+    }
 }
