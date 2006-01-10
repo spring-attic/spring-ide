@@ -171,7 +171,8 @@ public class BeansEditorUtils {
         String parentId = (rootAttributes.getNamedItem("parent") != null ? rootAttributes
                 .getNamedItem("parent").getNodeValue() : null);
 
-        getClassNamesOfBeans(file, node.getOwnerDocument(), id, className, parentId, classNames, new ArrayList());
+        getClassNamesOfBeans(file, node.getOwnerDocument(), id, className, parentId, classNames,
+                new ArrayList());
         return classNames;
     }
 
@@ -222,20 +223,51 @@ public class BeansEditorUtils {
                 }
             }
             if (!foundLocal) {
-                List beansList = BeansEditorUtils
-                        .getBeansFromConfigSets(file);
+                List beansList = BeansEditorUtils.getBeansFromConfigSets(file);
                 for (int i = 0; i < beansList.size(); i++) {
                     IBean bean = (IBean) beansList.get(i);
 
                     if (parentId.equals(bean.getElementName())) {
-                        getClassNamesOfBeans(file, document, bean
-                                .getElementName(), bean.getClassName(), bean.getParentName(),
-                                classNames, beans);
+                        getClassNamesOfBeans(file, document, bean.getElementName(), bean
+                                .getClassName(), bean.getParentName(), classNames, beans);
                         break;
                     }
                 }
             }
         }
+    }
+
+    public static String getClassNameForBean(IFile file, Document document, String id) {
+        
+        boolean foundLocal = false;
+        
+        NodeList beanNodes = document.getElementsByTagName("bean");
+        for (int i = 0; i < beanNodes.getLength(); i++) {
+            Node beanNode = beanNodes.item(i);
+            NamedNodeMap attributes = beanNode.getAttributes();
+            if (attributes.getNamedItem("id") != null) {
+                String idTemp = (attributes.getNamedItem("id") != null ? attributes.getNamedItem(
+                        "id").getNodeValue() : null);
+                String classNameTemp = (attributes.getNamedItem("class") != null ? attributes
+                        .getNamedItem("class").getNodeValue() : null);
+
+                if (id.equals(idTemp)) {
+                    foundLocal = true;
+                    return classNameTemp;
+                }
+            }
+        }
+        if (!foundLocal) {
+            List beansList = BeansEditorUtils.getBeansFromConfigSets(file);
+            for (int i = 0; i < beansList.size(); i++) {
+                IBean bean = (IBean) beansList.get(i);
+                if (id.equals(bean.getElementName())) {
+                    return bean.getClassName();
+                }
+            }
+        }
+        
+        return null;
     }
 
 }

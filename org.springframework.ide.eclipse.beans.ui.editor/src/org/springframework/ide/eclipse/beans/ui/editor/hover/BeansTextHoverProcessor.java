@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -192,6 +193,34 @@ public class BeansTextHoverProcessor
                     }
                 }
             }
+        }
+        else if (("factory-method").equals(attName)) {
+            String factoryMethod = attributes.getNamedItem(attName).getNodeValue();
+            String className = null;
+            if (attributes.getNamedItem("class") != null) {
+                className = attributes.getNamedItem("class").getNodeValue();
+            }
+            if (attributes.getNamedItem("factory-bean") != null) {
+                className = BeansEditorUtils.getClassNameForBean(file, xmlnode.getOwnerDocument(),
+                        attributes.getNamedItem("factory-bean").getNodeValue());
+            }
+            IType type = BeansModelUtils.getJavaType(this.getResource(document).getProject(),
+                    className);
+            if (type != null) {
+                try {
+                    IMethod[] methods = type.getMethods();
+                    for (int i = 0; i < methods.length; i++) {
+                        IMethod method = methods[i];
+                        if (method.getElementName().equals(factoryMethod) && Flags.isStatic(method.getFlags())) {
+                            BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
+                            result = utils.getJavaDoc();
+                        }
+                    }
+                }
+                catch (JavaModelException e) {
+                }
+            }
+            
         }
         if (result != null && !"".equals(result)) {
             return result;
