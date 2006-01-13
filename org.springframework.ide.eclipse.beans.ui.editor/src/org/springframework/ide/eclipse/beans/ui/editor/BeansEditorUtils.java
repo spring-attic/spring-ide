@@ -22,7 +22,11 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.ui.IEditorPart;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -283,6 +287,31 @@ public class BeansEditorUtils {
 		}
 
 		return null;
+	}
+	
+	/**
+	 * Returns the non-blocking Progress Monitor form the StatuslineManger
+	 * @return the progress monitor
+	 */
+	public static IProgressMonitor getProgressMonitor() {
+		IEditorPart editor = BeansEditorPlugin.getActiveWorkbenchPage().getActiveEditor();
+		if (editor != null
+				&& editor.getEditorSite() != null
+				&& editor.getEditorSite().getActionBars() != null
+				&& editor.getEditorSite().getActionBars()
+						.getStatusLineManager() != null
+				&& editor.getEditorSite().getActionBars()
+						.getStatusLineManager().getProgressMonitor() != null) {
+
+			IStatusLineManager manager = editor.getEditorSite()
+					.getActionBars().getStatusLineManager();
+			IProgressMonitor monitor = manager.getProgressMonitor();
+			manager.setMessage("Processing completion proposals");
+			return monitor;
+		} else {
+
+			return new NullProgressMonitor();
+		}
 	}
 
 }
