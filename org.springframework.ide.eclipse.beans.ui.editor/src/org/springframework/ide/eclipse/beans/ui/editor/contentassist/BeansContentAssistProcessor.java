@@ -123,7 +123,7 @@ public class BeansContentAssistProcessor
                     String displayText = buf.toString();
                     Image image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
                     ImageDescriptor descriptor = new BeansModelImageDescriptor(image,
-                            BeansEditorUtils.getBeanFlags(bean));
+                            BeansEditorUtils.getBeanFlags(bean, true));
                     image = BeansUIPlugin.getImageDescriptorRegistry().get(descriptor);
 
                     BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
