@@ -8,7 +8,9 @@
    class="org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin">
 
    <runtime>
-      <library name="beans-editor.jar"/>
+      <library name="beans-editor.jar">
+         <export name="*"/>
+      </library>
    </runtime>
 
    <requires>
