@@ -59,6 +59,7 @@ public class ConfigSetNode extends AbstractNode {
 		setElement(configSet);
 
 		isOverrideEnabled = configSet.isAllowBeanDefinitionOverriding();
+		isIncomplete = configSet.isIncomplete();
 
 		// Add configs from given config set to internal list
 		Iterator iter = configSet.getConfigs().iterator();
