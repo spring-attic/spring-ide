@@ -14,6 +14,7 @@
 
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -287,11 +288,14 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 		protected Map methods;
 
 		protected ContentAssistRequest request;
+		
+		private String prefix;
 
-		public PropertyNameSearchRequestor(ContentAssistRequest request) {
+		public PropertyNameSearchRequestor(ContentAssistRequest request, String prefix) {
 			this.request = request;
 			this.methods = new HashMap();
 			this.imageProvider = new JavaElementImageProvider();
+			this.prefix = prefix;
 		}
 
 		public void acceptSearchMatch(IMethod method, boolean external)
@@ -315,7 +319,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 				String key = method.getElementName() + method.getSignature();
 				if (!methods.containsKey(key)) {
 					String propertyName = getPropertyNameFromMethodName(method);
-					String replaceText = propertyName;
+					String replaceText = prefix + propertyName;
 					StringBuffer buf = new StringBuffer();
 					buf.append(propertyName);
 					buf.append(" - ");
@@ -411,7 +415,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 			PropertyNameSearchRequestor {
 
 		public VoidMethodSearchRequestor(ContentAssistRequest request) {
-			super(request);
+			super(request, "");
 		}
 
 		public void acceptSearchMatch(IMethod method) throws CoreException {
@@ -672,31 +676,71 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 		}
 	}
 
+	
 	private void addPropertyNameAttributeValueProposals(
-			ContentAssistRequest request, String prefix, Node node) {
-
-		List classNames = BeansEditorUtils.getClassNamesOfBean(
-				(IFile) getResource(request), node);
+			ContentAssistRequest request, String prefix, String oldPrefix, Node node, List classNames) {
+		
 		PropertyNameSearchRequestor requestor = new PropertyNameSearchRequestor(
-				request);
-
-		for (int i = 0; i < classNames.size(); i++) {
-			IType type = (IType) classNames.get(i);
-			try {
-				Collection methods = Introspector.findWritableProperties(type,
-						prefix);
-				if (methods != null && methods.size() > 0) {
-
-					Iterator iterator = methods.iterator();
-					while (iterator.hasNext()) {
-						requestor.acceptSearchMatch((IMethod) iterator.next(),
-								false);
+				request, oldPrefix);
+		if (prefix.endsWith(".")) {
+			int firstIndex = prefix.indexOf(".");
+			String firstPrefix = prefix.substring(0, firstIndex);
+			String lastPrefix = prefix.substring(firstIndex);
+			if (".".equals(lastPrefix)) {
+				lastPrefix = "";
+			}
+			else if (lastPrefix.startsWith(".")) {
+				lastPrefix = lastPrefix.substring(1);
+			}
+			for (int i = 0; i < classNames.size(); i++) {
+				IType type = (IType) classNames.get(i);
+				try {
+					Collection methods = Introspector.findReadableProperties(type,
+							firstPrefix);
+					if (methods != null && methods.size() == 1) {
+	
+						Iterator iterator = methods.iterator();
+						while (iterator.hasNext()) {
+							IMethod method = (IMethod) iterator.next();
+							IType returnType = BeansEditorUtils.getTypeForMethodReturnType(method, type, (IFile) getResource(request));
+							
+							if (returnType != null) {
+								List typesTemp = new ArrayList();
+								typesTemp.add(returnType);
+								
+								String newPrefix = oldPrefix + firstPrefix + ".";;
+								
+								addPropertyNameAttributeValueProposals(request, lastPrefix, newPrefix, node, typesTemp);
+							}
+							return;
+						}
 					}
+				} catch (JavaModelException e1) {
+					// do nothing
+				} catch (CoreException e) {
+					// // do nothing
 				}
-			} catch (JavaModelException e1) {
-				// do nothing
-			} catch (CoreException e) {
-				// // do nothing
+			}
+		}
+		else {
+			for (int i = 0; i < classNames.size(); i++) {
+				IType type = (IType) classNames.get(i);
+				try {
+					Collection methods = Introspector.findWritableProperties(type,
+							prefix);
+					if (methods != null && methods.size() > 0) {
+	
+						Iterator iterator = methods.iterator();
+						while (iterator.hasNext()) {
+							requestor.acceptSearchMatch((IMethod) iterator.next(),
+									false);
+						}
+					}
+				} catch (JavaModelException e1) {
+					// do nothing
+				} catch (CoreException e) {
+					// // do nothing
+				}
 			}
 		}
 	}
@@ -827,8 +871,10 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 			NamedNodeMap parentAttributes = parentNode.getAttributes();
 
 			if ("name".equals(attributeName) && parentAttributes != null) {
-				addPropertyNameAttributeValueProposals(request, matchString,
-						parentNode);
+				List classNames = BeansEditorUtils.getClassNamesOfBean(
+						(IFile) getResource(request), parentNode);
+				addPropertyNameAttributeValueProposals(request, matchString, "",
+						parentNode, classNames);
 			} else if ("ref".equals(attributeName)) {
 				addBeanReferenceProposals(request, matchString, node
 						.getOwnerDocument(), true);

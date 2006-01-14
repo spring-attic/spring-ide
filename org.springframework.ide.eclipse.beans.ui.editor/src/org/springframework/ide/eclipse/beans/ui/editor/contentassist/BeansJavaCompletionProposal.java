@@ -344,7 +344,8 @@ public class BeansJavaCompletionProposal implements ICompletionProposal,
 			String start = document.get(fReplacementOffset, length);
 			// Remove " for comparison
 			start = start.replaceAll("\"", "");
-			return word.substring(0, start.length()).equalsIgnoreCase(start);
+			String wordTemp = word.replaceAll("\"", "").substring(0, start.length());
+			return wordTemp.equalsIgnoreCase(start);
 		} catch (BadLocationException x) {
 		}
 

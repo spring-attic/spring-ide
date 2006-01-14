@@ -24,7 +24,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.ui.IEditorPart;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
@@ -288,13 +291,15 @@ public class BeansEditorUtils {
 
 		return null;
 	}
-	
+
 	/**
 	 * Returns the non-blocking Progress Monitor form the StatuslineManger
+	 * 
 	 * @return the progress monitor
 	 */
 	public static IProgressMonitor getProgressMonitor() {
-		IEditorPart editor = BeansEditorPlugin.getActiveWorkbenchPage().getActiveEditor();
+		IEditorPart editor = BeansEditorPlugin.getActiveWorkbenchPage()
+				.getActiveEditor();
 		if (editor != null
 				&& editor.getEditorSite() != null
 				&& editor.getEditorSite().getActionBars() != null
@@ -303,15 +308,44 @@ public class BeansEditorUtils {
 				&& editor.getEditorSite().getActionBars()
 						.getStatusLineManager().getProgressMonitor() != null) {
 
-			IStatusLineManager manager = editor.getEditorSite()
-					.getActionBars().getStatusLineManager();
+			IStatusLineManager manager = editor.getEditorSite().getActionBars()
+					.getStatusLineManager();
 			IProgressMonitor monitor = manager.getProgressMonitor();
 			manager.setMessage("Processing completion proposals");
+			manager.setCancelEnabled(true);
 			return monitor;
 		} else {
 
 			return new NullProgressMonitor();
 		}
+	}
+
+	public static IType getTypeForMethodReturnType(IMethod method,
+			IType contextType, IFile file) {
+		IType returnType = null;
+		try {
+			String returnTypeString = Signature
+					.toString(method.getReturnType()).replace('$', '.');
+			returnType = BeansModelUtils.getJavaType(file.getProject(), resolveClassName(
+					returnTypeString, contextType));
+		} catch (IllegalArgumentException e) {
+			// do Nothing
+		} catch (JavaModelException e) {
+			// do Nothing
+		}
+		return returnType;
+	}
+
+	public static String resolveClassName(String className, IType type) {
+		try {
+			String[][] fullInter = type.resolveType(className);
+			if (fullInter != null && fullInter.length > 0) {
+				return fullInter[0][0] + "." + fullInter[0][1];
+			}
+		} catch (JavaModelException e) {
+		}
+
+		return className;
 	}
 
 }
