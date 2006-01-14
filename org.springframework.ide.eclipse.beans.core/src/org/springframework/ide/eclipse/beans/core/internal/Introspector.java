@@ -143,6 +143,17 @@ public class Introspector {
         return findAllMethods(type, "set" + base, 1, true,
         						  Introspector.STATIC_NO);
     }
+    
+    /**
+     * Returns a map of method name + <code>IMethod</code> for all setters with
+     * the given prefix.
+     */
+    public static final Collection findReadableProperties(IType type,
+    						   String methodPrefix) throws JavaModelException {
+        String base = StringUtils.capitalize(methodPrefix);
+        return findAllMethods(type, "get" + base, 0, true,
+        						  Introspector.STATIC_NO);
+    }
 
     /**
      * Returns super type of given type.
@@ -236,6 +247,12 @@ public class Introspector {
     						   String propertyName) throws JavaModelException {
         String base = StringUtils.capitalize(propertyName);
         return findMethod(type, "set" + base, 1, true, Introspector.STATIC_NO);
+    }
+    
+    public static final IMethod getReadableProperty(IType type,
+    						   String propertyName) throws JavaModelException {
+        String base = StringUtils.capitalize(propertyName);
+        return findMethod(type, "get" + base, 0, true, Introspector.STATIC_NO);
     }
 
     /**
