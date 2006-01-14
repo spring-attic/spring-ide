@@ -22,15 +22,16 @@ import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 
 public class BeansJavaCompletionProposalCollector extends
 		CompletionProposalCollector {
-	
+
 	/**
 	 * Creates a new instance ready to collect proposals. If the passed
 	 * <code>ICompilationUnit</code> is not contained in an
 	 * {@link IJavaProject}, no javadoc will be available as
 	 * {@link org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo() additional info}
 	 * on the created proposals.
-	 *
-	 * @param cu the compilation unit that the result collector will operate on
+	 * 
+	 * @param cu
+	 *            the compilation unit that the result collector will operate on
 	 */
 	public BeansJavaCompletionProposalCollector(ICompilationUnit cu) {
 		super(cu);
@@ -49,8 +50,10 @@ public class BeansJavaCompletionProposalCollector extends
 	 * {@link org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo() additional info}
 	 * on the created (e.g. method and type) proposals.
 	 * </p>
-	 * @param project the project that the result collector will operate on, or
-	 *        <code>null</code>
+	 * 
+	 * @param project
+	 *            the project that the result collector will operate on, or
+	 *            <code>null</code>
 	 */
 	public BeansJavaCompletionProposalCollector(IJavaProject project) {
 		super(project);
@@ -67,8 +70,11 @@ public class BeansJavaCompletionProposalCollector extends
 	 */
 	public void accept(CompletionProposal proposal) {
 		if (!Flags.isInterface(proposal.getFlags())) {
-			super.accept(proposal);
+			if (CompletionProposal.TYPE_REF == proposal.getKind()
+					|| CompletionProposal.PACKAGE_REF == proposal.getKind()) {
+				super.accept(proposal);
+			}
 		}
 	}
-	
+
 }
