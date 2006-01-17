@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,11 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 public class BeanAlias extends AbstractSourceModelElement
 														implements IBeanAlias {
-	private String alias;
+	private String name;
 
 	public BeanAlias(IBeansConfig config, String name, String alias) {
-		super(config, name);
-		this.alias = alias;
+		super(config, alias);
+		this.name = name;
 	}
 
 	public int getElementType() {
@@ -48,8 +48,8 @@ public class BeanAlias extends AbstractSourceModelElement
 		return (IBeansConfig) getElementParent();
 	}
 
-	public String getAlias() {
-		return alias;
+	public String getName() {
+		return name;
 	}
 
 	public String toString() {
@@ -57,8 +57,8 @@ public class BeanAlias extends AbstractSourceModelElement
 		text.append(getElementName());
 		text.append(" (");
 		text.append(getElementStartLine());
-		text.append("): alias=");
-		text.append(alias);
+		text.append("): name=");
+		text.append(name);
 		return text.toString();
 	}
 }

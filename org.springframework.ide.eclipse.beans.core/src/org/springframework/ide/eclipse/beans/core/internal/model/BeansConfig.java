@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -332,11 +332,11 @@ public class BeansConfig extends AbstractSourceModelElement
 			this.nestedBeans = new Stack();
 		}
 
-		public void registerAlias(Element element, String name, String alias) {
-			IBeanAlias al = new BeanAlias(config, name, alias);
+		public void registerAlias(Element element, String alias, String name) {
+			IBeanAlias al = new BeanAlias(config, alias, name);
 			setXmlTextRange(al, element);
 			aliases.add(al);
-			aliasesMap.put(name, al);
+			aliasesMap.put(alias, al);
 		}
 
 		public void startBean(Element element, boolean isNestedBean) {

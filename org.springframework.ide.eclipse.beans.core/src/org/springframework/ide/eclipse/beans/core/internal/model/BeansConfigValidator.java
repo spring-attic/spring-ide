@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -213,7 +213,7 @@ public class BeansConfigValidator {
 						   "Overrides another alias in the same config file",
 						   IMarker.SEVERITY_ERROR, alias.getElementStartLine(),
 						   IBeansProjectMarker.ERROR_CODE_ALIAS_OVERRIDE,
-						   alias.getElementName(), alias.getAlias());
+						   alias.getElementName(), alias.getName());
 				break;
 			}
 		}
@@ -240,12 +240,12 @@ public class BeansConfigValidator {
 		}
 
 		// Check if corresponding bean exists
-		if (!registry.containsBeanDefinition(alias.getAlias())) {
+		if (!registry.containsBeanDefinition(alias.getName())) {
 			BeansModelUtils.createProblemMarker(alias,
-						"Referenced bean '" + alias.getAlias() + "' not found",
+						"Referenced bean '" + alias.getName() + "' not found",
 						IMarker.SEVERITY_WARNING, alias.getElementStartLine(),
 						IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCE,
-						alias.getElementName(), alias.getAlias());
+						alias.getElementName(), alias.getName());
 		}
 	}
 
