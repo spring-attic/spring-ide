@@ -207,10 +207,10 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 		} else if ("parent".equals(attrName)) {
 			return true;
 		} else if ("depends-on".equals(attrName)) {
-			return true;
+			return true; 
 		} else if ("bean".equals(attrName) || "local".equals(attrName)
 				|| "parent".equals(attrName) || "ref".equals(attrName)
-				|| "alias".equals(attrName)) {
+				|| ("name".equals(attrName) && "alias".equals(attr.getOwnerElement().getNodeName()))) {
 			return true;
 		} else if ("value".equals(attrName)) {
 			return true;
@@ -316,7 +316,7 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 			} else if ("factory-bean".equals(name) || "depends-on".equals(name)
 					|| "bean".equals(name) || "local".equals(name)
 					|| "parent".equals(name) || "ref".equals(name)
-					|| "alias".equals(name)) {
+					|| "name".equals(name)) {
 				Document doc = node.getOwnerDocument();
 				Element bean = doc.getElementById(target);
 				if (bean != null) {

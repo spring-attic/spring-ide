@@ -175,7 +175,7 @@ public class BeansTextHoverProcessor
             }
         }
         else if (("parent".equals(attName) || "depends-on".equals(attName) || "factory-bean"
-                .equals(attName))
+                .equals(attName)  || ("name".equals(attName) && "alias".equals(xmlnode.getNodeName())))
                 && attributes.getNamedItem(attName) != null) {
             Element ref = xmlnode.getOwnerDocument().getElementById(
                     attributes.getNamedItem(attName).getNodeValue());

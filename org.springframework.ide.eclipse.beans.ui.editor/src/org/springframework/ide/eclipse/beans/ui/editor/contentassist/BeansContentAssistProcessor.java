@@ -896,7 +896,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 						.getOwnerDocument(), true);
 			}
 		} else if ("alias".equals(node.getNodeName())) {
-			if ("alias".equals(attributeName)) {
+			if ("name".equals(attributeName)) {
 				addBeanReferenceProposals(request, matchString, node
 						.getOwnerDocument(), true);
 			}
