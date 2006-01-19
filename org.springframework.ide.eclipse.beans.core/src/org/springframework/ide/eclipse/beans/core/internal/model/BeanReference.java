@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,8 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * Holder for information about a reference from a model element to to a Spring
- * bean.
+ * bean within a certain context (<code>IBeansConfig</code> or
+ * <code>IBeansConfigSet</code>).
  */
 public class BeanReference {
 
@@ -36,15 +37,22 @@ public class BeanReference {
 	private IModelElement source;
 	private IBean target;
 	private int type;
+	private IModelElement context;
 
 	public BeanReference(IModelElement source, IBean target) {
 		this(STANDARD_BEAN_TYPE, source, target);
 	}
 
 	public BeanReference(int type, IModelElement source, IBean target) {
+		this(STANDARD_BEAN_TYPE, source, target, target.getElementParent());
+	}
+
+	public BeanReference(int type, IModelElement source, IBean target,
+						 IModelElement context) {
 		this.type = type;
 		this.source = source;
 		this.target = target;
+		this.context = context;
 	}
 
 	public final int getType() {
@@ -58,6 +66,10 @@ public class BeanReference {
 	public final IBean getTarget() {
 		return target;
 	}
+	
+	public IModelElement getContext() {
+		return context;
+	}
 
 	/**
 	 * Returns the unique ID of this bean references. The ID is built from the
@@ -65,15 +77,17 @@ public class BeanReference {
 	 */
 	public final String getID() {
 		StringBuffer id = new StringBuffer();
-		id.append(id);
+		id.append(type);
 		id.append('|');
 		if (source != null) {
-			id.append(source);
+			id.append(source.getElementID());
 		}
 		id.append('|');
 		if (target != null) {
-			id.append(target);
+			id.append(target.getElementID());
 		}
+		id.append('|');
+		id.append(context.getElementID());
 		return id.toString();
 	}
 
@@ -88,7 +102,8 @@ public class BeanReference {
 		if (obj instanceof BeanReference) {
 			return ((BeanReference) obj).getType() == getType() &&
 				   ((BeanReference) obj).getSource().equals(source) &&
-				   ((BeanReference) obj).getTarget().equals(target);
+				   ((BeanReference) obj).getTarget().equals(target) &&
+				   ((BeanReference) obj).getContext().equals(context);
 		}
 		return false;
 	}
@@ -107,6 +122,8 @@ public class BeanReference {
 		text.append(source);
 		text.append(" -> ");
 		text.append(target);
+		text.append(" @ ");
+		text.append(context);
 		return text.toString();
 	}
 }

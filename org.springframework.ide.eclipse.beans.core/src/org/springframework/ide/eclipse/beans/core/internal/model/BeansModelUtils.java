@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,6 +135,82 @@ public class BeansModelUtils {
 	}
 
 	/**
+	 * Returns a list of all <code>BeanReference</code>s which have a target
+	 * bean with given ID. The references are looked-up within a certain
+	 * context (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>).
+	 * @param beanID  the ID of the bean which is referenced  
+	 * @param context  the context (<code>IBeanConfig</code> or
+	 * 		  <code>IBeanConfigSet</code>) the referencing beans are looked-up
+	 * @throws IllegalArgumentException if unsupported context specified 
+	 */
+	public static final List getBeanReferences(String beanID,
+											   IModelElement context) {
+		List references = new ArrayList();
+
+		if (context instanceof IBeansConfig) {
+			List configSets = getConfigSets((IBeansConfig) context);
+			if (configSets.isEmpty()) {
+				Collection beans = ((IBeansConfig) context).getBeans();
+				addBeanReferences(beans, beanID, context, references);
+			} else {
+				Iterator iter = configSets.iterator();
+				while (iter.hasNext()) {
+					IBeansConfigSet configSet = (IBeansConfigSet) iter.next();
+					Collection beans = ((IBeansConfig) context).getBeans();
+					addBeanReferences(beans, beanID, configSet, references);
+				}
+			}
+		} else if (context instanceof IBeansConfigSet) {
+			Collection beans = ((IBeansConfigSet) context).getBeans();
+			addBeanReferences(beans, beanID, context, references);
+		} else {
+			throw new IllegalArgumentException("Unsupported context " +
+											   context);
+		}
+		return references;
+	}
+
+	/**
+	 * Check given beans for a reference to a bean with given ID and add
+	 * these references to the specified list.
+	 */
+	private static final void addBeanReferences(Collection beans,
+					   String beanID, IModelElement context, List references) {
+		Iterator iter = beans.iterator();
+		while (iter.hasNext()) {
+			IBean bean = (IBean) iter.next();
+			Iterator refs = getBeanReferences(bean, context,
+											  false).iterator();
+			while (refs.hasNext()) {
+				BeanReference reference = (BeanReference) refs.next();
+				IModelElement target = reference.getTarget();
+				if (target instanceof IBean &&
+									  target.getElementName().equals(beanID)) {
+					if (!references.contains(reference)) {
+						references.add(reference);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Returns a list of <code>IBeansConfig</code>s a given config belongs to.
+	 */
+	public static final List getConfigSets(IBeansConfig config) {
+		List configSets = new ArrayList();
+		Iterator allConfigSets = ((IBeansProject)
+						 config.getElementParent()).getConfigSets().iterator();
+		while (allConfigSets.hasNext()) {
+			IBeansConfigSet configSet = (IBeansConfigSet) allConfigSets.next();
+			if (configSet.hasConfig(config.getElementName())) {
+				configSets.add(configSet);
+			}
+		}
+		return configSets;
+	}
+
+	/**
 	 * Returns a collection of <code>BeanReference</code>s holding all
 	 * <code>IBean</code>s which are referenced from given model element.
 	 * For a bean it's parent bean (for child beans only), constructor argument
@@ -148,9 +224,10 @@ public class BeansModelUtils {
 	 * 		  <code>IBeanConfigSet</code>) the referenced beans are looked-up
 	 * @param recursive  if set to <code>true</code> then the dependeny graph is
 	 *			traversed recursively
-	 * @throws IllegalArgumentException if unsupported model element specified 
+	 * @throws IllegalArgumentException if unsupported model element specified
+	 * @see BeanReference
 	 */
-	public static final Collection getBeanReferences(IModelElement element,
+	public static final List getBeanReferences(IModelElement element,
 									IModelElement context, boolean recursive) {
 		List references = new ArrayList();
 		List referencedBeans = new ArrayList(); // used to break from cycles
@@ -159,26 +236,33 @@ public class BeansModelUtils {
 			// Add referenced beans from bean element
 			Bean bean = (Bean) element;
 
-			// For a child bean add all parent beans and all beans which are
-			// referenced by the parent beans
-			Set beanNames = new HashSet();  // used to detect a cycle
-			beanNames.add(bean.getElementName());
-			for (IBean parentBean = bean; parentBean != null &&
-												  !parentBean.isRootBean(); ) {
-				String parentName = parentBean.getParentName();
-				if (beanNames.contains(parentName)) {
-					// break from cycle
-					break;
-				}
-				beanNames.add(parentName);
-				parentBean = getBean(parentName, context);
-				if (addBeanReference(BeanReference.PARENT_BEAN_TYPE, bean,
-									 parentBean, references, referencedBeans) &&
-									 							   recursive) {
-					addBeanReferencesForElement(parentBean, context,
+			// For a child bean add the parent bean
+			if (!bean.isRootBean()) {
+				IBean parentBean = getBean(bean.getParentName(), context);
+				addBeanReference(BeanReference.PARENT_BEAN_TYPE, bean,
+							 parentBean, context, references, referencedBeans);
+				if (recursive) {
+					// Now add all parent beans and all beans which are
+					// referenced by the parent beans
+					Set beanNames = new HashSet();  // used to detect a cycle
+					beanNames.add(bean.getElementName());
+					beanNames.add(parentBean.getElementName());
+					while (parentBean != null && !parentBean.isRootBean()) {
+						String parentName = parentBean.getParentName();
+						if (beanNames.contains(parentName)) {
+							// break from cycle
+							break;
+						}
+						beanNames.add(parentName);
+						parentBean = getBean(parentName, context);
+						if (addBeanReference(BeanReference.PARENT_BEAN_TYPE,
+										 bean, parentBean, context, references,
+										 referencedBeans) && recursive) {
+							addBeanReferencesForElement(parentBean, context,
 									   references, referencedBeans, recursive);
+						}
+					}
 				}
-
 			}
 
 			// Get bean's merged or standard bean definition
@@ -194,7 +278,7 @@ public class BeansModelUtils {
 			if (bd.getFactoryBeanName() != null) {
 				IBean factoryBean = getBean(bd.getFactoryBeanName(), context);
 				if (addBeanReference(BeanReference.FACTORY_BEAN_TYPE, bean,
-								   factoryBean, references, referencedBeans) &&
+						  factoryBean, context, references, referencedBeans) &&
 								   recursive) {
 					addBeanReferencesForElement(factoryBean, context,
 									   references, referencedBeans, recursive);
@@ -207,8 +291,8 @@ public class BeansModelUtils {
 				for (int i = 0; i < dependsOnBeans.length; i++) {
 					IBean dependsOnBean = getBean(dependsOnBeans[i], context);
 					if (addBeanReference(BeanReference.DEPENDS_ON_BEAN_TYPE,
-										 bean, dependsOnBean, references,
-										 referencedBeans) && recursive) {
+									  bean, dependsOnBean, context, references,
+									  referencedBeans) && recursive) {
 						addBeanReferencesForElement(dependsOnBean, context,
 									   references, referencedBeans, recursive);
 					}
@@ -228,8 +312,8 @@ public class BeansModelUtils {
 						IBean overrideBean = getBean(beanName, context);
 						if (addBeanReference(
 								 BeanReference.METHOD_OVERRIDE_BEAN_TYPE, bean,
-								 overrideBean, references, referencedBeans) &&
-								 recursive) {
+								 overrideBean, context, references,
+								 referencedBeans) && recursive) {
 							addBeanReferencesForElement(overrideBean, context,
 									   references, referencedBeans, recursive);
 						}
@@ -239,8 +323,8 @@ public class BeansModelUtils {
 						IBean overrideBean = getBean(beanName, context);
 						if (addBeanReference(
 								 BeanReference.METHOD_OVERRIDE_BEAN_TYPE, bean,
-								 overrideBean, references, referencedBeans) &&
-								 recursive) {
+								 overrideBean, context, references,
+								 referencedBeans) && recursive) {
 							addBeanReferencesForElement(overrideBean, context,
 									   references, referencedBeans, recursive);
 						}
@@ -285,9 +369,11 @@ public class BeansModelUtils {
 	}
 
 	private static boolean addBeanReference(int type, IModelElement source,
-						 IBean target, List references, List referencedBeans) {
+									   IBean target, IModelElement context,
+									   List references, List referencedBeans) {
 		if (target != null && target  != source) {
-			BeanReference ref = new BeanReference(type, source, target); 
+			BeanReference ref = new BeanReference(type, source, target,
+												  context); 
 			if (!references.contains(ref)) {
 				references.add(ref);
 				if (!referencedBeans.contains(target)) {
@@ -344,7 +430,8 @@ public class BeansModelUtils {
 			String beanName = ((RuntimeBeanReference) value).getBeanName();
 			IBean bean = getBean(beanName, context);
 			if (addBeanReference(BeanReference.STANDARD_BEAN_TYPE, element,
-							 bean, references, referencedBeans) && recursive) {
+								 bean, context, references, referencedBeans) &&
+								 recursive) {
 				addBeanReferencesForElement(bean, context, references,
 											referencedBeans, recursive);
 			}
@@ -352,7 +439,8 @@ public class BeansModelUtils {
 			String beanName = ((BeanDefinitionHolder) value).getBeanName();
 			IBean bean = getInnerBean(beanName, context);
 			addBeanReference(BeanReference.INNER_BEAN_TYPE,
-				   bean.getElementParent(), bean, references, referencedBeans);
+							bean.getElementParent(), bean, context, references,
+							referencedBeans);
 			addBeanReferencesForElement(bean, context, references,
 										referencedBeans, recursive);
 		} else if (value instanceof List) {
@@ -373,8 +461,9 @@ public class BeansModelUtils {
 															context);
 								if (addBeanReference(
 										   BeanReference.INTERCEPTOR_BEAN_TYPE,
-										   element, interceptor, references,
-										   referencedBeans) && recursive) {
+										   element, interceptor, context,
+										   references, referencedBeans) &&
+										   recursive) {
 									addBeanReferencesForElement(interceptor,
 												   context, references,
 											   	   referencedBeans, recursive);
