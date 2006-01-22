@@ -16,9 +16,10 @@
 
 package org.springframework.ide.eclipse.beans.ui.model;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
-public interface INode {
+public interface INode extends IAdaptable {
 
 	INode[] NO_CHILDREN = new INode[] {};
 
