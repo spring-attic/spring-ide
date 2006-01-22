@@ -55,6 +55,7 @@ import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
+import org.springframework.ide.eclipse.beans.ui.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
@@ -63,7 +64,6 @@ import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConstructorArgumentNode;
 import org.springframework.ide.eclipse.beans.ui.model.INode;
 import org.springframework.ide.eclipse.beans.ui.model.ModelLabelDecorator;
-import org.springframework.ide.eclipse.beans.ui.model.ModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
 import org.springframework.ide.eclipse.beans.ui.model.PropertyNode;
 import org.springframework.ide.eclipse.beans.ui.model.RootNode;
@@ -135,7 +135,7 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 										   SWT.V_SCROLL);
 		viewer.setContentProvider(new BeansViewContentProvider(this));
 		viewer.setLabelProvider(new DecoratingLabelProvider(
-						  new ModelLabelProvider(), new ModelLabelDecorator()));
+					new BeansModelLabelProvider(), new ModelLabelDecorator()));
 		viewer.setInput(getRootNode());
 		viewer.setSorter(new ViewerSorter() {
 			public int compare(Viewer viewer, Object e1, Object e2) {

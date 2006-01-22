@@ -43,11 +43,11 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.ui.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
 import org.springframework.ide.eclipse.beans.ui.model.ModelLabelDecorator;
-import org.springframework.ide.eclipse.beans.ui.model.ModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.model.ModelSorter;
 import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
 
@@ -146,7 +146,7 @@ public class ConfigSetDialog extends Dialog {
 		configsViewer.setContentProvider(new ConfigFilesContentProvider(
 														   createConfigList()));
 		configsViewer.setLabelProvider(new DecoratingLabelProvider(
-						  new ModelLabelProvider(), new ModelLabelDecorator()));
+					new BeansModelLabelProvider(), new ModelLabelDecorator()));
 		configsViewer.setSorter(new ModelSorter(true));
 		configsViewer.setInput(this);	// activate content provider
 		configsViewer.setCheckedElements(configSet.getConfigs().toArray());

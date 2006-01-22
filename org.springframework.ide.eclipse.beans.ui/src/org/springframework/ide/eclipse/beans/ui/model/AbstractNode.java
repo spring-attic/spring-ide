@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.ui.views.properties.IPropertySource;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
-public abstract class AbstractNode implements INode {
+public abstract class AbstractNode implements INode, IAdaptable  {
 
 	private INode parent;
 	private String name;
@@ -238,7 +241,16 @@ public abstract class AbstractNode implements INode {
 		}
 	}
 
+	/**
+	 * Returns an adapter for <code>IPropertySource</code> and
+	 * <code>IModelElement</code>.
+	 */
 	public Object getAdapter(Class adapter) {
+		if (adapter == IPropertySource.class) {
+			return BeansUIUtils.getPropertySource(element);
+		} else if (adapter == IModelElement.class) {
+			return element;
+		}
 		return null;
 	}
 

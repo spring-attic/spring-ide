@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.ui.views.properties.IPropertySource;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
-import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * Representation of a Spring bean.
@@ -285,15 +282,6 @@ public class BeanNode extends AbstractNode {
 
 	public void remove(INode node) {
 		properties.remove(node);
-	}
-
-	public Object getAdapter(Class adapter) {
-		if (adapter == IPropertySource.class) {
-			return BeansUIUtils.getPropertySource(getBean());
-		} else if (adapter == IModelElement.class) {
-			return getBean();
-		}
-		return super.getAdapter(adapter);
 	}
 
 	public String toString() {

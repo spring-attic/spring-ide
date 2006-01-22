@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 package org.springframework.ide.eclipse.beans.ui.model;
 
-import org.eclipse.core.runtime.IAdaptable;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
-public interface INode extends IAdaptable {
+public interface INode {
 
 	INode[] NO_CHILDREN = new INode[] {};
 

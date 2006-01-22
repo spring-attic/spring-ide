@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,7 @@
 
 package org.springframework.ide.eclipse.beans.ui.model;
 
-import org.eclipse.ui.views.properties.IPropertySource;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
-import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
-import org.springframework.ide.eclipse.core.model.IModelElement;
 
 public class PropertyNode extends AbstractNode {
 
@@ -46,15 +43,6 @@ public class PropertyNode extends AbstractNode {
 	 */
 	public ConfigNode getConfigNode() {
 		return ((BeanNode) getParent()).getConfigNode();
-	}
-
-	public Object getAdapter(Class adapter) {
-		if (adapter == IPropertySource.class) {
-			return BeansUIUtils.getPropertySource(getProperty());
-		} else if (adapter == IModelElement.class) {
-			return getProperty();
-		}
-		return super.getAdapter(adapter);
 	}
 
 	public String toString() {

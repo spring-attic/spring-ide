@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,9 @@ import java.util.Map;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.util.ListenerList;
 import org.eclipse.ui.IPropertyListener;
-import org.eclipse.ui.views.properties.IPropertySource;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
-import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * Representation of an Spring project.
@@ -211,15 +208,6 @@ public class ProjectNode extends AbstractNode {
 		} else {
 			configSets.remove(node.getName());
 		}
-	}
-
-	public Object getAdapter(Class adapter) {
-		if (adapter == IPropertySource.class) {
-			return BeansUIUtils.getPropertySource(getProject());
-		} else if (adapter == IModelElement.class) {
-			return getProject();
-		}
-		return super.getAdapter(adapter);
 	}
 
 	public String toString() {
