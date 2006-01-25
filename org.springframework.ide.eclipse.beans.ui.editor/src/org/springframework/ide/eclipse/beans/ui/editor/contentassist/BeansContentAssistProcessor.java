@@ -525,7 +525,10 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 			String attributeName = open.getText(nameRegion);
 			computeAttributeValueProposals(request, node, matchString,
 					attributeName);
-			super.addAttributeValueProposals(request);
+			// TODO remove as soon as WTP has fixed the bug; refs #237
+			if (!"<".equals(attributeName)) {
+				super.addAttributeValueProposals(request);
+			}
 		}
 	}
 
