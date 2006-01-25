@@ -48,26 +48,31 @@ public class BeansEditorUtils {
 		Map configsMap = new HashMap();
 		IBeansProject project = BeansCorePlugin.getModel().getProject(
 				file.getProject());
-		Iterator configSets = project.getConfigSets().iterator();
+		if (project != null) {
 
-		while (configSets.hasNext()) {
-			IBeansConfigSet configSet = (IBeansConfigSet) configSets.next();
-			if (configSet.hasConfig(file)) {
-				Iterator configs = configSet.getConfigs().iterator();
-				while (configs.hasNext()) {
-					String beansConfigName = (String) configs.next();
-					IBeansConfig beansConfig = project
-							.getConfig(beansConfigName);
-					if (beansConfig != null) {
-						IResource resource = beansConfig.getElementResource();
-						if (!configsMap.containsKey(resource.getName())
-								&& !resource.getFullPath().equals(
-										file.getFullPath())) {
-							configsMap.put(resource.getName(), beansConfig);
+			Iterator configSets = project.getConfigSets().iterator();
+
+			while (configSets.hasNext()) {
+				IBeansConfigSet configSet = (IBeansConfigSet) configSets.next();
+				if (configSet.hasConfig(file)) {
+					Iterator configs = configSet.getConfigs().iterator();
+					while (configs.hasNext()) {
+						String beansConfigName = (String) configs.next();
+						IBeansConfig beansConfig = project
+								.getConfig(beansConfigName);
+						if (beansConfig != null) {
+							IResource resource = beansConfig
+									.getElementResource();
+							if (!configsMap.containsKey(resource.getName())
+									&& !resource.getFullPath().equals(
+											file.getFullPath())) {
+								configsMap.put(resource.getName(), beansConfig);
+							}
 						}
 					}
 				}
 			}
+
 		}
 
 		Iterator paths = configsMap.keySet().iterator();
@@ -326,8 +331,8 @@ public class BeansEditorUtils {
 		try {
 			String returnTypeString = Signature
 					.toString(method.getReturnType()).replace('$', '.');
-			returnType = BeansModelUtils.getJavaType(file.getProject(), resolveClassName(
-					returnTypeString, contextType));
+			returnType = BeansModelUtils.getJavaType(file.getProject(),
+					resolveClassName(returnTypeString, contextType));
 		} catch (IllegalArgumentException e) {
 			// do Nothing
 		} catch (JavaModelException e) {
