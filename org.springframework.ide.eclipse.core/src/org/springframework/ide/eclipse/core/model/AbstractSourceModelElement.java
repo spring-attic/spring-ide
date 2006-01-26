@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,17 @@
 
 package org.springframework.ide.eclipse.core.model;
 
-public abstract class AbstractSourceModelElement extends AbstractModelElement
-											   implements ISourceModelElement {
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.springframework.ide.eclipse.core.SpringCore;
+
+public abstract class AbstractSourceModelElement
+		  extends AbstractResourceModelElement implements ISourceModelElement {
+
 	private int startLine;
     private int endLine;
 
@@ -32,7 +41,7 @@ public abstract class AbstractSourceModelElement extends AbstractModelElement
 	}
 
 	public final int getElementStartLine() {
-		return this.startLine;
+		return startLine;
 	}
 
     public final void setElementEndLine(int endLine) {
@@ -40,6 +49,39 @@ public abstract class AbstractSourceModelElement extends AbstractModelElement
     }
 
 	public final int getElementEndLine() {
-	    return this.endLine;
+	    return endLine;
+	}
+
+	public Object getAdapter(Class adapter) {
+		if (adapter == IMarker.class) {
+			return createMarker();
+		}
+		return super.getAdapter(adapter);
+	}
+
+	private IMarker createMarker() {
+		final IResource resource = getElementResource();
+		if (resource != null) {
+			try {
+				final IMarker[] markers = new IMarker[1];
+				IWorkspaceRunnable runnable = new IWorkspaceRunnable() {
+					public void run(IProgressMonitor monitor)
+														 throws CoreException {
+						IMarker marker = resource.createMarker(IMarker.TEXT);
+						marker.setAttribute(IMarker.LINE_NUMBER, startLine);
+						marker.setAttribute(IMarker.LOCATION, "line " +
+											startLine);
+						marker.setAttribute(IMarker.MESSAGE, toString());
+						markers[0] = marker;
+					}
+				};
+				resource.getWorkspace().run(runnable, null,
+												IWorkspace.AVOID_UPDATE, null);
+				return markers[0];
+			} catch (CoreException e) {
+				SpringCore.log(e);
+			}
+		}
+		return null;
 	}
 }

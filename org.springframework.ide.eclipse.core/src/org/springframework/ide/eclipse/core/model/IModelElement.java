@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 
 package org.springframework.ide.eclipse.core.model;
 
+import org.eclipse.core.runtime.IAdaptable;
+
 /**
  * Common protocol for all elements provided by the model.
  */
-public interface IModelElement {
+public interface IModelElement extends IAdaptable {
 
 	/** Character used for delimiting nodes within an element's unique id */
 	char ID_DELIMITER = '|';
