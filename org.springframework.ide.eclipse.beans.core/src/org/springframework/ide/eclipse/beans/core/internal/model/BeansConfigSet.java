@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,20 +25,18 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
+import org.springframework.ide.eclipse.core.model.AbstractModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
  * This class defines a Spring beans config set (a list of beans config names).
  */
-public class BeansConfigSet extends AbstractSourceModelElement
+public class BeansConfigSet extends AbstractModelElement
 												   implements IBeansConfigSet {
 	private List configNames;
 	private boolean allowBeanDefinitionOverriding;
@@ -67,13 +65,6 @@ public class BeansConfigSet extends AbstractSourceModelElement
 
 	public int getElementType() {
 		return IBeansModelElementTypes.CONFIG_SET_TYPE;
-	}
-
-	public IResource getElementResource() {
-		return (getElementParent() instanceof IResourceModelElement ?
-					((IResourceModelElement)
-							getElementParent()).getElementResource() :
-							null);
 	}
 
 	public IModelElement[] getElementChildren() {

@@ -44,16 +44,18 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.io.FileResource;
 import org.springframework.ide.eclipse.core.io.xml.LineNumberPreservingDOMParser;
+import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
 import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.w3c.dom.Element;
 
 /**
  * This class defines a Spring beans configuration.
  */
-public class BeansConfig extends AbstractSourceModelElement
+public class BeansConfig extends AbstractResourceModelElement
 													  implements IBeansConfig {
 	/** This bean's config file */
 	private IFile file;
@@ -239,7 +241,7 @@ public class BeansConfig extends AbstractSourceModelElement
 		if (name.charAt(0) == '/') {
 			container = ResourcesPlugin.getWorkspace().getRoot();
 		} else {
-			container = (IProject) ((ISourceModelElement)
+			container = (IProject) ((IResourceModelElement)
 									  getElementParent()).getElementResource();
 		}
 		return (IFile) container.findMember(name);
