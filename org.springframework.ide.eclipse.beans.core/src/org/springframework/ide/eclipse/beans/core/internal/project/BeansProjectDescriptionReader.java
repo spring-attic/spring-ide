@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,11 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+/**
+ * This class provides a reader for a Spring project's description file.
+ *
+ * @author Torsten Juergeleit
+ */
 public class BeansProjectDescriptionReader {
 
 	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID +
@@ -63,15 +68,15 @@ public class BeansProjectDescriptionReader {
 				} catch (ParserConfigurationException e) {
 					handler.log(IStatus.ERROR, e);
 				} catch (SAXException e) {
-					handler.log(IStatus.WARNING, e);
+					handler.log(IStatus.ERROR, e);
 				} catch (IOException e) {
-					handler.log(IStatus.WARNING, e);
+					handler.log(IStatus.ERROR, e);
 				}
 				IStatus status = handler.getStatus(); 
 				switch (status.getSeverity()) {
 					case IStatus.ERROR :
 						BeansCorePlugin.log(status);
-						return null;
+						break;
 		
 					case IStatus.WARNING :
 					case IStatus.INFO :

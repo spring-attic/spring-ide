@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,11 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
+/**
+ * This class provides a SAX handler for a Spring project's description file.
+ *
+ * @author Torsten Juergeleit
+ */
 public class BeansProjectDescriptionHandler extends DefaultHandler
 								  implements IBeansProjectDescriptionConstants {
 	protected static final int S_INITIAL = 0;
@@ -226,11 +231,6 @@ public class BeansProjectDescriptionHandler extends DefaultHandler
 
 	public void setDocumentLocator(Locator locator) {
 		this.locator = locator;
-	}
-
-	public void fatalError(SAXParseException error) throws SAXException {
-		log(IStatus.ERROR, error);
-		throw error;
 	}
 
 	public void error(SAXParseException error) throws SAXException {
