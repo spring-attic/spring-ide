@@ -22,10 +22,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 
 /**
  * Representation of a Spring bean configuration set.
+ *
+ * @author Torsten Juergeleit
  */
 public class ConfigSetNode extends AbstractNode {
 
@@ -73,6 +76,12 @@ public class ConfigSetNode extends AbstractNode {
 
 	public void setName(String name) {
 		super.setName(name);
+		if (getElement() == null) {
+
+			// Add dummy beans config set which is required for label provider
+			setElement(new BeansConfigSet(getProjectNode().getProject(),
+										  name));
+		}
 		propertyChanged(this, NAME);
 	}
 

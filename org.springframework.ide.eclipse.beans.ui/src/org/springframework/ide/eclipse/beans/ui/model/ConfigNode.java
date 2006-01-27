@@ -25,6 +25,7 @@ import java.util.Map;
 import org.eclipse.core.resources.IFile;
 import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
@@ -32,6 +33,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 
 /**
  * Representation of a Spring bean configuration.
+ *
+ * @author Torsten Juergeleit
  */
 public class ConfigNode extends AbstractNode {
 
@@ -157,12 +160,19 @@ public class ConfigNode extends AbstractNode {
 
 	private void setConfig(ProjectNode project) {
 		String configName = getName();
+		IBeansConfig config;
 		if (configName.charAt(0) == '/') {
-			setElement(BeansCorePlugin.getModel().getConfig(configName));
+			config = BeansCorePlugin.getModel().getConfig(configName);
 			setFlags(INode.FLAG_IS_EXTERNAL);
 		} else {
-			setElement(project.getProject().getConfig(configName));
+			config = project.getProject().getConfig(configName);
 		}
+		if (config == null) {
+
+			// Add dummy beans config set which is required for label provider
+			config = new BeansConfig(project.getProject(), configName);
+		}
+		setElement(config);
 	}
 
 	/**

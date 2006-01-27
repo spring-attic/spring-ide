@@ -16,7 +16,6 @@
 
 package org.springframework.ide.eclipse.beans.ui;
 
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -29,12 +28,14 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * This class is an <code>ILabelProvider</code> which knows about the beans
- * core model. If the given element is not of type <code>IModelElement</code>
- * the it tries to adapt it via <code>IAdaptable</code>.
+ * core model's <code>IModelElement</code>s. If the given element is not of
+ * type <code>IModelElement</code> the it tries to adapt it via
+ * <code>IAdaptable</code>.
  *
  * @see org.springframework.ide.eclipse.core.model.IModelElement
  * @see org.eclipse.core.runtime.IAdaptable
@@ -46,7 +47,7 @@ public class BeansModelLabelProvider extends LabelProvider {
 	public Image getImage(Object element) {
 
 		// At first try to adapt given element to IModelElement 
-		Object adaptedElement = adaptToModelElement(element);
+		Object adaptedElement = SpringCoreUtils.adaptToModelElement(element);
 
 		// Now check if given object is a member of the beans core model
 		if (adaptedElement instanceof IBeansProject) {
@@ -72,7 +73,7 @@ public class BeansModelLabelProvider extends LabelProvider {
 	public String getText(Object element) {
 
 		// At first try to adapt given element to IModelElement 
-		Object adaptedElement = adaptToModelElement(element);
+		Object adaptedElement = SpringCoreUtils.adaptToModelElement(element);
 
 		// Now check if given object is a member of the beans core model
 		if (adaptedElement instanceof IModelElement) {
@@ -119,16 +120,5 @@ public class BeansModelLabelProvider extends LabelProvider {
 			return label.toString();
 		}
 		return super.getText(element);
-	}
-
-	/**
-	 * Trys to adapt given element to <code>IModelElement</code>. 
-	 */
-	private Object adaptToModelElement(Object element) {
-		if (!(element instanceof IModelElement) &&
-											 (element instanceof IAdaptable)) {
-			element = ((IAdaptable) element).getAdapter(IModelElement.class);
-		}
-		return element;
 	}
 }
