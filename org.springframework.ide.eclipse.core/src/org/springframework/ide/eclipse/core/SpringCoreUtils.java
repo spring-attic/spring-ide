@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.JavaCore;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 
-public class SpringCoreUtils {
+public final class SpringCoreUtils {
 
 	/**
 	 * Adds given nature as first nature to specified project.
@@ -150,5 +152,16 @@ public class SpringCoreUtils {
 				SpringCore.log(e);
 			}
 		}
+	}
+
+	/**
+	 * Trys to adapt given element to <code>IModelElement</code>. 
+	 */
+	public static Object adaptToModelElement(Object element) {
+		if (!(element instanceof IModelElement) &&
+											 (element instanceof IAdaptable)) {
+			element = ((IAdaptable) element).getAdapter(IModelElement.class);
+		}
+		return element;
 	}
 }
