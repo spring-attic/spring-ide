@@ -16,6 +16,9 @@
 
 package org.springframework.ide.eclipse.core;
 
+import java.util.Collection;
+import java.util.Iterator;
+
 /**
  * Miscellaneous string utility methods.
  */
@@ -42,6 +45,30 @@ public class StringUtils {
         }
         return buf.toString();
     }
+
+	/**
+	 * Convenience method to return a <code>Collection</code> as a delimited
+	 * (e.g. CSV) <code>String</code>.
+	 * @param coll  <code>Collection</code> to display
+	 * @param delim  delimiter to use (probably a ",")
+	 */
+	public static String collectionToDelimitedString(Collection coll,
+													 String delim) {
+		if (coll == null) {
+			return "";
+		}
+		StringBuffer sb = new StringBuffer();
+		Iterator it = coll.iterator();
+		int i = 0;
+		while (it.hasNext()) {
+			if (i > 0) {
+				sb.append(delim);
+			}
+			sb.append(it.next());
+			i++;
+		}
+		return sb.toString();
+	}
 
 	/**
 	 * Returns <code>true</code> if given string has a leading and trailing
