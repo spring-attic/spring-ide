@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,8 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
  *
  * @see org.springframework.ide.eclipse.core.model.IModelChangeListener
  * @see org.springframework.ide.eclipse.core.model.ModelChangeEvent
+ *
+ * @author Torsten Juergeleit
  */
 public class BeansModel extends AbstractModel implements IBeansModel {
 
@@ -389,7 +391,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			BeansProject project = (BeansProject)
 												projects.get(file.getProject());
 			BeansConfig config = (BeansConfig) project.getConfig(file);
-			project.removeConfig(file);
+			project.removeConfig(file, true);
 			notifyListeners(config, ModelChangeEvent.REMOVED);
 		}
 

@@ -38,15 +38,17 @@ public class BeansProjectDescriptionHandler extends DefaultHandler
 								  implements IBeansProjectDescriptionConstants {
 	protected static final int S_INITIAL = 0;
 	protected static final int S_PROJECT_DESC = 1;
-	protected static final int S_CONFIGS = 2;
-	protected static final int S_CONFIG = 3;
-	protected static final int S_CONFIG_SETS = 4;
-	protected static final int S_CONFIG_SET = 5;
-	protected static final int S_CONFIG_SET_NAME = 6;
-	protected static final int S_CONFIG_SET_OVERRIDING = 7;
-	protected static final int S_CONFIG_SET_INCOMPLETE = 8;
-	protected static final int S_CONFIG_SET_CONFIGS = 9;
-	protected static final int S_CONFIG_SET_CONFIG = 10;
+	protected static final int S_CONFIG_EXTENSIONS = 2;
+	protected static final int S_CONFIG_EXTENSION = 3;
+	protected static final int S_CONFIGS = 4;
+	protected static final int S_CONFIG = 5;
+	protected static final int S_CONFIG_SETS = 6;
+	protected static final int S_CONFIG_SET = 7;
+	protected static final int S_CONFIG_SET_NAME = 8;
+	protected static final int S_CONFIG_SET_OVERRIDING = 9;
+	protected static final int S_CONFIG_SET_INCOMPLETE = 10;
+	protected static final int S_CONFIG_SET_CONFIGS = 11;
+	protected static final int S_CONFIG_SET_CONFIG = 12;
 
 	protected IBeansProject project;
 	protected MultiStatus problems;
@@ -89,10 +91,18 @@ public class BeansProjectDescriptionHandler extends DefaultHandler
 				break;
 
 			case S_PROJECT_DESC :
-				if (elementName.equals(CONFIGS)) {
+				if (elementName.equals(CONFIG_EXTENSIONS)) {
+					state = S_CONFIG_EXTENSIONS;
+				} else if (elementName.equals(CONFIGS)) {
 					state = S_CONFIGS;
 				} else if (elementName.equals(CONFIG_SETS)) {
 					state = S_CONFIG_SETS;
+				}
+				break;
+
+			case S_CONFIG_EXTENSIONS :
+				if (elementName.equals(CONFIG_EXTENSION)) {
+					state = S_CONFIG_EXTENSION;
 				}
 				break;
 
@@ -132,7 +142,27 @@ public class BeansProjectDescriptionHandler extends DefaultHandler
 														   throws SAXException {
 		switch (state) {
 			case S_PROJECT_DESC :
-				// Don't think we need to do anything here.
+
+				// make sure that at least the default config extension is in
+				// the list of config extensions
+				if (description.getConfigExtensions().isEmpty()) {
+					description.addConfigExtension(
+									   IBeansProject.DEFAULT_CONFIG_EXTENSION);
+				}
+				break;
+
+			case S_CONFIG_EXTENSIONS :
+				if (elementName.equals(CONFIG_EXTENSIONS)) {
+					state = S_PROJECT_DESC;
+				}
+				break;
+
+			case S_CONFIG_EXTENSION :
+				if (elementName.equals(CONFIG_EXTENSION)) {
+					String extension = charBuffer.toString().trim();
+					description.addConfigExtension(extension);
+					state = S_CONFIG_EXTENSIONS;
+				}
 				break;
 
 			case S_CONFIGS :

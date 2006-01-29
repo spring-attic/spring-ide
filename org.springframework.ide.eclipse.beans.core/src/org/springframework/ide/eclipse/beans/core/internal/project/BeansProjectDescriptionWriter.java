@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,11 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.io.xml.XMLWriter;
 
+/**
+ * This class saves the description of a Spring Beans project to an XML file.
+ *
+ * @author Torsten Juergeleit
+ */
 public class BeansProjectDescriptionWriter
 								  implements IBeansProjectDescriptionConstants {
 	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID +
@@ -73,6 +78,8 @@ public class BeansProjectDescriptionWriter
 	protected static void write(BeansProjectDescription description,
 								XMLWriter writer) throws IOException {
 		writer.startTag(PROJECT_DESCRIPTION, null);
+		write(CONFIG_EXTENSIONS, CONFIG_EXTENSION,
+			  description.getConfigExtensions(), writer);
 		write(CONFIGS, CONFIG, description.getConfigNames(), writer);
 		write(CONFIG_SETS, description.getConfigSets(), writer);
 		writer.endTag(PROJECT_DESCRIPTION);

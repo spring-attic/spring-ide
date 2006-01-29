@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.ide.eclipse.beans.core.internal.project;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -30,18 +31,39 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 
+/**
+ * This class holds the configuration for a Spring Beans project.
+ *
+ * @author Torsten Juergeleit
+ */
 public class BeansProjectDescription {
 
 	private IBeansProject project;
+	private List configExtensions;
 	private List configNames;
 	private Map configs;
 	private Map configSets;
 
 	public BeansProjectDescription(IBeansProject project) {
 		this.project = project;
+		this.configExtensions = new ArrayList();
 		this.configs = new HashMap();
 		this.configNames = new ArrayList();
 		this.configSets = new HashMap();
+	}
+	
+	public Collection getConfigExtensions() {
+		return Collections.unmodifiableCollection(configExtensions);
+	}
+	
+	public void setConfigExtensions(List configExtensions) {
+		this.configExtensions = configExtensions;
+	}
+
+	public void addConfigExtension(String extension) {
+		if (extension.length() > 0 && !configExtensions.contains(extension)) {
+			configExtensions.add(extension);
+		}
 	}
 
 	public void setConfigNames(Collection configNames) {
@@ -56,7 +78,7 @@ public class BeansProjectDescription {
 	}
 
 	public Collection getConfigNames() {
-		return configNames;
+		return Collections.unmodifiableCollection(configNames);
 	}
 
 	public void addConfig(IFile file) {
@@ -64,7 +86,7 @@ public class BeansProjectDescription {
 	}
 
 	public void addConfig(String name) {
-		if (name.length() > 0) {
+		if (name.length() > 0 && !configNames.contains(name)) {
 			configNames.add(name);
 			IBeansConfig config = new BeansConfig(project, name);
 			configs.put(name, config);
@@ -104,7 +126,7 @@ public class BeansProjectDescription {
 	}
 
 	public Collection getConfigs() {
-		return configs.values();
+		return Collections.unmodifiableCollection(configs.values());
 	}
 
 	public void removeConfig(IFile file) {
@@ -141,7 +163,7 @@ public class BeansProjectDescription {
 	}
 
 	public Collection getConfigSetNames() {
-		return configSets.keySet();
+		return Collections.unmodifiableCollection(configSets.keySet());
 	}
 
 	public IBeansConfigSet getConfigSet(String name) {
@@ -149,11 +171,10 @@ public class BeansProjectDescription {
 	}
 
 	public Collection getConfigSets() {
-		return configSets.values();
+		return Collections.unmodifiableCollection(configSets.values());
 	}
 
 	public String toString() {
 		return "Configs=" + configNames + ", ConfigsSets=" + configSets.toString();
 	}
-
 }

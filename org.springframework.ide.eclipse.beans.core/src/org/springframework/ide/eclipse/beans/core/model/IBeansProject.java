@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,17 @@ import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
- * This interface holds information for a Spring Beans project.
+ * This interface provides information for a Spring Beans project.
+ *
+ * @author Torsten Juergeleit
  */
 public interface IBeansProject extends IResourceModelElement, IBeanClassAware {
 
 	/** File name of the Spring Beans project description */
 	public static final String DESCRIPTION_FILE = ".springBeans";
+
+	/** Default file extension for beans config files */
+	public static final String DEFAULT_CONFIG_EXTENSION = "xml";
 
 	/**
 	 * Returns corresponding Eclipse project. 
@@ -36,21 +41,15 @@ public interface IBeansProject extends IResourceModelElement, IBeanClassAware {
 	IProject getProject();
 
 	/**
-	 * Retruns a list of config names.
+	 * Returns a list of file extensions for <code>IBeansConfig</code> files. 
 	 */
-	Collection getConfigNames();
+	Collection getConfigExtensions();
 
 	/**
-	 * Returns true if given file belongs to the list of Spring bean config
-	 * files which are stored in the project description. 
+	 * Returns true if given config extension belongs to the list of Spring
+	 * bean config file extensions which are stored in the project description. 
 	 */
-	boolean hasConfig(IFile file);
-
-	/**
-	 * Returns true if given config name belongs to the list of Spring bean
-	 * config files which are stored in the project description. 
-	 */
-	boolean hasConfig(String configName);
+	boolean hasConfigExtension(String extension);
 
 	/**
 	 * Returns <code>IBeansConfig</code> for given config file. 
@@ -68,6 +67,18 @@ public interface IBeansProject extends IResourceModelElement, IBeanClassAware {
 	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfig
 	 */
 	Collection getConfigs();
+
+	/**
+	 * Returns true if given file belongs to the list of Spring bean config
+	 * files which are stored in the project description. 
+	 */
+	boolean hasConfig(IFile file);
+
+	/**
+	 * Returns true if given config name belongs to the list of Spring bean
+	 * config files which are stored in the project description. 
+	 */
+	boolean hasConfig(String configName);
 
 	/**
 	 * Returns a list of <code>IBeansConfigSet</code> instances.

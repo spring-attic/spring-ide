@@ -34,7 +34,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
- * This class provides a reader for a Spring project's description file.
+ * This class reads the description for a Spring Beans project from an XML
+ * file.
  *
  * @author Torsten Juergeleit
  */
