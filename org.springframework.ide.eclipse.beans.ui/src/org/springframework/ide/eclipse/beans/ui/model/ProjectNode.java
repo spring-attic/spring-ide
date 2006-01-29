@@ -18,6 +18,7 @@ package org.springframework.ide.eclipse.beans.ui.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -27,17 +28,21 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.util.ListenerList;
 import org.eclipse.ui.IPropertyListener;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 
 /**
  * Representation of an Spring project.
+ *
+ * @author Torsten Juergeleit
  */
 public class ProjectNode extends AbstractNode {
 
 	public static final int CONFIGS = 1;
 	public static final int CONFIG_SETS = 2;
 
+	private List configExtensions;
 	private Map configs;
 	private Map configSets;
 	private ListenerList listeners;
@@ -51,9 +56,10 @@ public class ProjectNode extends AbstractNode {
 		super(parent, name);
 		setElement(BeansCorePlugin.getModel().getProject(name));
 
-		this.configs = new HashMap();
-		this.configSets = new HashMap();
-		this.listeners = new ListenerList();
+		configExtensions = new ArrayList();
+		configs = new HashMap();
+		configSets = new HashMap();
+		listeners = new ListenerList();
 	}
 
 	public IBeansProject getProject() {
@@ -81,11 +87,32 @@ public class ProjectNode extends AbstractNode {
 		listeners.remove(listener);
 	}
 
+	public void setConfigExtensions(Collection extensions) {
+		configExtensions.clear();
+		Iterator iter = extensions.iterator();
+		while (iter.hasNext()) {
+			String extension = (String) iter.next();
+			if (!configExtensions.contains(extension)) {
+				configExtensions.add(extension);
+			}
+		}
+		propertyChanged(this, CONFIGS);
+	}
+
+	public boolean hasConfigExtension(String extension) {
+		return configExtensions.contains(extension);
+	}
+
+	public List getConfigExtensions() {
+		return Collections.unmodifiableList(configExtensions);
+	}
+
 	public void setConfigs(Collection configs) {
 		this.configs.clear();
 		Iterator iter = configs.iterator();
 		while (iter.hasNext()) {
-			addConfig((String) iter.next());
+			IBeansConfig config = (IBeansConfig) iter.next();
+			addConfig(config.getElementName());
 		}
 		propertyChanged(this, CONFIGS);
 	}

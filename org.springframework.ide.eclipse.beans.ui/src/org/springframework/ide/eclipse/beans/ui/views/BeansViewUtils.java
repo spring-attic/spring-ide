@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -31,7 +31,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUILabelDecorator;
 import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
@@ -49,7 +49,7 @@ public final class BeansViewUtils {
 	 * 
 	 * @return the resource selection from the LocalSelectionTransfer
 	 */
-	public static final Object getSelectedObjects() {
+	public static Object getSelectedObjects() {
 		ArrayList selectedResources = new ArrayList();
 		ArrayList selectedNodes = new ArrayList();
 		Object result = null;
@@ -95,7 +95,7 @@ public final class BeansViewUtils {
 	 *            the parent configNode
 	 * @return the created bean nodes
 	 */
-	public static final BeanNode[] createBeanNodes(IResource[] resources,
+	public static BeanNode[] createBeanNodes(IResource[] resources,
 			ConfigNode configNode) {
 		// nothing for now
 		return null;
@@ -111,7 +111,7 @@ public final class BeansViewUtils {
 	 *            the parent projectNode
 	 * @return the created config nodes
 	 */
-	public static final ConfigNode[] createConfigNodes(IResource[] resources,
+	public static ConfigNode[] createConfigNodes(IResource[] resources,
 			ProjectNode projectNode) {
 		ConfigNode[] configNodes = new ConfigNode[resources.length];
 		for (int i = 0; i < resources.length; i++) {
@@ -138,7 +138,7 @@ public final class BeansViewUtils {
 	 *            the parent rootNode
 	 * @return the created project nodes
 	 */
-	public static final ProjectNode[] createProjectNodes(IResource[] resources,
+	public static ProjectNode[] createProjectNodes(IResource[] resources,
 			RootNode rootNode) {
 		ProjectNode[] projectNodes = new ProjectNode[resources.length];
 		for (int i = 0; i < resources.length; i++) {
@@ -164,7 +164,7 @@ public final class BeansViewUtils {
 	 * @param configNode
 	 *            the configNode under which they're added
 	 */
-	public static final void addBeanNodes(TreeViewer treeViewer,
+	public static void addBeanNodes(TreeViewer treeViewer,
 			BeanNode[] beanNodes, ConfigNode configNode) {
 		// nothing for now
 	}
@@ -179,7 +179,7 @@ public final class BeansViewUtils {
 	 * @param projectNode
 	 *            the projectNode under which they're added
 	 */
-	public static final void addConfigNodes(TreeViewer treeViewer,
+	public static void addConfigNodes(TreeViewer treeViewer,
 			ConfigNode[] configNodes, ProjectNode projectNode) {
 		for (int i = 0; i < configNodes.length; i++) {
 			BeansProject beansProject = (BeansProject) projectNode.getProject();
@@ -187,7 +187,7 @@ public final class BeansViewUtils {
 			// target project if possible.
 			configNodes[i].setParent(projectNode);
 			projectNode.addConfig(configNodes[i].getName());
-			beansProject.setConfigs(projectNode.getConfigNames());
+			beansProject.setConfigs(projectNode.getConfigNames(), true);
 			BeansUILabelDecorator.update();
 			treeViewer.add(projectNode, configNodes[i]);
 			treeViewer.reveal(configNodes[i]);
@@ -205,7 +205,7 @@ public final class BeansViewUtils {
 	 * @param configSetNode
 	 *            the configSetNode under which they're added
 	 */
-	public static final void addConfigNodes(TreeViewer treeViewer,
+	public static void addConfigNodes(TreeViewer treeViewer,
 			ConfigNode[] configNodes, ConfigSetNode configSetNode) {
 		for (int i = 0; i < configNodes.length; i++) {
 			ConfigNode droppedConfigNode = (ConfigNode) configNodes[i];
@@ -228,7 +228,7 @@ public final class BeansViewUtils {
 					configSet.setIncomplete(node.isIncomplete());
 					configSets.add(configSet);
 				}
-				beansProject.setConfigSets(configSets);
+				beansProject.setConfigSets(configSets, true);
 				BeansUILabelDecorator.update();
 				treeViewer.reveal(configSetNode);
 			}
@@ -245,15 +245,14 @@ public final class BeansViewUtils {
 	 * @param rootNode
 	 *            the rootNode under which they're added
 	 */
-	public static final void addProjectNodes(TreeViewer treeViewer,
+	public static void addProjectNodes(TreeViewer treeViewer,
 			ProjectNode[] projectNodes, RootNode rootNode) {
 		for (int i = 0; i < projectNodes.length; i++) {
-
 			SpringCoreUtils.addProjectNature(projectNodes[i].getProject()
 					.getProject(), SpringCore.NATURE_ID);
 			projectNodes[i].setParent(rootNode);
 			rootNode.addProject(projectNodes[i].getName(), new ArrayList(),
-					new ArrayList());
+								new ArrayList(), new ArrayList());
 			BeansUILabelDecorator.update();
 			treeViewer.add(rootNode, projectNodes[i]);
 			treeViewer.reveal(projectNodes[i]);
@@ -267,7 +266,7 @@ public final class BeansViewUtils {
 	 *            the original table
 	 * @return a ConfigNode[] table
 	 */
-	public static final ConfigNode[] castToConfigNodes(INode[] nodes) {
+	public static ConfigNode[] castToConfigNodes(INode[] nodes) {
 		ConfigNode[] configNodes = new ConfigNode[nodes.length];
 		for (int i = 0; i < nodes.length; i++) {
 			configNodes[i] = (ConfigNode) nodes[i];
@@ -275,7 +274,7 @@ public final class BeansViewUtils {
 		return configNodes;
 	}
 
-	public static final int getResourcesCommonType(IResource[] resources) {
+	public static int getResourcesCommonType(IResource[] resources) {
 		int result = IResource.NONE;
 		for (int i = 0; i < resources.length; i++) {
 			IResource resource = resources[i];
@@ -291,7 +290,7 @@ public final class BeansViewUtils {
 		return result;
 	}
 
-	public static final boolean areResourcesFromTheSameProject(
+	public static boolean areResourcesFromTheSameProject(
 			IResource[] resources) {
 		String projectId = null;
 		for (int i = 0; i < resources.length; i++) {
@@ -304,7 +303,7 @@ public final class BeansViewUtils {
 		return true;
 	}
 
-	public static final boolean areAllResourcesJavaProjects(
+	public static boolean areAllResourcesJavaProjects(
 			IResource[] resources) {
 		for (int i = 0; i < resources.length; i++) {
 			if (!SpringCoreUtils.isJavaProject(resources[i])) {
@@ -314,7 +313,7 @@ public final class BeansViewUtils {
 		return true;
 	}
 
-	public static final boolean areAllResourcesCompilationUnits(
+	public static boolean areAllResourcesCompilationUnits(
 			IResource[] resources) {
 		for (int i = 0; i < resources.length; i++) {
 			if (!isCompilationUnit(resources[i])) {
@@ -324,25 +323,27 @@ public final class BeansViewUtils {
 		return true;
 	}
 
-	public static final boolean areAllResourcesXmlFiles(IResource[] resources) {
+	public static boolean areAllResourcesConfigFiles(IResource[] resources,
+													 IBeansProject project) {
 		for (int i = 0; i < resources.length; i++) {
-			if (!isXmlFile(resources[i])) {
+			if (!hasConfigFileExtension(resources[i], project)) {
 				return false;
 			}
 		}
 		return true;
 	}
 
-	public static final boolean isCompilationUnit(IResource resource) {
+	public static boolean isCompilationUnit(IResource resource) {
 		if (resource.getAdapter(ICompilationUnit.class) != null) {
 			return true;
 		}
 		return false;
 	}
 
-	public static final boolean isXmlFile(IResource resource) {
+	public static boolean hasConfigFileExtension(IResource resource,
+												 IBeansProject project) {
 		if (resource instanceof IFile &&
-					IBeansConfig.DEFAULT_FILE_EXTENSION.equalsIgnoreCase(
+					project.hasConfigExtension(
 							((IFile) resource).getFileExtension())) {
 			return true;
 		}

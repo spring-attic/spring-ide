@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.resource.JFaceColors;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -50,23 +51,24 @@ import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
 import org.springframework.ide.eclipse.beans.ui.model.ModelLabelDecorator;
 import org.springframework.ide.eclipse.beans.ui.model.ModelSorter;
 import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class ConfigSetDialog extends Dialog {
 
-	private static final String TITLE_NEW = "ConfigSetDialog.title.new";
-	private static final String TITLE_EDIT = "ConfigSetDialog.title.edit";
+	private static final String PREFIX = "ConfigSetDialog.";
+
+	private static final String TITLE_NEW = PREFIX + "title.new";
+	private static final String TITLE_EDIT = PREFIX + "title.edit";
 	private static final String ERROR_INVALID_NAME =
-											"ConfigSetDialog.error.invalidName";
-	private static final String ERROR_USED_NAME =
-											   "ConfigSetDialog.error.usedName";
-	private static final String NAME_TEXT_LABEL =
-											   "ConfigSetDialog.nameText.label";
-	private static final String OVERRIDE_TEXT_LABEL =
-										   "ConfigSetDialog.overrideText.label";
-	private static final String INCOMPLETE_TEXT_LABEL =
-										   "ConfigSetDialog.incompleteText.label";
+												  PREFIX + "error.invalidName";
+	private static final String ERROR_USED_NAME = PREFIX + "error.usedName";
+	private static final String NAME_LABEL = PREFIX + "name.label";
+	private static final int NAME_LIMIT = 30; 
+	private static final String OVERRIDE_LABEL = PREFIX + "override.label";
+	private static final String INCOMPLETE_LABEL = PREFIX + "incomplete.label";
+	private static final String VIEWER_LABEL = PREFIX + "viewer.label";
+	private static final int LIST_VIEWER_WIDTH = 400;
 	private static final int LIST_VIEWER_HEIGHT = 250;
-	private static final int LIST_VIEWER_WIDTH = 300;
 
 	private Text nameText;
 	private Button overrideButton;
@@ -102,22 +104,22 @@ public class ConfigSetDialog extends Dialog {
 	}
 
 	protected Control createDialogArea(Composite parent) {
- 		// create composite    
+
+		// group composite for options
 		Composite composite = (Composite) super.createDialogArea(parent);
-
-		// create labeled name text field
-		Composite nameGroup = new Composite(composite, SWT.NULL);
-		nameGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		Composite optionsGroup = new Composite(composite, SWT.NULL);
+		optionsGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		GridLayout layout = new GridLayout();
-		layout.numColumns = 2;
-		layout.marginWidth = 0;
-		nameGroup.setLayout(layout);
+		layout.marginHeight = convertVerticalDLUsToPixels( 
+											 IDialogConstants.VERTICAL_MARGIN); 
+		layout.marginWidth = convertHorizontalDLUsToPixels( 
+										   IDialogConstants.HORIZONTAL_MARGIN); 
+		optionsGroup.setLayout(layout); 
+		optionsGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL)); 
 
-		Label nameLabel = new Label(nameGroup, SWT.NONE);
-		nameLabel.setText(BeansUIPlugin.getResourceString(NAME_TEXT_LABEL));
-
-		nameText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
-		nameText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		// labeled name text field
+		nameText = SpringUIUtils.createTextField(optionsGroup, 
+					  BeansUIPlugin.getResourceString(NAME_LABEL), NAME_LIMIT); 
 		nameText.addModifyListener(
 			new ModifyListener() {
 				public void modifyText(ModifyEvent e) {
@@ -126,22 +128,31 @@ public class ConfigSetDialog extends Dialog {
 			}
 		);
 
-		// create group of labeled checkboxes
+		// labeled checkboxes
 		Composite checkboxGroup = new Composite(composite, SWT.NULL);
 		checkboxGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		overrideButton = createCheckBox(checkboxGroup,
-						  BeansUIPlugin.getResourceString(OVERRIDE_TEXT_LABEL));
+		overrideButton = SpringUIUtils.createCheckBox(checkboxGroup, 
+							  BeansUIPlugin.getResourceString(OVERRIDE_LABEL));
 		overrideButton.setSelection(configSet.isOverrideEnabled());
 
-		incompleteButton = createCheckBox(checkboxGroup,
-						BeansUIPlugin.getResourceString(INCOMPLETE_TEXT_LABEL));
+		incompleteButton = SpringUIUtils.createCheckBox(checkboxGroup, 
+							BeansUIPlugin.getResourceString(INCOMPLETE_LABEL));
 		incompleteButton.setSelection(configSet.isIncomplete());
 
 		// config set list viewer
-		configsViewer = CheckboxTableViewer.newCheckList(composite, SWT.BORDER);
-		GridData gd = new GridData(GridData.FILL_BOTH);
+		Label viewerLabel = new Label(optionsGroup, SWT.NONE);
+		GridData gd = new GridData(GridData.GRAB_HORIZONTAL | 
+											   GridData.HORIZONTAL_ALIGN_FILL); 
+		gd.verticalIndent = 15; 
+		viewerLabel.setLayoutData(gd); 
+		viewerLabel.setText(BeansUIPlugin.getResourceString(VIEWER_LABEL)); 
+
+		configsViewer = CheckboxTableViewer.newCheckList(optionsGroup, 
+														 SWT.BORDER); 
+		gd = new GridData(GridData.FILL_BOTH);
 		gd.widthHint = LIST_VIEWER_WIDTH;
 		gd.heightHint = LIST_VIEWER_HEIGHT;
+
 		configsViewer.getTable().setLayoutData(gd);
 		configsViewer.setContentProvider(new ConfigFilesContentProvider(
 														   createConfigList()));
@@ -154,23 +165,11 @@ public class ConfigSetDialog extends Dialog {
 		// error label
 		errorLabel = new Label(composite, SWT.NONE);
 		errorLabel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL |
-											   GridData.HORIZONTAL_ALIGN_FILL));
-		applyDialogFont(composite);		
-		return composite;
-	}
-
-	protected Button createCheckBox(Composite group, String labelText) {
-		GridLayout layout = new GridLayout();
-		layout.numColumns = 2;
-		layout.marginWidth = 0;
-		group.setLayout(layout);
-
-		Button button = new Button(group, SWT.CHECK);
-
-		Label label = new Label(group, SWT.NONE);
-		label.setText(labelText);
-
-		return button;
+											  GridData.HORIZONTAL_ALIGN_FILL));
+		errorLabel.setForeground(JFaceColors.getErrorText(parent.getDisplay()));
+		errorLabel.setBackground(
+						  JFaceColors.getErrorBackground(parent.getDisplay()));
+		return super.createDialogArea(parent);
 	}
 
 	protected void createButtonsForButtonBar(Composite parent) {
@@ -274,6 +273,7 @@ public class ConfigSetDialog extends Dialog {
 				isEnabled = true;
 			}
 		} else {
+			errorLabel.setText("");
 			isEnabled = true;
 		}
 

@@ -32,6 +32,8 @@ import org.springframework.ide.eclipse.beans.ui.views.BeansView;
 
 /**
  * The root node of an Spring view node tree.
+ *
+ * @author Torsten Juergeleit
  */
 public class RootNode extends AbstractNode {
 
@@ -70,8 +72,8 @@ public class RootNode extends AbstractNode {
 		Iterator projects = BeansCorePlugin.getModel().getProjects().iterator();
 		while (projects.hasNext()) {
 			IBeansProject project = (IBeansProject) projects.next();
-			addProject(project.getElementName(), project.getConfigNames(),
-					   project.getConfigSets());
+			addProject(project.getElementName(), project.getConfigExtensions(),
+					   project.getConfigs(), project.getConfigSets());
 		}
 	}
 
@@ -106,14 +108,15 @@ public class RootNode extends AbstractNode {
 	/**
 	 * Adds a new Spring project to this root node.
 	 */
-	public void addProject(String project, Collection configs,
-						   Collection configSets) {
+	public void addProject(String project, Collection configExtensions,
+						   Collection configs, Collection configSets) {
 		ProjectNode node = getProject(project);
 		if (node == null) {
 			node = new ProjectNode(this, project);
 			projects.put(project, node);
 			propertyChanged(this, PROJECTS);
 		}
+		node.setConfigExtensions(configExtensions);
 		node.setConfigs(configs);
 		node.setConfigSets(configSets);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,16 +39,16 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.IPropertyListener;
+import org.springframework.ide.eclipse.beans.ui.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
 import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
 import org.springframework.ide.eclipse.beans.ui.model.INode;
 import org.springframework.ide.eclipse.beans.ui.model.ModelLabelDecorator;
-import org.springframework.ide.eclipse.beans.ui.model.ModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
-public class ConfigSetsBlock {
+public class ConfigSetsTab {
 
 	private static final int TABLE_WIDTH = 250;
 	private static final String DESCRIPTION =
@@ -64,6 +64,7 @@ public class ConfigSetsBlock {
 	private static final String DOWN_BUTTON =
 						   "ConfigurationPropertyPage.tabConfigSets.downButton";
 	private ProjectNode project;
+	private Object element;
 	private List configSets;
 	private Tree configSetsTree;
 	private TreeViewer configSetsViewer;
@@ -84,8 +85,10 @@ public class ConfigSetsBlock {
 
 	private boolean hasUserMadeChanges;
 
-	public ConfigSetsBlock(ProjectNode project, IAdaptable element) {
+	public ConfigSetsTab(ProjectNode project, IAdaptable element) {
 		this.project = project;
+		this.element = element;
+
 		this.project.addPropertyListener(propertyListener);
 	}
 
@@ -130,11 +133,11 @@ public class ConfigSetsBlock {
 		});
 		configSetsViewer = new TreeViewer(configSetsTree);
 		configSetsViewer.setContentProvider(new ProjectContentProvider(
-																	  project));
+																	 project));
 		configSetsViewer.setLabelProvider(new DecoratingLabelProvider(
-						  new ModelLabelProvider(), new ModelLabelDecorator()));
+					new BeansModelLabelProvider(), new ModelLabelDecorator()));
 		configSetsViewer.setSorter(new ConfigSetsSorter());
-		configSetsViewer.setInput(this);	// activate content provider
+		configSetsViewer.setInput(element);	// activate content provider
 		configSetsViewer.expandToLevel(project, 1);
 		configSetsViewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
@@ -150,17 +153,19 @@ public class ConfigSetsBlock {
 		buttonArea.setLayout(layout);
 		buttonArea.setLayoutData(new GridData(GridData.FILL_VERTICAL));
 		newButton = SpringUIUtils.createButton(buttonArea,
-			 BeansUIPlugin.getResourceString(NEW_BUTTON), true, buttonListener);
+				  BeansUIPlugin.getResourceString(NEW_BUTTON), buttonListener);
 		editButton = SpringUIUtils.createButton(buttonArea,
-			BeansUIPlugin.getResourceString(EDIT_BUTTON), false, buttonListener);
+				  BeansUIPlugin.getResourceString(EDIT_BUTTON), buttonListener,
+				  0, false);
 		removeButton = SpringUIUtils.createButton(buttonArea,
-		 				  BeansUIPlugin.getResourceString(REMOVE_BUTTON), false,
-		 				  buttonListener);
+		 		BeansUIPlugin.getResourceString(REMOVE_BUTTON), buttonListener,
+		 		0, false);
 		upButton = SpringUIUtils.createButton(buttonArea,
-			 BeansUIPlugin.getResourceString(UP_BUTTON), false, buttonListener);
+					BeansUIPlugin.getResourceString(UP_BUTTON), buttonListener,
+					0, false);
 		downButton = SpringUIUtils.createButton(buttonArea,
-							BeansUIPlugin.getResourceString(DOWN_BUTTON), false,
-							buttonListener);
+				  BeansUIPlugin.getResourceString(DOWN_BUTTON), buttonListener,
+				  0, false);
 		return composite;
 	}
 
