@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,20 @@ import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
 import org.springframework.ide.eclipse.beans.ui.model.INode;
 import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
 
-public class ProjectContentProvider implements ITreeContentProvider {
+/**
+ * This content provider is used to display a tree of the beans config sets
+ * (and their beans configs) within a given project. 
+ *
+ * @author Torsten Juergeleit
+ * @see org.springframework.ide.eclipse.beans.ui.properties.ConfigSetDialog
+ */
+public class ConfigSetContentProvider implements ITreeContentProvider {
+
+	private static final Object[] NO_CHILDREN = new Object[0];
 
 	private ProjectNode project;
 
-	public ProjectContentProvider(ProjectNode project) {
+	public ConfigSetContentProvider(ProjectNode project) {
 		this.project = project;
 	}
 
@@ -38,7 +47,7 @@ public class ProjectContentProvider implements ITreeContentProvider {
 	}
 
 	public Object[] getElements(Object obj) {
-		return getChildren(null);
+		return getChildren(project);
 	}
 
 	public Object[] getChildren(Object parentElement) {
@@ -53,11 +62,11 @@ public class ProjectContentProvider implements ITreeContentProvider {
 		} else if (parentElement instanceof ConfigNode) {
 			return new Object[0];
 		}
-		return new Object[] { project };
+		return NO_CHILDREN;
 	}
 
 	public Object getParent(Object element) {
-		if (!(element instanceof ProjectNode)) {
+		if (!(element instanceof ConfigSetNode)) {
 			return ((INode) element).getParent();
 		}
 		return null;

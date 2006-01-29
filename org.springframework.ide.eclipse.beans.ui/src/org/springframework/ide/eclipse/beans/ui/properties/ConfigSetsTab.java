@@ -132,7 +132,7 @@ public class ConfigSetsTab {
 			}
 		});
 		configSetsViewer = new TreeViewer(configSetsTree);
-		configSetsViewer.setContentProvider(new ProjectContentProvider(
+		configSetsViewer.setContentProvider(new ConfigSetContentProvider(
 																	 project));
 		configSetsViewer.setLabelProvider(new DecoratingLabelProvider(
 					new BeansModelLabelProvider(), new ModelLabelDecorator()));
