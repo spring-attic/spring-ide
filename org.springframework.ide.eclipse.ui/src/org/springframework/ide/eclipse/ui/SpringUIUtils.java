@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,13 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -49,6 +52,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 public class SpringUIUtils {
 
@@ -66,28 +70,75 @@ public class SpringUIUtils {
 	}
 
 	/**
-	 * Returns a button with the given label, id, enablement and selection
-	 * listener.
+	 * Returns a button with the given label and selection listener.
 	 */
-	public static final Button createButton(Composite parent, String label,
-							boolean enabled, SelectionListener buttonListener) {
+	public static final Button createButton(Composite parent, String labelText,
+											SelectionListener listener) {
+		return createButton(parent, labelText, listener, 0, true);
+	}
+
+	/**
+	 * Returns a button with the given label, indentation, enablement and
+	 * selection listener.
+	 */
+	public static final Button createButton(Composite parent, String labelText,
+				SelectionListener listener, int indentation, boolean enabled) {
 		Button button = new Button(parent, SWT.PUSH);
 		button.setFont(parent.getFont());
-		button.setText(label);
+		button.setText(labelText);
+		button.addSelectionListener(listener);
 		button.setEnabled(enabled);
-		button.addSelectionListener(buttonListener);
 
-		// calculate button layout
 		FontMetrics fontMetrics = getFontMetrics(button);
-		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		int widthHint = Dialog.convertHorizontalDLUsToPixels(fontMetrics,
 												 IDialogConstants.BUTTON_WIDTH);
-		data.widthHint = Math.max(widthHint, button.computeSize(SWT.DEFAULT,
+		gd.widthHint = Math.max(widthHint, button.computeSize(SWT.DEFAULT,
 														  SWT.DEFAULT, true).x);
-		data.heightHint = Dialog.convertVerticalDLUsToPixels(fontMetrics,
-												IDialogConstants.BUTTON_HEIGHT);
-		button.setLayoutData(data);
+		gd.horizontalIndent = indentation;
+		button.setLayoutData(gd);
 		return button;
+	}
+	
+	/**
+	 * Returns a check box with the given label.
+	 */
+	public static final Button createCheckBox(Composite parent,
+											  String labelText) {
+		Button button = new Button(parent, SWT.CHECK);
+		button.setFont(parent.getFont());
+		button.setText(labelText);
+		button.setLayoutData(new GridData(
+										 GridData.HORIZONTAL_ALIGN_BEGINNING));
+		return button;
+	}
+
+	/**
+	 * Returns a text field with the given label and limit.
+	 */
+	public static final Text createTextField(Composite parent,
+							  				 String labelText, int textLimit) {
+		Composite textArea = new Composite(parent, SWT.NULL);
+		GridLayout layout = new GridLayout();
+		layout.numColumns = 2;
+		layout.marginWidth = 0;
+		textArea.setLayout(layout);
+		textArea.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		Label label = new Label(textArea, SWT.NONE);
+		label.setText(labelText);
+		label.setFont(parent.getFont());
+		
+		Text text = new Text(textArea, SWT.BORDER | SWT.SINGLE);
+		text.setFont(parent.getFont());
+		GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		if (textLimit > 0) {
+			text.setTextLimit(textLimit);
+			gd.widthHint = Dialog.convertWidthInCharsToPixels(
+										  getFontMetrics(text), textLimit + 1);
+		}
+		text.setLayoutData(gd);
+		return text;
 	}
 
 	/**
@@ -153,6 +204,17 @@ public class SpringUIUtils {
 		}
 		return null;
     }
+
+	/**
+	 * Opens given model element in associated editor.
+	 */
+	public static final IEditorPart openInEditor(ISourceModelElement element) {
+		IFile file = (IFile) element.getElementResource();
+		if (file != null) {
+			return openInEditor(file, element.getElementStartLine());
+		}
+		return null;
+	}
 
 	/**
 	 * Opens given file in associated editor and go to specified line (if > 0).
