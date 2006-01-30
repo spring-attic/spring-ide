@@ -245,7 +245,7 @@ public class ConfigSetDialog extends Dialog {
 					while (iter.hasNext()) {
 						IBeansConfig config = (IBeansConfig) iter.next();
 						String path = config.getConfigPath();
-						if (!configSet.hasConfig(path)) {
+						if (path != null && !configSet.hasConfig(path)) {
 							configs.add(new ConfigNode(configSet, path));
 						}
 					}
