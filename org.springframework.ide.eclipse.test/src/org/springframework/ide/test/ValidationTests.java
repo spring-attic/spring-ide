@@ -217,7 +217,7 @@ public class ValidationTests extends AbstractSpringIdeTest {
         Collection c = beansProject.getConfigSets();
         ArrayList l = new ArrayList(c);
         l.add(b);
-        beansProject.setConfigSets(l);
+        beansProject.setConfigSets(l, true);
         updateTestFile(xmlFolder,"b.xml");
         project.waitForAutoBuild();
        
