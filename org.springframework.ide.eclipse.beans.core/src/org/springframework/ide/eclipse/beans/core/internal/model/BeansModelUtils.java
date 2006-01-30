@@ -790,4 +790,21 @@ public class BeansModelUtils {
 			}
 		}
 	}
+
+	/**
+	 * Returns the child of given parent element's subtree the specified
+	 * element belongs to. If the given element does not belong to the subtree
+	 * of the specified parent element <code>null</code> is returned.
+	 */
+	public static final IModelElement getChildForElement(IModelElement parent,
+													   IModelElement element) {
+		while (element != null) {
+			IModelElement elementParent = element.getElementParent();
+			if (parent.equals(elementParent)) {
+				return element;
+			}
+			element = elementParent;
+		}
+		return null;
+	}
 }
