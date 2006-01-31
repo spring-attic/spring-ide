@@ -62,7 +62,9 @@ public class BeansSearchContentProvider implements ITreeContentProvider,
 			IModelElement element = (IModelElement) matches[i];
 			IModelElement project = BeansModelUtils.getChildForElement(
 										  BeansCorePlugin.getModel(), element);
-			projects.add(project);
+			if (!projects.contains(project)) {
+				projects.add(project);
+			}
 		}
 		return (IModelElement[])
 						  projects.toArray(new IModelElement[projects.size()]);
@@ -81,7 +83,7 @@ public class BeansSearchContentProvider implements ITreeContentProvider,
 			IModelElement element = (IModelElement) matches[i];
 			IModelElement child = BeansModelUtils.getChildForElement(
 									   (IModelElement) parentElement, element);
-			if (child != null) {
+			if (child != null && !childs.contains(child)) {
 				childs.add(child);
 			}
 		}
