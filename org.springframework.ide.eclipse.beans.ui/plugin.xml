@@ -134,7 +134,6 @@
       <decorator
             lightweight="true"
             location="TOP_RIGHT"
-            adaptable="true"
             label="%decorator.label"
             state="true"
             class="org.springframework.ide.eclipse.beans.ui.BeansUILabelDecorator"
