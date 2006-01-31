@@ -155,29 +155,33 @@ public class BeansModelUtils {
 			Collection beans = ((IBeansConfigSet) context).getBeans();
 			addBeanReferences(beans, beanID, context, references);
 		} else if (context instanceof IBeansProject) {
-			Iterator configs = ((IBeansProject)
-											  context).getConfigs().iterator();
-			while (configs.hasNext()) {
-				IBeansConfig config = (IBeansConfig) configs.next();
-				Collection beans = config.getBeans();
-				addBeanReferences(beans, beanID, config, references);
-			}
+			addBeanReferences(beanID, (IBeansProject) context, references);
 		} else if (context instanceof IBeansModel) {
 			Iterator projects = ((IBeansModel)
 											 context).getProjects().iterator();
 			while (projects.hasNext()) {
 				IBeansProject project = (IBeansProject) projects.next();
-				Iterator configs = project.getConfigs().iterator();
-				while (configs.hasNext()) {
-					IBeansConfig config = (IBeansConfig) configs.next();
-					addBeanReferences(beanID, config, references);
-				}
+				addBeanReferences(beanID, project, references);
 			}
 		} else {
 			throw new IllegalArgumentException("Unsupported context " +
 											   context);
 		}
 		return references;
+	}
+
+	/**
+	 * Check all beans from given project's configs for a reference to a bean
+	 * with given ID and add these references to the specified list.
+	 */
+	private static void addBeanReferences(String beanID, IBeansProject project,
+										  List references) {
+		Iterator configs = project.getConfigs().iterator();
+		while (configs.hasNext()) {
+			IBeansConfig config = (IBeansConfig) configs.next();
+			Collection beans = config.getBeans();
+			addBeanReferences(beans, beanID, config, references);
+		}
 	}
 
 	/**
