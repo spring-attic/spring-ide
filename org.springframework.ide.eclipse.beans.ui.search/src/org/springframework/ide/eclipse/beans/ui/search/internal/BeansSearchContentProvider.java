@@ -56,11 +56,12 @@ public class BeansSearchContentProvider implements ITreeContentProvider,
 		}
 
 		// Create list of projects the matched beans belong to
-		BeansMatch[] matches = (BeansMatch[]) result.getElements();
+		Object[] matches = result.getElements();
 		List projects = new ArrayList();
 		for (int i = 0; i < matches.length; i++) {
+			IModelElement element = (IModelElement) matches[i];
 			IModelElement project = BeansModelUtils.getChildForElement(
-						  BeansCorePlugin.getModel(), matches[i].getElement());
+										  BeansCorePlugin.getModel(), element);
 			projects.add(project);
 		}
 		return (IModelElement[])
@@ -74,11 +75,12 @@ public class BeansSearchContentProvider implements ITreeContentProvider,
 
 		// Create list of matched element's child elements which belong to
 		// given parent element
-		BeansMatch[] matches = (BeansMatch[]) result.getElements();
+		Object[] matches = result.getElements();
 		List childs = new ArrayList();
 		for (int i = 0; i < matches.length; i++) {
+			IModelElement element = (IModelElement) matches[i];
 			IModelElement child = BeansModelUtils.getChildForElement(
-				   (IModelElement) parentElement, matches[i].getElement());
+									   (IModelElement) parentElement, element);
 			if (child != null) {
 				childs.add(child);
 			}

@@ -16,28 +16,60 @@
 
 package org.springframework.ide.eclipse.beans.ui.search.internal;
 
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
+import org.eclipse.search.ui.text.Match;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.ui.search.BeansSearchPlugin;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
  * @author Torsten Juergeleit
  */
 public class BeansReferenceQuery implements ISearchQuery {
 
-	private AbstractTextSearchResult result;
+	private ISearchResult result;
 	private String reference;
 
 	public BeansReferenceQuery(String reference) {
-		reference = this.reference;
+		this.reference = reference;
+	}
+
+	public String getReference() {
+		return reference;
 	}
 
 	public IStatus run(IProgressMonitor monitor) {
-		result.removeAll();
+		AbstractTextSearchResult textResult = (AbstractTextSearchResult)
+															 getSearchResult();
+		textResult.removeAll();
+		List references = BeansModelUtils.getBeanReferences(reference,
+												   BeansCorePlugin.getModel());
+		for (Iterator iter = references.iterator(); iter.hasNext();) {
+			BeanReference reference = (BeanReference) iter.next();
+			IModelElement element = reference.getSource();
+			int startLine = -1;
+			int lines = -1;
+			if (element instanceof ISourceModelElement) {
+				ISourceModelElement sourceElement = (ISourceModelElement)
+																	   element;
+				startLine = sourceElement.getElementStartLine();
+				lines = sourceElement.getElementEndLine() - startLine + 1;
+			}
+			textResult.addMatch(new Match(element, Match.UNIT_LINE,
+										  startLine, lines));
+		}
+
 		return new MultiStatus(BeansSearchPlugin.PLUGIN_ID, IStatus.OK,
 				"Search message", null);
 	}

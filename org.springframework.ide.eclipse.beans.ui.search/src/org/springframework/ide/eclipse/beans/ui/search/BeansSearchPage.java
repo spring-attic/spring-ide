@@ -363,12 +363,12 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 			/*collator = new BeanTypeSearcher(getType(), _includeSubtypesCheckbox
 					.getSelection(), scope);*/
 		}
-		if (_refSearch.getSelection()) {
+//		if (_refSearch.getSelection()) {
 			collator = new BeansReferenceQuery(_reference);
 			if (!_refHistory.contains(_reference)) {
 				_refHistory.add(_reference);
 			}
-		}
+//		}
 		NewSearchUI.activateSearchResultView();
 		IRunnableContext ctx = new ProgressMonitorDialog(new Shell());
 		NewSearchUI.runQueryInBackground(collator);

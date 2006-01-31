@@ -30,7 +30,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
-import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
@@ -81,14 +80,11 @@ public class BeansSearchResult extends AbstractTextSearchResult implements
 	}
 
 	public IFile getFile(Object element) {
-		if (element instanceof BeansMatch) {
-			IModelElement elem = ((BeansMatch) element).getElement();
-			if (elem instanceof ISourceModelElement) {
-				IResource resource = ((ISourceModelElement)
-													elem).getElementResource();
-				if (resource instanceof IFile) {
-					return (IFile) resource;
-				}
+		if (element instanceof ISourceModelElement) {
+			IResource resource = ((ISourceModelElement)
+												 element).getElementResource();
+			if (resource instanceof IFile) {
+				return (IFile) resource;
 			}
 		}
 		return null;
