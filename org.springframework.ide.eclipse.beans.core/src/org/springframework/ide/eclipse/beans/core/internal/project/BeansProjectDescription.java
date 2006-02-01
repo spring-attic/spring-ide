@@ -132,12 +132,18 @@ public class BeansProjectDescription {
 	public void removeConfig(IFile file) {
 		removeConfig(file.getProjectRelativePath().toString());
 	}
-
+	
 	public void removeConfig(String name) {
 		configNames.remove(name);
 		configs.remove(name);
+		removeConfigFromConfigSets(name);
+	}
 
-		// Remove given config name from any config set
+	public void removeExternalConfig(IFile file) {
+		removeConfigFromConfigSets(file.getFullPath().toString());
+	}
+
+	private void removeConfigFromConfigSets(String name) {
 		Iterator iter = configSets.values().iterator();
 		while (iter.hasNext()) {
 			BeansConfigSet configSet = (BeansConfigSet) iter.next();

@@ -117,8 +117,8 @@ public class BeansProject extends AbstractResourceModelElement
 	}
 
 	/**
-	 * Remove the given beans config from the list of configs.
-	 * Optionally (by setting <code>doSaveDescription</code> to
+	 * Remove the given beans config from the list of configs and from all
+	 * config sets. Optionally (by setting <code>doSaveDescription</code> to
 	 * <code>true</code> the modified project description is saved to disk.
 	 * @param file  the config file to remove
 	 * @param doSaveDescription  if <code>true</code> then the project's
@@ -127,6 +127,7 @@ public class BeansProject extends AbstractResourceModelElement
 	 */
 	public void removeConfig(IFile file, boolean doSaveDescription) {
 		getDescription().removeConfig(file);
+		getDescription().removeExternalConfig(file);
 		if (doSaveDescription) {
 			BeansProjectDescriptionWriter.write(project, getDescription());
 		}

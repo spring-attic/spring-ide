@@ -392,6 +392,15 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 												projects.get(file.getProject());
 			BeansConfig config = (BeansConfig) project.getConfig(file);
 			project.removeConfig(file, true);
+
+			// Remove config from config sets where referenced as external
+			// config
+			Iterator iter = projects.values().iterator();
+			while (iter.hasNext()) {
+				project = (BeansProject) iter.next();
+				project.removeConfig(file, true);
+				
+			}
 			notifyListeners(config, ModelChangeEvent.REMOVED);
 		}
 
