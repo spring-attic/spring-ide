@@ -27,6 +27,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
@@ -79,14 +80,17 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 									  new IModelElement[getProjects().size()]);
 	}
 
-	public void accept(IModelElementVisitor visitor) {
+	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 
 		// Ask this model's projects
 		synchronized (projects) {
 			Iterator iter = projects.values().iterator();
 			while (iter.hasNext()) {
 				IModelElement element = (IModelElement) iter.next();
-				element.accept(visitor);
+				element.accept(visitor, monitor);
+				if (monitor.isCanceled()) {
+					return;
+				}
 			}
 		}
 	}

@@ -30,6 +30,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
@@ -54,6 +55,8 @@ import org.w3c.dom.Element;
 
 /**
  * This class defines a Spring beans configuration.
+ *
+ * @author Torsten Juergeleit
  */
 public class BeansConfig extends AbstractResourceModelElement
 													  implements IBeansConfig {
@@ -103,16 +106,19 @@ public class BeansConfig extends AbstractResourceModelElement
 		return file;
 	}
 
-	public void accept(IModelElementVisitor visitor) {
+	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 
 		// First visit this project
-		if (visitor.visit(this)) {
+		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
 			// Now ask this configs's beans
 			Iterator iter = beans.iterator();
 			while (iter.hasNext()) {
 				IModelElement element = (IModelElement) iter.next();
-				element.accept(visitor);
+				element.accept(visitor, monitor);
+				if (monitor.isCanceled()) {
+					return;
+				}
 			}
 		}
 	}

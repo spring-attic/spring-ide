@@ -26,6 +26,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescription;
@@ -69,23 +70,29 @@ public class BeansProject extends AbstractResourceModelElement
 		return project;
 	}
 
-	public void accept(IModelElementVisitor visitor) {
+	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 
 		// First visit this project
-		if (visitor.visit(this)) {
+		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
 			// Now ask this project's configs
 			Iterator iter = getDescription().getConfigs().iterator();
 			while (iter.hasNext()) {
 				IModelElement element = (IModelElement) iter.next();
-				element.accept(visitor);
+				element.accept(visitor, monitor);
+				if (monitor.isCanceled()) {
+					return;
+				}
 			}
 
 			// Finally ask this project's config sets
 			iter = getDescription().getConfigSets().iterator();
 			while (iter.hasNext()) {
 				IModelElement element = (IModelElement) iter.next();
-				element.accept(visitor);
+				element.accept(visitor, monitor);
+				if (monitor.isCanceled()) {
+					return;
+				}
 			}
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -41,6 +42,8 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
  * Parser data for a Spring bean.
+ *
+ * @author Torsten Juergeleit
  */
 public class Bean extends AbstractSourceModelElement implements IBean {
 
@@ -78,30 +81,39 @@ public class Bean extends AbstractSourceModelElement implements IBean {
 		return null;
 	}
 
-	public void accept(IModelElementVisitor visitor) {
+	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 
 		// First visit this bean
-		if (visitor.visit(this)) {
+		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
 			// Now ask this beans's constructor arguments
 			Iterator iter = constructorArguments.iterator();
 			while (iter.hasNext()) {
 				IModelElement element = (IModelElement) iter.next();
-				element.accept(visitor);
+				element.accept(visitor, monitor);
+				if (monitor.isCanceled()) {
+					return;
+				}
 			}
 
 			// The ask this beans's properties
 			iter = properties.iterator();
 			while (iter.hasNext()) {
 				IModelElement element = (IModelElement) iter.next();
-				element.accept(visitor);
+				element.accept(visitor, monitor);
+				if (monitor.isCanceled()) {
+					return;
+				}
 			}
 
 			// Finally ask this bean's inner beans
 			iter = innerBeans.iterator();
 			while (iter.hasNext()) {
 				IModelElement element = (IModelElement) iter.next();
-				element.accept(visitor);
+				element.accept(visitor, monitor);
+				if (monitor.isCanceled()) {
+					return;
+				}
 			}
 		}
 	}
