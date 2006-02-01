@@ -112,7 +112,7 @@ public class BeansConfig extends AbstractResourceModelElement
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
 			// Now ask this configs's beans
-			Iterator iter = beans.iterator();
+			Iterator iter = getBeans().iterator();
 			while (iter.hasNext()) {
 				IModelElement element = (IModelElement) iter.next();
 				element.accept(visitor, monitor);
