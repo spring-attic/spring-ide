@@ -24,7 +24,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * Usage:
  * <pre>
  * class Visitor implements IModelElementVisitor {
- *    public boolean visit(IModelElement element) {
+ *    public boolean visit(IModelElement element, IProgressMonitor) {
  *       // your code here
  *       return true;
  *    }
