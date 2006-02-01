@@ -16,29 +16,31 @@
 
 package org.springframework.ide.eclipse.beans.ui.search.internal;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.search.ui.ISearchQuery;
-import org.eclipse.search.ui.ISearchResult;
-import org.eclipse.search.ui.text.AbstractTextSearchResult;
-import org.eclipse.search.ui.text.Match;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.LookupOverride;
+import org.springframework.beans.factory.support.MethodOverride;
+import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
-import org.springframework.ide.eclipse.beans.ui.search.BeansSearchPlugin;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
+import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.core.model.ISourceModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 
 /**
  * @author Torsten Juergeleit
  */
-public class BeansReferenceQuery implements ISearchQuery {
+public class BeansReferenceQuery extends AbstractBeansQuery {
 
-	private ISearchResult result;
 	private String reference;
 
 	public BeansReferenceQuery(String reference) {
@@ -49,47 +51,126 @@ public class BeansReferenceQuery implements ISearchQuery {
 		return reference;
 	}
 
-	public IStatus run(IProgressMonitor monitor) {
-		AbstractTextSearchResult textResult = (AbstractTextSearchResult)
-															 getSearchResult();
-		textResult.removeAll();
-		List references = BeansModelUtils.getBeanReferences(reference,
-												   BeansCorePlugin.getModel());
-		for (Iterator iter = references.iterator(); iter.hasNext();) {
-			BeanReference reference = (BeanReference) iter.next();
-			IModelElement element = reference.getSource();
-			int startLine = -1;
-			int lines = -1;
-			if (element instanceof ISourceModelElement) {
-				ISourceModelElement sourceElement = (ISourceModelElement)
-																	   element;
-				startLine = sourceElement.getElementStartLine();
-				lines = sourceElement.getElementEndLine() - startLine + 1;
+	protected List getMatchedElements(IProgressMonitor monitor) {
+		final List elements = new ArrayList();
+		IModelElementVisitor visitor = new IModelElementVisitor() {
+			public boolean visit(IModelElement element,
+								 IProgressMonitor monitor) {
+				
+				if (doesMatch(element)) {
+					elements.add(element);
+				}
+				return true;
 			}
-			textResult.addMatch(new Match(element, Match.UNIT_LINE,
-										  startLine, lines));
-		}
+		};
+		BeansCorePlugin.getModel().accept(visitor, monitor);
+		return elements;
+	}
 
-		return new MultiStatus(BeansSearchPlugin.PLUGIN_ID, IStatus.OK,
-				"Search message", null);
+	private boolean doesMatch(IModelElement element) {
+		if (element instanceof IBean) {
+			IBean bean = (IBean) element;
+
+			// Compare reference with parent bean
+			if (!bean.isRootBean() && reference.equals(bean.getParentName())) {
+				return true;
+			}
+			AbstractBeanDefinition bd = (AbstractBeanDefinition)
+									   BeansModelUtils.getBeanDefinition(bean);
+			// Compare reference with factory bean
+			if (reference.equals(bd.getFactoryBeanName())) {
+				return true;
+			}
+
+			// Compare reference with depends-on beans
+			String dependsOnBeanNames[] = bd.getDependsOn();
+			if (dependsOnBeanNames != null) {
+				for (int i = 0; i < dependsOnBeanNames.length; i++) {
+					String beanName = dependsOnBeanNames[i];
+					if (reference.equals(beanName)) {
+						return true;
+					}
+				}
+			}
+
+			// Compare reference with method-override beans
+			if (!bd.getMethodOverrides().isEmpty()) {
+				Iterator methodsOverrides =
+							 bd.getMethodOverrides().getOverrides().iterator();
+				while (methodsOverrides.hasNext()) {
+					MethodOverride methodOverride = (MethodOverride)
+													   methodsOverrides.next();
+					if (methodOverride instanceof LookupOverride) {
+						String beanName = ((LookupOverride)
+												 methodOverride).getBeanName();
+						if (reference.equals(beanName)) {
+							return true;
+						}
+					} else if (methodOverride instanceof ReplaceOverride) {
+						String beanName = ((ReplaceOverride)
+								 methodOverride).getMethodReplacerBeanName();
+						if (reference.equals(beanName)) {
+							return true;
+						}
+					}
+				}
+			}
+		} else if (element instanceof IBeanConstructorArgument) {
+			return doesValueMatch(element, ((IBeanConstructorArgument)
+														  element).getValue());
+		} else if (element instanceof IBeanProperty) {
+			return doesValueMatch(element, ((IBeanProperty)
+														  element).getValue());
+		}
+		return false;
+	}
+
+	private boolean doesValueMatch(IModelElement element, Object value) {
+		if (value instanceof RuntimeBeanReference) {
+			String beanName = ((RuntimeBeanReference) value).getBeanName();
+			if (reference.equals(beanName)) {
+				return true;
+			}
+		} else if (value instanceof List) {
+
+			// Compare reference with bean property's interceptors
+			if (element instanceof IBeanProperty &&
+						 element.getElementName().equals("interceptorNames")) {
+				String beanClass = BeansModelUtils.getBeanClass((IBean)
+											 element.getElementParent(), null);
+				if ("org.springframework.aop.framework.ProxyFactoryBean".
+														   equals(beanClass)) {
+					Iterator names = ((List) value).iterator();
+					while (names.hasNext()) {
+						Object name = (Object) names.next();
+						if (name instanceof String) {
+							if (reference.equals(name)) {
+								return true;
+							}
+						}
+					}
+				}
+			} else {
+				List list = (List) value;
+				for (int i = 0; i < list.size(); i++) {
+					return doesValueMatch(element, list.get(i));
+				}
+			}
+		} else if (value instanceof Set) {
+			Set set = (Set) value;
+			for (Iterator iter = set.iterator(); iter.hasNext(); ) {
+				return doesValueMatch(element, iter.next());
+			}
+		} else if (value instanceof Map) {
+			Map map = (Map) value;
+			for (Iterator iter = map.keySet().iterator(); iter.hasNext(); ) {
+				return doesValueMatch(element, map.get(iter.next()));
+			}
+		}
+		return false;
 	}
 
 	public String getLabel() {
 		return "Spring Bean Reference Search for: " + reference;
-	}
-
-	public boolean canRerun() {
-		return true;
-	}
-
-	public boolean canRunInBackground() {
-		return true;
-	}
-
-	public ISearchResult getSearchResult() {
-		if (result == null) {
-			result = new BeansSearchResult(this);
-		}
-		return result;
 	}
 }

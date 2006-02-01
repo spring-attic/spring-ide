@@ -37,9 +37,8 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  * @author Torsten Juergeleit
  */
 public class BeansSearchResult extends AbstractTextSearchResult implements
-		IEditorMatchAdapter, IFileMatchAdapter {
-
-	private final Match[] EMPTY = new Match[0];
+									   IEditorMatchAdapter, IFileMatchAdapter {
+	private static final Match[] NO_MATCH = new Match[0];
 
 	private ISearchQuery query;
 
@@ -48,17 +47,17 @@ public class BeansSearchResult extends AbstractTextSearchResult implements
 	}
 
 	public IEditorMatchAdapter getEditorMatchAdapter() {
-		return null;
+		return this;
 	}
 	
 	public Match[] computeContainedMatches(AbstractTextSearchResult result,
-			IEditorPart editor) {
+										   IEditorPart editor) {
 		IEditorInput ei = editor.getEditorInput();
 		if (ei instanceof IFileEditorInput) {
 			IFileEditorInput fi = (IFileEditorInput) ei;
 			return getMatches(fi.getFile());
 		}
-		return EMPTY;
+		return NO_MATCH;
 	}
 
 	public boolean isShownInEditor(Match match, IEditorPart editor) {
@@ -76,7 +75,7 @@ public class BeansSearchResult extends AbstractTextSearchResult implements
 
 	public Match[] computeContainedMatches(AbstractTextSearchResult result,
 			IFile file) {
-		return EMPTY;
+		return NO_MATCH;
 	}
 
 	public IFile getFile(Object element) {
