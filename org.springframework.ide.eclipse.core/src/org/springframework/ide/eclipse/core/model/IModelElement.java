@@ -17,9 +17,12 @@
 package org.springframework.ide.eclipse.core.model;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
  * Common protocol for all elements provided by the model.
+ *
+ * @author Torsten Juergeleit
  */
 public interface IModelElement extends IAdaptable {
 
@@ -78,8 +81,10 @@ public interface IModelElement extends IAdaptable {
 	 * element. If the visitor returns <code>true</code>, this method
 	 * visits this element's members.
 	 *
-	 * @param visitor the visitor
+	 * @param visitor  the visitor
+	 * @param monitor  the progress monitor used to give feedback on progress
+	 * 					and to check for cancelation
 	 * @see IModelElementVisitor#visit(IModelElement)
 	 */
-	void accept(IModelElementVisitor visitor);
+	void accept(IModelElementVisitor visitor, IProgressMonitor monitor);
 }

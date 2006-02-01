@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.ide.eclipse.core.model;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
 /** 
  * This interface is implemented by objects that visit model element trees.
  * <p> 
@@ -28,23 +30,26 @@ package org.springframework.ide.eclipse.core.model;
  *    }
  * }
  * IModelElement root = ...;
- * root.accept(new Visitor());
+ * root.accept(new Visitor(), monitor);
  * </pre>
  * </p> 
  * <p>
  * Clients may implement this interface.
  * </p>
  *
- * @see IModelElement#accept(IModelElementVisitor)
+ * @see IModelElement#accept(IModelElementVisitor, IProgressMonitor)
+ * @author Torsten Juergeleit
  */
 public interface IModelElementVisitor {
 
 	/** 
 	 * Visits the given model element.
 	 *
-	 * @param element the model element to visit
+	 * @param element  the model element to visit
+	 * @param monitor  the progress monitor used to give feedback on progress
+	 * 					and to check for cancelation
 	 * @return <code>true</code> if the elements's members should
 	 *		be visited; <code>false</code> if they should be skipped
 	 */
-	public boolean visit(IModelElement element);
+	public boolean visit(IModelElement element, IProgressMonitor monitor);
 }

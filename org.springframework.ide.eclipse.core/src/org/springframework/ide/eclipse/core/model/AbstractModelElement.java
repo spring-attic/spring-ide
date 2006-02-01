@@ -16,6 +16,8 @@
 
 package org.springframework.ide.eclipse.core.model;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
 public abstract class AbstractModelElement implements IModelElement {
 
 	private IModelElement parent;
@@ -85,8 +87,8 @@ public abstract class AbstractModelElement implements IModelElement {
 		return id.toString();
 	}
 
-	public void accept(IModelElementVisitor visitor) {
-		visitor.visit(this);
+	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
+		visitor.visit(this, monitor);
 	}
 
 	/**
