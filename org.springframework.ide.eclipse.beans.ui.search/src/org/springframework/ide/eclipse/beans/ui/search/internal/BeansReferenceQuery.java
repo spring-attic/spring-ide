@@ -16,7 +16,6 @@
 
 package org.springframework.ide.eclipse.beans.ui.search.internal;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -28,13 +27,12 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MethodOverride;
 import org.springframework.beans.factory.support.ReplaceOverride;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.ui.search.BeansSearchPlugin;
 import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 
 /**
  * @author Torsten Juergeleit
@@ -43,7 +41,8 @@ public class BeansReferenceQuery extends AbstractBeansQuery {
 
 	private String reference;
 
-	public BeansReferenceQuery(String reference) {
+	public BeansReferenceQuery(BeansSearchScope scope, String reference) {
+		super(scope);
 		this.reference = reference;
 	}
 
@@ -51,23 +50,8 @@ public class BeansReferenceQuery extends AbstractBeansQuery {
 		return reference;
 	}
 
-	protected List getMatchedElements(IProgressMonitor monitor) {
-		final List elements = new ArrayList();
-		IModelElementVisitor visitor = new IModelElementVisitor() {
-			public boolean visit(IModelElement element,
-								 IProgressMonitor monitor) {
-				
-				if (doesMatch(element)) {
-					elements.add(element);
-				}
-				return true;
-			}
-		};
-		BeansCorePlugin.getModel().accept(visitor, monitor);
-		return elements;
-	}
-
-	private boolean doesMatch(IModelElement element) {
+	protected boolean doesMatch(IModelElement element,
+								IProgressMonitor monitor) {
 		if (element instanceof IBean) {
 			IBean bean = (IBean) element;
 
@@ -171,6 +155,9 @@ public class BeansReferenceQuery extends AbstractBeansQuery {
 	}
 
 	public String getLabel() {
-		return "Spring Bean Reference Search for: " + reference;
+		Object[] args = new Object[] { reference,
+									   getSearchScope().getDescription() };
+		return BeansSearchPlugin.getFormattedMessage("ReferenceSearch.label",
+													 args);
 	}
 }

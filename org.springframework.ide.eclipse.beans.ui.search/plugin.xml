@@ -50,6 +50,6 @@
             icon="icons/full/obj16/spring_obj.gif"
             id="org.springframework.ide.eclipse.beans.ui.search.searchPage"
             label="%searchPage.label"
-            showScopeSection="false"/>
+            showScopeSection="true"/>
    </extension>
 </plugin>

@@ -18,17 +18,16 @@ package org.springframework.ide.eclipse.beans.ui.search;
 
 import java.util.ArrayList;
 
-import org.eclipse.core.runtime.preferences.IScope;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -47,9 +46,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansReferenceQuery;
+import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchScope;
 
 /**
  * @author David Watkins
@@ -102,7 +101,6 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 	}
 
 	public void createControl(final Composite parent) {
-		try {
 			Composite contents = new Composite(parent, SWT.NONE);
 
 			GridData gridData = new GridData();
@@ -122,12 +120,9 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 
 			_refSearch = createReferenceSearchElements(contents);
 			createSearchToggle();
+			Dialog.applyDialogFont(contents);
 
 			initialiseSelection();
-		} catch (Exception e) {
-			// FIXME
-			e.printStackTrace();
-		}
 	}
 
 	private void initialiseSelection() {
@@ -225,9 +220,6 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 
 	private void createSearchToggle() {
 		SelectionAdapter adapter = new SelectionAdapter() {
-			/*
-			 * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-			 */
 			public void widgetSelected(SelectionEvent e) {
 				Button but = (Button) e.getSource();
 				if (but == _refSearch) {
@@ -294,7 +286,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 					dialog = JavaUI.createTypeDialog(parent.getShell(),
 							new ProgressMonitorDialog(parent.getShell()),
 							SearchEngine.createWorkspaceScope(),
-							IJavaElementSearchConstants.CONSIDER_TYPES, false);
+							IJavaElementSearchConstants.CONSIDER_ALL_TYPES, false);
 					dialog.setTitle("Select Bean Type");
 					dialog
 							.setMessage("Select bean type to search for in Spring configs:");
@@ -358,40 +350,41 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 
 	public boolean performAction() {
 		ISearchQuery collator = null;
-		//IScope scope = determineSearchScope();
-		if (_javaSearch.getSelection()) {
-			/*collator = new BeanTypeSearcher(getType(), _includeSubtypesCheckbox
-					.getSelection(), scope);*/
-		}
-//		if (_refSearch.getSelection()) {
-			collator = new BeansReferenceQuery(_reference);
+		BeansSearchScope scope = getSearchScope();
+//		if (_javaSearch.getSelection()) {
+//			collator = new BeanTypeSearcher(getType(), _includeSubtypesCheckbox
+//					.getSelection(), scope);
+//		}
+		if (_refSearch.getSelection()) {
+			collator = new BeansReferenceQuery(scope, _reference);
 			if (!_refHistory.contains(_reference)) {
 				_refHistory.add(_reference);
 			}
-//		}
+		}
 		NewSearchUI.activateSearchResultView();
-		IRunnableContext ctx = new ProgressMonitorDialog(new Shell());
 		NewSearchUI.runQueryInBackground(collator);
 		return true;
 	}
 
-	private IScope determineSearchScope() {
-		IScope scope = null;
-		int scopeIndicator = _container.getSelectedScope();
-		/*switch (scopeIndicator) {
-		case ISearchPageContainer.WORKSPACE_SCOPE:
-			scope = new WorkspaceScope();
-			break;
-		case ISearchPageContainer.WORKING_SET_SCOPE:
-			scope = new WorkingSetScope(_container.getSelectedWorkingSets());
-			break;
-		case ISearchPageContainer.SELECTED_PROJECTS_SCOPE:
-			scope = new SelectionScope(_container.getSelection());
-			break;
-		default:
-			scope = new WorkspaceScope();
-			break;
-		}*/
+	private BeansSearchScope getSearchScope() {
+		BeansSearchScope scope;
+		switch (_container.getSelectedScope()) {
+			case ISearchPageContainer.SELECTION_SCOPE :
+				scope = BeansSearchScope.newSearchScope(_container.getSelection(), false);
+				break;
+
+			case ISearchPageContainer.WORKING_SET_SCOPE :
+				scope = BeansSearchScope.newSearchScope(_container.getSelectedWorkingSets());
+				break;
+
+			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE :
+				
+				scope = BeansSearchScope.newSearchScope(_container.getSelection(), true);
+				break;
+
+			default:
+				scope = BeansSearchScope.newSearchScope();
+		}
 		return scope;
 	}
 

@@ -112,10 +112,10 @@ public class BeansSearchPlugin extends AbstractUIPlugin {
 	}
 
 	public static String getFormattedMessage(String key, String arg) {
-		return getFormattedMessage(key, new String[] { arg });
+		return getFormattedMessage(key, new Object[] { arg });
 	}
 
-	public static String getFormattedMessage(String key, String[] args) {
+	public static String getFormattedMessage(String key, Object[] args) {
 		return MessageFormat.format(getResourceString(key), args);
 	}
 
