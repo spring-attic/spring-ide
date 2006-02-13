@@ -23,6 +23,11 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
+/**
+ * This class defines an alias within a Spring beans configuration.
+ *
+ * @author Torsten Juergeleit
+ */
 public class BeanAlias extends AbstractSourceModelElement
 														implements IBeanAlias {
 	private String name;
@@ -42,10 +47,6 @@ public class BeanAlias extends AbstractSourceModelElement
 									  getElementParent()).getElementResource();
 		}
 		return null;
-	}
-
-	public IBeansConfig getConfig() {
-		return (IBeansConfig) getElementParent();
 	}
 
 	public String getName() {

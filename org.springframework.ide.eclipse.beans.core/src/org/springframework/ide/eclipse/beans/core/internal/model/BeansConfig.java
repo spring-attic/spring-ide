@@ -98,8 +98,10 @@ public class BeansConfig extends AbstractResourceModelElement
 	}
 
 	public IModelElement[] getElementChildren() {
-		return (IModelElement[]) getBeans().toArray(
-										 new IModelElement[getBeans().size()]);
+		ArrayList children = new ArrayList(getAliases());
+		children.addAll(getBeans());
+		return (IModelElement[]) children.toArray(
+										   new IModelElement[children.size()]);
 	}
 
 	public IResource getElementResource() {
@@ -108,11 +110,21 @@ public class BeansConfig extends AbstractResourceModelElement
 
 	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 
-		// First visit this project
+		// First visit this config
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
-			// Now ask this configs's beans
-			Iterator iter = getBeans().iterator();
+			// Now ask this config's aliases
+			Iterator iter = getAliases().iterator();
+			while (iter.hasNext()) {
+				IModelElement element = (IModelElement) iter.next();
+				element.accept(visitor, monitor);
+				if (monitor.isCanceled()) {
+					return;
+				}
+			}
+
+			// Finally ask this configs's beans
+			iter = getBeans().iterator();
 			while (iter.hasNext()) {
 				IModelElement element = (IModelElement) iter.next();
 				element.accept(visitor, monitor);
@@ -161,6 +173,11 @@ public class BeansConfig extends AbstractResourceModelElement
 	}
 
 	public Collection getAliases() {
+		if (aliases == null) {
+
+			// Lazily initialization of alias list
+			readConfig();
+		}
 		return Collections.unmodifiableCollection(aliases);
 	}
 
@@ -188,7 +205,7 @@ public class BeansConfig extends AbstractResourceModelElement
 	public Collection getBeans() {
 		if (beans == null) {
 
-			// Lazily initialization of beans list
+			// Lazily initialization of bean list
 			readConfig();
 		}
 		return Collections.unmodifiableCollection(beans);
