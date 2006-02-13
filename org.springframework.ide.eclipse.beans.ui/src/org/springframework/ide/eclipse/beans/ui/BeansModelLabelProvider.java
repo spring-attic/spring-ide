@@ -23,6 +23,7 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -56,6 +57,8 @@ public class BeansModelLabelProvider extends LabelProvider {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONFIG_SET);
 		} else if (adaptedElement instanceof IBeansConfig) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONFIG);
+		} else if (adaptedElement instanceof IBeanAlias) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ALIAS);
 		} else if (adaptedElement instanceof IBean) {
 			if (((IBean) adaptedElement).isRootBean()) {
 				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
