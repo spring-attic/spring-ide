@@ -16,7 +16,6 @@
 
 package org.springframework.ide.eclipse.beans.ui.search;
 
-import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -29,7 +28,6 @@ import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.MatchEvent;
 import org.eclipse.search.ui.text.RemoveAllEvent;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.beans.ui.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchContentProvider;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
@@ -42,12 +40,8 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
 public class BeansSearchResultPage extends AbstractTextSearchViewPage {
 
 	private ISearchResultListener resultListener;
-
 	private IDoubleClickListener doubleClickListener;
-
 	private BeansSearchContentProvider provider;
-
-	private TreeViewer viewer;
 
 	public BeansSearchResultPage() {
 		super(AbstractTextSearchViewPage.FLAG_LAYOUT_TREE);
@@ -76,12 +70,9 @@ public class BeansSearchResultPage extends AbstractTextSearchViewPage {
 
 	protected void configureTreeViewer(TreeViewer viewer) {
 		viewer.setUseHashlookup(true);
-		viewer.setLabelProvider(new DecoratingLabelProvider(
-				new BeansModelLabelProvider(), PlatformUI.getWorkbench()
-						.getDecoratorManager().getLabelDecorator()));
+		viewer.setLabelProvider(new BeansModelLabelProvider());
 		BeansSearchContentProvider provider = new BeansSearchContentProvider();
 		viewer.setContentProvider(provider);
-		this.viewer = viewer;
 		this.provider = provider;
 	}
 
@@ -111,9 +102,9 @@ public class BeansSearchResultPage extends AbstractTextSearchViewPage {
 	private synchronized void handleSearchResultsChanged(
 			final SearchResultEvent e) {
 		if (e instanceof MatchEvent) {
-			MatchEvent me = (MatchEvent) e;
 			// FIXME
-			// postUpdate(me.getMatches());
+//			MatchEvent me = (MatchEvent) e;
+//			postUpdate(me.getMatches());
 		} else if (e instanceof RemoveAllEvent) {
 			clear();
 		}

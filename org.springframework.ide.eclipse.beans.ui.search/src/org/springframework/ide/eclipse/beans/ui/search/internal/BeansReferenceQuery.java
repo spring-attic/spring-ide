@@ -29,6 +29,7 @@ import org.springframework.beans.factory.support.MethodOverride;
 import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.ui.search.BeansSearchPlugin;
@@ -50,9 +51,21 @@ public class BeansReferenceQuery extends AbstractBeansQuery {
 		return reference;
 	}
 
+	public String getLabel() {
+		Object[] args = new Object[] { reference,
+									   getSearchScope().getDescription() };
+		return BeansSearchPlugin.getFormattedMessage("ReferenceSearch.label",
+													 args);
+	}
+
 	protected boolean doesMatch(IModelElement element,
 								IProgressMonitor monitor) {
-		if (element instanceof IBean) {
+		if (element instanceof IBeanAlias) {
+			IBeanAlias alias = (IBeanAlias) element;
+			if (reference.equals(alias.getName())) {
+				return true;
+			}
+		} else if (element instanceof IBean) {
 			IBean bean = (IBean) element;
 
 			// Compare reference with parent bean
@@ -152,12 +165,5 @@ public class BeansReferenceQuery extends AbstractBeansQuery {
 			}
 		}
 		return false;
-	}
-
-	public String getLabel() {
-		Object[] args = new Object[] { reference,
-									   getSearchScope().getDescription() };
-		return BeansSearchPlugin.getFormattedMessage("ReferenceSearch.label",
-													 args);
 	}
 }

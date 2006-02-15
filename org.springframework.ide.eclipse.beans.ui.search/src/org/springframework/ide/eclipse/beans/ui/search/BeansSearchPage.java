@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.dialogs.SelectionDialog;
+import org.springframework.ide.eclipse.beans.ui.search.internal.BeansClassQuery;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansReferenceQuery;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchScope;
 
@@ -351,10 +352,9 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 	public boolean performAction() {
 		ISearchQuery collator = null;
 		BeansSearchScope scope = getSearchScope();
-//		if (_javaSearch.getSelection()) {
-//			collator = new BeanTypeSearcher(getType(), _includeSubtypesCheckbox
-//					.getSelection(), scope);
-//		}
+		if (_javaSearch.getSelection()) {
+			collator = new BeansClassQuery(scope, getType().getFullyQualifiedName());
+		}
 		if (_refSearch.getSelection()) {
 			collator = new BeansReferenceQuery(scope, _reference);
 			if (!_refHistory.contains(_reference)) {

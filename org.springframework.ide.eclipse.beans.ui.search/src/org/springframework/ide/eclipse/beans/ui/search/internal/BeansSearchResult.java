@@ -61,9 +61,9 @@ public class BeansSearchResult extends AbstractTextSearchResult implements
 	}
 
 	public boolean isShownInEditor(Match match, IEditorPart editor) {
-		IEditorInput ei= editor.getEditorInput();
+		IEditorInput ei = editor.getEditorInput();
 		if (ei instanceof IFileEditorInput) {
-			IFileEditorInput fi= (IFileEditorInput) ei;
+			IFileEditorInput fi = (IFileEditorInput) ei;
 			return match.getElement().equals(fi.getFile());
 		}
 		return false;
@@ -74,7 +74,7 @@ public class BeansSearchResult extends AbstractTextSearchResult implements
 	}
 
 	public Match[] computeContainedMatches(AbstractTextSearchResult result,
-			IFile file) {
+										   IFile file) {
 		return NO_MATCH;
 	}
 
@@ -106,7 +106,7 @@ public class BeansSearchResult extends AbstractTextSearchResult implements
 	}
 
 	public String toString() {
-		return "Results for " + getQuery().getLabel() + " # = "
-				+ getMatchCount();
+		return "Results for " + getQuery().getLabel() + " # = " +
+			   getMatchCount();
 	}
 }
