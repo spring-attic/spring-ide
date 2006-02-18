@@ -353,7 +353,8 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		ISearchQuery collator = null;
 		BeansSearchScope scope = getSearchScope();
 		if (_javaSearch.getSelection()) {
-			collator = new BeansClassQuery(scope, getType().getFullyQualifiedName());
+			collator = new BeansClassQuery(scope, getType(),
+									  _includeSubtypesCheckbox.getSelection());
 		}
 		if (_refSearch.getSelection()) {
 			collator = new BeansReferenceQuery(scope, _reference);

@@ -16,7 +16,17 @@
 
 package org.springframework.ide.eclipse.beans.ui.search.internal;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.util.Assert;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.search.BeansSearchPlugin;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -26,19 +36,25 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  */
 public class BeansClassQuery extends AbstractBeansQuery {
 
-	private String className;
+	private IType type;
+	private boolean checkSubtypes;
+	private Map subtypesCache;
 
-	public BeansClassQuery(BeansSearchScope scope, String className) {
+	public BeansClassQuery(BeansSearchScope scope, IType type,
+						   boolean checkSubtypes) {
 		super(scope);
-		this.className = className;
+		Assert.isNotNull(type);
+		this.type = type;
+		this.checkSubtypes = checkSubtypes;
+		this.subtypesCache = new HashMap();
 	}
 
-	public String getClassName() {
-		return className;
+	public IType getType() {
+		return type;
 	}
 
 	public String getLabel() {
-		Object[] args = new Object[] { className,
+		Object[] args = new Object[] { type.getFullyQualifiedName(),
 									   getSearchScope().getDescription() };
 		return BeansSearchPlugin.getFormattedMessage("ClassSearch.label",
 													 args);
@@ -48,12 +64,61 @@ public class BeansClassQuery extends AbstractBeansQuery {
 								IProgressMonitor monitor) {
 		if (element instanceof IBean) {
 			IBean bean = (IBean) element;
+			String beanClassName = bean.getClassName();
+			if (beanClassName != null) {
 
-			// Compare given class name with bean's one
-			if (className.equals(bean.getClassName())) {
+				// Compare given class name with bean's one
+				if (type.getFullyQualifiedName().equals(beanClassName)) {
+					return true;
+				} else if (checkSubtypes) {
+
+					// Check if this class is a subclass of the one we are
+					// looking for
+					IProject project = bean.getElementResource().getProject();
+					if (project != null) {
+						IJavaProject javaProject = JavaCore.create(project);
+						if (javaProject != null) {
+							try {
+								IType beanType = javaProject.findType(
+																beanClassName);
+								if (beanType != null &&
+											isSubtype(javaProject, beanType)) {
+									return true;
+								}
+							} catch (JavaModelException e) {
+								// Do nothing
+							}
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+    private boolean isSubtype(IJavaProject project, IType subtype) {
+		IType[] subtypes = getSubtypes(project);
+		for (int i = 0; i < subtypes.length; i++) {
+			IType type = subtypes[i];
+			if (type.equals(subtype)) {
 				return true;
 			}
 		}
 		return false;
 	}
+
+    private IType[] getSubtypes(IJavaProject project)  {
+		IType[] types = (IType[]) subtypesCache.get(project.getElementName());
+		if (types == null) {
+			try {
+				ITypeHierarchy hierarchy = type.newTypeHierarchy(
+													  project, null);
+				types = hierarchy.getAllSubtypes(type);
+				subtypesCache.put(project.getElementName(), types);
+			} catch (JavaModelException e) {
+				// Do nothing
+			}
+		}
+		return types;
+    }
 }
