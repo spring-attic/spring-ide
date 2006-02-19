@@ -36,23 +36,27 @@ import org.springframework.ide.eclipse.beans.ui.search.BeansSearchPlugin;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
+ * This implementation of <code>ISearchQuery</code> looks for all
+ * <code>IBeanAlias</code>es or <code>IBean</code>s which are referencing
+ * a given bean.
+ *
+ * @see org.eclipse.search.ui.ISearchQuery
+ * @see org.springframework.ide.eclipse.beans.core.model.IBeanAlias
+ * @see org.springframework.ide.eclipse.beans.core.model.IBean
+ *
  * @author Torsten Juergeleit
  */
-public class BeansReferenceQuery extends AbstractBeansQuery {
+public class BeanReferenceQuery extends AbstractBeansQuery {
 
-	private String reference;
+	private String beanName;
 
-	public BeansReferenceQuery(BeansSearchScope scope, String reference) {
+	public BeanReferenceQuery(BeansSearchScope scope, String beanName) {
 		super(scope);
-		this.reference = reference;
-	}
-
-	public String getReference() {
-		return reference;
+		this.beanName = beanName;
 	}
 
 	public String getLabel() {
-		Object[] args = new Object[] { reference,
+		Object[] args = new Object[] { beanName,
 									   getSearchScope().getDescription() };
 		return BeansSearchPlugin.getFormattedMessage("ReferenceSearch.label",
 													 args);
@@ -62,20 +66,20 @@ public class BeansReferenceQuery extends AbstractBeansQuery {
 								IProgressMonitor monitor) {
 		if (element instanceof IBeanAlias) {
 			IBeanAlias alias = (IBeanAlias) element;
-			if (reference.equals(alias.getName())) {
+			if (beanName.equals(alias.getName())) {
 				return true;
 			}
 		} else if (element instanceof IBean) {
 			IBean bean = (IBean) element;
 
 			// Compare reference with parent bean
-			if (!bean.isRootBean() && reference.equals(bean.getParentName())) {
+			if (!bean.isRootBean() && beanName.equals(bean.getParentName())) {
 				return true;
 			}
 			AbstractBeanDefinition bd = (AbstractBeanDefinition)
 									   BeansModelUtils.getBeanDefinition(bean);
 			// Compare reference with factory bean
-			if (reference.equals(bd.getFactoryBeanName())) {
+			if (beanName.equals(bd.getFactoryBeanName())) {
 				return true;
 			}
 
@@ -83,8 +87,8 @@ public class BeansReferenceQuery extends AbstractBeansQuery {
 			String dependsOnBeanNames[] = bd.getDependsOn();
 			if (dependsOnBeanNames != null) {
 				for (int i = 0; i < dependsOnBeanNames.length; i++) {
-					String beanName = dependsOnBeanNames[i];
-					if (reference.equals(beanName)) {
+					String name = dependsOnBeanNames[i];
+					if (beanName.equals(name)) {
 						return true;
 					}
 				}
@@ -98,15 +102,15 @@ public class BeansReferenceQuery extends AbstractBeansQuery {
 					MethodOverride methodOverride = (MethodOverride)
 													   methodsOverrides.next();
 					if (methodOverride instanceof LookupOverride) {
-						String beanName = ((LookupOverride)
+						String name = ((LookupOverride)
 												 methodOverride).getBeanName();
-						if (reference.equals(beanName)) {
+						if (beanName.equals(name)) {
 							return true;
 						}
 					} else if (methodOverride instanceof ReplaceOverride) {
-						String beanName = ((ReplaceOverride)
+						String name = ((ReplaceOverride)
 								 methodOverride).getMethodReplacerBeanName();
-						if (reference.equals(beanName)) {
+						if (beanName.equals(name)) {
 							return true;
 						}
 					}
@@ -124,8 +128,8 @@ public class BeansReferenceQuery extends AbstractBeansQuery {
 
 	private boolean doesValueMatch(IModelElement element, Object value) {
 		if (value instanceof RuntimeBeanReference) {
-			String beanName = ((RuntimeBeanReference) value).getBeanName();
-			if (reference.equals(beanName)) {
+			String name = ((RuntimeBeanReference) value).getBeanName();
+			if (beanName.equals(name)) {
 				return true;
 			}
 		} else if (value instanceof List) {
@@ -141,7 +145,7 @@ public class BeansReferenceQuery extends AbstractBeansQuery {
 					while (names.hasNext()) {
 						Object name = (Object) names.next();
 						if (name instanceof String) {
-							if (reference.equals(name)) {
+							if (beanName.equals(name)) {
 								return true;
 							}
 						}

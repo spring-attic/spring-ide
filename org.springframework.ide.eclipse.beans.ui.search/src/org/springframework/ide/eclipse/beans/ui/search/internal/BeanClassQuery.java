@@ -32,29 +32,31 @@ import org.springframework.ide.eclipse.beans.ui.search.BeansSearchPlugin;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
+ * This implementation of <code>ISearchQuery</code> looks for all
+ * <code>IBean</code>s which bean class match a given class.
+ *
+ * @see org.eclipse.search.ui.ISearchQuery
+ * @see org.springframework.ide.eclipse.beans.core.model.IBean
+ *
  * @author Torsten Juergeleit
  */
-public class BeansClassQuery extends AbstractBeansQuery {
+public class BeanClassQuery extends AbstractBeansQuery {
 
-	private IType type;
+	private IType beanClass;
 	private boolean checkSubtypes;
 	private Map subtypesCache;
 
-	public BeansClassQuery(BeansSearchScope scope, IType type,
+	public BeanClassQuery(BeansSearchScope scope, IType beanClass,
 						   boolean checkSubtypes) {
 		super(scope);
-		Assert.isNotNull(type);
-		this.type = type;
+		Assert.isNotNull(beanClass);
+		this.beanClass = beanClass;
 		this.checkSubtypes = checkSubtypes;
 		this.subtypesCache = new HashMap();
 	}
 
-	public IType getType() {
-		return type;
-	}
-
 	public String getLabel() {
-		Object[] args = new Object[] { type.getFullyQualifiedName(),
+		Object[] args = new Object[] { beanClass.getFullyQualifiedName(),
 									   getSearchScope().getDescription() };
 		return BeansSearchPlugin.getFormattedMessage("ClassSearch.label",
 													 args);
@@ -68,7 +70,7 @@ public class BeansClassQuery extends AbstractBeansQuery {
 			if (beanClassName != null) {
 
 				// Compare given class name with bean's one
-				if (type.getFullyQualifiedName().equals(beanClassName)) {
+				if (beanClass.getFullyQualifiedName().equals(beanClassName)) {
 					return true;
 				} else if (checkSubtypes) {
 
@@ -111,9 +113,9 @@ public class BeansClassQuery extends AbstractBeansQuery {
 		IType[] types = (IType[]) subtypesCache.get(project.getElementName());
 		if (types == null) {
 			try {
-				ITypeHierarchy hierarchy = type.newTypeHierarchy(
+				ITypeHierarchy hierarchy = beanClass.newTypeHierarchy(
 													  project, null);
-				types = hierarchy.getAllSubtypes(type);
+				types = hierarchy.getAllSubtypes(beanClass);
 				subtypesCache.put(project.getElementName(), types);
 			} catch (JavaModelException e) {
 				// Do nothing
