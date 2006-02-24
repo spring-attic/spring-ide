@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionParser;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -52,9 +53,14 @@ import org.xml.sax.SAXParseException;
  * @see EventBeanDefinitionParser
  * @see org.springframework.beans.factory.xml.XmlBeanDefinitionParser
  * @see org.springframework.beans.factory.support.BeanDefinitionRegistry
+ *
+ * @author Torsten Juergeleit
  */
 public class EventBeanDefinitionReader implements BeanDefinitionReader {
 
+	private static final String WRONG_XERCES_MESSAGE = "Are you using a JRE " +
+						 "with an outdated version of the Xerces XML parser? "+
+						 "Please check the 'endorsed' folder of your JRE.";
 	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID +
 																"/reader/debug";
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
@@ -115,6 +121,12 @@ public class EventBeanDefinitionReader implements BeanDefinitionReader {
 			parser.setErrorHandler(new BeansErrorHandler());
 			parser.parse(inputSource);
 			return registerBeanDefinitions(parser.getDocument(), resource);
+		} catch (NoClassDefFoundError e) {
+			throw new BeanDefinitionException(-1, WRONG_XERCES_MESSAGE, e);
+		} catch (NoSuchMethodError e) {
+			throw new BeanDefinitionException(-1, WRONG_XERCES_MESSAGE, e);
+		} catch (ClassCastException e) {
+			throw new BeanDefinitionException(-1, WRONG_XERCES_MESSAGE, e);
 		} catch (SAXException e) {
 			throw new BeanDefinitionException(e);
 		} catch (DOMException e) {
