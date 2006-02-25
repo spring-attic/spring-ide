@@ -183,9 +183,15 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 							.createAdditionalProposalInfo(modelBean);
 				}
 			}
-		} else if (("parent".equals(attName) || "depends-on".equals(attName)
-				|| "factory-bean".equals(attName) || "key-ref".equals(attName)
-				|| "value-ref".equals(attName) || ("name".equals(attName) && "alias"
+		} else if (("ref".equals(attName)
+				|| "local".equals(attName)
+				|| "parent".equals(attName)
+				|| "depends-on".equals(attName)
+				|| "factory-bean".equals(attName)
+				|| "key-ref".equals(attName)
+				|| "value-ref".equals(attName)
+				|| ("name".equals(attName) && "alias".equals(xmlnode
+						.getNodeName())) || ("bean".equals(attName) && "ref"
 				.equals(xmlnode.getNodeName())))
 				&& attributes.getNamedItem(attName) != null) {
 			Element ref = xmlnode.getOwnerDocument().getElementById(
