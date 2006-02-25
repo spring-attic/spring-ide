@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.search.BeansSearchPlugin;
+import org.springframework.ide.eclipse.core.MessageUtils;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
@@ -50,8 +51,7 @@ public class BeansSearchScope {
 	 * Returns a workspace scope.
 	 */
 	public static BeansSearchScope newSearchScope() {
-		return new BeansSearchScope(
-				  BeansSearchPlugin.getResourceString("SearchScope.workspace"),
+		return new BeansSearchScope(BeansSearchMessages.SearchScope_workspace,
 				  new IModelElement[] { BeansCorePlugin.getModel() }); 
 	}
 
@@ -78,11 +78,10 @@ public class BeansSearchScope {
 				}
 			}
 			Object[] args = new Object[] { text.toString() };
-			description = BeansSearchPlugin.getFormattedMessage(
-										 "SearchScope.selectedProjects", args);
+			description = MessageUtils.format(
+					   BeansSearchMessages.SearchScope_selectedProjects, args);
 		} else {
-			description = BeansSearchPlugin.getResourceString(
-													  "SearchScope.selection");
+			description = BeansSearchMessages.SearchScope_selection;
 		}
 		return new BeansSearchScope(description, elements);
 	}
@@ -104,8 +103,9 @@ public class BeansSearchScope {
 			}
 		}
 		Object[] args = new Object[] { text.toString() };
-		return new BeansSearchScope(BeansSearchPlugin.getFormattedMessage(
-			 "SearchScope.workingSets", args), convertToElements(workingSets));
+		return new BeansSearchScope(MessageUtils.format(
+							BeansSearchMessages.SearchScope_workingSets, args),
+							convertToElements(workingSets));
 	}
 
 	private BeansSearchScope(String description, IModelElement[] elements) {

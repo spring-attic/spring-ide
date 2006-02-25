@@ -16,6 +16,8 @@
 
 package org.springframework.ide.eclipse.beans.ui.search.internal;
 
+import java.util.regex.Pattern;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -24,6 +26,8 @@ import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.text.Match;
 import org.springframework.ide.eclipse.beans.ui.search.BeansSearchPlugin;
+import org.springframework.ide.eclipse.core.MessageUtils;
+import org.springframework.ide.eclipse.core.PatternUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
@@ -33,24 +37,35 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  */
 public abstract class AbstractBeansQuery implements ISearchQuery {
 
-	private ISearchResult searchResult;
-	private BeansSearchScope searchScope;
+	private BeansSearchScope scope;
+	private String pattern;
+	private Pattern compiledPattern;
+	private ISearchResult result;
 
-	public AbstractBeansQuery(BeansSearchScope scope) {
+	public AbstractBeansQuery(BeansSearchScope scope, String pattern,
+							  boolean isCaseSensitive, boolean isRegexSearch) {
 		Assert.isNotNull(scope);
-		searchScope = scope;
+		this.scope = scope;
+		this.pattern = pattern;
+		this.compiledPattern = PatternUtils.createPattern(pattern,
+											   isCaseSensitive, isRegexSearch);
 	}
 	
-	public final ISearchResult getSearchResult() {
-		if (searchResult == null) {
-			searchResult = new BeansSearchResult(this);
-		}
-		return searchResult;
+	public BeansSearchScope getScope() {
+		return scope;
 	}
 
-	public BeansSearchScope getSearchScope() {
-		return searchScope;
+	public String getPattern() {
+		return pattern;
 	}
+
+	public final ISearchResult getSearchResult() {
+		if (result == null) {
+			result = new BeansSearchResult(this);
+		}
+		return result;
+	}
+
 	public boolean canRerun() {
 		return true;
 	}
@@ -62,26 +77,27 @@ public abstract class AbstractBeansQuery implements ISearchQuery {
 	public final IStatus run(IProgressMonitor monitor) {
 		final BeansSearchResult result = (BeansSearchResult) getSearchResult();
 		result.removeAll();
-		IModelElement[] elements = searchScope.getModelElements();
+		IModelElement[] elements = scope.getModelElements();
 		for (int i = 0; !monitor.isCanceled() && i < elements.length; i++) {
 			IModelElement element = elements[i];
 			IModelElementVisitor visitor = new IModelElementVisitor() {
 				public boolean visit(IModelElement element,
 													IProgressMonitor monitor) {
-					if (doesMatch(element, monitor)) {
+					if (doesMatch(element, compiledPattern, monitor)) {
 						int startLine;
 						int lines;
 						if (element instanceof ISourceModelElement) {
-							ISourceModelElement sourceElement = (ISourceModelElement)
-							element;
+							ISourceModelElement sourceElement =
+												 (ISourceModelElement) element;
 							startLine = sourceElement.getElementStartLine();
-							lines = sourceElement.getElementEndLine() - startLine + 1;
+							lines = sourceElement.getElementEndLine() -
+															   startLine + 1;
 						} else {
 							startLine = -1;
 							lines = -1;
 						}
-						Match match = new Match(element, Match.UNIT_LINE, startLine,
-								lines);
+						Match match = new Match(element, Match.UNIT_LINE,
+												startLine, lines);
 						result.addMatch(match);
 					}
 					return true;
@@ -90,8 +106,8 @@ public abstract class AbstractBeansQuery implements ISearchQuery {
 			element.accept(visitor, monitor);
 		}
 		Object[] args = new Object[] { new Integer(result.getMatchCount()) };
-		String message = BeansSearchPlugin.getFormattedMessage("Search.status",
-															   args);
+		String message = MessageUtils.format(
+								 BeansSearchMessages.SearchQuery_status, args);
 		return new Status(IStatus.OK, BeansSearchPlugin.PLUGIN_ID, 0, message,
 						  null);
 	}
@@ -101,6 +117,5 @@ public abstract class AbstractBeansQuery implements ISearchQuery {
 	 * this query. 
 	 */
 	protected abstract boolean doesMatch(IModelElement element,
-													 IProgressMonitor monitor);
-
+									Pattern pattern, IProgressMonitor monitor);
 }

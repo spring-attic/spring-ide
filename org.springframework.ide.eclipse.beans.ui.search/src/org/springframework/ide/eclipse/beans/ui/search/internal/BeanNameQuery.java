@@ -16,12 +16,13 @@
 
 package org.springframework.ide.eclipse.beans.ui.search.internal;
 
+import java.util.regex.Pattern;
+
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.util.Assert;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.ui.search.BeansSearchPlugin;
+import org.springframework.ide.eclipse.core.MessageUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
@@ -35,29 +36,26 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  */
 public class BeanNameQuery extends AbstractBeansQuery {
 
-	private String beanName;
-
-	public BeanNameQuery(BeansSearchScope scope, String beanName) {
-		super(scope);
-		Assert.isNotNull(beanName);
-		this.beanName = beanName;
+	public BeanNameQuery(BeansSearchScope scope, String pattern,
+						 boolean isCaseSensitive, boolean isRegexSearch) {
+		super(scope, pattern, isCaseSensitive, isRegexSearch);
 	}
 
 	public String getLabel() {
-		Object[] args = new Object[] { beanName,
-									   getSearchScope().getDescription() };
-		return BeansSearchPlugin.getFormattedMessage("NameSearch.label",
-													 args);
+		Object[] args = new Object[] { getPattern(),
+									   getScope().getDescription() };
+		return MessageUtils.format(
+						 BeansSearchMessages.SearchQuery_searchFor_name, args);
 	}
 
-	protected boolean doesMatch(IModelElement element,
+	protected boolean doesMatch(IModelElement element, Pattern pattern,
 								IProgressMonitor monitor) {
 		if (element instanceof IBean) {
 			Bean bean = (Bean) element;
 			BeanDefinitionHolder bdh = bean.getBeanDefinitionHolder();
 
 			// Compare bean name first
-			if (beanName.equals(bdh.getBeanName())) {
+			if (pattern.matcher(bean.getElementName()).matches()) {
 				return true;
 			}
 
@@ -65,7 +63,7 @@ public class BeanNameQuery extends AbstractBeansQuery {
 			String[] aliases = bdh.getAliases();
 			if (aliases != null) {
 				for (int i = 0; i < aliases.length; i++) {
-					if (beanName.equals(aliases[i])) {
+					if (pattern.matcher(aliases[i]).matches()) {
 						return true;
 					}
 					

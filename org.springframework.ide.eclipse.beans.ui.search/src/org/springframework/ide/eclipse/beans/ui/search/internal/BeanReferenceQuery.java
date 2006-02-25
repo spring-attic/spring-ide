@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -32,7 +33,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
-import org.springframework.ide.eclipse.beans.ui.search.BeansSearchPlugin;
+import org.springframework.ide.eclipse.core.MessageUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
@@ -48,38 +49,37 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  */
 public class BeanReferenceQuery extends AbstractBeansQuery {
 
-	private String beanName;
-
-	public BeanReferenceQuery(BeansSearchScope scope, String beanName) {
-		super(scope);
-		this.beanName = beanName;
+	public BeanReferenceQuery(BeansSearchScope scope, String pattern,
+							  boolean isCaseSensitive, boolean isRegexSearch) {
+		super(scope, pattern, isCaseSensitive, isRegexSearch);
 	}
 
 	public String getLabel() {
-		Object[] args = new Object[] { beanName,
-									   getSearchScope().getDescription() };
-		return BeansSearchPlugin.getFormattedMessage("ReferenceSearch.label",
-													 args);
+		Object[] args = new Object[] { getPattern(),
+									   getScope().getDescription() };
+		return MessageUtils.format(
+					BeansSearchMessages.SearchQuery_searchFor_reference, args);
 	}
 
-	protected boolean doesMatch(IModelElement element,
+	protected boolean doesMatch(IModelElement element, Pattern pattern,
 								IProgressMonitor monitor) {
 		if (element instanceof IBeanAlias) {
 			IBeanAlias alias = (IBeanAlias) element;
-			if (beanName.equals(alias.getName())) {
+			if (pattern.matcher(alias.getName()).matches()) {
 				return true;
 			}
 		} else if (element instanceof IBean) {
 			IBean bean = (IBean) element;
 
 			// Compare reference with parent bean
-			if (!bean.isRootBean() && beanName.equals(bean.getParentName())) {
+			if (!bean.isRootBean() &&
+							 pattern.matcher(bean.getParentName()).matches()) {
 				return true;
 			}
 			AbstractBeanDefinition bd = (AbstractBeanDefinition)
 									   BeansModelUtils.getBeanDefinition(bean);
 			// Compare reference with factory bean
-			if (beanName.equals(bd.getFactoryBeanName())) {
+			if (pattern.matcher(bd.getFactoryBeanName()).matches()) {
 				return true;
 			}
 
@@ -88,7 +88,7 @@ public class BeanReferenceQuery extends AbstractBeansQuery {
 			if (dependsOnBeanNames != null) {
 				for (int i = 0; i < dependsOnBeanNames.length; i++) {
 					String name = dependsOnBeanNames[i];
-					if (beanName.equals(name)) {
+					if (pattern.matcher(name).matches()) {
 						return true;
 					}
 				}
@@ -104,13 +104,13 @@ public class BeanReferenceQuery extends AbstractBeansQuery {
 					if (methodOverride instanceof LookupOverride) {
 						String name = ((LookupOverride)
 												 methodOverride).getBeanName();
-						if (beanName.equals(name)) {
+						if (pattern.matcher(name).matches()) {
 							return true;
 						}
 					} else if (methodOverride instanceof ReplaceOverride) {
 						String name = ((ReplaceOverride)
 								 methodOverride).getMethodReplacerBeanName();
-						if (beanName.equals(name)) {
+						if (pattern.matcher(name).matches()) {
 							return true;
 						}
 					}
@@ -118,18 +118,19 @@ public class BeanReferenceQuery extends AbstractBeansQuery {
 			}
 		} else if (element instanceof IBeanConstructorArgument) {
 			return doesValueMatch(element, ((IBeanConstructorArgument)
-														  element).getValue());
+												 element).getValue(), pattern);
 		} else if (element instanceof IBeanProperty) {
 			return doesValueMatch(element, ((IBeanProperty)
-														  element).getValue());
+												 element).getValue(), pattern);
 		}
 		return false;
 	}
 
-	private boolean doesValueMatch(IModelElement element, Object value) {
+	private boolean doesValueMatch(IModelElement element, Object value,
+								   Pattern pattern) {
 		if (value instanceof RuntimeBeanReference) {
 			String name = ((RuntimeBeanReference) value).getBeanName();
-			if (beanName.equals(name)) {
+			if (pattern.matcher(name).matches()) {
 				return true;
 			}
 		} else if (value instanceof List) {
@@ -145,7 +146,7 @@ public class BeanReferenceQuery extends AbstractBeansQuery {
 					while (names.hasNext()) {
 						Object name = (Object) names.next();
 						if (name instanceof String) {
-							if (beanName.equals(name)) {
+							if (pattern.matcher((String) name).matches()) {
 								return true;
 							}
 						}
@@ -154,18 +155,18 @@ public class BeanReferenceQuery extends AbstractBeansQuery {
 			} else {
 				List list = (List) value;
 				for (int i = 0; i < list.size(); i++) {
-					return doesValueMatch(element, list.get(i));
+					return doesValueMatch(element, list.get(i), pattern);
 				}
 			}
 		} else if (value instanceof Set) {
 			Set set = (Set) value;
 			for (Iterator iter = set.iterator(); iter.hasNext(); ) {
-				return doesValueMatch(element, iter.next());
+				return doesValueMatch(element, iter.next(), pattern);
 			}
 		} else if (value instanceof Map) {
 			Map map = (Map) value;
 			for (Iterator iter = map.keySet().iterator(); iter.hasNext(); ) {
-				return doesValueMatch(element, map.get(iter.next()));
+				return doesValueMatch(element, map.get(iter.next()), pattern);
 			}
 		}
 		return false;
