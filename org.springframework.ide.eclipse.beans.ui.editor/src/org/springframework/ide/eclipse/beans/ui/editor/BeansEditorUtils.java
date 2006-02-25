@@ -174,7 +174,7 @@ public class BeansEditorUtils {
 		}
 		return flags;
 	}
-
+	
 	public static List getClassNamesOfBean(IFile file, Node node) {
 		List classNames = new ArrayList();
 		NamedNodeMap rootAttributes = node.getAttributes();

@@ -218,6 +218,9 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 		} else if ("value".equals(attrName)) {
 			return true;
 		}
+		else if ("value-ref".equals(attrName) || "key-ref".equals(attrName)) {
+			return true;
+		}
 
 		return false;
 	}
@@ -319,7 +322,8 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 			} else if ("factory-bean".equals(name) || "depends-on".equals(name)
 					|| "bean".equals(name) || "local".equals(name)
 					|| "parent".equals(name) || "ref".equals(name)
-					|| "name".equals(name)) {
+					|| "name".equals(name) || "key-ref".equals(name) 
+					|| "value-ref".equals(name)) {
 				Document doc = node.getOwnerDocument();
 				Element bean = doc.getElementById(target);
 				if (bean != null) {

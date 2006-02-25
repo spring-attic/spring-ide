@@ -28,8 +28,6 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
@@ -47,13 +45,11 @@ import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
-import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
@@ -68,14 +64,12 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansJavaDocUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansModelImageDescriptor;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateCompletionProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextTypeIds;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -821,48 +815,26 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 							className);
 				}
 			} else if ("factory-method".equals(attributeName)) {
-				// TODO add support for parent bean
 				NamedNodeMap attributes = node.getAttributes();
 				Node factoryBean = attributes.getNamedItem("factory-bean");
 				String className = null;
 				String factoryClassName = null;
 				if (factoryBean != null) {
-					String factoryBeanId = factoryBean.getNodeValue();
-					Document doc = node.getOwnerDocument();
-					Element bean = doc.getElementById(factoryBeanId);
-					if (bean != null && bean instanceof Node) {
-						NamedNodeMap attr = ((Node) bean).getAttributes();
-						className = attr.getNamedItem("class").getNodeValue();
-					} else {
-						if (getResource(request) instanceof IFile) {
-							IFile file = (IFile) getResource(request);
-
-							// assume this is an external reference
-							Iterator beans = BeansEditorUtils
-									.getBeansFromConfigSets(file).iterator();
-							while (beans.hasNext()) {
-								IBean modelBean = (IBean) beans.next();
-								if (modelBean.getElementName().equals(
-										factoryBeanId)) {
-									className = modelBean.getClassName();
-								}
-							}
-						}
-					}
+					List list = BeansEditorUtils.getClassNamesOfBean((IFile) getResource(request), factoryBean);
+					className = (list.size() != 0 ? (String) list.get(0) : null);
 				} else {
-					if (attributes.getNamedItem("class") != null) {
-						className = attributes.getNamedItem("class")
-								.getNodeValue();
-					}
+					List list = BeansEditorUtils.getClassNamesOfBean((IFile) getResource(request), node);
+					className = (list.size() != 0 ? (String) list.get(0) : null);
 				}
-				if (attributes.getNamedItem("class") != null) {
-					factoryClassName = attributes.getNamedItem("class")
-							.getNodeValue();
-				}
+				
+				List list = BeansEditorUtils.getClassNamesOfBean((IFile) getResource(request), node);
+				factoryClassName = (list.size() != 0 ? (String) list.get(0) : null);
+
 				if (className != null && factoryClassName != null) {
 					addFactoryMethodAttributeValueProposals(request,
 							matchString, className, factoryClassName);
 				}
+				
 			} else if ("parent".equals(attributeName)
 					|| "depends-on".equals(attributeName)
 					|| "factory-bean".equals(attributeName)) {
@@ -900,6 +872,11 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 			}
 		} else if ("alias".equals(node.getNodeName())) {
 			if ("name".equals(attributeName)) {
+				addBeanReferenceProposals(request, matchString, node
+						.getOwnerDocument(), true);
+			}
+		} else if ("entry".equals(node.getNodeName())) {
+			if ("key-ref".equals(attributeName) || "value-ref".equals(attributeName)) {
 				addBeanReferenceProposals(request, matchString, node
 						.getOwnerDocument(), true);
 			}
