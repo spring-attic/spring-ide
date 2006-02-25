@@ -207,10 +207,13 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 		} else if ("parent".equals(attrName)) {
 			return true;
 		} else if ("depends-on".equals(attrName)) {
-			return true; 
-		} else if ("bean".equals(attrName) || "local".equals(attrName)
-				|| "parent".equals(attrName) || "ref".equals(attrName)
-				|| ("name".equals(attrName) && "alias".equals(attr.getOwnerElement().getNodeName()))) {
+			return true;
+		} else if ("bean".equals(attrName)
+				|| "local".equals(attrName)
+				|| "parent".equals(attrName)
+				|| "ref".equals(attrName)
+				|| ("name".equals(attrName) && "alias".equals(attr
+						.getOwnerElement().getNodeName()))) {
 			return true;
 		} else if ("value".equals(attrName)) {
 			return true;
@@ -381,25 +384,30 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 
 		int cursorIndexInTarget = cursor.getOffset()
 				- hyperlinkRegion.getOffset();
-		String preTarget = target.substring(0, cursorIndexInTarget);
-		if (!preTarget.endsWith(".")) {
-			int regionOffset = hyperlinkRegion.getOffset()
-					+ preTarget.lastIndexOf(".") + 1;
-			int segmentCount = new StringTokenizer(preTarget, ".")
-					.countTokens();
-			StringTokenizer tok = new StringTokenizer(target, ".");
 
-			for (int i = 0; i < segmentCount; i++) {
-				propertyPaths.add(tok.nextToken());
+		if (cursorIndexInTarget > 0 && cursorIndexInTarget < target.length()) {
+
+			String preTarget = target.substring(0, cursorIndexInTarget);
+			if (!preTarget.endsWith(".")) {
+				int regionOffset = hyperlinkRegion.getOffset()
+						+ preTarget.lastIndexOf(".") + 1;
+				int segmentCount = new StringTokenizer(preTarget, ".")
+						.countTokens();
+				StringTokenizer tok = new StringTokenizer(target, ".");
+
+				for (int i = 0; i < segmentCount; i++) {
+					propertyPaths.add(tok.nextToken());
+				}
+
+				int regionLenght = ((String) propertyPaths
+						.get(segmentCount - 1)).length();
+
+				return new Region(regionOffset, regionLenght);
 			}
-
-			int regionLenght = ((String) propertyPaths.get(segmentCount - 1))
-					.length();
-
-			return new Region(regionOffset, regionLenght);
-		} else {
-			return hyperlinkRegion;
 		}
+
+		return hyperlinkRegion;
+
 	}
 
 	private IMethod extractMethodFromPropertyPathElements(List propertyPath,
