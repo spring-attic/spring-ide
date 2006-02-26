@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,11 @@ import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
 import org.springframework.ide.eclipse.beans.ui.graph.parts.BeanPart;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
+/**
+ * This action opens the selected bean's Java type.
+ *
+ * @author Torsten Juergeleit
+ */
 public class OpenJavaType extends EditorPartAction {
 
 	public OpenJavaType(IEditorPart editor) {
@@ -49,9 +54,11 @@ public class OpenJavaType extends EditorPartAction {
 
 	public boolean isEnabled() {
 		EditPart part = getFirstSelectedEditPart();
-		if (part instanceof BeanPart &&
-									 ((BeanPart) part).getBean().isRootBean()) {
-			return true;
+		if (part instanceof BeanPart) {
+			Bean bean = ((BeanPart) part).getBean();
+			if (bean.isRootBean() && bean.getClassName() != null) {
+				return true;
+			}
 		}
 		return false;
 	}

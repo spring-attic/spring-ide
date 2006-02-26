@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,11 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 
+/**
+ * This is a representation of a Spring bean.
+ *
+ * @author Torsten Juergeleit
+ */
 public class Bean extends Node implements IAdaptable {
 
 	public int preferredHeight;
@@ -99,6 +104,10 @@ public class Bean extends Node implements IAdaptable {
 
 	public boolean isRootBean() {
 		return bean.isRootBean();
+	}
+
+	public boolean isChildBean() {
+		return bean.isChildBean();
 	}
 
 	public Object getAdapter(Class adapter) {

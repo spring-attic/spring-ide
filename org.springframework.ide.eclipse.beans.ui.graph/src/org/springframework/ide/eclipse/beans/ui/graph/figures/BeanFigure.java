@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,10 +66,15 @@ public class BeanFigure extends Figure {
 				// TODO set tooltip for abstract beans, bean factories, ...
 				label.setToolTip(new Label("Class: <no class specified>"));
 			}
-		} else {
+		} else if (bean.isChildBean()){
 			label.setIcon(BeansGraphImages.getImage(
 										 BeansGraphImages.IMG_OBJS_CHILD_BEAN));
 			label.setToolTip(new Label("Parent: " + bean.getParentName()));
+		} else {
+			// FIXME Handle factory beans
+//			label.setIcon(BeansGraphImages.getImage(
+//										 BeansGraphImages.IMG_OBJS_CHILD_BEAN));
+//			label.setToolTip(new Label("Parent: " + bean.getParentName()));
 		}
 		return label;
 	}
