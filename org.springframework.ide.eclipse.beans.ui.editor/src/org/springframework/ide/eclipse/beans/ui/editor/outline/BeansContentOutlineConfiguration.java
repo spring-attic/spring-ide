@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansTagUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.actions.LexicalSortingAction;
 import org.springframework.ide.eclipse.beans.ui.editor.actions.OutlineStyleAction;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
@@ -111,6 +112,7 @@ public class BeansContentOutlineConfiguration
 			// Create Spring beans label image
 			Node node = (Node) object;
 			String nodeName = node.getNodeName();
+			NamedNodeMap attributes = node.getAttributes();
 	
 			// Root elements (alias, import and bean)
 			if ("alias".equals(nodeName)) {
@@ -120,14 +122,16 @@ public class BeansContentOutlineConfiguration
 				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_IMPORT);
 			}
 			if ("bean".equals(nodeName)) {
-				Node parentNode = node.getAttributes().getNamedItem("parent");
-				if (parentNode != null) {
-					return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CHILD_BEAN);
-				} else {
-					return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
+				int flags = 0;
+				if (attributes.getNamedItem("parent") != null) {
+					flags |= BeansModelImages.FLAG_CHILD;
+				} else if (attributes.getNamedItem("factory-method") != null) {
+					flags |= BeansModelImages.FLAG_FACTORY;
 				}
+				return BeansModelImages.getImage(BeansModelImages.ELEMENT_BEAN,
+												 flags);
 			}
-	
+
 			// Bean elements
 			if ("constructor-arg".equals(nodeName)) {
 				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONSTRUCTOR);

@@ -45,7 +45,6 @@ import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -63,12 +62,11 @@ import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
-import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansJavaDocUtils;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansModelImageDescriptor;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateCompletionProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextTypeIds;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -120,13 +118,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 					buf.append(" - ");
 					buf.append(fileName);
 					String displayText = buf.toString();
-					Image image = BeansUIImages
-							.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
-					ImageDescriptor descriptor = new BeansModelImageDescriptor(
-							image, BeansEditorUtils.getBeanFlags(bean, true));
-					image = BeansUIPlugin.getImageDescriptorRegistry().get(
-							descriptor);
-
+					Image image = BeansModelImages.getImage(bean);
 					BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
 							replaceText,
 							request.getReplacementBeginPosition(),
@@ -175,7 +167,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 						}
 						String displayText = buf.toString();
 						Image image = BeansUIImages
-								.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
+								.getImage(BeansUIImages.IMG_OBJS_BEAN);
 
 						BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
 								replaceText,
@@ -330,11 +322,8 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 							.getFlags()
 							| JavaElementImageProvider.SMALL_ICONS);
 					if (external) {
-						ImageDescriptor descriptor = new BeansModelImageDescriptor(
-								image,
-								BeansModelImageDescriptor.FLAG_IS_EXTERNAL);
-						image = BeansUIPlugin.getImageDescriptorRegistry().get(
-								descriptor);
+						image = BeansModelImages.getDecoratedImage(image,
+								BeansModelImages.FLAG_EXTERNAL);
 					}
 					BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
 					String javadoc = utils.getJavaDoc();

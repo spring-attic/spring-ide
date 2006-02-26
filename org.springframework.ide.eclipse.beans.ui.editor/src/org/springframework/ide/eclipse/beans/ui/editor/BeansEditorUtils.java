@@ -36,6 +36,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -157,24 +158,20 @@ public class BeansEditorUtils {
 	public static int getBeanFlags(IBean bean, boolean isExternal) {
 		int flags = 0;
 		if (isExternal) {
-			flags |= BeansModelImageDescriptor.FLAG_IS_EXTERNAL;
+			flags |= BeansModelImages.FLAG_EXTERNAL;
 		}
 		if (!bean.isSingleton()) {
-			flags |= BeansModelImageDescriptor.FLAG_IS_PROTOTYPE;
+			flags |= BeansModelImages.FLAG_PROTOTYPE;
 		}
 		if (bean.isAbstract()) {
-			flags |= BeansModelImageDescriptor.FLAG_IS_ABSTRACT;
+			flags |= BeansModelImages.FLAG_ABSTRACT;
 		}
 		if (bean.isLazyInit()) {
-			flags |= BeansModelImageDescriptor.FLAG_IS_LAZY_INIT;
-		}
-		if (bean.isRootBean() && bean.getClassName() == null
-				&& bean.getParentName() == null) {
-			flags |= BeansModelImageDescriptor.FLAG_IS_ROOT_BEAN_WITHOUT_CLASS;
+			flags |= BeansModelImages.FLAG_LAZY_INIT;
 		}
 		return flags;
 	}
-	
+
 	public static List getClassNamesOfBean(IFile file, Node node) {
 		List classNames = new ArrayList();
 		NamedNodeMap rootAttributes = node.getAttributes();
