@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,8 +85,11 @@ public class PropertyProperties implements IPropertySource {
 			IBean bean = (IBean) property.getElementParent();
 			if (bean.isRootBean()) {
 				return new RootBeanProperties(bean);
-			} else {
+			} else if (bean.isChildBean()) {
 				return new ChildBeanProperties(bean);
+			} else {
+				// FIXME add factory bean support
+//				return new FactoryBeanProperties(bean);
 			}
 		} else if (P_ID_CLASS.equals(id)) {
 			Object value = property.getValue();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,8 +113,11 @@ public class ChildBeanProperties implements IPropertySource {
 			if (parentBean != null) {
 				if (parentBean.isRootBean()) {
 					return new RootBeanProperties(parentBean);
-				} else {
+				} else if (parentBean.isChildBean()) {
 					return new ChildBeanProperties(parentBean);
+				} else {
+					// FIXME add factory bean support
+//					return new FactoryBeanProperties(parentBean);
 				}
 			}
 			return parentName;

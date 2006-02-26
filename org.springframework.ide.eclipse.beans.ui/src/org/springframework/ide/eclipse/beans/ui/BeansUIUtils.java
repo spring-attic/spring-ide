@@ -90,8 +90,11 @@ public class BeansUIUtils {
 			IBean bean = ((IBean) element);
 			if (bean.isRootBean()) {
 				return new RootBeanProperties(bean);
-			} else {
+			} else if (bean.isChildBean()){
 				return new ChildBeanProperties(bean);
+			} else {
+				// FIXME add support for factory beans
+//				return new FactoryBeanProperties(bean);
 			}
 		} else if (element instanceof IBeanConstructorArgument) {
 			return new ConstructorArgumentProperties(
