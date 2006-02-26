@@ -45,6 +45,8 @@ public interface IBean extends ISourceModelElement {
 
 	public boolean isRootBean();
 
+	public boolean isChildBean();
+
 	public boolean isSingleton();
 
 	public boolean isAbstract();

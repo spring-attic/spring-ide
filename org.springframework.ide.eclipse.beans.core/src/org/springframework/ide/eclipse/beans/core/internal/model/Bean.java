@@ -41,7 +41,7 @@ import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
- * Parser data for a Spring bean.
+ * This class holds the data for a Spring bean.
  *
  * @author Torsten Juergeleit
  */
@@ -182,7 +182,12 @@ public class Bean extends AbstractSourceModelElement implements IBean {
 
 	public boolean isRootBean() {
 		return (beanDefinitionHolder.getBeanDefinition() instanceof
-															RootBeanDefinition);
+														   RootBeanDefinition);
+	}
+
+	public boolean isChildBean() {
+		return (beanDefinitionHolder.getBeanDefinition() instanceof
+														  ChildBeanDefinition);
 	}
 
 	public boolean isSingleton() {

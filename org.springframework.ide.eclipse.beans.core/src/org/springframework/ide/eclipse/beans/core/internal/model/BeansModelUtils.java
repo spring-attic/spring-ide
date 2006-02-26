@@ -237,7 +237,7 @@ public class BeansModelUtils {
 			Bean bean = (Bean) element;
 
 			// For a child bean add the parent bean
-			if (!bean.isRootBean()) {
+			if (bean.isChildBean()) {
 				IBean parentBean = getBean(bean.getParentName(), context);
 				addBeanReference(BeanReference.PARENT_BEAN_TYPE, bean,
 							 parentBean, context, references, referencedBeans);
@@ -247,7 +247,7 @@ public class BeansModelUtils {
 					Set beanNames = new HashSet();  // used to detect a cycle
 					beanNames.add(bean.getElementName());
 					beanNames.add(parentBean.getElementName());
-					while (parentBean != null && !parentBean.isRootBean()) {
+					while (parentBean != null && parentBean.isChildBean()) {
 						String parentName = parentBean.getParentName();
 						if (beanNames.contains(parentName)) {
 							// break from cycle
@@ -516,7 +516,7 @@ public class BeansModelUtils {
 	public static final BeanDefinition getMergedBeanDefinition(IBean bean,
 													   IModelElement context) {
 		BeanDefinition bd = getBeanDefinition(bean);
-		if (!bean.isRootBean()) {
+		if (bean.isChildBean()) {
 
 			// Fill a set with all bean definitions belonging to the
 			// hierarchy of the requested bean definition 
@@ -561,7 +561,7 @@ public class BeansModelUtils {
 			if (!parentName.equals(bean.getElementName()) &&
 										 !beanDefinitions.contains(parentBd)) {
 				beanDefinitions.add(parentBd);
-				if (!parentBean.isRootBean()) {
+				if (parentBean.isChildBean()) {
 					addBeanDefinition(parentBean, context, beanDefinitions);
 				}
 			}
