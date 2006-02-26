@@ -160,7 +160,7 @@ public final class SpringCoreUtils {
 	public static Object adaptToModelElement(Object element) {
 		if (!(element instanceof IModelElement) &&
 											 (element instanceof IAdaptable)) {
-			element = ((IAdaptable) element).getAdapter(IModelElement.class);
+			return ((IAdaptable) element).getAdapter(IModelElement.class);
 		}
 		return element;
 	}
