@@ -136,8 +136,8 @@
             location="TOP_RIGHT"
             label="%decorator.label"
             state="true"
-            class="org.springframework.ide.eclipse.beans.ui.BeansUILabelDecorator"
-            id="org.springframework.ide.eclipse.beans.ui.beansLabelDecorator">
+            class="org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator"
+            id="org.springframework.ide.eclipse.beans.ui.model.beansModelLabelDecorator">
          <description>
             %decorator.description
          </description>

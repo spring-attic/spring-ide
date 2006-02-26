@@ -43,8 +43,8 @@ import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectD
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionHandler;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionWriter;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.ui.BeansUILabelDecorator;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.xml.sax.Attributes;
@@ -104,7 +104,7 @@ public class MigrateSpringUIProject implements IObjectActionDelegate {
 		}
 
 		// Refresh label decoration for Spring beans project and config files
-		BeansUILabelDecorator.update();
+		BeansModelLabelDecorator.update();
 	}
 
 	/**

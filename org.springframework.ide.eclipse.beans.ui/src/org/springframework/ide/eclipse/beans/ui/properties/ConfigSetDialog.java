@@ -44,13 +44,13 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.ui.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
-import org.springframework.ide.eclipse.beans.ui.model.ModelLabelDecorator;
-import org.springframework.ide.eclipse.beans.ui.model.ModelSorter;
-import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
+import org.springframework.ide.eclipse.beans.ui.views.model.ConfigNode;
+import org.springframework.ide.eclipse.beans.ui.views.model.ConfigSetNode;
+import org.springframework.ide.eclipse.beans.ui.views.model.ModelLabelDecorator;
+import org.springframework.ide.eclipse.beans.ui.views.model.ModelSorter;
+import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class ConfigSetDialog extends Dialog {

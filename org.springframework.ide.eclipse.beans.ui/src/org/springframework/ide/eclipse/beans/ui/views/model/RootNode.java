@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.beans.ui.model;
+package org.springframework.ide.eclipse.beans.ui.views.model;
 
 import java.util.Collection;
 import java.util.HashMap;

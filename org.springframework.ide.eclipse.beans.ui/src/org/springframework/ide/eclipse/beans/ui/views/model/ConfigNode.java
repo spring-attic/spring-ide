@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.beans.ui.model;
+package org.springframework.ide.eclipse.beans.ui.views.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -163,7 +163,6 @@ public class ConfigNode extends AbstractNode {
 		IBeansConfig config;
 		if (configName.charAt(0) == '/') {
 			config = BeansCorePlugin.getModel().getConfig(configName);
-			setFlags(INode.FLAG_IS_EXTERNAL);
 		} else {
 			config = project.getProject().getConfig(configName);
 		}

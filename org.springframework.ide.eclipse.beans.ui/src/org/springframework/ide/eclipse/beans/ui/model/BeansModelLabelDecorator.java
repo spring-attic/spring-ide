@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.beans.ui;
+package org.springframework.ide.eclipse.beans.ui.model;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IClassFile;
@@ -30,6 +30,8 @@ import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
+import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
@@ -40,16 +42,17 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
  * This decoration is refreshed on every modification to the Spring Beans model.
  * Therefore the decorator adds a change listener to the beans model.
  * 
- * @author Torsten Juergeleit
  * @see org.springframework.ide.eclipse.beans.core.model.IBeansModelChangedListener
+ *
+ * @author Torsten Juergeleit
  */
-public class BeansUILabelDecorator extends LabelProvider
+public class BeansModelLabelDecorator extends LabelProvider
 										 implements ILightweightLabelDecorator {
 	public static final String DECORATOR_ID = BeansUIPlugin.PLUGIN_ID +
-														 ".beansLabelDecorator";
+											 ".model.beansModelLabelDecorator";
 	private IModelChangeListener listener;
 
-	public BeansUILabelDecorator() {
+	public BeansModelLabelDecorator() {
 		listener = new IModelChangeListener() {
 			public void elementChanged(ModelChangeEvent event) {
 				update();
@@ -59,8 +62,8 @@ public class BeansUILabelDecorator extends LabelProvider
 	}
 
 	public void decorate(Object element, IDecoration decoration) {
-		IBeansModel model = BeansCorePlugin.getModel();
 		if (element instanceof IFile) {
+			IBeansModel model = BeansCorePlugin.getModel();
 			if (model.getConfig((IFile) element) != null) {
 				decoration.addOverlay(BeansUIImages.DESC_OVR_SPRING);
 			}
@@ -69,6 +72,7 @@ public class BeansUILabelDecorator extends LabelProvider
 			int type = javaElement.getElementType();
 			if (type == IJavaElement.COMPILATION_UNIT ||
 											  type == IJavaElement.CLASS_FILE) {
+				IBeansModel model = BeansCorePlugin.getModel();
 				IBeansProject project = model.getProject(
 									 javaElement.getJavaProject().getProject());
 				if (project != null) {

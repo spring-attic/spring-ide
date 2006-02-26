@@ -31,8 +31,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.ui.BeansUILabelDecorator;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
@@ -86,7 +86,7 @@ public class MigrateSpringBeansProject implements IObjectActionDelegate {
 		}
 
 		// Refresh label decoration for Spring beans project and config files
-		BeansUILabelDecorator.update();
+		BeansModelLabelDecorator.update();
 	}
 
 	/**

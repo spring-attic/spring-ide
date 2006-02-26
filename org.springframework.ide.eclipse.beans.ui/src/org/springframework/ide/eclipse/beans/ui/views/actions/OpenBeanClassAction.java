@@ -21,9 +21,9 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.action.Action;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
-import org.springframework.ide.eclipse.beans.ui.model.INode;
 import org.springframework.ide.eclipse.beans.ui.views.BeansView;
+import org.springframework.ide.eclipse.beans.ui.views.model.BeanNode;
+import org.springframework.ide.eclipse.beans.ui.views.model.INode;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class OpenBeanClassAction extends Action {

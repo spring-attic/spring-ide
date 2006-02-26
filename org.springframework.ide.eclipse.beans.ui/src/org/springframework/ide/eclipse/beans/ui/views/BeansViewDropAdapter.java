@@ -24,14 +24,14 @@ import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
-import org.springframework.ide.eclipse.beans.ui.model.ConstructorArgumentNode;
-import org.springframework.ide.eclipse.beans.ui.model.INode;
-import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
-import org.springframework.ide.eclipse.beans.ui.model.PropertyNode;
-import org.springframework.ide.eclipse.beans.ui.model.RootNode;
+import org.springframework.ide.eclipse.beans.ui.views.model.BeanNode;
+import org.springframework.ide.eclipse.beans.ui.views.model.ConfigNode;
+import org.springframework.ide.eclipse.beans.ui.views.model.ConfigSetNode;
+import org.springframework.ide.eclipse.beans.ui.views.model.ConstructorArgumentNode;
+import org.springframework.ide.eclipse.beans.ui.views.model.INode;
+import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
+import org.springframework.ide.eclipse.beans.ui.views.model.PropertyNode;
+import org.springframework.ide.eclipse.beans.ui.views.model.RootNode;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
 /**

@@ -20,10 +20,10 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
-import org.springframework.ide.eclipse.beans.ui.model.INode;
-import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
+import org.springframework.ide.eclipse.beans.ui.views.model.ConfigNode;
+import org.springframework.ide.eclipse.beans.ui.views.model.ConfigSetNode;
+import org.springframework.ide.eclipse.beans.ui.views.model.INode;
+import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
 
 /**
  * This content provider is used to display a tree of the beans config sets

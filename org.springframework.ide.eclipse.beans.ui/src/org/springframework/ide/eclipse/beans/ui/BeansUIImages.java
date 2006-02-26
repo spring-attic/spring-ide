@@ -92,8 +92,7 @@ public class BeansUIImages {
 	public static final String IMG_OBJS_IMPORT = NAME_PREFIX + "import_obj.gif";
 	public static final String IMG_OBJS_ALIAS = NAME_PREFIX + "alias_obj.gif";
 	public static final String IMG_OBJS_DESCRIPTION = NAME_PREFIX + "description_obj.gif";
-	public static final String IMG_OBJS_ROOT_BEAN = NAME_PREFIX + "rootbean_obj.gif";
-	public static final String IMG_OBJS_CHILD_BEAN = NAME_PREFIX + "childbean_obj.gif";
+	public static final String IMG_OBJS_BEAN = NAME_PREFIX + "bean_obj.gif";
 	public static final String IMG_OBJS_BEAN_REF = NAME_PREFIX + "beanref_obj.gif";
 	public static final String IMG_OBJS_CONSTRUCTOR = NAME_PREFIX + "constructor_obj.gif";
 	public static final String IMG_OBJS_PROPERTY = NAME_PREFIX + "property_obj.gif";
@@ -118,8 +117,7 @@ public class BeansUIImages {
 	public static final ImageDescriptor DESC_OBJS_IMPORT = createManaged(OBJECT, IMG_OBJS_IMPORT);
 	public static final ImageDescriptor DESC_OBJS_ALIAS = createManaged(OBJECT, IMG_OBJS_ALIAS);
 	public static final ImageDescriptor DESC_OBJS_DESCRIPTION = createManaged(OBJECT, IMG_OBJS_DESCRIPTION);
-	public static final ImageDescriptor DESC_OBJS_ROOT_BEAN = createManaged(OBJECT, IMG_OBJS_ROOT_BEAN);
-	public static final ImageDescriptor DESC_OBJS_CHILD_BEAN = createManaged(OBJECT, IMG_OBJS_CHILD_BEAN);
+	public static final ImageDescriptor DESC_OBJS_BEAN = createManaged(OBJECT, IMG_OBJS_BEAN);
 	public static final ImageDescriptor DESC_OBJS_BEAN_REF = createManaged(OBJECT, IMG_OBJS_BEAN_REF);
 	public static final ImageDescriptor DESC_OBJS_CONSTRUCTOR = createManaged(OBJECT, IMG_OBJS_CONSTRUCTOR);
 	public static final ImageDescriptor DESC_OBJS_PROPERTY = createManaged(OBJECT, IMG_OBJS_PROPERTY);
@@ -131,10 +129,11 @@ public class BeansUIImages {
 	public static final ImageDescriptor DESC_OVR_SPRING = create(OVR, "spring_ovr.gif");
 	public static final ImageDescriptor DESC_OVR_ERROR = create(OVR, "error_ovr.gif");
 	public static final ImageDescriptor DESC_OVR_WARNING = create(OVR, "warning_ovr.gif");
-	public static final ImageDescriptor DESC_OVR_PROTOTYPE = create(OVR, "prototype_ovr.gif");
 	public static final ImageDescriptor DESC_OVR_EXTERNAL = create(OVR, "external_ovr.gif");
+	public static final ImageDescriptor DESC_OVR_CHILD = create(OVR, "child_ovr.gif");
+	public static final ImageDescriptor DESC_OVR_FACTORY = create(OVR, "factory_ovr.gif");
+	public static final ImageDescriptor DESC_OVR_PROTOTYPE = create(OVR, "prototype_ovr.gif");
 	public static final ImageDescriptor DESC_OVR_ABSTRACT = create(OVR, "abstract_ovr.gif");
-	public static final ImageDescriptor DESC_OVR_NO_CLASS = create(OVR, "no_class_ovr.gif");
 
 	/**
 	 * Returns the <code>Image<code> identified by the given key,

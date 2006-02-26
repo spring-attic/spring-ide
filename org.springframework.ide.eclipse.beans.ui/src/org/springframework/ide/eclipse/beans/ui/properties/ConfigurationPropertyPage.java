@@ -33,10 +33,10 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.ui.BeansUILabelDecorator;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
-import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
+import org.springframework.ide.eclipse.beans.ui.views.model.ConfigSetNode;
+import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
 
 public class ConfigurationPropertyPage extends PropertyPage {
 
@@ -134,7 +134,7 @@ public class ConfigurationPropertyPage extends PropertyPage {
 
 		// Refresh label decoration of Spring project and config files
 		if (configFilesTab.hasUserMadeChanges()) {
-			BeansUILabelDecorator.update();
+			BeansModelLabelDecorator.update();
 		}
 		return super.performOk();
 	}

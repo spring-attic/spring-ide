@@ -22,7 +22,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.IPreferencesConstants;
-import org.springframework.ide.eclipse.beans.ui.model.ModelSorter;
+import org.springframework.ide.eclipse.beans.ui.views.model.ModelSorter;
 
 public class LexicalSortingAction extends Action {
 

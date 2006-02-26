@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.beans.ui.model;
+package org.springframework.ide.eclipse.beans.ui.views.model;
 
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 

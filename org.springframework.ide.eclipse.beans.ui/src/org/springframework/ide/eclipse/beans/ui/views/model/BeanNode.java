@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.beans.ui.model;
+package org.springframework.ide.eclipse.beans.ui.views.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +26,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 
 /**
  * Representation of a Spring bean.
+ *
+ * @author Torsten Juergeleit
  */
 public class BeanNode extends AbstractNode {
 
@@ -49,12 +51,6 @@ public class BeanNode extends AbstractNode {
 		this.properties = new ArrayList();
 		this.innerBeans = new ArrayList();
 		this.isOverride = false;
-
-		// copy external flag from config node
-		if (config != null &&
-							(config.getFlags() & INode.FLAG_IS_EXTERNAL) != 0) {
-			setFlags(INode.FLAG_IS_EXTERNAL);
-		}
 	}
 
 	/**
@@ -70,11 +66,6 @@ public class BeanNode extends AbstractNode {
 		this.properties = new ArrayList();
 		this.innerBeans = new ArrayList();
 		this.isOverride = false;
-
-		// Copy external flag from config node
-		if (bean != null && (bean.getFlags() & INode.FLAG_IS_EXTERNAL) != 0) {
-			setFlags(INode.FLAG_IS_EXTERNAL);
-		}
 	}
 
 	/**
@@ -114,12 +105,6 @@ public class BeanNode extends AbstractNode {
 		}
 		
 		this.isOverride = false;
-
-		// copy external flag from config set node
-		if (this.config != null &&
-					   (this.config.getFlags() & INode.FLAG_IS_EXTERNAL) != 0) {
-			setFlags(INode.FLAG_IS_EXTERNAL);
-		}
 	}
 
 	/**
@@ -159,31 +144,10 @@ public class BeanNode extends AbstractNode {
 		}
 		
 		this.isOverride = false;
-
-		// copy external flag from config set node
-		if (this.config != null &&
-					   (this.config.getFlags() & INode.FLAG_IS_EXTERNAL) != 0) {
-			setFlags(INode.FLAG_IS_EXTERNAL);
-		}
 	}
 
 	public void setBean(IBean bean) {
 		setElement(bean);
-		if (bean != null) {
-			if (!bean.isSingleton()) {
-				setFlags(INode.FLAG_IS_PROTOTYPE);
-			}
-			if (bean.isLazyInit()) {
-				setFlags(INode.FLAG_IS_LAZY_INIT);
-			}
-			if (bean.isAbstract()) {
-				setFlags(INode.FLAG_IS_ABSTRACT);
-			}
-			if (bean.isRootBean() && bean.getClassName() == null &&
-												 bean.getParentName() == null) {
-				setFlags(INode.FLAG_IS_ROOT_BEAN_WITHOUT_CLASS);
-			}
-		}
 	}
 
 	public IBean getBean() {
@@ -257,6 +221,10 @@ public class BeanNode extends AbstractNode {
 
 	public boolean isRootBean() {
 		return (getBean() != null ? getBean().isRootBean() : true);
+	}
+
+	public boolean isChildBean() {
+		return (getBean() != null ? getBean().isChildBean() : true);
 	}
 
 	public boolean isSingleton() {

@@ -27,7 +27,7 @@ import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
+import org.springframework.ide.eclipse.beans.ui.views.model.ConfigNode;
 
 /**
  * Adapter for DND support in beans view.

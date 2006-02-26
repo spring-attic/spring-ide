@@ -39,13 +39,13 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.IPropertyListener;
-import org.springframework.ide.eclipse.beans.ui.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
-import org.springframework.ide.eclipse.beans.ui.model.INode;
-import org.springframework.ide.eclipse.beans.ui.model.ModelLabelDecorator;
-import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
+import org.springframework.ide.eclipse.beans.ui.views.model.ConfigNode;
+import org.springframework.ide.eclipse.beans.ui.views.model.ConfigSetNode;
+import org.springframework.ide.eclipse.beans.ui.views.model.INode;
+import org.springframework.ide.eclipse.beans.ui.views.model.ModelLabelDecorator;
+import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class ConfigSetsTab {

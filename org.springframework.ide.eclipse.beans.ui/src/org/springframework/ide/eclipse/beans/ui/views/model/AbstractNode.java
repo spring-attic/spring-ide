@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.beans.ui.model;
+package org.springframework.ide.eclipse.beans.ui.views.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -150,9 +150,6 @@ public abstract class AbstractNode implements INode {
 
 	public final void setFlags(int flags) {
 		this.flags |= flags;
-
-		// Mask flags which are not propagated
-		flags &= ~NOT_PROPAGATED_FLAGS;
 
 		// Propagate modification of flags to parent
 		if (parent != null && parent instanceof AbstractNode) {

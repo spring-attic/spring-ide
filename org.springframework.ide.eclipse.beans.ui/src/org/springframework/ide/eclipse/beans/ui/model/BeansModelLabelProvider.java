@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.beans.ui;
+package org.springframework.ide.eclipse.beans.ui.model;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
@@ -23,12 +23,8 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
-import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
-import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
@@ -46,44 +42,27 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 public class BeansModelLabelProvider extends LabelProvider {
 
 	public Image getImage(Object element) {
-
-		// At first try to adapt given element to IModelElement 
 		Object adaptedElement = SpringCoreUtils.adaptToModelElement(element);
-
-		// Now check if given object is a member of the beans core model
-		if (adaptedElement instanceof IBeansProject) {
-			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_PROJECT);
-		} else if (adaptedElement instanceof IBeansConfigSet) {
-			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONFIG_SET);
-		} else if (adaptedElement instanceof IBeansConfig) {
-			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONFIG);
-		} else if (adaptedElement instanceof IBeanAlias) {
-			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ALIAS);
-		} else if (adaptedElement instanceof IBean) {
-			if (((IBean) adaptedElement).isRootBean()) {
-				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ROOT_BEAN);
-			} else {
-				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CHILD_BEAN);
-			}
-		} else if (adaptedElement instanceof IBeanConstructorArgument) {
-			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONSTRUCTOR);
-		} else if (adaptedElement instanceof IBeanProperty) {
-			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_PROPERTY);
+		if (adaptedElement instanceof IModelElement) {
+			return BeansModelImages.getImage((IModelElement) adaptedElement);
 		}
 		return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_SPRING);
 	}
 
 	public String getText(Object element) {
-
-		// At first try to adapt given element to IModelElement 
 		Object adaptedElement = SpringCoreUtils.adaptToModelElement(element);
-
-		// Now check if given object is a member of the beans core model
 		if (adaptedElement instanceof IModelElement) {
+			return getText((IModelElement) adaptedElement);
+		}
+		return super.getText(element);
+	}
+
+	public static String getText(IModelElement element) {
+		if (element instanceof IModelElement) {
 			StringBuffer label = new StringBuffer();
-			label.append(((IModelElement) adaptedElement).getElementName());
-			if (adaptedElement instanceof IBean) {
-				IBean bean = (IBean) adaptedElement;
+			label.append(((IModelElement) element).getElementName());
+			if (element instanceof IBean) {
+				IBean bean = (IBean) element;
 				if (bean.getClassName() != null) {
 					label.append(" [");
 					label.append(bean.getClassName());
@@ -93,8 +72,8 @@ public class BeansModelLabelProvider extends LabelProvider {
 					label.append(bean.getParentName());
 					label.append('>');
 				}
-			} else if (adaptedElement instanceof IBeanProperty) {
-				Object value = ((IBeanProperty) adaptedElement).getValue();
+			} else if (element instanceof IBeanProperty) {
+				Object value = ((IBeanProperty) element).getValue();
 				if (value instanceof String) {
 					label.append(" \"");
 					label.append(value);
@@ -122,6 +101,6 @@ public class BeansModelLabelProvider extends LabelProvider {
 			}
 			return label.toString();
 		}
-		return super.getText(element);
+		return element.toString();
 	}
 }

@@ -32,13 +32,13 @@ import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.ui.BeansUILabelDecorator;
-import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigNode;
-import org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode;
-import org.springframework.ide.eclipse.beans.ui.model.INode;
-import org.springframework.ide.eclipse.beans.ui.model.ProjectNode;
-import org.springframework.ide.eclipse.beans.ui.model.RootNode;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
+import org.springframework.ide.eclipse.beans.ui.views.model.BeanNode;
+import org.springframework.ide.eclipse.beans.ui.views.model.ConfigNode;
+import org.springframework.ide.eclipse.beans.ui.views.model.ConfigSetNode;
+import org.springframework.ide.eclipse.beans.ui.views.model.INode;
+import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
+import org.springframework.ide.eclipse.beans.ui.views.model.RootNode;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
@@ -188,7 +188,7 @@ public final class BeansViewUtils {
 			configNodes[i].setParent(projectNode);
 			projectNode.addConfig(configNodes[i].getName());
 			beansProject.setConfigs(projectNode.getConfigNames(), true);
-			BeansUILabelDecorator.update();
+			BeansModelLabelDecorator.update();
 			treeViewer.add(projectNode, configNodes[i]);
 			treeViewer.reveal(configNodes[i]);
 		}
@@ -229,7 +229,7 @@ public final class BeansViewUtils {
 					configSets.add(configSet);
 				}
 				beansProject.setConfigSets(configSets, true);
-				BeansUILabelDecorator.update();
+				BeansModelLabelDecorator.update();
 				treeViewer.reveal(configSetNode);
 			}
 		}
@@ -253,7 +253,7 @@ public final class BeansViewUtils {
 			projectNodes[i].setParent(rootNode);
 			rootNode.addProject(projectNodes[i].getName(), new ArrayList(),
 								new ArrayList(), new ArrayList());
-			BeansUILabelDecorator.update();
+			BeansModelLabelDecorator.update();
 			treeViewer.add(rootNode, projectNodes[i]);
 			treeViewer.reveal(projectNodes[i]);
 		}
