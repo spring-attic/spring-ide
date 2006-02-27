@@ -18,10 +18,13 @@ package org.springframework.ide.eclipse.beans.ui.search.internal;
 
 import org.eclipse.osgi.util.NLS;
 
+/**
+ * @author Torsten Juergeleit
+ */
 public final class BeansSearchMessages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchMessages";
-
+	private static final String BUNDLE_NAME = "org.springframework.ide." +
+						"eclipse.beans.ui.search.internal.BeansSearchMessages";
 	private BeansSearchMessages() {
 		// Do not instantiate
 	}
@@ -34,7 +37,8 @@ public final class BeansSearchMessages extends NLS {
 	public static String SearchPage_searchFor_name;
 	public static String SearchPage_searchFor_reference;
 	public static String SearchPage_searchFor_class;
-	public static String SearchPage_includeSubtypes;
+	public static String SearchPage_searchFor_child;
+	public static String SearchPage_searchFor_property;
 
 	public static String SearchScope_workspace;
 	public static String SearchScope_selection;
@@ -45,6 +49,8 @@ public final class BeansSearchMessages extends NLS {
 	public static String SearchQuery_searchFor_name;
 	public static String SearchQuery_searchFor_reference;
 	public static String SearchQuery_searchFor_class;
+	public static String SearchQuery_searchFor_child;
+	public static String SearchQuery_searchFor_property;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, BeansSearchMessages.class);

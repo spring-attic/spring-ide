@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.beans.ui.search.internal;
+package org.springframework.ide.eclipse.beans.ui.search.internal.queries;
 
 import java.util.Iterator;
 import java.util.List;
@@ -33,6 +33,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchMessages;
+import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchScope;
 import org.springframework.ide.eclipse.core.MessageUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
@@ -72,7 +74,7 @@ public class BeanReferenceQuery extends AbstractBeansQuery {
 			IBean bean = (IBean) element;
 
 			// Compare reference with parent bean
-			if (!bean.isRootBean() &&
+			if (bean.isChildBean() &&
 							 pattern.matcher(bean.getParentName()).matches()) {
 				return true;
 			}

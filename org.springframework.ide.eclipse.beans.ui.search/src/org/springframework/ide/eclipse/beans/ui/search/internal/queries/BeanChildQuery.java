@@ -14,30 +14,30 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.beans.ui.search.internal;
+package org.springframework.ide.eclipse.beans.ui.search.internal.queries;
 
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchMessages;
+import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchScope;
 import org.springframework.ide.eclipse.core.MessageUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * This implementation of <code>ISearchQuery</code> looks for all
- * <code>IBean</code>s which ID or alias names match a given name.
+ * <code>IBean</code>s which are a child of a parent with given name.
  *
  * @see org.eclipse.search.ui.ISearchQuery
  * @see org.springframework.ide.eclipse.beans.core.model.IBean
  *
  * @author Torsten Juergeleit
  */
-public class BeanNameQuery extends AbstractBeansQuery {
+public class BeanChildQuery extends AbstractBeansQuery {
 
-	public BeanNameQuery(BeansSearchScope scope, String pattern,
-						 boolean isCaseSensitive, boolean isRegexSearch) {
+	public BeanChildQuery(BeansSearchScope scope, String pattern,
+						  boolean isCaseSensitive, boolean isRegexSearch) {
 		super(scope, pattern, isCaseSensitive, isRegexSearch);
 	}
 
@@ -45,28 +45,18 @@ public class BeanNameQuery extends AbstractBeansQuery {
 		Object[] args = new Object[] { getPattern(),
 									   getScope().getDescription() };
 		return MessageUtils.format(
-						 BeansSearchMessages.SearchQuery_searchFor_name, args);
+						BeansSearchMessages.SearchQuery_searchFor_class, args);
 	}
 
 	protected boolean doesMatch(IModelElement element, Pattern pattern,
 								IProgressMonitor monitor) {
 		if (element instanceof IBean) {
-			Bean bean = (Bean) element;
-			BeanDefinitionHolder bdh = bean.getBeanDefinitionHolder();
+			IBean bean = (IBean) element;
+			if (bean.isChildBean()) {
 
-			// Compare bean name first
-			if (pattern.matcher(bean.getElementName()).matches()) {
-				return true;
-			}
-
-			// Now compare aliases
-			String[] aliases = bdh.getAliases();
-			if (aliases != null) {
-				for (int i = 0; i < aliases.length; i++) {
-					if (pattern.matcher(aliases[i]).matches()) {
-						return true;
-					}
-					
+				// Compare given parent bean's name with bean's one
+				if (pattern.matcher(bean.getParentName()).matches()) {
+					return true;
 				}
 			}
 		}

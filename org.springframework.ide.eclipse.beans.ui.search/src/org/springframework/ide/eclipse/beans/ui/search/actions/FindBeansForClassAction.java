@@ -16,40 +16,67 @@
 
 package org.springframework.ide.eclipse.beans.ui.search.actions;
 
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.action.Action;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
-import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.model.BeanNode;
-import org.springframework.ide.eclipse.beans.ui.model.INode;
-import org.springframework.ide.eclipse.beans.ui.views.BeansView;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.search.ui.ISearchQuery;
+import org.eclipse.search.ui.NewSearchUI;
+import org.eclipse.ui.IViewActionDelegate;
+import org.eclipse.ui.IViewPart;
+import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchScope;
+import org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanClassQuery;
 
 /**
  * @author Torsten Juergeleit
  */
-public class FindBeansForClassAction extends Action {
+public class FindBeansForClassAction extends Action
+											   implements IViewActionDelegate {
+	private ISelection selection;
 
-	private static final String PREFIX = "SearchBeanReferencesAction.";
+	public void init(IViewPart view) {
+	}
 
-    private BeansView view;
-
-	public FindBeansForClassAction(BeansView view) {
-		super(BeansUIPlugin.getResourceString(PREFIX + "label"));
-		setToolTipText(BeansUIPlugin.getResourceString(PREFIX + "tooltip"));
-		this.view = view;
-    }
-
-	public boolean isEnabled() {
-		INode node = view.getSelectedNode();
-		return (node instanceof BeanNode);
+	public void selectionChanged(IAction action, ISelection selection) {
+		this.selection = selection;
+	}
+	
+	public void run(IAction action) {
+		run();
 	}
 
 	public void run() {
-		INode node = view.getSelectedNode();
-		if (node instanceof BeanNode) {
-			IBean bean = ((BeanNode) node).getBean();
-			// TODO implement search view
-			BeansModelUtils.getBeanReferences(bean.getElementName(), bean.getElementParent());
+		String className = getSelectedClassName();
+		if (className != null) {
+			BeansSearchScope scope = BeansSearchScope.newSearchScope();
+			ISearchQuery query = new BeanClassQuery(scope, className, true,
+													false);
+			NewSearchUI.activateSearchResultView();
+			NewSearchUI.runQueryInBackground(query);
 		}
+	}
+
+	private String getSelectedClassName() {
+		if ((selection instanceof IStructuredSelection) &&
+														!selection.isEmpty()) {
+			Object obj = ((IStructuredSelection) selection).getFirstElement();
+			if (obj instanceof IType) {
+				return ((IType) obj).getFullyQualifiedName();
+			} else if (obj instanceof ICompilationUnit) {
+				return ((ICompilationUnit)
+								obj).findPrimaryType().getFullyQualifiedName();
+			} else if (obj instanceof IClassFile) {
+				try {
+					return ((IClassFile) obj).getType().getFullyQualifiedName();
+				} catch (JavaModelException e) {
+					// Can't do nothing here
+				}
+			}
+		}
+		return null;
 	}
 }

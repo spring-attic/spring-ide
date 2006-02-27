@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.beans.ui.search.internal;
+package org.springframework.ide.eclipse.beans.ui.search.internal.queries;
 
 import java.util.regex.Pattern;
 
@@ -26,6 +26,9 @@ import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.text.Match;
 import org.springframework.ide.eclipse.beans.ui.search.BeansSearchPlugin;
+import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchMessages;
+import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchResult;
+import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchScope;
 import org.springframework.ide.eclipse.core.MessageUtils;
 import org.springframework.ide.eclipse.core.PatternUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;

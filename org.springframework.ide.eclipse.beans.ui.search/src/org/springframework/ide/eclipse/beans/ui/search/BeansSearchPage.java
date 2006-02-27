@@ -50,11 +50,13 @@ import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.model.IWorkbenchAdapter;
-import org.springframework.ide.eclipse.beans.ui.search.internal.BeanClassQuery;
-import org.springframework.ide.eclipse.beans.ui.search.internal.BeanNameQuery;
-import org.springframework.ide.eclipse.beans.ui.search.internal.BeanReferenceQuery;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchMessages;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchScope;
+import org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanChildQuery;
+import org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanClassQuery;
+import org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanNameQuery;
+import org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanPropertyQuery;
+import org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanReferenceQuery;
 
 /**
  * @author Torsten Juergeleit
@@ -62,8 +64,10 @@ import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchScope
 public class BeansSearchPage extends DialogPage implements ISearchPage {
 
 	public static final int SEARCH_FOR_BEAN_NAME = 0;
-	public static final int SEARCH_FOR_BEAN_REFERENCES = 1; 
+	public static final int SEARCH_FOR_BEAN_REFERENCE = 1; 
 	public static final int SEARCH_FOR_BEAN_CLASS = 2;
+	public static final int SEARCH_FOR_BEAN_CHILD = 3;
+	public static final int SEARCH_FOR_BEAN_PROPERTY = 4;
 
 	private static final int HISTORY_SIZE = 12;
 	
@@ -71,7 +75,6 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 	private final static String PAGE_NAME = "BeansSearchPage";
 	private final static String STORE_CASE_SENSITIVE = "CASE_SENSITIVE";
 	private static final String STORE_REG_EX_SEARCH = "REG_EX_SEARCH";
-	private final static String STORE_INCLUDE_SUBTYPES = "INCLUDE_SUBTYPES";
 	private final static String STORE_HISTORY = "HISTORY";
 	private final static String STORE_HISTORY_SIZE = "HISTORY_SIZE";
 	
@@ -81,7 +84,6 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 	private IDialogSettings dialogSettings;
 	private boolean isCaseSensitive;
 	private boolean isRegExSearch;
-	private boolean includeSubtypes;
 	
 	private Combo expressionCombo;
 	private ISearchPageContainer searchContainer;
@@ -93,9 +95,9 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 	private String[] searchForText = {
 							BeansSearchMessages.SearchPage_searchFor_name,
 							BeansSearchMessages.SearchPage_searchFor_reference, 
-							BeansSearchMessages.SearchPage_searchFor_class };
-	private Button includeSubtypesCheckbox;
-
+							BeansSearchMessages.SearchPage_searchFor_class, 
+							BeansSearchMessages.SearchPage_searchFor_child, 
+							BeansSearchMessages.SearchPage_searchFor_property };
 	public BeansSearchPage() {
 		// required
 	}
@@ -157,7 +159,6 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		match = new SearchData(getSearchFor(), pattern,
 							   caseSensitiveCheckbox.getSelection(),
 							   regExCheckbox.getSelection(),
-							   includeSubtypesCheckbox.getSelection(),
 							   searchContainer.getSelectedScope(),
 							   searchContainer.getSelectedWorkingSets());
 			
@@ -216,15 +217,24 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 									  data.isCaseSensitive(), data.isRegExp());
 				break;
 
-			case SEARCH_FOR_BEAN_REFERENCES :
+			case SEARCH_FOR_BEAN_REFERENCE :
 				query = new BeanReferenceQuery(scope, data.getPattern(),
 									  data.isCaseSensitive(), data.isRegExp());
 				break;
 
 			case SEARCH_FOR_BEAN_CLASS :
 				query = new BeanClassQuery(scope, data.getPattern(),
-									   isCaseSensitive, isRegExSearch,
-									   includeSubtypesCheckbox.getSelection());
+										   isCaseSensitive, isRegExSearch);
+				break;
+
+			case SEARCH_FOR_BEAN_CHILD :
+				query = new BeanChildQuery(scope, data.getPattern(),
+										   isCaseSensitive, isRegExSearch);
+				break;
+
+			case SEARCH_FOR_BEAN_PROPERTY :
+				query = new BeanPropertyQuery(scope, data.getPattern(),
+											  isCaseSensitive, isRegExSearch);
 				break;
 		} 
 
@@ -255,7 +265,6 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		IDialogSettings s = getDialogSettings();
 		isCaseSensitive = s.getBoolean(STORE_CASE_SENSITIVE);
 		isRegExSearch = s.getBoolean(STORE_REG_EX_SEARCH);
-		includeSubtypes = s.getBoolean(STORE_INCLUDE_SUBTYPES);
 
 		try {
 			int historySize = s.getInt(STORE_HISTORY_SIZE);
@@ -280,7 +289,6 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		IDialogSettings s = getDialogSettings();
 		s.put(STORE_CASE_SENSITIVE, isCaseSensitive);
 		s.put(STORE_REG_EX_SEARCH, isRegExSearch);
-		s.put(STORE_INCLUDE_SUBTYPES, includeSubtypes);
 
 		int historySize = Math.min(previousSearchPatterns.size(), HISTORY_SIZE);
 		s.put(STORE_HISTORY_SIZE, historySize);
@@ -406,11 +414,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 	}
 
 	private void doPatternModified() {
-		if (getSearchFor() == SEARCH_FOR_BEAN_CLASS) {
-			includeSubtypesCheckbox.setEnabled(true);
-		} else {
-			includeSubtypesCheckbox.setEnabled(false);
-		}
+		// TODO Is this method necessary?
 	}
 
 	private void handlePatternSelected() {
@@ -427,9 +431,6 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		isCaseSensitive = data.isCaseSensitive();
 		caseSensitiveCheckbox.setSelection(data.isCaseSensitive());
 		regExCheckbox.setSelection(data.isRegExp());
-		includeSubtypesCheckbox.setSelection(data.includeSubtypes());
-		includeSubtypesCheckbox.setSelection(data.getSearchFor() !=
-														SEARCH_FOR_BEAN_CLASS);
 		if (data.getWorkingSets() != null) {
 			searchContainer.setSelectedWorkingSets(data.getWorkingSets());
 		} else {
@@ -469,17 +470,6 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 //		filler.setVisible(false);
 //		filler.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1,
 //										  1));
-		// Search subtypes checkbox		
-		includeSubtypesCheckbox = new Button(group, SWT.CHECK);
-		includeSubtypesCheckbox.setText(
-							   BeansSearchMessages.SearchPage_includeSubtypes); 
-		includeSubtypesCheckbox.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				includeSubtypes = includeSubtypesCheckbox.getSelection();
-			}
-		});
-		includeSubtypesCheckbox.setLayoutData(new GridData(GridData.FILL,
-										   GridData.FILL, false, false, 1, 1));
 		return group;		
 	}
 
@@ -501,9 +491,6 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		regExCheckbox.setSelection(initData.isRegExp());
 		
 		setSearchFor(initData.getSearchFor());
-		includeSubtypesCheckbox.setSelection(initData.includeSubtypes());
-		includeSubtypesCheckbox.setEnabled(getSearchFor() ==
-										   SEARCH_FOR_BEAN_CLASS);
 	}
 
 	private SearchData tryStructuredSelection(IStructuredSelection selection) {
@@ -517,7 +504,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 						   ((IAdaptable)o).getAdapter(IWorkbenchAdapter.class);
 			if (adapter != null) {
 				return new SearchData(SEARCH_FOR_BEAN_CLASS, adapter.getLabel(o),
-									  isCaseSensitive, false, includeSubtypes);
+									  isCaseSensitive, false);
 			}
 		}
 		return res;
@@ -533,8 +520,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 			}
 			if (i > 0) {
 				return new SearchData(SEARCH_FOR_BEAN_CLASS,
-								 selectedText.substring(0, i), isCaseSensitive,
-								 false, includeSubtypes);
+						 selectedText.substring(0, i), isCaseSensitive, false);
 			}
 		}
 		return null;
@@ -544,8 +530,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		if (!previousSearchPatterns.isEmpty()) {
 			return (SearchData) previousSearchPatterns.get(0);
 		}
-		return new SearchData(SEARCH_FOR_BEAN_NAME, "", isCaseSensitive, false,
-							  includeSubtypes);
+		return new SearchData(SEARCH_FOR_BEAN_NAME, "", isCaseSensitive, false);
 	}	
 
 	private static class SearchData {
@@ -554,28 +539,24 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		private String pattern;
 		private boolean isCaseSensitive;
 		private boolean isRegExp;
-		private boolean includeSubtypes;
 		private int scope;
 		private IWorkingSet[] workingSets;
 
 		public SearchData(int searchFor, String pattern,
-						  boolean isCaseSensitive, boolean isRegExp,
-						  boolean includeSubtypes) {
+						  boolean isCaseSensitive, boolean isRegExp) {
 			this(searchFor, pattern, isCaseSensitive, isRegExp,
-				 includeSubtypes, ISearchPageContainer.WORKSPACE_SCOPE, null);
+				 ISearchPageContainer.WORKSPACE_SCOPE, null);
 		}
 
 		public SearchData(int searchFor, String pattern,
 						  boolean isCaseSensitive, boolean isRegExp,
-						  boolean includeSubtypes, int scope,
-						  IWorkingSet[] workingSets) {
+						  int scope, IWorkingSet[] workingSets) {
 			this.searchFor = searchFor;
 			this.pattern = pattern;
 			this.isCaseSensitive = isCaseSensitive;
 			this.isRegExp = isRegExp;
 			this.scope = scope;
 			this.workingSets = workingSets;
-			this.includeSubtypes = includeSubtypes;
 		}
 		
 		public String getPattern() {
@@ -588,10 +569,6 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 
 		public boolean isRegExp() {
 			return isRegExp;
-		}
-
-		public boolean includeSubtypes() {
-			return includeSubtypes;
 		}
 		
 		public int getSearchFor() {
@@ -611,7 +588,6 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 			settings.put("pattern", pattern);
 			settings.put("isCaseSensitive", isCaseSensitive);
 			settings.put("isRegExp", isRegExp);
-			settings.put("includeSubtypes", includeSubtypes);
 			settings.put("scope", scope);
 			if (workingSets != null) {
 				String[] wsIds = new String[workingSets.length];
@@ -650,10 +626,8 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 				boolean isCaseSensitive = settings.getBoolean(
 															"isCaseSensitive");
 				boolean isRegExp = settings.getBoolean("isRegExp");
-				boolean includeSubtypes = settings.getBoolean(
-															"includeSubtypes");
 				return new SearchData(searchFor, pattern, isCaseSensitive,
-								isRegExp, includeSubtypes, scope, workingSets);
+									  isRegExp, scope, workingSets);
 			} catch (NumberFormatException e) {
 				return null;
 			}
