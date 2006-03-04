@@ -2,7 +2,7 @@
 
 <!--
 	Spring XML Beans DTD
-	Authors: Rod Johnson, Juergen Hoeller, Alef Arendsen, Colin Sampaleanu
+	Authors: Rod Johnson, Juergen Hoeller, Alef Arendsen, Colin Sampaleanu, Rob Harrop
 
 	This defines a simple and consistent way of creating a namespace
 	of JavaBeans objects, managed by a Spring BeanFactory, read by
@@ -56,6 +56,8 @@
 <!ATTLIST beans default-lazy-init (true | false) "false">
 <!ATTLIST beans default-autowire (no | byName | byType | constructor | autodetect) "no">
 <!ATTLIST beans default-dependency-check (none | objects | simple | all) "none">
+<!ATTLIST beans default-init-method CDATA #IMPLIED>
+<!ATTLIST beans default-destroy-method CDATA #IMPLIED>
 
 <!--
 	Element containing informative text describing the purpose of the enclosing
@@ -117,7 +119,8 @@
 
 <!--
 	Optional. Can be used to create one or more aliases illegal in an id.
-	Multiple aliases can be separated by any number of spaces or commas.
+	Multiple aliases can be separated by any number of spaces, commas, or
+	semi-colons (or indeed any mixture of the three).
 -->
 <!ATTLIST bean name CDATA #IMPLIED>
 
@@ -150,6 +153,9 @@
 	rather just serving as parent for concrete child bean definitions.
 	Default is "false". Specify "true" to tell the bean factory to not try to
 	instantiate that particular bean in any case.
+
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
 -->
 <!ATTLIST bean abstract (true | false) "false">
 
@@ -161,6 +167,9 @@
 
 	Singletons are most commonly used, and are ideal for multi-threaded
 	service objects.
+
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
 -->
 <!ATTLIST bean singleton (true | false) "true">
 
@@ -168,6 +177,10 @@
 	If this bean should be lazily initialized.
 	If false, it will get instantiated on startup by bean factories
 	that perform eager initialization of singletons.
+
+
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
 -->
 <!ATTLIST bean lazy-init (true | false | default) "default">
 
@@ -208,8 +221,11 @@
 	behaviour for bigger applications.
 
 	Note that explicit dependencies, i.e. "property" and "constructor-arg" elements,
-	always override autowiring. Autowire behaviour can be combined with dependency
+	always override autowiring. Autowire behavior can be combined with dependency
 	checking, which will be performed after all autowiring has been completed.
+
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
 -->
 <!ATTLIST bean autowire (no | byName | byType | constructor | autodetect | default) "default">
 
@@ -221,6 +237,9 @@
 	"simple" type dependency checking includes primitives and String
 	"object" includes collaborators (other beans in the factory)
 	"all" includes both types of dependency checking
+
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
 -->
 <!ATTLIST bean dependency-check (none | objects | simple | all | default) "default">
 
@@ -231,6 +250,9 @@
 	Note that dependencies are normally expressed through bean properties or
 	constructor arguments. This property should just be necessary for other kinds
 	of dependencies like statics (*ugh*) or database preparation on startup.
+
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
 -->
 <!ATTLIST bean depends-on CDATA #IMPLIED>
 
@@ -386,7 +408,7 @@
 <!--
 	Similar to the lookup method mechanism, the replaced-method element is used to control
 	IoC container method overriding: Method Injection. This mechanism allows the overriding
-	of a method with arbitrary code. 
+	of a method with arbitrary code.
 -->
 <!ELEMENT replaced-method (
 	(arg-type)*
@@ -395,7 +417,7 @@
 <!--
 	Name of the method whose implementation should be replaced by the IoC container.
 	If this method is not overloaded, there's no need to use arg-type subelements.
-	If this method is overloaded, arg-type subelements must be used for all 
+	If this method is overloaded, arg-type subelements must be used for all
 	override definitions for the method.
 -->
 <!ATTLIST replaced-method name CDATA #IMPLIED>
@@ -415,13 +437,13 @@
 <!ELEMENT arg-type (#PCDATA)>
 
 <!--
-	Specification of the type of an overloaded method argument as a String. 
+	Specification of the type of an overloaded method argument as a String.
 	For convenience, this may be a substring of the FQN. E.g. all the
 	following would match "java.lang.String":
 	- java.lang.String
 	- String
 	- Str
-	
+
 	As the number of arguments will be checked also, this convenience can often
 	be used to save typing.
 -->
