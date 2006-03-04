@@ -25,14 +25,25 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
 
+/**
+ * This label decorator decorates the nodes of externally defined configs and
+ * beans. 
+ * 
+ * @author Torsten Juergeleit
+ */
 public class ModelLabelDecorator implements ILabelDecorator {
 
-	public ModelLabelDecorator() {
-	}
-
 	public Image decorateImage(Image image, Object element) {
-		int flags = ((INode) element).getFlags();
+		INode node = (INode) element;
+		if (node instanceof ConfigNode && node.getName().charAt(0) == '/' ||
+				node instanceof BeanNode &&
+				((BeanNode) node).getConfigNode().getName().charAt(0) == '/') {
+			image = BeansModelImages.getDecoratedImage(image,
+											   BeansModelImages.FLAG_EXTERNAL);
+		}
+		int flags = node.getFlags();
 		if (flags != 0) {
 			ImageDescriptor descriptor = new ModelImageDescriptor(image, flags);
 			image = BeansUIPlugin.getImageDescriptorRegistry().get(descriptor);
@@ -41,6 +52,14 @@ public class ModelLabelDecorator implements ILabelDecorator {
 	}
 
 	public String decorateText(String text, Object element) {
+		INode node = (INode) element;
+		if (node instanceof ConfigNode && node.getName().charAt(0) == '/') {
+			ConfigNode config = (ConfigNode) node;
+			if (config.getName().charAt(0) == '/') {
+				text = '/' + config.getParent().getParent().getName() + '/' +
+					   text;
+			}
+		}
 		return text;
 	}
 
@@ -57,29 +76,17 @@ public class ModelLabelDecorator implements ILabelDecorator {
 	public void dispose() {
 	}
 
-	/**
-	 * An image descriptor consisting of a main icon and several adornments.
-	 * The adornments are computed according to flags set on creation of the
-	 * descriptor.
-	 */
 	private class ModelImageDescriptor extends CompositeImageDescriptor {
 
 		private Image baseImage;
 		private int flags;
 		private Point size;
-	
-		/**
-		 * Create a new CompositeImageDescriptor.
-		 * 
-		 * @param baseImage  an image descriptor used as the base image
-		 * @param node  a node which adornments are to be rendered
-		 * 
-		 */
+
 		public ModelImageDescriptor(Image baseImage, int flags) {
 			this.baseImage = baseImage;
 			this.flags = flags;
 		}
-	
+
 		protected Point getSize() {
 			if (size == null) {
 				ImageData data = baseImage.getImageData();
@@ -87,7 +94,7 @@ public class ModelLabelDecorator implements ILabelDecorator {
 			}
 			return size;
 		}
-	
+
 		protected void drawCompositeImage(int width, int height) {
 			ImageData background = baseImage.getImageData();
 			if (background == null) {
@@ -96,10 +103,7 @@ public class ModelLabelDecorator implements ILabelDecorator {
 			drawImage(background, 0, 0);
 			drawOverlays();
 		}
-	
-		/**
-		 * Add any overlays to the image as specified in the flags.
-		 */
+
 		protected void drawOverlays() {
 			ImageData data = null;
 			if ((flags & INode.FLAG_HAS_ERRORS) != 0) {

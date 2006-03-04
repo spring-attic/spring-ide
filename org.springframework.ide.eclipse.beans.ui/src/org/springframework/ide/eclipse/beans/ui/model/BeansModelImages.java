@@ -87,7 +87,7 @@ public final class BeansModelImages {
 
 	private static Image getImage(Image baseImage, IModelElement element) {
 		ImageDescriptor descriptor = new ElementImageDescriptor(baseImage,
-															 element);
+																element);
 		return BeansUIPlugin.getImageDescriptorRegistry().get(descriptor);
 	}
 
@@ -96,14 +96,14 @@ public final class BeansModelImages {
 	}
 
 	public static Image getImage(int element, int flags) {
-		ImageDescriptor descriptor = new ConstantsImageDescriptor(element,
-																  flags);
+		ImageDescriptor descriptor = new FlagsImageDescriptor(element,
+															  flags);
 		return BeansUIPlugin.getImageDescriptorRegistry().get(descriptor);
 	}
 
 	public static Image getDecoratedImage(Image baseImage, int flags) {
-		ImageDescriptor descriptor = new ConstantsImageDescriptor(baseImage,
-																  flags);
+		ImageDescriptor descriptor = new FlagsImageDescriptor(baseImage,
+															  flags);
 		return BeansUIPlugin.getImageDescriptorRegistry().get(descriptor);
 	}
 
@@ -149,14 +149,7 @@ public final class BeansModelImages {
 
 		protected void drawOverlays() {
 			ImageData data = null;
-			if (element instanceof IBeansConfig) {
-				IBeansConfig config = (IBeansConfig) element;
-				if (config.getElementName().charAt(0) == '/') {
-					data = BeansUIImages.DESC_OVR_EXTERNAL.getImageData();
-					drawImage(data, getSize().x - data.width,
-							  getSize().y - data.height);
-				}
-			} else if (element instanceof Bean) {
+			if (element instanceof Bean) {
 				Bean bean = (Bean) element;
 				BeanDefinitionHolder bh = bean.getBeanDefinitionHolder();
 				if (bean.isChildBean()) {
@@ -180,15 +173,15 @@ public final class BeansModelImages {
 		}
 	}
 
-	private static class ConstantsImageDescriptor extends BaseImageDescriptor {
+	private static class FlagsImageDescriptor extends BaseImageDescriptor {
 		private int flags;
 
-		public ConstantsImageDescriptor(int element, int flags) {
+		public FlagsImageDescriptor(int element, int flags) {
 			super(getBaseImage(element));
 			this.flags = flags;
 		}
 
-		public ConstantsImageDescriptor(Image baseImage, int flags) {
+		public FlagsImageDescriptor(Image baseImage, int flags) {
 			super(baseImage);
 			this.flags = flags;
 		}
