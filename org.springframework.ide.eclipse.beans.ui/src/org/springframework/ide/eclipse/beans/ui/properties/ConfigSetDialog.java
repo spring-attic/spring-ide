@@ -26,7 +26,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.JFaceColors;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
@@ -45,12 +44,12 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.views.model.ConfigNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.ConfigSetNode;
-import org.springframework.ide.eclipse.beans.ui.views.model.ModelLabelDecorator;
+import org.springframework.ide.eclipse.beans.ui.views.model.ModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.views.model.ModelSorter;
 import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
+import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class ConfigSetDialog extends Dialog {
@@ -129,25 +128,24 @@ public class ConfigSetDialog extends Dialog {
 		);
 
 		// labeled checkboxes
-		Composite checkboxGroup = new Composite(composite, SWT.NULL);
-		checkboxGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		overrideButton = SpringUIUtils.createCheckBox(checkboxGroup, 
+//		Composite checkboxGroup = new Composite(composite, SWT.NULL);
+//		checkboxGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		overrideButton = SpringUIUtils.createCheckBox(optionsGroup, 
 							  BeansUIPlugin.getResourceString(OVERRIDE_LABEL));
 		overrideButton.setSelection(configSet.isOverrideEnabled());
 
-		incompleteButton = SpringUIUtils.createCheckBox(checkboxGroup, 
+		incompleteButton = SpringUIUtils.createCheckBox(optionsGroup, 
 							BeansUIPlugin.getResourceString(INCOMPLETE_LABEL));
 		incompleteButton.setSelection(configSet.isIncomplete());
 
 		// config set list viewer
-		Label viewerLabel = new Label(optionsGroup, SWT.NONE);
+		Label viewerLabel = new Label(composite, SWT.NONE);
 		GridData gd = new GridData(GridData.GRAB_HORIZONTAL | 
 											   GridData.HORIZONTAL_ALIGN_FILL); 
-		gd.verticalIndent = 15; 
 		viewerLabel.setLayoutData(gd); 
 		viewerLabel.setText(BeansUIPlugin.getResourceString(VIEWER_LABEL)); 
 
-		configsViewer = CheckboxTableViewer.newCheckList(optionsGroup, 
+		configsViewer = CheckboxTableViewer.newCheckList(composite, 
 														 SWT.BORDER); 
 		gd = new GridData(GridData.FILL_BOTH);
 		gd.widthHint = LIST_VIEWER_WIDTH;
@@ -156,8 +154,7 @@ public class ConfigSetDialog extends Dialog {
 		configsViewer.getTable().setLayoutData(gd);
 		configsViewer.setContentProvider(new ConfigFilesContentProvider(
 														   createConfigList()));
-		configsViewer.setLabelProvider(new DecoratingLabelProvider(
-					new BeansModelLabelProvider(), new ModelLabelDecorator()));
+		configsViewer.setLabelProvider(new ModelLabelProvider());
 		configsViewer.setSorter(new ModelSorter(true));
 		configsViewer.setInput(this);	// activate content provider
 		configsViewer.setCheckedElements(configSet.getConfigs().toArray());
@@ -169,7 +166,8 @@ public class ConfigSetDialog extends Dialog {
 		errorLabel.setForeground(JFaceColors.getErrorText(parent.getDisplay()));
 		errorLabel.setBackground(
 						  JFaceColors.getErrorBackground(parent.getDisplay()));
-		return super.createDialogArea(parent);
+		applyDialogFont(composite); 
+		return composite;
 	}
 
 	protected void createButtonsForButtonBar(Composite parent) {
@@ -261,7 +259,8 @@ public class ConfigSetDialog extends Dialog {
 		boolean isEnabled = false;
 
 		String name = nameText.getText();
-		if (name == null || name.trim().length() == 0) {
+		if (name == null || name.trim().length() == 0 ||
+										   !StringUtils.isAlphaNumeric(name)) {
 			errorLabel.setText(BeansUIPlugin.getResourceString(
 														   ERROR_INVALID_NAME));
 		} else if (configSetName == null || !name.equals(configSetName)) {

@@ -19,7 +19,6 @@ package org.springframework.ide.eclipse.beans.ui.properties;
 import java.util.List;
 
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -40,11 +39,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.IPropertyListener;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.views.model.ConfigNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.ConfigSetNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.INode;
-import org.springframework.ide.eclipse.beans.ui.views.model.ModelLabelDecorator;
+import org.springframework.ide.eclipse.beans.ui.views.model.ModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
@@ -134,8 +132,7 @@ public class ConfigSetsTab {
 		configSetsViewer = new TreeViewer(configSetsTree);
 		configSetsViewer.setContentProvider(new ConfigSetContentProvider(
 																	 project));
-		configSetsViewer.setLabelProvider(new DecoratingLabelProvider(
-					new BeansModelLabelProvider(), new ModelLabelDecorator()));
+		configSetsViewer.setLabelProvider(new ModelLabelProvider());
 		configSetsViewer.setSorter(new ConfigSetsSorter());
 		configSetsViewer.setInput(element);	// activate content provider
 		configSetsViewer.expandToLevel(project, 1);

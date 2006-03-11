@@ -31,7 +31,6 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -57,7 +56,6 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.views.actions.CollapseAllAction;
 import org.springframework.ide.eclipse.beans.ui.views.actions.LexicalSortingAction;
 import org.springframework.ide.eclipse.beans.ui.views.actions.OpenBeanClassAction;
@@ -69,7 +67,7 @@ import org.springframework.ide.eclipse.beans.ui.views.model.ConfigNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.ConfigSetNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.ConstructorArgumentNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.INode;
-import org.springframework.ide.eclipse.beans.ui.views.model.ModelLabelDecorator;
+import org.springframework.ide.eclipse.beans.ui.views.model.ModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.PropertyNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.RootNode;
@@ -134,8 +132,7 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 		TreeViewer viewer = new TreeViewer(parent, SWT.SINGLE | SWT.H_SCROLL |
 										   SWT.V_SCROLL);
 		viewer.setContentProvider(new BeansViewContentProvider(this));
-		viewer.setLabelProvider(new DecoratingLabelProvider(
-					new BeansModelLabelProvider(), new ModelLabelDecorator()));
+		viewer.setLabelProvider(new ModelLabelProvider());
 		viewer.setInput(getRootNode());
 		viewer.setSorter(new ViewerSorter() {
 			public int compare(Viewer viewer, Object e1, Object e2) {

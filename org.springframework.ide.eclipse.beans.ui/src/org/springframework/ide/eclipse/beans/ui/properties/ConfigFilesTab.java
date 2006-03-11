@@ -48,9 +48,9 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceSorter;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.views.model.ConfigNode;
+import org.springframework.ide.eclipse.beans.ui.views.model.ModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
 import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
@@ -156,7 +156,7 @@ public class ConfigFilesTab {
 		configsViewer = new TableViewer(configsTable);
 		configsViewer.setContentProvider(new ConfigFilesContentProvider(
 																	  project));
-		configsViewer.setLabelProvider(new BeansModelLabelProvider());
+		configsViewer.setLabelProvider(new ModelLabelProvider());
 		configsViewer.setInput(this);	// activate content provider
 		configsViewer.setSorter(new ConfigFilesSorter());
 
