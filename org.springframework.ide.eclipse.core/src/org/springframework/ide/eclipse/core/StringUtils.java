@@ -134,4 +134,18 @@ public class StringUtils {
 		buf.append(str.substring(1));
 		return buf.toString();
 	}
+
+	public static boolean isAlphaNumeric(String str) {
+		int strLen;
+		if (str == null || (strLen = str.length()) == 0) {
+			return false;
+		}
+		for (int i = 0; i < strLen; i++) {
+			char c = str.charAt(i);
+			if (!Character.isLetterOrDigit(c) && c != ' ') {
+				return false;
+			}
+		}
+		return true;
+	}
 }
