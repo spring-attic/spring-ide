@@ -27,8 +27,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * This implementation of <code>ISearchQuery</code> looks for all
- * <code>IBean</code>s which are child beans and their parent's name matches
- * the given bean name.
+ * <code>IBean</code>s which class name matches the given class name.
  *
  * @see org.eclipse.search.ui.ISearchQuery
  * @see org.springframework.ide.eclipse.beans.core.model.IBean
@@ -52,12 +51,11 @@ public class BeanClassQuery extends AbstractBeansQuery {
 	protected boolean doesMatch(IModelElement element, Pattern pattern,
 								IProgressMonitor monitor) {
 		if (element instanceof IBean) {
-			IBean bean = (IBean) element;
-			if (bean.isChildBean()) {
-				String parentName = bean.getParentName();
+			String className = ((IBean) element).getClassName();
+			if (className != null) {
 
-				// Compare given bean name with bean's parent name
-				if (pattern.matcher(parentName).matches()) {
+				// Compare given class name with bean's one
+				if (pattern.matcher(className).matches()) {
 					return true;
 				}
 			}

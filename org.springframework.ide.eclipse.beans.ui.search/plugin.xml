@@ -35,21 +35,22 @@
       <import plugin="org.springframework.ide.eclipse.beans.core"/>
    </requires>
    <extension
-         point="org.eclipse.search.searchResultViewPages">
-      <viewPage
-            class="org.springframework.ide.eclipse.beans.ui.search.BeansSearchResultPage"
-            id="org.springframework.ide.eclipse.beans.ui.search.resultViewPage"
-            searchResultClass="org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchResult"/>
-   </extension>
-   <extension
          point="org.eclipse.search.searchPages">
       <page
-            class="org.springframework.ide.eclipse.beans.ui.search.BeansSearchPage"
-            enabled="true"
-            extensions="*"
-            icon="icons/full/obj16/spring_obj.gif"
             id="org.springframework.ide.eclipse.beans.ui.search.searchPage"
+            class="org.springframework.ide.eclipse.beans.ui.search.BeansSearchPage"
             label="%searchPage.label"
+            icon="icons/full/obj16/spring_obj.gif"
+            extensions="*"
+            enabled="true"
+            canSearchEnclosingProjects="true"
             showScopeSection="true"/>
+   </extension>
+   <extension
+         point="org.eclipse.search.searchResultViewPages">
+      <viewPage
+            id="org.springframework.ide.eclipse.beans.ui.search.resultViewPage"
+            class="org.springframework.ide.eclipse.beans.ui.search.BeansSearchResultPage"
+            searchResultClass="org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchResult"/>
    </extension>
 </plugin>

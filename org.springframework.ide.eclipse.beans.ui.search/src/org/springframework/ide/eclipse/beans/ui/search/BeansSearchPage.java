@@ -26,7 +26,6 @@ import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.search.ui.ISearchPage;
 import org.eclipse.search.ui.ISearchPageContainer;
@@ -63,6 +62,8 @@ import org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanRefe
  */
 public class BeansSearchPage extends DialogPage implements ISearchPage {
 
+	public static final String EXTENSION_POINT_ID = "org.springframework." +
+									  "ide.eclipse.beans.ui.search.searchPage";
 	public static final int SEARCH_FOR_BEAN_NAME = 0;
 	public static final int SEARCH_FOR_BEAN_REFERENCE = 1; 
 	public static final int SEARCH_FOR_BEAN_CLASS = 2;
@@ -464,24 +465,20 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 			button.addSelectionListener(selectionListener);
 			searchForButtons[i] = button;
 		}
-
-		// Fill with dummy radio buttons
-//		Label filler = new Label(group, SWT.NONE);
-//		filler.setVisible(false);
-//		filler.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1,
-//										  1));
 		return group;		
 	}
 
 	private void initSelections() {
-		ISelection sel = searchContainer.getSelection();
 		SearchData initData = null;
 
-		if (sel instanceof IStructuredSelection) {
-			initData = tryStructuredSelection((IStructuredSelection) sel);
-		} else if (sel instanceof ITextSelection) {
-			initData = trySimpleTextSelection((ITextSelection) sel);
-		}
+// TODO handle seclection
+//		ISelection sel = searchContainer.getSelection();
+//		if (sel instanceof IStructuredSelection) {
+//			initData = tryStructuredSelection((IStructuredSelection) sel);
+//		} else if (sel instanceof ITextSelection) {
+//			initData = trySimpleTextSelection((ITextSelection) sel);
+//		}
+
 		if (initData == null) {
 			initData = getDefaultInitValues();
 		}
