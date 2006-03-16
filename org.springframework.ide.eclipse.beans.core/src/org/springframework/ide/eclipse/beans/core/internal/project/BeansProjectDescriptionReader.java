@@ -99,7 +99,10 @@ public class BeansProjectDescriptionReader {
 			}
 		}
 
-		// Return empty project description
-		return new BeansProjectDescription(project);
+		// Return empty project description with default config extension
+		BeansProjectDescription description = new BeansProjectDescription(
+																	  project);
+		description.addConfigExtension(IBeansProject.DEFAULT_CONFIG_EXTENSION);
+		return description;
 	}
 }
