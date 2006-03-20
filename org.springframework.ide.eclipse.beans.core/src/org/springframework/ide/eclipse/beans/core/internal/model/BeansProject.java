@@ -241,7 +241,7 @@ public class BeansProject extends AbstractResourceModelElement
 	 * 				modified configuration is saved to the config file
 	 * 				<code>IBeansProject.DESCRIPTION_FILE</code>
 	 */
-	public void setConfigExtensions(List extensions,
+	public void setConfigExtensions(Set extensions,
 									boolean doSaveDescription) {
 		getDescription().setConfigExtensions(extensions);
 		if (doSaveDescription) {

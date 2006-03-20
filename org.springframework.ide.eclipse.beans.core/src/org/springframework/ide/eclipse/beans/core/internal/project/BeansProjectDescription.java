@@ -16,13 +16,14 @@
 
 package org.springframework.ide.eclipse.beans.core.internal.project;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
@@ -39,24 +40,24 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 public class BeansProjectDescription {
 
 	private IBeansProject project;
-	private List configExtensions;
-	private List configNames;
+	private Set configExtensions;
+	private Set configNames;
 	private Map configs;
 	private Map configSets;
 
 	public BeansProjectDescription(IBeansProject project) {
 		this.project = project;
-		this.configExtensions = new ArrayList();
+		this.configExtensions = new HashSet();
 		this.configs = new HashMap();
-		this.configNames = new ArrayList();
+		this.configNames = new HashSet();
 		this.configSets = new HashMap();
 	}
 	
-	public Collection getConfigExtensions() {
-		return Collections.unmodifiableCollection(configExtensions);
+	public Set getConfigExtensions() {
+		return Collections.unmodifiableSet(configExtensions);
 	}
 	
-	public void setConfigExtensions(List configExtensions) {
+	public void setConfigExtensions(Set configExtensions) {
 		this.configExtensions = configExtensions;
 	}
 
@@ -67,7 +68,7 @@ public class BeansProjectDescription {
 	}
 
 	public void setConfigNames(Collection configNames) {
-		this.configNames = new ArrayList(configNames);
+		this.configNames = new HashSet(configNames);
 		this.configs = new HashMap();
 		Iterator iter = this.configNames.iterator();
 		while (iter.hasNext()) {
@@ -77,8 +78,8 @@ public class BeansProjectDescription {
 		}
 	}
 
-	public Collection getConfigNames() {
-		return Collections.unmodifiableCollection(configNames);
+	public Set getConfigNames() {
+		return Collections.unmodifiableSet(configNames);
 	}
 
 	public void addConfig(IFile file) {
