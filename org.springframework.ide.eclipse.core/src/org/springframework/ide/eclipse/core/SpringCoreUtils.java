@@ -17,15 +17,48 @@
 package org.springframework.ide.eclipse.core;
 
 import org.eclipse.core.resources.ICommand;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 public final class SpringCoreUtils {
+
+	/**
+	 * Creates given project at specified location.
+	 */
+	public static void createProject(IProject project, IPath location,
+							   IProgressMonitor monitor) throws CoreException {
+		if (!Platform.getLocation().equals(location)) {
+			IProjectDescription desc = project.getWorkspace()
+									 .newProjectDescription(project.getName());
+			desc.setLocation(location);
+			project.create(desc, monitor);
+		} else {
+			project.create(monitor);
+		}
+	}
+
+	/**
+	 * Creates given folder and (if necessary) all of it's parents.
+	 */
+	public static void createFolder(IFolder folder) throws CoreException {
+		if (!folder.exists()) {
+			IContainer parent = folder.getParent();
+			if (parent instanceof IFolder) {
+				createFolder((IFolder) parent);
+			}
+			folder.create(true, true, null);
+		}
+	}
 
 	/**
 	 * Adds given nature as first nature to specified project.
