@@ -114,16 +114,35 @@ public class SpringUIUtils {
 	}
 
 	/**
-	 * Returns a text field with the given label and limit.
+	 * Returns a text field with the given label.
 	 */
 	public static final Text createTextField(Composite parent,
-							  				 String labelText, int textLimit) {
+							  				 String labelText) {
+		return createTextField(parent, labelText, 0, 0);
+	}
+
+	/**
+	 * Returns a text field with the given label and horizontal indentation.
+	 */
+	public static final Text createTextField(Composite parent,
+							  			   String labelText, int indentation) {
+		return createTextField(parent, labelText, indentation, 0);
+	}
+
+	/**
+	 * Returns a text field with the given label, horizontal indentation and
+	 * width hint.
+	 */
+	public static final Text createTextField(Composite parent,
+							String labelText, int indentation, int widthHint) {
 		Composite textArea = new Composite(parent, SWT.NULL);
 		GridLayout layout = new GridLayout();
 		layout.numColumns = 2;
 		layout.marginWidth = 0;
 		textArea.setLayout(layout);
-		textArea.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalIndent = indentation;
+		textArea.setLayoutData(gd);
 
 		Label label = new Label(textArea, SWT.NONE);
 		label.setText(labelText);
@@ -131,11 +150,11 @@ public class SpringUIUtils {
 		
 		Text text = new Text(textArea, SWT.BORDER | SWT.SINGLE);
 		text.setFont(parent.getFont());
-		GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		if (textLimit > 0) {
-			text.setTextLimit(textLimit);
-			gd.widthHint = Dialog.convertWidthInCharsToPixels(
-										  getFontMetrics(text), textLimit + 1);
+		if (widthHint > 0) {
+			gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+			gd.widthHint = widthHint;
+		} else {
+			gd = new GridData(GridData.FILL_HORIZONTAL);
 		}
 		text.setLayoutData(gd);
 		return text;
