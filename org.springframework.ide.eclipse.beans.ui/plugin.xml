@@ -20,6 +20,7 @@
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.ui.views"/>
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.eclipse.ui.cheatsheets"/>
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.springframework.ide.eclipse.core"/>
@@ -203,6 +204,20 @@
             keySequence="Ctrl+Alt+V"
             contextId="org.eclipse.ui.textEditorScope"
             keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            id="org.springframework.ide.eclipse.beans.ui.wizards.category"
+            name="%wizards.category"/>
+      <wizard
+            id="org.springframework.ide.eclipse.beans.ui.wizards.newSpringProject"
+            category="org.springframework.ide.eclipse.beans.ui.wizards.category"
+            class="org.springframework.ide.eclipse.beans.ui.wizards.NewSpringProjectWizard"
+            icon="icons/full/obj16/spring_obj.gif"
+            hasPages="true"
+            name="%wizards.newProject"
+            project="true"/>
    </extension>
 
 </plugin>

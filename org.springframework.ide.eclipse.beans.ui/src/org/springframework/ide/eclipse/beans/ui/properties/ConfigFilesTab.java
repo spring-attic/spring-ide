@@ -63,7 +63,6 @@ public class ConfigFilesTab {
 										 "tabConfigFiles.";
 	private static final String DESCRIPTION = PREFIX + "description";
 	private static final String EXTENSIONS_LABEL = PREFIX + "extensions.label";
-	private static final int EXTENSIONS_LIMIT = 50;
 	private static final String ERROR_NO_EXTENSIONS =
 												 PREFIX + "error.noExtensions";
 	private static final String ERROR_INVALID_EXTENSIONS =
@@ -122,8 +121,7 @@ public class ConfigFilesTab {
 
 		// extension text field
 		extensionsText = SpringUIUtils.createTextField(composite, 
-							 BeansUIPlugin.getResourceString(EXTENSIONS_LABEL),
-							 EXTENSIONS_LIMIT);
+							BeansUIPlugin.getResourceString(EXTENSIONS_LABEL));
 		extensionsText.setText(StringUtils.collectionToDelimitedString(
 										  project.getConfigExtensions(), ","));
 		extensionsText.addModifyListener(

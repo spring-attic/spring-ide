@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,13 +32,15 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+import org.eclipse.ui.cheatsheets.ICheatSheetAction;
+import org.eclipse.ui.cheatsheets.ICheatSheetManager;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.views.BeansViewLocation;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class ShowInView extends Action implements IEditorActionDelegate,
-												IWorkbenchWindowActionDelegate {
+							IWorkbenchWindowActionDelegate, ICheatSheetAction {
     private ITextEditor editor;
     private IFile file;
 
@@ -80,6 +82,25 @@ public class ShowInView extends Action implements IEditorActionDelegate,
 			if (location != null) {
 				location.show();
 			}
+		}
+	}
+
+	public void run(String[] params, ICheatSheetManager manager) {
+		if (params != null) {
+			BeansViewLocation location = new BeansViewLocation();
+			if (params.length > 1) {
+				location.setProjectName(params[0]);
+			}
+			if (params.length > 2) {
+				location.setConfigName(params[1]);
+			}
+			if (params.length > 3) {
+				location.setBeanName(params[2]);
+			}
+			if (params.length > 4) {
+				location.setPropertyName(params[3]);
+			}
+			location.show();
 		}
 	}
 

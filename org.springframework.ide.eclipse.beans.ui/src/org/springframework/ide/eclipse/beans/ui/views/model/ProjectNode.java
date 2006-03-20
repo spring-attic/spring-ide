@@ -20,9 +20,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.util.ListenerList;
@@ -42,7 +44,7 @@ public class ProjectNode extends AbstractNode {
 	public static final int CONFIGS = 1;
 	public static final int CONFIG_SETS = 2;
 
-	private List configExtensions;
+	private Set configExtensions;
 	private Map configs;
 	private Map configSets;
 	private ListenerList listeners;
@@ -56,7 +58,7 @@ public class ProjectNode extends AbstractNode {
 		super(parent, name);
 		setElement(BeansCorePlugin.getModel().getProject(name));
 
-		configExtensions = new ArrayList();
+		configExtensions = new HashSet();
 		configs = new HashMap();
 		configSets = new HashMap();
 		listeners = new ListenerList();
@@ -103,8 +105,8 @@ public class ProjectNode extends AbstractNode {
 		return configExtensions.contains(extension);
 	}
 
-	public List getConfigExtensions() {
-		return Collections.unmodifiableList(configExtensions);
+	public Set getConfigExtensions() {
+		return Collections.unmodifiableSet(configExtensions);
 	}
 
 	public void setConfigs(Collection configs) {

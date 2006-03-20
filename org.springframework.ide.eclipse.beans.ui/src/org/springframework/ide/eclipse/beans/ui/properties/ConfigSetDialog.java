@@ -62,7 +62,6 @@ public class ConfigSetDialog extends Dialog {
 												  PREFIX + "error.invalidName";
 	private static final String ERROR_USED_NAME = PREFIX + "error.usedName";
 	private static final String NAME_LABEL = PREFIX + "name.label";
-	private static final int NAME_LIMIT = 30; 
 	private static final String OVERRIDE_LABEL = PREFIX + "override.label";
 	private static final String INCOMPLETE_LABEL = PREFIX + "incomplete.label";
 	private static final String VIEWER_LABEL = PREFIX + "viewer.label";
@@ -118,7 +117,7 @@ public class ConfigSetDialog extends Dialog {
 
 		// labeled name text field
 		nameText = SpringUIUtils.createTextField(optionsGroup, 
-					  BeansUIPlugin.getResourceString(NAME_LABEL), NAME_LIMIT); 
+								  BeansUIPlugin.getResourceString(NAME_LABEL)); 
 		nameText.addModifyListener(
 			new ModifyListener() {
 				public void modifyText(ModifyEvent e) {

@@ -101,13 +101,15 @@ public class BeansUIImages {
 	public static final String IMG_OBJS_SPRING = NAME_PREFIX + "spring_obj.gif";
 	public static final String IMG_OBJS_ERROR = NAME_PREFIX + "error_obj.gif";
 
+	public static final String IMG_WIZ_PROJECT = NAME_PREFIX + "project_wiz.gif";
+
 	// Use IPath and toOSString to build the names to ensure they have the slashes correct
 //	private final static String CTOOL = "ctool16/"; //basic colors - size 16x16
 //	private final static String LOCALTOOL = "clcl16/"; //basic colors - size 16x16
 //	private final static String DLCL = "dlcl16/"; //disabled - size 16x16
 //	private final static String ELCL = "elcl16/"; //enabled - size 16x16
 	private final static String OBJECT = "obj16/"; //basic colors - size 16x16
-//	private final static String WIZBAN = "wizban/"; //basic colors - size 16x16
+	private final static String WIZBAN = "wizban/"; //basic colors - size 16x16
 	private final static String OVR = "ovr16/"; //basic colors - size 7x8
 //	private final static String VIEW= "cview16/"; // views
 
@@ -134,6 +136,8 @@ public class BeansUIImages {
 	public static final ImageDescriptor DESC_OVR_FACTORY = create(OVR, "factory_ovr.gif");
 	public static final ImageDescriptor DESC_OVR_PROTOTYPE = create(OVR, "prototype_ovr.gif");
 	public static final ImageDescriptor DESC_OVR_ABSTRACT = create(OVR, "abstract_ovr.gif");
+
+	public static final ImageDescriptor DESC_WIZ_PROJECT = createManaged(WIZBAN, IMG_WIZ_PROJECT);
 
 	/**
 	 * Returns the <code>Image<code> identified by the given key,
