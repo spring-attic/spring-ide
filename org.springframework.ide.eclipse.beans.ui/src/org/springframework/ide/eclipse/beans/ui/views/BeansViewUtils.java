@@ -113,7 +113,7 @@ public final class BeansViewUtils {
 	 */
 	public static ConfigNode[] createConfigNodes(IResource[] resources,
 			ProjectNode projectNode) {
-		ConfigNode[] configNodes = new ConfigNode[resources.length];
+		List configNodes = new ArrayList();
 		for (int i = 0; i < resources.length; i++) {
 			String configName = resources[i].getProjectRelativePath()
 					.toString();
@@ -122,10 +122,11 @@ public final class BeansViewUtils {
 					resources[i].getProjectRelativePath())
 					&& !beansProject.hasConfig(configName)) {
 				ConfigNode configNode = new ConfigNode(projectNode, configName);
-				configNodes[i] = configNode;
+				configNodes.add(configNode);
 			}
 		}
-		return configNodes;
+		return (ConfigNode[]) configNodes.toArray(new ConfigNode[configNodes
+				.size()]);
 	}
 
 	/**
@@ -140,7 +141,7 @@ public final class BeansViewUtils {
 	 */
 	public static ProjectNode[] createProjectNodes(IResource[] resources,
 			RootNode rootNode) {
-		ProjectNode[] projectNodes = new ProjectNode[resources.length];
+		List projectNodes = new ArrayList();
 		for (int i = 0; i < resources.length; i++) {
 			if (!SpringCoreUtils.isSpringProject(resources[i])) {
 				IProject project = (IProject) resources[i];
@@ -148,10 +149,11 @@ public final class BeansViewUtils {
 						.getName());
 				BeansProject beansProject = new BeansProject(project);
 				projectNode.setElement(beansProject);
-				projectNodes[i] = projectNode;
+				projectNodes.add(projectNode);
 			}
 		}
-		return projectNodes;
+		return (ProjectNode[]) projectNodes.toArray(new ProjectNode[projectNodes
+				.size()]);
 	}
 
 	/**
