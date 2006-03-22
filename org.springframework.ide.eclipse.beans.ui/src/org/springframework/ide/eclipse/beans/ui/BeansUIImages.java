@@ -101,7 +101,8 @@ public class BeansUIImages {
 	public static final String IMG_OBJS_SPRING = NAME_PREFIX + "spring_obj.gif";
 	public static final String IMG_OBJS_ERROR = NAME_PREFIX + "error_obj.gif";
 
-	public static final String IMG_WIZ_PROJECT = NAME_PREFIX + "project_wiz.gif";
+	public static final String IMG_WIZ_PROJECT = NAME_PREFIX + "project_wiz.png";
+	public static final String IMG_WIZ_CONFIG = NAME_PREFIX + "config_wiz.png";
 
 	// Use IPath and toOSString to build the names to ensure they have the slashes correct
 //	private final static String CTOOL = "ctool16/"; //basic colors - size 16x16
@@ -138,6 +139,7 @@ public class BeansUIImages {
 	public static final ImageDescriptor DESC_OVR_ABSTRACT = create(OVR, "abstract_ovr.gif");
 
 	public static final ImageDescriptor DESC_WIZ_PROJECT = createManaged(WIZBAN, IMG_WIZ_PROJECT);
+	public static final ImageDescriptor DESC_WIZ_CONFIG = createManaged(WIZBAN, IMG_WIZ_CONFIG);
 
 	/**
 	 * Returns the <code>Image<code> identified by the given key,
