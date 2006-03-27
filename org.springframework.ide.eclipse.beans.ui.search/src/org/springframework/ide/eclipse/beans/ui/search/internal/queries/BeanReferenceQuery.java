@@ -81,7 +81,8 @@ public class BeanReferenceQuery extends AbstractBeansQuery {
 			AbstractBeanDefinition bd = (AbstractBeanDefinition)
 									   BeansModelUtils.getBeanDefinition(bean);
 			// Compare reference with factory bean
-			if (pattern.matcher(bd.getFactoryBeanName()).matches()) {
+			String factoryBeanName = bd.getFactoryBeanName();
+			if (factoryBeanName != null && pattern.matcher(factoryBeanName).matches()) {
 				return true;
 			}
 
