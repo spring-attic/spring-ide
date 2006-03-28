@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -14,6 +14,8 @@
 
 package org.springframework.ide.eclipse.beans.ui.editor.hover;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -46,10 +48,17 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansJavaDocUtils;
+import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
+/**
+ * Hover information processor to create hover information for the spring beans
+ * editor
+ * 
+ * @author Christian Dupuis
+ */
 public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 		ITextHover {
 
@@ -150,21 +159,31 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 			}
 		} else if ("name".equals(attName)
 				&& "property".equals(xmlnode.getNodeName())) {
-			List classNames = BeansEditorUtils.getClassNamesOfBean(file,
-					xmlnode.getParentNode());
+
 			String propertyName = attributes.getNamedItem(attName)
 					.getNodeValue();
-			for (int i = 0; i < classNames.size(); i++) {
-				try {
-					IMethod method = Introspector.getWritableProperty(
-							(IType) classNames.get(i), propertyName);
-					if (method != null) {
-						BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
-						result = utils.getJavaDoc();
-					}
-				} catch (JavaModelException e) {
+			String[] paths = StringUtils.split(propertyName, ".");
+			if (paths == null) {
+				paths = new String[] { propertyName };
+			}
+			List propertyPaths = Arrays.asList(paths);
+			List classNames = BeansEditorUtils.getClassNamesOfBean(file,
+					xmlnode.getParentNode());
+			List methods = new ArrayList();
+			BeansEditorUtils.extractAllMethodsFromPropertyPathElements(
+					propertyPaths, classNames, this.getResource(document), 0,
+					methods);
+
+			StringBuffer buf = new StringBuffer();
+			for (int i = 0; i < methods.size(); i++) {
+				IMethod method = (IMethod) methods.get(i);
+
+				if (method != null) {
+					BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
+					buf.append(utils.getJavaDoc() + "<br>");
 				}
 			}
+			result = buf.toString();
 		} else if ("local".equals(attName)
 				&& attributes.getNamedItem(attName) != null) {
 			Element ref = xmlnode.getOwnerDocument().getElementById(

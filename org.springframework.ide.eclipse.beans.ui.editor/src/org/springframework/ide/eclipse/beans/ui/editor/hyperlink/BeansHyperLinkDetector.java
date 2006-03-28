@@ -249,7 +249,7 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 					&& "property".equals(node.getNodeName())) {
 
 				List propertyPaths = new ArrayList();
-				hyperlinkRegion = extractPropertyPathFromCursorPosition(
+				hyperlinkRegion = BeansEditorUtils.extractPropertyPathFromCursorPosition(
 						hyperlinkRegion, cursor, target, propertyPaths);
 
 				if ("bean".equals(parentName)) {
@@ -257,7 +257,7 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 					List classNames = BeansEditorUtils.getClassNamesOfBean(
 							file, parentNode);
 
-					IMethod method = extractMethodFromPropertyPathElements(
+					IMethod method = BeansEditorUtils.extractMethodFromPropertyPathElements(
 							propertyPaths, classNames, file, 0);
 					if (method != null) {
 						link = new JavaElementHyperlink(hyperlinkRegion, method);
@@ -380,81 +380,5 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 			}
 		}
 		return resource;
-	}
-
-	private IRegion extractPropertyPathFromCursorPosition(
-			IRegion hyperlinkRegion, IRegion cursor, String target,
-			List propertyPaths) {
-
-		int cursorIndexInTarget = cursor.getOffset()
-				- hyperlinkRegion.getOffset();
-
-		if (cursorIndexInTarget > 0 && cursorIndexInTarget < target.length()) {
-
-			String preTarget = target.substring(0, cursorIndexInTarget);
-			if (!preTarget.endsWith(".")) {
-				int regionOffset = hyperlinkRegion.getOffset()
-						+ preTarget.lastIndexOf(".") + 1;
-				int segmentCount = new StringTokenizer(preTarget, ".")
-						.countTokens();
-				StringTokenizer tok = new StringTokenizer(target, ".");
-
-				for (int i = 0; i < segmentCount; i++) {
-					propertyPaths.add(tok.nextToken());
-				}
-
-				int regionLenght = ((String) propertyPaths
-						.get(segmentCount - 1)).length();
-
-				return new Region(regionOffset, regionLenght);
-			}
-		}
-
-		return hyperlinkRegion;
-
-	}
-
-	private IMethod extractMethodFromPropertyPathElements(List propertyPath,
-			List types, IFile file, int counter) {
-		IMethod method = null;
-		if (propertyPath != null && propertyPath.size() > 0) {
-			if (propertyPath.size() > (counter + 1)) {
-
-				if (types != null) {
-					IType returnType = null;
-					for (int i = 0; i < types.size(); i++) {
-						IType type = (IType) types.get(i);
-						try {
-							IMethod getMethod = Introspector
-									.getReadableProperty(type,
-											(String) propertyPath.get(counter));
-							returnType = BeansEditorUtils
-									.getTypeForMethodReturnType(getMethod,
-											type, file);
-						} catch (JavaModelException e) {
-						}
-					}
-
-					if (returnType != null) {
-						List newTypes = new ArrayList();
-						newTypes.add(returnType);
-						method = extractMethodFromPropertyPathElements(
-								propertyPath, newTypes, file, (counter + 1));
-					}
-
-				}
-			} else {
-				for (int i = 0; i < types.size(); i++) {
-					IType type = (IType) types.get(i);
-					try {
-						method = Introspector.getWritableProperty(type,
-								(String) propertyPath.get(counter));
-
-					} catch (JavaModelException e) {
-					}
-				}
-			}
-		}
-		return method;
 	}
 }

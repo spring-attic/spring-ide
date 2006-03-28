@@ -668,7 +668,7 @@ public class BeansContentAssistProcessor extends XMLContentAssistProcessor
 		
 		PropertyNameSearchRequestor requestor = new PropertyNameSearchRequestor(
 				request, oldPrefix);
-		if (prefix.endsWith(".")) {
+		if (prefix.lastIndexOf(".") >= 0) {
 			int firstIndex = prefix.indexOf(".");
 			String firstPrefix = prefix.substring(0, firstIndex);
 			String lastPrefix = prefix.substring(firstIndex);
