@@ -48,13 +48,13 @@
          <visibility>
             <or>
                <objectClass
-                     name="org.springframework.ide.eclipse.beans.ui.model.ConfigNode">
+                     name="org.springframework.ide.eclipse.beans.ui.views.model.ConfigNode">
                </objectClass>
                <objectClass
-                     name="org.springframework.ide.eclipse.beans.ui.model.ConfigSetNode">
+                     name="org.springframework.ide.eclipse.beans.ui.views.model.ConfigSetNode">
                </objectClass>
                <objectClass
-                     name="org.springframework.ide.eclipse.beans.ui.model.BeanNode">
+                     name="org.springframework.ide.eclipse.beans.ui.views.model.BeanNode">
                </objectClass>
             </or>
          </visibility>
