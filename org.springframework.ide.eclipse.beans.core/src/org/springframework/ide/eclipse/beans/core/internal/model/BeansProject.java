@@ -168,10 +168,15 @@ public class BeansProject extends AbstractResourceModelElement
 	}
 
 	/**
-	 * Returns <code>IBeansConfig</code> of given name. 
+	 * Returns <code>IBeansConfig</code> of given name.
 	 */
 	public IBeansConfig getConfig(String configName) {
-		return getDescription().getConfig(configName);
+        if (configName != null && configName.charAt(0) == '/') {
+            return BeansCorePlugin.getModel().getConfig(configName);
+        }
+        else {
+            return getDescription().getConfig(configName);
+        }
 	}
 
 	/**
