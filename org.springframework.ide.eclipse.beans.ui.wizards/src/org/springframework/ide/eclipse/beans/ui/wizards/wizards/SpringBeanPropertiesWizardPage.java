@@ -26,6 +26,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -640,6 +641,11 @@ public class SpringBeanPropertiesWizardPage extends AbstractWizardCustomPage {
 	protected void handleDialogFieldChanged(IDialogField field) {
 		if (injectCheckBoxField != null && field.equals(injectCheckBoxField)) {
 			setListEnabled(injectCheckBoxField.isSelected());
+			// MacOSX patch because enablement(or not) is not visible
+			if(injectCheckBoxField.isSelected())
+				propertiesDialogField.getTreeControl(null).setForeground(new Color(propertiesDialogField.getTreeControl(null).getDisplay(),0,0,0));
+			else 
+				propertiesDialogField.getTreeControl(null).setForeground(new Color(propertiesDialogField.getTreeControl(null).getDisplay(),200,200,200));
 		}
 		touch();
 	}

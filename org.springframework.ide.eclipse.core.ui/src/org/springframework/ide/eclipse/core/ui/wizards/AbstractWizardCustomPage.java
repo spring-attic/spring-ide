@@ -27,6 +27,8 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -157,6 +159,18 @@ public abstract class AbstractWizardCustomPage extends WizardPage {
 					setAlreadyInited(true);
 					touch();
 				}
+			}
+
+		});
+		getShell().addPaintListener(new PaintListener() {
+
+			public void paintControl(PaintEvent e) {
+				if (!isAlreadyInited()) {
+					initialize();
+					setAlreadyInited(true);
+					touch();
+				}
+
 			}
 
 		});
