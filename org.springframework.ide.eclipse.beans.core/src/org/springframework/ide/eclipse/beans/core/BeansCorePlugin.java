@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.core;
 
@@ -50,7 +50,7 @@ public class BeansCorePlugin extends Plugin {
 	private static BeansCorePlugin plugin;
 
 	/** The singleton beans model */
-	private final static BeansModel BEANS_MODEL = new BeansModel();
+	private static BeansModel model;
 
 	/** Resource bundle */
 	private ResourceBundle resourceBundle;
@@ -63,6 +63,7 @@ public class BeansCorePlugin extends Plugin {
 	 */
 	public BeansCorePlugin() {
 		plugin = this;
+		model = new BeansModel();
 		try {
 			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);
 		} catch (MissingResourceException e) {
@@ -72,18 +73,18 @@ public class BeansCorePlugin extends Plugin {
 
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-		BEANS_MODEL.startup();
+		model.startup();
 	}
 
 	public void stop(BundleContext context) throws Exception {
-		BEANS_MODEL.shutdown();
+		model.shutdown();
 		super.stop(context);
 	}
 
 	/**
 	 * Returns the shared instance.
 	 */
-	public static BeansCorePlugin getDefault() {
+	public static final BeansCorePlugin getDefault() {
 		return plugin;
 	}
 
@@ -91,13 +92,13 @@ public class BeansCorePlugin extends Plugin {
 	 * Returns the singleton <code>IBeansModel</code>.
 	 */
 	public static final IBeansModel getModel() {
-		return BEANS_MODEL;
+		return model;
 	}
 
 	/**
 	 * Returns the workspace instance.
 	 */
-	public static IWorkspace getWorkspace() {
+	public static final IWorkspace getWorkspace() {
 		return ResourcesPlugin.getWorkspace();
 	}
 
@@ -124,7 +125,7 @@ public class BeansCorePlugin extends Plugin {
 	/**
 	 * Returns the plugin's resource bundle,
 	 */
-	public ResourceBundle getResourceBundle() {
+	public final ResourceBundle getResourceBundle() {
 		return resourceBundle;
 	}
 
