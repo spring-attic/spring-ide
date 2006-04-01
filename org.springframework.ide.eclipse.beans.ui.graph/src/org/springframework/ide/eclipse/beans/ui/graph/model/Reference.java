@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,20 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.draw2d.graph.Edge;
 import org.eclipse.draw2d.graph.Node;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 
+/**
+ * This edge connect two beans. Optionally a node (constructor argument or
+ * property) describing the origin of this edge can be attached.
+ * @see org.springframework.ide.eclipse.beans.ui.graph.model.Bean
+ * @see org.eclipse.draw2d.graph.Node 
+ * @author Torsten Juergeleit
+ */
 public class Reference extends Edge implements IAdaptable {
 
 	private int type;
 	private Node node;
-
-	public Reference(Bean source, Bean target) {
-		this(BeanReference.STANDARD_BEAN_TYPE, source, target, null);
-	}
 
 	public Reference(int type, Bean source, Bean target) {
 		this(type, source, target, null);

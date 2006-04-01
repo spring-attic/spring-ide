@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,13 @@ import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput;
 import org.springframework.ide.eclipse.beans.ui.graph.figures.BeanFigure;
 
+/**
+ * This class builds the graphical representation of the model data (given as
+ * editor input) via GEF's <code>DirectedGraphLayout</code>.
+ * @see org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput
+ * @see org.eclipse.draw2d.graph.DirectedGraphLayout
+ * @author Torsten Juergeleit
+ */
 public class Graph implements IAdaptable {
 
 	/* Max width of rows with orphan beans (unconnected beans) if no subgraph
@@ -54,14 +61,14 @@ public class Graph implements IAdaptable {
 
 	public Graph(GraphEditorInput input) {
 		this.input = input;
-		initGraph();
+		init();
 	}
 
 	/**
 	 * Initializes the embedded graph with nodes from GraphEditorInput's beans
 	 * and edges from GraphEditorInput's bean references.
 	 */
-	private void initGraph() {
+	private void init() {
 		graph = new DirectedGraph();
 
 		// Add all beans defined in GraphEditorInput as nodes to the graph
@@ -169,7 +176,8 @@ public class Graph implements IAdaptable {
 				orphanBeans.add(bean);
 				graph.nodes.remove(bean);
 			} else {
-				Reference reference = new Reference(root, bean);
+				Reference reference = new Reference(
+								 BeanReference.STANDARD_BEAN_TYPE, root, bean);
 				reference.weight = 0;
 				rootEdges.add(reference);
 				graph.edges.add(reference);
