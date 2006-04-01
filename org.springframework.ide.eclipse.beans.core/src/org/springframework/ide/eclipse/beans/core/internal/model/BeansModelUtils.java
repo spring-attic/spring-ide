@@ -337,7 +337,7 @@ public class BeansModelUtils {
 			while (cargs.hasNext()) {
 				IBeanConstructorArgument carg = (IBeanConstructorArgument)
 																  cargs.next();
-				addBeanReferencesForValue(bean, carg.getValue(), context,
+				addBeanReferencesForValue(carg, carg.getValue(), context,
 									   references, referencedBeans, recursive);
 			}
 
@@ -368,6 +368,13 @@ public class BeansModelUtils {
 		return references;
 	}
 
+	/**
+	 * If given target is not equal to source then a  <code>BeanReference</code>
+	 * created. This bean reference is added to the given list of bean
+	 * references (if not already).
+	 * If given target is not already checked for bean references then
+	 * <code>true</code> is returned else <code>false</code>.
+	 */
 	private static boolean addBeanReference(int type, IModelElement source,
 									   IBean target, IModelElement context,
 									   List references, List referencedBeans) {
@@ -376,6 +383,8 @@ public class BeansModelUtils {
 												  context); 
 			if (!references.contains(ref)) {
 				references.add(ref);
+
+				// If given target not checked for references then check it too 
 				if (!referencedBeans.contains(target)) {
 					return true;
 				}

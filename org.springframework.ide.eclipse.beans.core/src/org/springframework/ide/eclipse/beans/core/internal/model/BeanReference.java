@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  * Holder for information about a reference from a model element to to a Spring
  * bean within a certain context (<code>IBeansConfig</code> or
  * <code>IBeansConfigSet</code>).
+ * @author Torsten Juergeleit
  */
 public class BeanReference {
 
@@ -38,10 +39,6 @@ public class BeanReference {
 	private IBean target;
 	private int type;
 	private IModelElement context;
-
-	public BeanReference(IModelElement source, IBean target) {
-		this(STANDARD_BEAN_TYPE, source, target);
-	}
 
 	public BeanReference(int type, IModelElement source, IBean target) {
 		this(STANDARD_BEAN_TYPE, source, target, target.getElementParent());
