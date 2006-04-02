@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.ide.eclipse.ui;
 
-import java.text.MessageFormat;
-import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.eclipse.core.resources.IWorkspace;
@@ -32,6 +30,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 /**
  * The main plugin class to be used in the desktop.
+ * @author Torsten Juergeleit
  */
 public class SpringUIPlugin extends AbstractUIPlugin {
 
@@ -41,9 +40,7 @@ public class SpringUIPlugin extends AbstractUIPlugin {
 	 */
 	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.ui";
 
-	private static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
-
-	/** he shared instance. */
+	/** The shared instance. */
 	private static SpringUIPlugin plugin;
 
 	private ResourceBundle resourceBundle;
@@ -56,12 +53,6 @@ public class SpringUIPlugin extends AbstractUIPlugin {
 	 */
 	public SpringUIPlugin() {
 		plugin = this;
-		try {
-			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);
-		} catch (MissingResourceException e) {
-			log(e);
-			resourceBundle = null;
-		}
 	}
 
 	/**
@@ -94,34 +85,6 @@ public class SpringUIPlugin extends AbstractUIPlugin {
 		return getActiveWorkbenchWindow().getActivePage();
 	}
 
-	/**
-	 * Returns the string from the plugin's resource bundle,
-	 * or 'key' if not found.
-	 */
-	public static String getResourceString(String key) {
-	    String bundleString;
-		ResourceBundle bundle = getDefault().getResourceBundle();
-		if (bundle != null) {
-			try {
-				bundleString = bundle.getString(key);
-			} catch (MissingResourceException e) {
-			    log(e);
-				bundleString = "!" + key + "!";
-			}
-		} else {
-			bundleString = "!" + key + "!";
-		}
-		return bundleString;
-	}
-
-	public static String getFormattedMessage(String key, String arg) {
-		return getFormattedMessage(key, new String[] { arg });
-	}
-
-	public static String getFormattedMessage(String key, String[] args) {
-		return MessageFormat.format(getResourceString(key), args);
-	}
-
 	public static boolean isDebug(String option) {
 		String value = Platform.getDebugOption(option);
 		return (value != null && value.equalsIgnoreCase("true") ? true : false);
@@ -143,8 +106,9 @@ public class SpringUIPlugin extends AbstractUIPlugin {
 	
 	public static void log(Throwable exception) {
 		getDefault().getLog().log(createErrorStatus(
-						getResourceString("Plugin.internal_error"), exception));
+							SpringUIMessages.Plugin_internalError, exception));
 	}
+
 	/**
 	 * Returns a new <code>IStatus</code> for this plug-in
 	 */

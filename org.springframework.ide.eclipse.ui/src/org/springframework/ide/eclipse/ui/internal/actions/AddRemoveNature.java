@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,24 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.ui.SpringUIMessages;
+import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 
+/**
+ * This action toggles the selected project's Spring project nature.
+ * @author Torsten Juergeleit
+ */
 public class AddRemoveNature implements IObjectActionDelegate {
 
 	private List selected = new ArrayList();
@@ -69,11 +78,29 @@ public class AddRemoveNature implements IObjectActionDelegate {
 		while (iter.hasNext()) {
 			IProject project = (IProject) iter.next();
 			if (SpringCoreUtils.isSpringProject(project)) {
-				SpringCoreUtils.removeProjectNature(project,
-													SpringCore.NATURE_ID);
+				try {
+					SpringCoreUtils.removeProjectNature(project,
+													    SpringCore.NATURE_ID);
+				} catch (CoreException e) {
+					MessageDialog.openError(
+							SpringUIPlugin.getActiveWorkbenchShell(),
+							SpringUIMessages.ProjectNature_errorMessage,
+							NLS.bind(
+								  SpringUIMessages.ProjectNature_removeError,
+								  project.getName(), e.getLocalizedMessage()));
+				}
 			} else {
-				SpringCoreUtils.addProjectNature(project,
-												 SpringCore.NATURE_ID);
+				try {
+					SpringCoreUtils.addProjectNature(project,
+													 SpringCore.NATURE_ID);
+				} catch (CoreException e) {
+					MessageDialog.openError(
+							SpringUIPlugin.getActiveWorkbenchShell(),
+							SpringUIMessages.ProjectNature_errorMessage,
+							NLS.bind(
+								  SpringUIMessages.ProjectNature_addError,
+								  project.getName(), e.getLocalizedMessage()));
+				}
 			}
 		}
 	}

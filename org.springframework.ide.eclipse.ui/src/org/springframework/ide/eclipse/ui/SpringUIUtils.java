@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
@@ -45,6 +46,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -293,6 +295,18 @@ public class SpringUIUtils {
 		ISelection selection = editor.getSelectionProvider().getSelection();
 		if (selection instanceof ITextSelection) {
 			return ((ITextSelection) selection).getText().trim();
+		}
+		return null;
+	}
+
+	public static final IProgressMonitor getStatusLineProgressMonitor() {
+		IWorkbenchPage wbPage = SpringUIPlugin.getActiveWorkbenchPage();
+		if (wbPage != null) {
+			IEditorPart editor = wbPage.getActiveEditor();
+			if (editor != null) {
+				IActionBars bars = editor.getEditorSite().getActionBars(); 
+				return bars.getStatusLineManager().getProgressMonitor();
+			}
 		}
 		return null;
 	}
