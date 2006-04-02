@@ -71,9 +71,7 @@ public class ViewStatePart extends ChildrenStatePart {
     protected List getModelChildren() {
         if (getModel() instanceof IViewState) {
             List child = new ArrayList();
-            if (((IViewState) getModel()).getSetup() != null) {
-                child.add(((IViewState) getModel()).getSetup());
-            }
+            
             return child;
         }
         else {

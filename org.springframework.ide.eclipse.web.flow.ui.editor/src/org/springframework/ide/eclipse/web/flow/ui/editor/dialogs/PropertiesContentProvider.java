@@ -22,7 +22,7 @@ import java.beans.PropertyChangeListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 
@@ -33,7 +33,7 @@ class PropertiesContentProvider implements IStructuredContentProvider,
 
     private TableViewer viewer;
 
-    public PropertiesContentProvider(IPropertyEnabled project, TableViewer viewer) {
+    public PropertiesContentProvider(IAttributeEnabled project, TableViewer viewer) {
         this.project = project;
         this.viewer = viewer;
     }
@@ -48,8 +48,8 @@ class PropertiesContentProvider implements IStructuredContentProvider,
     }
 
     public Object[] getElements(Object obj) {
-        if (project instanceof IPropertyEnabled) {
-            return ((IPropertyEnabled) project).getProperties().toArray();
+        if (project instanceof IAttributeEnabled) {
+            return ((IAttributeEnabled) project).getProperties().toArray();
         }
         else 
             return null;

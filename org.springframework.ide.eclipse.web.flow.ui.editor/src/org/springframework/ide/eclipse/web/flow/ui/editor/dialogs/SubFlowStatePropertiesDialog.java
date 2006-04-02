@@ -68,9 +68,9 @@ import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IDescriptionEnabled;
-import org.springframework.ide.eclipse.web.flow.core.model.IInput;
-import org.springframework.ide.eclipse.web.flow.core.model.IOutput;
-import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
+import org.springframework.ide.eclipse.web.flow.core.model.IInputMapping;
+import org.springframework.ide.eclipse.web.flow.core.model.IOutputMapping;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowEditorInput;
@@ -207,55 +207,18 @@ public class SubFlowStatePropertiesDialog
                 }
                 if (this.radioBeanRef.getSelection()) {
                     mapper.setBean(trimString(getBean()));
-                    mapper.setBeanClass(null);
-                    mapper.setAutowire(null);
-                    mapper.setClassRef(null);
                 }
                 else if (this.radioClass.getSelection()) {
                     mapper.setBean(null);
-                    mapper.setBeanClass(trimString(getBeanClass()));
-                    mapper.setAutowire(trimString(getAutowire()));
-                    mapper.setClassRef(null);
                 }
                 else if (this.radioClassRef.getSelection()) {
                     mapper.setBean(null);
-                    mapper.setBeanClass(null);
-                    mapper.setAutowire(null);
-                    mapper.setClassRef(trimString(getClassRef()));
                 }
             }
             else {
                 if (this.subFlowStateClone.getAttributeMapper() != null) {
                     this.subFlowStateClone.removeAttributeMapper();
                 }
-            }
-            if (this.beanProperties.useBeanReference()) {
-                if (this.beanProperties.getRadioBeanRef()) {
-                    this.subFlowStateClone.setBean(this.beanProperties.getBeanText());
-                    this.subFlowStateClone.setBeanClass(null);
-                    this.subFlowStateClone.setAutowire(null);
-                    this.subFlowStateClone.setClassRef(null);
-                }
-                else if (this.beanProperties.getRadioClass()) {
-                    this.subFlowStateClone.setBean(null);
-                    this.subFlowStateClone.setBeanClass(trimString(this.beanProperties
-                            .getClassText()));
-                    this.subFlowStateClone.setAutowire(trimString(this.beanProperties
-                            .getAutowireText()));
-                    this.subFlowStateClone.setClassRef(null);
-                }
-                else if (this.beanProperties.getRadioClassRef()) {
-                    this.subFlowStateClone.setBean(null);
-                    this.subFlowStateClone.setBeanClass(null);
-                    this.subFlowStateClone.setAutowire(null);
-                    this.subFlowStateClone.setClassRef(this.beanProperties.getClassRefText());
-                }
-            }
-            else {
-                this.subFlowStateClone.setBean(null);
-                this.subFlowStateClone.setBeanClass(null);
-                this.subFlowStateClone.setAutowire(null);
-                this.subFlowStateClone.setClassRef(null);
             }
 
             if (this.subFlowStateClone instanceof IDescriptionEnabled) {
@@ -422,10 +385,6 @@ public class SubFlowStatePropertiesDialog
         browseBeanButton.addSelectionListener(buttonListener);
 
         radioClassRef = new Button(groupActionType, SWT.RADIO);
-        if (this.subFlowState != null && this.subFlowState.getAttributeMapper() != null
-                && this.subFlowState.getAttributeMapper().getClassRef() != null) {
-            radioClassRef.setSelection(true);
-        }
         radioClassRef.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         radioClassRef.setText("Locate attribute mapper by class reference");
         radioClassRef.addSelectionListener(new SelectionAdapter() {
@@ -452,10 +411,6 @@ public class SubFlowStatePropertiesDialog
 
         // Add the text box for action classname.
         classRefText = new Text(inset3, SWT.SINGLE | SWT.BORDER);
-        if (this.subFlowState != null && this.subFlowState.getAttributeMapper() != null
-                && this.subFlowState.getAttributeMapper().getClassRef() != null) {
-            classRefText.setText(this.subFlowState.getAttributeMapper().getClassRef());
-        }
         classRefText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         classRefText.addModifyListener(new ModifyListener() {
             public void modifyText(ModifyEvent e) {
@@ -469,10 +424,6 @@ public class SubFlowStatePropertiesDialog
         browseClassRefButton.addSelectionListener(buttonListener);
 
         radioClass = new Button(groupActionType, SWT.RADIO);
-        if (this.subFlowState != null && this.subFlowState.getAttributeMapper() != null
-                && this.subFlowState.getAttributeMapper().getBeanClass() != null) {
-            radioClass.setSelection(true);
-        }
 
         radioClass.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         radioClass.setText("Locate attribute mapper by class");
@@ -500,10 +451,6 @@ public class SubFlowStatePropertiesDialog
 
         // Add the text box for action classname.
         classText = new Text(inset2, SWT.SINGLE | SWT.BORDER);
-        if (this.subFlowState != null && this.subFlowState.getAttributeMapper() != null
-                && this.subFlowState.getAttributeMapper().getBeanClass() != null) {
-            classText.setText(this.subFlowState.getAttributeMapper().getBeanClass());
-        }
         classText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         classText.addModifyListener(new ModifyListener() {
             public void modifyText(ModifyEvent e) {
@@ -529,10 +476,6 @@ public class SubFlowStatePropertiesDialog
         autowireText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         autowireText.setItems(new String[] { "no", "byName", "byType", "constructor", "autodetect",
                 "default" });
-        if (this.subFlowState != null && this.subFlowState.getAttributeMapper() != null
-                && this.subFlowState.getAttributeMapper().getAutowire() != null) {
-            autowireText.setText(this.subFlowState.getAttributeMapper().getAutowire());
-        }
         autowireText.addModifyListener(new ModifyListener() {
             public void modifyText(ModifyEvent e) {
                 validateInput();
@@ -605,7 +548,7 @@ public class SubFlowStatePropertiesDialog
 
             // Add a task to the ExampleTaskList and refresh the view
             public void widgetSelected(SelectionEvent e) {
-                IInput input = new Input(mapper, "<name>", "<value>");
+                IInputMapping input = new Input(mapper, "<name>", "<value>");
                 InputOutputEditorDialog dialog = new InputOutputEditorDialog(parentShell, input,
                         true);
                 dialog.open();
@@ -623,7 +566,7 @@ public class SubFlowStatePropertiesDialog
             public void widgetSelected(SelectionEvent e) {
                 IStructuredSelection selection = (IStructuredSelection) inputViewer.getSelection();
                 if (selection.getFirstElement() != null) {
-                    if (selection.getFirstElement() instanceof IInput) {
+                    if (selection.getFirstElement() instanceof IInputMapping) {
                         InputOutputEditorDialog dialog = new InputOutputEditorDialog(parentShell,
                                 selection.getFirstElement(), true);
                         dialog.open();
@@ -643,8 +586,8 @@ public class SubFlowStatePropertiesDialog
             public void widgetSelected(SelectionEvent e) {
                 IStructuredSelection selection = (IStructuredSelection) inputViewer.getSelection();
                 if (selection.getFirstElement() != null) {
-                    if (selection.getFirstElement() instanceof IInput) {
-                        mapper.removeInput((IInput) selection.getFirstElement());
+                    if (selection.getFirstElement() instanceof IInputMapping) {
+                        mapper.removeInput((IInputMapping) selection.getFirstElement());
                     }
                 }
             }
@@ -718,7 +661,7 @@ public class SubFlowStatePropertiesDialog
 
             // Add a task to the ExampleTaskList and refresh the view
             public void widgetSelected(SelectionEvent e) {
-                IOutput output = new Output(mapper, "<name>", "<value>");
+                IOutputMapping output = new Output(mapper, "<name>", "<value>");
                 InputOutputEditorDialog dialog = new InputOutputEditorDialog(parentShell, output,
                         false);
                 dialog.open();
@@ -737,7 +680,7 @@ public class SubFlowStatePropertiesDialog
                 IStructuredSelection selection = (IStructuredSelection) inputViewerOutput
                         .getSelection();
                 if (selection.getFirstElement() != null) {
-                    if (selection.getFirstElement() instanceof IOutput) {
+                    if (selection.getFirstElement() instanceof IOutputMapping) {
                         InputOutputEditorDialog dialog = new InputOutputEditorDialog(parentShell,
                                 selection.getFirstElement(), false);
                         dialog.open();
@@ -758,8 +701,8 @@ public class SubFlowStatePropertiesDialog
                 IStructuredSelection selection = (IStructuredSelection) inputViewerOutput
                         .getSelection();
                 if (selection.getFirstElement() != null) {
-                    if (selection.getFirstElement() instanceof IOutput) {
-                        mapper.removeOutput((IOutput) selection.getFirstElement());
+                    if (selection.getFirstElement() instanceof IOutputMapping) {
+                        mapper.removeOutput((IOutputMapping) selection.getFirstElement());
                     }
                 }
             }
@@ -774,7 +717,7 @@ public class SubFlowStatePropertiesDialog
         item3.setControl(beanProperties.createDialogArea(folder));
 
         properties = new PropertiesComposite(this, item4, getShell(),
-                (IPropertyEnabled) this.subFlowStateClone);
+                (IAttributeEnabled) this.subFlowStateClone);
         item4.setControl(properties.createDialogArea(folder));
 
         description = new DescriptionComposite(this, item5, getShell(),
@@ -1066,12 +1009,6 @@ public class SubFlowStatePropertiesDialog
             if (this.subFlowState.getAttributeMapper() != null) {
                 if (this.subFlowState.getAttributeMapper().getBean() != null) {
                     this.setAttributeMapperChoice(RADIOBEANREF_CHOICE);
-                }
-                else if (this.subFlowState.getAttributeMapper().getBeanClass() != null) {
-                    this.setAttributeMapperChoice(RADIOCLASS_CHOICE);
-                }
-                else if (this.subFlowState.getAttributeMapper().getClassRef() != null) {
-                    this.setAttributeMapperChoice(RADIOCLASSREF_CHOICE);
                 }
             }
         }

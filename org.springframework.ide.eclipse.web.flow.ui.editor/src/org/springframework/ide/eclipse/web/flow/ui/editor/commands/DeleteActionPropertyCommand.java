@@ -18,15 +18,16 @@ package org.springframework.ide.eclipse.web.flow.ui.editor.commands;
 
 import org.eclipse.gef.commands.Command;
 import org.springframework.ide.eclipse.web.flow.core.model.IAction;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttribute;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttributeEnabled;
 
 public class DeleteActionPropertyCommand extends Command {
 
-    private IProperty child;
+    private IAttribute child;
 
     private int index = -1;
 
-    private IAction parent;
+    private IAttributeEnabled parent;
 
     public void execute() {
         primExecute();
@@ -41,12 +42,12 @@ public class DeleteActionPropertyCommand extends Command {
         primExecute();
     }
 
-    public void setChild(IProperty a) {
+    public void setChild(IAttribute a) {
         child = a;
     }
 
     public void setParent(IAction sa) {
-        parent = sa;
+        parent = (IAttributeEnabled) sa;
     }
 
     public void undo() {

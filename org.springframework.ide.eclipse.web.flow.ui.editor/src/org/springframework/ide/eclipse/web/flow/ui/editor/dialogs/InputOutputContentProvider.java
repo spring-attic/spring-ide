@@ -23,8 +23,8 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
-import org.springframework.ide.eclipse.web.flow.core.model.IInput;
-import org.springframework.ide.eclipse.web.flow.core.model.IOutput;
+import org.springframework.ide.eclipse.web.flow.core.model.IInputMapping;
+import org.springframework.ide.eclipse.web.flow.core.model.IOutputMapping;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 
 class InputOutputContentProvider implements IStructuredContentProvider,
@@ -72,8 +72,8 @@ class InputOutputContentProvider implements IStructuredContentProvider,
 
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals(IWebFlowModelElement.ADD_CHILDREN)) {
-            if ((evt.getNewValue() instanceof IInput && useInputs)
-                    || (evt.getNewValue() instanceof IOutput && !useInputs)) {
+            if ((evt.getNewValue() instanceof IInputMapping && useInputs)
+                    || (evt.getNewValue() instanceof IOutputMapping && !useInputs)) {
                 if (evt.getNewValue() != null) {
                     this.viewer.add(evt.getNewValue());
                 }

@@ -21,6 +21,7 @@ import java.util.Map;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.LineBorder;
+import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.geometry.Insets;
 import org.eclipse.draw2d.graph.CompoundDirectedGraph;
@@ -54,7 +55,7 @@ public class StatePart extends AbstractStatePart {
             n.setPadding(new Insets(0, 40, 10, 40));
         else if (getModel() instanceof IAction
                 || getModel() instanceof IAttributeMapper)
-            n.setPadding(new Insets(0, 5, 5, 5));
+            n.setPadding(new Insets(0, 5, 5, 0));
         else
             n.setPadding(new Insets(0, 50, 50, 50));
         map.put(this, n);
@@ -64,9 +65,11 @@ public class StatePart extends AbstractStatePart {
 
     protected IFigure createFigure() {
         Label l = new StateLabel();
+        //l.setBorder(new MarginBorder(3, 5, 3, 0));
         l.setBackgroundColor(COLOR);
         l.setLabelAlignment(PositionConstants.LEFT);
         l.setIcon(labelProvider.getImage(getModel()));
+        l.setIconTextGap(5);
         l.setIconAlignment(PositionConstants.TOP);
         l.setBorder(new LineBorder());
         return l;
@@ -81,7 +84,7 @@ public class StatePart extends AbstractStatePart {
     }
 
     protected void refreshVisuals() {
-        ((Label) getFigure()).setText(labelProvider.getText(getModel()));
+        ((Label) getFigure()).setText(labelProvider.getText(getModel()) + " ");
         // ((Label) getFigure()).setToolTip(new Label(labelProvider.getLongText(getModel())));
         ((Label) getFigure()).setIcon(labelProvider.getImage(getModel()));
     }

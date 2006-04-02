@@ -18,7 +18,7 @@ package org.springframework.ide.eclipse.web.flow.ui.editor.dialogs;
 
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.swt.widgets.TableItem;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttribute;
 
 class TableCellModifier implements ICellModifier {
 
@@ -27,12 +27,12 @@ class TableCellModifier implements ICellModifier {
     }
 
     public Object getValue(Object element, String property) {
-        if (element instanceof IProperty) {
+        if (element instanceof IAttribute) {
             if (property.equals("Name")) {
-                return ((IProperty) element).getName();
+                return ((IAttribute) element).getName();
             }
             else if (property.equals("Value")) {
-                return ((IProperty) element).getValue();
+                return ((IAttribute) element).getValue();
             }
         }
         return new String("");
@@ -40,14 +40,14 @@ class TableCellModifier implements ICellModifier {
 
     public void modify(Object element, String property, Object value) {
         if (element instanceof TableItem
-                && ((TableItem) element).getData() instanceof IProperty) {
+                && ((TableItem) element).getData() instanceof IAttribute) {
             if (property.equals("Name")) {
-                ((IProperty) ((TableItem) element).getData())
+                ((IAttribute) ((TableItem) element).getData())
                         .setName((String) value);
                 ((TableItem) element).setText(0, (String) value);
             }
             else if (property.equals("Value")) {
-                ((IProperty) ((TableItem) element).getData())
+                ((IAttribute) ((TableItem) element).getData())
                         .setValue((String) value);
                 ((TableItem) element).setText(1, (String) value);
             }

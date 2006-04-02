@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.web.flow.core.model.IAction;
 import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
-import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
 
@@ -78,29 +78,13 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
             if (this.beanProperties.useBeanReference()) {
                 if (this.beanProperties.getRadioBeanRef()) {
                     this.actionClone.setBean(this.beanProperties.getBeanText());
-                    this.actionClone.setBeanClass(null);
-                    this.actionClone.setAutowire(null);
-                    this.actionClone.setClassRef(null);
                 } else if (this.beanProperties.getRadioClass()) {
                     this.actionClone.setBean(null);
-                    this.actionClone
-                            .setBeanClass(trimString(this.beanProperties
-                                    .getClassText()));
-                    this.actionClone.setAutowire(trimString(this.beanProperties
-                            .getAutowireText()));
-                    this.actionClone.setClassRef(null);
                 } else if (this.beanProperties.getRadioClassRef()) {
                     this.actionClone.setBean(null);
-                    this.actionClone.setBeanClass(null);
-                    this.actionClone.setAutowire(null);
-                    this.actionClone.setClassRef(this.beanProperties
-                            .getClassRefText());
                 }
             } else {
                 this.actionClone.setBean(null);
-                this.actionClone.setBeanClass(null);
-                this.actionClone.setAutowire(null);
-                this.actionClone.setClassRef(null);
             }
             this.actionClone.setMethod(this.beanProperties.getMethodText());
             ((ICloneableModelElement) this.action)
@@ -184,7 +168,7 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
         item2.setControl(beanProperties.createDialogArea(folder));
 
         properties = new PropertiesComposite(this, item3, getShell(),
-                (IPropertyEnabled) this.actionClone);
+                (IAttributeEnabled) this.actionClone);
         item3.setControl(properties.createDialogArea(folder));
 
         applyDialogFont(parentComposite);

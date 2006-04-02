@@ -47,7 +47,7 @@ import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElemen
 import org.springframework.ide.eclipse.web.flow.core.model.IDecisionState;
 import org.springframework.ide.eclipse.web.flow.core.model.IDescriptionEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IIf;
-import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
 import org.springframework.ide.eclipse.web.flow.ui.editor.model.WebFlowModelLabelProvider;
@@ -108,35 +108,6 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog implements
     protected void buttonPressed(int buttonId) {
         if (buttonId == IDialogConstants.OK_ID) {
             this.decisionStateClone.setId(trimString(getId()));
-            if (this.beanProperties.useBeanReference()) {
-                if (this.beanProperties.getRadioBeanRef()) {
-                    this.decisionStateClone.setBean(this.beanProperties
-                            .getBeanText());
-                    this.decisionStateClone.setBeanClass(null);
-                    this.decisionStateClone.setAutowire(null);
-                    this.decisionStateClone.setClassRef(null);
-                } else if (this.beanProperties.getRadioClass()) {
-                    this.decisionStateClone.setBean(null);
-                    this.decisionStateClone
-                            .setBeanClass(trimString(this.beanProperties
-                                    .getClassText()));
-                    this.decisionStateClone
-                            .setAutowire(trimString(this.beanProperties
-                                    .getAutowireText()));
-                    this.decisionStateClone.setClassRef(null);
-                } else if (this.beanProperties.getRadioClassRef()) {
-                    this.decisionStateClone.setBean(null);
-                    this.decisionStateClone.setBeanClass(null);
-                    this.decisionStateClone.setAutowire(null);
-                    this.decisionStateClone.setClassRef(this.beanProperties
-                            .getClassRefText());
-                }
-            } else {
-                this.decisionStateClone.setBean(null);
-                this.decisionStateClone.setBeanClass(null);
-                this.decisionStateClone.setAutowire(null);
-                this.decisionStateClone.setClassRef(null);
-            }
 
             if (this.decisionStateClone instanceof IDescriptionEnabled) {
                 ((IDescriptionEnabled) this.decisionStateClone)
@@ -290,7 +261,7 @@ public class DecisionStatePropertiesDialog extends TitleAreaDialog implements
         item3.setControl(beanProperties.createDialogArea(folder));
 
         properties = new PropertiesComposite(this, item4, getShell(),
-                (IPropertyEnabled) this.decisionStateClone);
+                (IAttributeEnabled) this.decisionStateClone);
         item4.setControl(properties.createDialogArea(folder));
 
         description = new DescriptionComposite(this, item5, getShell(),

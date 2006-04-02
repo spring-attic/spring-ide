@@ -32,13 +32,13 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.springframework.ide.eclipse.web.flow.core.internal.model.Property;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
-import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttribute;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
 
 public class PropertiesComposite {
 
-    private IPropertyEnabled state;
+    private IAttributeEnabled state;
 
     private Button removeButton;
 
@@ -53,7 +53,7 @@ public class PropertiesComposite {
     private Shell parentShell;
 
     public PropertiesComposite(IDialogValidator validator, TabItem item,
-            Shell parentShell, IPropertyEnabled state) {
+            Shell parentShell, IAttributeEnabled state) {
         this.state = state;
         item.setText("Properties");
         item.setToolTipText("Define element properties");
@@ -127,7 +127,7 @@ public class PropertiesComposite {
 
             // Add a task to the ExampleTaskList and refresh the view
             public void widgetSelected(SelectionEvent e) {
-                IProperty property = new Property(state, "<name>", "<value>");
+                IAttribute property = new Property(state, "<name>", "<value>");
                 PropertyEditorDialog dialog = new PropertyEditorDialog(parentShell, property);
                 dialog.open();
                 configsViewer.refresh(true);
@@ -145,8 +145,8 @@ public class PropertiesComposite {
                 IStructuredSelection selection = (IStructuredSelection) configsViewer
                         .getSelection();
                 if (selection.getFirstElement() != null) {
-                    if (selection.getFirstElement() instanceof IProperty) {
-                        PropertyEditorDialog dialog = new PropertyEditorDialog(parentShell, (IProperty) selection
+                    if (selection.getFirstElement() instanceof IAttribute) {
+                        PropertyEditorDialog dialog = new PropertyEditorDialog(parentShell, (IAttribute) selection
                                 .getFirstElement());
                         dialog.open();
                         configsViewer.refresh(true);
@@ -166,8 +166,8 @@ public class PropertiesComposite {
                 IStructuredSelection selection = (IStructuredSelection) configsViewer
                         .getSelection();
                 if (selection.getFirstElement() != null) {
-                    if (selection.getFirstElement() instanceof IProperty) {
-                        state.removeProperty((IProperty) selection
+                    if (selection.getFirstElement() instanceof IAttribute) {
+                        state.removeProperty((IAttribute) selection
                                 .getFirstElement());
                     }
                 }

@@ -49,7 +49,7 @@ import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.web.flow.core.model.IAction;
 import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
-import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
@@ -118,35 +118,6 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
         if (buttonId == IDialogConstants.OK_ID) {
             this.transitionClone.setOn(trimString(getOn()));
             this.transitionClone.getActions().removeAll(markedForDeletion);
-            if (this.beanProperties.useBeanReference()) {
-                if (this.beanProperties.getRadioBeanRef()) {
-                    this.transitionClone.setBean(this.beanProperties
-                            .getBeanText());
-                    this.transitionClone.setBeanClass(null);
-                    this.transitionClone.setAutowire(null);
-                    this.transitionClone.setClassRef(null);
-                } else if (this.beanProperties.getRadioClass()) {
-                    this.transitionClone.setBean(null);
-                    this.transitionClone
-                            .setBeanClass(trimString(this.beanProperties
-                                    .getClassText()));
-                    this.transitionClone
-                            .setAutowire(trimString(this.beanProperties
-                                    .getAutowireText()));
-                    this.transitionClone.setClassRef(null);
-                } else if (this.beanProperties.getRadioClassRef()) {
-                    this.transitionClone.setBean(null);
-                    this.transitionClone.setBeanClass(null);
-                    this.transitionClone.setAutowire(null);
-                    this.transitionClone.setClassRef(this.beanProperties
-                            .getClassRefText());
-                }
-            } else {
-                this.transitionClone.setBean(null);
-                this.transitionClone.setBeanClass(null);
-                this.transitionClone.setAutowire(null);
-                this.transitionClone.setClassRef(null);
-            }
 
             ((ICloneableModelElement) this.transition)
                     .applyCloneValues((ICloneableModelElement) this.transitionClone);
@@ -324,7 +295,7 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
         item3.setControl(beanProperties.createDialogArea(folder));
 
         properties = new PropertiesComposite(this, item4, getShell(),
-                (IPropertyEnabled) this.transitionClone);
+                (IAttributeEnabled) this.transitionClone);
         item4.setControl(properties.createDialogArea(folder));
 
         applyDialogFont(parentComposite);

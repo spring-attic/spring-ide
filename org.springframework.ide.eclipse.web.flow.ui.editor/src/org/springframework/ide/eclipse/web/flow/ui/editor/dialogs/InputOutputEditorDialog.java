@@ -39,8 +39,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.springframework.ide.eclipse.web.flow.core.model.IInput;
-import org.springframework.ide.eclipse.web.flow.core.model.IOutput;
+import org.springframework.ide.eclipse.web.flow.core.model.IInputMapping;
+import org.springframework.ide.eclipse.web.flow.core.model.IOutputMapping;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
 
 public class InputOutputEditorDialog
@@ -71,9 +71,9 @@ public class InputOutputEditorDialog
 
     private Button okButton;
 
-    private IInput input;
+    private IInputMapping input;
 
-    private IOutput output;
+    private IOutputMapping output;
 
     private boolean isInput;
 
@@ -81,10 +81,10 @@ public class InputOutputEditorDialog
         super(parentShell);
         this.isInput = isInput;
         if (isInput) {
-            this.input = (IInput) state;
+            this.input = (IInputMapping) state;
         }
         else {
-            this.output = (IOutput) state;
+            this.output = (IOutputMapping) state;
         }
     }
 

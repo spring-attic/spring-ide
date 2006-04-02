@@ -40,14 +40,14 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttribute;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
 
 public class PropertyEditorDialog
         extends TitleAreaDialog implements IDialogValidator {
 
-    private IProperty property;
+    private IAttribute property;
 
     private SelectionListener buttonListener = new SelectionAdapter() {
 
@@ -70,7 +70,7 @@ public class PropertyEditorDialog
 
     private Button okButton;
 
-    public PropertyEditorDialog(Shell parentShell, IProperty state) {
+    public PropertyEditorDialog(Shell parentShell, IAttribute state) {
         super(parentShell);
         this.property = state;
     }

@@ -21,15 +21,15 @@ import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.web.flow.core.model.IAction;
 import org.springframework.ide.eclipse.web.flow.core.model.IActionState;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttribute;
 import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
 import org.springframework.ide.eclipse.web.flow.core.model.IDecisionState;
 import org.springframework.ide.eclipse.web.flow.core.model.IEndState;
 import org.springframework.ide.eclipse.web.flow.core.model.IIf;
-import org.springframework.ide.eclipse.web.flow.core.model.IInput;
-import org.springframework.ide.eclipse.web.flow.core.model.IOutput;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
-import org.springframework.ide.eclipse.web.flow.core.model.ISetup;
+import org.springframework.ide.eclipse.web.flow.core.model.IInlineFlowState;
+import org.springframework.ide.eclipse.web.flow.core.model.IInputMapping;
+import org.springframework.ide.eclipse.web.flow.core.model.IOutputMapping;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
 import org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState;
 import org.springframework.ide.eclipse.web.flow.core.model.IViewState;
@@ -56,26 +56,27 @@ public class WebFlowModelLabelProvider extends LabelProvider {
                     .getImage(WebFlowImages.IMG_OBJS_DECISION_STATE);
         } else if (obj instanceof IIf) {
             return WebFlowImages.getImage(WebFlowImages.IMG_OBJS_IF);
-        } else if (obj instanceof IProperty) {
+        } else if (obj instanceof IAttribute) {
             return WebFlowImages.getImage(WebFlowImages.IMG_OBJS_PROPERTIES);
         } else if (obj instanceof IBean) {
             return WebFlowImages.getImage(WebFlowImages.IMG_OBJS_JAVABEAN);
-        } else if (obj instanceof IInput) {
+        } else if (obj instanceof IInputMapping) {
             return WebFlowImages.getImage(WebFlowImages.IMG_OBJS_INPUT);
-        } else if (obj instanceof IOutput) {
+        } else if (obj instanceof IOutputMapping) {
             return WebFlowImages.getImage(WebFlowImages.IMG_OBJS_OUTPUT);
-        } else if (obj instanceof ISetup) {
-            return WebFlowImages.getImage(WebFlowImages.IMG_OBJS_SETUP);
-        }
+        } else if (obj instanceof IInlineFlowState) {
+            return WebFlowImages.getImage(WebFlowImages.IMG_OBJS_SUBFLOW_STATE);
+        }  
+        
         return null;
     }
 
     public String getText(Object element) {
-        return this.getText(element, false, true);
+        return this.getText(element, false, true, true);
     }
 
     public String getText(Object element, boolean showElementType,
-            boolean showBean) {
+            boolean showBean, boolean showAdditionalInfo) {
         StringBuffer buf = new StringBuffer();
         if (element instanceof IState) {
             buf.append(((IState) element).getId());
@@ -84,61 +85,22 @@ public class WebFlowModelLabelProvider extends LabelProvider {
             if (action.getBean() != null) {
                 buf.append("Bean: ");
                 buf.append(action.getBean());
-            } else if (action.getBeanClass() != null) {
-                buf.append("Class: ");
-                buf.append(action.getBeanClass().substring(
-                        action.getBeanClass().lastIndexOf(".") + 1,
-                        action.getBeanClass().length()));
-            } else if (action.getClassRef() != null) {
-                buf.append("ClassRef: ");
-                buf.append(action.getClassRef().substring(
-                        action.getClassRef().lastIndexOf(".") + 1,
-                        action.getClassRef().length()));
             }
             if (action.getMethod() != null) {
                 buf.append(".");
                 buf.append(action.getMethod());
-                buf.append("()");
+                if (action.getMethod().lastIndexOf("(") == -1) {
+                    buf.append("()");
+                }
             }
         } else if (element instanceof IAttributeMapper) {
             IAttributeMapper attributeMapper = (IAttributeMapper) element;
             if (attributeMapper.getBean() != null) {
                 buf.append("Bean: ");
                 buf.append(attributeMapper.getBean());
-            } else if (attributeMapper.getBeanClass() != null) {
-                buf.append("Class: ");
-                buf.append(attributeMapper.getBeanClass().substring(
-                        attributeMapper.getBeanClass().lastIndexOf(".") + 1,
-                        attributeMapper.getBeanClass().length()));
-            } else if (attributeMapper.getClassRef() != null) {
-                buf.append("ClassRef: ");
-                buf.append(attributeMapper.getClassRef().substring(
-                        attributeMapper.getClassRef().lastIndexOf(".") + 1,
-                        attributeMapper.getClassRef().length()));
             }
-        } else if (element instanceof ISetup) {
-            ISetup setup = (ISetup) element;
-            if (setup.getBean() != null) {
-                buf.append("Bean: ");
-                buf.append(setup.getBean());
-            } else if (setup.getBeanClass() != null) {
-                buf.append("Class: ");
-                buf.append(setup.getBeanClass().substring(
-                        setup.getBeanClass().lastIndexOf(".") + 1,
-                        setup.getBeanClass().length()));
-            } else if (setup.getClassRef() != null) {
-                buf.append("ClassRef: ");
-                buf.append(setup.getClassRef().substring(
-                        setup.getClassRef().lastIndexOf(".") + 1,
-                        setup.getClassRef().length()));
-            }
-            if (setup.getMethod() != null) {
-                buf.append(".");
-                buf.append(setup.getMethod());
-                buf.append("()");
-            }
-        } else if (element instanceof IProperty) {
-            IProperty property = (IProperty) element;
+        } else if (element instanceof IAttribute) {
+            IAttribute property = (IAttribute) element;
             buf.append(property.getName());
             buf.append("=");
             buf.append(property.getValue());
@@ -157,41 +119,50 @@ public class WebFlowModelLabelProvider extends LabelProvider {
                 buf.append(bean.getClassName());
                 buf.append(']');
             }
-        } else if (element instanceof IInput) {
-            IInput input = (IInput) element;
+        } else if (element instanceof IInputMapping) {
+            IInputMapping input = (IInputMapping) element;
             buf.append(input.getName());
             buf.append("=");
             buf.append(input.getValue());
-        } else if (element instanceof IOutput) {
-            IOutput input = (IOutput) element;
+        } else if (element instanceof IOutputMapping) {
+            IOutputMapping input = (IOutputMapping) element;
             buf.append(input.getName());
             buf.append("=");
             buf.append(input.getValue());
         } else {
             buf.append(super.getText(element));
         }
-
+        if (showAdditionalInfo) {
+            if (element instanceof IViewState) {
+                IViewState state = (IViewState) element;
+                if (state.getView() != null) {
+                    buf.append("\nView: " + state.getView());
+                }
+            }
+            if (element instanceof ISubFlowState) {
+                ISubFlowState state = (ISubFlowState) element;
+                if (state.getFlow() != null) {
+                    buf.append("\nFlow: " + state.getFlow());
+                }
+            }
+            if (element instanceof IEndState) {
+                IEndState state = (IEndState) element;
+                if (state.getView() != null) {
+                    buf.append("\nView: " + state.getView());
+                }
+            }
+        }
+        
         if (showBean
                 && (element instanceof IBeanReference && !(element instanceof IAction))) {
             IBeanReference action = (IBeanReference) element;
-            if (action.getBean() != null || action.getBeanClass() != null
-                    || action.getClassRef() != null) {
+            if (action.getBean() != null) {
                 buf.append("\n");
 
                 if (action.getBean() != null) {
                     buf.append("Bean: ");
                     buf.append(action.getBean());
-                } else if (action.getBeanClass() != null) {
-                    buf.append("Class: ");
-                    buf.append(action.getBeanClass().substring(
-                            action.getBeanClass().lastIndexOf(".") + 1,
-                            action.getBeanClass().length()));
-                } else if (action.getClassRef() != null) {
-                    buf.append("ClassRef: ");
-                    buf.append(action.getClassRef().substring(
-                            action.getClassRef().lastIndexOf(".") + 1,
-                            action.getClassRef().length()));
-                }
+                } 
                 if (action.getMethod() != null) {
                     buf.append(".");
                     buf.append(action.getMethod());
@@ -214,19 +185,19 @@ public class WebFlowModelLabelProvider extends LabelProvider {
                 buf.append("Action");
             } else if (element instanceof IAttributeMapper) {
                 buf.append("Attribute Mapper");
-            } else if (element instanceof IProperty) {
+            } else if (element instanceof IAttribute) {
                 buf.append("Property");
             } else if (element instanceof IIf) {
                 buf.append("If");
             } else if (element instanceof IDecisionState) {
                 buf.append("Decision State");
-            } else if (element instanceof IInput) {
+            } else if (element instanceof IInputMapping) {
                 buf.append("Input");
-            } else if (element instanceof IOutput) {
+            } else if (element instanceof IOutputMapping) {
                 buf.append("Output");
-            } else if (element instanceof ISetup) {
-                buf.append("Setup");
-            }
+            } else if (element instanceof IInlineFlowState) {
+                buf.append("Inline Flow");
+            } 
             buf.append("]");
         }
 
@@ -241,28 +212,12 @@ public class WebFlowModelLabelProvider extends LabelProvider {
             IAction action = (IAction) element;
             if (action.getBean() != null) {
                 buf.append(action.getBean());
-            } else if (action.getBeanClass() != null) {
-                buf.append(action.getBeanClass().substring(
-                        action.getBeanClass().lastIndexOf(".") + 1,
-                        action.getBeanClass().length()));
-            } else if (action.getClassRef() != null) {
-                buf.append(action.getClassRef().substring(
-                        action.getClassRef().lastIndexOf(".") + 1,
-                        action.getClassRef().length()));
-            }
+            } 
         } else if (element instanceof IAttributeMapper) {
             IAttributeMapper attributeMapper = (IAttributeMapper) element;
             if (attributeMapper.getBean() != null) {
                 buf.append(attributeMapper.getBean());
-            } else if (attributeMapper.getBeanClass() != null) {
-                buf.append(attributeMapper.getBeanClass().substring(
-                        attributeMapper.getBeanClass().lastIndexOf(".") + 1,
-                        attributeMapper.getBeanClass().length()));
-            } else if (attributeMapper.getClassRef() != null) {
-                buf.append(attributeMapper.getClassRef().substring(
-                        attributeMapper.getClassRef().lastIndexOf(".") + 1,
-                        attributeMapper.getClassRef().length()));
-            }
+            } 
         } else {
             buf.append(super.getText(element));
         }

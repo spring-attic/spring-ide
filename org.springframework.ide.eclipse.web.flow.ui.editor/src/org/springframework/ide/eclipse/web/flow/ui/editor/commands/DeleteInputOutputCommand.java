@@ -18,8 +18,8 @@ package org.springframework.ide.eclipse.web.flow.ui.editor.commands;
 
 import org.eclipse.gef.commands.Command;
 import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
-import org.springframework.ide.eclipse.web.flow.core.model.IInput;
-import org.springframework.ide.eclipse.web.flow.core.model.IOutput;
+import org.springframework.ide.eclipse.web.flow.core.model.IInputMapping;
+import org.springframework.ide.eclipse.web.flow.core.model.IOutputMapping;
 
 public class DeleteInputOutputCommand extends Command {
 
@@ -32,11 +32,11 @@ public class DeleteInputOutputCommand extends Command {
     }
 
     protected void primExecute() {
-        if (child instanceof IInput) {
-            parent.removeInput((IInput) child);
+        if (child instanceof IInputMapping) {
+            parent.removeInput((IInputMapping) child);
         }
-        else if (child instanceof IOutput) {
-            parent.removeOutput((IOutput) child);
+        else if (child instanceof IOutputMapping) {
+            parent.removeOutput((IOutputMapping) child);
         } 
     }
 
@@ -53,11 +53,11 @@ public class DeleteInputOutputCommand extends Command {
     }
 
     public void undo() {
-        if (child instanceof IInput) {
-            parent.addInput((IInput) child);
+        if (child instanceof IInputMapping) {
+            parent.addInput((IInputMapping) child);
         }
-        else if (child instanceof IOutput) {
-            parent.addOutput((IOutput) child);
+        else if (child instanceof IOutputMapping) {
+            parent.addOutput((IOutputMapping) child);
         } 
     }
 }

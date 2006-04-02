@@ -39,14 +39,12 @@ import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IDescriptionEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IEndState;
-import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
 
 public class EndStatePropertiesDialog extends TitleAreaDialog implements
         IDialogValidator {
-
-    private Button addButton;
 
     private TableViewer configsViewer2;
 
@@ -83,35 +81,6 @@ public class EndStatePropertiesDialog extends TitleAreaDialog implements
         if (buttonId == IDialogConstants.OK_ID) {
             this.endStateClone.setId(trimString(getId()));
             this.endStateClone.setView(trimString(getView()));
-            if (this.beanProperties.useBeanReference()) {
-                if (this.beanProperties.getRadioBeanRef()) {
-                    this.endStateClone.setBean(this.beanProperties
-                            .getBeanText());
-                    this.endStateClone.setBeanClass(null);
-                    this.endStateClone.setAutowire(null);
-                    this.endStateClone.setClassRef(null);
-                } else if (this.beanProperties.getRadioClass()) {
-                    this.endStateClone.setBean(null);
-                    this.endStateClone
-                            .setBeanClass(trimString(this.beanProperties
-                                    .getClassText()));
-                    this.endStateClone
-                            .setAutowire(trimString(this.beanProperties
-                                    .getAutowireText()));
-                    this.endStateClone.setClassRef(null);
-                } else if (this.beanProperties.getRadioClassRef()) {
-                    this.endStateClone.setBean(null);
-                    this.endStateClone.setBeanClass(null);
-                    this.endStateClone.setAutowire(null);
-                    this.endStateClone.setClassRef(this.beanProperties
-                            .getClassRefText());
-                }
-            } else {
-                this.endStateClone.setBean(null);
-                this.endStateClone.setBeanClass(null);
-                this.endStateClone.setAutowire(null);
-                this.endStateClone.setClassRef(null);
-            }
             
             if (this.endStateClone instanceof IDescriptionEnabled) {
                 ((IDescriptionEnabled) this.endStateClone)
@@ -215,7 +184,7 @@ public class EndStatePropertiesDialog extends TitleAreaDialog implements
         item2.setControl(beanProperties.createDialogArea(folder));
 
         properties = new PropertiesComposite(this, item3, getShell(),
-                (IPropertyEnabled) this.endStateClone);
+                (IAttributeEnabled) this.endStateClone);
         item3.setControl(properties.createDialogArea(folder));
         
         description = new DescriptionComposite(this, item4, getShell(),

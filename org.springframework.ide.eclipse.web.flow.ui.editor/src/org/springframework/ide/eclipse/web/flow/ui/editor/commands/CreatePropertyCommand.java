@@ -17,14 +17,16 @@
 package org.springframework.ide.eclipse.web.flow.ui.editor.commands;
 
 import org.eclipse.gef.commands.Command;
+import org.eclipse.jdt.core.util.IAttributeNamesConstants;
 import org.springframework.ide.eclipse.web.flow.core.model.IAction;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttribute;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 
 public class CreatePropertyCommand extends Command {
 
-    private IProperty child;
+    private IAttribute child;
 
     private int index = -1;
 
@@ -32,21 +34,15 @@ public class CreatePropertyCommand extends Command {
 
     public void execute() {
         child.setElementParent(parent);
-        if (parent instanceof IState) {
+        if (parent instanceof IAttributeEnabled) {
             if (index >= 0)
-                ((IState) parent).addProperty(child, index);
+                ((IAttributeEnabled) parent).addProperty(child, index);
             else
-                ((IState) parent).addProperty(child);
-        }
-        else if (parent instanceof IAction) {
-            if (index >= 0)
-                ((IAction) parent).addProperty(child, index);
-            else
-                ((IAction) parent).addProperty(child);
+                ((IAttributeEnabled) parent).addProperty(child);
         }
     }
 
-    public void setChild(IProperty action) {
+    public void setChild(IAttribute action) {
         child = action;
     }
 
@@ -59,11 +55,8 @@ public class CreatePropertyCommand extends Command {
     }
 
     public void undo() {
-        if (parent instanceof IState) {
+        if (parent instanceof IAttributeEnabled) {
             ((IState) parent).removeProperty(child);
-        }
-        else if (parent instanceof IAction) {
-            ((IAction) parent).removeProperty(child);
         }
     }
 }

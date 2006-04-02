@@ -16,29 +16,41 @@
 
 package org.springframework.ide.eclipse.web.flow.ui.editor.parts;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.draw2d.geometry.Dimension;
-import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.graph.CompoundDirectedGraph;
 import org.eclipse.draw2d.graph.Edge;
 import org.eclipse.draw2d.graph.Node;
 import org.springframework.ide.eclipse.web.flow.core.model.IAction;
-import org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState;
+import org.springframework.ide.eclipse.web.flow.core.model.IInlineFlowState;
+import org.springframework.ide.eclipse.web.flow.ui.editor.figures.CompoundStateFigure;
 
-public class SubFlowStatePart extends ChildrenStatePart {
+public class InlineFlowStatePart extends ChildrenStatePart {
 
     protected void applyChildrenResults(CompoundDirectedGraph graph, Map map) {
+        CompoundStateFigure figure = (CompoundStateFigure) getFigure();
+        int headerY = figure.getHeader().getBounds().getBottom().y + 7;
+        
+        int diff = -1;
         for (int i = 0; i < getChildren().size(); i++) {
             AbstractStatePart part = (AbstractStatePart) getChildren().get(i);
-            //part.applyGraphResults(graph, map);
-            Node n = (Node) map.get(part);
+            part.applyGraphResults(graph, map);
+            
+            Point p = part.getFigure().getBounds().getLocation();
+            
+            if (diff == -1) {
+                diff = p.y - headerY;
+            }
+            p.y = p.y - diff;
+            part.getFigure().setLocation(p);
+            
+            /*Node n = (Node) map.get(part);
             Dimension dim = part.getFigure().getPreferredSize();
             part.getFigure().setBounds(
-                    new Rectangle(n.x, n.y, n.width, dim.height));
+                    new Rectangle(n.x, n.y, n.width, dim.height));*/
         }
     }
 
@@ -69,10 +81,8 @@ public class SubFlowStatePart extends ChildrenStatePart {
     }
 
     protected List getModelChildren() {
-        if (getModel() instanceof ISubFlowState) {
-            List child = new ArrayList();
-            if (((ISubFlowState) getModel()).getAttributeMapper() != null)
-                child.add(((ISubFlowState) getModel()).getAttributeMapper());
+        if (getModel() instanceof IInlineFlowState) {
+            List child = ((IInlineFlowState) getModel()).getWebFlowState().getStates();
             return child;
         }
         else {

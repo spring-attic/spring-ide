@@ -17,16 +17,16 @@
 package org.springframework.ide.eclipse.web.flow.ui.editor.commands;
 
 import org.eclipse.gef.commands.Command;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
-import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttribute;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttributeEnabled;
 
 public class DeleteStatePropertyCommand extends Command {
 
-    private IProperty child;
+    private IAttribute child;
 
     private int index = -1;
 
-    private IPropertyEnabled parent;
+    private IAttributeEnabled parent;
 
     public void execute() {
         primExecute();
@@ -41,11 +41,11 @@ public class DeleteStatePropertyCommand extends Command {
         primExecute();
     }
 
-    public void setChild(IProperty a) {
+    public void setChild(IAttribute a) {
         child = a;
     }
 
-    public void setParent(IPropertyEnabled sa) {
+    public void setParent(IAttributeEnabled sa) {
         parent = sa;
     }
 

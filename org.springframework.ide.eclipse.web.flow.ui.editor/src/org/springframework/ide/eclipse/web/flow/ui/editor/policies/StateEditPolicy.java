@@ -22,16 +22,14 @@ import org.eclipse.gef.editpolicies.ComponentEditPolicy;
 import org.eclipse.gef.requests.GroupRequest;
 import org.springframework.ide.eclipse.web.flow.core.model.IAction;
 import org.springframework.ide.eclipse.web.flow.core.model.IActionState;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttribute;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IDecisionState;
 import org.springframework.ide.eclipse.web.flow.core.model.IIf;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
-import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
-import org.springframework.ide.eclipse.web.flow.core.model.ISetup;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
 import org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState;
-import org.springframework.ide.eclipse.web.flow.core.model.IViewState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
 import org.springframework.ide.eclipse.web.flow.ui.editor.actions.EditPropertiesAction;
 import org.springframework.ide.eclipse.web.flow.ui.editor.actions.SetAsStartStateAction;
@@ -40,19 +38,18 @@ import org.springframework.ide.eclipse.web.flow.ui.editor.commands.DeleteAttribu
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.DeleteCommand;
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.DeleteIfCommand;
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.DeleteInputOutputCommand;
-import org.springframework.ide.eclipse.web.flow.ui.editor.commands.DeleteSetupCommand;
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.DeleteStatePropertyCommand;
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.EditPropertiesCommand;
 
 public class StateEditPolicy extends ComponentEditPolicy {
 
     protected Command createDeleteCommand(GroupRequest deleteRequest) {
-        if (getHost().getModel() instanceof IProperty
-                && getHost().getParent().getModel() instanceof IPropertyEnabled) {
-            IPropertyEnabled parent = (IPropertyEnabled) (getHost().getParent().getModel());
+        if (getHost().getModel() instanceof IAttribute
+                && getHost().getParent().getModel() instanceof IAttributeEnabled) {
+            IAttributeEnabled parent = (IAttributeEnabled) (getHost().getParent().getModel());
             DeleteStatePropertyCommand deleteCmd = new DeleteStatePropertyCommand();
             deleteCmd.setParent(parent);
-            deleteCmd.setChild((IProperty) (getHost().getModel()));
+            deleteCmd.setChild((IAttribute) (getHost().getModel()));
             return deleteCmd;
         }
         else if (getHost().getParent().getModel() instanceof ISubFlowState) {
@@ -69,14 +66,6 @@ public class StateEditPolicy extends ComponentEditPolicy {
             DeleteInputOutputCommand deleteCmd = new DeleteInputOutputCommand();
             deleteCmd.setParent(parent);
             deleteCmd.setChild(getHost().getModel());
-            return deleteCmd;
-        }
-        else if (getHost().getParent().getModel() instanceof IViewState) {
-            IViewState parent = (IViewState) (getHost().getParent()
-                    .getModel());
-            DeleteSetupCommand deleteCmd = new DeleteSetupCommand();
-            deleteCmd.setParent(parent);
-            deleteCmd.setChild((ISetup) getHost().getModel());
             return deleteCmd;
         }
         else if (getHost().getParent().getModel() instanceof IWebFlowState) {

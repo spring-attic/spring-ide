@@ -17,8 +17,8 @@ package org.springframework.ide.eclipse.web.flow.ui.editor.commands;
 
 import org.eclipse.gef.commands.Command;
 import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
-import org.springframework.ide.eclipse.web.flow.core.model.IInput;
-import org.springframework.ide.eclipse.web.flow.core.model.IOutput;
+import org.springframework.ide.eclipse.web.flow.core.model.IInputMapping;
+import org.springframework.ide.eclipse.web.flow.core.model.IOutputMapping;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 
 public class CreateInputOutputCommand extends Command {
@@ -33,16 +33,16 @@ public class CreateInputOutputCommand extends Command {
 
     public void execute() {
         ((IWebFlowModelElement) child).setElementParent(parent);
-        if (child instanceof IInput) {
+        if (child instanceof IInputMapping) {
             if (index > 0)
-                parent.addInput((IInput) child, index);
+                parent.addInput((IInputMapping) child, index);
             else
-                parent.addInput((IInput) child);
-        } else if (child instanceof IOutput) {
+                parent.addInput((IInputMapping) child);
+        } else if (child instanceof IOutputMapping) {
             if (index > 0)
-                parent.addOutput((IOutput) child, index);
+                parent.addOutput((IOutputMapping) child, index);
             else
-                parent.addOutput((IOutput) child);
+                parent.addOutput((IOutputMapping) child);
         }
     }
 
@@ -63,10 +63,10 @@ public class CreateInputOutputCommand extends Command {
     }
 
     public void undo() {
-        if (child instanceof IInput) {
-            parent.removeInput((IInput) child);
-        } else if (child instanceof IOutput) {
-            parent.removeOutput((IOutput) child);
+        if (child instanceof IInputMapping) {
+            parent.removeInput((IInputMapping) child);
+        } else if (child instanceof IOutputMapping) {
+            parent.removeOutput((IOutputMapping) child);
         }
     }
 }

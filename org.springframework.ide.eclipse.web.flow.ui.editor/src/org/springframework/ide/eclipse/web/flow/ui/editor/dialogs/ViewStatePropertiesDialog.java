@@ -33,10 +33,8 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -64,13 +62,11 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.web.flow.core.WebFlowCoreUtils;
 import org.springframework.ide.eclipse.web.flow.core.internal.model.Property;
-import org.springframework.ide.eclipse.web.flow.core.internal.model.Setup;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttribute;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IDescriptionEnabled;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
-import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
-import org.springframework.ide.eclipse.web.flow.core.model.ISetup;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
 import org.springframework.ide.eclipse.web.flow.core.model.IViewState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
@@ -82,28 +78,6 @@ import org.springframework.ide.eclipse.web.flow.ui.editor.model.WebFlowModelLabe
 
 public class ViewStatePropertiesDialog
         extends TitleAreaDialog implements IDialogValidator {
-
-    private class SetupContentProvider implements IStructuredContentProvider {
-
-        private IViewState project;
-
-        public SetupContentProvider(IViewState project) {
-            this.project = project;
-        }
-
-        public void dispose() {
-        }
-
-        public Object[] getElements(Object obj) {
-            if (project.getSetup() != null)
-                return new Object[] { project.getSetup() };
-            else
-                return null;
-        }
-
-        public void inputChanged(Viewer arg0, Object arg1, Object arg2) {
-        }
-    }
 
     private static int RADIOBEANREF_CHOICE = 0;
 
@@ -186,8 +160,6 @@ public class ViewStatePropertiesDialog
 
     private Button setupButton;
 
-    private ISetup setupClone;
-
     private IViewState viewState;
 
     private IViewState viewStateClone;
@@ -200,10 +172,6 @@ public class ViewStatePropertiesDialog
         this.viewState = state;
         this.parent = parent;
         this.viewStateClone = (IViewState) ((ICloneableModelElement) state).cloneModelElement();
-        this.setupClone = this.viewStateClone.getSetup();
-        if (this.setupClone == null) {
-            this.setupClone = new Setup();
-        }
         this.parentShell = parentShell;
         WebFlowEditorInput input = WebFlowUtils.getActiveFlowEditorInput();
         beansConfig = input.getBeansConfigSet();
@@ -213,65 +181,7 @@ public class ViewStatePropertiesDialog
         if (buttonId == IDialogConstants.OK_ID) {
             this.viewStateClone.setId(trimString(getId()));
             this.viewStateClone.setView(trimString(getView()));
-            if (this.beanProperties.useBeanReference()) {
-                if (this.beanProperties.getRadioBeanRef()) {
-                    this.viewStateClone.setBean(this.beanProperties.getBeanText());
-                    this.viewStateClone.setBeanClass(null);
-                    this.viewStateClone.setAutowire(null);
-                    this.viewStateClone.setClassRef(null);
-                }
-                else if (this.beanProperties.getRadioClass()) {
-                    this.viewStateClone.setBean(null);
-                    this.viewStateClone
-                            .setBeanClass(trimString(this.beanProperties.getClassText()));
-                    this.viewStateClone.setAutowire(trimString(this.beanProperties
-                            .getAutowireText()));
-                    this.viewStateClone.setClassRef(null);
-                }
-                else if (this.beanProperties.getRadioClassRef()) {
-                    this.viewStateClone.setBean(null);
-                    this.viewStateClone.setBeanClass(null);
-                    this.viewStateClone.setAutowire(null);
-                    this.viewStateClone.setClassRef(this.beanProperties.getClassRefText());
-                }
-            }
-            else {
-                this.viewStateClone.setBean(null);
-                this.viewStateClone.setBeanClass(null);
-                this.viewStateClone.setAutowire(null);
-                this.viewStateClone.setClassRef(null);
-            }
-            if (this.setupButton.getSelection()) {
-                if (this.radioBeanRef.getSelection()) {
-                    this.setupClone.setBean(this.beanText.getText());
-                    this.setupClone.setBeanClass(null);
-                    this.setupClone.setAutowire(null);
-                    this.setupClone.setClassRef(null);
-                }
-                else if (this.radioClass.getSelection()) {
-                    this.setupClone.setBean(null);
-                    this.setupClone.setBeanClass(trimString(this.classText.getText()));
-                    this.setupClone.setAutowire(trimString(this.autowireText.getText()));
-                    this.setupClone.setClassRef(null);
-                }
-                else if (this.radioClassRef.getSelection()) {
-                    this.setupClone.setBean(null);
-                    this.setupClone.setBeanClass(null);
-                    this.setupClone.setAutowire(null);
-                    this.setupClone.setClassRef(this.classRefText.getText());
-                }
-                this.setupClone.setMethod(trimString(this.methodText.getText()));
-                this.setupClone.setOnErrorId(trimString(this.onerrorText.getText()));
-                if (this.viewStateClone.getSetup() == null) {
-                    this.viewStateClone.setSetup(setupClone);
-                }
-            }
-            else {
-                if (this.viewStateClone.getSetup() != null) {
-                    this.viewStateClone.removeSetup();
-                }
-            }
-
+            
             if (this.viewStateClone instanceof IDescriptionEnabled) {
                 ((IDescriptionEnabled) this.viewStateClone).setDescription(description
                         .getDescription());
@@ -380,9 +290,6 @@ public class ViewStatePropertiesDialog
 
         // Create the radio button for no attribute mapper.
         setupButton = new Button(groupActionType, SWT.CHECK);
-        if (this.viewState != null && this.viewState.getSetup() != null) {
-            setupButton.setSelection(true);
-        }
         setupButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         setupButton.setText("Use Setup");
         setupButton.addSelectionListener(new SelectionAdapter() {
@@ -407,9 +314,6 @@ public class ViewStatePropertiesDialog
         onerrorLabel.setText("On Error");
 
         onerrorText = new Text(methodComposite, SWT.SINGLE | SWT.BORDER);
-        if (this.setupClone != null && this.setupClone.getOnErrorId() != null) {
-            onerrorText.setText(this.setupClone.getOnErrorId());
-        }
         onerrorText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         onerrorText.addModifyListener(new ModifyListener() {
 
@@ -431,11 +335,6 @@ public class ViewStatePropertiesDialog
 
         methodText = new Text(methodComposite, SWT.SINGLE | SWT.BORDER);
 
-        if (this.viewState != null && this.viewState.getSetup() != null
-                && this.viewState.getSetup().getMethod() != null) {
-            methodText.setText(this.viewState.getSetup().getMethod());
-        }
-
         methodText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         methodText.addModifyListener(new ModifyListener() {
 
@@ -446,10 +345,6 @@ public class ViewStatePropertiesDialog
 
         // // Create the radio button for no attribute mapper.
         radioBeanRef = new Button(groupActionType, SWT.RADIO);
-        if (this.viewState != null && this.viewState.getSetup() != null
-                && this.viewState.getSetup().getBean() != null) {
-            radioBeanRef.setSelection(true);
-        }
         radioBeanRef.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         radioBeanRef.setText("Locate setup by bean reference");
         radioBeanRef.addSelectionListener(new SelectionAdapter() {
@@ -476,10 +371,6 @@ public class ViewStatePropertiesDialog
 
         // Add the text box for action classname.
         beanText = new Text(inset1, SWT.SINGLE | SWT.BORDER);
-        if (this.viewState != null && this.viewState.getSetup() != null
-                && this.viewState.getSetup().getBean() != null) {
-            beanText.setText(this.viewState.getSetup().getBean());
-        }
         beanText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         beanText.addModifyListener(new ModifyListener() {
             public void modifyText(ModifyEvent e) {
@@ -492,10 +383,6 @@ public class ViewStatePropertiesDialog
         browseBeanButton.addSelectionListener(buttonListener);
 
         radioClassRef = new Button(groupActionType, SWT.RADIO);
-        if (this.viewState != null && this.viewState.getSetup() != null
-                && this.viewState.getSetup().getClassRef() != null) {
-            radioClassRef.setSelection(true);
-        }
         radioClassRef.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         radioClassRef.setText("Locate setup by class reference");
         radioClassRef.addSelectionListener(new SelectionAdapter() {
@@ -523,10 +410,6 @@ public class ViewStatePropertiesDialog
 
         // Add the text box for action classname.
         classRefText = new Text(inset3, SWT.SINGLE | SWT.BORDER);
-        if (this.viewState != null && this.viewState.getSetup() != null
-                && this.viewState.getSetup().getClassRef() != null) {
-            classRefText.setText(this.viewState.getSetup().getClassRef());
-        }
         classRefText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         classRefText.addModifyListener(new ModifyListener() {
             public void modifyText(ModifyEvent e) {
@@ -540,10 +423,6 @@ public class ViewStatePropertiesDialog
         browseClassRefButton.addSelectionListener(buttonListener);
 
         radioClass = new Button(groupActionType, SWT.RADIO);
-        if (this.viewState != null && this.viewState.getSetup() != null
-                && this.viewState.getSetup().getBeanClass() != null) {
-            radioClass.setSelection(true);
-        }
 
         radioClass.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         radioClass.setText("Locate setup by class");
@@ -572,10 +451,6 @@ public class ViewStatePropertiesDialog
 
         // Add the text box for action classname.
         classText = new Text(inset2, SWT.SINGLE | SWT.BORDER);
-        if (this.viewState != null && this.viewState.getSetup() != null
-                && this.viewState.getSetup().getBeanClass() != null) {
-            classText.setText(this.viewState.getSetup().getBeanClass());
-        }
         classText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         classText.addModifyListener(new ModifyListener() {
             public void modifyText(ModifyEvent e) {
@@ -601,10 +476,6 @@ public class ViewStatePropertiesDialog
         autowireText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         autowireText.setItems(new String[] { "no", "byName", "byType", "constructor", "autodetect",
                 "default" });
-        if (this.viewState != null && this.viewState.getSetup() != null
-                && this.viewState.getSetup().getAutowire() != null) {
-            autowireText.setText(this.viewState.getSetup().getAutowire());
-        }
         autowireText.addModifyListener(new ModifyListener() {
             public void modifyText(ModifyEvent e) {
                 validateInput();
@@ -647,11 +518,9 @@ public class ViewStatePropertiesDialog
         configsViewer = new TableViewer(configsTable);
         String[] columnNames = new String[] { "Name", "Value", "Type" };
         configsViewer.setColumnProperties(columnNames);
-        configsViewer.setContentProvider(new PropertiesContentProvider(setupClone, configsViewer));
 
         configsViewer.setLabelProvider(new ModelTableLabelProvider());
         configsViewer.setCellModifier(new TableCellModifier());
-        configsViewer.setInput(this.setupClone);
         configsTable.addSelectionListener(new SelectionAdapter() {
 
             public void widgetSelected(SelectionEvent e) {
@@ -669,16 +538,6 @@ public class ViewStatePropertiesDialog
         GridData data1 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
         data1.widthHint = 40;
         addButton.setLayoutData(data1);
-        addButton.addSelectionListener(new SelectionAdapter() {
-
-            // Add a task to the ExampleTaskList and refresh the view
-            public void widgetSelected(SelectionEvent e) {
-                IProperty property = new Property(setupClone, "<name>", "<value>");
-                PropertyEditorDialog dialog = new PropertyEditorDialog(parentShell, property);
-                dialog.open();
-                configsViewer.refresh(true);
-            }
-        });
         editButton = new Button(buttonArea, SWT.PUSH);
         editButton.setText("Edit");
         data1 = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -691,9 +550,9 @@ public class ViewStatePropertiesDialog
                 IStructuredSelection selection = (IStructuredSelection) configsViewer
                         .getSelection();
                 if (selection.getFirstElement() != null) {
-                    if (selection.getFirstElement() instanceof IProperty) {
+                    if (selection.getFirstElement() instanceof IAttribute) {
                         PropertyEditorDialog dialog = new PropertyEditorDialog(parentShell,
-                                (IProperty) selection.getFirstElement());
+                                (IAttribute) selection.getFirstElement());
                         dialog.open();
                         configsViewer.refresh(true);
                     }
@@ -712,8 +571,7 @@ public class ViewStatePropertiesDialog
                 IStructuredSelection selection = (IStructuredSelection) configsViewer
                         .getSelection();
                 if (selection.getFirstElement() != null) {
-                    if (selection.getFirstElement() instanceof IProperty) {
-                        setupClone.removeProperty((IProperty) selection.getFirstElement());
+                    if (selection.getFirstElement() instanceof IAttribute) {
                     }
                 }
             }
@@ -728,7 +586,7 @@ public class ViewStatePropertiesDialog
         item2.setControl(beanProperties.createDialogArea(folder));
 
         properties = new PropertiesComposite(this, item3, getShell(),
-                (IPropertyEnabled) this.viewStateClone);
+                (IAttributeEnabled) this.viewStateClone);
         item3.setControl(properties.createDialogArea(folder));
 
         description = new DescriptionComposite(this, item5, getShell(),
@@ -1003,17 +861,6 @@ public class ViewStatePropertiesDialog
             this.onerrorLabel.setEnabled(true);
             this.browseOnerrorButton.setEnabled(true);
 
-            if (this.viewState.getSetup() != null) {
-                if (this.viewState.getSetup().getBean() != null) {
-                    this.setSetupChoice(RADIOBEANREF_CHOICE);
-                }
-                else if (this.viewState.getSetup().getBeanClass() != null) {
-                    this.setSetupChoice(RADIOCLASS_CHOICE);
-                }
-                else if (this.viewState.getSetup().getClassRef() != null) {
-                    this.setSetupChoice(RADIOCLASSREF_CHOICE);
-                }
-            }
         }
     }
 

@@ -62,8 +62,7 @@ public class OpenBeansViewAction extends EditorPartAction {
             if (beansConfig != null) {
                 if (flowModelElement instanceof IBeanReference) {
                     IBeanReference action = (IBeanReference) flowModelElement;
-                    if (action.getBean() != null
-                            || action.getBeanClass() != null) {
+                    if (action.getBean() != null) {
                         return true;
                     }
                 } 
@@ -81,13 +80,7 @@ public class OpenBeansViewAction extends EditorPartAction {
             IBeanReference action = (IBeanReference) flowModelElement;
             if (action.getBean() != null) {
                 bean = beansConfig.getBean(action.getBean());
-            } else if (action.getBeanClass() != null) {
-                Collection beans = beansConfig.getBeans(action.getBeanClass());
-                if (beans != null && beans.size() > 0) {
-                    bean = (IBean) beans.toArray()[0];
-                }
-            }
-
+            } 
         } 
         if (bean != null && bean instanceof Bean) {
             IFile file = (IFile) bean.getElementResource();

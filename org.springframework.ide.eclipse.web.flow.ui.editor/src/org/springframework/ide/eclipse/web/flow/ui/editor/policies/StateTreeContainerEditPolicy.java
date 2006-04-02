@@ -27,16 +27,14 @@ import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.requests.CreateRequest;
 import org.springframework.ide.eclipse.web.flow.core.model.IAction;
 import org.springframework.ide.eclipse.web.flow.core.model.IActionState;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttribute;
 import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.web.flow.core.model.IDecisionState;
 import org.springframework.ide.eclipse.web.flow.core.model.IIf;
-import org.springframework.ide.eclipse.web.flow.core.model.IInput;
-import org.springframework.ide.eclipse.web.flow.core.model.IOutput;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
-import org.springframework.ide.eclipse.web.flow.core.model.ISetup;
+import org.springframework.ide.eclipse.web.flow.core.model.IInputMapping;
+import org.springframework.ide.eclipse.web.flow.core.model.IOutputMapping;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
 import org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState;
-import org.springframework.ide.eclipse.web.flow.core.model.IViewState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.CreateActionCommand;
@@ -44,14 +42,11 @@ import org.springframework.ide.eclipse.web.flow.ui.editor.commands.CreateAttribu
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.CreateIfCommand;
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.CreateInputOutputCommand;
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.CreatePropertyCommand;
-import org.springframework.ide.eclipse.web.flow.ui.editor.commands.CreateSetupCommand;
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.DeleteActionCommand;
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.DeleteActionPropertyCommand;
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.DeleteAttributeMapperCommand;
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.DeleteIfCommand;
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.DeleteInputOutputCommand;
-import org.springframework.ide.eclipse.web.flow.ui.editor.commands.DeleteSetupCommand;
-import org.springframework.ide.eclipse.web.flow.ui.editor.commands.DeleteSetupPropertyCommand;
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.DeleteStatePropertyCommand;
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.ReorderIfCommand;
 import org.springframework.ide.eclipse.web.flow.ui.editor.commands.ReorderStateCommand;
@@ -86,15 +81,6 @@ public class StateTreeContainerEditPolicy extends TreeContainerEditPolicy {
         return cmd;
     }
     
-    protected Command createCreateSetupCommand(ISetup child) {
-        CreateSetupCommand cmd = new CreateSetupCommand();
-        cmd.setParent((IViewState) getHost().getModel());
-        cmd.setChild(child);
-        cmd.setMove(true);
-        
-        return cmd;
-    }
-    
     protected Command createCreateInputOutputCommand(Object child) {
         CreateInputOutputCommand cmd = new CreateInputOutputCommand();
         cmd.setParent((IAttributeMapper) getHost().getModel());
@@ -104,7 +90,7 @@ public class StateTreeContainerEditPolicy extends TreeContainerEditPolicy {
         return cmd;
     }
 
-    protected Command createCreatePropertyCommand(IProperty child, int index) {
+    protected Command createCreatePropertyCommand(IAttribute child, int index) {
         CreatePropertyCommand cmd = new CreatePropertyCommand();
         cmd.setParent((IWebFlowModelElement) getHost().getModel());
         cmd.setChild(child);
@@ -134,13 +120,6 @@ public class StateTreeContainerEditPolicy extends TreeContainerEditPolicy {
         return cmd;
     }
 
-    protected Command createDeleteSetupCommand(ISetup child) {
-        DeleteSetupCommand cmd = new DeleteSetupCommand();
-        cmd.setParent((IViewState) child.getElementParent());
-        cmd.setChild(child);
-        return cmd;
-    }
-    
     protected Command createDeleteInputOutputCommand(Object child) {
         DeleteInputOutputCommand cmd = new DeleteInputOutputCommand();
         cmd.setParent((IAttributeMapper) ((IWebFlowModelElement) child).getElementParent());
@@ -148,7 +127,7 @@ public class StateTreeContainerEditPolicy extends TreeContainerEditPolicy {
         return cmd;
     }
     
-    protected Command createDeletePropertyCommand(IProperty child) {
+    protected Command createDeletePropertyCommand(IAttribute child) {
         if (child.getElementParent() instanceof IState) {
             DeleteStatePropertyCommand cmd = new DeleteStatePropertyCommand();
             cmd.setParent((IState) child.getElementParent());
@@ -158,12 +137,6 @@ public class StateTreeContainerEditPolicy extends TreeContainerEditPolicy {
         else if (child.getElementParent() instanceof IAction) {
             DeleteActionPropertyCommand cmd = new DeleteActionPropertyCommand();
             cmd.setParent((IAction) child.getElementParent());
-            cmd.setChild(child);
-            return cmd;
-        }
-        else if (child.getElementParent() instanceof ISetup) {
-            DeleteSetupPropertyCommand cmd = new DeleteSetupPropertyCommand();
-            cmd.setParent((ISetup) child.getElementParent());
             cmd.setChild(child);
             return cmd;
         }
@@ -199,10 +172,10 @@ public class StateTreeContainerEditPolicy extends TreeContainerEditPolicy {
                     command.add(createCreateAttributeMapperCommand(childModel,
                             index)); //$NON-NLS-1$
                 }
-                else if (child.getModel() instanceof IProperty
+                else if (child.getModel() instanceof IAttribute
                         && (getHost().getModel() instanceof IAction || getHost()
                                 .getModel() instanceof IState)) {
-                    IProperty childModel = (IProperty) child.getModel();
+                    IAttribute childModel = (IAttribute) child.getModel();
                     command.add(createDeletePropertyCommand(childModel));
                     command.add(createCreatePropertyCommand(childModel, index));
                 }
@@ -212,13 +185,7 @@ public class StateTreeContainerEditPolicy extends TreeContainerEditPolicy {
                     command.add(createDeleteIfCommand(childModel));
                     command.add(createCreateIfCommand(childModel, index));
                 }
-                else if (child.getModel() instanceof ISetup
-                        && getHost().getModel() instanceof IViewState) {
-                    ISetup childModel = (ISetup) child.getModel();
-                    command.add(createDeleteSetupCommand(childModel));
-                    command.add(createCreateSetupCommand(childModel));
-                }
-                else if ((child.getModel() instanceof IInput || child.getModel() instanceof IOutput)
+                else if ((child.getModel() instanceof IInputMapping || child.getModel() instanceof IOutputMapping)
                         && getHost().getModel() instanceof IAttributeMapper) {
                     command.add(createDeleteInputOutputCommand(child.getModel()));
                     command.add(createCreateInputOutputCommand(child.getModel()));

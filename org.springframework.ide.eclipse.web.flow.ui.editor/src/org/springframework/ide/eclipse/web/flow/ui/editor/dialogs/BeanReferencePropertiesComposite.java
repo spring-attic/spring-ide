@@ -145,8 +145,7 @@ public class BeanReferencePropertiesComposite {
 
         //      Create the radio button for no attribute mapper.
         beanReferenceButton = new Button(groupActionType, SWT.CHECK);
-        if (this.state.getBean() != null || this.state.getBeanClass() != null
-                || this.state.getClassRef() != null) {
+        if (this.state.getBean() != null) {
             beanReferenceButton.setSelection(true);
         }
         //beanReferenceButton.setLayoutData(new GridData(
@@ -240,9 +239,6 @@ public class BeanReferencePropertiesComposite {
         browseBeanButton.addSelectionListener(buttonListener);
 
         radioClassRef = new Button(groupActionType, SWT.RADIO);
-        if (this.state != null && this.state.getClassRef() != null) {
-            radioClassRef.setSelection(true);
-        }
         radioClassRef.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         radioClassRef.setText("Locate by class reference");
         radioClassRef.addSelectionListener(new SelectionAdapter() {
@@ -271,9 +267,6 @@ public class BeanReferencePropertiesComposite {
 
         // Add the text box for action classname.
         classRefText = new Text(inset3, SWT.SINGLE | SWT.BORDER);
-        if (this.state != null && this.state.getClassRef() != null) {
-            classRefText.setText(this.state.getClassRef());
-        }
         classRefText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         classRefText.addModifyListener(new ModifyListener() {
 
@@ -289,9 +282,6 @@ public class BeanReferencePropertiesComposite {
         browseClassRefButton.addSelectionListener(buttonListener);
 
         radioClass = new Button(groupActionType, SWT.RADIO);
-        if (this.state != null && this.state.getBeanClass() != null) {
-            radioClass.setSelection(true);
-        }
         radioClass.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         radioClass.setText("Locate by class");
         radioClass.addSelectionListener(new SelectionAdapter() {
@@ -320,9 +310,6 @@ public class BeanReferencePropertiesComposite {
 
         // Add the text box for action classname.
         classText = new Text(inset2, SWT.SINGLE | SWT.BORDER);
-        if (this.state != null && this.state.getBeanClass() != null) {
-            classText.setText(this.state.getBeanClass());
-        }
         classText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         classText.addModifyListener(new ModifyListener() {
 
@@ -350,9 +337,6 @@ public class BeanReferencePropertiesComposite {
         autowireText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         autowireText.setItems(new String[] { "no", "byName", "byType",
                 "constructor", "autodetect", "default" });
-        if (this.state != null && this.state.getAutowire() != null) {
-            autowireText.setText(this.state.getAutowire());
-        }
         autowireText.addModifyListener(new ModifyListener() {
 
             public void modifyText(ModifyEvent e) {
@@ -617,10 +601,6 @@ public class BeanReferencePropertiesComposite {
 
         if (this.state.getBean() != null) {
             this.setActionImplementationChoice(RADIOBEANREF_CHOICE);
-        } else if (this.state.getBeanClass() != null) {
-            this.setActionImplementationChoice(RADIOCLASS_CHOICE);
-        } else if (this.state.getClassRef() != null) {
-            this.setActionImplementationChoice(RADIOCLASSREF_CHOICE);
         } else {
             this.setActionImplementationChoice(-4);
         }

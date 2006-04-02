@@ -28,12 +28,12 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.springframework.ide.eclipse.web.flow.core.model.IActionState;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.web.flow.core.model.IDecisionState;
-import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
+import org.springframework.ide.eclipse.web.flow.core.model.IInlineFlowState;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
 import org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState;
-import org.springframework.ide.eclipse.web.flow.core.model.IViewState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowUtils;
@@ -81,11 +81,14 @@ public class StateTreeEditPart extends
     protected List getModelChildren() {
         List children = new ArrayList();
         
-        if (getModel() instanceof IPropertyEnabled) {
-            IPropertyEnabled properties = (IPropertyEnabled) getModel();
+        if (getModel() instanceof IAttributeEnabled) {
+            IAttributeEnabled properties = (IAttributeEnabled) getModel();
             if (properties.getProperties() != null) {
                 children.addAll(properties.getProperties());
             }
+        }
+        if (getModel() instanceof IState) {
+            children.addAll( ((IState) getModel()).getEntryActions());
         }
         if (getModel() instanceof IActionState) {
             if (((IActionState) getState()).getActions() != null) {
@@ -96,9 +99,12 @@ public class StateTreeEditPart extends
             if (((ISubFlowState) getModel()).getAttributeMapper() != null)
                 children.add(((ISubFlowState) getModel()).getAttributeMapper());
         }
+        else if (getModel() instanceof IInlineFlowState) {  
+            children.addAll(((IInlineFlowState) getModel()).getWebFlowState().getStates());
+        }
         else if (getModel() instanceof IWebFlowState) {
             if (((IWebFlowState) getState()).getStates() != null)
-            children.addAll(((IWebFlowState) getState()).getStates());
+                children.addAll(((IWebFlowState) getState()).getStates());
         }
         else if (getModel() instanceof IDecisionState) {
             if (((IDecisionState) getModel()).getIfs() != null) {
@@ -113,10 +119,8 @@ public class StateTreeEditPart extends
                 children.addAll(((IAttributeMapper) getModel()).getOutputs());
             }
         }
-        else if (getModel() instanceof IViewState) {
-            if (((IViewState) getModel()).getSetup() != null) {
-                children.add(((IViewState) getModel()).getSetup());
-            }
+        if (getModel() instanceof IState) {
+            children.addAll( ((IState) getModel()).getExitActions());
         }
         
         return children;
@@ -147,7 +151,7 @@ public class StateTreeEditPart extends
 
     protected void refreshVisuals() {
         Image image = labelProvider.getImage(getModel());
-        String text = tLabelProvider.getText(getModel(), true, false);
+        String text = tLabelProvider.getText(getModel(), true, false, false);
         if (image != null) {
             setWidgetImage(image);
         }

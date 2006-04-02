@@ -30,7 +30,7 @@ public class StateLabel extends Label {
     private boolean hasFocus;
 
     private boolean selected;
-
+    
     private Rectangle getSelectionRectangle() {
         Rectangle bounds = getTextBounds();
         bounds.expand(new Insets(1, 1, 1, 1));

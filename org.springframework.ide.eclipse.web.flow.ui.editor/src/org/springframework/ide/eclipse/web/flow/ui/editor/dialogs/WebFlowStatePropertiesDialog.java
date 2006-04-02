@@ -37,15 +37,13 @@ import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.web.flow.core.WebFlowCoreUtils;
 import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
-import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
 import org.springframework.ide.eclipse.web.flow.ui.editor.WebFlowImages;
 
 public class WebFlowStatePropertiesDialog extends TitleAreaDialog implements
         IDialogValidator {
-
-    private Button addButton;
 
     private TableViewer configsViewer2;
 
@@ -77,35 +75,6 @@ public class WebFlowStatePropertiesDialog extends TitleAreaDialog implements
     protected void buttonPressed(int buttonId) {
         if (buttonId == IDialogConstants.OK_ID) {
             this.webflowStateClone.setId(trimString(getId()));
-            if (this.beanProperties.useBeanReference()) {
-                if (this.beanProperties.getRadioBeanRef()) {
-                    this.webflowStateClone.setBean(this.beanProperties
-                            .getBeanText());
-                    this.webflowStateClone.setBeanClass(null);
-                    this.webflowStateClone.setAutowire(null);
-                    this.webflowStateClone.setClassRef(null);
-                } else if (this.beanProperties.getRadioClass()) {
-                    this.webflowStateClone.setBean(null);
-                    this.webflowStateClone
-                            .setBeanClass(trimString(this.beanProperties
-                                    .getClassText()));
-                    this.webflowStateClone
-                            .setAutowire(trimString(this.beanProperties
-                                    .getAutowireText()));
-                    this.webflowStateClone.setClassRef(null);
-                } else if (this.beanProperties.getRadioClassRef()) {
-                    this.webflowStateClone.setBean(null);
-                    this.webflowStateClone.setBeanClass(null);
-                    this.webflowStateClone.setAutowire(null);
-                    this.webflowStateClone.setClassRef(this.beanProperties
-                            .getClassRefText());
-                }
-            } else {
-                this.webflowStateClone.setBean(null);
-                this.webflowStateClone.setBeanClass(null);
-                this.webflowStateClone.setAutowire(null);
-                this.webflowStateClone.setClassRef(null);
-            }
 
             ((ICloneableModelElement) this.webflowState)
                     .applyCloneValues((ICloneableModelElement) this.webflowStateClone);
@@ -195,7 +164,7 @@ public class WebFlowStatePropertiesDialog extends TitleAreaDialog implements
         item2.setControl(beanProperties.createDialogArea(folder));
 
         properties = new PropertiesComposite(this, item3, getShell(),
-                (IPropertyEnabled) this.webflowStateClone);
+                (IAttributeEnabled) this.webflowStateClone);
         item3.setControl(properties.createDialogArea(folder));
 
         applyDialogFont(parentComposite);

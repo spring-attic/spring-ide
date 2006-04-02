@@ -66,21 +66,8 @@ public class ActionProperties implements IPropertySource {
         if (A_BEAN.equals(id)) {
             return property.getBean();
         }
-        else if (A_AUTOWIRE.equals(id)) {
-            String autowire = WebFlowUtils.returnNotNullOnString(property
-                    .getAutowire());
-            List list = Arrays.asList(AUTOWIRE_VALUES);
-            int i = list.indexOf(autowire);
-            return new Integer(i);
-        }
         else if (A_BEAN.equals(id)) {
             return WebFlowUtils.returnNotNullOnString(property.getBean());
-        }
-        else if (A_CLASS.equals(id)) {
-            return WebFlowUtils.returnNotNullOnString(property.getBeanClass());
-        }
-        else if (A_CLASSREF.equals(id)) {
-            return WebFlowUtils.returnNotNullOnString(property.getClassRef());
         }
         else if (A_METHOD.equals(id)) {
             return WebFlowUtils.returnNotNullOnString(property.getMethod());
@@ -102,18 +89,8 @@ public class ActionProperties implements IPropertySource {
         if (A_BEAN.equals(id)) {
             property.setBean((String) value);
         }
-        else if (A_AUTOWIRE.equals(id)) {
-            int index = ((Integer) value).intValue();
-            property.setAutowire(AUTOWIRE_VALUES[index]);
-        }
         else if (A_BEAN.equals(id)) {
             property.setBean((String) value);
-        }
-        else if (A_CLASS.equals(id)) {
-            property.setBeanClass((String) value);
-        }
-        else if (A_CLASSREF.equals(id)) {
-            property.setClassRef((String) value);
         }
         else if (A_METHOD.equals(id)) {
             property.setMethod((String) value);

@@ -50,29 +50,60 @@ import org.springframework.ide.eclipse.web.flow.ui.editor.policies.WebFlowStateL
 public abstract class ChildrenStatePart extends AbstractStatePart implements
         NodeEditPart {
 
-    private static final Insets INNER_PADDING = new Insets(5, 0, 0, 0);
+    private static final Insets INNER_PADDING = new Insets(5, 5, 5, 0);
 
     protected static LabelProvider labelProvider = new DecoratingLabelProvider(
             new WebFlowModelLabelProvider(), new WebFlowModelLabelDecorator());
 
-    private static final Insets PADDING = new Insets(0, 50, 50, 0);
+    private static final Insets PADDING = new Insets(0, 50, 50, 5);
 
     protected void applyChildrenResults(CompoundDirectedGraph graph, Map map) {
+        
         for (int i = 0; i < getChildren().size(); i++) {
             AbstractStatePart part = (AbstractStatePart) getChildren().get(i);
             part.applyGraphResults(graph, map);
+        }
+    }
+    
+    protected void applyChildrenResultsToOwn(CompoundDirectedGraph graph, Map map) {
+        Node n = (Node) map.get(this);
+        int bottom = -1;
+        for (int i = 0; i < getChildren().size(); i++) {
+            AbstractStatePart part = (AbstractStatePart) getChildren().get(i);
+            
+            if (part.getFigure().getBounds().bottom() > bottom) {
+                bottom = part.getFigure().getBounds().getBottom().y;
+            }
+        }
+        if (bottom > -1) {
+            int top = getFigure().getBounds().getTop().y;
+            int height = bottom - top + 5 + 7;
+            getFigure().setBounds(new Rectangle(n.x, n.y, n.width, height));
         }
     }
 
     protected void applyGraphResults(CompoundDirectedGraph graph, Map map) {
         applyOwnResults(graph, map);
         applyChildrenResults(graph, map);
+        applyChildrenResultsToOwn(graph, map);
     }
 
     protected void applyOwnResults(CompoundDirectedGraph graph, Map map) {
         Node n = (Node) map.get(this);
-        getFigure().setBounds(new Rectangle(n.x, n.y, n.width, n.height));
-
+        
+        if (getModelChildren() != null && getModelChildren().size() > 0) {
+            getFigure().setBounds(new Rectangle(n.x, n.y, n.width, n.height));
+        }
+        else {
+            int height = ((CompoundStateFigure) getFigure()).getHeader().getPreferredSize().height;
+            if (height < 20) {
+                getFigure().setBounds(new Rectangle(n.x, n.y, n.width, 23));
+            }
+            else {
+                getFigure().setBounds(new Rectangle(n.x, n.y, n.width, 33));
+            }
+        }
+        
         for (int i = 0; i < getSourceConnections().size(); i++) {
             StateTransitionPart trans = (StateTransitionPart) getSourceConnections()
                     .get(i);
