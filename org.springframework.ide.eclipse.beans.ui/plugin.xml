@@ -61,38 +61,6 @@
 
    <extension
          point="org.eclipse.ui.popupMenus">
-      <objectContribution
-            objectClass="org.eclipse.core.resources.IProject"
-            adaptable="true"
-            id="org.springframework.ide.eclipse.beans.ui.actions.springBeansProject">
-         <filter
-               name="nature"
-               value="org.springframework.ide.eclipse.beans.core.beansnature">
-         </filter>
-         <action
-               label="%popupMenus.migrateSpringBeans.label"
-               class="org.springframework.ide.eclipse.beans.ui.actions.MigrateSpringBeansProject"
-               enablesFor="+"
-               id="org.springframework.ide.eclipse.beans.ui.actions.migrateSpringBeans">
-         </action>
-      </objectContribution>
-
-      <objectContribution
-            objectClass="org.eclipse.core.resources.IProject"
-            adaptable="true"
-            id="org.springframework.ide.eclipse.beans.ui.actions.springUIProject">
-         <filter
-               name="nature"
-               value="org.springframework.eclipse.core.springnature">
-         </filter>
-         <action
-               label="%popupMenus.migrateSpringUI.label"
-               class="org.springframework.ide.eclipse.beans.ui.actions.MigrateSpringUIProject"
-               enablesFor="+"
-               id="org.springframework.ide.eclipse.beans.ui.actions.migrateSpringUI">
-         </action>
-      </objectContribution>
-
       <viewerContribution
             targetID="#TextEditorContext"
             id="org.springframework.ide.eclipse.beans.ui.actions.beansConfigFile">
