@@ -160,15 +160,15 @@ public class ConfigSetsBlock {
         buttonArea.setLayout(layout);
         buttonArea.setLayoutData(new GridData(GridData.FILL_VERTICAL));
         newButton = SpringUIUtils.createButton(buttonArea, WebFlowUIPlugin
-                .getResourceString(NEW_BUTTON), true, buttonListener);
+                .getResourceString(NEW_BUTTON), buttonListener, 0, true);
         editButton = SpringUIUtils.createButton(buttonArea, WebFlowUIPlugin
-                .getResourceString(EDIT_BUTTON), true, buttonListener);
+                .getResourceString(EDIT_BUTTON), buttonListener, 0, true);
         removeButton = SpringUIUtils.createButton(buttonArea, WebFlowUIPlugin
-                .getResourceString(REMOVE_BUTTON), false, buttonListener);
+                .getResourceString(REMOVE_BUTTON), buttonListener, 0, false);
         upButton = SpringUIUtils.createButton(buttonArea, WebFlowUIPlugin
-                .getResourceString(UP_BUTTON), false, buttonListener);
+                .getResourceString(UP_BUTTON), buttonListener, 0, false);
         downButton = SpringUIUtils.createButton(buttonArea, WebFlowUIPlugin
-                .getResourceString(DOWN_BUTTON), false, buttonListener);
+                .getResourceString(DOWN_BUTTON), buttonListener, 0, false);
         return composite;
     }
 

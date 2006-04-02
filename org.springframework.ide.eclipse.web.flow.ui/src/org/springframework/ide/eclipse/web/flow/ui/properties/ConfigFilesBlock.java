@@ -142,9 +142,9 @@ public class ConfigFilesBlock {
         buttonArea.setLayout(layout);
         buttonArea.setLayoutData(new GridData(GridData.FILL_VERTICAL));
         addButton = SpringUIUtils.createButton(buttonArea, WebFlowUIPlugin
-                .getResourceString(ADD_BUTTON), true, buttonListener);
+                .getResourceString(ADD_BUTTON), buttonListener, 0, true);
         removeButton = SpringUIUtils.createButton(buttonArea, WebFlowUIPlugin
-                .getResourceString(REMOVE_BUTTON), false, buttonListener);
+                .getResourceString(REMOVE_BUTTON), buttonListener, 0, false);
         return composite;
     }
 
