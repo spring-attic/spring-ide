@@ -23,11 +23,14 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
@@ -41,6 +44,8 @@ import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.RootNode;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.ui.SpringUIMessages;
+import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 
 public final class BeansViewUtils {
 
@@ -238,7 +243,7 @@ public final class BeansViewUtils {
 	}
 
 	/**
-	 * This method adds projectNodes to the beansView as childs to the RootNode.
+	 * Adds given project nodes to beans view as childs to the root node.
 	 * 
 	 * @param treeViewer
 	 *            the beansView treeViewer
@@ -248,16 +253,25 @@ public final class BeansViewUtils {
 	 *            the rootNode under which they're added
 	 */
 	public static void addProjectNodes(TreeViewer treeViewer,
-			ProjectNode[] projectNodes, RootNode rootNode) {
+							   ProjectNode[] projectNodes, RootNode rootNode) {
 		for (int i = 0; i < projectNodes.length; i++) {
-			SpringCoreUtils.addProjectNature(projectNodes[i].getProject()
-					.getProject(), SpringCore.NATURE_ID);
-			projectNodes[i].setParent(rootNode);
-			rootNode.addProject(projectNodes[i].getName(), new ArrayList(),
-								new ArrayList(), new ArrayList());
-			BeansModelLabelDecorator.update();
-			treeViewer.add(rootNode, projectNodes[i]);
-			treeViewer.reveal(projectNodes[i]);
+			IProject project = projectNodes[i].getProject().getProject();
+			try {
+				SpringCoreUtils.addProjectNature(project,
+												 SpringCore.NATURE_ID);
+				projectNodes[i].setParent(rootNode);
+				rootNode.addProject(projectNodes[i].getName(), new ArrayList(),
+						new ArrayList(), new ArrayList());
+				BeansModelLabelDecorator.update();
+				treeViewer.add(rootNode, projectNodes[i]);
+				treeViewer.reveal(projectNodes[i]);
+			} catch (CoreException e) {
+				MessageDialog.openError(
+							  SpringUIPlugin.getActiveWorkbenchShell(),
+							  SpringUIMessages.ProjectNature_errorMessage,
+							  NLS.bind(SpringUIMessages.ProjectNature_addError,
+								  project.getName(), e.getLocalizedMessage()));
+			}
 		}
 	}
 

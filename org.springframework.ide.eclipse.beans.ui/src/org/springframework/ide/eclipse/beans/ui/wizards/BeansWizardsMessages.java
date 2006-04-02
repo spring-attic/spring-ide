@@ -34,6 +34,14 @@ public final class BeansWizardsMessages extends NLS {
 	public static String NewProject_title;
 	public static String NewProject_description;
 
+	public static String NewProject_createProject;
+	public static String NewProject_createNewProject;
+	public static String NewProject_addProjectNature;
+
+	public static String NewProject_errorMessage;
+	public static String NewProject_caseVariantExistsError;
+	public static String NewProject_internalError;
+
 	public static String NewProjectPage_settings;
 	public static String NewProjectPage_java;
 	public static String NewProjectPage_source;
