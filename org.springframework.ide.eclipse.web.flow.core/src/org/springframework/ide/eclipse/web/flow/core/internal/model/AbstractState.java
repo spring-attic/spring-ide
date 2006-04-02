@@ -16,6 +16,9 @@
 
 package org.springframework.ide.eclipse.web.flow.core.internal.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.web.flow.core.model.IAction;
 import org.springframework.ide.eclipse.web.flow.core.model.IDescriptionEnabled;
@@ -31,6 +34,10 @@ public abstract class AbstractState extends AbstractModelElement implements
     private String description;
 
     protected String id;
+    
+    protected List entryActions = new ArrayList();
+    
+    protected List exitActions = new ArrayList();
     
     public AbstractState(IWebFlowModelElement parent, String id) {
         super(parent, id);
@@ -112,5 +119,97 @@ public abstract class AbstractState extends AbstractModelElement implements
     
     public String getDescription() {
         return this.description;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.springframework.ide.eclipse.web.core.model.IActionState#getActions()
+     */
+    public List getEntryActions() {
+        return this.entryActions;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.springframework.ide.eclipse.web.core.model.IActionState#addAction(org.springframework.ide.eclipse.web.core.model.IAction)
+     */
+    public void addEntryAction(IAction action) {
+        if (!this.entryActions.contains(action)) {
+            action.setElementParent(this);
+            this.entryActions.add(action);
+            super.firePropertyChange(ADD_CHILDREN, new Integer(this.entryActions
+                    .indexOf(action)), action);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.springframework.ide.eclipse.web.core.model.IActionState#removeAction(org.springframework.ide.eclipse.web.core.model.IAction)
+     */
+    public void removeEntryAction(IAction action) {
+        this.entryActions.remove(action);
+        super.fireStructureChange(REMOVE_CHILDREN, action);
+    }
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IActionState#addAction(org.springframework.ide.eclipse.web.flow.core.model.IAction,
+     *      int)
+     */
+    public void addEntryAction(IAction action, int i) {
+        if (!this.entryActions.contains(action)) {
+            this.entryActions.add(i, action);
+            super.firePropertyChange(ADD_CHILDREN, new Integer(i), action);
+        }
+    }
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.springframework.ide.eclipse.web.core.model.IActionState#getActions()
+     */
+    public List getExitActions() {
+        return this.exitActions;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.springframework.ide.eclipse.web.core.model.IActionState#addAction(org.springframework.ide.eclipse.web.core.model.IAction)
+     */
+    public void addExitAction(IAction action) {
+        if (!this.exitActions.contains(action)) {
+            action.setElementParent(this);
+            this.exitActions.add(action);
+            super.firePropertyChange(ADD_CHILDREN, new Integer(this.exitActions
+                    .indexOf(action)), action);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.springframework.ide.eclipse.web.core.model.IActionState#removeAction(org.springframework.ide.eclipse.web.core.model.IAction)
+     */
+    public void removeExitAction(IAction action) {
+        this.exitActions.remove(action);
+        super.fireStructureChange(REMOVE_CHILDREN, action);
+    }
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IActionState#addAction(org.springframework.ide.eclipse.web.flow.core.model.IAction,
+     *      int)
+     */
+    public void addExitAction(IAction action, int i) {
+        if (!this.exitActions.contains(action)) {
+            this.exitActions.add(i, action);
+            super.firePropertyChange(ADD_CHILDREN, new Integer(i), action);
+        }
     }
 }

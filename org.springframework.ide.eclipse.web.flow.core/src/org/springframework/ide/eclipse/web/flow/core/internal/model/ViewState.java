@@ -18,11 +18,10 @@ package org.springframework.ide.eclipse.web.flow.core.internal.model;
 
 import java.util.Iterator;
 
+import org.springframework.ide.eclipse.web.flow.core.model.IAttribute;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
 import org.springframework.ide.eclipse.web.flow.core.model.IPersistableModelElement;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
-import org.springframework.ide.eclipse.web.flow.core.model.ISetup;
 import org.springframework.ide.eclipse.web.flow.core.model.IViewState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
@@ -32,8 +31,6 @@ public class ViewState extends AbstractTransitionableFrom implements
 
     private String view;
     
-    private ISetup setup;
-
     public ViewState(IWebFlowModelElement parent, String id, String viewName) {
         super(parent, id);
         this.view = viewName;
@@ -86,9 +83,6 @@ public class ViewState extends AbstractTransitionableFrom implements
     public void save(IModelWriter writer) {
         writer.doStart(this);
 
-        if (this.setup != null) {
-            ((IPersistableModelElement) this.setup).save(writer);
-        }
         super.save(writer);
         Iterator iter = this.getProperties().iterator();
         while (iter.hasNext()) {
@@ -109,20 +103,11 @@ public class ViewState extends AbstractTransitionableFrom implements
         ViewState state = new ViewState();
         state.setId(getId());
         state.setView(getView());
-        state.setAutowire(getAutowire());
-        state.setBean(getBean());
-        state.setBeanClass(getBeanClass());
-        state.setClassRef(getClassRef());
         state.setElementName(getElementName());
         state.setDescription(getDescription());
         for (int i = 0; i < this.getProperties().size(); i++) {
             Property property = (Property) this.getProperties().get(i);
-            state.addProperty((IProperty) property.cloneModelElement());
-        }
-        if (this.setup != null) {
-            state
-                    .setSetup((ISetup) ((ICloneableModelElement) this.setup)
-                            .cloneModelElement());
+            state.addProperty((IAttribute) property.cloneModelElement());
         }
         return state;
     }
@@ -137,10 +122,6 @@ public class ViewState extends AbstractTransitionableFrom implements
             ViewState state = (ViewState) element;
             setView(state.getView());
             setId(state.getId());
-            setAutowire(state.getAutowire());
-            setBean(state.getBean());
-            setBeanClass(state.getBeanClass());
-            setClassRef(state.getClassRef());
             setDescription(state.getDescription());
             Property[] props = (Property[]) this.getProperties().toArray(
                     new Property[this.getProperties().size()]);
@@ -148,52 +129,8 @@ public class ViewState extends AbstractTransitionableFrom implements
                 removeProperty(props[i]);
             }
             for (int i = 0; i < state.getProperties().size(); i++) {
-                addProperty((IProperty) state.getProperties().get(i));
-            }
-            if (state.getSetup() != null) {
-                if (this.setup != null) {
-                    ((ICloneableModelElement) this.setup)
-                            .applyCloneValues((ICloneableModelElement) state
-                                    .getSetup());
-                }
-                else {
-                    setSetup(state.getSetup());
-                    getSetup().setElementParent(this);
-                }
-            }
-            else {
-                if (this.setup != null) {
-                    removeSetup();
-                }
+                addProperty((IAttribute) state.getProperties().get(i));
             }
         }
-    }
-
-    /* (non-Javadoc)
-     * @see org.springframework.ide.eclipse.web.flow.core.model.IViewState#getSetup()
-     */
-    public ISetup getSetup() {
-        return this.setup;
-    }
-
-    /* (non-Javadoc)
-     * @see org.springframework.ide.eclipse.web.flow.core.model.IViewState#setSetup(org.springframework.ide.eclipse.web.flow.core.model.ISetup)
-     */
-    public void setSetup(ISetup setup) {
-        //if (this.getSetup() != null) {
-        //    this.removeSetup();
-        //}
-        this.setup = setup;
-        super.firePropertyChange(ADD_CHILDREN, new Integer(0), setup);
-    }
-
-    /* (non-Javadoc)
-     * @see org.springframework.ide.eclipse.web.flow.core.model.IViewState#removeSetup()
-     */
-    public void removeSetup() {
-        ISetup oldValue = this.setup;
-        this.setup = null;
-        super.firePropertyChange(REMOVE_CHILDREN, setup, oldValue);
-        
     }
 }

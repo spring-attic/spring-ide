@@ -16,7 +16,7 @@
 
 package org.springframework.ide.eclipse.web.flow.core.model;
 
-public interface ITransition extends IBeanReference {
+public interface ITransition extends IWebFlowModelElement {
 
     ITransitionableTo getToState();
 

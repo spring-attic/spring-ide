@@ -19,7 +19,7 @@ package org.springframework.ide.eclipse.web.flow.core.model;
 import java.util.List;
 
 public interface IActionState extends IState {
-
+    
     List getActions();
 
     void addAction(IAction action);
@@ -27,5 +27,5 @@ public interface IActionState extends IState {
     void addAction(IAction action, int i);
 
     void removeAction(IAction action);
-
+    
 }

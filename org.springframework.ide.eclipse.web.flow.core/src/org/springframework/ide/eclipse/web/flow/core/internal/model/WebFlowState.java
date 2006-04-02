@@ -24,7 +24,7 @@ import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElemen
 import org.springframework.ide.eclipse.web.flow.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
 import org.springframework.ide.eclipse.web.flow.core.model.IPersistableModelElement;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttribute;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
 import org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
@@ -37,6 +37,10 @@ public class WebFlowState extends AbstractTransitionableFrom implements
 
     private IState startState;
 
+    public WebFlowState(IWebFlowModelElement parent) {
+        this(parent, null);
+    }
+    
     public WebFlowState(IWebFlowModelElement parent, String id) {
         super(parent, id);
         this.states = new ArrayList();
@@ -46,7 +50,7 @@ public class WebFlowState extends AbstractTransitionableFrom implements
     }
     
     public WebFlowState() {
-        this(null, null);
+        this(null);
     }
 
     /*
@@ -208,15 +212,11 @@ public class WebFlowState extends AbstractTransitionableFrom implements
     public ICloneableModelElement cloneModelElement() {
         WebFlowState state = new WebFlowState();
         state.setId(getId());        
-        state.setAutowire(getAutowire());
-        state.setBean(getBean());
-        state.setBeanClass(getBeanClass());
-        state.setClassRef(getClassRef());
         //state.setStartState((IState) ((ICloneableModelElement) this.startState));
         state.setElementName(getElementName());
         for (int i = 0; i < super.getProperties().size(); i++) {
             Property property = (Property) super.getProperties().get(i);
-            state.addProperty((IProperty) property.cloneModelElement());
+            state.addProperty((IAttribute) property.cloneModelElement());
         }
         return state;
     }
@@ -228,17 +228,13 @@ public class WebFlowState extends AbstractTransitionableFrom implements
         if (element instanceof WebFlowState) {
             WebFlowState state = (WebFlowState) element;
             this.id = state.getId();        
-            this.autowire = state.getAutowire();
-            this.bean = state.getBean();
-            this.beanClass = state.getBeanClass();
-            this.classRef = state.getClassRef();
             Property[] props = (Property[]) this.getProperties().toArray(
                     new Property[this.getProperties().size()]);
             for (int i = 0; i < props.length; i++) {
                 this.properties.remove(props[i]);
             }
             for (int i = 0; i < state.getProperties().size(); i++) {
-                this.properties.add((IProperty) state.getProperties().get(i));
+                this.properties.add((IAttribute) state.getProperties().get(i));
             }
         }
     }

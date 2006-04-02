@@ -18,11 +18,11 @@ package org.springframework.ide.eclipse.web.flow.core.internal.model;
 
 import java.util.Iterator;
 
+import org.springframework.ide.eclipse.web.flow.core.model.IAttribute;
 import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
 import org.springframework.ide.eclipse.web.flow.core.model.IPersistableModelElement;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
 import org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
@@ -148,10 +148,6 @@ public class SubFlowState extends WebFlowState implements ISubFlowState,
         SubFlowState state = new SubFlowState();
         state.setId(getId());
         state.setFlow(getFlow());
-        state.setAutowire(getAutowire());
-        state.setBean(getBean());
-        state.setBeanClass(getBeanClass());
-        state.setClassRef(getClassRef());
         state.setElementName(getElementName());
         state.setDescription(getDescription());
         if (this.attributeMapper != null) {
@@ -161,7 +157,7 @@ public class SubFlowState extends WebFlowState implements ISubFlowState,
         }
         for (int i = 0; i < this.getProperties().size(); i++) {
             Property property = (Property) this.getProperties().get(i);
-            state.addProperty((IProperty) property.cloneModelElement());
+            state.addProperty((IAttribute) property.cloneModelElement());
         }
         return state;
     }
@@ -176,10 +172,6 @@ public class SubFlowState extends WebFlowState implements ISubFlowState,
             SubFlowState state = (SubFlowState) element;
             setId(state.getId());
             setFlow(state.getFlow());
-            setAutowire(state.getAutowire());
-            setBean(state.getBean());
-            setBeanClass(state.getBeanClass());
-            setClassRef(state.getClassRef());
             setDescription(state.getDescription());
             if (state.getAttributeMapper() != null) {
                 if (this.attributeMapper != null) {
@@ -203,7 +195,7 @@ public class SubFlowState extends WebFlowState implements ISubFlowState,
                 removeProperty(props[i]);
             }
             for (int i = 0; i < state.getProperties().size(); i++) {
-                addProperty((IProperty) state.getProperties().get(i));
+                addProperty((IAttribute) state.getProperties().get(i));
             }
         }
     }

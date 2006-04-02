@@ -56,7 +56,7 @@ public interface IWebFlowModelElement {
 
     int IF = 10;
     
-    int SETUP = 11;
+    int INLINE_FLOW = 11;
     
     int INPUT = 12;
     

@@ -34,12 +34,10 @@ import org.springframework.ide.eclipse.web.flow.core.internal.model.WebFlowModel
 import org.springframework.ide.eclipse.web.flow.core.model.IAction;
 import org.springframework.ide.eclipse.web.flow.core.model.IActionState;
 import org.springframework.ide.eclipse.web.flow.core.model.IBeanReference;
-import org.springframework.ide.eclipse.web.flow.core.model.ISetup;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
 import org.springframework.ide.eclipse.web.flow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.web.flow.core.model.ITransition;
 import org.springframework.ide.eclipse.web.flow.core.model.ITransitionableFrom;
-import org.springframework.ide.eclipse.web.flow.core.model.IViewState;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowConfig;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowConfigSet;
 
@@ -71,13 +69,7 @@ public class ActionTypeValidator implements IWebFlowConfigValidator {
                     if (state instanceof IActionState) {
                         List actions = ((IActionState) state).getActions();
                         this.validateActions(actions, config, configSet);
-                    } else if (state instanceof IViewState) {
-                        ISetup setup = ((IViewState) state).getSetup();
-                        if (setup != null) {
-                            this.validateAction((IBeanReference) setup, config,
-                                    configSet);
-                        }
-                    }
+                    } 
 
                     if (state instanceof ITransitionableFrom) {
                         List transitions = ((ITransitionableFrom) state)
@@ -117,9 +109,6 @@ public class ActionTypeValidator implements IWebFlowConfigValidator {
 
             // check if all fields are filled correctly
             String bean = reference.getBean();
-            String beanClass = reference.getBeanClass();
-            String classRef = reference.getClassRef();
-            String autowire = reference.getAutowire();
             String method = reference.getMethod();
 
             if (configSet.getBeansConfigSet() != null) {
@@ -132,12 +121,6 @@ public class ActionTypeValidator implements IWebFlowConfigValidator {
                     if (b != null) {
                         className = b.getClassName();
                     }
-                }
-                if (classRef != null && className == null) {
-                    className = classRef;
-                }
-                if (beanClass != null && className == null) {
-                    className = beanClass;
                 }
                 if (className != null) {
                     this.validateActionClass(reference, className, config,

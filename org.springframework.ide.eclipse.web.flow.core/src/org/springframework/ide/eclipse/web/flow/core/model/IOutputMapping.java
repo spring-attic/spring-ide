@@ -16,24 +16,22 @@
 
 package org.springframework.ide.eclipse.web.flow.core.model;
 
-import java.util.List;
-
-public interface IAttributeMapper extends IBeanReference {
+public interface IOutputMapping extends IWebFlowModelElement {
     
-    List getInputs();
+    void setName(String name);
     
-    List getOutputs();
+    void setValue(String value);
     
-    void removeInput(IInputMapping input);
+    void setAs(String as);
     
-    void removeOutput(IOutputMapping input);
+    void setType(String type);
     
-    void addInput(IInputMapping input);
+    String getName();
     
-    void addInput(IInputMapping input, int index);
+    String getValue();
     
-    void addOutput(IOutputMapping output);
+    String getAs();
     
-    void addOutput(IOutputMapping output, int index);
-
+    String getType();
+    
 }

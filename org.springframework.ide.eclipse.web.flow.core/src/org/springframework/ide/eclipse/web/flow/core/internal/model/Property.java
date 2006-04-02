@@ -20,11 +20,11 @@ import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
 import org.springframework.ide.eclipse.web.flow.core.model.IPersistableModelElement;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
-import org.springframework.ide.eclipse.web.flow.core.model.IPropertyEnabled;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttribute;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 
-public class Property extends WebFlowModelElement implements IProperty,
+public class Property extends WebFlowModelElement implements IAttribute,
         IPersistableModelElement, ICloneableModelElement {
 
     private String name;
@@ -41,8 +41,8 @@ public class Property extends WebFlowModelElement implements IProperty,
         super(parent, name);
         this.value = value;
         this.name = name;
-        if (parent instanceof IPropertyEnabled) {
-            ((IPropertyEnabled) parent).addProperty(this);
+        if (parent instanceof IAttributeEnabled) {
+            ((IAttributeEnabled) parent).addProperty(this);
         }
     }
 

@@ -22,7 +22,7 @@ import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElemen
 import org.springframework.ide.eclipse.web.flow.core.model.IEndState;
 import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
 import org.springframework.ide.eclipse.web.flow.core.model.IPersistableModelElement;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttribute;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
 
@@ -82,15 +82,11 @@ public class EndState extends AbstractTransitionableTo implements IEndState,
         EndState state = new EndState();
         state.setId(getId());
         state.setView(getView());
-        state.setAutowire(getAutowire());
-        state.setBean(getBean());
-        state.setBeanClass(getBeanClass());
-        state.setClassRef(getClassRef());
         state.setElementName(getElementName());
         state.setDescription(getDescription());
         for (int i = 0; i < this.getProperties().size(); i++) {
             Property property = (Property) this.getProperties().get(i);
-            state.addProperty((IProperty) property.cloneModelElement());
+            state.addProperty((IAttribute) property.cloneModelElement());
         }
         return state;
     }
@@ -105,10 +101,6 @@ public class EndState extends AbstractTransitionableTo implements IEndState,
             EndState state = (EndState) element;
             setView(state.getView());
             setId(state.getId());
-            setAutowire(state.getAutowire());
-            setBean(state.getBean());
-            setBeanClass(state.getBeanClass());
-            setClassRef(state.getClassRef());
             setDescription(state.getDescription());
             Property[] props = (Property[]) this.getProperties().toArray(
                     new Property[this.getProperties().size()]);
@@ -116,7 +108,7 @@ public class EndState extends AbstractTransitionableTo implements IEndState,
                 removeProperty(props[i]);
             }
             for (int i = 0; i < state.getProperties().size(); i++) {
-                addProperty((IProperty) state.getProperties().get(i));
+                addProperty((IAttribute) state.getProperties().get(i));
             }
         }
     }

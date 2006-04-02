@@ -22,27 +22,24 @@ import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.web.flow.core.model.IAction;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttribute;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
 import org.springframework.ide.eclipse.web.flow.core.model.IPersistableModelElement;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 
-public class Action extends WebFlowModelElement implements IAction,
+public class Action extends AbstractModelElement implements IAction, IAttributeEnabled,
         IPersistableModelElement, ICloneableModelElement {
 
-    private String autowire;
-
     private String bean;
-
-    private String beanClass;
-
-    private String classRef;
 
     private String method;
 
     private String name;
+    
+    private int kind;
 
     private List properties = new ArrayList();
 
@@ -75,7 +72,7 @@ public class Action extends WebFlowModelElement implements IAction,
      * 
      * @see org.springframework.ide.eclipse.web.flow.core.model.IAction#addProperty(org.springframework.ide.eclipse.web.flow.core.model.IProperty)
      */
-    public void addProperty(IProperty property) {
+    public void addProperty(IAttribute property) {
         if (!this.properties.contains(property)) {
             property.setElementParent(this);
             this.properties.add(property);
@@ -89,7 +86,7 @@ public class Action extends WebFlowModelElement implements IAction,
      * 
      * @see org.springframework.ide.eclipse.web.flow.core.model.IAction#addProperty(org.springframework.ide.eclipse.web.flow.core.model.IProperty)
      */
-    public void addProperty(IProperty property, int index) {
+    public void addProperty(IAttribute property, int index) {
         if (!this.properties.contains(property)) {
             property.setElementParent(this);
             this.properties.add(index, property);
@@ -106,7 +103,7 @@ public class Action extends WebFlowModelElement implements IAction,
      *      java.lang.String)
      */
     public void addProperty(String name, String value) {
-        IProperty property = new Property(this, name, value);
+        IAttribute property = new Property(this, name, value);
     }
 
     /*
@@ -117,19 +114,17 @@ public class Action extends WebFlowModelElement implements IAction,
     public void applyCloneValues(ICloneableModelElement element) {
         if (element instanceof IAction) {
             Action action = (Action) element;
-            setAutowire(action.getAutowire());
             setBean(action.getBean());
-            setBeanClass(action.getBeanClass());
-            setClassRef(action.getClassRef());
             setMethod(action.getMethod());
             setName(action.getName());
+            setKind(action.getKind());
             Property[] props = (Property[]) this.getProperties().toArray(
                     new Property[this.getProperties().size()]);
             for (int i = 0; i < props.length; i++) {
                 removeProperty(props[i]);
             }
             for (int i = 0; i < action.getProperties().size(); i++) {
-                addProperty((IProperty) action.getProperties().get(i));
+                addProperty((IAttribute) action.getProperties().get(i));
             }
         }
     }
@@ -141,24 +136,15 @@ public class Action extends WebFlowModelElement implements IAction,
      */
     public ICloneableModelElement cloneModelElement() {
         Action action = new Action(); // don't set parent
-        action.setAutowire(getAutowire());
         action.setBean(getBean());
-        action.setBeanClass(getBeanClass());
-        action.setClassRef(getClassRef());
         action.setMethod(getMethod());
         action.setName(getName());
+        action.setKind(getKind());
         for (int i = 0; i < this.properties.size(); i++) {
             Property property = (Property) this.properties.get(i);
-            action.addProperty((IProperty) property.cloneModelElement());
+            action.addProperty((IAttribute) property.cloneModelElement());
         }
         return action;
-    }
-
-    /**
-     * @return Returns the autowire.
-     */
-    public String getAutowire() {
-        return autowire;
     }
 
     /**
@@ -166,20 +152,6 @@ public class Action extends WebFlowModelElement implements IAction,
      */
     public String getBean() {
         return bean;
-    }
-
-    /**
-     * @return Returns the beanClass.
-     */
-    public String getBeanClass() {
-        return beanClass;
-    }
-
-    /**
-     * @return Returns the classRef.
-     */
-    public String getClassRef() {
-        return classRef;
     }
 
     /*
@@ -232,7 +204,7 @@ public class Action extends WebFlowModelElement implements IAction,
      * 
      * @see org.springframework.ide.eclipse.web.flow.core.model.IAction#removeProperty(org.springframework.ide.eclipse.web.flow.core.model.IProperty)
      */
-    public void removeProperty(IProperty property) {
+    public void removeProperty(IAttribute property) {
         if (this.properties.contains(property)) {
             this.properties.remove(property);
             super.fireStructureChange(REMOVE_CHILDREN, property);
@@ -256,14 +228,10 @@ public class Action extends WebFlowModelElement implements IAction,
         writer.doEnd(this);
     }
 
-    /**
-     * @param autowire
-     *            The autowire to set.
-     */
-    public void setAutowire(String autowire) {
-        String oldValue = this.autowire;
-        this.autowire = autowire;
-        super.firePropertyChange(PROPS, oldValue, autowire);
+    public void setKind(int kind) {
+        int oldValue = this.kind;
+        this.kind = kind;
+        super.firePropertyChange(PROPS, new Integer(oldValue), new Integer(kind));
     }
 
     /**
@@ -274,26 +242,6 @@ public class Action extends WebFlowModelElement implements IAction,
         String oldValue = this.bean;
         this.bean = bean;
         super.firePropertyChange(PROPS, oldValue, bean);
-    }
-
-    /**
-     * @param beanClass
-     *            The beanClass to set.
-     */
-    public void setBeanClass(String beanClass) {
-        String oldValue = this.beanClass;
-        this.beanClass = beanClass;
-        super.firePropertyChange(PROPS, oldValue, beanClass);
-    }
-
-    /**
-     * @param classRef
-     *            The classRef to set.
-     */
-    public void setClassRef(String classRef) {
-        String oldValue = this.classRef;
-        this.classRef = classRef;
-        super.firePropertyChange(PROPS, oldValue, classRef);
     }
 
     /*
@@ -319,7 +267,10 @@ public class Action extends WebFlowModelElement implements IAction,
     }
     
     public boolean hasBeanReference() {
-        return (this.bean != null || this.beanClass != null
-                || this.classRef != null || this.autowire != null || this.method != null);
+        return (this.bean != null);
+    }
+
+    public int getKind() {
+        return kind;
     }
 }

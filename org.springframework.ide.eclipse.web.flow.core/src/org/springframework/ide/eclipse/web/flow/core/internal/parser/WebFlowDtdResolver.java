@@ -44,10 +44,10 @@ public class WebFlowDtdResolver implements EntityResolver {
                 return source;
             }
             catch (IOException ex) {
-                throw new SAXParseException("Spring WebFlow Dtd not found", publicId, systemId, 1, 1);
+                throw new SAXParseException("Spring Web Flow Dtd not found", publicId, systemId, 1, 1);
             }
         }
-        throw new SAXParseException("Spring WebFlow Dtd not declared", publicId, systemId, 1, 1);
+        throw new SAXParseException("Spring Web Flow Dtd not declared", publicId, systemId, 1, 1);
     }
 
 }

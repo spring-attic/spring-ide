@@ -109,17 +109,8 @@ public class BeanReferenceValidator implements IWebFlowConfigValidator {
             boolean valid = true;
             // check if all fields are filled correctly
             String bean = reference.getBean();
-            String beanClass = reference.getBeanClass();
-            String classRef = reference.getClassRef();
-            String autowire = reference.getAutowire();
 
-            if (bean != null
-                    && (beanClass != null || classRef != null || autowire != null)) {
-                valid = false;
-            } else if (classRef != null
-                    && (bean != null || beanClass != null || autowire != null)) {
-                valid = false;
-            } else if (beanClass != null && (bean != null || classRef != null)) {
+            if (bean != null) {
                 valid = false;
             }
             if (!valid) {
@@ -148,34 +139,6 @@ public class BeanReferenceValidator implements IWebFlowConfigValidator {
                                                 + configSet.getElementName()
                                                 + "'. Specified bean with id '"
                                                 + bean
-                                                + "' can not be found in associated Beans ConfigSet '"
-                                                + beansConfigSet
-                                                        .getElementName()
-                                                + "'",
-                                        IMarker.SEVERITY_ERROR,
-                                        reference.getElementStartLine(),
-                                        IWebFlowProjectMarker.ERROR_CODE_PARSING_FAILED);
-                    }
-                }
-
-                if (classRef != null) {
-                    Iterator iterator = beansConfigSet.getBeanClasses()
-                            .iterator();
-                    valid = false;
-                    while (iterator.hasNext()) {
-                        String className = (String) iterator.next();
-                        if (className.equals(classRef)) {
-                            valid = true;
-                        }
-                    }
-                    if (!valid) {
-                        WebFlowModelUtils
-                                .createProblemMarker(
-                                        config,
-                                        "Bean Reference is not valid within the WebFlow ConfigSet '"
-                                                + configSet.getElementName()
-                                                + "'. Specified bean with classref '"
-                                                + classRef
                                                 + "' can not be found in associated Beans ConfigSet '"
                                                 + beansConfigSet
                                                         .getElementName()

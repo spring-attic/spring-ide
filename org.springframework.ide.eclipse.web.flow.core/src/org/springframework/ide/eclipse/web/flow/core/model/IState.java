@@ -16,7 +16,9 @@
 
 package org.springframework.ide.eclipse.web.flow.core.model;
 
-public interface IState extends IBeanReference {
+import java.util.List;
+
+public interface IState extends IAttributeEnabled {
 
     IWebFlowConfig getConfig();
 
@@ -29,5 +31,20 @@ public interface IState extends IBeanReference {
     void setStartState(boolean startState);
 
     String getParentName();
+    
+    List getEntryActions();
 
+    void addEntryAction(IAction action);
+
+    void addEntryAction(IAction action, int i);
+
+    void removeEntryAction(IAction action);
+    
+    List getExitActions();
+
+    void addExitAction(IAction action);
+
+    void addExitAction(IAction action, int i);
+
+    void removeExitAction(IAction action);
 }

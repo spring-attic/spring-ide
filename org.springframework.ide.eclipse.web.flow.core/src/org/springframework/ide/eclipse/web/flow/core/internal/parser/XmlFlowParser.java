@@ -31,24 +31,25 @@ import org.springframework.ide.eclipse.web.flow.core.internal.model.DecisionStat
 import org.springframework.ide.eclipse.web.flow.core.internal.model.EndState;
 import org.springframework.ide.eclipse.web.flow.core.internal.model.If;
 import org.springframework.ide.eclipse.web.flow.core.internal.model.IfTransition;
+import org.springframework.ide.eclipse.web.flow.core.internal.model.InlineFlowState;
 import org.springframework.ide.eclipse.web.flow.core.internal.model.Input;
 import org.springframework.ide.eclipse.web.flow.core.internal.model.Output;
 import org.springframework.ide.eclipse.web.flow.core.internal.model.Property;
-import org.springframework.ide.eclipse.web.flow.core.internal.model.Setup;
 import org.springframework.ide.eclipse.web.flow.core.internal.model.StateTransition;
 import org.springframework.ide.eclipse.web.flow.core.internal.model.SubFlowState;
 import org.springframework.ide.eclipse.web.flow.core.internal.model.Transition;
 import org.springframework.ide.eclipse.web.flow.core.internal.model.ViewState;
 import org.springframework.ide.eclipse.web.flow.core.internal.model.WebFlowState;
+import org.springframework.ide.eclipse.web.flow.core.model.IAction;
 import org.springframework.ide.eclipse.web.flow.core.model.IDescriptionEnabled;
 import org.springframework.ide.eclipse.web.flow.core.model.IIf;
-import org.springframework.ide.eclipse.web.flow.core.model.ISetup;
+import org.springframework.ide.eclipse.web.flow.core.model.IInlineFlowState;
 import org.springframework.ide.eclipse.web.flow.core.model.IState;
 import org.springframework.ide.eclipse.web.flow.core.model.ITransitionableFrom;
 import org.springframework.ide.eclipse.web.flow.core.model.ITransitionableTo;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowConfig;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
-import org.springframework.util.Assert;
+import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
@@ -65,14 +66,12 @@ public class XmlFlowParser {
     private static final String ACTION_STATE_ELEMENT = "action-state";
 
     private static final String ACTION_ELEMENT = "action";
+    
+    private static final String ENTRY_ACTION_ELEMENT = "entry-actions";
+    
+    private static final String EXIT_ACTION_ELEMENT = "exit-actions";
 
     private static final String BEAN_ATTRIBUTE = "bean";
-
-    private static final String CLASS_ATTRIBUTE = "class";
-
-    private static final String AUTOWIRE_ATTRIBUTE = "autowire";
-
-    private static final String CLASSREF_ATTRIBUTE = "classref";
 
     private static final String NAME_ATTRIBUTE = "name";
 
@@ -85,6 +84,10 @@ public class XmlFlowParser {
     private static final String SUBFLOW_STATE_ELEMENT = "subflow-state";
 
     private static final String FLOW_ATTRIBUTE = "flow";
+    
+    private static final String INLINE_FLOW_ELEMENT = "inline-flow";
+    
+    private static final String FLOW_ELEMENT = "flow";
 
     private static final String ATTRIBUTE_MAPPER_ELEMENT = "attribute-mapper";
 
@@ -114,15 +117,11 @@ public class XmlFlowParser {
 
     private static final String ELSE_ATTRIBUTE = "else";
     
-    private static final String SETUP_ELEMENT = "setup";
-    
-    private static final String ONERROR_ATTRIBUTE = "on-error";
-    
-    private static final String INPUT_ELEMENT = "input";
+    private static final String INPUT_ELEMENT = "input-mapping";
     
     private static final String AS_ATTRIBUTE = "as";
     
-    private static final String OUTPUT_ELEMENT = "output";
+    private static final String OUTPUT_ELEMENT = "output-mapping";
 
     private IFile resource;
 
@@ -153,36 +152,28 @@ public class XmlFlowParser {
 
     public void buildStates(IWebFlowConfig config, Document doc)
             throws WebFlowBuilderException {
-        parseStateDefinitions(config, doc);
+        parseStateDefinitions(config, doc.getDocumentElement());
     }
 
     /**
      * Parse the state definitions in the XML file and add them to the flow
      * object we're constructing.
      */
-    protected void parseStateDefinitions(IWebFlowConfig config, Document doc) {
-        Element root = doc.getDocumentElement();
+    protected IWebFlowState parseStateDefinitions(IWebFlowModelElement config, Element root) {
         String startStateId = root.getAttribute(START_STATE_ELEMENT_ATTRIBUTE);
-        String id = root.getAttribute(ID_ATTRIBUTE);
-        WebFlowState rootState = new WebFlowState(config, id);
-        config.setState(rootState);
-        String bean = root.getAttribute(BEAN_ATTRIBUTE);
-        String classref = root.getAttribute(CLASSREF_ATTRIBUTE);
-        String beanClass = root.getAttribute(CLASS_ATTRIBUTE);
-        String autowire = root.getAttribute(AUTOWIRE_ATTRIBUTE);
-        if (bean != null && !"".equals(bean)) {
-            rootState.setBean(bean);
+        WebFlowState rootState = new WebFlowState(config);
+        if (config instanceof IWebFlowConfig) {
+            ((IWebFlowConfig) config).setState(rootState);
         }
-        if (classref != null && !"".equals(classref)) {
-            rootState.setClassRef(classref);
-        }
-        if (beanClass != null && !"".equals(beanClass)) {
-            rootState.setBeanClass(beanClass);
-            if (autowire != null && !"".equals(autowire)) {
-                rootState.setAutowire(autowire);
-            }
-        }
+
         List properties = parseProperties(rootState, root);
+        rootState.getProperties().addAll(properties);
+       
+        // TODO add var parsing here
+
+        List entryActions = parseEntryActions(rootState, root);
+        rootState.getEntryActions().addAll(entryActions);
+        
         rootState.setElementStartLine(LineNumberPreservingDOMParser
                 .getStartLineNumber(root));
         rootState.setElementEndLine(LineNumberPreservingDOMParser
@@ -202,23 +193,27 @@ public class XmlFlowParser {
                 Element element = (Element) node;
                 IState state = null;
                 if (ACTION_STATE_ELEMENT.equals(element.getNodeName())) {
-                    state = parseAndAddActionState(config.getState(), element,
+                    state = parseAndAddActionState(rootState, element,
                             transitions);
                 }
                 else if (VIEW_STATE_ELEMENT.equals(element.getNodeName())) {
-                    state = parseAndAddViewState(config.getState(), element,
+                    state = parseAndAddViewState(rootState, element,
                             transitions);
                 }
                 else if (SUBFLOW_STATE_ELEMENT.equals(element.getNodeName())) {
-                    state = parseAndAddSubFlowState(config.getState(), element,
+                    state = parseAndAddSubFlowState(rootState, element,
                             transitions);
                 }
                 else if (END_STATE_ELEMENT.equals(element.getNodeName())) {
-                    state = parseAndAddEndState(config.getState(), element);
+                    state = parseAndAddEndState(rootState, element);
                 }
                 else if (DECISION_STATE_ELEMENT.equals(element.getNodeName())) {
-                    state = parseAndAddDecisionState(config.getState(),
+                    state = parseAndAddDecisionState(rootState,
                             element, transitions);
+                }
+                else if (INLINE_FLOW_ELEMENT.equals(element.getNodeName())) {
+                    state = parseInlineFlowState(rootState,
+                            element);
                 }
                 if (state != null) {
                     states.put(state.getId(), state);
@@ -239,7 +234,28 @@ public class XmlFlowParser {
         }
 
         linkTransitions(transitions, states);
-        config.getState().setStartState((IState) states.get(startStateId));
+        rootState.setStartState((IState) states.get(startStateId));
+        
+        return rootState;
+    }
+
+    protected IState parseInlineFlowState(IWebFlowState state, Element element) {
+        String id = element.getAttribute(ID_ATTRIBUTE);
+        IInlineFlowState inLineState = new InlineFlowState(state, id);
+        
+        NodeList childNodeList = element.getChildNodes();
+        
+        for (int i = 0; i < childNodeList.getLength(); i++) {
+            Node childNode = childNodeList.item(i);
+            if (childNode instanceof Element) {
+                Element childElement = (Element) childNode;
+                if (FLOW_ELEMENT.equals(childElement.getNodeName())) {
+                    IWebFlowState webFlowState = parseStateDefinitions(state, childElement);
+                    inLineState.setWebFlowState(webFlowState);
+                }
+            }
+        }
+        return inLineState;
     }
 
     protected void linkTransitions(List transitions, Map states) {
@@ -258,24 +274,16 @@ public class XmlFlowParser {
             Element element, List transitionList) {
         String id = element.getAttribute(ID_ATTRIBUTE);
         ActionState state = new ActionState(parent, id, null);
-        String bean = element.getAttribute(BEAN_ATTRIBUTE);
-        String classref = element.getAttribute(CLASSREF_ATTRIBUTE);
-        String beanClass = element.getAttribute(CLASS_ATTRIBUTE);
-        String autowire = element.getAttribute(AUTOWIRE_ATTRIBUTE);
-        if (bean != null && !"".equals(bean)) {
-            state.setBean(bean);
-        }
-        if (classref != null && !"".equals(classref)) {
-            state.setClassRef(classref);
-        }
-        if (beanClass != null && !"".equals(beanClass)) {
-            state.setBeanClass(beanClass);
-            if (autowire != null && !"".equals(autowire)) {
-                state.setAutowire(autowire);
-            }
-        }
-        List actions = parseActions(state, element);
+        
+        List actions = parseActions(state, element, IAction.ACTION);
         state.getActions().addAll(actions);
+        
+        List entryActions = parseEntryActions(state, element);
+        List exitActions = parseExitActions(state, element);
+        
+        state.getEntryActions().addAll(entryActions);
+        state.getExitActions().addAll(exitActions);
+        
         state.getProperties().addAll(parseProperties(state, element));
         List transitions = parseTransitions(element, state);
         transitionList.addAll(transitions);
@@ -299,25 +307,17 @@ public class XmlFlowParser {
         String id = element.getAttribute(ID_ATTRIBUTE);
         DecisionState state = new DecisionState(parent, id, null);
         String bean = element.getAttribute(BEAN_ATTRIBUTE);
-        String classref = element.getAttribute(CLASSREF_ATTRIBUTE);
-        String beanClass = element.getAttribute(CLASS_ATTRIBUTE);
-        String autowire = element.getAttribute(AUTOWIRE_ATTRIBUTE);
-        if (bean != null && !"".equals(bean)) {
-            state.setBean(bean);
-        }
-        if (classref != null && !"".equals(classref)) {
-            state.setClassRef(classref);
-        }
-        if (beanClass != null && !"".equals(beanClass)) {
-            state.setBeanClass(beanClass);
-            if (autowire != null && !"".equals(autowire)) {
-                state.setAutowire(autowire);
-            }
-        }
+
         List ifs = parseIfs(state, element, transitionList);
         state.getIfs().addAll(ifs);
         state.getProperties().addAll(parseProperties(state, element));
 
+        List entryActions = parseEntryActions(state, element);
+        List exitActions = parseExitActions(state, element);
+        
+        state.getEntryActions().addAll(entryActions);
+        state.getExitActions().addAll(exitActions);
+        
         state.setElementStartLine(LineNumberPreservingDOMParser
                 .getStartLineNumber(element));
         state.setElementEndLine(LineNumberPreservingDOMParser
@@ -341,30 +341,16 @@ public class XmlFlowParser {
         else {
             state = new ViewState(parent, id);
         }
-        String bean = element.getAttribute(BEAN_ATTRIBUTE);
-        String classref = element.getAttribute(CLASSREF_ATTRIBUTE);
-        String beanClass = element.getAttribute(CLASS_ATTRIBUTE);
-        String autowire = element.getAttribute(AUTOWIRE_ATTRIBUTE);
-        if (bean != null && !"".equals(bean)) {
-            state.setBean(bean);
-        }
-        if (classref != null && !"".equals(classref)) {
-            state.setClassRef(classref);
-        }
-        if (beanClass != null && !"".equals(beanClass)) {
-            state.setBeanClass(beanClass);
-            if (autowire != null && !"".equals(autowire)) {
-                state.setAutowire(autowire);
-            }
-        }
-        
-        ISetup setup = this.parseSetup(element, state);
-        if (setup != null) {
-            state.setSetup(setup);
-        }
         
         List transitions = parseTransitions(element, state);
         transitionList.addAll(transitions);
+        
+        List entryActions = parseEntryActions(state, element);
+        List exitActions = parseExitActions(state, element);
+        
+        state.getEntryActions().addAll(entryActions);
+        state.getExitActions().addAll(exitActions);
+        
         state.getProperties().addAll(parseProperties(state, element));
         state.setElementStartLine(LineNumberPreservingDOMParser
                 .getStartLineNumber(element));
@@ -385,26 +371,18 @@ public class XmlFlowParser {
         String flowName = element.getAttribute(FLOW_ATTRIBUTE);
         String mapper = null;
         SubFlowState state = new SubFlowState(parent, id, flowName);
-        String bean = element.getAttribute(BEAN_ATTRIBUTE);
-        String classref = element.getAttribute(CLASSREF_ATTRIBUTE);
-        String beanClass = element.getAttribute(CLASS_ATTRIBUTE);
-        String autowire = element.getAttribute(AUTOWIRE_ATTRIBUTE);
-        if (bean != null && !"".equals(bean)) {
-            state.setBean(bean);
-        }
-        if (classref != null && !"".equals(classref)) {
-            state.setClassRef(classref);
-        }
-        if (beanClass != null && !"".equals(beanClass)) {
-            state.setBeanClass(beanClass);
-            if (autowire != null && !"".equals(autowire)) {
-                state.setAutowire(autowire);
-            }
-        }
+
         state.setAttributeMapper(parseAttributeMapper(state, element));
         List transitions = parseTransitions(element, state);
         transitionList.addAll(transitions);
         state.getProperties().addAll(parseProperties(state, element));
+        
+        List entryActions = parseEntryActions(state, element);
+        List exitActions = parseExitActions(state, element);
+        
+        state.getEntryActions().addAll(entryActions);
+        state.getExitActions().addAll(exitActions);
+        
         state.setElementStartLine(LineNumberPreservingDOMParser
                 .getStartLineNumber(element));
         state.setElementEndLine(LineNumberPreservingDOMParser
@@ -420,24 +398,12 @@ public class XmlFlowParser {
             if (ATTRIBUTE_MAPPER_ELEMENT
                     .equals(children.item(i).getLocalName())) {
                 Element child = (Element) children.item(i);
-                String beanId = child.getAttribute(BEAN_ATTRIBUTE);
                 AttributeMapper mapper = new AttributeMapper(parent, null);
                 String bean = child.getAttribute(BEAN_ATTRIBUTE);
-                String classref = child.getAttribute(CLASSREF_ATTRIBUTE);
-                String beanClass = child.getAttribute(CLASS_ATTRIBUTE);
-                String autowire = child.getAttribute(AUTOWIRE_ATTRIBUTE);
                 if (bean != null && !"".equals(bean)) {
                     mapper.setBean(bean);
                 }
-                if (classref != null && !"".equals(classref)) {
-                    mapper.setClassRef(classref);
-                }
-                if (beanClass != null && !"".equals(beanClass)) {
-                    mapper.setBeanClass(beanClass);
-                    if (autowire != null && !"".equals(autowire)) {
-                        mapper.setAutowire(autowire);
-                    }
-                }
+
                 mapper.setElementStartLine(LineNumberPreservingDOMParser
                         .getStartLineNumber(child));
                 mapper.setElementEndLine(LineNumberPreservingDOMParser
@@ -518,22 +484,10 @@ public class XmlFlowParser {
             state = new EndState(parent, id);
 
         }
-        String bean = element.getAttribute(BEAN_ATTRIBUTE);
-        String classref = element.getAttribute(CLASSREF_ATTRIBUTE);
-        String beanClass = element.getAttribute(CLASS_ATTRIBUTE);
-        String autowire = element.getAttribute(AUTOWIRE_ATTRIBUTE);
-        if (bean != null && !"".equals(bean)) {
-            state.setBean(bean);
-        }
-        if (classref != null && !"".equals(classref)) {
-            state.setClassRef(classref);
-        }
-        if (beanClass != null && !"".equals(beanClass)) {
-            state.setBeanClass(beanClass);
-            if (autowire != null && !"".equals(autowire)) {
-                state.setAutowire(autowire);
-            }
-        }
+        
+        List entryActions = parseEntryActions(state, element);
+        state.getEntryActions().addAll(entryActions);
+
         state.getProperties().addAll(parseProperties(state, element));
         state.setElementStartLine(LineNumberPreservingDOMParser
                 .getStartLineNumber(element));
@@ -547,7 +501,7 @@ public class XmlFlowParser {
      * Find all action definitions in given action state definition and obtain
      * corresponding Action objects.
      */
-    protected List parseActions(IWebFlowModelElement parent, Element element) {
+    protected List parseActions(IWebFlowModelElement parent, Element element, int kind) {
         List actions = new LinkedList();
         NodeList childNodeList = element.getChildNodes();
         for (int i = 0; i < childNodeList.getLength(); i++) {
@@ -555,7 +509,7 @@ public class XmlFlowParser {
             if (childNode instanceof Element) {
                 Element childElement = (Element) childNode;
                 if (ACTION_ELEMENT.equals(childElement.getNodeName())) {
-                    actions.add(parseAction(parent, childElement));
+                    actions.add(parseAction(parent, childElement, kind));
                 }
             }
         }
@@ -624,6 +578,44 @@ public class XmlFlowParser {
      * Find all action definitions in given action state definition and obtain
      * corresponding Action objects.
      */
+    protected List parseExitActions(IWebFlowModelElement parent, Element element) {
+        List properties = new LinkedList();
+        NodeList childNodeList = element.getChildNodes();
+        for (int i = 0; i < childNodeList.getLength(); i++) {
+            Node childNode = childNodeList.item(i);
+            if (childNode instanceof Element) {
+                Element childElement = (Element) childNode;
+                if (EXIT_ACTION_ELEMENT.equals(childElement.getNodeName())) {
+                    properties.addAll(parseActions(parent, childElement, IAction.EXIT_ACTION));
+                }
+            }
+        }
+        return properties;
+    }
+    
+    /**
+     * Find all action definitions in given action state definition and obtain
+     * corresponding Action objects.
+     */
+    protected List parseEntryActions(IWebFlowModelElement parent, Element element) {
+        List properties = new LinkedList();
+        NodeList childNodeList = element.getChildNodes();
+        for (int i = 0; i < childNodeList.getLength(); i++) {
+            Node childNode = childNodeList.item(i);
+            if (childNode instanceof Element) {
+                Element childElement = (Element) childNode;
+                if (ENTRY_ACTION_ELEMENT.equals(childElement.getNodeName())) {
+                    properties.addAll(parseActions(parent, childElement, IAction.ENTRY_ACTION));
+                }
+            }
+        }
+        return properties;
+    }
+    
+    /**
+     * Find all action definitions in given action state definition and obtain
+     * corresponding Action objects.
+     */
     protected List parseProperties(IWebFlowModelElement parent, Element element) {
         List properties = new LinkedList();
         NodeList childNodeList = element.getChildNodes();
@@ -680,25 +672,14 @@ public class XmlFlowParser {
     /**
      * Parse given action definition and return a corresponding Action object.
      */
-    protected Action parseAction(IWebFlowModelElement parent, Element element) {
+    protected Action parseAction(IWebFlowModelElement parent, Element element, int kind) {
+        Action action = new Action(parent, null);
+
         String name = element.getAttribute(NAME_ATTRIBUTE);
         String method = element.getAttribute(METHOD_ATTRIBUTE);
-        Action action = new Action(parent, null);
         String bean = element.getAttribute(BEAN_ATTRIBUTE);
-        String classref = element.getAttribute(CLASSREF_ATTRIBUTE);
-        String beanClass = element.getAttribute(CLASS_ATTRIBUTE);
-        String autowire = element.getAttribute(AUTOWIRE_ATTRIBUTE);
         if (bean != null && !"".equals(bean)) {
             action.setBean(bean);
-        }
-        if (classref != null && !"".equals(classref)) {
-            action.setClassRef(classref);
-        }
-        if (beanClass != null && !"".equals(beanClass)) {
-            action.setBeanClass(beanClass);
-            if (autowire != null && !"".equals(autowire)) {
-                action.setAutowire(autowire);
-            }
         }
         if (!"".equals(name)) {
             action.setName(name);
@@ -706,6 +687,9 @@ public class XmlFlowParser {
         if (!"".equals(method)) {
             action.setMethod(method);
         }
+        
+        action.setKind(kind);
+        
         action.getProperties().addAll(parseProperties(action, element));
 
         action.setElementStartLine(LineNumberPreservingDOMParser
@@ -735,51 +719,6 @@ public class XmlFlowParser {
 
         return transitions;
     }
-    
-    /**
-     * Find all transition definitions in given state definition and return a
-     * list of corresponding Transition objects.
-     */
-    protected ISetup parseSetup(Element element, IState state) {
-        NodeList childNodeList = element.getChildNodes();
-        for (int i = 0; i < childNodeList.getLength(); i++) {
-            Node childNode = childNodeList.item(i);
-            if (childNode instanceof Element) {
-                Element childElement = (Element) childNode;
-                if (SETUP_ELEMENT.equals(childElement.getNodeName())) {
-                    Setup setup = new Setup(state, null);
-                    String bean = childElement.getAttribute(BEAN_ATTRIBUTE);
-                    String classref = childElement.getAttribute(CLASSREF_ATTRIBUTE);
-                    String beanClass = childElement.getAttribute(CLASS_ATTRIBUTE);
-                    String autowire = childElement.getAttribute(AUTOWIRE_ATTRIBUTE);
-                    String method = childElement.getAttribute(METHOD_ATTRIBUTE);
-                    String onError = childElement.getAttribute(ONERROR_ATTRIBUTE);
-                    if (bean != null && !"".equals(bean)) {
-                        setup.setBean(bean);
-                    }
-                    if (classref != null && !"".equals(classref)) {
-                        setup.setClassRef(classref);
-                    }
-                    if (beanClass != null && !"".equals(beanClass)) {
-                        setup.setBeanClass(beanClass);
-                        if (autowire != null && !"".equals(autowire)) {
-                            setup.setAutowire(autowire);
-                        }
-                    }
-                    if (method != null && !"".equals(method)) {
-                        setup.setMethod(method);
-                    }
-                    if (onError != null && !"".equals(onError)) {
-                        setup.setOnErrorId(onError);
-                    }
-                    setup.getProperties().addAll(parseProperties(setup, childElement));
-                    return setup;
-                }
-            }
-        }
-
-        return null;
-    }
 
     /**
      * Parse a transition definition and return a corresponding Transition
@@ -790,23 +729,8 @@ public class XmlFlowParser {
         String to = element.getAttribute(TO_ATTRIBUTE);
         StateTransition trans = new StateTransition(to,
                 (ITransitionableFrom) state, event);
-        String bean = element.getAttribute(BEAN_ATTRIBUTE);
-        String classref = element.getAttribute(CLASSREF_ATTRIBUTE);
-        String beanClass = element.getAttribute(CLASS_ATTRIBUTE);
-        String autowire = element.getAttribute(AUTOWIRE_ATTRIBUTE);
-        if (bean != null && !"".equals(bean)) {
-            trans.setBean(bean);
-        }
-        if (classref != null && !"".equals(classref)) {
-            trans.setClassRef(classref);
-        }
-        if (beanClass != null && !"".equals(beanClass)) {
-            trans.setBeanClass(beanClass);
-            if (autowire != null && !"".equals(autowire)) {
-                trans.setAutowire(autowire);
-            }
-        }
-        trans.getActions().addAll(parseActions(trans, element));
+
+        trans.getActions().addAll(parseActions(trans, element, IAction.ACTION));
         trans.getProperties().addAll(parseProperties(trans, element));
         
         trans.setElementStartLine(LineNumberPreservingDOMParser

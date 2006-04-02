@@ -20,11 +20,11 @@ import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
-import org.springframework.ide.eclipse.web.flow.core.model.IOutput;
+import org.springframework.ide.eclipse.web.flow.core.model.IOutputMapping;
 import org.springframework.ide.eclipse.web.flow.core.model.IPersistableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 
-public class Output extends WebFlowModelElement implements IOutput,
+public class Output extends WebFlowModelElement implements IOutputMapping,
         IPersistableModelElement, ICloneableModelElement {
 
     private String name;

@@ -23,9 +23,9 @@ import java.util.List;
 import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElement;
-import org.springframework.ide.eclipse.web.flow.core.model.IInput;
+import org.springframework.ide.eclipse.web.flow.core.model.IInputMapping;
 import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
-import org.springframework.ide.eclipse.web.flow.core.model.IOutput;
+import org.springframework.ide.eclipse.web.flow.core.model.IOutputMapping;
 import org.springframework.ide.eclipse.web.flow.core.model.IPersistableModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 
@@ -35,6 +35,8 @@ public class AttributeMapper extends AbstractModelElement implements
     private List inputs;
     
     private List outputs;
+    
+    private String bean;
     
     public AttributeMapper(IWebFlowModelElement parent, String id) {
         super(parent, id);
@@ -70,10 +72,7 @@ public class AttributeMapper extends AbstractModelElement implements
      */
     public ICloneableModelElement cloneModelElement() {
         AttributeMapper mapper = new AttributeMapper();
-        mapper.setAutowire(getAutowire());
         mapper.setBean(getBean());
-        mapper.setBeanClass(getBeanClass());
-        mapper.setClassRef(getClassRef());
         for (int i = 0; i < this.getInputs().size(); i++) {
             Input input = (Input) this.getInputs().get(i);
             mapper.addInput((Input) input.cloneModelElement());
@@ -93,10 +92,7 @@ public class AttributeMapper extends AbstractModelElement implements
     public void applyCloneValues(ICloneableModelElement element) {
         if (element instanceof IAttributeMapper) {
             IAttributeMapper mapper = (IAttributeMapper) element;
-            setAutowire(mapper.getAutowire());
             setBean(mapper.getBean());
-            setBeanClass(mapper.getBeanClass());
-            setClassRef(mapper.getClassRef());
             Input[] inputs = (Input[]) this.getInputs().toArray(
                     new Input[this.getInputs().size()]);
             for (int i = 0; i < inputs.length; i++) {
@@ -133,7 +129,7 @@ public class AttributeMapper extends AbstractModelElement implements
     /* (non-Javadoc)
      * @see org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper#addInput(org.springframework.ide.eclipse.web.flow.core.model.IInput)
      */
-    public void addInput(IInput input) {
+    public void addInput(IInputMapping input) {
         if (!this.inputs.contains(input)) {
             input.setElementParent(this);
             this.inputs.add(input);
@@ -145,7 +141,7 @@ public class AttributeMapper extends AbstractModelElement implements
     /* (non-Javadoc)
      * @see org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper#addOutput(org.springframework.ide.eclipse.web.flow.core.model.IOutput)
      */
-    public void addOutput(IOutput output) {
+    public void addOutput(IOutputMapping output) {
         if (!this.outputs.contains(output)) {
             output.setElementParent(this);
             this.outputs.add(output);
@@ -175,7 +171,7 @@ public class AttributeMapper extends AbstractModelElement implements
     /* (non-Javadoc)
      * @see org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper#removeInput(org.springframework.ide.eclipse.web.flow.core.model.IInput)
      */
-    public void removeInput(IInput input) {
+    public void removeInput(IInputMapping input) {
         if (this.inputs.contains(input)) {
             this.inputs.remove(input);
             super.fireStructureChange(REMOVE_CHILDREN, input);
@@ -185,7 +181,7 @@ public class AttributeMapper extends AbstractModelElement implements
     /* (non-Javadoc)
      * @see org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper#removeOutput(org.springframework.ide.eclipse.web.flow.core.model.IOutput)
      */
-    public void removeOutput(IOutput output) {
+    public void removeOutput(IOutputMapping output) {
         if (this.outputs.contains(output)) {
             this.outputs.remove(output);
             super.fireStructureChange(REMOVE_CHILDREN, output);
@@ -196,7 +192,7 @@ public class AttributeMapper extends AbstractModelElement implements
     /* (non-Javadoc)
      * @see org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper#addInput(org.springframework.ide.eclipse.web.flow.core.model.IInput, int)
      */
-    public void addInput(IInput input, int index) {
+    public void addInput(IInputMapping input, int index) {
         if (!this.inputs.contains(input)) {
             input.setElementParent(this);
             this.inputs.add(index, input);
@@ -208,12 +204,38 @@ public class AttributeMapper extends AbstractModelElement implements
     /* (non-Javadoc)
      * @see org.springframework.ide.eclipse.web.flow.core.model.IAttributeMapper#addOutput(org.springframework.ide.eclipse.web.flow.core.model.IOutput, int)
      */
-    public void addOutput(IOutput output, int index) {
+    public void addOutput(IOutputMapping output, int index) {
         if (!this.outputs.contains(output)) {
             output.setElementParent(this);
             this.outputs.add(index, output);
             super.firePropertyChange(ADD_CHILDREN, new Integer(this.outputs
                     .indexOf(output)), output);
         }        
+    }
+    
+    /**
+     * @param bean
+     *            The bean to set.
+     */
+    public void setBean(String bean) {
+        String oldValue = this.bean;
+        this.bean = bean;
+        super.firePropertyChange(PROPS, oldValue, bean);
+    }
+    
+    public String getBean() {
+        return this.bean;
+    }
+
+    public boolean hasBeanReference() {
+        // TODO Auto-generated method stub
+        return (this.bean != null);
+    }
+
+    public void setMethod(String method) {
+    }
+
+    public String getMethod() {
+        return null;
     }
 }

@@ -18,11 +18,18 @@ package org.springframework.ide.eclipse.web.flow.core.model;
 
 public interface IAction extends IBeanReference {
 
-    String getMethod();
-
+    int ENTRY_ACTION = 1;
+    
+    int EXIT_ACTION = 2;
+    
+    int ACTION = 3;
+    
     String getName();
-
-    void setMethod(String method);
-
+    
     void setName(String name);
+    
+    int getKind();
+    
+    void setKind(int kind);
+
 }

@@ -25,7 +25,7 @@ import org.springframework.ide.eclipse.web.flow.core.model.IDecisionState;
 import org.springframework.ide.eclipse.web.flow.core.model.IIf;
 import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
 import org.springframework.ide.eclipse.web.flow.core.model.IPersistableModelElement;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttribute;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
 
@@ -132,10 +132,6 @@ public class DecisionState extends AbstractTransitionableFrom implements
         state.setId(getId());
         state.setElementName(getElementName());
         state.setElementParent(getElementParent());
-        state.setAutowire(getAutowire());
-        state.setBean(getBean());
-        state.setBeanClass(getBeanClass());
-        state.setClassRef(getClassRef());
         state.setDescription(getDescription());
         for (int i = 0; i < this.getIfs().size(); i++) {
             state.addIf((IIf) ((ICloneableModelElement) this.getIfs().get(i))
@@ -143,7 +139,7 @@ public class DecisionState extends AbstractTransitionableFrom implements
         }
         for (int i = 0; i < this.getProperties().size(); i++) {
             Property property = (Property) this.getProperties().get(i);
-            state.addProperty((IProperty) property.cloneModelElement());
+            state.addProperty((IAttribute) property.cloneModelElement());
         }
         return state;
     }
@@ -157,10 +153,6 @@ public class DecisionState extends AbstractTransitionableFrom implements
         if (element instanceof IDecisionState) {
             DecisionState state = (DecisionState) element;
             setId(state.getId());
-            setAutowire(state.getAutowire());
-            setBean(state.getBean());
-            setBeanClass(state.getBeanClass());
-            setClassRef(state.getClassRef());
             setDescription(state.getDescription());
             for (int i = 0; i < state.getIfs().size(); i++) {
                 ((ICloneableModelElement) this.getIfs().get(i))
@@ -173,7 +165,7 @@ public class DecisionState extends AbstractTransitionableFrom implements
                 removeProperty(props[i]);
             }
             for (int i = 0; i < state.getProperties().size(); i++) {
-                addProperty((IProperty) state.getProperties().get(i));
+                addProperty((IAttribute) state.getProperties().get(i));
             }
         }
     }

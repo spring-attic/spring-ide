@@ -22,9 +22,4 @@ public interface IViewState extends ITransitionableFrom {
 
     void setView(String view);
     
-    ISetup getSetup();
-    
-    void setSetup(ISetup setup);
-    
-    void removeSetup();
 }

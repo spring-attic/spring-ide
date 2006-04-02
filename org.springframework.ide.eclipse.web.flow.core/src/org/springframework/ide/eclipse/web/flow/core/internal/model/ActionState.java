@@ -26,15 +26,15 @@ import org.springframework.ide.eclipse.web.flow.core.model.ICloneableModelElemen
 import org.springframework.ide.eclipse.web.flow.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.web.flow.core.model.IModelWriter;
 import org.springframework.ide.eclipse.web.flow.core.model.IPersistableModelElement;
-import org.springframework.ide.eclipse.web.flow.core.model.IProperty;
+import org.springframework.ide.eclipse.web.flow.core.model.IAttribute;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowModelElement;
 import org.springframework.ide.eclipse.web.flow.core.model.IWebFlowState;
 
 public class ActionState extends AbstractTransitionableFrom implements
         IActionState, IPersistableModelElement, ICloneableModelElement {
 
-    List actions = null;
-
+    private List actions = new ArrayList();
+    
     public ActionState(IWebFlowModelElement parent, String id, List actions) {
         super(parent, id);
         if (actions != null)
@@ -48,40 +48,6 @@ public class ActionState extends AbstractTransitionableFrom implements
 
     public ActionState() {
         super(null, null);
-        this.actions = new ArrayList();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.ide.eclipse.web.core.model.IActionState#getActions()
-     */
-    public List getActions() {
-        return this.actions;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.ide.eclipse.web.core.model.IActionState#addAction(org.springframework.ide.eclipse.web.core.model.IAction)
-     */
-    public void addAction(IAction action) {
-        if (!this.actions.contains(action)) {
-            action.setElementParent(this);
-            this.actions.add(action);
-            super.firePropertyChange(ADD_CHILDREN, new Integer(this.actions
-                    .indexOf(action)), action);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.ide.eclipse.web.core.model.IActionState#removeAction(org.springframework.ide.eclipse.web.core.model.IAction)
-     */
-    public void removeAction(IAction action) {
-        this.actions.remove(action);
-        super.fireStructureChange(REMOVE_CHILDREN, action);
     }
 
     /*
@@ -91,19 +57,6 @@ public class ActionState extends AbstractTransitionableFrom implements
      */
     public int getElementType() {
         return IWebFlowModelElement.ACTION_STATE;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.ide.eclipse.web.flow.core.model.IActionState#addAction(org.springframework.ide.eclipse.web.flow.core.model.IAction,
-     *      int)
-     */
-    public void addAction(IAction action, int i) {
-        if (!this.actions.contains(action)) {
-            this.actions.add(i, action);
-            super.firePropertyChange(ADD_CHILDREN, new Integer(i), action);
-        }
     }
 
     /*
@@ -156,10 +109,6 @@ public class ActionState extends AbstractTransitionableFrom implements
         ActionState state = new ActionState();
         state.setId(getId());
         state.setElementName(getElementName());
-        state.setAutowire(getAutowire());
-        state.setBean(getBean());
-        state.setBeanClass(getBeanClass());
-        state.setClassRef(getClassRef());
         state.setDescription(getDescription());
         for (int i = 0; i < this.getActions().size(); i++) {
             state.addAction((IAction) ((ICloneableModelElement) this
@@ -167,7 +116,7 @@ public class ActionState extends AbstractTransitionableFrom implements
         }
         for (int i = 0; i < this.getProperties().size(); i++) {
             Property property = (Property) this.getProperties().get(i);
-            state.addProperty((IProperty) property.cloneModelElement());
+            state.addProperty((IAttribute) property.cloneModelElement());
         }
         return state;
     }
@@ -181,10 +130,6 @@ public class ActionState extends AbstractTransitionableFrom implements
         if (element instanceof IActionState) {
             ActionState action = (ActionState) element;
             setId(action.getId());
-            setAutowire(action.getAutowire());
-            setBean(action.getBean());
-            setBeanClass(action.getBeanClass());
-            setClassRef(action.getClassRef());
             setDescription(action.getDescription());
             Action[] actions = (Action[]) this.getActions().toArray(
                     new Action[this.getActions().size()]);
@@ -200,8 +145,54 @@ public class ActionState extends AbstractTransitionableFrom implements
                 removeProperty(props[i]);
             }
             for (int i = 0; i < action.getProperties().size(); i++) {
-                addProperty((IProperty) action.getProperties().get(i));
+                addProperty((IAttribute) action.getProperties().get(i));
             }
+        }
+    }
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.springframework.ide.eclipse.web.core.model.IActionState#getActions()
+     */
+    public List getActions() {
+        return this.actions;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.springframework.ide.eclipse.web.core.model.IActionState#addAction(org.springframework.ide.eclipse.web.core.model.IAction)
+     */
+    public void addAction(IAction action) {
+        if (!this.actions.contains(action)) {
+            action.setElementParent(this);
+            this.actions.add(action);
+            super.firePropertyChange(ADD_CHILDREN, new Integer(this.actions
+                    .indexOf(action)), action);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.springframework.ide.eclipse.web.core.model.IActionState#removeAction(org.springframework.ide.eclipse.web.core.model.IAction)
+     */
+    public void removeAction(IAction action) {
+        this.actions.remove(action);
+        super.fireStructureChange(REMOVE_CHILDREN, action);
+    }
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.springframework.ide.eclipse.web.flow.core.model.IActionState#addAction(org.springframework.ide.eclipse.web.flow.core.model.IAction,
+     *      int)
+     */
+    public void addAction(IAction action, int i) {
+        if (!this.actions.contains(action)) {
+            this.actions.add(i, action);
+            super.firePropertyChange(ADD_CHILDREN, new Integer(i), action);
         }
     }
 }
