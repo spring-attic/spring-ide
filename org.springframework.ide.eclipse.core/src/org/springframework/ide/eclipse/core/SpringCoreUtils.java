@@ -63,23 +63,20 @@ public final class SpringCoreUtils {
 	/**
 	 * Adds given nature as first nature to specified project.
 	 */	
-	public static void addProjectNature(IProject project, String nature) {
+	public static void addProjectNature(IProject project, String nature)
+														 throws CoreException {
 		if (project != null && nature != null) {
-			try {
-				if (!project.hasNature(nature)) {
-					IProjectDescription desc = project.getDescription();
-					String[] oldNatures = desc.getNatureIds();
-					String[] newNatures = new String[oldNatures.length + 1];
-					newNatures[0] = nature;
-					if (oldNatures.length > 0) {
-						System.arraycopy(oldNatures, 0, newNatures, 1,
-										 oldNatures.length);
-					}
-					desc.setNatureIds(newNatures);
-					project.setDescription(desc, null);
+			if (!project.hasNature(nature)) {
+				IProjectDescription desc = project.getDescription();
+				String[] oldNatures = desc.getNatureIds();
+				String[] newNatures = new String[oldNatures.length + 1];
+				newNatures[0] = nature;
+				if (oldNatures.length > 0) {
+					System.arraycopy(oldNatures, 0, newNatures, 1,
+									 oldNatures.length);
 				}
-			} catch (CoreException e) {
-				SpringCore.log(e);
+				desc.setNatureIds(newNatures);
+				project.setDescription(desc, null);
 			}
 		}
 	}
@@ -87,33 +84,30 @@ public final class SpringCoreUtils {
 	/**
 	 * Removes given nature from specified project.
 	 */	
-	public static void removeProjectNature(IProject project, String nature) {
+	public static void removeProjectNature(IProject project, String nature)
+														 throws CoreException {
 		if (project != null && nature != null) {
-			try {
-				if (project.exists() && project.hasNature(nature)) {
+			if (project.exists() && project.hasNature(nature)) {
 
-					// first remove all problem markers (including the
-					// inherited ones) from Spring beans project
-					if (nature.equals(SpringCore.NATURE_ID)) {
-						project.deleteMarkers(SpringCore.MARKER_ID, true,
-											  IResource.DEPTH_INFINITE);
-					}
-
-					// now remove project nature
-					IProjectDescription desc = project.getDescription();
-					String[] oldNatures = desc.getNatureIds();
-					String[] newNatures = new String[oldNatures.length - 1];
-					int newIndex = oldNatures.length - 2;
-					for (int i =  oldNatures.length - 1; i >= 0; i--) {
-						if (!oldNatures[i].equals(nature)) {
-							newNatures[newIndex--] = oldNatures[i];
-						}
-					}
-					desc.setNatureIds(newNatures);
-					project.setDescription(desc, null);
+				// first remove all problem markers (including the
+				// inherited ones) from Spring beans project
+				if (nature.equals(SpringCore.NATURE_ID)) {
+					project.deleteMarkers(SpringCore.MARKER_ID, true,
+										  IResource.DEPTH_INFINITE);
 				}
-			} catch (CoreException e) {
-				SpringCore.log(e);
+
+				// now remove project nature
+				IProjectDescription desc = project.getDescription();
+				String[] oldNatures = desc.getNatureIds();
+				String[] newNatures = new String[oldNatures.length - 1];
+				int newIndex = oldNatures.length - 2;
+				for (int i =  oldNatures.length - 1; i >= 0; i--) {
+					if (!oldNatures[i].equals(nature)) {
+						newNatures[newIndex--] = oldNatures[i];
+					}
+				}
+				desc.setNatureIds(newNatures);
+				project.setDescription(desc, null);
 			}
 		} 
 	}
