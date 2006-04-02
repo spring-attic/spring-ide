@@ -2,7 +2,7 @@
 <feature
       id="org.springframework.ide.eclipse.web.flow"
       label="%featureName"
-      version="0.0.3"
+      version="0.0.4"
       provider-name="%providerName">
    <install-handler/>
 
@@ -48,18 +48,18 @@
          id="org.springframework.ide.eclipse.web.flow.core"
          download-size="0"
          install-size="0"
-         version="0.0.3"/>
+         version="0.0.4"/>
 
    <plugin
          id="org.springframework.ide.eclipse.web.flow.ui"
          download-size="0"
          install-size="0"
-         version="0.0.3"/>
+         version="0.0.4"/>
 
    <plugin
          id="org.springframework.ide.eclipse.web.flow.ui.editor"
          download-size="0"
          install-size="0"
-         version="0.0.3"/>
+         version="0.0.4"/>
 
 </feature>
