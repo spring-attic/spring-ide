@@ -30,19 +30,37 @@
 
    <plugin
          id="org.springframework.ide.eclipse"
-         download-size="8193"
+         download-size="7459"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.core"
+         download-size="85830"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.core.doc"
+         download-size="459897"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.ui"
+         download-size="12733"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.core"
-         download-size="77524"
+         download-size="85830"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.ui"
-         download-size="128766"
+         download-size="151204"
          install-size="0"
          version="0.0.0"/>
 
@@ -54,31 +72,19 @@
 
    <plugin
          id="org.springframework.ide.eclipse.beans.ui.graph"
-         download-size="54210"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.springframework.ide.eclipse.core"
-         download-size="1339484"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.springframework.ide.eclipse.core.doc"
-         download-size="449609"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.springframework.ide.eclipse.ui"
-         download-size="9319"
+         download-size="54473"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.ui.editor"
-         download-size="57469"
+         download-size="77950"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.beans.ui.search"
+         download-size="35922"
          install-size="0"
          version="0.0.0"/>
 
