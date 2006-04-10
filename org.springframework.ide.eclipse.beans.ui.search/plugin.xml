@@ -72,7 +72,7 @@
 				definitionId="org.springframework.ide.eclipse.beans.search.actions.openBeansSearchPage"
 				menubarPath="org.eclipse.search.menu/dialogGroup"
 				label="%action.openBeansSearchPage.label"
-				icon="icons/full/obj16/spring_obj.gif"
+				icon="icons/full/obj16/spring_search_obj.gif"
 				class="org.springframework.ide.eclipse.beans.ui.search.actions.OpenBeansSearchPageAction"/>
 		</actionSet>
    </extension>
