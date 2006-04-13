@@ -213,7 +213,7 @@ public class SpringUIUtils {
     }    
 
     /**
-     * Returns the <code>ItextEditor</code> instance for given
+     * Returns the <code>ITextEditor</code> instance for given
      * <code>IEditorPart</code> or <code>null</code> for any non text editor.
      */
     public static final ITextEditor getTextEditor(IEditorPart part) {
