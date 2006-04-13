@@ -76,12 +76,12 @@
 				class="org.springframework.ide.eclipse.beans.ui.search.actions.OpenBeansSearchPageAction"/>
 		</actionSet>
    </extension>
-   
+
 	<extension point="org.eclipse.ui.commands">
 		<command
 			id="org.springframework.ide.eclipse.beans.search.actions.openBeansSearchPage"
 			name="%command.openBeansSearchPage.name"
 			description="%command.openBeansSearchPage.description"
-			categoryId="org.springframework.ide.eclipse.beans.ui.commands"/>
+			categoryId="org.eclipse.ui.category.views"/>
    </extension>
 </plugin>
