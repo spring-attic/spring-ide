@@ -22,63 +22,25 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.ui.IEditorActionDelegate;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.cheatsheets.ICheatSheetAction;
 import org.eclipse.ui.cheatsheets.ICheatSheetManager;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.views.BeansViewLocation;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
-public class ShowInView extends Action implements IEditorActionDelegate,
-							IWorkbenchWindowActionDelegate, ICheatSheetAction {
-    private ITextEditor editor;
-    private IFile file;
-
-	public void init(IWorkbenchWindow window) {
-		IEditorPart editor;
-		IWorkbenchPage page = window.getActivePage();
-		if (page != null) {
-			editor = page.getActiveEditor();
-		} else {
-			editor = null;
-		}
-		setActiveEditor(this, editor);
-	}
-
-	public void dispose() {
-		// unused
-	}
-
-	public void setActiveEditor(IAction action, IEditorPart part) {
-		editor = SpringUIUtils.getTextEditor(part);
-		if (editor != null) {
-			file = BeansUIUtils.getConfigFile(editor);
-		} else {
-			editor = null;
-			file = null;
-		}
-
-		// Disable action if not a Spring config file is currently edited 
-		action.setEnabled(file != null);
-	}
-
-	public void selectionChanged(IAction action, ISelection selection) {
-		setActiveEditor(action, SpringUIUtils.getActiveEditor());
-	}
-
+/**
+ * Shows the currently selected bean or property in Spring beans view.
+ * @author Torsten Juergeleit
+ */
+public class ShowInBeansViewAction extends AbstractBeansConfigEditorAction
+												 implements ICheatSheetAction {
 	public void run(IAction action) {
-		if (editor != null && file != null) {
-			BeansViewLocation location = guessBeansViewLocation();
+		if (getTextEditor() != null && getConfigFile() != null) {
+			BeansViewLocation location = guessBeansViewLocation(
+											 getTextEditor(), getConfigFile());
 			if (location != null) {
 				location.show();
 			}
@@ -104,7 +66,8 @@ public class ShowInView extends Action implements IEditorActionDelegate,
 		}
 	}
 
-	private BeansViewLocation guessBeansViewLocation() {
+	private BeansViewLocation guessBeansViewLocation(ITextEditor editor,
+													 IFile file) {
 		BeansViewLocation location = new BeansViewLocation();
 		location.setProjectName(file.getProject().getName());
 		location.setConfigName(file.getProjectRelativePath().toString());
