@@ -17,29 +17,26 @@
 package org.springframework.ide.eclipse.beans.ui.editor.hyperlink;
 
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
+import org.springframework.ide.eclipse.beans.ui.views.BeansViewLocation;
 
 /**
  * This implementation of <code>IHyperlink</code> represents a link to a node
- * within the same file.
- * @author Christian Dupuis
+ * within the Spring beans view.
+ * @author Torsten Juergeleit
  */
-public class NodeElementHyperlink implements IHyperlink {
+public class BeansViewLocationHyperlink implements IHyperlink {
 
 	private final IRegion region;
-	private final IRegion targetRegion;
-	private final ITextViewer viewer;
+	private BeansViewLocation location;
 
-	public NodeElementHyperlink(IRegion region, IRegion targetRegion,
-			ITextViewer viewer) {
+	public BeansViewLocationHyperlink(IRegion region, BeansViewLocation location) {
 		this.region = region;
-		this.targetRegion = targetRegion;
-		this.viewer = viewer;
+		this.location = location;
 	}
 
 	public IRegion getHyperlinkRegion() {
-		return region;
+		return this.region;
 	}
 
 	public String getTypeLabel() {
@@ -51,7 +48,6 @@ public class NodeElementHyperlink implements IHyperlink {
 	}
 
 	public void open() {
-		viewer.setSelectedRange(targetRegion.getOffset(), 0);
-		viewer.revealRange(targetRegion.getOffset(), targetRegion.getLength());
+		location.show();
 	}
 }

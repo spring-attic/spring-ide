@@ -1,16 +1,18 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  * 
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ 
 
 package org.springframework.ide.eclipse.beans.ui.editor;
 
@@ -23,16 +25,24 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
+import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
+import org.eclipse.wst.sse.core.internal.provisional.StructuredModelManager;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -41,11 +51,16 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+/**
+ * Collection of helper methods for beans XML editor.
+ * @author Christian Dupuis
+ */
 public class BeansEditorUtils {
 
 	public static final List getBeansFromConfigSets(IFile file) {
@@ -159,7 +174,7 @@ public class BeansEditorUtils {
 		return buf.toString();
 	}
 
-	public static int getBeanFlags(IBean bean, boolean isExternal) {
+	public static final int getBeanFlags(IBean bean, boolean isExternal) {
 		int flags = 0;
 		if (isExternal) {
 			flags |= BeansModelImages.FLAG_EXTERNAL;
@@ -176,7 +191,7 @@ public class BeansEditorUtils {
 		return flags;
 	}
 
-	public static List getClassNamesOfBean(IFile file, Node node) {
+	public static final List getClassNamesOfBean(IFile file, Node node) {
 		List classNames = new ArrayList();
 		NamedNodeMap rootAttributes = node.getAttributes();
 
@@ -197,7 +212,7 @@ public class BeansEditorUtils {
 		return classNames;
 	}
 
-	private static void getClassNamesOfBeans(IFile file, Document document,
+	private static final void getClassNamesOfBeans(IFile file, Document document,
 			String id, String className, String parentId, List classNames,
 			List beans) {
 
@@ -262,7 +277,7 @@ public class BeansEditorUtils {
 		}
 	}
 
-	public static String getClassNameForBean(IFile file, Document document,
+	public static final String getClassNameForBean(IFile file, Document document,
 			String id) {
 
 		boolean foundLocal = false;
@@ -303,7 +318,7 @@ public class BeansEditorUtils {
 	 * 
 	 * @return the progress monitor
 	 */
-	public static IProgressMonitor getProgressMonitor() {
+	public static final IProgressMonitor getProgressMonitor() {
 		IEditorPart editor = BeansEditorPlugin.getActiveWorkbenchPage()
 				.getActiveEditor();
 		if (editor != null
@@ -326,7 +341,7 @@ public class BeansEditorUtils {
 		}
 	}
 
-	public static IType getTypeForMethodReturnType(IMethod method,
+	public static final IType getTypeForMethodReturnType(IMethod method,
 			IType contextType, IFile file) {
 		IType returnType = null;
 		try {
@@ -342,7 +357,7 @@ public class BeansEditorUtils {
 		return returnType;
 	}
 
-	public static String resolveClassName(String className, IType type) {
+	public static final String resolveClassName(String className, IType type) {
 		try {
 			String[][] fullInter = type.resolveType(className);
 			if (fullInter != null && fullInter.length > 0) {
@@ -354,7 +369,7 @@ public class BeansEditorUtils {
 		return className;
 	}
 
-	public static IRegion extractPropertyPathFromCursorPosition(
+	public static final IRegion extractPropertyPathFromCursorPosition(
 			IRegion hyperlinkRegion, IRegion cursor, String target,
 			List propertyPaths) {
 
@@ -386,7 +401,7 @@ public class BeansEditorUtils {
 
 	}
 
-	public static IMethod extractMethodFromPropertyPathElements(
+	public static final IMethod extractMethodFromPropertyPathElements(
 			List propertyPath, List types, IFile file, int counter) {
 		IMethod method = null;
 		if (propertyPath != null && propertyPath.size() > 0) {
@@ -430,7 +445,7 @@ public class BeansEditorUtils {
 		return method;
 	}
 
-	public static void extractAllMethodsFromPropertyPathElements(
+	public static final void extractAllMethodsFromPropertyPathElements(
 			List propertyPath, List types, IFile file, int counter, List methods) {
 		IMethod method = null;
 		if (propertyPath != null && propertyPath.size() > 0) {
@@ -473,5 +488,86 @@ public class BeansEditorUtils {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Returns the node from given document at specified offset.
+	 * 
+	 * @param offset  the offset with given document
+	 * @return Node either element, doctype, text, or null
+	 */
+	public static final Node getNodeByOffset(IDocument document, int offset) {
+		// get the node at offset (returns either: element, doctype, text)
+		IndexedRegion inode = null;
+		IStructuredModel sModel = null;
+		try {
+			sModel = StructuredModelManager.getModelManager()
+					.getExistingModelForRead(document);
+			inode = sModel.getIndexedRegion(offset);
+			if (inode == null)
+				inode = sModel.getIndexedRegion(offset - 1);
+		} finally {
+			if (sModel != null)
+				sModel.releaseFromRead();
+		}
+	
+		if (inode instanceof Node) {
+			return (Node) inode;
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the attribute from given node at specified offset.
+	 */
+	public static final Attr getAttrByOffset(Node node, int offset) {
+		if ((node instanceof IndexedRegion)
+				&& ((IndexedRegion) node).contains(offset)
+				&& (node.hasAttributes())) {
+			NamedNodeMap attrs = node.getAttributes();
+			// go through each attribute in node and if attribute contains
+			// offset, return that attribute
+			for (int i = 0; i < attrs.getLength(); ++i) {
+				// assumption that if parent node is of type IndexedRegion,
+				// then its attributes will also be of type IndexedRegion
+				IndexedRegion attRegion = (IndexedRegion) attrs.item(i);
+				if (attRegion.contains(offset)) {
+					return (Attr) attrs.item(i);
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the file the given document was read from.
+	 */
+	public static final IFile getFile(IDocument document) {
+		IFile resource = null;
+		String baselocation = null;
+	
+		if (document != null) {
+			IStructuredModel model = null;
+			try {
+				model = StructuredModelManager.getModelManager()
+						.getExistingModelForRead(document);
+				if (model != null) {
+					baselocation = model.getBaseLocation();
+				}
+			} finally {
+				if (model != null) {
+					model.releaseFromRead();
+				}
+			}
+		}
+	
+		if (baselocation != null) {
+			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+			IPath filePath = new Path(baselocation);
+			if (filePath.segmentCount() > 0) {
+				resource = root.getFile(filePath);
+			}
+		}
+		return resource;
 	}
 }
