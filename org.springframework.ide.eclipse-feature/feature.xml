@@ -65,12 +65,6 @@
          version="0.0.0"/>
 
    <plugin
-         id="org.springframework.ide.eclipse.beans.ui.doc"
-         download-size="1220704"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
          id="org.springframework.ide.eclipse.beans.ui.graph"
          download-size="54473"
          install-size="0"
