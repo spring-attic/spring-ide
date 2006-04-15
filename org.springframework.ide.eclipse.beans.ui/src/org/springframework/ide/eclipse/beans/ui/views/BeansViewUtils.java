@@ -18,7 +18,6 @@ package org.springframework.ide.eclipse.beans.ui.views;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -29,24 +28,25 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
-import org.springframework.ide.eclipse.beans.ui.views.model.BeanNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.ConfigNode;
-import org.springframework.ide.eclipse.beans.ui.views.model.ConfigSetNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.INode;
-import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
-import org.springframework.ide.eclipse.beans.ui.views.model.RootNode;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.ui.SpringUIMessages;
 import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 
+/**
+ * Helper classe for DND support in beans view.
+ * 
+ * @author Pierre-Antoine Grégoire
+ * @author Torsten Juergeleit
+ */
 public final class BeansViewUtils {
 
 	/**
@@ -91,203 +91,58 @@ public final class BeansViewUtils {
 	}
 
 	/**
-	 * This method creates beanNodes as childs to a ConfigNode from java files
-	 * IResources.
-	 * 
-	 * @param resources
-	 *            the java files to add
-	 * @param configNode
-	 *            the parent configNode
-	 * @return the created bean nodes
+	 * Adds given projects to beans core model.
 	 */
-	public static BeanNode[] createBeanNodes(IResource[] resources,
-			ConfigNode configNode) {
-		// nothing for now
-		return null;
-	}
-
-	/**
-	 * This method creates configNodes as childs to a ProjectNode from Xml files
-	 * IResources.
-	 * 
-	 * @param resources
-	 *            the Xml files to add
-	 * @param projectNode
-	 *            the parent projectNode
-	 * @return the created config nodes
-	 */
-	public static ConfigNode[] createConfigNodes(IResource[] resources,
-			ProjectNode projectNode) {
-		List configNodes = new ArrayList();
-		for (int i = 0; i < resources.length; i++) {
-			String configName = resources[i].getProjectRelativePath()
-					.toString();
-			BeansProject beansProject = (BeansProject) projectNode.getProject();
-			if (projectNode.getProject().getProject().exists(
-					resources[i].getProjectRelativePath())
-					&& !beansProject.hasConfig(configName)) {
-				ConfigNode configNode = new ConfigNode(projectNode, configName);
-				configNodes.add(configNode);
-			}
-		}
-		return (ConfigNode[]) configNodes.toArray(new ConfigNode[configNodes
-				.size()]);
-	}
-
-	/**
-	 * This method creates projectNodes as childs to the RootNode ProjectNode
-	 * from java projects IResources.
-	 * 
-	 * @param resources
-	 *            the java projects to add
-	 * @param rootNode
-	 *            the parent rootNode
-	 * @return the created project nodes
-	 */
-	public static ProjectNode[] createProjectNodes(IResource[] resources,
-			RootNode rootNode) {
-		List projectNodes = new ArrayList();
-		for (int i = 0; i < resources.length; i++) {
-			if (!SpringCoreUtils.isSpringProject(resources[i])) {
-				IProject project = (IProject) resources[i];
-				ProjectNode projectNode = new ProjectNode(rootNode, project
-						.getName());
-				BeansProject beansProject = new BeansProject(project);
-				projectNode.setElement(beansProject);
-				projectNodes.add(projectNode);
-			}
-		}
-		return (ProjectNode[]) projectNodes.toArray(new ProjectNode[projectNodes
-				.size()]);
-	}
-
-	/**
-	 * This method adds beanNodes to the beansView as childs to a ConfigNode.
-	 * 
-	 * @param treeViewer
-	 *            the beansView treeViewer
-	 * @param beanNodes
-	 *            the beanNodes to add
-	 * @param configNode
-	 *            the configNode under which they're added
-	 */
-	public static void addBeanNodes(TreeViewer treeViewer,
-			BeanNode[] beanNodes, ConfigNode configNode) {
-		// nothing for now
-	}
-
-	/**
-	 * This method adds configNodes to the beansView as childs to a ProjectNode.
-	 * 
-	 * @param treeViewer
-	 *            the beansView treeViewer
-	 * @param configNodes
-	 *            the configNodes to add
-	 * @param projectNode
-	 *            the projectNode under which they're added
-	 */
-	public static void addConfigNodes(TreeViewer treeViewer,
-			ConfigNode[] configNodes, ProjectNode projectNode) {
-		for (int i = 0; i < configNodes.length; i++) {
-			BeansProject beansProject = (BeansProject) projectNode.getProject();
-			// if the file is not in the target project, we'll copy it to the
-			// target project if possible.
-			configNodes[i].setParent(projectNode);
-			projectNode.addConfig(configNodes[i].getName());
-			beansProject.setConfigs(projectNode.getConfigNames(), true);
-			BeansModelLabelDecorator.update();
-			treeViewer.add(projectNode, configNodes[i]);
-			treeViewer.reveal(configNodes[i]);
-		}
-	}
-
-	/**
-	 * This method adds configNodes to a ConfigSetNode and refreshes the
-	 * ConfigSet's display.
-	 * 
-	 * @param treeViewer
-	 *            the beansView treeViewer
-	 * @param configNodes
-	 *            the configNodes to add
-	 * @param configSetNode
-	 *            the configSetNode under which they're added
-	 */
-	public static void addConfigNodes(TreeViewer treeViewer,
-			ConfigNode[] configNodes, ConfigSetNode configSetNode) {
-		for (int i = 0; i < configNodes.length; i++) {
-			ConfigNode droppedConfigNode = (ConfigNode) configNodes[i];
-			if (droppedConfigNode.getProjectNode().getProject().equals(
-					configSetNode.getProjectNode().getProject())) {
-				BeansConfigSet beansConfigSet = (BeansConfigSet) configSetNode
-						.getConfigSet();
-				BeansProject beansProject = (BeansProject) configSetNode
-						.getProjectNode().getProject();
-				beansConfigSet.addConfig(droppedConfigNode.getName());
-				configSetNode.addConfig(droppedConfigNode);
-				List configSets = new ArrayList();
-				for (Iterator it = configSetNode.getProjectNode()
-						.getConfigSets().iterator(); it.hasNext();) {
-					ConfigSetNode node = (ConfigSetNode) it.next();
-					BeansConfigSet configSet = new BeansConfigSet(beansProject,
-							node.getName(), node.getConfigNames());
-					configSet.setAllowBeanDefinitionOverriding(node
-							.isOverrideEnabled());
-					configSet.setIncomplete(node.isIncomplete());
-					configSets.add(configSet);
-				}
-				beansProject.setConfigSets(configSets, true);
-				BeansModelLabelDecorator.update();
-				treeViewer.reveal(configSetNode);
-			}
-		}
-	}
-
-	/**
-	 * Adds given project nodes to beans view as childs to the root node.
-	 * 
-	 * @param treeViewer
-	 *            the beansView treeViewer
-	 * @param projectNodes
-	 *            the projectNodes to add
-	 * @param rootNode
-	 *            the rootNode under which they're added
-	 */
-	public static void addProjectNodes(TreeViewer treeViewer,
-							   ProjectNode[] projectNodes, RootNode rootNode) {
-		for (int i = 0; i < projectNodes.length; i++) {
-			IProject project = projectNodes[i].getProject().getProject();
-			try {
-				SpringCoreUtils.addProjectNature(project,
-												 SpringCore.NATURE_ID);
-				projectNodes[i].setParent(rootNode);
-				rootNode.addProject(projectNodes[i].getName(), new ArrayList(),
-						new ArrayList(), new ArrayList());
-				BeansModelLabelDecorator.update();
-				treeViewer.add(rootNode, projectNodes[i]);
-				treeViewer.reveal(projectNodes[i]);
-			} catch (CoreException e) {
-				MessageDialog.openError(
-							  SpringUIPlugin.getActiveWorkbenchShell(),
-							  SpringUIMessages.ProjectNature_errorMessage,
-							  NLS.bind(SpringUIMessages.ProjectNature_addError,
+	public static void addProjects(IResource[] projects) {
+		for (int i = 0; i < projects.length; i++) {
+			if (projects[i] instanceof IProject) {
+				IProject project = (IProject) projects[i];
+				if (!SpringCoreUtils.isSpringProject(project)) {
+					try {
+						SpringCoreUtils.addProjectNature(project,
+								SpringCore.NATURE_ID);
+					} catch (CoreException e) {
+						MessageDialog.openError(
+							SpringUIPlugin.getActiveWorkbenchShell(),
+							SpringUIMessages.ProjectNature_errorMessage,
+							NLS.bind(SpringUIMessages.ProjectNature_addError,
 								  project.getName(), e.getLocalizedMessage()));
+					}
+				}
 			}
 		}
 	}
 
 	/**
-	 * This method casts an INode[] table to a ConfigNode[] table.
-	 * 
-	 * @param nodes
-	 *            the original table
-	 * @return a ConfigNode[] table
+	 * Adds given configs to specified beans project.
 	 */
-	public static ConfigNode[] castToConfigNodes(INode[] nodes) {
-		ConfigNode[] configNodes = new ConfigNode[nodes.length];
-		for (int i = 0; i < nodes.length; i++) {
-			configNodes[i] = (ConfigNode) nodes[i];
+	public static void addConfigs(IResource[] configs, IBeansProject project) {
+		BeansProject proj = (BeansProject) project;
+		for (int i = 0; i < configs.length; i++) {
+			if (configs[i] instanceof IFile) {
+				proj.addConfig((IFile) configs[i], false);
+			}
 		}
-		return configNodes;
+		proj.saveDescription();
+	}
+
+	/**
+	 * Adds given config nodes to specified beans project.
+	 */
+	public static void addNodes(INode[] nodes, IBeansConfigSet configSet) {
+		BeansProject project = (BeansProject) configSet.getElementParent();
+		for (int i = 0; i < nodes.length; i++) {
+			if (nodes[i] instanceof ConfigNode) {
+				ConfigNode configNode = (ConfigNode) nodes[i];
+
+				// Make sure that config belongs to same project as config set
+				if (configNode.getProjectNode().getProject().equals(project)) {
+					((BeansConfigSet) configSet).addConfig(configNode.
+							getName());
+				}
+			}
+		}
+		project.saveDescription();
 	}
 
 	public static int getResourcesCommonType(IResource[] resources) {
@@ -313,16 +168,6 @@ public final class BeansViewUtils {
 			IResource resource = resources[i];
 			if (projectId != null
 					&& !(resource.getProject().getName().equals(projectId))) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	public static boolean areAllResourcesJavaProjects(
-			IResource[] resources) {
-		for (int i = 0; i < resources.length; i++) {
-			if (!SpringCoreUtils.isJavaProject(resources[i])) {
 				return false;
 			}
 		}

@@ -17,8 +17,8 @@
 package org.springframework.ide.eclipse.beans.ui.views;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
@@ -38,6 +38,7 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
  * Adapter for DND support in beans view.
  * 
  * @author Pierre-Antoine Grégoire
+ * @author Torsten Juergeleit
  */
 public class BeansViewDropAdapter extends ViewerDropAdapter {
 	/*
@@ -49,10 +50,10 @@ public class BeansViewDropAdapter extends ViewerDropAdapter {
 
 	public final static int JAVA_FILE_SOURCE = 1 << 2;
 
-	public final static int JAVA_PROJECT_SOURCE = 1 << 3;
+	public final static int PROJECT_SOURCE = 1 << 3;
 
 	public final static int ALL_RESOURCES_SOURCES = (UNKNOWN_SOURCE
-			| CONFIG_FILE_SOURCE | JAVA_FILE_SOURCE | JAVA_PROJECT_SOURCE);
+			| CONFIG_FILE_SOURCE | JAVA_FILE_SOURCE | PROJECT_SOURCE);
 
 	public final static int PROJECT_NODE_SOURCE = 1 << 4;
 
@@ -72,7 +73,7 @@ public class BeansViewDropAdapter extends ViewerDropAdapter {
 
 	// All drops : necessary to clear the DROP flags
 	public final static int ALL_SOURCES = (UNKNOWN_SOURCE | CONFIG_FILE_SOURCE
-			| JAVA_FILE_SOURCE | JAVA_PROJECT_SOURCE | PROJECT_NODE_SOURCE
+			| JAVA_FILE_SOURCE | PROJECT_SOURCE | PROJECT_NODE_SOURCE
 			| CONFIG_NODE_SOURCE | CONFIGSET_NODE_SOURCE | BEAN_NODE_SOURCE
 			| PROPERTY_NODE_SOURCE | CONSTRUCTORARGUMENT_NODE_SOURCE);
 
@@ -107,7 +108,7 @@ public class BeansViewDropAdapter extends ViewerDropAdapter {
 
 	public final static int ALL_LOCATIONS = (LOCATION_AROUND | LOCATION_ON);
 
-	public BeansViewDropAdapter(Viewer viewer) {
+	public BeansViewDropAdapter(TreeViewer viewer) {
 		super(viewer);
 		setScrollExpandEnabled(true);
 	}
@@ -141,60 +142,49 @@ public class BeansViewDropAdapter extends ViewerDropAdapter {
 					IResource[] resources = (IResource[]) selectedObjects;
 					if (dropStatus.hasFlag(JAVA_FILE_SOURCE
 							| CONFIG_NODE_TARGET | LOCATION_ON)) {
-						BeanNode[] beanNodes = BeansViewUtils.createBeanNodes(
-								resources, (ConfigNode) dropTarget);
-						BeansViewUtils.addBeanNodes((TreeViewer) getViewer(),
-								beanNodes, (ConfigNode) dropTarget);
+						// TODO drop Java file onto config
 					} else if (dropStatus.hasFlag(CONFIG_FILE_SOURCE)) {
 						if (dropStatus.hasFlag(CONFIG_NODE_TARGET
 								| LOCATION_AROUND)) {
-							ConfigNode[] configNodes = BeansViewUtils
-									.createConfigNodes(resources,
-											(ProjectNode) dropTarget
-													.getParent());
-							BeansViewUtils.addConfigNodes(
-									(TreeViewer) getViewer(), configNodes,
-									(ProjectNode) dropTarget.getParent());
+							ProjectNode project = (ProjectNode)
+									dropTarget.getParent();
+							BeansViewUtils.addConfigs(resources,
+									project.getProject());
+							selectAndReveal(project, true);
 						} else if (dropStatus.hasFlag(PROJECT_NODE_TARGET
 								| LOCATION_ON)) {
-							ConfigNode[] configNodes = BeansViewUtils
-									.createConfigNodes(resources,
-											(ProjectNode) dropTarget);
-							BeansViewUtils.addConfigNodes(
-									(TreeViewer) getViewer(), configNodes,
-									(ProjectNode) dropTarget);
+							ProjectNode project = (ProjectNode) dropTarget;
+							BeansViewUtils.addConfigs(resources,
+									project.getProject());
+							selectAndReveal(project, true);
 						}
-					} else if (dropStatus.hasFlag(JAVA_PROJECT_SOURCE)) {
+					} else if (dropStatus.hasFlag(PROJECT_SOURCE)) {
 						if (dropStatus.hasFlag(ROOT_NODE_TARGET | LOCATION_ON)) {
-							ProjectNode[] projectNodes = BeansViewUtils
-									.createProjectNodes(resources,
-											(RootNode) dropTarget);
-							BeansViewUtils.addProjectNodes(
-									(TreeViewer) getViewer(), projectNodes,
-									(RootNode) dropTarget);
+							BeansViewUtils.addProjects(resources);
 						} else if (dropStatus.hasFlag(PROJECT_NODE_TARGET
 								| LOCATION_AROUND)) {
-							ProjectNode[] projectNodes = BeansViewUtils
-									.createProjectNodes(resources,
-											(RootNode) dropTarget.getParent());
-							BeansViewUtils.addProjectNodes(
-									(TreeViewer) getViewer(), projectNodes,
-									(RootNode) dropTarget.getParent());
+							BeansViewUtils.addProjects(resources);
 						}
 					}
 				} else if (dropStatus.hasAnyFlag(ALL_NODES_SOURCES)) {
 					INode[] nodes = (INode[]) selectedObjects;
 					if (dropStatus.hasFlag(CONFIG_NODE_SOURCE
 							| CONFIGSET_NODE_TARGET | LOCATION_ON)) {
-						ConfigNode[] configNodes = BeansViewUtils
-								.castToConfigNodes(nodes);
-						BeansViewUtils.addConfigNodes((TreeViewer) getViewer(),
-								configNodes, (ConfigSetNode) dropTarget);
+						BeansViewUtils.addNodes(nodes,
+								((ConfigSetNode) dropTarget).getConfigSet());
 					}
 				}
 			}
 		}
 		return false;
+	}
+
+	private void selectAndReveal(INode node, boolean expand) {
+		TreeViewer viewer = (TreeViewer) getViewer();
+		viewer.setSelection(new StructuredSelection(node), true);
+		if (expand) {
+			viewer.expandToLevel(node, 1);
+		}
 	}
 
 	/**
@@ -266,17 +256,13 @@ public class BeansViewDropAdapter extends ViewerDropAdapter {
 					switch (BeansViewUtils.getResourcesCommonType(resources)) {
 					case IResource.NONE:
 						// resource is not known
-						System.out.println();
 						result |= UNKNOWN_SOURCE;
 						break;
 					case IResource.FOLDER:
 						// TODO handle folders
 						break;
 					case IResource.PROJECT:
-						if (BeansViewUtils
-								.areAllResourcesJavaProjects(resources)) {
-							result |= JAVA_PROJECT_SOURCE;
-						}
+						result |= PROJECT_SOURCE;
 						break;
 					case IResource.FILE:
 						if (allResourcesfromSameProject
@@ -301,7 +287,6 @@ public class BeansViewDropAdapter extends ViewerDropAdapter {
 				} else {
 					result |= UNKNOWN_SOURCE;
 				}
-
 			}
 
 			if (datas instanceof INode[]) {
@@ -375,6 +360,5 @@ public class BeansViewDropAdapter extends ViewerDropAdapter {
 			}
 			return result.toString();
 		}
-
 	}
 }
