@@ -82,16 +82,18 @@ public class BeansProjectDescription {
 		return Collections.unmodifiableSet(configNames);
 	}
 
-	public void addConfig(IFile file) {
-		addConfig(file.getProjectRelativePath().toString());
+	public boolean addConfig(IFile file) {
+		return addConfig(file.getProjectRelativePath().toString());
 	}
 
-	public void addConfig(String name) {
+	public boolean addConfig(String name) {
 		if (name.length() > 0 && !configNames.contains(name)) {
 			configNames.add(name);
 			IBeansConfig config = new BeansConfig(project, name);
 			configs.put(name, config);
+			return true;
 		}
+		return false;
 	}
 
 	/**
@@ -130,26 +132,34 @@ public class BeansProjectDescription {
 		return Collections.unmodifiableCollection(configs.values());
 	}
 
-	public void removeConfig(IFile file) {
-		removeConfig(file.getProjectRelativePath().toString());
+	public boolean removeConfig(IFile file) {
+		return removeConfig(file.getProjectRelativePath().toString());
 	}
 	
-	public void removeConfig(String name) {
-		configNames.remove(name);
-		configs.remove(name);
-		removeConfigFromConfigSets(name);
+	public boolean removeConfig(String name) {
+		if (hasConfig(name)) {
+			configNames.remove(name);
+			configs.remove(name);
+			removeConfigFromConfigSets(name);
+			return true;
+		}
+		return false;
 	}
 
-	public void removeExternalConfig(IFile file) {
-		removeConfigFromConfigSets(file.getFullPath().toString());
+	public boolean removeExternalConfig(IFile file) {
+		return removeConfigFromConfigSets(file.getFullPath().toString());
 	}
 
-	private void removeConfigFromConfigSets(String name) {
+	private boolean removeConfigFromConfigSets(String name) {
 		Iterator iter = configSets.values().iterator();
 		while (iter.hasNext()) {
 			BeansConfigSet configSet = (BeansConfigSet) iter.next();
-			configSet.removeConfig(name);
+			if (configSet.hasConfig(name)) {
+				configSet.removeConfig(name);
+				return true;
+			}
 		}
+		return false;
 	}
 
 	public void addConfigSet(IBeansConfigSet configSet) {

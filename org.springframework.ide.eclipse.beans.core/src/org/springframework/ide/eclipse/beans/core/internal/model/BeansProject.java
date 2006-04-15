@@ -129,8 +129,7 @@ public class BeansProject extends AbstractResourceModelElement
 	 * 				<code>IBeansProject.DESCRIPTION_FILE</code>
 	 */
 	public void addConfig(IFile file, boolean doSaveDescription) {
-		getDescription().addConfig(file);
-		if (doSaveDescription) {
+		if (getDescription().addConfig(file) && doSaveDescription) {
 			saveDescription();
 		}
 	}
@@ -145,9 +144,10 @@ public class BeansProject extends AbstractResourceModelElement
 	 * 				<code>IBeansProject.DESCRIPTION_FILE</code>
 	 */
 	public void removeConfig(IFile file, boolean doSaveDescription) {
-		getDescription().removeConfig(file);
-		getDescription().removeExternalConfig(file);
-		if (doSaveDescription) {
+		boolean removedConfig = getDescription().removeConfig(file);
+		boolean removedExternalConfig = getDescription().
+				removeExternalConfig(file);
+		if (removedConfig || removedExternalConfig && doSaveDescription) {
 			saveDescription();
 		}
 	}

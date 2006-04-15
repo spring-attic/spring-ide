@@ -394,6 +394,8 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			}
 			BeansProject project = (BeansProject)
 												projects.get(file.getProject());
+			// Before removing the config from it's project keep a copy for
+			// notifying the listeners
 			BeansConfig config = (BeansConfig) project.getConfig(file);
 			project.removeConfig(file, true);
 
