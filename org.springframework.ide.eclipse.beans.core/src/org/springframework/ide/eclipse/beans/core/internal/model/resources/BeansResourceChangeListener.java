@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,14 +44,14 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
  * <p>
  * An implementation of <code>IBeansResourceChangeEvents</code> has to be
  * provided. Here are callbacks defined for the different events. 
- * 
  * @see IBeansResourceChangeEvents
+ * @author Torsten Juergeleit
  */
 public class BeansResourceChangeListener implements IResourceChangeListener {
 
 	public static final int LISTENER_FLAGS = IResourceChangeEvent.PRE_CLOSE |
 											 IResourceChangeEvent.PRE_DELETE |
-											 IResourceChangeEvent.POST_BUILD;
+											 IResourceChangeEvent.POST_CHANGE;
 	private static final int VISITOR_FLAGS = IResourceDelta.ADDED |
 											 IResourceDelta.CHANGED |
 											 IResourceDelta.REMOVED;
@@ -78,7 +78,7 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 					}
 					break;
 
-				case IResourceChangeEvent.POST_BUILD :
+				case IResourceChangeEvent.POST_CHANGE :
 					if (delta != null) {
 						try {
 							delta.accept(new BeansProjectVisitor(),
