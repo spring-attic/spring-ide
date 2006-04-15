@@ -119,8 +119,20 @@ public class BeansProject extends AbstractResourceModelElement
 		description = null;
 	}
 
-	public void addConfig(IFile file) {
+	/**
+	 * Adds the given beans config to the list of configs.
+	 * Optionally (by setting <code>doSaveDescription</code> to
+	 * <code>true</code> the modified project description is saved to disk.
+	 * @param file  the config file to add
+	 * @param doSaveDescription  if <code>true</code> then the project's
+	 * 				modified configuration is saved to the config file
+	 * 				<code>IBeansProject.DESCRIPTION_FILE</code>
+	 */
+	public void addConfig(IFile file, boolean doSaveDescription) {
 		getDescription().addConfig(file);
+		if (doSaveDescription) {
+			saveDescription();
+		}
 	}
 
 	/**
@@ -136,7 +148,7 @@ public class BeansProject extends AbstractResourceModelElement
 		getDescription().removeConfig(file);
 		getDescription().removeExternalConfig(file);
 		if (doSaveDescription) {
-			BeansProjectDescriptionWriter.write(project, getDescription());
+			saveDescription();
 		}
 	}
 
@@ -144,32 +156,18 @@ public class BeansProject extends AbstractResourceModelElement
 		return getDescription().getConfigNames();
 	}
 
-	/**
-	 * Returns true if given file belongs to the list of Spring bean config
-	 * files which are stored in the project description. 
-	 */
 	public boolean hasConfig(IFile file) {
 		return getDescription().hasConfig(file);
 	}
 
-	/**
-	 * Returns true if given config name belongs to the list of Spring bean
-	 * config files which are stored in the project description. 
-	 */
 	public boolean hasConfig(String configName) {
 		return getDescription().hasConfig(configName);
 	}
 
-	/**
-	 * Returns <code>IBeansConfig</code> for given config file. 
-	 */
 	public IBeansConfig getConfig(IFile configFile) {
 		return getDescription().getConfig(configFile);
 	}
 
-	/**
-	 * Returns <code>IBeansConfig</code> of given name.
-	 */
 	public IBeansConfig getConfig(String configName) {
         if (configName != null && configName.charAt(0) == '/') {
             return BeansCorePlugin.getModel().getConfig(configName);
@@ -179,11 +177,6 @@ public class BeansProject extends AbstractResourceModelElement
         }
 	}
 
-	/**
-	 * Returns a collection of all <code>IBeansConfig</code>s defined in this
-	 * project.
-	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfig
-	 */
 	public Collection getConfigs() {
 		return getDescription().getConfigs();
 	}
@@ -193,11 +186,10 @@ public class BeansProject extends AbstractResourceModelElement
         return configSet != null;
     }
 
-	/**
-	 * Returns a list of <code>IBeansConfigSet</code>s defined within this
-	 * project.
-	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet
-	 */
+	public IBeansConfigSet getConfigSet(String configSetName) {
+		return getDescription().getConfigSet(configSetName);
+	}
+
 	public Collection getConfigSets() {
 		return getDescription().getConfigSets();
 	}
@@ -250,7 +242,7 @@ public class BeansProject extends AbstractResourceModelElement
 									boolean doSaveDescription) {
 		getDescription().setConfigExtensions(extensions);
 		if (doSaveDescription) {
-			BeansProjectDescriptionWriter.write(project, getDescription());
+			saveDescription();
 		}
 	}
 
@@ -293,7 +285,7 @@ public class BeansProject extends AbstractResourceModelElement
 		
 		description.setConfigNames(configs);
 		if (doSaveDescription) {
-			BeansProjectDescriptionWriter.write(project, description);
+			saveDescription();
 		}
 	}
 
@@ -311,7 +303,7 @@ public class BeansProject extends AbstractResourceModelElement
 		BeansProjectDescription description = getDescription();
 		description.setConfigSets(configSets);
 		if (doSaveDescription) {
-			BeansProjectDescriptionWriter.write(project, description);
+			saveDescription();
 		}
 	}
 

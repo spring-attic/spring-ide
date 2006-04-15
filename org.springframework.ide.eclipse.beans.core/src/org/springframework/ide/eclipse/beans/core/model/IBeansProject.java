@@ -52,6 +52,18 @@ public interface IBeansProject extends IResourceModelElement, IBeanClassAware {
 	boolean hasConfigExtension(String extension);
 
 	/**
+	 * Returns true if given file belongs to the list of Spring bean config
+	 * files which are stored in the project description. 
+	 */
+	boolean hasConfig(IFile file);
+
+	/**
+	 * Returns true if given config name belongs to the list of Spring bean
+	 * config files which are stored in the project description. 
+	 */
+	boolean hasConfig(String configName);
+
+	/**
 	 * Returns <code>IBeansConfig</code> for given config file. 
 	 */
 	IBeansConfig getConfig(IFile configFile);
@@ -69,28 +81,19 @@ public interface IBeansProject extends IResourceModelElement, IBeanClassAware {
 	Collection getConfigs();
 
 	/**
-	 * Returns true if given file belongs to the list of Spring bean config
-	 * files which are stored in the project description. 
+	 * Returns true if a config set with the given name is defined within this
+	 * project.
 	 */
-	boolean hasConfig(IFile file);
+	boolean hasConfigSet(String configSetName);
 
 	/**
-	 * Returns true if given config name belongs to the list of Spring bean
-	 * config files which are stored in the project description. 
+	 * Returns <code>IBeansConfigSet</code> of given name.
 	 */
-	boolean hasConfig(String configName);
+	public IBeansConfigSet getConfigSet(String configSetName);
 
 	/**
 	 * Returns a list of <code>IBeansConfigSet</code> instances.
 	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet
 	 */
 	Collection getConfigSets();
-
-	/**
-	 * Returns true if a config set with the given name is defined within this
-	 * project.
-	 * @param name
-	 * @return
-	 */
-	boolean hasConfigSet(String configSetName);
 }

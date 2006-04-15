@@ -365,7 +365,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			}
 			BeansProject project = (BeansProject)
 												projects.get(file.getProject());
-			project.addConfig(file);
+			project.addConfig(file, true);
 			IBeansConfig config = project.getConfig(file);
 			notifyListeners(config, ModelChangeEvent.ADDED);
 		}
