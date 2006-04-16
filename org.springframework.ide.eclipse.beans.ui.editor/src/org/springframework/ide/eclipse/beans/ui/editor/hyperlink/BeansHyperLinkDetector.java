@@ -37,7 +37,6 @@ import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
-import org.springframework.ide.eclipse.beans.ui.views.BeansViewLocation;
 import org.springframework.ide.eclipse.core.StringUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -87,16 +86,16 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 				}
 
 				// otherwise handle selected element
-				IDOMElement element = (IDOMElement) currentNode;
-				if (region.getOffset() <= element.getStartEndOffset()) {
-					IRegion hyperlinkRegion = getHyperlinkRegion(
-							currentNode);
-					IHyperlink hyperLink = createElementHyperlink(element,
-							hyperlinkRegion, document, textViewer, region);
-					if (hyperLink != null) {
-						return new IHyperlink[] { hyperLink };
-					}
-				}
+//				IDOMElement element = (IDOMElement) currentNode;
+//				if (region.getOffset() <= element.getStartEndOffset()) {
+//					IRegion hyperlinkRegion = getHyperlinkRegion(
+//							currentNode);
+//					IHyperlink hyperLink = createElementHyperlink(element,
+//							hyperlinkRegion, document, textViewer, region);
+//					if (hyperLink != null) {
+//						return new IHyperlink[] { hyperLink };
+//					}
+//				}
 				break;
 
 			case Node.TEXT_NODE:
@@ -305,49 +304,49 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 		return null;
 	}
 
-	private IHyperlink createElementHyperlink(Element element,
-			IRegion hyperlinkRegion, IDocument document,
-			ITextViewer textViewer, IRegion region) {
-		String elementName = element.getNodeName();
-		Node parentNode = element.getParentNode();
-		String parentName = parentNode.getNodeName();
-		if ("beans".equals(parentName)) {
-			if ("alias".equals(elementName)) {
-				// TODO extend BeansViewLocation and BeansView
-			} else if ("bean".equals(elementName)) {
-				Node idAttribute = element.getAttributeNode("id");
-				if (idAttribute != null && idAttribute.getNodeValue() != null) {
-					IFile file = BeansEditorUtils.getFile(document);
-					BeansViewLocation location = new BeansViewLocation();
-					location.setProjectName(file.getProject().getName());
-					location.setConfigName(file.getProjectRelativePath()
-							.toString());
-					location.setBeanName(idAttribute.getNodeValue());
-					return new BeansViewLocationHyperlink(hyperlinkRegion,
-							location);
-				}
-			}
-		} else if ("bean".equals(parentName)
-				&& "beans".equals(parentNode.getParentNode().getNodeName())) {
-			if ("property".equals(elementName)) {
-				Node idAttribute = ((Element) parentNode).
-					getAttributeNode("id");
-				Node nameAttribute = element.getAttributeNode("name");
-				if (idAttribute != null && idAttribute.getNodeValue() != null
-						&& nameAttribute != null
-						&& nameAttribute.getNodeValue() != null) {
-					IFile file = BeansEditorUtils.getFile(document);
-					BeansViewLocation location = new BeansViewLocation();
-					location.setProjectName(file.getProject().getName());
-					location.setConfigName(file.getProjectRelativePath()
-							.toString());
-					location.setBeanName(idAttribute.getNodeValue());
-					location.setPropertyName(nameAttribute.getNodeValue());
-					return new BeansViewLocationHyperlink(hyperlinkRegion,
-							location);
-				}
-			}
-		}
-		return null;
-	}
+//	private IHyperlink createElementHyperlink(Element element,
+//			IRegion hyperlinkRegion, IDocument document,
+//			ITextViewer textViewer, IRegion region) {
+//		String elementName = element.getNodeName();
+//		Node parentNode = element.getParentNode();
+//		String parentName = parentNode.getNodeName();
+//		if ("beans".equals(parentName)) {
+//			if ("alias".equals(elementName)) {
+//				// TODO extend BeansViewLocation and BeansView
+//			} else if ("bean".equals(elementName)) {
+//				Node idAttribute = element.getAttributeNode("id");
+//				if (idAttribute != null && idAttribute.getNodeValue() != null) {
+//					IFile file = BeansEditorUtils.getFile(document);
+//					BeansViewLocation location = new BeansViewLocation();
+//					location.setProjectName(file.getProject().getName());
+//					location.setConfigName(file.getProjectRelativePath()
+//							.toString());
+//					location.setBeanName(idAttribute.getNodeValue());
+//					return new BeansViewLocationHyperlink(hyperlinkRegion,
+//							location);
+//				}
+//			}
+//		} else if ("bean".equals(parentName)
+//				&& "beans".equals(parentNode.getParentNode().getNodeName())) {
+//			if ("property".equals(elementName)) {
+//				Node idAttribute = ((Element) parentNode).
+//					getAttributeNode("id");
+//				Node nameAttribute = element.getAttributeNode("name");
+//				if (idAttribute != null && idAttribute.getNodeValue() != null
+//						&& nameAttribute != null
+//						&& nameAttribute.getNodeValue() != null) {
+//					IFile file = BeansEditorUtils.getFile(document);
+//					BeansViewLocation location = new BeansViewLocation();
+//					location.setProjectName(file.getProject().getName());
+//					location.setConfigName(file.getProjectRelativePath()
+//							.toString());
+//					location.setBeanName(idAttribute.getNodeValue());
+//					location.setPropertyName(nameAttribute.getNodeValue());
+//					return new BeansViewLocationHyperlink(hyperlinkRegion,
+//							location);
+//				}
+//			}
+//		}
+//		return null;
+//	}
 }
