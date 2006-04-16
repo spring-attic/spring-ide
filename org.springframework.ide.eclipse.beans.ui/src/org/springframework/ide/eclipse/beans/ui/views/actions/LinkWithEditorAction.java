@@ -22,37 +22,37 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.views.BeansView;
 
 /**
- * Toolbar action for activating / deactivating lexicaly sorting of entries in
- * the beans view.
+ * Toolbar action for activating / deactivating linking the beans view with an
+ * active beans XML editor.
  * @author Torsten Juergeleit
  */
-public class LexicalSortingAction extends Action {
+public class LinkWithEditorAction extends Action {
 
-	private static final String PREFIX = "View.SortAction.";
+	private static final String PREFIX = "View.LinkAction.";
 
 	private BeansView view;
 
-	public LexicalSortingAction(BeansView view) {
+	public LinkWithEditorAction(BeansView view) {
 		this.view = view;
 		setText(BeansUIPlugin.getResourceString(PREFIX + "label"));
-		BeansUIImages.setLocalImageDescriptors(this, "alphab_sort_co.gif");
-		boolean state = view.isSortingEnabled();
+		BeansUIImages.setLocalImageDescriptors(this, "synced.gif");
+		boolean state = view.isLinkingEnabled();
 		setChecked(state);
 		stateChanged(state);
 	}
 
-    public void run() {
+	public void run() {
 		boolean state = isChecked();
-		view.setSortingEnabled(state);
+		view.setLinkingEnabled(state);
 		stateChanged(state);
-    }
+	}
 
-    private void stateChanged(boolean state) {
-        setToolTipText(state ?
-			BeansUIPlugin.getResourceString(PREFIX + "tooltip.checked") :
-			BeansUIPlugin.getResourceString(PREFIX + "tooltip.unchecked"));
-        setDescription(state ?
-			BeansUIPlugin.getResourceString(PREFIX + "description.checked") :
-			BeansUIPlugin.getResourceString(PREFIX + "description.unchecked"));
-    }
+	private void stateChanged(boolean state) {
+		setToolTipText(state ? BeansUIPlugin.getResourceString(PREFIX
+				+ "tooltip.checked") : BeansUIPlugin.getResourceString(PREFIX
+				+ "tooltip.unchecked"));
+		setDescription(state ? BeansUIPlugin.getResourceString(PREFIX
+				+ "description.checked") : BeansUIPlugin
+				.getResourceString(PREFIX + "description.unchecked"));
+	}
 }

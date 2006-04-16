@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -44,9 +45,14 @@ import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IPageLayout;
+import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTarget;
@@ -54,10 +60,13 @@ import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
+import org.eclipse.wst.xml.ui.internal.tabletree.XMLMultiPageEditorPart;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
+import org.springframework.ide.eclipse.beans.ui.IPreferencesConstants;
 import org.springframework.ide.eclipse.beans.ui.views.actions.CollapseAllAction;
 import org.springframework.ide.eclipse.beans.ui.views.actions.LexicalSortingAction;
+import org.springframework.ide.eclipse.beans.ui.views.actions.LinkWithEditorAction;
 import org.springframework.ide.eclipse.beans.ui.views.actions.OpenBeanClassAction;
 import org.springframework.ide.eclipse.beans.ui.views.actions.OpenConfigFileAction;
 import org.springframework.ide.eclipse.beans.ui.views.actions.OpenPropertiesAction;
@@ -68,14 +77,24 @@ import org.springframework.ide.eclipse.beans.ui.views.model.ConfigSetNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.ConstructorArgumentNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.INode;
 import org.springframework.ide.eclipse.beans.ui.views.model.ModelLabelProvider;
+import org.springframework.ide.eclipse.beans.ui.views.model.ModelSorter;
 import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.PropertyNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.RootNode;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
+
+/**
+ * This is a tree view of all Spring projects and their configs and config
+ * sets within the workspace.
+ * @author Torsten Juergeleit
+ */
 public class BeansView extends ViewPart implements IBeansView, IShowInSource,
-																 IShowInTarget {
+											IShowInTarget, ISelectionListener {
 	public static final String VIEW_ID = BeansUIPlugin.PLUGIN_ID +
 															 ".views.beansView";
 	public static final String CONTEXT_MENU_ID = "#BeansViewContext";
@@ -87,8 +106,47 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 	private OpenBeanClassAction openBeanClassAction;
 	private OpenPropertiesAction openPropertiesAction;
 
+	private boolean isSortingEnabled;
+	private boolean isLinkingEnabled;
+
 	public BeansView() {
 		this.rootNode = null;
+		IPreferenceStore store = BeansUIPlugin.getDefault().getPreferenceStore();
+		setSortingEnabled(store.getBoolean(IPreferencesConstants.VIEW_SORT));
+		setLinkingEnabled(store.getBoolean(IPreferencesConstants.VIEW_LINK));
+	}
+
+	public boolean isSortingEnabled() {
+		return isSortingEnabled;
+	}
+
+	public void setSortingEnabled(boolean isSortingEnabled) {
+		this.isSortingEnabled = isSortingEnabled;
+		IPreferenceStore store = BeansUIPlugin.getDefault()
+				.getPreferenceStore();
+		store.setValue(IPreferencesConstants.VIEW_SORT, isSortingEnabled);
+		BeansUIPlugin.getDefault().savePluginPreferences();
+		if (treeViewer != null) {
+			treeViewer.setSorter(isSortingEnabled ? new ModelSorter(true)
+					: new ModelSorter(false));
+		}
+	}
+
+	public boolean isLinkingEnabled() {
+		return isLinkingEnabled;
+	}
+
+	public void setLinkingEnabled(boolean isLinkingEnabled) {
+		this.isLinkingEnabled = isLinkingEnabled;
+		IPreferenceStore store = BeansUIPlugin.getDefault().getPreferenceStore();
+		store.setValue(IPreferencesConstants.VIEW_LINK, isLinkingEnabled);
+		BeansUIPlugin.getDefault().savePluginPreferences();
+	}
+
+	public void dispose() {
+		getSite().getWorkbenchWindow().getSelectionService()
+				.removeSelectionListener(this);
+		super.dispose();
 	}
 
 	public Object getAdapter(Class adapter) {
@@ -120,6 +178,8 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 		fillToolBar();
 	
 		getSite().setSelectionProvider(treeViewer);
+		getSite().getWorkbenchWindow().getSelectionService()
+				.addPostSelectionListener(this);
 	}
 
 	private void initializeActions() {
@@ -132,6 +192,8 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 		TreeViewer viewer = new TreeViewer(parent, SWT.SINGLE | SWT.H_SCROLL |
 										   SWT.V_SCROLL);
 		viewer.setContentProvider(new BeansViewContentProvider(this));
+		viewer.setSorter(isSortingEnabled ? new ModelSorter(true)
+				: new ModelSorter(false));
 		viewer.setLabelProvider(new ModelLabelProvider());
 		viewer.setInput(getRootNode());
 		viewer.setSorter(new ViewerSorter() {
@@ -194,11 +256,12 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 	private void fillToolBar() {
 		IToolBarManager mgr = getViewSite().getActionBars().getToolBarManager();
 		mgr.removeAll();
-		
+	
 		mgr.add(new CollapseAllAction(treeViewer));
-		mgr.add(new LexicalSortingAction(treeViewer));
+		mgr.add(new LinkWithEditorAction(this));
+		mgr.add(new LexicalSortingAction(this));
 		mgr.add(new PropertySheetAction(this));
-		
+
 		mgr.update(false);	
 	}
 
@@ -462,5 +525,74 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 			BeansUIPlugin.log(e);
 		}
 		return null;
+	}
+
+	/**
+	 * If linking is enabled (via toolbar action) the links to beans XML
+	 * editor. 
+	 */
+	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+		if (isLinkingEnabled() && isPartVisible()
+				&& part instanceof XMLMultiPageEditorPart
+				&& selection instanceof IStructuredSelection) {
+			IStructuredSelection sselection = (IStructuredSelection) selection;
+			if (sselection.size() == 1) {
+				Object selectedObj = sselection.getFirstElement();
+				if (selectedObj instanceof Element) {
+					IFile file = getEditorFile(part);
+					if (file != null
+							&& SpringCoreUtils.isSpringProject(file
+									.getProject())) {
+						linkToBeansXmlEditor(file, (Element) selectedObj);
+					}
+				}
+			}
+		}
+	}
+
+	private boolean isPartVisible() {
+		return getSite().getPage().isPartVisible(this);
+	}
+
+	private IFile getEditorFile(IWorkbenchPart part) {
+		if (part instanceof IEditorPart) {
+			IEditorInput input = ((IEditorPart) part).getEditorInput();
+			if (input instanceof IFileEditorInput) {
+				return ((IFileEditorInput) input).getFile();
+			}
+		}
+		return null;
+	}
+
+	private void linkToBeansXmlEditor(IFile file, Element element) {
+		String elementName = element.getNodeName();
+		Node parentNode = element.getParentNode();
+		String parentName = parentNode.getNodeName();
+		if ("bean".equals(elementName) && "beans".equals(parentName)) {
+			Node idAttribute = element.getAttributeNode("id");
+			if (idAttribute != null && idAttribute.getNodeValue() != null) {
+				BeansViewLocation location = new BeansViewLocation();
+				location.setProjectName(file.getProject().getName());
+				location.setConfigName(file.getProjectRelativePath()
+						.toString());
+				location.setBeanName(idAttribute.getNodeValue());
+				showLocation(location);
+			}
+		} else if ("property".equals(elementName) && "bean".equals(parentName)
+				&& "beans".equals(parentNode.getParentNode().getNodeName())) {
+			Node idAttribute = ((Element) parentNode).getAttributeNode("id");
+			Node nameAttribute = element.getAttributeNode("name");
+			if (idAttribute != null && idAttribute.getNodeValue() != null
+					&& nameAttribute != null
+					&& nameAttribute.getNodeValue() != null) {
+				BeansViewLocation location = new BeansViewLocation();
+				location.setProjectName(file.getProject().getName());
+				location.setConfigName(file.getProjectRelativePath()
+						.toString());
+				location.setBeanName(idAttribute.getNodeValue());
+				location.setPropertyName(nameAttribute.getNodeValue());
+				showLocation(location);
+			}
+		}
 	}
 }
