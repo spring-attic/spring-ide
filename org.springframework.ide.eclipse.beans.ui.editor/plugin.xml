@@ -133,7 +133,7 @@
 		         id="org.springframework.ide.eclipse.beans.ui.editor.actions.searchBeanReferencesAction"
 		         label="%action.searchBeanReferences.label"
 		         definitionId="org.springframework.ide.eclipse.beans.ui.editor.commands.searchBeanReferences"
-		         icon="icons/full/obj16/spring_obj.gif"
+		         icon="icons/full/obj16/bean_obj.gif"
 		         menubarPath="org.eclipse.search.menu/contextMenuActionsGroup"
 		         class="org.springframework.ide.eclipse.beans.ui.editor.actions.SearchBeanReferencesAction">
 			</action>
