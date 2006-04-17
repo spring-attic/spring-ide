@@ -39,7 +39,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.Transfer;
@@ -192,15 +191,9 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 		TreeViewer viewer = new TreeViewer(parent, SWT.SINGLE | SWT.H_SCROLL |
 										   SWT.V_SCROLL);
 		viewer.setContentProvider(new BeansViewContentProvider(this));
-		viewer.setSorter(isSortingEnabled ? new ModelSorter(true)
-				: new ModelSorter(false));
 		viewer.setLabelProvider(new ModelLabelProvider());
 		viewer.setInput(getRootNode());
-		viewer.setSorter(new ViewerSorter() {
-			public int compare(Viewer viewer, Object e1, Object e2) {
-				return e1.toString().compareToIgnoreCase(e2.toString());
-			}
-		});
+		viewer.setSorter(new ModelSorter(isSortingEnabled));
 		viewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
 				handleDoubleClick(event);
