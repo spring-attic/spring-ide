@@ -22,10 +22,11 @@
    </url>
 
    <requires>
-      <import plugin="org.eclipse.core.resources" version="3.0.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.core.resources" version="3.1.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jdt.ui"/>
+      <import plugin="org.eclipse.gef" version="3.1.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.wst" version="1.0.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
