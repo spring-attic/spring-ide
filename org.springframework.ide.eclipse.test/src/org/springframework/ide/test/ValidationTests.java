@@ -237,7 +237,7 @@ public class ValidationTests extends AbstractSpringIdeTest {
 	 }
 
 
-	 private BeansProject createBeansProject() {
+	 private BeansProject createBeansProject() throws CoreException {
 		IProject eclipseProject = project.getProject();
 		SpringCoreUtils.addProjectNature(eclipseProject, SpringCore.NATURE_ID);				
 		project.waitForAutoBuild();
@@ -256,7 +256,7 @@ public class ValidationTests extends AbstractSpringIdeTest {
 		assertTrue(xmlFile.getLocation().toFile().exists());
 				
 		// BeansProject beansProject = createBeansProject();		
-		beansProject.addConfig(xmlFile);
+		beansProject.addConfig(xmlFile, false);
 		project.waitForAutoBuild();
 		
 		IBeansConfig beansConfig = beansProject.getConfig(xmlFile);
