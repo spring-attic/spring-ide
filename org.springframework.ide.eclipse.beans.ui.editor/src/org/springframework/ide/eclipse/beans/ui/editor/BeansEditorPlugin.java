@@ -62,6 +62,8 @@ public class BeansEditorPlugin extends AbstractUIPlugin {
 	private ResourceBundle resourceBundle;
 	private ContextTypeRegistry contextTypeRegistry;
 	private TemplateStore templateStore;
+	
+	private BundleContext context;
 
 	/**
 	 * Creates the Spring Beans Editor plug-in.
@@ -85,6 +87,7 @@ public class BeansEditorPlugin extends AbstractUIPlugin {
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+		this.context = context;
 	}
 
 	/**
@@ -94,6 +97,7 @@ public class BeansEditorPlugin extends AbstractUIPlugin {
 		super.stop(context);
 		plugin = null;
 		resourceBundle = null;
+		this.context = null;
 	}
 
 	/**
@@ -105,6 +109,10 @@ public class BeansEditorPlugin extends AbstractUIPlugin {
 
 	public ResourceBundle getResourceBundle() {
 		return resourceBundle;
+	}
+	
+	public BundleContext getBundleContext() {
+		return context;
 	}
 
 	public AdapterFactoryRegistry getAdapterFactoryRegistry() {

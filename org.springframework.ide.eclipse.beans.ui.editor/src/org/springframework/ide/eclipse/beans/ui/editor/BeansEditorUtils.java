@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -43,6 +44,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.core.internal.provisional.StructuredModelManager;
+import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -63,6 +65,70 @@ import org.w3c.dom.NodeList;
  */
 public class BeansEditorUtils {
 
+	protected static final String AMPERSTAND = "&"; //$NON-NLS-1$
+	protected static final String AMPERSTAND_ENTITY = "&&;"; //$NON-NLS-1$
+	protected static final String CARRIAGE_RETURN = "\r"; //$NON-NLS-1$
+	protected static final String CARRIAGE_RETURN_ENTITY = "\\r"; //$NON-NLS-1$
+	protected static final String CR = "\r"; //$NON-NLS-1$
+	protected static final String CRLF = "\r\n"; //$NON-NLS-1$
+	protected static final String DELIMITERS = " \t\n\r\f"; //$NON-NLS-1$
+	protected static final String DOUBLE_QUOTE = "\""; //$NON-NLS-1$
+	protected static final char DOUBLE_QUOTE_CHAR = '\"'; //$NON-NLS-1$
+	protected static final String DOUBLE_QUOTE_ENTITY = "&quot;"; //$NON-NLS-1$
+
+	protected static final String EQUAL_SIGN = "="; //$NON-NLS-1$
+	protected static final String EQUAL_SIGN_ENTITY = "&#61;"; //$NON-NLS-1$
+	protected static final String GREATER_THAN = ">"; //$NON-NLS-1$
+	protected static final String GREATER_THAN_ENTITY = "&gt;"; //$NON-NLS-1$
+	protected static final String LESS_THAN = "<"; //$NON-NLS-1$
+	protected static final String LESS_THAN_ENTITY = "&lt;"; //$NON-NLS-1$
+	protected static final String LF = "\n"; //$NON-NLS-1$
+	protected static final String LINE_FEED = "\n"; //$NON-NLS-1$
+	protected static final String LINE_FEED_ENTITY = "\\n"; //$NON-NLS-1$
+	protected static final String LINE_FEED_TAG = "<dl>"; //$NON-NLS-1$
+	protected static final String LINE_TAB = "\t"; //$NON-NLS-1$
+	protected static final String LINE_TAB_ENTITY = "\\t"; //$NON-NLS-1$
+	protected static final String LINE_TAB_TAG = "<dd>"; //$NON-NLS-1$
+	protected static final String SINGLE_QUOTE = "'"; //$NON-NLS-1$
+	protected static final char SINGLE_QUOTE_CHAR = '\''; //$NON-NLS-1$
+	protected static final String SINGLE_QUOTE_ENTITY = "&#039;"; //$NON-NLS-1$
+	protected static final String SPACE = " "; //$NON-NLS-1$
+	protected static final String SPACE_ENTITY = "&nbsp;"; //$NON-NLS-1$
+
+	/**
+	 * Replace matching literal portions of a string with another string
+	 */
+	public static String replace(String aString, String source, String target) {
+		if (aString == null)
+			return null;
+		String normalString = ""; //$NON-NLS-1$
+		int length = aString.length();
+		int position = 0;
+		int previous = 0;
+		int spacer = source.length();
+		while (position + spacer - 1 < length && aString.indexOf(source, position) > -1) {
+			position = aString.indexOf(source, previous);
+			normalString = normalString + aString.substring(previous, position) + target;
+			position += spacer;
+			previous = position;
+		}
+		normalString = normalString + aString.substring(position, aString.length());
+
+		return normalString;
+	}
+	
+	public static String convertToHTMLContent(String content) {
+		content = replace(content, AMPERSTAND, AMPERSTAND_ENTITY);
+		content = replace(content, LESS_THAN, LESS_THAN_ENTITY);
+		content = replace(content, GREATER_THAN, GREATER_THAN_ENTITY);
+		content = replace(content, LINE_FEED, LINE_FEED_TAG);
+		content = replace(content, LINE_TAB, LINE_TAB_TAG);
+		content = replace(content, SINGLE_QUOTE, SINGLE_QUOTE_ENTITY);
+		content = replace(content, DOUBLE_QUOTE, DOUBLE_QUOTE_ENTITY);
+		content = replace(content, SPACE + SPACE, SPACE_ENTITY + SPACE_ENTITY); // replacing
+		return content;
+	}
+	
 	public static final List getBeansFromConfigSets(IFile file) {
 		List beans = new ArrayList();
 		Map configsMap = new HashMap();
@@ -569,5 +635,14 @@ public class BeansEditorUtils {
 			}
 		}
 		return resource;
+	}
+	
+	public static final String getJDTVersion() {
+		Bundle bundle = JavaCore.getPlugin().getBundle();
+		return (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_VERSION);
+	}
+
+	public static final boolean isJDTVersion32() {
+		return getJDTVersion().startsWith("3.2");
 	}
 }

@@ -30,6 +30,7 @@ import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredPartitionTy
 import org.eclipse.wst.xml.core.internal.provisional.text.IXMLPartitions;
 import org.eclipse.wst.xml.ui.StructuredTextViewerConfigurationXML;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansContentAssistProcessor;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.provisional.Jdt31BeansContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.hover.BeansTextHoverProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.BeansHyperLinkDetector;
 
@@ -43,7 +44,12 @@ public class BeansStructuredTextViewerConfiguration extends
 
 		if (partitionType == IStructuredPartitionTypes.DEFAULT_PARTITION
 				|| partitionType == IXMLPartitions.XML_DEFAULT) {
-			processors = new IContentAssistProcessor[] { new BeansContentAssistProcessor() };
+			if (BeansEditorUtils.isJDTVersion32()) {
+				processors = new IContentAssistProcessor[] { new BeansContentAssistProcessor() };
+			}
+			else {
+				processors = new IContentAssistProcessor[] { new Jdt31BeansContentAssistProcessor() };
+			}
 		} else {
 			processors = super.getContentAssistProcessors(sourceViewer, partitionType);
 		}

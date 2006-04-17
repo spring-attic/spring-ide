@@ -546,32 +546,37 @@ public class BeansContentAssistProcessor
             ICompletionProposal[] proposals = order(props);
 
             for (int i = 0; i < proposals.length; i++) {
-                if (proposals[i] instanceof JavaCompletionProposal) {
-                    JavaCompletionProposal prop = (JavaCompletionProposal) proposals[i];
-                    BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(prop
-                            .getReplacementString(), request.getReplacementBeginPosition(), request
-                            .getReplacementLength(), prop.getReplacementString().length(), prop
-                            .getImage(), prop.getDisplayString(), null, prop
-                            .getAdditionalProposalInfo(), prop.getRelevance());
-
-                    request.addProposal(proposal);
-                }
-                else if (proposals[i] instanceof LazyJavaTypeCompletionProposal) {
-                    LazyJavaTypeCompletionProposal prop = (LazyJavaTypeCompletionProposal) proposals[i];
-                    BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(prop
-                            .getReplacementString(), request.getReplacementBeginPosition(), request
-                            .getReplacementLength(), prop.getReplacementString().length(), prop
-                            .getImage(), prop.getDisplayString(), null, prop
-                            .getAdditionalProposalInfo(), prop.getRelevance());
-
-                    request.addProposal(proposal);
-                }
+            	ICompletionProposal comProposal = proposals[i];
+                processJavaCompletionProposal(request, comProposal);
             }
         }
         catch (Exception e) {
             // do nothing
         }
     }
+
+	protected void processJavaCompletionProposal(ContentAssistRequest request, ICompletionProposal comProposal) {
+		if (comProposal instanceof JavaCompletionProposal) {
+		    JavaCompletionProposal prop = (JavaCompletionProposal) comProposal;
+		    BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(prop
+		            .getReplacementString(), request.getReplacementBeginPosition(), request
+		            .getReplacementLength(), prop.getReplacementString().length(), prop
+		            .getImage(), prop.getDisplayString(), null, prop
+		            .getAdditionalProposalInfo(), prop.getRelevance());
+
+		    request.addProposal(proposal);
+		}
+		else if (comProposal instanceof LazyJavaTypeCompletionProposal) {
+			LazyJavaTypeCompletionProposal prop = (LazyJavaTypeCompletionProposal) comProposal;
+			BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(prop
+					.getQualifiedTypeName(), request.getReplacementBeginPosition(), request
+					.getReplacementLength(), prop.getQualifiedTypeName().length(), prop
+					.getImage(), prop.getDisplayString(), null, prop
+					.getAdditionalProposalInfo(), prop.getRelevance());
+			
+			request.addProposal(proposal);
+		}
+	}
 
     private void addFactoryMethodAttributeValueProposals(ContentAssistRequest request,
             String prefix, String className, String factoryClassName) {
