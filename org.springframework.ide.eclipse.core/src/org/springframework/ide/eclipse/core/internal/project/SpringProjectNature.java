@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,16 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
+/**
+ * This class defines the project nature with the corresponding incremental
+ * builder for Spring projects.
+ * @author Torsten Juergeleit
+ */
 public class SpringProjectNature implements IProjectNature {
 
 	public static final String DEBUG_OPTION = SpringCore.PLUGIN_ID +
@@ -58,6 +65,7 @@ public class SpringProjectNature implements IProjectNature {
 		}
 		IProject project = getProject();
 		IProjectDescription desc = project.getDescription();
+		IProgressMonitor monitor = new NullProgressMonitor();
 		ICommand builderCommand = getBuilderCommand(desc,
 													SpringCore.BUILDER_ID);
 		if (builderCommand == null) {
@@ -67,8 +75,8 @@ public class SpringProjectNature implements IProjectNature {
 			command.setBuilderName(SpringCore.BUILDER_ID);
 
 			// Commit the spec change into the project
-			setBuilderCommand(desc, command);
-			project.setDescription(desc, null);
+			setBuilderCommand(desc, command, monitor);
+			project.setDescription(desc, monitor);
 		}
 	}
 
@@ -80,7 +88,8 @@ public class SpringProjectNature implements IProjectNature {
 			System.out.println("deconfiguring Spring project nature");
 		}
 		IProject project = getProject();
-		SpringCoreUtils.removeProjectBuilder(project, SpringCore.BUILDER_ID);
+		SpringCoreUtils.removeProjectBuilder(project, SpringCore.BUILDER_ID,
+											 new NullProgressMonitor());
 	}
 
 	private ICommand getBuilderCommand(IProjectDescription description,
@@ -97,7 +106,7 @@ public class SpringProjectNature implements IProjectNature {
 	}
 
 	private void setBuilderCommand(IProjectDescription description,
-								   ICommand command) throws CoreException {
+			 ICommand command, IProgressMonitor monitor) throws CoreException {
 		ICommand[] oldCommands = description.getBuildSpec();
 		ICommand oldBuilderCommand = getBuilderCommand(description,
 													 command.getBuilderName());
@@ -124,6 +133,6 @@ public class SpringProjectNature implements IProjectNature {
 
 		// Commit the spec change into the project
 		description.setBuildSpec(newCommands);
-		getProject().setDescription(description, null);
+		getProject().setDescription(description, monitor);
 	}
 }

@@ -22,49 +22,88 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
+/**
+ * Some helper methods.
+ * @author Torsten Juergeleit
+ */
 public final class SpringCoreUtils {
 
 	/**
-	 * Creates given project at specified location.
+	 * Creates specified simple project.
 	 */
-	public static void createProject(IProject project, IPath location,
-							   IProgressMonitor monitor) throws CoreException {
-		if (!Platform.getLocation().equals(location)) {
-			IProjectDescription desc = project.getWorkspace()
-									 .newProjectDescription(project.getName());
-			desc.setLocation(location);
-			project.create(desc, monitor);
+	public static IProject createProject(String projectName,
+				IProjectDescription description, IProgressMonitor monitor)
+				throws CoreException {
+		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+		IProject project = root.getProject(projectName);
+		if (!project.exists()) {
+			if (description == null) {
+				project.create(monitor);
+			} else {
+				project.create(description, monitor);
+			}
 		} else {
-			project.create(monitor);
+			project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
 		}
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+		if (!project.isOpen()) {
+			project.open(monitor);
+		}
+		return project;	
+	}
+
+	/**
+	 * Creates specified Java project.
+	 */
+	public static IJavaProject createJavaProject(String projectName,
+							   IProgressMonitor monitor) throws CoreException {
+		IProject project = createProject(projectName, null, monitor);
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+		if (!project.hasNature(JavaCore.NATURE_ID)) {
+			addProjectNature(project, JavaCore.NATURE_ID, monitor);
+		}
+		IJavaProject jproject = JavaCore.create(project);
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+		jproject.setRawClasspath(new IClasspathEntry[0], monitor);
+		return jproject;	
 	}
 
 	/**
 	 * Creates given folder and (if necessary) all of it's parents.
 	 */
-	public static void createFolder(IFolder folder) throws CoreException {
+	public static void createFolder(IFolder folder, IProgressMonitor monitor)
+													   throws CoreException {
 		if (!folder.exists()) {
 			IContainer parent = folder.getParent();
 			if (parent instanceof IFolder) {
-				createFolder((IFolder) parent);
+				createFolder((IFolder) parent, monitor);
 			}
-			folder.create(true, true, null);
+			folder.create(true, true, monitor);
 		}
 	}
 
 	/**
 	 * Adds given nature as first nature to specified project.
 	 */	
-	public static void addProjectNature(IProject project, String nature)
-														 throws CoreException {
+	public static void addProjectNature(IProject project, String nature,
+							   IProgressMonitor monitor) throws CoreException {
 		if (project != null && nature != null) {
 			if (!project.hasNature(nature)) {
 				IProjectDescription desc = project.getDescription();
@@ -76,7 +115,7 @@ public final class SpringCoreUtils {
 									 oldNatures.length);
 				}
 				desc.setNatureIds(newNatures);
-				project.setDescription(desc, null);
+				project.setDescription(desc, monitor);
 			}
 		}
 	}
@@ -84,8 +123,8 @@ public final class SpringCoreUtils {
 	/**
 	 * Removes given nature from specified project.
 	 */	
-	public static void removeProjectNature(IProject project, String nature)
-														 throws CoreException {
+	public static void removeProjectNature(IProject project, String nature,
+							   IProgressMonitor monitor) throws CoreException {
 		if (project != null && nature != null) {
 			if (project.exists() && project.hasNature(nature)) {
 
@@ -107,7 +146,7 @@ public final class SpringCoreUtils {
 					}
 				}
 				desc.setNatureIds(newNatures);
-				project.setDescription(desc, null);
+				project.setDescription(desc, monitor);
 			}
 		} 
 	}
@@ -115,26 +154,23 @@ public final class SpringCoreUtils {
 	/**
 	 * Removes given builder from specified project.
 	 */
-	public static void removeProjectBuilder(IProject project, String builder) {
+	public static void removeProjectBuilder(IProject project, String builder,
+							   IProgressMonitor monitor) throws CoreException {
 		if (project != null && builder != null) {
-			try {
-				IProjectDescription desc = project.getDescription();
-				ICommand[] commands = desc.getBuildSpec();
-				for (int i = commands.length - 1; i >= 0; i--) {
-					if (commands[i].getBuilderName().equals(builder)) {
-						ICommand[] newCommands = new ICommand[commands.length -
-															  1];
-						System.arraycopy(commands, 0, newCommands, 0, i);
-						System.arraycopy(commands, i + 1, newCommands, i,
-										 commands.length - i - 1);
-						// Commit the spec change into the project
-						desc.setBuildSpec(newCommands);
-						project.setDescription(desc, null);
-						break;
-					}
+			IProjectDescription desc = project.getDescription();
+			ICommand[] commands = desc.getBuildSpec();
+			for (int i = commands.length - 1; i >= 0; i--) {
+				if (commands[i].getBuilderName().equals(builder)) {
+					ICommand[] newCommands = new ICommand[commands.length -
+														  1];
+					System.arraycopy(commands, 0, newCommands, 0, i);
+					System.arraycopy(commands, i + 1, newCommands, i,
+									 commands.length - i - 1);
+					// Commit the spec change into the project
+					desc.setBuildSpec(newCommands);
+					project.setDescription(desc, monitor);
+					break;
 				}
-			} catch (CoreException e) {
-				SpringCore.log(e);
 			}
 		}
 	}
