@@ -107,13 +107,31 @@
             id="org.springframework.ide.eclipse.beans.ui.wizards.category"
             name="%wizards.category"/>
       <wizard
-            id="org.springframework.ide.eclipse.beans.ui.wizards.newSpringProject"
             category="org.springframework.ide.eclipse.beans.ui.wizards.category"
             class="org.springframework.ide.eclipse.beans.ui.wizards.NewSpringProjectWizard"
-            icon="icons/full/obj16/spring_obj.gif"
-            hasPages="true"
+            icon="icons/full/etool16/newprj_wiz.gif"
+            id="org.springframework.ide.eclipse.beans.ui.wizards.newSpringProject"
             name="%wizards.newProject"
-            project="true"/>
+            project="true">
+            hasPages="true"
+            project="true">
+         <description>
+            %wizards.newProject.description
+         </description>
+      </wizard>
+      <wizard
+            id="org.springframework.ide.eclipse.beans.ui.wizards.newBeansConfig"
+            name="%wizards.newConfig"
+            class="org.springframework.ide.eclipse.beans.ui.wizards.NewBeansConfigWizard"
+            category="org.springframework.ide.eclipse.beans.ui.wizards.category"
+            icon="icons/full/etool16/newconfig_wiz.gif">
+         <description>
+            %wizards.newConfig.description
+         </description>
+         <selection
+               class="org.eclipse.core.resources.IResource">
+         </selection>
+      </wizard>
    </extension>
 
 </plugin>

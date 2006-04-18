@@ -25,14 +25,21 @@ public final class BeansWizardsMessages extends NLS {
 
 	private static final String BUNDLE_NAME = "org.springframework.ide." +
 							   "eclipse.beans.ui.wizards.BeansWizardsMessages";
-
 	private BeansWizardsMessages() {
 		// Do not instantiate
 	}
 
+	public static String ExceptionDialog_seeErrorLogMessage;
+
+	public static String NewResource_op_error_title;
+	public static String NewResource_op_error_message;
+
 	public static String NewProject_windowTitle;
 	public static String NewProject_title;
 	public static String NewProject_description;
+
+	public static String NewProject_referenceTitle;
+	public static String NewProject_referenceDescription;
 
 	public static String NewProject_createProject;
 	public static String NewProject_createNewProject;
