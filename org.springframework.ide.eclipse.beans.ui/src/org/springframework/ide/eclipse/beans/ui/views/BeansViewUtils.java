@@ -24,6 +24,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -100,7 +101,7 @@ public final class BeansViewUtils {
 				if (!SpringCoreUtils.isSpringProject(project)) {
 					try {
 						SpringCoreUtils.addProjectNature(project,
-								SpringCore.NATURE_ID);
+							  SpringCore.NATURE_ID, new NullProgressMonitor());
 					} catch (CoreException e) {
 						MessageDialog.openError(
 							SpringUIPlugin.getActiveWorkbenchShell(),
