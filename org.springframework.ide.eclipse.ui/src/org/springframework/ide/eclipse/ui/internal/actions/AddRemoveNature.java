@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -80,7 +81,7 @@ public class AddRemoveNature implements IObjectActionDelegate {
 			if (SpringCoreUtils.isSpringProject(project)) {
 				try {
 					SpringCoreUtils.removeProjectNature(project,
-													    SpringCore.NATURE_ID);
+							  SpringCore.NATURE_ID, new NullProgressMonitor());
 				} catch (CoreException e) {
 					MessageDialog.openError(
 							SpringUIPlugin.getActiveWorkbenchShell(),
@@ -92,7 +93,7 @@ public class AddRemoveNature implements IObjectActionDelegate {
 			} else {
 				try {
 					SpringCoreUtils.addProjectNature(project,
-													 SpringCore.NATURE_ID);
+							  SpringCore.NATURE_ID, new NullProgressMonitor());
 				} catch (CoreException e) {
 					MessageDialog.openError(
 							SpringUIPlugin.getActiveWorkbenchShell(),
