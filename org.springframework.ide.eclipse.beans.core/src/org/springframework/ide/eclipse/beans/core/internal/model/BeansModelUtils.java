@@ -154,19 +154,19 @@ public class BeansModelUtils {
 				Iterator configs = project.getConfigs().iterator();
 				while (configs.hasNext()) {
 					IBeansConfig config = (IBeansConfig) configs.next();
-					beans.add(config.getBeans());
+					beans.addAll(config.getBeans());
 				}
 			}
 		} else if (element instanceof IBeansProject) {
 			Iterator configs = ((IBeansProject) element).getConfigs().iterator();
 			while (configs.hasNext()) {
 				IBeansConfig config = (IBeansConfig) configs.next();
-				beans.add(config.getBeans());
+				beans.addAll(config.getBeans());
 			}
 		} else if (element instanceof IBeansConfig) {
 			beans.add(((IBeansConfig) element).getBeans());
 		} else if (element instanceof IBeansConfigSet) {
-			beans.add(((IBeansConfigSet) element).getBeans());
+			beans.addAll(((IBeansConfigSet) element).getBeans());
 		} else if (element instanceof IBean) {
 			beans.add(element);
 		} else {
