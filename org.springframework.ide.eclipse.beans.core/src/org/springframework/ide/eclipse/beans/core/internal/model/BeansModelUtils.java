@@ -50,11 +50,16 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.util.Assert;
 
+/**
+ * Helper methods for working with the BeansCodeModel.
+ * @author Torsten Juergeleit
+ */
 public class BeansModelUtils {
 
 	/**
@@ -132,6 +137,43 @@ public class BeansModelUtils {
 			throw new IllegalArgumentException("Unsupported model element " +
 											   element);
 		}
+	}
+
+	/**
+	 * Returns a list of all <code>IBean</code>s which belong to the given
+	 * <code>IModelElement</code>.
+	 * @param element  a model element which contains beans
+	 * @throws IllegalArgumentException if unsupported model element specified 
+	 */
+	public static final List getBeans(IModelElement element) {
+		List beans = new ArrayList();
+		if (element instanceof IBeansModel) {
+			Iterator projects = ((IBeansModel) element).getProjects().iterator();
+			while (projects.hasNext()) {
+				IBeansProject project = (IBeansProject) projects.next();
+				Iterator configs = project.getConfigs().iterator();
+				while (configs.hasNext()) {
+					IBeansConfig config = (IBeansConfig) configs.next();
+					beans.add(config.getBeans());
+				}
+			}
+		} else if (element instanceof IBeansProject) {
+			Iterator configs = ((IBeansProject) element).getConfigs().iterator();
+			while (configs.hasNext()) {
+				IBeansConfig config = (IBeansConfig) configs.next();
+				beans.add(config.getBeans());
+			}
+		} else if (element instanceof IBeansConfig) {
+			beans.add(((IBeansConfig) element).getBeans());
+		} else if (element instanceof IBeansConfigSet) {
+			beans.add(((IBeansConfigSet) element).getBeans());
+		} else if (element instanceof IBean) {
+			beans.add(element);
+		} else {
+			throw new IllegalArgumentException("Unsupported model element " +
+											   element);
+		}
+		return beans;
 	}
 
 	/**
