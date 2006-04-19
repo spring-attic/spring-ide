@@ -27,6 +27,7 @@
       <import plugin="org.springframework.ide.eclipse.beans.ui"/>
       <import plugin="org.eclipse.wst.sse.core"/>
       <import plugin="org.eclipse.wst.xml.core"/>
+      <import plugin="org.springframework.ide.eclipse.ui"/>
    </requires>
  
    <extension

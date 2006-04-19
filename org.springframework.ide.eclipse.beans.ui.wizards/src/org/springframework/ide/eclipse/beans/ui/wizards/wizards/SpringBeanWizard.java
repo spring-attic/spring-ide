@@ -15,17 +15,22 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWizard;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.wst.sse.core.internal.format.IStructuredFormatProcessor;
 import org.eclipse.wst.sse.core.internal.provisional.StructuredModelManager;
+import org.eclipse.wst.xml.core.internal.document.NodeImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
+import org.eclipse.wst.xml.core.internal.provisional.format.FormatProcessorXML;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
@@ -42,6 +47,7 @@ import org.springframework.ide.eclipse.beans.ui.wizards.model.ValueModelItem;
 import org.springframework.ide.eclipse.core.ui.dialogs.message.ErrorDialog;
 import org.springframework.ide.eclipse.core.ui.treemodel.IModelItem;
 import org.springframework.ide.eclipse.core.ui.utils.PluginUtils;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -91,20 +97,27 @@ public class SpringBeanWizard extends Wizard implements IWorkbenchWizard {
 		IBeansConfig originatingConfigFile = null;
 		IType originatingType = null;
 		if (selection.getFirstElement() instanceof IResource) {
-			IResource selectionFirstElement = (IResource) selection.getFirstElement();
+			IResource selectionFirstElement = (IResource) selection
+					.getFirstElement();
 			if (selectionFirstElement.isAccessible()) {
-				originatingProject = new BeansProject(selectionFirstElement.getProject());
+				originatingProject = new BeansProject(selectionFirstElement
+						.getProject());
 				if (selectionFirstElement instanceof IFile) {
-					if (originatingProject.getConfig(((IFile) selectionFirstElement).getName()) != null) {
-						originatingConfigFile = originatingProject.getConfig(selectionFirstElement.getName());
+					if (originatingProject
+							.getConfig(((IFile) selectionFirstElement)
+									.getName()) != null) {
+						originatingConfigFile = originatingProject
+								.getConfig(selectionFirstElement.getName());
 					} else {
-						Object adaptedElement = PluginUtils.getAdapted(selectionFirstElement, IJavaElement.class);
+						Object adaptedElement = PluginUtils.getAdapted(
+								selectionFirstElement, IJavaElement.class);
 						if (adaptedElement != null) {
 							IJavaElement javaElement = (IJavaElement) adaptedElement;
 							if (javaElement instanceof ICompilationUnit) {
 								ICompilationUnit compilationUnit = (ICompilationUnit) javaElement;
 								try {
-									originatingType = (IType) compilationUnit.getAllTypes()[0];
+									originatingType = (IType) compilationUnit
+											.getAllTypes()[0];
 								} catch (JavaModelException e) {
 									// silence this exception
 								}
@@ -114,7 +127,8 @@ public class SpringBeanWizard extends Wizard implements IWorkbenchWizard {
 				}
 			}
 		}
-		page1 = new SpringBeanBasicWizardPage(originatingProject, originatingConfigFile, originatingType);
+		page1 = new SpringBeanBasicWizardPage(originatingProject,
+				originatingConfigFile, originatingType);
 		page1.setTitle("Declare as Bean - basic");
 		addPage(page1);
 
@@ -128,11 +142,13 @@ public class SpringBeanWizard extends Wizard implements IWorkbenchWizard {
 	}
 
 	/**
-	 * This method is called when 'Finish' button is pressed in the wizard. We will create an operation and run it using wizard as execution context.
+	 * This method is called when 'Finish' button is pressed in the wizard. We
+	 * will create an operation and run it using wizard as execution context.
 	 */
 	public boolean performFinish() {
 		IRunnableWithProgress op = new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) throws InvocationTargetException {
+			public void run(IProgressMonitor monitor)
+					throws InvocationTargetException {
 				try {
 					doFinish(monitor);
 				} catch (RuntimeException e) {
@@ -149,7 +165,10 @@ public class SpringBeanWizard extends Wizard implements IWorkbenchWizard {
 		} catch (InterruptedException e) {
 			return false;
 		} catch (InvocationTargetException e) {
-			ErrorDialog internalError = new ErrorDialog(SpringBeanWizard.ACTION_LABEL_ID, "An exception in the bean declaration process occured : " + e.getTargetException().getMessage(), e);
+			ErrorDialog internalError = new ErrorDialog(
+					SpringBeanWizard.ACTION_LABEL_ID,
+					"An exception in the bean declaration process occured : "
+							+ e.getTargetException().getMessage(), e);
 			internalError.open();
 			return false;
 		}
@@ -157,12 +176,16 @@ public class SpringBeanWizard extends Wizard implements IWorkbenchWizard {
 	}
 
 	/**
-	 * The worker method. It will find the container, create the file if missing or just replace its contents, and open the editor on the newly created file. FIXME use constants for the tag names.
+	 * The worker method. It will find the container, create the file if missing
+	 * or just replace its contents, and open the editor on the newly created
+	 * file. FIXME use constants for the tag names.
 	 */
 	private void doFinish(IProgressMonitor monitor) {
 
 		try {
-			IDOMModel xmlModel = (IDOMModel) StructuredModelManager.getModelManager().getModelForEdit(page1.selectedConfigFile.getConfigFile());
+			IDOMModel xmlModel = (IDOMModel) StructuredModelManager
+					.getModelManager().getModelForEdit(
+							page1.selectedConfigFile.getConfigFile());
 			IDOMDocument xmlDoc = (IDOMDocument) xmlModel.getDocument();
 			xmlModel.beginRecording(this);
 			xmlModel.aboutToChangeModel();
@@ -181,78 +204,116 @@ public class SpringBeanWizard extends Wizard implements IWorkbenchWizard {
 				beanElement.setAttribute("class", page1.getBeanClass());
 			}
 			if (page3.getBeanAutoWireState() != SpringBeanLifecycleWizardPage.SINGLETON_DEFAULT) {
-				beanElement.setAttribute("singleton", SpringBeanLifecycleWizardPage.SINGLETON_LABELS[page3.getBeanSingletonState()]);
+				beanElement.setAttribute("singleton",
+						SpringBeanLifecycleWizardPage.SINGLETON_LABELS[page3
+								.getBeanSingletonState()]);
 			}
 			if (page3.getBeanAutoWireState() != SpringBeanBasicWizardPage.ABSTRACT_DEFAULT) {
-				beanElement.setAttribute("abstract", SpringBeanBasicWizardPage.ABSTRACT_LABELS[page1.getBeanAbstractState()]);
+				beanElement.setAttribute("abstract",
+						SpringBeanBasicWizardPage.ABSTRACT_LABELS[page1
+								.getBeanAbstractState()]);
 			}
 			if (page3.getBeanAutoWireState() != SpringBeanLifecycleWizardPage.AUTOWIRE_DEFAULT) {
-				beanElement.setAttribute("autowire", SpringBeanLifecycleWizardPage.AUTOWIRE_LABELS[page3.getBeanAutoWireState()]);
+				beanElement.setAttribute("autowire",
+						SpringBeanLifecycleWizardPage.AUTOWIRE_LABELS[page3
+								.getBeanAutoWireState()]);
 			}
 			if (page3.getBeanLazyInitState() != SpringBeanLifecycleWizardPage.LAZYINIT_DEFAULT) {
-				beanElement.setAttribute("lazy-init", SpringBeanLifecycleWizardPage.LAZYINIT_LABELS[page3.getBeanLazyInitState()]);
+				beanElement.setAttribute("lazy-init",
+						SpringBeanLifecycleWizardPage.LAZYINIT_LABELS[page3
+								.getBeanLazyInitState()]);
 			}
 			if (page3.getBeanDependencyCheckState() != SpringBeanLifecycleWizardPage.DEP_CHCK_DEFAULT) {
-				beanElement.setAttribute("dependency-check", SpringBeanLifecycleWizardPage.DEP_CHECK_LABELS[page3.getBeanDependencyCheckState()]);
+				beanElement.setAttribute("dependency-check",
+						SpringBeanLifecycleWizardPage.DEP_CHECK_LABELS[page3
+								.getBeanDependencyCheckState()]);
 			}
 			if (page3.getBeanInitMethod() != null) {
-				beanElement.setAttribute("init-method", page3.getBeanInitMethod());
+				beanElement.setAttribute("init-method", page3
+						.getBeanInitMethod());
 			}
 			if (page3.getBeanDestroyMethod() != null) {
-				beanElement.setAttribute("destroy-method", page3.getBeanDestroyMethod());
+				beanElement.setAttribute("destroy-method", page3
+						.getBeanDestroyMethod());
 			}
 			if (page2.getInjectionState()) {
 				List propertiesList = page2.getInjectableProperties();
 				for (Iterator it = propertiesList.iterator(); it.hasNext();) {
-					PropertyModelItem propertyModelItem = (PropertyModelItem) it.next();
+					PropertyModelItem propertyModelItem = (PropertyModelItem) it
+							.next();
 					Element propertyElement = xmlDoc.createElement("property");
-					propertyElement.setAttribute("name", propertyModelItem.getName());
+					propertyElement.setAttribute("name", propertyModelItem
+							.getName());
 					if (propertyModelItem.hasChildren()) {
-						handleChildren(xmlDoc,propertyModelItem.getChildren(), propertyElement);
+						handleChildren(xmlDoc, propertyModelItem.getChildren(),
+								propertyElement);
 					}
 					beanElement.appendChild(propertyElement);
 				}
 			}
 
 			tmp.item(0).appendChild(beanElement);
+
+			// do formatting
+			formatElement(beanElement);
+			final int offset = (beanElement instanceof NodeImpl ? ((NodeImpl) beanElement)
+					.getStartOffset()
+					: -1);
+
 			xmlModel.changedModel();
 			xmlModel.endRecording(this);
 			xmlModel.save();
 			xmlModel.releaseFromEdit();
-			
-			// FIXME find a way to format the xml config file before opening it. Targetting the created bean would be a plus.
-			
+
 			Display.getDefault().syncExec(new Runnable() {
-                public void run() {
-                    IWorkbenchPage page = PluginUtils.getWorkbench().getWorkbenchWindows()[0].getPages()[0];
-                    try {
-                        IDE.openEditor(page, page1.selectedConfigFile.getConfigFile());
-                    } catch (PartInitException e) {
-                        ErrorDialog errorDialog=new ErrorDialog("Post creation error","Impossible to open Spring configuration file.",e);
-                        errorDialog.open();
-                    }
-                }
-            });
+				public void run() {
+					IEditorPart editorPart = SpringUIUtils.openInEditor(
+							page1.selectedConfigFile.getConfigFile(), -1);
+					ITextEditor editor = SpringUIUtils
+							.getTextEditor(editorPart);
+					if (editor != null) {
+						IDocument doc = getDocument(editor);
+						try {
+							int line = doc.getLineOfOffset(offset);
+							SpringUIUtils.openInEditor(page1.selectedConfigFile
+									.getConfigFile(), line);
+						} catch (BadLocationException e) {
+						}
+					}
+
+				}
+			});
 		} catch (IOException e) {
-			ErrorDialog errorDialog=new ErrorDialog("Creation error","An IO Exception occured while persisting bean to the configuration file.",e);
-            errorDialog.open();
+			ErrorDialog errorDialog = new ErrorDialog(
+					"Creation error",
+					"An IO Exception occured while persisting bean to the configuration file.",
+					e);
+			errorDialog.open();
 			e.printStackTrace();
 		} catch (CoreException e) {
-			ErrorDialog errorDialog=new ErrorDialog("Creation error","An Eclipse Core Exception occured while persisting bean to the configuration file.",e);
-            errorDialog.open();
+			ErrorDialog errorDialog = new ErrorDialog(
+					"Creation error",
+					"An Eclipse Core Exception occured while persisting bean to the configuration file.",
+					e);
+			errorDialog.open();
 			e.printStackTrace();
 		}
 	}
 
-	private void handleChildren(IDOMDocument xmlDoc,Collection children, Element element) {
+	private void handleChildren(IDOMDocument xmlDoc, Collection children,
+			Element element) {
 		for (Iterator it = children.iterator(); it.hasNext();) {
-			IModelItem next =(IModelItem) it.next();
+			IModelItem next = (IModelItem) it.next();
 			if (next instanceof ValueModelItem) {
-				if(next.getParent() instanceof PropertyModelItem){
-					element.setAttribute("value", ((ValueModelItem) next).getValue());
-				}else{
-					Element valueElement=xmlDoc.createElement("value");
-					valueElement.appendChild(xmlDoc.createTextNode(((ValueModelItem) next).getValue()));
+				if (next.getParent() instanceof PropertyModelItem) {
+					element.setAttribute("value", ((ValueModelItem) next)
+							.getValue());
+				} else {
+					Element valueElement = xmlDoc.createElement("value");
+					valueElement
+							.appendChild(xmlDoc
+									.createTextNode(((ValueModelItem) next)
+											.getValue()));
 					element.appendChild(valueElement);
 				}
 			}
@@ -260,63 +321,80 @@ public class SpringBeanWizard extends Wizard implements IWorkbenchWizard {
 				element.setAttribute("ref", ((RefModelItem) next).getBeanId());
 			}
 			if (next instanceof MapModelItem) {
-				Element mapElement=xmlDoc.createElement("map");
-				IModelItem modelItem=(IModelItem)next;
-				handleChildren(xmlDoc,modelItem.getChildren(),mapElement);
+				Element mapElement = xmlDoc.createElement("map");
+				IModelItem modelItem = (IModelItem) next;
+				handleChildren(xmlDoc, modelItem.getChildren(), mapElement);
 				element.appendChild(mapElement);
 			}
 			if (next instanceof MapEntryModelItem) {
-				MapEntryModelItem mapEntryModelItem=(MapEntryModelItem)next;
-				Element entryElement=xmlDoc.createElement("entry");
-				Element keyElement=xmlDoc.createElement("key");
-				Element valueElement=xmlDoc.createElement("value");
-				valueElement.appendChild(xmlDoc.createTextNode(mapEntryModelItem.getKeyValue()));
+				MapEntryModelItem mapEntryModelItem = (MapEntryModelItem) next;
+				Element entryElement = xmlDoc.createElement("entry");
+				Element keyElement = xmlDoc.createElement("key");
+				Element valueElement = xmlDoc.createElement("value");
+				valueElement.appendChild(xmlDoc
+						.createTextNode(mapEntryModelItem.getKeyValue()));
 				keyElement.appendChild(valueElement);
 				entryElement.appendChild(keyElement);
-				handleChildren(xmlDoc,mapEntryModelItem.getChildren(),entryElement);
+				handleChildren(xmlDoc, mapEntryModelItem.getChildren(),
+						entryElement);
 				element.appendChild(entryElement);
 			}
 			if (next instanceof ListModelItem) {
-				Element listElement=xmlDoc.createElement("list");
-				IModelItem modelItem=(IModelItem)next;
-				handleChildren(xmlDoc,modelItem.getChildren(),listElement);
+				Element listElement = xmlDoc.createElement("list");
+				IModelItem modelItem = (IModelItem) next;
+				handleChildren(xmlDoc, modelItem.getChildren(), listElement);
 				element.appendChild(listElement);
 			}
 			if (next instanceof SetModelItem) {
-				Element setElement=xmlDoc.createElement("set");
-				IModelItem modelItem=(IModelItem)next;
-				handleChildren(xmlDoc,modelItem.getChildren(),setElement);
+				Element setElement = xmlDoc.createElement("set");
+				IModelItem modelItem = (IModelItem) next;
+				handleChildren(xmlDoc, modelItem.getChildren(), setElement);
 				element.appendChild(setElement);
 			}
 			if (next instanceof PropsModelItem) {
-				Element propsElement=xmlDoc.createElement("props");
-				IModelItem modelItem=(IModelItem)next;
-				handleChildren(xmlDoc,modelItem.getChildren(),propsElement);
+				Element propsElement = xmlDoc.createElement("props");
+				IModelItem modelItem = (IModelItem) next;
+				handleChildren(xmlDoc, modelItem.getChildren(), propsElement);
 				element.appendChild(propsElement);
 			}
 			if (next instanceof PropModelItem) {
-				Element propElement=xmlDoc.createElement("prop");
-				PropModelItem propModelItem=(PropModelItem)next;
-				propElement.setAttribute("key",propModelItem.getKey());
-				propElement.appendChild(xmlDoc.createTextNode(propModelItem.getValue()));
+				Element propElement = xmlDoc.createElement("prop");
+				PropModelItem propModelItem = (PropModelItem) next;
+				propElement.setAttribute("key", propModelItem.getKey());
+				propElement.appendChild(xmlDoc.createTextNode(propModelItem
+						.getValue()));
 				element.appendChild(propElement);
 			}
-			if(next instanceof IdRefModelItem){
-				Element idRefElement=xmlDoc.createElement("idref");
-				IdRefModelItem idRefModelItem=(IdRefModelItem)next;
-				idRefElement.setAttribute("bean",idRefModelItem.getBeanId());
+			if (next instanceof IdRefModelItem) {
+				Element idRefElement = xmlDoc.createElement("idref");
+				IdRefModelItem idRefModelItem = (IdRefModelItem) next;
+				idRefElement.setAttribute("bean", idRefModelItem.getBeanId());
 				element.appendChild(idRefElement);
 			}
 		}
 	}
 
 	/**
-	 * We will accept the selection in the workbench to see if we can initialize from it.
+	 * We will accept the selection in the workbench to see if we can initialize
+	 * from it.
 	 * 
 	 * @see IWorkbenchWizard#init(IWorkbench, IStructuredSelection)
 	 */
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		this.workbench = workbench;
 		this.selection = selection;
+	}
+
+	private void formatElement(Element element) {
+		IStructuredFormatProcessor formatProcessor = new FormatProcessorXML();
+		formatProcessor.formatNode(element);
+	}
+
+	private IDocument getDocument(ITextEditor editor) {
+		IDocument document = null;
+		if (editor != null)
+			document = editor.getDocumentProvider().getDocument(
+					editor.getEditorInput());
+		return document;
 	}
 }
