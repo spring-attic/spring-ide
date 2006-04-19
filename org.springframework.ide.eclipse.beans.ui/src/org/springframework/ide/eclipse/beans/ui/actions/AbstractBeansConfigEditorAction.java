@@ -35,6 +35,7 @@ public abstract class AbstractBeansConfigEditorAction extends ActionDelegate
 			 implements IEditorActionDelegate, IWorkbenchWindowActionDelegate {
     private ITextEditor editor;
     private IFile file;
+    private IWorkbenchWindow window;
 
 	public ITextEditor getTextEditor() {
 		return editor;
@@ -45,7 +46,7 @@ public abstract class AbstractBeansConfigEditorAction extends ActionDelegate
 	}
 
 	public void init(IWorkbenchWindow window) {
-		// do nothing
+		this.window = window;
 	}
 
 	public final void setActiveEditor(IAction proxyAction, IEditorPart part) {
@@ -69,5 +70,9 @@ public abstract class AbstractBeansConfigEditorAction extends ActionDelegate
      */
 	protected void actionActivated(IAction proxyAction) {
 		// do nothing
+	}
+
+	protected IWorkbenchWindow getWindow() {
+		return window;
 	}
 }
