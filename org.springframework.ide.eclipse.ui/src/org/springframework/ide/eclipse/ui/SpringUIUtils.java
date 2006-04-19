@@ -21,11 +21,14 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceNode;
 import org.eclipse.jface.preference.IPreferencePage;
 import org.eclipse.jface.preference.PreferenceDialog;
@@ -45,6 +48,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
@@ -54,16 +58,21 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
-public class SpringUIUtils {
+/**
+ * This is a collection of UI-related helper methods.
+ * @author Torsten Juergeleit
+ */
+public final class SpringUIUtils {
 
 	/**
 	 * Returns the standard display to be used. The method first checks, if
 	 * the thread calling this method has an associated display. If so, this
 	 * display is returned. Otherwise the method returns the default display.
 	 */
-	public static final Display getStandardDisplay() {
+	public static Display getStandardDisplay() {
 		Display display = Display.getCurrent();
 		if (display == null) {
 			display = Display.getDefault();
@@ -74,7 +83,7 @@ public class SpringUIUtils {
 	/**
 	 * Returns a button with the given label and selection listener.
 	 */
-	public static final Button createButton(Composite parent, String labelText,
+	public static Button createButton(Composite parent, String labelText,
 											SelectionListener listener) {
 		return createButton(parent, labelText, listener, 0, true);
 	}
@@ -83,7 +92,7 @@ public class SpringUIUtils {
 	 * Returns a button with the given label, indentation, enablement and
 	 * selection listener.
 	 */
-	public static final Button createButton(Composite parent, String labelText,
+	public static Button createButton(Composite parent, String labelText,
 				SelectionListener listener, int indentation, boolean enabled) {
 		Button button = new Button(parent, SWT.PUSH);
 		button.setFont(parent.getFont());
@@ -105,7 +114,7 @@ public class SpringUIUtils {
 	/**
 	 * Returns a check box with the given label.
 	 */
-	public static final Button createCheckBox(Composite parent,
+	public static Button createCheckBox(Composite parent,
 											  String labelText) {
 		Button button = new Button(parent, SWT.CHECK);
 		button.setFont(parent.getFont());
@@ -118,7 +127,7 @@ public class SpringUIUtils {
 	/**
 	 * Returns a text field with the given label.
 	 */
-	public static final Text createTextField(Composite parent,
+	public static Text createTextField(Composite parent,
 							  				 String labelText) {
 		return createTextField(parent, labelText, 0, 0);
 	}
@@ -126,7 +135,7 @@ public class SpringUIUtils {
 	/**
 	 * Returns a text field with the given label and horizontal indentation.
 	 */
-	public static final Text createTextField(Composite parent,
+	public static Text createTextField(Composite parent,
 							  			   String labelText, int indentation) {
 		return createTextField(parent, labelText, indentation, 0);
 	}
@@ -135,7 +144,7 @@ public class SpringUIUtils {
 	 * Returns a text field with the given label, horizontal indentation and
 	 * width hint.
 	 */
-	public static final Text createTextField(Composite parent,
+	public static Text createTextField(Composite parent,
 							String labelText, int indentation, int widthHint) {
 		Composite textArea = new Composite(parent, SWT.NULL);
 		GridLayout layout = new GridLayout();
@@ -165,7 +174,7 @@ public class SpringUIUtils {
 	/**
 	 * Returns the font metrics for given control.
 	 */
-	public static final FontMetrics getFontMetrics(Control control) {
+	public static FontMetrics getFontMetrics(Control control) {
 		FontMetrics fontMetrics = null;
 		GC gc = new GC(control);
 		try {
@@ -181,7 +190,7 @@ public class SpringUIUtils {
 	 * Displays specified preferences or property page and returns
 	 * <code>true</code> if <code>PreferenceDialog.OK</code> was selected.
 	 */
-	public static final boolean showPreferencePage(String id,
+	public static boolean showPreferencePage(String id,
 									IPreferencePage page, final String title) {
 		final IPreferenceNode targetNode = new PreferenceNode(id, page);
 		
@@ -201,7 +210,7 @@ public class SpringUIUtils {
 		return result[0];		
 	}
 
-    public static final IEditorPart getActiveEditor() {
+    public static IEditorPart getActiveEditor() {
         IWorkbenchWindow window = SpringUIPlugin.getActiveWorkbenchWindow();
         if (window != null) {
             IWorkbenchPage page = window.getActivePage();
@@ -216,7 +225,7 @@ public class SpringUIUtils {
      * Returns the <code>ITextEditor</code> instance for given
      * <code>IEditorPart</code> or <code>null</code> for any non text editor.
      */
-    public static final ITextEditor getTextEditor(IEditorPart part) {
+    public static ITextEditor getTextEditor(IEditorPart part) {
 		if (part instanceof ITextEditor) {
 			return (ITextEditor) part;
 		} else if (part instanceof IAdaptable) {
@@ -229,10 +238,14 @@ public class SpringUIUtils {
 	/**
 	 * Opens given model element in associated editor.
 	 */
-	public static final IEditorPart openInEditor(ISourceModelElement element) {
+	public static IEditorPart openInEditor(IResourceModelElement element) {
 		IFile file = (IFile) element.getElementResource();
 		if (file != null) {
-			return openInEditor(file, element.getElementStartLine());
+			int line = -1;
+			if (element instanceof ISourceModelElement) {
+				line = ((ISourceModelElement) element).getElementStartLine();
+			}
+			return openInEditor(file, line);
 		}
 		return null;
 	}
@@ -240,7 +253,7 @@ public class SpringUIUtils {
 	/**
 	 * Opens given file in associated editor and go to specified line (if > 0).
 	 */
-	public static final IEditorPart openInEditor(IFile file, int line) {
+	public static IEditorPart openInEditor(IFile file, int line) {
 		IEditorPart editor = null;
 		IWorkbenchPage page = SpringUIPlugin.getActiveWorkbenchPage();
 		try {
@@ -252,12 +265,12 @@ public class SpringUIUtils {
 				editor = IDE.openEditor(page, file);
 			}
 		} catch (CoreException e) {
-			SpringUIPlugin.log(e);
+			openError(SpringUIMessages.OpenInEditor_errorMessage, e.getMessage(), e);
 		}
 	    return editor;
 	}
 
-	public static final IEditorPart openInEditor(IEditorInput input,
+	public static IEditorPart openInEditor(IEditorInput input,
 												 String editorId) {
 		IWorkbenchPage page = SpringUIPlugin.getActiveWorkbenchPage();
 		try {
@@ -267,23 +280,23 @@ public class SpringUIUtils {
 				return editPart;
 			}
 		} catch (PartInitException e) {
-			SpringUIPlugin.log(e);
+			openError(SpringUIMessages.OpenInEditor_errorMessage, e.getMessage(), e);
 		}
 		return null;
 	}
 
-	public static final IEditorPart openInEditor(IType type) {
+	public static IEditorPart openInEditor(IType type) {
 		try {
 			return JavaUI.openInEditor(type);
 		} catch (PartInitException e) {
-			SpringUIPlugin.log(e);
+			openError(SpringUIMessages.OpenInEditor_errorMessage, e.getMessage(), e);
 		} catch (JavaModelException e) {
-			SpringUIPlugin.log(e);
+			openError(SpringUIMessages.OpenInEditor_errorMessage, e.getMessage(), e);
 		}
 		return null;
 	}
 
-	public static final int getCaretOffset(ITextEditor editor) {
+	public static int getCaretOffset(ITextEditor editor) {
 		ISelection selection = editor.getSelectionProvider().getSelection();
 		if (selection instanceof ITextSelection) {
 			return ((ITextSelection) selection).getOffset();
@@ -291,7 +304,7 @@ public class SpringUIUtils {
 		return -1;
 	}
 
-	public static final String getSelectedText(ITextEditor editor) {
+	public static String getSelectedText(ITextEditor editor) {
 		ISelection selection = editor.getSelectionProvider().getSelection();
 		if (selection instanceof ITextSelection) {
 			return ((ITextSelection) selection).getText().trim();
@@ -299,7 +312,7 @@ public class SpringUIUtils {
 		return null;
 	}
 
-	public static final IProgressMonitor getStatusLineProgressMonitor() {
+	public static IProgressMonitor getStatusLineProgressMonitor() {
 		IWorkbenchPage wbPage = SpringUIPlugin.getActiveWorkbenchPage();
 		if (wbPage != null) {
 			IEditorPart editor = wbPage.getActiveEditor();
@@ -309,5 +322,32 @@ public class SpringUIUtils {
 			}
 		}
 		return null;
+	}
+
+    /**
+	 * Open an error style dialog for a given <code>CoreException</code> by
+	 * including any extra information from a nested
+	 * <code>CoreException</code>.
+	 */
+	public static void openError(String title, String message,
+				CoreException exception) {
+		Shell shell = SpringUIPlugin.getActiveWorkbenchShell();
+
+		// Check for a nested CoreException
+		CoreException nestedException = null;
+		IStatus status = exception.getStatus();
+		if (status != null && status.getException() instanceof CoreException) {
+			nestedException = (CoreException) status.getException();
+		}
+		if (nestedException != null) {
+			// Open an error dialog and include the extra
+			// status information from the nested CoreException
+			ErrorDialog.openError(shell, title, message, nestedException
+					.getStatus());
+		} else {
+			// Open a regular error dialog since there is no
+			// extra information to display
+			MessageDialog.openError(shell, title, message);
+		}
 	}
 }

@@ -35,6 +35,8 @@ public final class SpringUIMessages extends NLS {
 	public static String ProjectNature_addError;
 	public static String ProjectNature_removeError;
 
+	public static String OpenInEditor_errorMessage;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, SpringUIMessages.class);
 	}
