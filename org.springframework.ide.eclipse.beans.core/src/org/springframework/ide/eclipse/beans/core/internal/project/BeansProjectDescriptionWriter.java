@@ -78,7 +78,7 @@ public class BeansProjectDescriptionWriter
 					return Status.OK_STATUS;
 				}
 			};
-			job.setRule(file);
+			job.setRule(file.getProject());
 			job.schedule();
 		}
 	}
