@@ -17,6 +17,7 @@
 package org.springframework.ide.eclipse.beans.ui.views.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -115,17 +116,27 @@ public class ConfigSetNode extends AbstractNode {
 		propertyChanged(this, CONFIGS);
 	}
 
+	/**
+	 * Adds the given configs to this config set.
+	 * 
+	 * @param configs  the configs to add
+	 */
+	public void addConfigs(List configs) {
+		this.configs.addAll(configs);
+		propertyChanged(this, CONFIGS);
+	}
+
 	public int getConfigCount() {
 		return configs.size();
 	}
 
 	/**
-	 * Returns the bean nodes of this bean factory.
+	 * Returns the config nodes of this config set.
 	 * 
-	 * @return bean nodes of this bean factory
+	 * @return config nodes of this config set
 	 */
 	public List getConfigs() {
-		return new ArrayList(configs);
+		return Collections.unmodifiableList(configs);
 	}
 
 	public List getConfigNames() {

@@ -17,6 +17,7 @@
 package org.springframework.ide.eclipse.beans.ui.properties;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -191,17 +192,30 @@ public class ConfigSetDialog extends Dialog {
 		if (buttonId == IDialogConstants.OK_ID) {
 			String name = nameText.getText();
 
+			// Keep a copy of the original list of configs in the config set
+			List oldConfigs = new ArrayList(configSet.getConfigs());
+
 			// Update config set
 			configSet.clear();
 			configSet.setName(name);
 			configSet.setOverrideEnabled(overrideButton.getSelection());
 			configSet.setIncomplete(incompleteButton.getSelection());
 
-			// Add selected configs to config set
-			Object[] configs = configsViewer.getCheckedElements();
-			for (int i = 0; i < configs.length; i++) {
-				configSet.addConfig((ConfigNode) configs[i]);
+			// At first add the originally and still selected configs to the
+			// config set
+			List newConfigs = new ArrayList(Arrays.asList(
+										  configsViewer.getCheckedElements()));
+			Iterator configs = oldConfigs.iterator();
+			while (configs.hasNext()) {
+				ConfigNode config = (ConfigNode) configs.next();
+				if (newConfigs.contains(config)) {
+					configSet.addConfig(config);
+					newConfigs.remove(config);
+				}
 			}
+
+			// Finally add the newly selected configs to the config set
+			configSet.addConfigs(newConfigs);
 
 			// Add newly created config set to project or re-add existing one
 			if (configSetName == null) {
