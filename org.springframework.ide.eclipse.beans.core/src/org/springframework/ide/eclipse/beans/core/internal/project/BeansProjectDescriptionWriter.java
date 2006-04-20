@@ -31,9 +31,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
@@ -58,29 +56,27 @@ public class BeansProjectDescriptionWriter
 			System.out.println("Writing project description to " +
 							   file.getLocation().toString());
 		}
-		Job currentJob = Platform.getJobManager().currentJob();
-		if (currentJob != null && currentJob.getRule().contains(file)) {
-			write(file, description);
-		} else {
 
-			// Write project description via a separate workspace job so we
-			// ommit the problem with the locked workspace
-			WorkspaceJob job = new WorkspaceJob(BeansCorePlugin
-					.getFormattedMessage("BeansProjectDescription.write",
-							file.getFullPath().toString())) {
-	
-				public boolean belongsTo(Object family) {
-					return ResourcesPlugin.FAMILY_MANUAL_BUILD.equals(family);
-				}
-	
-				public IStatus runInWorkspace(IProgressMonitor monitor) {
-					write(file, description);
-					return Status.OK_STATUS;
-				}
-			};
-			job.setRule(file.getProject());
-			job.schedule();
-		}
+		// Write project description via a separate workspace job so we
+		// ommit the problem with the locked workspace
+		WorkspaceJob job = new WorkspaceJob(BeansCorePlugin
+				.getFormattedMessage("BeansProjectDescription.write", file
+						.getFullPath().toString())) {
+
+			public boolean belongsTo(Object family) {
+				return ResourcesPlugin.FAMILY_MANUAL_BUILD.equals(family);
+			}
+
+			public IStatus runInWorkspace(IProgressMonitor monitor) {
+				write(file, description);
+				return Status.OK_STATUS;
+			}
+		};
+
+		// FIXME What is the right scheduling rule here which does not conflict
+		// with any outer ruler defined by a caller's job?
+		job.setRule(BeansCorePlugin.getWorkspace().getRoot());
+		job.schedule();
 	}
 
 	protected static void write(IFile file,
