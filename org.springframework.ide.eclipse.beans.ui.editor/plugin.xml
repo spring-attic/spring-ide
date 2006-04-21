@@ -156,5 +156,24 @@
             contextId="org.eclipse.wst.sse.ui.structuredTextEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
    </extension>
+   
+   <extension point="org.eclipse.ui.popupMenus">
+		<viewerContribution
+			targetID="org.springframework.ide.eclipse.beans.ui.editor.beansConfig.source.EditorContext"
+			id="org.springframework.ide.eclipse.beans.ui.editor.actions.context">
+		     <menu
+               label="Refactor"
+               path="additions"
+               id="org.springframework.ide.eclipse.beans.ui.editor.actions.rector.menu">
+         	</menu>
+			<action
+		         class="org.springframework.ide.eclipse.beans.ui.editor.actions.RefactorPropertyElementAction"
+		         icon="icons/full/obj16/spring_obj.gif"
+		         id="org.springframework.ide.eclipse.beans.ui.editor.actions.refactorPropertyElementAction"
+		         label="Refactor Property Element"
+		         menubarPath="org.springframework.ide.eclipse.beans.ui.editor.actions.rector.menu/group1">
+			</action>
+		</viewerContribution>
+	</extension>
 
 </plugin>
