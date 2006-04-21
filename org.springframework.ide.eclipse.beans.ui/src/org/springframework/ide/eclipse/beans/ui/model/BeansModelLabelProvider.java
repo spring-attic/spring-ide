@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.util.StringUtils;
 
 /**
  * This class is an <code>ILabelProvider</code> which knows about the beans
@@ -63,6 +64,11 @@ public class BeansModelLabelProvider extends LabelProvider {
 			label.append(((IModelElement) element).getElementName());
 			if (element instanceof IBean) {
 				IBean bean = (IBean) element;
+				if (bean.getAliases() != null && bean.getAliases().length > 0) {
+					label.append(" '");
+					label.append(StringUtils.arrayToDelimitedString(bean.getAliases(), ", "));
+					label.append('\'');
+				}
 				if (bean.getClassName() != null) {
 					label.append(" [");
 					label.append(bean.getClassName());
