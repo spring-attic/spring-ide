@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.springframework.ide.eclipse.beans.ui.wizards.wizards;
+package org.springframework.ide.eclipse.beans.ui.wizards.wizards.pages;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;

@@ -19,7 +19,7 @@ package org.springframework.ide.eclipse.beans.ui.wizards.actions;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.beans.ui.wizards.BeansWizardsPlugin;
-import org.springframework.ide.eclipse.beans.ui.wizards.wizards.SpringBeanWizard;
+import org.springframework.ide.eclipse.beans.ui.wizards.wizards.SpringBeanWizardWorkbenchAware;
 import org.springframework.ide.eclipse.core.ui.actions.AbstractObjectActionDelegate;
 import org.springframework.ide.eclipse.core.ui.dialogs.message.ErrorDialog;
 import org.springframework.ide.eclipse.core.ui.dialogs.wizards.WizardFormsDialog;
@@ -49,7 +49,7 @@ public class DeclareAsSpringBeanActionDelegate extends AbstractObjectActionDeleg
 
 	public void run(IAction action) {
 		try {
-			SpringBeanWizard springBeansDeclarationWizard=new SpringBeanWizard();
+			SpringBeanWizardWorkbenchAware springBeansDeclarationWizard=new SpringBeanWizardWorkbenchAware();
 			springBeansDeclarationWizard.init(PluginUtils.getWorkbench(), getSelection());
 			new WizardFormsDialog(getShell(),
 					springBeansDeclarationWizard).open();

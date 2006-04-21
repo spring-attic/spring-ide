@@ -1,7 +1,7 @@
 /*
  * Created on 13-Jan-2005
  */
-package org.springframework.ide.eclipse.beans.ui.wizards.wizards;
+package org.springframework.ide.eclipse.beans.ui.wizards.wizards.pages;
 
 import java.util.ArrayList;
 import java.util.Iterator;

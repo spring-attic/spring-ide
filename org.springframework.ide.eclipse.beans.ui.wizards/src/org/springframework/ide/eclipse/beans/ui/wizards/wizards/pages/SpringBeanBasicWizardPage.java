@@ -1,7 +1,7 @@
 /*
  * Created on 13-Jan-2005
  */
-package org.springframework.ide.eclipse.beans.ui.wizards.wizards;
+package org.springframework.ide.eclipse.beans.ui.wizards.wizards.pages;
 
 import java.beans.Introspector;
 import java.util.ArrayList;
@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
+//FIXME in 3.2 : replace with support for contentassist
 import org.eclipse.jface.contentassist.ISubjectControlContentAssistProcessor;
 import org.eclipse.jface.contentassist.SubjectControlContentAssistant;
 import org.eclipse.jface.resource.JFaceColors;
@@ -542,5 +543,9 @@ public class SpringBeanBasicWizardPage extends AbstractWizardCustomPage {
 			}
 		}
 		return result;
+	}
+
+	public IBeansConfig getSelectedConfigFile() {
+		return selectedConfigFile;
 	}
 }

@@ -1,4 +1,4 @@
-package org.springframework.ide.eclipse.beans.ui.wizards.wizards;
+package org.springframework.ide.eclipse.beans.ui.wizards.wizards.pages;
 
 import java.util.List;
 
