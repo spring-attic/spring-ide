@@ -245,7 +245,7 @@ public class SpringBeanBasicWizardPage extends AbstractWizardCustomPage {
 			}
 		}
 		if (selectedConfigFile != null) {
-			configFilesCombo.setItems(new String[] { selectedConfigFile.getConfigFile().getName() });
+			configFilesCombo.setItems(new String[] { selectedConfigFile.getConfigFile().getProjectRelativePath().toString() });
 			configFilesCombo.selectItem(0);
 		} else if (configFilesCombo.getItems().length == 1) {
 			configFilesCombo.selectItem(0);

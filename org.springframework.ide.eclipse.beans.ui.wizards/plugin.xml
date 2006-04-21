@@ -28,6 +28,7 @@
       <import plugin="org.eclipse.wst.sse.core"/>
       <import plugin="org.eclipse.wst.xml.core"/>
       <import plugin="org.springframework.ide.eclipse.ui"/>
+      <import plugin="org.eclipse.wst.sse.ui"/>
    </requires>
  
    <extension
@@ -50,4 +51,26 @@
                id="org.springframework.ide.eclipse.beans.ui.wizards.declare"/>
       </objectContribution>
    </extension>
+   
+   <extension
+         point="org.eclipse.wst.sse.ui.dropTargetTransfers">
+      <dropTargetContribution
+            targetID="org.eclipse.wst.xml.ui.internal.tabletree.XMLMultiPageEditorPart"
+            id="com.ibm.sed.edit.extention.ExtendedTransfers">
+         <transfer
+               priority="high"
+               singleton="true"
+               class="org.eclipse.ui.part.ResourceTransfer"
+               method="getInstance"
+               id="org.eclipse.ui.part.ResourceTransfer">
+         </transfer>
+         <dropAction
+               class="org.springframework.ide.eclipse.beans.ui.wizards.actions.BeansEditorFileDropAction"
+               id="org.springframework.ide.eclipse.beans.ui.wizards.actions.BeansEditorFileDropAction"
+			   transferID="org.eclipse.ui.part.ResourceTransfer"
+               priority="high">
+         </dropAction>
+      </dropTargetContribution>
+   </extension>
+   
 </plugin>
