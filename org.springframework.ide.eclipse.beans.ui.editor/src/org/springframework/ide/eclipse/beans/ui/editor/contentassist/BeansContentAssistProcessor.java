@@ -365,7 +365,12 @@ public class BeansContentAssistProcessor
                 String tempString = Signature.getSignatureSimpleName(parameterQualifiedTypes);
                 String[][] parameterPackages = type.resolveType(tempString);
                 if (parameterPackages != null) {
-                    return parameterPackages[0][0] + "." + parameterPackages[0][1];
+                		if (parameterPackages[0][0].length() > 0) {
+                			return parameterPackages[0][0] + "." + parameterPackages[0][1];
+                		}
+                		else {
+                			return parameterPackages[0][1];
+                		}
                 }
             }
             catch (IllegalArgumentException e) {
@@ -779,17 +784,17 @@ public class BeansContentAssistProcessor
                 if (factoryBean != null) {
                     List list = BeansEditorUtils.getClassNamesOfBean((IFile) getResource(request),
                             factoryBean);
-                    className = (list.size() != 0 ? (String) list.get(0) : null);
+                    className = (list.size() != 0 ? ((IType) list.get(0)).getFullyQualifiedName() : null);
                 }
                 else {
                     List list = BeansEditorUtils.getClassNamesOfBean((IFile) getResource(request),
                             node);
-                    className = (list.size() != 0 ? (String) list.get(0) : null);
+                    className = (list.size() != 0 ? ((IType) list.get(0)).getFullyQualifiedName() : null);
                 }
 
                 List list = BeansEditorUtils
                         .getClassNamesOfBean((IFile) getResource(request), node);
-                factoryClassName = (list.size() != 0 ? (String) list.get(0) : null);
+                factoryClassName = (list.size() != 0 ? ((IType) list.get(0)).getFullyQualifiedName() : null);
 
                 if (className != null && factoryClassName != null) {
                     addFactoryMethodAttributeValueProposals(request, matchString, className,
