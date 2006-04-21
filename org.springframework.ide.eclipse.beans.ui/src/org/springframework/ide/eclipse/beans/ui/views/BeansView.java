@@ -250,10 +250,11 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 		IToolBarManager mgr = getViewSite().getActionBars().getToolBarManager();
 		mgr.removeAll();
 	
-		mgr.add(new CollapseAllAction(treeViewer));
-		mgr.add(new LinkWithEditorAction(this));
 		mgr.add(new LexicalSortingAction(this));
 		mgr.add(new PropertySheetAction(this));
+		mgr.add(new Separator());
+		mgr.add(new CollapseAllAction(treeViewer));
+		mgr.add(new LinkWithEditorAction(this));
 
 		mgr.update(false);	
 	}
