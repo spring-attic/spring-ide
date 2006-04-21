@@ -28,6 +28,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -143,25 +146,64 @@ public class BeansModelUtils {
 	 * Returns a list of all <code>IBean</code>s which belong to the given
 	 * <code>IModelElement</code>.
 	 * @param element  a model element which contains beans
-	 * @throws IllegalArgumentException if unsupported model element specified 
+	 * @param monitor  the progress monitor to indicate progess; mark the monitor done after 
+	 * 		completing the work
+	 * @throws IllegalArgumentException if unsupported model element specified
 	 */
-	public static final List getBeans(IModelElement element) {
+	public static final List getBeans(IModelElement element, IProgressMonitor monitor) {
+		if (monitor == null) {
+			monitor = new NullProgressMonitor();
+		}
+		
 		List beans = new ArrayList();
 		if (element instanceof IBeansModel) {
-			Iterator projects = ((IBeansModel) element).getProjects().iterator();
-			while (projects.hasNext()) {
-				IBeansProject project = (IBeansProject) projects.next();
-				Iterator configs = project.getConfigs().iterator();
-				while (configs.hasNext()) {
-					IBeansConfig config = (IBeansConfig) configs.next();
-					beans.addAll(config.getBeans());
+			Collection projectsCollection = ((IBeansModel) element).getProjects();
+			Iterator projects = projectsCollection.iterator();
+			int worked = 0;
+			monitor.beginTask("Locating Spring Bean definitions", projectsCollection.size());
+			try {
+				while (projects.hasNext()) {
+					IBeansProject project = (IBeansProject) projects.next();
+					monitor.subTask("Locating Spring Bean definitions in project '" 
+							+ project.getElementName() + "'");
+					Iterator configs = project.getConfigs().iterator();
+					while (configs.hasNext()) {
+						IBeansConfig config = (IBeansConfig) configs.next();
+						monitor.subTask("Loading Spring Bean defintion from file '" 
+								+ config.getElementName() + "'");
+						beans.addAll(config.getBeans());
+						if (monitor.isCanceled()) {
+							throw new OperationCanceledException();
+						}
+					}
+					monitor.worked(worked++);
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
 				}
 			}
+			finally {
+				monitor.done();
+			}
 		} else if (element instanceof IBeansProject) {
-			Iterator configs = ((IBeansProject) element).getConfigs().iterator();
-			while (configs.hasNext()) {
-				IBeansConfig config = (IBeansConfig) configs.next();
-				beans.addAll(config.getBeans());
+			Collection configsCollection = ((IBeansProject) element).getConfigs();
+			Iterator configs = configsCollection.iterator();
+			int worked = 0;
+			monitor.beginTask("Locating Spring Bean definitions", configsCollection.size());
+			try {
+				while (configs.hasNext()) {
+					IBeansConfig config = (IBeansConfig) configs.next();
+					monitor.subTask("Loading Spring Bean defintion from file '" 
+							+ config.getElementName() + "'");
+					beans.addAll(config.getBeans());
+					monitor.worked(worked++);
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+				}
+			}
+			finally {
+				monitor.done();
 			}
 		} else if (element instanceof IBeansConfig) {
 			beans.add(((IBeansConfig) element).getBeans());
