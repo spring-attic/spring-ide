@@ -51,7 +51,7 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 
 	public static final int LISTENER_FLAGS = IResourceChangeEvent.PRE_CLOSE |
 											 IResourceChangeEvent.PRE_DELETE |
-											 IResourceChangeEvent.POST_CHANGE;
+											 IResourceChangeEvent.POST_BUILD;
 	private static final int VISITOR_FLAGS = IResourceDelta.ADDED |
 											 IResourceDelta.CHANGED |
 											 IResourceDelta.REMOVED;
@@ -78,7 +78,7 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 					}
 					break;
 
-				case IResourceChangeEvent.POST_CHANGE :
+				case IResourceChangeEvent.POST_BUILD :
 					if (delta != null) {
 						try {
 							delta.accept(new BeansProjectVisitor(),
