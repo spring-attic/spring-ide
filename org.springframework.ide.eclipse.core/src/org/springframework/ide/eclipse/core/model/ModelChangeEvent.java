@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,11 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  * Instances of this class are automatically created by the model.
  * </p>
  * @see IModelChangeListener
+ * @author Torsten Juergeleit
  */
 public class ModelChangeEvent extends EventObject {
+
+	private static final long serialVersionUID = 1L;
 
 	public static final int ADDED = 1;
 	public static final int REMOVED = 2;
