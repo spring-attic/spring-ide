@@ -146,7 +146,7 @@
                toolbarPath="org.eclipse.search.searchActionSet/Search"
                class="org.springframework.ide.eclipse.beans.ui.actions.OpenBeanSelectionDialogAction"
                definitionId="org.springframework.ide.eclipse.beans.ui.commands.openBean"
-               icon="icons/full/obj16/open_bean_obj.gif"
+               icon="icons/full/etool16/open_bean_obj.gif"
                label="%OpenBeanSelectionDialogAction.label"
                menubarPath="navigate/open.ext2"
                tooltip="%OpenBeanSelectionDialogAction.tooltip">
