@@ -6,16 +6,16 @@ package org.springframework.ide.eclipse.beans.ui.wizards.wizards.pages;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
-import org.springframework.ide.eclipse.beans.ui.wizards.model.IdRefModelItem;
-import org.springframework.ide.eclipse.beans.ui.wizards.model.ListModelItem;
-import org.springframework.ide.eclipse.beans.ui.wizards.model.MapEntryModelItem;
-import org.springframework.ide.eclipse.beans.ui.wizards.model.MapModelItem;
-import org.springframework.ide.eclipse.beans.ui.wizards.model.PropModelItem;
-import org.springframework.ide.eclipse.beans.ui.wizards.model.PropertyModelItem;
-import org.springframework.ide.eclipse.beans.ui.wizards.model.PropsModelItem;
-import org.springframework.ide.eclipse.beans.ui.wizards.model.RefModelItem;
-import org.springframework.ide.eclipse.beans.ui.wizards.model.SetModelItem;
-import org.springframework.ide.eclipse.beans.ui.wizards.model.ValueModelItem;
+import org.springframework.ide.eclipse.beans.ui.wizards.wizards.model.IdRefModelItem;
+import org.springframework.ide.eclipse.beans.ui.wizards.wizards.model.ListModelItem;
+import org.springframework.ide.eclipse.beans.ui.wizards.wizards.model.MapEntryModelItem;
+import org.springframework.ide.eclipse.beans.ui.wizards.wizards.model.MapModelItem;
+import org.springframework.ide.eclipse.beans.ui.wizards.wizards.model.PropModelItem;
+import org.springframework.ide.eclipse.beans.ui.wizards.wizards.model.PropertyModelItem;
+import org.springframework.ide.eclipse.beans.ui.wizards.wizards.model.PropsModelItem;
+import org.springframework.ide.eclipse.beans.ui.wizards.wizards.model.RefModelItem;
+import org.springframework.ide.eclipse.beans.ui.wizards.wizards.model.SetModelItem;
+import org.springframework.ide.eclipse.beans.ui.wizards.wizards.model.ValueModelItem;
 
 class PropertiesListLabelProvider extends LabelProvider {
 

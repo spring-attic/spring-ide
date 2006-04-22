@@ -25,7 +25,7 @@ import org.springframework.ide.eclipse.core.ui.dialogs.message.ErrorDialog;
 import org.springframework.ide.eclipse.core.ui.dialogs.wizards.WizardFormsDialog;
 import org.springframework.ide.eclipse.core.ui.utils.PluginUtils;
 
-public class DeclareAsSpringBeanActionDelegate extends AbstractObjectActionDelegate {
+public class SpringBeanWizardActionDelegate extends AbstractObjectActionDelegate {
 
 	private static final String PREFIX = "Wizards.BeansDeclarationAction";
 
@@ -43,7 +43,7 @@ public class DeclareAsSpringBeanActionDelegate extends AbstractObjectActionDeleg
 		return true;
 	}
 
-	public DeclareAsSpringBeanActionDelegate() {
+	public SpringBeanWizardActionDelegate() {
 		super();
 	}
 

@@ -46,7 +46,7 @@
                icon="icons/spring_16.gif"
                enablesFor="+"
                label="%popupMenus.menu.menuItems.declare.label"
-               class="org.springframework.ide.eclipse.beans.ui.wizards.actions.DeclareAsSpringBeanActionDelegate"
+               class="org.springframework.ide.eclipse.beans.ui.wizards.actions.SpringBeanWizardActionDelegate"
                menubarPath="SPRINGIDE.popupMenu/group1"
                id="org.springframework.ide.eclipse.beans.ui.wizards.declare"/>
       </objectContribution>

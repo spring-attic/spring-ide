@@ -1,4 +1,4 @@
-package org.springframework.ide.eclipse.beans.ui.wizards.model;
+package org.springframework.ide.eclipse.beans.ui.wizards.wizards.model;
 
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.core.ui.treemodel.AbstractModelItem;
