@@ -34,6 +34,8 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
+ * Implementation of <code>ISearchResultPage</code> which provides the UI for
+ * displaying the results from searching the BeansCoreModel.
  * @author David Watkins
  * @author Torsten Juergeleit
  */

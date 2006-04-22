@@ -20,13 +20,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.search.ui.ISearchPage;
 import org.eclipse.search.ui.ISearchPageContainer;
 import org.eclipse.search.ui.ISearchQuery;
@@ -48,7 +45,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchMessages;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchScope;
 import org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanChildQuery;
@@ -58,6 +54,8 @@ import org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanProp
 import org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanReferenceQuery;
 
 /**
+ * Implementation of <code>ISearchPage</code> which provides the UI for
+ * searching the BeansCoreModel.
  * @author Torsten Juergeleit
  */
 public class BeansSearchPage extends DialogPage implements ISearchPage {
@@ -490,38 +488,38 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		setSearchFor(initData.getSearchFor());
 	}
 
-	private SearchData tryStructuredSelection(IStructuredSelection selection) {
-		if (selection == null || selection.size() > 1) {
-			return null;
-		}
-		Object o = selection.getFirstElement();
-		SearchData res = null;
-		if (res == null && o instanceof IAdaptable) {
-			IWorkbenchAdapter adapter = (IWorkbenchAdapter)
-						   ((IAdaptable)o).getAdapter(IWorkbenchAdapter.class);
-			if (adapter != null) {
-				return new SearchData(SEARCH_FOR_BEAN_CLASS, adapter.getLabel(o),
-									  isCaseSensitive, false);
-			}
-		}
-		return res;
-	}
+//	private SearchData tryStructuredSelection(IStructuredSelection selection) {
+//		if (selection == null || selection.size() > 1) {
+//			return null;
+//		}
+//		Object o = selection.getFirstElement();
+//		SearchData res = null;
+//		if (res == null && o instanceof IAdaptable) {
+//			IWorkbenchAdapter adapter = (IWorkbenchAdapter)
+//						   ((IAdaptable)o).getAdapter(IWorkbenchAdapter.class);
+//			if (adapter != null) {
+//				return new SearchData(SEARCH_FOR_BEAN_CLASS, adapter.getLabel(o),
+//									  isCaseSensitive, false);
+//			}
+//		}
+//		return res;
+//	}
 
-	private SearchData trySimpleTextSelection(ITextSelection selection) {
-		String selectedText= selection.getText();
-		if (selectedText != null && selectedText.length() > 0) {
-			int i = 0;
+//	private SearchData trySimpleTextSelection(ITextSelection selection) {
+//		String selectedText= selection.getText();
+//		if (selectedText != null && selectedText.length() > 0) {
+//			int i = 0;
 // TODO			while (i < selectedText.length() && !StringUtils.isLineDelimiterChar(selectedText.charAt(i))) {
-			while (i < selectedText.length()) {
-				i++;
-			}
-			if (i > 0) {
-				return new SearchData(SEARCH_FOR_BEAN_CLASS,
-						 selectedText.substring(0, i), isCaseSensitive, false);
-			}
-		}
-		return null;
-	}
+//			while (i < selectedText.length()) {
+//				i++;
+//			}
+//			if (i > 0) {
+//				return new SearchData(SEARCH_FOR_BEAN_CLASS,
+//						 selectedText.substring(0, i), isCaseSensitive, false);
+//			}
+//		}
+//		return null;
+//	}
 	
 	private SearchData getDefaultInitValues() {
 		if (!previousSearchPatterns.isEmpty()) {
