@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2006 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ 
+
 package org.springframework.ide.eclipse.beans.ui.dialogs;
 
 import java.lang.reflect.InvocationTargetException;
@@ -6,7 +22,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -33,10 +48,9 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.util.StringUtils;
 
 /**
- * Bean Selection Dialog
+ * Spring Bean selection dialog.
  * 
  * @author Christian Dupuis
  */
@@ -122,9 +136,6 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 		return super.close();
 	}
 
-	/*
-	 * @see Dialog#createDialogArea(Composite)
-	 */
 	protected Control createDialogArea(Composite parent) {
 		readSettings();
 		Composite contents = (Composite) super.createDialogArea(parent);
@@ -226,7 +237,6 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 		}
 	}
 
-	// 3515
 	private void handleWidgetSelected() {
 		Object[] newSelection = fFilteredList.getSelection();
 
@@ -244,9 +254,6 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 		}
 	}
 
-	/*
-	 * @see org.eclipse.jface.window.Window#open()
-	 */
 	public int open() {
 		final ArrayList beanList = new ArrayList();
 
