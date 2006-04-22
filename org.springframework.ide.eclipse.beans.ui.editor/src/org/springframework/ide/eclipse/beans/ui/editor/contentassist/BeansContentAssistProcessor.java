@@ -59,9 +59,7 @@ import org.eclipse.wst.xml.core.internal.regions.DOMRegionContext;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
@@ -77,6 +75,7 @@ import org.w3c.dom.NodeList;
 
 /**
  * Main entry point for the Spring beans xml editor's content assist.
+ * @author Christian Dupuis
  */
 public class BeansContentAssistProcessor
         extends XMLContentAssistProcessor implements IPropertyChangeListener {
@@ -675,8 +674,6 @@ public class BeansContentAssistProcessor
 							return;
 						}
 					}
-				} catch (JavaModelException e1) {
-					// do nothing
 				} catch (CoreException e) {
 					// // do nothing
 				}

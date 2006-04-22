@@ -146,7 +146,7 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 				int regLength = att.getValueRegionText().length();
 				String attValue = att.getValueRegionText();
 				if (StringUtils.isQuoted(attValue)) {
-					regOffset = ++regOffset;
+					regOffset += 1;
 					regLength = regLength - 2;
 				}
 				return new Region(regOffset, regLength);
