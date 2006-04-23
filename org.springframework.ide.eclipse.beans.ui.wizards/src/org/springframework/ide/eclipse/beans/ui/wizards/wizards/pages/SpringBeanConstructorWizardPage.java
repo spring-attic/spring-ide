@@ -2,7 +2,6 @@ package org.springframework.ide.eclipse.beans.ui.wizards.wizards.pages;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -25,11 +24,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.forms.widgets.Section;
@@ -39,6 +34,8 @@ import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.ui.wizards.wizards.model.ConstructorArgModelItem;
+import org.springframework.ide.eclipse.beans.ui.wizards.wizards.model.ConstructorModelItem;
 import org.springframework.ide.eclipse.beans.ui.wizards.wizards.model.IdRefModelItem;
 import org.springframework.ide.eclipse.beans.ui.wizards.wizards.model.ListModelItem;
 import org.springframework.ide.eclipse.beans.ui.wizards.wizards.model.MapEntryModelItem;
@@ -54,9 +51,9 @@ import org.springframework.ide.eclipse.core.ui.dialogs.input.MultipleInputDialog
 import org.springframework.ide.eclipse.core.ui.dialogs.input.SimpleComboDialog;
 import org.springframework.ide.eclipse.core.ui.dialogs.input.SimpleInputDialog;
 import org.springframework.ide.eclipse.core.ui.dialogs.message.WarningDialog;
+import org.springframework.ide.eclipse.core.ui.fields.ComboDialogField;
 import org.springframework.ide.eclipse.core.ui.fields.IDialogField;
 import org.springframework.ide.eclipse.core.ui.fields.ListDialogField;
-import org.springframework.ide.eclipse.core.ui.fields.SelectionButtonDialogField;
 import org.springframework.ide.eclipse.core.ui.fields.TreeListDialogField;
 import org.springframework.ide.eclipse.core.ui.treemodel.IModelItem;
 import org.springframework.ide.eclipse.core.ui.treemodel.RootModelItem;
@@ -67,7 +64,7 @@ import org.springframework.ide.eclipse.core.ui.wizards.StatusInfo;
  * @author pagregoire
  * 
  */
-public class SpringBeanPropertiesWizardPage extends AbstractWizardCustomPage {
+public class SpringBeanConstructorWizardPage extends AbstractWizardCustomPage {
 	private final class RemoveItemAction extends Action {
 		private final List elements;
 
@@ -366,73 +363,20 @@ public class SpringBeanPropertiesWizardPage extends AbstractWizardCustomPage {
 		}
 	}
 
-	private final class AddPropertyListener implements MouseListener {
-		public void mouseUp(MouseEvent e) {
-		}
-
-		public void mouseDown(MouseEvent e) {
-			List properties = getBeanEligibleProperties();
-			Map index = new HashMap();
-			int counter = 0;
-			String[] chooseableProperties = new String[properties.size()];
-			for (Iterator it = properties.iterator(); it.hasNext();) {
-				PropertyModelItem next = (PropertyModelItem) it.next();
-				String shownLabel = next.getName()
-						+ " <"
-						+ (next.isPrimitive() ? next.getPrimitiveTypeName()
-								: next.getType().getElementName()) + ">";
-				chooseableProperties[counter++] = shownLabel;
-				index.put(shownLabel, next);
-			}
-			SimpleComboDialog comboDialog = new SimpleComboDialog(getShell(),
-					"Select a property", "Select a property", null,
-					"Available properties in the class :", chooseableProperties);
-			comboDialog.open();
-			String result = comboDialog.getResult();
-			RootModelItem.getInstance(
-					getFirstPage().selectedType.getFullyQualifiedName())
-					.addChild((IModelItem) index.get(result));
-		}
-
-		public void mouseDoubleClick(MouseEvent e) {
-		}
-	}
-
 	private final class ContextMenuListener implements IMenuListener {
 		public void menuAboutToShow(IMenuManager mgr) {
 			fillContextMenu(mgr);
 		}
 	}
 
-	private final class DiscoverPropertiesListener implements MouseListener {
-		public void mouseUp(MouseEvent e) {
-		}
-
-		public void mouseDown(MouseEvent e) {
-			for (Iterator it = getBeanEligibleProperties().iterator(); it
-					.hasNext();) {
-				RootModelItem.getInstance(
-						getFirstPage().selectedType.getFullyQualifiedName())
-						.addChild((IModelItem) it.next());
-			}
-		}
-
-		public void mouseDoubleClick(MouseEvent e) {
-		}
-	}
-
-	private static final String WIZARD_ID = SpringBeanPropertiesWizardPage.class
+	private static final String WIZARD_ID = SpringBeanConstructorWizardPage.class
 			.getName();
 
-	/**
-	 * Logger for this class
-	 */
+	private TreeListDialogField constructorArgsDialogField;
 
-	private SelectionButtonDialogField injectCheckBoxField;
+	private Composite constructorSectionClient;
 
-	private TreeListDialogField propertiesDialogField;
-
-	private Composite propertiesSectionClient;
+	private ComboDialogField constructorComboDialogField;
 
 	/**
 	 * @param selection
@@ -440,7 +384,7 @@ public class SpringBeanPropertiesWizardPage extends AbstractWizardCustomPage {
 	 * @param title
 	 * @param description
 	 */
-	public SpringBeanPropertiesWizardPage() {
+	public SpringBeanConstructorWizardPage() {
 		super(WIZARD_ID, "Inject dependencies in a Spring Bean's properties",
 				"This wizard page helps you to inject dependencies in this bean's properties.");
 	}
@@ -454,61 +398,88 @@ public class SpringBeanPropertiesWizardPage extends AbstractWizardCustomPage {
 		propertiesSection.setLayoutData(new TableWrapData(
 				TableWrapData.FILL_GRAB));
 		propertiesSection
-				.setText("What properties should receive injected values :");
+				.setText("Should a specific constructor be used to init the bean :");
 		TableWrapLayout layout = new TableWrapLayout();
 		layout.numColumns = 4;
 		layout.makeColumnsEqualWidth = false;
-		propertiesSectionClient = getWizardFormToolkit().createComposite(
+		constructorSectionClient = getWizardFormToolkit().createComposite(
 				propertiesSection);
-		propertiesSectionClient.setLayout(layout);
-		propertiesSectionClient.setLayoutData(new TableWrapData(
+		constructorSectionClient.setLayout(layout);
+		constructorSectionClient.setLayoutData(new TableWrapData(
 				TableWrapData.FILL_GRAB));
-		injectCheckBoxField = new SelectionButtonDialogField(
-				getWizardFormToolkit(), SWT.CHECK);
-		injectCheckBoxField
-				.setLabelText("I want to inject something into my bean.");
-		injectCheckBoxField.setDialogFieldListener(getWizardAdapter());
-		injectCheckBoxField.setEventDispatchingEnabled(true);
-		injectCheckBoxField.doFillIntoTable(propertiesSectionClient, 4);
+		constructorComboDialogField = new ComboDialogField(
+				getWizardFormToolkit(), SWT.FLAT);
+		constructorComboDialogField
+				.setLabelText("Choose a constructor to use :");
+		constructorComboDialogField.setDialogFieldListener(getWizardAdapter());
+		constructorComboDialogField
+				.doFillIntoTable(constructorSectionClient, 4);
 
-		Button addPropertyButton = getWizardFormToolkit()
-				.createButton(propertiesSectionClient,
-						"Add an injectable property", SWT.FLAT);
-		TableWrapData td = new TableWrapData();
-		td.colspan = 2;
-		addPropertyButton.setLayoutData(td);
-		addPropertyButton.addMouseListener(new AddPropertyListener());
-
-		Button discoverPropertiesButton = getWizardFormToolkit().createButton(
-				propertiesSectionClient, "Discover all properties", SWT.FLAT);
-		TableWrapData td2 = new TableWrapData();
-		td2.colspan = 2;
-		discoverPropertiesButton.setLayoutData(td2);
-		discoverPropertiesButton
-				.addMouseListener(new DiscoverPropertiesListener());
-
-		propertiesDialogField = new TreeListDialogField(getWizardFormToolkit(),
-				getWizardAdapter(), new String[] {},
-				new PropertiesListLabelProvider());
-		propertiesDialogField.setLabelText("Properties :");
-		propertiesDialogField.setDialogFieldListener(getWizardAdapter());
-		propertiesDialogField.doFillIntoTable(propertiesSectionClient, 4);
+		constructorArgsDialogField = new TreeListDialogField(
+				getWizardFormToolkit(), getWizardAdapter(), new String[] {},
+				new ConstructorArgsListLabelProvider());
+		constructorArgsDialogField.setLabelText("Constructor arguments :");
+		constructorArgsDialogField.setDialogFieldListener(getWizardAdapter());
+		constructorArgsDialogField.doFillIntoTable(constructorSectionClient, 4);
 		MenuManager menuManager = new MenuManager();
-		propertiesDialogField.getTreeViewer().getTree().setMenu(
-				menuManager.createContextMenu(propertiesDialogField
+		constructorArgsDialogField.getTreeViewer().getTree().setMenu(
+				menuManager.createContextMenu(constructorArgsDialogField
 						.getTreeViewer().getTree()));
 		menuManager.addMenuListener(new ContextMenuListener());
 
-		propertiesSection.setClient(propertiesSectionClient);
+		propertiesSection.setClient(constructorSectionClient);
 		getFirstPage().addPageCompleteListener(new IPageCompleteListener() {
 			public void pageComplete(AbstractWizardCustomPage wizardPage) {
-				propertiesDialogField.getTreeViewer().setContentProvider(
-						new PropertiesListContentProvider(
-								propertiesDialogField,
+				constructorArgsDialogField.getTreeViewer().setContentProvider(
+						new ConstructorArgsListContentProvider(
+								constructorArgsDialogField,
 								getFirstPage().selectedType
-										.getFullyQualifiedName()));
+										.getFullyQualifiedName()
+										+ "2"));
+				List constructors = getBeanEligibleConstructors();
+				String[] constructorIds = new String[constructors.size() + 1];
+				constructorIds[0] = "Use the default no-parameter constructor (default).";
+				int i = 1;
+				for (Iterator it = constructors.iterator(); it.hasNext();) {
+					ConstructorModelItem constructorModelItem = (ConstructorModelItem) it
+							.next();
+					String constructorId = createConstructorId(constructorModelItem);
+					constructorIds[i++] = constructorId.toString();
+				}
+				if (constructorIds.length == 1) {
+					constructorIds = new String[] { "No available specific constructor" };
+				}
+				constructorComboDialogField.setItems(constructorIds);
+				constructorComboDialogField.selectItem(0);
 			}
+
 		});
+	}
+
+	protected static String createConstructorId(
+			ConstructorModelItem constructorModelItem) {
+		StringBuffer constructorId = new StringBuffer(constructorModelItem
+				.getTypeName()
+				+ "(");
+		for (Iterator it2 = constructorModelItem.getChildren().iterator(); it2
+				.hasNext();) {
+			ConstructorArgModelItem constructorArgModelItem = (ConstructorArgModelItem) it2
+					.next();
+			if (constructorArgModelItem.isPrimitive()) {
+				constructorId.append(constructorArgModelItem
+						.getPrimitiveTypeName()
+						+ " " + constructorArgModelItem.getName());
+			} else {
+				constructorId.append(constructorArgModelItem.getType()
+						.getElementName()
+						+ " " + constructorArgModelItem.getName());
+			}
+			if (it2.hasNext()) {
+				constructorId.append(",");
+			}
+		}
+		constructorId.append(")");
+		return constructorId.toString();
 	}
 
 	private void fillContextMenu(IMenuManager mgr) {
@@ -523,20 +494,29 @@ public class SpringBeanPropertiesWizardPage extends AbstractWizardCustomPage {
 		boolean addSet = false;
 		boolean addMap = false;
 		boolean addMapEntry = false;
-		boolean addMapKey = false;
+		// boolean addMapKey = false;
 		boolean addProps = false;
 		boolean addProp = false;
 		final List accessibleBeans = getAccessibleBeans();
 		mgr.removeAll();
-		final List allSelectedElements = this.propertiesDialogField
+		final List allSelectedElements = this.constructorArgsDialogField
 				.getSelectedElements();
 		final Object firstElement = allSelectedElements.get(0);
 		remove = true;
+		for (Iterator it = allSelectedElements.iterator(); it.hasNext();) {
+			Object next = it.next();
+			if (next instanceof ConstructorModelItem
+					|| next instanceof ConstructorArgModelItem) {
+				remove = false;
+				break;
+			}
+		}
 		if (allSelectedElements.size() == 1) {
 			if (firstElement instanceof PropertyModelItem
 					|| firstElement instanceof ListModelItem
 					|| firstElement instanceof SetModelItem
-					|| firstElement instanceof MapEntryModelItem) {
+					|| firstElement instanceof MapEntryModelItem
+					|| firstElement instanceof ConstructorArgModelItem) {
 				IModelItem modelItem = (IModelItem) firstElement;
 				if (!modelItem.hasChildren()) {
 					addValue = true;
@@ -549,6 +529,60 @@ public class SpringBeanPropertiesWizardPage extends AbstractWizardCustomPage {
 						if (!(propertyModelItem.isPrimitive())) {
 							try {
 								ITypeHierarchy superTypeHierarchy = propertyModelItem
+										.getType().newSupertypeHierarchy(
+												new NullProgressMonitor());
+								if (superTypeHierarchy.contains(BeansModelUtils
+										.getJavaType(
+												getFirstPage().selectedProject
+														.getProject(),
+												Set.class.getName()))) {
+									addSet = true;
+									addValue = false;
+									addRef = false;
+									addIdRef = false;
+								}
+								if (superTypeHierarchy.contains(BeansModelUtils
+										.getJavaType(
+												getFirstPage().selectedProject
+														.getProject(),
+												List.class.getName()))) {
+									addList = true;
+									addValue = false;
+									addRef = false;
+									addIdRef = false;
+								}
+								if (superTypeHierarchy.contains(BeansModelUtils
+										.getJavaType(
+												getFirstPage().selectedProject
+														.getProject(),
+												Map.class.getName()))) {
+									addMap = true;
+									addValue = false;
+									addRef = false;
+									addIdRef = false;
+								}
+								if (superTypeHierarchy.contains(BeansModelUtils
+										.getJavaType(
+												getFirstPage().selectedProject
+														.getProject(),
+												Properties.class.getName()))) {
+									addProps = true;
+									addMap = false;// because Properties is a
+									// dirty extension of Map
+									addValue = false;
+									addRef = false;
+									addIdRef = false;
+								}
+
+							} catch (JavaModelException e) {
+								// do nothing
+							}
+						}
+					} else if (modelItem instanceof ConstructorArgModelItem) {
+						ConstructorArgModelItem constructorArgModelItem = (ConstructorArgModelItem) firstElement;
+						if (!(constructorArgModelItem.isPrimitive())) {
+							try {
+								ITypeHierarchy superTypeHierarchy = constructorArgModelItem
 										.getType().newSupertypeHierarchy(
 												new NullProgressMonitor());
 								if (superTypeHierarchy.contains(BeansModelUtils
@@ -667,8 +701,8 @@ public class SpringBeanPropertiesWizardPage extends AbstractWizardCustomPage {
 	}
 
 	private void setListEnabled(boolean enabled) {
-		if (propertiesDialogField != null) {
-			propertiesDialogField.setEnabled(enabled);
+		if (constructorArgsDialogField != null) {
+			constructorArgsDialogField.setEnabled(enabled);
 		}
 	}
 
@@ -736,15 +770,60 @@ public class SpringBeanPropertiesWizardPage extends AbstractWizardCustomPage {
 		} catch (Throwable e) {
 		}
 		return result;
-	} /*
-		 * (non-Javadoc)
-		 * 
-		 * @see ec.ep.dit.isp.foundry.eclipse.plugins.webservices.wizards.AbstractWizardPage#initialize()
-		 */
+	}
 
+	private List getBeanEligibleConstructors() {
+		List result = new ArrayList();
+		try {
+			IType type = getFirstPage().selectedType;
+			Collection constructors = Introspector.findAllConstructors(type);
+			int i = 0;
+			for (Iterator it = constructors.iterator(); it.hasNext();) {
+				IMethod constructor = (IMethod) it.next();
+				ConstructorModelItem constructorModelItem = new ConstructorModelItem(
+						i++, constructor.getElementName());
+				String[] parameterNames = constructor.getRawParameterNames();
+				String[] parameterTypes = constructor.getParameterTypes();
+				for (int j = 0; j < parameterNames.length; j++) {
+					ConstructorArgModelItem constructorArgModelItem = new ConstructorArgModelItem(
+							j);
+					IType constructorArgType = null;
+					try {
+						String constructorArgTypeString = Signature.toString(
+								parameterTypes[j]).replace('$', '.');
+						String resolvedconstructorArgType = resolveClassName(
+								constructorArgTypeString, type);
+						constructorArgType = BeansModelUtils.getJavaType(type
+								.getJavaProject().getProject(),
+								resolvedconstructorArgType);
+						if (constructorArgType == null) {
+							constructorArgModelItem.setPrimitive(true);
+							constructorArgModelItem
+									.setPrimitiveTypeName(resolvedconstructorArgType);
+						}
+					} catch (IllegalArgumentException e) {
+						// do Nothing
+					}
+					constructorArgModelItem.setType(constructorArgType);
+					constructorArgModelItem.setName(parameterNames[j]);
+					constructorModelItem.addChild(constructorArgModelItem);
+				}
+				if (parameterNames.length > 0) {
+					result.add(constructorModelItem);
+				}
+			}
+		} catch (Throwable e) {
+		}
+		return result;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see ec.ep.dit.isp.foundry.eclipse.plugins.webservices.wizards.AbstractWizardPage#initialize()
+	 */
 	protected void initialize() {
-		injectCheckBoxField.setSelection(false);
-		setListEnabled(false);
+		setListEnabled(true);
 	}
 
 	/*
@@ -774,17 +853,31 @@ public class SpringBeanPropertiesWizardPage extends AbstractWizardCustomPage {
 	 * @see ec.ep.dit.isp.foundry.eclipse.plugins.webservices.wizards.AbstractWizardPage#handleDialogFieldChanged()
 	 */
 	protected void handleDialogFieldChanged(IDialogField field) {
-		if (injectCheckBoxField != null && field.equals(injectCheckBoxField)) {
-			setListEnabled(injectCheckBoxField.isSelected());
-			// MacOSX patch because enablement(or not) is not visible
-			if (injectCheckBoxField.isSelected())
-				propertiesDialogField.getTreeControl(null).setForeground(
-						new Color(propertiesDialogField.getTreeControl(null)
-								.getDisplay(), 0, 0, 0));
-			else
-				propertiesDialogField.getTreeControl(null).setForeground(
-						new Color(propertiesDialogField.getTreeControl(null)
-								.getDisplay(), 200, 200, 200));
+		if (field.equals(constructorComboDialogField)) {
+			boolean constructorArgsRefreshed = false;
+			for (Iterator it = getBeanEligibleConstructors().iterator(); it
+					.hasNext();) {
+				ConstructorModelItem constructorModelItem = (ConstructorModelItem) it
+						.next();
+
+				if (constructorComboDialogField.getItems().length > 1
+						&& constructorComboDialogField.getSelectionIndex() != -1
+						&& constructorComboDialogField.getItems()[constructorComboDialogField
+								.getSelectionIndex()]
+								.equals(createConstructorId(constructorModelItem))) {
+					RootModelItem.getInstance(
+							getFirstPage().selectedType.getFullyQualifiedName()
+									+ "2").addChild(constructorModelItem);
+					constructorArgsRefreshed = true;
+				}
+			}
+			if (!constructorArgsRefreshed) {
+
+				RootModelItem.getInstance(
+						getFirstPage().selectedType.getFullyQualifiedName()
+								+ "2").clearChildren();
+
+			}
 		}
 		touch();
 	}
@@ -819,14 +912,12 @@ public class SpringBeanPropertiesWizardPage extends AbstractWizardCustomPage {
 		touch();
 	}
 
-	public boolean getInjectionState() {
-		return injectCheckBoxField.isSelected();
-	}
-
-	public List getInjectableProperties() {
-		return RootModelItem.getInstance(
-				getFirstPage().selectedType.getFullyQualifiedName())
+	public List getChosenConstructorArgs() {
+		List constructors = RootModelItem.getInstance(
+				getFirstPage().selectedType.getFullyQualifiedName() + "2")
 				.getChildren();
+		return constructors.size() != 0 ? ((ConstructorModelItem) constructors
+				.get(0)).getChildren() : new ArrayList();
 	}
 
 }

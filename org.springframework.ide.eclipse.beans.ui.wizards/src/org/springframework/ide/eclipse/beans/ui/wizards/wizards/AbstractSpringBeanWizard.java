@@ -24,6 +24,7 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.eclipse.wst.xml.core.internal.provisional.format.FormatProcessorXML;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.ui.wizards.wizards.model.ConstructorArgModelItem;
 import org.springframework.ide.eclipse.beans.ui.wizards.wizards.model.IdRefModelItem;
 import org.springframework.ide.eclipse.beans.ui.wizards.wizards.model.ListModelItem;
 import org.springframework.ide.eclipse.beans.ui.wizards.wizards.model.MapEntryModelItem;
@@ -35,6 +36,7 @@ import org.springframework.ide.eclipse.beans.ui.wizards.wizards.model.RefModelIt
 import org.springframework.ide.eclipse.beans.ui.wizards.wizards.model.SetModelItem;
 import org.springframework.ide.eclipse.beans.ui.wizards.wizards.model.ValueModelItem;
 import org.springframework.ide.eclipse.beans.ui.wizards.wizards.pages.SpringBeanBasicWizardPage;
+import org.springframework.ide.eclipse.beans.ui.wizards.wizards.pages.SpringBeanConstructorWizardPage;
 import org.springframework.ide.eclipse.beans.ui.wizards.wizards.pages.SpringBeanLifecycleWizardPage;
 import org.springframework.ide.eclipse.beans.ui.wizards.wizards.pages.SpringBeanPropertiesWizardPage;
 import org.springframework.ide.eclipse.core.ui.dialogs.message.ErrorDialog;
@@ -48,9 +50,11 @@ public abstract class AbstractSpringBeanWizard extends Wizard {
 
 	private SpringBeanBasicWizardPage page1;
 
+	private SpringBeanPropertiesWizardPage page2;
+
 	private SpringBeanLifecycleWizardPage page3;
 
-	private SpringBeanPropertiesWizardPage page2;
+	private SpringBeanConstructorWizardPage page4;
 
 	protected class WizardInitingDatas {
 		private IBeansProject beansProject;
@@ -102,9 +106,8 @@ public abstract class AbstractSpringBeanWizard extends Wizard {
 	public void addPages() {
 
 		WizardInitingDatas initingDatas = initWizardInitingDatas();
-		page1 = new SpringBeanBasicWizardPage(initingDatas
-				.getBeansProject(), initingDatas
-				.getBeansConfig(), initingDatas.getType());
+		page1 = new SpringBeanBasicWizardPage(initingDatas.getBeansProject(),
+				initingDatas.getBeansConfig(), initingDatas.getType());
 		page1.setTitle("Declare as Bean - basic");
 		addPage(page1);
 
@@ -115,6 +118,10 @@ public abstract class AbstractSpringBeanWizard extends Wizard {
 		page3 = new SpringBeanLifecycleWizardPage();
 		page3.setTitle("Declare as Bean - advanced : lifecycle");
 		addPage(page3);
+
+		page4 = new SpringBeanConstructorWizardPage();
+		page4.setTitle("Declare as Bean - advanced : constructor");
+		addPage(page4);
 	}
 
 	/**
@@ -213,20 +220,27 @@ public abstract class AbstractSpringBeanWizard extends Wizard {
 				beanElement.setAttribute("destroy-method", page3
 						.getBeanDestroyMethod());
 			}
-			if (page2.getInjectionState()) {
-				List propertiesList = page2.getInjectableProperties();
-				for (Iterator it = propertiesList.iterator(); it.hasNext();) {
-					PropertyModelItem propertyModelItem = (PropertyModelItem) it
-							.next();
-					Element propertyElement = xmlDoc.createElement("property");
-					propertyElement.setAttribute("name", propertyModelItem
-							.getName());
-					if (propertyModelItem.hasChildren()) {
-						handleChildren(xmlDoc, propertyModelItem.getChildren(),
-								propertyElement);
-					}
-					beanElement.appendChild(propertyElement);
+			List constructorArgsList = page4.getChosenConstructorArgs();
+			int i = 0;
+			for (Iterator it = constructorArgsList.iterator(); it.hasNext();) {
+				ConstructorArgModelItem constructorArgModelItem = (ConstructorArgModelItem) it
+						.next();
+				Element propertyElement = xmlDoc
+						.createElement("constructor-arg");
+				propertyElement.setAttribute("index", "" + (++i));
+				if (constructorArgModelItem.isPrimitive()) {
+					propertyElement.setAttribute("type", ""
+							+ constructorArgModelItem.getPrimitiveTypeName());
+				} else {
+					propertyElement.setAttribute("type", ""
+							+ constructorArgModelItem.getType()
+									.getElementName());
 				}
+				if (constructorArgModelItem.hasChildren()) {
+					handleChildren(xmlDoc, constructorArgModelItem
+							.getChildren(), propertyElement);
+				}
+				beanElement.appendChild(propertyElement);
 			}
 
 			tmp.item(0).appendChild(beanElement);
