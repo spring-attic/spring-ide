@@ -104,14 +104,14 @@ public abstract class AbstractMessageAndButtonDialog extends Dialog {
 		// create the top level composite for the dialog
 		Form form = getFormToolkit().createForm(parent);
 		GridLayout layout = new GridLayout();
-		layout.numColumns = 2;
+		layout.numColumns = 1;
 		layout.marginHeight = convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN) * 3 / 2;
 		layout.marginWidth = convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
 		layout.verticalSpacing = convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
 		layout.horizontalSpacing = convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING) * 2;
 		layout.makeColumnsEqualWidth = false;
 		form.getBody().setLayout(layout);
-		form.getBody().setLayoutData(new GridData(GridData.FILL_BOTH));
+		form.getBody().setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true));
 		createDialogAndButtonArea(form.getBody());
 		return parent;
 	}

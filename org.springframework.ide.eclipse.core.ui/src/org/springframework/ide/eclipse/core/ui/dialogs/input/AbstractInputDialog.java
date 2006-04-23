@@ -33,9 +33,11 @@ import org.springframework.ide.eclipse.core.ui.dialogs.AbstractMessageAndButtonD
 /**
  * Abstract class for dialogs asking the user for an input.
  * <p>
+ * 
  * @author Pierre-Antoine Grégoire
  */
-public abstract class AbstractInputDialog extends AbstractMessageAndButtonDialog {
+public abstract class AbstractInputDialog extends
+		AbstractMessageAndButtonDialog {
 
 	/**
 	 * Size of the text in lines.
@@ -68,9 +70,15 @@ public abstract class AbstractInputDialog extends AbstractMessageAndButtonDialog
 	private Image titleImage;
 
 	/**
-	 * Create a message dialog. Note that the dialog will have no visual representation (no widgets) until it is told to open.
+	 * Create a message dialog. Note that the dialog will have no visual
+	 * representation (no widgets) until it is told to open.
 	 * <p>
-	 * The labels of the buttons to appear in the button bar are supplied in this constructor as an array. The <code>open</code> method will return the index of the label in this array corresponding to the button that was pressed to close the dialog. If the dialog was dismissed without pressing a button (ESC, etc.) then -1 is returned. Note that the <code>open</code> method blocks.
+	 * The labels of the buttons to appear in the button bar are supplied in
+	 * this constructor as an array. The <code>open</code> method will return
+	 * the index of the label in this array corresponding to the button that was
+	 * pressed to close the dialog. If the dialog was dismissed without pressing
+	 * a button (ESC, etc.) then -1 is returned. Note that the <code>open</code>
+	 * method blocks.
 	 * </p>
 	 * 
 	 * @param parentShell
@@ -86,24 +94,31 @@ public abstract class AbstractInputDialog extends AbstractMessageAndButtonDialog
 	 * @param dialogImageType
 	 *            one of the following values:
 	 *            <ul>
-	 *            <li><code>AbstractInputDialog.NONE</code> for a dialog with no image</li>
-	 *            <li><code>AbstractInputDialog.ERROR</code> for a dialog with an error image</li>
-	 *            <li><code>AbstractInputDialog.INFORMATION</code> for a dialog with an information image</li>
-	 *            <li><code>AbstractInputDialog.QUESTION </code> for a dialog with a question image</li>
-	 *            <li><code>AbstractInputDialog.WARNING</code> for a dialog with a warning image</li>
+	 *            <li><code>AbstractInputDialog.NONE</code> for a dialog with
+	 *            no image</li>
+	 *            <li><code>AbstractInputDialog.ERROR</code> for a dialog
+	 *            with an error image</li>
+	 *            <li><code>AbstractInputDialog.INFORMATION</code> for a
+	 *            dialog with an information image</li>
+	 *            <li><code>AbstractInputDialog.QUESTION </code> for a dialog
+	 *            with a question image</li>
+	 *            <li><code>AbstractInputDialog.WARNING</code> for a dialog
+	 *            with a warning image</li>
 	 *            </ul>
 	 * @param dialogButtonLabels
 	 *            an array of labels for the buttons in the button bar
 	 * @param defaultIndex
 	 *            the index in the button label array of the default button
 	 */
-	public AbstractInputDialog(Shell parentShell, String dialogTitle, String dialogSubTitle, Image dialogTitleImage, String dialogMessage) {
+	public AbstractInputDialog(Shell parentShell, String dialogTitle,
+			String dialogSubTitle, Image dialogTitleImage, String dialogMessage) {
 		super(parentShell);
 		this.title = dialogTitle;
 		this.subTitle = dialogSubTitle;
 		this.titleImage = dialogTitleImage;
 		this.message = dialogMessage;
-		this.buttonLabels = new String[] { IDialogConstants.OK_LABEL };
+		this.buttonLabels = new String[] { IDialogConstants.OK_LABEL,
+				IDialogConstants.CANCEL_LABEL };
 		this.defaultButtonIndex = 0;
 	}
 
@@ -131,10 +146,13 @@ public abstract class AbstractInputDialog extends AbstractMessageAndButtonDialog
 	}
 
 	/*
-	 * @see org.eclipse.jface.dialogs.Dialog#createButton(org.eclipse.swt.widgets.Composite, int, java.lang.String, boolean)
+	 * @see org.eclipse.jface.dialogs.Dialog#createButton(org.eclipse.swt.widgets.Composite,
+	 *      int, java.lang.String, boolean)
 	 */
-	protected Button createButton(Composite parent, int id, String label, boolean defaultButton) {
-		Button button = super.createButton(parent, id, label, defaultButton, SWT.FLAT);
+	protected Button createButton(Composite parent, int id, String label,
+			boolean defaultButton) {
+		Button button = super.createButton(parent, id, label, defaultButton,
+				SWT.FLAT);
 		// Be sure to set the focus if the custom area cannot so as not
 		// to lose the defaultButton.
 		if (defaultButton) {
@@ -150,15 +168,18 @@ public abstract class AbstractInputDialog extends AbstractMessageAndButtonDialog
 		buttons = new Button[buttonLabels.length];
 		for (int i = 0; i < buttonLabels.length; i++) {
 			String label = buttonLabels[i];
-			Button button = createButton(parent, i, label, defaultButtonIndex == i);
+			Button button = createButton(parent, i, label,
+					defaultButtonIndex == i);
 			buttons[i] = button;
 		}
 	}
 
 	/**
-	 * Creates and returns the contents of an area of the dialog which appears below the message and above the button bar.
+	 * Creates and returns the contents of an area of the dialog which appears
+	 * below the message and above the button bar.
 	 * <p>
-	 * The default implementation of this framework method returns <code>null</code>. Subclasses may override.
+	 * The default implementation of this framework method returns
+	 * <code>null</code>. Subclasses may override.
 	 * </p>
 	 * 
 	 * @param parent
@@ -170,38 +191,37 @@ public abstract class AbstractInputDialog extends AbstractMessageAndButtonDialog
 	}
 
 	/**
-	 * This implementation of the <code>Dialog</code> framework method creates and lays out a composite and calls <code>createMessageArea</code> and <code>createCustomArea</code> to populate it. Subclasses should override <code>createCustomArea</code> to add contents below the message.
+	 * This implementation of the <code>Dialog</code> framework method creates
+	 * and lays out a composite and calls <code>createMessageArea</code> and
+	 * <code>createCustomArea</code> to populate it. Subclasses should
+	 * override <code>createCustomArea</code> to add contents below the
+	 * message.
 	 */
 	protected Control createDialogArea(Composite parent) {
 		// create message area
-		createMessageArea(parent);
-		// create the top level composite for the dialog area
-		Composite composite = getFormToolkit().createComposite(parent);
-		GridLayout layout = new GridLayout();
-		layout.marginHeight = 0;
-		layout.marginWidth = 0;
-		composite.setLayout(layout);
-		GridData data = new GridData(GridData.FILL_BOTH);
-		data.horizontalSpan = 2;
-		composite.setLayoutData(data);
-		composite.setBackground(JFaceColors.getBannerBackground(parent.getDisplay()));
-		// allow subclasses to add custom controls
-		return composite;
+		return createMessageArea(parent);
 	}
 
 	protected Control createMessageArea(Composite composite) {
-		// create composite
-		Section messageSection = getFormToolkit().createSection(composite, Section.EXPANDED | Section.TITLE_BAR);
-		messageSection.setLayout(new GridLayout(2, false));
+		Section messageSection = getFormToolkit().createSection(composite,
+				Section.EXPANDED | Section.TITLE_BAR);
+		messageSection.setLayout(new GridLayout(1, false));
+
+		Font font = new Font(composite.getDisplay(), new FontData(
+				"Lucida Grande", 10, SWT.BOLD));
+		messageSection.setFont(font);
 		if (subTitle != null) {
-			Font font = new Font(composite.getDisplay(), new FontData("Lucida Grande", 12, SWT.BOLD));
-			messageSection.setFont(font);
 			messageSection.setText(subTitle);
 		}
-		GridLayout layout = new GridLayout(3, false);
-		Composite sectionClient = getFormToolkit().createComposite(messageSection);
+		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
+		messageSection.setData(data);
+
+		GridLayout layout = new GridLayout(1, false);
+		Composite sectionClient = getFormToolkit().createComposite(
+				messageSection);
 		sectionClient.setLayout(layout);
-		sectionClient.setLayoutData(new GridData(GridData.FILL_BOTH | GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL));
+		sectionClient.setLayoutData(new GridData(GridData.FILL_BOTH
+				| GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL));
 		createInputPart(sectionClient);
 		getFormToolkit().paintBordersFor(sectionClient);
 		messageSection.setClient(sectionClient);
@@ -240,7 +260,8 @@ public abstract class AbstractInputDialog extends AbstractMessageAndButtonDialog
 	}
 
 	/**
-	 * Returns the minimum message area width in pixels This determines the minimum width of the dialog.
+	 * Returns the minimum message area width in pixels This determines the
+	 * minimum width of the dialog.
 	 * <p>
 	 * Subclasses may override.
 	 * </p>
@@ -252,7 +273,8 @@ public abstract class AbstractInputDialog extends AbstractMessageAndButtonDialog
 	}
 
 	/**
-	 * Handle the shell close. Set the return code to <code>SWT.DEFAULT</code> as there has been no explicit close by the user.
+	 * Handle the shell close. Set the return code to <code>SWT.DEFAULT</code>
+	 * as there has been no explicit close by the user.
 	 * 
 	 * @see org.eclipse.jface.window.Window#handleShellCloseEvent()
 	 */
@@ -281,7 +303,8 @@ public abstract class AbstractInputDialog extends AbstractMessageAndButtonDialog
 	 */
 	protected void setButtonLabels(String[] buttonLabels) {
 		if (buttonLabels == null) {
-			throw new NullPointerException("The array of button labels cannot be null.");} //$NON-NLS-1$
+			throw new NullPointerException(
+					"The array of button labels cannot be null.");} //$NON-NLS-1$
 		this.buttonLabels = buttonLabels;
 	}
 
@@ -293,7 +316,8 @@ public abstract class AbstractInputDialog extends AbstractMessageAndButtonDialog
 	 */
 	protected void setButtons(Button[] buttons) {
 		if (buttons == null) {
-			throw new NullPointerException("The array of buttons cannot be null.");} //$NON-NLS-1$
+			throw new NullPointerException(
+					"The array of buttons cannot be null.");} //$NON-NLS-1$
 		this.buttons = buttons;
 	}
 

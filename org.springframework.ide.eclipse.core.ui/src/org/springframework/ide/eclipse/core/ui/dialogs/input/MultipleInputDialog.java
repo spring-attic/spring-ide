@@ -44,7 +44,8 @@ public class MultipleInputDialog extends AbstractInputDialog {
 		}
 
 		public void modifyText(ModifyEvent e) {
-			results.put(fieldId, ((StringDialogField) fields.get(fieldId)).getText());
+			results.put(fieldId, ((StringDialogField) fields.get(fieldId))
+					.getText());
 		}
 	}
 
@@ -60,8 +61,11 @@ public class MultipleInputDialog extends AbstractInputDialog {
 
 	private StringDialogField stringDialogField;
 
-	public MultipleInputDialog(Shell parentShell, String dialogTitle, String dialogSubTitle, Image dialogTitleImage, String dialogMessage, String[] fieldLabels) {
-		super(parentShell, dialogTitle, dialogSubTitle, dialogTitleImage, dialogMessage);
+	public MultipleInputDialog(Shell parentShell, String dialogTitle,
+			String dialogSubTitle, Image dialogTitleImage,
+			String dialogMessage, String[] fieldLabels) {
+		super(parentShell, dialogTitle, dialogSubTitle, dialogTitleImage,
+				dialogMessage);
 		results = new HashMap();
 		fields = new HashMap();
 		this.fieldLabels = fieldLabels;
@@ -71,18 +75,22 @@ public class MultipleInputDialog extends AbstractInputDialog {
 	}
 
 	protected void createInputPart(Composite composite) {
-		Composite container = getFormToolkit().createComposite(composite, SWT.WRAP);
-		GridData data = new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_BEGINNING);
-		data.widthHint = convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH);
-		data.grabExcessHorizontalSpace = true;
+		Composite container = getFormToolkit().createComposite(composite,
+				SWT.WRAP);
+		GridData data = new GridData(SWT.FILL,SWT.FILL,true,true);
+		data.widthHint=300;
 		container.setLayoutData(data);
-		container.setLayout(new TableWrapLayout());
+		TableWrapLayout layout = new TableWrapLayout();
+		layout.numColumns = 2;
+		layout.makeColumnsEqualWidth=true;
+		container.setLayout(layout);
 		for (int i = 0; i < fieldLabels.length; i++) {
 			stringDialogField = new StringDialogField(getFormToolkit());
 			fields.put(fieldLabels[i], stringDialogField);
 			stringDialogField.setLabelText(fieldLabels[i]);
 			stringDialogField.doFillIntoTable(container, 2);
-			stringDialogField.getTextControl(null).addModifyListener(new FieldModifyListener(fieldLabels[i]));
+			stringDialogField.getTextControl(null).addModifyListener(
+					new FieldModifyListener(fieldLabels[i]));
 		}
 	}
 
