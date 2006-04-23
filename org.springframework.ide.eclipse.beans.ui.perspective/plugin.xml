@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin
+   id="org.springframework.ide.eclipse.beans.ui.perspective"
+   name="%pluginName"
+   version="1.0.0"
+   provider-name="%pluginProvider"
+   class="org.springframework.ide.eclipse.beans.ui.perspective.BeansPerspectivePlugin">
+
+   <runtime>
+      <library name="beans-perspective.jar">
+         <export name="*"/>
+      </library>
+   </runtime>
+
+   <requires>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.jdt.ui"/>
+      <import plugin="org.eclipse.search"/>
+      <import plugin="org.eclipse.ui.console"/>
+      <import plugin="org.eclipse.debug.ui"/>
+      <import plugin="org.springframework.ide.eclipse.beans.ui"/>
+   </requires>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="org.springframework.ide.eclipse.beans.ui.perspective.BeansPerspectiveFactory"
+            icon="icons/full/obj16/spring_obj.gif"
+            id="org.springframework.ide.eclipse.beans.ui.prespective"
+            name="Spring"/>
+   </extension>
+
+</plugin>
