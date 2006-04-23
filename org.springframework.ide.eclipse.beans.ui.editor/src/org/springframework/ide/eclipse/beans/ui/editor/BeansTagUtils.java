@@ -32,6 +32,7 @@ public final class BeansTagUtils {
 	public static final int KEY = 19;
 	public static final int PROP = 20;
 	public static final int ARG_TYPE = 21;
+	public static final int COMMENT = 22;
 
 	public static final int UNKNOWN_TAG = 99;
 
@@ -58,13 +59,14 @@ public final class BeansTagUtils {
 		tags.put("key", new Integer(KEY));
 		tags.put("prop", new Integer(PROP));
 		tags.put("arg-type", new Integer(ARG_TYPE));
+		tags.put("#comment", new Integer(COMMENT));
 	}
 
 	public static int getTag(Node node) {
 		if (node != null) {
 			if (node.getNodeType() == Node.TEXT_NODE) {
 				return getTag(node.getParentNode());
-			} else if (node.getNodeType() == Node.ELEMENT_NODE) {
+			} else if (node.getNodeType() == Node.ELEMENT_NODE || node.getNodeType() == Node.COMMENT_NODE) {
 				Integer tag = (Integer) tags.get(node.getNodeName());
 				if (tag != null) {
 					return tag.intValue();

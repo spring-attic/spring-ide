@@ -20,6 +20,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.wst.xml.core.internal.document.CommentImpl;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider;
 import org.eclipse.wst.xml.ui.views.contentoutline.XMLContentOutlineConfiguration;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
@@ -151,7 +152,7 @@ public class BeansContentOutlineConfiguration
 			if ("description".equals(nodeName)) {
 				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_DESCRIPTION);
 			}
-			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_VALUE);
+			return xmlProvider.getImage(object);
 		}
 
 		public String getText(Object o) {
@@ -207,12 +208,18 @@ public class BeansContentOutlineConfiguration
 					if (showAttributes) {
 						attr = attrs.getNamedItem("class");
 						if (attr != null) {
-							text += " [" + attr.getNodeValue() + "]";
+							if (text.length() > 0) {
+								text += ' ';
+							}
+							text += '[' + attr.getNodeValue() + ']';
 						}
 						if (!hasParent) {
 							attr = attrs.getNamedItem("parent");
 							if (attr != null) {
-								text += " <" + attr.getNodeValue() + ">";
+								if (text.length() > 0) {
+									text += ' ';
+								}
+								text += '<' + attr.getNodeValue() + '>';
 							}
 						}
 					}
@@ -306,7 +313,14 @@ public class BeansContentOutlineConfiguration
 						text += " \"" + attr.getNodeValue() + "\"";
 					}
 					break;
-
+					
+				case BeansTagUtils.COMMENT :
+					text = super.getText(o);
+					text += " <";
+					text += ((CommentImpl) o).getNodeValue().trim();
+					text += '>';
+					break;
+					
 				default :
 					text = super.getText(o);
 			}

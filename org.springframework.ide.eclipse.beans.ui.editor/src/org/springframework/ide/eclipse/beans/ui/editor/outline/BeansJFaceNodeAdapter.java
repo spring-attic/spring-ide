@@ -77,6 +77,9 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 									children.add(n);
 								}
 							}
+							else if (n.getNodeType() == Node.COMMENT_NODE) {
+								children.add(n);
+							}
 						}
 						return children.toArray();
 					}
