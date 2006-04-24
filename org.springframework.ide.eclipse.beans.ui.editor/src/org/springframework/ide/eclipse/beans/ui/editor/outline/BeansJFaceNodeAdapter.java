@@ -12,16 +12,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor.outline;
 
 import java.util.ArrayList;
 
+import org.eclipse.core.runtime.Preferences;
 import org.eclipse.wst.sse.ui.internal.contentoutline.IJFaceNodeAdapter;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeAdapter;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeAdapterFactory;
+import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
+import org.springframework.ide.eclipse.beans.ui.editor.IPreferencesConstants;
 import org.w3c.dom.Node;
 
 /**
@@ -36,8 +39,8 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 	}
 
 	/**
-	 * Allowing the INodeAdapter to compare itself against the type allows it
-	 * to return true in more than one case.
+	 * Allowing the INodeAdapter to compare itself against the type allows it to
+	 * return true in more than one case.
 	 */
 	public boolean isAdapterForType(Object type) {
 		return type.equals(ADAPTER_KEY);
@@ -46,8 +49,8 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 	public boolean hasChildren(Object object) {
 		if (BeansEditorUtils.isSpringStyleOutline()) {
 			Node node = (Node) object;
-			for (Node child = node.getFirstChild(); child != null;
-											  child = child.getNextSibling()) {
+			for (Node child = node.getFirstChild(); child != null; child = child
+					.getNextSibling()) {
 				if (child.getNodeType() != Node.TEXT_NODE)
 					return true;
 			}
@@ -56,28 +59,31 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 		}
 		return false;
 	}
-	
+
 	public Object[] getChildren(Object object) {
 		if (BeansEditorUtils.isSpringStyleOutline()) {
+			Preferences prefs = BeansEditorPlugin.getDefault()
+					.getPluginPreferences();
+			boolean sort = prefs.getBoolean(IPreferencesConstants.OUTLINE_SORT);
+
 			Node node = (Node) object;
 			if (node.getNodeType() == Node.DOCUMENT_NODE) {
-				for (Node child = node.getFirstChild(); child != null;
-											  child = child.getNextSibling()) {
-					if (child.getNodeType() == Node.ELEMENT_NODE &&
-										 "beans".equals(child.getNodeName())) {
+				for (Node child = node.getFirstChild(); child != null; child = child
+						.getNextSibling()) {
+					if (child.getNodeType() == Node.ELEMENT_NODE
+							&& "beans".equals(child.getNodeName())) {
 						ArrayList children = new ArrayList();
-						for (Node n = child.getFirstChild(); n != null;
-													  n = n.getNextSibling()) {
+						for (Node n = child.getFirstChild(); n != null; n = n
+								.getNextSibling()) {
 							if (n.getNodeType() == Node.ELEMENT_NODE) {
 								String nodeName = n.getNodeName();
-								if ("alias".equals(nodeName) ||
-											  "import".equals(nodeName) ||
-											  "description".equals(nodeName) ||
-											  "bean".equals(nodeName)) {
+								if ("alias".equals(nodeName)
+										|| "import".equals(nodeName)
+										|| "description".equals(nodeName)
+										|| "bean".equals(nodeName)) {
 									children.add(n);
 								}
-							}
-							else if (n.getNodeType() == Node.COMMENT_NODE) {
+							} else if (!sort && n.getNodeType() == Node.COMMENT_NODE) {
 								children.add(n);
 							}
 						}
@@ -86,11 +92,18 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 				}
 			}
 			ArrayList children = new ArrayList();
-			for (Node child = node.getFirstChild(); child != null;
-											  child = child.getNextSibling()) {
+			for (Node child = node.getFirstChild(); child != null; child = child
+					.getNextSibling()) {
 				Node n = child;
 				if (n.getNodeType() != Node.TEXT_NODE) {
-					children.add(n);
+					if (n.getNodeType() == Node.COMMENT_NODE) {
+						if (!sort) {
+							children.add(n);
+						}
+					}
+					else {
+						children.add(n);
+					}
 				}
 			}
 			return children.toArray();
