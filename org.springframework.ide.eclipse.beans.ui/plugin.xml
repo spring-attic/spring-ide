@@ -119,7 +119,7 @@
             %wizards.newProject.description
          </description>
       </wizard>
-      <wizard
+      <!--wizard
             id="org.springframework.ide.eclipse.beans.ui.wizards.newBeansConfig"
             name="%wizards.newConfig"
             class="org.springframework.ide.eclipse.beans.ui.wizards.NewBeansConfigWizard"
@@ -131,25 +131,24 @@
          <selection
                class="org.eclipse.core.resources.IResource">
          </selection>
-      </wizard>
+      </wizard-->
    </extension>
    
    <extension
          point="org.eclipse.ui.actionSets">
       <actionSet
-            label="%SpringActionSet.label"
-            description="%SpringActionSet.description"
+            label="%actionSet.label"
             visible="true"
-            id="org.springframework.ide.eclipse.beans.ui.SpringActionSet">
+            id="org.springframework.ide.eclipse.beans.ui.actionSet">
          <action
-               id="openBean"
+               id="org.springframework.ide.eclipse.beans.ui.openBeanAction"
                toolbarPath="org.eclipse.search.searchActionSet/Search"
                class="org.springframework.ide.eclipse.beans.ui.actions.OpenBeanSelectionDialogAction"
                definitionId="org.springframework.ide.eclipse.beans.ui.commands.openBean"
                icon="icons/full/etool16/open_bean_obj.gif"
-               label="%OpenBeanSelectionDialogAction.label"
+               label="%action.openBean.label"
                menubarPath="navigate/open.ext2"
-               tooltip="%OpenBeanSelectionDialogAction.tooltip">
+               tooltip="%action.openBean.tooltip">
          </action>
       </actionSet>
    </extension>
