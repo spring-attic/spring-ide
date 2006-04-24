@@ -61,6 +61,7 @@ public class LexicalSortingAction extends Action {
 		if (doStore) {
 			prefs.setValue(IPreferencesConstants.OUTLINE_SORT, value);
 			BeansEditorPlugin.getDefault().savePluginPreferences();
+			viewer.refresh(true);
 		}
 	}
 }
