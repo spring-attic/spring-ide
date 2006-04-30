@@ -184,9 +184,17 @@ public class BeansUIImages {
 	private static void setImageDescriptors(IAction action, String type,
 											String relPath) {
 		action.setImageDescriptor(create("e" + type, relPath));
-		action.setDisabledImageDescriptor(create("d" + type, relPath));
+		try {
+			ImageDescriptor id = ImageDescriptor.createFromURL(makeIconFileURL(
+														  "d" + type, relPath));
+			if (id != null) {
+				action.setDisabledImageDescriptor(id);
+			}
+		} catch (MalformedURLException e) {
+			BeansUIPlugin.log(e);
+		}
 	}
-	
+
 	private static ImageDescriptor createManaged(String prefix, String name) {
 		try {
 			ImageDescriptor result = ImageDescriptor.createFromURL(
