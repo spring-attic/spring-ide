@@ -37,6 +37,8 @@ public final class SpringUIMessages extends NLS {
 
 	public static String OpenInEditor_errorMessage;
 
+	public static String ImageDescriptorRegistry_wrongDisplay;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, SpringUIMessages.class);
 	}
