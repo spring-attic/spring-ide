@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,14 +105,9 @@ public class BeansUIImages {
 	public static final String IMG_WIZ_CONFIG = NAME_PREFIX + "config_wiz.png";
 
 	// Use IPath and toOSString to build the names to ensure they have the slashes correct
-//	private final static String CTOOL = "ctool16/"; //basic colors - size 16x16
-//	private final static String LOCALTOOL = "clcl16/"; //basic colors - size 16x16
-//	private final static String DLCL = "dlcl16/"; //disabled - size 16x16
-//	private final static String ELCL = "elcl16/"; //enabled - size 16x16
 	private final static String OBJECT = "obj16/"; //basic colors - size 16x16
 	private final static String WIZBAN = "wizban/"; //basic colors - size 16x16
 	private final static String OVR = "ovr16/"; //basic colors - size 7x8
-//	private final static String VIEW= "cview16/"; // views
 
 	public static final ImageDescriptor DESC_OBJS_PROJECT = createManaged(OBJECT, IMG_OBJS_PROJECT);
 	public static final ImageDescriptor DESC_OBJS_CONFIG = createManaged(OBJECT, IMG_OBJS_CONFIG);
@@ -168,7 +163,7 @@ public class BeansUIImages {
 	}
 	
 	/*
-	 * Helper method to access the image registry from the JavaPlugin class.
+	 * Helper method to access the image registry from the BeansUIPlugin class.
 	 */
 	/* package */ static ImageRegistry getImageRegistry() {
 		if (imageRegistry == null) {
@@ -188,27 +183,8 @@ public class BeansUIImages {
 
 	private static void setImageDescriptors(IAction action, String type,
 											String relPath) {
-		try {
-			ImageDescriptor id = ImageDescriptor.createFromURL(makeIconFileURL(
-														  "d" + type, relPath));
-			if (id != null) {
-				action.setDisabledImageDescriptor(id);
-			}
-		} catch (MalformedURLException e) {
-			BeansUIPlugin.log(e);
-		}
-/*
-		try {
-			ImageDescriptor id = ImageDescriptor.createFromURL(makeIconFileURL(
-														  "c" + type, relPath));
-			if (id != null) {
-				action.setHoverImageDescriptor(id);
-			}
-		} catch (MalformedURLException e) {
-			BeansUIPlugin.log(e);
-		}
-*/
 		action.setImageDescriptor(create("e" + type, relPath));
+		action.setDisabledImageDescriptor(create("d" + type, relPath));
 	}
 	
 	private static ImageDescriptor createManaged(String prefix, String name) {
