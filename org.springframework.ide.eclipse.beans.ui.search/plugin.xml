@@ -40,7 +40,7 @@
             id="org.springframework.ide.eclipse.beans.ui.search.searchPage"
             class="org.springframework.ide.eclipse.beans.ui.search.BeansSearchPage"
             label="%searchPage.label"
-            icon="icons/full/obj16/spring_obj.gif"
+            icon="icons/full/obj16/spring_search_obj.gif"
             extensions="*"
             enabled="true"
             canSearchEnclosingProjects="true"
