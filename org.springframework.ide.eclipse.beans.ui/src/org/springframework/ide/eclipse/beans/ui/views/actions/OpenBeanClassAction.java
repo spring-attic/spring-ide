@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,20 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.action.Action;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.views.BeansView;
 import org.springframework.ide.eclipse.beans.ui.views.model.BeanNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.INode;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
+/**
+ * Opens the Java <code>IType</code> at currently selected <code>INode</code>
+ * in BeansView.
+ * @see IType
+ * @see INode
+ * @author Torsten Juergeleit
+ */
 public class OpenBeanClassAction extends Action {
 
 	private static final String PREFIX = "View.OpenBeanClassAction.";
@@ -48,7 +56,8 @@ public class OpenBeanClassAction extends Action {
 		if (node instanceof BeanNode) {
 			IProject project = ((BeanNode) node).getConfigNode().
 									getProjectNode().getProject().getProject();
-			String className = ((BeanNode) node).getClassName();
+			IBean bean = ((BeanNode) node).getBean();
+			String className = BeansModelUtils.getBeanClass(bean, null);
 			IType type = BeansModelUtils.getJavaType(project, className);
 			if (type != null) {
 				SpringUIUtils.openInEditor(type);
