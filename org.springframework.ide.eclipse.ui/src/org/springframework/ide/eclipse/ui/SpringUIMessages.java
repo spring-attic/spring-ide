@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.ui;
 
@@ -23,8 +23,9 @@ import org.eclipse.osgi.util.NLS;
  */
 public final class SpringUIMessages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.springframework.ide." +
-										   "eclipse.beans.ui.SpringUIMessages";
+	private static final String BUNDLE_NAME =
+			"org.springframework.ide.eclipse.ui.SpringUIMessages";
+
 	private SpringUIMessages() {
 		// Do not instantiate
 	}
