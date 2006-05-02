@@ -60,6 +60,10 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.util.StringUtils;
 
+/**
+ * Validates given beans config file. 
+ * @author Torsten Juergeleit
+ */
 public class BeansConfigValidator {
 
 	private static final String PLACEHOLDER_PREFIX = "${";
@@ -319,24 +323,26 @@ public class BeansConfigValidator {
 								 mergedClassName);
 			if (type != null) {
 
-				// Validate merged constructor args of non-abstract beans but
-				// only if this bean has constructor args too
+				// Validate constructor args of non-abstract beans
 				if (bd.hasConstructorArgumentValues() && !bean.isAbstract()) {
 					validateConstructorArguments(bean, type,
 									  mergedBd.getConstructorArgumentValues());
 				}
 
-				// Validate bean's init-method, destroy-method and properties
+				// Validate bean's init-method and destroy-method
 				validateMethod(bean, type, METHOD_TYPE_INIT,
 							   bd.getInitMethodName(), 0, false);
 				validateMethod(bean, type, METHOD_TYPE_DESTROY,
 							   bd.getDestroyMethodName(), 0, false);
+
+				// Validate bean's properties
 				validateProperties(bean, type, bd.getPropertyValues());
 			}
 		}
 
 		// Validate bean's static factory method with bean class from merged
-		// bean definition - skip factory methods with placeholders
+		// bean definition - skip factory methods with placeholders or
+		// abstract beans
 		String methodName = bd.getFactoryMethodName();
 		if (methodName != null && !hasPlaceHolder(methodName)) {
 			if (mergedClassName == null) {
@@ -352,7 +358,8 @@ public class BeansConfigValidator {
 
 				// Use constructor argument values of root bean as arguments
 				// for static factory method
-				int argCount = (bd instanceof RootBeanDefinition ?
+				int argCount = (bd instanceof RootBeanDefinition &&
+					!bd.isAbstract() ?
 					bd.getConstructorArgumentValues().getArgumentCount() : -1);
 				validateFactoryMethod(bean, mergedClassName, methodName,
 									  argCount, true);
