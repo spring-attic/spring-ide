@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.w3c.dom.NodeList;
  * </ul>
  * Nested beans are supported too.
  * @see org.springframework.ide.eclipse.beans.core.internal.parser.IBeanDefinitionEvents
+ * @author Torsten Juergeleit
  */
 public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 
@@ -87,7 +88,8 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 	 * Checks root node of given document for Spring config file root. 
 	 */
 	public int registerBeanDefinitions(BeanDefinitionReader reader,
-									   Document doc, Resource resource) {
+									   Document doc, Resource resource)
+									   throws BeanDefinitionStoreException {
 		Element root = doc.getDocumentElement();
 		if (!ROOT_ELEMENT.equals(root.getNodeName())) {
 			throw new BeanDefinitionException(root, "No Spring bean config " +
@@ -148,7 +150,7 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 	 * the corresponding XML element.
 	 */
 	protected BeanDefinitionHolder parseBeanDefinitionElement(Element ele,
-														 boolean isInnerBean) {
+					 boolean isInnerBean) throws BeanDefinitionStoreException {
 		try {
 			if (isInnerBean) {
 				eventHandler.startBean(ele, true);
@@ -217,7 +219,7 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 	 * the corresponding XML element.
 	 */
 	protected void parsePropertyElement(Element ele, String beanName,
-								MutablePropertyValues pvs) throws DOMException {
+			   MutablePropertyValues pvs) throws BeanDefinitionStoreException {
 		try {
 			if (eventHandler != null) {
 				eventHandler.startProperty(ele);
@@ -235,14 +237,25 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 	}
 
 	/**
-	 * Converts an idref into a bean reference.
+	 * Converts an idref into a bean reference and skips exception for failed
+	 * loading of custom value types.
 	 */
-	protected Object parsePropertySubElement(Element ele, String beanName) {
-		Object value = super.parsePropertySubElement(ele, beanName);
-		if (ele.getTagName().equals(IDREF_ELEMENT)) {
-			value = new RuntimeBeanReference((String) value);
+	protected Object parsePropertySubElement(Element ele, String beanName)
+										  throws BeanDefinitionStoreException {
+		try {
+			Object value = super.parsePropertySubElement(ele, beanName);
+			if (ele.getTagName().equals(IDREF_ELEMENT)) {
+				value = new RuntimeBeanReference((String) value);
+			}
+			return value;
+		} catch (BeanDefinitionStoreException e) {
+			if (ele.getTagName().equals(VALUE_ELEMENT) &&
+											ele.hasAttribute(TYPE_ATTRIBUTE)) {
+				// Skip exception for failed loading of custom types
+				return null;
+			}
+			throw e;
 		}
-		return value;
 	}
 
 	private final class ConstructorArgumentValuesFilter
