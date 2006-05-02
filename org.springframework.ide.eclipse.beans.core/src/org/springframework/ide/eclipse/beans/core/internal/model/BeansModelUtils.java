@@ -63,7 +63,7 @@ import org.springframework.util.Assert;
  * Helper methods for working with the BeansCodeModel.
  * @author Torsten Juergeleit
  */
-public class BeansModelUtils {
+public final class BeansModelUtils {
 
 	/**
 	 * Returns config for given name from specified context
@@ -776,9 +776,11 @@ public class BeansModelUtils {
 	 * Returns the given bean's class name.
 	 * @param bean  the bean to lookup the bean class name for
 	 * @param context  the context (<code>IBeanConfig</code> or
-	 * 		  <code>IBeanConfigSet</code>) the beans are looked-up
+	 *		  <code>IBeanConfigSet</code>) the beans are looked-up;
+	 *		  if <code>null</code> then the bean's config is used
 	 */
-	public static final String getBeanClass(IBean bean, IModelElement context) {
+	public static final String getBeanClass(IBean bean,
+											IModelElement context) {
 		Assert.notNull(bean);
 		if (bean.isRootBean()) {
 			return bean.getClassName();
@@ -805,8 +807,9 @@ public class BeansModelUtils {
 	 * @param context  the context (<code>IBeanConfig</code> or
 	 * 		  <code>IBeanConfigSet</code>) the beans are looked-up
 	 * @param context  the context (<code>IBeanConfig</code> or
-	 * 		  <code>IBeanConfigSet</code>) the beans are looked-up
-	 * @return the Java type of givern bean's class or <code>null</code> if
+	 *		  <code>IBeanConfigSet</code>) the beans are looked-up;
+	 *		  if <code>null</code> then the bean's config is used
+	 * @return the Java type of given bean's class or <code>null</code> if
 	 *			no bean class defined or type not found
 	 */
 	public static final IType getBeanType(IBean bean, IModelElement context) {
