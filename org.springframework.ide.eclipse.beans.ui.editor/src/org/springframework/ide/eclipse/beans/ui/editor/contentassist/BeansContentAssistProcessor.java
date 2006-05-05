@@ -1,16 +1,18 @@
 /*
  * Copyright 2002-2006 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  * 
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ 
 
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
@@ -76,6 +78,7 @@ import org.w3c.dom.NodeList;
 /**
  * Main entry point for the Spring beans xml editor's content assist.
  * @author Christian Dupuis
+ * @author Torsten Juergeleit
  */
 public class BeansContentAssistProcessor
         extends XMLContentAssistProcessor implements IPropertyChangeListener {
@@ -83,7 +86,6 @@ public class BeansContentAssistProcessor
     protected static class BeanReferenceSearchRequestor {
 
         public static final int EXTERNAL_BEAN_RELEVANCE = 10;
-
         public static final int LOCAL_BEAN_RELEVANCE = 20;
 
         protected Map beans;
@@ -178,21 +180,67 @@ public class BeansContentAssistProcessor
         }
     }
 
+    protected static abstract class MethodSearchRequestor {
+
+        public static final int METHOD_RELEVANCE = 10;
+
+        protected ContentAssistRequest request;
+        protected JavaElementImageProvider imageProvider;
+        protected Map methods;
+
+        public MethodSearchRequestor(ContentAssistRequest request) {
+            this.request = request;
+            this.methods = new HashMap();
+            this.imageProvider = new JavaElementImageProvider();
+        }
+
+        protected String[] getParameterTypes(IMethod method) {
+            try {
+                String[] parameterQualifiedTypes = Signature.getParameterTypes(method
+                        .getSignature());
+                int length = parameterQualifiedTypes == null ? 0 : parameterQualifiedTypes.length;
+                String[] parameterPackages = new String[length];
+                for (int i = 0; i < length; i++) {
+                    parameterQualifiedTypes[i] = parameterQualifiedTypes[i].replace('/', '.');
+                    parameterPackages[i] = Signature
+                            .getSignatureSimpleName(parameterQualifiedTypes[i]);
+                }
+                return parameterPackages;
+            }
+            catch (IllegalArgumentException e) {
+            }
+            catch (JavaModelException e) {
+            }
+            return null;
+        }
+
+        protected String getReturnType(IMethod method, boolean classTypesOnly) {
+            try {
+                String qualifiedReturnType = Signature.getReturnType(method.getSignature());
+                if (!classTypesOnly || qualifiedReturnType.startsWith("L")
+                		|| qualifiedReturnType.startsWith("Q")) {
+                	return Signature.getSignatureSimpleName(qualifiedReturnType.replace('/', '.'));
+                }
+            }
+            catch (IllegalArgumentException e) {
+            }
+            catch (JavaModelException e) {
+            }
+            return null;
+        }
+    }
+
     protected static class FactoryMethodSearchRequestor
-            extends VoidMethodSearchRequestor {
+            extends MethodSearchRequestor {
 
-        private String className;
-
-        public FactoryMethodSearchRequestor(ContentAssistRequest request, String className) {
+        public FactoryMethodSearchRequestor(ContentAssistRequest request) {
             super(request);
-            this.className = className;
         }
 
         public void acceptSearchMatch(IMethod method) throws CoreException {
-            String returnType = super.getReturnType(method);
             if (Flags.isPublic(method.getFlags()) && !Flags.isInterface(method.getFlags())
                     && method.exists() && ((IType) method.getParent()).isClass()
-                    && className.equals(returnType) && !method.isConstructor()) {
+                    && !"V".equals(method.getReturnType()) && !method.isConstructor()) {
                 createMethodProposal(method);
             }
         }
@@ -200,9 +248,76 @@ public class BeansContentAssistProcessor
         protected void createMethodProposal(IMethod method) {
             try {
                 String[] parameterNames = method.getParameterNames();
-                String[] parameterTypes = super.getParameterTypes(method);
-                String returnType = super.getReturnType(method);
-                returnType = Signature.getSimpleName(returnType);
+                String[] parameterTypes = getParameterTypes(method);
+                String returnType = getReturnType(method, true);
+                String key = method.getElementName() + method.getSignature();
+                if (returnType != null && !methods.containsKey(key)) {
+                    String methodName = method.getElementName();
+                    String replaceText = methodName;
+                    StringBuffer buf = new StringBuffer();
+                    if (parameterTypes.length > 0 && parameterNames.length > 0) {
+                        buf.append(replaceText + "(");
+                        for (int i = 0; i < parameterTypes.length; i++) {
+                            buf.append(parameterTypes[0]);
+                            buf.append(' ');
+                            buf.append(parameterNames[0]);
+                            if (i < (parameterTypes.length - 1)) {
+                                buf.append(", ");
+                            }
+                        }
+                        buf.append(") ");
+                        buf.append(Signature.getSimpleName(returnType));
+                        buf.append(" - ");
+                        buf.append(method.getParent().getElementName());
+                    }
+                    else {
+                        buf.append(replaceText);
+                        buf.append("() ");
+                        buf.append(Signature.getSimpleName(returnType));
+                        buf.append(" - ");
+                        buf.append(method.getParent().getElementName());
+                    }
+                    String displayText = buf.toString();
+                    Image image = imageProvider.getImageLabel(method, method.getFlags()
+                            | JavaElementImageProvider.SMALL_ICONS);
+                    BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
+                    String javadoc = utils.getJavaDoc();
+
+                    BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
+                            replaceText, request.getReplacementBeginPosition(), request
+                                    .getReplacementLength(), replaceText.length(), image,
+                            displayText, null, javadoc,
+                            MethodSearchRequestor.METHOD_RELEVANCE);
+
+                    request.addProposal(proposal);
+                    methods.put(method.getSignature(), proposal);
+                }
+            }
+            catch (JavaModelException e) {
+                // do nothing
+            }
+        }
+    }
+
+    protected static class VoidMethodSearchRequestor
+            extends MethodSearchRequestor {
+
+        public VoidMethodSearchRequestor(ContentAssistRequest request) {
+            super(request);
+        }
+
+        public void acceptSearchMatch(IMethod method) throws CoreException {
+            if (Flags.isPublic(method.getFlags()) && !Flags.isInterface(method.getFlags())
+            		 && method.exists() && "V".equals(method.getReturnType())
+                    && ((IType) method.getParent()).isClass() && !method.isConstructor()) {
+                createMethodProposal(method);
+            }
+        }
+
+        protected void createMethodProposal(IMethod method) {
+            try {
+                String[] parameterNames = method.getParameterNames();
+                String[] parameterTypes = getParameterTypes(method);
                 String key = method.getElementName() + method.getSignature();
                 if (!methods.containsKey(key)) {
                     String methodName = method.getElementName();
@@ -218,16 +333,12 @@ public class BeansContentAssistProcessor
                                 buf.append(", ");
                             }
                         }
-                        buf.append(") ");
-                        buf.append(returnType);
-                        buf.append(" - ");
+                        buf.append(") void - ");
                         buf.append(method.getParent().getElementName());
                     }
                     else {
                         buf.append(replaceText);
-                        buf.append("() ");
-                        buf.append(returnType);
-                        buf.append(" - ");
+                        buf.append("() void - ");
                         buf.append(method.getParent().getElementName());
                     }
                     String displayText = buf.toString();
@@ -240,7 +351,7 @@ public class BeansContentAssistProcessor
                             replaceText, request.getReplacementBeginPosition(), request
                                     .getReplacementLength(), replaceText.length(), image,
                             displayText, null, javadoc,
-                            PropertyNameSearchRequestor.METHOD_RELEVANCE);
+                            MethodSearchRequestor.METHOD_RELEVANCE);
 
                     request.addProposal(proposal);
                     methods.put(method.getSignature(), proposal);
@@ -252,23 +363,14 @@ public class BeansContentAssistProcessor
         }
     }
 
-    protected static class PropertyNameSearchRequestor {
+    protected static class PropertyNameSearchRequestor extends MethodSearchRequestor {
 
-        public static final int METHOD_RELEVANCE = 10;
-
-        protected JavaElementImageProvider imageProvider;
-
-        protected Map methods;
-
-        protected ContentAssistRequest request;
-
-        private String prefix;
+    	protected String prefix;
 
         public PropertyNameSearchRequestor(ContentAssistRequest request, String prefix) {
-            this.request = request;
-            this.methods = new HashMap();
-            this.imageProvider = new JavaElementImageProvider();
+            super(request);
             this.prefix = prefix;
+
         }
 
         public void acceptSearchMatch(IMethod method, boolean external) throws CoreException {
@@ -314,7 +416,7 @@ public class BeansContentAssistProcessor
                             replaceText, request.getReplacementBeginPosition(), request
                                     .getReplacementLength(), replaceText.length(), image,
                             displayText, null, javadoc,
-                            PropertyNameSearchRequestor.METHOD_RELEVANCE);
+                            MethodSearchRequestor.METHOD_RELEVANCE);
 
                     request.addProposal(proposal);
                     methods.put(key, method);
@@ -323,27 +425,6 @@ public class BeansContentAssistProcessor
             catch (JavaModelException e) {
                 // do nothing
             }
-        }
-
-        protected String[] getParameterTypes(IMethod method) {
-            try {
-                String[] parameterQualifiedTypes = Signature.getParameterTypes(method
-                        .getSignature());
-                int length = parameterQualifiedTypes == null ? 0 : parameterQualifiedTypes.length;
-                String[] parameterPackages = new String[length];
-                for (int i = 0; i < length; i++) {
-                    parameterQualifiedTypes[i] = parameterQualifiedTypes[i].replace('/', '.');
-                    parameterPackages[i] = Signature
-                            .getSignatureSimpleName(parameterQualifiedTypes[i]);
-                }
-
-                return parameterPackages;
-            }
-            catch (IllegalArgumentException e) {
-            }
-            catch (JavaModelException e) {
-            }
-            return null;
         }
 
         protected String getPropertyNameFromMethodName(IMethod method) {
@@ -355,93 +436,6 @@ public class BeansContentAssistProcessor
                 replaceText = Character.toLowerCase(c) + replaceText;
             }
             return replaceText;
-        }
-
-        protected String getReturnType(IMethod method) {
-            try {
-                String parameterQualifiedTypes = Signature.getReturnType(method.getSignature());
-                IType type = (IType) method.getParent();
-                String tempString = Signature.getSignatureSimpleName(parameterQualifiedTypes);
-                String[][] parameterPackages = type.resolveType(tempString);
-                if (parameterPackages != null) {
-                		if (parameterPackages[0][0].length() > 0) {
-                			return parameterPackages[0][0] + "." + parameterPackages[0][1];
-                		}
-                		else {
-                			return parameterPackages[0][1];
-                		}
-                }
-            }
-            catch (IllegalArgumentException e) {
-            }
-            catch (JavaModelException e) {
-            }
-            return null;
-        }
-    }
-
-    protected static class VoidMethodSearchRequestor
-            extends PropertyNameSearchRequestor {
-
-        public VoidMethodSearchRequestor(ContentAssistRequest request) {
-            super(request, "");
-        }
-
-        public void acceptSearchMatch(IMethod method) throws CoreException {
-            String returnType = method.getReturnType();
-            if (Flags.isPublic(method.getFlags()) && !Flags.isInterface(method.getFlags())
-                    && "V".equals(returnType) && method.exists()
-                    && ((IType) method.getParent()).isClass() && !method.isConstructor()) {
-                createMethodProposal(method);
-            }
-        }
-
-        protected void createMethodProposal(IMethod method) {
-            try {
-                String[] parameterNames = method.getParameterNames();
-                String[] parameterTypes = getParameterTypes(method);
-                String key = method.getElementName() + method.getSignature();
-                if (!methods.containsKey(key)) {
-                    String methodName = method.getElementName();
-                    String replaceText = methodName;
-                    StringBuffer buf = new StringBuffer();
-                    if (parameterTypes.length > 0 && parameterNames.length > 0) {
-                        buf.append(replaceText + "(");
-                        for (int i = 0; i < parameterTypes.length; i++) {
-                            buf.append(parameterTypes[0]);
-                            buf.append(' ');
-                            buf.append(parameterNames[0]);
-                            if (i < (parameterTypes.length - 1)) {
-                                buf.append(", ");
-                            }
-                        }
-                        buf.append(") void - ");
-                        buf.append(method.getParent().getElementName());
-                    }
-                    else {
-                        buf.append(replaceText);
-                        buf.append("() void - ");
-                        buf.append(method.getParent().getElementName());
-                    }
-                    String displayText = buf.toString();
-                    Image image = imageProvider.getImageLabel(method, method.getFlags()
-                            | JavaElementImageProvider.SMALL_ICONS);
-                    BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
-                    String javadoc = utils.getJavaDoc();
-
-                    BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-                            replaceText, request.getReplacementBeginPosition(), request
-                                    .getReplacementLength(), replaceText.length(), image,
-                            displayText, null, javadoc,
-                            PropertyNameSearchRequestor.METHOD_RELEVANCE);
-
-                    request.addProposal(proposal);
-                    methods.put(method.getSignature(), proposal);
-                }
-            }
-            catch (JavaModelException e) {
-                // do nothing
-            }
         }
     }
 
@@ -583,17 +577,17 @@ public class BeansContentAssistProcessor
 	}
 
     private void addFactoryMethodAttributeValueProposals(ContentAssistRequest request,
-            String prefix, String className, String factoryClassName) {
+            String prefix, String factoryClassName, boolean isStatic) {
         if (getResource(request) instanceof IFile) {
             IFile file = (IFile) getResource(request);
-            IType type = BeansModelUtils.getJavaType(file.getProject(), className);
+            IType type = BeansModelUtils.getJavaType(file.getProject(), factoryClassName);
             if (type != null) {
                 try {
                     Collection methods = Introspector.findAllMethods(type, prefix, -1, true,
-                            Introspector.STATIC_YES);
+                            (isStatic ? Introspector.STATIC_YES : Introspector.STATIC_IRRELVANT));
                     if (methods != null && methods.size() > 0) {
                         FactoryMethodSearchRequestor requestor = new FactoryMethodSearchRequestor(
-                                request, factoryClassName);
+                                request);
                         Iterator iterator = methods.iterator();
                         while (iterator.hasNext()) {
                             requestor.acceptSearchMatch((IMethod) iterator.next());
@@ -776,28 +770,25 @@ public class BeansContentAssistProcessor
             else if ("factory-method".equals(attributeName)) {
                 NamedNodeMap attributes = node.getAttributes();
                 Node factoryBean = attributes.getNamedItem("factory-bean");
-                String className = null;
                 String factoryClassName = null;
+                boolean isStatic;
                 if (factoryBean != null) {
-                    List list = BeansEditorUtils.getClassNamesOfBean((IFile) getResource(request),
-                            factoryBean);
-                    className = (list.size() != 0 ? ((IType) list.get(0)).getFullyQualifiedName() : null);
+                	// instance factory method
+                	factoryClassName = BeansEditorUtils.getClassNameForBean((IFile) getResource(request),
+                    		node.getOwnerDocument(), factoryBean.getNodeValue());
+                	isStatic = false;
                 }
                 else {
+                	// static factory method
                     List list = BeansEditorUtils.getClassNamesOfBean((IFile) getResource(request),
                             node);
-                    className = (list.size() != 0 ? ((IType) list.get(0)).getFullyQualifiedName() : null);
+                    factoryClassName = (list.size() != 0 ? ((IType) list.get(0)).getFullyQualifiedName() : null);
+                    isStatic = true;
                 }
 
-                List list = BeansEditorUtils
-                        .getClassNamesOfBean((IFile) getResource(request), node);
-                factoryClassName = (list.size() != 0 ? ((IType) list.get(0)).getFullyQualifiedName() : null);
-
-                if (className != null && factoryClassName != null) {
-                    addFactoryMethodAttributeValueProposals(request, matchString, className,
-                            factoryClassName);
+                if (factoryClassName != null) {
+                    addFactoryMethodAttributeValueProposals(request, matchString, factoryClassName, isStatic);
                 }
-
             }
             else if ("parent".equals(attributeName) || "depends-on".equals(attributeName)
                     || "factory-bean".equals(attributeName)) {
