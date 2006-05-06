@@ -835,6 +835,11 @@ public class BeansContentAssistProcessor
                 addBeanReferenceProposals(request, matchString, node.getOwnerDocument(), true);
             }
         }
+        else if ("value".equals(node.getNodeName())) {
+            if ("type".equals(attributeName)) {
+                addClassAttributeValueProposals(request, matchString);
+            }
+        }
     }
 
     public char[] getCompletionProposalAutoActivationCharacters() {
