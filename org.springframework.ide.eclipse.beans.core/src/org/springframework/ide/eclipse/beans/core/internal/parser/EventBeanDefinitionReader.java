@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.core.io.FileResourceLoader;
 import org.springframework.ide.eclipse.core.io.xml.LineNumberPreservingDOMParser;
+import org.springframework.util.Assert;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.xml.sax.ErrorHandler;
@@ -171,6 +172,15 @@ public class EventBeanDefinitionReader implements BeanDefinitionReader {
 			Resource resource = resourceLoader.getResource(location);
 			return loadBeanDefinitions(resource);
 		}
+	}
+
+	public int loadBeanDefinitions(String[] locations) throws BeansException {
+		Assert.notNull(locations, "Location array must not be null");
+		int counter = 0;
+		for (int i = 0; i < locations.length; i++) {
+			counter += loadBeanDefinitions(locations[i]);
+		}
+		return counter;
 	}
 
 	/**
