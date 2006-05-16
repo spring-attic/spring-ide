@@ -88,9 +88,9 @@
    &lt;pre&gt;
       &lt;extension point=&quot;PropertyPageTabItems&quot;&gt;
          &lt;parser
-            id=&quot;ec.ep.dit.isp.foundry.eclipse.myplugin.properties.MyPluginTabItemDefinition&quot;
+            id=&quot;org.springframework.ide.eclipse.myplugin.properties.MyPluginTabItemDefinition&quot;
             name=&quot;My Plugin&quot;
-            class=&quot;ec.ep.dit.isp.foundry.eclipse.myplugin.properties.MyPluginTabItemDefinition&quot;&gt;
+            class=&quot;org.springframework.ide.eclipse.myplugin.properties.MyPluginTabItemDefinition&quot;&gt;
          &lt;/parser&gt;
       &lt;/extension&gt;
    &lt;/pre&gt;
