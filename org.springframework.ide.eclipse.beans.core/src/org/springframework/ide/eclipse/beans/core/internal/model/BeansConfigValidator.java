@@ -222,8 +222,10 @@ public class BeansConfigValidator {
 			}
 		}
 
-		// Validate alias overriding within config set
+		// Validate alias within config set
 		if (configSet != null) {
+
+			// Validate alias overriding
 			Iterator configs = configSet.getConfigs().iterator();
 			while (configs.hasNext()) {
 				String configName = (String) configs.next();
@@ -241,15 +243,18 @@ public class BeansConfigValidator {
 					break;
 				}
 			}
-		}
-
-		// Check if corresponding bean exists
-		if (!registry.containsBeanDefinition(alias.getName())) {
-			BeansModelUtils.createProblemMarker(alias,
-						"Referenced bean '" + alias.getName() + "' not found",
+			
+			// Check if corresponding bean exists
+			if (!configSet.isIncomplete() &&
+					!registry.containsBeanDefinition(alias.getName())) {
+				BeansModelUtils.createProblemMarker(alias,
+						"Referenced bean '" + alias.getName() +
+						"' not found in config set '" +
+						   configSet.getElementName() + "'",
 						IMarker.SEVERITY_WARNING, alias.getElementStartLine(),
 						IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCE,
 						alias.getElementName(), alias.getName());
+			}
 		}
 	}
 
