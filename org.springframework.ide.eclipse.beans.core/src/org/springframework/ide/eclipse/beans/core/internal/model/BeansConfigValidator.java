@@ -175,7 +175,7 @@ public class BeansConfigValidator {
 			IBeanAlias alias = (IBeanAlias) aliases.next();
 			validateAlias(alias, configSet, registry);
 		}
-    	}
+    }
 
 	protected void validateAlias(IBeanAlias alias, IBeansConfigSet configSet,
 								 BeanDefinitionRegistry registry) {
@@ -248,12 +248,12 @@ public class BeansConfigValidator {
 			if (!configSet.isIncomplete() &&
 					!registry.containsBeanDefinition(alias.getName())) {
 				BeansModelUtils.createProblemMarker(alias,
-						"Referenced bean '" + alias.getName() +
-						"' not found in config set '" +
-						   configSet.getElementName() + "'",
-						IMarker.SEVERITY_WARNING, alias.getElementStartLine(),
-						IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCE,
-						alias.getElementName(), alias.getName());
+					  "Referenced bean '" + alias.getName() +
+					  "' not found in config set '" +
+					  configSet.getElementName() + "'",
+					  IMarker.SEVERITY_WARNING, alias.getElementStartLine(),
+					  IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCED_BEAN,
+					  alias.getElementName(), alias.getName());
 			}
 		}
 	}
@@ -618,7 +618,7 @@ public class BeansConfigValidator {
 				// Lookup corresponding model element (constructor argument) 
 				Iterator cas = bean.getConstructorArguments().iterator();
 				while (cas.hasNext()) {
-					IBeanConstructorArgument	carg = (IBeanConstructorArgument)
+					IBeanConstructorArgument carg = (IBeanConstructorArgument)
 																	cas.next();
 					if (carg.getIndex() == index) {
 						ConstructorArgumentValues.ValueHolder valueHolder =
@@ -704,17 +704,25 @@ public class BeansConfigValidator {
 		if (value instanceof RuntimeBeanReference) {
 			String beanName = ((RuntimeBeanReference) value).getBeanName();
 			try {
-				registry.getBeanDefinition(beanName);
+				AbstractBeanDefinition refBd = (AbstractBeanDefinition)
+										  registry.getBeanDefinition(beanName);
+				if (!refBd.hasBeanClass()) {
+					BeansModelUtils.createProblemMarker(bean,
+						"Invalid referenced bean '" + beanName + "'",
+						IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+						IBeansProjectMarker.ERROR_CODE_INVALID_REFERENCED_BEAN,
+						bean.getElementName(), beanName);
+				}
 			} catch (NoSuchBeanDefinitionException e) {
 			    
 				// Display a warning if the bean ref contains a placeholder
 				if (hasPlaceHolder(beanName)) {
                     BeansModelUtils.createProblemMarker(element,
-    					  "Referenced bean '" + beanName + "' not found",
-    					  IMarker.SEVERITY_WARNING,
-    					  ((ISourceModelElement) element).getElementStartLine(),
-    					  IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCE,
-    					  element.getElementName(), beanName);
+    				  "Referenced bean '" + beanName + "' not found",
+    				  IMarker.SEVERITY_WARNING,
+    				  ((ISourceModelElement) element).getElementStartLine(),
+    				  IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCED_BEAN,
+    				  element.getElementName(), beanName);
                 // Handle factory bean references
                 } else if (isFactoryBeanReference(beanName)) {
                     String tempBeanName = beanName.replaceFirst(FACTORY_BEAN_REFERENCE_REGEXP, "");
@@ -735,7 +743,7 @@ public class BeansConfigValidator {
                                                         "' does not implement the FactoryBean interface",
                                                     IMarker.SEVERITY_ERROR,
                                                     ((ISourceModelElement) element).getElementStartLine(),
-                                                    IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCE,
+                                                    IBeansProjectMarker.ERROR_CODE_INVALID_FACTORY_BEAN,
                                                     element.getElementName(), beanName);
                                         }
                                     }
@@ -749,7 +757,7 @@ public class BeansConfigValidator {
                                             "' implementation class not found",
                                         IMarker.SEVERITY_WARNING,
                                         ((ISourceModelElement) element).getElementStartLine(),
-                                        IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCE,
+                                        IBeansProjectMarker.ERROR_CODE_INVALID_REFERENCED_BEAN,
                                         element.getElementName(), beanName);
                             }
                         }
@@ -758,7 +766,7 @@ public class BeansConfigValidator {
                                 "Referenced factory bean '" + tempBeanName + "' not found",
                                 IMarker.SEVERITY_WARNING,
                                 ((ISourceModelElement) element).getElementStartLine(),
-                                IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCE,
+                                IBeansProjectMarker.ERROR_CODE_UNDEFINED_FACTORY_BEAN,
                                 element.getElementName(), beanName);
                     }
                 }
@@ -767,7 +775,7 @@ public class BeansConfigValidator {
                           "Referenced bean '" + beanName + "' not found",
                           IMarker.SEVERITY_WARNING,
                           ((ISourceModelElement) element).getElementStartLine(),
-                          IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCE,
+                          IBeansProjectMarker.ERROR_CODE_UNDEFINED_REFERENCED_BEAN,
                           element.getElementName(), beanName);
                 }
 			}
@@ -846,7 +854,7 @@ public class BeansConfigValidator {
 			try {
 				AbstractBeanDefinition factoryBd = (AbstractBeanDefinition)
 										  registry.getBeanDefinition(beanName);
-				if (factoryBd.isAbstract()) {
+				if (!factoryBd.hasBeanClass()) {
 					BeansModelUtils.createProblemMarker(bean,
 						   "Invalid factory bean '" + beanName + "'",
 						   IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
@@ -900,7 +908,15 @@ public class BeansConfigValidator {
 										 BeanDefinitionRegistry registry) {
 		if (beanName != null && !hasPlaceHolder(beanName)) {
 			try {
-				registry.getBeanDefinition(beanName);
+				AbstractBeanDefinition dependsBd = (AbstractBeanDefinition)
+										  registry.getBeanDefinition(beanName);
+				if (!dependsBd.hasBeanClass()) {
+					BeansModelUtils.createProblemMarker(bean,
+						"Invalid depends-on bean '" + beanName + "'",
+						IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+						IBeansProjectMarker.ERROR_CODE_INVALID_DEPENDS_ON_BEAN,
+						bean.getElementName(), beanName);
+				}
 			} catch (NoSuchBeanDefinitionException e) {
 
 				// Skip error "parent name is equal to bean name"
