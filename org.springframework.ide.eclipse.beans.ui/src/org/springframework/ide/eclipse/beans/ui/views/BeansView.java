@@ -59,7 +59,6 @@ import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
-import org.eclipse.wst.xml.ui.internal.tabletree.XMLMultiPageEditorPart;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.IPreferencesConstants;
@@ -522,12 +521,11 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 	}
 
 	/**
-	 * If linking is enabled (via toolbar action) the links to beans XML
+	 * If linking is enabled (via toolbar action) then link to beans XML
 	 * editor. 
 	 */
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		if (isLinkingEnabled() && isPartVisible()
-				&& part instanceof XMLMultiPageEditorPart
 				&& selection instanceof IStructuredSelection) {
 			IStructuredSelection sselection = (IStructuredSelection) selection;
 			if (sselection.size() == 1) {

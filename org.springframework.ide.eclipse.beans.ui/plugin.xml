@@ -23,7 +23,6 @@
       <import plugin="org.eclipse.ui.cheatsheets"/>
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jdt.ui"/>
-      <import plugin="org.eclipse.wst.xml.ui"/>
       <import plugin="org.springframework.ide.eclipse.core"/>
       <import plugin="org.springframework.ide.eclipse.ui"/>
       <import plugin="org.springframework.ide.eclipse.beans.core"/>
