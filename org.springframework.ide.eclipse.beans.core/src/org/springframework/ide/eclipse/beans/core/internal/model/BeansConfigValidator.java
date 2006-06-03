@@ -231,16 +231,19 @@ public class BeansConfigValidator {
 				String configName = (String) configs.next();
 				IBeansConfig config = BeansModelUtils.getConfig(configName,
 																configSet);
-				if (config == BeansModelUtils.getConfig(alias)) {
-					break;
-				} else if (config.getAlias(alias.getElementName()) != null) {
-					BeansModelUtils.createProblemMarker(alias,
+				if (config != null) {
+					if (config == BeansModelUtils.getConfig(alias)) {
+						break;
+					}
+					if (config.getAlias(alias.getElementName()) != null) {
+						BeansModelUtils.createProblemMarker(alias,
 						   "Overrides another alias in config set '" +
 						   configSet.getElementName() + "'",
 						   IMarker.SEVERITY_ERROR, alias.getElementStartLine(),
 						   IBeansProjectMarker.ERROR_CODE_ALIAS_OVERRIDE,
 						   alias.getElementName(), configSet.getElementName());
-					break;
+						break;
+					}
 				}
 			}
 			
