@@ -35,6 +35,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * This class defines a Spring beans config set (a list of beans config names).
+ * @author Torsten Juergeleit
  */
 public class BeansConfigSet extends AbstractModelElement
 												   implements IBeansConfigSet {
@@ -68,12 +69,22 @@ public class BeansConfigSet extends AbstractModelElement
 	}
 
 	public IModelElement[] getElementChildren() {
-		return (IModelElement[]) getConfigs().toArray(
-									   new IModelElement[getConfigs().size()]);
+		IBeansProject project = (IBeansProject) getElementParent();
+		List configs = new ArrayList();
+		Iterator iter = configNames.iterator();
+		while (iter.hasNext()) {
+			String configName = (String) iter.next();
+			IBeansConfig config = project.getConfig(configName);
+			if (config != null) {
+				configs.add(config);
+			}
+		}
+		return (IModelElement[]) configs.toArray(
+									   new IModelElement[configs.size()]);
 	}
 
 	public void setAllowBeanDefinitionOverriding(
-										boolean allowBeanDefinitionOverriding) {
+									   boolean allowBeanDefinitionOverriding) {
 		this.allowBeanDefinitionOverriding = allowBeanDefinitionOverriding;
 		reset();
 	}
