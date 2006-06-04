@@ -707,11 +707,13 @@ public final class BeansModelUtils {
 				String configName = (String) configs.next();
 				IBeansConfig config = BeansModelUtils.getConfig(configName,
 																context);
-				Iterator beans = config.getInnerBeans().iterator();
-				while (beans.hasNext()) {
-					IBean bean = (IBean) beans.next();
-					if (beanName.equals(bean.getElementName())) {
-						return bean;
+				if (config != null) {
+					Iterator beans = config.getInnerBeans().iterator();
+					while (beans.hasNext()) {
+						IBean bean = (IBean) beans.next();
+						if (beanName.equals(bean.getElementName())) {
+							return bean;
+						}
 					}
 				}
 			}
