@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
  * Common protocol for all elements provided by the model.
- *
  * @author Torsten Juergeleit
  */
 public interface IModelElement extends IAdaptable {

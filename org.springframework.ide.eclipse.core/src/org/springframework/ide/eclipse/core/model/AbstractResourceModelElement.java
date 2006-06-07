@@ -18,12 +18,20 @@ package org.springframework.ide.eclipse.core.model;
 
 import org.eclipse.core.resources.IResource;
 
+/**
+ * Default implementation of the common protocol for all model elements that
+ * map to a resource in the Eclipse workspace.
+ * @author Torsten Juergeleit
+ */
 public abstract class AbstractResourceModelElement extends AbstractModelElement
 											 implements IResourceModelElement {
 	protected AbstractResourceModelElement(IModelElement parent, String name) {
 		super(parent, name);
 	}
 
+	/**
+	 * Returns an adapter for <code>IResource.class</code>.
+	 */
 	public Object getAdapter(Class adapter) {
 		if (adapter == IResource.class) {
 			return getElementResource();

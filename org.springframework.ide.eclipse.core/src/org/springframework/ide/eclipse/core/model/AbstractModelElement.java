@@ -18,6 +18,11 @@ package org.springframework.ide.eclipse.core.model;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
+/**
+ * Default implementation of the common protocol for all elements provided by
+ * the model.
+ * @author Torsten Juergeleit
+ */
 public abstract class AbstractModelElement implements IModelElement {
 
 	private IModelElement parent;
