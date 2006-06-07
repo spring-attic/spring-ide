@@ -24,7 +24,6 @@ import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
-import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.util.StringUtils;
@@ -37,7 +36,6 @@ import org.springframework.util.StringUtils;
  *
  * @see org.springframework.ide.eclipse.core.model.IModelElement
  * @see org.eclipse.core.runtime.IAdaptable
- *
  * @author Torsten Juergeleit
  */
 public class BeansModelLabelProvider extends LabelProvider {
@@ -47,7 +45,7 @@ public class BeansModelLabelProvider extends LabelProvider {
 		if (adaptedElement instanceof IModelElement) {
 			return BeansModelImages.getImage((IModelElement) adaptedElement);
 		}
-		return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_SPRING);
+		return null;
 	}
 
 	public String getText(Object element) {
@@ -55,7 +53,7 @@ public class BeansModelLabelProvider extends LabelProvider {
 		if (adaptedElement instanceof IModelElement) {
 			return getText((IModelElement) adaptedElement);
 		}
-		return super.getText(element);
+		return null;
 	}
 
 	public static String getText(IModelElement element) {
