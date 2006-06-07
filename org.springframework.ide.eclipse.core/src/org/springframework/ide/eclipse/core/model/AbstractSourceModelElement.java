@@ -24,8 +24,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.core.SpringCore;
 
+/**
+ * Default implementation of the common protocol for all model elements related
+ * to source code.
+ * @author Torsten Juergeleit
+ */
 public abstract class AbstractSourceModelElement
-		  extends AbstractResourceModelElement implements ISourceModelElement {
+				  extends AbstractModelElement implements ISourceModelElement {
 
 	private int startLine;
     private int endLine;
@@ -52,6 +57,9 @@ public abstract class AbstractSourceModelElement
 	    return endLine;
 	}
 
+	/**
+	 * Returns an adapter for <code>IMarker.class</code>.
+	 */
 	public Object getAdapter(Class adapter) {
 		if (adapter == IMarker.class) {
 			return createMarker();
