@@ -709,7 +709,7 @@ public class BeansConfigValidator {
 			try {
 				AbstractBeanDefinition refBd = (AbstractBeanDefinition)
 										  registry.getBeanDefinition(beanName);
-				if (!refBd.hasBeanClass()) {
+				if (refBd.getBeanClassName() == null) {
 					BeansModelUtils.createProblemMarker(bean,
 						"Invalid referenced bean '" + beanName + "'",
 						IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
@@ -857,7 +857,7 @@ public class BeansConfigValidator {
 			try {
 				AbstractBeanDefinition factoryBd = (AbstractBeanDefinition)
 										  registry.getBeanDefinition(beanName);
-				if (!factoryBd.hasBeanClass()) {
+				if (factoryBd.getBeanClassName() == null) {
 					BeansModelUtils.createProblemMarker(bean,
 						   "Invalid factory bean '" + beanName + "'",
 						   IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
@@ -913,7 +913,7 @@ public class BeansConfigValidator {
 			try {
 				AbstractBeanDefinition dependsBd = (AbstractBeanDefinition)
 										  registry.getBeanDefinition(beanName);
-				if (!dependsBd.hasBeanClass()) {
+				if (dependsBd.getBeanClassName() == null) {
 					BeansModelUtils.createProblemMarker(bean,
 						"Invalid depends-on bean '" + beanName + "'",
 						IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
