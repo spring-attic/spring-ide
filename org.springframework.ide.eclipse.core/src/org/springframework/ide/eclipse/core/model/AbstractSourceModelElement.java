@@ -27,13 +27,14 @@ import org.springframework.ide.eclipse.core.SpringCore;
 /**
  * Default implementation of the common protocol for all model elements related
  * to source code.
+ * 
  * @author Torsten Juergeleit
  */
-public abstract class AbstractSourceModelElement
-				  extends AbstractModelElement implements ISourceModelElement {
+public abstract class AbstractSourceModelElement extends
+		AbstractResourceModelElement implements ISourceModelElement {
 
 	private int startLine;
-    private int endLine;
+	private int endLine;
 
 	protected AbstractSourceModelElement(IModelElement parent, String name) {
 		super(parent, name);
