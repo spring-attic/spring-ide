@@ -78,7 +78,7 @@
          point="org.eclipse.ui.decorators">
       <decorator
             lightweight="true"
-            adaptable="true"
+            adaptable="false"
             location="TOP_RIGHT"
             label="%decorator.label"
             state="true"
