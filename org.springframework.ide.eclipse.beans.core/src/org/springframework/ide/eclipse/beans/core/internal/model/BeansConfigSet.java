@@ -25,19 +25,21 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.core.model.AbstractModelElement;
+import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * This class defines a Spring beans config set (a list of beans config names).
+ * 
  * @author Torsten Juergeleit
  */
-public class BeansConfigSet extends AbstractModelElement
+public class BeansConfigSet extends AbstractResourceModelElement
 												   implements IBeansConfigSet {
 	private List configNames;
 	private boolean allowBeanDefinitionOverriding;
@@ -52,7 +54,7 @@ public class BeansConfigSet extends AbstractModelElement
 	public BeansConfigSet(IBeansProject project, String name, List configNames) {
 		super(project, name);
 		this.allowBeanDefinitionOverriding = true;
-		this.configNames = new ArrayList(configNames); 
+		this.configNames = new ArrayList(configNames);
 	}
 
 	/**
@@ -81,6 +83,10 @@ public class BeansConfigSet extends AbstractModelElement
 		}
 		return (IModelElement[]) configs.toArray(
 									   new IModelElement[configs.size()]);
+	}
+
+	public IResource getElementResource() {
+		return ((IBeansProject) getElementParent()).getProject();
 	}
 
 	public void setAllowBeanDefinitionOverriding(
@@ -136,12 +142,6 @@ public class BeansConfigSet extends AbstractModelElement
 	public Collection getBeans() {
 		return getBeansMap().values();
 	}
-
-	public void replaceConfig(String origFileName, String newFileName) {
-		removeConfig(origFileName);
-		addConfig(newFileName);
-		reset();
-    }
 
 	public boolean isBeanClass(String className) {
 		return getBeanClassesMap().containsKey(className);
