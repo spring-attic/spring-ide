@@ -56,7 +56,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.util.StringUtils;
 
@@ -666,7 +665,7 @@ public class BeansConfigValidator {
 				PropertyValue prop = props[i];
 	
 				// Lookup corresponding model element (property) 
-				IModelElement element = bean.getProperty(prop.getName());
+				ISourceModelElement element = bean.getProperty(prop.getName());
 				if (element == null) {
 					element = bean;
 				}
@@ -702,17 +701,18 @@ public class BeansConfigValidator {
 	}
 
 	protected void validateBeanReferencesInValue(IBean bean,
-										   IModelElement element, Object value,
+								   ISourceModelElement element, Object value,
 										   BeanDefinitionRegistry registry) {
 		if (value instanceof RuntimeBeanReference) {
 			String beanName = ((RuntimeBeanReference) value).getBeanName();
 			try {
 				AbstractBeanDefinition refBd = (AbstractBeanDefinition)
 										  registry.getBeanDefinition(beanName);
-				if (refBd.getBeanClassName() == null) {
+				if (refBd.getBeanClassName() == null &&
+										  refBd.getFactoryBeanName() == null) {
 					BeansModelUtils.createProblemMarker(bean,
 						"Invalid referenced bean '" + beanName + "'",
-						IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
+						IMarker.SEVERITY_ERROR, element.getElementStartLine(),
 						IBeansProjectMarker.ERROR_CODE_INVALID_REFERENCED_BEAN,
 						bean.getElementName(), beanName);
 				}
@@ -913,7 +913,8 @@ public class BeansConfigValidator {
 			try {
 				AbstractBeanDefinition dependsBd = (AbstractBeanDefinition)
 										  registry.getBeanDefinition(beanName);
-				if (dependsBd.getBeanClassName() == null) {
+				if (dependsBd.getBeanClassName() == null &&
+									  dependsBd.getFactoryBeanName() == null) {
 					BeansModelUtils.createProblemMarker(bean,
 						"Invalid depends-on bean '" + beanName + "'",
 						IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
