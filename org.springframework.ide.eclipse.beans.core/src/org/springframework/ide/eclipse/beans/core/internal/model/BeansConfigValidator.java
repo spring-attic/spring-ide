@@ -17,7 +17,6 @@
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -336,11 +335,15 @@ public class BeansConfigValidator {
 									  mergedBd.getConstructorArgumentValues());
 				}
 
-				// Validate bean's init-method and destroy-method
-				validateMethod(bean, type, METHOD_TYPE_INIT,
-							   bd.getInitMethodName(), 0, false);
-				validateMethod(bean, type, METHOD_TYPE_DESTROY,
-							   bd.getDestroyMethodName(), 0, false);
+				// For non-factory beans validate bean's init-method and
+				// destroy-method
+				if (!Introspector.doesImplement(type,
+						FactoryBean.class.getName())) {
+					validateMethod(bean, type, METHOD_TYPE_INIT,
+							bd.getInitMethodName(), 0, false);
+					validateMethod(bean, type, METHOD_TYPE_DESTROY,
+							bd.getDestroyMethodName(), 0, false);
+				}
 
 				// Validate bean's properties
 				validateProperties(bean, type, bd.getPropertyValues());
@@ -737,24 +740,21 @@ public class BeansConfigValidator {
                                          BeansModelUtils.getProject(bean).getProject(),
                                          beanClassName);
                             if (type != null) {
-                                try {
-                                    String[] interfaces = type.getSuperInterfaceNames();
-                                    if (interfaces != null && interfaces.length > 0) {
-                                        if (!Arrays.asList(interfaces).contains(FactoryBean.class.getName())) {
-                                            BeansModelUtils.createProblemMarker(element,
-                                                    "Referenced factory bean '" + tempBeanName + 
-                                                        "' does not implement the FactoryBean interface",
-                                                    IMarker.SEVERITY_ERROR,
-                                                    ((ISourceModelElement) element).getElementStartLine(),
-                                                    IBeansProjectMarker.ERROR_CODE_INVALID_FACTORY_BEAN,
-                                                    element.getElementName(), beanName);
-                                        }
-                                    }
-                                } catch (JavaModelException me) {
-                                    BeansCorePlugin.log(e);
+								if (!Introspector.doesImplement(type,
+										FactoryBean.class.getName())) {
+									BeansModelUtils.createProblemMarker(
+											element,
+											"Referenced factory bean '"
+													+ tempBeanName
+													+ "' does not implement the FactoryBean interface",
+											IMarker.SEVERITY_ERROR,
+											((ISourceModelElement) element)
+													.getElementStartLine(),
+											IBeansProjectMarker.ERROR_CODE_INVALID_FACTORY_BEAN,
+											element.getElementName(),
+											beanName);
                                 }
-                            }
-                            else {
+                            } else {
                                 BeansModelUtils.createProblemMarker(element,
                                         "Referenced factory bean '" + tempBeanName + 
                                             "' implementation class not found",

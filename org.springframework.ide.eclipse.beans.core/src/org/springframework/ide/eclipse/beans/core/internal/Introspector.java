@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.core.StringUtils;
 
 /**
@@ -305,5 +306,30 @@ public final class Introspector {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Returns <code>true</code> if the given Java type implements the
+	 * specified interface.
+	 * 
+	 * @param type  the Java type to be examined
+	 * @param interfaceName  the name of the interface we are looking for
+	 */
+	public static boolean doesImplement(IType type, String interfaceName) {
+		if (interfaceName != null && interfaceName.length() > 0) {
+			try {
+		        String[] interfaces = type.getSuperInterfaceNames();
+		        if (interfaces != null && interfaces.length > 0) {
+		        	for (int i = 0; i < interfaces.length; i++) {
+						if (interfaces[i].equals(interfaceName)) {
+							return true;
+						}
+					}
+		        }
+			} catch (JavaModelException e) {
+				BeansCorePlugin.log(e);
+			}
+		}
+		return false;
 	}
 }
