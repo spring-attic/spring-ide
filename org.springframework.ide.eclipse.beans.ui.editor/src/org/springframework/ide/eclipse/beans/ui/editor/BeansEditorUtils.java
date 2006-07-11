@@ -45,6 +45,8 @@ import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.core.internal.provisional.StructuredModelManager;
 import org.osgi.framework.Bundle;
+import org.springframework.beans.PropertyAccessor;
+import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -445,21 +447,26 @@ public class BeansEditorUtils {
 		if (cursorIndexInTarget > 0 && cursorIndexInTarget < target.length()) {
 
 			String preTarget = target.substring(0, cursorIndexInTarget);
-			if (!preTarget.endsWith(".")) {
+			if (!preTarget.endsWith(
+					PropertyAccessor.NESTED_PROPERTY_SEPARATOR)) {
 				int regionOffset = hyperlinkRegion.getOffset()
-						+ preTarget.lastIndexOf(".") + 1;
-				int segmentCount = new StringTokenizer(preTarget, ".")
+						+ preTarget.lastIndexOf(
+								PropertyAccessor.NESTED_PROPERTY_SEPARATOR)
+						+ 1;
+				int segmentCount = new StringTokenizer(preTarget,
+						PropertyAccessor.NESTED_PROPERTY_SEPARATOR)
 						.countTokens();
-				StringTokenizer tok = new StringTokenizer(target, ".");
+				StringTokenizer tok = new StringTokenizer(target,
+						PropertyAccessor.NESTED_PROPERTY_SEPARATOR);
 
 				for (int i = 0; i < segmentCount; i++) {
 					propertyPaths.add(tok.nextToken());
 				}
 
-				int regionLenght = ((String) propertyPaths
+				int regionLength = ((String) propertyPaths
 						.get(segmentCount - 1)).length();
 
-				return new Region(regionOffset, regionLenght);
+				return new Region(regionOffset, regionLength);
 			}
 		}
 
@@ -468,19 +475,22 @@ public class BeansEditorUtils {
 	}
 
 	public static final IMethod extractMethodFromPropertyPathElements(
-			List propertyPath, List types, IFile file, int counter) {
+			List propertyPathElements, List types, IFile file, int counter) {
 		IMethod method = null;
-		if (propertyPath != null && propertyPath.size() > 0) {
-			if (propertyPath.size() > (counter + 1)) {
+		if (propertyPathElements != null && propertyPathElements.size() > 0) {
+			if (propertyPathElements.size() > (counter + 1)) {
 
 				if (types != null) {
 					IType returnType = null;
 					for (int i = 0; i < types.size(); i++) {
 						IType type = (IType) types.get(i);
+						String propertyPath = (String) propertyPathElements
+								.get(counter);
 						try {
 							IMethod getMethod = Introspector
 									.getReadableProperty(type,
-											(String) propertyPath.get(counter));
+											PropertyAccessorUtils
+											.getPropertyName(propertyPath));
 							returnType = BeansEditorUtils
 									.getTypeForMethodReturnType(getMethod,
 											type, file);
@@ -492,17 +502,19 @@ public class BeansEditorUtils {
 						List newTypes = new ArrayList();
 						newTypes.add(returnType);
 						method = extractMethodFromPropertyPathElements(
-								propertyPath, newTypes, file, (counter + 1));
+								propertyPathElements, newTypes, file,
+								(counter + 1));
 					}
-
 				}
 			} else {
 				for (int i = 0; i < types.size(); i++) {
 					IType type = (IType) types.get(i);
+					String propertyPath = (String) propertyPathElements
+							.get(counter);
 					try {
 						method = Introspector.getWritableProperty(type,
-								(String) propertyPath.get(counter));
-
+								PropertyAccessorUtils
+								.getPropertyName(propertyPath));
 					} catch (JavaModelException e) {
 					}
 				}
