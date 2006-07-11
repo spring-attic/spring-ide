@@ -477,6 +477,7 @@ public class BeansConfigValidator {
 			}
 			PropertyValue propValue = propValues[i];
 			String propertyName = propValue.getName();
+			IBeanProperty property = bean.getProperty(propertyName);
 
 			// Skip properties with placeholders
 			if (hasPlaceHolder(propertyName)) {
@@ -487,9 +488,11 @@ public class BeansConfigValidator {
 			try {
 
 				// First check for nested property path
-				int pos = getNestedPropertySeparatorIndex(propertyName, false);
-				if (pos >= 0) {
-					String nestedPropertyName = propertyName.substring(0, pos);
+				int nestedIndex = getNestedPropertySeparatorIndex(propertyName,
+						false);
+				if (nestedIndex >= 0) {
+					String nestedPropertyName = propertyName.substring(0,
+							nestedIndex);
 					PropertyTokenHolder tokens = getPropertyNameTokens(
 														   nestedPropertyName);
 					String getterName = "get" + StringUtils.capitalize(
@@ -497,7 +500,6 @@ public class BeansConfigValidator {
 					IMethod getter = Introspector.findMethod(type, getterName,
 											  0, true, Introspector.STATIC_NO);
 					if (getter == null) {
-						IBeanProperty property = bean.getProperty(propertyName);
 						BeansModelUtils.createProblemMarker(bean,
 									"No getter found for nested property '" +
 							 		nestedPropertyName + "' in class '" +
@@ -516,7 +518,15 @@ public class BeansConfigValidator {
 						}
 					}
 				} else {
-					IBeanProperty property = bean.getProperty(propertyName);
+
+					// Now check for mapped property
+					int mappedIndex = propertyName.indexOf(
+							PropertyAccessor.PROPERTY_KEY_PREFIX_CHAR);
+					if (mappedIndex != -1) {
+						propertyName = propertyName.substring(0, mappedIndex);
+					}
+
+					// Finally check property
 					if (!Introspector.isValidPropertyName(propertyName)) {
 						BeansModelUtils.createProblemMarker(bean,
 								   "Invalid property name '" +
@@ -538,6 +548,9 @@ public class BeansConfigValidator {
 						 IBeansProjectMarker.ERROR_CODE_NO_SETTER,
 						 bean.getElementName(), propertyName);
 					}
+
+					// TODO If mapped property then check type of setter's
+					// argument 
 				}
 			} catch (JavaModelException e) {
 				BeansCorePlugin.log(e);
@@ -984,6 +997,11 @@ public class BeansConfigValidator {
 		return -1;
 	}
 
+	/**
+	 * Parse the given property name into the corresponding property name tokens.
+	 * @param propertyName the property name to parse
+	 * @return representation of the parsed property tokens
+	 */
 	private PropertyTokenHolder getPropertyNameTokens(String propertyName) {
 		PropertyTokenHolder tokens = new PropertyTokenHolder();
 		String actualName = null;
