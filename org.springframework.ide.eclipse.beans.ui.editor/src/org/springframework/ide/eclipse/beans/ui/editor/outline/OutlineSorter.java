@@ -17,12 +17,12 @@
 package org.springframework.ide.eclipse.beans.ui.editor.outline;
 
 import org.eclipse.jface.viewers.ViewerSorter;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansTagUtils;
+import org.springframework.ide.eclipse.beans.core.BeansTags;
 import org.w3c.dom.Node;
 
 public class OutlineSorter extends ViewerSorter {
 
 	public int category(Object element) {
-		return BeansTagUtils.getTag((Node) element);
+		return BeansTags.getTag((Node) element);
 	}
 }

@@ -23,10 +23,10 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.core.internal.document.CommentImpl;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider;
 import org.eclipse.wst.xml.ui.views.contentoutline.XMLContentOutlineConfiguration;
+import org.springframework.ide.eclipse.beans.core.BeansTags;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansTagUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.actions.LexicalSortingAction;
 import org.springframework.ide.eclipse.beans.ui.editor.actions.OutlineStyleAction;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
@@ -167,15 +167,15 @@ public class BeansContentOutlineConfiguration
 			String text = "";
 
 			// Root elements (alias, import and bean)
-			switch (BeansTagUtils.getTag(node)) {
-				case BeansTagUtils.IMPORT :
+			switch (BeansTags.getTag(node)) {
+				case BeansTags.IMPORT :
 					attr = attrs.getNamedItem("resource");
 					if (attr != null) {
 						text = attr.getNodeValue();
 					}
 					break;
 
-				case BeansTagUtils.ALIAS :
+				case BeansTags.ALIAS :
 					attr = attrs.getNamedItem("name");
 					if (attr != null) {
 						text = attr.getNodeValue();
@@ -188,7 +188,7 @@ public class BeansContentOutlineConfiguration
 					}
 					break;
 
-				case BeansTagUtils.BEAN :
+				case BeansTags.BEAN :
 					boolean hasParent = false;
 					attr = attrs.getNamedItem("id");
 					if (attr != null) {
@@ -225,7 +225,7 @@ public class BeansContentOutlineConfiguration
 					}
 					break;
 
-				case BeansTagUtils.CONSTRUCTOR_ARG :
+				case BeansTags.CONSTRUCTOR_ARG :
 					attr = attrs.getNamedItem("index");
 					if (attr != null) {
 						text += " {" + attr.getNodeValue() + "}";
@@ -244,7 +244,7 @@ public class BeansContentOutlineConfiguration
 					}
 					break;
 
-				case BeansTagUtils.PROPERTY :
+				case BeansTags.PROPERTY :
 					attr = attrs.getNamedItem("name");
 					if (attr != null) {
 						text = attr.getNodeValue();
@@ -261,8 +261,8 @@ public class BeansContentOutlineConfiguration
 					}
 					break;
 
-				case BeansTagUtils.REF :
-				case BeansTagUtils.IDREF :
+				case BeansTags.REF :
+				case BeansTags.IDREF :
 					attr = attrs.getNamedItem("bean");
 					if (attr != null) {
 						text += "<" + attr.getNodeValue() + ">";
@@ -277,7 +277,7 @@ public class BeansContentOutlineConfiguration
 					}
 					break;
 
-				case BeansTagUtils.VALUE :
+				case BeansTags.VALUE :
 					text = node.getNodeName();
 					if (showAttributes) {
 						attr = attrs.getNamedItem("type");
@@ -287,7 +287,7 @@ public class BeansContentOutlineConfiguration
 					}
 					break;
 
-				case BeansTagUtils.ENTRY :
+				case BeansTags.ENTRY :
 					text = node.getNodeName();
 					attr = attrs.getNamedItem("key");
 					if (attr != null) {
@@ -306,7 +306,7 @@ public class BeansContentOutlineConfiguration
 					}
 					break;
 
-				case BeansTagUtils.PROP :
+				case BeansTags.PROP :
 					text = node.getNodeName();
 					attr = node.getFirstChild();
 					if (attr != null && attr.getNodeType() == Node.TEXT_NODE) {
@@ -314,7 +314,7 @@ public class BeansContentOutlineConfiguration
 					}
 					break;
 					
-				case BeansTagUtils.COMMENT :
+				case BeansTags.COMMENT :
 					text = super.getText(o);
 					text += " <";
 					text += ((CommentImpl) o).getNodeValue().trim();
