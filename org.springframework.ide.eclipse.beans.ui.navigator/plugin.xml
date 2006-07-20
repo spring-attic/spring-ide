@@ -2,27 +2,18 @@
 <?eclipse version="3.2"?>
 <plugin>
    <extension
-         point="org.eclipse.ui.views">
-      <view
-            id="org.springframework.ide.eclipse.beans.ui.navigator.beansNavigator"
-            class="org.eclipse.ui.navigator.CommonNavigator"
-            icon="icons/full/obj16/spring_obj.gif"
-            name="%viewName"
-            allowMultiple="false"/>
-   </extension>
-   <extension
          point="org.eclipse.ui.navigator.viewer">
-      <viewer viewerId="org.springframework.ide.eclipse.beans.ui.navigator.beansNavigator"/>
+      <viewer viewerId="org.eclipse.ui.navigator.ProjectExplorer"/>
       <viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
          <includes>
-            <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.beansContent"/>
+            <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.*"/>
          </includes>
       </viewerContentBinding>
    </extension>
    <extension
          point="org.eclipse.ui.navigator.navigatorContent">
       <navigatorContent
-            id="org.springframework.ide.eclipse.beans.ui.navigator.beansContent"
+            id="org.springframework.ide.eclipse.beans.ui.navigator.content"
             name="%navigatorContentName"
             contentProvider="org.springframework.ide.eclipse.beans.ui.navigator.internal.views.BeansNavigatorContentProvider"
             labelProvider="org.springframework.ide.eclipse.beans.ui.navigator.internal.views.BeansNavigatorLabelProvider"
@@ -50,8 +41,15 @@
          </possibleChildren>
       </navigatorContent>
    </extension>
-   <extension
-         point="org.eclipse.ui.navigator.linkHelper">
-   </extension>
+    <extension
+          point="org.eclipse.ui.navigator.linkHelper">
+       <linkHelper
+             id="org.springframework.ide.eclipse.beans.ui.navigator.linkHelper"
+             class="org.springframework.ide.eclipse.beans.ui.navigator.internal.views.BeansNavigatorLinkHelper">
+          <selectionEnablement>
+             <instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+          </selectionEnablement>
+       </linkHelper>
+    </extension>
 
 </plugin>

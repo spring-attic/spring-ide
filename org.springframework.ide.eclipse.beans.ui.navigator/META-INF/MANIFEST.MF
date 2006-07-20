@@ -15,6 +15,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.navigator.resources,
  org.eclipse.ui.navigator,
  org.springframework.ide.eclipse.core,
+ org.springframework.ide.eclipse.ui,
  org.springframework.ide.eclipse.beans.core,
  org.springframework.ide.eclipse.beans.ui
 Eclipse-LazyStart: true
