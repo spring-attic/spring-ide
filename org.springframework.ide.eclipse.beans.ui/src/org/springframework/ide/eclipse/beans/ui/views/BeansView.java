@@ -59,6 +59,8 @@ import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
+import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
+import org.springframework.ide.eclipse.beans.core.BeansTags;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.IPreferencesConstants;
@@ -79,7 +81,6 @@ import org.springframework.ide.eclipse.beans.ui.views.model.ModelSorter;
 import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.PropertyNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.RootNode;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.w3c.dom.Element;
@@ -528,13 +529,12 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 		if (isLinkingEnabled() && isPartVisible()
 				&& selection instanceof IStructuredSelection) {
 			IStructuredSelection sselection = (IStructuredSelection) selection;
-			if (sselection.size() == 1) {
-				Object selectedObj = sselection.getFirstElement();
+			Iterator iter = sselection.iterator();
+			while (iter.hasNext()) {
+				Object selectedObj = (Object) iter.next();
 				if (selectedObj instanceof Element) {
 					IFile file = getEditorFile(part);
-					if (file != null
-							&& SpringCoreUtils.isSpringProject(file
-									.getProject())) {
+					if (BeansCoreUtils.isBeansConfig(file)) {
 						linkToBeansXmlEditor(file, (Element) selectedObj);
 					}
 				}
@@ -557,34 +557,48 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 	}
 
 	private void linkToBeansXmlEditor(IFile file, Element element) {
-		String elementName = element.getNodeName();
-		Node parentNode = element.getParentNode();
-		String parentName = parentNode.getNodeName();
-		if ("bean".equals(elementName) && "beans".equals(parentName)) {
-			Node idAttribute = element.getAttributeNode("id");
-			if (idAttribute != null && idAttribute.getNodeValue() != null) {
+		Node parent = element.getParentNode();
+		if (BeansTags.isTag(element, BeansTags.BEAN)
+				&& BeansTags.isTag(parent, BeansTags.BEANS)) {
+			String beanName = getSelectedBeanName(element);
+			if (beanName != null) {
 				BeansViewLocation location = new BeansViewLocation();
 				location.setProjectName(file.getProject().getName());
 				location.setConfigName(file.getProjectRelativePath()
 						.toString());
-				location.setBeanName(idAttribute.getNodeValue());
+				location.setBeanName(beanName);
 				showLocation(location);
 			}
-		} else if ("property".equals(elementName) && "bean".equals(parentName)
-				&& "beans".equals(parentNode.getParentNode().getNodeName())) {
-			Node idAttribute = ((Element) parentNode).getAttributeNode("id");
-			Node nameAttribute = element.getAttributeNode("name");
-			if (idAttribute != null && idAttribute.getNodeValue() != null
-					&& nameAttribute != null
-					&& nameAttribute.getNodeValue() != null) {
+		} else if (BeansTags.isTag(element, BeansTags.PROPERTY)
+				&& BeansTags.isTag(parent, BeansTags.BEAN)
+				&& BeansTags.isTag(parent.getParentNode(), BeansTags.BEANS)) {
+			String beanName = getSelectedBeanName(element);
+			if (beanName != null) {
 				BeansViewLocation location = new BeansViewLocation();
 				location.setProjectName(file.getProject().getName());
 				location.setConfigName(file.getProjectRelativePath()
 						.toString());
-				location.setBeanName(idAttribute.getNodeValue());
-				location.setPropertyName(nameAttribute.getNodeValue());
+				location.setBeanName(beanName);
+
+				Node nameAttribute = element.getAttributeNode("name");
+				if (nameAttribute != null
+						&& nameAttribute.getNodeValue() != null) {
+					location.setPropertyName(nameAttribute.getNodeValue());
+				}
 				showLocation(location);
 			}
 		}
+	}
+
+	private String getSelectedBeanName(Element element) {
+		Node idAttribute = element.getAttributeNode("id");
+		if (idAttribute != null && idAttribute.getNodeValue() != null) {
+			return idAttribute.getNodeValue();
+		}
+		Node nameAttribute = element.getAttributeNode("name");
+		if (nameAttribute != null && nameAttribute.getNodeValue() != null) {
+			return nameAttribute.getNodeValue();
+		}
+		return null;
 	}
 }
