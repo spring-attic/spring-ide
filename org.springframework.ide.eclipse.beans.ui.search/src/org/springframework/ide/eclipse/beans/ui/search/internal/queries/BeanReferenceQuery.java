@@ -158,18 +158,30 @@ public class BeanReferenceQuery extends AbstractBeansQuery {
 			} else {
 				List list = (List) value;
 				for (int i = 0; i < list.size(); i++) {
-					return doesValueMatch(element, list.get(i), pattern);
+					boolean doesMatch = doesValueMatch(element, list.get(i),
+							pattern);
+					if (doesMatch) {
+						return true;
+					}
 				}
 			}
 		} else if (value instanceof Set) {
 			Set set = (Set) value;
-			for (Iterator iter = set.iterator(); iter.hasNext(); ) {
-				return doesValueMatch(element, iter.next(), pattern);
+			for (Iterator iter = set.iterator(); iter.hasNext();) {
+				boolean doesMatch = doesValueMatch(element, iter.next(),
+						pattern);
+				if (doesMatch) {
+					return true;
+				}
 			}
 		} else if (value instanceof Map) {
 			Map map = (Map) value;
-			for (Iterator iter = map.keySet().iterator(); iter.hasNext(); ) {
-				return doesValueMatch(element, map.get(iter.next()), pattern);
+			for (Iterator iter = map.keySet().iterator(); iter.hasNext();) {
+				boolean doesMatch = doesValueMatch(element, map
+						.get(iter.next()), pattern);
+				if (doesMatch) {
+					return true;
+				}
 			}
 		}
 		return false;
