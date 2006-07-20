@@ -53,9 +53,7 @@
       </perspectiveExtension>
       <perspectiveExtension
             targetID="org.eclipse.jdt.ui.JavaPerspective">
-         <showInPart
-               id="org.springframework.ide.eclipse.beans.ui.views.beansView">
-         </showInPart>
+         <showInPart id="org.springframework.ide.eclipse.beans.ui.views.beansView"/>
       </perspectiveExtension>
    </extension>
 
@@ -106,21 +104,22 @@
             id="org.springframework.ide.eclipse.beans.ui.wizards.category"
             name="%wizards.category"/>
       <wizard
+            id="org.springframework.ide.eclipse.beans.ui.wizards.newSpringProject"
             category="org.springframework.ide.eclipse.beans.ui.wizards.category"
             class="org.springframework.ide.eclipse.beans.ui.wizards.NewSpringProjectWizard"
-            icon="icons/full/etool16/newprj_wiz.gif"
-            id="org.springframework.ide.eclipse.beans.ui.wizards.newSpringProject"
-            name="%wizards.newProject"
-            project="true">
+            finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
             hasPages="true"
+            icon="icons/full/etool16/newprj_wiz.gif"
+            name="%wizards.newProject.name"
+            preferredPerspectives="org.eclipse.jdt.ui.JavaPerspective,org.eclipse.jdt.ui.JavaBrowsingPerspective,org.eclipse.jdt.ui.JavaHierarchyPerspective"
             project="true">
          <description>
-            %wizards.newProject.description
+         	%wizards.newProject.description
          </description>
       </wizard>
       <!--wizard
             id="org.springframework.ide.eclipse.beans.ui.wizards.newBeansConfig"
-            name="%wizards.newConfig"
+            name="%wizards.newConfig.name"
             class="org.springframework.ide.eclipse.beans.ui.wizards.NewBeansConfigWizard"
             category="org.springframework.ide.eclipse.beans.ui.wizards.category"
             icon="icons/full/etool16/newconfig_wiz.gif">
@@ -132,7 +131,7 @@
          </selection>
       </wizard-->
    </extension>
-   
+ 
    <extension
          point="org.eclipse.ui.actionSets">
       <actionSet

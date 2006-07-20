@@ -33,20 +33,19 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
-import org.eclipse.ui.dialogs.WizardNewProjectReferencePage;
-import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
-import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
@@ -60,10 +59,6 @@ public class NewSpringProjectWizard extends Wizard
 			implements INewWizard, IExecutableExtension  {
 
 	private NewSpringProjectCreationPage mainPage;
-	private WizardNewProjectReferencePage referencePage;
-	private JavaCapabilityConfigurationPage javaPage;
-
-    private IConfigurationElement configElement;
 	private IProject newProject;
 
 	public NewSpringProjectWizard() {
@@ -81,115 +76,77 @@ public class NewSpringProjectWizard extends Wizard
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		setNeedsProgressMonitor(true);
-		setWindowTitle(BeansWizardsMessages.NewProject_windowTitle);
 		setDefaultPageImageDescriptor(BeansUIImages.DESC_WIZ_PROJECT);
+		setWindowTitle(BeansWizardsMessages.NewProject_windowTitle);
+		setDialogSettings(BeansUIPlugin.getDefault().getDialogSettings());
+		setNeedsProgressMonitor(true);
 	}
 
 	public void addPages() {
-		super.addPages();
 		mainPage = new NewSpringProjectCreationPage("springNewProjectPage");
 		mainPage.setTitle(BeansWizardsMessages.NewProject_title);
 		mainPage.setDescription(BeansWizardsMessages.NewProject_description);
 		addPage(mainPage);
-
-		// only add page if there are already projects in the workspace
-		if (ResourcesPlugin.getWorkspace().getRoot().getProjects().length > 0) {
-			referencePage = new WizardNewProjectReferencePage(
-					"springReferenceProjectPage");
-			referencePage.setTitle(BeansWizardsMessages.
-					NewProject_referenceTitle);
-			referencePage.setDescription(BeansWizardsMessages.
-					NewProject_referenceDescription);
-			addPage(referencePage);
-		}
-
-		javaPage = new JavaCapabilityConfigurationPage();
-		addPage(javaPage);
-	}
-
-	public IWizardPage getNextPage(IWizardPage page) {
-		IWizardPage nextPage = super.getNextPage(page);
-		if (nextPage instanceof JavaCapabilityConfigurationPage) {
-			((JavaCapabilityConfigurationPage) nextPage).init(JavaCore.create(mainPage.getProjectHandle()), null, null, false);
-		}
-		return nextPage;
 	}
 
     /**
      * Stores the configuration element for the wizard. The config element will
      * be used in <code>performFinish</code> to set the result perspective.
      */
-    public void setInitializationData(IConfigurationElement cfig,
+    public void setInitializationData(IConfigurationElement config,
             String propertyName, Object data) {
-        configElement = cfig;
     }
 
 	public boolean performFinish() {
-		createNewProject();
-		if (newProject == null) {
-			return false;
-		}
-
-		BasicNewProjectResourceWizard.updatePerspective(configElement);
-		BasicNewResourceWizard.selectAndReveal(newProject,
-				BeansUIPlugin.getActiveWorkbenchWindow());
-		return true;
-	}
-
-	/**
-	 * Creates a new project resource with the selected name.
-	 * <p>
-	 * In normal usage, this method is invoked after the user has pressed Finish
-	 * on the wizard; the enablement of the Finish button implies that all
-	 * controls on the pages currently contain valid values.
-	 * </p>
-	 * <p>
-	 * Note that this wizard caches the new project once it has been
-	 * successfully created; subsequent invocations of this method will answer
-	 * the same project resource without attempting to create it again.
-	 * </p>
-	 * 
-	 * @return the created project resource, or <code>null</code> if the
-	 *         project was not created
-	 */
-	private IProject createNewProject() {
-		if (newProject != null) {
-			return newProject;
-		}
 
 		// get the data from the UI widgets
-		final IProject projectHandle = mainPage.getProjectHandle();
+		final IProject project = mainPage.getProjectHandle();
 		final Set configExtensions = mainPage.getConfigExtensions();
 		final boolean isJavaProject = mainPage.isJavaProject();
+		final String sourceDir = mainPage.getSourceDirectory().trim();
+		final String outputDir = mainPage.getOutputDirectory().trim();
 
-		// get a project descriptor
+		// create project descriptor
 		IPath newPath = null;
 		if (!mainPage.useDefaults()) {
 			newPath = mainPage.getLocationPath();
 		}
-
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		final IProjectDescription description = workspace
-				.newProjectDescription(projectHandle.getName());
+				.newProjectDescription(project.getName());
 		description.setLocation(newPath);
 
 		// create the new Spring project operation
 		WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
 			protected void execute(IProgressMonitor monitor)
 					throws CoreException {
-				createSpringProject(projectHandle, description,
-						configExtensions, monitor);
+				monitor.beginTask(
+						BeansWizardsMessages.NewProject_createNewProject, 2000);
+				createSpringProject(project, description, configExtensions,
+						new SubProgressMonitor(monitor, 1000));
 				if (isJavaProject) {
-					javaPage.init(JavaCore.create(projectHandle),
-							javaPage.getOutputLocation(),
-							javaPage.getRawClassPath(), false);
+
+					// convert to java project
+					IJavaProject jproject = JavaCore.create(project);
+					IPath source = (sourceDir.length() == 0 ? project
+							.getFullPath() : project.getFolder(sourceDir)
+							.getFullPath());
+					IPath output = (outputDir.length() == 0 ? project
+							.getFullPath() : project.getFolder(outputDir)
+							.getFullPath());
+					IClasspathEntry[] cpEntries = new IClasspathEntry[] {
+							JavaCore.newSourceEntry(source) };
+					JavaCapabilityConfigurationPage jccp =
+							new JavaCapabilityConfigurationPage();
+					jccp.init(jproject, output, cpEntries, true);
 					try {
-						javaPage.configureJavaProject(monitor);
+						jccp.configureJavaProject(new SubProgressMonitor(
+								monitor, 1000));
 					} catch (InterruptedException e) {
 						throw new OperationCanceledException(e.getMessage());
 					}
 				}
+				monitor.done();
 			}
 		};
 
@@ -197,7 +154,7 @@ public class NewSpringProjectWizard extends Wizard
 		try {
 			getContainer().run(true, true, op);
 		} catch (InterruptedException e) {
-			return null;
+			return false;
 		} catch (InvocationTargetException e) {
 			// ie.- one of the steps resulted in a core exception
 			Throwable t = e.getTargetException();
@@ -208,7 +165,7 @@ public class NewSpringProjectWizard extends Wizard
 								BeansWizardsMessages.NewProject_errorMessage,
 								NLS.bind(BeansWizardsMessages.
 										NewProject_caseVariantExistsError,
-													projectHandle.getName()));
+													project.getName()));
 				} else {
 					ErrorDialog.openError(getShell(),
 							BeansWizardsMessages.NewProject_errorMessage,
@@ -226,11 +183,10 @@ public class NewSpringProjectWizard extends Wizard
 						NLS.bind(BeansWizardsMessages.NewProject_internalError,
 								t.getMessage()));
 			}
-			return null;
+			return false;
 		}
-
-		newProject = projectHandle;
-		return newProject;
+		newProject = project;
+		return true;
 	}
 
 	/**
