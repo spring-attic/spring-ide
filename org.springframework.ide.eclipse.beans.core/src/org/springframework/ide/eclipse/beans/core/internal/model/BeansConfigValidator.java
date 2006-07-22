@@ -913,7 +913,10 @@ public class BeansConfigValidator {
 							IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
 							IBeansProjectMarker.ERROR_CODE_CLASS_NOT_FOUND,
 							bean.getElementName(), className);
-			} else {
+			// Skip factory-method validation for factory beans which are
+			// factory beans as well
+			} else if (!Introspector.doesImplement(type,
+						FactoryBean.class.getName())) {
 				validateMethod(bean, type, METHOD_TYPE_FACTORY, methodName,
 							   argCount, isStatic);
 			}
