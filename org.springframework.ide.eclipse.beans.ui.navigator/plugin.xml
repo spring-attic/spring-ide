@@ -15,8 +15,8 @@
       <navigatorContent
             id="org.springframework.ide.eclipse.beans.ui.navigator.content"
             name="%navigatorContentName"
-            contentProvider="org.springframework.ide.eclipse.beans.ui.navigator.internal.views.BeansNavigatorContentProvider"
-            labelProvider="org.springframework.ide.eclipse.beans.ui.navigator.internal.views.BeansNavigatorLabelProvider"
+            contentProvider="org.springframework.ide.eclipse.beans.ui.navigator.internal.BeansNavigatorContentProvider"
+            labelProvider="org.springframework.ide.eclipse.beans.ui.navigator.internal.BeansNavigatorLabelProvider"
             icon="icons/full/obj16/spring_obj.gif"
             activeByDefault="true">
 		<triggerPoints>
@@ -39,16 +39,22 @@
 				<instanceof
 						value="org.springframework.ide.eclipse.core.model.IModelElement"/>
          </possibleChildren>
+         <actionProvider
+         	id="org.springframework.ide.eclipse.beans.ui.navigator.actions"
+ 			class="org.springframework.ide.eclipse.beans.ui.navigator.internal.actions.BeansNavigatorActionProvider"/>
       </navigatorContent>
    </extension>
     <extension
           point="org.eclipse.ui.navigator.linkHelper">
        <linkHelper
              id="org.springframework.ide.eclipse.beans.ui.navigator.linkHelper"
-             class="org.springframework.ide.eclipse.beans.ui.navigator.internal.views.BeansNavigatorLinkHelper">
+             class="org.springframework.ide.eclipse.beans.ui.navigator.internal.BeansNavigatorLinkHelper">
           <selectionEnablement>
              <instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
           </selectionEnablement>
+          <editorInputEnablement>
+             <instanceof value="org.eclipse.ui.IFileEditorInput"/>
+          </editorInputEnablement>
        </linkHelper>
     </extension>
 

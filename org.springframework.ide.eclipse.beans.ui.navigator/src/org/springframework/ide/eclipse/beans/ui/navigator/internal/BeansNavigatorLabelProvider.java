@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.ide.eclipse.beans.ui.navigator.internal.views;
+package org.springframework.ide.eclipse.beans.ui.navigator.internal;
 
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
