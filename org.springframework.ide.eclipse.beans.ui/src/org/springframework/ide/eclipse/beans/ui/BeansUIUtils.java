@@ -17,6 +17,8 @@
 package org.springframework.ide.eclipse.beans.ui;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.preference.IPreferencePage;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
@@ -36,15 +38,17 @@ import org.springframework.ide.eclipse.beans.ui.model.properties.ConfigSetProper
 import org.springframework.ide.eclipse.beans.ui.model.properties.ConstructorArgumentProperties;
 import org.springframework.ide.eclipse.beans.ui.model.properties.PropertyProperties;
 import org.springframework.ide.eclipse.beans.ui.model.properties.RootBeanProperties;
+import org.springframework.ide.eclipse.beans.ui.properties.ConfigurationPropertyPage;
 import org.springframework.ide.eclipse.beans.ui.views.BeansViewLocation;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
-public class BeansUIUtils {
+public final class BeansUIUtils {
 
 	/**
 	 * Returns edited file from given editor if it's a Spring bean config file.
 	 */
-	public static final IFile getConfigFile(IEditorPart editor) {
+	public static IFile getConfigFile(IEditorPart editor) {
 		if (editor != null) {
 			IEditorInput input = editor.getEditorInput();
 			if (input instanceof IFileEditorInput) {
@@ -64,7 +68,7 @@ public class BeansUIUtils {
 	 * given model element ID or null.
 	 * @param id  the model element ID
 	 */
-	public static final IPropertySource getPropertySource(String id) {
+	public static IPropertySource getPropertySource(String id) {
 		IModelElement element = BeansCorePlugin.getModel().getElement(id);
 		return (element != null ? getPropertySource(element) : null);
 	}
@@ -73,7 +77,7 @@ public class BeansUIUtils {
 	 * Returns a corresponding instance of <code>IPropertySource</code> for the
 	 * given <code>IModelElement</code> or null.
 	 */
-	public static final IPropertySource getPropertySource(
+	public static IPropertySource getPropertySource(
 													   IModelElement element) {
 		if (element instanceof IBeansProject) {
 			return new ResourcePropertySource(
@@ -110,7 +114,7 @@ public class BeansUIUtils {
 	 * initialized with information from the model element identified by the
 	 * given element ID.
 	 */
-	public static final BeansViewLocation getBeansViewLocation(
+	public static BeansViewLocation getBeansViewLocation(
 															String elementID) {
 		IBeansModel model = BeansCorePlugin.getModel();
 		return getBeansViewLocation(model.getElement(elementID));
@@ -145,5 +149,16 @@ public class BeansUIUtils {
 			location.setPropertyName(element.getElementName());
 		}
 		return location;
+	}
+
+	public static void showProjectPropertyPage(IProject project, int block) {
+		if (project != null) {
+			String title = BeansUIPlugin
+					.getResourceString("PropertiesPage.title")
+					+ project.getName();
+			IPreferencePage page = new ConfigurationPropertyPage(project, block);
+			SpringUIUtils.showPreferencePage(ConfigurationPropertyPage.ID,
+					page, title);
+		}
 	}
 }

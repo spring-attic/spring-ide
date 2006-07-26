@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,9 @@ package org.springframework.ide.eclipse.beans.ui.views.actions;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.preference.IPreferencePage;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.properties.ConfigurationPropertyPage;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.views.BeansView;
 import org.springframework.ide.eclipse.beans.ui.views.model.BeanNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.ConfigNode;
@@ -29,12 +28,14 @@ import org.springframework.ide.eclipse.beans.ui.views.model.ConfigSetNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.INode;
 import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.PropertyNode;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
+/**
+ * Opens the project's property page for currently selected node in BeansView.
+ * @author Torsten Juergeleit
+ */
 public class OpenPropertiesAction extends Action {
 
 	private static final String PREFIX = "View.OpenPropertiesAction.";
-	private static final String TITLE = "PropertiesPage.title";
 
     private BeansView view;
 
@@ -65,15 +66,6 @@ public class OpenPropertiesAction extends Action {
 			project = ((PropertyNode) node).getConfigNode().getProjectNode().
 													 getProject().getProject();
 		}
-
-		// Show project's property page
-		if (project != null) {
-			String title = BeansUIPlugin.getResourceString(TITLE) +
-															  project.getName();
-			IPreferencePage page = new ConfigurationPropertyPage(project,
-																 block);
-			SpringUIUtils.showPreferencePage(ConfigurationPropertyPage.ID, page,
-											title);
-		}
+		BeansUIUtils.showProjectPropertyPage(project, block);
 	}
 }
