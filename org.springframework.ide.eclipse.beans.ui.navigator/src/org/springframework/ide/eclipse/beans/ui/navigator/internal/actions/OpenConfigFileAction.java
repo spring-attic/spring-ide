@@ -36,13 +36,13 @@ public class OpenConfigFileAction extends Action {
 
 	public OpenConfigFileAction(IWorkbenchPage page,
 			ISelectionProvider provider) {
-		setText("Op&en");
+		setText("Op&en");	// TODO externalize text
 		this.provider = provider;
 	}
 
 	public boolean isEnabled() {
 		ISelection selection = provider.getSelection();
-		if (!selection.isEmpty()) {
+		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection sSelection = (IStructuredSelection) selection;
 			if (sSelection.size() == 1
 					&& sSelection.getFirstElement()

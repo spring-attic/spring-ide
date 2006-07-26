@@ -18,6 +18,7 @@ package org.springframework.ide.eclipse.beans.ui.navigator.internal.actions;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.navigator.CommonActionProvider;
 import org.eclipse.ui.navigator.ICommonActionConstants;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
@@ -30,7 +31,8 @@ import org.eclipse.ui.navigator.ICommonViewerWorkbenchSite;
  */
 public class BeansNavigatorActionProvider extends CommonActionProvider {
 
-	private OpenConfigFileAction openAction;
+	private OpenConfigFileAction openConfigAction;
+	private OpenPropertiesAction openPropertiesAction;
 
 	public BeansNavigatorActionProvider() {
 	}
@@ -41,23 +43,34 @@ public class BeansNavigatorActionProvider extends CommonActionProvider {
 
 		// Make sure we're running in a workbench part instead of a dialog
 		if (viewSite instanceof ICommonViewerWorkbenchSite) {
-			ICommonViewerWorkbenchSite workbenchSite =
-					(ICommonViewerWorkbenchSite) viewSite;
-			openAction = new OpenConfigFileAction(workbenchSite.getPage(),
-					workbenchSite.getSelectionProvider());
+			ICommonViewerWorkbenchSite workbenchSite = (ICommonViewerWorkbenchSite) viewSite;
+			openConfigAction = new OpenConfigFileAction(
+					workbenchSite.getPage(), workbenchSite
+							.getSelectionProvider());
+			openPropertiesAction = new OpenPropertiesAction(workbenchSite
+					.getPage(), workbenchSite.getSelectionProvider());
 		}
 	}
 
 	public void fillContextMenu(IMenuManager menu) {
-		if (openAction.isEnabled()) {
-			menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN, openAction);
+		if (openConfigAction.isEnabled()) {
+			menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN,
+					openConfigAction);
+		}
+		if (openPropertiesAction.isEnabled()) {
+			menu.appendToGroup(ICommonMenuConstants.GROUP_PROPERTIES,
+					openPropertiesAction);
 		}
 	}
 
 	public void fillActionBars(IActionBars actionBars) {
-		if (openAction.isEnabled()) {
+		if (openConfigAction.isEnabled()) {
 			actionBars.setGlobalActionHandler(ICommonActionConstants.OPEN,
-					openAction);
+					openConfigAction);
+		}
+		if (openPropertiesAction.isEnabled()) {
+			actionBars.setGlobalActionHandler(ActionFactory.PROPERTIES.getId(),
+					openPropertiesAction);
 		}
 	}
 }
