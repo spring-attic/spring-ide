@@ -21,7 +21,6 @@
       <import plugin="org.eclipse.jface"/>
       <import plugin="org.springframework.ide.eclipse.core"/>
       <import plugin="org.springframework.ide.eclipse.beans.core"/>
-      <import plugin="org.springframework.ide.eclipse.beans.ui"/>
    </requires>
 
 </plugin>

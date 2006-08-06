@@ -1,5 +1,5 @@
 /*
-* Copyright 2004 the original author or authors.
+* Copyright 2006 the original author or authors.
 * 
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.ide.test;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.decorators.DecoratorManager;
@@ -63,7 +64,7 @@ public class NatureTests extends AbstractSpringIdeTest {
 		assertNull(model.getProject(eclipseProject));
 		assertFalse(hasBeansBuilder());
 
-		SpringCoreUtils.addProjectNature(eclipseProject, SpringCore.NATURE_ID);
+		SpringCoreUtils.addProjectNature(eclipseProject, SpringCore.NATURE_ID, new NullProgressMonitor());
 		project.waitForAutoBuild();
 		
 		assertNotNull (eclipseProject.getNature(SpringCore.NATURE_ID));
@@ -78,7 +79,7 @@ public class NatureTests extends AbstractSpringIdeTest {
 		
 		assertTrue(hasBeansDecorator());
 
-		SpringCoreUtils.removeProjectNature(eclipseProject, SpringCore.NATURE_ID);
+		SpringCoreUtils.removeProjectNature(eclipseProject, SpringCore.NATURE_ID, new NullProgressMonitor());
 		project.waitForAutoBuild();
 			
 		assertFalse(hasBeansProjectNature());
@@ -124,7 +125,7 @@ public class NatureTests extends AbstractSpringIdeTest {
 	 */
 	private boolean hasBeansDecorator() {
 		DecoratorManager decoratorManager = WorkbenchPlugin.getDefault().getDecoratorManager();
-        IBaseLabelProvider b = decoratorManager.getBaseLabelProvider("org.springframework.ide.eclipse.beans.ui.beansLabelDecorator");
+        IBaseLabelProvider b = decoratorManager.getBaseLabelProvider("org.springframework.ide.eclipse.beans.ui.model.beansModelLabelDecorator");
         return b != null;
 	}
 }
