@@ -229,35 +229,24 @@ public class BeansProject extends AbstractResourceModelElement
 
 	/**
 	 * Updates the list of config extensions belonging to this project.
-	 * Optionally (by setting <code>doSaveDescription</code> to
-	 * <code>true</code> the modified project description is saved to disk.
-	 * Saving is done after deleting all Spring IDE problem markers from the
-	 * removed configs.
+	 * <p>
+	 * The modified project description has to be saved to disk by calling
+	 * <code>saveDescription()</code>.
 	 * @param extensions  list of config extensions
-	 * @param doSaveDescription  if <code>true</code> then the project's
-	 * 				modified configuration is saved to the config file
-	 * 				<code>IBeansProject.DESCRIPTION_FILE</code>
 	 */
-	public void setConfigExtensions(Set extensions,
-									boolean doSaveDescription) {
+	public void setConfigExtensions(Set extensions) {
 		getDescription().setConfigExtensions(extensions);
-		if (doSaveDescription) {
-			saveDescription();
-		}
 	}
 
 	/**
 	 * Updates the list of configs (by name) belonging to this project.
-	 * Optionally (by setting <code>doSaveDescription</code> to
-	 * <code>true</code> the modified project description is saved to disk.
-	 * Saving is done after deleting all Spring IDE problem markers from the
-	 * removed configs.
+	 * From all removed configs the Spring IDE problem markers are deleted.
+	 * <p>
+	 * The modified project description has to be saved to disk by calling
+	 * <code>saveDescription()</code>.
 	 * @param configs  list of config names
-	 * @param doSaveDescription  if <code>true</code> then the project's
-	 * 				modified configuration is saved to the config file
-	 * 				<code>IBeansProject.DESCRIPTION_FILE</code>
 	 */
-	public void setConfigs(List configs, boolean doSaveDescription) {
+	public void setConfigs(List configs) {
 		BeansProjectDescription description = getDescription();
 
 		// Look for removed config files and
@@ -270,41 +259,30 @@ public class BeansProject extends AbstractResourceModelElement
 			String config = (String) iter.next();
 			if (!configs.contains(config)) {
 				toBeRemoved.add(config);
-				if (doSaveDescription) {
-					IFile file = getConfig(config).getConfigFile();
-					BeansCoreUtils.deleteProblemMarkers(file);
-				}
+				IFile file = getConfig(config).getConfigFile();
+				BeansCoreUtils.deleteProblemMarkers(file);
 			}
 		}
 		
-		for (int i = 0; i < toBeRemoved.size(); i++)
-		{
+		for (int i = 0; i < toBeRemoved.size(); i++) {
 		    String config = (String) toBeRemoved.get(i);
 		    description.removeConfig(config);
 		}
 		
 		description.setConfigNames(configs);
-		if (doSaveDescription) {
-			saveDescription();
-		}
 	}
 
 	/**
 	 * Updates the <code>BeansConfigSet</code>s defined within this project.
-	 * Optionally (by setting <code>doSaveDescription</code> to
-	 * <code>true</code> the modified project description is saved to disk.
+	 * <p>
+	 * The modified project description has to be saved to disk by calling
+	 * <code>saveDescription()</code>.
 	 * @param configSets  list of <code>BeansConfigSet</code> instances
-	 * @param doSaveDescription  if <code>true</code> then the project's
-	 * 				modified configuration is saved to the config file
-	 * 				<code>IBeansProject.DESCRIPTION_FILE</code>
 	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet
 	 */
-	public void setConfigSets(List configSets, boolean doSaveDescription) {
+	public void setConfigSets(List configSets) {
 		BeansProjectDescription description = getDescription();
 		description.setConfigSets(configSets);
-		if (doSaveDescription) {
-			saveDescription();
-		}
 	}
 
 	/**
