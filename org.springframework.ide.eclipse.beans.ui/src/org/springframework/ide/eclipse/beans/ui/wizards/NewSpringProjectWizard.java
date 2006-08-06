@@ -231,7 +231,8 @@ public class NewSpringProjectWizard extends Wizard
 			}
 
 			BeansProject project = new BeansProject(projectHandle);
-			project.setConfigExtensions(configExtensions, true);
+			project.setConfigExtensions(configExtensions);
+			project.saveDescription();
 			monitor.worked(2);
 		} finally {
 			monitor.done();

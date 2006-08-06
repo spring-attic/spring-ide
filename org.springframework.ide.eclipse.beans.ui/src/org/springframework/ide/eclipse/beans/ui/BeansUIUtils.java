@@ -38,7 +38,7 @@ import org.springframework.ide.eclipse.beans.ui.model.properties.ConfigSetProper
 import org.springframework.ide.eclipse.beans.ui.model.properties.ConstructorArgumentProperties;
 import org.springframework.ide.eclipse.beans.ui.model.properties.PropertyProperties;
 import org.springframework.ide.eclipse.beans.ui.model.properties.RootBeanProperties;
-import org.springframework.ide.eclipse.beans.ui.properties.ConfigurationPropertyPage;
+import org.springframework.ide.eclipse.beans.ui.properties.ProjectPropertyPage;
 import org.springframework.ide.eclipse.beans.ui.views.BeansViewLocation;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
@@ -156,8 +156,8 @@ public final class BeansUIUtils {
 			String title = BeansUIPlugin
 					.getResourceString("PropertiesPage.title")
 					+ project.getName();
-			IPreferencePage page = new ConfigurationPropertyPage(project, block);
-			SpringUIUtils.showPreferencePage(ConfigurationPropertyPage.ID,
+			IPreferencePage page = new ProjectPropertyPage(project, block);
+			SpringUIUtils.showPreferencePage(ProjectPropertyPage.ID,
 					page, title);
 		}
 	}

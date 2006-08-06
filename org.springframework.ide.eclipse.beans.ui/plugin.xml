@@ -62,9 +62,9 @@
       <page
             objectClass="org.eclipse.core.resources.IProject"
             adaptable="true"
-            name="%configurationPropertyPage"
-            class="org.springframework.ide.eclipse.beans.ui.properties.ConfigurationPropertyPage"
-            id="org.springframework.ide.eclipse.beans.ui.properties.ConfigurationPropertyPage">
+            name="%projectPropertyPage"
+            class="org.springframework.ide.eclipse.beans.ui.properties.ProjectPropertyPage"
+            id="org.springframework.ide.eclipse.beans.ui.properties.ProjectPropertyPage">
          <filter
                name="nature"
                value="org.springframework.ide.eclipse.core.springnature">

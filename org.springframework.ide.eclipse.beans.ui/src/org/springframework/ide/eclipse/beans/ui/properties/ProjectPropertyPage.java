@@ -38,10 +38,15 @@ import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 import org.springframework.ide.eclipse.beans.ui.views.model.ConfigSetNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
 
-public class ConfigurationPropertyPage extends PropertyPage {
+/**
+ * Spring project property page.
+ * 
+ * @author Torsten Juergeleit
+ */
+public class ProjectPropertyPage extends PropertyPage {
 
 	public static final String ID = BeansUIPlugin.PLUGIN_ID +
-									".ui.properties.ConfigurationPropertyPage";
+										  ".ui.properties.ProjectPropertyPage";
 	private static final String PREFIX = "ConfigurationPropertyPage.";
 	private static final String TITLE = PREFIX + "title";
 	private static final String CONFIG_FILES_LABEL = PREFIX +
@@ -53,15 +58,15 @@ public class ConfigurationPropertyPage extends PropertyPage {
 	private ConfigSetsTab configSetsTab;
 	private int selectedTab;
 
-	public ConfigurationPropertyPage() {
+	public ProjectPropertyPage() {
 		this(null, 0);
 	}
 
-	public ConfigurationPropertyPage(IProject project) {
+	public ProjectPropertyPage(IProject project) {
 		this(project, 0);
 	}
 
-	public ConfigurationPropertyPage(IProject project, int selectedTab) {
+	public ProjectPropertyPage(IProject project, int selectedTab) {
 		setElement(project);
 		setTitle(BeansUIPlugin.getResourceString(TITLE));
 		noDefaultAndApplyButton();
@@ -104,9 +109,8 @@ public class ConfigurationPropertyPage extends PropertyPage {
 
 		// Store config files from model in project
 		if (configFilesTab.hasUserMadeChanges()) {
-			project.setConfigExtensions(projectModel.getConfigExtensions(),
-										false);
-			project.setConfigs(projectModel.getConfigNames(), false);
+			project.setConfigExtensions(projectModel.getConfigExtensions());
+			project.setConfigs(projectModel.getConfigNames());
 			hasChanged = true;
 		}
 
@@ -123,7 +127,7 @@ public class ConfigurationPropertyPage extends PropertyPage {
 				configSet.setIncomplete(node.isIncomplete());
 				configSets.add(configSet);
 			}
-			project.setConfigSets(configSets, false);
+			project.setConfigSets(configSets);
 			hasChanged = true;
 		}
 
@@ -132,7 +136,8 @@ public class ConfigurationPropertyPage extends PropertyPage {
 			project.saveDescription();
 		}
 
-		// Refresh label decoration of Spring project and config files
+		// After saving the modified project description refresh the label
+		// decoration of all Spring config files
 		if (configFilesTab.hasUserMadeChanges()) {
 			BeansModelLabelDecorator.update();
 		}
