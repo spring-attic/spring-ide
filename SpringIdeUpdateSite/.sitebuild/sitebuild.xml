@@ -3,7 +3,4 @@
       autobuild="false"
       scrub-output="true"
       use-console="true">
-   <feature id="org.springframework.ide.eclipse.beans" version="1.1.0"/>
-   <feature id="org.springframework.ide.eclipse.beans" version="1.1.1"/>
-   <feature id="org.springframework.ide.eclipse" version="1.2.0"/>
 </site-build>
