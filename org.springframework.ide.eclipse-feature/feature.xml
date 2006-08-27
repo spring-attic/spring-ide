@@ -2,7 +2,7 @@
 <feature
       id="org.springframework.ide.eclipse"
       label="%featureName"
-      version="1.3.2"
+      version="1.3.3"
       provider-name="%providerName">
 
    <description>
@@ -29,55 +29,61 @@
 
    <plugin
          id="org.springframework.ide.eclipse"
-         download-size="7459"
+         download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.core"
-         download-size="85830"
+         download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.core.doc"
-         download-size="459897"
+         download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.ui"
-         download-size="12733"
+         download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.core"
-         download-size="85830"
+         download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.ui"
-         download-size="151204"
+         download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.ui.graph"
-         download-size="54473"
+         download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.ui.editor"
-         download-size="77950"
+         download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.ui.search"
-         download-size="35922"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.beans.ui.navigator"
+         download-size="0"
          install-size="0"
          version="0.0.0"/>
 
