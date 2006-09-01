@@ -352,12 +352,12 @@ public class BeansConfigValidator {
 
 		// Validate bean's static factory method with bean class from merged
 		// bean definition - skip factory methods with placeholders or
-		// abstract beans
+		// factory beans
 		String methodName = bd.getFactoryMethodName();
-		if (methodName != null && !hasPlaceHolder(methodName)) {
+		if (methodName != null && !hasPlaceHolder(methodName) &&
+											 bd.getFactoryBeanName() == null) {
 			if (mergedClassName == null) {
-				if (bd.getFactoryBeanName() == null &&
-										!(bd instanceof ChildBeanDefinition)) {
+				if (!(bd instanceof ChildBeanDefinition)) {
 					BeansModelUtils.createProblemMarker(bean,
 						"Factory method needs class from root or parent bean",
 						IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
