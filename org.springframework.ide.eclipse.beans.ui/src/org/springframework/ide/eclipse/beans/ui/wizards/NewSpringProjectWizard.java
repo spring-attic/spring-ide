@@ -116,6 +116,22 @@ public class NewSpringProjectWizard extends Wizard
 				.newProjectDescription(project.getName());
 		description.setLocation(newPath);
 
+		// initialize a JCC page in UI thread
+		final JavaCapabilityConfigurationPage jccp =
+				new JavaCapabilityConfigurationPage();
+		if (isJavaProject) {
+			IJavaProject jproject = JavaCore.create(project);
+			IPath source = (sourceDir.length() == 0 ? project
+					.getFullPath() : project.getFolder(sourceDir)
+					.getFullPath());
+			IPath output = (outputDir.length() == 0 ? project
+					.getFullPath() : project.getFolder(outputDir)
+					.getFullPath());
+			IClasspathEntry[] cpEntries = new IClasspathEntry[] {
+					JavaCore.newSourceEntry(source) };
+			jccp.init(jproject, output, cpEntries, true);
+		}
+
 		// create the new Spring project operation
 		WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
 			protected void execute(IProgressMonitor monitor)
@@ -127,18 +143,6 @@ public class NewSpringProjectWizard extends Wizard
 				if (isJavaProject) {
 
 					// convert to java project
-					IJavaProject jproject = JavaCore.create(project);
-					IPath source = (sourceDir.length() == 0 ? project
-							.getFullPath() : project.getFolder(sourceDir)
-							.getFullPath());
-					IPath output = (outputDir.length() == 0 ? project
-							.getFullPath() : project.getFolder(outputDir)
-							.getFullPath());
-					IClasspathEntry[] cpEntries = new IClasspathEntry[] {
-							JavaCore.newSourceEntry(source) };
-					JavaCapabilityConfigurationPage jccp =
-							new JavaCapabilityConfigurationPage();
-					jccp.init(jproject, output, cpEntries, true);
 					try {
 						jccp.configureJavaProject(new SubProgressMonitor(
 								monitor, 1000));
@@ -156,6 +160,7 @@ public class NewSpringProjectWizard extends Wizard
 		} catch (InterruptedException e) {
 			return false;
 		} catch (InvocationTargetException e) {
+
 			// ie.- one of the steps resulted in a core exception
 			Throwable t = e.getTargetException();
 			if (t instanceof CoreException) {
