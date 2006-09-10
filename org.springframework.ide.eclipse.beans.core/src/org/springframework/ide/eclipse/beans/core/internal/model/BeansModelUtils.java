@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -57,6 +56,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
+import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -861,17 +861,16 @@ public final class BeansModelUtils {
 		}
 	}
 
-	public static final void removeProblemMarkers(IModelElement element) {
-		if (element instanceof IBeansConfig) {
-			IFile file = ((IBeansConfig) element).getConfigFile();
-			BeansCoreUtils.deleteProblemMarkers(file);
-		} else if (element instanceof IBeansProject) {
-			Iterator configs = ((IBeansProject)
-											  element).getConfigs().iterator();
+	public static final void deleteProblemMarkers(IModelElement element) {
+		if (element instanceof IBeansProject) {
+			Iterator configs = ((IBeansProject) element).getConfigs()
+					.iterator();
 			while (configs.hasNext()) {
 				IBeansConfig config = (IBeansConfig) configs.next();
-				removeProblemMarkers(config);
+				ModelUtils.deleteProblemMarkers(config);
 			}
+		} else {
+			ModelUtils.deleteProblemMarkers(element);
 		}
 	}
 
