@@ -81,11 +81,12 @@ import org.springframework.ide.eclipse.beans.ui.views.model.ModelSorter;
 import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.PropertyNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.RootNode;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springframework.ide.eclipse.ui.dialogs.PatternFilteredTree;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
 
 /**
  * This is a tree view of all Spring projects and their configs and config
@@ -188,8 +189,16 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 	}
 
 	private TreeViewer createViewer(Composite parent) {
-		TreeViewer viewer = new TreeViewer(parent, SWT.SINGLE | SWT.H_SCROLL |
-										   SWT.V_SCROLL);
+		TreeViewer viewer;
+		if (SpringCoreUtils.isEclipseSameOrNewer(3, 2)) {
+			PatternFilteredTree filteredTree = new PatternFilteredTree(parent,
+					SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL);
+			viewer = filteredTree.getViewer();
+			viewer.setUseHashlookup(true);
+		} else {
+			viewer = new TreeViewer(parent, SWT.SINGLE | SWT.H_SCROLL
+					| SWT.V_SCROLL);
+		}
 		viewer.setContentProvider(new BeansViewContentProvider(this));
 		viewer.setLabelProvider(new ModelLabelProvider());
 		viewer.setInput(getRootNode());
