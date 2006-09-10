@@ -19,8 +19,8 @@ package org.springframework.ide.eclipse.beans.ui.model;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.ModelUtils;
 
 /**
  * This class is an <code>ILabelProvider</code> which knows about the beans
@@ -46,7 +46,7 @@ public class BeansModelLabelProvider extends LabelProvider {
     }
 
     public Image getImage(Object element) {
-		Object adaptedElement = SpringCoreUtils.adaptToModelElement(element);
+		Object adaptedElement = ModelUtils.adaptToModelElement(element);
 		if (adaptedElement instanceof IModelElement) {
 			return BeansModelImages.getImage((IModelElement) adaptedElement);
 		}
@@ -54,7 +54,7 @@ public class BeansModelLabelProvider extends LabelProvider {
 	}
 
 	public String getText(Object element) {
-		Object adaptedElement = SpringCoreUtils.adaptToModelElement(element);
+		Object adaptedElement = ModelUtils.adaptToModelElement(element);
 		if (adaptedElement instanceof IModelElement) {
 			return BeansModelElementLabels.getElementLabel(
 					(IModelElement) adaptedElement, 0);
