@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -33,7 +33,11 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansConten
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.provisional.Jdt31BeansContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.hover.BeansTextHoverProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.BeansHyperLinkDetector;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
+/**
+ * @author Christian Dupuis
+ */
 public class BeansStructuredTextViewerConfiguration extends
 		StructuredTextViewerConfigurationXML {
 
@@ -44,7 +48,7 @@ public class BeansStructuredTextViewerConfiguration extends
 
 		if (partitionType == IStructuredPartitionTypes.DEFAULT_PARTITION
 				|| partitionType == IXMLPartitions.XML_DEFAULT) {
-			if (BeansEditorUtils.isJDTVersion32()) {
+			if (SpringCoreUtils.isEclipseSameOrNewer(3, 2)) {
 				processors = new IContentAssistProcessor[] { new BeansContentAssistProcessor() };
 			}
 			else {

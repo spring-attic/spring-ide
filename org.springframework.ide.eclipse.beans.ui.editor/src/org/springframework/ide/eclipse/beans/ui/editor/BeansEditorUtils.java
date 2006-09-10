@@ -33,7 +33,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -44,7 +43,6 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.core.internal.provisional.StructuredModelManager;
-import org.osgi.framework.Bundle;
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
@@ -647,14 +645,5 @@ public class BeansEditorUtils {
 			}
 		}
 		return resource;
-	}
-	
-	public static final String getJDTVersion() {
-		Bundle bundle = JavaCore.getPlugin().getBundle();
-		return (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_VERSION);
-	}
-
-	public static final boolean isJDTVersion32() {
-		return getJDTVersion().startsWith("3.2");
 	}
 }
