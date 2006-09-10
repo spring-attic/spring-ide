@@ -16,6 +16,9 @@
 
 package org.springframework.ide.eclipse.core;
 
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
+
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
@@ -25,13 +28,13 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.osgi.framework.Bundle;
 
 /**
  * Some helper methods.
@@ -204,13 +207,14 @@ public final class SpringCoreUtils {
 	}
 
 	/**
-	 * Removes all Spring project problem markers from given resource.
+	 * Removes all Spring problem markers (including the inherited ones) from
+	 * given resource.
 	 */
 	public static void deleteProblemMarkers(IResource resource) {
 		if (resource != null && resource.isAccessible()) {
 			try {
-				resource.deleteMarkers(ISpringProjectMarker.PROBLEM_MARKER,
-									   false, IResource.DEPTH_ZERO);
+				resource.deleteMarkers(SpringCore.MARKER_ID, true,
+						IResource.DEPTH_ZERO);
 			} catch (CoreException e) {
 				SpringCore.log(e);
 			}
@@ -218,13 +222,33 @@ public final class SpringCoreUtils {
 	}
 
 	/**
-	 * Trys to adapt given element to <code>IModelElement</code>. 
+	 * Returns true if Eclipse's runtime bundle has the same or a newer than
+	 * given version.
 	 */
-	public static Object adaptToModelElement(Object element) {
-		if (!(element instanceof IModelElement) &&
-											 (element instanceof IAdaptable)) {
-			return ((IAdaptable) element).getAdapter(IModelElement.class);
+	public static boolean isEclipseSameOrNewer(int majorVersion,
+			int minorVersion) {
+		Bundle bundle = Platform.getBundle(Platform.PI_RUNTIME);
+		if (bundle != null) {
+			String version = (String) bundle.getHeaders().get(
+					org.osgi.framework.Constants.BUNDLE_VERSION);
+			StringTokenizer st = new StringTokenizer(version, ".");
+			try {
+				int major = Integer.parseInt(st.nextToken());
+				if (major > majorVersion) {
+					return true;
+				}
+				if (major == majorVersion) {
+					int minor = Integer.parseInt(st.nextToken());
+					if (minor >= minorVersion) {
+						return true;
+					}
+				}
+			} catch (NoSuchElementException e) {
+				// ignore
+			} catch (NumberFormatException e) {
+				// ignore
+			}
 		}
-		return element;
+		return false;
 	}
 }
