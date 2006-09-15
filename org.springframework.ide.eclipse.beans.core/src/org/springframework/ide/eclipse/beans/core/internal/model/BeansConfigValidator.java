@@ -724,10 +724,11 @@ public class BeansConfigValidator {
 			try {
 				AbstractBeanDefinition refBd = (AbstractBeanDefinition)
 										  registry.getBeanDefinition(beanName);
-				if (refBd.getBeanClassName() == null &&
-										  refBd.getFactoryBeanName() == null) {
+				if (refBd.isAbstract() || (refBd.getBeanClassName() == null &&
+										 refBd.getFactoryBeanName() == null)) {
 					BeansModelUtils.createProblemMarker(bean,
-						"Invalid referenced bean '" + beanName + "'",
+						"Referenced bean '" + beanName + "' is invalid "+
+						"(abstract or no bean class and no factory bean)",
 						IMarker.SEVERITY_ERROR, element.getElementStartLine(),
 						IBeansProjectMarker.ERROR_CODE_INVALID_REFERENCED_BEAN,
 						bean.getElementName(), beanName);
@@ -870,22 +871,30 @@ public class BeansConfigValidator {
 			try {
 				AbstractBeanDefinition factoryBd = (AbstractBeanDefinition)
 										  registry.getBeanDefinition(beanName);
-				if (factoryBd.getBeanClassName() == null) {
-					BeansModelUtils.createProblemMarker(bean,
-						   "Invalid factory bean '" + beanName + "'",
-						   IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
-					  	   IBeansProjectMarker.ERROR_CODE_INVALID_FACTORY_BEAN,
-						   bean.getElementName(), beanName);
-				} else {
+				// Skip validating factory beans which are created by another
+				// factory bean 
+				if (factoryBd.getFactoryBeanName() == null) {
+					if (factoryBd.isAbstract() ||
+										factoryBd.getBeanClassName() == null) {
+						BeansModelUtils.createProblemMarker(bean,
+								"Referenced factory bean '" + beanName	+
+								"' is invalid (abstract or no bean class)",
+								IMarker.SEVERITY_ERROR,
+								bean.getElementStartLine(),
+								IBeansProjectMarker
+										.ERROR_CODE_INVALID_FACTORY_BEAN,
+								bean.getElementName(), beanName);
+					} else {
 
-					// Validate non-static factory method in factory bean
-					// Factory beans with factory methods can only be validated
-					// during runtime - so skip them
-					if (factoryBd instanceof RootBeanDefinition &&
-									factoryBd.getFactoryMethodName() == null) {
-						validateFactoryMethod(bean,
-											  factoryBd.getBeanClassName(),
-											  methodName, -1, false);
+						// Validate non-static factory method in factory bean
+						// Factory beans with factory methods can only be
+						// validated during runtime - so skip them
+						if (factoryBd instanceof RootBeanDefinition
+								&& factoryBd.getFactoryMethodName() == null) {
+							validateFactoryMethod(bean,
+									factoryBd.getBeanClassName(), methodName,
+									-1, false);
+						}
 					}
 				}
 			} catch (NoSuchBeanDefinitionException e) {
@@ -907,16 +916,10 @@ public class BeansConfigValidator {
 		if (className != null && !hasPlaceHolder(className)) {
 			IType type = BeansModelUtils.getJavaType(
 					 BeansModelUtils.getProject(bean).getProject(), className);
-			if (type == null) {
-				BeansModelUtils.createProblemMarker(bean,
-							"Factory bean class '" + className + "' not found",
-							IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
-							IBeansProjectMarker.ERROR_CODE_CLASS_NOT_FOUND,
-							bean.getElementName(), className);
 			// Skip factory-method validation for factory beans which are
-			// factory beans as well
-			} else if (!Introspector.doesImplement(type,
-						FactoryBean.class.getName())) {
+			// Spring factory beans as well
+			if (type != null && !Introspector.doesImplement(type,
+												FactoryBean.class.getName())) {
 				validateMethod(bean, type, METHOD_TYPE_FACTORY, methodName,
 							   argCount, isStatic);
 			}
@@ -929,10 +932,13 @@ public class BeansConfigValidator {
 			try {
 				AbstractBeanDefinition dependsBd = (AbstractBeanDefinition)
 										  registry.getBeanDefinition(beanName);
-				if (dependsBd.getBeanClassName() == null &&
-									  dependsBd.getFactoryBeanName() == null) {
+				if (dependsBd.isAbstract() ||
+									 (dependsBd.getBeanClassName() == null &&
+									 dependsBd.getFactoryBeanName() == null)) {
 					BeansModelUtils.createProblemMarker(bean,
-						"Invalid depends-on bean '" + beanName + "'",
+						"Referenced depends-on bean '" + beanName +
+						"' is invalid (abstract or no bean class and no " +
+						"factory bean)",
 						IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
 						IBeansProjectMarker.ERROR_CODE_INVALID_DEPENDS_ON_BEAN,
 						bean.getElementName(), beanName);
