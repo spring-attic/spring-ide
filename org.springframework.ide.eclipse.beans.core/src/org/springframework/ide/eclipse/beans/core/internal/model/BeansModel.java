@@ -30,7 +30,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.BeansResourceChangeListener;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.IBeansResourceChangeEvents;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -43,6 +42,7 @@ import org.springframework.ide.eclipse.core.model.AbstractModel;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
+import org.springframework.ide.eclipse.core.model.ModelUtils;
 
 /**
  * The <code>BeansModel</code> manages instances of <code>IBeansProject</code>s.
@@ -420,7 +420,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				IBeansConfig config = (IBeansConfig) iter.next();
 
 				// Delete all problem markers created by Spring IDE
-				BeansCoreUtils.deleteProblemMarkers(config.getConfigFile());
+				ModelUtils.deleteProblemMarkers(config);
 				validator.validate(config, new NullProgressMonitor());
 			}
 		}

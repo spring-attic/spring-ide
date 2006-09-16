@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -38,7 +37,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
-import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
  * This class holds the data for a Spring bean.
@@ -71,14 +69,6 @@ public class Bean extends AbstractSourceModelElement implements IBean {
 		children.addAll(getInnerBeans());
 		return (IModelElement[]) children.toArray(
 										   new IModelElement[children.size()]);
-	}
-
-	public IResource getElementResource() {
-		if (getElementParent() instanceof IResourceModelElement) {
-			return ((IResourceModelElement)
-									  getElementParent()).getElementResource();
-		}
-		return null;
 	}
 
 	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {

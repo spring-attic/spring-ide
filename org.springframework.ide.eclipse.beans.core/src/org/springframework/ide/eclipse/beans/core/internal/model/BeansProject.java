@@ -28,7 +28,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescription;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionReader;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionWriter;
@@ -39,6 +38,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
+import org.springframework.ide.eclipse.core.model.ModelUtils;
 
 /**
  * This class provides information for a Spring Beans project.
@@ -68,6 +68,10 @@ public class BeansProject extends AbstractResourceModelElement
 
 	public IResource getElementResource() {
 		return project;
+	}
+
+	public boolean isElementArchived() {
+		return false;
 	}
 
 	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
@@ -259,8 +263,7 @@ public class BeansProject extends AbstractResourceModelElement
 			String config = (String) iter.next();
 			if (!configs.contains(config)) {
 				toBeRemoved.add(config);
-				IFile file = getConfig(config).getConfigFile();
-				BeansCoreUtils.deleteProblemMarkers(file);
+				ModelUtils.deleteProblemMarkers(getConfig(config));
 			}
 		}
 		

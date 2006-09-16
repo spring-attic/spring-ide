@@ -33,6 +33,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.core.io.Resource;
 import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
 import org.springframework.ide.eclipse.beans.core.internal.parser.EventBeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.internal.parser.IBeanDefinitionEvents;
@@ -44,6 +45,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.io.FileResource;
+import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
+import org.springframework.ide.eclipse.core.io.StorageResource;
 import org.springframework.ide.eclipse.core.io.xml.LineNumberPreservingDOMParser;
 import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
 import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
@@ -60,6 +63,9 @@ import org.w3c.dom.Element;
  */
 public class BeansConfig extends AbstractResourceModelElement
 													  implements IBeansConfig {
+	/** Indicator for a beans configuration embedded in a ZIP file */
+	boolean isArchived;
+
 	/** This bean's config file */
 	private IFile file;
 
@@ -82,15 +88,12 @@ public class BeansConfig extends AbstractResourceModelElement
 	 * corresponding class */
 	private Map beanClassesMap;
 
-	/** Exception which occured during reading the bean's config file */
+	/** Exception which occured during reading this bean's config file */
 	private BeanDefinitionException exception;
 
 	public BeansConfig(IBeansProject project, String name) {
 		super(project, name);
 		file = getFile(name);
-		if (file == null) {
-			exception = new BeanDefinitionException("File not found");
-		}
 	}
 
 	public int getElementType() {
@@ -106,6 +109,10 @@ public class BeansConfig extends AbstractResourceModelElement
 
 	public IResource getElementResource() {
 		return file;
+	}
+
+	public boolean isElementArchived() {
+		return isArchived;
 	}
 
 	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
@@ -162,14 +169,6 @@ public class BeansConfig extends AbstractResourceModelElement
 
 	public boolean isReset() {
 		return (beans == null);
-	}
-
-	public IFile getConfigFile() {
-		return file;
-	}
-
-	public String getConfigPath() {
-		return (file != null ? file.getFullPath().toString() : null);
 	}
 
 	public Collection getAliases() {
@@ -260,14 +259,30 @@ public class BeansConfig extends AbstractResourceModelElement
 	 * @return the file for given name
 	 */
 	private IFile getFile(String name) {
+		IFile file;
 		IContainer container;
-		if (name.charAt(0) == '/') {
+
+		// At first check for a config file in a JAR
+		int pos = name.indexOf(ZipEntryStorage.DELIMITER);
+		if (pos != -1) {
+			isArchived = true;
+			container = (IProject) ((IResourceModelElement) getElementParent())
+					.getElementResource();
+			name = name.substring(0, pos);
+
+		// Now check for an external config file
+		} else if (name.charAt(0) == '/') {
 			container = ResourcesPlugin.getWorkspace().getRoot();
 		} else {
-			container = (IProject) ((IResourceModelElement)
-									  getElementParent()).getElementResource();
+			container = (IProject) ((IResourceModelElement) getElementParent())
+					.getElementResource();
 		}
-		return (IFile) container.findMember(name);
+		file = (IFile) container.findMember(name);
+		if (file == null) {
+			exception = new BeanDefinitionException("File '" + name
+					+ "' not found");
+		}
+		return file;
 	}
 
 	/**
@@ -331,7 +346,14 @@ public class BeansConfig extends AbstractResourceModelElement
 		BeansConfigHandler handler = new BeansConfigHandler(this);
 		EventBeanDefinitionRegistry registry = new EventBeanDefinitionRegistry(handler);
 		try {
-			registry.loadBeanDefinitions(new FileResource(file));
+			Resource resource;
+			if (isArchived) {
+				resource = new StorageResource(new ZipEntryStorage(file
+						.getProject(), getElementName()));
+			} else {
+				resource = new FileResource(file);
+			}
+			registry.loadBeanDefinitions(resource);
 		} catch (BeanDefinitionException e) {
 			exception = e;
 		}

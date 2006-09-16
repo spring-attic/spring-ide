@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,16 @@
 
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
-import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
-import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
+/**
+ * This class defines a property within a Spring beans configuration.
+ *
+ * @author Torsten Juergeleit
+ */
 public class BeanProperty extends AbstractSourceModelElement
 													 implements IBeanProperty {
 	private Object value;
@@ -33,14 +36,6 @@ public class BeanProperty extends AbstractSourceModelElement
 
 	public int getElementType() {
 		return IBeansModelElementTypes.PROPERTY_TYPE;
-	}
-
-	public IResource getElementResource() {
-		if (getElementParent() instanceof IResourceModelElement) {
-			return ((IResourceModelElement)
-									  getElementParent()).getElementResource();
-		}
-		return null;
 	}
 
 	public void setValue(Object value) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +18,15 @@ package org.springframework.ide.eclipse.beans.core.model;
 
 import java.util.Collection;
 
-import org.eclipse.core.resources.IFile;
 import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
  * This interface provides information for a Spring beans configuration.
+ *
+ * @author Torsten Juergeleit
  */
 public interface IBeansConfig extends IResourceModelElement, IBeanClassAware {
-
-	String DEFAULT_FILE_EXTENSION = "xml";  
-
-	IFile getConfigFile();
-
-	String getConfigPath();
 
 	Collection getAliases();
 
@@ -45,5 +40,9 @@ public interface IBeansConfig extends IResourceModelElement, IBeanClassAware {
 
 	Collection getInnerBeans();
 
+	/**
+	 * Returns the exception occured while reading this Spring beans
+	 * configuration or <code>null</code> if no exception occured. 
+	 */
 	BeanDefinitionException getException();
 }

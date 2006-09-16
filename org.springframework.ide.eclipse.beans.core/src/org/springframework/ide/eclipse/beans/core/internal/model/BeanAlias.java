@@ -16,12 +16,10 @@
 
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
-import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
-import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
  * This class defines an alias within a Spring beans configuration.
@@ -39,14 +37,6 @@ public class BeanAlias extends AbstractSourceModelElement
 
 	public int getElementType() {
 		return IBeansModelElementTypes.ALIAS_TYPE;
-	}
-
-	public IResource getElementResource() {
-		if (getElementParent() instanceof IResourceModelElement) {
-			return ((IResourceModelElement)
-									  getElementParent()).getElementResource();
-		}
-		return null;
 	}
 
 	public String getName() {

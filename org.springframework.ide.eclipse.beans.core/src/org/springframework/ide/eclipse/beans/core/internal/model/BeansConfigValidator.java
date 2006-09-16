@@ -56,6 +56,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
+import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -142,21 +143,21 @@ public class BeansConfigValidator {
 				  IBeansConfigSet configSet, BeanDefinitionRegistry registry) {
 		if (configSet == null) {
 			monitor.subTask(BeansCorePlugin.getFormattedMessage(
-										 "BeansConfigValidator.validateConfig",
-										 config.getConfigPath()));
+					"BeansConfigValidator.validateConfig", ModelUtils
+							.getResourcePath(config)));
 			if (DEBUG) {
-				System.out.println("Validating config '" +
-								   config.getConfigPath() + "'");
+				System.out.println("Validating config '"
+						+ ModelUtils.getResourcePath(config) + "'");
 			}
 		} else {
 			monitor.subTask(BeansCorePlugin.getFormattedMessage(
-								 "BeansConfigValidator.validateConfigSet",
-								 new String[] { config.getConfigPath(),
-								 				configSet.getElementName() }));
+					"BeansConfigValidator.validateConfigSet", new String[] {
+							ModelUtils.getResourcePath(config),
+							configSet.getElementName() }));
 			if (DEBUG) {
-				System.out.println("Validating config '" +
-								   config.getConfigPath() + "' in set '" +
-								   configSet.getElementName() + "'");
+				System.out.println("Validating config '"
+						+ ModelUtils.getResourcePath(config) + "' in set '"
+						+ configSet.getElementName() + "'");
 			}
 		}
 
@@ -561,12 +562,13 @@ public class BeansConfigValidator {
 	protected void validateConfigReferences(IBeansConfig config,
 				  IBeansConfigSet configSet, BeanDefinitionRegistry registry) {
 		if (DEBUG) {
-			System.out.println("Validating references of bean config '" +
-							   config.getConfigPath() + "'");
+			System.out.println("Validating references of bean config '"
+					+ ModelUtils.getResourcePath(config) + "'");
 		}
 		monitor.subTask(BeansCorePlugin.getFormattedMessage(
-					  			 "BeansConfigValidator.validateReferences",
-								 config.getConfigPath()));
+				"BeansConfigValidator.validateReferences", ModelUtils
+						.getResourcePath(config)));
+
 		// Validate references of all beans
 		Iterator beans = config.getBeans().iterator();
 		while (beans.hasNext()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,10 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 
+/**
+ * Some helper methods.
+ * @author Torsten Juergeleit
+ */
 public class BeansCoreUtils {
 
 	/**
@@ -89,17 +93,6 @@ public class BeansCoreUtils {
 										errorData);
 				}
 				marker.setAttributes(attributes);
-			} catch (CoreException e) {
-				BeansCorePlugin.log(e);
-			}
-		}
-	}
-
-	public static void deleteProblemMarkers(IResource resource) {
-		if (resource != null && resource.isAccessible()) {
-			try {
-				resource.deleteMarkers(IBeansProjectMarker.PROBLEM_MARKER, false,
-									   IResource.DEPTH_ZERO);
 			} catch (CoreException e) {
 				BeansCorePlugin.log(e);
 			}

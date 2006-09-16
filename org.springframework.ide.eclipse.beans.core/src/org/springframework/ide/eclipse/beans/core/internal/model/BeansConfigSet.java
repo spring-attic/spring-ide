@@ -89,6 +89,10 @@ public class BeansConfigSet extends AbstractResourceModelElement
 		return ((IBeansProject) getElementParent()).getProject();
 	}
 
+	public boolean isElementArchived() {
+		return false;
+	}
+
 	public void setAllowBeanDefinitionOverriding(
 									   boolean allowBeanDefinitionOverriding) {
 		this.allowBeanDefinitionOverriding = allowBeanDefinitionOverriding;
