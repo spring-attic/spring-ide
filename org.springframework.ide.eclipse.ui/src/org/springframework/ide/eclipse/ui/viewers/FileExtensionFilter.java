@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.springframework.ide.eclipse.ui.SpringUIPlugin;
@@ -29,11 +30,12 @@ import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 /**
  * Viewer filter for file selection dialogs.
  * The filter is not case sensitive.
- * Folders are only shown if, searched recursivly, contain a config file.
+ * Folders are only shown if, searched recursivly, contain at least one file
+ * which has one of the specified file extensions.
  *
  * @author Torsten Juergeleit
  */
-public class FileFilter extends ViewerFilter {
+public class FileExtensionFilter extends ViewerFilter {
 
 	private String[] allowedFileExtensions;
 
@@ -43,25 +45,25 @@ public class FileFilter extends ViewerFilter {
 	 * @param allowedFileExtensions list of file extension the filter has to
 	 *			recognize or <code>null</code> if all files are allowed 
 	 */
-	public FileFilter(String[] allowedFileExtensions) {
+	public FileExtensionFilter(String[] allowedFileExtensions) {
 		this.allowedFileExtensions = allowedFileExtensions;
 	}
 
-	public FileFilter(Collection allowedFileExtensions) {
+	public FileExtensionFilter(Collection allowedFileExtensions) {
 		this((String[]) allowedFileExtensions.toArray(
 									new String[allowedFileExtensions.size()]));
 	}
 
-	public FileFilter() {
+	public FileExtensionFilter() {
 		allowedFileExtensions = null;
 	}
 
 	public boolean select(Viewer viewer, Object parent, Object element) {
 		if (element instanceof IFile) {
-			return hasAllowedFileExtension((IFile)element);
+			return hasAllowedFileExtension(((IFile) element).getFullPath());
 		} else if (element instanceof IContainer) { // IProject, IFolder
 			try {
-				IResource[] resources = ((IContainer)element).members();
+				IResource[] resources = ((IContainer) element).members();
 				for (int i = 0; i < resources.length; i++) {
 					// recursive! Only show containers that contain a configs
 					if (select(viewer, parent, resources[i])) {
@@ -75,11 +77,11 @@ public class FileFilter extends ViewerFilter {
 		return false;
 	}
 	
-	private boolean hasAllowedFileExtension(IFile file) {
+	protected boolean hasAllowedFileExtension(IPath path) {
 		if (allowedFileExtensions == null) {
 			return true;
 		}
-		String extension = file.getFileExtension();
+		String extension = path.getFileExtension();
 		if (extension != null) {
 			for (int i = 0; i < allowedFileExtensions.length; i++) {
 				if (extension.equalsIgnoreCase(allowedFileExtensions[i])) {

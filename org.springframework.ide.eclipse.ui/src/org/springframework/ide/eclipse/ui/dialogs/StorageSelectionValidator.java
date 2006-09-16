@@ -16,14 +16,14 @@
 
 package org.springframework.ide.eclipse.ui.dialogs;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IStorage;
 
 /**
- * Validates the selection if only instances of <code>IFile</code> are
+ * Validates the selection if only instances of <code>IStorage</code> are
  * selected.
  * @author Torsten Juergeleit
  */
-public class FileSelectionValidator extends AbstractSelectionValidator {
+public class StorageSelectionValidator extends AbstractSelectionValidator {
 
 	/**
 	 * Creates a new instance of the validator.
@@ -31,11 +31,11 @@ public class FileSelectionValidator extends AbstractSelectionValidator {
 	 * @param multiSelect <code>true</code> if multi selection is allowed.
 	 * 	<code>false</code> if only single selection is allowed. 
 	 */
-	public FileSelectionValidator(boolean multiSelect) {
+	public StorageSelectionValidator(boolean multiSelect) {
 		super(multiSelect);
 	}
 
 	public boolean isValid(Object selection) {
-		return (selection instanceof IFile);
+		return (selection instanceof IStorage);
 	}
 }
