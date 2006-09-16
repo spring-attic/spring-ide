@@ -23,16 +23,17 @@ package org.springframework.ide.eclipse.core.model;
 public interface ISourceModelElement extends IResourceModelElement {
 
 	/**
+	 * Returns the element which defines this element's source code resource.
+	 */
+	IResourceModelElement getElementSource();
+
+	/**
 	 * Returns the line number with the start of the element's source code.
-	 *
-	 * @return line number with start of element's source code
 	 */
 	int getElementStartLine();
 	
 	/**
 	 * Returns the line number with the logical end of the element's source code.
-	 *
-	 * @return line number with end of element's source code
 	 */
 	int getElementEndLine();
 }

@@ -58,6 +58,39 @@ public abstract class AbstractSourceModelElement extends
 	    return endLine;
 	}
 
+	public IResource getElementResource() {
+		IResourceModelElement element = getElementSource();
+		if (element != null) {
+			return element.getElementResource();
+		}
+		return null;
+	}
+
+	public boolean isElementArchived() {
+		IResourceModelElement element = getElementSource();
+		if (element != null) {
+			return element.isElementArchived();
+		}
+		return false;
+	}
+
+	/**
+	 * Traverses this model element's parent chain until the first
+	 * non-<code>ISourceModelElement</code> and returns the corresponding
+	 * model element.
+	 */
+	public IResourceModelElement getElementSource() {
+		for (IModelElement parent = getElementParent(); parent != null;
+				parent = parent.getElementParent()) {
+			if (!(parent instanceof ISourceModelElement)) {
+
+				// It must be an IResourceModelElement
+				return (IResourceModelElement) parent;
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Returns an adapter for <code>IMarker.class</code>.
 	 */

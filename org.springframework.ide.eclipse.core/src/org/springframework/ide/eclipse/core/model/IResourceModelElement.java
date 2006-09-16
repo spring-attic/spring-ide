@@ -27,8 +27,14 @@ public interface IResourceModelElement extends IModelElement {
 
 	/**
 	 * Returns the nearest enclosing resource for this element. 
-	 * 
-	 * @return the nearest enclosing resource for this element.
 	 */
 	IResource getElementResource();
+
+	/**
+	 * Returns <code>true</code> if this element belongs to a ZIP file.
+	 * In this case the element's resource specifies the ZIP file and the
+	 * elements's name defines the ZIP file name plus the corresponding
+	 * ZIP entry (delimited by <code>ZipEntryStorage.DELIMITER</code>).  
+	 */
+	boolean isElementArchived();
 }
