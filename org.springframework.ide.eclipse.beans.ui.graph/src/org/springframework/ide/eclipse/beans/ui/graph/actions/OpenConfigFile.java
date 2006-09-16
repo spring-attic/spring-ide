@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,15 @@ package org.springframework.ide.eclipse.beans.ui.graph.actions;
 
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.ui.actions.EditorPartAction;
 import org.eclipse.ui.IEditorPart;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditor;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
 import org.springframework.ide.eclipse.beans.ui.graph.parts.BeanPart;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class OpenConfigFile extends EditorPartAction {
 
@@ -55,10 +54,7 @@ public class OpenConfigFile extends EditorPartAction {
 
 	public void run() {
 		Bean bean = ((BeanPart) getFirstSelectedEditPart()).getBean();
-		IFile file = bean.getConfigFile();
-		if (file != null && file.exists()) {
-			SpringUIUtils.openInEditor(file, bean.getStartLine());
-		}
+		BeansUIUtils.openInEditor(bean.getBean());
 	}
 
 	protected EditPart getFirstSelectedEditPart() {

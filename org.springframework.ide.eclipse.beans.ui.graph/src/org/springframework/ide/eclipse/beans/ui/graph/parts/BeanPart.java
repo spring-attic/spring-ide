@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.ide.eclipse.beans.ui.graph.parts;
 
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.draw2d.Border;
 import org.eclipse.draw2d.ChopboxAnchor;
 import org.eclipse.draw2d.ConnectionAnchor;
@@ -34,9 +33,9 @@ import org.eclipse.gef.NodeEditPart;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.graph.figures.BeanFigure;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class BeanPart extends AbstractGraphicalEditPart implements NodeEditPart {
 
@@ -106,10 +105,7 @@ public class BeanPart extends AbstractGraphicalEditPart implements NodeEditPart 
 	 */
 	public void performRequest(Request req) {
 		if (req.getType() == RequestConstants.REQ_OPEN) {
-			IFile file = getBean().getConfigFile();
-			if (file != null && file.exists()) {
-				SpringUIUtils.openInEditor(file, getBean().getStartLine());
-			}
+			BeansUIUtils.openInEditor(getBean().getBean());
 		}
 		super.performRequest(req);
 	}

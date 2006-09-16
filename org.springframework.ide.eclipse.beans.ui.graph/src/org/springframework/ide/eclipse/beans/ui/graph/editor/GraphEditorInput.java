@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IMemento;
@@ -44,13 +44,17 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  * This editor input is used to specify the list of <code>IBean</code>s which
  * should be displayed in the beans graph editor.
  * Therefore a source model model element (<code>IBean</code>,
- * <code>IBeanConfig</code> or <code>IBeanConfigSet</code>) has to be specified.
- * For a given bean it's parent bean (for child beans only), constructor argument
- * values and property values are checked.
+ * <code>IBeanConfig</code> or <code>IBeanConfigSet</code>) has to be
+ * specified.
+ * For a given bean it's parent bean (for child beans only), constructor
+ * argument values and property values are checked.
  * <code>IBean</code> look-up is done from the specified context
  * (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>).
  * This list of beans is accessible via <code<>getBeans()</code>.
- * This context used for bean look-up is accessible via <code<>getContext()</code>.
+ * This context used for bean look-up is accessible via
+ * <code<>getContext()</code>.
+ *
+ * @author Torsten Juergeleit
  */
 public class GraphEditorInput implements IEditorInput, IPersistableElement {
 
@@ -127,12 +131,12 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 
 		// Prepare name and tooltip for given element and context
 		if (element instanceof IBeansConfig) {
-			IFile file = ((IBeansConfig) element).getConfigFile();
-			if (file != null) {
-				name = file.getName();
+			IResource resource = ((IBeansConfig) element).getElementResource();
+			if (resource != null) {
+				name = resource.getName();
 				toolTip = BeansGraphPlugin.getResourceString(
-												"ShowGraphAction.name.config") +
-												file.getFullPath().toString();
+											 "ShowGraphAction.name.config") +
+											 resource.getFullPath().toString();
 			} else {
 				name = BeansGraphPlugin.getResourceString(
 											  "ShowGraphAction.name.undefined");

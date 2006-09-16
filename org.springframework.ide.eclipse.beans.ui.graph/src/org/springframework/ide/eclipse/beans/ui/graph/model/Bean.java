@@ -31,7 +31,6 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 
 /**
  * This is a representation of a Spring bean.
- *
  * @author Torsten Juergeleit
  */
 public class Bean extends Node implements IAdaptable {
@@ -65,7 +64,7 @@ public class Bean extends Node implements IAdaptable {
 	}
 
 	public IFile getConfigFile() {
-		return BeansModelUtils.getConfig(bean).getConfigFile();
+		return (IFile) BeansModelUtils.getConfig(bean).getElementResource();
 	}
 
 	public int getStartLine() {

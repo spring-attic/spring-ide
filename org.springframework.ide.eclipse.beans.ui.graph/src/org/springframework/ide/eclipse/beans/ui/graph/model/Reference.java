@@ -16,12 +16,10 @@
 
 package org.springframework.ide.eclipse.beans.ui.graph.model;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.draw2d.graph.Edge;
 import org.eclipse.draw2d.graph.Node;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
-import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
  * This edge connect two beans. Optionally a node (constructor argument or
@@ -61,15 +59,16 @@ public class Reference extends Edge implements IAdaptable {
 		return node;
 	}
 
-	public IFile getConfigFile() {
+	/**
+	 * Returns the associated beans model element.
+	 */ 
+	public IResourceModelElement getResourceElement() {
 		if (node instanceof Property) {
-			IBean bean = ((Property) node).getBean().getBean();
-			return BeansModelUtils.getConfig(bean).getConfigFile();
+			return ((Property) node).getBean().getBean();
 		} else if (node instanceof ConstructorArgument) {
-			IBean bean = ((ConstructorArgument) node).getBean().getBean();
-			return BeansModelUtils.getConfig(bean).getConfigFile();
+			return ((ConstructorArgument) node).getBeanConstructorArgument();
 		}
-		return getSourceBean().getConfigFile();
+		return getSourceBean().getBean();
 	}
 
 	public int getStartLine() {
