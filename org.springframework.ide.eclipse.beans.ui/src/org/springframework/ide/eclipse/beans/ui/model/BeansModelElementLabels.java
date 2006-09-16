@@ -24,6 +24,8 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.util.StringUtils;
@@ -63,11 +65,24 @@ public class BeansModelElementLabels {
 			appendPathLabel(element, buf);
 			buf.append(CONCAT_STRING);
 		}
-		buf.append(element.getElementName());
-		if (element instanceof IBean) {
+		if (element instanceof IBeansConfig) {
+			String name = element.getElementName();
+			int pos = name.indexOf(ZipEntryStorage.DELIMITER);
+			if (pos != -1) {
+				buf.append(name.substring(0, pos));
+				buf.append(" - ");
+				buf.append(name.substring(pos + 1));
+			} else {
+				buf.append(element.getElementName());
+			}
+		} else if (element instanceof IBean) {
+			buf.append(element.getElementName());
 			appendBeanLabel((IBean) element, buf);
 		} else if (element instanceof IBeanProperty) {
+			buf.append(element.getElementName());
 			appendBeanPropertyLabel((IBeanProperty) element, buf);
+		} else {
+			buf.append(element.getElementName());
 		}
 		if (isFlagged(flags, APPEND_PATH)) {
 			buf.append(CONCAT_STRING);

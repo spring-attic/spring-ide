@@ -51,6 +51,7 @@ import org.springframework.ide.eclipse.beans.ui.views.model.ModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.views.model.ModelSorter;
 import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
 import org.springframework.ide.eclipse.core.StringUtils;
+import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class ConfigSetDialog extends Dialog {
@@ -255,7 +256,7 @@ public class ConfigSetDialog extends Dialog {
 					iter = project.getConfigs().iterator();
 					while (iter.hasNext()) {
 						IBeansConfig config = (IBeansConfig) iter.next();
-						String path = config.getConfigPath();
+						String path = ModelUtils.getResourcePath(config);
 						if (path != null && !configSet.hasConfig(path)) {
 							configs.add(new ConfigNode(configSet, path));
 						}

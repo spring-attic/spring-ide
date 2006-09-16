@@ -31,24 +31,71 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.views.model.ConfigNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.INode;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIMessages;
 import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 
 /**
- * Helper classe for DND support in beans view.
+ * Helper classe for beans view.
  * 
  * @author Pierre-Antoine Grégoire
  * @author Torsten Juergeleit
  */
 public final class BeansViewUtils {
+
+	/**
+	 * Returns an instance of <code>BeansViewLocation</code> which is
+	 * initialized with information from the model element identified by the
+	 * given element ID.
+	 */
+	public static BeansViewLocation getBeansViewLocation(String elementID) {
+		IBeansModel model = BeansCorePlugin.getModel();
+		return getBeansViewLocation(model.getElement(elementID));
+	}
+
+	/**
+	 * Returns an instance of <code>BeansViewLocation</code> which is
+	 * initialized with information from the given core model element.
+	 */
+	public static final BeansViewLocation getBeansViewLocation(
+			IModelElement element) {
+		BeansViewLocation location = new BeansViewLocation();
+		if (element instanceof IBeansProject) {
+			location.setProjectName(element.getElementName());
+		} else if (element instanceof IBeansConfigSet) {
+			location.setProjectName(element.getElementParent().getElementName());
+			location.setConfigSetName(element.getElementName());
+		} else if (element instanceof IBeansConfig) {
+			location.setProjectName(element.getElementParent().getElementName());
+			location.setConfigName(element.getElementName());
+		} else if (element instanceof IBean) {
+			location.setProjectName(
+				element.getElementParent().getElementParent().getElementName());
+			location.setConfigName(element.getElementParent().getElementName());
+			location.setBeanName(element.getElementName());
+		} else if (element instanceof IBeanProperty) {
+			location.setProjectName(element.getElementParent().
+						getElementParent().getElementParent().getElementName());
+			location.setConfigName(element.getElementParent().
+										   getElementParent().getElementName());
+			location.setBeanName(element.getElementParent().getElementName());
+			location.setPropertyName(element.getElementName());
+		}
+		return location;
+	}
 
 	/**
 	 * Returns the resource selection from the LocalSelectionTransfer.

@@ -17,11 +17,17 @@
 package org.springframework.ide.eclipse.beans.ui;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.preference.IPreferencePage;
+import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.views.properties.FilePropertySource;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.ResourcePropertySource;
@@ -31,7 +37,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
-import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.model.properties.ChildBeanProperties;
 import org.springframework.ide.eclipse.beans.ui.model.properties.ConfigSetProperties;
@@ -39,24 +44,55 @@ import org.springframework.ide.eclipse.beans.ui.model.properties.ConstructorArgu
 import org.springframework.ide.eclipse.beans.ui.model.properties.PropertyProperties;
 import org.springframework.ide.eclipse.beans.ui.model.properties.RootBeanProperties;
 import org.springframework.ide.eclipse.beans.ui.properties.ProjectPropertyPage;
-import org.springframework.ide.eclipse.beans.ui.views.BeansViewLocation;
+import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springframework.ide.eclipse.ui.editors.ZipEntryEditorInput;
 
+/**
+ * Some helper methods.
+ * @author Torsten Juergeleit
+ */
 public final class BeansUIUtils {
 
 	/**
-	 * Returns edited file from given editor if it's a Spring bean config file.
+	 * Returns edited file for given <code>IWorkbenchPart</code>
+	 * if it's an editor editing a Spring bean config file.
 	 */
-	public static IFile getConfigFile(IEditorPart editor) {
-		if (editor != null) {
-			IEditorInput input = editor.getEditorInput();
+	public static IFile getConfigFile(IWorkbenchPart part) {
+		if (part instanceof IEditorPart) {
+			IEditorInput input = ((IEditorPart) part).getEditorInput();
 			if (input instanceof IFileEditorInput) {
 				IFile file = ((IFileEditorInput) input).getFile();
 				IBeansProject project = BeansCorePlugin.getModel().getProject(
 															 file.getProject());
 				if (project != null && project.hasConfig(file)) {
 					return file;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns <code>IBeansConfig</code> for given <code>IWorkbenchPart</code>
+	 * if it's an editor editing a Spring bean config file.
+	 */
+	public static IBeansConfig getConfig(IWorkbenchPart part) {
+		if (part instanceof IEditorPart) {
+			IEditorInput input = ((IEditorPart) part).getEditorInput();
+			if (input instanceof IFileEditorInput) {
+				IFile file = ((IFileEditorInput) input).getFile();
+				return BeansCorePlugin.getModel().getConfig(file);
+			} else if (input instanceof ZipEntryEditorInput) {
+				ZipEntryStorage storage = (ZipEntryStorage)
+						((ZipEntryEditorInput) input).getStorage();
+				IBeansProject project = BeansCorePlugin.getModel().getProject(
+						storage.getZipResource().getProject());
+				if (project != null) {
+					return project.getConfig(storage.getFullName());
 				}
 			}
 		}
@@ -77,13 +113,12 @@ public final class BeansUIUtils {
 	 * Returns a corresponding instance of <code>IPropertySource</code> for the
 	 * given <code>IModelElement</code> or null.
 	 */
-	public static IPropertySource getPropertySource(
-													   IModelElement element) {
+	public static IPropertySource getPropertySource(IModelElement element) {
 		if (element instanceof IBeansProject) {
 			return new ResourcePropertySource(
 										((IBeansProject) element).getProject());
 		} else if (element instanceof IBeansConfig) {
-			IFile file = ((IBeansConfig) element).getConfigFile();
+			IFile file = (IFile) ((IBeansConfig) element).getElementResource();
 			if (file != null && file.exists()) {
 				return new FilePropertySource(file);
 			}
@@ -109,48 +144,6 @@ public final class BeansUIUtils {
 		return null;
 	}
 
-	/**
-	 * Returns an instance of <code>BeansViewLocation</code> which is
-	 * initialized with information from the model element identified by the
-	 * given element ID.
-	 */
-	public static BeansViewLocation getBeansViewLocation(
-															String elementID) {
-		IBeansModel model = BeansCorePlugin.getModel();
-		return getBeansViewLocation(model.getElement(elementID));
-	}
-
-	/**
-	 * Returns an instance of <code>BeansViewLocation</code> which is
-	 * initialized with information from the given core model element.
-	 */
-	public static final BeansViewLocation getBeansViewLocation(
-													   IModelElement element) {
-		BeansViewLocation location = new BeansViewLocation();
-		if (element instanceof IBeansProject) {
-			location.setProjectName(element.getElementName());
-		} else if (element instanceof IBeansConfigSet) {
-			location.setProjectName(element.getElementParent().getElementName());
-			location.setConfigSetName(element.getElementName());
-		} else if (element instanceof IBeansConfig) {
-			location.setProjectName(element.getElementParent().getElementName());
-			location.setConfigName(element.getElementName());
-		} else if (element instanceof IBean) {
-			location.setProjectName(
-				element.getElementParent().getElementParent().getElementName());
-			location.setConfigName(element.getElementParent().getElementName());
-			location.setBeanName(element.getElementName());
-		} else if (element instanceof IBeanProperty) {
-			location.setProjectName(element.getElementParent().
-						getElementParent().getElementParent().getElementName());
-			location.setConfigName(element.getElementParent().
-										   getElementParent().getElementName());
-			location.setBeanName(element.getElementParent().getElementName());
-			location.setPropertyName(element.getElementName());
-		}
-		return location;
-	}
-
 	public static void showProjectPropertyPage(IProject project, int block) {
 		if (project != null) {
 			String title = BeansUIPlugin
@@ -160,5 +153,46 @@ public final class BeansUIUtils {
 			SpringUIUtils.showPreferencePage(ProjectPropertyPage.ID,
 					page, title);
 		}
+	}
+
+	/**
+	 * Opens given <code>IResourceModelElement element</code> in associated
+	 * editor.
+	 */
+	public static IEditorPart openInEditor(IResourceModelElement element) {
+		int line;
+		if (element instanceof ISourceModelElement) {
+			ISourceModelElement source = (ISourceModelElement) element;
+			element = source.getElementSource();
+			line = source.getElementStartLine();
+		} else if (element instanceof IBeansConfig) {
+			line = -1;
+		} else {
+			return null;
+		}
+		IResource resource = element.getElementResource();
+		if (resource instanceof IFile) {
+			IFile file = (IFile) resource;
+			if (element.isElementArchived()) {
+				try {
+					ZipEntryStorage storage = new ZipEntryStorage(resource
+							.getProject(), element.getElementName());
+					IEditorInput input = new ZipEntryEditorInput(storage);
+					IEditorDescriptor desc = IDE.getEditorDescriptor(storage
+							.getName());
+					IEditorPart editor = SpringUIUtils.openInEditor(input, desc
+							.getId());
+					IMarker marker = file.createMarker(IMarker.TEXT);
+					marker.setAttribute(IMarker.LINE_NUMBER, line);
+					IDE.gotoMarker(editor, marker);
+					return editor;
+				} catch (CoreException e) {
+					BeansCorePlugin.log(e);
+				}
+			} else {
+				return SpringUIUtils.openInEditor(file, line);
+			}
+		}
+		return null;
 	}
 }

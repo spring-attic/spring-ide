@@ -76,7 +76,8 @@ public class ConfigNode extends AbstractNode {
 	}
 
 	public IFile getConfigFile() {
-		return (getConfig() != null ? getConfig().getConfigFile() : null);
+		return (getConfig() != null ?
+				(IFile) getConfig().getElementResource() : null);
 	}
 
 	public BeanNode getBean(String name) {

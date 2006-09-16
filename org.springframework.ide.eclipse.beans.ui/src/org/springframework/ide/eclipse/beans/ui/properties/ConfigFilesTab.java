@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.properties;
 
@@ -23,6 +23,8 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jface.resource.JFaceColors;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -45,54 +47,70 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
-import org.eclipse.ui.model.WorkbenchContentProvider;
-import org.eclipse.ui.model.WorkbenchLabelProvider;
-import org.eclipse.ui.views.navigator.ResourceSorter;
+import org.eclipse.ui.dialogs.SelectionStatusDialog;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.views.model.ConfigNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.ModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.StringUtils;
+import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
-import org.springframework.ide.eclipse.ui.dialogs.FileSelectionValidator;
-import org.springframework.ide.eclipse.ui.viewers.FileFilter;
+import org.springframework.ide.eclipse.ui.dialogs.FilteredElementTreeSelectionDialog;
+import org.springframework.ide.eclipse.ui.dialogs.StorageSelectionValidator;
+import org.springframework.ide.eclipse.ui.viewers.JavaFileExtensionFilter;
 
 public class ConfigFilesTab {
 
-	private static final String PREFIX = "ConfigurationPropertyPage." +
-										 "tabConfigFiles.";
+	private static final String PREFIX = "ConfigurationPropertyPage."
+			+ "tabConfigFiles.";
+
 	private static final String DESCRIPTION = PREFIX + "description";
+
 	private static final String EXTENSIONS_LABEL = PREFIX + "extensions.label";
-	private static final String ERROR_NO_EXTENSIONS =
-												 PREFIX + "error.noExtensions";
-	private static final String ERROR_INVALID_EXTENSIONS =
-											PREFIX + "error.invalidExtensions";
+
+	private static final String ERROR_NO_EXTENSIONS = PREFIX
+			+ "error.noExtensions";
+
+	private static final String ERROR_INVALID_EXTENSIONS = PREFIX
+			+ "error.invalidExtensions";
+
 	private static final String ADD_BUTTON = PREFIX + "addButton";
+
 	private static final String REMOVE_BUTTON = PREFIX + "removeButton";
-	private static final String DIALOG_TITLE = PREFIX +
-													   "addConfigDialog.title";
-	private static final String DIALOG_MESSAGE = PREFIX +
-													 "addConfigDialog.message";
+
+	private static final String DIALOG_TITLE = PREFIX + "addConfigDialog.title";
+
+	private static final String DIALOG_MESSAGE = PREFIX
+			+ "addConfigDialog.message";
+
 	private static final int TABLE_WIDTH = 250;
+
 	private ProjectNode project;
+
 	private IAdaptable element;
+
 	private Text extensionsText;
+
 	private Table configsTable;
+
 	private TableViewer configsViewer;
+
 	private Label errorLabel;
+
 	private Button addButton, removeButton;
 
 	private SelectionListener buttonListener = new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				handleButtonPressed((Button) e.widget);
-			}
-		};
+		public void widgetSelected(SelectionEvent e) {
+			handleButtonPressed((Button) e.widget);
+		}
+	};
 
 	private IPropertyListener propertyListener = new IPropertyListener() {
-			public void propertyChanged(Object source, int propId) {
-				handlePropertyChanged(source, propId);
-			}
-		};
+		public void propertyChanged(Object source, int propId) {
+			handlePropertyChanged(source, propId);
+		}
+	};
 
 	private boolean hasUserMadeChanges;
 
@@ -120,17 +138,15 @@ public class ConfigFilesTab {
 		description.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		// extension text field
-		extensionsText = SpringUIUtils.createTextField(composite, 
-							BeansUIPlugin.getResourceString(EXTENSIONS_LABEL));
-		extensionsText.setText(StringUtils.collectionToDelimitedString(
-										  project.getConfigExtensions(), ","));
-		extensionsText.addModifyListener(
-			new ModifyListener() {
-				public void modifyText(ModifyEvent e) {
-					handleExtensionsTextModified();
-				}
+		extensionsText = SpringUIUtils.createTextField(composite, BeansUIPlugin
+				.getResourceString(EXTENSIONS_LABEL));
+		extensionsText.setText(StringUtils.collectionToDelimitedString(project
+				.getConfigExtensions(), ","));
+		extensionsText.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				handleExtensionsTextModified();
 			}
-		);
+		});
 
 		Composite tableAndButtons = new Composite(composite, SWT.NONE);
 		tableAndButtons.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -140,9 +156,9 @@ public class ConfigFilesTab {
 		layout.numColumns = 2;
 		tableAndButtons.setLayout(layout);
 
-		// table and viewer for Spring bean configurations		
-		configsTable = new Table(tableAndButtons, SWT.MULTI | SWT.H_SCROLL |
-								SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
+		// table and viewer for Spring bean configurations
+		configsTable = new Table(tableAndButtons, SWT.MULTI | SWT.H_SCROLL
+				| SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		data.widthHint = TABLE_WIDTH;
 		configsTable.setLayoutData(data);
@@ -152,19 +168,19 @@ public class ConfigFilesTab {
 			}
 		});
 		configsViewer = new TableViewer(configsTable);
-		configsViewer.setContentProvider(new ConfigFilesContentProvider(
-																	  project));
+		configsViewer
+				.setContentProvider(new ConfigFilesContentProvider(project));
 		configsViewer.setLabelProvider(new ModelLabelProvider());
-		configsViewer.setInput(this);	// activate content provider
+		configsViewer.setInput(this); // activate content provider
 		configsViewer.setSorter(new ConfigFilesSorter());
 
 		// error label
 		errorLabel = new Label(composite, SWT.NONE);
-		errorLabel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL |
-											   GridData.HORIZONTAL_ALIGN_FILL));
+		errorLabel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
+				| GridData.HORIZONTAL_ALIGN_FILL));
 		errorLabel.setForeground(JFaceColors.getErrorText(parent.getDisplay()));
-		errorLabel.setBackground(
-						  JFaceColors.getErrorBackground(parent.getDisplay()));
+		errorLabel.setBackground(JFaceColors.getErrorBackground(parent
+				.getDisplay()));
 		// button area
 		Composite buttonArea = new Composite(tableAndButtons, SWT.NONE);
 		layout = new GridLayout();
@@ -172,28 +188,27 @@ public class ConfigFilesTab {
 		layout.marginWidth = 0;
 		buttonArea.setLayout(layout);
 		buttonArea.setLayoutData(new GridData(GridData.FILL_VERTICAL));
-		addButton = SpringUIUtils.createButton(buttonArea,
-				  BeansUIPlugin.getResourceString(ADD_BUTTON), buttonListener);
-		removeButton = SpringUIUtils.createButton(buttonArea,
-								BeansUIPlugin.getResourceString(REMOVE_BUTTON),
-								buttonListener, 0, false);
+		addButton = SpringUIUtils.createButton(buttonArea, BeansUIPlugin
+				.getResourceString(ADD_BUTTON), buttonListener);
+		removeButton = SpringUIUtils.createButton(buttonArea, BeansUIPlugin
+				.getResourceString(REMOVE_BUTTON), buttonListener, 0, false);
 		handleExtensionsTextModified();
-		hasUserMadeChanges = false;  // handleExtensionTextModified() has set this to true
+		hasUserMadeChanges = false; // handleExtensionTextModified() has set
+									// this to true
 		return composite;
 	}
 
 	/**
 	 * The user has modified the comma-separated list of config extensions.
-	 * Validate the input and update the "Add" button enablement and error
-	 * label accordingly .
+	 * Validate the input and update the "Add" button enablement and error label
+	 * accordingly .
 	 */
 	private void handleExtensionsTextModified() {
 		String errorMessage = null;
 		List extensions = new ArrayList();
 		String extText = extensionsText.getText().trim();
 		if (extText.length() == 0) {
-			errorMessage = BeansUIPlugin.getResourceString(
-														  ERROR_NO_EXTENSIONS);
+			errorMessage = BeansUIPlugin.getResourceString(ERROR_NO_EXTENSIONS);
 		} else {
 			StringTokenizer tokenizer = new StringTokenizer(extText, ",");
 			while (tokenizer.hasMoreTokens()) {
@@ -201,8 +216,8 @@ public class ConfigFilesTab {
 				if (isValidExtension(extension)) {
 					extensions.add(extension);
 				} else {
-					errorMessage = BeansUIPlugin.getResourceString(
-													 ERROR_INVALID_EXTENSIONS);
+					errorMessage = BeansUIPlugin
+							.getResourceString(ERROR_INVALID_EXTENSIONS);
 					break;
 				}
 			}
@@ -236,12 +251,12 @@ public class ConfigFilesTab {
 	}
 
 	/**
-	 * The user has selected a different configuration in table.
-	 * Update button enablement.
+	 * The user has selected a different configuration in table. Update button
+	 * enablement.
 	 */
 	private void handleTableSelectionChanged() {
-		IStructuredSelection selection = (IStructuredSelection)
-												   configsViewer.getSelection();
+		IStructuredSelection selection = (IStructuredSelection) configsViewer
+				.getSelection();
 		if (selection.isEmpty()) {
 			removeButton.setEnabled(false);
 		} else {
@@ -267,21 +282,50 @@ public class ConfigFilesTab {
 	 * dialog and adds the selected configuration.
 	 */
 	private void handleAddButtonPressed() {
-		ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(
-				  SpringUIUtils.getStandardDisplay().getActiveShell(),
-				  new WorkbenchLabelProvider(), new WorkbenchContentProvider());
+		SelectionStatusDialog dialog;
+		if (SpringCoreUtils.isEclipseSameOrNewer(3, 2)) {
+			FilteredElementTreeSelectionDialog selDialog =
+				new FilteredElementTreeSelectionDialog(
+					SpringUIUtils.getStandardDisplay().getActiveShell(),
+					new JavaElementLabelProvider(),
+					new NonJavaResourceContentProvider());
+			selDialog.addFilter(new JavaFileExtensionFilter(project
+					.getConfigExtensions()));
+			selDialog.setValidator(new StorageSelectionValidator(true));
+			selDialog.setInput(element);
+			selDialog.setSorter(new JavaElementSorter());
+			dialog = selDialog;
+		} else {
+			ElementTreeSelectionDialog selDialog =
+				new ElementTreeSelectionDialog(
+					SpringUIUtils.getStandardDisplay().getActiveShell(),
+					new JavaElementLabelProvider(),
+					new NonJavaResourceContentProvider());
+			selDialog.addFilter(new JavaFileExtensionFilter(project
+					.getConfigExtensions()));
+			selDialog.setValidator(new StorageSelectionValidator(true));
+			selDialog.setInput(element);
+			selDialog.setSorter(new JavaElementSorter());
+			dialog = selDialog;
+		}
 		dialog.setTitle(BeansUIPlugin.getResourceString(DIALOG_TITLE));
 		dialog.setMessage(BeansUIPlugin.getResourceString(DIALOG_MESSAGE));
-		dialog.addFilter(new FileFilter(project.getConfigExtensions()));
-		dialog.setValidator(new FileSelectionValidator(true));
-		dialog.setInput(element);
-		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
 		if (dialog.open() == ElementTreeSelectionDialog.OK) {
 			Object[] selection = dialog.getResult();
 			if (selection != null && selection.length > 0) {
 				for (int i = 0; i < selection.length; i++) {
-					IFile file = (IFile) selection[i];
-					String config = file.getProjectRelativePath().toString();
+					String config;
+					if (selection[i] instanceof ZipEntryStorage) {
+						ZipEntryStorage storage = (ZipEntryStorage)
+								selection[i];
+						config = storage.getZipResource()
+								.getProjectRelativePath()
+								+ ZipEntryStorage.DELIMITER
+								+ storage.getFullPath();
+					} else {
+						IFile file = (IFile) selection[i];
+						config = file.getProjectRelativePath().toString();
+					}
 					project.addConfig(config);
 				}
 				hasUserMadeChanges = true;
@@ -294,8 +338,8 @@ public class ConfigFilesTab {
 	 * configuration.
 	 */
 	private void handleRemoveButtonPressed() {
-		IStructuredSelection selection = (IStructuredSelection)
-												   configsViewer.getSelection();
+		IStructuredSelection selection = (IStructuredSelection) configsViewer
+				.getSelection();
 		if (!selection.isEmpty()) {
 			Iterator elements = selection.iterator();
 			while (elements.hasNext()) {
@@ -316,34 +360,35 @@ public class ConfigFilesTab {
 		project.removePropertyListener(propertyListener);
 	}
 
-	private class ConfigFilesContentProvider
-										 implements IStructuredContentProvider {
+	private class ConfigFilesContentProvider implements
+			IStructuredContentProvider {
 		private ProjectNode project;
-	
+
 		public ConfigFilesContentProvider(ProjectNode project) {
 			this.project = project;
 		}
-	
+
 		public Object[] getElements(Object obj) {
 			return project.getConfigs().toArray();
 		}
-	
+
 		public void inputChanged(Viewer arg0, Object arg1, Object arg2) {
 		}
-	
+
 		public void dispose() {
 		}
 	}
 
 	private class ConfigFilesSorter extends ViewerSorter {
 
-	    // Categories
-	    public static final int SUB_DIR = 0;
-	    public static final int ROOT_DIR = 1;
-	
+		// Categories
+		public static final int SUB_DIR = 0;
+
+		public static final int ROOT_DIR = 1;
+
 		public int category(Object element) {
-			return (((ConfigNode) element).getName().indexOf('/') == -1 ?
-															ROOT_DIR : SUB_DIR);
+			return (((ConfigNode) element).getName().indexOf('/') == -1 ? ROOT_DIR
+					: SUB_DIR);
 		}
 	}
 }

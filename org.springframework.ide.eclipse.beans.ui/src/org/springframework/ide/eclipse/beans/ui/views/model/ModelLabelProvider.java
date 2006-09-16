@@ -29,6 +29,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
+import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 
 /**
  * This class is an <code>ILabelProvider</code> which knows about the view
@@ -84,9 +85,20 @@ public class ModelLabelProvider extends LabelProvider {
 	public String getText(Object element) {
 		if (element instanceof INode) {
 			StringBuffer label = new StringBuffer();
-			label.append(((INode) element).getName());
-			if (element instanceof BeanNode) {
+			if (element instanceof ConfigNode) {
+				ConfigNode config = (ConfigNode) element;
+				String name = config.getName();
+				int pos = name.indexOf(ZipEntryStorage.DELIMITER);
+				if (pos != -1) {
+					label.append(name.substring(0, pos));
+					label.append(" - ");
+					label.append(name.substring(pos + 1));
+				} else {
+					label.append(config.getName());
+				}
+			} else if (element instanceof BeanNode) {
 				BeanNode bean = (BeanNode) element;
+				label.append(bean.getName());
 				if (bean.getClassName() != null) {
 					label.append(" [");
 					label.append(bean.getClassName());
@@ -97,7 +109,9 @@ public class ModelLabelProvider extends LabelProvider {
 					label.append('>');
 				}
 			} else if (element instanceof PropertyNode) {
-				Object value = ((PropertyNode) element).getValue();
+				PropertyNode property = (PropertyNode) element;
+				label.append(property.getName());
+				Object value = property.getValue();
 				if (value instanceof String) {
 					label.append(" \"");
 					label.append(value);
@@ -122,6 +136,8 @@ public class ModelLabelProvider extends LabelProvider {
 					label.append(' ');
 					label.append(value);
 				}
+			} else {
+				label.append(((INode) element).getName());
 			}
 			return label.toString();
 		}

@@ -100,7 +100,7 @@ public class ChildBeanProperties implements IPropertySource {
 		}
 		if (P_ID_CONFIG.equals(id)) {
 			IBeansConfig config = BeansModelUtils.getConfig(bean);
-			IFile file = config.getConfigFile();
+			IFile file = (IFile) config.getElementResource();
 			if (file != null) {
 				return new ConfigFilePropertySource(file);
 			}

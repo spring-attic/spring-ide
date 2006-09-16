@@ -44,9 +44,6 @@ import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IViewPart;
@@ -59,8 +56,8 @@ import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
-import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.BeansTags;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.IPreferencesConstants;
@@ -83,7 +80,7 @@ import org.springframework.ide.eclipse.beans.ui.views.model.PropertyNode;
 import org.springframework.ide.eclipse.beans.ui.views.model.RootNode;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.ui.dialogs.PatternFilteredTree;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -281,10 +278,9 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 		} else {
 
 			// Open selected config/bean/constructor/property in editor
-			IResource resource = getResourceFromSelectedNode();
-			if (resource instanceof IFile && resource.exists()) {
-				int line = getStartLineFromSelectedNode();
-				SpringUIUtils.openInEditor((IFile) resource, line);
+			IModelElement element = getElementFromSelectedNode();
+			if (element instanceof IResourceModelElement) {
+				BeansUIUtils.openInEditor((IResourceModelElement) element);
 			}
 		}
 	}
@@ -296,7 +292,7 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 		if (input instanceof BeansViewLocation) {
 			return showLocation((BeansViewLocation) input);
 		} else if (input instanceof IModelElement) {
-			return showLocation(BeansUIUtils.getBeansViewLocation(
+			return showLocation(BeansViewUtils.getBeansViewLocation(
 													   (IModelElement) input));
 		} else if (input instanceof IAdaptable) {
 			Object resource = ((IAdaptable) input).getAdapter(IResource.class);
@@ -314,7 +310,7 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 			Object element = ((IStructuredSelection)
 												   selection).getFirstElement();
 			if (element instanceof IModelElement) {
-				return showLocation(BeansUIUtils.getBeansViewLocation(
+				return showLocation(BeansViewUtils.getBeansViewLocation(
 													 (IModelElement) element));
 			} else if (element instanceof IResource) {
 				return showResource((IResource) element);
@@ -492,6 +488,11 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 		return null;
 	}
 
+	public IModelElement getElementFromSelectedNode() {
+		INode node = getSelectedNode();
+		return node.getElement();
+	}
+
 	public IResource getResourceFromSelectedNode() {
 		INode node = getSelectedNode();
 		if (node instanceof ProjectNode) {
@@ -542,9 +543,9 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 			while (iter.hasNext()) {
 				Object selectedObj = (Object) iter.next();
 				if (selectedObj instanceof Element) {
-					IFile file = getEditorFile(part);
-					if (BeansCoreUtils.isBeansConfig(file)) {
-						linkToBeansXmlEditor(file, (Element) selectedObj);
+					IBeansConfig config = BeansUIUtils.getConfig(part);
+					if (config != null) {
+						linkToBeansXmlEditor(config, (Element) selectedObj);
 					}
 				}
 			}
@@ -555,38 +556,28 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 		return getSite().getPage().isPartVisible(this);
 	}
 
-	private IFile getEditorFile(IWorkbenchPart part) {
-		if (part instanceof IEditorPart) {
-			IEditorInput input = ((IEditorPart) part).getEditorInput();
-			if (input instanceof IFileEditorInput) {
-				return ((IFileEditorInput) input).getFile();
-			}
-		}
-		return null;
-	}
-
-	private void linkToBeansXmlEditor(IFile file, Element element) {
+	private void linkToBeansXmlEditor(IBeansConfig config, Element element) {
 		Node parent = element.getParentNode();
 		if (BeansTags.isTag(element, BeansTags.BEAN)
 				&& BeansTags.isTag(parent, BeansTags.BEANS)) {
 			String beanName = getSelectedBeanName(element);
 			if (beanName != null) {
 				BeansViewLocation location = new BeansViewLocation();
-				location.setProjectName(file.getProject().getName());
-				location.setConfigName(file.getProjectRelativePath()
-						.toString());
+				location.setProjectName(config.getElementParent()
+						.getElementName());
+				location.setConfigName(config.getElementName());
 				location.setBeanName(beanName);
 				showLocation(location);
 			}
 		} else if (BeansTags.isTag(element, BeansTags.PROPERTY)
 				&& BeansTags.isTag(parent, BeansTags.BEAN)
 				&& BeansTags.isTag(parent.getParentNode(), BeansTags.BEANS)) {
-			String beanName = getSelectedBeanName(element);
+			String beanName = getSelectedBeanName((Element) parent);
 			if (beanName != null) {
 				BeansViewLocation location = new BeansViewLocation();
-				location.setProjectName(file.getProject().getName());
-				location.setConfigName(file.getProjectRelativePath()
-						.toString());
+				location.setProjectName(config.getElementParent()
+						.getElementName());
+				location.setConfigName(config.getElementName());
 				location.setBeanName(beanName);
 
 				Node nameAttribute = element.getAttributeNode("name");
