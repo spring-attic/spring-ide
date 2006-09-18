@@ -66,12 +66,13 @@ public class BeansModelElementLabels {
 			buf.append(CONCAT_STRING);
 		}
 		if (element instanceof IBeansConfig) {
-			String name = element.getElementName();
-			int pos = name.indexOf(ZipEntryStorage.DELIMITER);
-			if (pos != -1) {
-				buf.append(name.substring(0, pos));
+			IBeansConfig config = (IBeansConfig) element;
+			if (config.isElementArchived()) {
+				ZipEntryStorage storage = new ZipEntryStorage(config);
+				buf.append(storage.getZipResource().getProjectRelativePath()
+						.toString());
 				buf.append(" - ");
-				buf.append(name.substring(pos + 1));
+				buf.append(storage.getFullPath().toString());
 			} else {
 				buf.append(element.getElementName());
 			}

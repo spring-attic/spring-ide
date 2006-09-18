@@ -87,12 +87,13 @@ public class ModelLabelProvider extends LabelProvider {
 			StringBuffer label = new StringBuffer();
 			if (element instanceof ConfigNode) {
 				ConfigNode config = (ConfigNode) element;
-				String name = config.getName();
-				int pos = name.indexOf(ZipEntryStorage.DELIMITER);
-				if (pos != -1) {
-					label.append(name.substring(0, pos));
+				if (config.getConfig().isElementArchived()) {
+					ZipEntryStorage storage = new ZipEntryStorage(config
+							.getConfig());
+					label.append(storage.getZipResource()
+							.getProjectRelativePath().toString());
 					label.append(" - ");
-					label.append(name.substring(pos + 1));
+					label.append(storage.getFullPath().toString());
 				} else {
 					label.append(config.getName());
 				}

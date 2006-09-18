@@ -46,6 +46,10 @@ import org.springframework.ide.eclipse.beans.ui.views.model.ModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
+/**
+ * Property page tab for defining tthe beans config sets.  
+ * @author Torsten Juergeleit
+ */
 public class ConfigSetsTab {
 
 	private static final int TABLE_WIDTH = 250;

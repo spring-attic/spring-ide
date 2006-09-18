@@ -60,6 +60,11 @@ import org.springframework.ide.eclipse.ui.dialogs.FilteredElementTreeSelectionDi
 import org.springframework.ide.eclipse.ui.dialogs.StorageSelectionValidator;
 import org.springframework.ide.eclipse.ui.viewers.JavaFileExtensionFilter;
 
+/**
+ * Property page tab for defining the list of beans config file extensions and
+ * the selected beans config files.  
+ * @author Torsten Juergeleit
+ */
 public class ConfigFilesTab {
 
 	private static final String PREFIX = "ConfigurationPropertyPage."
@@ -318,10 +323,7 @@ public class ConfigFilesTab {
 					if (selection[i] instanceof ZipEntryStorage) {
 						ZipEntryStorage storage = (ZipEntryStorage)
 								selection[i];
-						config = storage.getZipResource()
-								.getProjectRelativePath()
-								+ ZipEntryStorage.DELIMITER
-								+ storage.getFullPath();
+						config = storage.getFullName();
 					} else {
 						IFile file = (IFile) selection[i];
 						config = file.getProjectRelativePath().toString();
