@@ -38,6 +38,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphImages;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
+import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
@@ -131,12 +132,22 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 
 		// Prepare name and tooltip for given element and context
 		if (element instanceof IBeansConfig) {
-			IResource resource = ((IBeansConfig) element).getElementResource();
+			String toolTipPrefix = BeansGraphPlugin
+					.getResourceString("ShowGraphAction.name.config");
+			IBeansConfig config = (IBeansConfig) element;
+			IResource resource = config.getElementResource();
 			if (resource != null) {
-				name = resource.getName();
-				toolTip = BeansGraphPlugin.getResourceString(
-											 "ShowGraphAction.name.config") +
-											 resource.getFullPath().toString();
+				if (config.isElementArchived()) {
+					ZipEntryStorage storage = new ZipEntryStorage(config);
+					name = storage.getName();
+					toolTip = toolTipPrefix
+							+ storage.getZipResource().getProjectRelativePath()
+									.toString() + " - "
+							+ storage.getFullPath().toString();
+				} else {
+					name = resource.getName();
+					toolTip = toolTipPrefix + resource.getFullPath().toString();
+				}
 			} else {
 				name = BeansGraphPlugin.getResourceString(
 											  "ShowGraphAction.name.undefined");
