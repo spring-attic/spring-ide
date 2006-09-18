@@ -112,7 +112,7 @@ public class BeansConfigValidator {
 						IBeansConfig cfg = BeansModelUtils.getConfig(cfgName,
 																	 project);
 						if (cfg != null) {
-							BeansModelUtils.registerBeanDefinitions(cfg,
+							BeansModelUtils.registerBeanConfig(cfg,
 																	registry);
 						}
 					}

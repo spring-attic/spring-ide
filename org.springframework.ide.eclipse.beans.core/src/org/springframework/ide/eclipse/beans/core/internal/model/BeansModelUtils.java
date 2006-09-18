@@ -60,7 +60,7 @@ import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.util.Assert;
 
 /**
- * Helper methods for working with the BeansCodeModel.
+ * Helper methods for working with the BeansCoreModel.
  * @author Torsten Juergeleit
  */
 public final class BeansModelUtils {
@@ -874,8 +874,14 @@ public final class BeansModelUtils {
 		}
 	}
 
-	public static final void registerBeanDefinitions(IBeansConfig config,
+	/**
+	 * Registers all bean definitions and aliases from given
+	 * <code>IBeansConfig</code> in specified
+	 * <code>BeanDefinitionRegistry</code>.
+	 */
+	public static final void registerBeanConfig(IBeansConfig config,
 											 BeanDefinitionRegistry registry) {
+		// Register bean definitions
 		Iterator beans = config.getBeans().iterator();
 		while (beans.hasNext()) {
 			Bean bean = (Bean) beans.next();
@@ -885,6 +891,13 @@ public final class BeansModelUtils {
 			} catch (BeansException e) {
 				// ignore - continue with next bean
 			}
+		}
+
+		// Register bean aliases
+		Iterator aliases = config.getAliases().iterator();
+		while (aliases.hasNext()) {
+			IBeanAlias alias = (IBeanAlias) aliases.next();
+			registry.registerAlias(alias.getName(), alias.getElementName());
 		}
 	}
 
