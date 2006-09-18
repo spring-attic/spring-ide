@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.PlatformObject;
 import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
  * Wrapper for an entry in a ZIP file.
@@ -83,6 +84,22 @@ public class ZipEntryStorage extends PlatformObject implements IStorage {
 				+ entryName;
 		this.zipResource = zipResource;
 		this.entryName = entryName;
+		this.entryPath = new Path(entryName);
+	}
+
+	/**
+	 * Creates a <code>ZipEntryStorage</code> from a given archived model
+	 * element.
+	 * @param element  the archived model element
+	 */
+	public ZipEntryStorage(IResourceModelElement element) {
+		if (element == null || !element.isElementArchived()) {
+			throw new IllegalArgumentException();
+		}
+		this.fullName = element.getElementName();
+		this.zipResource = element.getElementResource();
+		this.entryName = fullName.substring(fullName.indexOf(DELIMITER)
+				+ DELIMITER.length());
 		this.entryPath = new Path(entryName);
 	}
 
