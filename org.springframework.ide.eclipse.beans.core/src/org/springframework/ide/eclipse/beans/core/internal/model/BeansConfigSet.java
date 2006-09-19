@@ -27,6 +27,7 @@ import java.util.Map;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
@@ -36,14 +37,16 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * This class defines a Spring beans config set (a list of beans config names).
- * 
  * @author Torsten Juergeleit
  */
 public class BeansConfigSet extends AbstractResourceModelElement
 												   implements IBeansConfigSet {
 	private List configNames;
+	private boolean allowAliasOverriding;
 	private boolean allowBeanDefinitionOverriding;
 	private boolean isIncomplete;
+
+	private Map aliasesMap;
 	private Map beansMap;
 	private Map beanClassesMap;
 
@@ -53,8 +56,9 @@ public class BeansConfigSet extends AbstractResourceModelElement
 
 	public BeansConfigSet(IBeansProject project, String name, List configNames) {
 		super(project, name);
-		this.allowBeanDefinitionOverriding = true;
 		this.configNames = new ArrayList(configNames);
+		allowAliasOverriding = true;
+		allowBeanDefinitionOverriding = true;
 	}
 
 	/**
@@ -62,8 +66,10 @@ public class BeansConfigSet extends AbstractResourceModelElement
 	 * <code>null</code>.
 	 */
 	public void reset() {
-		this.beansMap = null;
-		this.beanClassesMap = null;
+		aliasesMap = null;
+		beansMap = null;
+		beanClassesMap = null;
+		aliasesMap = null;
 	}
 
 	public int getElementType() {
@@ -91,6 +97,15 @@ public class BeansConfigSet extends AbstractResourceModelElement
 
 	public boolean isElementArchived() {
 		return false;
+	}
+
+	public void setAllowAliasOverriding(boolean allowAliasOverriding) {
+		this.allowAliasOverriding = allowAliasOverriding;
+		reset();
+	}
+
+	public boolean isAllowAliasOverriding() {
+		return allowAliasOverriding;
 	}
 
 	public void setAllowBeanDefinitionOverriding(
@@ -135,6 +150,18 @@ public class BeansConfigSet extends AbstractResourceModelElement
 		return configNames;
 	}
 
+	public boolean hasAlias(String name) {
+		return getAliasesMap().containsKey(name);
+	}
+
+	public IBeanAlias getAlias(String name) {
+		return (IBeanAlias) getAliasesMap().get(name);
+	}
+
+	public Collection getAliases() {
+		return getAliasesMap().values();
+	}
+
 	public boolean hasBean(String name) {
 		return getBeansMap().containsKey(name);
 	}
@@ -164,6 +191,35 @@ public class BeansConfigSet extends AbstractResourceModelElement
 
 	public String toString() {
 		return getElementName() + ": " + configNames.toString();
+	}
+
+	/**
+	 * Returns lazily initialized map with all beans defined in this config set.
+	 */
+	private Map getAliasesMap() {
+		if (aliasesMap == null) {
+			aliasesMap = new HashMap();
+			Iterator iter = configNames.iterator();
+			while (iter.hasNext()) {
+				String configName = (String) iter.next();
+				IBeansConfig config = BeansModelUtils.getConfig(configName,
+						this);
+				if (config != null) {
+
+					// Add aliases to map
+					Iterator aliases = config.getAliases().iterator();
+					while (aliases.hasNext()) {
+						IBeanAlias alias = (IBeanAlias) aliases.next();
+						if (allowAliasOverriding
+								|| !aliasesMap.containsKey(alias
+										.getElementName())) {
+							aliasesMap.put(alias.getElementName(), alias);
+						}
+					}
+				}
+			}
+		}
+		return aliasesMap;
 	}
 
 	/**

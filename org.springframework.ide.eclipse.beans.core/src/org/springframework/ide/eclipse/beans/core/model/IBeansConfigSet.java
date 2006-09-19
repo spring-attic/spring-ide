@@ -50,6 +50,16 @@ public interface IBeansConfigSet extends IResourceModelElement,
 	 */
 	Collection getConfigs();
 
+	public boolean hasAlias(String name);
+
+	public IBeanAlias getAlias(String name);
+
+	/**
+	 * Returns a list of all <code>IBeanAlias</code>s defined in this config
+	 * set.
+	 */
+	public Collection getAliases();
+
 	boolean hasBean(String name);
 
 	IBean getBean(String name);

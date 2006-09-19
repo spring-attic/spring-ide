@@ -23,14 +23,13 @@ import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 
 /**
  * This class defines an alias within a Spring beans configuration.
- *
  * @author Torsten Juergeleit
  */
 public class BeanAlias extends AbstractSourceModelElement
 														implements IBeanAlias {
 	private String name;
 
-	public BeanAlias(IBeansConfig config, String name, String alias) {
+	public BeanAlias(IBeansConfig config, String alias, String name) {
 		super(config, alias);
 		this.name = name;
 	}

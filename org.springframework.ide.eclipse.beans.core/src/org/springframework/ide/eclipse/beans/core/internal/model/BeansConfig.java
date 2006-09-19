@@ -45,8 +45,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.io.FileResource;
-import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.io.StorageResource;
+import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.io.xml.LineNumberPreservingDOMParser;
 import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
 import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
@@ -58,7 +58,6 @@ import org.w3c.dom.Element;
 
 /**
  * This class defines a Spring beans configuration.
- *
  * @author Torsten Juergeleit
  */
 public class BeansConfig extends AbstractResourceModelElement
@@ -69,19 +68,19 @@ public class BeansConfig extends AbstractResourceModelElement
 	/** This bean's config file */
 	private IFile file;
 
-	/** List of bean aliases, in registration order */
+	/** List of bean aliases (in registration order) */
 	private List aliases;
 
 	/** Table of alias names mapped to aliases */
 	private Map aliasesMap;
 
-	/** List of bean names, in registration order */
+	/** List of beans (in registration order) */
 	private List beans;
 
 	/** Table of bean names mapped to beans */
 	private Map beansMap;
 
-	/** List of bean names, in registration order */
+	/** List of inner beans (in registration order) */
 	private List innerBeans;
 
 	/** Table of bean class names mapped to list of beans implementing the

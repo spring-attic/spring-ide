@@ -119,7 +119,7 @@ public class EventBeanDefinitionParser extends DefaultXmlBeanDefinitionParser {
 					if (ALIAS_ELEMENT.equals(node.getNodeName())) {
 						String name = ele.getAttribute(NAME_ATTRIBUTE);
 						String alias = ele.getAttribute(ALIAS_ATTRIBUTE);
-						eventHandler.registerAlias(ele, name, alias);
+						eventHandler.registerAlias(ele, alias, name);
 					}
 				}
 			}

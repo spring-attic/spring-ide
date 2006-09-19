@@ -662,30 +662,49 @@ public final class BeansModelUtils {
 	}
 
 	/**
-	 * Returns the IBean for a given bean name from specified context
-	 * (<code>IBeansConfig</code> or <code>IBeansConfigSet</code>).
+	 * Returns the <code>IBean</code> for a given bean name from specified
+	 * context (<code>IBeansConfig</code> or <code>IBeansConfigSet</code>).
+	 * If the corresponding bean is not found then the context's list of
+	 * <code>IBeanAlias</code>es is checked too.
 	 * @param context  the context (<code>IBeanConfig</code> or
 	 * 		  <code>IBeanConfigSet</code>) the beans are looked-up
-	 * @return IBean or null if bean not defined in the context
+	 * @return <code>IBean</code> or <code>null</code> if bean not found
 	 * @throws IllegalArgumentException if unsupported context specified 
 	 */
-	public static final IBean getBean(String beanName, IModelElement context) {
+	public static final IBean getBean(String name, IModelElement context) {
 		if (context instanceof IBeansConfig) {
-			return ((IBeansConfig) context).getBean(beanName);
+			IBeansConfig config = (IBeansConfig) context;
+			IBean bean = config.getBean(name);
+			if (bean == null) {
+				IBeanAlias alias = config.getAlias(name);
+				if (alias != null) {
+					bean = config.getBean(alias.getName());
+				}
+			}
+			return bean;
 		} else if (context instanceof IBeansConfigSet) {
-			return ((IBeansConfigSet) context).getBean(beanName);
+			IBeansConfigSet configSet = (IBeansConfigSet) context;
+			IBean bean = configSet.getBean(name);
+			if (bean == null) {
+				IBeanAlias alias = configSet.getAlias(name);
+				if (alias != null) {
+					bean = configSet.getBean(alias.getName());
+				}
+			}
+			return bean;
 		} else {
 			throw new IllegalArgumentException("Unsupported context " +
 											   context);
 		}
 	}
-	
+
 	/**
-	 * Returns the inner IBean for a given bean name from specified context
-	 * (<code>IBeansConfig</code> or <code>IBeansConfigSet</code>).
+	 * Returns the inner <code>IBean</code> for a given bean name from
+	 * specified context (<code>IBeansConfig</code> or
+	 * <code>IBeansConfigSet</code>).
 	 * @param context  the context (<code>IBeanConfig</code> or
 	 * 		  <code>IBeanConfigSet</code>) the beans are looked-up
-	 * @return IBean or null if bean not defined
+	 * @return <code>IBean</code> or <code>null</code> if bean not found
 	 * @throws IllegalArgumentException if unsupported context specified 
 	 */
 	public static final IBean getInnerBean(String beanName,
