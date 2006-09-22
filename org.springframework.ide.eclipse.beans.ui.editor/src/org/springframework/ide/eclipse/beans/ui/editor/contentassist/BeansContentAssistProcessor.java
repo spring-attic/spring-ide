@@ -378,7 +378,8 @@ public class BeansContentAssistProcessor
             String returnType = method.getReturnType();
             if (Flags.isPublic(method.getFlags()) && !Flags.isInterface(method.getFlags())
                     && parameterCount == 1 && "V".equals(returnType) && method.exists()
-                    && ((IType) method.getParent()).isClass() && !method.isConstructor()) {
+                    && ((IType) method.getParent()).isClass() && !method.isConstructor()
+                    && method.getElementName().startsWith("set")) {
                 createMethodProposal(method, external);
             }
         }
@@ -389,7 +390,8 @@ public class BeansContentAssistProcessor
                 String[] parameterTypes = getParameterTypes(method);
                 String key = method.getElementName() + method.getSignature();
                 if (!methods.containsKey(key)) {
-                    String propertyName = getPropertyNameFromMethodName(method);
+                    String propertyName = java.beans.Introspector
+							.decapitalize(method.getElementName().substring(3));
                     String replaceText = prefix + propertyName;
                     StringBuffer buf = new StringBuffer();
                     buf.append(propertyName);
@@ -425,17 +427,6 @@ public class BeansContentAssistProcessor
             catch (JavaModelException e) {
                 // do nothing
             }
-        }
-
-        protected String getPropertyNameFromMethodName(IMethod method) {
-            String replaceText = method.getElementName().substring("set".length(),
-                    method.getElementName().length());
-            if (replaceText != null) {
-                char c = replaceText.charAt(0);
-                replaceText = replaceText.substring(1, replaceText.length());
-                replaceText = Character.toLowerCase(c) + replaceText;
-            }
-            return replaceText;
         }
     }
 
@@ -661,7 +652,7 @@ public class BeansContentAssistProcessor
 								List typesTemp = new ArrayList();
 								typesTemp.add(returnType);
 								
-								String newPrefix = oldPrefix + firstPrefix + ".";;
+								String newPrefix = oldPrefix + firstPrefix + ".";
 								
 								addPropertyNameAttributeValueProposals(request, lastPrefix, newPrefix, node, typesTemp);
 							}
