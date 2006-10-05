@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.beans.ui.graph.model.Property;
 public class BeanFigure extends Figure {
 
 	public static final Color COLOR = new Color(null, 255, 255, 206);
+	public static final int MAX_NAME_LENGTH = 20;
 
 	protected Bean bean;
 
@@ -84,11 +85,20 @@ public class BeanFigure extends Figure {
 		ConstructorArgumentFigure figure = new ConstructorArgumentFigure();
 		for (int i = 0; i < cargs.length; i++) {
 			ConstructorArgument carg = cargs[i];
-			Label label = new Label(carg.getName());
-			label.setIcon(BeansGraphImages.getImage(
-										BeansGraphImages.IMG_OBJS_CONSTRUCTOR));
-			Object value = carg.getBeanConstructorArgument().getValue();
-			label.setToolTip(new Label(createToolTipForValue(value)));
+			String name = carg.getName();
+			Label label = new Label();
+
+			// Display a truncated element name if necessary
+			if (name.length() > MAX_NAME_LENGTH) {
+				label.setText(name.substring(0, MAX_NAME_LENGTH) + "...");
+				label.setToolTip(new Label(name));
+			} else {
+				label.setText(name);
+				Object value = carg.getBeanConstructorArgument().getValue();
+				label.setToolTip(new Label(createToolTipForValue(value)));
+			}
+			label.setIcon(BeansGraphImages
+					.getImage(BeansGraphImages.IMG_OBJS_CONSTRUCTOR));
 			figure.add(label);
 		}
 		return figure;
