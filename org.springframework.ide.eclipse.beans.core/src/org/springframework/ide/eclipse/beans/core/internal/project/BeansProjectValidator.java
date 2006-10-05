@@ -45,14 +45,10 @@ public class BeansProjectValidator implements IProjectBuilder {
 				throw new OperationCanceledException();
 			}
 
-			// Reset the corresponding config within the bean model to force
-			// re-reading the config file and updating the model
+			// At first check if model was able to parse the config file 
 			IBeansProject project = BeansCorePlugin.getModel().getProject(
 															 file.getProject());
 			BeansConfig config = (BeansConfig) project.getConfig(file);
-			config.reset();
-
-			// At first check if model was able to parse the config file 
 			BeanDefinitionException e = config.getException();
 			if (e != null) {
 				BeansModelUtils.createProblemMarker(config,

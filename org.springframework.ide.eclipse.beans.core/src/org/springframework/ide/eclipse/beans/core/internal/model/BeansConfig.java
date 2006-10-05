@@ -166,10 +166,6 @@ public class BeansConfig extends AbstractResourceModelElement
 		}
 	}
 
-	public boolean isReset() {
-		return (beans == null);
-	}
-
 	public Collection getAliases() {
 		if (aliases == null) {
 

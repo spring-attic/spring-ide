@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,32 +23,32 @@ import org.eclipse.core.resources.IProject;
 
 /**
  * Defines callbacks for the <code>BeansResourceChangeListener</code>.
- * 
  * @see BeansResourceChangeListener
+ * @author Torsten Juergeleit
  */
 public interface IBeansResourceChangeEvents {
 
-	boolean isSpringProject(IProject project);
+	boolean isSpringProject(IProject project, int eventType);
 
-	void springNatureAdded(IProject project);
+	void springNatureAdded(IProject project, int eventType);
 
-	void springNatureRemoved(IProject project);
+	void springNatureRemoved(IProject project, int eventType);
 
-	void projectAdded(IProject project);
+	void projectAdded(IProject project, int eventType);
 
-	void projectOpened(IProject project);
+	void projectOpened(IProject project, int eventType);
 
-	void projectClosed(IProject project);
+	void projectClosed(IProject project, int eventType);
 
-	void projectDeleted(IProject project);
+	void projectDeleted(IProject project, int eventType);
 
-	void projectDescriptionChanged(IFile file);
+	void projectDescriptionChanged(IFile file, int eventType);
 
-	void configAdded(IFile file);
+	void configAdded(IFile file, int eventType);
 
-	void configChanged(IFile file);
+	void configChanged(IFile file, int eventType);
 
-	void configRemoved(IFile file);
+	void configRemoved(IFile file, int eventType);
 
-	void beanClassChanged(String className, Collection configs);
+	void beanClassChanged(String className, Collection configs, int eventType);
 }

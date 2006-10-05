@@ -51,6 +51,7 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 
 	public static final int LISTENER_FLAGS = IResourceChangeEvent.PRE_CLOSE |
 											 IResourceChangeEvent.PRE_DELETE |
+											 IResourceChangeEvent.PRE_BUILD |
 											 IResourceChangeEvent.POST_BUILD;
 	private static final int VISITOR_FLAGS = IResourceDelta.ADDED |
 											 IResourceDelta.CHANGED |
@@ -65,24 +66,26 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 		if (event.getSource() instanceof IWorkspace) {
 			IProject project = (IProject) event.getResource();
 			IResourceDelta delta = event.getDelta();
-			switch (event.getType()) {
+			int eventType = event.getType();
+			switch (eventType) {
 				case IResourceChangeEvent.PRE_CLOSE :
 					if (SpringCoreUtils.isSpringProject(project)) {
-						events.projectClosed(project);
+						events.projectClosed(project, eventType);
 					}
 					break;
 
 				case IResourceChangeEvent.PRE_DELETE :
 					if (SpringCoreUtils.isSpringProject(project)) {
-						events.projectDeleted(project);
+						events.projectDeleted(project, eventType);
 					}
 					break;
 
+				case IResourceChangeEvent.PRE_BUILD :
 				case IResourceChangeEvent.POST_BUILD :
 					if (delta != null) {
 						try {
-							delta.accept(new BeansProjectVisitor(),
-										 VISITOR_FLAGS);
+							delta.accept(new BeansProjectVisitor(eventType),
+									VISITOR_FLAGS);
 						} catch (CoreException e) {
 							BeansCorePlugin.log("Error while traversing " +
 												"resource change delta", e);
@@ -98,21 +101,28 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 	 */
 	private class BeansProjectVisitor implements IResourceDeltaVisitor {
 
+		private int eventType;
+
+		public BeansProjectVisitor(int eventType) {
+			this.eventType = eventType;
+		}
+
 		public boolean visit(IResourceDelta delta) throws CoreException {
 			IResource resource = delta.getResource();
 			switch (delta.getKind()) {
 				case IResourceDelta.ADDED :
 					if (resource instanceof IProject) {
 						if (SpringCoreUtils.isSpringProject(resource)) {
-							events.projectAdded((IProject) resource);
+							events.projectAdded((IProject) resource,
+									eventType);
 						}
 						return false;
 					} else if (resource instanceof IFile) {
 						IFile file = (IFile) resource;
 						if (isProjectDescriptionFile(file)) {
-							events.projectDescriptionChanged(file);
+							events.projectDescriptionChanged(file, eventType);
 						} else if (BeansCoreUtils.isBeansConfig(file)) {
-							events.configAdded(file);
+							events.configAdded(file, eventType);
 						}
 						return false;
 					}
@@ -121,7 +131,8 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 				case IResourceDelta.OPEN :
 					if (resource instanceof IProject) {
 						if (SpringCoreUtils.isSpringProject(resource)) {
-							events.projectOpened((IProject) resource);
+							events.projectOpened((IProject) resource,
+									eventType);
 						}
 						return false;
 					}
@@ -133,9 +144,10 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 						if ((flags & IResourceDelta.CONTENT) != 0) {
 							IFile file = (IFile) resource;
 							if (isProjectDescriptionFile(resource)) {
-								events.projectDescriptionChanged(file);
+								events.projectDescriptionChanged(file,
+										eventType);
 							} else if (BeansCoreUtils.isBeansConfig(file)) {
-								events.configChanged(file);
+								events.configChanged(file, eventType);
 							} else {
 								visitChangedFile(file);
 							}
@@ -144,17 +156,22 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 					} else if (resource instanceof IProject) {
 						if ((flags & IResourceDelta.OPEN) != 0) {
 							if (SpringCoreUtils.isSpringProject(resource)) {
-								events.projectOpened((IProject) resource);
+								events.projectOpened((IProject) resource,
+										eventType);
 							}
 							return false;
 						} else if ((flags & IResourceDelta.DESCRIPTION) != 0) {
 							IProject project = (IProject) resource;
 							if (SpringCoreUtils.isSpringProject(project)) {
-								if (!events.isSpringProject((IProject) resource)) {
-									events.springNatureAdded(project);
+								if (!events.isSpringProject((IProject)
+										resource, eventType)) {
+									events.springNatureAdded(project,
+											eventType);
 								}
-							} else if (events.isSpringProject(project)) {
-								events.springNatureRemoved(project);
+							} else if (events.isSpringProject(project,
+									eventType)) {
+								events.springNatureRemoved(project,
+										eventType);
 							}
 							return false;
 						}
@@ -164,7 +181,7 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 				case IResourceDelta.REMOVED :
 					if (resource instanceof IFile) {
 						if (BeansCoreUtils.isBeansConfig(resource)) {
-							events.configRemoved((IFile) resource);
+							events.configRemoved((IFile) resource, eventType);
 						}
 						return false;
 					}
@@ -192,7 +209,8 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 							String className = types[i].getFullyQualifiedName();
 							Collection configs = model.getConfigs(className);
 							if (!configs.isEmpty()) {
-								events.beanClassChanged(className, configs);
+								events.beanClassChanged(className, configs,
+										eventType);
 							}
 						}
 					} catch (JavaModelException e) {

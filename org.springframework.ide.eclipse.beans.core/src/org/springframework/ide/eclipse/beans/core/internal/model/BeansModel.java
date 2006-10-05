@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -51,10 +52,8 @@ import org.springframework.ide.eclipse.core.model.ModelUtils;
  * <p>
  * The single instance of <code>IBeansModel</code> is available from
  * the static method <code>BeansCorePlugin.getModel()</code>.
- *
  * @see org.springframework.ide.eclipse.core.model.IModelChangeListener
  * @see org.springframework.ide.eclipse.core.model.ModelChangeEvent
- *
  * @author Torsten Juergeleit
  */
 public class BeansModel extends AbstractModel implements IBeansModel {
@@ -286,142 +285,164 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	 */
 	private class ResourceChangeEventHandler implements IBeansResourceChangeEvents {
 
-		public boolean isSpringProject(IProject project) {
+		public boolean isSpringProject(IProject project, int eventType) {
 			return getProject(project) != null;
 		}
 
-		public void springNatureAdded(IProject project) {
-			if (DEBUG) {
-				System.out.println("Spring beans nature added to project '" +
-								   project.getName() + "'");
+		public void springNatureAdded(IProject project, int eventType) {
+			if (eventType == IResourceChangeEvent.POST_BUILD) {
+				if (DEBUG) {
+					System.out.println("Spring beans nature added to "+
+							"project '" + project.getName() + "'");
+				}
+				BeansProject proj = new BeansProject(project);
+				projects.put(project, proj);
+				notifyListeners(proj, ModelChangeEvent.ADDED);
 			}
-			BeansProject proj = new BeansProject(project);
-			projects.put(project, proj);
-			notifyListeners(proj, ModelChangeEvent.ADDED);
 		}
 
-		public void springNatureRemoved(IProject project) {
-			if (DEBUG) {
-				System.out.println("Spring beans nature removed from " +
-								   "project '" + project.getName() + "'");
+		public void springNatureRemoved(IProject project, int eventType) {
+			if (eventType == IResourceChangeEvent.POST_BUILD) {
+				if (DEBUG) {
+					System.out.println("Spring beans nature removed from " +
+							"project '" + project.getName() + "'");
+				}
+				IBeansProject proj = (IBeansProject) projects.remove(project);
+				notifyListeners(proj, ModelChangeEvent.REMOVED);
 			}
-			IBeansProject proj = (IBeansProject) projects.remove(project);
-			notifyListeners(proj, ModelChangeEvent.REMOVED);
 		}
 
-		public void projectAdded(IProject project) {
-			if (DEBUG) {
-				System.out.println("Project '" + project.getName() + "' added");
+		public void projectAdded(IProject project, int eventType) {
+			if (eventType == IResourceChangeEvent.POST_BUILD) {
+				if (DEBUG) {
+					System.out.println("Project '" + project.getName() +
+							"' added");
+				}
+				BeansProject proj = new BeansProject(project);
+				projects.put(project, proj);
+				notifyListeners(proj, ModelChangeEvent.ADDED);
 			}
-			BeansProject proj = new BeansProject(project);
-			projects.put(project, proj);
-			notifyListeners(proj, ModelChangeEvent.ADDED);
 		}
 	
-		public void projectOpened(IProject project) {
-			if (DEBUG) {
-				System.out.println("Project '" + project.getName() +
-								   "' opened");
+		public void projectOpened(IProject project, int eventType) {
+			if (eventType == IResourceChangeEvent.POST_BUILD) {
+				if (DEBUG) {
+					System.out.println("Project '" + project.getName() +
+							"' opened");
+				}
+				BeansProject proj = new BeansProject(project);
+				projects.put(project, proj);
+				notifyListeners(proj, ModelChangeEvent.ADDED);
 			}
-			BeansProject proj = new BeansProject(project);
-			projects.put(project, proj);
-			notifyListeners(proj, ModelChangeEvent.ADDED);
 		}
 	
-		public void projectClosed(IProject project) {
-			if (DEBUG) {
-				System.out.println("Project '" + project.getName() +
-								   "' closed");
+		public void projectClosed(IProject project, int eventType) {
+			if (eventType == IResourceChangeEvent.POST_BUILD) {
+				if (DEBUG) {
+					System.out.println("Project '" + project.getName() +
+							"' closed");
+				}
+				IBeansProject proj = (IBeansProject) projects.remove(project);
+				notifyListeners(proj, ModelChangeEvent.REMOVED);
 			}
-			IBeansProject proj = (IBeansProject) projects.remove(project);
-			notifyListeners(proj, ModelChangeEvent.REMOVED);
 		}
 	
-		public void projectDeleted(IProject project) {
-			if (DEBUG) {
-				System.out.println("Project '" + project.getName() +
-								   "' deleted");
+		public void projectDeleted(IProject project, int eventType) {
+			if (eventType == IResourceChangeEvent.POST_BUILD) {
+				if (DEBUG) {
+					System.out.println("Project '" + project.getName() +
+							"' deleted");
+				}
+				IBeansProject proj = (IBeansProject) projects.remove(project);
+				notifyListeners(proj, ModelChangeEvent.REMOVED);
 			}
-			IBeansProject proj = (IBeansProject) projects.remove(project);
-			notifyListeners(proj, ModelChangeEvent.REMOVED);
 		}
 	
-		public void projectDescriptionChanged(IFile file) {
-			if (DEBUG) {
-				System.out.println("Project description '" +
-								   file.getFullPath() +
-								   "' changed");
+		public void projectDescriptionChanged(IFile file, int eventType) {
+			if (eventType == IResourceChangeEvent.POST_BUILD) {
+				if (DEBUG) {
+					System.out.println("Project description '" +
+							file.getFullPath() + "' changed");
+				}
+				BeansProject project = (BeansProject)
+						projects.get(file.getProject());
+				project.reset();
+				notifyListeners(project, ModelChangeEvent.CHANGED);
 			}
-			BeansProject project = (BeansProject)
-												projects.get(file.getProject());
-			project.reset();
-			notifyListeners(project, ModelChangeEvent.CHANGED);
 		}
 
-		public void configAdded(IFile file) {
-			if (DEBUG) {
-				System.out.println("Config '" + file.getFullPath() +
-								   "' added");
+		public void configAdded(IFile file, int eventType) {
+			if (eventType == IResourceChangeEvent.POST_BUILD) {
+				if (DEBUG) {
+					System.out.println("Config '" + file.getFullPath() +
+							"' added");
+				}
+				BeansProject project = (BeansProject)
+													projects.get(file.getProject());
+				project.addConfig(file, true);
+				IBeansConfig config = project.getConfig(file);
+				notifyListeners(config, ModelChangeEvent.ADDED);
 			}
-			BeansProject project = (BeansProject)
-												projects.get(file.getProject());
-			project.addConfig(file, true);
-			IBeansConfig config = project.getConfig(file);
-			notifyListeners(config, ModelChangeEvent.ADDED);
 		}
 	
-		public void configChanged(IFile file) {
-			if (DEBUG) {
-				System.out.println("Config '" + file.getFullPath() +
-								   "' changed");
-			}
+		public void configChanged(IFile file, int eventType) {
 			IBeansProject project = (IBeansProject)
-												projects.get(file.getProject());
+					projects.get(file.getProject());
 			BeansConfig config = (BeansConfig) project.getConfig(file);
-
-			// There is no need to reset this config again if it's already done
-			// by the BeansConfigValidator
-			if (!config.isReset()) {
+			if (eventType == IResourceChangeEvent.POST_BUILD) {
+				if (DEBUG) {
+					System.out.println("Config '" + file.getFullPath() +
+							"' changed");
+				}
+				notifyListeners(config, ModelChangeEvent.CHANGED);
+			} else {
+				// Reset corresponding BeansConfig BEFORE the project builder
+				// starts validating this BeansConfig
 				config.reset();
 			}
-			notifyListeners(config, ModelChangeEvent.CHANGED);
 		}
 	
-		public void configRemoved(IFile file) {
-			if (DEBUG) {
-				System.out.println("Config '" + file.getFullPath() +
-								   "' removed");
-			}
-			BeansProject project = (BeansProject)
-												projects.get(file.getProject());
-			// Before removing the config from it's project keep a copy for
-			// notifying the listeners
-			BeansConfig config = (BeansConfig) project.getConfig(file);
-			project.removeConfig(file, true);
-
-			// Remove config from config sets where referenced as external
-			// config
-			Iterator iter = projects.values().iterator();
-			while (iter.hasNext()) {
-				project = (BeansProject) iter.next();
+		public void configRemoved(IFile file, int eventType) {
+			if (eventType == IResourceChangeEvent.POST_BUILD) {
+				if (DEBUG) {
+					System.out.println("Config '" + file.getFullPath() +
+							"' removed");
+				}
+				BeansProject project = (BeansProject)
+						projects.get(file.getProject());
+				// Before removing the config from it's project keep a copy for
+				// notifying the listeners
+				BeansConfig config = (BeansConfig) project.getConfig(file);
 				project.removeConfig(file, true);
-				
+	
+				// Remove config from config sets where referenced as external
+				// config
+				Iterator iter = projects.values().iterator();
+				while (iter.hasNext()) {
+					project = (BeansProject) iter.next();
+					project.removeConfig(file, true);
+					
+				}
+				notifyListeners(config, ModelChangeEvent.REMOVED);
 			}
-			notifyListeners(config, ModelChangeEvent.REMOVED);
 		}
 
-		public void beanClassChanged(String className, Collection configs) {
-			if (DEBUG) {
-				System.out.println("Bean class '" + className + "' changed");
-			}
-			BeansConfigValidator validator = new BeansConfigValidator();
-			Iterator iter = configs.iterator();
-			while (iter.hasNext()) {
-				IBeansConfig config = (IBeansConfig) iter.next();
-
-				// Delete all problem markers created by Spring IDE
-				ModelUtils.deleteProblemMarkers(config);
-				validator.validate(config, new NullProgressMonitor());
+		public void beanClassChanged(String className, Collection configs,
+					int eventType) {
+			if (eventType == IResourceChangeEvent.POST_BUILD) {
+				if (DEBUG) {
+					System.out.println("Bean class '" + className +
+							"' changed");
+				}
+				BeansConfigValidator validator = new BeansConfigValidator();
+				Iterator iter = configs.iterator();
+				while (iter.hasNext()) {
+					IBeansConfig config = (IBeansConfig) iter.next();
+	
+					// Delete all problem markers created by Spring IDE
+					ModelUtils.deleteProblemMarkers(config);
+					validator.validate(config, new NullProgressMonitor());
+				}
 			}
 		}
 	}
