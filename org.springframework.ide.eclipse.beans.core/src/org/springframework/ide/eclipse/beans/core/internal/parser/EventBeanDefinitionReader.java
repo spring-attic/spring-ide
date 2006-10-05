@@ -19,6 +19,7 @@ package org.springframework.ide.eclipse.beans.core.internal.parser;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.xerces.parsers.DOMParser;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
@@ -113,21 +114,11 @@ public class EventBeanDefinitionReader implements BeanDefinitionReader {
 			input = resource.getInputStream();
 			InputSource inputSource = new InputSource(input);
 			inputSource.setSystemId(resource.getDescription());
-			LineNumberPreservingDOMParser parser =
-											new LineNumberPreservingDOMParser();
-			parser.setFeature("http://xml.org/sax/features/validation", true);
-			parser.setFeature(
-					 "http://apache.org/xml/features/validation/dynamic", true);
+			DOMParser parser = getDomParser();
 			parser.setEntityResolver(new BeansDtdResolver());
 			parser.setErrorHandler(new BeansErrorHandler());
 			parser.parse(inputSource);
 			return registerBeanDefinitions(parser.getDocument(), resource);
-		} catch (NoClassDefFoundError e) {
-			throw new BeanDefinitionException(-1, WRONG_XERCES_MESSAGE, e);
-		} catch (NoSuchMethodError e) {
-			throw new BeanDefinitionException(-1, WRONG_XERCES_MESSAGE, e);
-		} catch (ClassCastException e) {
-			throw new BeanDefinitionException(-1, WRONG_XERCES_MESSAGE, e);
 		} catch (SAXException e) {
 			throw new BeanDefinitionException(e);
 		} catch (DOMException e) {
@@ -201,6 +192,27 @@ public class EventBeanDefinitionReader implements BeanDefinitionReader {
 		EventBeanDefinitionParser parser = new EventBeanDefinitionParser(
 															this.eventHandler);
 		return parser.registerBeanDefinitions(this, doc, resource);
+	}
+
+	/**
+	 * Returns an validating version of Xerces <code>DOMParser</code> which
+	 * saves the starting and ending line number for every <code>Node</code>. 
+	 * @see LineNumberPreservingDOMParser
+	 */
+	private DOMParser getDomParser() throws BeanDefinitionException {
+		try {
+			LineNumberPreservingDOMParser parser = new
+					LineNumberPreservingDOMParser();
+			parser.setFeature("http://xml.org/sax/features/validation", true);
+			parser.setFeature(
+					"http://apache.org/xml/features/validation/dynamic", true);
+			return parser;
+		} catch (Throwable e) {
+			BeanDefinitionException be = new BeanDefinitionException(-1,
+					WRONG_XERCES_MESSAGE, e);
+			BeansCorePlugin.log(be);
+			throw be;
+		}
 	}
 
 	/**
