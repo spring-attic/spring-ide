@@ -248,17 +248,25 @@ public class ConfigSetDialog extends Dialog {
 		// Add all configs from referenced projects
 		IBeansModel model = BeansCorePlugin.getModel();
 		try {
-			IProject[] projects = project.getProject().getProject().
-													   getReferencedProjects();
+			IProject[] projects = project.getProject().getProject()
+					.getReferencedProjects();
 			for (int i = 0; i < projects.length; i++) {
 				IBeansProject project = model.getProject(projects[i]);
 				if (project != null) {
 					iter = project.getConfigs().iterator();
 					while (iter.hasNext()) {
 						IBeansConfig config = (IBeansConfig) iter.next();
-						String path = ModelUtils.getResourcePath(config);
-						if (path != null && !configSet.hasConfig(path)) {
-							configs.add(new ConfigNode(configSet, path));
+						String projectPath = ModelUtils
+								.getResourcePath(config.getElementParent());
+						if (projectPath != null) {
+
+							// Create the full qualified path of the config
+							// (with support for configs stored in JAR files)  
+							String name = projectPath + "/"
+									+ config.getElementName();
+							if (!configSet.hasConfig(name)) {
+								configs.add(new ConfigNode(configSet, name));
+							}
 						}
 					}
 				}
