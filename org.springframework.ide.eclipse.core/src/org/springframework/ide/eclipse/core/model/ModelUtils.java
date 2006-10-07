@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
 /**
- * Some helper methods.
+ * Some model-related helper methods.
  * @author Torsten Juergeleit
  */
 public final class ModelUtils {
@@ -51,11 +51,13 @@ public final class ModelUtils {
 
 	/**
 	 * Returns the full path of the give element's resource or
-	 * <code>null</code> if no element or resource found. 
+	 * <code>null</code> if no <code>IResourceModelElement</code> or resource
+	 * found.
 	 */
-	public static String getResourcePath(IResourceModelElement element) {
-		if (element != null) {
-			IResource resource = element.getElementResource();
+	public static String getResourcePath(IModelElement element) {
+		if (element instanceof IResourceModelElement) {
+			IResource resource = ((IResourceModelElement) element)
+					.getElementResource();
 			if (resource != null) {
 				return resource.getFullPath().toString();
 			}
