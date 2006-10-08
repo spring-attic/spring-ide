@@ -114,7 +114,10 @@ public class BeansContentOutlineConfiguration
 			Node node = (Node) object;
 			String nodeName = node.getNodeName();
 			NamedNodeMap attributes = node.getAttributes();
-	
+			
+			if ("beans".equals(nodeName)) {
+				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONFIG);
+			}
 			// Root elements (alias, import and bean)
 			if ("alias".equals(nodeName)) {
 				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ALIAS);
