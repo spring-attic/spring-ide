@@ -33,6 +33,7 @@ public class BeansNavigatorActionProvider extends CommonActionProvider {
 
 	private OpenConfigFileAction openConfigAction;
 	private OpenPropertiesAction openPropertiesAction;
+	private ShowBeansGraphAction showBeansGraphAction;
 
 	public BeansNavigatorActionProvider() {
 	}
@@ -43,11 +44,14 @@ public class BeansNavigatorActionProvider extends CommonActionProvider {
 
 		// Make sure we're running in a workbench part instead of a dialog
 		if (viewSite instanceof ICommonViewerWorkbenchSite) {
-			ICommonViewerWorkbenchSite workbenchSite = (ICommonViewerWorkbenchSite) viewSite;
+			ICommonViewerWorkbenchSite workbenchSite =
+					(ICommonViewerWorkbenchSite) viewSite;
 			openConfigAction = new OpenConfigFileAction(
 					workbenchSite.getPage(), workbenchSite
 							.getSelectionProvider());
 			openPropertiesAction = new OpenPropertiesAction(workbenchSite
+					.getPage(), workbenchSite.getSelectionProvider());
+			showBeansGraphAction = new ShowBeansGraphAction(workbenchSite
 					.getPage(), workbenchSite.getSelectionProvider());
 		}
 	}
@@ -56,6 +60,10 @@ public class BeansNavigatorActionProvider extends CommonActionProvider {
 		if (openConfigAction.isEnabled()) {
 			menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN,
 					openConfigAction);
+		}
+		if (showBeansGraphAction.isEnabled()) {
+			menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN,
+					showBeansGraphAction);
 		}
 		if (openPropertiesAction.isEnabled()) {
 			menu.appendToGroup(ICommonMenuConstants.GROUP_PROPERTIES,
