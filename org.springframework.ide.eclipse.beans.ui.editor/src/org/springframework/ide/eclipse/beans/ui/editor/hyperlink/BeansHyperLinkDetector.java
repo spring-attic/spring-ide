@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor.hyperlink;
 
@@ -48,6 +48,7 @@ import org.w3c.dom.Node;
  * Detects hyperlinks in XML tags. Includes detection of bean classes and bean
  * properties in attribute values. Resolves bean references (including
  * references to parent beans or factory beans).
+ * 
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  */
@@ -73,8 +74,7 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 						&& region.getOffset() >= attr
 								.getValueRegionStartOffset()) {
 					if (isLinkableAttr(currentAttr)) {
-						IRegion hyperlinkRegion = getHyperlinkRegion(
-								currentAttr);
+						IRegion hyperlinkRegion = getHyperlinkRegion(currentAttr);
 						IHyperlink hyperLink = createHyperlink(currentAttr
 								.getName(), currentAttr.getNodeValue(),
 								currentNode.getParentNode(), hyperlinkRegion,
@@ -86,16 +86,16 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 				}
 
 				// otherwise handle selected element
-//				IDOMElement element = (IDOMElement) currentNode;
-//				if (region.getOffset() <= element.getStartEndOffset()) {
-//					IRegion hyperlinkRegion = getHyperlinkRegion(
-//							currentNode);
-//					IHyperlink hyperLink = createElementHyperlink(element,
-//							hyperlinkRegion, document, textViewer, region);
-//					if (hyperLink != null) {
-//						return new IHyperlink[] { hyperLink };
-//					}
-//				}
+				// IDOMElement element = (IDOMElement) currentNode;
+				// if (region.getOffset() <= element.getStartEndOffset()) {
+				// IRegion hyperlinkRegion = getHyperlinkRegion(
+				// currentNode);
+				// IHyperlink hyperLink = createElementHyperlink(element,
+				// hyperlinkRegion, document, textViewer, region);
+				// if (hyperLink != null) {
+				// return new IHyperlink[] { hyperLink };
+				// }
+				// }
 				break;
 
 			case Node.TEXT_NODE:
@@ -122,11 +122,12 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 	private IRegion getHyperlinkRegion(Node node) {
 		if (node != null) {
 			switch (node.getNodeType()) {
-			case Node.DOCUMENT_TYPE_NODE :
-			case Node.TEXT_NODE :
+			case Node.DOCUMENT_TYPE_NODE:
+			case Node.TEXT_NODE:
 				IDOMNode docNode = (IDOMNode) node;
-				return new Region(docNode.getStartOffset(),
-						docNode.getEndOffset() - docNode.getStartOffset());
+				return new Region(docNode.getStartOffset(), docNode
+						.getEndOffset()
+						- docNode.getStartOffset());
 
 			case Node.ELEMENT_NODE:
 				IDOMElement element = (IDOMElement) node;
@@ -136,8 +137,8 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 				} else {
 					endOffset = element.getEndOffset();
 				}
-				return new Region(element.getStartOffset(),
-						endOffset - element.getStartOffset());
+				return new Region(element.getStartOffset(), endOffset
+						- element.getStartOffset());
 
 			case Node.ATTRIBUTE_NODE:
 				IDOMAttr att = (IDOMAttr) node;
@@ -177,16 +178,13 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 			return true;
 		} else if ("depends-on".equals(attrName)) {
 			return true;
-		} else if ("bean".equals(attrName)
-				|| "local".equals(attrName)
-				|| "parent".equals(attrName)
-				|| "ref".equals(attrName)
+		} else if ("bean".equals(attrName) || "local".equals(attrName)
+				|| "parent".equals(attrName) || "ref".equals(attrName)
 				|| ("name".equals(attrName) && "alias".equals(ownerName))) {
 			return true;
 		} else if ("value".equals(attrName)) {
 			return true;
-		} else if ("value-ref".equals(attrName)
-				|| "key-ref".equals(attrName)) {
+		} else if ("value-ref".equals(attrName) || "key-ref".equals(attrName)) {
 			return true;
 		}
 		return false;
@@ -203,8 +201,8 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 			parentName = parentNode.getNodeName();
 		}
 		if ("class".equals(name) || "value".equals(name)) {
-			IFile file = BeansEditorUtils.getFile(document);
-			IType type = BeansModelUtils.getJavaType(file.getProject(), target);
+			IType type = BeansModelUtils.getJavaType(BeansEditorUtils
+					.getProject(document), target);
 			if (type != null) {
 				return new JavaElementHyperlink(hyperlinkRegion, type);
 			}
@@ -230,9 +228,8 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 			if (attributes != null && attributes.getNamedItem("class") != null) {
 				String className = attributes.getNamedItem("class")
 						.getNodeValue();
-				IFile file = BeansEditorUtils.getFile(document);
-				IType type = BeansModelUtils.getJavaType(file.getProject(),
-						className);
+				IType type = BeansModelUtils.getJavaType(BeansEditorUtils
+						.getProject(document), className);
 				try {
 					IMethod method = Introspector.findMethod(type, target, 0,
 							true, Introspector.STATIC_IRRELVANT);
@@ -266,9 +263,8 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 				className = attributes.getNamedItem("class").getNodeValue();
 			}
 			try {
-				IFile file = BeansEditorUtils.getFile(document);
-				IType type = BeansModelUtils.getJavaType(file.getProject(),
-						className);
+				IType type = BeansModelUtils.getJavaType(BeansEditorUtils
+						.getProject(document), className);
 				IMethod method = Introspector.findMethod(type, target, -1,
 						true, Introspector.STATIC_YES);
 				if (method != null) {
@@ -304,49 +300,49 @@ public class BeansHyperLinkDetector implements IHyperlinkDetector {
 		return null;
 	}
 
-//	private IHyperlink createElementHyperlink(Element element,
-//			IRegion hyperlinkRegion, IDocument document,
-//			ITextViewer textViewer, IRegion region) {
-//		String elementName = element.getNodeName();
-//		Node parentNode = element.getParentNode();
-//		String parentName = parentNode.getNodeName();
-//		if ("beans".equals(parentName)) {
-//			if ("alias".equals(elementName)) {
-//				// TODO extend BeansViewLocation and BeansView
-//			} else if ("bean".equals(elementName)) {
-//				Node idAttribute = element.getAttributeNode("id");
-//				if (idAttribute != null && idAttribute.getNodeValue() != null) {
-//					IFile file = BeansEditorUtils.getFile(document);
-//					BeansViewLocation location = new BeansViewLocation();
-//					location.setProjectName(file.getProject().getName());
-//					location.setConfigName(file.getProjectRelativePath()
-//							.toString());
-//					location.setBeanName(idAttribute.getNodeValue());
-//					return new BeansViewLocationHyperlink(hyperlinkRegion,
-//							location);
-//				}
-//			}
-//		} else if ("bean".equals(parentName)
-//				&& "beans".equals(parentNode.getParentNode().getNodeName())) {
-//			if ("property".equals(elementName)) {
-//				Node idAttribute = ((Element) parentNode).
-//					getAttributeNode("id");
-//				Node nameAttribute = element.getAttributeNode("name");
-//				if (idAttribute != null && idAttribute.getNodeValue() != null
-//						&& nameAttribute != null
-//						&& nameAttribute.getNodeValue() != null) {
-//					IFile file = BeansEditorUtils.getFile(document);
-//					BeansViewLocation location = new BeansViewLocation();
-//					location.setProjectName(file.getProject().getName());
-//					location.setConfigName(file.getProjectRelativePath()
-//							.toString());
-//					location.setBeanName(idAttribute.getNodeValue());
-//					location.setPropertyName(nameAttribute.getNodeValue());
-//					return new BeansViewLocationHyperlink(hyperlinkRegion,
-//							location);
-//				}
-//			}
-//		}
-//		return null;
-//	}
+	// private IHyperlink createElementHyperlink(Element element,
+	// IRegion hyperlinkRegion, IDocument document,
+	// ITextViewer textViewer, IRegion region) {
+	// String elementName = element.getNodeName();
+	// Node parentNode = element.getParentNode();
+	// String parentName = parentNode.getNodeName();
+	// if ("beans".equals(parentName)) {
+	// if ("alias".equals(elementName)) {
+	// // TODO extend BeansViewLocation and BeansView
+	// } else if ("bean".equals(elementName)) {
+	// Node idAttribute = element.getAttributeNode("id");
+	// if (idAttribute != null && idAttribute.getNodeValue() != null) {
+	// IFile file = BeansEditorUtils.getFile(document);
+	// BeansViewLocation location = new BeansViewLocation();
+	// location.setProjectName(file.getProject().getName());
+	// location.setConfigName(file.getProjectRelativePath()
+	// .toString());
+	// location.setBeanName(idAttribute.getNodeValue());
+	// return new BeansViewLocationHyperlink(hyperlinkRegion,
+	// location);
+	// }
+	// }
+	// } else if ("bean".equals(parentName)
+	// && "beans".equals(parentNode.getParentNode().getNodeName())) {
+	// if ("property".equals(elementName)) {
+	// Node idAttribute = ((Element) parentNode).
+	// getAttributeNode("id");
+	// Node nameAttribute = element.getAttributeNode("name");
+	// if (idAttribute != null && idAttribute.getNodeValue() != null
+	// && nameAttribute != null
+	// && nameAttribute.getNodeValue() != null) {
+	// IFile file = BeansEditorUtils.getFile(document);
+	// BeansViewLocation location = new BeansViewLocation();
+	// location.setProjectName(file.getProject().getName());
+	// location.setConfigName(file.getProjectRelativePath()
+	// .toString());
+	// location.setBeanName(idAttribute.getNodeValue());
+	// location.setPropertyName(nameAttribute.getNodeValue());
+	// return new BeansViewLocationHyperlink(hyperlinkRegion,
+	// location);
+	// }
+	// }
+	// }
+	// return null;
+	// }
 }
