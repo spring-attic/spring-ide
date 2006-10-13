@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.core.io;
 
@@ -23,6 +23,8 @@ import java.io.InputStream;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.springframework.core.io.AbstractResource;
+import org.springframework.core.io.Resource;
+import org.springframework.util.StringUtils;
 
 /**
  * Resource implementation for Eclipse storage handles.
@@ -55,5 +57,19 @@ public class StorageResource extends AbstractResource {
 
 	public String getDescription() {
 		return "storage [" + (storage != null ? storage.getName() : "") + "]";
+	}
+	
+	public Resource createRelative(String relativePath) throws IOException {
+		if (storage instanceof ZipEntryStorage) {
+			ZipEntryStorage zipEntry = (ZipEntryStorage) storage;
+			String newPath = StringUtils.applyRelativePath(zipEntry
+					.getFullPath().toString(), relativePath);
+			return new StorageResource(new ZipEntryStorage(zipEntry
+					.getZipResource(), newPath));
+		} else {
+			String newPath = StringUtils.applyRelativePath(storage
+					.getFullPath().toString(), relativePath);
+			return new FileResource(newPath);
+		}
 	}
 }
