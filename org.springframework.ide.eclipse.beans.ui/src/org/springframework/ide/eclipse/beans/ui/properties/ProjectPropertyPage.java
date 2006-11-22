@@ -150,8 +150,14 @@ public class ProjectPropertyPage extends PropertyPage {
 	}
 
 	public void dispose() {
-		configFilesTab.dispose();
-		configSetsTab.dispose();
+		if (configFilesTab != null) {
+			configFilesTab.dispose();
+			configFilesTab = null;
+		}
+		if (configSetsTab != null) {
+			configSetsTab.dispose();
+			configSetsTab = null;
+		}
 		super.dispose();
 	}
 }
