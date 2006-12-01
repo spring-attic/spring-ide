@@ -34,38 +34,31 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
  * Wrapper for an entry in a ZIP file.
- * 
  * @author Torsten Juergeleit
  */
 public class ZipEntryStorage extends PlatformObject implements IStorage {
 
 	/**
-	 * This string (with the value of "!") is used to delimit ZIP file name plus
-	 * the corresponding ZIP entry (delimited by
+	 * This string (with the value of "!") is used to delimit ZIP file name
+	 * plus the corresponding ZIP entry (delimited by
 	 * <code>ZipEntryStorage.NAME_DELIMITER</code>)
 	 */
-	public static final String DELIMITER = "!";
+	public static final String DELIMITER = "!"; 
 
 	private String fullName;
-
 	private IResource zipResource;
-
 	private String entryName;
-
 	private IPath entryPath;
 
 	/**
 	 * Creates a <code>ZipEntryStorage</code> from a full-qualified name of a
 	 * ZIP file entry (project-relative path to the ZIP file plus full path of
-	 * the ZIP file entry delimited by <code>DELIMITER</code>) and the
-	 * project which contains the ZIP file.
-	 * 
-	 * @param project
-	 *            the project which contains the ZIP file
-	 * @param fullName
-	 *            the full-qualified name of the ZIP file entry
-	 *            (project-relative path to the ZIP file plus full path of the
-	 *            ZIP file entry delimited by <code>DELIMITER</code>)
+	 * the ZIP file entry delimited by <code>DELIMITER</code>) and the project
+	 * which contains the ZIP file.
+	 * @param project  the project which contains the ZIP file
+	 * @param fullName  the full-qualified name of the ZIP file entry
+	 *			(project-relative path to the ZIP file plus full path of the
+	 *			ZIP file entry delimited by <code>DELIMITER</code>)
 	 */
 	public ZipEntryStorage(IProject project, String fullName) {
 		int pos = fullName.indexOf(ZipEntryStorage.DELIMITER);
@@ -81,13 +74,10 @@ public class ZipEntryStorage extends PlatformObject implements IStorage {
 	}
 
 	/**
-	 * Creates a <code>ZipEntryStorage</code> from a full path of a ZIP file
-	 * entry and the corresponding ZIP file resource.
-	 * 
-	 * @param zipResource
-	 *            the ZIP file resource
-	 * @param entryName
-	 *            the full path of the ZIP file entry
+	 * Creates a <code>ZipEntryStorage</code> from a full path of a
+	 * ZIP file entry and the corresponding ZIP file resource.
+	 * @param zipResource  the ZIP file resource
+	 * @param entryName  the full path of the ZIP file entry
 	 */
 	public ZipEntryStorage(IResource zipResource, String entryName) {
 		this.fullName = zipResource.getProjectRelativePath() + DELIMITER
@@ -100,9 +90,7 @@ public class ZipEntryStorage extends PlatformObject implements IStorage {
 	/**
 	 * Creates a <code>ZipEntryStorage</code> from a given archived model
 	 * element.
-	 * 
-	 * @param element
-	 *            the archived model element
+	 * @param element  the archived model element
 	 */
 	public ZipEntryStorage(IResourceModelElement element) {
 		if (element == null || !element.isElementArchived()) {
@@ -124,14 +112,14 @@ public class ZipEntryStorage extends PlatformObject implements IStorage {
 
 	public InputStream getContents() throws CoreException {
 		try {
-			ZipFile zipFile = new ZipFile(zipResource.getLocation().toFile());
+			ZipFile zipFile = new ZipFile(zipResource.getLocation().toFile()); 
 			ZipEntry zipEntry = zipFile.getEntry(this.entryName);
 			if (zipEntry == null) {
 				throw new CoreException(SpringCore.createErrorStatus(
 						"Invalid path '" + entryName + "'", null));
 			}
 			return zipFile.getInputStream(zipEntry);
-		} catch (IOException e) {
+		} catch (IOException e){
 			throw new CoreException(SpringCore.createErrorStatus(
 					e.getMessage(), e));
 		}
@@ -149,16 +137,16 @@ public class ZipEntryStorage extends PlatformObject implements IStorage {
 	}
 
 	/**
-	 * Returns the full-qualified name of the ZIP file entry (project-relative
-	 * path to the ZIP file plus full path of the ZIP file entry delimited by
-	 * <code>DELIMITER</code>).
+	 * Returns the full-qualified name of the ZIP file entry
+	 * (project-relative path to the ZIP file plus full path of the
+	 * ZIP file entry delimited by <code>DELIMITER</code>).
 	 */
 	public String getFullName() {
 		return fullName;
 	}
 
 	/**
-	 * Returns <code>true</code> because the ZIP file entry is not modifiable.
+	 * Returns <code>true</code> because the ZIP file entry is not modifiable. 
 	 */
 	public boolean isReadOnly() {
 		return true;
