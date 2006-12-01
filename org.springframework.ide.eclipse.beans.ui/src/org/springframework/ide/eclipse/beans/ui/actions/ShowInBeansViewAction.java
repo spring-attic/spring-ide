@@ -16,10 +16,10 @@
 
 package org.springframework.ide.eclipse.beans.ui.actions;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.IAction;
@@ -93,10 +93,10 @@ public class ShowInBeansViewAction extends AbstractBeansConfigEditorAction
 		private int nameOffset;
 		private String name;
 		private int beanOffset;
-		private List beanTokens;
+		private Set<String> beanTokens;
 		private String beanName;
 		private int propertyOffset;
-		private List propertyTokens;
+		private Set<String> propertyTokens;
 		private String propertyName;
 
 		public BeansViewLocationGuesser(IDocument doc, int caretOffset) {
@@ -158,21 +158,22 @@ public class ShowInBeansViewAction extends AbstractBeansConfigEditorAction
 		}
 
 		private void createBeanTokens() {
-			List beanTokens = null;
+			Set<String> beanTokens = null;
 			if (nameOffset != -1) {
 				try {
 					beanOffset = searchBackward(doc, nameOffset, "<bean");
 					if (beanOffset != -1) {
-						String beanText = doc.get(beanOffset,
-												  nameOffset - beanOffset - 1);
+						String beanText = doc.get(beanOffset, nameOffset
+								- beanOffset - 1);
 						String[] tokens = beanText.split("[=\\s]");
-						beanTokens = new ArrayList(Arrays.asList(tokens));
+						beanTokens = new LinkedHashSet<String>(Arrays
+								.asList(tokens));
 
 						// remove empty tokens from list
 						Iterator iter = beanTokens.iterator();
 						while (iter.hasNext()) {
 							String token = (String) iter.next();
-							if (token.length() == 0){
+							if (token.length() == 0) {
 								iter.remove();
 							}
 						}
@@ -194,8 +195,7 @@ public class ShowInBeansViewAction extends AbstractBeansConfigEditorAction
 							token = (String) iter.next();
 
 							// remove leading and trailing quote
-							if (token.length() > 1 &&
-											   token.charAt(0) == '"') {
+							if (token.length() > 1 && token.charAt(0) == '"') {
 								token = token.substring(1);
 							}
 							int pos = token.indexOf('"');
@@ -214,22 +214,23 @@ public class ShowInBeansViewAction extends AbstractBeansConfigEditorAction
 		}
 
 		private void createPropertyTokens() {
-			List propertyTokens = null;
+			Set<String> propertyTokens = null;
 			if (nameOffset != -1) {
 				try {
 					propertyOffset = searchBackward(doc, nameOffset,
-													"<property");
+							"<property");
 					if (propertyOffset > beanOffset) {
 						String propertyText = doc.get(propertyOffset,
-											   nameOffset - propertyOffset - 1);
+								nameOffset - propertyOffset - 1);
 						String[] tokens = propertyText.split("[=\\s]");
-						propertyTokens = new ArrayList(Arrays.asList(tokens));
+						propertyTokens = new LinkedHashSet<String>(Arrays
+								.asList(tokens));
 
 						// remove empty tokens from list
 						Iterator iter = propertyTokens.iterator();
 						while (iter.hasNext()) {
 							String token = (String) iter.next();
-							if (token.length() == 0){
+							if (token.length() == 0) {
 								iter.remove();
 							}
 						}
@@ -251,8 +252,7 @@ public class ShowInBeansViewAction extends AbstractBeansConfigEditorAction
 							token = (String) iter.next();
 
 							// remove leading and trailing quote
-							if (token.length() > 1 &&
-											   token.charAt(0) == '"') {
+							if (token.length() > 1 && token.charAt(0) == '"') {
 								token = token.substring(1);
 							}
 							int pos = token.indexOf('"');

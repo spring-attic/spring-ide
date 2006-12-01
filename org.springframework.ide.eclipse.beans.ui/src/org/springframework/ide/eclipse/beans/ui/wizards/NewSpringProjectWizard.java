@@ -101,7 +101,7 @@ public class NewSpringProjectWizard extends Wizard
 
 		// get the data from the UI widgets
 		final IProject project = mainPage.getProjectHandle();
-		final Set configExtensions = mainPage.getConfigExtensions();
+		final Set<String> configExtensions = mainPage.getConfigExtensions();
 		final boolean isJavaProject = mainPage.isJavaProject();
 		final String sourceDir = mainPage.getSourceDirectory().trim();
 		final String outputDir = mainPage.getOutputDirectory().trim();
@@ -204,13 +204,11 @@ public class NewSpringProjectWizard extends Wizard
 	 * @param monitor
 	 *            the progress monitor to show visual progress with
 	 * 
-	 * @exception CoreException
-	 *                if the operation fails
-	 * @exception OperationCanceledException
-	 *                if the operation is canceled
+	 * @exception CoreException  if the operation fails
+	 * @exception OperationCanceledException  if the operation is canceled
 	 */
 	protected void createSpringProject(IProject projectHandle,
-				IProjectDescription description, Set configExtensions,
+				IProjectDescription description, Set<String> configExtensions,
 				IProgressMonitor monitor) throws CoreException,
 						OperationCanceledException {
 		try {

@@ -17,13 +17,15 @@
 package org.springframework.ide.eclipse.beans.ui.views.model;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 
 /**
@@ -36,9 +38,9 @@ public class ConfigSetNode extends AbstractNode {
 	public static final int NAME = 1;
 	public static final int CONFIGS = 2;
 
-	private List configs = new ArrayList();
-	private List beans = null;  // lazy initialized in getBeans() or getBean()
-	private Map beansMap;  // lazy initialized in getBean()
+	private List<ConfigNode> configs = new ArrayList<ConfigNode>();
+	private List<BeanNode> beans = null;  // lazy initialized in getBeans() or getBean()
+	private Map<String, BeanNode> beansMap;  // lazy initialized in getBean()
 	private boolean isOverrideEnabled = false;
 	private boolean isIncomplete = false;
 
@@ -63,11 +65,9 @@ public class ConfigSetNode extends AbstractNode {
 		isIncomplete = configSet.isIncomplete();
 
 		// Add configs from given config set to internal list
-		Iterator iter = configSet.getConfigs().iterator();
-		while (iter.hasNext()) {
-			String configName = (String) iter.next();
-			ConfigNode config = new ConfigNode(this, configName); 
-			configs.add(config);
+		for (IBeansConfig config : configSet.getConfigs()) {
+			ConfigNode node = new ConfigNode(this, config.getElementName()); 
+			configs.add(node);
 		}
 	}
 
@@ -121,7 +121,7 @@ public class ConfigSetNode extends AbstractNode {
 	 * 
 	 * @param configs  the configs to add
 	 */
-	public void addConfigs(List configs) {
+	public void addConfigs(List<ConfigNode> configs) {
 		this.configs.addAll(configs);
 		propertyChanged(this, CONFIGS);
 	}
@@ -135,15 +135,13 @@ public class ConfigSetNode extends AbstractNode {
 	 * 
 	 * @return config nodes of this config set
 	 */
-	public List getConfigs() {
-		return Collections.unmodifiableList(configs);
+	public Set<ConfigNode> getConfigs() {
+		return new LinkedHashSet<ConfigNode>(configs);
 	}
 
-	public List getConfigNames() {
-		List names = new ArrayList();
-		Iterator iter = configs.iterator();
-		while (iter.hasNext()) {
-			ConfigNode config = (ConfigNode) iter.next();
+	public Set<String> getConfigNames() {
+		Set<String> names = new LinkedHashSet<String>();
+		for (ConfigNode config : configs) {
 			names.add(config.getName());
 		}
 		return names;
@@ -203,10 +201,8 @@ public class ConfigSetNode extends AbstractNode {
 			}
 
 			// Lazily initialize the bean map
-			beansMap = new HashMap();
-			Iterator iter = beans.iterator();
-			while (iter.hasNext()) {
-				BeanNode bean = (BeanNode) iter.next();
+			beansMap = new HashMap<String, BeanNode>();
+			for (BeanNode bean : beans) {
 				beansMap.put(bean.getName(), bean);
 			}
 		}
@@ -230,26 +226,21 @@ public class ConfigSetNode extends AbstractNode {
 	}
 
 	private void readConfigFiles() {
-		this.beans = new ArrayList();
-		Iterator iter = configs.iterator();
-		while (iter.hasNext()) {
-			ConfigNode config = (ConfigNode) iter.next();
-			BeanNode[] beans = config.getBeans(false);
-			for (int i = 0; i < beans.length; i++) {
-				BeanNode bean = new BeanNode(this, beans[i]);
-				markOverridingBean(bean);
-				this.beans.add(bean);
+		beans = new ArrayList<BeanNode>();
+		for (ConfigNode config : configs) {
+			for (BeanNode bean : config.getBeans(false)) {
+				BeanNode newBean = new BeanNode(this, bean);
+				markOverridingBean(newBean);
+				beans.add(newBean);
 			}
 		}
 	}
 
 	private void markOverridingBean(BeanNode newBean) {
 		String beanName = newBean.getName();
-		Iterator iter = beans.iterator();
-		while (iter.hasNext()) {
-			BeanNode bean = (BeanNode) iter.next();
-			if ((bean.getFlags() & INode.FLAG_HAS_ERRORS) == 0 &&
-											  beanName.equals(bean.getName())) {
+		for (BeanNode bean : beans) {
+			if ((bean.getFlags() & INode.FLAG_HAS_ERRORS) == 0
+					&& beanName.equals(bean.getName())) {
 				newBean.setIsOverride(true);
 				break;
 			}

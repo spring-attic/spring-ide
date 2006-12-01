@@ -48,7 +48,7 @@ public class AliasNode extends AbstractNode {
 		StringBuffer text = new StringBuffer();
 		text.append(getName());
 		text.append(": bean=");
-		text.append(getAlias().getName());
+		text.append(getAlias().getBeanName());
 		return text.toString();
 	}
 }

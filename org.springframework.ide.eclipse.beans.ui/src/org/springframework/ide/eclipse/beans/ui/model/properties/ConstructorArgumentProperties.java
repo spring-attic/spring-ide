@@ -16,8 +16,8 @@
 
 package org.springframework.ide.eclipse.beans.ui.model.properties;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -26,6 +26,9 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 
+/**
+ * @author Torsten Juergeleit
+ */
 public class ConstructorArgumentProperties implements IPropertySource {
 
 	// Property unique keys
@@ -36,31 +39,31 @@ public class ConstructorArgumentProperties implements IPropertySource {
 	public static final String P_ID_VALUE = "ConstructorArgument.value";
 
 	// Property descriptors
-	private static List descriptors;
+	private static Set<PropertyDescriptor> descriptors;
 	static {
-		descriptors = new ArrayList();
+		descriptors = new LinkedHashSet<PropertyDescriptor>();
 		PropertyDescriptor descriptor;
 
-		descriptor = new PropertyDescriptor(P_ID_BEAN,
-									BeansUIPlugin.getResourceString(P_ID_BEAN));
+		descriptor = new PropertyDescriptor(P_ID_BEAN, BeansUIPlugin
+				.getResourceString(P_ID_BEAN));
 		descriptor.setAlwaysIncompatible(true);
 		descriptor.setCategory(BeansUIPlugin.getResourceString(P_CATEGORY));
 		descriptors.add(descriptor);
 
-		descriptor = new PropertyDescriptor(P_ID_INDEX,
-									  BeansUIPlugin.getResourceString(P_ID_INDEX));
+		descriptor = new PropertyDescriptor(P_ID_INDEX, BeansUIPlugin
+				.getResourceString(P_ID_INDEX));
 		descriptor.setAlwaysIncompatible(true);
 		descriptor.setCategory(BeansUIPlugin.getResourceString(P_CATEGORY));
 		descriptors.add(descriptor);
 
-		descriptor = new PropertyDescriptor(P_ID_TYPE,
-									   BeansUIPlugin.getResourceString(P_ID_TYPE));
+		descriptor = new PropertyDescriptor(P_ID_TYPE, BeansUIPlugin
+				.getResourceString(P_ID_TYPE));
 		descriptor.setAlwaysIncompatible(true);
 		descriptor.setCategory(BeansUIPlugin.getResourceString(P_CATEGORY));
 		descriptors.add(descriptor);
 
-		descriptor = new PropertyDescriptor(P_ID_VALUE,
-								   BeansUIPlugin.getResourceString(P_ID_VALUE));
+		descriptor = new PropertyDescriptor(P_ID_VALUE, BeansUIPlugin
+				.getResourceString(P_ID_VALUE));
 		descriptor.setAlwaysIncompatible(true);
 		descriptor.setCategory(BeansUIPlugin.getResourceString(P_CATEGORY));
 		descriptors.add(descriptor);
@@ -73,8 +76,8 @@ public class ConstructorArgumentProperties implements IPropertySource {
 	}
 
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		return (IPropertyDescriptor[]) descriptors.toArray(
-									new IPropertyDescriptor[descriptors.size()]);
+		return descriptors
+				.toArray(new IPropertyDescriptor[descriptors.size()]);
 	}
 
 	public Object getPropertyValue(Object id) {
@@ -86,7 +89,7 @@ public class ConstructorArgumentProperties implements IPropertySource {
 				return new ChildBeanProperties(bean);
 			} else {
 				// FIXME add factory bean support
-//				return new FactoryBeanProperties(bean);
+				// return new FactoryBeanProperties(bean);
 			}
 		} else if (P_ID_INDEX.equals(id)) {
 			return new Integer(constructorArg.getIndex());

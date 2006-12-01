@@ -41,8 +41,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * @author Torsten Juergeleit
@@ -72,7 +72,7 @@ public class NewSpringProjectCreationPage extends WizardNewProjectCreationPage {
 		return outputDirText.getText();
 	}
 
-	public Set getConfigExtensions() {
+	public Set<String> getConfigExtensions() {
 		return StringUtils.commaDelimitedListToSet(extensionsText.getText());
 	}
 

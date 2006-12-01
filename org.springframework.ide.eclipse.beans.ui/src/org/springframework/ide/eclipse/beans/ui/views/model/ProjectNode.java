@@ -16,18 +16,15 @@
 
 package org.springframework.ide.eclipse.beans.ui.views.model;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.jface.util.ListenerList;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.ui.IPropertyListener;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -36,7 +33,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 
 /**
  * Representation of an Spring project.
- *
  * @author Torsten Juergeleit
  */
 public class ProjectNode extends AbstractNode {
@@ -44,9 +40,9 @@ public class ProjectNode extends AbstractNode {
 	public static final int CONFIGS = 1;
 	public static final int CONFIG_SETS = 2;
 
-	private Set configExtensions;
-	private Map configs;
-	private Map configSets;
+	private Set<String> configExtensions;
+	private Map<String, ConfigNode> configs;
+	private Map<String, ConfigSetNode> configSets;
 	private ListenerList listeners;
 
 	/**
@@ -58,9 +54,9 @@ public class ProjectNode extends AbstractNode {
 		super(parent, name);
 		setElement(BeansCorePlugin.getModel().getProject(name));
 
-		configExtensions = new HashSet();
-		configs = new HashMap();
-		configSets = new HashMap();
+		configExtensions = new LinkedHashSet<String>();
+		configs = new LinkedHashMap<String, ConfigNode>();
+		configSets = new LinkedHashMap<String, ConfigSetNode>();
 		listeners = new ListenerList();
 	}
 
@@ -105,8 +101,8 @@ public class ProjectNode extends AbstractNode {
 		return configExtensions.contains(extension);
 	}
 
-	public Set getConfigExtensions() {
-		return Collections.unmodifiableSet(configExtensions);
+	public Set<String> getConfigExtensions() {
+		return new LinkedHashSet<String>(configExtensions);
 	}
 
 	public void setConfigs(Collection configs) {
@@ -137,19 +133,19 @@ public class ProjectNode extends AbstractNode {
 	}
 
 	public ConfigNode getConfig(String name) {
-		return (configs.containsKey(name) ?
-										 (ConfigNode) configs.get(name) : null);
+		return (configs.containsKey(name) ? (ConfigNode) configs.get(name)
+				: null);
 	}
 
 	/**
 	 * Returns all Spring bean configs from this project.
 	 */
-	public List getConfigs() {
-		return new ArrayList(configs.values());
+	public Set<ConfigNode> getConfigs() {
+		return new LinkedHashSet<ConfigNode>(configs.values());
 	}
 
-	public List getConfigNames() {
-		return new ArrayList(configs.keySet());
+	public Set<String> getConfigNames() {
+		return new LinkedHashSet<String>(configs.keySet());
 	}
 
 	/**
@@ -210,8 +206,8 @@ public class ProjectNode extends AbstractNode {
 	/**
 	 * Returns all Spring bean config sets from this project.
 	 */
-	public List getConfigSets() {
-		return new ArrayList(configSets.values());
+	public Set<ConfigSetNode> getConfigSets() {
+		return new LinkedHashSet<ConfigSetNode>(configSets.values());
 	}
 
 	/**

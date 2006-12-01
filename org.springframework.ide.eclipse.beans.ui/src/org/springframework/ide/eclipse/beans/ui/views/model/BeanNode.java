@@ -16,11 +16,11 @@
 
 package org.springframework.ide.eclipse.beans.ui.views.model;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 
@@ -33,10 +33,10 @@ public class BeanNode extends AbstractNode {
 
 	private ConfigNode config;
 	private boolean isOverride;
-	private List constructorArguments;
-	private List properties;
-	private Map propertiesMap;	// lazily initialized in getProperty()
-	private List innerBeans;
+	private Set<ConstructorArgumentNode> constructorArguments;
+	private Set<PropertyNode> properties;
+	private Map<String, PropertyNode> propertiesMap;	// lazily initialized in getProperty()
+	private Set<BeanNode> innerBeans;
 
 	/**
 	 * Creates a new bean node with the given name within the specified config.
@@ -47,10 +47,10 @@ public class BeanNode extends AbstractNode {
 	public BeanNode(ConfigNode config, String name) {
 		super(config, name);
 		this.config = config; 
-		this.constructorArguments = new ArrayList();
-		this.properties = new ArrayList();
-		this.innerBeans = new ArrayList();
-		this.isOverride = false;
+		constructorArguments = new LinkedHashSet<ConstructorArgumentNode>();
+		properties = new LinkedHashSet<PropertyNode>();
+		innerBeans = new LinkedHashSet<BeanNode>();
+		isOverride = false;
 	}
 
 	/**
@@ -62,10 +62,10 @@ public class BeanNode extends AbstractNode {
 	 */
 	public BeanNode(BeanNode bean, String name) {
 		super(bean, name);
-		this.constructorArguments = new ArrayList();
-		this.properties = new ArrayList();
-		this.innerBeans = new ArrayList();
-		this.isOverride = false;
+		constructorArguments = new LinkedHashSet<ConstructorArgumentNode>();
+		properties = new LinkedHashSet<PropertyNode>();
+		innerBeans = new LinkedHashSet<BeanNode>();
+		isOverride = false;
 	}
 
 	/**
@@ -77,31 +77,27 @@ public class BeanNode extends AbstractNode {
 	 */
 	public BeanNode(ConfigSetNode configSet, BeanNode bean) {
 		super(configSet, bean.getName());
-		this.config = bean.getConfigNode(); 
+		config = bean.getConfigNode(); 
 		setElement(bean.getElement());
 		setFlags(bean.getFlags());
 
 		// Clone contructor arguments
-		this.constructorArguments = new ArrayList();
-		ConstructorArgumentNode[] cargs = bean.getConstructorArguments();
-		for (int i = 0; i < cargs.length; i++) {
-			this.constructorArguments.add(new ConstructorArgumentNode(this,
-										  cargs[i].getConstructorArgument()));
+		constructorArguments = new LinkedHashSet<ConstructorArgumentNode>();
+		for (ConstructorArgumentNode carg : bean.getConstructorArguments()) {
+			constructorArguments.add(new ConstructorArgumentNode(this,
+					carg.getConstructorArgument()));
 		}
 
 		// Clone properties
-		this.properties = new ArrayList();
-		PropertyNode[] props = bean.getProperties();
-		for (int i = 0; i < props.length; i++) {
-			this.properties.add(new PropertyNode(this,
-												 props[i].getProperty()));
+		properties = new LinkedHashSet<PropertyNode>();
+		for (PropertyNode prop : bean.getProperties()) {
+			properties.add(new PropertyNode(this, prop.getProperty()));
 		}
 
 		// Clone inner beans
-		this.innerBeans = new ArrayList();
-		BeanNode[] inner = bean.getInnerBeans();
-		for (int i = 0; i < inner.length; i++) {
-			this.innerBeans.add(new BeanNode(this, inner[i]));
+		innerBeans = new LinkedHashSet<BeanNode>();
+		for (BeanNode inner : bean.getInnerBeans()) {
+			innerBeans.add(new BeanNode(this, inner));
 		}
 		
 		this.isOverride = false;
@@ -116,34 +112,31 @@ public class BeanNode extends AbstractNode {
 	 */
 	public BeanNode(BeanNode bean, BeanNode innerBean) {
 		super(bean, innerBean.getName());
-		this.config = innerBean.getConfigNode(); 
+		config = innerBean.getConfigNode(); 
 		setElement(innerBean.getElement());
 		setFlags(innerBean.getFlags());
 
 		// Clone contructor arguments
-		this.constructorArguments = new ArrayList();
-		ConstructorArgumentNode[] cargs = innerBean.getConstructorArguments();
-		for (int i = 0; i < cargs.length; i++) {
+		constructorArguments = new LinkedHashSet<ConstructorArgumentNode>();
+		for (ConstructorArgumentNode carg :
+				innerBean.getConstructorArguments()) {
 			this.constructorArguments.add(new ConstructorArgumentNode(this,
-										  cargs[i].getConstructorArgument()));
+					carg.getConstructorArgument()));
 		}
 
 		// Clone properties
-		this.properties = new ArrayList();
-		PropertyNode[] props = innerBean.getProperties();
-		for (int i = 0; i < props.length; i++) {
-			this.properties.add(new PropertyNode(this,
-												 props[i].getProperty()));
+		properties = new LinkedHashSet<PropertyNode>();
+		for (PropertyNode prop : innerBean.getProperties()) {
+			properties.add(new PropertyNode(this, prop.getProperty()));
 		}
 
 		// Clone inner beans
-		this.innerBeans = new ArrayList();
-		BeanNode[] inner = innerBean.getInnerBeans();
-		for (int i = 0; i < inner.length; i++) {
-			this.innerBeans.add(new BeanNode(this, inner[i]));
+		innerBeans = new LinkedHashSet<BeanNode>();
+		for (BeanNode inner : innerBean.getInnerBeans()) {
+			innerBeans.add(new BeanNode(this, inner));
 		}
 		
-		this.isOverride = false;
+		isOverride = false;
 	}
 
 	public void setBean(IBean bean) {
@@ -167,9 +160,8 @@ public class BeanNode extends AbstractNode {
 		constructorArguments.add(carg);
 	}
 
-	public ConstructorArgumentNode[] getConstructorArguments() {
-		return (ConstructorArgumentNode[]) constructorArguments.toArray(
-					  new ConstructorArgumentNode[constructorArguments.size()]);
+	public Set<ConstructorArgumentNode> getConstructorArguments() {
+		return new LinkedHashSet<ConstructorArgumentNode>(constructorArguments);
 	}
 
 	public boolean hasConstructorArguments() {
@@ -184,7 +176,7 @@ public class BeanNode extends AbstractNode {
 		if (propertiesMap == null) {
 
 			// Lazily initialize the property map
-			propertiesMap = new HashMap();
+			propertiesMap = new LinkedHashMap<String, PropertyNode>();
 			Iterator iter = properties.iterator();
 			while (iter.hasNext()) {
 				PropertyNode property = (PropertyNode) iter.next();
@@ -198,9 +190,8 @@ public class BeanNode extends AbstractNode {
 		return !properties.isEmpty();
 	}
 
-	public PropertyNode[] getProperties() {
-		return (PropertyNode[]) properties.toArray(
-										   new PropertyNode[properties.size()]);
+	public Set<PropertyNode> getProperties() {
+		return new LinkedHashSet<PropertyNode>(properties);
 	}
 
 	public void addInnerBean(BeanNode bean) {

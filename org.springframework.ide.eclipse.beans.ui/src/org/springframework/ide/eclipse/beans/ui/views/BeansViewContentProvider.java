@@ -16,9 +16,8 @@
 
 package org.springframework.ide.eclipse.beans.ui.views;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -80,20 +79,20 @@ class BeansViewContentProvider implements ITreeContentProvider {
 			return ((RootNode) parent).getProjects();
 		} else if (parent instanceof ProjectNode) {
 			ProjectNode project = (ProjectNode) parent;
-			List nodes = project.getConfigs();
+			Set<INode> nodes = new LinkedHashSet<INode>(); 
+			nodes.addAll(project.getConfigs());
 			nodes.addAll(project.getConfigSets());
-			return (INode[]) nodes.toArray(new INode[nodes.size()]);
-//			return project.getBeanPackages();
+			return nodes.toArray(new INode[nodes.size()]);
 		} else if (parent instanceof ConfigSetNode) {
 			return ((ConfigSetNode) parent).getBeans(true);
 		} else if (parent instanceof ConfigNode) {
 			return ((ConfigNode) parent).getBeans(true);
 		} else if (parent instanceof BeanNode) {
 			BeanNode bean = (BeanNode) parent;
-			List nodes = new ArrayList(Arrays.asList(
-											   bean.getConstructorArguments()));
-			nodes.addAll(Arrays.asList(bean.getProperties()));
-			return (INode[]) nodes.toArray(new INode[nodes.size()]);
+			Set<INode> nodes = new LinkedHashSet<INode>(); 
+			nodes.addAll(bean.getConstructorArguments());
+			nodes.addAll(bean.getProperties());
+			return nodes.toArray(new INode[nodes.size()]);
 		}
 		return null;
 	}

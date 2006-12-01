@@ -16,8 +16,8 @@
 
 package org.springframework.ide.eclipse.beans.ui.model.properties;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.ui.views.properties.FilePropertySource;
@@ -29,6 +29,9 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 
+/**
+ * @author Torsten Juergeleit
+ */
 public class ChildBeanProperties implements IPropertySource {
 
 	// Property unique keys
@@ -41,43 +44,43 @@ public class ChildBeanProperties implements IPropertySource {
 	public static final String P_ID_ABSTRACT = "ChildBean.abstract";
 
 	// Property descriptors
-	private static List descriptors;
+	private static Set<PropertyDescriptor> descriptors;
 	static {
-		descriptors = new ArrayList();
+		descriptors = new LinkedHashSet<PropertyDescriptor>();
 		PropertyDescriptor descriptor;
 
-		descriptor = new PropertyDescriptor(P_ID_NAME,
-									BeansUIPlugin.getResourceString(P_ID_NAME));
+		descriptor = new PropertyDescriptor(P_ID_NAME, BeansUIPlugin
+				.getResourceString(P_ID_NAME));
 		descriptor.setAlwaysIncompatible(true);
 		descriptor.setCategory(BeansUIPlugin.getResourceString(P_CATEGORY));
 		descriptors.add(descriptor);
 
-		descriptor = new PropertyDescriptor(P_ID_CONFIG,
-								  BeansUIPlugin.getResourceString(P_ID_CONFIG));
+		descriptor = new PropertyDescriptor(P_ID_CONFIG, BeansUIPlugin
+				.getResourceString(P_ID_CONFIG));
 		descriptor.setAlwaysIncompatible(true);
 		descriptor.setCategory(BeansUIPlugin.getResourceString(P_CATEGORY));
 		descriptors.add(descriptor);
 
-		descriptor = new PropertyDescriptor(P_ID_PARENT,
-								  BeansUIPlugin.getResourceString(P_ID_PARENT));
+		descriptor = new PropertyDescriptor(P_ID_PARENT, BeansUIPlugin
+				.getResourceString(P_ID_PARENT));
 		descriptor.setAlwaysIncompatible(true);
 		descriptor.setCategory(BeansUIPlugin.getResourceString(P_CATEGORY));
 		descriptors.add(descriptor);
 
-		descriptor = new PropertyDescriptor(P_ID_SINGLETON,
-							   BeansUIPlugin.getResourceString(P_ID_SINGLETON));
+		descriptor = new PropertyDescriptor(P_ID_SINGLETON, BeansUIPlugin
+				.getResourceString(P_ID_SINGLETON));
 		descriptor.setAlwaysIncompatible(true);
 		descriptor.setCategory(BeansUIPlugin.getResourceString(P_CATEGORY));
 		descriptors.add(descriptor);
 
-		descriptor = new PropertyDescriptor(P_ID_LAZY_INIT,
-							   BeansUIPlugin.getResourceString(P_ID_LAZY_INIT));
+		descriptor = new PropertyDescriptor(P_ID_LAZY_INIT, BeansUIPlugin
+				.getResourceString(P_ID_LAZY_INIT));
 		descriptor.setAlwaysIncompatible(true);
 		descriptor.setCategory(BeansUIPlugin.getResourceString(P_CATEGORY));
 		descriptors.add(descriptor);
 
-		descriptor = new PropertyDescriptor(P_ID_ABSTRACT,
-								BeansUIPlugin.getResourceString(P_ID_ABSTRACT));
+		descriptor = new PropertyDescriptor(P_ID_ABSTRACT, BeansUIPlugin
+				.getResourceString(P_ID_ABSTRACT));
 		descriptor.setAlwaysIncompatible(true);
 		descriptor.setCategory(BeansUIPlugin.getResourceString(P_CATEGORY));
 		descriptors.add(descriptor);
@@ -90,8 +93,8 @@ public class ChildBeanProperties implements IPropertySource {
 	}
 
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		return (IPropertyDescriptor[]) descriptors.toArray(
-								   new IPropertyDescriptor[descriptors.size()]);
+		return descriptors
+				.toArray(new IPropertyDescriptor[descriptors.size()]);
 	}
 
 	public Object getPropertyValue(Object id) {
@@ -109,7 +112,7 @@ public class ChildBeanProperties implements IPropertySource {
 		if (P_ID_PARENT.equals(id)) {
 			String parentName = bean.getParentName();
 			IBean parentBean = BeansModelUtils.getConfig(bean).getBean(
-																   parentName);
+					parentName);
 			if (parentBean != null) {
 				if (parentBean.isRootBean()) {
 					return new RootBeanProperties(parentBean);
@@ -117,7 +120,7 @@ public class ChildBeanProperties implements IPropertySource {
 					return new ChildBeanProperties(parentBean);
 				} else {
 					// FIXME add factory bean support
-//					return new FactoryBeanProperties(parentBean);
+					// return new FactoryBeanProperties(parentBean);
 				}
 			}
 			return parentName;

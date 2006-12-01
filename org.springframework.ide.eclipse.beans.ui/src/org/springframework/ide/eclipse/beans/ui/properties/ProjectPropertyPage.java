@@ -16,9 +16,8 @@
 
 package org.springframework.ide.eclipse.beans.ui.properties;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.Dialog;
@@ -32,6 +31,7 @@ import org.eclipse.ui.dialogs.PropertyPage;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
@@ -116,14 +116,13 @@ public class ProjectPropertyPage extends PropertyPage {
 
 		// Store modified config sets in project
 		if (configSetsTab.hasUserMadeChanges()) {
-			List configSets = new ArrayList();
-			Iterator iter = projectModel.getConfigSets().iterator();
-			while (iter.hasNext()) {
-				ConfigSetNode node = (ConfigSetNode) iter.next();
-				BeansConfigSet configSet = new BeansConfigSet(project,
-										 node.getName(), node.getConfigNames());
-				configSet.setAllowBeanDefinitionOverriding(
-													  node.isOverrideEnabled());
+			Set<IBeansConfigSet> configSets =
+					new LinkedHashSet<IBeansConfigSet>();
+			for (ConfigSetNode node : projectModel.getConfigSets()) {
+				BeansConfigSet configSet = new BeansConfigSet(project, node
+						.getName(), node.getConfigNames());
+				configSet.setAllowBeanDefinitionOverriding(node
+						.isOverrideEnabled());
 				configSet.setIncomplete(node.isIncomplete());
 				configSets.add(configSet);
 			}

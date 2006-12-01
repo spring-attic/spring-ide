@@ -16,7 +16,7 @@
 
 package org.springframework.ide.eclipse.beans.ui.properties;
 
-import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -28,7 +28,6 @@ import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
 /**
  * This content provider is used to display a tree of the beans config sets
  * (and their beans configs) within a given project. 
- *
  * @author Torsten Juergeleit
  * @see org.springframework.ide.eclipse.beans.ui.properties.ConfigSetDialog
  */
@@ -52,15 +51,15 @@ public class ConfigSetContentProvider implements ITreeContentProvider {
 
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof ProjectNode) {
-			List configSets = ((ProjectNode) parentElement).getConfigSets();
-			return (ConfigSetNode[])
-					   configSets.toArray(new ConfigSetNode[configSets.size()]);
+			Set<ConfigSetNode> configSets =
+					((ProjectNode) parentElement).getConfigSets();
+			return configSets.toArray(new ConfigSetNode[configSets.size()]);
 		} else if (parentElement instanceof ConfigSetNode) {
-			List configs = ((ConfigSetNode) parentElement).getConfigs();
-			return (ConfigNode[])
-								configs.toArray(new ConfigNode[configs.size()]);
+			Set<ConfigNode> configs =
+					((ConfigSetNode) parentElement).getConfigs();
+			return configs.toArray(new ConfigNode[configs.size()]);
 		} else if (parentElement instanceof ConfigNode) {
-			return new Object[0];
+			return NO_CHILDREN;
 		}
 		return NO_CHILDREN;
 	}

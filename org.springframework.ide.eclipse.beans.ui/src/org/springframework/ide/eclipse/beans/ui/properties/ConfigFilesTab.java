@@ -16,9 +16,9 @@
 
 package org.springframework.ide.eclipse.beans.ui.properties;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IFile;
@@ -210,7 +210,7 @@ public class ConfigFilesTab {
 	 */
 	private void handleExtensionsTextModified() {
 		String errorMessage = null;
-		List extensions = new ArrayList();
+		Set<String> extensions = new LinkedHashSet<String>();
 		String extText = extensionsText.getText().trim();
 		if (extText.length() == 0) {
 			errorMessage = BeansUIPlugin.getResourceString(ERROR_NO_EXTENSIONS);
@@ -318,14 +318,13 @@ public class ConfigFilesTab {
 		if (dialog.open() == ElementTreeSelectionDialog.OK) {
 			Object[] selection = dialog.getResult();
 			if (selection != null && selection.length > 0) {
-				for (int i = 0; i < selection.length; i++) {
+				for (Object element : selection) {
 					String config;
-					if (selection[i] instanceof ZipEntryStorage) {
-						ZipEntryStorage storage = (ZipEntryStorage)
-								selection[i];
+					if (element instanceof ZipEntryStorage) {
+						ZipEntryStorage storage = (ZipEntryStorage) element;
 						config = storage.getFullName();
 					} else {
-						IFile file = (IFile) selection[i];
+						IFile file = (IFile) element;
 						config = file.getProjectRelativePath().toString();
 					}
 					project.addConfig(config);

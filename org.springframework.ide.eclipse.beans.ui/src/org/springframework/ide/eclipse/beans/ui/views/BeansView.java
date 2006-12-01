@@ -18,7 +18,9 @@ package org.springframework.ide.eclipse.beans.ui.views;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -57,6 +59,7 @@ import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 import org.springframework.ide.eclipse.beans.core.BeansTags;
+import org.springframework.ide.eclipse.beans.core.BeansTags.Tag;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
@@ -418,9 +421,8 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 		BeansViewState state = new BeansViewState();
 
 		// Save state of expanded elements
-		Object[] expandedElements = treeViewer.getExpandedElements();
-		for (int i = 0; i < expandedElements.length; i++) {
-			INode node = (INode) expandedElements[i];
+		for (Object expandedElement : treeViewer.getExpandedElements()) {
+			INode node = (INode) expandedElement;
 			if (node.getElement() != null) {
 				state.expandedElements.add(node.getElement().getElementID());
 			}
@@ -457,7 +459,7 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 		}
 
 		// Restore state of selected elements
-		List selectedElements = new ArrayList();
+		Set<INode> selectedElements = new LinkedHashSet<INode>();
 		Iterator selectedElementIDs = state.selectedElements.iterator();
 		while (selectedElementIDs.hasNext()) {
 			String elementID = (String) selectedElementIDs.next();
@@ -558,8 +560,8 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 
 	private void linkToBeansXmlEditor(IBeansConfig config, Element element) {
 		Node parent = element.getParentNode();
-		if (BeansTags.isTag(element, BeansTags.BEAN)
-				&& BeansTags.isTag(parent, BeansTags.BEANS)) {
+		if (BeansTags.isTag(element, Tag.BEAN)
+				&& BeansTags.isTag(parent, Tag.BEANS)) {
 			String beanName = getSelectedBeanName(element);
 			if (beanName != null) {
 				BeansViewLocation location = new BeansViewLocation();
@@ -569,9 +571,9 @@ public class BeansView extends ViewPart implements IBeansView, IShowInSource,
 				location.setBeanName(beanName);
 				showLocation(location);
 			}
-		} else if (BeansTags.isTag(element, BeansTags.PROPERTY)
-				&& BeansTags.isTag(parent, BeansTags.BEAN)
-				&& BeansTags.isTag(parent.getParentNode(), BeansTags.BEANS)) {
+		} else if (BeansTags.isTag(element, Tag.PROPERTY)
+				&& BeansTags.isTag(parent, Tag.BEAN)
+				&& BeansTags.isTag(parent.getParentNode(), Tag.BEANS)) {
 			String beanName = getSelectedBeanName((Element) parent);
 			if (beanName != null) {
 				BeansViewLocation location = new BeansViewLocation();

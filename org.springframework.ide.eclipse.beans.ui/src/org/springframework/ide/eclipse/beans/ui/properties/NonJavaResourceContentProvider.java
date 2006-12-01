@@ -71,9 +71,6 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 			if (element instanceof IJavaProject) { 
 				return getPackageFragmentRoots((IJavaProject) element);
 			}
-			else if (element instanceof IProject) {
-				return getResources((IProject) element);
-			}
 			if (element instanceof IPackageFragmentRoot) {
 				return getPackageFragments((IPackageFragmentRoot) element);
 			}

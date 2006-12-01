@@ -185,7 +185,7 @@ public final class BeansViewUtils {
 
 				// Make sure that config belongs to same project as config set
 				if (configNode.getProjectNode().getProject().equals(project)) {
-					((BeansConfigSet) configSet).addConfig(configNode.
+					((BeansConfigSet) configSet).addConfigName(configNode.
 							getName());
 				}
 			}

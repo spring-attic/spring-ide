@@ -20,7 +20,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -154,18 +154,17 @@ public final class BeansModelImages {
 		int flags = 0;
 		if (element instanceof Bean) {
 			Bean bean = (Bean) element;
-			BeanDefinitionHolder bh = bean.getBeanDefinitionHolder();
+			BeanDefinition bd = bean.getBeanDefinition();
 			if (bean.isChildBean()) {
 				flags |= FLAG_CHILD;
-			} else if (bean.isRootBean()
-					&& ((RootBeanDefinition) bh.getBeanDefinition())
-							.getFactoryMethodName() != null) {
+			} else if (bean.isRootBean() && ((RootBeanDefinition) bd)
+					.getFactoryMethodName() != null) {
 				flags |= FLAG_FACTORY;
 			}
 			if (bean.isAbstract()) {
 				flags |= FLAG_ABSTRACT;
 			}
-			if (!bh.getBeanDefinition().isSingleton()) {
+			if (!bd.isSingleton()) {
 				flags |= FLAG_PROTOTYPE;
 			}
 			if (context != null) {

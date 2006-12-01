@@ -17,8 +17,8 @@
 package org.springframework.ide.eclipse.beans.ui.dialogs;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -51,7 +51,6 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 
 /**
  * Spring Bean selection dialog.
- * 
  * @author Christian Dupuis
  */
 public class BeanListSelectionDialog extends ElementListSelectionDialog {
@@ -65,9 +64,8 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 				if (fMatcher.match(bean.getElementName())) {
 					return true;
 				}
-				String[] tokens = bean.getAliases();
-				for (int i = 0; i < tokens.length; i++) {
-					if (fMatcher.match(tokens[i])) {
+				for (String token : bean.getAliases()) {
+					if (fMatcher.match(token)) {
 						return true;
 					}
 				}
@@ -84,7 +82,7 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 	}
 
 	private static final String DIALOG_SETTINGS = BeanListSelectionDialog.class
-			.getName(); //$NON-NLS-1$
+			.getName();
 
 	private static final String HEIGHT = "height";
 
@@ -174,7 +172,7 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 		data.verticalAlignment = GridData.FILL;
 		list.setLayoutData(data);
 		list.setFont(parent.getFont());
-		list.setFilter((getFilter() == null ? "" : getFilter())); //$NON-NLS-1$		
+		list.setFilter((getFilter() == null ? "" : getFilter()));		
 
 		list.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -255,15 +253,14 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 	}
 
 	public int open() {
-		final ArrayList beanList = new ArrayList();
+		final Set<IBean> beanList = new LinkedHashSet<IBean>();
 
 		IRunnableWithProgress runnable = new IRunnableWithProgress() {
 			public void run(final IProgressMonitor monitor)
 					throws InvocationTargetException, InterruptedException {
 				IBeansModel beansModel = BeansCorePlugin.getModel();
 				try {
-					List beans = BeansModelUtils.getBeans(beansModel, monitor);
-					beanList.addAll(beans);
+					beanList.addAll(BeansModelUtils.getBeans(beansModel, monitor));
 				} catch (OperationCanceledException e) {
 					throw new InterruptedException();
 				}
@@ -291,15 +288,15 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 	 */
 	private void readSettings() {
 		try {
-			int x = fSettings.getInt("x"); //$NON-NLS-1$
-			int y = fSettings.getInt("y"); //$NON-NLS-1$
+			int x = fSettings.getInt("x");
+			int y = fSettings.getInt("y");
 			fLocation = new Point(x, y);
 		} catch (NumberFormatException e) {
 			fLocation = null;
 		}
 		try {
-			int width = fSettings.getInt("width"); //$NON-NLS-1$
-			int height = fSettings.getInt("height"); //$NON-NLS-1$
+			int width = fSettings.getInt("width");
+			int height = fSettings.getInt("height");
 			fSize = new Point(width, height);
 
 		} catch (NumberFormatException e) {
@@ -312,11 +309,11 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 	 */
 	private void writeSettings() {
 		Point location = getShell().getLocation();
-		fSettings.put("x", location.x); //$NON-NLS-1$
-		fSettings.put("y", location.y); //$NON-NLS-1$
+		fSettings.put("x", location.x);
+		fSettings.put("y", location.y);
 
 		Point size = getShell().getSize();
-		fSettings.put("width", size.x); //$NON-NLS-1$
-		fSettings.put("height", size.y); //$NON-NLS-1$
+		fSettings.put("width", size.x);
+		fSettings.put("height", size.y);
 	}
 }

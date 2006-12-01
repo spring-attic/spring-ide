@@ -16,9 +16,8 @@
 
 package org.springframework.ide.eclipse.beans.ui.views.model;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
@@ -79,19 +78,20 @@ public abstract class AbstractNode implements INode {
 			return ((RootNode) this).getProjects();
 		} else if (this instanceof ProjectNode) {
 			ProjectNode project = (ProjectNode) this;
-			List nodes = project.getConfigs();
+			Set<INode> nodes = new LinkedHashSet<INode>();
+			nodes.addAll(project.getConfigs());
 			nodes.addAll(project.getConfigSets());
-			return (INode[]) nodes.toArray(new INode[nodes.size()]);
+			return nodes.toArray(new INode[nodes.size()]);
 		} else if (this instanceof ConfigSetNode) {
 			return ((ConfigSetNode) this).getBeans(true);
 		} else if (this instanceof ConfigNode) {
 			return ((ConfigNode) this).getBeans(true);
 		} else if (this instanceof BeanNode) {
 			BeanNode bean = (BeanNode) this;
-			List nodes = new ArrayList(Arrays.asList(
-											   bean.getConstructorArguments()));
-			nodes.addAll(Arrays.asList(bean.getProperties()));
-			return (INode[]) nodes.toArray(new INode[nodes.size()]);
+			Set<INode> nodes = new LinkedHashSet<INode>();
+			nodes.addAll(bean.getConstructorArguments());
+			nodes.addAll(bean.getProperties());
+			return nodes.toArray(new INode[nodes.size()]);
 		}
 		return NO_CHILDREN;
 	}
