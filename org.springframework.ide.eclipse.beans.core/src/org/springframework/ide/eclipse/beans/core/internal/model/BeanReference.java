@@ -27,32 +27,28 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  */
 public class BeanReference {
 
-	public static final int STANDARD_BEAN_TYPE = 1;
-	public static final int PARENT_BEAN_TYPE = 2;
-	public static final int FACTORY_BEAN_TYPE = 3;
-	public static final int DEPENDS_ON_BEAN_TYPE = 4;
-	public static final int METHOD_OVERRIDE_BEAN_TYPE = 5;
-	public static final int INTERCEPTOR_BEAN_TYPE = 6;
-	public static final int INNER_BEAN_TYPE = 7;
-
+	public enum BeanType {
+		STANDARD, PARENT, FACTORY, DEPENDS_ON, METHOD_OVERRIDE, INTERCEPTOR,
+		INNER
+	}
 	private IModelElement source;
 	private IBean target;
-	private int type;
+	private BeanType type;
 	private IModelElement context;
 
-	public BeanReference(int type, IModelElement source, IBean target) {
-		this(STANDARD_BEAN_TYPE, source, target, target.getElementParent());
+	public BeanReference(BeanType type, IModelElement source, IBean target) {
+		this(BeanType.STANDARD, source, target, target.getElementParent());
 	}
 
-	public BeanReference(int type, IModelElement source, IBean target,
-						 IModelElement context) {
+	public BeanReference(BeanType type, IModelElement source, IBean target,
+			IModelElement context) {
 		this.type = type;
 		this.source = source;
 		this.target = target;
 		this.context = context;
 	}
 
-	public final int getType() {
+	public final BeanType getType() {
 		return type;
 	}
 
@@ -97,10 +93,10 @@ public class BeanReference {
 			return true;
 		}
 		if (obj instanceof BeanReference) {
-			return ((BeanReference) obj).getType() == getType() &&
-				   ((BeanReference) obj).getSource().equals(source) &&
-				   ((BeanReference) obj).getTarget().equals(target) &&
-				   ((BeanReference) obj).getContext().equals(context);
+			return ((BeanReference) obj).getType() == getType()
+					&& ((BeanReference) obj).getSource().equals(source)
+					&& ((BeanReference) obj).getTarget().equals(target)
+					&& ((BeanReference) obj).getContext().equals(context);
 		}
 		return false;
 	}
@@ -113,8 +109,7 @@ public class BeanReference {
 	}
 
 	public String toString() {
-		StringBuffer text = new StringBuffer();
-		text.append(type);
+		StringBuffer text = new StringBuffer(type.toString());
 		text.append(": ");
 		text.append(source);
 		text.append(" -> ");

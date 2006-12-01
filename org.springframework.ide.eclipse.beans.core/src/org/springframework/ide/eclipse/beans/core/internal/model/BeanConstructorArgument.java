@@ -16,6 +16,7 @@
 
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
+import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
@@ -24,7 +25,6 @@ import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 /**
  * This class defines a constructor argument within a Spring beans
  * configuration.
- *
  * @author Torsten Juergeleit
  */
 public class BeanConstructorArgument extends AbstractSourceModelElement
@@ -33,32 +33,29 @@ public class BeanConstructorArgument extends AbstractSourceModelElement
 	private String type;
 	private Object value;
 
-	public BeanConstructorArgument(IBean bean) {
+	public BeanConstructorArgument(IBean bean, int index,
+			ValueHolder vHolder) {
 		super(bean, null);
+		setSourceRange(vHolder);
+		this.index = index;
+		type = vHolder.getType();
+		value = vHolder.getValue();
+	}
+
+	public BeanConstructorArgument(IBean bean, ValueHolder vHolder) {
+		this(bean, -1, vHolder);
 	}
 
 	public int getElementType() {
 		return IBeansModelElementTypes.CONSTRUCTOR_ARGUMENT_TYPE;
 	}
 
-	public void setIndex(int index) {
-		this.index = index;
-	}
-
 	public int getIndex() {
 		return index;
 	}
 
-	public void setType(String type) {
-		this.type = type;
-	}
-
 	public String getType() {
 		return type;
-	}
-
-	public void setValue(Object value) {
-		this.value = value;
 	}
 
 	public Object getValue() {
@@ -66,8 +63,7 @@ public class BeanConstructorArgument extends AbstractSourceModelElement
 	}
 
 	public String toString() {
-		StringBuffer text = new StringBuffer();
-		text.append(getElementName());
+		StringBuffer text = new StringBuffer(getElementName());
 		text.append(" (");
 		text.append(getElementStartLine());
 		text.append("): index=");

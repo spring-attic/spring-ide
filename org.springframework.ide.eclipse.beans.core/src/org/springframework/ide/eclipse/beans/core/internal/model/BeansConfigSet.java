@@ -16,18 +16,17 @@
 
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
+import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
@@ -41,22 +40,24 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  */
 public class BeansConfigSet extends AbstractResourceModelElement
 												   implements IBeansConfigSet {
-	private List configNames;
 	private boolean allowAliasOverriding;
 	private boolean allowBeanDefinitionOverriding;
 	private boolean isIncomplete;
 
-	private Map aliasesMap;
-	private Map beansMap;
-	private Map beanClassesMap;
+	private Set<String> configNames;
+	private Map<String, IBeanAlias> aliasesMap;
+	private Set<IBeansComponent> components;
+	private Map<String, IBean> beansMap;
+	private Map<String, Set<IBean>> beanClassesMap;
 
 	public BeansConfigSet(IBeansProject project, String name) {
-		this(project, name, new ArrayList());
+		this(project, name, new HashSet<String>());
 	}
 
-	public BeansConfigSet(IBeansProject project, String name, List configNames) {
+	public BeansConfigSet(IBeansProject project, String name,
+			Set<String> configNames) {
 		super(project, name);
-		this.configNames = new ArrayList(configNames);
+		this.configNames = new LinkedHashSet<String>(configNames);
 		allowAliasOverriding = true;
 		allowBeanDefinitionOverriding = true;
 	}
@@ -67,9 +68,9 @@ public class BeansConfigSet extends AbstractResourceModelElement
 	 */
 	public void reset() {
 		aliasesMap = null;
+		components= null;
 		beansMap = null;
 		beanClassesMap = null;
-		aliasesMap = null;
 	}
 
 	public int getElementType() {
@@ -77,18 +78,14 @@ public class BeansConfigSet extends AbstractResourceModelElement
 	}
 
 	public IModelElement[] getElementChildren() {
-		IBeansProject project = (IBeansProject) getElementParent();
-		List configs = new ArrayList();
-		Iterator iter = configNames.iterator();
-		while (iter.hasNext()) {
-			String configName = (String) iter.next();
-			IBeansConfig config = project.getConfig(configName);
+		Set<IModelElement> children = new LinkedHashSet<IModelElement>();
+		for (String configName : configNames) {
+			IBeansConfig config = BeansModelUtils.getConfig(configName, this);
 			if (config != null) {
-				configs.add(config);
+				children.add(config);
 			}
 		}
-		return (IModelElement[]) configs.toArray(
-									   new IModelElement[configs.size()]);
+		return children.toArray(new IModelElement[children.size()]);
 	}
 
 	public IResource getElementResource() {
@@ -126,7 +123,7 @@ public class BeansConfigSet extends AbstractResourceModelElement
 		return isIncomplete;
 	}
 
-	public void addConfig(String configName) {
+	public void addConfigName(String configName) {
 		if (configName.length() > 0 && !configNames.contains(configName)) {
 			configNames.add(configName);
 			reset();
@@ -138,7 +135,12 @@ public class BeansConfigSet extends AbstractResourceModelElement
 	}
 
 	public boolean hasConfig(IFile file) {
-		return configNames.contains(file.getProjectRelativePath().toString());
+		if (file.getProject().equals(
+				((IBeansProject) getElementParent()).getProject())) {
+			return configNames.contains(file.getProjectRelativePath()
+					.toString());
+		}
+		return configNames.contains(file.getFullPath().toString());
 	}
 
 	public void removeConfig(String configName) {
@@ -146,8 +148,15 @@ public class BeansConfigSet extends AbstractResourceModelElement
 		reset();
 	}
 
-	public Collection getConfigs() {
-		return configNames;
+	public Set<IBeansConfig> getConfigs() {
+		Set<IBeansConfig> configs = new LinkedHashSet<IBeansConfig>();
+		for (String configName : configNames) {
+			IBeansConfig config = BeansModelUtils.getConfig(configName, this);
+			if (config != null) {
+				configs.add(config);
+			}
+		}
+		return configs;
 	}
 
 	public boolean hasAlias(String name) {
@@ -158,8 +167,12 @@ public class BeansConfigSet extends AbstractResourceModelElement
 		return (IBeanAlias) getAliasesMap().get(name);
 	}
 
-	public Collection getAliases() {
-		return getAliasesMap().values();
+	public Set<IBeanAlias> getAliases() {
+		return new LinkedHashSet<IBeanAlias>(getAliasesMap().values());
+	}
+
+	public Set<IBeansComponent> getComponents() {
+		return new LinkedHashSet<IBeansComponent>(getComponentsList());
 	}
 
 	public boolean hasBean(String name) {
@@ -167,26 +180,26 @@ public class BeansConfigSet extends AbstractResourceModelElement
 	}
 
 	public IBean getBean(String name) {
-		return (IBean) getBeansMap().get(name);
+		return getBeansMap().get(name);
 	}
 
-	public Collection getBeans() {
-		return getBeansMap().values();
+	public Set<IBean> getBeans() {
+		return new LinkedHashSet<IBean>(getBeansMap().values());
 	}
 
 	public boolean isBeanClass(String className) {
 		return getBeanClassesMap().containsKey(className);
 	}
 
-	public Collection getBeanClasses() {
-		return getBeanClassesMap().keySet();
+	public Set<String> getBeanClasses() {
+		return new LinkedHashSet<String>(getBeanClassesMap().keySet());
 	}
 
-	public Collection getBeans(String className) {
+	public Set<IBean> getBeans(String className) {
 		if (isBeanClass(className)) {
-			return (Collection) getBeanClassesMap().get(className);
+			return new LinkedHashSet<IBean>(getBeanClassesMap().get(className));
 		}
-		return Collections.EMPTY_LIST;
+		return new HashSet<IBean>();
 	}
 
 	public String toString() {
@@ -196,20 +209,14 @@ public class BeansConfigSet extends AbstractResourceModelElement
 	/**
 	 * Returns lazily initialized map with all beans defined in this config set.
 	 */
-	private Map getAliasesMap() {
+	private Map<String, IBeanAlias> getAliasesMap() {
 		if (aliasesMap == null) {
-			aliasesMap = new HashMap();
-			Iterator iter = configNames.iterator();
-			while (iter.hasNext()) {
-				String configName = (String) iter.next();
+			aliasesMap = new LinkedHashMap<String, IBeanAlias>();
+			for (String configName : configNames) {
 				IBeansConfig config = BeansModelUtils.getConfig(configName,
 						this);
 				if (config != null) {
-
-					// Add aliases to map
-					Iterator aliases = config.getAliases().iterator();
-					while (aliases.hasNext()) {
-						IBeanAlias alias = (IBeanAlias) aliases.next();
+					for (IBeanAlias alias : config.getAliases()) {
 						if (allowAliasOverriding
 								|| !aliasesMap.containsKey(alias
 										.getElementName())) {
@@ -223,21 +230,36 @@ public class BeansConfigSet extends AbstractResourceModelElement
 	}
 
 	/**
+	 * Returns lazily initialized list with all componets defined in this
+	 * config set.
+	 */
+	private Set<IBeansComponent> getComponentsList() {
+		if (components == null) {
+			components = new LinkedHashSet<IBeansComponent>();
+			for (String configName : configNames) {
+				IBeansConfig config = BeansModelUtils.getConfig(configName,
+						this);
+				if (config != null) {
+					for (IBeansComponent component : config.getComponents()) {
+						components.add(component);
+					}
+				}
+			}
+		}
+		return components;
+	}
+
+	/**
 	 * Returns lazily initialized map with all beans defined in this config set.
 	 */
-	private Map getBeansMap() {
+	private Map<String, IBean> getBeansMap() {
 		if (beansMap == null) {
-			beansMap = new HashMap();
-			Iterator iter = configNames.iterator();
-			while (iter.hasNext()) {
-				String configName = (String) iter.next();
-				IBeansConfig config = BeansModelUtils.getConfig(configName, this);
+			beansMap = new LinkedHashMap<String, IBean>();
+			for (String configName : configNames) {
+				IBeansConfig config = BeansModelUtils.getConfig(configName,
+						this);
 				if (config != null) {
-	
-					// Add beans to map
-					Iterator beans = config.getBeans().iterator();
-					while (beans.hasNext()) {
-						IBean bean = (IBean) beans.next();
+					for (IBean bean : config.getBeans()) {
 						if (allowBeanDefinitionOverriding ||
 								 !beansMap.containsKey(bean.getElementName())) {
 							beansMap.put(bean.getElementName(), bean);
@@ -253,16 +275,12 @@ public class BeansConfigSet extends AbstractResourceModelElement
 	 * Returns lazily initialized map with all bean classes used in this config
 	 * set.
 	 */
-	private Map getBeanClassesMap() {
+	private Map<String, Set<IBean>> getBeanClassesMap() {
 		if (beanClassesMap == null) {
-			beanClassesMap = new HashMap();
-			Iterator beans = getBeansMap().values().iterator();
-			while (beans.hasNext()) {
-				IBean bean = (IBean) beans.next();
+			beanClassesMap = new LinkedHashMap<String, Set<IBean>>();
+			for (IBean bean : getBeansMap().values()) {
 				addBeanClassToMap(bean);
-				Iterator innerBeans = bean.getInnerBeans().iterator();
-				while (innerBeans.hasNext()) {
-					IBean innerBean = (IBean) innerBeans.next();
+				for (IBean innerBean :bean.getInnerBeans()) {
 					addBeanClassToMap(innerBean);
 				}
 			}
@@ -282,9 +300,9 @@ public class BeansConfigSet extends AbstractResourceModelElement
 
 			// Maintain a list of bean names within every entry in the
 			// bean class map
-			List beanClassBeans = (List) beanClassesMap.get(className);
+			Set<IBean> beanClassBeans = beanClassesMap.get(className);
 			if (beanClassBeans == null) {
-				beanClassBeans = new ArrayList();
+				beanClassBeans = new LinkedHashSet<IBean>();
 				beanClassesMap.put(className, beanClassBeans);
 			}
 			beanClassBeans.add(bean);

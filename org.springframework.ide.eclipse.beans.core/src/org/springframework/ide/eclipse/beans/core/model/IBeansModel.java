@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,22 @@
 
 package org.springframework.ide.eclipse.beans.core.model;
 
-import java.util.Collection;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.core.model.IModel;
 
 /**
- * The <code>IBeansModel</code> manages instances of <code>IBeansProject</code>s.
- * <code>IBeansModelChangedListener</code>s register with the <code>IBeansModel</code>,
- * and receive <code>BeansModelChangedEvent</code>s for all changes.
+ * The <code>IBeansModel</code> manages instances of
+ * <code>IBeansProject</code>s.
+ * <code>IBeansModelChangedListener</code>s register with the
+ * <code>IBeansModel</code> and receive <code>BeansModelChangedEvent</code>s
+ * for all changes.
  * <p>
  * The single instance of <code>IBeansModel</code> is available from
  * the static method <code>BeansCorePlugin.getModel()</code>.
+ * @author Torsten Juergeleit
  */
 public interface IBeansModel extends IModel {
 
@@ -50,11 +53,9 @@ public interface IBeansModel extends IModel {
 	IBeansProject getProject(String name);
 
 	/**
-	 * Returns a collection of all <code>IBeansProject</code>s defined in this
-	 * model.
-	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansProject
+	 * Returns a collection of all projects defined in this model.
 	 */
-	Collection getProjects();
+	Set<IBeansProject> getProjects();
 
 	/**
 	 * Returns the beans config for given config file.
@@ -72,9 +73,8 @@ public interface IBeansModel extends IModel {
 	IBeansConfig getConfig(String configName);
 
 	/**
-	 * Returns a list of all <code>IBeanConfig</code>s which contain a bean with
-	 * given bean class.
-	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfig
+	 * Returns a list of all configs which contain a bean with given bean
+	 * class.
 	 */
-	Collection getConfigs(String className);
+	Set<IBeansConfig> getConfigs(String className);
 }

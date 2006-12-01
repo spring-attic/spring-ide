@@ -16,7 +16,7 @@
 
 package org.springframework.ide.eclipse.beans.core.internal.model.resources;
 
-import java.util.Collection;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
@@ -49,13 +50,13 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
  */
 public class BeansResourceChangeListener implements IResourceChangeListener {
 
-	public static final int LISTENER_FLAGS = IResourceChangeEvent.PRE_CLOSE |
-											 IResourceChangeEvent.PRE_DELETE |
-											 IResourceChangeEvent.PRE_BUILD |
-											 IResourceChangeEvent.POST_BUILD;
-	private static final int VISITOR_FLAGS = IResourceDelta.ADDED |
-											 IResourceDelta.CHANGED |
-											 IResourceDelta.REMOVED;
+	public static final int LISTENER_FLAGS = IResourceChangeEvent.PRE_CLOSE
+			| IResourceChangeEvent.PRE_DELETE
+			| IResourceChangeEvent.PRE_BUILD
+			| IResourceChangeEvent.POST_BUILD;
+	private static final int VISITOR_FLAGS = IResourceDelta.ADDED
+			| IResourceDelta.CHANGED
+			| IResourceDelta.REMOVED;
 	private IBeansResourceChangeEvents events;
 
 	public BeansResourceChangeListener(IBeansResourceChangeEvents events) {
@@ -204,10 +205,10 @@ public class BeansResourceChangeListener implements IResourceChangeListener {
 				if (cu != null && cu.exists()) {
 					try {
 						IBeansModel model = BeansCorePlugin.getModel();
-						IType[] types = cu.getTypes();
-						for (int i= 0; i < types.length; i++) {
-							String className = types[i].getFullyQualifiedName();
-							Collection configs = model.getConfigs(className);
+						for (IType type : cu.getTypes()) {
+							String className = type.getFullyQualifiedName();
+							Set<IBeansConfig> configs = model
+									.getConfigs(className);
 							if (!configs.isEmpty()) {
 								events.beanClassChanged(className, configs,
 										eventType);

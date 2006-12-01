@@ -16,13 +16,14 @@
 
 package org.springframework.ide.eclipse.beans.core.model;
 
+import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
- * Holds an <code>IBean</code>'s alias.
+ * This interface provides information for a Spring beans import.
  * @author Torsten Juergeleit
  */
-public interface IBeanAlias extends ISourceModelElement {
+public interface IBeansImport extends ISourceModelElement {
 
-	String getBeanName();
+	IResource getImportedResource();
 }

@@ -36,31 +36,30 @@ import org.xml.sax.SAXException;
 /**
  * This class reads the description for a Spring Beans project from an XML
  * file.
- *
  * @author Torsten Juergeleit
  */
 public class BeansProjectDescriptionReader {
 
-	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID +
-												   "/project/description/debug";
+	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID
+			+ "/project/description/debug";
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
 
 	/**
 	 * Reads project description for given project.
 	 */
-	public static BeansProjectDescription read(IBeansProject project)  {
-		IFile file = ((IProject) project.getElementResource()).getFile(new Path(
-											   IBeansProject.DESCRIPTION_FILE));
+	public static BeansProjectDescription read(IBeansProject project) {
+		IFile file = ((IProject) project.getElementResource())
+				.getFile(new Path(IBeansProject.DESCRIPTION_FILE));
 		if (file.isAccessible()) {
 			if (DEBUG) {
-				System.out.println("Reading project description from " +
-								   file.getLocation().toString());
+				System.out.println("Reading project description from "
+						+ file.getLocation().toString());
 			}
 			BufferedInputStream is = null;
 			try {
 				is = new BufferedInputStream(file.getContents());
-				BeansProjectDescriptionHandler handler =
-									new BeansProjectDescriptionHandler(project);
+				BeansProjectDescriptionHandler handler = new
+						BeansProjectDescriptionHandler(project);
 				try {
 					SAXParserFactory factory = SAXParserFactory.newInstance();
 					factory.setNamespaceAware(true);
@@ -73,19 +72,19 @@ public class BeansProjectDescriptionReader {
 				} catch (IOException e) {
 					handler.log(IStatus.ERROR, e);
 				}
-				IStatus status = handler.getStatus(); 
+				IStatus status = handler.getStatus();
 				switch (status.getSeverity()) {
-					case IStatus.ERROR :
-						BeansCorePlugin.log(status);
-						break;
-		
-					case IStatus.WARNING :
-					case IStatus.INFO :
-						BeansCorePlugin.log(status);
-		
-					case IStatus.OK :
-					default :
-						return handler.getDescription();
+				case IStatus.ERROR:
+					BeansCorePlugin.log(status);
+					break;
+
+				case IStatus.WARNING:
+				case IStatus.INFO:
+					BeansCorePlugin.log(status);
+
+				case IStatus.OK:
+				default:
+					return handler.getDescription();
 				}
 			} catch (CoreException e) {
 				BeansCorePlugin.log(e.getStatus());
@@ -94,6 +93,7 @@ public class BeansProjectDescriptionReader {
 					try {
 						is.close();
 					} catch (IOException e) {
+						// ignore
 					}
 				}
 			}
@@ -101,7 +101,7 @@ public class BeansProjectDescriptionReader {
 
 		// Return empty project description with default config extension
 		BeansProjectDescription description = new BeansProjectDescription(
-																	  project);
+				project);
 		description.addConfigExtension(IBeansProject.DEFAULT_CONFIG_EXTENSION);
 		return description;
 	}

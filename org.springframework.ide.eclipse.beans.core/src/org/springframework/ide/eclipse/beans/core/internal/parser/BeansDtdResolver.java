@@ -28,37 +28,48 @@ import org.xml.sax.InputSource;
  * EntityResolver implementation for the Spring beans DTD,
  * to load the DTD from the Spring class path (or JAR file).
  *
- * <p>Fetches "spring-beans.dtd" from the class path resource
- * "/org/springframework/beans/factory/xml/spring-beans.dtd",
+ * <p>Fetches "spring-beans-2.0.dtd" from the class path resource
+ * "/org/springframework/beans/factory/xml/spring-beans-2.0.dtd",
  * no matter whether specified as some local URL that includes "spring-beans"
- * in the DTD name or as "http://www.springframework.org/dtd/spring-beans.dtd".
+ * in the DTD name or as
+ * "http://www.springframework.org/dtd/spring-beans-2.0.dtd".
  *
- * @see org.springframework.beans.factory.xml.ResourceEntityResolver
+ * @author Juergen Hoeller
+ * @author Colin Sampaleanu
+ * @author Torsten Juergeleit
  */
 public class BeansDtdResolver implements EntityResolver {
 
-	private static final String DTD_NAME = "spring-beans";
-
+	private static final String DTD_EXTENSION = ".dtd";
+	private static final String[] DTD_NAMES = { "spring-beans-2.0",
+			"spring-beans" };
 	private static final String SEARCH_PACKAGE =
-									 "/org/springframework/beans/factory/xml/";
+			"/org/springframework/beans/factory/xml/";
 
-	public InputSource resolveEntity(String publicId,
-									 String systemId) throws IOException {
-		if (systemId != null &&
-					  systemId.indexOf(DTD_NAME) > systemId.lastIndexOf("/")) {
-			String dtdFile = systemId.substring(systemId.indexOf(DTD_NAME));
-			try {
-				Resource resource = new ClassPathResource(SEARCH_PACKAGE +
-														  dtdFile, getClass());
-				InputSource source = new InputSource(resource.getInputStream());
-				source.setPublicId(publicId);
-				source.setSystemId(systemId);
-				return source;
-			} catch (IOException e) {
-				BeansCorePlugin.log("Could not resolve beans DTD [" +
-								   systemId + "]: not found in class path", e);
+	public InputSource resolveEntity(String publicId, String systemId)
+			throws IOException {
+		if (systemId != null && systemId.endsWith(DTD_EXTENSION)) {
+			int lastPathSeparator = systemId.lastIndexOf("/");
+			for (String dtdName : DTD_NAMES) {
+				int dtdNameStart = systemId.indexOf(dtdName);
+				if (dtdNameStart > lastPathSeparator) {
+					String dtdFile = systemId.substring(dtdNameStart);
+					try {
+						Resource resource = new ClassPathResource(
+								SEARCH_PACKAGE + dtdFile, getClass());
+						InputSource source = new InputSource(resource
+								.getInputStream());
+						source.setPublicId(publicId);
+						source.setSystemId(systemId);
+						return source;
+					} catch (IOException e) {
+						BeansCorePlugin.log("Could not resolve beans DTD ["
+								+ systemId + "]: not found in class path", e);
+					}
+				}
 			}
 		}
+
 		// Use the default behavior -> download from website or wherever.
 		return null;
 	}

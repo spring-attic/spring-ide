@@ -16,13 +16,16 @@
 
 package org.springframework.ide.eclipse.beans.core.model;
 
+import java.util.Set;
+
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
- * Holds an <code>IBean</code>'s alias.
+ * This interface provides information for a Spring beans component defined via
+ * an XML namespace.
  * @author Torsten Juergeleit
  */
-public interface IBeanAlias extends ISourceModelElement {
+public interface IBeansComponent extends ISourceModelElement {
 
-	String getBeanName();
+	Set<IBean> getBeans();
 }

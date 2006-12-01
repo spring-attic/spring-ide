@@ -16,11 +16,12 @@
 
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -42,8 +43,8 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.AbstractModel;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
-import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
+import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 
 /**
  * The <code>BeansModel</code> manages instances of <code>IBeansProject</code>s.
@@ -58,35 +59,34 @@ import org.springframework.ide.eclipse.core.model.ModelUtils;
  */
 public class BeansModel extends AbstractModel implements IBeansModel {
 
-	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID +
-																 "/model/debug";
+	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID
+			+ "/model/debug";
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
 
 	/** The table of Spring Beans projects (synchronized for concurrent
 	 * access) */
-	private Hashtable projects;
+	private Map<IProject, IBeansProject> projects;
+
 	private IResourceChangeListener workspaceListener;
 
 	public BeansModel() {
 		super(null, IBeansModel.ELEMENT_NAME);
-		this.projects = new Hashtable();
-		this.workspaceListener = new BeansResourceChangeListener(
-											 new ResourceChangeEventHandler());
+		projects = new LinkedHashMap<IProject, IBeansProject>();
+		workspaceListener = new BeansResourceChangeListener(
+				new ResourceChangeEventHandler());
 	}
 
 	public IModelElement[] getElementChildren() {
-		return (IModelElement[]) getProjects().toArray(
-									  new IModelElement[getProjects().size()]);
+		return getProjects().toArray(
+				new IModelElement[getProjects().size()]);
 	}
 
-	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
-
+	public void accept(IModelElementVisitor visitor,
+			IProgressMonitor monitor) {
 		// Ask this model's projects
 		synchronized (projects) {
-			Iterator iter = projects.values().iterator();
-			while (iter.hasNext()) {
-				IModelElement element = (IModelElement) iter.next();
-				element.accept(visitor, monitor);
+			for (IBeansProject project : projects.values()) {
+				project.accept(visitor, monitor);
 				if (monitor.isCanceled()) {
 					return;
 				}
@@ -101,7 +101,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		initialize();
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.addResourceChangeListener(workspaceListener,
-									BeansResourceChangeListener.LISTENER_FLAGS);
+				BeansResourceChangeListener.LISTENER_FLAGS);
 	}
 
 	public void shutdown() {
@@ -111,19 +111,21 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.removeResourceChangeListener(workspaceListener);
 		workspaceListener = null;
-		projects.clear();
+		synchronized (projects) {
+			projects.clear();
+		}
 	}
 
 	public boolean hasProject(IProject project) {
-		if (project != null  && project.isAccessible() &&
-												projects.containsKey(project)) {
+		if (project != null && project.isAccessible()
+				&& projects.containsKey(project)) {
 			return true;
 		}
 		return false;
 	}
 
 	public IBeansProject getProject(IProject project) {
-		return (IBeansProject) projects.get(project);
+		return projects.get(project);
 	}
 
 	public IBeansProject getProject(String name) {
@@ -140,12 +142,11 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	}
 
 	/**
-	 * Returns a collection of all <code>IBeansProject</code>s defined in this
-	 * model.
-	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansProject
+	 * Returns a collection of all projects defined in this model.
 	 */
-	public Collection getProjects() {
-		return projects.values();
+	public Set<IBeansProject> getProjects() {
+		return Collections.unmodifiableSet(new HashSet<IBeansProject>(projects
+				.values()));
 	}
 
 	public boolean hasConfig(IFile configFile) {
@@ -173,12 +174,12 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		// Extract config name from given full-qualified name
 		// External config files (with a leading '/') are handled too
 		int configNamePos = configName.indexOf('/',
-										(configName.charAt(0) == '/' ? 1 : 0));
+				(configName.charAt(0) == '/' ? 1 : 0));
 		if (configNamePos > 0) {
 			String projectName = configName.substring(1, configNamePos);
 			configName = configName.substring(configNamePos + 1);
 			IBeansProject project = BeansCorePlugin.getModel().getProject(
-																  projectName);
+					projectName);
 			if (project != null) {
 				return project.getConfig(configName);
 			}
@@ -187,18 +188,13 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	}
 
 	/**
-	 * Returns a list of all <code>IBeanConfig</code>s from this model which
-	 * contain a bean with given bean class.
-	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfig
+	 * Returns a list of all configs from this model which contain a bean with
+	 * given bean class.
 	 */
-	public Collection getConfigs(String className) {
-		List configs = new ArrayList();
-		Iterator iter = getProjects().iterator();
-		while (iter.hasNext()) {
-			IBeansProject project = (IBeansProject) iter.next();
-			Iterator iter2 = project.getConfigs().iterator();
-			while (iter2.hasNext()) {
-				IBeansConfig config = (IBeansConfig) iter2.next();
+	public Set<IBeansConfig> getConfigs(String className) {
+		Set<IBeansConfig> configs = new LinkedHashSet<IBeansConfig>();
+		for (IBeansProject project : projects.values()) { 
+			for (IBeansConfig config : project.getConfigs()) {
 				if (config.isBeanClass(className)) {
 					configs.add(config);
 				}
@@ -210,21 +206,15 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	public String toString() {
 		StringBuffer text = new StringBuffer("Beans model:\n");
 		synchronized (projects) {
-			Iterator projs = projects.values().iterator();
-			while (projs.hasNext()) {
-				IBeansProject project = (IBeansProject) projs.next();
+			for (IBeansProject project : projects.values()) { 
 				text.append(" Configs of project '");
 				text.append(project.getElementName());
 				text.append("':\n");
-				Iterator configs = project.getConfigs().iterator();
-				while (configs.hasNext()) {
-					IBeansConfig config = (IBeansConfig) configs.next();
+				for (IBeansConfig config : project.getConfigs()) {
 					text.append("  ");
 					text.append(config);
 					text.append('\n');
-					Iterator beans = config.getBeans().iterator();
-					while (beans.hasNext()) {
-						IBean bean = (IBean) beans.next();
+					for (IBean bean :config.getBeans()) {
 						text.append("   ");
 						text.append(bean);
 						text.append('\n');
@@ -233,10 +223,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				text.append(" Config sets of project '");
 				text.append(project.getElementName());
 				text.append("':\n");
-				Iterator configSets = project.getConfigSets().iterator();
-				while (configSets.hasNext()) {
-					IBeansConfigSet configSet = (IBeansConfigSet)
-															 configSets.next();
+				for (IBeansConfigSet configSet :project.getConfigSets()) {
 					text.append("  ");
 					text.append(configSet);
 					text.append('\n');
@@ -251,28 +238,20 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			System.out.println("Initializing model - loading all projects");
 		}
 		synchronized (projects) {
-			this.projects.clear();
-			List projects = getBeansProjects();
-			if (!projects.isEmpty()) {
-				Iterator iter = projects.iterator();
-				while (iter.hasNext()) {
-					IProject project = (IProject) iter.next();
-					this.projects.put(project, new BeansProject(project));
-				}
+			projects.clear();
+			for (IProject project : getSpringProjects()) {
+				projects.put(project, new BeansProject(project));
 			}
 		}
 	}
 
 	/**
-	 * Returns a list of all <code>IProject</code>s with the Beans project nature.
-	 * @return list of all <code>IProject</code>s with the Beans project nature
+	 * Returns a list of all projects with the Spring project nature.
 	 */
-	private static List getBeansProjects() {
-		List springProjects = new ArrayList();
-		IProject[] projects =
-						 ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		for (int i = 0; i < projects.length; i++) {
-			IProject project = projects[i];
+	private static Set<IProject> getSpringProjects() {
+		Set<IProject> springProjects = new LinkedHashSet<IProject>();
+		for (IProject project : ResourcesPlugin.getWorkspace().getRoot()
+				.getProjects()) {
 			if (SpringCoreUtils.isSpringProject(project)) {
 				springProjects.add(project);
 			}
@@ -283,7 +262,8 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	/**
 	 * Internal resource change event handler.
 	 */
-	private class ResourceChangeEventHandler implements IBeansResourceChangeEvents {
+	private class ResourceChangeEventHandler implements
+			IBeansResourceChangeEvents {
 
 		public boolean isSpringProject(IProject project, int eventType) {
 			return getProject(project) != null;
@@ -292,153 +272,151 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		public void springNatureAdded(IProject project, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Spring beans nature added to "+
-							"project '" + project.getName() + "'");
+					System.out.println("Spring beans nature added to "
+							+ "project '" + project.getName() + "'");
 				}
 				BeansProject proj = new BeansProject(project);
-				projects.put(project, proj);
-				notifyListeners(proj, ModelChangeEvent.ADDED);
+				synchronized (projects) {
+					projects.put(project, proj);
+				}
+				notifyListeners(proj, Type.ADDED);
 			}
 		}
 
 		public void springNatureRemoved(IProject project, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Spring beans nature removed from " +
-							"project '" + project.getName() + "'");
+					System.out.println("Spring beans nature removed from "
+							+ "project '" + project.getName() + "'");
 				}
 				IBeansProject proj = (IBeansProject) projects.remove(project);
-				notifyListeners(proj, ModelChangeEvent.REMOVED);
+				notifyListeners(proj, Type.REMOVED);
 			}
 		}
 
 		public void projectAdded(IProject project, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Project '" + project.getName() +
-							"' added");
+					System.out.println("Project '" + project.getName()
+							+ "' added");
 				}
 				BeansProject proj = new BeansProject(project);
 				projects.put(project, proj);
-				notifyListeners(proj, ModelChangeEvent.ADDED);
+				notifyListeners(proj, Type.ADDED);
 			}
 		}
-	
+
 		public void projectOpened(IProject project, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Project '" + project.getName() +
-							"' opened");
+					System.out.println("Project '" + project.getName()
+							+ "' opened");
 				}
 				BeansProject proj = new BeansProject(project);
 				projects.put(project, proj);
-				notifyListeners(proj, ModelChangeEvent.ADDED);
+				notifyListeners(proj, Type.ADDED);
 			}
 		}
-	
+
 		public void projectClosed(IProject project, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Project '" + project.getName() +
-							"' closed");
+					System.out.println("Project '" + project.getName()
+							+ "' closed");
 				}
 				IBeansProject proj = (IBeansProject) projects.remove(project);
-				notifyListeners(proj, ModelChangeEvent.REMOVED);
+				notifyListeners(proj, Type.REMOVED);
 			}
 		}
-	
+
 		public void projectDeleted(IProject project, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Project '" + project.getName() +
-							"' deleted");
+					System.out.println("Project '" + project.getName()
+							+ "' deleted");
 				}
 				IBeansProject proj = (IBeansProject) projects.remove(project);
-				notifyListeners(proj, ModelChangeEvent.REMOVED);
+				notifyListeners(proj, Type.REMOVED);
 			}
 		}
-	
+
 		public void projectDescriptionChanged(IFile file, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Project description '" +
-							file.getFullPath() + "' changed");
+					System.out.println("Project description '"
+							+ file.getFullPath() + "' changed");
 				}
-				BeansProject project = (BeansProject)
-						projects.get(file.getProject());
+				BeansProject project = (BeansProject) projects.get(file
+						.getProject());
 				project.reset();
-				notifyListeners(project, ModelChangeEvent.CHANGED);
+				notifyListeners(project, Type.CHANGED);
 			}
 		}
 
 		public void configAdded(IFile file, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Config '" + file.getFullPath() +
-							"' added");
+					System.out.println("Config '" + file.getFullPath()
+							+ "' added");
 				}
-				BeansProject project = (BeansProject)
-													projects.get(file.getProject());
+				BeansProject project = (BeansProject) projects.get(file
+						.getProject());
 				project.addConfig(file, true);
 				IBeansConfig config = project.getConfig(file);
-				notifyListeners(config, ModelChangeEvent.ADDED);
+				notifyListeners(config, Type.ADDED);
 			}
 		}
-	
+
 		public void configChanged(IFile file, int eventType) {
-			IBeansProject project = (IBeansProject)
-					projects.get(file.getProject());
+			IBeansProject project = (IBeansProject) projects.get(file
+					.getProject());
 			BeansConfig config = (BeansConfig) project.getConfig(file);
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Config '" + file.getFullPath() +
-							"' changed");
+					System.out.println("Config '" + file.getFullPath()
+							+ "' changed");
 				}
-				notifyListeners(config, ModelChangeEvent.CHANGED);
+				notifyListeners(config, Type.CHANGED);
 			} else {
 				// Reset corresponding BeansConfig BEFORE the project builder
 				// starts validating this BeansConfig
 				config.reset();
 			}
 		}
-	
+
 		public void configRemoved(IFile file, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Config '" + file.getFullPath() +
-							"' removed");
+					System.out.println("Config '" + file.getFullPath()
+							+ "' removed");
 				}
-				BeansProject project = (BeansProject)
-						projects.get(file.getProject());
+				IBeansProject project = projects.get(file.getProject());
+
 				// Before removing the config from it's project keep a copy for
 				// notifying the listeners
 				BeansConfig config = (BeansConfig) project.getConfig(file);
-				project.removeConfig(file, true);
-	
+				((BeansProject)project).removeConfig(file, true);
+
 				// Remove config from config sets where referenced as external
 				// config
-				Iterator iter = projects.values().iterator();
-				while (iter.hasNext()) {
-					project = (BeansProject) iter.next();
-					project.removeConfig(file, true);
-					
+				for (IBeansProject proj : projects.values()) {
+					((BeansProject) proj).removeConfig(file, true);
+
 				}
-				notifyListeners(config, ModelChangeEvent.REMOVED);
+				notifyListeners(config, Type.REMOVED);
 			}
 		}
 
-		public void beanClassChanged(String className, Collection configs,
-					int eventType) {
+		public void beanClassChanged(String className,
+				Set<IBeansConfig> configs, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
-					System.out.println("Bean class '" + className +
-							"' changed");
+					System.out.println("Bean class '" + className
+							+ "' changed");
 				}
 				BeansConfigValidator validator = new BeansConfigValidator();
-				Iterator iter = configs.iterator();
-				while (iter.hasNext()) {
-					IBeansConfig config = (IBeansConfig) iter.next();
-	
+				for (IBeansConfig config : configs) {
+
 					// Delete all problem markers created by Spring IDE
 					ModelUtils.deleteProblemMarkers(config);
 					validator.validate(config, new NullProgressMonitor());

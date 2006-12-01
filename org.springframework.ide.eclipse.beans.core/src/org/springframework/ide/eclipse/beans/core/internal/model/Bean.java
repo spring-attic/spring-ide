@@ -16,23 +16,24 @@
 
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -40,23 +41,25 @@ import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 
 /**
  * This class holds the data for a Spring bean.
- *
  * @author Torsten Juergeleit
  */
 public class Bean extends AbstractSourceModelElement implements IBean {
 
-	private BeanDefinitionHolder beanDefinitionHolder;
-	private List constructorArguments;
-	private List properties;
-	private Map propertiesMap;
-	private List innerBeans;
+	private BeanDefinition beanDefinition;
+	private String[] aliases;
+	private Set<IBeanConstructorArgument> constructorArguments;
+	private Map<String, IBeanProperty> properties;
+	private Set<IBean> innerBeans;
 
-	public Bean(IBeansConfig config) {
-		super(config, null);   // the name we get from the BeanDefinitionHolder
-		this.constructorArguments = new ArrayList();
-		this.properties = new ArrayList();
-		this.propertiesMap = new HashMap();
-		this.innerBeans = new ArrayList();
+	public Bean(IModelElement parent, BeanDefinitionHolder bdHolder) {
+		super(parent, bdHolder.getBeanName());
+		setSourceRange(bdHolder);
+		beanDefinition = bdHolder.getBeanDefinition();
+		aliases = bdHolder.getAliases();
+		constructorArguments = retrieveConstructorArguments(bdHolder
+				.getBeanDefinition());
+		properties = retrieveProperties(bdHolder.getBeanDefinition());
+		innerBeans = retrieveInnerBeans();
 	}
 
 	public int getElementType() {
@@ -64,11 +67,11 @@ public class Bean extends AbstractSourceModelElement implements IBean {
 	}
 
 	public IModelElement[] getElementChildren() {
-		ArrayList children = new ArrayList(getConstructorArguments());
+		Set<IModelElement> children = new LinkedHashSet<IModelElement>(
+				getConstructorArguments());
 		children.addAll(getProperties());
 		children.addAll(getInnerBeans());
-		return (IModelElement[]) children.toArray(
-										   new IModelElement[children.size()]);
+		return children.toArray(new IModelElement[children.size()]);
 	}
 
 	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
@@ -77,30 +80,24 @@ public class Bean extends AbstractSourceModelElement implements IBean {
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
 			// Now ask this beans's constructor arguments
-			Iterator iter = constructorArguments.iterator();
-			while (iter.hasNext()) {
-				IModelElement element = (IModelElement) iter.next();
-				element.accept(visitor, monitor);
+			for (IBeanConstructorArgument carg : constructorArguments) {
+				carg.accept(visitor, monitor);
 				if (monitor.isCanceled()) {
 					return;
 				}
 			}
 
-			// The ask this beans's properties
-			iter = properties.iterator();
-			while (iter.hasNext()) {
-				IModelElement element = (IModelElement) iter.next();
-				element.accept(visitor, monitor);
+			// Then ask this beans's properties
+			for (IBeanProperty property : properties.values()) {
+				property.accept(visitor, monitor);
 				if (monitor.isCanceled()) {
 					return;
 				}
 			}
 
 			// Finally ask this bean's inner beans
-			iter = innerBeans.iterator();
-			while (iter.hasNext()) {
-				IModelElement element = (IModelElement) iter.next();
-				element.accept(visitor, monitor);
+			for (IBean bean : innerBeans) {
+				bean.accept(visitor, monitor);
 				if (monitor.isCanceled()) {
 					return;
 				}
@@ -108,103 +105,141 @@ public class Bean extends AbstractSourceModelElement implements IBean {
 		}
 	}
 
-	public void setBeanDefinitionHolder(
-									BeanDefinitionHolder beanDefinitionHolder) {
-		this.beanDefinitionHolder = beanDefinitionHolder;
-		setElementName(beanDefinitionHolder.getBeanName());
-	}
-
-	public BeanDefinitionHolder getBeanDefinitionHolder() {
-		return beanDefinitionHolder;
+	public BeanDefinition getBeanDefinition() {
+		return beanDefinition;
 	}
 
 	public String[] getAliases() {
-		return beanDefinitionHolder.getAliases();
+		return aliases;
 	}
 
-	public void addConstructorArgument(IBeanConstructorArgument carg) {
-		constructorArguments.add(carg);
-	}
-
-	public Collection getConstructorArguments() {
+	public Set<IBeanConstructorArgument> getConstructorArguments() {
 		return constructorArguments;
-	}
-
-	public void addProperty(IBeanProperty property) {
-		properties.add(property);
-		propertiesMap.put(property.getElementName(), property);
 	}
 
 	public IBeanProperty getProperty(String name) {
 		if (name != null) {
-			return (IBeanProperty) propertiesMap.get(name);
+			return properties.get(name);
 		}
 		return null;
 	}
 
-	public Collection getProperties() {
-		return properties;
+	public Set<IBeanProperty> getProperties() {
+		return new LinkedHashSet<IBeanProperty>(properties.values());
 	}
 
-	public void addInnerBean(Bean bean) {
-		innerBeans.add(bean);
-	}
-
-	public Collection getInnerBeans() {
+	public Set<IBean> getInnerBeans() {
 		return innerBeans;
 	}
 
 	public String getClassName() {
-		BeanDefinition beanDef = beanDefinitionHolder.getBeanDefinition();
-		if (beanDef instanceof AbstractBeanDefinition) {
-			return ((AbstractBeanDefinition) beanDef).getBeanClassName();
+		if (beanDefinition instanceof AbstractBeanDefinition) {
+			return ((AbstractBeanDefinition) beanDefinition)
+				.getBeanClassName();
 		}
 		return null;
 	}
 
 	public String getParentName() {
-		BeanDefinition beanDef = beanDefinitionHolder.getBeanDefinition();
-		if (beanDef instanceof ChildBeanDefinition) {
-			return ((ChildBeanDefinition) beanDef).getParentName();
+		if (beanDefinition instanceof ChildBeanDefinition) {
+			return ((ChildBeanDefinition) beanDefinition).getParentName();
 		}
 		return null;
 	}
 
 	public boolean isRootBean() {
-		return (beanDefinitionHolder.getBeanDefinition() instanceof
-														   RootBeanDefinition);
+		return (beanDefinition instanceof RootBeanDefinition);
 	}
 
 	public boolean isChildBean() {
-		return (beanDefinitionHolder.getBeanDefinition() instanceof
-														  ChildBeanDefinition);
+		return (beanDefinition instanceof ChildBeanDefinition);
 	}
 
 	public boolean isSingleton() {
-		BeanDefinition beanDef = beanDefinitionHolder.getBeanDefinition();
-		if (beanDef instanceof RootBeanDefinition) {
-			return ((RootBeanDefinition) beanDef).isSingleton();
-		} else if (beanDef instanceof ChildBeanDefinition){
-			return ((ChildBeanDefinition) beanDef).isSingleton();
+		if (beanDefinition instanceof AbstractBeanDefinition) {
+			return ((AbstractBeanDefinition) beanDefinition).isSingleton();
 		}
 		return true;
 	}
 
 	public boolean isAbstract() {
-		return beanDefinitionHolder.getBeanDefinition().isAbstract();
+		if (beanDefinition instanceof AbstractBeanDefinition) {
+			return ((AbstractBeanDefinition) beanDefinition).isAbstract();
+		}
+		return false;
 	}
 
 	public boolean isLazyInit() {
-		return beanDefinitionHolder.getBeanDefinition().isLazyInit();
+		if (beanDefinition instanceof AbstractBeanDefinition) {
+			return ((AbstractBeanDefinition) beanDefinition).isLazyInit();
+		}
+		return true;
 	}
 
-	public boolean isInnerBean() {
-		return (getElementParent() != null);
+	private Set<IBeanConstructorArgument> retrieveConstructorArguments(
+			BeanDefinition beanDefinition) {
+		Set<IBeanConstructorArgument> cargs = new LinkedHashSet
+				<IBeanConstructorArgument>();
+		ConstructorArgumentValues cargValues = beanDefinition
+				.getConstructorArgumentValues();
+		for (Object cargValue : cargValues.getGenericArgumentValues()) {
+			IBeanConstructorArgument carg = new BeanConstructorArgument(this,
+					(ValueHolder) cargValue);
+			cargs.add(carg);
+		}
+		Map indexedCargValues = cargValues.getIndexedArgumentValues();
+		for (Object key : indexedCargValues.keySet()) {
+			ValueHolder vHolder = (ValueHolder) indexedCargValues.get(key);
+			IBeanConstructorArgument carg = new BeanConstructorArgument(this,
+					((Integer) key).intValue(), vHolder);
+			cargs.add(carg);
+		}
+		return cargs;
+	}
+
+	private Map<String, IBeanProperty> retrieveProperties(
+			BeanDefinition definition) {
+		Map<String, IBeanProperty> properties = new LinkedHashMap
+				<String, IBeanProperty>();
+		for (PropertyValue propValue : definition.getPropertyValues()
+				.getPropertyValues()) {
+			IBeanProperty property = new BeanProperty(this, propValue);
+			properties.put(property.getElementName(), property);
+		}
+		return properties;
+	}
+
+	private Set<IBean> retrieveInnerBeans() {
+		Set<IBean> innerBeans = new LinkedHashSet<IBean>();
+		for (IBeanConstructorArgument carg : constructorArguments) {
+			addInnerBeans(carg, carg.getValue(), innerBeans);
+		}
+		return innerBeans;
+	}
+
+	private void addInnerBeans(IModelElement parent, Object value,
+			Set<IBean> innerBeans) {
+		if (value instanceof BeanDefinitionHolder) {
+			IBean bean = new Bean(parent, (BeanDefinitionHolder) value);
+			innerBeans.add(bean);
+		} else if (value instanceof List) {
+			for (Object element : (List) value) {
+				addInnerBeans(parent, element, innerBeans);
+			}
+		} else if (value instanceof Set) {
+			for (Object element : (Set) value) {
+				addInnerBeans(parent, element, innerBeans);
+			}
+		} else if (value instanceof Map) {
+			Map map = (Map) value;
+			for (Object key : map.keySet()) {
+				addInnerBeans(parent, map.get(key), innerBeans);
+			}
+		}
 	}
 
 	public String toString() {
-		StringBuffer text = new StringBuffer();
-		text.append(getElementName());
+		StringBuffer text = new StringBuffer(getElementName());
 		text.append(" (");
 		text.append(getElementStartLine());
 		text.append(')');

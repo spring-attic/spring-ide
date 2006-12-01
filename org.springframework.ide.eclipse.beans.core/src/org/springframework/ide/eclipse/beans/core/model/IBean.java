@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,32 +16,23 @@
 
 package org.springframework.ide.eclipse.beans.core.model;
 
-import java.util.Collection;
+import java.util.Set;
 
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
  * Holds all data of a Spring bean.
+ * @author Torsten Juergeleit
  */
 public interface IBean extends ISourceModelElement {
-
-	String[] getAliases();
-
-	Collection getConstructorArguments();
-
-	IBeanProperty getProperty(String name);
-
-	Collection getProperties();
-
-	Collection getInnerBeans();
-
-	String getClassName();
-
+	
 	/**
 	 * Returns the name of the parent bean (in case of a child bean) or null
 	 * (in case of a root bean).
 	 */
 	String getParentName();
+
+	String getClassName();
 
 	public boolean isRootBean();
 
@@ -53,5 +44,13 @@ public interface IBean extends ISourceModelElement {
 
 	public boolean isLazyInit();
 
-	public boolean isInnerBean();
+	String[] getAliases();
+
+	Set<IBeanConstructorArgument> getConstructorArguments();
+
+	IBeanProperty getProperty(String name);
+
+	Set<IBeanProperty> getProperties();
+
+	Set<IBean> getInnerBeans();
 }

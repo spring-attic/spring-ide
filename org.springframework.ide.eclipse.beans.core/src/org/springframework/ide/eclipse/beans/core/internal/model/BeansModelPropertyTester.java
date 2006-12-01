@@ -29,7 +29,6 @@ import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
  * <li><strong>isBeansConfig</strong> checks if a given <code>IFile</code>
  * is a BeansConfig file</li>
  * </ul>
- * 
  * @author Torsten Juergeleit
  */
 public class BeansModelPropertyTester extends PropertyTester {
@@ -39,8 +38,8 @@ public class BeansModelPropertyTester extends PropertyTester {
 		if (receiver instanceof IFile && "isBeansConfig".equals(property)) {
 			boolean isBeansConfig = BeansCoreUtils
 					.isBeansConfig((IFile) receiver);
-			return expectedValue == null ? isBeansConfig :
-					isBeansConfig == ((Boolean) expectedValue).booleanValue();
+			return expectedValue == null ? isBeansConfig
+					: isBeansConfig == ((Boolean) expectedValue).booleanValue();
 		}
 		return false;
 	}

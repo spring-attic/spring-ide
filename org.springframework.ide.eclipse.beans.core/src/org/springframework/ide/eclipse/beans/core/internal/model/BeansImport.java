@@ -16,40 +16,40 @@
 
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
-import org.springframework.beans.PropertyValue;
-import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.eclipse.core.resources.IResource;
+import org.springframework.beans.factory.parsing.ImportDefinition;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 
 /**
- * This class defines a property within a Spring beans configuration.
+ * This class defines an import within a Spring beans configuration.
  * @author Torsten Juergeleit
  */
-public class BeanProperty extends AbstractSourceModelElement implements
-		IBeanProperty {
-	private Object value;
+public class BeansImport extends AbstractSourceModelElement
+		implements IBeansImport {
 
-	public BeanProperty(IBean bean, PropertyValue propValue) {
-		super(bean, propValue.getName());
-		setSourceRange(propValue);
-		value = propValue.getValue();
+	private String resourceName;
+
+	public BeansImport(IBeansConfig config, ImportDefinition definition) {
+		super(config, definition.getImportedResource());
+		setSourceRange(definition);
 	}
 
 	public int getElementType() {
-		return IBeansModelElementTypes.PROPERTY_TYPE;
+		return IBeansModelElementTypes.IMPORT_TYPE;
 	}
-	
-	public Object getValue() {
-		return value;
+
+	public IResource getImportedResource() {
+		// TODO
+		return null;
 	}
 
 	public String toString() {
-		StringBuffer text = new StringBuffer(getElementName());
-		text.append(" (");
-		text.append(getElementStartLine());
-		text.append("): value=");
-		text.append(value);
+		StringBuffer text = new StringBuffer("import \"");
+		text.append(resourceName);
+		text.append('"');
 		return text.toString();
 	}
 }

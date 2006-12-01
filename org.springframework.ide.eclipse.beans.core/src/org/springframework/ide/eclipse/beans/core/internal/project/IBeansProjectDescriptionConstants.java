@@ -19,7 +19,6 @@ package org.springframework.ide.eclipse.beans.core.internal.project;
 /**
  * This interface defines the string constants for the XML tags of the
  * Spring Beans project's description file.
- *
  * @author Torsten Juergeleit
  */
 public interface IBeansProjectDescriptionConstants {

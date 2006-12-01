@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser;
+import org.springframework.beans.factory.xml.DefaultBeanDefinitionDocumentReader;
 
 /**
  * Default implementation of the <code>BeanDefinitionRegistry</code>
@@ -47,8 +47,8 @@ import org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser;
  *
  * <p><b>Creation of bean instances is not supported!!!</b>
  *
- * @see org.springframework.ide.eclipse.beans.core.internal.parser.EventBeanDefinitionRegistry 
  * @see org.springframework.ide.eclipse.beans.core.internal.model.validator.BeansConfigValidator
+ * @author Torsten Juergeleit
  */
 public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory
 											implements BeanDefinitionRegistry {
@@ -61,10 +61,11 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory
 	private boolean allowAliasOverriding = true;
 
 	/** Map of bean definition objects, keyed by bean name */
-	private final Map beanDefinitionMap = new HashMap();
+	private final Map<String, BeanDefinition> beanDefinitionMap = new HashMap
+		<String, BeanDefinition>();
 
 	/** List of bean definition names, in registration order */
-	private final List beanDefinitionNames = new ArrayList();
+	private final List<String> beanDefinitionNames = new ArrayList<String>();
 
 	/**
 	 * Create a new DefaultBeanDefinitionRegistry.
@@ -87,14 +88,14 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory
 	 * former. If not, an exception will be thrown. Default is true.
 	 */
 	public void setAllowBeanDefinitionOverriding(
-										boolean allowBeanDefinitionOverriding) {
+			boolean allowBeanDefinitionOverriding) {
 		this.allowBeanDefinitionOverriding = allowBeanDefinitionOverriding;
 	}
 
 	/**
 	 * Set if it should be allowed to override aliases by registering a
-	 * different alias with the same name, automatically replacing the
-	 * former. If not, an exception will be thrown. Default is true.
+	 * different alias with the same name, automatically replacing the former.
+	 * If not, an exception will be thrown. Default is true.
 	 */
 	public void setAllowAliasOverriding(boolean allowAliasOverriding) {
 		this.allowAliasOverriding = allowAliasOverriding;
@@ -105,8 +106,8 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory
 	}
 
 	public String[] getBeanDefinitionNames() {
-		return (String[]) beanDefinitionNames.toArray(
-									   new String[beanDefinitionNames.size()]);
+		return (String[]) beanDefinitionNames
+				.toArray(new String[beanDefinitionNames.size()]);
 	}
 
 	public boolean containsBeanDefinition(String beanName) {
@@ -117,14 +118,16 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory
 	/**
 	 * Return a RootBeanDefinition for the given bean name, by merging with the
 	 * parent if the given original bean definition is a child bean definition.
-	 * @param beanName the name of the bean definition
+	 * 
+	 * @param beanName
+	 *            the name of the bean definition
 	 * @return a merged RootBeanDefinition with overridden properties
 	 */
 	public BeanDefinition getBeanDefinition(String beanName)
-														throws BeansException {
+			throws BeansException {
 		String transformedBeanName = transformedBeanName(beanName);
-		BeanDefinition bd = (BeanDefinition)
-									beanDefinitionMap.get(transformedBeanName);
+		BeanDefinition bd = (BeanDefinition) beanDefinitionMap
+				.get(transformedBeanName);
 		if (bd == null) {
 			throw new NoSuchBeanDefinitionException(beanName, toString());
 		}
@@ -136,8 +139,8 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory
 		Object oldBeanDefinition = beanDefinitionMap.get(beanName);
 		if (oldBeanDefinition != null) {
 			if (!allowBeanDefinitionOverriding) {
-				throw new BeanDefinitionStoreException("Overrides bean '" +
-													   oldBeanDefinition + "'");
+				throw new BeanDefinitionStoreException("Overrides bean '"
+						+ oldBeanDefinition + "'");
 			}
 		} else {
 			beanDefinitionNames.add(beanName);
@@ -146,13 +149,13 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory
 	}
 
 	public void registerAlias(String beanName, String alias)
-										  throws BeanDefinitionStoreException {
+			throws BeanDefinitionStoreException {
 		try {
 			super.registerAlias(beanName, alias);
 		} catch (IllegalArgumentException e) {
 			throw new BeanDefinitionStoreException(
-								  DefaultXmlBeanDefinitionParser.ALIAS_ELEMENT,
-								  beanName, e.getMessage());
+					DefaultBeanDefinitionDocumentReader.ALIAS_ELEMENT,
+					beanName, e.getMessage());
 		} catch (BeanDefinitionStoreException e) {
 			if (!allowAliasOverriding) {
 				throw e;
@@ -161,8 +164,8 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory
 	}
 
 	public Object createBean(String beanName,
-							 RootBeanDefinition mergedBeanDefinition,
-							 Object[] args) throws BeansException {
+			RootBeanDefinition mergedBeanDefinition, Object[] args)
+			throws BeansException {
 		throw new BeanCreationException(beanName, "Not implemented");
 	}
 

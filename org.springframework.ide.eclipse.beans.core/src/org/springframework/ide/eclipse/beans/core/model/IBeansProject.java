@@ -16,7 +16,7 @@
 
 package org.springframework.ide.eclipse.beans.core.model;
 
-import java.util.Collection;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -24,7 +24,6 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
  * This interface provides information for a Spring Beans project.
- *
  * @author Torsten Juergeleit
  */
 public interface IBeansProject extends IResourceModelElement, IBeanClassAware {
@@ -43,7 +42,7 @@ public interface IBeansProject extends IResourceModelElement, IBeanClassAware {
 	/**
 	 * Returns a list of file extensions for <code>IBeansConfig</code> files. 
 	 */
-	Collection getConfigExtensions();
+	Set<String> getConfigExtensions();
 
 	/**
 	 * Returns true if given config extension belongs to the list of Spring
@@ -74,11 +73,9 @@ public interface IBeansProject extends IResourceModelElement, IBeanClassAware {
 	IBeansConfig getConfig(String configName);
 
 	/**
-	 * Returns a collection of all <code>IBeansConfig</code>s defined in this
-	 * project.
-	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfig
+	 * Returns a collection of all configs defined in this project.
 	 */
-	Collection getConfigs();
+	Set<IBeansConfig> getConfigs();
 
 	/**
 	 * Returns true if a config set with the given name is defined within this
@@ -92,8 +89,7 @@ public interface IBeansProject extends IResourceModelElement, IBeanClassAware {
 	public IBeansConfigSet getConfigSet(String configSetName);
 
 	/**
-	 * Returns a list of <code>IBeansConfigSet</code> instances.
-	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet
+	 * Returns a list of config sets defined within this project.
 	 */
-	Collection getConfigSets();
+	Set<IBeansConfigSet> getConfigSets();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package org.springframework.ide.eclipse.beans.core;
  * This interface declares constants only; it is not intended to be implemented
  * or extended.
  * </p>
+ * @author Torsten Juergeleit
  */
 public interface IBeansProjectMarker {
 
@@ -31,8 +32,8 @@ public interface IBeansProjectMarker {
 	 * This can be used to recognize those markers in the workspace that flag
 	 * problems related with Spring Beans projects.
 	 */
-	public static final String PROBLEM_MARKER =
-								   BeansCorePlugin.PLUGIN_ID + ".problemmarker";
+	public static final String PROBLEM_MARKER = BeansCorePlugin.PLUGIN_ID
+			+ ".problemmarker";
 	/**
 	 * Error code marker attribute (value <code>"errorCode"</code>).
 	 */
@@ -49,28 +50,30 @@ public interface IBeansProjectMarker {
 	public static final String ERROR_DATA = "errorData";
 
 	// Codes used for attribute 'ERROR_CODE'
-	public static final int ERROR_CODE_NONE = 0;
-	public static final int ERROR_CODE_PARSING_FAILED = 1;
-	public static final int ERROR_CODE_BEAN_OVERRIDE = 2;
-	public static final int ERROR_CODE_BEAN_WITHOUT_CLASS_OR_PARENT = 3;
-	public static final int ERROR_CODE_CLASS_NOT_FOUND = 4;
-	public static final int ERROR_CODE_UNDEFINED_PARENT_BEAN = 5;
-	public static final int ERROR_CODE_NO_CONSTRUCTOR = 6;
-	public static final int ERROR_CODE_NO_SETTER = 7;
-	public static final int ERROR_CODE_UNDEFINED_REFERENCED_BEAN = 8;
-	public static final int ERROR_CODE_INVALID_REFERENCED_BEAN = 9;
-	public static final int ERROR_CODE_INVALID_BEAN_DEFINITION = 10;
-	public static final int ERROR_CODE_INVALID_BEAN_ALIAS = 11;
-	public static final int ERROR_CODE_UNDEFINED_DEPENDS_ON_BEAN = 12;
-	public static final int ERROR_CODE_INVALID_DEPENDS_ON_BEAN = 13;
-	public static final int ERROR_CODE_UNDEFINED_FACTORY_BEAN = 14;
-	public static final int ERROR_CODE_INVALID_FACTORY_BEAN = 15;
-	public static final int ERROR_CODE_UNDEFINED_FACTORY_BEAN_METHOD = 16;
-	public static final int ERROR_CODE_NO_GETTER = 17;
-	public static final int ERROR_CODE_CLASS_NOT_ALLOWED = 18;
-	public static final int ERROR_CODE_NO_FACTORY_METHOD = 19;
-	public static final int ERROR_CODE_ALIAS_OVERRIDE = 20;
-	public static final int ERROR_CODE_INVALID_PROPERTY_NAME = 21;
-	public static final int ERROR_CODE_UNDEFINED_INIT_METHOD = 22;
-	public static final int ERROR_CODE_UNDEFINED_DESTROY_METHOD = 23;
+	public enum ErrorCode {
+		NONE,
+		PARSING_FAILED,
+		BEAN_OVERRIDE,
+		BEAN_WITHOUT_CLASS_OR_PARENT,
+		CLASS_NOT_FOUND,
+		UNDEFINED_PARENT_BEAN,
+		NO_CONSTRUCTOR,
+		NO_SETTER,
+		UNDEFINED_REFERENCED_BEAN,
+		INVALID_REFERENCED_BEAN,
+		INVALID_BEAN_DEFINITION,
+		INVALID_BEAN_ALIAS,
+		UNDEFINED_DEPENDS_ON_BEAN,
+		INVALID_DEPENDS_ON_BEAN,
+		UNDEFINED_FACTORY_BEAN,
+		INVALID_FACTORY_BEAN,
+		UNDEFINED_FACTORY_BEAN_METHOD,
+		NO_GETTER,
+		CLASS_NOT_ALLOWED,
+		NO_FACTORY_METHOD,
+		ALIAS_OVERRIDE,
+		INVALID_PROPERTY_NAME,
+		UNDEFINED_INIT_METHOD,
+		UNDEFINED_DESTROY_METHOD
+	}
 }

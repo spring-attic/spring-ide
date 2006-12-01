@@ -16,6 +16,7 @@
 
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
+import org.springframework.beans.factory.parsing.AliasDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
@@ -26,29 +27,29 @@ import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
  * @author Torsten Juergeleit
  */
 public class BeanAlias extends AbstractSourceModelElement
-														implements IBeanAlias {
-	private String name;
+		implements IBeanAlias {
 
-	public BeanAlias(IBeansConfig config, String alias, String name) {
-		super(config, alias);
-		this.name = name;
+	private String beanName;
+
+	public BeanAlias(IBeansConfig config, AliasDefinition definition) {
+		super(config, definition.getAlias());
+		beanName = definition.getBeanName();
 	}
 
 	public int getElementType() {
 		return IBeansModelElementTypes.ALIAS_TYPE;
 	}
 
-	public String getName() {
-		return name;
+	public String getBeanName() {
+		return beanName;
 	}
 
 	public String toString() {
-		StringBuffer text = new StringBuffer();
-		text.append(getElementName());
+		StringBuffer text = new StringBuffer(getElementName());
 		text.append(" (");
 		text.append(getElementStartLine());
 		text.append("): name=");
-		text.append(name);
+		text.append(beanName);
 		return text.toString();
 	}
 }

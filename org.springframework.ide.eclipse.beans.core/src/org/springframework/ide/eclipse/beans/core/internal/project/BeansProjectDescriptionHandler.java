@@ -31,29 +31,19 @@ import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * This class provides a SAX handler for a Spring project's description file.
- *
  * @author Torsten Juergeleit
  */
-public class BeansProjectDescriptionHandler extends DefaultHandler
-								  implements IBeansProjectDescriptionConstants {
-	protected static final int S_INITIAL = 0;
-	protected static final int S_PROJECT_DESC = 1;
-	protected static final int S_CONFIG_EXTENSIONS = 2;
-	protected static final int S_CONFIG_EXTENSION = 3;
-	protected static final int S_CONFIGS = 4;
-	protected static final int S_CONFIG = 5;
-	protected static final int S_CONFIG_SETS = 6;
-	protected static final int S_CONFIG_SET = 7;
-	protected static final int S_CONFIG_SET_NAME = 8;
-	protected static final int S_CONFIG_SET_OVERRIDING = 9;
-	protected static final int S_CONFIG_SET_INCOMPLETE = 10;
-	protected static final int S_CONFIG_SET_CONFIGS = 11;
-	protected static final int S_CONFIG_SET_CONFIG = 12;
-
+public class BeansProjectDescriptionHandler extends DefaultHandler implements
+		IBeansProjectDescriptionConstants {
+	protected enum State { INITIAL, PROJECT_DESC, CONFIG_EXTENSIONS,
+		CONFIG_EXTENSION, CONFIGS, CONFIG, CONFIG_SETS, CONFIG_SET,
+		CONFIG_SET_NAME, CONFIG_SET_OVERRIDING, CONFIG_SET_INCOMPLETE,
+		CONFIG_SET_CONFIGS,CONFIG_SET_CONFIG
+	}
 	protected IBeansProject project;
 	protected MultiStatus problems;
 	protected BeansProjectDescription description;
-	protected int state;
+	protected State state;
 	protected BeansConfigSet configSet;
 
 	protected final StringBuffer charBuffer = new StringBuffer();
@@ -62,10 +52,10 @@ public class BeansProjectDescriptionHandler extends DefaultHandler
 	public BeansProjectDescriptionHandler(IBeansProject project) {
 		this.project = project;
 		problems = new MultiStatus(BeansCorePlugin.PLUGIN_ID,
-							  IResourceStatus.FAILED_READ_METADATA,
-							  "Error reading Spring project description", null);
+				IResourceStatus.FAILED_READ_METADATA,
+				"Error reading Spring project description", null);
 		description = new BeansProjectDescription(project);
-		state = S_INITIAL;
+		state = State.INITIAL;
 	}
 
 	public IStatus getStatus() {
@@ -77,185 +67,147 @@ public class BeansProjectDescriptionHandler extends DefaultHandler
 	}
 
 	public void startElement(String uri, String elementName, String qname,
-							 Attributes attributes) throws SAXException {
-		//clear the character buffer at the start of every element
+			Attributes attributes) throws SAXException {
+		// clear the character buffer at the start of every element
 		charBuffer.setLength(0);
-		switch (state) {
-			case S_INITIAL :
-				if (elementName.equals(PROJECT_DESCRIPTION)) {
-					state = S_PROJECT_DESC;
-				} else {
-					throw new SAXParseException("No Spring project description",
-												locator);
-				}
-				break;
-
-			case S_PROJECT_DESC :
-				if (elementName.equals(CONFIG_EXTENSIONS)) {
-					state = S_CONFIG_EXTENSIONS;
-				} else if (elementName.equals(CONFIGS)) {
-					state = S_CONFIGS;
-				} else if (elementName.equals(CONFIG_SETS)) {
-					state = S_CONFIG_SETS;
-				}
-				break;
-
-			case S_CONFIG_EXTENSIONS :
-				if (elementName.equals(CONFIG_EXTENSION)) {
-					state = S_CONFIG_EXTENSION;
-				}
-				break;
-
-			case S_CONFIGS :
-				if (elementName.equals(CONFIG)) {
-					state = S_CONFIG;
-				}
-				break;
-
-			case S_CONFIG_SETS :
-				if (elementName.equals(CONFIG_SET)) {
-					state = S_CONFIG_SET;
-				}
-				break;
-
-			case S_CONFIG_SET :
-				if (elementName.equals(NAME)) {
-					state = S_CONFIG_SET_NAME;
-				} else if (elementName.equals(OVERRIDING)) {
-					state = S_CONFIG_SET_OVERRIDING;
-				} else if (elementName.equals(INCOMPLETE)) {
-					state = S_CONFIG_SET_INCOMPLETE;
-				} else if (elementName.equals(CONFIGS)) {
-					state = S_CONFIG_SET_CONFIGS;
-				}
-				break;
-
-			case S_CONFIG_SET_CONFIGS :
-				if (elementName.equals(CONFIG)) {
-					state = S_CONFIG_SET_CONFIG;
-				}
-				break;
+		if (state == State.INITIAL) {
+			if (elementName.equals(PROJECT_DESCRIPTION)) {
+				state = State.PROJECT_DESC;
+			} else {
+				throw new SAXParseException("No Spring project description",
+						locator);
+			}
+		} else if (state == State.PROJECT_DESC) {
+			if (elementName.equals(CONFIG_EXTENSIONS)) {
+				state = State.CONFIG_EXTENSIONS;
+			} else if (elementName.equals(CONFIGS)) {
+				state = State.CONFIGS;
+			} else if (elementName.equals(CONFIG_SETS)) {
+				state = State.CONFIG_SETS;
+			}
+		} else if (state == State.CONFIG_EXTENSIONS) {
+			if (elementName.equals(CONFIG_EXTENSION)) {
+				state = State.CONFIG_EXTENSION;
+			}
+		} else if (state == State.CONFIGS) {
+			if (elementName.equals(CONFIG)) {
+				state = State.CONFIG;
+			}
+		} else if (state == State.CONFIG_SETS) {
+			if (elementName.equals(CONFIG_SET)) {
+				state = State.CONFIG_SET;
+			}
+		} else if (state == State.CONFIG_SET) {
+			if (elementName.equals(NAME)) {
+				state = State.CONFIG_SET_NAME;
+			} else if (elementName.equals(OVERRIDING)) {
+				state = State.CONFIG_SET_OVERRIDING;
+			} else if (elementName.equals(INCOMPLETE)) {
+				state = State.CONFIG_SET_INCOMPLETE;
+			} else if (elementName.equals(CONFIGS)) {
+				state = State.CONFIG_SET_CONFIGS;
+			}
+		} else if (state == State.CONFIG_SET_CONFIGS) {
+			if (elementName.equals(CONFIG)) {
+				state = State.CONFIG_SET_CONFIG;
+			}
 		}
 	}
 
 	public void endElement(String uri, String elementName, String qname)
-														   throws SAXException {
-		switch (state) {
-			case S_PROJECT_DESC :
+			throws SAXException {
+		if (state == State.PROJECT_DESC) {
 
-				// make sure that at least the default config extension is in
-				// the list of config extensions
-				if (description.getConfigExtensions().isEmpty()) {
-					description.addConfigExtension(
-									   IBeansProject.DEFAULT_CONFIG_EXTENSION);
-				}
-				break;
+			// make sure that at least the default config extension is in
+			// the list of config extensions
+			if (description.getConfigExtensions().isEmpty()) {
+				description.addConfigExtension(IBeansProject
+						.DEFAULT_CONFIG_EXTENSION);
+			}
+		} else if (state == State.CONFIG_EXTENSIONS) {
+			if (elementName.equals(CONFIG_EXTENSIONS)) {
+				state = State.PROJECT_DESC;
+			}
+		} else if (state == State.CONFIG_EXTENSION) {
+			if (elementName.equals(CONFIG_EXTENSION)) {
+				String extension = charBuffer.toString().trim();
+				description.addConfigExtension(extension);
+				state = State.CONFIG_EXTENSIONS;
+			}
+		} else if (state == State.CONFIGS) {
+			if (elementName.equals(CONFIGS)) {
+				state = State.PROJECT_DESC;
+			}
+		} else if (state == State.CONFIG) {
+			if (elementName.equals(CONFIG)) {
+				String config = charBuffer.toString().trim();
 
-			case S_CONFIG_EXTENSIONS :
-				if (elementName.equals(CONFIG_EXTENSIONS)) {
-					state = S_PROJECT_DESC;
-				}
-				break;
-
-			case S_CONFIG_EXTENSION :
-				if (elementName.equals(CONFIG_EXTENSION)) {
-					String extension = charBuffer.toString().trim();
-					description.addConfigExtension(extension);
-					state = S_CONFIG_EXTENSIONS;
-				}
-				break;
-
-			case S_CONFIGS :
-				if (elementName.equals(CONFIGS)) {
-					state = S_PROJECT_DESC;
-				}
-				break;
-
-			case S_CONFIG :
-				if (elementName.equals(CONFIG)) {
-					String config = charBuffer.toString().trim();
-
-					// If given config is a full path within this Spring
-					// project then convert it to a project relative path
-					if (config.length() > 0 && config.charAt(0) == '/') {
-						String projectPath = '/' + project.getElementName() + '/';
-						if (config.startsWith(projectPath)) {
-							config = config.substring(projectPath.length());
-						}
+				// If given config is a full path within this Spring
+				// project then convert it to a project relative path
+				if (config.length() > 0 && config.charAt(0) == '/') {
+					String projectPath = '/' + project.getElementName() + '/';
+					if (config.startsWith(projectPath)) {
+						config = config.substring(projectPath.length());
 					}
-					description.addConfig(config);
-					state = S_CONFIGS;
 				}
-				break;
+				description.addConfig(config);
+				state = State.CONFIGS;
+			}
+		} else if (state == State.CONFIG_SETS) {
+			if (elementName.equals(CONFIG_SETS)) {
+				state = State.PROJECT_DESC;
+			}
+		} else if (state == State.CONFIG_SET) {
+			if (elementName.equals(CONFIG_SET)) {
+				description.addConfigSet(configSet);
+				state = State.CONFIG_SETS;
+			}
+		} else if (state == State.CONFIG_SET_NAME) {
+			if (elementName.equals(NAME)) {
+				String name = charBuffer.toString().trim();
+				configSet = new BeansConfigSet(project, name);
+				state = State.CONFIG_SET;
+			}
+		} else if (state == State.CONFIG_SET_OVERRIDING) {
+			if (elementName.equals(OVERRIDING)) {
+				boolean override = Boolean
+						.valueOf(charBuffer.toString().trim()).booleanValue();
+				configSet.setAllowBeanDefinitionOverriding(override);
+				state = State.CONFIG_SET;
+			}
+		} else if (state == State.CONFIG_SET_INCOMPLETE) {
+			if (elementName.equals(INCOMPLETE)) {
+				boolean incomplete = Boolean.valueOf(
+						charBuffer.toString().trim()).booleanValue();
+				configSet.setIncomplete(incomplete);
+				state = State.CONFIG_SET;
+			}
+		} else if (state == State.CONFIG_SET_CONFIGS) {
+			if (elementName.equals(CONFIGS)) {
+				state = State.CONFIG_SET;
+			}
+		} else if (state == State.CONFIG_SET_CONFIG) {
+			if (elementName.equals(CONFIG)) {
+				String config = charBuffer.toString().trim();
 
-			case S_CONFIG_SETS :
-				if (elementName.equals(CONFIG_SETS)) {
-					state = S_PROJECT_DESC;
-				}
-				break;
-
-			case S_CONFIG_SET :
-				if (elementName.equals(CONFIG_SET)) {
-					description.addConfigSet(configSet);
-					state = S_CONFIG_SETS;
-				}
-				break;
-
-			case S_CONFIG_SET_NAME :
-				if (elementName.equals(NAME)) {
-					String name = charBuffer.toString().trim();
-					configSet = new BeansConfigSet(project, name);
-					state = S_CONFIG_SET;
-				}
-				break;
-
-			case S_CONFIG_SET_OVERRIDING :
-				if (elementName.equals(OVERRIDING)) {
-					boolean override = Boolean.valueOf(
-								   charBuffer.toString().trim()).booleanValue();
-					configSet.setAllowBeanDefinitionOverriding(override);
-					state = S_CONFIG_SET;
-				}
-				break;
-
-			case S_CONFIG_SET_INCOMPLETE :
-				if (elementName.equals(INCOMPLETE)) {
-					boolean incomplete = Boolean.valueOf(
-								   charBuffer.toString().trim()).booleanValue();
-					configSet.setIncomplete(incomplete);
-					state = S_CONFIG_SET;
-				}
-				break;
-
-			case S_CONFIG_SET_CONFIGS :
-				if (elementName.equals(CONFIGS)) {
-					state = S_CONFIG_SET;
-				}
-				break;
-
-			case S_CONFIG_SET_CONFIG :
-				if (elementName.equals(CONFIG)) {
-					String config = charBuffer.toString().trim();
-
-					// If given config is a full path within this Spring
-					// project then convert it to a project relative path
-					if (config.length() > 0 && config.charAt(0) == '/') {
-						String projectPath = '/' + project.getElementName() + '/';
-						if (config.startsWith(projectPath)) {
-							config = config.substring(projectPath.length());
-						}
+				// If given config is a full path within this Spring
+				// project then convert it to a project relative path
+				if (config.length() > 0 && config.charAt(0) == '/') {
+					String projectPath = '/' + project.getElementName() + '/';
+					if (config.startsWith(projectPath)) {
+						config = config.substring(projectPath.length());
 					}
-					configSet.addConfig(config);
-					state = S_CONFIG_SET_CONFIGS;
 				}
-				break;
+				configSet.addConfigName(config);
+				state = State.CONFIG_SET_CONFIGS;
+			}
 		}
 		charBuffer.setLength(0);
 	}
 
 	public void characters(char[] chars, int offset, int length)
-														   throws SAXException {
-		//accumulate characters and process them when endElement is reached
+			throws SAXException {
+		// accumulate characters and process them when endElement is reached
 		charBuffer.append(chars, offset, length);
 	}
 
@@ -277,6 +229,6 @@ public class BeansProjectDescriptionHandler extends DefaultHandler
 
 	public void log(int code, String errorMessage, Throwable error) {
 		problems.add(new Status(code, BeansCorePlugin.PLUGIN_ID,
-					IResourceStatus.FAILED_READ_METADATA, errorMessage, error));
+				IResourceStatus.FAILED_READ_METADATA, errorMessage, error));
 	}
 }

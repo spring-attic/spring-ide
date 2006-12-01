@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
-import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker;
+import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker.ErrorCode;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigValidator;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -31,13 +31,16 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 
+/**
+ * @author Torsten Juergeleit
+ */
 public class BeansProjectValidator implements IProjectBuilder {
 
 	public void build(IFile file, IProgressMonitor monitor) {
 		if (BeansCoreUtils.isBeansConfig(file)) {
 			monitor.beginTask(BeansCorePlugin.getFormattedMessage(
-					  "BeansProjectValidator.validateFile",
-					  file.getFullPath().toString()), IProgressMonitor.UNKNOWN);
+					"BeansProjectValidator.validateFile", file.getFullPath()
+							.toString()), IProgressMonitor.UNKNOWN);
 			// Delete all problem markers created by Spring IDE
 			SpringCoreUtils.deleteProblemMarkers(file);
 			monitor.worked(1);
@@ -47,14 +50,13 @@ public class BeansProjectValidator implements IProjectBuilder {
 
 			// At first check if model was able to parse the config file 
 			IBeansProject project = BeansCorePlugin.getModel().getProject(
-															 file.getProject());
+					file.getProject());
 			BeansConfig config = (BeansConfig) project.getConfig(file);
 			BeanDefinitionException e = config.getException();
 			if (e != null) {
-				BeansModelUtils.createProblemMarker(config,
-								 e.getMessage(), IMarker.SEVERITY_ERROR,
-								 e.getLineNumber(),
-								 IBeansProjectMarker.ERROR_CODE_PARSING_FAILED);
+				BeansModelUtils.createProblemMarker(config, e.getMessage(),
+						IMarker.SEVERITY_ERROR, e.getLineNumber(),
+						ErrorCode.PARSING_FAILED);
 			} else {
 				monitor.worked(1);
 				if (monitor.isCanceled()) {

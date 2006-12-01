@@ -27,68 +27,52 @@ import org.w3c.dom.NodeList;
 
 public final class BeansTags {
 
-	public static final int DESCRIPTION = 1;
-	public static final int IMPORT = 2;
-	public static final int ALIAS = 3;
-	public static final int BEANS = 4;
-	public static final int BEAN = 5;
-	public static final int CONSTRUCTOR_ARG = 6;
-	public static final int LOOKUP_METHOD = 7;
-	public static final int REPLACE_METHOD = 8;
-	public static final int PROPERTY = 9;
-	public static final int REF = 10;
-	public static final int IDREF = 11;
-	public static final int VALUE = 12;
-	public static final int NULL = 13;
-	public static final int LIST = 14;
-	public static final int SET = 15;
-	public static final int MAP = 16;
-	public static final int PROPS = 17;
-	public static final int ENTRY = 18;
-	public static final int KEY = 19;
-	public static final int PROP = 20;
-	public static final int ARG_TYPE = 21;
-	public static final int COMMENT = 22;
+	// TODO Update for Spring 2.0
+	public enum Tag { DESCRIPTION, IMPORT, ALIAS, BEANS, BEAN, CONSTRUCTOR_ARG,
+		LOOKUP_METHOD, REPLACE_METHOD, PROPERTY, REF, IDREF, VALUE, NULL,
+		LIST, SET, MAP, PROPS, ENTRY, KEY, PROP, ARG_TYPE, COMMENT,
 
-	public static final int UNKNOWN_TAG = 99;
-
-	private static final Map TAGS = new HashMap();
-	static {
-		TAGS.put("description", new Integer(DESCRIPTION));
-		TAGS.put("import", new Integer(IMPORT));
-		TAGS.put("alias", new Integer(ALIAS));
-		TAGS.put("beans", new Integer(BEANS));
-		TAGS.put("bean", new Integer(BEAN));
-		TAGS.put("constructor-arg", new Integer(CONSTRUCTOR_ARG));
-		TAGS.put("lookup-method", new Integer(LOOKUP_METHOD));
-		TAGS.put("replace-method", new Integer(REPLACE_METHOD));
-		TAGS.put("property", new Integer(PROPERTY));
-		TAGS.put("ref", new Integer(REF));
-		TAGS.put("idref", new Integer(IDREF));
-		TAGS.put("value", new Integer(VALUE));
-		TAGS.put("null", new Integer(NULL));
-		TAGS.put("list", new Integer(LIST));
-		TAGS.put("set", new Integer(SET));
-		TAGS.put("map", new Integer(MAP));
-		TAGS.put("props", new Integer(PROPS));
-		TAGS.put("entry", new Integer(ENTRY));
-		TAGS.put("key", new Integer(KEY));
-		TAGS.put("prop", new Integer(PROP));
-		TAGS.put("arg-type", new Integer(ARG_TYPE));
-		TAGS.put("#comment", new Integer(COMMENT));
+		UNKNOWN
 	}
 
-	public static int getTag(String name) {
+	private static final Map<String, Tag> TAGS = new HashMap<String, Tag>();
+	// TODO Update for Spring 2.0
+	static {
+		TAGS.put("description", Tag.DESCRIPTION);
+		TAGS.put("import", Tag.IMPORT);
+		TAGS.put("alias", Tag.ALIAS);
+		TAGS.put("beans", Tag.BEANS);
+		TAGS.put("bean", Tag.BEAN);
+		TAGS.put("constructor-arg", Tag.CONSTRUCTOR_ARG);
+		TAGS.put("lookup-method", Tag.LOOKUP_METHOD);
+		TAGS.put("replace-method", Tag.REPLACE_METHOD);
+		TAGS.put("property", Tag.PROPERTY);
+		TAGS.put("ref", Tag.REF);
+		TAGS.put("idref", Tag.IDREF);
+		TAGS.put("value", Tag.VALUE);
+		TAGS.put("null", Tag.NULL);
+		TAGS.put("list", Tag.LIST);
+		TAGS.put("set", Tag.SET);
+		TAGS.put("map", Tag.MAP);
+		TAGS.put("props", Tag.PROPS);
+		TAGS.put("entry", Tag.ENTRY);
+		TAGS.put("key", Tag.KEY);
+		TAGS.put("prop", Tag.PROP);
+		TAGS.put("arg-type", Tag.ARG_TYPE);
+		TAGS.put("#comment", Tag.COMMENT);
+	}
+
+	public static Tag getTag(String name) {
 		if (name != null) {
-			Integer tag = (Integer) TAGS.get(name.trim());
-			if (tag != null) {
-				return tag.intValue();
+			name = name.trim();
+			if (TAGS.containsKey(name)) {
+				return TAGS.get(name);
 			}
 		}
-		return UNKNOWN_TAG;
+		return Tag.UNKNOWN;
 	}
 
-	public static int getTag(Node node) {
+	public static Tag getTag(Node node) {
 		if (node != null) {
 			if (node.getNodeType() == Node.TEXT_NODE) {
 				return getTag(node.getParentNode());
@@ -97,15 +81,16 @@ public final class BeansTags {
 				return getTag(node.getNodeName());
 			}
 		}
-		return UNKNOWN_TAG;
+		return Tag.UNKNOWN;
 	}
 
-	public static boolean isTag(Node node, int tag) {
+	public static boolean isTag(Node node, Tag tag) {
 		return (getTag(node) == tag);
 	}
 
-	public static List getChildElementsByTagName(Element element, String name) {
-		ArrayList list = new ArrayList();
+	public static List<Node> getChildElementsByTagName(Element element,
+			String name) {
+		List<Node> list = new ArrayList<Node>();
 		NodeList children = element.getChildNodes();
 		if (children != null) {
 			for (int i = 0; i < children.getLength(); i++) {

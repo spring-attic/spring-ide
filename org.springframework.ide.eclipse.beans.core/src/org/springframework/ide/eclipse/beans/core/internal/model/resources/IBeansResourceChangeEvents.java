@@ -16,10 +16,11 @@
 
 package org.springframework.ide.eclipse.beans.core.internal.model.resources;
 
-import java.util.Collection;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 
 /**
  * Defines callbacks for the <code>BeansResourceChangeListener</code>.
@@ -50,5 +51,6 @@ public interface IBeansResourceChangeEvents {
 
 	void configRemoved(IFile file, int eventType);
 
-	void beanClassChanged(String className, Collection configs, int eventType);
+	void beanClassChanged(String className, Set<IBeansConfig> configs,
+			int eventType);
 }

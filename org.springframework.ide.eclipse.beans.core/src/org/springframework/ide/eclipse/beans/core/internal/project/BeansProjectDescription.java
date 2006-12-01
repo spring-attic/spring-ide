@@ -16,16 +16,14 @@
 
 package org.springframework.ide.eclipse.beans.core.internal.project;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -34,63 +32,66 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 
 /**
  * This class holds the configuration for a Spring Beans project.
- *
  * @author Torsten Juergeleit
  */
 public class BeansProjectDescription {
 
 	private IBeansProject project;
-	private Set configExtensions;
-	private Set configNames;
-	private Map configs;
-	private Map configSets;
+	private Set<String> configExtensions;
+	private Map<String, IBeansConfig> configs;
+	private Map<String, IBeansConfigSet> configSets;
 
 	public BeansProjectDescription(IBeansProject project) {
 		this.project = project;
-		this.configExtensions = new HashSet();
-		this.configs = new HashMap();
-		this.configNames = new HashSet();
-		this.configSets = new HashMap();
+		configExtensions = new LinkedHashSet<String>();
+		configs = new LinkedHashMap<String, IBeansConfig>();
+		configSets = new LinkedHashMap<String, IBeansConfigSet>();
 	}
-	
-	public Set getConfigExtensions() {
+
+	public Set<String> getConfigExtensions() {
 		return Collections.unmodifiableSet(configExtensions);
 	}
-	
-	public void setConfigExtensions(Set configExtensions) {
+
+	public void setConfigExtensions(Set<String> configExtensions) {
 		this.configExtensions = configExtensions;
 	}
 
 	public void addConfigExtension(String extension) {
-		if (extension.length() > 0 && !configExtensions.contains(extension)) {
+		Assert.isNotNull(extension);
+		if (extension != null && extension.length() > 0
+				&& !configExtensions.contains(extension)) {
 			configExtensions.add(extension);
 		}
 	}
 
-	public void setConfigNames(Collection configNames) {
-		this.configNames = new HashSet(configNames);
-		this.configs = new HashMap();
-		Iterator iter = this.configNames.iterator();
-		while (iter.hasNext()) {
-			String configName = (String) iter.next();
-			IBeansConfig config = new BeansConfig(project, configName);
-			configs.put(configName, config);
+	public void setConfigNames(Set<String> configNames) {
+		configs.clear();
+		for (String configName : configNames){
+			configs.put(configName, new BeansConfig(project, configName));
 		}
 	}
 
-	public Set getConfigNames() {
-		return Collections.unmodifiableSet(configNames);
+	public Set<String> getConfigNames() {
+		return Collections.unmodifiableSet(configs.keySet());
 	}
 
 	public boolean addConfig(IFile file) {
-		return addConfig(file.getProjectRelativePath().toString());
+		return addConfig(getConfigName(file));
 	}
 
-	public boolean addConfig(String name) {
-		if (name.length() > 0 && !configNames.contains(name)) {
-			configNames.add(name);
-			IBeansConfig config = new BeansConfig(project, name);
-			configs.put(name, config);
+	private String getConfigName(IFile file) {
+		String configName;
+		if (file.getProject().equals(project.getProject())) {
+			configName = file.getProjectRelativePath().toString();
+		} else {
+			configName = file.getFullPath().toString();
+		}
+		return configName;
+	}
+
+	public boolean addConfig(String configName) {
+		if (configName.length() > 0 && !configs.containsKey(configName)) {
+			configs.put(configName, new BeansConfig(project, configName));
 			return true;
 		}
 		return false;
@@ -98,47 +99,45 @@ public class BeansProjectDescription {
 
 	/**
 	 * Returns true if given file belongs to the list of Spring bean config
-	 * files which are stored in the project description. 
+	 * files which are stored in the project description.
 	 */
 	public boolean hasConfig(IFile file) {
-		return configNames.contains(file.getProjectRelativePath().toString());
+		return hasConfig(getConfigName(file));
 	}
 
 	/**
 	 * Returns true if given config (project-relative file name) belongs to the
 	 * list of Spring bean config files which are stored in the project
-	 * description. 
+	 * description.
 	 */
-	public boolean hasConfig(String name) {
-		return configNames.contains(name);
+	public boolean hasConfig(String configName) {
+		return configs.containsKey(configName);
 	}
 
 	public IBeansConfig getConfig(IFile file) {
-		String name = file.getProjectRelativePath().toString();
-		if (configNames.contains(name)) {
-			return (IBeansConfig) configs.get(name);
-		}
-		return null;
+		return configs.get(getConfigName(file));
 	}
 
 	public IBeansConfig getConfig(String name) {
-		if (configNames.contains(name)) {
-			return (IBeansConfig) configs.get(name);
-		}
-		return null;
+		return configs.get(name);
 	}
 
-	public Collection getConfigs() {
-		return Collections.unmodifiableCollection(configs.values());
+	public Set<IBeansConfig> getConfigs() {
+		return Collections.unmodifiableSet(new LinkedHashSet<IBeansConfig>(
+				configs.values()));
 	}
 
 	public boolean removeConfig(IFile file) {
-		return removeConfig(file.getProjectRelativePath().toString());
+		if (file.getProject().equals(project)) {
+			return removeConfig(file.getProjectRelativePath().toString());
+		}
+
+		// External configs only remove from all config sets 
+		return removeConfigFromConfigSets(file.getFullPath().toString());
 	}
-	
+
 	public boolean removeConfig(String name) {
 		if (hasConfig(name)) {
-			configNames.remove(name);
 			configs.remove(name);
 			removeConfigFromConfigSets(name);
 			return true;
@@ -146,16 +145,10 @@ public class BeansProjectDescription {
 		return false;
 	}
 
-	public boolean removeExternalConfig(IFile file) {
-		return removeConfigFromConfigSets(file.getFullPath().toString());
-	}
-
 	private boolean removeConfigFromConfigSets(String name) {
-		Iterator iter = configSets.values().iterator();
-		while (iter.hasNext()) {
-			BeansConfigSet configSet = (BeansConfigSet) iter.next();
+		for (IBeansConfigSet configSet : configSets.values()) {
 			if (configSet.hasConfig(name)) {
-				configSet.removeConfig(name);
+				((BeansConfigSet) configSet).removeConfig(name);
 				return true;
 			}
 		}
@@ -166,32 +159,24 @@ public class BeansProjectDescription {
 		configSets.put(configSet.getElementName(), configSet);
 	}
 
-	public void setConfigSets(List configSets) {
+	public void setConfigSets(Set<IBeansConfigSet> configSets) {
 		this.configSets.clear();
-		Iterator iter = configSets.iterator();
-		while (iter.hasNext()) {
-			IBeansConfigSet configSet = (IBeansConfigSet) iter.next();
+		for (IBeansConfigSet configSet : configSets) {
 			this.configSets.put(configSet.getElementName(), configSet);
 		}
 	}
 
-	public int getNumberOfConfigSets() {
-		return configSets.size();
-	}
-
-	public Collection getConfigSetNames() {
-		return Collections.unmodifiableCollection(configSets.keySet());
-	}
-
 	public IBeansConfigSet getConfigSet(String name) {
-		return (IBeansConfigSet) configSets.get(name);
+		return configSets.get(name);
 	}
 
-	public Collection getConfigSets() {
-		return Collections.unmodifiableCollection(configSets.values());
+	public Set<IBeansConfigSet> getConfigSets() {
+		return Collections.unmodifiableSet(new LinkedHashSet<IBeansConfigSet>(
+				configSets.values()));
 	}
 
 	public String toString() {
-		return "Configs=" + configNames + ", ConfigsSets=" + configSets.toString();
+		return "ConfigExtensions=" + configExtensions + ", Configs="
+				+ configs.values() + ", ConfigsSets=" + configSets;
 	}
 }

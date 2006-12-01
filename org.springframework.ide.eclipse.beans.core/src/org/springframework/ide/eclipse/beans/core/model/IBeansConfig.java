@@ -16,29 +16,37 @@
 
 package org.springframework.ide.eclipse.beans.core.model;
 
-import java.util.Collection;
+import java.util.Set;
 
+import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
  * This interface provides information for a Spring beans configuration.
- *
  * @author Torsten Juergeleit
  */
 public interface IBeansConfig extends IResourceModelElement, IBeanClassAware {
 
-	Collection getAliases();
+	char EXTERNAL_FILE_NAME_PREFIX = '/';
+
+	Set<Problem> getErrors();
+	
+	Set<Problem> getWarnings();
+
+	Set<IBeanAlias> getAliases();
 
 	IBeanAlias getAlias(String name);
+
+	Set<IBeansComponent> getComponents();
 
 	boolean hasBean(String name);
 
 	IBean getBean(String name);
 
-	Collection getBeans();
+	Set<IBean> getBeans();
 
-	Collection getInnerBeans();
+	Set<IBean> getInnerBeans();
 
 	/**
 	 * Returns the exception occured while reading this Spring beans

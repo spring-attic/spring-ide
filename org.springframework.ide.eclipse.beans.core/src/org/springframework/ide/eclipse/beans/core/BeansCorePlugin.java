@@ -16,7 +16,6 @@
 
 package org.springframework.ide.eclipse.beans.core;
 
-import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -29,6 +28,7 @@ import org.eclipse.core.runtime.Status;
 import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
+import org.springframework.ide.eclipse.core.MessageUtils;
 
 /**
  * Central access point for the Spring Framework Core plug-in
@@ -165,10 +165,10 @@ public class BeansCorePlugin extends Plugin {
 	}
 
 	public static String getFormattedMessage(String key, String arg) {
-		return getFormattedMessage(key, new String[] { arg });
+		return MessageUtils.format(getResourceString(key), arg);
 	}
 
 	public static String getFormattedMessage(String key, String[] args) {
-		return MessageFormat.format(getResourceString(key), args);
+		return MessageUtils.format(getResourceString(key), args);
 	}
 }

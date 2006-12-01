@@ -16,14 +16,12 @@
 
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Stack;
+import java.util.Set;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -31,61 +29,80 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.springframework.beans.PropertyValues;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.parsing.AliasDefinition;
+import org.springframework.beans.factory.parsing.BeanComponentDefinition;
+import org.springframework.beans.factory.parsing.ComponentDefinition;
+import org.springframework.beans.factory.parsing.ImportDefinition;
+import org.springframework.beans.factory.parsing.Location;
+import org.springframework.beans.factory.parsing.Problem;
+import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.beans.factory.parsing.ReaderEventListener;
+import org.springframework.beans.factory.xml.DelegatingEntityResolver;
+import org.springframework.beans.factory.xml.PluggableSchemaResolver;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
-import org.springframework.ide.eclipse.beans.core.internal.parser.EventBeanDefinitionRegistry;
-import org.springframework.ide.eclipse.beans.core.internal.parser.IBeanDefinitionEvents;
+import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
+import org.springframework.ide.eclipse.beans.core.internal.parser.BeansDtdResolver;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
-import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
-import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.io.FileResource;
 import org.springframework.ide.eclipse.core.io.StorageResource;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
-import org.springframework.ide.eclipse.core.io.xml.LineNumberPreservingDOMParser;
+import org.springframework.ide.eclipse.core.io.xml.XercesDocumentLoader;
+import org.springframework.ide.eclipse.core.io.xml.XmlSource;
+import org.springframework.ide.eclipse.core.io.xml.XmlSourceExtractor;
 import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
-import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
-import org.springframework.ide.eclipse.core.model.ISourceModelElement;
-import org.w3c.dom.Element;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 /**
  * This class defines a Spring beans configuration.
  * @author Torsten Juergeleit
  */
-public class BeansConfig extends AbstractResourceModelElement
-													  implements IBeansConfig {
+public class BeansConfig extends AbstractResourceModelElement implements
+		IBeansConfig {
 	/** Indicator for a beans configuration embedded in a ZIP file */
 	boolean isArchived;
 
 	/** This bean's config file */
 	private IFile file;
+	
+	private Set<Problem> errors;
 
-	/** List of bean aliases (in registration order) */
-	private List aliases;
+	private Set<Problem> warnings;
 
-	/** Table of alias names mapped to aliases */
-	private Map aliasesMap;
+	/** List of imports (in registration order) */
+	private Set<IBeansImport> imports;
 
-	/** List of beans (in registration order) */
-	private List beans;
+	/** List of aliases (in registration order) */
+	private Map<String, IBeanAlias> aliases;
 
-	/** Table of bean names mapped to beans */
-	private Map beansMap;
+	/** List of components (in registration order) */
+	private Set<IBeansComponent> components;
+
+	/** List of bean names mapped beans (in registration order) */
+	private Map<String, IBean> beans;
 
 	/** List of inner beans (in registration order) */
-	private List innerBeans;
+	private Set<IBean> innerBeans;
 
-	/** Table of bean class names mapped to list of beans implementing the
+	/** List of bean class names mapped to list of beans implementing the
 	 * corresponding class */
-	private Map beanClassesMap;
+	private Map<String, Set<IBean>> beanClassesMap;
 
 	/** Exception which occured during reading this bean's config file */
 	private BeanDefinitionException exception;
@@ -100,10 +117,12 @@ public class BeansConfig extends AbstractResourceModelElement
 	}
 
 	public IModelElement[] getElementChildren() {
-		ArrayList children = new ArrayList(getAliases());
+		Set<IModelElement> children = new LinkedHashSet<IModelElement>(
+				getImports());
+		children.addAll(getAliases());
+		children.addAll(getComponents());
 		children.addAll(getBeans());
-		return (IModelElement[]) children.toArray(
-										   new IModelElement[children.size()]);
+		return children.toArray(new IModelElement[children.size()]);
 	}
 
 	public IResource getElementResource() {
@@ -119,21 +138,33 @@ public class BeansConfig extends AbstractResourceModelElement
 		// First visit this config
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
+			// Now ask this config's imports
+			for (IBeansImport imp : getImports()) {
+				imp.accept(visitor, monitor);
+				if (monitor.isCanceled()) {
+					return;
+				}
+			}
+
 			// Now ask this config's aliases
-			Iterator iter = getAliases().iterator();
-			while (iter.hasNext()) {
-				IModelElement element = (IModelElement) iter.next();
-				element.accept(visitor, monitor);
+			for (IBeanAlias alias : getAliases()) {
+				alias.accept(visitor, monitor);
+				if (monitor.isCanceled()) {
+					return;
+				}
+			}
+
+			// Now ask this config's aliases
+			for (IBeansComponent component : getComponents()) {
+				component.accept(visitor, monitor);
 				if (monitor.isCanceled()) {
 					return;
 				}
 			}
 
 			// Finally ask this configs's beans
-			iter = getBeans().iterator();
-			while (iter.hasNext()) {
-				IModelElement element = (IModelElement) iter.next();
-				element.accept(visitor, monitor);
+			for (IBean bean : getBeans()) {
+				bean.accept(visitor, monitor);
 				if (monitor.isCanceled()) {
 					return;
 				}
@@ -147,71 +178,116 @@ public class BeansConfig extends AbstractResourceModelElement
 	 * <code>IBeansConfig</code> leads to reloading of this beans config file.
 	 */
 	public void reset() {
+		errors = null;
+		warnings = null;
+		imports = null;
 		aliases = null;
-		aliasesMap = null;
 		beans = null;
-		beansMap = null;
 		innerBeans = null;
 		beanClassesMap = null;
 		exception = null;
 
 		// Reset all config sets which contain this config
-		IBeansProject project = (IBeansProject) getElementParent();
-		Iterator configSets = project.getConfigSets().iterator();
-		while (configSets.hasNext()) {
-			BeansConfigSet configSet = (BeansConfigSet) configSets.next();
+		for (IBeansConfigSet configSet : ((IBeansProject) getElementParent())
+				.getConfigSets()) {
 			if (configSet.hasConfig(getElementName())) {
-				configSet.reset();
+				((BeansConfigSet) configSet).reset();
 			}
 		}
 	}
+	
+	public void addError(Problem error) {
+		errors.add(error);
+	}
 
-	public Collection getAliases() {
+	public Set<Problem> getErrors() {
+		return errors;
+	}
+	
+	public void addWarning(Problem warning) {
+		warnings.add(warning);
+	}
+
+	public Set<Problem> getWarnings() {
+		return warnings;
+	}
+
+	public Set<IBeansImport> getImports() {
+		if (imports == null) {
+
+			// Lazily initialization of import list
+			readConfig();
+		}
+		return Collections.unmodifiableSet(imports);
+	}
+
+	public Set<IBeanAlias> getAliases() {
 		if (aliases == null) {
 
 			// Lazily initialization of alias list
 			readConfig();
 		}
-		return Collections.unmodifiableCollection(aliases);
+		return Collections.unmodifiableSet(new LinkedHashSet<IBeanAlias>(
+				aliases.values()));
 	}
 
 	public IBeanAlias getAlias(String name) {
 		if (name != null) {
-			return (IBeanAlias) aliasesMap.get(name);
+			return aliases.get(name);
 		}
 		return null;
 	}
 
+	public Set<IBeansComponent> getComponents() {
+		if (components == null) {
+
+			// Lazily initialization of components list
+			readConfig();
+		}
+		return Collections.unmodifiableSet(components);
+	}
+
 	public boolean hasBean(String name) {
 		if (name != null) {
-			return getBeansMap().containsKey(name);
+			if (beans == null) {
+
+				// Lazily initialization of bean list
+				readConfig();
+			}
+			return beans.containsKey(name);
 		}
 		return false;
 	}
 
 	public IBean getBean(String name) {
 		if (name != null) {
-			return (IBean) getBeansMap().get(name);
+			if (beans == null) {
+
+				// Lazily initialization of bean list
+				readConfig();
+			}
+			return beans.get(name);
 		}
 		return null;
 	}
 
-	public Collection getBeans() {
+	public Set<IBean> getBeans() {
 		if (beans == null) {
 
 			// Lazily initialization of bean list
 			readConfig();
 		}
-		return Collections.unmodifiableCollection(beans);
+		return Collections.unmodifiableSet(new LinkedHashSet<IBean>(beans
+				.values()));
 	}
 
-	public Collection getInnerBeans() {
+	public Set<IBean> getInnerBeans() {
 		if (innerBeans == null) {
 
 			// Lazily initialization of inner beans list
 			readConfig();
 		}
-		return Collections.unmodifiableCollection(innerBeans);
+		return Collections.unmodifiableSet(innerBeans);
 	}
 
 	public BeanDefinitionException getException() {
@@ -230,21 +306,21 @@ public class BeansConfig extends AbstractResourceModelElement
 		return false;
 	}
 
-	public Collection getBeanClasses() {
-		return Collections.unmodifiableCollection(
-												 getBeanClassesMap().keySet());
+	public Set<String> getBeanClasses() {
+		return Collections.unmodifiableSet(new LinkedHashSet<String>(
+				getBeanClassesMap().keySet()));
 	}
 
-	public Collection getBeans(String className) {
+	public Set<IBean> getBeans(String className) {
 		if (isBeanClass(className)) {
-			return Collections.unmodifiableCollection((Collection)
-										   getBeanClassesMap().get(className));
+			return Collections.unmodifiableSet(getBeanClassesMap().get(
+					className));
 		}
-		return Collections.EMPTY_LIST;
+		return new HashSet<IBean>();
 	}
 
 	public String toString() {
-		return getElementName() + ": " + getBeans().toString();
+		return getElementName() + ": " + getBeans();
 	}
 
 	/**
@@ -281,30 +357,16 @@ public class BeansConfig extends AbstractResourceModelElement
 	}
 
 	/**
-	 * Returns lazily initialized map with all beans defined in this config.
-	 */
-	private Map getBeansMap() {
-		if (beansMap == null) {
-			readConfig();
-		}
-		return beansMap;
-	}
-
-	/**
 	 * Returns lazily initialized map with all bean classes used in this config.
 	 */
-	private Map getBeanClassesMap() {
+	private Map<String, Set<IBean>> getBeanClassesMap() {
 		if (beanClassesMap == null) {
-			beanClassesMap = new HashMap();
-			Iterator beans = getBeans().iterator();
-			while (beans.hasNext()) {
-				IBean bean = (IBean) beans.next();
+			beanClassesMap = new LinkedHashMap<String, Set<IBean>>();
+			for (IBean bean : getBeans()) {
 				addBeanClassToMap(bean);
-			}
-			beans = getInnerBeans().iterator();
-			while (beans.hasNext()) {
-				IBean bean = (IBean) beans.next();
-				addBeanClassToMap(bean);
+				for (IBean innerBean : bean.getInnerBeans()) {
+					addBeanClassToMap(innerBean);
+				}
 			}
 		}
 		return beanClassesMap;
@@ -322,9 +384,9 @@ public class BeansConfig extends AbstractResourceModelElement
 
 			// Maintain a list of bean names within every entry in the
 			// bean class map
-			List beanClassBeans = (List) beanClassesMap.get(className);
+			Set<IBean> beanClassBeans = beanClassesMap.get(className);
 			if (beanClassBeans == null) {
-				beanClassBeans = new ArrayList();
+				beanClassBeans = new LinkedHashSet<IBean>();
 				beanClassesMap.put(className, beanClassBeans);
 			}
 			beanClassBeans.add(bean);
@@ -332,149 +394,118 @@ public class BeansConfig extends AbstractResourceModelElement
 	}
 
 	private void readConfig() {
-		this.aliases = new ArrayList();
-		this.aliasesMap = new HashMap();
-		this.beans = new ArrayList();
-		this.beansMap = new HashMap();
-		this.innerBeans = new ArrayList();
+		imports = new LinkedHashSet<IBeansImport>();
+		aliases = new LinkedHashMap<String, IBeanAlias>();
+		components  = new LinkedHashSet<IBeansComponent>();
+		beans = new LinkedHashMap<String, IBean>();
+		innerBeans = new LinkedHashSet<IBean>();
+		errors = new LinkedHashSet<Problem>();
 
-		BeansConfigHandler handler = new BeansConfigHandler(this);
-		EventBeanDefinitionRegistry registry = new EventBeanDefinitionRegistry(handler);
+		Resource resource;
+		if (isArchived) {
+			resource = new StorageResource(new ZipEntryStorage(file
+					.getProject(), getElementName()));
+		} else {
+			resource = new FileResource(file);
+		}
+
+		DefaultBeanDefinitionRegistry registry =
+				new DefaultBeanDefinitionRegistry();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(registry);
+		EntityResolver resolver = new DelegatingEntityResolver(
+				new BeansDtdResolver(), new PluggableSchemaResolver(
+						PluggableSchemaResolver.class.getClassLoader()));
+		reader.setEntityResolver(resolver);
+		reader.setDocumentLoader(new XercesDocumentLoader());
+		reader.setSourceExtractor(new XmlSourceExtractor());
+		reader.setErrorHandler(new BeansConfigErrorHandler(resource));
+		reader.setProblemReporter(new BeansConfigProblemReporter());
+		reader.setEventListener(new BeansConfigReaderEventListener(this));
 		try {
-			Resource resource;
-			if (isArchived) {
-				resource = new StorageResource(new ZipEntryStorage(file
-						.getProject(), getElementName()));
-			} else {
-				resource = new FileResource(file);
-			}
-			registry.loadBeanDefinitions(resource);
-		} catch (BeanDefinitionException e) {
-			exception = e;
+			reader.loadBeanDefinitions(resource);
+		} catch (BeanDefinitionStoreException e) {
+			exception = new BeanDefinitionException(e.getCause());
 		}
 	}
 
+	private final class BeansConfigErrorHandler implements ErrorHandler {
+
+		private Resource resource;
+
+		public BeansConfigErrorHandler(Resource resource) {
+			this.resource = resource;
+		}
+		
+		public void warning(SAXParseException ex) throws SAXException {
+			warnings.add(createProblem(ex));
+		}
+
+		public void error(SAXParseException ex) throws SAXException {
+			errors.add(createProblem(ex));
+		}
+
+		public void fatalError(SAXParseException ex) throws SAXException {
+			errors.add(createProblem(ex));
+		}
+
+		private Problem createProblem(SAXParseException ex) {
+			XmlSource source = new XmlSource(resource, null,
+					ex.getLineNumber(), ex.getLineNumber());
+			return new Problem(ex.getMessage(), new Location(resource,
+					source));
+		}
+	}
+
+	private final class BeansConfigProblemReporter implements ProblemReporter {
+
+		public void error(Problem problem) {
+			errors.add(problem);
+		}
+
+		public void warning(Problem problem) {
+			warnings.add(problem);
+		}
+	}
+	
 	/**
-	 * Implementation of <code>IBeanDefinitionEvents</code> which populates an
-	 * instance of <code>IBeansConfig</code> with data from the the bean definition
-	 * events.
-	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfig
+	 * Implementation of <code>ReaderEventListener</code> which populates the
+	 * current instance of <code>IBeansConfig</code> with data from the XML
+	 * bean definition reader events.
 	 */
-	private final class BeansConfigHandler implements IBeanDefinitionEvents {
+	private final class BeansConfigReaderEventListener implements
+			ReaderEventListener {
 
 		private IBeansConfig config;
-	    private Stack nestedElements;
-		private ISourceModelElement currentElement;
-	    private Stack nestedBeans;
-		private Bean currentBean;
 
-		public BeansConfigHandler(IBeansConfig config) {
+		public BeansConfigReaderEventListener(IBeansConfig config) {
 			this.config = config;
-			this.nestedElements = new Stack();
-			this.nestedBeans = new Stack();
 		}
 
-		public void registerAlias(Element element, String alias, String name) {
-			IBeanAlias al = new BeanAlias(config, alias, name);
-			setXmlTextRange(al, element);
-			aliases.add(al);
-			aliasesMap.put(alias, al);
+		public void importProcessed(ImportDefinition importDefinition) {
+			BeansImport imp = new BeansImport(config, importDefinition);
+			imports.add(imp);
 		}
 
-		public void startBean(Element element, boolean isNestedBean) {
-			if (isNestedBean) {
-				nestedElements.push(currentElement);
-				nestedBeans.push(currentBean);
-			}
-			currentBean = new Bean(config);
-			setXmlTextRange(currentBean, element);
+		public void aliasRegistered(AliasDefinition aliasDefinition) {
+			
+			BeanAlias alias = new BeanAlias(config, aliasDefinition);
+			aliases.put(aliasDefinition.getAlias(), alias);
 		}
 
-		public void registerBean(BeanDefinitionHolder bdHolder,
-								 boolean isNestedBean) {
-			currentBean.setBeanDefinitionHolder(bdHolder);
-			if (isNestedBean) {
-	
-				// Use current bean as an inner bean for the current constructor
-				// argument or property
-				currentElement = (ISourceModelElement) nestedElements.pop();
-				currentBean.setElementParent(currentElement);
-				innerBeans.add(currentBean);
-	
-				// Add current bean as inner bean to outer bean
-				Bean outerBean;
-				if (currentElement instanceof BeanConstructorArgument) {
-					outerBean = (Bean) ((IBeanConstructorArgument)
-											currentElement).getElementParent();
-				} else {
-					outerBean = (Bean) ((IBeanProperty)
-											currentElement).getElementParent();
+		public void componentRegistered(ComponentDefinition
+				componentDefinition) {
+			if (componentDefinition instanceof BeanComponentDefinition) {
+				if (componentDefinition.getBeanDefinitions()[0].getRole() !=
+							BeanDefinition.ROLE_INFRASTRUCTURE) {
+					IBean bean = new Bean(config,
+							(BeanComponentDefinition) componentDefinition);
+					beans.put(bean.getElementName(), bean);
 				}
-				outerBean.addInnerBean(currentBean);
-				currentBean = (Bean) nestedBeans.pop();
 			} else {
-				beans.add(currentBean);
-				beansMap.put(bdHolder.getBeanName(), currentBean);
+				IBeansComponent comp = new BeansComponent(config,
+						componentDefinition);
+				components.add(comp);
 			}
 		}
-	
-		public void startConstructorArgument(Element element) {
-			BeanConstructorArgument carg = new BeanConstructorArgument(currentBean);
-			setXmlTextRange(carg, element);
-			currentBean.addConstructorArgument(carg);
-			currentElement = carg;
-		}
-	
-		public void registerConstructorArgument(int index, Object value,
-												String type) {
-			BeanConstructorArgument carg = (BeanConstructorArgument) currentElement;
-			carg.setIndex(index);
-			carg.setValue(value);
-			carg.setType(type);
-			StringBuffer name = new StringBuffer();
-			if (index != -1) {
-				name.append(index);
-				name.append(':');
-			}
-			if (type != null) {
-				name.append(type);
-				name.append(':');
-			}
-			if (value != null) {
-				name.append(value.toString());
-			} else {
-				name.append("NULL");
-			}
-			carg.setElementName(name.toString());
-		}
-	
-		public void startProperty(Element element) {
-			BeanProperty property = new BeanProperty(currentBean);
-			setXmlTextRange(property, element);
-			currentElement = property;
-		}
-	
-		public void registerProperty(String name, PropertyValues pvs) {
-			BeanProperty property = (BeanProperty) currentElement;
-			property.setElementName(name);
-			Object value = pvs.getPropertyValue(name).getValue();
-			property.setValue(value);
-			currentBean.addProperty(property);
-		}
-	
-		/**
-		 * Sets the start and end lines on the given model element.
-	     */
-		private void setXmlTextRange(ISourceModelElement modelElement,
-									 Element xmlElement) {
-			int startLine = LineNumberPreservingDOMParser.getStartLineNumber(
-																   xmlElement);
-			int endLine = LineNumberPreservingDOMParser.getEndLineNumber(
-																   xmlElement);
-			((AbstractSourceModelElement) modelElement).setElementStartLine(
-																	startLine);
-			((AbstractSourceModelElement) modelElement).setElementEndLine(
-																	  endLine);
-	    }
 	}
 }

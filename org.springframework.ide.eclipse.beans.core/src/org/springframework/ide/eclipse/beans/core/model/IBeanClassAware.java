@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,12 @@
 
 package org.springframework.ide.eclipse.beans.core.model;
 
-import java.util.Collection;
+import java.util.Set;
 
 /**
  * Interface to be implemented by model elements that know about
  * <code>IBean</code>s and their full-qualified class name.
- * 
- * @see org.springframework.ide.eclipse.beans.core.internal.model.BeansProject
- * @see org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig
+ * @author Torsten Juergeleit
  */
 public interface IBeanClassAware {
 
@@ -33,16 +31,12 @@ public interface IBeanClassAware {
 	 */
 	boolean isBeanClass(String className);
 
-	/**
-	 * Returns a list of full qualified class names of all bean classes used
-	 * within this Beans model element. 
-	 */
-	Collection getBeanClasses();
+	Set<String> getBeanClasses();
 
 	/**
-	 * Returns a list of <code>IBean</code>s which are using the given class as
-	 * their bean class.
+	 * Returns a list of beans which are using the given class as their bean
+	 * class.
 	 * @param className  full qualified name of bean class
 	 */
-	Collection getBeans(String className);
+	Set<IBean> getBeans(String className);
 }

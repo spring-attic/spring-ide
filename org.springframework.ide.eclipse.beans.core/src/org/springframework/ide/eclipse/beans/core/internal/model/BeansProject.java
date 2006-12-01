@@ -16,11 +16,7 @@
 
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -31,6 +27,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescription;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionReader;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionWriter;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
@@ -45,9 +42,9 @@ import org.springframework.ide.eclipse.core.model.ModelUtils;
  *
  * @author Torsten Juergeleit
  */
-public class BeansProject extends AbstractResourceModelElement
-													 implements IBeansProject {
-	private IProject project; 
+public class BeansProject extends AbstractResourceModelElement implements
+		IBeansProject {
+	private IProject project;
 	private BeansProjectDescription description;
 
 	public BeansProject(IProject project) {
@@ -60,10 +57,10 @@ public class BeansProject extends AbstractResourceModelElement
 	}
 
 	public IModelElement[] getElementChildren() {
-		ArrayList children = new ArrayList(getDescription().getConfigs());
+		Set<IModelElement> children = new LinkedHashSet<IModelElement>(
+				getDescription().getConfigs());
 		children.addAll(getDescription().getConfigSets());
-		return (IModelElement[]) children.toArray(
-										   new IModelElement[children.size()]);
+		return children.toArray(new IModelElement[children.size()]);
 	}
 
 	public IResource getElementResource() {
@@ -74,26 +71,23 @@ public class BeansProject extends AbstractResourceModelElement
 		return false;
 	}
 
-	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
+	public void accept(IModelElementVisitor visitor,
+			IProgressMonitor monitor) {
 
 		// First visit this project
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
 			// Now ask this project's configs
-			Iterator iter = getDescription().getConfigs().iterator();
-			while (iter.hasNext()) {
-				IModelElement element = (IModelElement) iter.next();
-				element.accept(visitor, monitor);
+			for (IBeansConfig config : getDescription().getConfigs()) {
+				config.accept(visitor, monitor);
 				if (monitor.isCanceled()) {
 					return;
 				}
 			}
 
 			// Finally ask this project's config sets
-			iter = getDescription().getConfigSets().iterator();
-			while (iter.hasNext()) {
-				IModelElement element = (IModelElement) iter.next();
-				element.accept(visitor, monitor);
+			for (IBeansConfigSet configSet : getDescription().getConfigSets()) {
+				configSet.accept(visitor, monitor);
 				if (monitor.isCanceled()) {
 					return;
 				}
@@ -105,7 +99,7 @@ public class BeansProject extends AbstractResourceModelElement
 		return project;
 	}
 
-	public Collection getConfigExtensions() {
+	public Set<String> getConfigExtensions() {
 		return getDescription().getConfigExtensions();
 	}
 
@@ -148,15 +142,12 @@ public class BeansProject extends AbstractResourceModelElement
 	 * 				<code>IBeansProject.DESCRIPTION_FILE</code>
 	 */
 	public void removeConfig(IFile file, boolean doSaveDescription) {
-		boolean removedConfig = getDescription().removeConfig(file);
-		boolean removedExternalConfig = getDescription().
-				removeExternalConfig(file);
-		if (removedConfig || removedExternalConfig && doSaveDescription) {
+		if (getDescription().removeConfig(file) && doSaveDescription) {
 			saveDescription();
 		}
 	}
 
-	public Collection getConfigNames() {
+	public Set<String> getConfigNames() {
 		return getDescription().getConfigNames();
 	}
 
@@ -173,35 +164,33 @@ public class BeansProject extends AbstractResourceModelElement
 	}
 
 	public IBeansConfig getConfig(String configName) {
-        if (configName != null && configName.charAt(0) == '/') {
-            return BeansCorePlugin.getModel().getConfig(configName);
-        }
-        else {
-            return getDescription().getConfig(configName);
-        }
+		if (configName != null && configName.charAt(0) == '/') {
+			return BeansCorePlugin.getModel().getConfig(configName);
+		} else {
+			return getDescription().getConfig(configName);
+		}
 	}
 
-	public Collection getConfigs() {
+	public Set<IBeansConfig> getConfigs() {
 		return getDescription().getConfigs();
 	}
 
-    public boolean hasConfigSet(String configSetName) {
-        IBeansConfigSet configSet = getDescription().getConfigSet(configSetName);
-        return configSet != null;
-    }
+	public boolean hasConfigSet(String configSetName) {
+		IBeansConfigSet configSet = getDescription()
+				.getConfigSet(configSetName);
+		return configSet != null;
+	}
 
 	public IBeansConfigSet getConfigSet(String configSetName) {
 		return getDescription().getConfigSet(configSetName);
 	}
 
-	public Collection getConfigSets() {
+	public Set<IBeansConfigSet> getConfigSets() {
 		return getDescription().getConfigSets();
 	}
 
 	public boolean isBeanClass(String className) {
-		Iterator configs = getDescription().getConfigs().iterator();
-		while (configs.hasNext()) {
-			IBeansConfig config = (IBeansConfig) configs.next();
+		for (IBeansConfig config : getDescription().getConfigs()) {
 			if (config.isBeanClass(className)) {
 				return true;
 			}
@@ -209,21 +198,17 @@ public class BeansProject extends AbstractResourceModelElement
 		return false;
 	}
 
-	public Collection getBeanClasses() {
-		Set beanClasses = new HashSet();
-		Iterator configs = getDescription().getConfigs().iterator();
-		while (configs.hasNext()) {
-			IBeansConfig config = (IBeansConfig) configs.next();
+	public Set<String> getBeanClasses() {
+		Set<String> beanClasses = new LinkedHashSet<String>();
+		for (IBeansConfig config : getDescription().getConfigs()) {
 			beanClasses.addAll(config.getBeanClasses());
 		}
 		return beanClasses;
 	}
 
-	public Collection getBeans(String className) {
-		List beans = new ArrayList(); 
-		Iterator configs = getDescription().getConfigs().iterator();
-		while (configs.hasNext()) {
-			IBeansConfig config = (IBeansConfig) configs.next();
+	public Set<IBean> getBeans(String className) {
+		Set<IBean> beans = new LinkedHashSet<IBean>();
+		for (IBeansConfig config : getDescription().getConfigs()) {
 			if (config.isBeanClass(className)) {
 				beans.addAll(config.getBeans(className));
 			}
@@ -238,7 +223,7 @@ public class BeansProject extends AbstractResourceModelElement
 	 * <code>saveDescription()</code>.
 	 * @param extensions  list of config extensions
 	 */
-	public void setConfigExtensions(Set extensions) {
+	public void setConfigExtensions(Set<String> extensions) {
 		getDescription().setConfigExtensions(extensions);
 	}
 
@@ -250,28 +235,18 @@ public class BeansProject extends AbstractResourceModelElement
 	 * <code>saveDescription()</code>.
 	 * @param configs  list of config names
 	 */
-	public void setConfigs(List configs) {
+	public void setConfigs(Set<String> configs) {
 		BeansProjectDescription description = getDescription();
 
-		// Look for removed config files and
+		// Look for removed configs and
 		// 1. delete all problem markers from them
 		// 2. remove config from any config set
-		ArrayList toBeRemoved = new ArrayList();
-		
-		Iterator iter = description.getConfigNames().iterator();
-		while (iter.hasNext()) {
-			String config = (String) iter.next();
-			if (!configs.contains(config)) {
-				toBeRemoved.add(config);
-				ModelUtils.deleteProblemMarkers(getConfig(config));
+		for (IBeansConfig config : getDescription().getConfigs()) {
+			if (!configs.contains(config.getElementName())) {
+				ModelUtils.deleteProblemMarkers(config);
+				description.removeConfig(config.getElementName());
 			}
 		}
-		
-		for (int i = 0; i < toBeRemoved.size(); i++) {
-		    String config = (String) toBeRemoved.get(i);
-		    description.removeConfig(config);
-		}
-		
 		description.setConfigNames(configs);
 	}
 
@@ -283,9 +258,8 @@ public class BeansProject extends AbstractResourceModelElement
 	 * @param configSets  list of <code>BeansConfigSet</code> instances
 	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet
 	 */
-	public void setConfigSets(List configSets) {
-		BeansProjectDescription description = getDescription();
-		description.setConfigSets(configSets);
+	public void setConfigSets(Set<IBeansConfigSet> configSets) {
+		getDescription().setConfigSets(configSets);
 	}
 
 	/**
