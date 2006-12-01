@@ -20,8 +20,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 
 /**
@@ -30,7 +28,8 @@ import java.util.HashMap;
 public class XMLWriter extends PrintWriter {
 
 	public static final String XML_VERSION =
-								   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+
 	protected int tab;
 
 	public XMLWriter(OutputStream output) throws UnsupportedEncodingException {
@@ -53,23 +52,22 @@ public class XMLWriter extends PrintWriter {
 	}
 
 	public void printTabulation() {
-		for (int i = 0; i < tab; i++)
+		for (int i = 0; i < tab; i++) {
 			super.print('\t');
+		}
 	}
 
-	public void printTag(String name, HashMap parameters) {
+	public void printTag(String name, HashMap<String, ?> parameters) {
 		printTag(name, parameters, true, true);
 	}
 
-	public void printTag(String name, HashMap parameters, boolean tab,
-						 boolean newLine) {
+	public void printTag(String name, HashMap<String, ?> parameters,
+			boolean tab, boolean newLine) {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("<");
 		buffer.append(name);
 		if (parameters != null) {
-			Enumeration keys = Collections.enumeration(parameters.keySet());
-			while (keys.hasMoreElements()) {
-				String key = (String) keys.nextElement();
+			for (String key : parameters.keySet()) {
 				buffer.append(" ");
 				buffer.append(key);
 				buffer.append("=\"");
@@ -88,11 +86,12 @@ public class XMLWriter extends PrintWriter {
 		}
 	}
 
-	public void startTag(String name, HashMap parameters) {
+	public void startTag(String name, HashMap<String, ?> parameters) {
 		startTag(name, parameters, true);
 	}
 
-	public void startTag(String name, HashMap parameters, boolean newLine) {
+	public void startTag(String name, HashMap<String, ?> parameters,
+			boolean newLine) {
 		printTag(name, parameters, true, newLine);
 		tab++;
 	}
@@ -108,27 +107,28 @@ public class XMLWriter extends PrintWriter {
 		}
 	}
 
-	public static String getEscaped(String s) {
-		StringBuffer result = new StringBuffer(s.length() + 10);
-		for (int i = 0; i < s.length(); ++i)
-			appendEscapedChar(result, s.charAt(i));
+	public static String getEscaped(String text) {
+		StringBuffer result = new StringBuffer(text.length() + 10);
+		for (int i = 0; i < text.length(); ++i) {
+			appendEscapedChar(result, text.charAt(i));
+		}
 		return result.toString();
 	}
 
 	private static String getReplacement(char c) {
-		// Encode special XML characters into the equivalent character references.
-		// These five are defined by default for all XML documents.
+		// Encode special XML characters into the equivalent character
+		// references. These five are defined by default for all XML documents.
 		switch (c) {
-			case '<' :
-				return "lt"; //$NON-NLS-1$
-			case '>' :
-				return "gt"; //$NON-NLS-1$
-			case '"' :
-				return "quot"; //$NON-NLS-1$
-			case '\'' :
-				return "apos"; //$NON-NLS-1$
-			case '&' :
-				return "amp"; //$NON-NLS-1$
+		case '<':
+			return "lt";
+		case '>':
+			return "gt";
+		case '"':
+			return "quot";
+		case '\'':
+			return "apos";
+		case '&':
+			return "amp";
 		}
 		return null;
 	}

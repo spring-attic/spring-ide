@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 
 package org.springframework.ide.eclipse.core.io;
 
+import org.eclipse.core.runtime.Assert;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.util.Assert;
 
 /**
  * ResourceLoader implementation that resolves paths as file system resources
  * rather than as class path resources (Spring's DefaultResourceLoader's
  * strategy).
  * @see org.springframework.core.io.DefaultResourceLoader
+ * @author Torsten Juergeleit
  */
 public class FileResourceLoader implements ResourceLoader {
 
@@ -35,7 +36,15 @@ public class FileResourceLoader implements ResourceLoader {
 	 * @see FileResource
 	 */
 	public Resource getResource(String location) {
-		Assert.notNull(location, "location is required");
+		Assert.isNotNull(location, "location is required");
 		return new FileResource(location);
+	}
+
+	/**
+	 * Returns <code>null</code> because Spring IDE's plug-in classloader is
+	 * not useable in Spring's context.
+	 */
+	public ClassLoader getClassLoader() {
+		return null;
 	}
 }

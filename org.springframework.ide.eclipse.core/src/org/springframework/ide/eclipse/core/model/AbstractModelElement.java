@@ -87,12 +87,13 @@ public abstract class AbstractModelElement implements IModelElement {
 		if (getElementName() != null) {
 			id.append(getElementName());
 		} else {
-			id.append(this.hashCode());
+			id.append(super.hashCode());
 		}
 		return id.toString();
 	}
 
-	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
+	public void accept(IModelElementVisitor visitor,
+			IProgressMonitor monitor) {
 		visitor.visit(this, monitor);
 	}
 
@@ -112,15 +113,13 @@ public abstract class AbstractModelElement implements IModelElement {
 						String name = id.substring(sepPos + 1, delPos);
 						if (name.equals(getElementName())) {
 
-							// Ask all children for the remaining part of the id
+							// Ask children for remaining part of id
 							id = id.substring(delPos + 1);
-							IModelElement[] children = getElementChildren();
-							for (int i = 0; i < children.length; i++) {
-								IModelElement child = children[i];
+							for (IModelElement child : getElementChildren()) {
 								if (child instanceof AbstractModelElement) {
 									IModelElement element =
-													((AbstractModelElement)
-														 child).getElement(id);
+											((AbstractModelElement) child)
+												.getElement(id);
 									if (element != null) {
 										return element;
 									}

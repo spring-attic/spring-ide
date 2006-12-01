@@ -16,21 +16,22 @@
 
 package org.springframework.ide.eclipse.core.model;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 
 /**
  * Default implementation of the common protocol for a model.
  * @author Torsten Juergeleit
  */
-public abstract class AbstractModel extends AbstractModelElement
-															implements IModel {
-	private List listeners;
+public abstract class AbstractModel extends AbstractModelElement implements
+		IModel {
+	private Set<IModelChangeListener> listeners;
 
 	public AbstractModel(IModelElement parent, String name) {
 		super(parent, name);
-		this.listeners = new ArrayList();
+		listeners = new HashSet<IModelChangeListener>();
 	}
 
 	public int getElementType() {
@@ -38,18 +39,18 @@ public abstract class AbstractModel extends AbstractModelElement
 	}
 
 	public final void addChangeListener(IModelChangeListener listener) {
-		listeners.add(listener);
+		if (!listeners.contains(listener)) {
+			listeners.add(listener);
+		}
 	}
 
 	public final void removeChangeListener(IModelChangeListener listener) {
 		listeners.remove(listener);
 	}
 
-	protected final void notifyListeners(IModelElement element, int type) {
+	protected final void notifyListeners(IModelElement element, Type type) {
 		ModelChangeEvent event = new ModelChangeEvent(element, type);
-		Iterator iter = listeners.iterator();
-		while (iter.hasNext()) {
-			IModelChangeListener listener = (IModelChangeListener) iter.next();
+		for (IModelChangeListener listener : listeners) {
 			listener.elementChanged(event);
 		}
 	}

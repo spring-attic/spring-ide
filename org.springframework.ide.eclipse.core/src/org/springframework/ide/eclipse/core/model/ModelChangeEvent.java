@@ -33,11 +33,9 @@ public class ModelChangeEvent extends EventObject {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final int ADDED = 1;
-	public static final int REMOVED = 2;
-	public static final int CHANGED = 3;
+	public enum Type { ADDED, REMOVED, CHANGED };
 
-	private int type;
+	private Type type;
 
 	/**
 	 * Creates an new element change event.
@@ -46,7 +44,7 @@ public class ModelChangeEvent extends EventObject {
 	 * @param type  the type of modification (ADDED, REMOVED, CHANGED) this
 	 * 				event contains
 	 */
-	public ModelChangeEvent(IModelElement element, int type) {
+	public ModelChangeEvent(IModelElement element, Type type) {
 		super(element);
 		this.type = type;
 	}
@@ -61,7 +59,7 @@ public class ModelChangeEvent extends EventObject {
 	/**
 	 * Returns the type of modification.
 	 */
-	public int getType() {
+	public Type getType() {
 		return type;
 	}
 }

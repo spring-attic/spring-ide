@@ -18,16 +18,12 @@ package org.springframework.ide.eclipse.core.model;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.beans.BeanMetadataElement;
+import org.springframework.ide.eclipse.core.io.xml.XmlSource;
 
 /**
  * Default implementation of the common protocol for all model elements related
  * to source code.
- * 
  * @author Torsten Juergeleit
  */
 public abstract class AbstractSourceModelElement extends
@@ -96,34 +92,17 @@ public abstract class AbstractSourceModelElement extends
 	 */
 	public Object getAdapter(Class adapter) {
 		if (adapter == IMarker.class) {
-			return createMarker();
+			return ModelUtils.createMarker(this);
 		}
 		return super.getAdapter(adapter);
 	}
 
-	private IMarker createMarker() {
-		final IResource resource = getElementResource();
-		if (resource != null) {
-			try {
-				final IMarker[] markers = new IMarker[1];
-				IWorkspaceRunnable runnable = new IWorkspaceRunnable() {
-					public void run(IProgressMonitor monitor)
-														 throws CoreException {
-						IMarker marker = resource.createMarker(IMarker.TEXT);
-						marker.setAttribute(IMarker.LINE_NUMBER, startLine);
-						marker.setAttribute(IMarker.LOCATION, "line " +
-											startLine);
-						marker.setAttribute(IMarker.MESSAGE, toString());
-						markers[0] = marker;
-					}
-				};
-				resource.getWorkspace().run(runnable, null,
-												IWorkspace.AVOID_UPDATE, null);
-				return markers[0];
-			} catch (CoreException e) {
-				SpringCore.log(e);
-			}
+	protected void setSourceRange(BeanMetadataElement metadata) {
+		if (metadata.getSource() instanceof XmlSource) {
+			XmlSource source = (XmlSource) metadata
+					.getSource();
+			setElementStartLine(source.getStartLine());
+			setElementEndLine(source.getEndLine());
 		}
-		return null;
 	}
 }

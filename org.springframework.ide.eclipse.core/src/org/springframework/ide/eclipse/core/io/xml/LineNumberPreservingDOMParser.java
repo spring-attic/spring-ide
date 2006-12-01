@@ -31,9 +31,7 @@ import org.xml.sax.SAXException;
 /**
  * Extended version of Xerces' DOM parser which adds line numbers
  * (as DOM level 3 user data) to every node.
- * <p>
- * <b>Requires Xerces 2.7 or newer!!!</b>
- *
+ * <p><b>Requires Xerces 2.7 or newer!!!</b></p>
  * @author Torsten Juergeleit
  */
 public class LineNumberPreservingDOMParser extends DOMParser {
@@ -71,37 +69,37 @@ public class LineNumberPreservingDOMParser extends DOMParser {
 	}
 
 	public void startDocument(XMLLocator locator, String encoding,
-							  NamespaceContext namespaceContext,
-							  Augmentations augs) throws XNIException {
-		super.startDocument(locator, encoding, namespaceContext, augs);
+			NamespaceContext namespaceContext, Augmentations augs)
+			throws XNIException {
 		this.locator = locator;
+		super.startDocument(locator, encoding, namespaceContext, augs);
 		addLineNumberToCurrentNode(START_LINE);
 	}
 
 	public void endDocument(Augmentations augs) throws XNIException {
-		super.endDocument(augs);
 		addLineNumberToCurrentNode(END_LINE);
+		super.endDocument(augs);
 	}
 
 	public void startElement(QName element, XMLAttributes attributes,
-							 Augmentations augs) throws XNIException {
+			Augmentations augs) throws XNIException {
 		super.startElement(element, attributes, augs);
 		addLineNumberToCurrentNode(START_LINE);
 	}
 
 	public void endElement(QName element, Augmentations augs)
-														   throws XNIException {
-		super.endElement(element, augs);
+			throws XNIException {
 		addLineNumberToCurrentNode(END_LINE);
+		super.endElement(element, augs);
 	}
 
 	private void addLineNumberToCurrentNode(String key) throws XNIException {
 		try {
 			Node node = (Node) getProperty(CURRENT_ELEMENT_NODE);
 			if (node instanceof NodeImpl) {
-				((NodeImpl) node).setUserData(key,
-								  String.valueOf(this.locator.getLineNumber()),
-								  (UserDataHandler) null);
+				String line = String.valueOf(locator.getLineNumber());
+				((NodeImpl) node)
+						.setUserData(key, line, (UserDataHandler) null);
 			}
 		} catch (SAXException e) {
 			throw new XNIException(e);

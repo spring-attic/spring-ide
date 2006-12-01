@@ -18,6 +18,8 @@ package org.springframework.ide.eclipse.core;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Miscellaneous string utility methods.
@@ -147,5 +149,21 @@ public final class StringUtils {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Convenience method to convert a CSV string list to a set.
+	 * Note that this will suppress duplicates.
+	 * @param str CSV String
+	 * @return a Set of String entries in the list
+	 */
+	public static Set<String> commaDelimitedListToSet(String str) {
+		Set<String> set = new LinkedHashSet<String>();
+		String[] tokens = org.springframework.util.StringUtils
+				.commaDelimitedListToStringArray(str);
+		for (int i = 0; i < tokens.length; i++) {
+			set.add(tokens[i]);
+		}
+		return set;
 	}
 }
