@@ -33,6 +33,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Font;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference.BeanType;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput;
@@ -176,8 +177,8 @@ public class Graph implements IAdaptable {
 				orphanBeans.add(bean);
 				graph.nodes.remove(bean);
 			} else {
-				Reference reference = new Reference(
-								 BeanReference.STANDARD_BEAN_TYPE, root, bean);
+				Reference reference = new Reference(BeanType.STANDARD, root,
+						bean);
 				reference.weight = 0;
 				rootEdges.add(reference);
 				graph.edges.add(reference);

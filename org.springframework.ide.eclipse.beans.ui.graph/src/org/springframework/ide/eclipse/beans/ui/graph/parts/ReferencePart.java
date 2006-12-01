@@ -34,7 +34,7 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.editparts.AbstractConnectionEditPart;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference.BeanType;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
 import org.springframework.ide.eclipse.beans.ui.graph.model.ConstructorArgument;
@@ -50,42 +50,31 @@ public class ReferencePart extends AbstractConnectionEditPart {
 	protected IFigure createFigure() {
 		PolylineConnection conn = createConnection(getReference());
 		Label label = new Label();
-		switch (getReference().getType()) {
-			case BeanReference.PARENT_BEAN_TYPE :
-				conn.setLineStyle(Graphics.LINE_DOT);
-				label.setText("Parent bean: " +
-							  getReference().getTargetBean().getName());
-				break;
-
-			case BeanReference.FACTORY_BEAN_TYPE :
-				conn.setLineStyle(Graphics.LINE_DASH);
-				label.setText("Factory bean");
-				break;
-
-			case BeanReference.DEPENDS_ON_BEAN_TYPE :
-				conn.setLineStyle(Graphics.LINE_DASH);
-				label.setText("Depends-on bean");
-				break;
-
-			case BeanReference.METHOD_OVERRIDE_BEAN_TYPE :
-				conn.setLineStyle(Graphics.LINE_DOT);
-				label.setText("Method-override bean");
-				break;
-
-			case BeanReference.INTERCEPTOR_BEAN_TYPE :
-				conn.setLineStyle(Graphics.LINE_DASHDOT);
-				label.setText("Interceptor bean");
-				break;
-
-			default :
-				Node node = getReference().getNode();
-				if (node instanceof ConstructorArgument) {
-					label.setText("ConstructorArgument: " +
-								  ((ConstructorArgument) node).getName());
-				} else if (node instanceof Property) {
-					label.setText("Property: " + ((Property) node).getName());
-				}
-				break;
+		BeanType type = getReference().getType();
+		if (type == BeanType.PARENT) {
+			conn.setLineStyle(Graphics.LINE_DOT);
+			label.setText("Parent bean: "
+					+ getReference().getTargetBean().getName());
+		} else if (type == BeanType.FACTORY) {
+			conn.setLineStyle(Graphics.LINE_DASH);
+			label.setText("Factory bean");
+		} else if (type == BeanType.DEPENDS_ON) {
+			conn.setLineStyle(Graphics.LINE_DASH);
+			label.setText("Depends-on bean");
+		} else if (type == BeanType.METHOD_OVERRIDE) {
+			conn.setLineStyle(Graphics.LINE_DOT);
+			label.setText("Method-override bean");
+		} else if (type == BeanType.INTERCEPTOR) {
+			conn.setLineStyle(Graphics.LINE_DASHDOT);
+			label.setText("Interceptor bean");
+		} else {
+			Node node = getReference().getNode();
+			if (node instanceof ConstructorArgument) {
+				label.setText("ConstructorArgument: "
+						+ ((ConstructorArgument) node).getName());
+			} else if (node instanceof Property) {
+				label.setText("Property: " + ((Property) node).getName());
+			}
 		}
 		conn.setToolTip(label);
 		return conn;

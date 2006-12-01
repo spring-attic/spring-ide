@@ -19,6 +19,7 @@ package org.springframework.ide.eclipse.beans.ui.graph.model;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.draw2d.graph.Edge;
 import org.eclipse.draw2d.graph.Node;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference.BeanType;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
@@ -30,20 +31,20 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
  */
 public class Reference extends Edge implements IAdaptable {
 
-	private int type;
+	private BeanType type;
 	private Node node;
 
-	public Reference(int type, Bean source, Bean target) {
+	public Reference(BeanType type, Bean source, Bean target) {
 		this(type, source, target, null);
 	}
 
-	public Reference(int type, Bean source, Bean target, Node node) {
+	public Reference(BeanType type, Bean source, Bean target, Node node) {
 		super(source, target);
 		this.type = type;
 		this.node = node;
 	}
 
-	public int getType() {
+	public BeanType getType() {
 		return type;
 	}
 

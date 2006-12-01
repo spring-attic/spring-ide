@@ -96,7 +96,6 @@ public class Property extends Node implements IAdaptable {
 						break;
 					}
 				}
-				
 			}
 			if (innerBean != null) {
 				Iterator refBeans = BeansModelUtils.getBeanReferences(
