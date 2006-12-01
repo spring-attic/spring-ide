@@ -19,7 +19,6 @@ package org.springframework.ide.eclipse.beans.ui.search.internal.queries;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchMessages;
@@ -30,10 +29,8 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 /**
  * This implementation of <code>ISearchQuery</code> looks for all
  * <code>IBean</code>s which ID or alias names match a given name.
- *
  * @see org.eclipse.search.ui.ISearchQuery
  * @see org.springframework.ide.eclipse.beans.core.model.IBean
- *
  * @author Torsten Juergeleit
  */
 public class BeanNameQuery extends AbstractBeansQuery {
@@ -54,7 +51,6 @@ public class BeanNameQuery extends AbstractBeansQuery {
 								IProgressMonitor monitor) {
 		if (element instanceof IBean) {
 			Bean bean = (Bean) element;
-			BeanDefinitionHolder bdh = bean.getBeanDefinitionHolder();
 
 			// Compare bean name first
 			if (pattern.matcher(bean.getElementName()).matches()) {
@@ -62,7 +58,7 @@ public class BeanNameQuery extends AbstractBeansQuery {
 			}
 
 			// Now compare aliases
-			String[] aliases = bdh.getAliases();
+			String[] aliases = bean.getAliases();
 			if (aliases != null) {
 				for (int i = 0; i < aliases.length; i++) {
 					if (pattern.matcher(aliases[i]).matches()) {

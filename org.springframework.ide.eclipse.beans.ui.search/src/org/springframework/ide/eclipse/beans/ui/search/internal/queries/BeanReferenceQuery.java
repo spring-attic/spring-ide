@@ -28,6 +28,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MethodOverride;
 import org.springframework.beans.factory.support.ReplaceOverride;
+import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
@@ -42,12 +43,10 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  * This implementation of <code>ISearchQuery</code> looks for all
  * <code>IBeanAlias</code>es or <code>IBean</code>s which are referencing
  * a given bean.
- *
+ * @author Torsten Juergeleit
  * @see org.eclipse.search.ui.ISearchQuery
  * @see org.springframework.ide.eclipse.beans.core.model.IBeanAlias
  * @see org.springframework.ide.eclipse.beans.core.model.IBean
- *
- * @author Torsten Juergeleit
  */
 public class BeanReferenceQuery extends AbstractBeansQuery {
 
@@ -67,7 +66,7 @@ public class BeanReferenceQuery extends AbstractBeansQuery {
 								IProgressMonitor monitor) {
 		if (element instanceof IBeanAlias) {
 			IBeanAlias alias = (IBeanAlias) element;
-			if (pattern.matcher(alias.getName()).matches()) {
+			if (pattern.matcher(alias.getBeanName()).matches()) {
 				return true;
 			}
 		} else if (element instanceof IBean) {
@@ -79,7 +78,8 @@ public class BeanReferenceQuery extends AbstractBeansQuery {
 				return true;
 			}
 			AbstractBeanDefinition bd = (AbstractBeanDefinition)
-									   BeansModelUtils.getBeanDefinition(bean);
+					((Bean) element).getBeanDefinition();
+
 			// Compare reference with factory bean
 			String factoryBeanName = bd.getFactoryBeanName();
 			if (factoryBeanName != null && pattern.matcher(factoryBeanName).matches()) {
