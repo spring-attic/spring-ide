@@ -20,9 +20,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -62,6 +65,7 @@ import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
+import org.springframework.ide.eclipse.beans.core.internal.Introspector.Statics;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
@@ -88,13 +92,12 @@ public class BeansContentAssistProcessor
         public static final int EXTERNAL_BEAN_RELEVANCE = 10;
         public static final int LOCAL_BEAN_RELEVANCE = 20;
 
-        protected Map beans;
-
+        protected Set<String> beans;
         protected ContentAssistRequest request;
 
         public BeanReferenceSearchRequestor(ContentAssistRequest request) {
             this.request = request;
-            this.beans = new HashMap();
+            this.beans = new HashSet<String>();
         }
 
         public void acceptSearchMatch(IBean bean, IFile file, String prefix) {
@@ -103,7 +106,7 @@ public class BeansContentAssistProcessor
                 String replaceText = beanName;
                 String fileName = bean.getElementResource().getProjectRelativePath().toString();
                 String key = beanName + fileName;
-                if (!beans.containsKey(key)) {
+                if (!beans.contains(key)) {
                     StringBuffer buf = new StringBuffer();
                     buf.append(beanName);
                     if (bean.getClassName() != null) {
@@ -131,7 +134,7 @@ public class BeansContentAssistProcessor
                             BeanReferenceSearchRequestor.EXTERNAL_BEAN_RELEVANCE);
 
                     request.addProposal(proposal);
-                    beans.put(key, proposal);
+                    beans.add(key);
                 }
             }
         }
@@ -147,7 +150,7 @@ public class BeansContentAssistProcessor
                     String replaceText = beanName;
                     String fileName = file.getProjectRelativePath().toString();
                     String key = beanName + fileName;
-                    if (!beans.containsKey(key)) {
+                    if (!beans.contains(key)) {
                         StringBuffer buf = new StringBuffer();
                         buf.append(beanName);
                         if (attributes.getNamedItem("class") != null) {
@@ -173,7 +176,7 @@ public class BeansContentAssistProcessor
                                 BeanReferenceSearchRequestor.LOCAL_BEAN_RELEVANCE);
 
                         request.addProposal(proposal);
-                        beans.put(key, proposal);
+                        beans.add(key);
                     }
                 }
             }
@@ -186,11 +189,11 @@ public class BeansContentAssistProcessor
 
         protected ContentAssistRequest request;
         protected JavaElementImageProvider imageProvider;
-        protected Map methods;
+        protected Set<String> methods;
 
         public MethodSearchRequestor(ContentAssistRequest request) {
             this.request = request;
-            this.methods = new HashMap();
+            this.methods = new HashSet<String>();
             this.imageProvider = new JavaElementImageProvider();
         }
 
@@ -251,7 +254,7 @@ public class BeansContentAssistProcessor
                 String[] parameterTypes = getParameterTypes(method);
                 String returnType = getReturnType(method, true);
                 String key = method.getElementName() + method.getSignature();
-                if (returnType != null && !methods.containsKey(key)) {
+                if (returnType != null && !methods.contains(key)) {
                     String methodName = method.getElementName();
                     String replaceText = methodName;
                     StringBuffer buf = new StringBuffer();
@@ -290,7 +293,7 @@ public class BeansContentAssistProcessor
                             MethodSearchRequestor.METHOD_RELEVANCE);
 
                     request.addProposal(proposal);
-                    methods.put(method.getSignature(), proposal);
+                    methods.add(method.getSignature());
                 }
             }
             catch (JavaModelException e) {
@@ -319,7 +322,7 @@ public class BeansContentAssistProcessor
                 String[] parameterNames = method.getParameterNames();
                 String[] parameterTypes = getParameterTypes(method);
                 String key = method.getElementName() + method.getSignature();
-                if (!methods.containsKey(key)) {
+                if (!methods.contains(key)) {
                     String methodName = method.getElementName();
                     String replaceText = methodName;
                     StringBuffer buf = new StringBuffer();
@@ -354,10 +357,9 @@ public class BeansContentAssistProcessor
                             MethodSearchRequestor.METHOD_RELEVANCE);
 
                     request.addProposal(proposal);
-                    methods.put(method.getSignature(), proposal);
+                    methods.add(method.getSignature());
                 }
-            }
-            catch (JavaModelException e) {
+            } catch (JavaModelException e) {
                 // do nothing
             }
         }
@@ -370,7 +372,6 @@ public class BeansContentAssistProcessor
         public PropertyNameSearchRequestor(ContentAssistRequest request, String prefix) {
             super(request);
             this.prefix = prefix;
-
         }
 
         public void acceptSearchMatch(IMethod method, boolean external) throws CoreException {
@@ -389,7 +390,7 @@ public class BeansContentAssistProcessor
                 String[] parameterNames = method.getParameterNames();
                 String[] parameterTypes = getParameterTypes(method);
                 String key = method.getElementName() + method.getSignature();
-                if (!methods.containsKey(key)) {
+                if (!methods.contains(key)) {
                     String propertyName = java.beans.Introspector
 							.decapitalize(method.getElementName().substring(3));
                     String replaceText = prefix + propertyName;
@@ -421,7 +422,7 @@ public class BeansContentAssistProcessor
                             MethodSearchRequestor.METHOD_RELEVANCE);
 
                     request.addProposal(proposal);
-                    methods.put(key, method);
+                    methods.add(key);
                 }
             }
             catch (JavaModelException e) {
@@ -575,7 +576,7 @@ public class BeansContentAssistProcessor
             if (type != null) {
                 try {
                     Collection methods = Introspector.findAllMethods(type, prefix, -1, true,
-                            (isStatic ? Introspector.STATIC_YES : Introspector.STATIC_IRRELVANT));
+                            (isStatic ? Statics.YES : Statics.DONT_CARE));
                     if (methods != null && methods.size() > 0) {
                         FactoryMethodSearchRequestor requestor = new FactoryMethodSearchRequestor(
                                 request);
@@ -647,9 +648,8 @@ public class BeansContentAssistProcessor
 						while (iterator.hasNext()) {
 							IMethod method = (IMethod) iterator.next();
 							IType returnType = BeansEditorUtils.getTypeForMethodReturnType(method, type, (IFile) getResource(request));
-							
 							if (returnType != null) {
-								List typesTemp = new ArrayList();
+								List<IType> typesTemp = new ArrayList<IType>();
 								typesTemp.add(returnType);
 								
 								String newPrefix = oldPrefix + firstPrefix + ".";
@@ -752,10 +752,12 @@ public class BeansContentAssistProcessor
             }
             else if ("init-method".equals(attributeName) || "destroy-method".equals(attributeName)) {
                 // TODO add support for parent bean
-                NamedNodeMap attributes = node.getAttributes();
-                String className = attributes.getNamedItem("class").getNodeValue();
-                if (className != null) {
-                    addInitDestroyAttributeValueProposals(request, matchString, className);
+                Node classNode = node.getAttributes().getNamedItem("class");
+                if (classNode != null) {
+	                String className = classNode.getNodeValue();
+	                if (className != null) {
+	                    addInitDestroyAttributeValueProposals(request, matchString, className);
+	                }
                 }
             }
             else if ("factory-method".equals(attributeName)) {
@@ -888,8 +890,9 @@ public class BeansContentAssistProcessor
     /**
      * Order the given proposals.
      */
-    private ICompletionProposal[] order(ICompletionProposal[] proposals) {
-        Arrays.sort(proposals, comparator);
+    @SuppressWarnings("unchecked")
+	private ICompletionProposal[] order(ICompletionProposal[] proposals) {
+		Arrays.sort(proposals, comparator);
         return proposals;
     }
 

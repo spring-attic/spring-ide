@@ -3,7 +3,7 @@
 <plugin
    id="org.springframework.ide.eclipse.beans.ui.editor"
    name="%pluginName"
-   version="1.3.6"
+   version="2.0.0"
    provider-name="%providerName"
    class="org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin">
 
@@ -83,6 +83,38 @@
              publicId="-//SPRING//DTD BEAN//EN"
              uri="dtds/spring-beans.dtd"
              webURL="http://www.springframework.org/dtd/spring-beans.dtd"/>
+       <public
+             publicId="-//SPRING//DTD BEAN//EN"
+             uri="dtds/spring-beans-2.0.dtd"
+             webURL="http://www.springframework.org/dtd/spring-beans-2.0.dtd"/>
+       <public
+             publicId="http://www.springframework.org/schema/beans"
+             uri="schemas/spring-beans-2.0.xsd"
+             webURL="http://www.springframework.org/schema/beans/spring-beans-2.0.xsd"/>
+       <public
+             publicId="http://www.springframework.org/schema/util"
+             uri="schemas/spring-util-2.0.xsd"
+             webURL="http://www.springframework.org/schema/beans/spring-util-2.0.xsd"/>
+       <public
+             publicId="http://www.springframework.org/schema/aop"
+             uri="schemas/spring-aop-2.0.xsd"
+             webURL="http://www.springframework.org/schema/aop/spring-aop-2.0.xsd"/>
+       <public
+             publicId="http://www.springframework.org/schema/tx"
+             uri="schemas/spring-tx-2.0.xsd"
+             webURL="http://www.springframework.org/schema/tx/spring-tx-2.0.xsd"/>
+       <public
+             publicId="http://www.springframework.org/schema/jee"
+             uri="schemas/spring-jee-2.0.xsd"
+             webURL="http://www.springframework.org/schema/jee/spring-jee-2.0.xsd"/>
+       <public
+             publicId="http://www.springframework.org/schema/tool"
+             uri="schemas/spring-tool-2.0.xsd"
+             webURL="http://www.springframework.org/schema/tool/spring-tool-2.0.xsd"/>
+       <public
+             publicId="http://www.springframework.org/schema/lang"
+             uri="schemas/spring-lang-2.0.xsd"
+             webURL="http://www.springframework.org/schema/lang/spring-lang-2.0.xsd"/>
     </catalogContribution>
  </extension>
  

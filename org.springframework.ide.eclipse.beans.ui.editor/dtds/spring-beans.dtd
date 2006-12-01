@@ -1,12 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
 <!--
-	Spring XML Beans DTD
+	Spring XML Beans DTD, version 1.2
 	Authors: Rod Johnson, Juergen Hoeller, Alef Arendsen, Colin Sampaleanu, Rob Harrop
 
 	This defines a simple and consistent way of creating a namespace
 	of JavaBeans objects, managed by a Spring BeanFactory, read by
-	XmlBeanDefinitionReader (with DefaultXmlBeanDefinitionParser).
+	XmlBeanDefinitionReader (with DefaultBeanDefinitionDocumentReader).
 
 	This document type is used by most Spring functionality, including
 	web application contexts, which are based on bean factories.
@@ -19,7 +17,7 @@
 	(independent instances). Further scopes are supposed to be built on top
 	of the core BeanFactory infrastructure and are therefore not part of it.
 
-	References among beans are supported, i.e. setting a JavaBean property
+	References among beans are supported, that is, setting a JavaBean property
 	or a constructor argument to refer to another bean in the same factory
 	(or an ancestor factory).
 
@@ -30,8 +28,8 @@
 	There is also support for lists, sets, maps, and java.util.Properties
 	as bean property types or constructor argument types.
 
-	As the format is simple, a DTD is sufficient, and there's no need
-	for a schema at this point.
+	For simple purposes, this DTD is sufficient. As of Spring 2.0,
+	XSD-based bean definitions are supported as more powerful alternative.
 
 	XML documents that conform to this DTD should declare the following doctype:
 
@@ -177,7 +175,6 @@
 	If this bean should be lazily initialized.
 	If false, it will get instantiated on startup by bean factories
 	that perform eager initialization of singletons.
-
 
 	Note: This attribute will not be inherited by child bean definitions.
 	Hence, it needs to be specified per concrete bean definition.

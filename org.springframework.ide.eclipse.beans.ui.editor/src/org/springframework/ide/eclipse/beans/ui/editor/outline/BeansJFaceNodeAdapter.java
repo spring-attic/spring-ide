@@ -38,6 +38,28 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 		super(adapterFactory);
 	}
 
+	/**
+	 * Allowing the INodeAdapter to compare itself against the type allows it to
+	 * return true in more than one case.
+	 */
+	public boolean isAdapterForType(Object type) {
+		return type.equals(ADAPTER_KEY);
+	}
+
+	public boolean hasChildren(Object object) {
+		if (BeansEditorUtils.isSpringStyleOutline()) {
+			Node node = (Node) object;
+			for (Node child = node.getFirstChild(); child != null; child = child
+					.getNextSibling()) {
+				if (child.getNodeType() != Node.TEXT_NODE)
+					return true;
+			}
+		} else {
+			return super.hasChildren(object);
+		}
+		return false;
+	}
+
 	public Object[] getChildren(Object object) {
 		if (BeansEditorUtils.isSpringStyleOutline()) {
 			Preferences prefs = BeansEditorPlugin.getDefault()
@@ -45,8 +67,7 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 			boolean sort = prefs.getBoolean(IPreferencesConstants.OUTLINE_SORT);
 
 			Node node = (Node) object;
-			// cdupuis: commented due to not refreshing of root elements in outline	
-			/*if (node.getNodeType() == Node.DOCUMENT_NODE) {
+			if (node.getNodeType() == Node.DOCUMENT_NODE) {
 				for (Node child = node.getFirstChild(); child != null; child = child
 						.getNextSibling()) {
 					if (child.getNodeType() == Node.ELEMENT_NODE
@@ -69,13 +90,13 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 						return children.toArray();
 					}
 				}
-			}*/
+			}
 			ArrayList children = new ArrayList();
 			for (Node child = node.getFirstChild(); child != null; child = child
 					.getNextSibling()) {
 				Node n = child;
 				if (n.getNodeType() != Node.TEXT_NODE) {
-					if (n.getNodeType() != Node.ELEMENT_NODE) {
+					if (n.getNodeType() == Node.COMMENT_NODE) {
 						if (!sort) {
 							children.add(n);
 						}
@@ -91,15 +112,6 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 		}
 	}
 
-	public Object[] getElements(Object node) {
-		if (BeansEditorUtils.isSpringStyleOutline()) {
-			return getChildren(node);
-		}
-		else {
-			return super.getElements(node);
-		}
-	}
-	
 	public Object getParent(Object object) {
 		if (BeansEditorUtils.isSpringStyleOutline()) {
 			Node node = (Node) object;
@@ -107,27 +119,5 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 		} else {
 			return super.getParent(object);
 		}
-	}
-
-	public boolean hasChildren(Object object) {
-		if (BeansEditorUtils.isSpringStyleOutline()) {
-			Node node = (Node) object;
-			for (Node child = node.getFirstChild(); child != null; child = child
-					.getNextSibling()) {
-				if (child.getNodeType() != Node.TEXT_NODE)
-					return true;
-			}
-		} else {
-			return super.hasChildren(object);
-		}
-		return false;
-	}
-
-	/**
-	 * Allowing the INodeAdapter to compare itself against the type allows it to
-	 * return true in more than one case.
-	 */
-	public boolean isAdapterForType(Object type) {
-		return type.equals(ADAPTER_KEY);
 	}
 }

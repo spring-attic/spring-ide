@@ -24,6 +24,7 @@ import org.eclipse.wst.xml.core.internal.document.CommentImpl;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider;
 import org.eclipse.wst.xml.ui.views.contentoutline.XMLContentOutlineConfiguration;
 import org.springframework.ide.eclipse.beans.core.BeansTags;
+import org.springframework.ide.eclipse.beans.core.BeansTags.Tag;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
@@ -114,10 +115,7 @@ public class BeansContentOutlineConfiguration
 			Node node = (Node) object;
 			String nodeName = node.getNodeName();
 			NamedNodeMap attributes = node.getAttributes();
-			
-			if ("beans".equals(nodeName)) {
-				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONFIG);
-			}
+	
 			// Root elements (alias, import and bean)
 			if ("alias".equals(nodeName)) {
 				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ALIAS);
@@ -165,78 +163,86 @@ public class BeansContentOutlineConfiguration
 
 			// Create Spring beans label text
 			Node node = (Node) o;
-			NamedNodeMap attrs = node.getAttributes(); 
+			NamedNodeMap attrs = node.getAttributes();
 			Node attr;
 			String text = "";
 
 			// Root elements (alias, import and bean)
-			switch (BeansTags.getTag(node)) {
-				case BeansTags.IMPORT :
-					attr = attrs.getNamedItem("resource");
+			Tag tag = BeansTags.getTag(node);
+			if (tag == Tag.IMPORT) {
+				attr = attrs.getNamedItem("resource");
+				if (attr != null) {
+					text = attr.getNodeValue();
+				}
+			} else if (tag == Tag.ALIAS) {
+				attr = attrs.getNamedItem("name");
+				if (attr != null) {
+					text = attr.getNodeValue();
+				}
+				if (showAttributes) {
+					attr = attrs.getNamedItem("alias");
 					if (attr != null) {
-						text = attr.getNodeValue();
+						text += " \"" + attr.getNodeValue() + "\"";
 					}
-					break;
-
-				case BeansTags.ALIAS :
+				}
+			} else if (tag == Tag.BEAN) {
+				boolean hasParent = false;
+				attr = attrs.getNamedItem("id");
+				if (attr != null) {
+					text = attr.getNodeValue();
+				} else {
 					attr = attrs.getNamedItem("name");
 					if (attr != null) {
 						text = attr.getNodeValue();
-					}
-					if (showAttributes) {
-						attr = attrs.getNamedItem("alias");
-						if (attr != null) {
-							text += " \"" + attr.getNodeValue() + "\"";
-						}
-					}
-					break;
-
-				case BeansTags.BEAN :
-					boolean hasParent = false;
-					attr = attrs.getNamedItem("id");
-					if (attr != null) {
-						text = attr.getNodeValue();
 					} else {
-						attr = attrs.getNamedItem("name");
+						attr = attrs.getNamedItem("parent");
 						if (attr != null) {
-							text = attr.getNodeValue();
-						} else {
-							attr = attrs.getNamedItem("parent");
-							if (attr != null) {
-								text = "<" + attr.getNodeValue() + ">";
-								hasParent = true;
-							}
+							text = "<" + attr.getNodeValue() + ">";
+							hasParent = true;
 						}
 					}
-					if (showAttributes) {
-						attr = attrs.getNamedItem("class");
+				}
+				if (showAttributes) {
+					attr = attrs.getNamedItem("class");
+					if (attr != null) {
+						if (text.length() > 0) {
+							text += ' ';
+						}
+						text += '[' + attr.getNodeValue() + ']';
+					}
+					if (!hasParent) {
+						attr = attrs.getNamedItem("parent");
 						if (attr != null) {
 							if (text.length() > 0) {
 								text += ' ';
 							}
-							text += '[' + attr.getNodeValue() + ']';
-						}
-						if (!hasParent) {
-							attr = attrs.getNamedItem("parent");
-							if (attr != null) {
-								if (text.length() > 0) {
-									text += ' ';
-								}
-								text += '<' + attr.getNodeValue() + '>';
-							}
+							text += '<' + attr.getNodeValue() + '>';
 						}
 					}
-					break;
-
-				case BeansTags.CONSTRUCTOR_ARG :
-					attr = attrs.getNamedItem("index");
-					if (attr != null) {
-						text += " {" + attr.getNodeValue() + "}";
-					}
-					attr = attrs.getNamedItem("type");
-					if (attr != null) {
-						text += " [" + attr.getNodeValue() + "]";
-					}
+				}
+			} else if (tag == Tag.CONSTRUCTOR_ARG) {
+				attr = attrs.getNamedItem("index");
+				if (attr != null) {
+					text += " {" + attr.getNodeValue() + "}";
+				}
+				attr = attrs.getNamedItem("type");
+				if (attr != null) {
+					text += " [" + attr.getNodeValue() + "]";
+				}
+				attr = attrs.getNamedItem("ref");
+				if (attr != null) {
+					text += " <" + attr.getNodeValue() + ">";
+				}
+				attr = attrs.getNamedItem("value");
+				if (attr != null) {
+					text += " \"" + attr.getNodeValue() + "\"";
+				}
+			} else if (tag == Tag.PROPERTY) {
+				attr = attrs.getNamedItem("name");
+				if (attr != null) {
+					text = attr.getNodeValue();
+				}
+				if (showAttributes) {
 					attr = attrs.getNamedItem("ref");
 					if (attr != null) {
 						text += " <" + attr.getNodeValue() + ">";
@@ -245,87 +251,58 @@ public class BeansContentOutlineConfiguration
 					if (attr != null) {
 						text += " \"" + attr.getNodeValue() + "\"";
 					}
-					break;
-
-				case BeansTags.PROPERTY :
-					attr = attrs.getNamedItem("name");
+				}
+			} else if (tag == Tag.REF || tag == Tag.IDREF) {
+				attr = attrs.getNamedItem("bean");
+				if (attr != null) {
+					text += "<" + attr.getNodeValue() + ">";
+				}
+				attr = attrs.getNamedItem("local");
+				if (attr != null) {
+					text += "<" + attr.getNodeValue() + ">";
+				}
+				attr = attrs.getNamedItem("parent");
+				if (attr != null) {
+					text += "<" + attr.getNodeValue() + ">";
+				}
+			} else if (tag == Tag.VALUE) {
+				text = node.getNodeName();
+				if (showAttributes) {
+					attr = attrs.getNamedItem("type");
 					if (attr != null) {
-						text = attr.getNodeValue();
+						text += " [" + attr.getNodeValue() + "]";
 					}
-					if (showAttributes) {
-						attr = attrs.getNamedItem("ref");
-						if (attr != null) {
-							text += " <" + attr.getNodeValue() + ">";
-						}
-						attr = attrs.getNamedItem("value");
-						if (attr != null) {
-							text += " \"" + attr.getNodeValue() + "\"";
-						}
-					}
-					break;
-
-				case BeansTags.REF :
-				case BeansTags.IDREF :
-					attr = attrs.getNamedItem("bean");
+				}
+			} else if (tag == Tag.ENTRY) {
+				text = node.getNodeName();
+				attr = attrs.getNamedItem("key");
+				if (attr != null) {
+					text += " \"" + attr.getNodeValue() + "\"";
+				} else {
+					attr = attrs.getNamedItem("key-ref");
 					if (attr != null) {
-						text += "<" + attr.getNodeValue() + ">";
+						text += " <" + attr.getNodeValue() + ">";
 					}
-					attr = attrs.getNamedItem("local");
-					if (attr != null) {
-						text += "<" + attr.getNodeValue() + ">";
-					}
-					attr = attrs.getNamedItem("parent");
-					if (attr != null) {
-						text += "<" + attr.getNodeValue() + ">";
-					}
-					break;
-
-				case BeansTags.VALUE :
-					text = node.getNodeName();
-					if (showAttributes) {
-						attr = attrs.getNamedItem("type");
-						if (attr != null) {
-							text += " [" + attr.getNodeValue() + "]";
-						}
-					}
-					break;
-
-				case BeansTags.ENTRY :
-					text = node.getNodeName();
-					attr = attrs.getNamedItem("key");
+				}
+				if (showAttributes) {
+					attr = attrs.getNamedItem("value");
 					if (attr != null) {
 						text += " \"" + attr.getNodeValue() + "\"";
-					} else {
-						attr = attrs.getNamedItem("key-ref");
-						if (attr != null) {
-							text += " <" + attr.getNodeValue() + ">";
-						}
 					}
-					if (showAttributes) {
-						attr = attrs.getNamedItem("value");
-						if (attr != null) {
-							text += " \"" + attr.getNodeValue() + "\"";
-						}
-					}
-					break;
-
-				case BeansTags.PROP :
-					text = node.getNodeName();
-					attr = node.getFirstChild();
-					if (attr != null && attr.getNodeType() == Node.TEXT_NODE) {
-						text += " \"" + attr.getNodeValue() + "\"";
-					}
-					break;
-					
-				case BeansTags.COMMENT :
-					text = super.getText(o);
-					text += " <";
-					text += ((CommentImpl) o).getNodeValue().trim();
-					text += '>';
-					break;
-					
-				default :
-					text = super.getText(o);
+				}
+			} else if (tag == Tag.PROP) {
+				text = node.getNodeName();
+				attr = node.getFirstChild();
+				if (attr != null && attr.getNodeType() == Node.TEXT_NODE) {
+					text += " \"" + attr.getNodeValue() + "\"";
+				}
+			} else if (tag == Tag.COMMENT) {
+				text = super.getText(o);
+				text += " <";
+				text += ((CommentImpl) o).getNodeValue().trim();
+				text += '>';
+			} else {
+				text = super.getText(o);
 			}
 			return text;
 		}
