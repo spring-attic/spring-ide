@@ -16,17 +16,11 @@
 
 package org.springframework.ide.eclipse.beans.ui.navigator.internal;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -37,6 +31,7 @@ import org.eclipse.ui.navigator.IPipelinedTreeContentProvider;
 import org.eclipse.ui.navigator.PipelinedShapeModification;
 import org.eclipse.ui.navigator.PipelinedViewerUpdate;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -88,36 +83,24 @@ public class BeansNavigatorContentProvider implements
 	}
 
 	public Object[] getChildren(Object parentElement) {
-		if (parentElement instanceof IWorkspaceRoot) {
-			return BeansCorePlugin.getModel().getElementChildren();
-		} else if (parentElement instanceof IModelElement) {
+		if (parentElement instanceof IModelElement) {
 			if (parentElement instanceof IBeansConfigSet) {
-				List beans = new ArrayList();
-				IBeansConfigSet configSet = (IBeansConfigSet) parentElement;
-				IBeansProject project = (IBeansProject) configSet
-						.getElementParent();
-				Iterator configs = configSet.getConfigs().iterator();
-				while (configs.hasNext()) {
-					String configName = (String) configs.next();
-					IBeansConfig config = project.getConfig(configName);
+				Set<IBean> beans = new LinkedHashSet<IBean>();
+				for (IBeansConfig config : ((IBeansConfigSet) parentElement)
+						.getConfigs()) {
 					if (config != null) {
 						beans.addAll(config.getBeans());
 					}
 				}
-				return (IModelElement[]) beans.toArray(new IModelElement[beans
-						.size()]);
+				return beans.toArray(new IBean[beans.size()]);
 			} else {
 				return ((IModelElement) parentElement).getElementChildren();
 			}
 		} else if (parentElement instanceof IFile) {
-			IFile file = (IFile) parentElement;
-			IBeansProject project = BeansCorePlugin.getModel().getProject(
-					file.getProject());
-			if (project != null) {
-				IBeansConfig config = project.getConfig(file);
-				if (config != null) {
-					return config.getElementChildren();
-				}
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
+					(IFile) parentElement);
+			if (config != null) {
+				return config.getElementChildren();
 			}
 		} else if (parentElement instanceof IAdaptable) {
 			IProject project = (IProject) ((IAdaptable) parentElement)
@@ -126,9 +109,10 @@ public class BeansNavigatorContentProvider implements
 				IBeansProject beansProject = BeansCorePlugin.getModel()
 						.getProject(project);
 				if (beansProject != null) {
-					Collection configSets = beansProject.getConfigSets();
-					return (IModelElement[]) configSets
-							.toArray(new IModelElement[configSets.size()]);
+					Set<IBeansConfigSet> configSets = beansProject
+							.getConfigSets();
+					return configSets.toArray(new IBeansConfigSet[configSets
+							.size()]);
 				}
 			}
 		}
@@ -138,6 +122,8 @@ public class BeansNavigatorContentProvider implements
 	public Object getParent(Object element) {
 		if (element instanceof IModelElement) {
 			return ((IModelElement) element).getElementParent();
+		} else if (element instanceof IFile) {
+			return ((IFile) element).getParent();
 		}
 		return null;
 	}
@@ -195,23 +181,9 @@ public class BeansNavigatorContentProvider implements
 	}
 
 	public void getPipelinedChildren(Object parent, Set currentChildren) {
-		Object[] children = getChildren(parent);
-		for (Iterator iter = currentChildren.iterator(); iter.hasNext(); ) {
-			if (iter.next() instanceof IResource) {
-				iter.remove();
-			}
-		}
-		currentChildren.addAll(Arrays.asList(children));
 	}
 
 	public void getPipelinedElements(Object input, Set currentElements) {
-		Object[] children = getElements(input);
-		for (Iterator iter = currentElements.iterator(); iter.hasNext(); ) {
-			if (iter.next() instanceof IResource) {
-				iter.remove();
-			}
-		}
-		currentElements.addAll(Arrays.asList(children));
 	}
 
 	public Object getPipelinedParent(Object object, Object suggestedParent) {
