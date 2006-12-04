@@ -1,18 +1,18 @@
 /*
  * Copyright 2002-2006 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */ 
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor;
 
@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IFile;
@@ -40,6 +41,7 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.internal.Workbench;
@@ -51,6 +53,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
@@ -169,16 +172,12 @@ public class BeansEditorUtils {
                 file.getProject());
         if (project != null) {
 
-            Iterator configSets = project.getConfigSets().iterator();
+            Set<IBeansConfigSet> configSets = project.getConfigSets();
 
-            while (configSets.hasNext()) {
-                IBeansConfigSet configSet = (IBeansConfigSet) configSets.next();
+            for (IBeansConfigSet configSet : configSets) {
                 if (configSet.hasConfig(file)) {
-                    Iterator configs = configSet.getConfigs().iterator();
-                    while (configs.hasNext()) {
-                        String beansConfigName = (String) configs.next();
-                        IBeansConfig beansConfig = project
-                                .getConfig(beansConfigName);
+                    Set<IBeansConfig> configs = configSet.getConfigs();
+                    for (IBeansConfig beansConfig : configs) {
                         if (beansConfig != null) {
                             IResource resource = beansConfig
                                     .getElementResource();
@@ -193,7 +192,6 @@ public class BeansEditorUtils {
                     }
                 }
             }
-
         }
 
         Iterator paths = configsMap.keySet().iterator();
@@ -201,6 +199,10 @@ public class BeansEditorUtils {
             IBeansConfig beansConfig = (IBeansConfig) configsMap
                     .get((String) paths.next());
             beans.addAll(beansConfig.getBeans());
+            Set<IBeansComponent> components = beansConfig.getComponents();
+            for (IBeansComponent component : components) {
+                beans.addAll(component.getBeans());
+            }
         }
         return beans;
     }
@@ -569,7 +571,8 @@ public class BeansEditorUtils {
     }
 
     public static final void extractAllMethodsFromPropertyPathElements(
-            List propertyPath, List types, IFile file, int counter, List<IMethod> methods) {
+            List propertyPath, List types, IFile file, int counter,
+            List<IMethod> methods) {
         IMethod method = null;
         if (propertyPath != null && propertyPath.size() > 0) {
             if (propertyPath.size() > (counter + 1)) {
@@ -776,5 +779,17 @@ public class BeansEditorUtils {
     public static boolean hasAttribute(Node node, String attributeName) {
         return (node != null && node.hasAttributes() && node.getAttributes()
                 .getNamedItem(attributeName) != null);
+    }
+
+    public static Map<String, Node> getReferenceableNodes(Document document) {
+        Map<String, Node> nodes = new HashMap<String, Node>();
+        for (INamespaceAwareEditorContribution contribution : NamespaceEditorContributionRegistry
+                .getNamespaceAwareEditorContributions()) {
+            Map<String, Node> tempNodes = contribution.getReferenceableElements(document);
+            if (tempNodes != null) {
+                nodes.putAll(tempNodes);
+            }
+        }
+        return nodes;
     }
 }

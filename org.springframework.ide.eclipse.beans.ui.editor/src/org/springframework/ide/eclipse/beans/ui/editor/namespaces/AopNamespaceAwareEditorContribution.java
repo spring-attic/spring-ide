@@ -16,12 +16,16 @@
 
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 
+import java.util.Map;
+
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.editor.INamespaceAwareEditorContribution;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.INamespaceContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.outline.BeansContentOutlineConfiguration;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 public class AopNamespaceAwareEditorContribution implements
 		INamespaceAwareEditorContribution {
@@ -54,6 +58,10 @@ public class AopNamespaceAwareEditorContribution implements
             this.hyperLinkDetector = new AopHyperLinkDetector();
         }
         return hyperLinkDetector;
+    }
+
+    public Map<String, Node> getReferenceableElements(Document document) {
+        return null;
     }
 
 }

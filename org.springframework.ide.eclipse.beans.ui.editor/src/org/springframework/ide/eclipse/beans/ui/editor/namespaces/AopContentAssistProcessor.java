@@ -19,6 +19,7 @@ package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -57,10 +58,10 @@ public class AopContentAssistProcessor
         if (document != null) {
             BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(
                     request);
-            NodeList beanNodes = document.getElementsByTagName("bean");
-            for (int i = 0; i < beanNodes.getLength(); i++) {
-                Node beanNode = beanNodes.item(i);
-                requestor.acceptSearchMatch(beanNode, file, prefix);
+            Map<String, Node> beanNodes = BeansEditorUtils.getReferenceableNodes(document);
+            for (Map.Entry<String, Node> node : beanNodes.entrySet()) {
+                Node beanNode = node.getValue();
+                requestor.acceptSearchMatch(node.getKey(), beanNode, file, prefix);
             }
             if (showExternal) {
                 List beans = BeansEditorUtils.getBeansFromConfigSets(file);

@@ -17,6 +17,7 @@
 package org.springframework.ide.eclipse.beans.ui.editor;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,10 @@ public class NamespaceEditorContributionRegistry {
 
     public static List<IHyperlinkDetector> getHyperLinkDetectors() {
         return hyperLinkDetectors;
+    }
+
+    public static Collection<INamespaceAwareEditorContribution> getNamespaceAwareEditorContributions() {
+        return contributions.values();
     }
 
     public static void init() {

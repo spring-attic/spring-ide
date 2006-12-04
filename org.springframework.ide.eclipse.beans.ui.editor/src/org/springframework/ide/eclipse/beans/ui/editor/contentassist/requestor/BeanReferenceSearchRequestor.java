@@ -25,9 +25,9 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposal;
+import org.springframework.ide.eclipse.beans.ui.editor.outline.DelegatingLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -84,14 +84,12 @@ public class BeanReferenceSearchRequestor {
         }
     }
 
-    public void acceptSearchMatch(Node beanNode, IFile file, String prefix) {
+    public void acceptSearchMatch(String beanId, Node beanNode, IFile file, String prefix) {
         NamedNodeMap attributes = beanNode.getAttributes();
-        Node idAttribute = attributes.getNamedItem("id");
-        if (idAttribute != null && idAttribute.getNodeValue() != null
-                && idAttribute.getNodeValue().startsWith(prefix)) {
+        if (beanId.startsWith(prefix)) {
             if (beanNode.getParentNode() != null
                     && "beans".equals(beanNode.getParentNode().getNodeName())) {
-                String beanName = idAttribute.getNodeValue();
+                String beanName = beanId;
                 String replaceText = beanName;
                 String fileName = file.getProjectRelativePath().toString();
                 String key = beanName + fileName;
@@ -110,8 +108,10 @@ public class BeanReferenceSearchRequestor {
                         buf.append(parentName);
                         buf.append(">");
                     }
+                    buf.append(" - ");
+                    buf.append(fileName);
                     String displayText = buf.toString();
-                    Image image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_BEAN);
+                    Image image = new DelegatingLabelProvider().getImage(beanNode);
 
                     BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
                             replaceText, request.getReplacementBeginPosition(), request

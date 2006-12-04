@@ -244,4 +244,4 @@ public abstract class AbstractContentAssistProcessor implements
         }
         return templateProcessor;
     }
-}
+} 

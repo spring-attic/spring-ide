@@ -214,6 +214,7 @@
          point="org.springframework.ide.eclipse.beans.ui.editor.namespacecontribution">
       <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.BeansNamespaceAwareEditorContribution"/>
       <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.AopNamespaceAwareEditorContribution"/>
+      <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.UtilNamespaceAwareEditorContribution"/>
    </extension>
 
 </plugin>
