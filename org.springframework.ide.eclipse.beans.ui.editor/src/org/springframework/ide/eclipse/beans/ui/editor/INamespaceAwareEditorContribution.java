@@ -16,21 +16,17 @@
 
 package org.springframework.ide.eclipse.beans.ui.editor;
 
-import java.util.Map;
-
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.INamespaceContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.outline.BeansContentOutlineConfiguration;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 
 public interface INamespaceAwareEditorContribution {
 
 	String getNamespaceURI();
 
-	JFaceNodeLabelProvider getLabelProvider(
+	LabelProvider getLabelProvider(
 			BeansContentOutlineConfiguration configuration,
 			ILabelProvider parent);
 
@@ -38,5 +34,6 @@ public interface INamespaceAwareEditorContribution {
     
     IHyperlinkDetector getHyperLinkDetector();
     
-    Map<String, Node> getReferenceableElements(Document documet);
+    IReferenceableElementsLocator getReferenceableElementsLocator();
+    
 }

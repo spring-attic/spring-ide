@@ -80,7 +80,7 @@ final class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 			return AopUIImages.getImage(AopUIImages.IMG_OBJS_POINTCUT);
 		}
 		if ("advisor".equals(nodeName)) {
-		    return AopUIImages.getImage(AopUIImages.IMG_OBJS_ASPECT);
+		    return AopUIImages.getImage(AopUIImages.IMG_OBJS_ADVICE);
 		}
 
 		return xmlProvider.getImage(object);

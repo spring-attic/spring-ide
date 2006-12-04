@@ -16,51 +16,43 @@
 
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 
-import java.util.HashMap;
-import java.util.Map;
 
+import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.INamespaceAwareEditorContribution;
+import org.springframework.ide.eclipse.beans.ui.editor.IReferenceableElementsLocator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.INamespaceContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.outline.BeansContentOutlineConfiguration;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 public class UtilNamespaceAwareEditorContribution implements
-        INamespaceAwareEditorContribution {
+		INamespaceAwareEditorContribution {
 
-    public String getNamespaceURI() {
-        return "http://www.springframework.org/schema/util";
-    }
+	private IReferenceableElementsLocator referenceableElemenLocator;
+	
+	public INamespaceContentAssistProcessor getContentAssistProcessor() {
+		return null;
+	}
 
-    public JFaceNodeLabelProvider getLabelProvider(
-            BeansContentOutlineConfiguration configuration,
-            ILabelProvider parent) {
-        return null;
-    }
+	public IHyperlinkDetector getHyperLinkDetector() {
+		return null;
+	}
 
-    public INamespaceContentAssistProcessor getContentAssistProcessor() {
-        return null;
-    }
+	public JFaceNodeLabelProvider getLabelProvider(
+			BeansContentOutlineConfiguration configuration,
+			ILabelProvider parent) {
+		return null;
+	}
 
-    public BeansHyperLinkDetector getHyperLinkDetector() {
-        return null;
-    }
+	public String getNamespaceURI() {
+		return "http://www.springframework.org/schema/util";
+	}
+	
 
-    public Map<String, Node> getReferenceableElements(Document document) {
-        Map<String, Node> nodes = new HashMap<String, Node>();
-        NodeList childNodes = document.getDocumentElement().getChildNodes();
-
-        for (int i = 0; i < childNodes.getLength(); i++) {
-            Node node = childNodes.item(i);
-            if (getNamespaceURI().equals(node.getNamespaceURI())
-                    && BeansEditorUtils.hasAttribute(node, "id")) {
-                nodes.put(BeansEditorUtils.getAttribute(node, "id"), node);
-            }
-        }
-        return nodes;
-    }
+	public IReferenceableElementsLocator getReferenceableElementsLocator() {
+		if (this.referenceableElemenLocator == null) {
+			this.referenceableElemenLocator = new DefaultReferenceableElementsLocator(this);
+		}
+		return this.referenceableElemenLocator;
+	}
 }

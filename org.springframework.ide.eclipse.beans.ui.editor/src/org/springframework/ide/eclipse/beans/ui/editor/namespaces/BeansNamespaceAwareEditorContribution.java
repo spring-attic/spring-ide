@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 
@@ -23,6 +23,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.INamespaceAwareEditorContribution;
+import org.springframework.ide.eclipse.beans.ui.editor.IReferenceableElementsLocator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.INamespaceContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.outline.BeansContentOutlineConfiguration;
 import org.w3c.dom.Document;
@@ -32,50 +33,66 @@ import org.w3c.dom.NodeList;
 public class BeansNamespaceAwareEditorContribution implements
 		INamespaceAwareEditorContribution {
 
+	private class BeansReferenceableElementsLocator implements
+			IReferenceableElementsLocator {
+
+		public Map<String, Node> getReferenceableElements(Document document) {
+			Map<String, Node> nodes = new HashMap<String, Node>();
+			NodeList childNodes = document.getDocumentElement().getChildNodes();
+			
+			for (int i = 0; i < childNodes.getLength(); i++) {
+				Node node = childNodes.item(i);
+				if ("bean".equals(node.getNodeName())
+						&& BeansEditorUtils.hasAttribute(node, "id")) {
+					nodes.put(BeansEditorUtils.getAttribute(node, "id"), node);
+				}
+			}
+			return nodes;
+		}
+	}
+
 	private BeansContentAssistProcessor contentAssistProcessor;
-	
+
 	private BeansOutlineLabelProvider labelProvider;
-    
-    private BeansHyperLinkDetector hyperLinkDetector;
 	
-	public String getNamespaceURI() {
-		return "http://www.springframework.org/schema/beans";
+	private BeansHyperLinkDetector hyperLinkDetector;
+
+	private BeansReferenceableElementsLocator referenceableElementsLocator;
+
+	public INamespaceContentAssistProcessor getContentAssistProcessor() {
+		if (this.contentAssistProcessor == null) {
+			this.contentAssistProcessor = new BeansContentAssistProcessor();
+		}
+		return contentAssistProcessor;
+	}
+
+	public BeansHyperLinkDetector getHyperLinkDetector() {
+		if (this.hyperLinkDetector == null) {
+			this.hyperLinkDetector = new BeansHyperLinkDetector();
+		}
+		return hyperLinkDetector;
 	}
 
 	public JFaceNodeLabelProvider getLabelProvider(
 			BeansContentOutlineConfiguration configuration,
 			ILabelProvider parent) {
 		if (this.labelProvider == null) {
-			this.labelProvider = new BeansOutlineLabelProvider(configuration, parent);
+			this.labelProvider = new BeansOutlineLabelProvider(configuration,
+					parent);
 		}
 		return this.labelProvider;
 	}
 
-	public INamespaceContentAssistProcessor getContentAssistProcessor() {
-		if (this.contentAssistProcessor == null) {
-				this.contentAssistProcessor = new BeansContentAssistProcessor();
-		}
-		return contentAssistProcessor;
+
+	public String getNamespaceURI() {
+		return "http://www.springframework.org/schema/beans";
 	}
 
-    public BeansHyperLinkDetector getHyperLinkDetector() {
-        if (this.hyperLinkDetector == null) {
-            this.hyperLinkDetector = new BeansHyperLinkDetector();
-        }
-        return hyperLinkDetector;
-    }
 
-    public Map<String, Node> getReferenceableElements(Document document) {
-        Map<String, Node> nodes = new HashMap<String, Node>();
-        NodeList childNodes = document.getDocumentElement().getChildNodes();
-
-        for (int i = 0; i < childNodes.getLength(); i++) {
-            Node node = childNodes.item(i);
-            if ("bean".equals(node.getNodeName())
-                    && BeansEditorUtils.hasAttribute(node, "id")) {
-                nodes.put(BeansEditorUtils.getAttribute(node, "id"), node);
-            }
-        }
-        return nodes;
-    }
+	public IReferenceableElementsLocator getReferenceableElementsLocator() {
+		if (this.referenceableElementsLocator == null) {
+			this.referenceableElementsLocator = new BeansReferenceableElementsLocator();
+		}
+		return this.referenceableElementsLocator;
+	}
 }
