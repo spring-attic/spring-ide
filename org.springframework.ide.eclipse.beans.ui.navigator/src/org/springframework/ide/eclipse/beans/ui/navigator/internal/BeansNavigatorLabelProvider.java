@@ -19,14 +19,14 @@ package org.springframework.ide.eclipse.beans.ui.navigator.internal;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonLabelProvider;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelElementLabels;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabels;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
- * This class is an <code>ICommonLabelProvider</code> which knows about the
- * beans core model's <code>IModelElement</code>s.
- *
+ * This class is a label provider which knows about the beans core model's
+ * <code>IModelElement</code>s.
+ * 
  * @author Torsten Juergeleit
  */
 public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
@@ -34,9 +34,8 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 
 	public String getDescription(Object element) {
 		if (element instanceof IModelElement) {
-			return BeansModelElementLabels.getElementLabel(
-					(IModelElement) element,
-					BeansModelElementLabels.APPEND_PATH);
+			return BeansModelLabels.getElementLabel((IModelElement) element,
+					BeansModelLabels.APPEND_PATH);
 		}
 		return null;
 	}

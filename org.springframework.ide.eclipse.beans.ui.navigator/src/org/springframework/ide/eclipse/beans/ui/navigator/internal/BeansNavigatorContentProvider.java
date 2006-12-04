@@ -16,6 +16,7 @@
 
 package org.springframework.ide.eclipse.beans.ui.navigator.internal;
 
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -181,9 +182,11 @@ public class BeansNavigatorContentProvider implements
 	}
 
 	public void getPipelinedChildren(Object parent, Set currentChildren) {
+		currentChildren.addAll(Arrays.asList(getChildren(parent)));
 	}
 
 	public void getPipelinedElements(Object input, Set currentElements) {
+		currentElements.addAll(Arrays.asList(getElements(input)));
 	}
 
 	public Object getPipelinedParent(Object object, Object suggestedParent) {

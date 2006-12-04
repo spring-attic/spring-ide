@@ -2,23 +2,91 @@
 <?eclipse version="3.2"?>
 <plugin>
    <extension
+         point="org.eclipse.ui.views">
+      <view
+            name="%viewName"
+            icon="icons/full/obj16/spring_obj.gif"
+            category="org.springframework.ide.eclipse.beans.ui.views"
+            class="org.eclipse.ui.navigator.CommonNavigator"
+            id="org.springframework.ide.eclipse.beans.ui.navigator.BeansExplorer">
+      </view>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.navigator.viewer">
+      <viewer viewerId="org.springframework.ide.eclipse.beans.ui.navigator.BeansExplorer"/>
+      <viewerContentBinding viewerId="org.springframework.ide.eclipse.beans.ui.navigator.BeansExplorer">
+         <includes>
+            <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.beansExplorerContent"/>
+            <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.filters.*"/>
+            <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.linkHelper"/>
+         </includes>
+      </viewerContentBinding>
+      <viewerActionBinding viewerId="org.springframework.ide.eclipse.beans.ui.navigator.BeansExplorer">
+         <includes>
+            <actionExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.actions"/>
+         </includes>
+      </viewerActionBinding>
+   </extension>
+
+   <extension
          point="org.eclipse.ui.navigator.viewer">
       <viewer viewerId="org.eclipse.ui.navigator.ProjectExplorer"/>
       <viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
          <includes>
-            <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.*"/>
+            <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.projectExplorerContent"/>
+            <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.filters.*"/>
+            <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.linkHelper"/>
          </includes>
       </viewerContentBinding>
+      <viewerActionBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+         <includes>
+            <actionExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.actions"/>
+         </includes>
+      </viewerActionBinding>
    </extension>
+
    <extension
          point="org.eclipse.ui.navigator.navigatorContent">
       <navigatorContent
-            id="org.springframework.ide.eclipse.beans.ui.navigator.content"
+            id="org.springframework.ide.eclipse.beans.ui.navigator.beansExplorerContent"
             name="%navigatorContentName"
             contentProvider="org.springframework.ide.eclipse.beans.ui.navigator.internal.BeansNavigatorContentProvider"
             labelProvider="org.springframework.ide.eclipse.beans.ui.navigator.internal.BeansNavigatorLabelProvider"
             icon="icons/full/obj16/spring_obj.gif"
+            activeByDefault="true">
+		<triggerPoints>
+			<or>
+                <instanceof value="org.eclipse.core.resources.IWorkspaceRoot"/>
+				<adapt
+						type="org.eclipse.core.resources.IProject">
+					<test
+						property="org.eclipse.core.resources.projectNature"
+						value="org.springframework.ide.eclipse.core.springnature"/>
+				</adapt>
+				<and>
+					<instanceof
+						value="org.eclipse.core.resources.IFile"/>
+					<test
+						property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
+				</and>
+			</or>
+		 </triggerPoints>
+         <possibleChildren>
+				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+         </possibleChildren>
+         <commonSorter
+               id="org.springframework.ide.eclipse.beans.ui.navigator.sorter.beansExplorerSorter"
+               class="org.springframework.ide.eclipse.beans.ui.navigator.internal.BeansNavigatorSorter"/>
+      </navigatorContent>
+
+      <navigatorContent
             activeByDefault="true"
+            contentProvider="org.springframework.ide.eclipse.beans.ui.navigator.internal.BeansNavigatorContentProvider"
+            icon="icons/full/obj16/spring_obj.gif"
+            id="org.springframework.ide.eclipse.beans.ui.navigator.projectExplorerContent"
+            labelProvider="org.springframework.ide.eclipse.beans.ui.navigator.internal.BeansNavigatorLabelProvider"
+            name="%navigatorContentName"
             priority="high">
 		<triggerPoints>
 			<or>
@@ -37,19 +105,37 @@
 			</or>
 		 </triggerPoints>
          <possibleChildren>
-				<instanceof value="org.eclipse.core.resources.IFile"/>
 				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
          </possibleChildren>
-         <actionProvider
-         	   id="org.springframework.ide.eclipse.beans.ui.navigator.actions"
- 			   class="org.springframework.ide.eclipse.beans.ui.navigator.internal.actions.BeansNavigatorActionProvider"/>
          <commonSorter
-               id="org.springframework.ide.eclipse.beans.ui.navigator.sorter"
+               id="org.springframework.ide.eclipse.beans.ui.navigator.sorter.projectExplorerSorter"
                class="org.springframework.ide.eclipse.beans.ui.navigator.internal.BeansNavigatorSorter"/>
 		 <override
 				policy="InvokeAlwaysRegardlessOfSuppressedExt"
 				suppressedExtensionId="org.eclipse.ui.navigator.resourceContent"/>
       </navigatorContent>
+
+      <actionProvider
+            id="org.springframework.ide.eclipse.beans.ui.navigator.actions"
+            class="org.springframework.ide.eclipse.beans.ui.navigator.internal.actions.BeansNavigatorActionProvider">
+         <enablement>
+			<or>
+				<adapt
+						type="org.eclipse.core.resources.IProject">
+					<test
+						property="org.eclipse.core.resources.projectNature"
+						value="org.springframework.ide.eclipse.core.springnature"/>
+				</adapt>
+				<and>
+					<instanceof
+						value="org.eclipse.core.resources.IFile"/>
+					<test
+						property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
+				</and>
+            	<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+            </or>
+         </enablement>
+      </actionProvider>
       <commonFilter
             id="org.springframework.ide.eclipse.beans.ui.navigator.filters.hideNonSpringProjects"
             name="%navigatorfilterHideNonSpringProjectsName"
@@ -57,6 +143,7 @@
             class="org.springframework.ide.eclipse.beans.ui.navigator.internal.filters.NonSpringProjectFilter"
             activeByDefault="true"/>
    </extension>
+
    <extension
           point="org.eclipse.ui.navigator.linkHelper">
        <linkHelper

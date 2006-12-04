@@ -23,6 +23,8 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchPage;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
@@ -32,7 +34,7 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
 public class OpenConfigFileAction extends Action {
 
 	private ISelectionProvider provider;
-	private ISourceModelElement element;
+	private IResourceModelElement element;
 
 	public OpenConfigFileAction(IWorkbenchPage page,
 			ISelectionProvider provider) {
@@ -44,11 +46,14 @@ public class OpenConfigFileAction extends Action {
 		ISelection selection = provider.getSelection();
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection sSelection = (IStructuredSelection) selection;
-			if (sSelection.size() == 1
-					&& sSelection.getFirstElement()
-							instanceof ISourceModelElement) {
-				element = ((ISourceModelElement) sSelection.getFirstElement());
-				return true;
+			if (sSelection.size() == 1 && sSelection
+					.getFirstElement() instanceof IResourceModelElement) {
+				element = ((IResourceModelElement) sSelection
+						.getFirstElement());
+				if (element instanceof ISourceModelElement
+						|| element instanceof IBeansConfig) {
+					return true;
+				}
 			}
 		}
 		return false;
@@ -58,7 +63,13 @@ public class OpenConfigFileAction extends Action {
 		if (isEnabled()) {
 			IResource resource = element.getElementResource();
 			if (resource instanceof IFile && resource.exists()) {
-				int line = element.getElementStartLine();
+				int line;
+				if (element instanceof ISourceModelElement) {
+					line = ((ISourceModelElement) element)
+							.getElementStartLine();
+				} else {
+					line = -1;
+				}
 				SpringUIUtils.openInEditor((IFile) resource, line);
 			}
 		}
