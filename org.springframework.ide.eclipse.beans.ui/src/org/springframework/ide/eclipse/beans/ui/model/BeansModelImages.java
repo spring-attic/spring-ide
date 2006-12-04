@@ -171,11 +171,11 @@ public final class BeansModelImages {
 				// TODO add handling for other model element types
 				if (context instanceof IResourceModelElement
 						&& element instanceof IResourceModelElement) {
-					IProject projectContext = ((IResourceModelElement) context)
+					IProject contextProject = ((IResourceModelElement) context)
 							.getElementResource().getProject();
-					IProject projectElement = ((IResourceModelElement) element)
+					IProject elementProject = ((IResourceModelElement) element)
 							.getElementResource().getProject();
-					if (!projectElement.equals(projectContext)) {
+					if (!elementProject.equals(contextProject)) {
 						flags |= FLAG_EXTERNAL;
 					}
 				}

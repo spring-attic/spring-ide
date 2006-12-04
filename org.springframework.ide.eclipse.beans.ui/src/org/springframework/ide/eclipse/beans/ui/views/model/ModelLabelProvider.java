@@ -26,6 +26,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
@@ -87,11 +88,18 @@ public class ModelLabelProvider extends LabelProvider {
 			StringBuffer label = new StringBuffer();
 			if (element instanceof ConfigNode) {
 				ConfigNode config = (ConfigNode) element;
+				String configName = config.getName();
 				if (config.getConfig().isElementArchived()) {
 					ZipEntryStorage storage = new ZipEntryStorage(config
 							.getConfig());
-					label.append(storage.getZipResource()
-							.getProjectRelativePath().toString());
+					if (configName.charAt(0) == IBeansConfig
+							.EXTERNAL_FILE_NAME_PREFIX) {
+						label.append(storage.getZipResource()
+								.getFullPath().toString());
+					} else {
+						label.append(storage.getZipResource()
+								.getProjectRelativePath().toString());
+					}
 					label.append(" - ");
 					label.append(storage.getFullPath().toString());
 				} else {

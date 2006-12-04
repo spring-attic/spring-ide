@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
-import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -169,7 +168,7 @@ public class ConfigNode extends AbstractNode {
 		}
 		if (config == null) {
 
-			// Add dummy beans config set which is required for label provider
+			// Add dummy beans config which is required for label provider
 			config = new BeansConfig(project.getProject(), configName);
 		}
 		setElement(config);
@@ -186,19 +185,12 @@ public class ConfigNode extends AbstractNode {
 		if (getConfig() == null) {
 			setErrorMessage("Undefined Spring config '" + getName() + "'", -1);
 		} else {
-			BeanDefinitionException exception = getConfig().getException();
-			if (exception != null	) {
-				setErrorMessage(exception.getMessage(),
-								exception.getLineNumber());
-			} else {
-				Iterator iter = getConfig().getBeans().iterator();
-				while (iter.hasNext()) {
-					IBean bean = (IBean) iter.next();
-					BeanNode beanNode = new BeanNode(this,
-													 bean.getElementName());
-					initBeanNode(beanNode, bean);
-					beans.add(beanNode);
-				}
+			Iterator iter = getConfig().getBeans().iterator();
+			while (iter.hasNext()) {
+				IBean bean = (IBean) iter.next();
+				BeanNode beanNode = new BeanNode(this, bean.getElementName());
+				initBeanNode(beanNode, bean);
+				beans.add(beanNode);
 			}
 		}
 	}

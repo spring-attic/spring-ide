@@ -19,7 +19,9 @@ package org.springframework.ide.eclipse.beans.ui.properties;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -194,7 +196,8 @@ public class ConfigSetDialog extends Dialog {
 			String name = nameText.getText();
 
 			// Keep a copy of the original list of configs in the config set
-			List oldConfigs = new ArrayList(configSet.getConfigs());
+			Set<ConfigNode> oldConfigs = new LinkedHashSet<ConfigNode>(
+					configSet.getConfigs());
 
 			// Update config set
 			configSet.clear();
@@ -203,20 +206,21 @@ public class ConfigSetDialog extends Dialog {
 			configSet.setIncomplete(incompleteButton.getSelection());
 
 			// At first add the originally and still selected configs to the
-			// config set
-			List newConfigs = new ArrayList(Arrays.asList(
-										  configsViewer.getCheckedElements()));
-			Iterator configs = oldConfigs.iterator();
-			while (configs.hasNext()) {
-				ConfigNode config = (ConfigNode) configs.next();
+			// config set to preserve their order
+			List newConfigs = Arrays.asList(configsViewer.getCheckedElements());
+			for (ConfigNode config : oldConfigs) {
 				if (newConfigs.contains(config)) {
 					configSet.addConfig(config);
-					newConfigs.remove(config);
 				}
 			}
 
 			// Finally add the newly selected configs to the config set
-			configSet.addConfigs(newConfigs);
+			for (Object newConfig : newConfigs) {
+				ConfigNode config = (ConfigNode) newConfig;
+				if (!configSet.hasConfig(config.getName())) {
+					configSet.addConfig(config);
+				}
+			}
 
 			// Add newly created config set to project or re-add existing one
 			if (configSetName == null) {

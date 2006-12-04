@@ -1,24 +1,33 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
-Bundle-SymbolicName: org.springframework.ide.eclipse.beans.ui.navigator; singleton:=true
+Bundle-SymbolicName: org.springframework.ide.eclipse.beans.ui; singleton:=true
 Bundle-Version: 2.0.0
-Bundle-Activator: org.springframework.ide.eclipse.beans.ui.navigator.Activator
+Bundle-Activator: org.springframework.ide.eclipse.beans.ui.BeansUIPlugin
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.eclipse.jface.text,
  org.eclipse.core.resources,
- org.eclipse.ui.editors,
+ org.eclipse.jface.text,
  org.eclipse.ui.ide,
+ org.eclipse.ui.views,
+ org.eclipse.ui.cheatsheets,
  org.eclipse.ui.workbench.texteditor,
- org.eclipse.ui.navigator.resources,
- org.eclipse.ui.navigator,
+ org.eclipse.jdt.core,
+ org.eclipse.jdt.ui,
  org.springframework.ide.eclipse.core,
  org.springframework.ide.eclipse.ui,
- org.springframework.ide.eclipse.beans.core,
- org.springframework.ide.eclipse.beans.ui,
- org.springframework.ide.eclipse.beans.ui.graph
+ org.springframework.ide.eclipse.beans.core
 Eclipse-LazyStart: true
 Bundle-Vendor: %providerName
-Bundle-ClassPath: beans-navigator.jar
+Bundle-ClassPath: beans-ui.jar
+Export-Package: org.springframework.ide.eclipse.beans.ui,
+ org.springframework.ide.eclipse.beans.ui.actions,
+ org.springframework.ide.eclipse.beans.ui.dialogs,
+ org.springframework.ide.eclipse.beans.ui.model,
+ org.springframework.ide.eclipse.beans.ui.model.properties,
+ org.springframework.ide.eclipse.beans.ui.properties,
+ org.springframework.ide.eclipse.beans.ui.views,
+ org.springframework.ide.eclipse.beans.ui.views.actions,
+ org.springframework.ide.eclipse.beans.ui.views.model,
+ org.springframework.ide.eclipse.beans.ui.wizards

@@ -25,6 +25,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPage;
@@ -34,9 +35,9 @@ import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.ui.ImageDescriptorRegistry;
 
 /**
- * Central access point for the Spring Framework UI plug-in
- * (id <code>"org.springframework.ide.eclipse.beans.ui"</code>).
- *
+ * Central access point for the Spring Framework UI plug-in (id
+ * <code>"org.springframework.ide.eclipse.beans.ui"</code>).
+ * 
  * @author Torsten Juergeleit
  */
 public class BeansUIPlugin extends AbstractUIPlugin {
@@ -46,10 +47,10 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	 * <code>org.springframework.ide.eclipse.beans.ui</code>).
 	 */
 	public static final String PLUGIN_ID =
-									 "org.springframework.ide.eclipse.beans.ui";
+			"org.springframework.ide.eclipse.beans.ui";
 	private static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
 
-	/** The shared instance.*/
+	/** The shared instance. */
 	private static BeansUIPlugin plugin;
 
 	private ResourceBundle resourceBundle;
@@ -92,6 +93,17 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 			imageDescriptorRegistry = new ImageDescriptorRegistry();
 		}
 		return imageDescriptorRegistry;
+	}
+
+	/**
+	 * Returns an image descriptor for the image file at the given
+	 * plug-in relative path
+	 *
+	 * @param path the path
+	 * @return the image descriptor
+	 */
+	public static ImageDescriptor getImageDescriptor(String path) {
+		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
 
 	public static BeansUIPlugin getDefault() {
@@ -138,11 +150,11 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 		return bundleString;
 	}
 
-	public static String getFormattedMessage(String key, String arg) {
-		return getFormattedMessage(key, new String[] { arg });
+	public static String getFormattedMessage(String key, Object arg) {
+		return getFormattedMessage(key, new Object[] { arg });
 	}
 
-	public static String getFormattedMessage(String key, String[] args) {
+	public static String getFormattedMessage(String key, Object[] args) {
 		return MessageFormat.format(getResourceString(key), args);
 	}
 

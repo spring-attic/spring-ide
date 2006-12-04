@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 
 /**
@@ -65,8 +64,8 @@ public class ConfigSetNode extends AbstractNode {
 		isIncomplete = configSet.isIncomplete();
 
 		// Add configs from given config set to internal list
-		for (IBeansConfig config : configSet.getConfigs()) {
-			ConfigNode node = new ConfigNode(this, config.getElementName()); 
+		for (String configName : configSet.getConfigNames()) {
+			ConfigNode node = new ConfigNode(this, configName); 
 			configs.add(node);
 		}
 	}
@@ -113,16 +112,6 @@ public class ConfigSetNode extends AbstractNode {
 	 */
 	public void addConfig(ConfigNode config) {
 		configs.add(config);
-		propertyChanged(this, CONFIGS);
-	}
-
-	/**
-	 * Adds the given configs to this config set.
-	 * 
-	 * @param configs  the configs to add
-	 */
-	public void addConfigs(List<ConfigNode> configs) {
-		this.configs.addAll(configs);
 		propertyChanged(this, CONFIGS);
 	}
 

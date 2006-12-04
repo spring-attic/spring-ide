@@ -16,7 +16,10 @@
 
 package org.springframework.ide.eclipse.beans.ui.model;
 
+import org.eclipse.jface.viewers.ITreePathLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.jface.viewers.ViewerLabel;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -32,7 +35,8 @@ import org.springframework.ide.eclipse.core.model.ModelUtils;
  * @see org.eclipse.core.runtime.IAdaptable
  * @author Torsten Juergeleit
  */
-public class BeansModelLabelProvider extends LabelProvider {
+public class BeansModelLabelProvider extends LabelProvider implements
+		ITreePathLabelProvider {
 
 	WorkbenchLabelProvider wbLabelProvider;
 
@@ -45,6 +49,26 @@ public class BeansModelLabelProvider extends LabelProvider {
     	super.dispose();
     }
 
+	public void updateLabel(ViewerLabel label, TreePath elementPath) {
+		Object element = ModelUtils.adaptToModelElement(elementPath
+				.getLastSegment());
+		if (element instanceof IModelElement
+				&& elementPath.getSegmentCount() > 1) {
+			Object parentElement = elementPath.getParentPath()
+					.getLastSegment();
+			if (parentElement instanceof IModelElement) {
+				label.setImage(BeansModelImages.getImage(
+						(IModelElement) element,
+						(IModelElement) parentElement));
+			} else {
+				label.setImage(getImage(element));
+			}
+		} else {
+			label.setImage(getImage(element));
+		}
+		label.setText(getText(element));
+	}
+
     public Image getImage(Object element) {
 		Object adaptedElement = ModelUtils.adaptToModelElement(element);
 		if (adaptedElement instanceof IModelElement) {
@@ -56,7 +80,7 @@ public class BeansModelLabelProvider extends LabelProvider {
 	public String getText(Object element) {
 		Object adaptedElement = ModelUtils.adaptToModelElement(element);
 		if (adaptedElement instanceof IModelElement) {
-			return BeansModelElementLabels.getElementLabel(
+			return BeansModelLabels.getElementLabel(
 					(IModelElement) adaptedElement, 0);
 		}
 		return wbLabelProvider.getText(element);

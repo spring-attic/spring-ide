@@ -31,12 +31,12 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.util.StringUtils;
 
 /**
- * Provides helper methods to render names of beans model elements.
- * 
+ * This class provides images for the beans core model's
+ * <code>IModelElement</code>s.
  * @see IModelElement
  * @author Torsten Juergeleit
  */
-public class BeansModelElementLabels {
+public class BeansModelLabels {
 
 	/** String for separating post qualified names (" - ") */
 	public final static String CONCAT_STRING = " - ";
@@ -67,14 +67,21 @@ public class BeansModelElementLabels {
 		}
 		if (element instanceof IBeansConfig) {
 			IBeansConfig config = (IBeansConfig) element;
+			String configName = element.getElementName();
 			if (config.isElementArchived()) {
 				ZipEntryStorage storage = new ZipEntryStorage(config);
-				buf.append(storage.getZipResource().getProjectRelativePath()
-						.toString());
+				if (configName.charAt(0) == IBeansConfig
+						.EXTERNAL_FILE_NAME_PREFIX) {
+					buf.append(storage.getZipResource()
+							.getFullPath().toString());
+				} else {
+					buf.append(storage.getZipResource()
+							.getProjectRelativePath().toString());
+				}
 				buf.append(" - ");
 				buf.append(storage.getFullPath().toString());
 			} else {
-				buf.append(element.getElementName());
+				buf.append(configName);
 			}
 		} else if (element instanceof IBean) {
 			buf.append(element.getElementName());
