@@ -759,4 +759,14 @@ public class BeansEditorUtils {
 		}
 		return nodes;
 	}
+
+	public static final Node getFirstReferenceableNodeById(Document document, String id) {
+		Map<String, Node> nodes = getReferenceableNodes(document);
+		for (Map.Entry<String, Node> node : nodes.entrySet()) {
+			if (node.getKey().equals(id)) {
+				return node.getValue();
+			}
+ 		}
+		return null;
+	}
 }
