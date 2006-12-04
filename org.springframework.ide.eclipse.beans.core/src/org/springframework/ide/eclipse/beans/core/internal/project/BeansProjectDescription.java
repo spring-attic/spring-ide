@@ -71,10 +71,6 @@ public class BeansProjectDescription {
 		}
 	}
 
-	public Set<String> getConfigNames() {
-		return Collections.unmodifiableSet(configs.keySet());
-	}
-
 	public boolean addConfig(IFile file) {
 		return addConfig(getConfigName(file));
 	}
@@ -123,8 +119,11 @@ public class BeansProjectDescription {
 	}
 
 	public Set<IBeansConfig> getConfigs() {
-		return Collections.unmodifiableSet(new LinkedHashSet<IBeansConfig>(
-				configs.values()));
+		return new LinkedHashSet<IBeansConfig>(configs.values());
+	}
+
+	public Set<String> getConfigNames() {
+		return new LinkedHashSet<String>(configs.keySet());
 	}
 
 	public boolean removeConfig(IFile file) {
@@ -171,8 +170,7 @@ public class BeansProjectDescription {
 	}
 
 	public Set<IBeansConfigSet> getConfigSets() {
-		return Collections.unmodifiableSet(new LinkedHashSet<IBeansConfigSet>(
-				configSets.values()));
+		return new LinkedHashSet<IBeansConfigSet>(configSets.values());
 	}
 
 	public String toString() {

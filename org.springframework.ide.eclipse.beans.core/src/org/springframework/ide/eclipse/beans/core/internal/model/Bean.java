@@ -18,7 +18,6 @@ package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,6 +29,9 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
+import org.springframework.beans.factory.support.ManagedList;
+import org.springframework.beans.factory.support.ManagedMap;
+import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
@@ -214,6 +216,9 @@ public class Bean extends AbstractSourceModelElement implements IBean {
 		for (IBeanConstructorArgument carg : constructorArguments) {
 			addInnerBeans(carg, carg.getValue(), innerBeans);
 		}
+		for (IBeanProperty prop : properties.values()) {
+			addInnerBeans(prop, prop.getValue(), innerBeans);
+		}
 		return innerBeans;
 	}
 
@@ -222,16 +227,17 @@ public class Bean extends AbstractSourceModelElement implements IBean {
 		if (value instanceof BeanDefinitionHolder) {
 			IBean bean = new Bean(parent, (BeanDefinitionHolder) value);
 			innerBeans.add(bean);
-		} else if (value instanceof List) {
-			for (Object element : (List) value) {
+			innerBeans.addAll(bean.getInnerBeans());
+		} else if (value instanceof ManagedList) {
+			for (Object element : (ManagedList) value) {
 				addInnerBeans(parent, element, innerBeans);
 			}
-		} else if (value instanceof Set) {
-			for (Object element : (Set) value) {
+		} else if (value instanceof ManagedSet) {
+			for (Object element : (ManagedSet) value) {
 				addInnerBeans(parent, element, innerBeans);
 			}
-		} else if (value instanceof Map) {
-			Map map = (Map) value;
+		} else if (value instanceof ManagedMap) {
+			ManagedMap map = (ManagedMap) value;
 			for (Object key : map.keySet()) {
 				addInnerBeans(parent, map.get(key), innerBeans);
 			}

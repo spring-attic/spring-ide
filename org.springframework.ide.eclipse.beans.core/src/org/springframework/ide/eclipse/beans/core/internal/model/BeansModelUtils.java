@@ -696,13 +696,10 @@ public final class BeansModelUtils {
 			}
 			return null;
 		} else if (context instanceof IBeansConfigSet) {
-			for (IBeansConfig config : ((IBeansConfigSet) context)
-					.getConfigs()) {
-				if (config != null) {
-					for (IBean bean : config.getInnerBeans()) {
-						if (beanName.equals(bean.getElementName())) {
-							return bean;
-						}
+			for (IBeansConfig config : ((IBeansConfigSet) context).getConfigs()) {
+				for (IBean bean : config.getInnerBeans()) {
+					if (beanName.equals(bean.getElementName())) {
+						return bean;
 					}
 				}
 			}

@@ -19,7 +19,6 @@ package org.springframework.ide.eclipse.beans.core.model;
 import java.util.Set;
 
 import org.springframework.beans.factory.parsing.Problem;
-import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
@@ -30,27 +29,21 @@ public interface IBeansConfig extends IResourceModelElement, IBeanClassAware {
 
 	char EXTERNAL_FILE_NAME_PREFIX = '/';
 
-	Set<Problem> getErrors();
-	
 	Set<Problem> getWarnings();
+
+	Set<Problem> getErrors();
 
 	Set<IBeanAlias> getAliases();
 
 	IBeanAlias getAlias(String name);
 
 	Set<IBeansComponent> getComponents();
+	
+	Set<IBean> getBeans();
+	
+	IBean getBean(String name);
 
 	boolean hasBean(String name);
 
-	IBean getBean(String name);
-
-	Set<IBean> getBeans();
-
 	Set<IBean> getInnerBeans();
-
-	/**
-	 * Returns the exception occured while reading this Spring beans
-	 * configuration or <code>null</code> if no exception occured. 
-	 */
-	BeanDefinitionException getException();
 }

@@ -172,8 +172,8 @@ public class BeansConfigValidator {
 		// Validate bean overriding
 		if (registry.containsBeanDefinition(alias.getElementName())) {
 			if (configSet == null
-					|| BeansModelUtils.getConfig(alias).hasBean(
-							alias.getElementName())) {
+					|| BeansModelUtils.getConfig(alias).getBean(
+							alias.getElementName()) != null) {
 				BeansModelUtils.createProblemMarker(alias,
 						"Overrides another bean in the same config file",
 						IMarker.SEVERITY_ERROR, alias.getElementStartLine(),

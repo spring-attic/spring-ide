@@ -41,6 +41,8 @@ public interface IBeansConfigSet extends IResourceModelElement,
 
 	Set<IBeansConfig> getConfigs();
 
+	Set<String> getConfigNames();
+
 	public boolean hasAlias(String name);
 
 	public IBeanAlias getAlias(String name);

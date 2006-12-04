@@ -90,7 +90,7 @@ public class BeansProjectDescriptionWriter implements
 				.isAllowBeanDefinitionOverriding()).toString());
 		writer.printSimpleTag(INCOMPLETE, new Boolean(configSet.isIncomplete())
 				.toString());
-		write(CONFIGS, CONFIG, configSet.getConfigs(), writer);
+		write(CONFIGS, CONFIG, configSet.getConfigNames(), writer);
 		writer.endTag(CONFIG_SET);
 	}
 
@@ -98,16 +98,11 @@ public class BeansProjectDescriptionWriter implements
 			XMLWriter writer) throws IOException {
 		writer.startTag(name, null);
 		for (Object element : elements) {
-			write(element, writer);
+			if (element instanceof IBeansConfigSet) {
+				write((IBeansConfigSet) element, writer);
+			}
 		}
 		writer.endTag(name);
-	}
-
-	protected static void write(Object element, XMLWriter writer)
-			throws IOException {
-		if (element instanceof IBeansConfigSet) {
-			write((IBeansConfigSet) element, writer);
-		}
 	}
 
 	protected static void write(String name, String elementTagName,

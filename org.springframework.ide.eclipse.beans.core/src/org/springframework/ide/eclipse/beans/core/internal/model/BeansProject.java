@@ -147,10 +147,6 @@ public class BeansProject extends AbstractResourceModelElement implements
 		}
 	}
 
-	public Set<String> getConfigNames() {
-		return getDescription().getConfigNames();
-	}
-
 	public boolean hasConfig(IFile file) {
 		return getDescription().hasConfig(file);
 	}

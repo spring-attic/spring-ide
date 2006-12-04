@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -43,8 +44,8 @@ import org.springframework.beans.factory.xml.DelegatingEntityResolver;
 import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
-import org.springframework.ide.eclipse.beans.core.BeanDefinitionException;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
+import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker.ErrorCode;
 import org.springframework.ide.eclipse.beans.core.internal.parser.BeansDtdResolver;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
@@ -75,15 +76,16 @@ import org.xml.sax.SAXParseException;
  */
 public class BeansConfig extends AbstractResourceModelElement implements
 		IBeansConfig {
-	/** Indicator for a beans configuration embedded in a ZIP file */
-	boolean isArchived;
-
+	
 	/** This bean's config file */
 	private IFile file;
-	
-	private Set<Problem> errors;
 
-	private Set<Problem> warnings;
+	/** Indicator for a beans configuration embedded in a ZIP file */
+	boolean isArchived;
+	
+	private Set<Problem> warnings = new LinkedHashSet<Problem>();
+	
+	private Set<Problem> errors = new LinkedHashSet<Problem>();
 
 	/** List of imports (in registration order) */
 	private Set<IBeansImport> imports;
@@ -103,9 +105,6 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	/** List of bean class names mapped to list of beans implementing the
 	 * corresponding class */
 	private Map<String, Set<IBean>> beanClassesMap;
-
-	/** Exception which occured during reading this bean's config file */
-	private BeanDefinitionException exception;
 
 	public BeansConfig(IBeansProject project, String name) {
 		super(project, name);
@@ -178,14 +177,14 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	 * <code>IBeansConfig</code> leads to reloading of this beans config file.
 	 */
 	public void reset() {
-		errors = null;
-		warnings = null;
+		warnings.clear();
+		errors.clear();
+
 		imports = null;
 		aliases = null;
 		beans = null;
 		innerBeans = null;
 		beanClassesMap = null;
-		exception = null;
 
 		// Reset all config sets which contain this config
 		for (IBeansConfigSet configSet : ((IBeansProject) getElementParent())
@@ -247,16 +246,14 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		return Collections.unmodifiableSet(components);
 	}
 
-	public boolean hasBean(String name) {
-		if (name != null) {
-			if (beans == null) {
+	public Set<IBean> getBeans() {
+		if (beans == null) {
 
-				// Lazily initialization of bean list
-				readConfig();
-			}
-			return beans.containsKey(name);
+			// Lazily initialization of bean list
+			readConfig();
 		}
-		return false;
+		return Collections.unmodifiableSet(new LinkedHashSet<IBean>(beans
+				.values()));
 	}
 
 	public IBean getBean(String name) {
@@ -271,14 +268,16 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		return null;
 	}
 
-	public Set<IBean> getBeans() {
-		if (beans == null) {
+	public boolean hasBean(String name) {
+		if (name != null) {
+			if (beans == null) {
 
-			// Lazily initialization of bean list
-			readConfig();
+				// Lazily initialization of bean list
+				readConfig();
+			}
+			return beans.containsKey(name);
 		}
-		return Collections.unmodifiableSet(new LinkedHashSet<IBean>(beans
-				.values()));
+		return false;
 	}
 
 	public Set<IBean> getInnerBeans() {
@@ -288,15 +287,6 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			readConfig();
 		}
 		return Collections.unmodifiableSet(innerBeans);
-	}
-
-	public BeanDefinitionException getException() {
-		if (beans == null) {
-
-			// Lazily initialization of beans list
-			readConfig();
-		}
-		return exception;
 	}
 
 	public boolean isBeanClass(String className) {
@@ -330,8 +320,9 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	 * @return the file for given name
 	 */
 	private IFile getFile(String name) {
-		IFile file;
 		IContainer container;
+		IFile file;
+		String fullPath;
 
 		// At first check for a config file in a JAR
 		int pos = name.indexOf(ZipEntryStorage.DELIMITER);
@@ -340,18 +331,22 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			container = (IProject) ((IResourceModelElement) getElementParent())
 					.getElementResource();
 			name = name.substring(0, pos);
+			fullPath = container.getFullPath().append(name).toString();
 
 		// Now check for an external config file
 		} else if (name.charAt(0) == '/') {
 			container = ResourcesPlugin.getWorkspace().getRoot();
+			fullPath = name;
 		} else {
 			container = (IProject) ((IResourceModelElement) getElementParent())
 					.getElementResource();
+			fullPath = container.getFullPath().append(name).toString();
 		}
 		file = (IFile) container.findMember(name);
 		if (file == null) {
-			exception = new BeanDefinitionException("File '" + name
-					+ "' not found");
+			Problem problem = new Problem("File '" + fullPath + "' not found",
+					new Location(new FileResource(fullPath), null));
+			errors.add(problem);
 		}
 		return file;
 	}
@@ -399,7 +394,6 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		components  = new LinkedHashSet<IBeansComponent>();
 		beans = new LinkedHashMap<String, IBean>();
 		innerBeans = new LinkedHashSet<IBean>();
-		errors = new LinkedHashSet<Problem>();
 
 		Resource resource;
 		if (isArchived) {
@@ -418,39 +412,57 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		reader.setEntityResolver(resolver);
 		reader.setDocumentLoader(new XercesDocumentLoader());
 		reader.setSourceExtractor(new XmlSourceExtractor());
-		reader.setErrorHandler(new BeansConfigErrorHandler(resource));
-		reader.setProblemReporter(new BeansConfigProblemReporter());
+		reader.setErrorHandler(new BeansConfigErrorHandler(this, resource));
+		reader.setProblemReporter(new BeansConfigProblemReporter(this));
 		reader.setEventListener(new BeansConfigReaderEventListener(this));
 		try {
 			reader.loadBeanDefinitions(resource);
 		} catch (BeanDefinitionStoreException e) {
-			exception = new BeanDefinitionException(e.getCause());
+			if (!(e.getCause() instanceof SAXParseException)) {
+				BeansModelUtils.createProblemMarker(this, e.getMessage(),
+						IMarker.SEVERITY_ERROR, -1, ErrorCode.PARSING_FAILED);
+				Problem problem = new Problem(e.getMessage(), new Location(
+						resource, null));
+				errors.add(problem);
+			}
 		}
 	}
 
 	private final class BeansConfigErrorHandler implements ErrorHandler {
 
+		private IBeansConfig config;
 		private Resource resource;
 
-		public BeansConfigErrorHandler(Resource resource) {
+		public BeansConfigErrorHandler(IBeansConfig config,
+				Resource resource) {
+			this.config = config;
 			this.resource = resource;
 		}
 		
 		public void warning(SAXParseException ex) throws SAXException {
+			BeansModelUtils.createProblemMarker(config, ex.getMessage(),
+					IMarker.SEVERITY_WARNING, ex.getLineNumber(),
+					ErrorCode.PARSING_FAILED);
 			warnings.add(createProblem(ex));
 		}
 
 		public void error(SAXParseException ex) throws SAXException {
+			BeansModelUtils.createProblemMarker(config, ex.getMessage(),
+					IMarker.SEVERITY_ERROR, ex.getLineNumber(),
+					ErrorCode.PARSING_FAILED);
 			errors.add(createProblem(ex));
 		}
 
 		public void fatalError(SAXParseException ex) throws SAXException {
+			BeansModelUtils.createProblemMarker(config, ex.getMessage(),
+					IMarker.SEVERITY_ERROR, ex.getLineNumber(),
+					ErrorCode.PARSING_FAILED);
 			errors.add(createProblem(ex));
 		}
 
 		private Problem createProblem(SAXParseException ex) {
-			XmlSource source = new XmlSource(resource, null,
-					ex.getLineNumber(), ex.getLineNumber());
+			XmlSource source = new XmlSource(resource, null, ex.getLineNumber(),
+						ex.getLineNumber());
 			return new Problem(ex.getMessage(), new Location(resource,
 					source));
 		}
@@ -458,11 +470,25 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 	private final class BeansConfigProblemReporter implements ProblemReporter {
 
+		private IBeansConfig config;
+
+		public BeansConfigProblemReporter(IBeansConfig config) {
+			this.config = config;
+		}
+
 		public void error(Problem problem) {
+			BeansModelUtils.createProblemMarker(config, problem.getMessage(),
+					IMarker.SEVERITY_ERROR, ((XmlSource) problem
+							.getLocation().getSource()).getStartLine(),
+					ErrorCode.PARSING_FAILED);
 			errors.add(problem);
 		}
 
 		public void warning(Problem problem) {
+			BeansModelUtils.createProblemMarker(config, problem.getMessage(),
+					IMarker.SEVERITY_WARNING, ((XmlSource) problem
+							.getLocation().getSource()).getStartLine(),
+					ErrorCode.PARSING_FAILED);
 			warnings.add(problem);
 		}
 	}
@@ -487,7 +513,6 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		}
 
 		public void aliasRegistered(AliasDefinition aliasDefinition) {
-			
 			BeanAlias alias = new BeanAlias(config, aliasDefinition);
 			aliases.put(aliasDefinition.getAlias(), alias);
 		}
@@ -500,11 +525,14 @@ public class BeansConfig extends AbstractResourceModelElement implements
 					IBean bean = new Bean(config,
 							(BeanComponentDefinition) componentDefinition);
 					beans.put(bean.getElementName(), bean);
+					innerBeans.addAll(bean.getInnerBeans());
 				}
 			} else {
 				IBeansComponent comp = new BeansComponent(config,
 						componentDefinition);
 				components.add(comp);
+// TODO add component's inner beans
+//				innerBeans.addAll(comp.getInnerBeans());
 			}
 		}
 	}
