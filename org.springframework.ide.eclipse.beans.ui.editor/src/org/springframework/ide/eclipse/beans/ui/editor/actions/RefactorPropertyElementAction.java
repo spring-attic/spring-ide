@@ -26,9 +26,9 @@ import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
-import org.eclipse.wst.sse.core.internal.provisional.StructuredModelManager;
 import org.eclipse.wst.xml.core.internal.document.TextImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.format.FormatProcessorXML;
@@ -146,7 +146,7 @@ public class RefactorPropertyElementAction extends
 	private void removeTextChildren(Element elem) {
 		NodeList children = elem.getChildNodes();
 
-		List textElements = new ArrayList();
+		List<Node> textElements = new ArrayList<Node>();
 		for (int j = 0; j < children.getLength(); j++) {
 			Node nodetest = children.item(j);
 			if (nodetest instanceof TextImpl) {
@@ -155,7 +155,7 @@ public class RefactorPropertyElementAction extends
 		}
 
 		for (int k = 0; k < textElements.size(); k++) {
-			elem.removeChild((Node) textElements.get(k));
+			elem.removeChild(textElements.get(k));
 		}
 		elem.normalize();
 	}

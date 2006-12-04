@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,7 @@ public class BeansEditorPlugin extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		this.context = context;
+        NamespaceEditorContributionRegistry.init();
 	}
 
 	/**
@@ -207,7 +208,7 @@ public class BeansEditorPlugin extends AbstractUIPlugin {
 	}
 
 	public static String getFormattedMessage(String key, String[] args) {
-		return MessageFormat.format(getResourceString(key), args);
+		return MessageFormat.format(getResourceString(key), (Object[]) args);
 	}
 
 	public static boolean isDebug(String option) {

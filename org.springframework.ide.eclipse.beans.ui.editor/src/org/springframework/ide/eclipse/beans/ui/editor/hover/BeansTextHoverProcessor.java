@@ -32,9 +32,9 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
-import org.eclipse.wst.sse.core.internal.provisional.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegion;
@@ -165,17 +165,17 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 			if (paths == null) {
 				paths = new String[] { propertyName };
 			}
-			List propertyPaths = Arrays.asList(paths);
+			List<String> propertyPaths = Arrays.asList(paths);
 			List classNames = BeansEditorUtils.getClassNamesOfBean(file,
 					xmlnode.getParentNode());
-			List methods = new ArrayList();
+			List<IMethod> methods = new ArrayList<IMethod>();
 			BeansEditorUtils.extractAllMethodsFromPropertyPathElements(
 					propertyPaths, classNames, this.getResource(document), 0,
 					methods);
 
 			StringBuffer buf = new StringBuffer();
 			for (int i = 0; i < methods.size(); i++) {
-				IMethod method = (IMethod) methods.get(i);
+				IMethod method = methods.get(i);
 
 				if (method != null) {
 					BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
@@ -208,6 +208,7 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 				|| "factory-bean".equals(attName)
 				|| "key-ref".equals(attName)
 				|| "value-ref".equals(attName)
+                || attName.endsWith("-ref")
 				|| ("name".equals(attName) && "alias".equals(xmlnode
 						.getNodeName())) || ("bean".equals(attName) && "ref"
 				.equals(xmlnode.getNodeName())))

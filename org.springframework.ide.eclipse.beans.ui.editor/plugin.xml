@@ -50,6 +50,8 @@
 		</content-type>
 	</extension>
 
+	<extension-point id="namespacecontribution" name="&amp;contributionName" schema="schema/namespacecontribution.exsd"/>
+
 	<extension point="org.eclipse.wst.sse.ui.editorConfiguration">
 		<sourceViewerConfiguration
 			class="org.springframework.ide.eclipse.beans.ui.editor.BeansStructuredTextViewerConfiguration"
@@ -89,31 +91,31 @@
              webURL="http://www.springframework.org/dtd/spring-beans-2.0.dtd"/>
        <public
              publicId="http://www.springframework.org/schema/beans"
-             uri="schemas/spring-beans-2.0.xsd"
+             uri="xsd/spring-beans-2.0.xsd"
              webURL="http://www.springframework.org/schema/beans/spring-beans-2.0.xsd"/>
        <public
              publicId="http://www.springframework.org/schema/util"
-             uri="schemas/spring-util-2.0.xsd"
+             uri="xsd/spring-util-2.0.xsd"
              webURL="http://www.springframework.org/schema/beans/spring-util-2.0.xsd"/>
        <public
              publicId="http://www.springframework.org/schema/aop"
-             uri="schemas/spring-aop-2.0.xsd"
+             uri="xsd/spring-aop-2.0.xsd"
              webURL="http://www.springframework.org/schema/aop/spring-aop-2.0.xsd"/>
        <public
              publicId="http://www.springframework.org/schema/tx"
-             uri="schemas/spring-tx-2.0.xsd"
+             uri="xsd/spring-tx-2.0.xsd"
              webURL="http://www.springframework.org/schema/tx/spring-tx-2.0.xsd"/>
        <public
              publicId="http://www.springframework.org/schema/jee"
-             uri="schemas/spring-jee-2.0.xsd"
+             uri="xsd/spring-jee-2.0.xsd"
              webURL="http://www.springframework.org/schema/jee/spring-jee-2.0.xsd"/>
        <public
              publicId="http://www.springframework.org/schema/tool"
-             uri="schemas/spring-tool-2.0.xsd"
+             uri="xsd/spring-tool-2.0.xsd"
              webURL="http://www.springframework.org/schema/tool/spring-tool-2.0.xsd"/>
        <public
              publicId="http://www.springframework.org/schema/lang"
-             uri="schemas/spring-lang-2.0.xsd"
+             uri="xsd/spring-lang-2.0.xsd"
              webURL="http://www.springframework.org/schema/lang/spring-lang-2.0.xsd"/>
     </catalogContribution>
  </extension>
@@ -207,5 +209,11 @@
 			</action>
 		</viewerContribution>
 	</extension>
+   
+   <extension
+         point="org.springframework.ide.eclipse.beans.ui.editor.namespacecontribution">
+      <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.BeansNamespaceAwareEditorContribution"/>
+      <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.AopNamespaceAwareEditorContribution"/>
+   </extension>
 
 </plugin>
