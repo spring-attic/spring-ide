@@ -28,4 +28,8 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 public interface IBeansComponent extends ISourceModelElement {
 
 	Set<IBean> getBeans();
+
+	Set<IBeansComponent> getComponents();
+
+	Set<IBean> getInnerBeans();
 }

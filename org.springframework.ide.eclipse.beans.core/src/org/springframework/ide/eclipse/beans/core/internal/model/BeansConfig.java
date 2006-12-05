@@ -531,8 +531,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 				IBeansComponent comp = new BeansComponent(config,
 						componentDefinition);
 				components.add(comp);
-// TODO add component's inner beans
-//				innerBeans.addAll(comp.getInnerBeans());
+				innerBeans.addAll(comp.getInnerBeans());
 			}
 		}
 	}

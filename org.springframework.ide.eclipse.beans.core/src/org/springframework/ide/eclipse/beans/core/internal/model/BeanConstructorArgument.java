@@ -32,18 +32,35 @@ public class BeanConstructorArgument extends AbstractSourceModelElement
 	private int index;
 	private String type;
 	private Object value;
+	
+	public BeanConstructorArgument(IBean bean, ValueHolder vHolder) {
+		this(bean, -1, vHolder);
+	}
 
 	public BeanConstructorArgument(IBean bean, int index,
 			ValueHolder vHolder) {
-		super(bean, null);
+		super(bean, createName(index, vHolder));
 		setSourceRange(vHolder);
 		this.index = index;
-		type = vHolder.getType();
-		value = vHolder.getValue();
+		this.type = vHolder.getType();
+		this.value = vHolder.getValue();
 	}
 
-	public BeanConstructorArgument(IBean bean, ValueHolder vHolder) {
-		this(bean, -1, vHolder);
+	protected static final String createName(int index, ValueHolder vHolder) {
+		StringBuffer buf = new StringBuffer();
+		if (index >= 0) {
+			buf.append(index);
+		}
+		if (vHolder.getType() != null) {
+			if (buf.length() > 0) {
+				buf.append(" - ");
+			}
+			buf.append(vHolder.getType());
+		}
+		if (buf.length() == 0) {
+			buf.append(vHolder.getValue());
+		}
+		return buf.toString();
 	}
 
 	public int getElementType() {

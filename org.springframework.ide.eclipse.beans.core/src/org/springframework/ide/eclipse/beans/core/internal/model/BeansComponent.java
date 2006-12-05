@@ -43,10 +43,20 @@ public class BeansComponent extends AbstractSourceModelElement implements
 	/** List of all inner components which are defined within this component */
 	private Set<IBeansComponent> components;
 
+	private LinkedHashSet<IBean> innerBeans;
+
 	public BeansComponent(IModelElement parent, ComponentDefinition definition) {
-		super(parent, definition.getName() + " #" + definition.hashCode());
+		super(parent, definition.getName());
 		setSourceRange(definition);
 		beans = new LinkedHashSet<IBean>();
+		for (BeanDefinition beanDef : definition.getBeanDefinitions()) {
+			if (beanDef.getRole() != BeanDefinition.ROLE_INFRASTRUCTURE) {
+				IBean bean = new Bean(this, beanDef.getBeanClassName(),
+						null, beanDef);
+				beans.add(bean);
+			}
+		}
+
 		components = new LinkedHashSet<IBeansComponent>();
 		if (definition instanceof CompositeComponentDefinition) {
 			for (ComponentDefinition compDef : ((CompositeComponentDefinition)
@@ -64,6 +74,14 @@ public class BeansComponent extends AbstractSourceModelElement implements
 					components.add(component);
 				}
 			}
+		}
+
+		innerBeans = new LinkedHashSet<IBean>();
+		for (IBean bean : beans) {
+			innerBeans.addAll(bean.getInnerBeans());
+		}
+		for (IBeansComponent comp : components) {
+			innerBeans.addAll(comp.getInnerBeans());
 		}
 	}
 
@@ -83,5 +101,9 @@ public class BeansComponent extends AbstractSourceModelElement implements
 
 	public Set<IBeansComponent> getComponents() {
 		return Collections.unmodifiableSet(components);
+	}
+
+	public Set<IBean> getInnerBeans() {
+		return Collections.unmodifiableSet(innerBeans);
 	}
 }

@@ -31,6 +31,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
+import org.springframework.beans.factory.support.ManagedProperties;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -54,13 +55,19 @@ public class Bean extends AbstractSourceModelElement implements IBean {
 	private Set<IBean> innerBeans;
 
 	public Bean(IModelElement parent, BeanDefinitionHolder bdHolder) {
-		super(parent, bdHolder.getBeanName());
-		setSourceRange(bdHolder);
-		beanDefinition = bdHolder.getBeanDefinition();
-		aliases = bdHolder.getAliases();
-		constructorArguments = retrieveConstructorArguments(bdHolder
-				.getBeanDefinition());
-		properties = retrieveProperties(bdHolder.getBeanDefinition());
+		this(parent, bdHolder.getBeanName(), bdHolder.getAliases(),
+				bdHolder.getBeanDefinition());
+	}
+
+	public Bean(IModelElement parent, String name, String[] aliases,
+			BeanDefinition beanDefinition) {
+		super(parent, name);
+		setSourceRange(beanDefinition);
+		this.beanDefinition = beanDefinition;
+		this.aliases = aliases;
+
+		constructorArguments = retrieveConstructorArguments(beanDefinition);
+		properties = retrieveProperties(beanDefinition);
 		innerBeans = retrieveInnerBeans();
 	}
 
@@ -240,6 +247,11 @@ public class Bean extends AbstractSourceModelElement implements IBean {
 			ManagedMap map = (ManagedMap) value;
 			for (Object key : map.keySet()) {
 				addInnerBeans(parent, map.get(key), innerBeans);
+			}
+		} else if (value instanceof ManagedProperties) {
+			ManagedProperties props = (ManagedProperties) value;
+			for (Object key : props.keySet()) {
+				addInnerBeans(parent, props.get(key), innerBeans);
 			}
 		}
 	}
