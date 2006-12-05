@@ -1,19 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
-<plugin
-   id="org.springframework.ide.eclipse.beans.ui.editor"
-   name="%pluginName"
-   version="2.0.0"
-   provider-name="%providerName"
-   class="org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin">
+<plugin>
 
-   <runtime>
-      <library name="beans-editor.jar">
-         <export name="*"/>
-      </library>
-   </runtime>
-
-   <requires>
+   <!--requires>
       <import plugin="org.eclipse.core.runtime" />
       <import plugin="org.eclipse.core.resources" />
       <import plugin="org.eclipse.ui"/>
@@ -35,7 +24,7 @@
       <import plugin="org.springframework.ide.eclipse.beans.core" />
       <import plugin="org.springframework.ide.eclipse.beans.ui" />
       <import plugin="org.springframework.ide.eclipse.beans.ui.search"/>
-   </requires>
+   </requires-->
  
    <extension point="org.eclipse.core.runtime.contentTypes">
 		<content-type id="beansConfig"
