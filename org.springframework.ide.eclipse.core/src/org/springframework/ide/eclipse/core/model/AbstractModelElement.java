@@ -85,11 +85,23 @@ public abstract class AbstractModelElement implements IModelElement {
 		id.append(getElementType());
 		id.append(ID_SEPARATOR);
 		if (getElementName() != null) {
-			id.append(getElementName());
+			id.append(getUniqueElementName());
 		} else {
 			id.append(super.hashCode());
 		}
 		return id.toString();
+	}
+
+	/**
+	 * Overwrite this method if the element's name is not unique.
+	 * <p>
+	 * This method is called by <code>getElementID()</code>. The default
+	 * implementation returns <code>getElementName()</code>.
+	 * 
+	 * @see #getElementID()
+	 */
+	protected String getUniqueElementName() {
+		return getElementName();
 	}
 
 	public void accept(IModelElementVisitor visitor,

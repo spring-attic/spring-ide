@@ -105,4 +105,17 @@ public abstract class AbstractSourceModelElement extends
 			setElementEndLine(source.getEndLine());
 		}
 	}
+
+	/**
+	 * Overwrite this method if the element's name is not unique.
+	 * <p>
+	 * This method is called by <code>getElementID()</code>. The default
+	 * implementation returns to
+	 * <code>getElementName() + "-" + getElementStartLine()</code>.
+	 * 
+	 * @see #getElementID()
+	 */
+	protected String getUniqueElementName() {
+		return getElementName() + ID_SEPARATOR + getElementStartLine();
+	}
 }
