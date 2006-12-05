@@ -81,12 +81,12 @@
       </navigatorContent>
 
       <navigatorContent
-            activeByDefault="true"
-            contentProvider="org.springframework.ide.eclipse.beans.ui.navigator.internal.BeansNavigatorContentProvider"
-            icon="icons/full/obj16/spring_obj.gif"
             id="org.springframework.ide.eclipse.beans.ui.navigator.projectExplorerContent"
-            labelProvider="org.springframework.ide.eclipse.beans.ui.navigator.internal.BeansNavigatorLabelProvider"
             name="%navigatorContentName"
+            contentProvider="org.springframework.ide.eclipse.beans.ui.navigator.internal.BeansNavigatorContentProvider"
+            labelProvider="org.springframework.ide.eclipse.beans.ui.navigator.internal.BeansNavigatorLabelProvider"
+            icon="icons/full/obj16/spring_obj.gif"
+            activeByDefault="true"
             priority="high">
 		<triggerPoints>
 			<or>

@@ -28,6 +28,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
+import org.eclipse.ui.navigator.INavigatorContentExtension;
 import org.eclipse.ui.navigator.IPipelinedTreeContentProvider;
 import org.eclipse.ui.navigator.PipelinedShapeModification;
 import org.eclipse.ui.navigator.PipelinedViewerUpdate;
@@ -37,8 +38,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
-import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.ui.navigator.Activator;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
@@ -50,6 +51,10 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 public class BeansNavigatorContentProvider implements
 		IPipelinedTreeContentProvider, IModelChangeListener {
 
+	public static final String BEANS_EXPLORER_CONTENT_ID = Activator.PLUGIN_ID
+			+ ".beansExplorerContent";
+
+	private INavigatorContentExtension contentExtension;
 	private StructuredViewer viewer;
 
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
@@ -67,15 +72,8 @@ public class BeansNavigatorContentProvider implements
 	}
 
 	public void dispose() {
-		if (viewer != null) {
-			IBeansModel model = null;
-			Object obj = viewer.getInput();
-			if (obj instanceof IBeansModel) {
-				model = (IBeansModel) obj;
-			}
-			if (model != null) {
-				model.removeChangeListener(this);
-			}
+		if (viewer != null && viewer.getInput() != null) {
+			BeansCorePlugin.getModel().removeChangeListener(this);
 		}
 	}
 
@@ -131,8 +129,7 @@ public class BeansNavigatorContentProvider implements
 
 	public boolean hasChildren(Object element) {
 		if (element instanceof IModelElement) {
-			return !(element instanceof IBeanProperty
-					|| element instanceof IBeanConstructorArgument);
+			return !(element instanceof IBeanProperty || element instanceof IBeanConstructorArgument);
 		} else if (element instanceof IFile) {
 			IFile file = (IFile) element;
 			IBeansProject project = BeansCorePlugin.getModel().getProject(
@@ -149,8 +146,8 @@ public class BeansNavigatorContentProvider implements
 
 	public void elementChanged(ModelChangeEvent event) {
 		IModelElement element = event.getElement();
-		if (element instanceof IBeansProject
-				|| element instanceof IBeansConfig) {
+		if (!contentExtension.getId().equals(BEANS_EXPLORER_CONTENT_ID)
+				&& (element instanceof IBeansProject || element instanceof IBeansConfig)) {
 			refreshViewer(((IResourceModelElement) element)
 					.getElementResource());
 		} else {
@@ -181,10 +178,12 @@ public class BeansNavigatorContentProvider implements
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public void getPipelinedChildren(Object parent, Set currentChildren) {
 		currentChildren.addAll(Arrays.asList(getChildren(parent)));
 	}
 
+	@SuppressWarnings("unchecked")
 	public void getPipelinedElements(Object input, Set currentElements) {
 		currentElements.addAll(Arrays.asList(getElements(input)));
 	}
@@ -193,11 +192,13 @@ public class BeansNavigatorContentProvider implements
 		return getParent(object);
 	}
 
-	public PipelinedShapeModification interceptAdd(PipelinedShapeModification addModification) {
+	public PipelinedShapeModification interceptAdd(
+			PipelinedShapeModification addModification) {
 		return addModification;
 	}
 
-	public PipelinedShapeModification interceptRemove(PipelinedShapeModification removeModification) {
+	public PipelinedShapeModification interceptRemove(
+			PipelinedShapeModification removeModification) {
 		return removeModification;
 	}
 
@@ -209,12 +210,13 @@ public class BeansNavigatorContentProvider implements
 		return false;
 	}
 
-	public void init(ICommonContentExtensionSite aConfig) {
+	public void init(ICommonContentExtensionSite config) {
+		contentExtension = config.getExtension();
 	}
 
-	public void restoreState(IMemento aMemento) {
+	public void restoreState(IMemento memento) {
 	}
 
-	public void saveState(IMemento aMemento) {
+	public void saveState(IMemento memento) {
 	}
 }
