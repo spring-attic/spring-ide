@@ -19,7 +19,7 @@ package org.springframework.ide.eclipse.beans.ui.navigator.internal;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
-import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
  * @author Torsten Juergeleit
@@ -34,10 +34,11 @@ public class BeansNavigatorSorter extends ViewerSorter {
     }
 
     public int compare(Viewer viewer, Object e1, Object e2) {
-		if (e1 instanceof IModelElement || e2 instanceof IModelElement) {
+		if (e1 instanceof ISourceModelElement
+				|| e2 instanceof ISourceModelElement) {
 			// we don't want to sort it, just show it in the order it's found
 			// in the file
-			return 0; 
+			return 0;
 		}
 		return super.compare(viewer, e1, e2);
 	}
