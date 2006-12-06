@@ -68,6 +68,7 @@ import org.w3c.dom.Node;
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  */
+@SuppressWarnings("restriction")
 public class BeansContentAssistProcessor
         extends AbstractContentAssistProcessor {
 

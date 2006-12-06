@@ -32,22 +32,14 @@ import org.w3c.dom.Node;
 final class BeansOutlineLabelProvider
         extends JFaceNodeLabelProvider {
 
-    private ILabelProvider xmlProvider;
-
     private BeansContentOutlineConfiguration configuration;
 
     public BeansOutlineLabelProvider(
-            BeansContentOutlineConfiguration configuration,
-            ILabelProvider xmlProvider) {
-        this.xmlProvider = xmlProvider;
+            BeansContentOutlineConfiguration configuration) {
         this.configuration = configuration;
     }
 
     public Image getImage(Object object) {
-        if (!BeansEditorUtils.isSpringStyleOutline()) {
-            return xmlProvider.getImage(object);
-        }
-
         // Create Spring beans label image
         Node node = (Node) object;
         String nodeName = node.getNodeName();
@@ -94,14 +86,10 @@ final class BeansOutlineLabelProvider
         if ("description".equals(nodeName)) {
             return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_DESCRIPTION);
         }
-        return xmlProvider.getImage(object);
+        return null;
     }
 
     public String getText(Object o) {
-        if (!BeansEditorUtils.isSpringStyleOutline()) {
-            return xmlProvider.getText(o);
-        }
-
         // Create Spring beans label text
         Node node = (Node) o;
         NamedNodeMap attrs = node.getAttributes();
@@ -255,9 +243,6 @@ final class BeansOutlineLabelProvider
             text += ((CommentImpl) o).getNodeValue().trim();
             text += '>';
         }
-        else {
-            text = super.getText(o);
-        }
-        return text;
+        return null;
     }
 }

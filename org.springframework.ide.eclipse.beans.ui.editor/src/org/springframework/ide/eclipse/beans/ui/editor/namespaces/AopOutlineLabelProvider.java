@@ -16,31 +16,22 @@
 
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.outline.BeansContentOutlineConfiguration;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 final class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 
-	private ILabelProvider xmlProvider;
-
 	private BeansContentOutlineConfiguration configuration;
 
 	public AopOutlineLabelProvider(
-			BeansContentOutlineConfiguration configuration,
-			ILabelProvider xmlProvider) {
-		this.xmlProvider = xmlProvider;
+			BeansContentOutlineConfiguration configuration) {
 		this.configuration = configuration;
 	}
 
 	public Image getImage(Object object) {
-		if (!BeansEditorUtils.isSpringStyleOutline()) {
-			return xmlProvider.getImage(object);
-		}
 
 		// Create Spring beans label image
 		Node node = (Node) object;
@@ -83,14 +74,10 @@ final class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 		    return AopUIImages.getImage(AopUIImages.IMG_OBJS_ADVICE);
 		}
 
-		return xmlProvider.getImage(object);
+		return null;
 	}
 
 	public String getText(Object o) {
-		if (!BeansEditorUtils.isSpringStyleOutline()) {
-			return xmlProvider.getText(o);
-		}
-
 		// Create Spring beans label text
 		Node node = (Node) o;
 		NamedNodeMap attrs = node.getAttributes();
@@ -163,6 +150,6 @@ final class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 			}
 		}
 
-		return text;
+		return null;
 	}
 }

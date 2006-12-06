@@ -80,7 +80,7 @@ public class NamespaceEditorContributionRegistry {
                             .createExecutableExtension("class");
                     if (namespaceContribution instanceof INamespaceAwareEditorContribution) {
                         INamespaceAwareEditorContribution contribution = (INamespaceAwareEditorContribution) namespaceContribution;
-                        contributions.put(contribution.getNamespaceURI(),
+                        contributions.put(contribution.getNamespaceUri(),
                                 contribution);
                     }
                 }

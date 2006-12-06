@@ -24,6 +24,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.INamespaceAwareEditorCont
 import org.springframework.ide.eclipse.beans.ui.editor.NamespaceEditorContributionRegistry;
 import org.w3c.dom.Node;
 
+@SuppressWarnings("restriction")
 public class DelegatingLabelProvider
         extends JFaceNodeLabelProvider {
 
@@ -53,10 +54,13 @@ public class DelegatingLabelProvider
                 .getNamespaceAwareEditorContribution(namespace);
         if (contribution != null
                 && contribution
-                        .getLabelProvider(configuration, xmlProvider) != null) {
-            return contribution
-                    .getLabelProvider(configuration, xmlProvider).getImage(
+                        .getLabelProvider(configuration) != null) {
+            Image image = contribution
+                    .getLabelProvider(configuration).getImage(
                             object);
+            if (image != null) {
+                return image;
+            }
         }
         return xmlProvider.getImage(object);
     }
@@ -73,10 +77,13 @@ public class DelegatingLabelProvider
                 .getNamespaceAwareEditorContribution(namespace);
         if (contribution != null
                 && contribution
-                        .getLabelProvider(configuration, xmlProvider) != null) {
-            return contribution
-                    .getLabelProvider(configuration, xmlProvider).getText(
+                        .getLabelProvider(configuration) != null) {
+            String text = contribution
+                    .getLabelProvider(configuration).getText(
                             object);
+            if (text != null) {
+                return text;
+            }
         }
         return xmlProvider.getText(object);
     }

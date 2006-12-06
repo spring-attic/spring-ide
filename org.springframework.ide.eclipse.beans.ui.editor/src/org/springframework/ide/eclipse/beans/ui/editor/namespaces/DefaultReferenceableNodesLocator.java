@@ -5,17 +5,17 @@ import java.util.Map;
 
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.INamespaceAwareEditorContribution;
-import org.springframework.ide.eclipse.beans.ui.editor.IReferenceableElementsLocator;
+import org.springframework.ide.eclipse.beans.ui.editor.IReferenceableNodesLocator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-class DefaultReferenceableElementsLocator implements
-		IReferenceableElementsLocator {
+public class DefaultReferenceableNodesLocator implements
+		IReferenceableNodesLocator {
 
 	private INamespaceAwareEditorContribution contribution;
 
-	DefaultReferenceableElementsLocator(INamespaceAwareEditorContribution contribution) {
+    public DefaultReferenceableNodesLocator(INamespaceAwareEditorContribution contribution) {
 		this.contribution = contribution;
 	}
 
@@ -25,7 +25,7 @@ class DefaultReferenceableElementsLocator implements
 
 		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node node = childNodes.item(i);
-			if (this.contribution.getNamespaceURI().equals(node.getNamespaceURI())
+			if (this.contribution.getNamespaceUri().equals(node.getNamespaceURI())
 					&& BeansEditorUtils.hasAttribute(node, "id")) {
 				nodes.put(BeansEditorUtils.getAttribute(node, "id"), node);
 			}

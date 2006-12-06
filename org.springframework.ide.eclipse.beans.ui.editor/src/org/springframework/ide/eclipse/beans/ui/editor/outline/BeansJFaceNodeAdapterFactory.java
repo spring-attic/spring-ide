@@ -26,6 +26,7 @@ import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeAdapterFactory;
  * An adapter factory to create JFaceNodeAdapters. Use this adapter factory
  * with a JFaceAdapterContentProvider to display DOM nodes in a tree.
  */
+@SuppressWarnings("restriction")
 public class BeansJFaceNodeAdapterFactory extends JFaceNodeAdapterFactory {
 
 	public BeansJFaceNodeAdapterFactory() {

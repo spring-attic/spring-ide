@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
  * Purpose of this class is to make the additional proposal info into content
  * fit for an HTML viewer (by escaping characters)
  */
+@SuppressWarnings("restriction")
 public class BeansCustomTemplateProposal extends TemplateProposal implements IRelevanceCompletionProposal {
     
     public BeansCustomTemplateProposal(Template template, TemplateContext context, IRegion region, Image image, int relevance) {

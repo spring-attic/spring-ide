@@ -31,6 +31,7 @@ import org.w3c.dom.Node;
 /**
  * Adapts a Spring beans node to a JFace viewer.
  */
+@SuppressWarnings("restriction")
 public class BeansJFaceNodeAdapter
         extends JFaceNodeAdapter {
 

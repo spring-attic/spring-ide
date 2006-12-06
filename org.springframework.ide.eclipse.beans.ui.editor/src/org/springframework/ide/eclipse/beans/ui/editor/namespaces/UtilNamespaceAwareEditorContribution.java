@@ -16,43 +16,32 @@
 
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 
-
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider;
-import org.springframework.ide.eclipse.beans.ui.editor.INamespaceAwareEditorContribution;
-import org.springframework.ide.eclipse.beans.ui.editor.IReferenceableElementsLocator;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.INamespaceContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.outline.BeansContentOutlineConfiguration;
 
-public class UtilNamespaceAwareEditorContribution implements
-		INamespaceAwareEditorContribution {
+public class UtilNamespaceAwareEditorContribution
+        extends AbstractNamespaceAwareEditorContribution {
 
-	private IReferenceableElementsLocator referenceableElemenLocator;
-	
-	public INamespaceContentAssistProcessor getContentAssistProcessor() {
-		return null;
-	}
+    public String getNamespaceUri() {
+        return "http://www.springframework.org/schema/util";
+    }
 
-	public IHyperlinkDetector getHyperLinkDetector() {
-		return null;
-	}
+    @Override
+    protected IHyperlinkDetector createHyperlinkDetector() {
+        return new UtilHyperLinkDetector();
+    }
+ 
+    @Override
+    protected LabelProvider createLabelProvider(
+            BeansContentOutlineConfiguration configuration) {
+        return new UtilOutlineLabelProvider(configuration);
+    }
 
-	public JFaceNodeLabelProvider getLabelProvider(
-			BeansContentOutlineConfiguration configuration,
-			ILabelProvider parent) {
-		return null;
-	}
-
-	public String getNamespaceURI() {
-		return "http://www.springframework.org/schema/util";
-	}
-	
-
-	public IReferenceableElementsLocator getReferenceableElementsLocator() {
-		if (this.referenceableElemenLocator == null) {
-			this.referenceableElemenLocator = new DefaultReferenceableElementsLocator(this);
-		}
-		return this.referenceableElemenLocator;
-	}
+    @Override
+    protected INamespaceContentAssistProcessor createNamespaceContentAssistProcessor() {
+        return new UtilContentAssistProcessor();
+    }
 }

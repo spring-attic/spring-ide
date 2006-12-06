@@ -5,7 +5,7 @@ import java.util.Map;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-public interface IReferenceableElementsLocator {
+public interface IReferenceableNodesLocator {
 
 	Map<String, Node> getReferenceableElements(Document documet);
 	
