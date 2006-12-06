@@ -69,6 +69,7 @@ import org.w3c.dom.NodeList;
  * 
  * @author Christian Dupuis
  */
+@SuppressWarnings("restriction")
 public class BeansEditorUtils {
 
 	protected static final String AMPERSTAND = "&"; //$NON-NLS-1$

@@ -28,6 +28,7 @@ import org.eclipse.wst.xml.core.internal.modelhandler.XMLModelLoader;
 /**
  * Provides model handling for Spring beans config files. 
  */
+@SuppressWarnings("restriction")
 public class BeansModelHandler extends AbstractModelHandler
 													 implements IModelHandler {
 	/**

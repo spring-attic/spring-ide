@@ -32,6 +32,7 @@ import org.eclipse.wst.xml.ui.internal.preferences.XMLUIPreferenceNames;
 import org.eclipse.wst.xml.ui.internal.registry.AdapterFactoryProviderForXML;
 import org.springframework.ide.eclipse.beans.ui.editor.outline.BeansJFaceNodeAdapterFactory;
 
+@SuppressWarnings("restriction")
 public class BeansAdapterFactoryProvider extends AdapterFactoryProviderForXML {
 
 	protected void addContentBasedFactories(IStructuredModel structuredModel) {

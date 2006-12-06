@@ -21,6 +21,7 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
 
+@SuppressWarnings("restriction")
 public class DelegatingContentAssistProcessor
         extends XMLContentAssistProcessor {
 

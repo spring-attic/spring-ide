@@ -43,6 +43,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateCo
 /**
  * The main plugin class
  */
+@SuppressWarnings("restriction")
 public class BeansEditorPlugin extends AbstractUIPlugin {
 
 	/**
