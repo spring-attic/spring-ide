@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--  -->
 <site>
    <description url="http://springide.org/updatesite_dev">
       This site provides plugins supporting the Spring Framework (http://www.springframework.org/) within the Eclipse platform.
    </description>
-   <feature url="features/org.springframework.ide.eclipse.web.flow_0.0.4.jar" id="org.springframework.ide.eclipse.web.flow" version="0.0.4">
-      <category name="spring-ide-webflow"/>
+   <feature url="features/org.springframework.ide.eclipse_1.9.0.jar" id="org.springframework.ide.eclipse" version="1.9.0">
+      <category name="Spring IDE Developer Preview"/>
    </feature>
-   <category-def name="spring-ide-webflow" label="Spring IDE WebFlow">
-      <description>
-         Plugins which are providing support for the Spring framework within the Eclipse IDE
-      </description>
-   </category-def>
+   <category-def name="Spring IDE Developer Preview" label="Spring IDE Developer Preview"/>
 </site>
