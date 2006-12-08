@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.outline.BeansContentOutli
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
+@SuppressWarnings("restriction")
 final class UtilOutlineLabelProvider
         extends JFaceNodeLabelProvider {
 
@@ -154,6 +155,6 @@ final class UtilOutlineLabelProvider
                 }
             }
         }
-        return null;
+        return text;
     }
 }

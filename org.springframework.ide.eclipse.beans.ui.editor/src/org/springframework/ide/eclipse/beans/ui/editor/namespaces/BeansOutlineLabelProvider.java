@@ -16,19 +16,18 @@
 
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.core.internal.document.CommentImpl;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider;
 import org.springframework.ide.eclipse.beans.core.BeansTags;
 import org.springframework.ide.eclipse.beans.core.BeansTags.Tag;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.outline.BeansContentOutlineConfiguration;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
+@SuppressWarnings("restriction")
 final class BeansOutlineLabelProvider
         extends JFaceNodeLabelProvider {
 
@@ -243,6 +242,6 @@ final class BeansOutlineLabelProvider
             text += ((CommentImpl) o).getNodeValue().trim();
             text += '>';
         }
-        return null;
+        return text;
     }
 }
