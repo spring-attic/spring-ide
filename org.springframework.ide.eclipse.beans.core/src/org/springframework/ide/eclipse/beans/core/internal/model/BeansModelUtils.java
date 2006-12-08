@@ -309,6 +309,13 @@ public final class BeansModelUtils {
 		Set<BeanReference> references = new LinkedHashSet<BeanReference>();
 		Set<IBean> referencedBeans = new HashSet<IBean>(); // used to break
 															// from cycles
+		return getBeanReferences(element, context, recursive, references,
+				referencedBeans);
+	}
+
+	private static Set<BeanReference> getBeanReferences(IModelElement element,
+			IModelElement context, boolean recursive,
+			Set<BeanReference> references, Set<IBean> referencedBeans) {
 		if (element instanceof Bean) {
 
 			// Add referenced beans from bean element
@@ -338,7 +345,7 @@ public final class BeansModelUtils {
 								context, references, referencedBeans)
 								&& recursive) {
 							addBeanReferencesForBean(parentBean, context,
-									references, referencedBeans, recursive);
+									recursive, references, referencedBeans);
 						}
 					}
 				}
@@ -360,7 +367,7 @@ public final class BeansModelUtils {
 						context, references, referencedBeans)
 						&& recursive) {
 					addBeanReferencesForBean(factoryBean, context,
-							references, referencedBeans, recursive);
+							recursive, references, referencedBeans);
 				}
 			}
 
@@ -373,7 +380,7 @@ public final class BeansModelUtils {
 							referencedBeans)
 							&& recursive) {
 						addBeanReferencesForBean(dependsOnBean, context,
-								references, referencedBeans, recursive);
+								recursive, references, referencedBeans);
 					}
 				}
 			}
@@ -391,7 +398,7 @@ public final class BeansModelUtils {
 								referencedBeans)
 								&& recursive) {
 							addBeanReferencesForBean(overrideBean, context,
-									references, referencedBeans, recursive);
+									recursive, references, referencedBeans);
 						}
 					} else if (methodOverride instanceof ReplaceOverride) {
 						String beanName = ((ReplaceOverride) methodOverride)
@@ -402,7 +409,7 @@ public final class BeansModelUtils {
 								referencedBeans)
 								&& recursive) {
 							addBeanReferencesForBean(overrideBean, context,
-									references, referencedBeans, recursive);
+									recursive, references, referencedBeans);
 						}
 					}
 				}
@@ -475,12 +482,11 @@ public final class BeansModelUtils {
 	 * @param referencedBeans  used to break from cycles
 	 */
 	private static final void addBeanReferencesForBean(
-			IBean element, IModelElement context,
-			Set<BeanReference> references, Set<IBean> referencedBeans,
-			boolean recursive) {
+			IBean element, IModelElement context, boolean recursive,
+			Set<BeanReference> references, Set<IBean> referencedBeans) {
 		if (!referencedBeans.contains(element)) {
 			for (BeanReference ref : getBeanReferences(element, context,
-					recursive)) {
+					recursive, references, referencedBeans)) {
 				if (!references.contains(ref)) {
 					references.add(ref);
 				}
@@ -516,8 +522,8 @@ public final class BeansModelUtils {
 			if (addBeanReference(BeanType.STANDARD, element,
 					bean, context, references, referencedBeans)
 					&& recursive) {
-				addBeanReferencesForBean(bean, context, references,
-						referencedBeans, recursive);
+				addBeanReferencesForBean(bean, context, recursive, references,
+						referencedBeans);
 			}
 		} else if (value instanceof BeanDefinitionHolder) {
 			String beanName = ((BeanDefinitionHolder) value).getBeanName();
@@ -525,8 +531,8 @@ public final class BeansModelUtils {
 			addBeanReference(BeanType.INNER, bean
 					.getElementParent(), bean, context, references,
 					referencedBeans);
-			addBeanReferencesForBean(bean, context, references,
-					referencedBeans, recursive);
+			addBeanReferencesForBean(bean, context, recursive, references,
+					referencedBeans);
 		} else if (value instanceof List) {
 
 			// Add bean property's interceptors
@@ -546,8 +552,8 @@ public final class BeansModelUtils {
 										references, referencedBeans)
 										&& recursive) {
 									addBeanReferencesForBean(interceptor,
-											context, references,
-											referencedBeans, recursive);
+											context, recursive, references,
+											referencedBeans);
 								}
 							}
 						}
@@ -591,7 +597,8 @@ public final class BeansModelUtils {
 
 			// Fill a set with all bean definitions belonging to the
 			// hierarchy of the requested bean definition
-			List<BeanDefinition> beanDefinitions = new ArrayList<BeanDefinition>(); // used to detect a cycle
+			List<BeanDefinition> beanDefinitions = new ArrayList
+					<BeanDefinition>(); // used to detect a cycle
 			beanDefinitions.add(bd);
 			addBeanDefinition(bean, context, beanDefinitions);
 
@@ -696,7 +703,8 @@ public final class BeansModelUtils {
 			}
 			return null;
 		} else if (context instanceof IBeansConfigSet) {
-			for (IBeansConfig config : ((IBeansConfigSet) context).getConfigs()) {
+			for (IBeansConfig config : ((IBeansConfigSet) context)
+					.getConfigs()) {
 				for (IBean bean : config.getInnerBeans()) {
 					if (beanName.equals(bean.getElementName())) {
 						return bean;
