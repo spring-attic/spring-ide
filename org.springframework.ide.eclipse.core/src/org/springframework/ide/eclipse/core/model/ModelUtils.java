@@ -38,7 +38,10 @@ public final class ModelUtils {
 	public static Object adaptToModelElement(Object element) {
 		if (!(element instanceof IModelElement) &&
 											 (element instanceof IAdaptable)) {
-			return ((IAdaptable) element).getAdapter(IModelElement.class);
+			Object modelElement = ((IAdaptable) element).getAdapter(IModelElement.class);
+			if (modelElement != null) {
+				return modelElement;
+			}
 		}
 		return element;
 	}

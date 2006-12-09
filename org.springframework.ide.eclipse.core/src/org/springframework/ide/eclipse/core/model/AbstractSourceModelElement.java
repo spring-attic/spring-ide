@@ -18,64 +18,28 @@ package org.springframework.ide.eclipse.core.model;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.springframework.beans.BeanMetadataElement;
-import org.springframework.ide.eclipse.core.io.xml.XmlSource;
 
 /**
  * Default implementation of the common protocol for all model elements related
  * to source code.
+ * 
  * @author Torsten Juergeleit
  */
 public abstract class AbstractSourceModelElement extends
 		AbstractResourceModelElement implements ISourceModelElement {
 
-	private int startLine;
-	private int endLine;
+	private IModelSource source;
 
 	protected AbstractSourceModelElement(IModelElement parent, String name) {
 		super(parent, name);
-		this.startLine = -1;
-		this.endLine = -1;
-	}
-
-	public final void setElementStartLine(int line) {
-		this.startLine = line;
-	}
-
-	public final int getElementStartLine() {
-		return startLine;
-	}
-
-    public final void setElementEndLine(int endLine) {
-       	this.endLine = endLine;
-    }
-
-	public final int getElementEndLine() {
-	    return endLine;
-	}
-
-	public IResource getElementResource() {
-		IResourceModelElement element = getElementSource();
-		if (element != null) {
-			return element.getElementResource();
-		}
-		return null;
-	}
-
-	public boolean isElementArchived() {
-		IResourceModelElement element = getElementSource();
-		if (element != null) {
-			return element.isElementArchived();
-		}
-		return false;
 	}
 
 	/**
 	 * Traverses this model element's parent chain until the first
-	 * non-<code>ISourceModelElement</code> and returns the corresponding
-	 * model element.
+	 * non-<code>IResourceModelElement</code> and returns this
+	 * <code>IResourceModelElement</code>.
 	 */
-	public IResourceModelElement getElementSource() {
+	public IResourceModelElement getElementSourceElement() {
 		for (IModelElement parent = getElementParent(); parent != null;
 				parent = parent.getElementParent()) {
 			if (!(parent instanceof ISourceModelElement)) {
@@ -85,6 +49,38 @@ public abstract class AbstractSourceModelElement extends
 			}
 		}
 		return null;
+	}
+
+	public IResource getElementResource() {
+		IResourceModelElement element = getElementSourceElement();
+		if (element != null) {
+			return element.getElementResource();
+		}
+		return null;
+	}
+
+	public boolean isElementArchived() {
+		IResourceModelElement element = getElementSourceElement();
+		if (element != null) {
+			return element.isElementArchived();
+		}
+		return false;
+	}
+
+	protected final void setElementSource(IModelSource source) {
+		this.source = source;
+	}
+
+	public final IModelSource getElementSource() {
+		return source;
+	}
+
+	public int getElementStartLine() {
+		return (source != null ? source.getStartLine() : -1);
+	}
+
+	public int getElementEndLine() {
+		return (source != null ? source.getEndLine() : -1);
 	}
 
 	/**
@@ -97,25 +93,17 @@ public abstract class AbstractSourceModelElement extends
 		return super.getAdapter(adapter);
 	}
 
-	protected void setSourceRange(BeanMetadataElement metadata) {
-		if (metadata.getSource() instanceof XmlSource) {
-			XmlSource source = (XmlSource) metadata
-					.getSource();
-			setElementStartLine(source.getStartLine());
-			setElementEndLine(source.getEndLine());
-		}
-	}
-
 	/**
 	 * Overwrite this method if the element's name is not unique.
 	 * <p>
 	 * This method is called by <code>getElementID()</code>. The default
 	 * implementation returns to
-	 * <code>getElementName() + "-" + getElementStartLine()</code>.
+	 * <code>getElementName() + "-" + source.getStartLine()</code>.
 	 * 
 	 * @see #getElementID()
 	 */
 	protected String getUniqueElementName() {
-		return getElementName() + ID_SEPARATOR + getElementStartLine();
+		return (source != null ? getElementName() + ID_SEPARATOR
+				+ source.getStartLine() : getElementName());
 	}
 }

@@ -14,10 +14,11 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.core.io.xml;
+package org.springframework.ide.eclipse.core.model.xml;
 
 import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.core.io.Resource;
+import org.springframework.ide.eclipse.core.io.xml.LineNumberPreservingDOMParser;
 import org.w3c.dom.Node;
 
 /**
@@ -30,12 +31,14 @@ import org.w3c.dom.Node;
 public class XmlSourceExtractor implements SourceExtractor {
 
 	public Object extractSource(Object sourceCandidate,
-				Resource definingResource) {
+			Resource definingResource) {
+
 		if (sourceCandidate instanceof Node) {
 			Node node = (Node) sourceCandidate;
-			int startLine = LineNumberPreservingDOMParser.getStartLineNumber(node);
+			int startLine = LineNumberPreservingDOMParser
+					.getStartLineNumber(node);
 			int endLine = LineNumberPreservingDOMParser.getEndLineNumber(node);
-			return new XmlSource(definingResource, node.getNodeName(), startLine, endLine);
+			return new XmlSource(definingResource, node, startLine, endLine);
 		}
 		return sourceCandidate;
 	}

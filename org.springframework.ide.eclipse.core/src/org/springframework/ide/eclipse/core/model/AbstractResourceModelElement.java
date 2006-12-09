@@ -19,12 +19,13 @@ package org.springframework.ide.eclipse.core.model;
 import org.eclipse.core.resources.IResource;
 
 /**
- * Default implementation of the common protocol for all model elements that
- * map to a resource in the Eclipse workspace.
+ * Default implementation of the common protocol for all model elements that map
+ * to a resource in the Eclipse workspace.
+ * 
  * @author Torsten Juergeleit
  */
 public abstract class AbstractResourceModelElement extends AbstractModelElement
-											 implements IResourceModelElement {
+		implements IResourceModelElement {
 	protected AbstractResourceModelElement(IModelElement parent, String name) {
 		super(parent, name);
 	}

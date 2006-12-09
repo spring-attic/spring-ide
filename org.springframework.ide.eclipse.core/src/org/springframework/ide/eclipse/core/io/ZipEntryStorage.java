@@ -146,6 +146,16 @@ public class ZipEntryStorage extends PlatformObject implements IStorage {
 	}
 
 	/**
+	 * Returns the full-qualified name of the ZIP file entry
+	 * (workspace-relative path to the ZIP file plus full path of the
+	 * ZIP file entry delimited by <code>DELIMITER</code>).
+	 */
+	public String getAbsoluteName() {
+		return zipResource.getProject().getFullPath().append(fullName)
+				.toString();
+	}
+
+	/**
 	 * Returns <code>true</code> because the ZIP file entry is not modifiable. 
 	 */
 	public boolean isReadOnly() {

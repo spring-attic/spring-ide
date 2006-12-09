@@ -12,34 +12,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.core.model;
 
+import org.springframework.core.io.Resource;
+
 /**
- * Common protocol for all model elements related to source code.
- * 
+ * Defines a storage for source information of <code>IModelElement</code>s.
+ *
  * @author Torsten Juergeleit
  */
-public interface ISourceModelElement extends IResourceModelElement {
+public interface IModelSource {
 
-	/**
-	 * Returns the element's source code element.
-	 */
-	IResourceModelElement getElementSourceElement();
+	Resource getResource();
 
-	/**
-	 * Returns the element's source code information.
-	 */
-	IModelSource getElementSource();
+	int getStartLine();
 
-	/**
-	 * Returns the line number with the start of the element's source code.
-	 */
-	int getElementStartLine();
-	
-	/**
-	 * Returns the line number with the logical end of the element's source code.
-	 */
-	int getElementEndLine();
+	int getEndLine();
 }

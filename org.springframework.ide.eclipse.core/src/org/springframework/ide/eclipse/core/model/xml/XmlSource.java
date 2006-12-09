@@ -14,25 +14,33 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.core.io.xml;
+package org.springframework.ide.eclipse.core.model.xml;
 
 import org.springframework.core.io.Resource;
+import org.springframework.ide.eclipse.core.model.IModelSource;
+import org.w3c.dom.Node;
 
 /**
- * Storage for XML source information retrived via {@link XmlSourceExtractor}.
+ * Storage for an <code>IModelElement</code>'s XML source information
+ * retrieved via {@link XmlSourceExtractor}.
+ * 
  * @author Torsten Juergeleit
  */
-public class XmlSource {
+public class XmlSource implements IModelSource {
 
 	private Resource resource;
-	private String nodeName;
+	private String localName;
+	private String prefix;
+	private String namespaceURI;
 	private int startLine;
 	private int endLine;
 
-	public XmlSource(Resource resource, String nodeName, int startLine,
+	public XmlSource(Resource resource, Node node, int startLine,
 			int endLine) {
 		this.resource = resource;
-		this.nodeName = nodeName;
+		this.localName = node.getLocalName();
+		this.prefix = node.getPrefix();
+		this.namespaceURI = node.getNamespaceURI();
 		this.startLine = startLine;
 		this.endLine = endLine;
 	}
@@ -42,7 +50,19 @@ public class XmlSource {
 	}
 
 	public String getNodeName() {
-		return nodeName;
+		return (prefix == null ? localName : prefix + ':' + localName);
+	}
+
+	public String getPrefix() {
+		return prefix;
+	}
+
+	public String getLocalName() {
+		return localName;
+	}
+
+	public String getNamespaceURI() {
+		return namespaceURI;
 	}
 
 	public int getStartLine() {
@@ -54,7 +74,8 @@ public class XmlSource {
 	}
 
 	public String toString() {
-		return "LineNumberSource: resource=" + resource + ", nodeName="
-				+ nodeName + ", startLine=" + startLine + ", endLine=" + endLine;
+		return "XmlSource: resource=" + resource + ", nodeName="
+				+ getNodeName() + ", startLine=" + startLine + ", endLine="
+				+ endLine;
 	}
 }
