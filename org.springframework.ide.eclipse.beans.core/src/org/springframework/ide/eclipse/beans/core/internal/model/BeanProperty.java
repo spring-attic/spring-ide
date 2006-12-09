@@ -20,19 +20,18 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
-import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 
 /**
  * This class defines a property within a Spring beans configuration.
+ * 
  * @author Torsten Juergeleit
  */
-public class BeanProperty extends AbstractSourceModelElement implements
+public class BeanProperty extends AbstractBeansModelElement implements
 		IBeanProperty {
 	private Object value;
 
 	public BeanProperty(IBean bean, PropertyValue propValue) {
-		super(bean, propValue.getName());
-		setSourceRange(propValue);
+		super(bean, propValue.getName(), propValue);
 		value = propValue.getValue();
 	}
 
@@ -47,7 +46,7 @@ public class BeanProperty extends AbstractSourceModelElement implements
 	public String toString() {
 		StringBuffer text = new StringBuffer(getElementName());
 		text.append(" (");
-		text.append(getElementStartLine());
+		text.append(getElementSource().getStartLine());
 		text.append("): value=");
 		text.append(value);
 		return text.toString();

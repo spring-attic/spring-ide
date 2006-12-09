@@ -27,14 +27,14 @@ import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
-import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * This class defines a Spring beans component defined via an XML namespace.
+ * 
  * @author Torsten Juergeleit
  */
-public class BeansComponent extends AbstractSourceModelElement implements
+public class BeansComponent extends AbstractBeansModelElement implements
 		IBeansComponent {
 
 	/** List of all beans which are defined within this component */
@@ -46,8 +46,7 @@ public class BeansComponent extends AbstractSourceModelElement implements
 	private LinkedHashSet<IBean> innerBeans;
 
 	public BeansComponent(IModelElement parent, ComponentDefinition definition) {
-		super(parent, definition.getName());
-		setSourceRange(definition);
+		super(parent, definition.getName(), definition);
 		beans = new LinkedHashSet<IBean>();
 		for (BeanDefinition beanDef : definition.getBeanDefinitions()) {
 			if (beanDef.getRole() != BeanDefinition.ROLE_INFRASTRUCTURE) {

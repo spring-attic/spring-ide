@@ -21,20 +21,19 @@ import org.springframework.beans.factory.parsing.ImportDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
-import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 
 /**
  * This class defines an import within a Spring beans configuration.
+ * 
  * @author Torsten Juergeleit
  */
-public class BeansImport extends AbstractSourceModelElement
+public class BeansImport extends AbstractBeansModelElement
 		implements IBeansImport {
 
 	private String resourceName;
 
 	public BeansImport(IBeansConfig config, ImportDefinition definition) {
-		super(config, definition.getImportedResource());
-		setSourceRange(definition);
+		super(config, definition.getImportedResource(), definition);
 	}
 
 	public int getElementType() {

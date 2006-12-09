@@ -20,15 +20,16 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueH
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
-import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 
 /**
  * This class defines a constructor argument within a Spring beans
  * configuration.
+ * 
  * @author Torsten Juergeleit
  */
-public class BeanConstructorArgument extends AbstractSourceModelElement
-										  implements IBeanConstructorArgument {
+public class BeanConstructorArgument extends AbstractBeansModelElement
+		implements IBeanConstructorArgument {
+
 	private int index;
 	private String type;
 	private Object value;
@@ -39,8 +40,7 @@ public class BeanConstructorArgument extends AbstractSourceModelElement
 
 	public BeanConstructorArgument(IBean bean, int index,
 			ValueHolder vHolder) {
-		super(bean, createName(index, vHolder));
-		setSourceRange(vHolder);
+		super(bean, createName(index, vHolder), vHolder);
 		this.index = index;
 		this.type = vHolder.getType();
 		this.value = vHolder.getValue();
@@ -82,7 +82,7 @@ public class BeanConstructorArgument extends AbstractSourceModelElement
 	public String toString() {
 		StringBuffer text = new StringBuffer(getElementName());
 		text.append(" (");
-		text.append(getElementStartLine());
+		text.append(getElementSource().getStartLine());
 		text.append("): index=");
 		text.append(index);
 		text.append(", type=");

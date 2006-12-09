@@ -38,17 +38,17 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
-import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 
 /**
  * This class holds the data for a Spring bean.
+ * 
  * @author Torsten Juergeleit
  */
-public class Bean extends AbstractSourceModelElement implements IBean {
+public class Bean extends AbstractBeansModelElement implements IBean {
 
-	private BeanDefinition beanDefinition;
+	private BeanDefinition definition;
 	private String[] aliases;
 	private Set<IBeanConstructorArgument> constructorArguments;
 	private Map<String, IBeanProperty> properties;
@@ -60,14 +60,13 @@ public class Bean extends AbstractSourceModelElement implements IBean {
 	}
 
 	public Bean(IModelElement parent, String name, String[] aliases,
-			BeanDefinition beanDefinition) {
-		super(parent, name);
-		setSourceRange(beanDefinition);
-		this.beanDefinition = beanDefinition;
+			BeanDefinition definition) {
+		super(parent, name, definition);
+		this.definition = definition;
 		this.aliases = aliases;
 
-		constructorArguments = retrieveConstructorArguments(beanDefinition);
-		properties = retrieveProperties(beanDefinition);
+		constructorArguments = retrieveConstructorArguments(definition);
+		properties = retrieveProperties(definition);
 		innerBeans = retrieveInnerBeans();
 	}
 
@@ -115,7 +114,7 @@ public class Bean extends AbstractSourceModelElement implements IBean {
 	}
 
 	public BeanDefinition getBeanDefinition() {
-		return beanDefinition;
+		return definition;
 	}
 
 	public String[] getAliases() {
@@ -142,45 +141,45 @@ public class Bean extends AbstractSourceModelElement implements IBean {
 	}
 
 	public String getClassName() {
-		if (beanDefinition instanceof AbstractBeanDefinition) {
-			return ((AbstractBeanDefinition) beanDefinition)
+		if (definition instanceof AbstractBeanDefinition) {
+			return ((AbstractBeanDefinition) definition)
 				.getBeanClassName();
 		}
 		return null;
 	}
 
 	public String getParentName() {
-		if (beanDefinition instanceof ChildBeanDefinition) {
-			return ((ChildBeanDefinition) beanDefinition).getParentName();
+		if (definition instanceof ChildBeanDefinition) {
+			return ((ChildBeanDefinition) definition).getParentName();
 		}
 		return null;
 	}
 
 	public boolean isRootBean() {
-		return (beanDefinition instanceof RootBeanDefinition);
+		return (definition instanceof RootBeanDefinition);
 	}
 
 	public boolean isChildBean() {
-		return (beanDefinition instanceof ChildBeanDefinition);
+		return (definition instanceof ChildBeanDefinition);
 	}
 
 	public boolean isSingleton() {
-		if (beanDefinition instanceof AbstractBeanDefinition) {
-			return ((AbstractBeanDefinition) beanDefinition).isSingleton();
+		if (definition instanceof AbstractBeanDefinition) {
+			return ((AbstractBeanDefinition) definition).isSingleton();
 		}
 		return true;
 	}
 
 	public boolean isAbstract() {
-		if (beanDefinition instanceof AbstractBeanDefinition) {
-			return ((AbstractBeanDefinition) beanDefinition).isAbstract();
+		if (definition instanceof AbstractBeanDefinition) {
+			return ((AbstractBeanDefinition) definition).isAbstract();
 		}
 		return false;
 	}
 
 	public boolean isLazyInit() {
-		if (beanDefinition instanceof AbstractBeanDefinition) {
-			return ((AbstractBeanDefinition) beanDefinition).isLazyInit();
+		if (definition instanceof AbstractBeanDefinition) {
+			return ((AbstractBeanDefinition) definition).isLazyInit();
 		}
 		return true;
 	}
@@ -259,7 +258,7 @@ public class Bean extends AbstractSourceModelElement implements IBean {
 	public String toString() {
 		StringBuffer text = new StringBuffer(getElementName());
 		text.append(" (");
-		text.append(getElementStartLine());
+		text.append(getElementSource().getStartLine());
 		text.append(')');
 		if (getClassName() != null) {
 			text.append(" [");

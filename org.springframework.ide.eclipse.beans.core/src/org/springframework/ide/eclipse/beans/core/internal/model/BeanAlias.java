@@ -20,19 +20,18 @@ import org.springframework.beans.factory.parsing.AliasDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
-import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 
 /**
  * This class defines an alias within a Spring beans configuration.
+ * 
  * @author Torsten Juergeleit
  */
-public class BeanAlias extends AbstractSourceModelElement
-		implements IBeanAlias {
+public class BeanAlias extends AbstractBeansModelElement implements IBeanAlias {
 
 	private String beanName;
 
 	public BeanAlias(IBeansConfig config, AliasDefinition definition) {
-		super(config, definition.getAlias());
+		super(config, definition.getAlias(), definition);
 		beanName = definition.getBeanName();
 	}
 
@@ -47,7 +46,7 @@ public class BeanAlias extends AbstractSourceModelElement
 	public String toString() {
 		StringBuffer text = new StringBuffer(getElementName());
 		text.append(" (");
-		text.append(getElementStartLine());
+		text.append(getElementSource().getStartLine());
 		text.append("): name=");
 		text.append(beanName);
 		return text.toString();

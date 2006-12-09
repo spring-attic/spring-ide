@@ -53,6 +53,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
@@ -60,6 +61,7 @@ import org.springframework.util.Assert;
 
 /**
  * Helper methods for working with the BeansCoreModel.
+ * 
  * @author Torsten Juergeleit
  */
 public final class BeansModelUtils {
@@ -912,6 +914,18 @@ public final class BeansModelUtils {
 				return element;
 			}
 			element = elementParent;
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the beans config for a given ZIP file entry.
+	 */
+	public static final IBeansConfig getConfig(ZipEntryStorage storage) {
+		IBeansProject project = BeansCorePlugin.getModel().getProject(
+				storage.getZipResource().getProject());
+		if (project != null) {
+			return project.getConfig(storage.getFullName());
 		}
 		return null;
 	}
