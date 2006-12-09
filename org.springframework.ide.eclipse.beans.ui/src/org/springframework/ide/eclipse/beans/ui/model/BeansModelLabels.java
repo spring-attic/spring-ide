@@ -24,16 +24,19 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelSource;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
+import org.springframework.ide.eclipse.core.model.xml.XmlSource;
 import org.springframework.util.StringUtils;
 
 /**
  * This class provides images for the beans core model's
  * <code>IModelElement</code>s.
- * @see IModelElement
+ * 
  * @author Torsten Juergeleit
  */
 public class BeansModelLabels {
@@ -66,28 +69,29 @@ public class BeansModelLabels {
 			buf.append(CONCAT_STRING);
 		}
 		if (element instanceof IBeansConfig) {
-			IBeansConfig config = (IBeansConfig) element;
-			String configName = element.getElementName();
-			if (config.isElementArchived()) {
-				ZipEntryStorage storage = new ZipEntryStorage(config);
-				if (configName.charAt(0) == IBeansConfig
-						.EXTERNAL_FILE_NAME_PREFIX) {
-					buf.append(storage.getZipResource()
-							.getFullPath().toString());
-				} else {
-					buf.append(storage.getZipResource()
-							.getProjectRelativePath().toString());
-				}
-				buf.append(" - ");
-				buf.append(storage.getFullPath().toString());
-			} else {
-				buf.append(configName);
-			}
+//			IBeansConfig config = (IBeansConfig) element;
+//			String configName = element.getElementName();
+//			if (config.isElementArchived()) {
+//				ZipEntryStorage storage = new ZipEntryStorage(config);
+//				if (configName.charAt(0) == IBeansConfig
+//						.EXTERNAL_FILE_NAME_PREFIX) {
+//					buf.append(storage.getZipResource()
+//							.getFullPath().toString());
+//				} else {
+//					buf.append(storage.getZipResource()
+//							.getProjectRelativePath().toString());
+//				}
+//				buf.append(" - ");
+//				buf.append(storage.getFullPath().toString());
+//			} else {
+//				buf.append(configName);
+//			}
+			buf.append("beans");
+		} else if (element instanceof IBeansComponent) {
+			appendBeansComponentLabel((IBeansComponent) element, buf);
 		} else if (element instanceof IBean) {
-			buf.append(element.getElementName());
 			appendBeanLabel((IBean) element, buf);
 		} else if (element instanceof IBeanProperty) {
-			buf.append(element.getElementName());
 			appendBeanPropertyLabel((IBeanProperty) element, buf);
 		} else {
 			buf.append(element.getElementName());
@@ -113,8 +117,29 @@ public class BeansModelLabels {
 		}
 	}
 
-	protected static void appendBeanLabel(IBean element, StringBuffer buf) {
-		IBean bean = (IBean) element;
+	protected static void appendBeansComponentLabel(IBeansComponent component,
+			StringBuffer buf) {
+		IModelSource source = component.getElementSource();
+		if (source instanceof XmlSource) {
+			String nodename = ((XmlSource) source).getNodeName();
+			if (!nodename.equals(component.getElementName())) {
+				buf.append(((XmlSource) source).getNodeName()).append(' ');
+			}
+		}
+		buf.append(component.getElementName());
+	}
+
+	protected static void appendBeanLabel(IBean bean, StringBuffer buf) {
+		if (bean.getElementParent() instanceof IBeansConfig) {
+			IModelSource source = bean.getElementSource();
+			if (source instanceof XmlSource) {
+				String prefix = ((XmlSource) source).getPrefix();
+				if (prefix != null && prefix.length() > 0) {
+					buf.append(((XmlSource) source).getNodeName()).append(' ');
+				}
+			}
+		}
+		buf.append(bean.getElementName());
 		if (bean.getAliases() != null && bean.getAliases().length > 0) {
 			buf.append(" '");
 			buf.append(StringUtils.arrayToDelimitedString(bean.getAliases(),
@@ -122,23 +147,18 @@ public class BeansModelLabels {
 			buf.append('\'');
 		}
 		if (bean.getClassName() != null) {
-			buf.append(" [");
-			buf.append(bean.getClassName());
-			buf.append(']');
+			buf.append(" [").append(bean.getClassName()).append(']');
 		} else if (bean.getParentName() != null) {
-			buf.append(" <");
-			buf.append(bean.getParentName());
-			buf.append('>');
+			buf.append(" <").append(bean.getParentName()).append('>');
 		}
 	}
 
-	protected static void appendBeanPropertyLabel(IBeanProperty element,
+	protected static void appendBeanPropertyLabel(IBeanProperty property,
 			StringBuffer buf) {
-		Object value = ((IBeanProperty) element).getValue();
+		buf.append(property.getElementName());
+		Object value = ((IBeanProperty) property).getValue();
 		if (value instanceof String) {
-			buf.append(" \"");
-			buf.append(value);
-			buf.append('"');
+			buf.append(" \"").append(value).append('"');
 		} else if (value instanceof BeanDefinitionHolder) {
 			BeanDefinition beanDef = ((BeanDefinitionHolder) value)
 					.getBeanDefinition();
@@ -154,8 +174,7 @@ public class BeansModelLabels {
 			}
 			buf.append('}');
 		} else {
-			buf.append(' ');
-			buf.append(value);
+			buf.append(' ').append(value);
 		}
 	}
 

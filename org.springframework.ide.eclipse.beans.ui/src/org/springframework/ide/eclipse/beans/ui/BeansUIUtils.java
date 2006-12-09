@@ -53,6 +53,7 @@ import org.springframework.ide.eclipse.ui.editors.ZipEntryEditorInput;
 
 /**
  * Some helper methods.
+ * 
  * @author Torsten Juergeleit
  */
 public final class BeansUIUtils {
@@ -160,23 +161,24 @@ public final class BeansUIUtils {
 	 * editor.
 	 */
 	public static IEditorPart openInEditor(IResourceModelElement element) {
+		IResourceModelElement sourceElement;
 		int line;
 		if (element instanceof ISourceModelElement) {
 			ISourceModelElement source = (ISourceModelElement) element;
-			element = source.getElementSource();
+			sourceElement = source.getElementSourceElement();
 			line = source.getElementStartLine();
 		} else if (element instanceof IBeansConfig) {
+			sourceElement = element;
 			line = -1;
 		} else {
 			return null;
 		}
-		IResource resource = element.getElementResource();
+		IResource resource = sourceElement.getElementResource();
 		if (resource instanceof IFile) {
 			IFile file = (IFile) resource;
-			if (element.isElementArchived()) {
+			if (sourceElement.isElementArchived()) {
 				try {
-					ZipEntryStorage storage = new ZipEntryStorage(resource
-							.getProject(), element.getElementName());
+					ZipEntryStorage storage = new ZipEntryStorage(sourceElement);
 					IEditorInput input = new ZipEntryEditorInput(storage);
 					IEditorDescriptor desc = IDE.getEditorDescriptor(storage
 							.getName());
