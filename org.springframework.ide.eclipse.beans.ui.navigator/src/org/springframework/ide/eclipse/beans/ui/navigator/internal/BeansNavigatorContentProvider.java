@@ -27,18 +27,18 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
+import org.eclipse.ui.navigator.ICommonContentProvider;
 import org.eclipse.ui.navigator.INavigatorContentExtension;
-import org.eclipse.ui.navigator.IPipelinedTreeContentProvider;
-import org.eclipse.ui.navigator.PipelinedShapeModification;
-import org.eclipse.ui.navigator.PipelinedViewerUpdate;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.ui.navigator.Activator;
+import org.springframework.ide.eclipse.beans.ui.navigator.BeansExplorer;
+import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
@@ -47,11 +47,8 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 /**
  * @author Torsten Juergeleit
  */
-public class BeansNavigatorContentProvider implements
-		IPipelinedTreeContentProvider, IModelChangeListener {
-
-	public static final String BEANS_EXPLORER_CONTENT_ID = Activator.PLUGIN_ID
-			+ ".beansExplorerContent";
+public class BeansNavigatorContentProvider implements ICommonContentProvider,
+		IModelChangeListener {
 
 	private INavigatorContentExtension contentExtension;
 	private StructuredViewer viewer;
@@ -82,7 +79,18 @@ public class BeansNavigatorContentProvider implements
 
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof IModelElement) {
-			if (parentElement instanceof IBeansConfigSet) {
+			if (parentElement instanceof IBeansProject) {
+				Set<Object> children = new LinkedHashSet<Object>();
+				for (IBeansConfig config : ((IBeansProject) parentElement).getConfigs()) {
+					if (config.isElementArchived()) {
+						children.add(new ZipEntryStorage(config));
+					} else {
+						children.add(config.getElementResource());
+					}
+				}
+				children.addAll(((IBeansProject) parentElement).getConfigSets());
+				return children.toArray(new Object[children.size()]);
+			} else if (parentElement instanceof IBeansConfigSet) {
 				Set<IBean> beans = new LinkedHashSet<IBean>();
 				for (IBeansConfig config : ((IBeansConfigSet) parentElement)
 						.getConfigs()) {
@@ -91,14 +99,19 @@ public class BeansNavigatorContentProvider implements
 					}
 				}
 				return beans.toArray(new IBean[beans.size()]);
-			} else {
-				return ((IModelElement) parentElement).getElementChildren();
 			}
+			return ((IModelElement) parentElement).getElementChildren();
 		} else if (parentElement instanceof IFile) {
 			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
 					(IFile) parentElement);
 			if (config != null) {
-				return config.getElementChildren();
+				return new Object[] { config };
+			}
+		} else if (parentElement instanceof ZipEntryStorage) {
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
+					((ZipEntryStorage) parentElement).getAbsoluteName());
+			if (config != null) {
+				return new Object[] { config };
 			}
 		} else if (parentElement instanceof IAdaptable) {
 			IProject project = (IProject) ((IAdaptable) parentElement)
@@ -119,25 +132,41 @@ public class BeansNavigatorContentProvider implements
 
 	public Object getParent(Object element) {
 		if (element instanceof IModelElement) {
+
+			// For the BeasProjectExplorer returning the corresponding file for
+			// every IBeansConfig
+			if (element instanceof IBeansConfig && !contentExtension.getId()
+					.equals(BeansExplorer.BEANS_EXPLORER_CONTENT_ID)) {
+				return ((IBeansConfig) element).getElementResource();
+			}
 			return ((IModelElement) element).getElementParent();
 		} else if (element instanceof IFile) {
-			return ((IFile) element).getParent();
+			return BeansCorePlugin.getModel().getConfig((IFile) element)
+					.getElementParent();
+		}
+		if (element instanceof ZipEntryStorage) {
+			return BeansCorePlugin.getModel().getConfig(
+					((ZipEntryStorage) element).getFullName())
+					.getElementParent();
 		}
 		return null;
 	}
 
 	public boolean hasChildren(Object element) {
 		if (element instanceof IModelElement) {
-			return !(element instanceof IBeanProperty || element instanceof IBeanConstructorArgument);
+			return !(element instanceof IBeanProperty
+					|| element instanceof IBeanConstructorArgument);
 		} else if (element instanceof IFile) {
-			IFile file = (IFile) element;
-			IBeansProject project = BeansCorePlugin.getModel().getProject(
-					file.getProject());
-			if (project != null) {
-				IBeansConfig config = project.getConfig(file);
-				if (config != null) {
-					return config.getElementChildren().length > 0;
-				}
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
+					(IFile) element);
+			if (config != null) {
+				return config.getElementChildren().length > 0;
+			}
+		} else if (element instanceof ZipEntryStorage) {
+			IBeansConfig config = BeansModelUtils
+					.getConfig((ZipEntryStorage) element);
+			if (config != null) {
+				return config.getElementChildren().length > 0;
 			}
 		}
 		return false;
@@ -145,8 +174,10 @@ public class BeansNavigatorContentProvider implements
 
 	public void elementChanged(ModelChangeEvent event) {
 		IModelElement element = event.getElement();
-		if (!contentExtension.getId().equals(BEANS_EXPLORER_CONTENT_ID)
-				&& (element instanceof IBeansProject || element instanceof IBeansConfig)) {
+		if (!contentExtension.getId().equals(
+				BeansExplorer.BEANS_EXPLORER_CONTENT_ID)
+				&& (element instanceof IBeansProject
+						|| element instanceof IBeansConfig)) {
 			refreshViewer(((IResourceModelElement) element)
 					.getElementResource());
 		} else {
@@ -177,41 +208,13 @@ public class BeansNavigatorContentProvider implements
 		}
 	}
 
-	public void getPipelinedChildren(Object parent, Set currentChildren) {
-	}
-
-	public void getPipelinedElements(Object input, Set currentElements) {
-	}
-
-	public Object getPipelinedParent(Object object, Object suggestedParent) {
-		return suggestedParent;
-	}
-
-	public PipelinedShapeModification interceptAdd(
-			PipelinedShapeModification addModification) {
-		return addModification;
-	}
-
-	public PipelinedShapeModification interceptRemove(
-			PipelinedShapeModification removeModification) {
-		return removeModification;
-	}
-
-	public boolean interceptRefresh(PipelinedViewerUpdate refreshSynchronization) {
-		return false;
-	}
-
-	public boolean interceptUpdate(PipelinedViewerUpdate anUpdateSynchronization) {
-		return false;
-	}
-
 	public void init(ICommonContentExtensionSite config) {
 		contentExtension = config.getExtension();
 	}
 
-	public void restoreState(IMemento memento) {
+	public void saveState(IMemento aMemento) {
 	}
 
-	public void saveState(IMemento memento) {
+	public void restoreState(IMemento aMemento) {
 	}
 }

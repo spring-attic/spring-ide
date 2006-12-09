@@ -17,18 +17,22 @@
 package org.springframework.ide.eclipse.beans.ui.navigator.internal.actions;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchPage;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
+import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
+ * Opens the file for currently selected {@link IBeansConfig}.
+ * 
  * @author Torsten Juergeleit
  */
 public class OpenConfigFileAction extends Action {
@@ -46,10 +50,18 @@ public class OpenConfigFileAction extends Action {
 		ISelection selection = provider.getSelection();
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection sSelection = (IStructuredSelection) selection;
-			if (sSelection.size() == 1 && sSelection
-					.getFirstElement() instanceof IResourceModelElement) {
-				element = ((IResourceModelElement) sSelection
+			if (sSelection.size() == 1) {
+				Object sElement = sSelection.getFirstElement();
+				if (sElement instanceof IResourceModelElement) {
+					element = ((IResourceModelElement) sSelection
 						.getFirstElement());
+				} else if (sElement instanceof IFile) {
+					element = BeansCorePlugin.getModel().getConfig(
+							(IFile) sElement);
+				} else if (sElement instanceof ZipEntryStorage) {
+					element = BeansModelUtils
+							.getConfig((ZipEntryStorage) sElement);
+				}
 				if (element instanceof ISourceModelElement
 						|| element instanceof IBeansConfig) {
 					return true;
@@ -61,17 +73,7 @@ public class OpenConfigFileAction extends Action {
 
 	public void run() {
 		if (isEnabled()) {
-			IResource resource = element.getElementResource();
-			if (resource instanceof IFile && resource.exists()) {
-				int line;
-				if (element instanceof ISourceModelElement) {
-					line = ((ISourceModelElement) element)
-							.getElementStartLine();
-				} else {
-					line = -1;
-				}
-				SpringUIUtils.openInEditor((IFile) resource, line);
-			}
+			BeansUIUtils.openInEditor(element);
 		}
 	}
 }

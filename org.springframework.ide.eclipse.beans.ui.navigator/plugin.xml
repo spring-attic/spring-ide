@@ -7,9 +7,20 @@
             name="%viewName"
             icon="icons/full/obj16/spring_obj.gif"
             category="org.springframework.ide.eclipse.beans.ui.views"
-            class="org.eclipse.ui.navigator.CommonNavigator"
+            class="org.springframework.ide.eclipse.beans.ui.navigator.BeansExplorer"
             id="org.springframework.ide.eclipse.beans.ui.navigator.BeansExplorer">
       </view>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+         <showInPart id="org.springframework.ide.eclipse.beans.ui.navigator.BeansExplorer">
+         </showInPart>
+      </perspectiveExtension>
+      <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <showInPart id="org.springframework.ide.eclipse.beans.ui.navigator.BeansExplorer"/>
+      </perspectiveExtension>
    </extension>
 
    <extension
@@ -58,22 +69,19 @@
 		<triggerPoints>
 			<or>
                 <instanceof value="org.eclipse.core.resources.IWorkspaceRoot"/>
-				<adapt
-						type="org.eclipse.core.resources.IProject">
-					<test
-						property="org.eclipse.core.resources.projectNature"
+				<adapt type="org.eclipse.core.resources.IProject">
+					<test property="org.eclipse.core.resources.projectNature"
 						value="org.springframework.ide.eclipse.core.springnature"/>
 				</adapt>
 				<and>
-					<instanceof
-						value="org.eclipse.core.resources.IFile"/>
-					<test
-						property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
+					<instanceof value="org.eclipse.core.resources.IFile"/>
+					<test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
 				</and>
 			</or>
 		 </triggerPoints>
          <possibleChildren>
 				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+				<instanceof value="org.eclipse.core.resources.IFile"/>
          </possibleChildren>
          <commonSorter
                id="org.springframework.ide.eclipse.beans.ui.navigator.sorter.beansExplorerSorter"
@@ -90,17 +98,13 @@
             priority="high">
 		<triggerPoints>
 			<or>
-				<adapt
-						type="org.eclipse.core.resources.IProject">
-					<test
-						property="org.eclipse.core.resources.projectNature"
+				<adapt type="org.eclipse.core.resources.IProject">
+					<test property="org.eclipse.core.resources.projectNature"
 						value="org.springframework.ide.eclipse.core.springnature"/>
 				</adapt>
 				<and>
-					<instanceof
-						value="org.eclipse.core.resources.IFile"/>
-					<test
-						property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
+					<instanceof value="org.eclipse.core.resources.IFile"/>
+					<test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
 				</and>
 			</or>
 		 </triggerPoints>
@@ -110,9 +114,6 @@
          <commonSorter
                id="org.springframework.ide.eclipse.beans.ui.navigator.sorter.projectExplorerSorter"
                class="org.springframework.ide.eclipse.beans.ui.navigator.internal.BeansNavigatorSorter"/>
-		 <override
-				policy="InvokeAlwaysRegardlessOfSuppressedExt"
-				suppressedExtensionId="org.eclipse.ui.navigator.resourceContent"/>
       </navigatorContent>
 
       <actionProvider
@@ -120,22 +121,20 @@
             class="org.springframework.ide.eclipse.beans.ui.navigator.internal.actions.BeansNavigatorActionProvider">
          <enablement>
 			<or>
-				<adapt
-						type="org.eclipse.core.resources.IProject">
-					<test
-						property="org.eclipse.core.resources.projectNature"
+				<adapt type="org.eclipse.core.resources.IProject">
+					<test property="org.eclipse.core.resources.projectNature"
 						value="org.springframework.ide.eclipse.core.springnature"/>
 				</adapt>
 				<and>
-					<instanceof
-						value="org.eclipse.core.resources.IFile"/>
-					<test
-						property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
+					<instanceof value="org.eclipse.core.resources.IFile"/>
+					<test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
 				</and>
+				<instanceof value="org.springframework.ide.eclipse.core.io.ZipEntryStorage"/>
             	<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
             </or>
          </enablement>
       </actionProvider>
+
       <commonFilter
             id="org.springframework.ide.eclipse.beans.ui.navigator.filters.hideNonSpringProjects"
             name="%navigatorfilterHideNonSpringProjectsName"
@@ -150,6 +149,11 @@
              id="org.springframework.ide.eclipse.beans.ui.navigator.linkHelper"
              class="org.springframework.ide.eclipse.beans.ui.navigator.internal.BeansNavigatorLinkHelper">
           <selectionEnablement>
+			 <and>
+				<instanceof value="org.eclipse.core.resources.IFile"/>
+				<test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
+			 </and>
+			 <instanceof value="org.springframework.ide.eclipse.core.io.ZipEntryStorage"/>
              <instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
           </selectionEnablement>
           <editorInputEnablement>

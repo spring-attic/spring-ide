@@ -16,6 +16,7 @@
 
 package org.springframework.ide.eclipse.beans.ui.navigator.internal.actions;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
@@ -23,14 +24,17 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.ui.IWorkbenchPage;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
+import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * Opens the project's property page for currently selected
- * {@link IModelElement} in Project Explorer.
+ * {@link IModelElement}.
+ * 
  * @author Torsten Juergeleit
  */
 public class OpenPropertiesAction extends Action {
@@ -49,12 +53,23 @@ public class OpenPropertiesAction extends Action {
 		ISelection selection = provider.getSelection();
 		if (selection instanceof ITreeSelection) {
 			ITreeSelection tSelection = (ITreeSelection) selection;
-			if (tSelection.size() == 1
-					&& tSelection.getFirstElement() instanceof IModelElement) {
-				IModelElement element = ((IModelElement) tSelection
-						.getFirstElement());
-				project = BeansModelUtils.getProject(element).getProject();
-				block = getProjectPropertyPageBlock(tSelection.getPaths()[0]);
+			if (tSelection.size() == 1) {
+				Object tElement = tSelection.getFirstElement();
+				IModelElement element = null;
+				if (tElement instanceof IModelElement) {
+					element = ((IModelElement) tSelection.getFirstElement());
+				} else if (tElement instanceof IFile) {
+					element = BeansCorePlugin.getModel().getConfig(
+							(IFile) tElement);
+				} else if (tElement instanceof IFile) {
+					element = BeansModelUtils
+							.getConfig((ZipEntryStorage) tElement);
+				}
+				if (element != null) {
+					project = BeansModelUtils.getProject(element).getProject();
+					block = getProjectPropertyPageBlock(
+							tSelection.getPaths()[0]);
+				}
 				return true;
 			}
 		}

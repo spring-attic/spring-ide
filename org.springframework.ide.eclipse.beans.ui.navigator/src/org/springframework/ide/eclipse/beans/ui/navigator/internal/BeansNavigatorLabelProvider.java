@@ -19,6 +19,7 @@ package org.springframework.ide.eclipse.beans.ui.navigator.internal;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonLabelProvider;
+import org.eclipse.ui.navigator.INavigatorContentExtension;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabels;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -32,6 +33,8 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 		implements ICommonLabelProvider {
 
+	private INavigatorContentExtension contentExtension;
+
 	public String getDescription(Object element) {
 		if (element instanceof IModelElement) {
 			return BeansModelLabels.getElementLabel((IModelElement) element,
@@ -40,12 +43,13 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 		return null;
 	}
 
-	public void init(ICommonContentExtensionSite aConfig) {
+	public void init(ICommonContentExtensionSite config) {
+		contentExtension = config.getExtension();
 	}
 
-	public void restoreState(IMemento aMemento) {
+	public void restoreState(IMemento memento) {
 	}
 
-	public void saveState(IMemento aMemento) {
+	public void saveState(IMemento memento) {
 	}
 }
