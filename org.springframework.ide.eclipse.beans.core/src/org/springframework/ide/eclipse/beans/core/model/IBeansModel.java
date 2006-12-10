@@ -24,13 +24,13 @@ import org.springframework.ide.eclipse.core.model.IModel;
 
 /**
  * The <code>IBeansModel</code> manages instances of
- * <code>IBeansProject</code>s.
- * <code>IBeansModelChangedListener</code>s register with the
- * <code>IBeansModel</code> and receive <code>BeansModelChangedEvent</code>s
- * for all changes.
+ * <code>IBeansProject</code>s. <code>IBeansModelChangedListener</code>s
+ * register with the <code>IBeansModel</code> and receive
+ * <code>BeansModelChangedEvent</code>s for all changes.
  * <p>
- * The single instance of <code>IBeansModel</code> is available from
- * the static method <code>BeansCorePlugin.getModel()</code>.
+ * The single instance of <code>IBeansModel</code> is available from the
+ * static method <code>BeansCorePlugin.getModel()</code>.
+ * 
  * @author Torsten Juergeleit
  */
 public interface IBeansModel extends IModel {

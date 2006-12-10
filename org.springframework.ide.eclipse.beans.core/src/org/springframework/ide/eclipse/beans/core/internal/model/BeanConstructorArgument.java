@@ -20,6 +20,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueH
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
+import org.springframework.util.ObjectUtils;
 
 /**
  * This class defines a constructor argument within a Spring beans
@@ -79,10 +80,33 @@ public class BeanConstructorArgument extends AbstractBeansModelElement
 		return value;
 	}
 
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof BeanConstructorArgument)) {
+			return false;
+		}
+		BeanConstructorArgument that = (BeanConstructorArgument) other;
+		if (!ObjectUtils.nullSafeEquals(this.index, that.index)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.type, that.type)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.value, that.value)) return false;
+		return super.equals(other);
+	}
+
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(index);
+		hashCode = getElementType() * hashCode
+				+ ObjectUtils.nullSafeHashCode(type);
+		hashCode = getElementType() * hashCode
+				+ ObjectUtils.nullSafeHashCode(value);
+		return getElementType() * hashCode + super.hashCode();
+	}
+
 	public String toString() {
 		StringBuffer text = new StringBuffer(getElementName());
 		text.append(" (");
-		text.append(getElementSource().getStartLine());
+		text.append(getElementSourceLocation().getStartLine());
 		text.append("): index=");
 		text.append(index);
 		text.append(", type=");

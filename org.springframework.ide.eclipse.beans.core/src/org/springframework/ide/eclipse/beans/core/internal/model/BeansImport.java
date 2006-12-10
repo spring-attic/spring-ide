@@ -21,6 +21,7 @@ import org.springframework.beans.factory.parsing.ImportDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
+import org.springframework.util.ObjectUtils;
 
 /**
  * This class defines an import within a Spring beans configuration.
@@ -43,6 +44,24 @@ public class BeansImport extends AbstractBeansModelElement
 	public IResource getImportedResource() {
 		// TODO
 		return null;
+	}
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof BeansImport)) {
+			return false;
+		}
+		BeansImport that = (BeansImport) other;
+		if (!ObjectUtils.nullSafeEquals(this.resourceName, that.resourceName))
+			return false;
+		return super.equals(other);
+	}
+
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(resourceName);
+		return getElementType() * hashCode + super.hashCode();
 	}
 
 	public String toString() {

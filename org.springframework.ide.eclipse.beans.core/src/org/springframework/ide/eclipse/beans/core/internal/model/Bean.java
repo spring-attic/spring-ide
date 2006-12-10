@@ -40,6 +40,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
+import org.springframework.util.ObjectUtils;
 
 /**
  * This class holds the data for a Spring bean.
@@ -50,6 +51,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 
 	private BeanDefinition definition;
 	private String[] aliases;
+
 	private Set<IBeanConstructorArgument> constructorArguments;
 	private Map<String, IBeanProperty> properties;
 	private Set<IBean> innerBeans;
@@ -184,6 +186,45 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		return true;
 	}
 
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof Bean)) {
+			return false;
+		}
+		Bean that = (Bean) other;
+		if (!ObjectUtils.nullSafeEquals(this.definition, that.definition))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.aliases, that.aliases))
+			return false;
+		return super.equals(other);
+	}
+
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(definition);
+		hashCode = getElementType() * hashCode
+				+ ObjectUtils.nullSafeHashCode(aliases);
+		return getElementType() * hashCode + super.hashCode();
+	}
+
+	public String toString() {
+		StringBuffer text = new StringBuffer(getElementName());
+		text.append(" (");
+		text.append(getElementSourceLocation().getStartLine());
+		text.append(')');
+		if (getClassName() != null) {
+			text.append(" [");
+			text.append(getClassName());
+			text.append(']');
+		} else if (getParentName() != null) {
+			text.append(" <");
+			text.append(getParentName());
+			text.append('>');
+		}
+		return text.toString();
+	}
+
 	private Set<IBeanConstructorArgument> retrieveConstructorArguments(
 			BeanDefinition beanDefinition) {
 		Set<IBeanConstructorArgument> cargs = new LinkedHashSet
@@ -253,22 +294,5 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 				addInnerBeans(parent, props.get(key), innerBeans);
 			}
 		}
-	}
-
-	public String toString() {
-		StringBuffer text = new StringBuffer(getElementName());
-		text.append(" (");
-		text.append(getElementSource().getStartLine());
-		text.append(')');
-		if (getClassName() != null) {
-			text.append(" [");
-			text.append(getClassName());
-			text.append(']');
-		} else if (getParentName() != null) {
-			text.append(" <");
-			text.append(getParentName());
-			text.append('>');
-		}
-		return text.toString();
 	}
 }

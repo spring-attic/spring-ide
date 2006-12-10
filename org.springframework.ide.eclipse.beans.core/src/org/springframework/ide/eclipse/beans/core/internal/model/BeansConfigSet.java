@@ -34,18 +34,21 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.util.ObjectUtils;
 
 /**
  * This class defines a Spring beans config set (a list of beans config names).
+ * 
  * @author Torsten Juergeleit
  */
-public class BeansConfigSet extends AbstractResourceModelElement
-												   implements IBeansConfigSet {
+public class BeansConfigSet extends AbstractResourceModelElement implements
+		IBeansConfigSet {
+
+	private Set<String> configNames;
 	private boolean allowAliasOverriding;
 	private boolean allowBeanDefinitionOverriding;
 	private boolean isIncomplete;
 
-	private Set<String> configNames;
 	private Map<String, IBeanAlias> aliasesMap;
 	private Set<IBeansComponent> components;
 	private Map<String, IBean> beansMap;
@@ -205,6 +208,38 @@ public class BeansConfigSet extends AbstractResourceModelElement
 			return new LinkedHashSet<IBean>(getBeanClassesMap().get(className));
 		}
 		return new HashSet<IBean>();
+	}
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof BeansConfigSet)) {
+			return false;
+		}
+		BeansConfigSet that = (BeansConfigSet) other;
+		if (!ObjectUtils.nullSafeEquals(this.configNames, that.configNames))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.allowAliasOverriding,
+				that.allowAliasOverriding))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.allowBeanDefinitionOverriding,
+				that.allowBeanDefinitionOverriding))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.isIncomplete, that.isIncomplete))
+			return false;
+		return super.equals(other);
+	}
+
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(configNames);
+		hashCode = getElementType() * hashCode
+				+ ObjectUtils.nullSafeHashCode(allowAliasOverriding);
+		hashCode = getElementType() * hashCode
+				+ ObjectUtils.nullSafeHashCode(allowBeanDefinitionOverriding);
+		hashCode = getElementType() * hashCode
+				+ ObjectUtils.nullSafeHashCode(isIncomplete);
+		return getElementType() * hashCode + super.hashCode();
 	}
 
 	public String toString() {

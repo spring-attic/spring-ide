@@ -19,7 +19,7 @@ package org.springframework.ide.eclipse.beans.core.internal.model;
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.core.model.IModelSource;
+import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 
 /**
  * Default implementation of the common protocol for all model elements related
@@ -33,10 +33,15 @@ public abstract class AbstractBeansModelElement extends
 
 	protected AbstractBeansModelElement(IModelElement parent, String name,
 			BeanMetadataElement metadata) {
-		super(parent, name);
+		super(parent, name, getSourceLocation(metadata));
+	}
+
+	protected static final IModelSourceLocation getSourceLocation(
+			BeanMetadataElement metadata) {
 		Object source = metadata.getSource();
-		if (source instanceof IModelSource) {
-			setElementSource((IModelSource) source);
+		if (source instanceof IModelSourceLocation) {
+			return (IModelSourceLocation) source;
 		}
+		return null;
 	}
 }

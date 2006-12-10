@@ -63,8 +63,8 @@ import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
-import org.springframework.ide.eclipse.core.model.xml.XmlSource;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceExtractor;
+import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -72,6 +72,7 @@ import org.xml.sax.SAXParseException;
 
 /**
  * This class defines a Spring beans configuration.
+ * 
  * @author Torsten Juergeleit
  */
 public class BeansConfig extends AbstractResourceModelElement implements
@@ -81,7 +82,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	private IFile file;
 
 	/** Indicator for a beans configuration embedded in a ZIP file */
-	boolean isArchived;
+	private boolean isArchived;
 	
 	private Set<Problem> warnings = new LinkedHashSet<Problem>();
 	
@@ -461,7 +462,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		}
 
 		private Problem createProblem(SAXParseException ex) {
-			XmlSource source = new XmlSource(resource, null, ex.getLineNumber(),
+			XmlSourceLocation source = new XmlSourceLocation(resource, null, ex.getLineNumber(),
 						ex.getLineNumber());
 			return new Problem(ex.getMessage(), new Location(resource,
 					source));
@@ -478,7 +479,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 		public void error(Problem problem) {
 			BeansModelUtils.createProblemMarker(config, problem.getMessage(),
-					IMarker.SEVERITY_ERROR, ((XmlSource) problem
+					IMarker.SEVERITY_ERROR, ((XmlSourceLocation) problem
 							.getLocation().getSource()).getStartLine(),
 					ErrorCode.PARSING_FAILED);
 			errors.add(problem);
@@ -486,7 +487,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 		public void warning(Problem problem) {
 			BeansModelUtils.createProblemMarker(config, problem.getMessage(),
-					IMarker.SEVERITY_WARNING, ((XmlSource) problem
+					IMarker.SEVERITY_WARNING, ((XmlSourceLocation) problem
 							.getLocation().getSource()).getStartLine(),
 					ErrorCode.PARSING_FAILED);
 			warnings.add(problem);

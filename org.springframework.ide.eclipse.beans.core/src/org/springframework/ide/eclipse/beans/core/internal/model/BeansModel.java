@@ -45,14 +45,17 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
+import org.springframework.util.ObjectUtils;
 
 /**
  * The <code>BeansModel</code> manages instances of <code>IBeansProject</code>s.
- * <code>IModelChangeListener</code>s register with the <code>BeansModel</code>,
- * and receive <code>ModelChangeEvent</code>s for all changes.
+ * <code>IModelChangeListener</code>s register with the
+ * <code>BeansModel</code>, and receive <code>ModelChangeEvent</code>s for
+ * all changes.
  * <p>
- * The single instance of <code>IBeansModel</code> is available from
- * the static method <code>BeansCorePlugin.getModel()</code>.
+ * The single instance of <code>IBeansModel</code> is available from the
+ * static method <code>BeansCorePlugin.getModel()</code>.
+ * 
  * @see org.springframework.ide.eclipse.core.model.IModelChangeListener
  * @see org.springframework.ide.eclipse.core.model.ModelChangeEvent
  * @author Torsten Juergeleit
@@ -61,10 +64,12 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 
 	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID
 			+ "/model/debug";
+
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
 
-	/** The table of Spring Beans projects (synchronized for concurrent
-	 * access) */
+	/**
+	 * The table of Spring Beans projects (synchronized for concurrent access)
+	 */
 	private Map<IProject, IBeansProject> projects;
 
 	private IResourceChangeListener workspaceListener;
@@ -201,6 +206,24 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			}
 		}
 		return configs;
+	}
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof BeansModel)) {
+			return false;
+		}
+		BeansModel that = (BeansModel) other;
+		if (!ObjectUtils.nullSafeEquals(this.projects, that.projects))
+			return false;
+		return super.equals(other);
+	}
+
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(projects);
+		return getElementType() * hashCode + super.hashCode();
 	}
 
 	public String toString() {

@@ -18,11 +18,13 @@ package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Holder for information about a reference from a model element to to a Spring
  * bean within a certain context (<code>IBeansConfig</code> or
  * <code>IBeansConfigSet</code>).
+ * 
  * @author Torsten Juergeleit
  */
 public class BeanReference {
@@ -31,9 +33,9 @@ public class BeanReference {
 		STANDARD, PARENT, FACTORY, DEPENDS_ON, METHOD_OVERRIDE, INTERCEPTOR,
 		INNER
 	}
+	private BeanType type;
 	private IModelElement source;
 	private IBean target;
-	private BeanType type;
 	private IModelElement context;
 
 	public BeanReference(BeanType type, IModelElement source, IBean target) {
@@ -70,8 +72,7 @@ public class BeanReference {
 	 */
 	public final String getID() {
 		StringBuffer id = new StringBuffer();
-		id.append(type);
-		id.append('|');
+		id.append(type).append('|');
 		if (source != null) {
 			id.append(source.getElementID());
 		}
@@ -79,43 +80,41 @@ public class BeanReference {
 		if (target != null) {
 			id.append(target.getElementID());
 		}
-		id.append('|');
-		id.append(context.getElementID());
+		id.append('|').append(context.getElementID());
 		return id.toString();
 	}
 
-	/**
-	 * Checks for model element equality by comparing the types, the sources
-	 * and the targets.
-	 */
-	public final boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj instanceof BeanReference) {
-			return ((BeanReference) obj).getType() == getType()
-					&& ((BeanReference) obj).getSource().equals(source)
-					&& ((BeanReference) obj).getTarget().equals(target)
-					&& ((BeanReference) obj).getContext().equals(context);
+		if (!(other instanceof BeanReference)) {
+			return false;
 		}
-		return false;
+		BeanReference that = (BeanReference) other;
+		if (!ObjectUtils.nullSafeEquals(this.type, that.type))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.source, that.source))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.target, that.target))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.context, that.target))
+			return false;
+		return super.equals(other);
 	}
 
-	/**
-	 * Returns the hash code of this bean references's ID.
-	 */
-	public final int hashCode() {
-		return getID().hashCode();
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(type);
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(source);
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(target);
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(target);
+		return 29 * hashCode + super.hashCode();
 	}
 
 	public String toString() {
 		StringBuffer text = new StringBuffer(type.toString());
-		text.append(": ");
-		text.append(source);
-		text.append(" -> ");
-		text.append(target);
-		text.append(" @ ");
-		text.append(context);
+		text.append(": ").append(source).append(" -> ").append(target);
+		text.append(" @ ").append(context);
 		return text.toString();
 	}
 }

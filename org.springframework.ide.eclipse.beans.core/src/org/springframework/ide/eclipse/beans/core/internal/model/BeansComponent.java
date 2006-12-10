@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.util.ObjectUtils;
 
 /**
  * This class defines a Spring beans component defined via an XML namespace.
@@ -45,7 +46,8 @@ public class BeansComponent extends AbstractBeansModelElement implements
 
 	private LinkedHashSet<IBean> innerBeans;
 
-	public BeansComponent(IModelElement parent, ComponentDefinition definition) {
+	public BeansComponent(IModelElement parent,
+			ComponentDefinition definition) {
 		super(parent, definition.getName(), definition);
 		beans = new LinkedHashSet<IBean>();
 		for (BeanDefinition beanDef : definition.getBeanDefinitions()) {
@@ -104,5 +106,38 @@ public class BeansComponent extends AbstractBeansModelElement implements
 
 	public Set<IBean> getInnerBeans() {
 		return Collections.unmodifiableSet(innerBeans);
+	}
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof BeansComponent)) {
+			return false;
+		}
+		BeansComponent that = (BeansComponent) other;
+		if (!ObjectUtils.nullSafeEquals(this.beans, that.beans))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.components, that.components))
+			return false;
+		return super.equals(other);
+	}
+
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(beans);
+		hashCode = getElementType() * hashCode
+				+ ObjectUtils.nullSafeHashCode(components);
+		return getElementType() * hashCode + super.hashCode();
+	}
+
+	public String toString() {
+		StringBuffer text = new StringBuffer(getElementName());
+		text.append(" (");
+		text.append(getElementSourceLocation().getStartLine());
+		text.append("): beans=");
+		text.append(beans);
+		text.append(", components=");
+		text.append(components);
+		return text.toString();
 	}
 }

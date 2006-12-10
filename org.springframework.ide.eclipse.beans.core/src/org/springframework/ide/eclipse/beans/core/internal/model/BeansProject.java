@@ -36,6 +36,7 @@ import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * This class provides information for a Spring Beans project.
@@ -44,6 +45,7 @@ import org.springframework.ide.eclipse.core.model.ModelUtils;
  */
 public class BeansProject extends AbstractResourceModelElement implements
 		IBeansProject {
+
 	private IProject project;
 	private BeansProjectDescription description;
 
@@ -264,6 +266,23 @@ public class BeansProject extends AbstractResourceModelElement implements
 	 */
 	public void saveDescription() {
 		BeansProjectDescriptionWriter.write(project, getDescription());
+	}
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof BeansProject)) {
+			return false;
+		}
+		BeansProject that = (BeansProject) other;
+		if (!ObjectUtils.nullSafeEquals(this.project, that.project)) return false;
+		return super.equals(other);
+	}
+
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(project);
+		return getElementType() * hashCode + super.hashCode();
 	}
 
 	public String toString() {

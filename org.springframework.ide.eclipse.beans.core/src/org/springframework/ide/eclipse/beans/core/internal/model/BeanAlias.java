@@ -20,6 +20,7 @@ import org.springframework.beans.factory.parsing.AliasDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
+import org.springframework.util.ObjectUtils;
 
 /**
  * This class defines an alias within a Spring beans configuration.
@@ -43,10 +44,27 @@ public class BeanAlias extends AbstractBeansModelElement implements IBeanAlias {
 		return beanName;
 	}
 
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof BeanAlias)) {
+			return false;
+		}
+		BeanAlias that = (BeanAlias) other;
+		if (!ObjectUtils.nullSafeEquals(this.beanName, that.beanName)) return false;
+		return super.equals(other);
+	}
+
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(beanName);
+		return getElementType() * hashCode + super.hashCode();
+	}
+
 	public String toString() {
 		StringBuffer text = new StringBuffer(getElementName());
 		text.append(" (");
-		text.append(getElementSource().getStartLine());
+		text.append(getElementSourceLocation().getStartLine());
 		text.append("): name=");
 		text.append(beanName);
 		return text.toString();

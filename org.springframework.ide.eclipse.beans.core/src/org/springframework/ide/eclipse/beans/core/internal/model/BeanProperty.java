@@ -20,6 +20,7 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
+import org.springframework.util.ObjectUtils;
 
 /**
  * This class defines a property within a Spring beans configuration.
@@ -28,6 +29,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
  */
 public class BeanProperty extends AbstractBeansModelElement implements
 		IBeanProperty {
+
 	private Object value;
 
 	public BeanProperty(IBean bean, PropertyValue propValue) {
@@ -43,10 +45,27 @@ public class BeanProperty extends AbstractBeansModelElement implements
 		return value;
 	}
 
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof BeanProperty)) {
+			return false;
+		}
+		BeanProperty that = (BeanProperty) other;
+		if (!ObjectUtils.nullSafeEquals(this.value, that.value)) return false;
+		return super.equals(other);
+	}
+
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(value);
+		return getElementType() * hashCode + super.hashCode();
+	}
+
 	public String toString() {
 		StringBuffer text = new StringBuffer(getElementName());
 		text.append(" (");
-		text.append(getElementSource().getStartLine());
+		text.append(getElementSourceLocation().getStartLine());
 		text.append("): value=");
 		text.append(value);
 		return text.toString();
