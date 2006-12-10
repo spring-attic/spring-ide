@@ -31,7 +31,7 @@ public interface ISourceModelElement extends IResourceModelElement {
 	/**
 	 * Returns the element's source code information.
 	 */
-	IModelSource getElementSource();
+	IModelSourceLocation getElementSourceLocation();
 
 	/**
 	 * Returns the line number with the start of the element's source code.

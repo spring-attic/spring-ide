@@ -18,6 +18,7 @@ package org.springframework.ide.eclipse.core.model;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Default implementation of the common protocol for all model elements related
@@ -28,10 +29,12 @@ import org.eclipse.core.resources.IResource;
 public abstract class AbstractSourceModelElement extends
 		AbstractResourceModelElement implements ISourceModelElement {
 
-	private IModelSource source;
+	private IModelSourceLocation location;
 
-	protected AbstractSourceModelElement(IModelElement parent, String name) {
+	protected AbstractSourceModelElement(IModelElement parent, String name,
+			IModelSourceLocation location) {
 		super(parent, name);
+		this.location = location;
 	}
 
 	/**
@@ -67,20 +70,16 @@ public abstract class AbstractSourceModelElement extends
 		return false;
 	}
 
-	protected final void setElementSource(IModelSource source) {
-		this.source = source;
-	}
-
-	public final IModelSource getElementSource() {
-		return source;
+	public final IModelSourceLocation getElementSourceLocation() {
+		return location;
 	}
 
 	public int getElementStartLine() {
-		return (source != null ? source.getStartLine() : -1);
+		return (location != null ? location.getStartLine() : -1);
 	}
 
 	public int getElementEndLine() {
-		return (source != null ? source.getEndLine() : -1);
+		return (location != null ? location.getEndLine() : -1);
 	}
 
 	/**
@@ -93,17 +92,35 @@ public abstract class AbstractSourceModelElement extends
 		return super.getAdapter(adapter);
 	}
 
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof AbstractSourceModelElement)) {
+			return false;
+		}
+		AbstractSourceModelElement that = (AbstractSourceModelElement) other;
+		if (!ObjectUtils.nullSafeEquals(this.location, that.location))
+			return false;
+		return super.equals(other);
+	}
+
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(location);
+		return getElementType() * hashCode + super.hashCode();
+	}
+
 	/**
 	 * Overwrite this method if the element's name is not unique.
 	 * <p>
 	 * This method is called by <code>getElementID()</code>. The default
 	 * implementation returns to
-	 * <code>getElementName() + "-" + source.getStartLine()</code>.
+	 * <code>getElementName() + "-" + location.getStartLine()</code>.
 	 * 
 	 * @see #getElementID()
 	 */
 	protected String getUniqueElementName() {
-		return (source != null ? getElementName() + ID_SEPARATOR
-				+ source.getStartLine() : getElementName());
+		return (location != null ? getElementName() : getElementName()
+				+ ID_SEPARATOR + location.getStartLine());
 	}
 }

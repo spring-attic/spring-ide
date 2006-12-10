@@ -23,7 +23,7 @@ import org.springframework.core.io.Resource;
  *
  * @author Torsten Juergeleit
  */
-public interface IModelSource {
+public interface IModelSourceLocation {
 
 	Resource getResource();
 

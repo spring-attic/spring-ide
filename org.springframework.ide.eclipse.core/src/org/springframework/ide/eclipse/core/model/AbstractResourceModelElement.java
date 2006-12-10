@@ -17,6 +17,7 @@
 package org.springframework.ide.eclipse.core.model;
 
 import org.eclipse.core.resources.IResource;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Default implementation of the common protocol for all model elements that map
@@ -26,6 +27,7 @@ import org.eclipse.core.resources.IResource;
  */
 public abstract class AbstractResourceModelElement extends AbstractModelElement
 		implements IResourceModelElement {
+
 	protected AbstractResourceModelElement(IModelElement parent, String name) {
 		super(parent, name);
 	}
@@ -38,5 +40,24 @@ public abstract class AbstractResourceModelElement extends AbstractModelElement
 			return getElementResource();
 		}
 		return super.getAdapter(adapter);
+	}
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof AbstractResourceModelElement)) {
+			return false;
+		}
+		AbstractResourceModelElement that = (AbstractResourceModelElement)
+				other;
+		if (!ObjectUtils.nullSafeEquals(this.getElementResource(), that
+				.getElementResource())) return false;
+		return super.equals(other);
+	}
+
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(getElementResource());
+		return getElementType() * hashCode + super.hashCode();
 	}
 }

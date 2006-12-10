@@ -23,9 +23,9 @@ import org.w3c.dom.Node;
 
 /**
  * A {@link SourceExtractor} implementation which retrieves
- * {@link XmlSource XML source information} from a given
+ * {@link XmlSourceLocation XML source location} from a given
  * {@link Node DOM node} using Apache's Xerces XML parser.
- * @see XmlSource
+ * 
  * @author Torsten Juergeleit
  */
 public class XmlSourceExtractor implements SourceExtractor {
@@ -38,7 +38,8 @@ public class XmlSourceExtractor implements SourceExtractor {
 			int startLine = LineNumberPreservingDOMParser
 					.getStartLineNumber(node);
 			int endLine = LineNumberPreservingDOMParser.getEndLineNumber(node);
-			return new XmlSource(definingResource, node, startLine, endLine);
+			return new XmlSourceLocation(definingResource, node, startLine,
+					endLine);
 		}
 		return sourceCandidate;
 	}

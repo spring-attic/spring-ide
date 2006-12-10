@@ -23,10 +23,12 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 
 /**
  * Default implementation of the common protocol for a model.
+ * 
  * @author Torsten Juergeleit
  */
 public abstract class AbstractModel extends AbstractModelElement implements
 		IModel {
+
 	private Set<IModelChangeListener> listeners;
 
 	public AbstractModel(IModelElement parent, String name) {

@@ -17,16 +17,17 @@
 package org.springframework.ide.eclipse.core.model.xml;
 
 import org.springframework.core.io.Resource;
-import org.springframework.ide.eclipse.core.model.IModelSource;
+import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
+import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Node;
 
 /**
- * Storage for an <code>IModelElement</code>'s XML source information
+ * Storage for an <code>IModelElement</code>'s XML source location
  * retrieved via {@link XmlSourceExtractor}.
  * 
  * @author Torsten Juergeleit
  */
-public class XmlSource implements IModelSource {
+public class XmlSourceLocation implements IModelSourceLocation {
 
 	private Resource resource;
 	private String localName;
@@ -35,7 +36,7 @@ public class XmlSource implements IModelSource {
 	private int startLine;
 	private int endLine;
 
-	public XmlSource(Resource resource, Node node, int startLine,
+	public XmlSourceLocation(Resource resource, Node node, int startLine,
 			int endLine) {
 		this.resource = resource;
 		this.localName = node.getLocalName();
@@ -71,6 +72,39 @@ public class XmlSource implements IModelSource {
 	
 	public int getEndLine() {
 		return endLine;
+	}
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof XmlSourceLocation)) {
+			return false;
+		}
+		XmlSourceLocation that = (XmlSourceLocation) other;
+		if (!ObjectUtils.nullSafeEquals(this.resource, that.resource))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.localName, that.localName))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.prefix, that.prefix))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.namespaceURI, that.namespaceURI))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.startLine, that.startLine))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.endLine, that.endLine))
+			return false;
+		return super.equals(other);
+	}
+
+	public int hashCode() {
+		int hashCode = 29 * ObjectUtils.nullSafeHashCode(resource);
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(localName);
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(prefix);
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(namespaceURI);
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(startLine);
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(endLine);
+		return 29 * hashCode + super.hashCode();
 	}
 
 	public String toString() {

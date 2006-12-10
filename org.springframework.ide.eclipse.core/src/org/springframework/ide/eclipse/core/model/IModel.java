@@ -20,6 +20,7 @@ package org.springframework.ide.eclipse.core.model;
  * The <code>IModel</code> manages instances of <code>IModelElement</code>s.
  * <code>IModelChangedListener</code>s register with the <code>IModel</code>,
  * and receive <code>ModelChangedEvent</code>s for all changes.
+ * 
  * @author Torsten Juergeleit
  */
 public interface IModel extends IModelElement {

@@ -17,10 +17,12 @@
 package org.springframework.ide.eclipse.core.model;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Default implementation of the common protocol for all elements provided by
  * the model.
+ * 
  * @author Torsten Juergeleit
  */
 public abstract class AbstractModelElement implements IModelElement {
@@ -35,26 +37,6 @@ public abstract class AbstractModelElement implements IModelElement {
 
 	public Object getAdapter(Class adapter) {
 		return null;
-	}
-
-	/**
-	 * Checks for model element equality by comparing the element's unique IDs.
-	 */
-	public final boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj instanceof IModelElement) {
-			return getElementID().equals(((IModelElement) obj).getElementID());
-		}
-		return false;
-	}
-
-	/**
-	 * Returns the hash code of this element's ID.
-	 */
-	public final int hashCode() {
-		return getElementID().hashCode();
 	}
 
 	public final void setElementParent(IModelElement parent) {
@@ -73,9 +55,8 @@ public abstract class AbstractModelElement implements IModelElement {
 	}
 
 	public final String getElementName() {
-		return this.name;
+		return name;
 	}
-
 	public final String getElementID() {
 		StringBuffer id = new StringBuffer();
 		if (getElementParent() != null) {
@@ -102,11 +83,6 @@ public abstract class AbstractModelElement implements IModelElement {
 	 */
 	protected String getUniqueElementName() {
 		return getElementName();
-	}
-
-	public void accept(IModelElementVisitor visitor,
-			IProgressMonitor monitor) {
-		visitor.visit(this, monitor);
 	}
 
 	/**
@@ -150,5 +126,27 @@ public abstract class AbstractModelElement implements IModelElement {
 			}
 		}
 		return null;
+	}
+
+	public void accept(IModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+		visitor.visit(this, monitor);
+	}
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof AbstractModelElement)) {
+			return false;
+		}
+		AbstractModelElement that = (AbstractModelElement) other;
+		if (!ObjectUtils.nullSafeEquals(this.name, that.name)) return false;
+		return super.equals(other);
+	}
+
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(name);
+		return getElementType() * hashCode + super.hashCode();
 	}
 }
