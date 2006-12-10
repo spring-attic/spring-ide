@@ -115,6 +115,9 @@ final class BeansOutlineLabelProvider
                 }
             }
         }
+        else if (tag == Tag.BEANS) {
+        	text = "beans";
+        }
         else if (tag == Tag.BEAN) {
             boolean hasParent = false;
             attr = attrs.getNamedItem("id");
