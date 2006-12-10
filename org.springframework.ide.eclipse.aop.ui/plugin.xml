@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+   <extension
+         id="aopvalidator"
+         name="%aopValidator"
+         point="org.springframework.ide.eclipse.core.builders">
+      <run
+            class="org.springframework.ide.eclipse.aop.ui.BeansWeavingProjectBuilder">
+      </run>
+   </extension>
+   
+   <extension
+         id="aopmarker"
+         name="%aopMarker"
+         point="org.eclipse.core.resources.markers">
+      <persistent value="true"/>
+	  <super type="org.eclipse.core.resources.textmarker"/>
+   </extension>
+   <extension
+   	      id="beforeadvicemarker"
+   	      name="Before Advice Marker"
+   	      point="org.eclipse.core.resources.markers">
+      <super
+            type="org.springframework.ide.eclipse.aop.ui.aopmarker">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
+
+	<extension point="org.eclipse.ui.editors.annotationTypes">
+      <type
+        	name="org.springframework.ide.eclipse.aop.ui.aopannotation"
+			markerType="org.springframework.ide.eclipse.aop.ui.aopmarker">
+      </type>
+      <type
+            super="org.springframework.ide.eclipse.aop.ui.aopannotation"
+            markerType="org.springframework.ide.eclipse.aop.ui.beforeadvicemarker"
+            name="org.springframework.ide.eclipse.aop.ui.beforeAdviceAnnotation"/>
+    </extension>
+
+	<extension
+	     point="org.eclipse.ui.editors.markerAnnotationSpecification">
+	     <specification
+      		annotationType="org.springframework.ide.eclipse.aop.ui.aopannotation"
+            	label="Advice"
+            	icon="icons/markers/advice.gif"
+            	textPreferenceKey="adviceIndication"
+            	textPreferenceValue="true"
+            	overviewRulerPreferenceKey="adviceIndicationInOverviewRuler"
+            	overviewRulerPreferenceValue="true"
+            	verticalRulerPreferenceKey="adviceIndicationInVerticalRuler"
+            	verticalRulerPreferenceValue="true"
+            	colorPreferenceKey="adviceIndicationColor"
+            	colorPreferenceValue="222,109,33"
+            	presentationLayer="4">
+ 	     </specification>
+ 	     <specification
+			annotationType="org.springframework.ide.eclipse.aop.ui.beforeAdviceAnnotation"
+			icon="icons/markers/before_advice.gif">
+		 </specification>
+	</extension>
+</plugin>

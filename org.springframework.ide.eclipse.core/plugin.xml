@@ -38,6 +38,15 @@
       <library name="commons-logging.jar">
          <export name="*"/>
       </library>
+      <library name="asm-util-2.2.2.jar">
+         <export name="*"/>
+      </library>
+      <library name="asm-commons-2.2.2.jar">
+         <export name="*"/>
+      </library>
+      <library name="asm-2.2.2.jar">
+         <export name="*"/>
+      </library>
    </runtime>
 
    <requires>

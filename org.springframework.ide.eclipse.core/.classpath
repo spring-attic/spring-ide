@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="asm-util-2.2.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="asm-commons-2.2.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="asm-2.2.2.jar" sourcepath="/Users/cd/Development/Java/lib/asm-2.2.2/src"/>
 	<classpathentry exported="true" kind="lib" path="aopalliance.jar"/>
-	<classpathentry kind="lib" path="spring-core.jar"/>
+	<classpathentry kind="lib" path="spring-core.jar" sourcepath="/Users/cd/Development/Java/lib/spring-framework-2.0.1/src"/>
 	<classpathentry kind="lib" path="spring-beans.jar"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="spring-aop.jar"/>
+	<classpathentry kind="lib" path="spring-aop.jar" sourcepath="/Users/cd/Development/Java/lib/spring-framework-2.0.1/src"/>
 	<classpathentry kind="lib" path="spring-dao.jar"/>
 	<classpathentry kind="lib" path="spring-remoting.jar"/>
 	<classpathentry kind="lib" path="spring-support.jar"/>
+	<classpathentry kind="lib" path="commons-logging.jar"/>
+	<classpathentry kind="lib" path="aspectjweaver.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Spring IDE AOP support
+Bundle-SymbolicName: org.springframework.ide.eclipse.beans.ui.aop; singleton:=true
+Bundle-Version: 1.9.0
+Bundle-Activator: org.springframework.ide.eclipse.aop.ui.BeansWeavingPlugin
+Bundle-Localization: plugin
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.springframework.ide.eclipse.beans.ui,
+ org.springframework.ide.eclipse.beans.core,
+ org.springframework.ide.eclipse.core,
+ org.eclipse.jdt.core,
+ org.eclipse.core.resources,
+ org.eclipse.wst.sse.core,
+ org.eclipse.wst.xml.core,
+ org.eclipse.wst.xml_core.feature.source,
+ org.springframework.ide.eclipse.beans.ui.editor
+Eclipse-LazyStart: true
