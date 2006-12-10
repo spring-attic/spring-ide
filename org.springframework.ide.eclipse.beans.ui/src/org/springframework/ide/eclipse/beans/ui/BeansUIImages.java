@@ -19,7 +19,6 @@ package org.springframework.ide.eclipse.beans.ui;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.jface.action.IAction;
@@ -69,16 +68,15 @@ public class BeansUIImages {
 
 	static {
 		try {
-			ICON_BASE_URL = new URL(
-						  BeansUIPlugin.getDefault().getBundle().getEntry("/"),
-						  ICON_PATH_PREFIX);
+			ICON_BASE_URL = new URL(BeansUIPlugin.getDefault().getBundle()
+					.getEntry("/"), ICON_PATH_PREFIX);
 		} catch (MalformedURLException e) {
 			BeansUIPlugin.log(e);
 		}
 	}
 	
 	/** A table of all the <code>ImageDescriptor</code>s. */
-	private static Map imageDescriptors;
+	private static Map<String, ImageDescriptor> imageDescriptors;
 
 	/**  The image registry containing <code>Image</code>s. */
 	private static ImageRegistry imageRegistry;
@@ -145,20 +143,20 @@ public class BeansUIImages {
 	}
 	
 	/**
-	 * Sets the three image descriptors for enabled, disabled, and hovered to an
-	 * action. The actions are retrieved from the *tool16 folders.
+	 * Sets the three image descriptors for enabled, disabled, and hovered to
+	 * an action. The actions are retrieved from the *tool16 folders.
 	 */
 	public static void setToolImageDescriptors(IAction action,
-											   String iconName) {
+			String iconName) {
 		setImageDescriptors(action, "tool16", iconName);
 	}
 
 	/**
-	 * Sets the three image descriptors for enabled, disabled, and hovered to an
-	 * action. The actions are retrieved from the *lcl16 folders.
+	 * Sets the three image descriptors for enabled, disabled, and hovered to
+	 * an action. The actions are retrieved from the *lcl16 folders.
 	 */
 	public static void setLocalImageDescriptors(IAction action,
-												String iconName) {
+			String iconName) {
 		setImageDescriptors(action, "lcl16", iconName);
 	}
 	
@@ -168,11 +166,8 @@ public class BeansUIImages {
 	/* package */ static ImageRegistry getImageRegistry() {
 		if (imageRegistry == null) {
 			imageRegistry = new ImageRegistry();
-			for (Iterator iter = imageDescriptors.keySet().iterator();
-															 iter.hasNext(); ) {
-				String key = (String) iter.next();
-				imageRegistry.put(key, (ImageDescriptor)
-													 imageDescriptors.get(key));
+			for (String key : imageDescriptors.keySet()) {
+				imageRegistry.put(key, imageDescriptors.get(key));
 			}
 			imageDescriptors = null;
 		}
@@ -182,11 +177,11 @@ public class BeansUIImages {
 	//---- Helper methods to access icons on the file system -------------------
 
 	private static void setImageDescriptors(IAction action, String type,
-											String relPath) {
+			String relPath) {
 		action.setImageDescriptor(create("e" + type, relPath));
 		try {
 			ImageDescriptor id = ImageDescriptor.createFromURL(makeIconFileURL(
-														  "d" + type, relPath));
+					"d" + type, relPath));
 			if (id != null) {
 				action.setDisabledImageDescriptor(id);
 			}
@@ -200,7 +195,7 @@ public class BeansUIImages {
 			ImageDescriptor result = ImageDescriptor.createFromURL(
 				   makeIconFileURL(prefix, name.substring(NAME_PREFIX_LENGTH)));
 			if (imageDescriptors == null) {
-				imageDescriptors = new HashMap();
+				imageDescriptors = new HashMap<String, ImageDescriptor>();
 			}
 			imageDescriptors.put(name, result);
 			if (imageRegistry != null) {
@@ -215,7 +210,8 @@ public class BeansUIImages {
 
 	private static ImageDescriptor create(String prefix, String name) {
 		try {
-			return ImageDescriptor.createFromURL(makeIconFileURL(prefix, name));
+			return ImageDescriptor.createFromURL(makeIconFileURL(prefix,
+					name));
 		} catch (MalformedURLException e) {
 			BeansUIPlugin.log(e);
 			return ImageDescriptor.getMissingImageDescriptor();
@@ -223,14 +219,13 @@ public class BeansUIImages {
 	}
 
 	private static URL makeIconFileURL(String prefix, String name)
-												  throws MalformedURLException {
+			throws MalformedURLException {
 		if (ICON_BASE_URL == null) {
 			throw new MalformedURLException();
 		}
-		
+
 		StringBuffer buffer = new StringBuffer(prefix);
-		buffer.append('/');
-		buffer.append(name);
+		buffer.append('/').append(name);
 		return new URL(ICON_BASE_URL, buffer.toString());
 	}
 }

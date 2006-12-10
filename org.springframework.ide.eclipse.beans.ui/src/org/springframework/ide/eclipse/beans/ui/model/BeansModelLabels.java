@@ -16,7 +16,8 @@
 
 package org.springframework.ide.eclipse.beans.ui.model;
 
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
@@ -26,11 +27,13 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.core.model.IModelSource;
+import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
-import org.springframework.ide.eclipse.core.model.xml.XmlSource;
+import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 import org.springframework.util.StringUtils;
 
 /**
@@ -56,6 +59,9 @@ public class BeansModelLabels {
 	/** Add concat string and full path name */
 	public static final int APPEND_PATH = 1 << 1;
 
+	/** Add element description insted of element name */
+	public static final int DESCRIPTION = 1 << 2;
+
 	public static String getElementLabel(IModelElement element, int flags) {
 		StringBuffer buf = new StringBuffer(60);
 		getElementLabel(element, flags, buf);
@@ -65,28 +71,11 @@ public class BeansModelLabels {
 	public static String getElementLabel(IModelElement element, int flags,
 			StringBuffer buf) {
 		if (isFlagged(flags, PREPEND_PATH)) {
-			appendPathLabel(element, buf);
+			appendPathLabel(element, flags, buf);
 			buf.append(CONCAT_STRING);
 		}
 		if (element instanceof IBeansConfig) {
-//			IBeansConfig config = (IBeansConfig) element;
-//			String configName = element.getElementName();
-//			if (config.isElementArchived()) {
-//				ZipEntryStorage storage = new ZipEntryStorage(config);
-//				if (configName.charAt(0) == IBeansConfig
-//						.EXTERNAL_FILE_NAME_PREFIX) {
-//					buf.append(storage.getZipResource()
-//							.getFullPath().toString());
-//				} else {
-//					buf.append(storage.getZipResource()
-//							.getProjectRelativePath().toString());
-//				}
-//				buf.append(" - ");
-//				buf.append(storage.getFullPath().toString());
-//			} else {
-//				buf.append(configName);
-//			}
-			buf.append("beans");
+			appendBeansConfigLabel(element, flags, buf);
 		} else if (element instanceof IBeansComponent) {
 			appendBeansComponentLabel((IBeansComponent) element, buf);
 		} else if (element instanceof IBean) {
@@ -98,32 +87,36 @@ public class BeansModelLabels {
 		}
 		if (isFlagged(flags, APPEND_PATH)) {
 			buf.append(CONCAT_STRING);
-			appendPathLabel(element, buf);
+			appendPathLabel(element, flags, buf);
 		}
 		return buf.toString();
 	}
 
-	protected static void appendPathLabel(IModelElement element,
-			StringBuffer buf) {
-		if (element instanceof IResourceModelElement) {
-			IResource resource = ((IResourceModelElement) element)
-					.getElementResource();
-			buf.append(resource.getFullPath().makeRelative());
-			if (element instanceof IBeanConstructorArgument ||
-					element instanceof IBeanProperty) {
-				buf.append(CONCAT_STRING);
-				buf.append(element.getElementParent().getElementName());
+	protected static void appendBeansConfigLabel(IModelElement element,
+			int flags, StringBuffer buf) {
+		if (isFlagged(flags, DESCRIPTION)) {
+			IBeansConfig config = (IBeansConfig) element;
+			String configName = config.getElementName();
+			if (config.isElementArchived()) {
+				ZipEntryStorage storage = new ZipEntryStorage(config);
+				buf.append(storage.getFullPath());
+				buf.append(" - ");
+				buf.append(storage.getZipResource().getName());
+			} else {
+				buf.append(new Path(configName).lastSegment());
 			}
+		} else {
+			buf.append("beans");
 		}
 	}
 
 	protected static void appendBeansComponentLabel(IBeansComponent component,
 			StringBuffer buf) {
-		IModelSource source = component.getElementSource();
-		if (source instanceof XmlSource) {
-			String nodename = ((XmlSource) source).getNodeName();
+		IModelSourceLocation source = component.getElementSourceLocation();
+		if (source instanceof XmlSourceLocation) {
+			String nodename = ((XmlSourceLocation) source).getNodeName();
 			if (!nodename.equals(component.getElementName())) {
-				buf.append(((XmlSource) source).getNodeName()).append(' ');
+				buf.append(((XmlSourceLocation) source).getNodeName()).append(' ');
 			}
 		}
 		buf.append(component.getElementName());
@@ -131,11 +124,11 @@ public class BeansModelLabels {
 
 	protected static void appendBeanLabel(IBean bean, StringBuffer buf) {
 		if (bean.getElementParent() instanceof IBeansConfig) {
-			IModelSource source = bean.getElementSource();
-			if (source instanceof XmlSource) {
-				String prefix = ((XmlSource) source).getPrefix();
+			IModelSourceLocation source = bean.getElementSourceLocation();
+			if (source instanceof XmlSourceLocation) {
+				String prefix = ((XmlSourceLocation) source).getPrefix();
 				if (prefix != null && prefix.length() > 0) {
-					buf.append(((XmlSource) source).getNodeName()).append(' ');
+					buf.append(((XmlSourceLocation) source).getNodeName()).append(' ');
 				}
 			}
 		}
@@ -175,6 +168,25 @@ public class BeansModelLabels {
 			buf.append('}');
 		} else {
 			buf.append(' ').append(value);
+		}
+	}
+
+	protected static void appendPathLabel(IModelElement element,
+			int flags, StringBuffer buf) {
+		if (element instanceof IResourceModelElement) {
+			IPath path = ((IResourceModelElement) element)
+					.getElementResource().getFullPath().makeRelative();
+			if (isFlagged(flags, DESCRIPTION)
+					&& !((element instanceof IBeansProject)
+							|| (element instanceof IBeansConfigSet))) {
+				path = path.removeLastSegments(1);
+			}
+			buf.append(path);
+			if (element instanceof IBeanConstructorArgument ||
+					element instanceof IBeanProperty) {
+				buf.append(CONCAT_STRING);
+				buf.append(element.getElementParent().getElementName());
+			}
 		}
 	}
 
