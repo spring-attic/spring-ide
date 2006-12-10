@@ -56,7 +56,8 @@ public class BeansWeavingProjectBuilder implements IProjectBuilder {
         for (IFile currentFile : filesToBuild) {
 
             // TODO reduce scope here
-            BeansWeavingMarkerUtils.deleteProblemMarkers(currentFile.getProject());
+            BeansWeavingMarkerUtils.deleteProblemMarkers(currentFile
+                    .getProject());
 
             monitor.worked(work++);
 
@@ -78,51 +79,57 @@ public class BeansWeavingProjectBuilder implements IProjectBuilder {
         IBeansProject project = BeansCorePlugin.getModel().getProject(
                 currentFile.getProject());
         BeansConfig config = (BeansConfig) project.getConfig(currentFile);
-
+        IJavaProject javaProject = BeansWeavingUtils.getJavaProject(config);
         IAopProject aopProject = BeansWeavingPlugin.getModel().getProject(
                 config.getElementResource().getProject());
+
         aopProject.clearReferencesForResource(currentFile);
+
+        ClassLoader weavingClassLoader = BeansWeavingUtils
+                .getProjectClassLoader(javaProject);
+        ClassLoader classLoader = Thread.currentThread()
+                .getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(weavingClassLoader);
 
         try {
             IDOMDocument document = ((DOMModelImpl) StructuredModelManager
-                    .getModelManager().getModelForRead(currentFile)).getDocument();
-            List<BeanAspectDefinition> aspectInfos = BeanAspectDefinitionParser.parse(document, currentFile);
+                    .getModelManager().getModelForRead(currentFile))
+                    .getDocument();
+            List<BeanAspectDefinition> aspectInfos = BeanAspectDefinitionParser
+                    .parse(document, currentFile);
             for (BeanAspectDefinition info : aspectInfos) {
-                buildModel(config, info);
+                buildModel(weavingClassLoader, config, info);
             }
         }
         catch (IOException e) {
         }
         catch (CoreException e) {
         }
+        finally {
+            Thread.currentThread().setContextClassLoader(classLoader);
+        }
         return aopProject;
     }
 
-    private void buildModel(IBeansConfig config, BeanAspectDefinition info) {
+    private void buildModel(ClassLoader loader, IBeansConfig config,
+            BeanAspectDefinition info) {
 
         IResource file = config.getElementResource();
-        IJavaProject project = BeansWeavingUtils.getJavaProject(config);
         IAopProject aopProject = BeansWeavingPlugin.getModel().getProject(
                 config.getElementResource().getProject());
-
-        ClassLoader weavingClassLoader = BeansWeavingUtils
-                .getProjectClassLoader(project);
-        ClassLoader classLoader = Thread.currentThread()
-                .getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(weavingClassLoader);
 
         Set<String> beanClasses = config.getBeanClasses();
         for (String beanClass : beanClasses) {
             try {
 
-                Class targetClass = weavingClassLoader.loadClass(beanClass);
-                Class aspectClass = weavingClassLoader
-                        .loadClass(info.getClassName());
+                Class targetClass = loader.loadClass(beanClass);
+                Class aspectClass = loader.loadClass(info.getClassName());
 
-                Method aspectMethod = BeanUtils.resolveSignature(
-                        info.getMethod(), aspectClass);
+                Method aspectMethod = BeanUtils.resolveSignature(info
+                        .getMethod(), aspectClass);
 
                 AspectJExpressionPointcut pc = new AspectJExpressionPointcut();
+                pc.setPointcutDeclarationScope(targetClass);
                 pc.setExpression(info.getPointcut());
                 if (info.getArgNames() != null) {
                     pc.setParameterNames(info.getArgNames());
@@ -135,27 +142,30 @@ public class BeansWeavingProjectBuilder implements IProjectBuilder {
                 if (info.getReturning() != null) {
                     advice.setReturningName(info.getReturning());
                 }
-                
-                List<IMethod> matchingMethods = advice.getMatches(targetClass);
-
-                for (IMethod method : matchingMethods) {
-                    IType jdtAspectType = BeansModelUtils.getJavaType(
-                            aopProject.getProject(), aspectClass.getName());
-                    IMethod jdtAspectMethod = BeansWeavingUtils.getMethod(
-                            jdtAspectType, info.getMethod(), aspectMethod
-                                    .getParameterTypes().length);
-                    IMethod source = new AopMethodElement(config
-                            .getElementResource(), info.getNode(), info.getDocument(),
-                            jdtAspectMethod);
-                    IAopReference ref = new AopReference(info.getType(), source, method);
-                    aopProject.addAopReference(ref);
+                advice.afterPropertiesSet();
+                try {
+                    List<IMethod> matchingMethods = advice
+                            .getMatches(targetClass);
+                    for (IMethod method : matchingMethods) {
+                        IType jdtAspectType = BeansModelUtils.getJavaType(
+                                aopProject.getProject(), aspectClass.getName());
+                        IMethod jdtAspectMethod = BeansWeavingUtils.getMethod(
+                                jdtAspectType, info.getMethod(), aspectMethod
+                                        .getParameterTypes().length);
+                        IMethod source = new AopMethodElement(config
+                                .getElementResource(), info.getNode(), info
+                                .getDocument(), jdtAspectMethod);
+                        IAopReference ref = new AopReference(info.getType(),
+                                source, method);
+                        aopProject.addAopReference(ref);
+                    }
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
             catch (Exception e) {
                 SpringCore.log(e);
-            }
-            finally {
-                Thread.currentThread().setContextClassLoader(classLoader);
             }
         }
     }
@@ -196,9 +206,9 @@ public class BeansWeavingProjectBuilder implements IProjectBuilder {
         private IProject project;
 
         private String throwing = null;
-        
+
         private String returning = null;
-        
+
         public InternalAspectJAdvice(IProject project,
                 Method aspectJAdviceMethod,
                 AspectJExpressionPointcut pointcutExpression) throws Exception {
@@ -206,7 +216,6 @@ public class BeansWeavingProjectBuilder implements IProjectBuilder {
             String name = aspectJAdviceMethod.getDeclaringClass().getName();
             this.type = BeansModelUtils.getJavaType(project, name);
             this.project = project;
-            afterPropertiesSet();
         }
 
         public List<IMethod> getMatches(Class clazz) {
@@ -236,20 +245,9 @@ public class BeansWeavingProjectBuilder implements IProjectBuilder {
         }
 
         protected ParameterNameDiscoverer createParameterNameDiscoverer() {
-            // We need to discover them, or if that fails, guess,
-            // and if we can't guess with 100% accuracy, fail.
-            PrioritizedParameterNameDiscoverer discoverer = new PrioritizedParameterNameDiscoverer();
-            discoverer.addDiscoverer(new JdtParameterNameDiscoverer(this.type));
-            AspectJAdviceParameterNameDiscoverer adviceParameterNameDiscoverer = 
-                new AspectJAdviceParameterNameDiscoverer(getPointcut().getExpression());
-            adviceParameterNameDiscoverer.setReturningName(this.returning);
-            adviceParameterNameDiscoverer.setThrowingName(this.throwing);
-            // last in chain, so if we're called and we fail, that's bad...
-            adviceParameterNameDiscoverer.setRaiseExceptions(true);
-            discoverer.addDiscoverer(adviceParameterNameDiscoverer);
-            return discoverer;
+            return new JdtParameterNameDiscoverer(this.type);
         }
-        
+
         public void setReturningName(String name) {
             setReturningNameNoCheck(name);
             this.returning = name;
