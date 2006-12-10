@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.PlatformObject;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Wrapper for an entry in a ZIP file.
@@ -162,21 +163,6 @@ public class ZipEntryStorage extends PlatformObject implements IStorage {
 		return true;
 	}
 
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!(obj instanceof ZipEntryStorage)) {
-			return false;
-		}
-		ZipEntryStorage other = (ZipEntryStorage) obj;
-		return fullName.equals(other.fullName);
-	}
-
-	public int hashCode() {
-		return fullName.hashCode();
-	}
-
 	/**
 	 * Adapts to <code>org.eclipse.core.resources.IResource</code>,
 	 * <code>java.io.File</code> or <code>java.util.zip.ZipFile</code>.
@@ -195,6 +181,27 @@ public class ZipEntryStorage extends PlatformObject implements IStorage {
 			}
 		}
 		return super.getAdapter(adapter);
+	}
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof ZipEntryStorage)) {
+			return false;
+		}
+		ZipEntryStorage that = (ZipEntryStorage) other;
+		if (!ObjectUtils.nullSafeEquals(this.fullName, that.fullName))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.zipResource, that.zipResource))
+			return false;
+		return super.equals(other);
+	}
+
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(fullName);
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(zipResource);
+		return 29 * hashCode + super.hashCode();
 	}
 
 	public String toString() {
