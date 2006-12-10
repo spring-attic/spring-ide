@@ -16,8 +16,36 @@
          name="%aopMarker"
          point="org.eclipse.core.resources.markers">
       <persistent value="true"/>
+      <persistent
+            value="true">
+      </persistent>
 	  <super type="org.eclipse.core.resources.textmarker"/>
    </extension>
+   <extension
+   	      id="sourcebeforeadvicemarker"
+   	      name="Before Advice Marker"
+   	      point="org.eclipse.core.resources.markers">
+      <super
+            type="org.springframework.ide.eclipse.aop.ui.aopmarker">
+      </super>
+   </extension>
+   <extension
+   	      id="sourceafteradvicemarker"
+   	      name="After Advice Marker"
+   	      point="org.eclipse.core.resources.markers">
+      <super
+            type="org.springframework.ide.eclipse.aop.ui.aopmarker">
+      </super>
+   </extension>
+   <extension
+   	      id="sourcearoundadvicemarker"
+   	      name="Around Adivce Marker"
+   	      point="org.eclipse.core.resources.markers">
+      <super
+            type="org.springframework.ide.eclipse.aop.ui.aopmarker">
+      </super>
+   </extension>
+
    <extension
    	      id="beforeadvicemarker"
    	      name="Before Advice Marker"
@@ -25,9 +53,22 @@
       <super
             type="org.springframework.ide.eclipse.aop.ui.aopmarker">
       </super>
-      <persistent
-            value="true">
-      </persistent>
+   </extension>
+   <extension
+   	      id="afteradvicemarker"
+   	      name="After Advice Marker"
+   	      point="org.eclipse.core.resources.markers">
+      <super
+            type="org.springframework.ide.eclipse.aop.ui.aopmarker">
+      </super>
+   </extension>
+   <extension
+   	      id="aroundadvicemarker"
+   	      name="Around Adivce Marker"
+   	      point="org.eclipse.core.resources.markers">
+      <super
+            type="org.springframework.ide.eclipse.aop.ui.aopmarker">
+      </super>
    </extension>
 
 	<extension point="org.eclipse.ui.editors.annotationTypes">
@@ -39,6 +80,26 @@
             super="org.springframework.ide.eclipse.aop.ui.aopannotation"
             markerType="org.springframework.ide.eclipse.aop.ui.beforeadvicemarker"
             name="org.springframework.ide.eclipse.aop.ui.beforeAdviceAnnotation"/>
+      <type
+            super="org.springframework.ide.eclipse.aop.ui.aopannotation"
+            markerType="org.springframework.ide.eclipse.aop.ui.afteradvicemarker"
+            name="org.springframework.ide.eclipse.aop.ui.afterAdviceAnnotation"/>            
+      <type
+            super="org.springframework.ide.eclipse.aop.ui.aopannotation"
+            markerType="org.springframework.ide.eclipse.aop.ui.aroundadvicemarker"
+            name="org.springframework.ide.eclipse.aop.ui.aroundAdviceAnnotation"/>            
+      <type
+            super="org.springframework.ide.eclipse.aop.ui.aopannotation"
+            markerType="org.springframework.ide.eclipse.aop.ui.sourcebeforeadvicemarker"
+            name="org.springframework.ide.eclipse.aop.ui.sourceBeforeAdviceAnnotation"/>            
+      <type
+            super="org.springframework.ide.eclipse.aop.ui.aopannotation"
+            markerType="org.springframework.ide.eclipse.aop.ui.sourceafteradvicemarker"
+            name="org.springframework.ide.eclipse.aop.ui.sourceAfterAdviceAnnotation"/>            
+      <type
+            super="org.springframework.ide.eclipse.aop.ui.aopannotation"
+            markerType="org.springframework.ide.eclipse.aop.ui.sourcearoundadvicemarker"
+            name="org.springframework.ide.eclipse.aop.ui.sourceAroundAdviceAnnotation"/>            
     </extension>
 
 	<extension
@@ -57,9 +118,29 @@
             	colorPreferenceValue="222,109,33"
             	presentationLayer="4">
  	     </specification>
- 	     <specification
+   		<specification
+			annotationType="org.springframework.ide.eclipse.aop.ui.sourceBeforeAdviceAnnotation"
+			icon="icons/markers/source_before_advice.gif">
+		</specification>
+		<specification
+			annotationType="org.springframework.ide.eclipse.aop.ui.sourceAfterAdviceAnnotation"
+			icon="icons/markers/source_after_advice.gif">
+		</specification>
+		<specification
+			annotationType="org.springframework.ide.eclipse.aop.ui.sourceAroundAdviceAnnotation"
+			icon="icons/markers/source_around_advice.gif">
+		</specification>
+	    <specification
 			annotationType="org.springframework.ide.eclipse.aop.ui.beforeAdviceAnnotation"
 			icon="icons/markers/before_advice.gif">
-		 </specification>
+		</specification>
+		<specification
+			annotationType="org.springframework.ide.eclipse.aop.ui.afterAdviceAnnotation"
+			icon="icons/markers/after_advice.gif">
+		</specification>
+		<specification
+			annotationType="org.springframework.ide.eclipse.aop.ui.aroundAdviceAnnotation"
+			icon="icons/markers/around_advice.gif">
+		</specification>
 	</extension>
 </plugin>

@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Spring IDE AOP support
-Bundle-SymbolicName: org.springframework.ide.eclipse.beans.ui.aop; singleton:=true
+Bundle-SymbolicName: org.springframework.ide.eclipse.aop.ui;singleton:=true
 Bundle-Version: 1.9.0
 Bundle-Activator: org.springframework.ide.eclipse.aop.ui.BeansWeavingPlugin
 Bundle-Localization: plugin

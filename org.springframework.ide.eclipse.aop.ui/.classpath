@@ -6,9 +6,9 @@
 	<classpathentry kind="lib" path="/org.springframework.ide.eclipse.core/spring-support.jar"/>
 	<classpathentry kind="lib" path="/org.springframework.ide.eclipse.core/spring-remoting.jar"/>
 	<classpathentry kind="lib" path="/org.springframework.ide.eclipse.core/spring-dao.jar"/>
-	<classpathentry kind="lib" path="/org.springframework.ide.eclipse.core/spring-core.jar" sourcepath="/Users/torsten/Develop/EclipseWorkspace.32/spring/src"/>
+	<classpathentry kind="lib" path="/org.springframework.ide.eclipse.core/spring-core.jar" sourcepath="D:/lib/spring-framework-2.0/src"/>
 	<classpathentry kind="lib" path="/org.springframework.ide.eclipse.core/spring-beans.jar" sourcepath="/Users/torsten/Develop/spring-framework-2.0.1/src"/>
-	<classpathentry kind="lib" path="/org.springframework.ide.eclipse.core/spring-aop.jar" sourcepath="/Users/cd/Development/Java/lib/spring-framework-2.0.1/src"/>
+	<classpathentry kind="lib" path="/org.springframework.ide.eclipse.core/spring-aop.jar" sourcepath="D:/lib/spring-framework-2.0/src"/>
 	<classpathentry kind="lib" path="/org.springframework.ide.eclipse.core/commons-logging.jar"/>
 	<classpathentry kind="lib" path="/org.springframework.ide.eclipse.core/aspectjweaver.jar"/>
 	<classpathentry kind="lib" path="/org.springframework.ide.eclipse.core/aopalliance.jar"/>
