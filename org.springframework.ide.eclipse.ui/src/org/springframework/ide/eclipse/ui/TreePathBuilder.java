@@ -1,0 +1,73 @@
+package org.springframework.ide.eclipse.ui;
+
+import java.util.LinkedList;
+
+import org.eclipse.jface.viewers.TreePath;
+
+public class TreePathBuilder {
+
+	private final LinkedList<Object> segments = new LinkedList<Object>();
+	
+	public TreePathBuilder() {
+	}
+
+	public TreePathBuilder(Object segment) {
+		segments.add(segment);
+	}
+
+	public TreePathBuilder(TreePathBuilder builder) {
+		segments.addAll(builder.segments);
+	}
+
+	public TreePathBuilder(TreePath path) {
+		for (int i = 0; i < path.getSegmentCount(); i++) {
+			segments.addLast(path.getSegment(i));
+		}
+	}
+
+	public void addParent(Object segment) throws IllegalArgumentException {
+		if (segments.contains(segment)) {
+			throw createCyclicPathException(segment);
+		}
+		segments.addFirst(segment);
+	}
+
+	public void addChild(Object segment) throws IllegalArgumentException {
+		if (segments.contains(segment)) {
+			throw createCyclicPathException(segment);
+		}
+		segments.addLast(segment);
+	}
+
+	public TreePath getPath() {
+		return new TreePath(segments.toArray());
+	}
+
+	public TreePath getParentPath() {
+		LinkedList parentSegments = new LinkedList<Object>(segments);
+		parentSegments.removeLast();
+		return new TreePath(parentSegments.toArray());
+	}
+
+	public Object getLastSegment() {
+		return segments.getLast();
+	}
+
+	public Object getFirstSegment() {
+		return segments.getFirst();
+	}
+
+	public String toString() {
+		StringBuffer buffer = new StringBuffer();
+		for (Object segment : segments) {
+			buffer.append(segment).append("::");
+		}
+		return buffer.toString();
+	}
+
+	protected IllegalArgumentException createCyclicPathException(
+			Object segment) {
+		return new IllegalArgumentException("Cyclic in path '" + this
+				+ "' while adding segment '" + segment + "'");
+	}
+}
