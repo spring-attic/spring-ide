@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.preference.IPreferencePage;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -49,6 +50,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springframework.ide.eclipse.ui.TreePathBuilder;
 import org.springframework.ide.eclipse.ui.editors.ZipEntryEditorInput;
 
 /**
@@ -196,5 +198,22 @@ public final class BeansUIUtils {
 			}
 		}
 		return null;
+	}
+
+	public static TreePath createTreePath(IModelElement element) {
+		TreePathBuilder path = new TreePathBuilder();
+		while (element != null && element.getElementParent() != null) {
+			path.addParent(element);
+			if (element instanceof IBeansConfig) {
+				IBeansConfig config = (IBeansConfig) element;
+				if (config.isElementArchived()) {
+					path.addParent(new ZipEntryStorage(config));
+				} else {
+					path.addParent(config.getElementResource());
+				}
+			}
+			element = element.getElementParent();
+		}
+		return path.getPath();
 	}
 }
