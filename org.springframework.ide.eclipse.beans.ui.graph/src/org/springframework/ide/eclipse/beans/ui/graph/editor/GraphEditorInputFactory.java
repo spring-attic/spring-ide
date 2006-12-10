@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2006 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ 
+
 package org.springframework.ide.eclipse.beans.ui.graph.editor;
 
 import org.eclipse.core.runtime.IAdaptable;
@@ -16,7 +32,9 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  * The workbench will automatically create instances of this class as required.
  * It is not intended to be instantiated or subclassed by the client.
  * </p>
+ * 
  * @see org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput
+ * @author Torsten Juergeleit
  */
 public class GraphEditorInputFactory implements IElementFactory {
 
@@ -24,8 +42,8 @@ public class GraphEditorInputFactory implements IElementFactory {
 	 * Factory id. The workbench plug-in registers a factory by this name with
 	 * the "org.eclipse.ui.elementFactories" extension point.
 	 */
-	private static final String ID_FACTORY = BeansGraphPlugin.PLUGIN_ID +
-														".editor.inputfactory";
+	private static final String ID_FACTORY = BeansGraphPlugin.PLUGIN_ID
+			+ ".editor.inputfactory";
 	/**
 	 * Tag for the ID of the element.
 	 */
