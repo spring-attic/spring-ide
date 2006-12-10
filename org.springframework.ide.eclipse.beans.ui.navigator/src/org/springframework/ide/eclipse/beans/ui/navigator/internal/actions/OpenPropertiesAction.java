@@ -20,14 +20,14 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.TreePath;
-import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
+import org.springframework.ide.eclipse.beans.ui.navigator.BeansExplorer;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
@@ -39,29 +39,32 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  */
 public class OpenPropertiesAction extends Action {
 
-	private ISelectionProvider provider;
+	private ICommonActionExtensionSite site;
 	private IProject project;
 	private int block = 0;
 
-	public OpenPropertiesAction(IWorkbenchPage page,
-			ISelectionProvider provider) {
+	public OpenPropertiesAction(ICommonActionExtensionSite site) {
+		this.site = site;
 		setText("&Properties");	// TODO externalize text
-		this.provider = provider;
     }
 
 	public boolean isEnabled() {
-		ISelection selection = provider.getSelection();
+		ISelection selection = site.getViewSite().getSelectionProvider()
+				.getSelection();
 		if (selection instanceof ITreeSelection) {
 			ITreeSelection tSelection = (ITreeSelection) selection;
 			if (tSelection.size() == 1) {
 				Object tElement = tSelection.getFirstElement();
 				IModelElement element = null;
 				if (tElement instanceof IModelElement) {
-					element = ((IModelElement) tSelection.getFirstElement());
+					element = (IModelElement) tElement;
 				} else if (tElement instanceof IFile) {
-					element = BeansCorePlugin.getModel().getConfig(
-							(IFile) tElement);
-				} else if (tElement instanceof IFile) {
+					if (site.getViewSite().getId().equals(
+							BeansExplorer.BEANS_EXPLORER_ID)) {
+						element = BeansCorePlugin.getModel().getConfig(
+								(IFile) tElement);
+					}
+				} else if (tElement instanceof ZipEntryStorage) {
 					element = BeansModelUtils
 							.getConfig((ZipEntryStorage) tElement);
 				}
@@ -69,8 +72,8 @@ public class OpenPropertiesAction extends Action {
 					project = BeansModelUtils.getProject(element).getProject();
 					block = getProjectPropertyPageBlock(
 							tSelection.getPaths()[0]);
+					return true;
 				}
-				return true;
 			}
 		}
 		return false;

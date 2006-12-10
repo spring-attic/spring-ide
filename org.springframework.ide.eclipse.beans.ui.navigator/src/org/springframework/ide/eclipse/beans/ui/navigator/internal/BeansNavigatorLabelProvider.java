@@ -16,12 +16,15 @@
 
 package org.springframework.ide.eclipse.beans.ui.navigator.internal;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonLabelProvider;
-import org.eclipse.ui.navigator.INavigatorContentExtension;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabels;
+import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
@@ -33,18 +36,32 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 		implements ICommonLabelProvider {
 
-	private INavigatorContentExtension contentExtension;
-
 	public String getDescription(Object element) {
 		if (element instanceof IModelElement) {
 			return BeansModelLabels.getElementLabel((IModelElement) element,
-					BeansModelLabels.APPEND_PATH);
+					BeansModelLabels.APPEND_PATH
+							| BeansModelLabels.DESCRIPTION);
+		} else if (element instanceof IFile) {
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
+					(IFile) element);
+			if (config != null) {
+				return BeansModelLabels.getElementLabel(config,
+						BeansModelLabels.APPEND_PATH
+								| BeansModelLabels.DESCRIPTION);
+			}
+		} else if (element instanceof ZipEntryStorage) {
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
+					((ZipEntryStorage) element).getAbsoluteName());
+			if (config != null) {
+				return BeansModelLabels.getElementLabel(config,
+						BeansModelLabels.APPEND_PATH
+								| BeansModelLabels.DESCRIPTION);
+			}
 		}
 		return null;
 	}
 
 	public void init(ICommonContentExtensionSite config) {
-		contentExtension = config.getExtension();
 	}
 
 	public void restoreState(IMemento memento) {

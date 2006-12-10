@@ -16,46 +16,65 @@
 
 package org.springframework.ide.eclipse.beans.ui.navigator.internal.actions;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.navigator.ICommonActionExtensionSite;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditor;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput;
+import org.springframework.ide.eclipse.beans.ui.navigator.BeansExplorer;
+import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
- * Shows the BeansGraph for the currently selected {@link IModelElement} in
- * the Project Explorer.
+ * Shows the BeansGraph for the currently selected {@link IModelElement} in the
+ * Project Explorer.
+ * 
  * @author Torsten Juergeleit
  */
 public class ShowBeansGraphAction extends Action {
 
-	private ISelectionProvider provider;
-	private IEditorInput input;
+	private ICommonActionExtensionSite site;
+	private IResourceModelElement element;
+	private TreePath path;
 
-	public ShowBeansGraphAction(IWorkbenchPage page,
-			ISelectionProvider provider) {
+	public ShowBeansGraphAction(ICommonActionExtensionSite site) {
+		this.site = site;
 		setText("Show &Graph");	// TODO externalize text
-		this.provider = provider;
     }
 
 	public boolean isEnabled() {
-		ISelection selection = provider.getSelection();
+		ISelection selection = site.getViewSite().getSelectionProvider()
+				.getSelection();
 		if (selection instanceof ITreeSelection) {
 			ITreeSelection tSelection = (ITreeSelection) selection;
-			if (tSelection.size() == 1
-					&& tSelection.getFirstElement() instanceof IModelElement) {
-				IModelElement element = ((IModelElement) tSelection
-						.getFirstElement());
-				input = getEditorInput(element, tSelection.getPaths()[0]);
-				if (input != null) {
+			if (tSelection.size() == 1) {
+				Object tElement = tSelection.getFirstElement();
+				IModelElement rElement = null;
+				if (tElement instanceof IModelElement) {
+					rElement = (IModelElement) tElement;
+				} else if (tElement instanceof IFile) {
+					if (site.getViewSite().getId().equals(
+							BeansExplorer.BEANS_EXPLORER_ID)) {
+						rElement = BeansCorePlugin.getModel().getConfig(
+								(IFile) tElement);
+					}
+				} else if (tElement instanceof ZipEntryStorage) {
+					rElement = BeansModelUtils
+							.getConfig((ZipEntryStorage) tElement);
+				}
+				if (rElement != null) {
+					element = (IResourceModelElement) rElement;
+					path = tSelection.getPaths()[0];
 					return true;
 				}
 			}
@@ -64,10 +83,6 @@ public class ShowBeansGraphAction extends Action {
 	}
 
 	public void run() {
-		SpringUIUtils.openInEditor(input, GraphEditor.EDITOR_ID);
-	}
-
-	private IEditorInput getEditorInput(IModelElement element, TreePath path) {
 		IEditorInput input;
 		if (element instanceof IBeansConfig
 				|| element instanceof IBeansConfigSet) {
@@ -84,6 +99,6 @@ public class ShowBeansGraphAction extends Action {
 			}
 			input = new GraphEditorInput(element, context);
 		}
-		return input;
+		SpringUIUtils.openInEditor(input, GraphEditor.EDITOR_ID);
 	}
 }

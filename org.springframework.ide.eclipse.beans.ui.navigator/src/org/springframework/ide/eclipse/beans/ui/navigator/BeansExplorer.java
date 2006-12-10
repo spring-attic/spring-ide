@@ -9,7 +9,13 @@ import org.eclipse.ui.navigator.CommonNavigator;
 import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.ShowInContext;
 
+/**
+ * @TODO add support for getting source location from XML editor
+ */
 public class BeansExplorer extends CommonNavigator implements IShowInTarget {
+
+	public static final String BEANS_EXPLORER_ID = Activator.PLUGIN_ID
+			+ ".BeansExplorer";
 
 	Object getElementOfInput(IEditorInput input) {
 		if (input instanceof IFileEditorInput) {

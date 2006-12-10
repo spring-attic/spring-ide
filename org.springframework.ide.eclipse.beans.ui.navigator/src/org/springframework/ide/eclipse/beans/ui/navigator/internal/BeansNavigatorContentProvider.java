@@ -37,7 +37,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.ui.navigator.BeansExplorer;
+import org.springframework.ide.eclipse.beans.ui.navigator.Activator;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -49,6 +49,9 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
  */
 public class BeansNavigatorContentProvider implements ICommonContentProvider,
 		IModelChangeListener {
+
+	public static final String BEANS_EXPLORER_CONTENT_ID = Activator.PLUGIN_ID
+			+ ".beansExplorerContent";
 
 	private INavigatorContentExtension contentExtension;
 	private StructuredViewer viewer;
@@ -136,7 +139,7 @@ public class BeansNavigatorContentProvider implements ICommonContentProvider,
 			// For the BeasProjectExplorer returning the corresponding file for
 			// every IBeansConfig
 			if (element instanceof IBeansConfig && !contentExtension.getId()
-					.equals(BeansExplorer.BEANS_EXPLORER_CONTENT_ID)) {
+					.equals(BEANS_EXPLORER_CONTENT_ID)) {
 				return ((IBeansConfig) element).getElementResource();
 			}
 			return ((IModelElement) element).getElementParent();
@@ -174,8 +177,7 @@ public class BeansNavigatorContentProvider implements ICommonContentProvider,
 
 	public void elementChanged(ModelChangeEvent event) {
 		IModelElement element = event.getElement();
-		if (!contentExtension.getId().equals(
-				BeansExplorer.BEANS_EXPLORER_CONTENT_ID)
+		if (!contentExtension.getId().equals(BEANS_EXPLORER_CONTENT_ID)
 				&& (element instanceof IBeansProject
 						|| element instanceof IBeansConfig)) {
 			refreshViewer(((IResourceModelElement) element)

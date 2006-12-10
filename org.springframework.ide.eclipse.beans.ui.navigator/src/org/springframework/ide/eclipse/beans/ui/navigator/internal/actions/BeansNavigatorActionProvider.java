@@ -23,8 +23,6 @@ import org.eclipse.ui.navigator.CommonActionProvider;
 import org.eclipse.ui.navigator.ICommonActionConstants;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.eclipse.ui.navigator.ICommonMenuConstants;
-import org.eclipse.ui.navigator.ICommonViewerSite;
-import org.eclipse.ui.navigator.ICommonViewerWorkbenchSite;
 
 /**
  * @author Torsten Juergeleit
@@ -39,21 +37,9 @@ public class BeansNavigatorActionProvider extends CommonActionProvider {
 	}
 
 	public void init(ICommonActionExtensionSite site) {
-
-		ICommonViewerSite viewSite = site.getViewSite();
-
-		// Make sure we're running in a workbench part instead of a dialog
-		if (viewSite instanceof ICommonViewerWorkbenchSite) {
-			ICommonViewerWorkbenchSite workbenchSite =
-					(ICommonViewerWorkbenchSite) viewSite;
-			openConfigAction = new OpenConfigFileAction(
-					workbenchSite.getPage(), workbenchSite
-							.getSelectionProvider());
-			openPropertiesAction = new OpenPropertiesAction(workbenchSite
-					.getPage(), workbenchSite.getSelectionProvider());
-			showBeansGraphAction = new ShowBeansGraphAction(workbenchSite
-					.getPage(), workbenchSite.getSelectionProvider());
-		}
+		openConfigAction = new OpenConfigFileAction(site);
+		openPropertiesAction = new OpenPropertiesAction(site);
+		showBeansGraphAction = new ShowBeansGraphAction(site);
 	}
 
 	public void fillContextMenu(IMenuManager menu) {

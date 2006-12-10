@@ -19,13 +19,13 @@ package org.springframework.ide.eclipse.beans.ui.navigator.internal.actions;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
+import org.springframework.ide.eclipse.beans.ui.navigator.BeansExplorer;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
@@ -37,33 +37,38 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  */
 public class OpenConfigFileAction extends Action {
 
-	private ISelectionProvider provider;
+	private ICommonActionExtensionSite site;
 	private IResourceModelElement element;
 
-	public OpenConfigFileAction(IWorkbenchPage page,
-			ISelectionProvider provider) {
+	public OpenConfigFileAction(ICommonActionExtensionSite site) {
+		this.site = site;
 		setText("Op&en");	// TODO externalize text
-		this.provider = provider;
 	}
 
 	public boolean isEnabled() {
-		ISelection selection = provider.getSelection();
+		ISelection selection = site.getViewSite().getSelectionProvider()
+				.getSelection();
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection sSelection = (IStructuredSelection) selection;
 			if (sSelection.size() == 1) {
 				Object sElement = sSelection.getFirstElement();
+				IResourceModelElement rElement = null;
 				if (sElement instanceof IResourceModelElement) {
-					element = ((IResourceModelElement) sSelection
+					rElement = ((IResourceModelElement) sSelection
 						.getFirstElement());
 				} else if (sElement instanceof IFile) {
-					element = BeansCorePlugin.getModel().getConfig(
-							(IFile) sElement);
+					if (site.getViewSite().getId().equals(
+							BeansExplorer.BEANS_EXPLORER_ID)) {
+						rElement = BeansCorePlugin.getModel().getConfig(
+								(IFile) sElement);
+					}
 				} else if (sElement instanceof ZipEntryStorage) {
-					element = BeansModelUtils
+					rElement = BeansModelUtils
 							.getConfig((ZipEntryStorage) sElement);
 				}
-				if (element instanceof ISourceModelElement
-						|| element instanceof IBeansConfig) {
+				if (rElement instanceof ISourceModelElement
+						|| rElement instanceof IBeansConfig) {
+					element = rElement;
 					return true;
 				}
 			}
