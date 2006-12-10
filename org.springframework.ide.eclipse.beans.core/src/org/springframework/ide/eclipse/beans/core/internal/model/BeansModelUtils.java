@@ -23,9 +23,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -43,6 +45,8 @@ import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
+import org.springframework.ide.eclipse.beans.core.BeansTags;
+import org.springframework.ide.eclipse.beans.core.BeansTags.Tag;
 import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker.ErrorCode;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference.BeanType;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -58,6 +62,8 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.util.Assert;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * Helper methods for working with the BeansCoreModel.
@@ -926,6 +932,67 @@ public final class BeansModelUtils {
 				storage.getZipResource().getProject());
 		if (project != null) {
 			return project.getConfig(storage.getFullName());
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the <code>IResourceModelElement</code> for a given object.
+	 */
+	public static final IResourceModelElement getResourceModelElement(
+			Object obj) {
+		if (obj instanceof IFile) {
+			return BeansCorePlugin.getModel().getConfig((IFile) obj);
+		} else if (obj instanceof IProject) {
+			return BeansCorePlugin.getModel().getProject((IProject) obj);
+		} else if (obj instanceof IAdaptable) {
+			IResource resource = (IResource) ((IAdaptable) obj)
+					.getAdapter(IResource.class);
+			if (resource instanceof IFile) {
+				return BeansCorePlugin.getModel().getConfig((IFile) resource);
+			} else if (resource instanceof IProject) {
+				return BeansCorePlugin.getModel().getConfig((IFile) obj);
+			}
+		}
+		return null;
+	}
+
+	public static final IModelElement getModelElement(Element element,
+			IModelElement context) {
+		Node parent = element.getParentNode();
+		if (BeansTags.isTag(element, Tag.BEAN)
+				&& BeansTags.isTag(parent, Tag.BEANS)) {
+			String beanName = getBeanName(element);
+			if (beanName != null) {
+				return BeansModelUtils.getBean(beanName, context);
+			}
+		} else if (BeansTags.isTag(element, Tag.PROPERTY)
+				&& BeansTags.isTag(parent, Tag.BEAN)
+				&& BeansTags.isTag(parent.getParentNode(), Tag.BEANS)) {
+			String beanName = getBeanName((Element) parent);
+			if (beanName != null) {
+				IBean bean = BeansModelUtils.getBean(beanName, context);
+				if (bean != null) {
+					Node nameAttribute = element.getAttributeNode("name");
+					if (nameAttribute != null
+							&& nameAttribute.getNodeValue() != null) {
+						return bean.getProperty(nameAttribute.getNodeValue());
+					}
+					return bean;
+				}
+			}
+		}
+		return null;
+	}
+
+	private static final String getBeanName(Element element) {
+		Node idAttribute = element.getAttributeNode("id");
+		if (idAttribute != null && idAttribute.getNodeValue() != null) {
+			return idAttribute.getNodeValue();
+		}
+		Node nameAttribute = element.getAttributeNode("name");
+		if (nameAttribute != null && nameAttribute.getNodeValue() != null) {
+			return nameAttribute.getNodeValue();
 		}
 		return null;
 	}
