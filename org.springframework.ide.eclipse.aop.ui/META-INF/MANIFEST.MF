@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Spring IDE AOP support
 Bundle-SymbolicName: org.springframework.ide.eclipse.aop.ui;singleton:=true
 Bundle-Version: 1.9.0
-Bundle-Activator: org.springframework.ide.eclipse.aop.ui.BeansWeavingPlugin
+Bundle-Activator: org.springframework.ide.eclipse.aop.ui.BeansAopPlugin
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -15,5 +15,11 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.wst.sse.core,
  org.eclipse.wst.xml.core,
  org.eclipse.wst.xml_core.feature.source,
- org.springframework.ide.eclipse.beans.ui.editor
+ org.springframework.ide.eclipse.beans.ui.editor,
+ org.eclipse.contribution.xref.ui,
+ org.eclipse.contribution.xref.core,
+ org.eclipse.ui.ide,
+ org.eclipse.ajdt.ui,
+ org.eclipse.ajdt.core,
+ org.springframework.ide.eclipse.ui
 Eclipse-LazyStart: true

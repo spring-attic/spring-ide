@@ -21,95 +21,109 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 
 @SuppressWarnings("restriction")
 public class BeanAspectDefinition {
-    
-    private IAopReference.ADVICE_TYPES type;
-    
-    private String pointcut;
-    
-    private String[] argNames;
-    
-    private String throwing;
-    
-    private String returning;
-    
-    private IDOMNode node;
-    
-    private IDOMDocument document;
-    
-    private String method;
-    
-    private String className;
 
-    public String getClassName() {
-        return className;
-    }
+	private IAopReference.ADVICE_TYPES type;
 
-    public void setClassName(String className) {
-        this.className = className;
-    }
+	private String pointcut;
 
-    public String getMethod() {
-        return method;
-    }
+	private String[] argNames;
 
-    public void setMethod(String method) {
-        this.method = method;
-    }
+	private String throwing;
 
-    public String[] getArgNames() {
-        return argNames;
-    }
+	private String returning;
 
-    public void setArgNames(String[] argNames) {
-        this.argNames = argNames;
-    }
+	private IDOMNode node;
 
-    public String getPointcut() {
-        return pointcut;
-    }
+	private IDOMDocument document;
 
-    public void setPointcut(String pointcut) {
-        this.pointcut = pointcut;
-    }
+	private String method;
 
-    public String getReturning() {
-        return returning;
-    }
+	private String className;
 
-    public void setReturning(String returning) {
-        this.returning = returning;
-    }
+	private int lineNumber = -1;
 
-    public String getThrowing() {
-        return throwing;
-    }
+	public String getClassName() {
+		return className;
+	}
 
-    public void setThrowing(String throwing) {
-        this.throwing = throwing;
-    }
+	public void setClassName(String className) {
+		this.className = className;
+	}
 
-    public IAopReference.ADVICE_TYPES getType() {
-        return type;
-    }
+	public String getMethod() {
+		return method;
+	}
 
-    public void setType(IAopReference.ADVICE_TYPES type) {
-        this.type = type;
-    }
+	public void setMethod(String method) {
+		this.method = method;
+	}
 
-    public IDOMDocument getDocument() {
-        return document;
-    }
+	public String[] getArgNames() {
+		return argNames;
+	}
 
-    public void setDocument(IDOMDocument document) {
-        this.document = document;
-    }
+	public void setArgNames(String[] argNames) {
+		this.argNames = argNames;
+	}
 
-    public IDOMNode getNode() {
-        return node;
-    }
+	public String getPointcut() {
+		return pointcut;
+	}
 
-    public void setNode(IDOMNode node) {
-        this.node = node;
-    }
-    
+	public void setPointcut(String pointcut) {
+		this.pointcut = pointcut;
+	}
+
+	public String getReturning() {
+		return returning;
+	}
+
+	public void setReturning(String returning) {
+		this.returning = returning;
+	}
+
+	public String getThrowing() {
+		return throwing;
+	}
+
+	public void setThrowing(String throwing) {
+		this.throwing = throwing;
+	}
+
+	public IAopReference.ADVICE_TYPES getType() {
+		return type;
+	}
+
+	public void setType(IAopReference.ADVICE_TYPES type) {
+		this.type = type;
+	}
+
+	public IDOMDocument getDocument() {
+		return document;
+	}
+
+	public void setDocument(IDOMDocument document) {
+		this.document = document;
+	}
+
+	public IDOMNode getNode() {
+		return node;
+	}
+
+	public void setNode(IDOMNode node) {
+		this.node = node;
+	}
+
+	public int getLineNumber() {
+		if (this.lineNumber == -1) {
+			this.lineNumber = this.document.getStructuredDocument()
+					.getLineOfOffset(this.node.getStartOffset()) + 1;
+		}
+		return lineNumber;
+	}
+
+	public void setLineNumber(int lineNumber) {
+		this.lineNumber = lineNumber;
+	}
+
 }

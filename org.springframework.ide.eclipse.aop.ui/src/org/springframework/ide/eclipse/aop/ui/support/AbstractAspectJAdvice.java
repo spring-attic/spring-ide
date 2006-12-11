@@ -49,6 +49,8 @@ import org.springframework.util.StringUtils;
  * @author Adrian Colyer
  * @author Juergen Hoeller
  * @since 2.0
+ * 
+ * TODO remove this class as soon as Juergens change is in CVS
  */
 public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedenceInformation, InitializingBean {
 	

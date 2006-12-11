@@ -15,33 +15,50 @@
  */
 package org.springframework.ide.eclipse.aop.core.model.internal;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IMethod;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
+import org.springframework.ide.eclipse.aop.ui.BeanAspectDefinition;
 
 public class AopReference implements IAopReference {
-    
-    private ADVICE_TYPES type;
-    
-    private IMethod source;
-    
-    private IMethod target;
-    
-    public AopReference(ADVICE_TYPES type, IMethod source, IMethod target) {
-        this.type = type;
-        this.source = source;
-        this.target = target;
-    }
 
-    public ADVICE_TYPES getAdviceType() {
-        return this.type;
-    }
+	private ADVICE_TYPES type;
 
-    public IMethod getSource() {
-        return this.source;
-    }
+	private IMethod source;
 
-    public IMethod getTarget() {
-        return this.target;
-    }
+	private IMethod target;
+
+	private BeanAspectDefinition definition;
+
+	private IResource file;
+	
+	public AopReference(ADVICE_TYPES type, IMethod source, IMethod target,
+			BeanAspectDefinition def, IResource file) {
+		this.type = type;
+		this.source = source;
+		this.target = target;
+		this.definition = def;
+		this.file = file;
+	}
+
+	public BeanAspectDefinition getDefinition() {
+		return definition;
+	}
+
+	public ADVICE_TYPES getAdviceType() {
+		return this.type;
+	}
+
+	public IMethod getSource() {
+		return this.source;
+	}
+
+	public IMethod getTarget() {
+		return this.target;
+	}
+
+	public IResource getResource() {
+		return file;
+	}
 
 }

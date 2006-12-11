@@ -15,8 +15,9 @@
  */
 package org.springframework.ide.eclipse.aop.core.model;
 
-import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IMethod;
+import org.springframework.ide.eclipse.aop.ui.BeanAspectDefinition;
 
 public interface IAopReference {
 
@@ -27,6 +28,10 @@ public interface IAopReference {
     ADVICE_TYPES getAdviceType();
     
     IMethod getSource();
+    
+    BeanAspectDefinition getDefinition();
+    
+    IResource getResource();
     
     IMethod getTarget();
 }

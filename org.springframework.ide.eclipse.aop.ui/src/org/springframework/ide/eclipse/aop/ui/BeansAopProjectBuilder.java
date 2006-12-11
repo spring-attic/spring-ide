@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2006 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.ide.eclipse.aop.ui;
 
 import java.io.IOException;
@@ -20,14 +36,11 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
-import org.springframework.aop.aspectj.AspectJAdviceParameterNameDiscoverer;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.core.model.internal.AopMethodElement;
 import org.springframework.ide.eclipse.aop.core.model.internal.AopReference;
 import org.springframework.ide.eclipse.aop.ui.support.AbstractAspectJAdvice;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
@@ -40,11 +53,11 @@ import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 
 @SuppressWarnings("restriction")
-public class BeansWeavingProjectBuilder implements IProjectBuilder {
+public class BeansAopProjectBuilder implements IProjectBuilder {
 
     public void build(IFile file, IProgressMonitor monitor) {
 
-        Set<IFile> filesToBuild = BeansWeavingUtils.getFilesToBuild(file);
+        Set<IFile> filesToBuild = BeansAopUtils.getFilesToBuild(file);
         if (filesToBuild.size() == 0 && BeansCoreUtils.isBeansConfig(file)) {
             filesToBuild.add(file);
         }
@@ -56,7 +69,7 @@ public class BeansWeavingProjectBuilder implements IProjectBuilder {
         for (IFile currentFile : filesToBuild) {
 
             // TODO reduce scope here
-            BeansWeavingMarkerUtils.deleteProblemMarkers(currentFile
+            BeansAopMarkerUtils.deleteProblemMarkers(currentFile
                     .getProject());
 
             monitor.worked(work++);
@@ -69,7 +82,7 @@ public class BeansWeavingProjectBuilder implements IProjectBuilder {
 
             List<IAopReference> references = aopProject.getAllReferences();
             for (IAopReference reference : references) {
-                BeansWeavingMarkerUtils.createMarker(reference);
+                BeansAopMarkerUtils.createMarker(reference);
             }
             monitor.done();
         }
@@ -79,13 +92,13 @@ public class BeansWeavingProjectBuilder implements IProjectBuilder {
         IBeansProject project = BeansCorePlugin.getModel().getProject(
                 currentFile.getProject());
         BeansConfig config = (BeansConfig) project.getConfig(currentFile);
-        IJavaProject javaProject = BeansWeavingUtils.getJavaProject(config);
-        IAopProject aopProject = BeansWeavingPlugin.getModel().getProject(
+        IJavaProject javaProject = BeansAopUtils.getJavaProject(config);
+        IAopProject aopProject = BeansAopPlugin.getModel().getProject(
                 config.getElementResource().getProject());
 
         aopProject.clearReferencesForResource(currentFile);
 
-        ClassLoader weavingClassLoader = BeansWeavingUtils
+        ClassLoader weavingClassLoader = BeansAopUtils
                 .getProjectClassLoader(javaProject);
         ClassLoader classLoader = Thread.currentThread()
                 .getContextClassLoader();
@@ -115,7 +128,7 @@ public class BeansWeavingProjectBuilder implements IProjectBuilder {
             BeanAspectDefinition info) {
 
         IResource file = config.getElementResource();
-        IAopProject aopProject = BeansWeavingPlugin.getModel().getProject(
+        IAopProject aopProject = BeansAopPlugin.getModel().getProject(
                 config.getElementResource().getProject());
 
         Set<String> beanClasses = config.getBeanClasses();
@@ -149,14 +162,11 @@ public class BeansWeavingProjectBuilder implements IProjectBuilder {
                     for (IMethod method : matchingMethods) {
                         IType jdtAspectType = BeansModelUtils.getJavaType(
                                 aopProject.getProject(), aspectClass.getName());
-                        IMethod jdtAspectMethod = BeansWeavingUtils.getMethod(
+                        IMethod jdtAspectMethod = BeansAopUtils.getMethod(
                                 jdtAspectType, info.getMethod(), aspectMethod
                                         .getParameterTypes().length);
-                        IMethod source = new AopMethodElement(config
-                                .getElementResource(), info.getNode(), info
-                                .getDocument(), jdtAspectMethod);
                         IAopReference ref = new AopReference(info.getType(),
-                                source, method);
+                        		jdtAspectMethod, method, info, file);
                         aopProject.addAopReference(ref);
                     }
                 }
@@ -183,7 +193,7 @@ public class BeansWeavingProjectBuilder implements IProjectBuilder {
             int argCount = method.getParameterTypes().length;
             IMethod jdtMethod;
             try {
-                jdtMethod = BeansWeavingUtils.getMethod(type, methodName,
+                jdtMethod = BeansAopUtils.getMethod(type, methodName,
                         argCount);
                 return jdtMethod.getParameterNames();
             }
@@ -225,7 +235,7 @@ public class BeansWeavingProjectBuilder implements IProjectBuilder {
             List<IMethod> matchingMethod = new ArrayList<IMethod>();
             for (Method method : methods) {
                 if (getPointcut().matches(method, clazz)) {
-                    IMethod jdtMethod = BeansWeavingUtils.getMethod(
+                    IMethod jdtMethod = BeansAopUtils.getMethod(
                             jdtTargetClass, method.getName(), method
                                     .getParameterTypes().length);
                     if (jdtMethod != null) {

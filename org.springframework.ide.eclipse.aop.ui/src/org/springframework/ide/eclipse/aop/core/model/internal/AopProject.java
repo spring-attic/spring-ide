@@ -48,7 +48,7 @@ public class AopProject implements IAopProject {
     public void clearReferencesForResource(IResource resource) {
         List<IAopReference> toRemove = new ArrayList<IAopReference>();
         for (IAopReference reference : this.references) {
-            if (reference.getSource().getResource().equals(resource)) {
+            if (reference.getResource().equals(resource)) {
                 toRemove.add(reference);
             }
         }

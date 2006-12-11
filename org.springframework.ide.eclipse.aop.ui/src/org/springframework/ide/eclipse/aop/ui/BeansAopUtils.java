@@ -51,7 +51,7 @@ import org.springframework.ide.eclipse.core.SpringCore;
  * 
  * @author Torsten Juergeleit
  */
-public class BeansWeavingUtils {
+public class BeansAopUtils {
 
     public static void createProblemMarker(IResource resource, String message,
             int severity, int line, String markerId) {
