@@ -215,10 +215,6 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
 
         private IProject project;
 
-        private String throwing = null;
-
-        private String returning = null;
-
         public InternalAspectJAdvice(IProject project,
                 Method aspectJAdviceMethod,
                 AspectJExpressionPointcut pointcutExpression) throws Exception {
@@ -260,12 +256,10 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
 
         public void setReturningName(String name) {
             setReturningNameNoCheck(name);
-            this.returning = name;
         }
 
         public void setThrowingName(String name) {
             setThrowingNameNoCheck(name);
-            this.throwing = name;
         }
     }
 }
