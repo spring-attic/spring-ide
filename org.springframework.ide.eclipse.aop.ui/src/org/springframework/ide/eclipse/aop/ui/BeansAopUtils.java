@@ -116,7 +116,7 @@ public class BeansAopUtils {
                     count++;
                     if (l == line) {
                         resource.findMarker(marker.getId()).delete();
-                        createProblemMarker(resource, count + " AOP marker at this line", 1,
+                        createProblemMarker(resource, count + " Spring AOP marker at this line", 1,
                                 line, BeansAopMarkerUtils.PROBLEM_MARKER, count);
                         return;
                     }
