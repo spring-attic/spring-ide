@@ -1,17 +1,17 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.springframework.ide.eclipse.aop.core.model.internal;
 
@@ -32,7 +32,7 @@ public class AopModel implements IAopModel {
     private Map<IProject, IAopProject> projects = new HashMap<IProject, IAopProject>();
 
     private List<IAdviceChangedListener> listener = new LinkedList<IAdviceChangedListener>();
-    
+
     public void addProject(IProject project, IAopProject aopProject) {
         this.projects.put(project, aopProject);
     }
@@ -52,26 +52,45 @@ public class AopModel implements IAopModel {
         return null;
     }
 
-	public boolean isAdvised(IJavaElement je) {
-		IProject project = je.getJavaProject().getProject();
-		
-		IAopProject aopProject = getProject(project);
-		List<IAopReference> references = aopProject.getAllReferences();
-		
-		for (IAopReference reference : references) {
-			if (reference.getTarget().equals(je)) {
-				return true;
-			}
-		}
-		return false;
-	}
+    public boolean isAdvised(IJavaElement je) {
+        IProject project = je.getJavaProject().getProject();
 
-	public void registerAdivceListener(IAdviceChangedListener listener) {
-		this.listener.add(listener);
-	}
+        IAopProject aopProject = getProject(project);
+        List<IAopReference> references = aopProject.getAllReferences();
 
-	public void unregisterAdivceListener(IAdviceChangedListener listener) {
-		this.listener.remove(listener);
-	}
+        for (IAopReference reference : references) {
+            if (reference.getTarget().equals(je)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isAdvice(IJavaElement je) {
+        return getAdviceDefinition(je).size() > 0;
+    }
+
+    public void registerAdivceListener(IAdviceChangedListener listener) {
+        this.listener.add(listener);
+    }
+
+    public void unregisterAdivceListener(IAdviceChangedListener listener) {
+        this.listener.remove(listener);
+    }
+
+    public List<IAopReference> getAdviceDefinition(IJavaElement je) {
+        List<IAopReference> advices = new LinkedList<IAopReference>();
+        IProject project = je.getJavaProject().getProject();
+
+        IAopProject aopProject = getProject(project);
+        List<IAopReference> references = aopProject.getAllReferences();
+
+        for (IAopReference reference : references) {
+            if (reference.getSource().equals(je)) {
+                advices.add(reference);
+            }
+        }
+        return advices;
+    }
 
 }

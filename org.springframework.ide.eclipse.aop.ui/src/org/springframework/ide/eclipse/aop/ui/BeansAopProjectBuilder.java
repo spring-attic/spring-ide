@@ -1,17 +1,17 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package org.springframework.ide.eclipse.aop.ui;
@@ -43,11 +43,13 @@ import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.internal.AopReference;
 import org.springframework.ide.eclipse.aop.ui.decorator.BeansAdviceImageDecorator;
+import org.springframework.ide.eclipse.aop.ui.decorator.BeansAdviceTextDecorator;
 import org.springframework.ide.eclipse.aop.ui.support.AbstractAspectJAdvice;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.SpringCore;
@@ -70,8 +72,7 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
         for (IFile currentFile : filesToBuild) {
 
             // TODO reduce scope here
-            BeansAopMarkerUtils.deleteProblemMarkers(currentFile
-                    .getProject());
+            BeansAopMarkerUtils.deleteProblemMarkers(currentFile.getProject());
 
             monitor.worked(work++);
 
@@ -85,10 +86,11 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
             for (IAopReference reference : references) {
                 BeansAopMarkerUtils.createMarker(reference);
             }
-            
+
             // update images
             BeansAdviceImageDecorator.update();
-            
+            BeansAdviceTextDecorator.update();
+
             monitor.done();
         }
     }
@@ -136,11 +138,11 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
         IAopProject aopProject = BeansAopPlugin.getModel().getProject(
                 config.getElementResource().getProject());
 
-        Set<String> beanClasses = config.getBeanClasses();
-        for (String beanClass : beanClasses) {
+        Set<IBean> beans = config.getBeans();
+        for (IBean bean : beans) {
             try {
 
-                Class targetClass = loader.loadClass(beanClass);
+                Class targetClass = loader.loadClass(bean.getClassName());
                 Class aspectClass = loader.loadClass(info.getClassName());
 
                 Method aspectMethod = BeanUtils.resolveSignature(info
@@ -171,7 +173,7 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
                                 jdtAspectType, info.getMethod(), aspectMethod
                                         .getParameterTypes().length);
                         IAopReference ref = new AopReference(info.getType(),
-                        		jdtAspectMethod, method, info, file);
+                                jdtAspectMethod, method, info, file);
                         aopProject.addAopReference(ref);
                     }
                 }
@@ -198,8 +200,7 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
             int argCount = method.getParameterTypes().length;
             IMethod jdtMethod;
             try {
-                jdtMethod = BeansAopUtils.getMethod(type, methodName,
-                        argCount);
+                jdtMethod = BeansAopUtils.getMethod(type, methodName, argCount);
                 return jdtMethod.getParameterNames();
             }
             catch (JavaModelException e) {
@@ -236,8 +237,8 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
             List<IMethod> matchingMethod = new ArrayList<IMethod>();
             for (Method method : methods) {
                 if (getPointcut().matches(method, clazz)) {
-                    IMethod jdtMethod = BeansAopUtils.getMethod(
-                            jdtTargetClass, method.getName(), method
+                    IMethod jdtMethod = BeansAopUtils
+                            .getMethod(jdtTargetClass, method.getName(), method
                                     .getParameterTypes().length);
                     if (jdtMethod != null) {
                         matchingMethod.add(jdtMethod);

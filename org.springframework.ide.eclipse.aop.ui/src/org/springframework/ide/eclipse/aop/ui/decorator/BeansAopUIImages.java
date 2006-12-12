@@ -95,7 +95,9 @@ public class BeansAopUIImages {
 
 	public static final String IMG_OBJS_POINTCUT = NAME_PREFIX + "pointcut_def.gif";
 	
-	public static final String IMG_OBJS_ADVICE_OVERLAY = NAME_PREFIX + "adviceoverlay.gif";
+	public static final String IMG_OVR_ADVICE = NAME_PREFIX + "adviceoverlay.gif";
+
+    public static final String IMG_OVR_SPRING = NAME_PREFIX + "springoverlay.gif";
 
 	private final static String STRUCTURE = "structure/"; // basic colors - size 16x16
 
@@ -120,8 +122,11 @@ public class BeansAopUIImages {
 	public static final ImageDescriptor DESC_OBJS_POINTCUT = createManaged(STRUCTURE,
 			IMG_OBJS_POINTCUT);
 
-	public static final ImageDescriptor DESC_OBJS_ADVICE_OVERLAY = createManaged(STRUCTURE,
-			IMG_OBJS_ADVICE_OVERLAY);
+	public static final ImageDescriptor DESC_OVR_ADVICE = createManaged(STRUCTURE,
+			IMG_OVR_ADVICE);
+
+    public static final ImageDescriptor DESC_OVR_SPRING = createManaged(STRUCTURE,
+	        IMG_OVR_SPRING);
 
 	/**
 	 * Returns the <code>Image<code> identified by the given key,

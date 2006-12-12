@@ -23,7 +23,7 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 public class BeanAspectDefinition {
 
 	private IAopReference.ADVICE_TYPES type;
-
+	
 	private String pointcut;
 
 	private String[] argNames;
@@ -41,8 +41,18 @@ public class BeanAspectDefinition {
 	private String className;
 
 	private int lineNumber = -1;
+    
+    private String aspectName;
 
-	public String getClassName() {
+	public String getAspectName() {
+        return aspectName;
+    }
+
+    public void setAspectName(String aspectName) {
+        this.aspectName = aspectName;
+    }
+
+    public String getClassName() {
 		return className;
 	}
 

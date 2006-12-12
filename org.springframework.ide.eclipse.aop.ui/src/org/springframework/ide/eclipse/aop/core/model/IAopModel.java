@@ -30,7 +30,11 @@ public interface IAopModel {
     void addProject(IProject project, IAopProject aopProject);
 
 	boolean isAdvised(IJavaElement je);
-	
+    
+    boolean isAdvice(IJavaElement je);
+    
+    List<IAopReference> getAdviceDefinition(IJavaElement je);
+    
 	void registerAdivceListener(IAdviceChangedListener listener);
 	
 	void unregisterAdivceListener(IAdviceChangedListener listener);

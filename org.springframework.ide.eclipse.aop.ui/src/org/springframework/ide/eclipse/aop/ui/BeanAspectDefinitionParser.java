@@ -93,18 +93,21 @@ public class BeanAspectDefinitionParser {
                     BeanAspectDefinition info = parseAspect(pointcuts, rootPointcuts, aspectNode,
                             IAopReference.ADVICE_TYPES.BEFORE);
                     info.setClassName(className);
+                    info.setAspectName(beanRef);
                     aspectInfos.add(info);
                 }
                 else if ("around".equals(aspectNode.getLocalName())) {
                     BeanAspectDefinition info = parseAspect(pointcuts, rootPointcuts, aspectNode,
                             IAopReference.ADVICE_TYPES.AROUND);
                     info.setClassName(className);
+                    info.setAspectName(beanRef);
                     aspectInfos.add(info);
                 }
                 else if ("after".equals(aspectNode.getLocalName())) {
                     BeanAspectDefinition info = parseAspect(pointcuts, rootPointcuts, aspectNode,
                             IAopReference.ADVICE_TYPES.AFTER);
                     info.setClassName(className);
+                    info.setAspectName(beanRef);
                     aspectInfos.add(info);
                 }
                 else if ("after-returning".equals(aspectNode.getLocalName())) {
@@ -114,6 +117,7 @@ public class BeanAspectDefinitionParser {
                             aspectNode, "returning");
                     info.setReturning(returning);
                     info.setClassName(className);
+                    info.setAspectName(beanRef);
                     aspectInfos.add(info);
                 }
                 else if ("after-throwing".equals(aspectNode.getLocalName())) {
@@ -123,12 +127,14 @@ public class BeanAspectDefinitionParser {
                             "throwing");
                     info.setThrowing(throwing);
                     info.setClassName(className);
+                    info.setAspectName(beanRef);
                     aspectInfos.add(info);
                 }
                 else if ("around".equals(aspectNode.getLocalName())) {
                     BeanAspectDefinition info = parseAspect(pointcuts, rootPointcuts, aspectNode,
                             IAopReference.ADVICE_TYPES.AROUND);
                     info.setClassName(className);
+                    info.setAspectName(beanRef);
                     aspectInfos.add(info);
                 }
             }

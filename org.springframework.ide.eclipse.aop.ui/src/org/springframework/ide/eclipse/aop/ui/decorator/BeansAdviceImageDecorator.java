@@ -36,7 +36,7 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
 public class BeansAdviceImageDecorator implements ILightweightLabelDecorator {
 
 	public static final String DECORATOR_ID = BeansAopPlugin.PLUGIN_ID
-			+ ".decorator.advicedecorator";
+			+ ".decorator.adviceimagedecorator";
 
 	private ListenerList fListeners;
 
@@ -48,16 +48,20 @@ public class BeansAdviceImageDecorator implements ILightweightLabelDecorator {
 		if ((element instanceof IMethod || element instanceof SourceType)) {
 			IJavaElement je = (IJavaElement) element;
 			IJavaProject jp = je.getJavaProject();
-			// only query the model if the element is in an AJ project
+			// only query the model if the element is in an Spring project
 
 			if ((jp != null)
 					&& SpringCoreUtils.isSpringProject(jp.getProject())) {
 				if (BeansAopPlugin.getModel().isAdvised(je)) {
-					decoration.addOverlay(BeansAopUIImages.DESC_OBJS_ADVICE_OVERLAY,
+					decoration.addOverlay(BeansAopUIImages.DESC_OVR_ADVICE,
 							IDecoration.TOP_LEFT);
 				}
+                else if (BeansAopPlugin.getModel().isAdvice(je)) {
+				    decoration.addOverlay(BeansAopUIImages.DESC_OVR_SPRING,
+				            IDecoration.TOP_LEFT);
+				}
 			}
-		}
+		} 
 	}
 
 	public void addListener(ILabelProviderListener listener) {

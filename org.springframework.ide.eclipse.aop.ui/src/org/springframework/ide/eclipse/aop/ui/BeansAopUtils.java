@@ -1,17 +1,17 @@
 /*
  * Copyright 2002-2006 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package org.springframework.ide.eclipse.aop.ui;
@@ -39,6 +39,8 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector.Statics;
@@ -53,21 +55,70 @@ import org.springframework.ide.eclipse.core.SpringCore;
  */
 public class BeansAopUtils {
 
+    public static String getJavaElementLinkName(IJavaElement je) {
+        // use element name instead, qualified with parent
+        if (je instanceof IMethod) {
+            return je.getParent().getElementName() + '.'
+                    + readableName((IMethod) je);
+        }
+        else if (je.getParent() != null) {
+            return je.getParent().getElementName() + '.' + je.getElementName();
+        }
+        return je.getElementName();
+    }
+
+    /**
+     */
+    private static String readableName(IMethod method) {
+
+        StringBuffer buffer = new StringBuffer(method.getElementName());
+        buffer.append('(');
+        String[] parameterTypes = method.getParameterTypes();
+        int length;
+        if (parameterTypes != null && (length = parameterTypes.length) > 0) {
+            for (int i = 0; i < length; i++) {
+                buffer.append(Signature.toString(parameterTypes[i]));
+                if (i < length - 1) {
+                    buffer.append(", "); //$NON-NLS-1$
+                }
+            }
+        }
+        buffer.append(')');
+        return buffer.toString();
+    }
+
+    public static String getElementDescription(IAopReference reference) {
+        StringBuffer buf = new StringBuffer("<");
+        buf.append(reference.getDefinition().getAspectName());
+        buf.append("> [");
+        buf.append(reference.getResource().getProjectRelativePath().toString());
+        buf.append("]");
+        return buf.toString();
+    }
+    
     public static void createProblemMarker(IResource resource, String message,
             int severity, int line, String markerId) {
+        createProblemMarker(resource, message, severity, line, markerId, 1);
+    }
+
+    public static void createProblemMarker(IResource resource, String message,
+            int severity, int line, String markerId, int markerCount) {
         if (resource != null && resource.isAccessible()) {
             try {
 
                 // First check if specified marker already exists
-                IMarker[] markers = resource.findMarkers(markerId, false,
+                IMarker[] markers = resource.findMarkers(
+                        BeansAopMarkerUtils.PROBLEM_MARKER, true,
                         IResource.DEPTH_ZERO);
                 for (IMarker marker : markers) {
                     int l = marker.getAttribute(IMarker.LINE_NUMBER, -1);
+                    int count = marker.getAttribute("marker_count", 1);
+                    count++;
                     if (l == line) {
-                        String msg = marker.getAttribute(IMarker.MESSAGE, "");
-                        if (msg.equals(message)) {
-                            return;
-                        }
+                        resource.findMarker(marker.getId()).delete();
+                        createProblemMarker(resource, count + " AOP marker at this line", 1,
+                                line, BeansAopMarkerUtils.PROBLEM_MARKER, count);
+                        return;
                     }
                 }
 
@@ -76,6 +127,7 @@ public class BeansAopUtils {
                 Map<String, Object> attributes = new HashMap<String, Object>();
                 attributes.put(IMarker.MESSAGE, message);
                 attributes.put(IMarker.SEVERITY, new Integer(severity));
+                attributes.put("marker_count", markerCount);
                 if (line > 0) {
                     attributes.put(IMarker.LINE_NUMBER, new Integer(line));
                 }
@@ -125,7 +177,7 @@ public class BeansAopUtils {
             return project.getRawLocation();
         }
     }
-    
+
     public static IMethod getMethod(IType type, String methodName, int argCount) {
         try {
             return Introspector.findMethod(type, methodName, argCount, true,
@@ -135,7 +187,7 @@ public class BeansAopUtils {
         }
         return null;
     }
-    
+
     public static Set<IFile> getFilesToBuild(IFile file) {
         Set<IFile> resourcesToBuild = new HashSet<IFile>();
         if (file.getName().endsWith(".java")) {
@@ -154,7 +206,8 @@ public class BeansAopUtils {
                         Set<String> allBeanClasses = config.getBeanClasses();
                         for (String className : allBeanClasses) {
                             if (typeNames.contains(className)) {
-                                resourcesToBuild.add((IFile) config.getElementResource());
+                                resourcesToBuild.add((IFile) config
+                                        .getElementResource());
                             }
                         }
                     }

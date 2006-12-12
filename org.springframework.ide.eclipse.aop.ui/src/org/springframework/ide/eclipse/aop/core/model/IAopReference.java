@@ -34,4 +34,5 @@ public interface IAopReference {
     IResource getResource();
     
     IMethod getTarget();
+    
 }

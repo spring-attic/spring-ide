@@ -183,12 +183,12 @@
    
       <extension
          point="org.eclipse.ui.decorators">
-      <!--decorator
+      <decorator
             lightweight="false"
-            label="%ajElementDecorator.label"
-            class="org.eclipse.ajdt.internal.ui.ImageDecorator"
+            label="Spring Advice Text decorator"
+            class="org.springframework.ide.eclipse.aop.ui.decorator.BeansAdviceTextDecorator"
             state="true"
-            id="org.eclipse.ajdt.ui.decorator">
+            id="org.springframework.ide.eclipse.aop.ui.decorator.decorator">
          <description>
 			%ajElementDecorator.description
 		 </description>
@@ -197,11 +197,11 @@
                   name="java.lang.Object">
             </objectClass>
          </enablement>
-      </decorator--> 
+      </decorator> 
       <decorator
             lightweight="true"
             label="Spring Advice decorator"
-            class="org.springframework.ide.eclipse.aop.ui.decorator.BeansAdviceImageDecoratorrator"
+            class="org.springframework.ide.eclipse.aop.ui.decorator.BeansAdviceImageDecorator"
             state="true"
             adaptable="true"
             id="org.springframework.ide.eclipse.aop.ui.decorator.advicedecorator">

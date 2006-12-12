@@ -31,7 +31,7 @@ public class AopReference implements IAopReference {
 	private BeanAspectDefinition definition;
 
 	private IResource file;
-	
+    
 	public AopReference(ADVICE_TYPES type, IMethod source, IMethod target,
 			BeanAspectDefinition def, IResource file) {
 		this.type = type;
@@ -39,8 +39,8 @@ public class AopReference implements IAopReference {
 		this.target = target;
 		this.definition = def;
 		this.file = file;
-	}
-
+    }
+    
 	public BeanAspectDefinition getDefinition() {
 		return definition;
 	}
@@ -60,5 +60,4 @@ public class AopReference implements IAopReference {
 	public IResource getResource() {
 		return file;
 	}
-
 }

@@ -95,8 +95,7 @@ public class BeansAopReferenceProvider implements IXReferenceProvider {
 				}
 				refs.put(reference.getSource(), ref);
 				BeansAopNode associate = new BeansAopNode(
-						reference.getTarget(), reference.getTarget()
-								.getElementName(), reference);
+                        BeansAopNode.TYPE.TARGET, reference);
 				ref.getAssociatesList().add(associate);
 			}
 			else if (reference.getTarget().equals(je)) {
@@ -109,8 +108,7 @@ public class BeansAopReferenceProvider implements IXReferenceProvider {
 				}
 				refs.put(reference.getTarget(), ref);
 				BeansAopNode associate = new BeansAopNode(
-						reference.getSource(), reference.getSource()
-						.getElementName(), reference);
+						BeansAopNode.TYPE.SOURCE, reference);
 				ref.getAssociatesList().add(associate);
 			}
 		}
