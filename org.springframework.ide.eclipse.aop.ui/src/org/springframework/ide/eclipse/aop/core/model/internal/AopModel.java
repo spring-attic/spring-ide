@@ -16,17 +16,23 @@
 package org.springframework.ide.eclipse.aop.core.model.internal;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jdt.core.IJavaElement;
+import org.springframework.ide.eclipse.aop.core.model.IAdviceChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopModel;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 
 public class AopModel implements IAopModel {
 
     private Map<IProject, IAopProject> projects = new HashMap<IProject, IAopProject>();
 
+    private List<IAdviceChangedListener> listener = new LinkedList<IAdviceChangedListener>();
+    
     public void addProject(IProject project, IAopProject aopProject) {
         this.projects.put(project, aopProject);
     }
@@ -45,5 +51,27 @@ public class AopModel implements IAopModel {
     public List<IAopProject> getProjects() {
         return null;
     }
+
+	public boolean isAdvised(IJavaElement je) {
+		IProject project = je.getJavaProject().getProject();
+		
+		IAopProject aopProject = getProject(project);
+		List<IAopReference> references = aopProject.getAllReferences();
+		
+		for (IAopReference reference : references) {
+			if (reference.getTarget().equals(je)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void registerAdivceListener(IAdviceChangedListener listener) {
+		this.listener.add(listener);
+	}
+
+	public void unregisterAdivceListener(IAdviceChangedListener listener) {
+		this.listener.remove(listener);
+	}
 
 }

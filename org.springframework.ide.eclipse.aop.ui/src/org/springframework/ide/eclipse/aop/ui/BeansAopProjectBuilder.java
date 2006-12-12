@@ -42,6 +42,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.internal.AopReference;
+import org.springframework.ide.eclipse.aop.ui.decorator.BeansAdviceImageDecorator;
 import org.springframework.ide.eclipse.aop.ui.support.AbstractAspectJAdvice;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
@@ -84,6 +85,10 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
             for (IAopReference reference : references) {
                 BeansAopMarkerUtils.createMarker(reference);
             }
+            
+            // update images
+            BeansAdviceImageDecorator.update();
+            
             monitor.done();
         }
     }

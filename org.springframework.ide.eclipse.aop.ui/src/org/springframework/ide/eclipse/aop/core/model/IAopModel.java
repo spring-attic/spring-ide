@@ -19,6 +19,7 @@ package org.springframework.ide.eclipse.aop.core.model;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jdt.core.IJavaElement;
 
 public interface IAopModel {
     
@@ -27,5 +28,11 @@ public interface IAopModel {
     List<IAopProject> getProjects();
     
     void addProject(IProject project, IAopProject aopProject);
+
+	boolean isAdvised(IJavaElement je);
+	
+	void registerAdivceListener(IAdviceChangedListener listener);
+	
+	void unregisterAdivceListener(IAdviceChangedListener listener);
     
 }

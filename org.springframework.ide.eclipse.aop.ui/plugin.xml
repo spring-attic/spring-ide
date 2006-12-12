@@ -180,5 +180,40 @@
          </action>
       </viewerContribution>
    </extension>
+   
+      <extension
+         point="org.eclipse.ui.decorators">
+      <!--decorator
+            lightweight="false"
+            label="%ajElementDecorator.label"
+            class="org.eclipse.ajdt.internal.ui.ImageDecorator"
+            state="true"
+            id="org.eclipse.ajdt.ui.decorator">
+         <description>
+			%ajElementDecorator.description
+		 </description>
+         <enablement>
+            <objectClass
+                  name="java.lang.Object">
+            </objectClass>
+         </enablement>
+      </decorator--> 
+      <decorator
+            lightweight="true"
+            label="Spring Advice decorator"
+            class="org.springframework.ide.eclipse.aop.ui.decorator.BeansAdviceImageDecoratorrator"
+            state="true"
+            adaptable="true"
+            id="org.springframework.ide.eclipse.aop.ui.decorator.advicedecorator">
+         <description>
+			%advisesDecorator.description
+		 </description>
+         <enablement>
+            <objectClass
+                  name="java.lang.Object">
+            </objectClass>
+         </enablement>
+      </decorator>
+   </extension>
     
 </plugin>
