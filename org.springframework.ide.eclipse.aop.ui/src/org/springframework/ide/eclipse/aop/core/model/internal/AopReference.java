@@ -18,7 +18,7 @@ package org.springframework.ide.eclipse.aop.core.model.internal;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IMethod;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition;
+import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 
 public class AopReference implements IAopReference {
 
@@ -28,12 +28,12 @@ public class AopReference implements IAopReference {
 
 	private IMethod target;
 
-	private IBeanAspectDefinition definition;
+	private IAspectDefinition definition;
 
 	private IResource file;
     
 	public AopReference(ADVICE_TYPES type, IMethod source, IMethod target,
-			IBeanAspectDefinition def, IResource file) {
+			IAspectDefinition def, IResource file) {
 		this.type = type;
 		this.source = source;
 		this.target = target;
@@ -41,7 +41,7 @@ public class AopReference implements IAopReference {
 		this.file = file;
     }
     
-	public IBeanAspectDefinition getDefinition() {
+	public IAspectDefinition getDefinition() {
 		return definition;
 	}
 

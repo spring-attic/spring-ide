@@ -17,7 +17,6 @@ package org.springframework.ide.eclipse.aop.core.model;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IMethod;
-import org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition;
 
 public interface IAopReference {
 
@@ -29,7 +28,7 @@ public interface IAopReference {
     
     IMethod getSource();
     
-    IBeanAspectDefinition getDefinition();
+    IAspectDefinition getDefinition();
     
     IResource getResource();
     

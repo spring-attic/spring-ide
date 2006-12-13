@@ -40,7 +40,9 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
+import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.internal.AopReference;
+import org.springframework.ide.eclipse.aop.core.parser.BeanAspectDefinitionParser;
 import org.springframework.ide.eclipse.aop.ui.decorator.BeansAdviceImageDecorator;
 import org.springframework.ide.eclipse.aop.ui.decorator.BeansAdviceTextDecorator;
 import org.springframework.ide.eclipse.aop.ui.support.AbstractAspectJAdvice;
@@ -114,9 +116,9 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
             IDOMDocument document = ((DOMModelImpl) StructuredModelManager
                     .getModelManager().getModelForRead(currentFile))
                     .getDocument();
-            List<IBeanAspectDefinition> aspectInfos = BeanAspectDefinitionParser
+            List<IAspectDefinition> aspectInfos = BeanAspectDefinitionParser
                     .parse(document, currentFile);
-            for (IBeanAspectDefinition info : aspectInfos) {
+            for (IAspectDefinition info : aspectInfos) {
                 buildModel(weavingClassLoader, config, info);
             }
         }
@@ -131,7 +133,7 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
     }
 
     private void buildModel(ClassLoader loader, IBeansConfig config,
-            IBeanAspectDefinition info) {
+            IAspectDefinition info) {
 
         IResource file = config.getElementResource();
         IAopProject aopProject = BeansAopPlugin.getModel().getProject(

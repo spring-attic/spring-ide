@@ -22,8 +22,8 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
+import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.ui.BeansAopUtils;
-import org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition;
 
 public class BeansAopNode implements IAdaptable, IXReferenceNode {
 
@@ -80,7 +80,7 @@ public class BeansAopNode implements IAdaptable, IXReferenceNode {
         return null;
     }
 
-    public IBeanAspectDefinition getDefinition() {
+    public IAspectDefinition getDefinition() {
         return this.reference.getDefinition();
     }
 

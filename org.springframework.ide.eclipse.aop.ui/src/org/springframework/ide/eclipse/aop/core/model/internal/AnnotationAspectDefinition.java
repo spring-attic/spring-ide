@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.springframework.ide.eclipse.aop.ui;
+package org.springframework.ide.eclipse.aop.core.model.internal;
 
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 

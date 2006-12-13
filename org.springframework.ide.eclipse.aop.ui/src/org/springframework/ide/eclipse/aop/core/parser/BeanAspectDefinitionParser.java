@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.ide.eclipse.aop.ui;
+package org.springframework.ide.eclipse.aop.core.parser;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -42,7 +42,10 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
+import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.core.model.internal.AnnotationAspectDefinition;
+import org.springframework.ide.eclipse.aop.core.model.internal.BeanAspectDefinition;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -164,8 +167,8 @@ public class BeanAspectDefinitionParser {
     private static final String AJC_MAGIC = "ajc$";
 
     private static void addDocument(IDOMDocument document,
-            List<IBeanAspectDefinition> aspectInfos) {
-        for (IBeanAspectDefinition info : aspectInfos) {
+            List<IAspectDefinition> aspectInfos) {
+        for (IAspectDefinition info : aspectInfos) {
             if (info instanceof BeanAspectDefinition) {
                 ((BeanAspectDefinition) info).setDocument(document);
             }
@@ -255,9 +258,9 @@ public class BeanAspectDefinitionParser {
         }
     }
 
-    public static List<IBeanAspectDefinition> parse(
+    public static List<IAspectDefinition> parse(
             final IDOMDocument document, IFile file) {
-        final List<IBeanAspectDefinition> aspectInfos = new ArrayList<IBeanAspectDefinition>();
+        final List<IAspectDefinition> aspectInfos = new ArrayList<IAspectDefinition>();
 
         parseXmlAspects(document, file, aspectInfos);
         parseAnnotationAspects(document, file, aspectInfos);
@@ -267,7 +270,7 @@ public class BeanAspectDefinitionParser {
     }
 
     private static void parseAnnotationAspects(final IDOMDocument document,
-            IFile file, final List<IBeanAspectDefinition> aspectInfos) {
+            IFile file, final List<IAspectDefinition> aspectInfos) {
         NodeList list;
         list = document.getDocumentElement().getElementsByTagNameNS(
                 "http://www.springframework.org/schema/aop",
@@ -311,7 +314,7 @@ public class BeanAspectDefinitionParser {
     }
 
     private static void parseXmlAspects(final IDOMDocument document,
-            IFile file, final List<IBeanAspectDefinition> aspectInfos) {
+            IFile file, final List<IAspectDefinition> aspectInfos) {
         NodeList list = document.getDocumentElement().getElementsByTagNameNS(
                 "http://www.springframework.org/schema/aop", "config");
 
@@ -334,7 +337,7 @@ public class BeanAspectDefinitionParser {
     private static void createAnnotationAspectDefinition(
             final IDOMDocument document, final Node bean, final String id,
             final String className, final Class aspectClass,
-            final List<IBeanAspectDefinition> aspectInfos) {
+            final List<IAspectDefinition> aspectInfos) {
         ReflectionUtils.doWithMethods(aspectClass,
                 new ReflectionUtils.MethodCallback() {
                     public void doWith(Method method)
@@ -429,7 +432,7 @@ public class BeanAspectDefinitionParser {
 
     private static void parseAspects(IFile file, Node child,
             Map<String, String> rootPointcuts,
-            List<IBeanAspectDefinition> aspectInfos) {
+            List<IAspectDefinition> aspectInfos) {
         String beanRef = BeansEditorUtils.getAttribute(child, "ref");
         String className = BeansEditorUtils.getClassNameForBean(file, child
                 .getOwnerDocument(), beanRef);

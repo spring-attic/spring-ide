@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.springframework.ide.eclipse.aop.ui;
+package org.springframework.ide.eclipse.aop.core.model.internal;
 
 import java.lang.reflect.Method;
 
@@ -23,9 +23,10 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.beans.BeanUtils;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
+import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 
 @SuppressWarnings("restriction")
-public class BeanAspectDefinition implements IBeanAspectDefinition {
+public class BeanAspectDefinition implements IAspectDefinition {
 
     private IAopReference.ADVICE_TYPES type;
 

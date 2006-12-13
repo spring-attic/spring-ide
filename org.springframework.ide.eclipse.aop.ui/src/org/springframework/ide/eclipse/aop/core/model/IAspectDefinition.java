@@ -14,14 +14,13 @@
  * the License.
  */
 
-package org.springframework.ide.eclipse.aop.ui;
+package org.springframework.ide.eclipse.aop.core.model;
 
 import java.lang.reflect.Method;
 
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
-import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 
-public interface IBeanAspectDefinition {
+public interface IAspectDefinition {
 
     Class getAdviceClass() throws ClassNotFoundException;
 
