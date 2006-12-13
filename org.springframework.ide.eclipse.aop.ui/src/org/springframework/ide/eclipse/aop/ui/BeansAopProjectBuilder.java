@@ -37,7 +37,6 @@ import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
-import org.springframework.beans.BeanUtils;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
@@ -115,9 +114,9 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
             IDOMDocument document = ((DOMModelImpl) StructuredModelManager
                     .getModelManager().getModelForRead(currentFile))
                     .getDocument();
-            List<BeanAspectDefinition> aspectInfos = BeanAspectDefinitionParser
+            List<IBeanAspectDefinition> aspectInfos = BeanAspectDefinitionParser
                     .parse(document, currentFile);
-            for (BeanAspectDefinition info : aspectInfos) {
+            for (IBeanAspectDefinition info : aspectInfos) {
                 buildModel(weavingClassLoader, config, info);
             }
         }
@@ -132,7 +131,7 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
     }
 
     private void buildModel(ClassLoader loader, IBeansConfig config,
-            BeanAspectDefinition info) {
+            IBeanAspectDefinition info) {
 
         IResource file = config.getElementResource();
         IAopProject aopProject = BeansAopPlugin.getModel().getProject(
@@ -143,19 +142,9 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
             try {
 
                 Class targetClass = loader.loadClass(bean.getClassName());
-                Class aspectClass = loader.loadClass(info.getClassName());
-
-                Method aspectMethod = BeanUtils.resolveSignature(info
-                        .getMethod(), aspectClass);
-
-                AspectJExpressionPointcut pc = new AspectJExpressionPointcut();
-                pc.setPointcutDeclarationScope(targetClass);
-                pc.setExpression(info.getPointcut());
-                if (info.getArgNames() != null) {
-                    pc.setParameterNames(info.getArgNames());
-                }
                 InternalAspectJAdvice advice = new InternalAspectJAdvice(file
-                        .getProject(), aspectMethod, pc);
+                        .getProject(), info.getAdviceMethod(), info
+                        .getPointcut());
                 if (info.getThrowing() != null) {
                     advice.setThrowingName(info.getThrowing());
                 }
@@ -163,15 +152,17 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
                     advice.setReturningName(info.getReturning());
                 }
                 advice.afterPropertiesSet();
+
                 try {
                     List<IMethod> matchingMethods = advice
                             .getMatches(targetClass);
                     for (IMethod method : matchingMethods) {
                         IType jdtAspectType = BeansModelUtils.getJavaType(
-                                aopProject.getProject(), aspectClass.getName());
-                        IMethod jdtAspectMethod = BeansAopUtils.getMethod(
-                                jdtAspectType, info.getMethod(), aspectMethod
-                                        .getParameterTypes().length);
+                                aopProject.getProject(), info.getClassName());
+                        IMethod jdtAspectMethod = BeansAopUtils
+                                .getMethod(jdtAspectType, info.getMethod(),
+                                        info.getAdviceMethod()
+                                                .getParameterTypes().length);
                         IAopReference ref = new AopReference(info.getType(),
                                 jdtAspectMethod, method, info, file);
                         aopProject.addAopReference(ref);

@@ -88,7 +88,7 @@ public class BeansAopUtils {
     }
 
     public static String getElementDescription(IAopReference reference) {
-        StringBuffer buf = new StringBuffer("<");
+        StringBuffer buf = new StringBuffer(" <");
         buf.append(reference.getDefinition().getAspectName());
         buf.append("> [");
         buf.append(reference.getResource().getProjectRelativePath().toString());

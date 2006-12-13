@@ -156,7 +156,7 @@
     <extension
          point="org.eclipse.ui.popupMenus">
       <viewerContribution
-            targetID="#CrossReferenceViewContext"
+            targetID="org.eclipse.contribution.xref.ui.views.XReferenceView"
             id="org.springframework.ide.eclipse.aop.ui.action.crossReferenceViewContext">
          <!-- visibility>
             <or>

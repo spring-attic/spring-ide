@@ -20,12 +20,10 @@ import org.eclipse.contribution.xref.core.IXReferenceNode;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.Signature;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.ui.BeanAspectDefinition;
 import org.springframework.ide.eclipse.aop.ui.BeansAopUtils;
+import org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition;
 
 public class BeansAopNode implements IAdaptable, IXReferenceNode {
 
@@ -82,7 +80,7 @@ public class BeansAopNode implements IAdaptable, IXReferenceNode {
         return null;
     }
 
-    public BeanAspectDefinition getDefinition() {
+    public IBeanAspectDefinition getDefinition() {
         return this.reference.getDefinition();
     }
 
