@@ -29,8 +29,8 @@ public interface IAspectDefinition {
 
     String getClassName();
 
-    int getLineNumber();
-
+    int getAspectLineNumber();
+    
     String getReturning();
 
     String getThrowing();
@@ -44,8 +44,6 @@ public interface IAspectDefinition {
     void setAspectName(String aspectName);
 
     void setClassName(String className);
-
-    void setLineNumber(int lineNumber);
 
     void setMethod(String method);
 

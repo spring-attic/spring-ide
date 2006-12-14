@@ -19,9 +19,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.contribution.xref.core.IXReference;
 import org.eclipse.contribution.xref.core.IXReferenceProvider;
@@ -89,26 +91,30 @@ public class BeansAopReferenceProvider implements IXReferenceProvider {
 				if (refs.containsKey(reference.getSource())) {
 					ref = refs.get(reference.getSource());
 				} else {
-					ref = new XRef("advises", new ArrayList<BeansAopNode>());
+					ref = new XRef("advises", new HashSet<BeansAopNode>());
 					xrefs.add(ref);
 				}
 				refs.put(reference.getSource(), ref);
 				BeansAopNode associate = new BeansAopNode(
                         BeansAopNode.TYPE.TARGET, reference);
-				ref.getAssociatesList().add(associate);
+				if (!ref.getAssociatesList().contains(associate)) {
+                    ref.getAssociatesList().add(associate);
+                }
 			}
 			else if (reference.getTarget().equals(je)) {
 				XRef ref = null;
 				if (refs.containsKey(reference.getTarget())) {
 					ref = refs.get(reference.getTarget());
 				} else {
-					ref = new XRef("advised by", new ArrayList<BeansAopNode>());
+					ref = new XRef("advised by", new HashSet<BeansAopNode>());
 					xrefs.add(ref);
 				}
 				refs.put(reference.getTarget(), ref);
 				BeansAopNode associate = new BeansAopNode(
 						BeansAopNode.TYPE.SOURCE, reference);
-				ref.getAssociatesList().add(associate);
+                if (!ref.getAssociatesList().contains(associate)) {
+                    ref.getAssociatesList().add(associate);
+                }
 			}
 		}
 		return xrefs;
@@ -124,9 +130,9 @@ public class BeansAopReferenceProvider implements IXReferenceProvider {
 
 		private String name;
 
-		private List<BeansAopNode> associates;
+		private Set<BeansAopNode> associates;
 
-		public XRef(String name, List<BeansAopNode> associates) {
+		public XRef(String name, Set<BeansAopNode> associates) {
 			this.name = name;
 			this.associates = associates;
 		}
@@ -139,7 +145,7 @@ public class BeansAopReferenceProvider implements IXReferenceProvider {
 			return associates.iterator();
 		}
 
-		public List<BeansAopNode> getAssociatesList() {
+		public Set<BeansAopNode> getAssociatesList() {
 			return associates;
 		}
 	}

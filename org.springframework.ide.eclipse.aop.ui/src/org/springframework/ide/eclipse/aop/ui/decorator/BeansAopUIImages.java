@@ -94,9 +94,9 @@ public class BeansAopUIImages {
 
 	public static final String IMG_OBJS_POINTCUT = NAME_PREFIX + "pointcut_def.gif";
 	
-	public static final String IMG_OVR_ADVICE = NAME_PREFIX + "adviceoverlay.gif";
+	public static final String IMG_OVR_ADVICE = NAME_PREFIX + "advice_overlay.gif";
 
-    public static final String IMG_OVR_SPRING = NAME_PREFIX + "springoverlay.gif";
+    public static final String IMG_OVR_SPRING = NAME_PREFIX + "spring_overlay.gif";
 
 	private final static String STRUCTURE = "structure/"; // basic colors - size 16x16
 

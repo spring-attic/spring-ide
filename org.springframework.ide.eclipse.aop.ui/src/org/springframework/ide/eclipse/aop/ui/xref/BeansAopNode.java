@@ -23,6 +23,7 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.ui.BeansAopUtils;
+import org.springframework.util.ObjectUtils;
 
 public class BeansAopNode implements IAdaptable, IXReferenceNode {
 
@@ -85,5 +86,26 @@ public class BeansAopNode implements IAdaptable, IXReferenceNode {
 
     public IResource getResouce() {
         return this.reference.getResource();
+    }
+
+    public boolean equals(Object obj) {
+        if (obj instanceof BeansAopNode) {
+            BeansAopNode other = (BeansAopNode) obj;
+            return getJavaElement().equals(other.getJavaElement())
+                    && getLabel().equals(other.getLabel())
+                    && getDefinition().getType() == other.getDefinition()
+                            .getType()
+                    && getDefinition().getAspectLineNumber() == other
+                            .getDefinition().getAspectLineNumber();
+        }
+        return false;
+    }
+    
+    public int hashCode() {
+        int hashCode = ObjectUtils.nullSafeHashCode(getJavaElement());
+        hashCode = 29 * hashCode + getDefinition().getType().hashCode();
+        hashCode = 24 * hashCode + ObjectUtils.nullSafeHashCode(getLabel());
+        hashCode = getDefinition().getAspectLineNumber() * 2 + hashCode;
+        return hashCode;
     }
 }

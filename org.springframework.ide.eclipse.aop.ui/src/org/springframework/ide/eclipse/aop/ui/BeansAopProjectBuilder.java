@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -46,13 +47,11 @@ import org.springframework.ide.eclipse.aop.ui.decorator.BeansAdviceImageDecorato
 import org.springframework.ide.eclipse.aop.ui.decorator.BeansAdviceTextDecorator;
 import org.springframework.ide.eclipse.aop.ui.support.AbstractAspectJAdvice;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 
 @SuppressWarnings("restriction")
@@ -61,18 +60,14 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
     public void build(IFile file, IProgressMonitor monitor) {
 
         Set<IFile> filesToBuild = BeansAopUtils.getFilesToBuild(file);
-        if (filesToBuild.size() == 0 && BeansCoreUtils.isBeansConfig(file)) {
-            filesToBuild.add(file);
-        }
-
+        
         monitor.beginTask(BeansCorePlugin.getFormattedMessage(
                 "BeansProjectValidator.validateFile", file.getFullPath()
                         .toString()), filesToBuild.size());
         int work = 0;
         for (IFile currentFile : filesToBuild) {
 
-            // TODO reduce scope here
-            BeansAopMarkerUtils.deleteProblemMarkers(currentFile.getProject());
+            BeansAopMarkerUtils.deleteProblemMarkers(currentFile);
 
             monitor.worked(work++);
 
@@ -84,7 +79,9 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
 
             List<IAopReference> references = aopProject.getAllReferences();
             for (IAopReference reference : references) {
-                BeansAopMarkerUtils.createMarker(reference);
+                if (reference.getResource().equals(file)) {
+                    BeansAopMarkerUtils.createMarker(reference, file);
+                }
             }
 
             // update images
@@ -169,12 +166,17 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
                         aopProject.addAopReference(ref);
                     }
                 }
+                catch (IllegalArgumentException e) {
+                    BeansAopMarkerUtils.createProblemMarker(file, e.getMessage(),
+                            IMarker.SEVERITY_ERROR, info.getAspectLineNumber(),
+                            BeansAopMarkerUtils.AOP_PROBLEM_MARKER, file);
+                }
                 catch (Exception e) {
-                    e.printStackTrace();
+
                 }
             }
             catch (Exception e) {
-                SpringCore.log(e);
+                // SpringCore.log(e);
             }
         }
     }

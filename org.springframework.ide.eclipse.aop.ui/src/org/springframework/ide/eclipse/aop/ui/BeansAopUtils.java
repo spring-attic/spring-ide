@@ -18,17 +18,13 @@ package org.springframework.ide.eclipse.aop.ui;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -41,11 +37,11 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector.Statics;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.core.SpringCore;
 
 /**
  * Some helper methods.
@@ -87,55 +83,12 @@ public class BeansAopUtils {
     }
 
     public static String getElementDescription(IAopReference reference) {
-        StringBuffer buf = new StringBuffer(" <");
+        StringBuffer buf = new StringBuffer(": <");
         buf.append(reference.getDefinition().getAspectName());
         buf.append("> [");
         buf.append(reference.getResource().getProjectRelativePath().toString());
         buf.append("]");
         return buf.toString();
-    }
-    
-    public static void createProblemMarker(IResource resource, String message,
-            int severity, int line, String markerId) {
-        createProblemMarker(resource, message, severity, line, markerId, 1);
-    }
-
-    public static void createProblemMarker(IResource resource, String message,
-            int severity, int line, String markerId, int markerCount) {
-        if (resource != null && resource.isAccessible()) {
-            try {
-
-                // First check if specified marker already exists
-                IMarker[] markers = resource.findMarkers(
-                        BeansAopMarkerUtils.PROBLEM_MARKER, true,
-                        IResource.DEPTH_ZERO);
-                for (IMarker marker : markers) {
-                    int l = marker.getAttribute(IMarker.LINE_NUMBER, -1);
-                    int count = marker.getAttribute("marker_count", 1);
-                    count++;
-                    if (l == line) {
-                        resource.findMarker(marker.getId()).delete();
-                        createProblemMarker(resource, count + " Spring AOP marker at this line", 1,
-                                line, BeansAopMarkerUtils.PROBLEM_MARKER, count);
-                        return;
-                    }
-                }
-
-                // Create new marker
-                IMarker marker = resource.createMarker(markerId);
-                Map<String, Object> attributes = new HashMap<String, Object>();
-                attributes.put(IMarker.MESSAGE, message);
-                attributes.put(IMarker.SEVERITY, new Integer(severity));
-                attributes.put("marker_count", markerCount);
-                if (line > 0) {
-                    attributes.put(IMarker.LINE_NUMBER, new Integer(line));
-                }
-                marker.setAttributes(attributes);
-            }
-            catch (CoreException e) {
-                SpringCore.log(e);
-            }
-        }
     }
 
     public static URLClassLoader getProjectClassLoader(IJavaProject project) {
@@ -214,6 +167,9 @@ public class BeansAopUtils {
                 catch (JavaModelException e) {
                 }
             }
+        }
+        else if (BeansCoreUtils.isBeansConfig(file)) {
+            resourcesToBuild.add(file);
         }
         return resourcesToBuild;
     }

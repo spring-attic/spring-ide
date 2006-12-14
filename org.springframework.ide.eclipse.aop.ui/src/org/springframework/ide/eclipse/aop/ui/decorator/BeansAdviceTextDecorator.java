@@ -124,6 +124,9 @@ public class BeansAdviceTextDecorator implements ILabelDecorator {
                         IAopReference reference = advices.get(0);
                         text = text + BeansAopUtils.getElementDescription(reference);
                     }
+                    else {
+                        text = text + ": <several aspect definitions>";
+                    }
                 }
             }
         }

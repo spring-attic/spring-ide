@@ -45,8 +45,8 @@ public class BeanAspectDefinition implements IAspectDefinition {
 
     private String className;
 
-    private int lineNumber = -1;
-
+    private int aspectLineNumber = -1;
+    
     private String aspectName;
 
     private Class adviceClass;
@@ -202,19 +202,12 @@ public class BeanAspectDefinition implements IAspectDefinition {
     /* (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#getLineNumber()
      */
-    public int getLineNumber() {
-        if (this.lineNumber == -1) {
-            this.lineNumber = this.document.getStructuredDocument()
+    public int getAspectLineNumber() {
+        if (this.aspectLineNumber == -1) {
+            this.aspectLineNumber = this.document.getStructuredDocument()
                     .getLineOfOffset(this.node.getStartOffset()) + 1;
         }
-        return lineNumber;
-    }
-
-    /* (non-Javadoc)
-     * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#setLineNumber(int)
-     */
-    public void setLineNumber(int lineNumber) {
-        this.lineNumber = lineNumber;
+        return aspectLineNumber;
     }
 
     /* (non-Javadoc)
@@ -237,6 +230,16 @@ public class BeanAspectDefinition implements IAspectDefinition {
                     getAdviceClass());
         }
         return adviceMethod;
+    }
+
+    public int getAspectBeanLineNumber() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    public int getTargetBeanLineNumber() {
+        // TODO Auto-generated method stub
+        return 0;
     }
 
 }
