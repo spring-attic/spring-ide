@@ -74,6 +74,12 @@ final class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 		if ("advisor".equals(nodeName)) {
 		    return AopUIImages.getImage(AopUIImages.IMG_OBJS_ADVICE);
 		}
+        if ("aspectj-autoproxy".equals(nodeName)) {
+            return AopUIImages.getImage(AopUIImages.IMG_OBJS_CONFIG);
+        }
+        if ("include".equals(nodeName)) {
+            return AopUIImages.getImage(AopUIImages.IMG_OBJS_CONFIG);
+        }
 
 		return null;
 	}
@@ -150,6 +156,18 @@ final class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 				}
 			}
 		}
+		if ("include".equals(shortNodeName)) {
+		    text = nodeName + " ";
+		    if (this.configuration.isShowAttributes()) {
+		        attr = attrs.getNamedItem("name");
+		        if (attr != null) {
+		            text += "[" + attr.getNodeValue() + "]";
+		        }
+		    }
+		}
+        if ("aspectj-autoproxy".equals(shortNodeName)) {
+            text = nodeName;
+        }
 
 		return text;
 	}
