@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.ide.eclipse.aop.core.model;
 
 import java.util.List;
@@ -32,7 +31,7 @@ public interface IAopModel {
 	boolean isAdvised(IJavaElement je);
     
     boolean isAdvice(IJavaElement je);
-    
+     
     List<IAopReference> getAdviceDefinition(IJavaElement je);
     
 	void registerAdivceListener(IAdviceChangedListener listener);

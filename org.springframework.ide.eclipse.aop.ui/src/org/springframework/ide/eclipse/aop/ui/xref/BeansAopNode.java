@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package org.springframework.ide.eclipse.aop.ui.xref;
 
 import org.eclipse.contribution.xref.core.IXReferenceNode;
