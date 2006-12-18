@@ -3,16 +3,21 @@
  */
 package org.springframework.ide.eclipse.aop.ui.navigator;
 
+import org.eclipse.contribution.xref.internal.ui.providers.TreeObject;
 import org.eclipse.contribution.xref.internal.ui.utils.XRefUIUtils;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.navigator.CommonNavigator;
+import org.springframework.ide.eclipse.aop.ui.navigator.util.JavaElementWrapper;
 
 @SuppressWarnings("restriction")
 public class BeansAopNavigator
@@ -38,6 +43,7 @@ public class BeansAopNavigator
                 getCommonViewer().setInput(javaElement);
                 getCommonViewer().refresh();
                 getCommonViewer().expandAll();
+                revealSelection(javaElement);
             }
             else {
                 ctrl.getDisplay().asyncExec(new Runnable() {
@@ -48,13 +54,33 @@ public class BeansAopNavigator
                         if (ctrl == null || ctrl.isDisposed()) {
                             return;
                         }
-                        getCommonViewer().setInput(lastJavaElement);
+                        getCommonViewer().setInput(javaElement);
                         getCommonViewer().refresh();
                         getCommonViewer().expandAll();
+                        revealSelection(javaElement);
                     }
                 });
             }
             lastJavaElement = javaElement;
+        }
+    }
+
+    private void revealSelection(final IJavaElement javaElement) {
+        TreeItem[] items = getCommonViewer().getTree().getItems();
+        JavaElementWrapper wr = null;
+        for (TreeItem item : items) {
+            Object obj = item.getData();
+            if (obj instanceof JavaElementWrapper
+                    && javaElement.equals(((JavaElementWrapper) item
+                            .getData()).getJavaElement())) {
+                wr = (JavaElementWrapper) item.getData();
+            }
+        }
+
+        if (wr != null) {
+            getCommonViewer().setSelection(new StructuredSelection(wr),
+                    true);
+            getCommonViewer().reveal(wr);
         }
     }
 
