@@ -14,7 +14,8 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.ui,
  org.springframework.ide.eclipse.beans.core,
  org.springframework.ide.eclipse.beans.ui,
- org.springframework.ide.eclipse.beans.ui.graph
+ org.springframework.ide.eclipse.beans.ui.graph,
+ org.eclipse.jdt.core
 Eclipse-LazyStart: true
 Bundle-Vendor: %providerName
 Bundle-ClassPath: beans-navigator.jar

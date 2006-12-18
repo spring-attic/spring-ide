@@ -22,6 +22,8 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Control;
@@ -46,12 +48,17 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 
 /**
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
+@SuppressWarnings("restriction")
 public class BeansNavigatorContentProvider implements ICommonContentProvider,
 		IModelChangeListener {
 
 	public static final String BEANS_EXPLORER_CONTENT_ID = Activator.PLUGIN_ID
 			+ ".beansExplorerContent";
+
+    public static final String BEANS_REFERENCE_CONTENT_ID = Activator.PLUGIN_ID
+	    + ".beansReferenceProjectExplorerContent";
 
 	private INavigatorContentExtension contentExtension;
 	private StructuredViewer viewer;
@@ -81,7 +88,22 @@ public class BeansNavigatorContentProvider implements ICommonContentProvider,
 	}
 
 	public Object[] getChildren(Object parentElement) {
-		if (parentElement instanceof IModelElement) {
+        // add bean references to jdt Type
+        if (parentElement instanceof IType) {
+            IType type = (IType) parentElement;
+            IBeansProject project = BeansCorePlugin.getModel().getProject(
+                    type.getJavaProject().getProject());
+            if (project != null) {
+                Set<IBean> beans = project.getBeans(type.getFullyQualifiedName());
+                if (beans != null && beans.size() > 0) {
+                    return new Object[] { new BeansReference(type, beans) };
+                }
+            }
+        }
+        else if (parentElement instanceof BeansReference) {
+            return ((BeansReference) parentElement).getElementChildren();
+        }
+        else if (parentElement instanceof IModelElement) {
 			if (parentElement instanceof IBeansProject) {
 				Set<Object> children = new LinkedHashSet<Object>();
 				for (IBeansConfig config : ((IBeansProject) parentElement).getConfigs()) {
@@ -155,7 +177,8 @@ public class BeansNavigatorContentProvider implements ICommonContentProvider,
 		return null;
 	}
 
-	public boolean hasChildren(Object element) {
+	@SuppressWarnings("restriction")
+    public boolean hasChildren(Object element) {
 		if (element instanceof IModelElement) {
 			return !(element instanceof IBeanProperty
 					|| element instanceof IBeanConstructorArgument);
@@ -171,13 +194,36 @@ public class BeansNavigatorContentProvider implements ICommonContentProvider,
 			if (config != null) {
 				return config.getElementChildren().length > 0;
 			}
-		}
+		} else if (element instanceof SourceType) {
+            IType type = (IType) element;
+            IBeansProject beansProject = BeansCorePlugin.getModel()
+                .getProject(type.getJavaProject().getProject());
+            if (beansProject != null) {
+                Set<IBean> beans = beansProject.getBeans(
+                        type.getFullyQualifiedName());
+                return beans != null && beans.size() > 0;
+            }
+        } else if (element instanceof BeansReference) {
+            return true;
+        }
 		return false;
 	}
 
-	public void elementChanged(ModelChangeEvent event) {
+    public void elementChanged(ModelChangeEvent event) {
 		IModelElement element = event.getElement();
-		if (!contentExtension.getId().equals(BEANS_EXPLORER_CONTENT_ID)
+		if (contentExtension.getId().equals(BEANS_REFERENCE_CONTENT_ID)) {
+            IBeansConfig config = (IBeansConfig) element;
+            Set<String> classes = config.getBeanClasses();
+            for (String clz : classes) {
+                IType type = BeansModelUtils.getJavaType(config.getElementResource()
+                        .getProject(), clz);
+                // check if we can resolve to a source type. otherwise we won't
+                // add the references
+                if (type != null && type instanceof SourceType) {
+                    refreshViewer(type);
+                }
+            }
+        } else if (!contentExtension.getId().equals(BEANS_EXPLORER_CONTENT_ID)
 				&& (element instanceof IBeansProject
 						|| element instanceof IBeansConfig)) {
 			refreshViewer(((IResourceModelElement) element)
@@ -219,4 +265,28 @@ public class BeansNavigatorContentProvider implements ICommonContentProvider,
 
 	public void restoreState(IMemento aMemento) {
 	}
+    
+	protected class BeansReference {
+        
+        private Set<IBean> beans = new LinkedHashSet<IBean>();
+
+        private IType type = null;
+        
+        public BeansReference(IType type, Set<IBean> beans) {
+            this.beans = beans;
+            this.type = type;
+        }
+        
+        public IModelElement[] getElementChildren() {
+            return this.beans.toArray(new IModelElement[beans.size()]);
+        }
+
+        public String getElementName() {
+            return "referenced by";
+        }
+
+        public IType getElementParent() {
+            return this.type;
+        }
+    }
 }
