@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
@@ -285,7 +286,7 @@ public final class SpringUIUtils {
 		return null;
 	}
 
-	public static IEditorPart openInEditor(IType type) {
+	public static IEditorPart openInEditor(IJavaElement type) {
 		try {
 			return JavaUI.openInEditor(type);
 		} catch (PartInitException e) {
