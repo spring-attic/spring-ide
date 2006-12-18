@@ -29,4 +29,5 @@ Require-Bundle: org.eclipse.core.runtime,
 Eclipse-LazyStart: true
 Bundle-Vendor: %providerName
 Bundle-ClassPath: beans-editor.jar
-Export-Package: org.springframework.ide.eclipse.beans.ui.editor
+Export-Package: org.springframework.ide.eclipse.beans.ui.editor,
+ org.springframework.ide.eclipse.beans.ui.editor.namespaces
