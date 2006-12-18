@@ -1,20 +1,21 @@
 /*
  * Copyright 2002-2006 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.springframework.ide.eclipse.aop.ui.navigator;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,6 +23,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.SourceMethod;
 import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -34,7 +36,7 @@ import org.eclipse.ui.navigator.INavigatorContentExtension;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.ui.BeansAopPlugin;
-import org.springframework.ide.eclipse.aop.ui.navigator.util.MethodWrapper;
+import org.springframework.ide.eclipse.aop.ui.navigator.util.JavaElementWrapper;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -77,31 +79,82 @@ public class BeansAopNavigatorContentProvider implements
     }
 
     public Object[] getElements(Object inputElement) {
-        return getChildren(BeansCorePlugin.getModel());
+        if (inputElement instanceof IType) {
+            return new Object[] { new JavaElementWrapper((IType) inputElement,
+                    true) };
+        }
+        else if (inputElement instanceof SourceMethod) {
+            return new Object[] { new JavaElementWrapper(
+                    (IMethod) inputElement, true) };
+        }
+        else if (inputElement instanceof JavaElementWrapper) {
+            return getChildren(((JavaElementWrapper) inputElement)
+                    .getJavaElement());
+        }
+        return new Object[0];
     }
 
     @SuppressWarnings("restriction")
     public Object[] getChildren(Object parentElement) {
-        if (parentElement instanceof IMethod
+        if (parentElement instanceof JavaElementWrapper
+                && ((JavaElementWrapper) parentElement).isRoot()) {
+            return getChildren(((JavaElementWrapper) parentElement)
+                    .getJavaElement());
+        }
+        else if (parentElement instanceof IType) {
+            IType type = (IType) parentElement;
+            List<IMethod> me = new ArrayList<IMethod>();
+            try {
+                IMethod[] methods = type.getMethods();
+                for (IMethod method : methods) {
+                    if (BeansAopPlugin.getModel().isAdvised(method) || BeansAopPlugin.getModel().isAdvice(method) ) {
+                        me.add(method);
+                    }
+                }
+            }
+            catch (JavaModelException e) {
+            }
+            return me.toArray();
+        }
+        else if (parentElement instanceof IMethod
                 && parentElement instanceof SourceMethod) {
             IMethod method = (IMethod) parentElement;
             IAopProject project = BeansAopPlugin.getModel().getProject(
                     method.getJavaProject().getProject());
             if (project != null && project.getAllReferences().size() > 0) {
                 List<IAopReference> references = project.getAllReferences();
-                Set<IAopReference> foundReferences = new LinkedHashSet<IAopReference>();
+                Set<IAopReference> foundTargetReferences = new LinkedHashSet<IAopReference>();
+                Set<IAopReference> foundSourceReferences = new LinkedHashSet<IAopReference>();
                 for (IAopReference reference : references) {
                     if (reference.getTarget().equals(method)) {
-                        foundReferences.add(reference);
+                        foundTargetReferences.add(reference);
+                    }
+                    if (reference.getSource().equals(method)) {
+                        foundSourceReferences.add(reference);
                     }
                 }
-                return new Object[] { new AopReference(foundReferences) };
+                if (foundTargetReferences.size() > 0
+                        && foundSourceReferences.size() > 0) {
+                    return new Object[] {
+                            new AopReference(foundTargetReferences, false),
+                            new AopReference(foundSourceReferences, true) };
+                }
+                else if (foundTargetReferences.size() > 0) {
+                    return new Object[] { new AopReference(
+                            foundTargetReferences, false) };
+                }
+                else if (foundSourceReferences.size() > 0) {
+                    return new Object[] { new AopReference(
+                            foundSourceReferences, true) };
+                }
             }
         }
         else if (parentElement instanceof AopReference) {
             return ((AopReference) parentElement).getElementChildren();
-       } else if (parentElement instanceof IAopReference) {
-            return new Object[] { new MethodWrapper(((IAopReference) parentElement).getSource()) };
+        }
+        else if (parentElement instanceof IAopReference) {
+            return new Object[] { new JavaElementWrapper(
+                    ((IAopReference) parentElement).getSource(), false) };
         }
         return IModelElement.NO_CHILDREN;
     }
@@ -124,7 +177,25 @@ public class BeansAopNavigatorContentProvider implements
 
     @SuppressWarnings("restriction")
     public boolean hasChildren(Object element) {
-        if (element instanceof IMethod && element instanceof SourceMethod) {
+        if (element instanceof JavaElementWrapper
+                && ((JavaElementWrapper) element).isRoot()) {
+            return hasChildren(((JavaElementWrapper) element).getJavaElement());
+        }
+        else if (element instanceof IType) {
+            IType type = (IType) element;
+            try {
+                IMethod[] methods = type.getMethods();
+                for (IMethod method : methods) {
+                    if (BeansAopPlugin.getModel().isAdvised(method)
+                            || BeansAopPlugin.getModel().isAdvice(method)) {
+                        return true;
+                    }
+                }
+            }
+            catch (JavaModelException e) {
+            }
+        }
+        else if (element instanceof IMethod && element instanceof SourceMethod) {
             IMethod method = (IMethod) element;
             IAopProject project = BeansAopPlugin.getModel().getProject(
                     method.getJavaProject().getProject());
@@ -204,8 +275,11 @@ public class BeansAopNavigatorContentProvider implements
 
         private Set<IAopReference> refs = new LinkedHashSet<IAopReference>();
 
-        public AopReference(Set<IAopReference> refs) {
+        private boolean isAdvice = false;
+
+        public AopReference(Set<IAopReference> refs, boolean isAdvice) {
             this.refs = refs;
+            this.isAdvice = isAdvice;
         }
 
         public Object[] getElementChildren() {
@@ -213,7 +287,16 @@ public class BeansAopNavigatorContentProvider implements
         }
 
         public String getElementName() {
-            return "advised by";
+            if (isAdvice) {
+                return "advises";
+            }
+            else {
+                return "advised by";
+            }
+        }
+
+        public boolean isAdvice() {
+            return isAdvice;
         }
     }
 }

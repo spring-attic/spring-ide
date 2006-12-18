@@ -18,13 +18,15 @@ package org.springframework.ide.eclipse.aop.ui.navigator.action;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.ui.navigator.util.MethodWrapper;
+import org.springframework.ide.eclipse.aop.ui.navigator.util.JavaElementWrapper;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
@@ -50,7 +52,7 @@ public class OpenConfigFileAction
             IStructuredSelection sSelection = (IStructuredSelection) selection;
             if (sSelection.size() == 1) {
                 if (sSelection.getFirstElement() instanceof IAopReference
-                        || sSelection.getFirstElement() instanceof MethodWrapper) {
+                        || sSelection.getFirstElement() instanceof JavaElementWrapper) {
                     element = sSelection.getFirstElement();
                     return true;
                 }
@@ -61,9 +63,15 @@ public class OpenConfigFileAction
 
     public void run() {
         if (isEnabled()) {
-            if (element instanceof MethodWrapper) {
-                IMethod method = ((MethodWrapper) element).getMethod();
-                SpringUIUtils.openInEditor(method);
+            if (element instanceof JavaElementWrapper) {
+                IJavaElement method = ((JavaElementWrapper) element).getJavaElement();
+                IEditorPart p;
+                try {
+                    p = JavaUI.openInEditor(method);
+                    JavaUI.revealInEditor(p, method);
+                }
+                catch (Exception e) {
+                }
             }
             else if (element instanceof IAopReference) {
                 IAopReference reference = (IAopReference) element;

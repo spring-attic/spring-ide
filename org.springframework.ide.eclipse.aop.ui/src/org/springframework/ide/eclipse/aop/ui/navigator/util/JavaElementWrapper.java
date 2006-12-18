@@ -15,17 +15,24 @@
  */
 package org.springframework.ide.eclipse.aop.ui.navigator.util;
 
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IJavaElement;
 
-public class MethodWrapper {
+public class JavaElementWrapper {
     
-    private IMethod method;
+    private IJavaElement method;
     
-    public MethodWrapper(IMethod method) {
-        this.method = method;
+    private boolean isRoot = false;
+    
+    public JavaElementWrapper(IJavaElement elem, boolean isRoot) {
+        this.method = elem;
+        this.isRoot = isRoot;
     }
 
-    public IMethod getMethod() {
+    public IJavaElement getJavaElement() {
         return method;
+    }
+
+    public boolean isRoot() {
+        return isRoot;
     }
 }

@@ -18,7 +18,7 @@ package org.springframework.ide.eclipse.aop.ui.navigator;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -28,7 +28,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.navigator.ILinkHelper;
 import org.eclipse.ui.part.FileEditorInput;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.ui.navigator.util.MethodWrapper;
+import org.springframework.ide.eclipse.aop.ui.navigator.util.JavaElementWrapper;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
@@ -38,8 +38,8 @@ public class BeansAopNavigatorLinkHelper implements ILinkHelper {
     public void activateEditor(IWorkbenchPage page,
             IStructuredSelection selection) {
         if (selection != null && !selection.isEmpty()) {
-            if (selection.getFirstElement() instanceof MethodWrapper) {
-                IMethod method = ((MethodWrapper) selection.getFirstElement()).getMethod();
+            if (selection.getFirstElement() instanceof JavaElementWrapper) {
+                IJavaElement method = ((JavaElementWrapper) selection.getFirstElement()).getJavaElement();
                 IResource resource;
                 try {
                     resource = method.getUnderlyingResource();

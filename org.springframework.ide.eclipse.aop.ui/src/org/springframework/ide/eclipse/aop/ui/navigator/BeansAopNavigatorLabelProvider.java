@@ -15,15 +15,19 @@
  */
 package org.springframework.ide.eclipse.aop.ui.navigator;
 
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jface.viewers.DecoratingLabelProvider;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonLabelProvider;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.ui.BeansAopPlugin;
 import org.springframework.ide.eclipse.aop.ui.BeansAopUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigatorContentProvider.AopReference;
-import org.springframework.ide.eclipse.aop.ui.navigator.util.MethodWrapper;
+import org.springframework.ide.eclipse.aop.ui.navigator.util.JavaElementWrapper;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.AopUIImages;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
@@ -32,6 +36,17 @@ import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
  */
 public class BeansAopNavigatorLabelProvider
         extends BeansModelLabelProvider implements ICommonLabelProvider {
+
+    public ILabelProvider labelProvider;
+
+    public BeansAopNavigatorLabelProvider() {
+        labelProvider = new DecoratingLabelProvider(
+                new JavaElementLabelProvider(
+                        JavaElementLabelProvider.SHOW_DEFAULT
+                                | JavaElementLabelProvider.SHOW_SMALL_ICONS),
+                BeansAopPlugin.getDefault().getWorkbench()
+                        .getDecoratorManager().getLabelDecorator());
+    }
 
     public String getDescription(Object element) {
         // TODO add descrption here
@@ -57,8 +72,9 @@ public class BeansAopNavigatorLabelProvider
                 return AopUIImages.getImage(AopUIImages.IMG_OBJS_ASPECT);
             }
         }
-        else if (element instanceof MethodWrapper) {
-            return super.getImage(((MethodWrapper) element).getMethod());
+        else if (element instanceof JavaElementWrapper) {
+            return labelProvider.getImage(((JavaElementWrapper) element)
+                    .getJavaElement());
         }
         return super.getImage(element);
     }
@@ -93,10 +109,16 @@ public class BeansAopNavigatorLabelProvider
             text += "]";
             return text;
         }
-        else if (element instanceof MethodWrapper) {
-            return BeansAopUtils
-                    .getJavaElementLinkName(((MethodWrapper) element)
-                            .getMethod());
+        else if (element instanceof JavaElementWrapper) {
+            JavaElementWrapper wrapper = (JavaElementWrapper) element;
+            if (wrapper.isRoot()) {
+                return super.getText(wrapper.getJavaElement());
+            }
+            else {
+                return BeansAopUtils
+                        .getJavaElementLinkName(((JavaElementWrapper) element)
+                                .getJavaElement());
+            }
         }
         return super.getText(element);
     }
