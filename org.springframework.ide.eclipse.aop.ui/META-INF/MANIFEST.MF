@@ -21,5 +21,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.ide,
  org.eclipse.ajdt.ui,
  org.eclipse.ajdt.core,
- org.springframework.ide.eclipse.ui
+ org.springframework.ide.eclipse.ui,
+ org.eclipse.ui.navigator
 Eclipse-LazyStart: true

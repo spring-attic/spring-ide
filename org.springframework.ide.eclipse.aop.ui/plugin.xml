@@ -220,5 +220,75 @@
          </enablement>
       </decorator>
    </extension>
+   
+   <extension
+         point="org.eclipse.ui.navigator.viewer">
+      <viewer viewerId="org.eclipse.ui.navigator.ProjectExplorer"/>
+      <viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+         <includes>
+            <contentExtension pattern="org.springframework.ide.eclipse.aop.ui.navigator.projectExplorerContent"/>
+            <contentExtension pattern="org.springframework.ide.eclipse.aop.ui.navigator.linkHelper"/>
+         </includes>
+      </viewerContentBinding>
+      <viewerActionBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+         <includes>
+            <actionExtension pattern="org.springframework.ide.eclipse.aop.ui.navigator.actions"/>
+         </includes>
+      </viewerActionBinding>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.navigator.navigatorContent">
+  		<navigatorContent
+            id="org.springframework.ide.eclipse.aop.ui.navigator.projectExplorerContent"
+            name="Spring AOP Cross Reference"
+            contentProvider="org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigatorContentProvider"
+            labelProvider="org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigatorLabelProvider"
+            icon="icons/full/obj16/spring_obj.gif"
+            activeByDefault="true"
+            priority="high">
+	     <triggerPoints>
+			<instanceof value="org.eclipse.jdt.core.IMethod"/>
+		 </triggerPoints>
+         <possibleChildren>
+         	<or>
+				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+				<instanceof value="org.eclipse.jdt.core.IMethod"/>
+			</or>
+         </possibleChildren>
+	    <commonSorter 
+               id="org.springframework.ide.eclipse.aop.ui.navigator.projectExplorerContent"
+               class="org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorSorter"/>
+	   </navigatorContent>
+	    
+	   <actionProvider
+            id="org.springframework.ide.eclipse.aop.ui.navigator.actions"
+            class="org.springframework.ide.eclipse.aop.ui.navigator.action.BeansAopNavigatorActionProvider">
+         <enablement>
+			<or>
+				<instanceof value="org.springframework.ide.eclipse.aop.ui.navigator.util.MethodWrapper"/>
+				<instanceof value="org.springframework.ide.eclipse.aop.core.model.IAopReference"/>
+             </or>
+         </enablement>
+      </actionProvider>
+	   
+    </extension>
+    
+    <extension
+          point="org.eclipse.ui.navigator.linkHelper">
+       <linkHelper
+             id="org.springframework.ide.eclipse.aop.ui.navigator.linkHelper"
+             class="org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigatorLinkHelper">
+          <selectionEnablement>
+			 <or>
+				<instanceof value="org.springframework.ide.eclipse.aop.ui.navigator.util.MethodWrapper"/>
+				<instanceof value="org.springframework.ide.eclipse.aop.core.model.IAopReference"/>
+             </or>
+          </selectionEnablement>
+          <editorInputEnablement>
+             <instanceof value="org.eclipse.ui.IFileEditorInput"/>
+          </editorInputEnablement>
+       </linkHelper>
+   </extension>
     
 </plugin>

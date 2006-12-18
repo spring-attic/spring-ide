@@ -231,15 +231,4 @@ public class BeanAspectDefinition implements IAspectDefinition {
         }
         return adviceMethod;
     }
-
-    public int getAspectBeanLineNumber() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    public int getTargetBeanLineNumber() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
 }
