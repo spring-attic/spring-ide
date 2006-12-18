@@ -29,16 +29,12 @@ import org.springframework.ide.eclipse.beans.ui.editor.namespaces.AopUIImages;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 
 /**
- * This class is a label provider which knows about the beans core model's
- * <code>IModelElement</code>s.
- * 
- * @author Torsten Juergeleit
  */
 public class BeansAopNavigatorLabelProvider
         extends BeansModelLabelProvider implements ICommonLabelProvider {
 
     public String getDescription(Object element) {
-
+        // TODO add descrption here
         return null;
     }
 
