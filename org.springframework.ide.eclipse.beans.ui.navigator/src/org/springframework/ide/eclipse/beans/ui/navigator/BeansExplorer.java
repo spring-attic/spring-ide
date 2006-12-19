@@ -33,7 +33,7 @@ import org.w3c.dom.Element;
 /**
  * Overwriting <code>CommonNavigator</code>'s implementation of
  * <code>IShowInTarget</code> to select and reveal a <code>IModelElement</code>
- * from the selection provided by the Beans XML Editor.
+ * for a selection provided by the Beans XML Editor.
  *
  * @author Torsten Juergeleit
  */

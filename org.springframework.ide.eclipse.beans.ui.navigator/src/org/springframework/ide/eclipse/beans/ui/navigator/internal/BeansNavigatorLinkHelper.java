@@ -18,6 +18,7 @@ package org.springframework.ide.eclipse.beans.ui.navigator.internal;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeSelection;
@@ -30,6 +31,7 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
@@ -61,6 +63,17 @@ public class BeansNavigatorLinkHelper implements ILinkHelper {
 		if (input instanceof IFileEditorInput) {
 			IFile file = ((IFileEditorInput) input).getFile();
 			IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
+			IEditorPart editor = SpringUIUtils.getActiveEditor();
+			if (editor.getEditorInput() == input) {
+				ISelection selection = editor.getSite().getSelectionProvider()
+						.getSelection();
+				IModelElement element = BeansUIUtils.getSelectedElement(
+						selection, config);
+				if (element != null) {
+					return new TreeSelection(BeansUIUtils
+							.createTreePath(element));
+				}
+			}
 			return new TreeSelection(BeansUIUtils.createTreePath(config));
 		}
 		return StructuredSelection.EMPTY;
