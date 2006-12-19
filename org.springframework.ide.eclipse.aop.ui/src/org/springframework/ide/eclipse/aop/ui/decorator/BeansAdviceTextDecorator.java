@@ -1,25 +1,21 @@
 /*
  * Copyright 2002-2006 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.ide.eclipse.aop.ui.decorator;
 
-import java.util.List;
-
 import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jface.viewers.ILabelDecorator;
@@ -29,10 +25,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.aop.core.model.IAdviceChangedListener;
-import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.ui.BeansAopPlugin;
-import org.springframework.ide.eclipse.aop.ui.BeansAopUtils;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 @SuppressWarnings("restriction")
@@ -111,11 +104,11 @@ public class BeansAdviceTextDecorator implements ILabelDecorator {
 
     public String decorateText(String text, Object element) {
         if ((element instanceof IMethod || element instanceof SourceType)) {
-            IJavaElement je = (IJavaElement) element;
-            IJavaProject jp = je.getJavaProject();
+            //IJavaElement je = (IJavaElement) element;
+            //IJavaProject jp = je.getJavaProject();
             // only query the model if the element is in an Spring project
 
-            if ((jp != null)
+            /*if ((jp != null)
                     && SpringCoreUtils.isSpringProject(jp.getProject())) {
                 if (BeansAopPlugin.getModel().isAdvice(je)) {
                     List<IAopReference> advices = BeansAopPlugin.getModel()
@@ -128,7 +121,7 @@ public class BeansAdviceTextDecorator implements ILabelDecorator {
                         text = text + ": <several aspect definitions>";
                     }
                 }
-            }
+            }*/
         }
         return text;
     }

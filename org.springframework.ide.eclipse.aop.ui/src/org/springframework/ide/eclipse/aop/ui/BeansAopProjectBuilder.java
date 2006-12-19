@@ -162,7 +162,7 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
                                         info.getAdviceMethod()
                                                 .getParameterTypes().length);
                         IAopReference ref = new AopReference(info.getType(),
-                                jdtAspectMethod, method, info, file);
+                                jdtAspectMethod, method, info, file, bean);
                         aopProject.addAopReference(ref);
                     }
                 }

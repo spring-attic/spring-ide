@@ -1,23 +1,25 @@
 /*
  * Copyright 2002-2006 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.ide.eclipse.aop.ui.navigator;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -27,6 +29,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.SourceMethod;
 import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IMemento;
@@ -35,10 +38,15 @@ import org.eclipse.ui.navigator.ICommonContentProvider;
 import org.eclipse.ui.navigator.INavigatorContentExtension;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
+import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.ui.BeansAopPlugin;
-import org.springframework.ide.eclipse.aop.ui.navigator.util.JavaElementWrapper;
+import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceRootAopReference;
+import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedRootAopReference;
+import org.springframework.ide.eclipse.aop.ui.navigator.model.IReferenceNode;
+import org.springframework.ide.eclipse.aop.ui.navigator.model.JavaElementReferenceNode;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
@@ -80,15 +88,14 @@ public class BeansAopNavigatorContentProvider implements
 
     public Object[] getElements(Object inputElement) {
         if (inputElement instanceof IType) {
-            return new Object[] { new JavaElementWrapper((IType) inputElement,
+            return new Object[] { new JavaElementReferenceNode((IType) inputElement,
                     true) };
         }
         else if (inputElement instanceof SourceMethod) {
-            return new Object[] { new JavaElementWrapper(
-                    (IMethod) inputElement, true) };
+            return getChildren(inputElement);
         }
-        else if (inputElement instanceof JavaElementWrapper) {
-            return getChildren(((JavaElementWrapper) inputElement)
+        else if (inputElement instanceof JavaElementReferenceNode) {
+            return getChildren(((JavaElementReferenceNode) inputElement)
                     .getJavaElement());
         }
         return new Object[0];
@@ -96,19 +103,23 @@ public class BeansAopNavigatorContentProvider implements
 
     @SuppressWarnings("restriction")
     public Object[] getChildren(Object parentElement) {
-        if (parentElement instanceof JavaElementWrapper
-                && ((JavaElementWrapper) parentElement).isRoot()) {
-            return getChildren(((JavaElementWrapper) parentElement)
+        if (parentElement instanceof IReferenceNode) {
+            return ((IReferenceNode) parentElement).getChildren();
+        }
+        else if (parentElement instanceof JavaElementReferenceNode
+                && ((JavaElementReferenceNode) parentElement).isRoot()) {
+            return getChildren(((JavaElementReferenceNode) parentElement)
                     .getJavaElement());
         }
         else if (parentElement instanceof IType) {
             IType type = (IType) parentElement;
-            List<IMethod> me = new ArrayList<IMethod>();
+            List<Object> me = new ArrayList<Object>();
             try {
                 IMethod[] methods = type.getMethods();
                 for (IMethod method : methods) {
-                    if (BeansAopPlugin.getModel().isAdvised(method) || BeansAopPlugin.getModel().isAdvice(method) ) {
-                        me.add(method);
+                    if (BeansAopPlugin.getModel().isAdvice(method)
+                            || BeansAopPlugin.getModel().isAdvised(method)) {
+                        me.addAll(Arrays.asList(getChildren(method)));
                     }
                 }
             }
@@ -123,38 +134,55 @@ public class BeansAopNavigatorContentProvider implements
                     method.getJavaProject().getProject());
             if (project != null && project.getAllReferences().size() > 0) {
                 List<IAopReference> references = project.getAllReferences();
-                Set<IAopReference> foundTargetReferences = new LinkedHashSet<IAopReference>();
-                Set<IAopReference> foundSourceReferences = new LinkedHashSet<IAopReference>();
+                Map<IAspectDefinition, List<IAopReference>> foundSourceReferences = new HashMap<IAspectDefinition, List<IAopReference>>();
+                Map<IBean, List<IAopReference>> foundTargetReferences = new HashMap<IBean, List<IAopReference>>();
                 for (IAopReference reference : references) {
                     if (reference.getTarget().equals(method)) {
-                        foundTargetReferences.add(reference);
+                        if (foundTargetReferences.containsKey(reference
+                                .getTargetBean())) {
+                            foundTargetReferences
+                                    .get(reference.getTargetBean()).add(
+                                            reference);
+                        }
+                        else {
+                            List<IAopReference> tmp = new ArrayList<IAopReference>();
+                            tmp.add(reference);
+                            foundTargetReferences.put(
+                                    reference.getTargetBean(), tmp);
+                        }
                     }
                     if (reference.getSource().equals(method)) {
-                        foundSourceReferences.add(reference);
+                        if (foundSourceReferences.containsKey(reference
+                                .getDefinition())) {
+                            foundSourceReferences
+                                    .get(reference.getDefinition()).add(
+                                            reference);
+                        }
+                        else {
+                            List<IAopReference> tmp = new ArrayList<IAopReference>();
+                            tmp.add(reference);
+                            foundSourceReferences.put(
+                                    reference.getDefinition(), tmp);
+                        }
                     }
                 }
-                if (foundTargetReferences.size() > 0
-                        && foundSourceReferences.size() > 0) {
-                    return new Object[] {
-                            new AopReference(foundTargetReferences, false),
-                            new AopReference(foundSourceReferences, true) };
+                List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
+                if (foundSourceReferences.size() > 0) {
+                    for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : foundSourceReferences
+                            .entrySet()) {
+                        nodes.add(new AdviceRootAopReference(entry.getValue()));
+                    }
                 }
-                else if (foundTargetReferences.size() > 0) {
-                    return new Object[] { new AopReference(
-                            foundTargetReferences, false) };
+                if (foundTargetReferences.size() > 0) {
+                    for (Map.Entry<IBean, List<IAopReference>> entry : foundTargetReferences
+                            .entrySet()) {
+                        nodes
+                                .add(new AdvisedRootAopReference(entry
+                                        .getValue()));
+                    }
                 }
-                else if (foundSourceReferences.size() > 0) {
-                    return new Object[] { new AopReference(
-                            foundSourceReferences, true) };
-                }
+                return nodes.toArray();
             }
-        }
-        else if (parentElement instanceof AopReference) {
-            return ((AopReference) parentElement).getElementChildren();
-        }
-        else if (parentElement instanceof IAopReference) {
-            return new Object[] { new JavaElementWrapper(
-                    ((IAopReference) parentElement).getSource(), false) };
         }
         return IModelElement.NO_CHILDREN;
     }
@@ -177,9 +205,8 @@ public class BeansAopNavigatorContentProvider implements
 
     @SuppressWarnings("restriction")
     public boolean hasChildren(Object element) {
-        if (element instanceof JavaElementWrapper
-                && ((JavaElementWrapper) element).isRoot()) {
-            return hasChildren(((JavaElementWrapper) element).getJavaElement());
+        if (element instanceof IReferenceNode) {
+            return ((IReferenceNode) element).hasChildren();
         }
         else if (element instanceof IType) {
             IType type = (IType) element;
@@ -201,10 +228,11 @@ public class BeansAopNavigatorContentProvider implements
                     method.getJavaProject().getProject());
             if (project != null && project.getAllReferences().size() > 0) {
                 List<IAopReference> references = project.getAllReferences();
-                // List<IAopReference> foundReferences = new
-                // ArrayList<IAopReference>();
                 for (IAopReference reference : references) {
                     if (reference.getTarget().equals(method)) {
+                        return true;
+                    }
+                    if (reference.getSource().equals(method)) {
                         return true;
                     }
                 }
@@ -212,12 +240,6 @@ public class BeansAopNavigatorContentProvider implements
             else {
                 return false;
             }
-        }
-        else if (element instanceof AopReference) {
-            return true;
-        }
-        else if (element instanceof IAopReference) {
-            return true;
         }
         return false;
     }
@@ -238,12 +260,15 @@ public class BeansAopNavigatorContentProvider implements
     }
 
     protected void refreshViewer(final Object element) {
-        if (viewer instanceof StructuredViewer) {
+        if (viewer instanceof TreeViewer) {
             Control ctrl = viewer.getControl();
 
             // Are we in the UI thread?
             if (ctrl.getDisplay().getThread() == Thread.currentThread()) {
+                ((TreeViewer) viewer).getTree().setRedraw(false);
                 viewer.refresh(element);
+                ((TreeViewer) viewer).expandAll();
+                ((TreeViewer) viewer).getTree().setRedraw(true);
             }
             else {
                 ctrl.getDisplay().asyncExec(new Runnable() {
@@ -254,7 +279,10 @@ public class BeansAopNavigatorContentProvider implements
                         if (ctrl == null || ctrl.isDisposed()) {
                             return;
                         }
+                        ((TreeViewer) viewer).getTree().setRedraw(false);
                         viewer.refresh(element);
+                        ((TreeViewer) viewer).expandAll();
+                        ((TreeViewer) viewer).getTree().setRedraw(true);
                     }
                 });
             }
@@ -269,34 +297,5 @@ public class BeansAopNavigatorContentProvider implements
     }
 
     public void restoreState(IMemento aMemento) {
-    }
-
-    public class AopReference {
-
-        private Set<IAopReference> refs = new LinkedHashSet<IAopReference>();
-
-        private boolean isAdvice = false;
-
-        public AopReference(Set<IAopReference> refs, boolean isAdvice) {
-            this.refs = refs;
-            this.isAdvice = isAdvice;
-        }
-
-        public Object[] getElementChildren() {
-            return this.refs.toArray(new Object[refs.size()]);
-        }
-
-        public String getElementName() {
-            if (isAdvice) {
-                return "advises";
-            }
-            else {
-                return "advised by";
-            }
-        }
-
-        public boolean isAdvice() {
-            return isAdvice;
-        }
     }
 }

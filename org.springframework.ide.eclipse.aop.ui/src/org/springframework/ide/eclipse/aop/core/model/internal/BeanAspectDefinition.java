@@ -46,73 +46,83 @@ public class BeanAspectDefinition implements IAspectDefinition {
     private String className;
 
     private int aspectLineNumber = -1;
-    
+
     private String aspectName;
 
     private Class adviceClass;
 
     private Method adviceMethod;
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#getAspectName()
      */
     public String getAspectName() {
         return aspectName;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#setAspectName(java.lang.String)
      */
     public void setAspectName(String aspectName) {
         this.aspectName = aspectName;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#getClassName()
      */
     public String getClassName() {
         return className;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#setClassName(java.lang.String)
      */
     public void setClassName(String className) {
         this.className = className;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#getMethod()
      */
     public String getMethod() {
         return method;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#setMethod(java.lang.String)
      */
     public void setMethod(String method) {
         this.method = method;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#getArgNames()
      */
     public String[] getArgNames() {
         return argNames;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#setArgNames(java.lang.String[])
      */
     public void setArgNames(String[] argNames) {
         this.argNames = argNames;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#getPointcut()
      */
-    public AspectJExpressionPointcut getPointcut() throws ClassNotFoundException {
+    public AspectJExpressionPointcut getPointcut()
+            throws ClassNotFoundException {
         AspectJExpressionPointcut pc = new AspectJExpressionPointcut();
         pc.setPointcutDeclarationScope(getAdviceClass());
         pc.setExpression(this.pointcut);
@@ -122,84 +132,96 @@ public class BeanAspectDefinition implements IAspectDefinition {
         return pc;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#setPointcut(java.lang.String)
      */
     public void setPointcut(String pointcut) {
         this.pointcut = pointcut;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#getReturning()
      */
     public String getReturning() {
         return returning;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#setReturning(java.lang.String)
      */
     public void setReturning(String returning) {
         this.returning = returning;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#getThrowing()
      */
     public String getThrowing() {
         return throwing;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#setThrowing(java.lang.String)
      */
     public void setThrowing(String throwing) {
         this.throwing = throwing;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#getType()
      */
     public IAopReference.ADVICE_TYPES getType() {
         return type;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#setType(org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES)
      */
     public void setType(IAopReference.ADVICE_TYPES type) {
         this.type = type;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#getDocument()
      */
     public IDOMDocument getDocument() {
         return document;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#setDocument(org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument)
      */
     public void setDocument(IDOMDocument document) {
         this.document = document;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#getNode()
      */
     public IDOMNode getNode() {
         return node;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#setNode(org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode)
      */
     public void setNode(IDOMNode node) {
         this.node = node;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#getLineNumber()
      */
     public int getAspectLineNumber() {
@@ -210,7 +232,8 @@ public class BeanAspectDefinition implements IAspectDefinition {
         return aspectLineNumber;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#getAdviceClass()
      */
     public Class getAdviceClass() throws ClassNotFoundException {
@@ -221,7 +244,8 @@ public class BeanAspectDefinition implements IAspectDefinition {
         return adviceClass;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#getAdviceMethod()
      */
     public Method getAdviceMethod() throws ClassNotFoundException {
@@ -230,5 +254,24 @@ public class BeanAspectDefinition implements IAspectDefinition {
                     getAdviceClass());
         }
         return adviceMethod;
+    }
+
+    public boolean equals(Object obj) {
+        if (obj instanceof BeanAspectDefinition) {
+            BeanAspectDefinition other = (BeanAspectDefinition) obj;
+            try {
+                return other.getNode().equals(node)
+                        && other.getAdviceMethod().equals(method);
+            }
+            catch (ClassNotFoundException e) {
+            }
+        }
+        return false;
+    }
+    
+    public int hashCode() {
+        int hc = node.hashCode();
+        hc = 23 * hc + method.hashCode();
+        return hc;
     }
 }

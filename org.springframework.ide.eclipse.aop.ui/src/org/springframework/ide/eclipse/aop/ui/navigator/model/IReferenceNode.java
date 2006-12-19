@@ -13,26 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.ide.eclipse.aop.ui.navigator.util;
+package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
-import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.swt.graphics.Image;
 
-public class JavaElementWrapper {
+public interface IReferenceNode {
+
+    IReferenceNode[] getChildren();
     
-    private IJavaElement method;
+    boolean hasChildren();
     
-    private boolean isRoot = false;
+    String getNodeName();
     
-    public JavaElementWrapper(IJavaElement elem, boolean isRoot) {
-        this.method = elem;
-        this.isRoot = isRoot;
-    }
-
-    public IJavaElement getJavaElement() {
-        return method;
-    }
-
-    public boolean isRoot() {
-        return isRoot;
-    }
+    Image getImage();
+    
 }

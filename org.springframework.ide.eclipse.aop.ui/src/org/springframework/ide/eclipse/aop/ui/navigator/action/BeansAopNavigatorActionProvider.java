@@ -36,16 +36,12 @@ public class BeansAopNavigatorActionProvider extends CommonActionProvider {
 	}
 
 	public void fillContextMenu(IMenuManager menu) {
-		if (openConfigAction.isEnabled()) {
 			menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN,
 					openConfigAction);
-		}
 	}
 
 	public void fillActionBars(IActionBars actionBars) {
-		if (openConfigAction.isEnabled()) {
 			actionBars.setGlobalActionHandler(ICommonActionConstants.OPEN,
 					openConfigAction);
-		}
 	}
 }

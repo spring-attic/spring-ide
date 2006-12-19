@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IMethod;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.util.ObjectUtils;
 
 public class AopReference implements IAopReference {
@@ -32,14 +33,17 @@ public class AopReference implements IAopReference {
     private IAspectDefinition definition;
 
     private IResource file;
+    
+    private IBean bean;
 
     public AopReference(ADVICE_TYPES type, IMethod source, IMethod target,
-            IAspectDefinition def, IResource file) {
+            IAspectDefinition def, IResource file, IBean bean) {
         this.type = type;
         this.source = source;
         this.target = target;
         this.definition = def;
         this.file = file;
+        this.bean = bean;
     }
 
     public IAspectDefinition getDefinition() {
@@ -81,5 +85,9 @@ public class AopReference implements IAopReference {
         hashCode = 12 + ObjectUtils.nullSafeHashCode(definition
                 .getAspectLineNumber());
         return hashCode;
+    }
+
+    public IBean getTargetBean() {
+        return bean;
     }
 }

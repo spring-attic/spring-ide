@@ -273,13 +273,10 @@
             id="org.springframework.ide.eclipse.aop.ui.navigator.actions"
             class="org.springframework.ide.eclipse.aop.ui.navigator.action.BeansAopNavigatorActionProvider">
          <enablement>
-			<or>
-				<instanceof value="org.springframework.ide.eclipse.aop.ui.navigator.util.JavaElementWrapper"/>
-				<instanceof value="org.springframework.ide.eclipse.aop.core.model.IAopReference"/>
-             </or>
+             <instanceof value="org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferenceNode"/>
          </enablement>
       </actionProvider>
-	   
+	       
     </extension>
     
     <extension
@@ -289,7 +286,7 @@
              class="org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigatorLinkHelper">
           <selectionEnablement>
 			 <or>
-				<instanceof value="org.springframework.ide.eclipse.aop.ui.navigator.util.JavaElementWrapper"/>
+				<instanceof value="org.springframework.ide.eclipse.aop.ui.navigator.model.JavaElementReferenceNode"/>
 				<instanceof value="org.springframework.ide.eclipse.aop.core.model.IAopReference"/>
              </or>
           </selectionEnablement>
@@ -302,8 +299,8 @@
   <extension
      point="org.eclipse.ui.views">
       <view
-            name="Beans Cross Reference"
-            icon="icons/full/obj16/spring_obj.gif"
+            name="Beans Cross References"
+            icon="icons/full/obj16/xref_obj.gif"
             category="org.springframework.ide.eclipse.beans.ui.views"
             class="org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigator"
             id="org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigator">

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 package org.springframework.ide.eclipse.aop.ui.decorator;
 
 import java.net.MalformedURLException;
@@ -98,6 +98,8 @@ public class BeansAopUIImages {
 
     public static final String IMG_OVR_SPRING = NAME_PREFIX + "spring_overlay.gif";
 
+    public static final String IMG_OVR_ANNOTATION = NAME_PREFIX + "annotation_overlay.gif";
+
 	private final static String STRUCTURE = "structure/"; // basic colors - size 16x16
 
 	public static final ImageDescriptor DESC_OBJS_ASPECT = createManaged(
@@ -126,6 +128,9 @@ public class BeansAopUIImages {
 
     public static final ImageDescriptor DESC_OVR_SPRING = createManaged(STRUCTURE,
 	        IMG_OVR_SPRING);
+   
+    public static final ImageDescriptor DESC_OVR_ANNOTATION = createManaged(STRUCTURE,
+            IMG_OVR_ANNOTATION);
 
 	/**
 	 * Returns the <code>Image<code> identified by the given key,
