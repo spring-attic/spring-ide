@@ -22,6 +22,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.preference.IPreferencePage;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
@@ -33,6 +35,7 @@ import org.eclipse.ui.views.properties.FilePropertySource;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.ResourcePropertySource;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
@@ -52,6 +55,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.ui.TreePathBuilder;
 import org.springframework.ide.eclipse.ui.editors.ZipEntryEditorInput;
+import org.w3c.dom.Element;
 
 /**
  * Some helper methods.
@@ -195,6 +199,22 @@ public final class BeansUIUtils {
 				}
 			} else {
 				return SpringUIUtils.openInEditor(file, line);
+			}
+		}
+		return null;
+	}
+
+	public static IModelElement getSelectedElement(ISelection selection,
+			IModelElement contextElement) {
+		if (selection instanceof IStructuredSelection
+				&& !selection.isEmpty()) {
+			IStructuredSelection sSelection = (IStructuredSelection) selection;
+			if (sSelection.size() == 1) {
+				Object sElement = sSelection.getFirstElement();
+				if (sElement instanceof Element) {
+					return BeansModelUtils.getModelElement((Element) sElement,
+							contextElement);
+				}
 			}
 		}
 		return null;
