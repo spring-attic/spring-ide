@@ -81,8 +81,9 @@
 			</or>
 		 </triggerPoints>
          <possibleChildren>
-				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
 				<instanceof value="org.eclipse.core.resources.IFile"/>
+                <instanceof value="org.eclipse.core.resources.IStorage"/>
+				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
          </possibleChildren>
          <commonSorter
                id="org.springframework.ide.eclipse.beans.ui.navigator.sorter.beansExplorerSorter"

@@ -51,8 +51,9 @@ public class BeansNavigatorLinkHelper implements ILinkHelper {
 					IEditorInput input = new FileEditorInput((IFile) resource);
 					IEditorPart editor = page.findEditor(input);
 					if (editor != null) {
-						SpringUIUtils.openInEditor((IFile) resource,
-								element.getElementStartLine());
+						page.bringToTop(editor);
+						SpringUIUtils.revealInEditor(editor, element
+								.getElementStartLine());
 					}
 				}
 			}
@@ -74,7 +75,6 @@ public class BeansNavigatorLinkHelper implements ILinkHelper {
 							.createTreePath(element));
 				}
 			}
-			return new TreeSelection(BeansUIUtils.createTreePath(config));
 		}
 		return StructuredSelection.EMPTY;
 	}
