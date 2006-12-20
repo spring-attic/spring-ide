@@ -209,8 +209,7 @@ public final class BeansUIUtils {
 		if (selection instanceof IStructuredSelection
 				&& !selection.isEmpty()) {
 			IStructuredSelection sSelection = (IStructuredSelection) selection;
-			if (sSelection.size() == 1) {
-				Object sElement = sSelection.getFirstElement();
+			for (Object sElement : sSelection.toArray()) {
 				if (sElement instanceof Element) {
 					return BeansModelUtils.getModelElement((Element) sElement,
 							contextElement);
