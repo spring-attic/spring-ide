@@ -25,4 +25,4 @@ Export-Package: org.springframework.ide.eclipse.aop.core,
  org.springframework.ide.eclipse.aop.core.model,
  org.springframework.ide.eclipse.aop.core.model.internal,
  org.springframework.ide.eclipse.aop.core.parser
-Bundle-Vendor: %provideraName
+Bundle-Vendor: %providerName

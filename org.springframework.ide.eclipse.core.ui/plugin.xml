@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
-<plugin id="org.springframework.ide.eclipse.core.ui" name="Spring Core UI Plug-in" version="1.0.0" provider-name="www.springide.org" class="org.springframework.ide.eclipse.core.ui.SpringCoreUIPlugin">
+<plugin id="org.springframework.ide.eclipse.core.ui" name="Spring IDE Core UI" version="1.9.0" provider-name="Spring IDE Developers" class="org.springframework.ide.eclipse.core.ui.SpringCoreUIPlugin">
   <runtime>
 		<library name="ec.ep.dit.isp.foundry.eclipse.platform.utils.jar">
          	<export name="*" />

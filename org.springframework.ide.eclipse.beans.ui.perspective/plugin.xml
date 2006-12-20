@@ -4,7 +4,7 @@
    id="org.springframework.ide.eclipse.beans.ui.perspective"
    name="%pluginName"
    version="1.0.0"
-   provider-name="%pluginProvider"
+   provider-name="%providerName"
    class="org.springframework.ide.eclipse.beans.ui.perspective.BeansPerspectivePlugin">
 
    <runtime>

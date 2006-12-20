@@ -34,3 +34,4 @@ Export-Package: org.springframework.ide.eclipse.aop.ui,
  org.springframework.ide.eclipse.aop.ui.navigator.model,
  org.springframework.ide.eclipse.aop.ui.navigator.util,
  org.springframework.ide.eclipse.aop.ui.support
+Bundle-Vendor: %providerName
