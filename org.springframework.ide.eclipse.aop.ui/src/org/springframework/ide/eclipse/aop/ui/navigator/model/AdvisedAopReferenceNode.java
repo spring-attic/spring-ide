@@ -22,18 +22,18 @@ import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 
-public class AdvisedAopReference implements IReferenceNode {
+public class AdvisedAopReferenceNode implements IReferenceNode {
 
     private List<IAopReference> references;
 
-    public AdvisedAopReference(List<IAopReference> reference) {
+    public AdvisedAopReferenceNode(List<IAopReference> reference) {
         this.references = reference;
     }
 
     public IReferenceNode[] getChildren() {
         List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
         for (IAopReference reference : references) {
-            nodes.add(new AdvisedAopSource(reference));
+            nodes.add(new AdvisedAopSourceNode(reference));
         }
         return nodes.toArray(new IReferenceNode[nodes.size()]);
     }
@@ -42,7 +42,7 @@ public class AdvisedAopReference implements IReferenceNode {
         return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_REFERENCE);
     }
 
-    public String getNodeName() {
+    public String getText() {
         return "advised by";
     }
     

@@ -17,6 +17,7 @@ package org.springframework.ide.eclipse.aop.ui.navigator;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -51,7 +52,7 @@ public class BeansAopNavigator
             Control ctrl = getCommonViewer().getControl();
             // Are we in the UI thread?
             if (ctrl.getDisplay().getThread() == Thread.currentThread()) {
-                refreshViewer(getCommonViewer(), element);
+                refreshViewer(getCommonViewer(), element, calculateExpandToLevel(element));
             }
             else {
                 ctrl.getDisplay().asyncExec(new Runnable() {
@@ -62,19 +63,32 @@ public class BeansAopNavigator
                         if (ctrl == null || ctrl.isDisposed()) {
                             return;
                         }
-                        refreshViewer(getCommonViewer(), element);
+                        refreshViewer(getCommonViewer(), element, calculateExpandToLevel(element));
                     }
                 });
             }
             lastElement = element;
         }
     }
+    
+    public static int calculateExpandToLevel(Object element) {
+        if (element instanceof IType) {
+            return 5;
+        }
+        else if (element instanceof IMethod) {
+            return 4;
+        }
+        else if (element instanceof Element) {
+            return 4;
+        }
+        return AbstractTreeViewer.ALL_LEVELS;
+    }
 
-    public static void refreshViewer(TreeViewer viewer, final Object javaElement) {
+    public static void refreshViewer(TreeViewer viewer, final Object javaElement, int expandToLevel) {
         viewer.getTree().setRedraw(false);
         viewer.setInput(javaElement);
         viewer.refresh();
-        viewer.expandAll();
+        viewer.expandToLevel(expandToLevel);
         revealSelection(viewer, javaElement);
         viewer.getTree().setRedraw(true);
     }

@@ -1,17 +1,17 @@
 /*
  * Copyright 2002-2006 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.springframework.ide.eclipse.aop.ui.navigator.util;
 
@@ -37,20 +37,34 @@ import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.viewers.DecoratingLabelProvider;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
+import org.springframework.ide.eclipse.aop.ui.BeansAopPlugin;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.w3c.dom.Element;
 
 @SuppressWarnings("restriction")
 public class BeansAopNavigatorUtils {
+
+    public static ILabelProvider JAVA_LABEL_PROVIDER = new DecoratingLabelProvider(
+            new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT
+                    | JavaElementLabelProvider.SHOW_SMALL_ICONS),
+            BeansAopPlugin.getDefault().getWorkbench().getDecoratorManager()
+                    .getLabelDecorator());
+
+    public static BeansModelLabelProvider BEAN_LABEL_PROVIDER = 
+        new BeansModelLabelProvider();
 
     public static Object getSelectedElement(IWorkbenchPart part,
             ISelection selection) {
@@ -249,7 +263,8 @@ public class BeansAopNavigatorUtils {
         try {
             ICompilationUnit compUnit = member.getCompilationUnit();
             Document document = new Document(compUnit.getBuffer().getContents());
-            return document.getLineOfOffset(member.getSourceRange().getOffset());
+            return document
+                    .getLineOfOffset(member.getSourceRange().getOffset());
         }
         catch (JavaModelException e) {
         }

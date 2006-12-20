@@ -62,6 +62,16 @@ public class BeansAopUtils {
         return je.getElementName();
     }
 
+    public static String getPackageLinkName(IJavaElement je) {
+        if (je instanceof IMethod) {
+            return ((IMethod) je).getDeclaringType().getPackageFragment().getElementName();
+        }
+        else if (je instanceof IType) {
+            return ((IType) je).getPackageFragment().getElementName();
+        }
+        return je.getElementName();
+    }
+
     /**
      */
     private static String readableName(IMethod method) {

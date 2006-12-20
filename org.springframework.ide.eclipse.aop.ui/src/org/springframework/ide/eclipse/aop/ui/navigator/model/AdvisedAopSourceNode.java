@@ -15,8 +15,6 @@
  */
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
-import java.util.List;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.graphics.Image;
@@ -25,30 +23,21 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.AopUIImages;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
-public class AdviceRootAopReference implements IReferenceNode,
+public class AdvisedAopSourceNode implements IReferenceNode,
         IRevealableReferenceNode {
 
-    private List<IAopReference> reference;
+    private IAopReference reference;
 
-    private boolean isBeanConfig = false;
-
-    public AdviceRootAopReference(List<IAopReference> reference) {
-        this(reference, false);
-    }
-
-    public AdviceRootAopReference(List<IAopReference> reference,
-            boolean isBeanConfig) {
+    public AdvisedAopSourceNode(IAopReference reference) {
         this.reference = reference;
-        this.isBeanConfig = isBeanConfig;
     }
 
     public IReferenceNode[] getChildren() {
-        return new IReferenceNode[] { new AdviceAopSourceMethod(this.reference,
-                this.isBeanConfig) };
+        return new IReferenceNode[] { new AdvisedAopSourceMethodNode(reference) };
     }
 
     public Image getImage() {
-        ADVICE_TYPES type = reference.get(0).getAdviceType();
+        ADVICE_TYPES type = reference.getAdviceType();
         if (type == ADVICE_TYPES.AFTER || type == ADVICE_TYPES.AFTER_RETURNING
                 || type == ADVICE_TYPES.AFTER_THROWING) {
             return AopUIImages.getImage(AopUIImages.IMG_OBJS_AFTER_ADVICE);
@@ -62,8 +51,8 @@ public class AdviceRootAopReference implements IReferenceNode,
         return null;
     }
 
-    public String getNodeName() {
-        ADVICE_TYPES type = reference.get(0).getAdviceType();
+    public String getText() {
+        ADVICE_TYPES type = reference.getAdviceType();
         String text = "";
         if (type == ADVICE_TYPES.AFTER) {
             text += "after()";
@@ -81,16 +70,11 @@ public class AdviceRootAopReference implements IReferenceNode,
             text += "around()";
         }
         text += " <";
-        text += reference.get(0).getDefinition().getAspectName();
+        text += reference.getDefinition().getAspectName();
         text += "> [";
-        text += reference.get(0).getResource().getProjectRelativePath()
-                .toString();
+        text += reference.getResource().getProjectRelativePath().toString();
         text += "]";
         return text;
-    }
-
-    public List<IAopReference> getReference() {
-        return reference;
     }
 
     public boolean hasChildren() {
@@ -98,17 +82,21 @@ public class AdviceRootAopReference implements IReferenceNode,
     }
 
     public void openAndReveal() {
-        IResource resource = reference.get(0).getResource();
-        SpringUIUtils.openInEditor((IFile) resource, reference.get(0)
-                .getDefinition().getAspectLineNumber());
+        IResource resource = reference.getResource();
+        SpringUIUtils.openInEditor((IFile) resource, reference.getDefinition()
+                .getAspectLineNumber());
+    }
+
+    public IAopReference getReference() {
+        return this.reference;
     }
 
     public int getLineNumber() {
-        return reference.get(0).getDefinition().getAspectLineNumber();
+        return reference.getDefinition().getAspectLineNumber();
     }
 
     public IResource getResource() {
-        return reference.get(0).getResource();
+        return reference.getResource();
     }
 
 }

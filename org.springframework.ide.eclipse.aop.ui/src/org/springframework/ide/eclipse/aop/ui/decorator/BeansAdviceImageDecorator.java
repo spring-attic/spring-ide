@@ -32,8 +32,8 @@ import org.springframework.ide.eclipse.aop.core.model.IAdviceChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.internal.AnnotationAspectDefinition;
 import org.springframework.ide.eclipse.aop.ui.BeansAopPlugin;
-import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceRootAopReference;
-import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedAopSource;
+import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceRootAopReferenceNode;
+import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedAopSourceNode;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
@@ -67,8 +67,8 @@ public class BeansAdviceImageDecorator implements ILightweightLabelDecorator {
                 }*/
             }
         }
-        else if (element instanceof AdviceRootAopReference) {
-            List<IAopReference> references = ((AdviceRootAopReference) element)
+        else if (element instanceof AdviceRootAopReferenceNode) {
+            List<IAopReference> references = ((AdviceRootAopReferenceNode) element)
                     .getReference();
             for (IAopReference reference : references) {
                 if (reference.getDefinition() instanceof AnnotationAspectDefinition) {
@@ -78,8 +78,8 @@ public class BeansAdviceImageDecorator implements ILightweightLabelDecorator {
                 }
             }
         }
-        else if (element instanceof AdvisedAopSource) {
-            IAopReference reference = ((AdvisedAopSource) element)
+        else if (element instanceof AdvisedAopSourceNode) {
+            IAopReference reference = ((AdvisedAopSourceNode) element)
                     .getReference();
             if (reference.getDefinition() instanceof AnnotationAspectDefinition) {
                 decoration.addOverlay(BeansAopUIImages.DESC_OVR_ANNOTATION,

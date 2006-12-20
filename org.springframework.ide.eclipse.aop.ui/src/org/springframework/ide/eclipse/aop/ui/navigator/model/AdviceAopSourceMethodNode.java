@@ -19,53 +19,49 @@ import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jface.viewers.DecoratingLabelProvider;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorPart;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.ui.BeansAopPlugin;
 import org.springframework.ide.eclipse.aop.ui.BeansAopUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 
-public class AdvisedAopTargetMethod implements IReferenceNode,
+public class AdviceAopSourceMethodNode implements IReferenceNode,
         IRevealableReferenceNode {
-
-    private ILabelProvider labelProvider;
 
     private List<IAopReference> reference;
 
     private boolean isBeanConfig = false;
 
-    public AdvisedAopTargetMethod(List<IAopReference> reference,
+    public AdviceAopSourceMethodNode(List<IAopReference> reference,
             boolean isBeanConfig) {
         this.reference = reference;
         this.isBeanConfig = isBeanConfig;
-        labelProvider = new DecoratingLabelProvider(
-                new JavaElementLabelProvider(
-                        JavaElementLabelProvider.SHOW_DEFAULT
-                                | JavaElementLabelProvider.SHOW_SMALL_ICONS),
-                BeansAopPlugin.getDefault().getWorkbench()
-                        .getDecoratorManager().getLabelDecorator());
     }
 
     public IReferenceNode[] getChildren() {
-        return new IReferenceNode[] { new AdvisedAopReference(this.reference) };
+        return new IReferenceNode[] { new AdviceAopReferenceNode(this.reference) };
     }
 
     public Image getImage() {
-        return labelProvider.getImage(reference.get(0).getTarget());
+        return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getImage(reference
+                .get(0).getSource());
     }
 
-    public String getNodeName() {
+    public String getText() {
         if (isBeanConfig) {
             return BeansAopUtils.getJavaElementLinkName(reference.get(0)
-                    .getTarget());
+                    .getSource())
+                    + " - "
+                    + BeansAopUtils.getPackageLinkName(reference.get(0)
+                            .getSource());
         }
         else {
-            return labelProvider.getText(reference.get(0).getTarget());
+            return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(reference
+                    .get(0).getSource())
+                    + " - "
+                    + BeansAopUtils.getPackageLinkName(reference.get(0)
+                            .getSource());
         }
     }
 
@@ -76,7 +72,7 @@ public class AdvisedAopTargetMethod implements IReferenceNode,
     public void openAndReveal() {
         IEditorPart p;
         try {
-            IJavaElement element = reference.get(0).getTarget();
+            IJavaElement element = reference.get(0).getSource();
             p = JavaUI.openInEditor(element);
             JavaUI.revealInEditor(p, element);
         }
@@ -85,11 +81,12 @@ public class AdvisedAopTargetMethod implements IReferenceNode,
     }
 
     public int getLineNumber() {
-        return BeansAopNavigatorUtils.getLineNumber(reference.get(0).getTarget());
+        return BeansAopNavigatorUtils.getLineNumber(reference.get(0)
+                .getSource());
     }
 
     public IResource getResource() {
-        return reference.get(0).getTarget().getResource();
+        return reference.get(0).getSource().getResource();
     }
 
 }

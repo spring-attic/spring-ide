@@ -23,7 +23,7 @@ public interface IReferenceNode {
     
     boolean hasChildren();
     
-    String getNodeName();
+    String getText();
     
     Image getImage();
     
