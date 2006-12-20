@@ -92,9 +92,7 @@ public class XmlSourceLocation implements IModelSourceLocation {
 			return false;
 		if (!ObjectUtils.nullSafeEquals(this.startLine, that.startLine))
 			return false;
-		if (!ObjectUtils.nullSafeEquals(this.endLine, that.endLine))
-			return false;
-		return super.equals(other);
+		return ObjectUtils.nullSafeEquals(this.endLine, that.endLine);
 	}
 
 	public int hashCode() {
@@ -103,8 +101,7 @@ public class XmlSourceLocation implements IModelSourceLocation {
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(prefix);
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(namespaceURI);
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(startLine);
-		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(endLine);
-		return 29 * hashCode + super.hashCode();
+		return 29 * hashCode + ObjectUtils.nullSafeHashCode(endLine);
 	}
 
 	public String toString() {

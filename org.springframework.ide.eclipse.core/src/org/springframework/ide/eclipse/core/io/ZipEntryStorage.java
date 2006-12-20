@@ -193,15 +193,12 @@ public class ZipEntryStorage extends PlatformObject implements IStorage {
 		ZipEntryStorage that = (ZipEntryStorage) other;
 		if (!ObjectUtils.nullSafeEquals(this.fullName, that.fullName))
 			return false;
-		if (!ObjectUtils.nullSafeEquals(this.zipResource, that.zipResource))
-			return false;
-		return super.equals(other);
+		return ObjectUtils.nullSafeEquals(this.zipResource, that.zipResource);
 	}
 
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(fullName);
-		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(zipResource);
-		return 29 * hashCode + super.hashCode();
+		return 29 * hashCode + ObjectUtils.nullSafeHashCode(zipResource);
 	}
 
 	public String toString() {
