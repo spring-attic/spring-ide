@@ -266,15 +266,12 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 		GraphEditorInput that = (GraphEditorInput) other;
 		if (!ObjectUtils.nullSafeEquals(this.element, that.element))
 			return false;
-		if (!ObjectUtils.nullSafeEquals(this.context, that.context))
-			return false;
-		return super.equals(other);
+		return ObjectUtils.nullSafeEquals(this.context, that.context);
 	}
 
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(element);
-		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(context);
-		return 29 * hashCode + super.hashCode();
+		return 29 * hashCode + ObjectUtils.nullSafeHashCode(context);
 	}
 
 	private static IModelElement getContext(IModelElement element) {
