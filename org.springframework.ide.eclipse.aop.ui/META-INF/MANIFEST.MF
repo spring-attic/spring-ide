@@ -27,6 +27,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jface.text,
  org.springframework.ide.eclipse.aop.core
 Eclipse-LazyStart: true
+Bundle-ClassPath: aop-ui.jar
 Export-Package: org.springframework.ide.eclipse.aop.ui,
  org.springframework.ide.eclipse.aop.ui.decorator,
  org.springframework.ide.eclipse.aop.ui.navigator,

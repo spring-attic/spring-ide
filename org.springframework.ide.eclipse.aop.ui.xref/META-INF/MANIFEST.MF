@@ -6,7 +6,10 @@ Bundle-Version: 1.9.0
 Bundle-Activator: org.springframework.ide.eclipse.aop.ui.xref.Activator
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Require-Bundle: org.eclipse.ui,
+Bundle-ClassPath: aop-ui-xref.jar
+Require-Bundle: org.eclipse.contribution.xref.ui,
+ org.eclipse.contribution.xref.core,
+ org.eclipse.ui,
  org.eclipse.core.runtime,
  org.springframework.ide.eclipse.beans.ui,
  org.springframework.ide.eclipse.beans.core,
@@ -17,8 +20,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.wst.xml.core,
  org.eclipse.wst.xml_core.feature.source,
  org.springframework.ide.eclipse.beans.ui.editor,
- org.eclipse.contribution.xref.ui,
- org.eclipse.contribution.xref.core,
  org.eclipse.ui.ide,
  org.eclipse.ajdt.ui,
  org.eclipse.ajdt.core,
