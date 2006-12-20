@@ -493,13 +493,15 @@ public final class BeansModelUtils {
 			IBean element, IModelElement context, boolean recursive,
 			Set<BeanReference> references, Set<IBean> referencedBeans) {
 		if (!referencedBeans.contains(element)) {
+
+			// must add this element first to break from cycles
+			referencedBeans.add(element);
 			for (BeanReference ref : getBeanReferences(element, context,
 					recursive, references, referencedBeans)) {
 				if (!references.contains(ref)) {
 					references.add(ref);
 				}
 			}
-			referencedBeans.add(element);
 		}
 	}
 
