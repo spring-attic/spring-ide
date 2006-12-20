@@ -54,4 +54,14 @@ public class AopProject implements IAopProject {
         }
         this.references.removeAll(toRemove);
     }
+
+    public List<IAopReference> getReferencesForResource(IResource resource) {
+        List<IAopReference> list = new ArrayList<IAopReference>();
+        for (IAopReference reference : this.references) {
+            if (reference.getResource().equals(resource)) {
+                list.add(reference);
+            }
+        }
+        return list;
+    }
 }

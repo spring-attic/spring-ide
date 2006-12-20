@@ -15,9 +15,12 @@
  */
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.ui.IEditorPart;
+import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 
 public class JavaElementReferenceNode implements IRevealableReferenceNode {
     
@@ -46,5 +49,18 @@ public class JavaElementReferenceNode implements IRevealableReferenceNode {
         }
         catch (Exception e) {
         }   
+    }
+
+    public int getLineNumber() {
+        if (method instanceof IMember) {
+            return BeansAopNavigatorUtils.getLineNumber((IMember) method);
+        }
+        else {
+            return -1;
+        }
+    }
+
+    public IResource getResource() {
+        return method.getResource();
     }
 }

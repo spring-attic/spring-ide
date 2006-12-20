@@ -1,17 +1,17 @@
 /*
  * Copyright 2002-2006 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
@@ -25,17 +25,26 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.AopUIImages;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
-public class AdviceRootAopReference implements IReferenceNode, IRevealableReferenceNode {
+public class AdviceRootAopReference implements IReferenceNode,
+        IRevealableReferenceNode {
 
     private List<IAopReference> reference;
 
+    private boolean isBeanConfig = false;
+
     public AdviceRootAopReference(List<IAopReference> reference) {
+        this(reference, false);
+    }
+
+    public AdviceRootAopReference(List<IAopReference> reference,
+            boolean isBeanConfig) {
         this.reference = reference;
+        this.isBeanConfig = isBeanConfig;
     }
 
     public IReferenceNode[] getChildren() {
-        return new IReferenceNode[] { new AdviceAopSourceMethod(
-                this.reference) };
+        return new IReferenceNode[] { new AdviceAopSourceMethod(this.reference,
+                this.isBeanConfig) };
     }
 
     public Image getImage() {
@@ -74,12 +83,12 @@ public class AdviceRootAopReference implements IReferenceNode, IRevealableRefere
         text += " <";
         text += reference.get(0).getDefinition().getAspectName();
         text += "> [";
-        text += reference.get(0).getResource().getProjectRelativePath().toString();
+        text += reference.get(0).getResource().getProjectRelativePath()
+                .toString();
         text += "]";
         return text;
     }
 
-    
     public List<IAopReference> getReference() {
         return reference;
     }
@@ -92,6 +101,14 @@ public class AdviceRootAopReference implements IReferenceNode, IRevealableRefere
         IResource resource = reference.get(0).getResource();
         SpringUIUtils.openInEditor((IFile) resource, reference.get(0)
                 .getDefinition().getAspectLineNumber());
+    }
+
+    public int getLineNumber() {
+        return reference.get(0).getDefinition().getAspectLineNumber();
+    }
+
+    public IResource getResource() {
+        return reference.get(0).getResource();
     }
 
 }

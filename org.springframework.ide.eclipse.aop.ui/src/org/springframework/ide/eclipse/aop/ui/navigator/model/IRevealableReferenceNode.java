@@ -15,8 +15,14 @@
  */
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
+import org.eclipse.core.resources.IResource;
+
 public interface IRevealableReferenceNode {
     
     void openAndReveal();
+    
+    int getLineNumber();
+    
+    IResource getResource();
     
 }

@@ -23,5 +23,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ajdt.core,
  org.springframework.ide.eclipse.ui,
  org.eclipse.ui.navigator,
- org.eclipse.jdt.ui
+ org.eclipse.jdt.ui,
+ org.eclipse.ui.workbench.texteditor,
+ org.eclipse.ui.editors,
+ org.eclipse.jface.text
 Eclipse-LazyStart: true

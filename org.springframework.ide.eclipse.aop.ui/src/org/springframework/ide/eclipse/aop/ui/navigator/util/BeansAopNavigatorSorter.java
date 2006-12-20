@@ -18,6 +18,7 @@ package org.springframework.ide.eclipse.aop.ui.navigator.util;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
+import org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferenceNode;
 
 /**
  */
@@ -31,13 +32,13 @@ public class BeansAopNavigatorSorter extends ViewerSorter {
     }
 
     public int compare(Viewer viewer, Object e1, Object e2) {
-		if (e1 instanceof IAopReference
-				|| e2 instanceof IAopReference) {
-			IAopReference ref1 = (IAopReference) e1;
-			IAopReference ref2 = (IAopReference) e2;
+		if (e1 instanceof IRevealableReferenceNode
+				|| e2 instanceof IRevealableReferenceNode) {
+            IRevealableReferenceNode ref1 = (IRevealableReferenceNode) e1;
+            IRevealableReferenceNode ref2 = (IRevealableReferenceNode) e2;
             if (ref1.getResource().equals(ref2.getResource())) {
-                int l1 = ref1.getDefinition().getAspectLineNumber();
-                int l2 = ref2.getDefinition().getAspectLineNumber();
+                int l1 = ref1.getLineNumber();
+                int l2 = ref2.getLineNumber();
                 if (l1 < l2) {
                     return -1;
                 }

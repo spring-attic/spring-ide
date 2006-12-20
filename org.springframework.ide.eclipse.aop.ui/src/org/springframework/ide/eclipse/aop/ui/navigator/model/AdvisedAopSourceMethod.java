@@ -15,6 +15,7 @@
  */
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
@@ -25,6 +26,7 @@ import org.eclipse.ui.IEditorPart;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.ui.BeansAopPlugin;
 import org.springframework.ide.eclipse.aop.ui.BeansAopUtils;
+import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 
 public class AdvisedAopSourceMethod implements IReferenceNode, IRevealableReferenceNode {
     
@@ -66,6 +68,14 @@ public class AdvisedAopSourceMethod implements IReferenceNode, IRevealableRefere
         }
         catch (Exception e) {
         }     
+    }
+
+    public int getLineNumber() {
+        return BeansAopNavigatorUtils.getLineNumber(reference.getSource());
+    }
+
+    public IResource getResource() {
+        return reference.getSource().getResource();
     }
 
 }

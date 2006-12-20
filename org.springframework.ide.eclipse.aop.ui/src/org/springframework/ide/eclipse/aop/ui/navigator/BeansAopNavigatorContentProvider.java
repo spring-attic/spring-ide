@@ -1,17 +1,17 @@
 /*
  * Copyright 2002-2006 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.springframework.ide.eclipse.aop.ui.navigator;
 
@@ -23,6 +23,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -36,6 +41,10 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonContentProvider;
 import org.eclipse.ui.navigator.INavigatorContentExtension;
+import org.eclipse.wst.sse.core.StructuredModelManager;
+import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
+import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
+import org.eclipse.wst.xml.core.internal.document.ElementImpl;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
@@ -88,8 +97,8 @@ public class BeansAopNavigatorContentProvider implements
 
     public Object[] getElements(Object inputElement) {
         if (inputElement instanceof IType) {
-            return new Object[] { new JavaElementReferenceNode((IType) inputElement,
-                    true) };
+            return new Object[] { new JavaElementReferenceNode(
+                    (IType) inputElement, true) };
         }
         else if (inputElement instanceof SourceMethod) {
             return getChildren(inputElement);
@@ -98,7 +107,10 @@ public class BeansAopNavigatorContentProvider implements
             return getChildren(((JavaElementReferenceNode) inputElement)
                     .getJavaElement());
         }
-        return new Object[0];
+        else if (inputElement instanceof ElementImpl) {
+            return getChildren(inputElement);
+        }
+        return IModelElement.NO_CHILDREN;
     }
 
     @SuppressWarnings("restriction")
@@ -184,7 +196,84 @@ public class BeansAopNavigatorContentProvider implements
                 return nodes.toArray();
             }
         }
+        else if (parentElement instanceof ElementImpl) {
+            ElementImpl element = (ElementImpl) parentElement;
+            IStructuredDocument document = element.getStructuredDocument();
+            int startLine = document.getLineOfOffset(element.getStartOffset()) + 1;
+            int endLine = document.getLineOfOffset(element.getEndOffset()) + 1;
+            IResource resource = getResource(document);
+            IAopProject project = BeansAopPlugin.getModel().getProject(
+                    resource.getProject());
+            List<IAopReference> references = project
+                    .getReferencesForResource(resource);
+            Map<IAspectDefinition, List<IAopReference>> foundSourceReferences = new HashMap<IAspectDefinition, List<IAopReference>>();
+            Map<IBean, List<IAopReference>> foundTargetReferences = new HashMap<IBean, List<IAopReference>>();
+            for (IAopReference reference : references) {
+                if (reference.getDefinition().getAspectLineNumber() >= startLine
+                        && reference.getDefinition().getAspectLineNumber() <= endLine) {
+                    if (foundSourceReferences.containsKey(reference
+                            .getDefinition())) {
+                        foundSourceReferences
+                                .get(reference.getDefinition()).add(
+                                        reference);
+                    }
+                    else {
+                        List<IAopReference> tmp = new ArrayList<IAopReference>();
+                        tmp.add(reference);
+                        foundSourceReferences.put(
+                                reference.getDefinition(), tmp);
+                    }
+                }
+                if (reference.getTargetBean().getElementStartLine() >= startLine
+                        && reference.getTargetBean().getElementEndLine() <= endLine) {
+                    if (foundTargetReferences.containsKey(reference
+                            .getTargetBean())) {
+                        foundTargetReferences
+                                .get(reference.getTargetBean()).add(
+                                        reference);
+                    }
+                    else {
+                        List<IAopReference> tmp = new ArrayList<IAopReference>();
+                        tmp.add(reference);
+                        foundTargetReferences.put(
+                                reference.getTargetBean(), tmp);
+                    }
+                }
+            }
+            List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
+            if (foundSourceReferences.size() > 0) {
+                for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : foundSourceReferences
+                        .entrySet()) {
+                    nodes.add(new AdviceRootAopReference(entry.getValue(), true));
+                }
+            }
+            if (foundTargetReferences.size() > 0) {
+                for (Map.Entry<IBean, List<IAopReference>> entry : foundTargetReferences
+                        .entrySet()) {
+                    nodes
+                            .add(new AdvisedRootAopReference(entry
+                                    .getValue(), true));
+                }
+            }
+            return nodes.toArray();
+        }
         return IModelElement.NO_CHILDREN;
+    }
+
+    private IResource getResource(IStructuredDocument document) {
+        IStructuredModel model = StructuredModelManager.getModelManager()
+                .getExistingModelForEdit(document);
+        String baselocation = model.getBaseLocation();
+        IResource resource = null;
+        if (baselocation != null) {
+            // copied from JSPTranslationAdapter#getJavaProject
+            IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+            IPath filePath = new Path(baselocation);
+            if (filePath.segmentCount() > 0) {
+                resource = root.getFile(filePath);
+            }
+        }
+        return resource;
     }
 
     public Object getParent(Object element) {

@@ -29,4 +29,6 @@ public interface IAopProject {
     IProject getProject();
     
     void clearReferencesForResource(IResource resource);
+    
+    List<IAopReference> getReferencesForResource(IResource resource);
 }
