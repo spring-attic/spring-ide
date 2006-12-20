@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.Dialog;
@@ -35,6 +34,9 @@ import org.eclipse.jface.preference.IPreferencePage;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.jface.preference.PreferenceNode;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.SWT;
@@ -58,6 +60,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
@@ -223,65 +226,102 @@ public final class SpringUIUtils {
     }    
 
     /**
-     * Returns the <code>ITextEditor</code> instance for given
-     * <code>IEditorPart</code> or <code>null</code> for any non text editor.
-     */
-    public static ITextEditor getTextEditor(IEditorPart part) {
+	 * Returns the <code>ITextEditor</code> instance for given
+	 * <code>IEditorPart</code> or <code>null</code> for any non text
+	 * editor.
+	 */
+	public static ITextEditor getTextEditor(IEditorPart part) {
 		if (part instanceof ITextEditor) {
 			return (ITextEditor) part;
 		} else if (part instanceof IAdaptable) {
-			return (ITextEditor)
-							 ((IAdaptable) part).getAdapter(ITextEditor.class);
+			return (ITextEditor) ((IAdaptable) part)
+					.getAdapter(ITextEditor.class);
 		}
 		return null;
-    }
+	}
+
+	public static void revealInEditor(IEditorPart editor, int line) {
+		ITextEditor textEditor = getTextEditor(editor);
+		if (textEditor != null && line > 0) {
+			IDocumentProvider provider = textEditor.getDocumentProvider();
+			IEditorInput input = editor.getEditorInput();
+			try {
+				provider.connect(input);
+			} catch (CoreException e) {
+				SpringUIPlugin.log(e);
+				return;
+			}
+			IDocument document = provider.getDocument(input);
+			try {
+				IRegion lineRegion = document.getLineInformation(line - 1);
+				textEditor.selectAndReveal(lineRegion.getOffset(), lineRegion
+						.getLength());
+			} catch (BadLocationException e) {
+				SpringUIPlugin.log(e);
+			}
+			provider.disconnect(input);
+		}
+	}
+
+	public static IEditorPart openInEditor(IResourceModelElement element) {
+		return openInEditor(element, true);
+	}
 
 	/**
 	 * Opens given model element in associated editor.
 	 */
-	public static IEditorPart openInEditor(IResourceModelElement element) {
+	public static IEditorPart openInEditor(IResourceModelElement element,
+			boolean activate) {
 		IFile file = (IFile) element.getElementResource();
 		if (file != null) {
 			int line = -1;
 			if (element instanceof ISourceModelElement) {
 				line = ((ISourceModelElement) element).getElementStartLine();
 			}
-			return openInEditor(file, line);
+			return openInEditor(file, line, activate);
 		}
 		return null;
+	}
+
+	public static IEditorPart openInEditor(IFile file, int line) {
+		return openInEditor(file, line, true);
 	}
 
 	/**
 	 * Opens given file in associated editor and go to specified line (if > 0).
 	 */
-	public static IEditorPart openInEditor(IFile file, int line) {
+	public static IEditorPart openInEditor(IFile file, int line,
+			boolean activate) {
 		IEditorPart editor = null;
 		IWorkbenchPage page = SpringUIPlugin.getActiveWorkbenchPage();
 		try {
 			if (line > 0) {
 				IMarker marker = file.createMarker(IMarker.TEXT);
 				marker.setAttribute(IMarker.LINE_NUMBER, line);
-				editor = IDE.openEditor(page, marker);
+				editor = IDE.openEditor(page, marker, activate);
 			} else {
-				editor = IDE.openEditor(page, file);
+				editor = IDE.openEditor(page, file, activate);
 			}
 		} catch (CoreException e) {
-			openError(SpringUIMessages.OpenInEditor_errorMessage, e.getMessage(), e);
+			openError(SpringUIMessages.OpenInEditor_errorMessage, e
+					.getMessage(), e);
 		}
-	    return editor;
+		return editor;
 	}
 
 	public static IEditorPart openInEditor(IEditorInput input,
-												 String editorId) {
+			 String editorId) {
+		return openInEditor(input, editorId, true);
+	}
+
+	public static IEditorPart openInEditor(IEditorInput input, String editorId,
+			boolean activate) {
 		IWorkbenchPage page = SpringUIPlugin.getActiveWorkbenchPage();
 		try {
-			IEditorPart editPart = page.openEditor(input, editorId);
-			if (editPart != null) {
-				editPart.setFocus();
-				return editPart;
-			}
+			return page.openEditor(input, editorId, activate);
 		} catch (PartInitException e) {
-			openError(SpringUIMessages.OpenInEditor_errorMessage, e.getMessage(), e);
+			openError(SpringUIMessages.OpenInEditor_errorMessage, e
+					.getMessage(), e);
 		}
 		return null;
 	}
@@ -290,9 +330,11 @@ public final class SpringUIUtils {
 		try {
 			return JavaUI.openInEditor(type);
 		} catch (PartInitException e) {
-			openError(SpringUIMessages.OpenInEditor_errorMessage, e.getMessage(), e);
+			openError(SpringUIMessages.OpenInEditor_errorMessage, e
+					.getMessage(), e);
 		} catch (JavaModelException e) {
-			openError(SpringUIMessages.OpenInEditor_errorMessage, e.getMessage(), e);
+			openError(SpringUIMessages.OpenInEditor_errorMessage, e
+					.getMessage(), e);
 		}
 		return null;
 	}
