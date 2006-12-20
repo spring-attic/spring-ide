@@ -141,12 +141,10 @@ public abstract class AbstractModelElement implements IModelElement {
 			return false;
 		}
 		AbstractModelElement that = (AbstractModelElement) other;
-		if (!ObjectUtils.nullSafeEquals(this.name, that.name)) return false;
-		return super.equals(other);
+		return ObjectUtils.nullSafeEquals(this.name, that.name); // ignore parent
 	}
 
 	public int hashCode() {
-		int hashCode = ObjectUtils.nullSafeHashCode(name);
-		return getElementType() * hashCode + super.hashCode();
+		return ObjectUtils.nullSafeHashCode(name); // ignore parent
 	}
 }
