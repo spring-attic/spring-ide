@@ -231,9 +231,6 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	
 		action = new OpenConfigFile(this);
 		registry.registerAction(action);
-	
-		action = new ShowInView(this);
-		registry.registerAction(action);
 
 		action = new PrintAction(this);
 		registry.registerAction(action);
