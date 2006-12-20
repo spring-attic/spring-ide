@@ -7,27 +7,6 @@
             name="%viewCategoryName"
             id="org.springframework.ide.eclipse.beans.ui.views">
       </category>
-      <view
-            name="%viewName"
-            icon="icons/full/obj16/spring_obj.gif"
-            category="org.springframework.ide.eclipse.beans.ui.views"
-            class="org.springframework.ide.eclipse.beans.ui.views.BeansView"
-            id="org.springframework.ide.eclipse.beans.ui.views.BeansView">
-      </view>
-   </extension>
-
-   <extension
-         point="org.eclipse.ui.perspectiveExtensions">
-      <perspectiveExtension
-            targetID="org.eclipse.ui.resourcePerspective">
-         <showInPart
-               id="org.springframework.ide.eclipse.beans.ui.views.BeansView">
-         </showInPart>
-      </perspectiveExtension>
-      <perspectiveExtension
-            targetID="org.eclipse.jdt.ui.JavaPerspective">
-         <showInPart id="org.springframework.ide.eclipse.beans.ui.views.BeansView"/>
-      </perspectiveExtension>
    </extension>
 
    <extension
