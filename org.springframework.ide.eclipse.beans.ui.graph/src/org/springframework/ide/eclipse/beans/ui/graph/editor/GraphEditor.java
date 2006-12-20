@@ -84,7 +84,6 @@ import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.actions.GraphContextMenuProvider;
 import org.springframework.ide.eclipse.beans.ui.graph.actions.OpenConfigFile;
 import org.springframework.ide.eclipse.beans.ui.graph.actions.OpenJavaType;
-import org.springframework.ide.eclipse.beans.ui.graph.actions.ShowInView;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Graph;
 import org.springframework.ide.eclipse.beans.ui.graph.parts.GraphicalPartFactory;
 

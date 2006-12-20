@@ -29,7 +29,6 @@
       <import plugin="org.springframework.ide.eclipse.beans.ui"/>
    </requires>
 
-
    <extension
          point="org.eclipse.ui.editors">
       <editor
@@ -39,32 +38,6 @@
             class="org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditor"
             id="org.springframework.ide.eclipse.beans.ui.graph.editor">
       </editor>
-   </extension>
-   <extension
-         point="org.eclipse.ui.popupMenus">
-      <viewerContribution
-            targetID="#BeansViewContext"
-            id="org.springframework.ide.eclipse.beans.ui.graph.actions.beansViewContext">
-         <visibility>
-            <or>
-               <objectClass
-                     name="org.springframework.ide.eclipse.beans.ui.views.model.ConfigNode">
-               </objectClass>
-               <objectClass
-                     name="org.springframework.ide.eclipse.beans.ui.views.model.ConfigSetNode">
-               </objectClass>
-               <objectClass
-                     name="org.springframework.ide.eclipse.beans.ui.views.model.BeanNode">
-               </objectClass>
-            </or>
-         </visibility>
-         <action
-               label="%popupMenus.showGraph.label"
-               class="org.springframework.ide.eclipse.beans.ui.graph.actions.ShowGraphAction"
-               menubarPath="additions"
-               id="org.springframework.ide.eclipse.beans.ui.graph.actions.showGraph">
-         </action>
-      </viewerContribution>
    </extension>
 
    <extension

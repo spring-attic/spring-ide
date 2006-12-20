@@ -55,11 +55,5 @@ public class GraphContextMenuProvider extends ContextMenuProvider {
 		if (action.isEnabled()) {
 			menu.appendToGroup(GEFActionConstants.GROUP_VIEW, action);
 		}
-
-		action = getActionRegistry().getAction(
-											 GraphActionConstants.SHOW_IN_VIEW);
-		if (action.isEnabled()) {
-			menu.appendToGroup(GEFActionConstants.GROUP_VIEW, action);
-		}
 	}
 }

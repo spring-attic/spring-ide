@@ -20,5 +20,4 @@ public interface GraphActionConstants  {
 
 	String OPEN_TYPE = "open_type";
 	String OPEN_FILE = "open_file";
-	String SHOW_IN_VIEW = "show_in_view";
 }
