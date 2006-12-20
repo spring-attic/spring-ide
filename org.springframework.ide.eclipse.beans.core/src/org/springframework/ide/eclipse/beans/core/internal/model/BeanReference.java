@@ -98,7 +98,7 @@ public class BeanReference {
 			return false;
 		if (!ObjectUtils.nullSafeEquals(this.target, that.target))
 			return false;
-		if (!ObjectUtils.nullSafeEquals(this.context, that.target))
+		if (!ObjectUtils.nullSafeEquals(this.context, that.context))
 			return false;
 		return super.equals(other);
 	}
@@ -107,7 +107,7 @@ public class BeanReference {
 		int hashCode = ObjectUtils.nullSafeHashCode(type);
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(source);
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(target);
-		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(target);
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(context);
 		return 29 * hashCode + super.hashCode();
 	}
 
