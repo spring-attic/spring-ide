@@ -1,9 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
-Bundle-SymbolicName: org.springframework.ide.eclipse.aop.ui;singleton:=true
+Bundle-SymbolicName: org.springframework.ide.eclipse.aop.ui.xref;singleton:=true
 Bundle-Version: 1.9.0
-Bundle-Activator: org.springframework.ide.eclipse.aop.ui.BeansAopPlugin
+Bundle-Activator: org.springframework.ide.eclipse.aop.ui.xref.Activator
+Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -16,6 +17,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.wst.xml.core,
  org.eclipse.wst.xml_core.feature.source,
  org.springframework.ide.eclipse.beans.ui.editor,
+ org.eclipse.contribution.xref.ui,
+ org.eclipse.contribution.xref.core,
  org.eclipse.ui.ide,
  org.eclipse.ajdt.ui,
  org.eclipse.ajdt.core,
@@ -25,12 +28,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.ui.editors,
  org.eclipse.jface.text,
- org.springframework.ide.eclipse.aop.core
+ org.springframework.ide.eclipse.aop.core,
+ org.springframework.ide.eclipse.aop.ui
 Eclipse-LazyStart: true
-Export-Package: org.springframework.ide.eclipse.aop.ui,
- org.springframework.ide.eclipse.aop.ui.decorator,
- org.springframework.ide.eclipse.aop.ui.navigator,
- org.springframework.ide.eclipse.aop.ui.navigator.action,
- org.springframework.ide.eclipse.aop.ui.navigator.model,
- org.springframework.ide.eclipse.aop.ui.navigator.util,
- org.springframework.ide.eclipse.aop.ui.support

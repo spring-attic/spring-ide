@@ -148,45 +148,8 @@
 			icon="icons/markers/around_advice.gif">
 		</specification>
 	</extension>
-	<extension
-           point="org.eclipse.contribution.xref.core.providers">
-           <xrefProvider
-                 class="org.springframework.ide.eclipse.aop.ui.xref.BeansAopReferenceProvider"
-                 id="org.springframework.ide.eclipse.aop.ui.xref.BeansAopReferenceProvider"
-                 label="extends/implements"
-                 enabled="true">
-           </xrefProvider> 
-    </extension>
     
     <extension
-         point="org.eclipse.ui.popupMenus">
-      <viewerContribution
-            targetID="org.eclipse.contribution.xref.ui.views.XReferenceView"
-            id="org.springframework.ide.eclipse.aop.ui.action.crossReferenceViewContext">
-         <!-- visibility>
-            <or>
-               <objectClass
-                     name="org.springframework.ide.eclipse.beans.ui.views.model.ConfigNode">
-               </objectClass>
-               <objectClass
-                     name="org.springframework.ide.eclipse.beans.ui.views.model.ConfigSetNode">
-               </objectClass>
-               <objectClass
-                     name="org.springframework.ide.eclipse.beans.ui.views.model.BeanNode">
-               </objectClass>
-            </or>
-         </visibility-->
-         <action
-               class="org.springframework.ide.eclipse.aop.ui.action.OpenBeansAopConfigAction"
-               icon="icons/aspect.gif"
-               id="org.springframework.ide.eclipse.aop.ui.openSpringAopConfig"
-               label="Open Aspect definition"
-               menubarPath="additions">
-         </action>
-      </viewerContribution>
-   </extension>
-   
-      <extension
          point="org.eclipse.ui.decorators">
       <decorator
             lightweight="false"
