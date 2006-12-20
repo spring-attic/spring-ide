@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Spring IDE AOP Support Core
+Bundle-SymbolicName: org.springframework.ide.eclipse.aop.core
+Bundle-Version: 1.9.0
+Bundle-Activator: org.springframework.ide.eclipse.aop.core.Activator
+Bundle-Localization: plugin
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime
+Eclipse-LazyStart: true
