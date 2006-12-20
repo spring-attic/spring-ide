@@ -53,6 +53,8 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.springframework.ide.eclipse.aop.ui.BeansAopPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 @SuppressWarnings("restriction")
 public class BeansAopNavigatorUtils {
@@ -82,6 +84,12 @@ public class BeansAopNavigatorUtils {
             Object obj = structSelection.getFirstElement();
             if (obj instanceof Element) {
                 selectedElement = obj;
+            } 
+            else if (obj instanceof Text) {
+                Node parent = ((Text) obj).getParentNode();
+                if (parent instanceof Element) {
+                    selectedElement = parent;
+                }
             }
         }
         return selectedElement;

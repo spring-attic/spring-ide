@@ -248,10 +248,7 @@
              id="org.springframework.ide.eclipse.aop.ui.navigator.linkHelper"
              class="org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigatorLinkHelper">
           <selectionEnablement>
-			 <or>
-				<instanceof value="org.springframework.ide.eclipse.aop.ui.navigator.model.JavaElementReferenceNode"/>
-				<instanceof value="org.springframework.ide.eclipse.aop.core.model.IAopReference"/>
-             </or>
+			 <instanceof value="org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferenceNode"/>
           </selectionEnablement>
           <editorInputEnablement>
              <instanceof value="org.eclipse.ui.IFileEditorInput"/>
