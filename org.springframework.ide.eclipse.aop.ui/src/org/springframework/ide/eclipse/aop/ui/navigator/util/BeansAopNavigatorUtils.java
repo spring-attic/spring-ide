@@ -50,7 +50,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
-import org.springframework.ide.eclipse.aop.ui.BeansAopPlugin;
+import org.springframework.ide.eclipse.aop.ui.Activator;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -62,7 +62,7 @@ public class BeansAopNavigatorUtils {
     public static ILabelProvider JAVA_LABEL_PROVIDER = new DecoratingLabelProvider(
             new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT
                     | JavaElementLabelProvider.SHOW_SMALL_ICONS),
-            BeansAopPlugin.getDefault().getWorkbench().getDecoratorManager()
+            Activator.getDefault().getWorkbench().getDecoratorManager()
                     .getLabelDecorator());
 
     public static BeansModelLabelProvider BEAN_LABEL_PROVIDER = 

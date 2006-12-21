@@ -97,7 +97,7 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
                 currentFile.getProject());
         BeansConfig config = (BeansConfig) project.getConfig(currentFile);
         IJavaProject javaProject = BeansAopUtils.getJavaProject(config);
-        IAopProject aopProject = BeansAopPlugin.getModel().getProject(
+        IAopProject aopProject = Activator.getModel().getProject(
                 config.getElementResource().getProject());
 
         aopProject.clearReferencesForResource(currentFile);
@@ -132,7 +132,7 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
             IAspectDefinition info) {
 
         IResource file = config.getElementResource();
-        IAopProject aopProject = BeansAopPlugin.getModel().getProject(
+        IAopProject aopProject = Activator.getModel().getProject(
                 config.getElementResource().getProject());
 
         Set<IBean> beans = config.getBeans();

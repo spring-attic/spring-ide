@@ -25,13 +25,13 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.aop.core.model.IAdviceChangedListener;
-import org.springframework.ide.eclipse.aop.ui.BeansAopPlugin;
+import org.springframework.ide.eclipse.aop.ui.Activator;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 @SuppressWarnings("restriction")
 public class BeansAdviceTextDecorator implements ILabelDecorator {
 
-    public static final String DECORATOR_ID = BeansAopPlugin.PLUGIN_ID
+    public static final String DECORATOR_ID = Activator.PLUGIN_ID
             + ".decorator.advicetextdecorator";
 
     private ListenerList fListeners;
@@ -49,7 +49,7 @@ public class BeansAdviceTextDecorator implements ILabelDecorator {
                     fireAdviceChanged();
                 }
             };
-            BeansAopPlugin.getModel().registerAdivceListener(
+            Activator.getModel().registerAdivceListener(
                     fAdviceChangedListener);
         }
     }
@@ -68,7 +68,7 @@ public class BeansAdviceTextDecorator implements ILabelDecorator {
 
     public void dispose() {
         if (fAdviceChangedListener != null) {
-            BeansAopPlugin.getModel().unregisterAdivceListener(
+            Activator.getModel().unregisterAdivceListener(
                     fAdviceChangedListener);
             fAdviceChangedListener = null;
         }
@@ -82,7 +82,7 @@ public class BeansAdviceTextDecorator implements ILabelDecorator {
         if (fListeners != null) {
             fListeners.remove(listener);
             if (fListeners.isEmpty() && fAdviceChangedListener != null) {
-                BeansAopPlugin.getModel().unregisterAdivceListener(
+                Activator.getModel().unregisterAdivceListener(
                         fAdviceChangedListener);
                 fAdviceChangedListener = null;
             }

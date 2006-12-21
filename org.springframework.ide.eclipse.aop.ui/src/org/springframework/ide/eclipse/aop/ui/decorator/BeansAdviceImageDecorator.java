@@ -31,7 +31,7 @@ import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.aop.core.model.IAdviceChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.internal.AnnotationAspectDefinition;
-import org.springframework.ide.eclipse.aop.ui.BeansAopPlugin;
+import org.springframework.ide.eclipse.aop.ui.Activator;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceRootAopReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedAopSourceNode;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
@@ -40,7 +40,7 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
 @SuppressWarnings("restriction")
 public class BeansAdviceImageDecorator implements ILightweightLabelDecorator {
 
-    public static final String DECORATOR_ID = BeansAopPlugin.PLUGIN_ID
+    public static final String DECORATOR_ID = Activator.PLUGIN_ID
             + ".decorator.adviceimagedecorator";
 
     private ListenerList fListeners;
@@ -57,7 +57,7 @@ public class BeansAdviceImageDecorator implements ILightweightLabelDecorator {
 
             if ((jp != null)
                     && SpringCoreUtils.isSpringProject(jp.getProject())) {
-                if (BeansAopPlugin.getModel().isAdvised(je)) {
+                if (Activator.getModel().isAdvised(je)) {
                     decoration.addOverlay(BeansAopUIImages.DESC_OVR_ADVICE,
                             IDecoration.TOP_LEFT);
                 }
@@ -99,7 +99,7 @@ public class BeansAdviceImageDecorator implements ILightweightLabelDecorator {
                     fireAdviceChanged();
                 }
             };
-            BeansAopPlugin.getModel().registerAdivceListener(
+            Activator.getModel().registerAdivceListener(
                     fAdviceChangedListener);
         }
     }
@@ -118,7 +118,7 @@ public class BeansAdviceImageDecorator implements ILightweightLabelDecorator {
 
     public void dispose() {
         if (fAdviceChangedListener != null) {
-            BeansAopPlugin.getModel().unregisterAdivceListener(
+            Activator.getModel().unregisterAdivceListener(
                     fAdviceChangedListener);
             fAdviceChangedListener = null;
         }
@@ -132,7 +132,7 @@ public class BeansAdviceImageDecorator implements ILightweightLabelDecorator {
         if (fListeners != null) {
             fListeners.remove(listener);
             if (fListeners.isEmpty() && fAdviceChangedListener != null) {
-                BeansAopPlugin.getModel().unregisterAdivceListener(
+                Activator.getModel().unregisterAdivceListener(
                         fAdviceChangedListener);
                 fAdviceChangedListener = null;
             }

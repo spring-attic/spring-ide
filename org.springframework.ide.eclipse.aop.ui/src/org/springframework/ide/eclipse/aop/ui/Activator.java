@@ -23,18 +23,18 @@ import org.springframework.ide.eclipse.aop.core.model.internal.AopModel;
 /**
  * The activator class controls the plug-in life cycle
  */
-public class BeansAopPlugin extends AbstractUIPlugin {
+public class Activator extends AbstractUIPlugin {
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.aop.ui";
 
 	// The shared instance
-	private static BeansAopPlugin plugin;
+	private static Activator plugin;
 	
 	/**
 	 * The constructor
 	 */
-	public BeansAopPlugin() {
+	public Activator() {
 		plugin = this;
 	}
 	
@@ -62,7 +62,7 @@ public class BeansAopPlugin extends AbstractUIPlugin {
 	 *
 	 * @return the shared instance
 	 */
-	public static BeansAopPlugin getDefault() {
+	public static Activator getDefault() {
 		return plugin;
 	}
     

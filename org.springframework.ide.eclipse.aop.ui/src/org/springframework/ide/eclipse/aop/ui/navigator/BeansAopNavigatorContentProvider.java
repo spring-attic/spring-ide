@@ -48,7 +48,7 @@ import org.eclipse.wst.xml.core.internal.document.ElementImpl;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
-import org.springframework.ide.eclipse.aop.ui.BeansAopPlugin;
+import org.springframework.ide.eclipse.aop.ui.Activator;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceRootAopReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedRootAopReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.BeanReferenceNode;
@@ -130,8 +130,8 @@ public class BeansAopNavigatorContentProvider implements
             try {
                 IMethod[] methods = type.getMethods();
                 for (IMethod method : methods) {
-                    if (BeansAopPlugin.getModel().isAdvice(method)
-                            || BeansAopPlugin.getModel().isAdvised(method)) {
+                    if (Activator.getModel().isAdvice(method)
+                            || Activator.getModel().isAdvised(method)) {
                         me.addAll(Arrays.asList(getChildren(method)));
                     }
                 }
@@ -160,7 +160,7 @@ public class BeansAopNavigatorContentProvider implements
         else if (parentElement instanceof IMethod
                 && parentElement instanceof SourceMethod) {
             IMethod method = (IMethod) parentElement;
-            IAopProject project = BeansAopPlugin.getModel().getProject(
+            IAopProject project = Activator.getModel().getProject(
                     method.getJavaProject().getProject());
             if (project != null && project.getAllReferences().size() > 0) {
                 List<IAopReference> references = project.getAllReferences();
@@ -220,7 +220,7 @@ public class BeansAopNavigatorContentProvider implements
             int startLine = document.getLineOfOffset(element.getStartOffset()) + 1;
             int endLine = document.getLineOfOffset(element.getEndOffset()) + 1;
             IResource resource = getResource(document);
-            IAopProject project = BeansAopPlugin.getModel().getProject(
+            IAopProject project = Activator.getModel().getProject(
                     resource.getProject());
             List<IAopReference> references = project
                     .getReferencesForResource(resource);
@@ -329,8 +329,8 @@ public class BeansAopNavigatorContentProvider implements
             try {
                 IMethod[] methods = type.getMethods();
                 for (IMethod method : methods) {
-                    if (BeansAopPlugin.getModel().isAdvised(method)
-                            || BeansAopPlugin.getModel().isAdvice(method)) {
+                    if (Activator.getModel().isAdvised(method)
+                            || Activator.getModel().isAdvice(method)) {
                         return true;
                     }
                 }
@@ -340,7 +340,7 @@ public class BeansAopNavigatorContentProvider implements
         }
         else if (element instanceof IMethod && element instanceof SourceMethod) {
             IMethod method = (IMethod) element;
-            IAopProject project = BeansAopPlugin.getModel().getProject(
+            IAopProject project = Activator.getModel().getProject(
                     method.getJavaProject().getProject());
             if (project != null && project.getAllReferences().size() > 0) {
                 List<IAopReference> references = project.getAllReferences();

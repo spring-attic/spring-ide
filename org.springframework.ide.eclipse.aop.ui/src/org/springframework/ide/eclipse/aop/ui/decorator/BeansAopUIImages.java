@@ -25,7 +25,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
-import org.springframework.ide.eclipse.aop.ui.BeansAopPlugin;
+import org.springframework.ide.eclipse.aop.ui.Activator;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin;
 
 /**
@@ -52,7 +52,7 @@ public class BeansAopUIImages {
 
 	private static final String ICON_PATH_PREFIX = "icons/";
 
-	private static final String NAME_PREFIX = BeansAopPlugin.PLUGIN_ID + '.';
+	private static final String NAME_PREFIX = Activator.PLUGIN_ID + '.';
 
 	private static final int NAME_PREFIX_LENGTH = NAME_PREFIX.length();
 
@@ -61,7 +61,7 @@ public class BeansAopUIImages {
 
 	static {
 		try {
-			ICON_BASE_URL = new URL(BeansAopPlugin.getDefault().getBundle()
+			ICON_BASE_URL = new URL(Activator.getDefault().getBundle()
 					.getEntry("/"), ICON_PATH_PREFIX);
 		} catch (MalformedURLException e) {
 			BeansEditorPlugin.log(e);

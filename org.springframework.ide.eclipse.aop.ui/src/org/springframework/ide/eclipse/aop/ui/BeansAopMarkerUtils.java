@@ -34,28 +34,28 @@ public class BeansAopMarkerUtils {
 
     private static final String MARKER_COUNT = "marker_count";
 
-    public static final String AOP_MARKER = BeansAopPlugin.PLUGIN_ID
+    public static final String AOP_MARKER = Activator.PLUGIN_ID
             + ".aopmarker";
 
-    public static final String AOP_PROBLEM_MARKER = BeansAopPlugin.PLUGIN_ID
+    public static final String AOP_PROBLEM_MARKER = Activator.PLUGIN_ID
             + ".aopproblemmarker";
 
-    public static final String BEFORE_ADVICE_MARKER = BeansAopPlugin.PLUGIN_ID
+    public static final String BEFORE_ADVICE_MARKER = Activator.PLUGIN_ID
             + ".beforeadvicemarker";
 
-    public static final String AFTER_ADVICE_MARKER = BeansAopPlugin.PLUGIN_ID
+    public static final String AFTER_ADVICE_MARKER = Activator.PLUGIN_ID
             + ".afteradvicemarker";
 
-    public static final String AROUND_ADVICE_MARKER = BeansAopPlugin.PLUGIN_ID
+    public static final String AROUND_ADVICE_MARKER = Activator.PLUGIN_ID
             + ".aroundadvicemarker";
 
-    public static final String SOURCE_BEFORE_ADVICE_MARKER = BeansAopPlugin.PLUGIN_ID
+    public static final String SOURCE_BEFORE_ADVICE_MARKER = Activator.PLUGIN_ID
             + ".sourcebeforeadvicemarker";
 
-    public static final String SOURCE_AFTER_ADVICE_MARKER = BeansAopPlugin.PLUGIN_ID
+    public static final String SOURCE_AFTER_ADVICE_MARKER = Activator.PLUGIN_ID
             + ".sourceafteradvicemarker";
 
-    public static final String SOURCE_AROUND_ADVICE_MARKER = BeansAopPlugin.PLUGIN_ID
+    public static final String SOURCE_AROUND_ADVICE_MARKER = Activator.PLUGIN_ID
             + ".sourcearoundadvicemarker";
 
     public static final String ADIVCE_TYPE = "adivice_type";
