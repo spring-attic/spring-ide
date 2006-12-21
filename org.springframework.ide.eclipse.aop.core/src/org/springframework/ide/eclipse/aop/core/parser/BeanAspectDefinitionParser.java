@@ -46,6 +46,8 @@ import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.aop.core.model.internal.AnnotationAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.internal.BeanAspectDefinition;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -296,7 +298,7 @@ public class BeanAspectDefinitionParser {
                 final Node bean = list.item(j);
                 final String id = BeansEditorUtils.getAttribute(bean, "id");
                 final String className = BeansEditorUtils.getClassNameForBean(
-                        file, document, id);
+                        bean);
                 if (className != null && isIncluded(patternList, id)) {
                     try {
                         final Class aspectClass = Thread.currentThread()
@@ -306,7 +308,8 @@ public class BeanAspectDefinitionParser {
                                     id, className, aspectClass, aspectInfos);
                         }
                     }
-                    catch (ClassNotFoundException e) {
+                    catch (Throwable e) {
+                        BeansCorePlugin.log(e);
                     }
                 }
             }

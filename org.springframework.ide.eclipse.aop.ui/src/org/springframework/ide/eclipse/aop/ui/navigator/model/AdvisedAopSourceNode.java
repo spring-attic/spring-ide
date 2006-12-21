@@ -46,7 +46,7 @@ public class AdvisedAopSourceNode implements IReferenceNode,
             return AopUIImages.getImage(AopUIImages.IMG_OBJS_BEFORE_ADVICE);
         }
         else if (type == ADVICE_TYPES.AROUND) {
-            return AopUIImages.getImage(AopUIImages.IMG_OBJS_ASPECT);
+            return AopUIImages.getImage(AopUIImages.IMG_OBJS_AROUND_ADVICE);
         }
         return null;
     }

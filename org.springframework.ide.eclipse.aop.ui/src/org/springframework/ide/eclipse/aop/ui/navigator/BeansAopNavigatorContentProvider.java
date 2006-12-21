@@ -58,6 +58,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -138,21 +139,25 @@ public class BeansAopNavigatorContentProvider implements
             }
             catch (JavaModelException e) {
             }
-            
+
             List<IBean> beansFound = new ArrayList<IBean>();
             for (int i = 0; i < me.size(); i++) {
                 if (me.get(i) instanceof AdvisedRootAopReferenceNode) {
-                    beansFound.add(((AdvisedRootAopReferenceNode) me.get(i)).getBean()); 
+                    beansFound.add(((AdvisedRootAopReferenceNode) me.get(i))
+                            .getBean());
                 }
             }
-            
+
             // add normal beans
-            Set<IBean> beans = BeansCorePlugin.getModel().getProject(
-                    type.getJavaProject().getProject()).getBeans(
-                    type.getFullyQualifiedName());
-            for (IBean bean : beans) {
-                if (!beansFound.contains(bean)) {
-                    me.add(new BeanReferenceNode(bean, false));
+            IBeansProject beanProject = BeansCorePlugin.getModel().getProject(
+                    type.getJavaProject().getProject());
+            if (beanProject != null) {
+                Set<IBean> beans = beanProject.getBeans(type
+                        .getFullyQualifiedName());
+                for (IBean bean : beans) {
+                    if (!beansFound.contains(bean)) {
+                        me.add(new BeanReferenceNode(bean, false));
+                    }
                 }
             }
             return me.toArray();

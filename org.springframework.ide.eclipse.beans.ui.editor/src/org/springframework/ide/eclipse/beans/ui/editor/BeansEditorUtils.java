@@ -770,4 +770,8 @@ public class BeansEditorUtils {
  		}
 		return null;
 	}
+
+    public static String getClassNameForBean(Node bean) {
+        return getAttribute(bean, "class");
+    }
 }

@@ -47,6 +47,7 @@ import org.springframework.ide.eclipse.aop.ui.decorator.BeansAdviceImageDecorato
 import org.springframework.ide.eclipse.aop.ui.decorator.BeansAdviceTextDecorator;
 import org.springframework.ide.eclipse.aop.ui.support.AbstractAspectJAdvice;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -60,7 +61,7 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
     public void build(IFile file, IProgressMonitor monitor) {
 
         Set<IFile> filesToBuild = BeansAopUtils.getFilesToBuild(file);
-        
+
         monitor.beginTask(BeansCorePlugin.getFormattedMessage(
                 "BeansProjectValidator.validateFile", file.getFullPath()
                         .toString()), filesToBuild.size());
@@ -76,11 +77,12 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
             }
 
             IAopProject aopProject = parseFile(currentFile);
-
-            List<IAopReference> references = aopProject.getAllReferences();
-            for (IAopReference reference : references) {
-                if (reference.getResource().equals(file)) {
-                    BeansAopMarkerUtils.createMarker(reference, file);
+            if (aopProject != null) {
+                List<IAopReference> references = aopProject.getAllReferences();
+                for (IAopReference reference : references) {
+                    if (reference.getResource().equals(file)) {
+                        BeansAopMarkerUtils.createMarker(reference, file);
+                    }
                 }
             }
 
@@ -93,37 +95,39 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
     }
 
     private IAopProject parseFile(IFile currentFile) {
+        IAopProject aopProject = null;
         IBeansProject project = BeansCorePlugin.getModel().getProject(
                 currentFile.getProject());
-        BeansConfig config = (BeansConfig) project.getConfig(currentFile);
-        IJavaProject javaProject = BeansAopUtils.getJavaProject(config);
-        IAopProject aopProject = Activator.getModel().getProject(
-                config.getElementResource().getProject());
+        if (project != null) {
+            BeansConfig config = (BeansConfig) project.getConfig(currentFile);
+            IJavaProject javaProject = BeansAopUtils.getJavaProject(config);
+            aopProject = Activator.getModel().getProject(
+                    config.getElementResource().getProject());
 
-        aopProject.clearReferencesForResource(currentFile);
+            aopProject.clearReferencesForResource(currentFile);
 
-        ClassLoader weavingClassLoader = BeansAopUtils
-                .getProjectClassLoader(javaProject);
-        ClassLoader classLoader = Thread.currentThread()
-                .getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(weavingClassLoader);
+            ClassLoader weavingClassLoader = BeansAopUtils
+                    .getProjectClassLoader(javaProject);
+            ClassLoader classLoader = Thread.currentThread()
+                    .getContextClassLoader();
+            Thread.currentThread().setContextClassLoader(weavingClassLoader);
 
-        try {
-            IDOMDocument document = ((DOMModelImpl) StructuredModelManager
-                    .getModelManager().getModelForRead(currentFile))
-                    .getDocument();
-            List<IAspectDefinition> aspectInfos = BeanAspectDefinitionParser
-                    .parse(document, currentFile);
-            for (IAspectDefinition info : aspectInfos) {
-                buildModel(weavingClassLoader, config, info);
+            try {
+                IDOMDocument document = ((DOMModelImpl) StructuredModelManager
+                        .getModelManager().getModelForRead(currentFile))
+                        .getDocument();
+                List<IAspectDefinition> aspectInfos = BeanAspectDefinitionParser
+                        .parse(document, currentFile);
+                for (IAspectDefinition info : aspectInfos) {
+                    buildModel(weavingClassLoader, config, info);
+                }
             }
-        }
-        catch (IOException e) {
-        }
-        catch (CoreException e) {
-        }
-        finally {
-            Thread.currentThread().setContextClassLoader(classLoader);
+            catch (Throwable e) {
+                BeansCorePlugin.log(e);
+            }
+            finally {
+                Thread.currentThread().setContextClassLoader(classLoader);
+            }
         }
         return aopProject;
     }
@@ -167,8 +171,9 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
                     }
                 }
                 catch (IllegalArgumentException e) {
-                    BeansAopMarkerUtils.createProblemMarker(file, e.getMessage(),
-                            IMarker.SEVERITY_ERROR, info.getAspectLineNumber(),
+                    BeansAopMarkerUtils.createProblemMarker(file, e
+                            .getMessage(), IMarker.SEVERITY_ERROR, info
+                            .getAspectLineNumber(),
                             BeansAopMarkerUtils.AOP_PROBLEM_MARKER, file);
                 }
                 catch (Exception e) {

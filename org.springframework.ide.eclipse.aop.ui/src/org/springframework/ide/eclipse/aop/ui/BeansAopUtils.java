@@ -64,7 +64,8 @@ public class BeansAopUtils {
 
     public static String getPackageLinkName(IJavaElement je) {
         if (je instanceof IMethod) {
-            return ((IMethod) je).getDeclaringType().getPackageFragment().getElementName();
+            return ((IMethod) je).getDeclaringType().getPackageFragment()
+                    .getElementName();
         }
         else if (je instanceof IType) {
             return ((IType) je).getPackageFragment().getElementName();
@@ -155,26 +156,30 @@ public class BeansAopUtils {
         if (file.getName().endsWith(".java")) {
             IBeansProject project = BeansCorePlugin.getModel().getProject(
                     file.getProject());
-            Set<IBeansConfig> configs = project.getConfigs();
-            IJavaElement element = JavaCore.create(file);
-            if (element instanceof ICompilationUnit) {
-                try {
-                    IType[] types = ((ICompilationUnit) element).getAllTypes();
-                    List<String> typeNames = new ArrayList<String>();
-                    for (IType type : types) {
-                        typeNames.add(type.getFullyQualifiedName());
-                    }
-                    for (IBeansConfig config : configs) {
-                        Set<String> allBeanClasses = config.getBeanClasses();
-                        for (String className : allBeanClasses) {
-                            if (typeNames.contains(className)) {
-                                resourcesToBuild.add((IFile) config
-                                        .getElementResource());
+            if (project != null) {
+                Set<IBeansConfig> configs = project.getConfigs();
+                IJavaElement element = JavaCore.create(file);
+                if (element instanceof ICompilationUnit) {
+                    try {
+                        IType[] types = ((ICompilationUnit) element)
+                                .getAllTypes();
+                        List<String> typeNames = new ArrayList<String>();
+                        for (IType type : types) {
+                            typeNames.add(type.getFullyQualifiedName());
+                        }
+                        for (IBeansConfig config : configs) {
+                            Set<String> allBeanClasses = config
+                                    .getBeanClasses();
+                            for (String className : allBeanClasses) {
+                                if (typeNames.contains(className)) {
+                                    resourcesToBuild.add((IFile) config
+                                            .getElementResource());
+                                }
                             }
                         }
                     }
-                }
-                catch (JavaModelException e) {
+                    catch (JavaModelException e) {
+                    }
                 }
             }
         }

@@ -23,6 +23,7 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.beans.BeanUtils;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
+import org.springframework.util.StringUtils;
 
 @SuppressWarnings("restriction")
 public class BeanAspectDefinition implements IAspectDefinition {
@@ -66,7 +67,12 @@ public class BeanAspectDefinition implements IAspectDefinition {
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#setAspectName(java.lang.String)
      */
     public void setAspectName(String aspectName) {
-        this.aspectName = aspectName;
+        if (!StringUtils.hasText(aspectName)) {
+            this.aspectName = "anonymous aspect";
+        }
+        else {
+            this.aspectName = aspectName;
+        }
     }
 
     /*
