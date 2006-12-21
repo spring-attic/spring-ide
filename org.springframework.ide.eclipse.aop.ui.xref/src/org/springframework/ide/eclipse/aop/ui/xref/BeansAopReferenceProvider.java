@@ -32,7 +32,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.springframework.ide.eclipse.aop.core.model.IAopModel;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.ui.BeansAopPlugin;
+import org.springframework.ide.eclipse.aop.ui.Activator;
 
 public class BeansAopReferenceProvider implements IXReferenceProvider {
 
@@ -79,7 +79,7 @@ public class BeansAopReferenceProvider implements IXReferenceProvider {
 		IJavaElement je = (IJavaElement) o;
 		List<XRef> xrefs = new ArrayList<XRef>();
 
-		IAopModel model = BeansAopPlugin.getModel();
+		IAopModel model = Activator.getModel();
 		IAopProject project = model
 				.getProject(je.getJavaProject().getProject());
 
