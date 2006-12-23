@@ -27,8 +27,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
-import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
@@ -116,7 +114,8 @@ public class BeansModelLabels {
 		if (source instanceof XmlSourceLocation) {
 			String nodename = ((XmlSourceLocation) source).getNodeName();
 			if (!nodename.equals(component.getElementName())) {
-				buf.append(((XmlSourceLocation) source).getNodeName()).append(' ');
+				buf.append(((XmlSourceLocation) source).getNodeName()).append(
+						' ');
 			}
 		}
 		buf.append(component.getElementName());
@@ -128,7 +127,8 @@ public class BeansModelLabels {
 			if (source instanceof XmlSourceLocation) {
 				String prefix = ((XmlSourceLocation) source).getPrefix();
 				if (prefix != null && prefix.length() > 0) {
-					buf.append(((XmlSourceLocation) source).getNodeName()).append(' ');
+					buf.append(((XmlSourceLocation) source).getNodeName())
+							.append(' ');
 				}
 			}
 		}
@@ -171,19 +171,14 @@ public class BeansModelLabels {
 		}
 	}
 
-	protected static void appendPathLabel(IModelElement element,
-			int flags, StringBuffer buf) {
+	protected static void appendPathLabel(IModelElement element, int flags,
+			StringBuffer buf) {
 		if (element instanceof IResourceModelElement) {
-			IPath path = ((IResourceModelElement) element)
-					.getElementResource().getFullPath().makeRelative();
-			if (isFlagged(flags, DESCRIPTION)
-					&& !((element instanceof IBeansProject)
-							|| (element instanceof IBeansConfigSet))) {
-				path = path.removeLastSegments(1);
-			}
+			IPath path = ((IResourceModelElement) element).getElementResource()
+					.getFullPath().makeRelative();
 			buf.append(path);
-			if (element instanceof IBeanConstructorArgument ||
-					element instanceof IBeanProperty) {
+			if (element instanceof IBeanConstructorArgument
+					|| element instanceof IBeanProperty) {
 				buf.append(CONCAT_STRING);
 				buf.append(element.getElementParent().getElementName());
 			}

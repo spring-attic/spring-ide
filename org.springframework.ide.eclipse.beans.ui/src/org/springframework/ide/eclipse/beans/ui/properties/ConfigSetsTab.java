@@ -47,7 +47,8 @@ import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
- * Property page tab for defining tthe beans config sets.  
+ * Property page tab for defining the beans config sets.
+ * 
  * @author Torsten Juergeleit
  */
 public class ConfigSetsTab {

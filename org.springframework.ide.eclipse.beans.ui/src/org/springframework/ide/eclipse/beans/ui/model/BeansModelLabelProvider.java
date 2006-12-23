@@ -23,6 +23,9 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.ViewerLabel;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeanClassReferences;
+import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
+import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
@@ -79,6 +82,8 @@ public class BeansModelLabelProvider extends LabelProvider implements
 		if (element instanceof ZipEntryStorage) {
 			return wbLabelProvider.getImage(((ZipEntryStorage) element)
 					.getZipResource());
+		} else if (element instanceof BeanClassReferences) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_REFERENCE);
 		}
 		return wbLabelProvider.getImage(element);
 	}
@@ -91,13 +96,14 @@ public class BeansModelLabelProvider extends LabelProvider implements
 		}
 		if (element instanceof IFile) {
 			return ((IFile) element).getProjectRelativePath().toString();
-		}
-		if (element instanceof ZipEntryStorage) {
+		} else if (element instanceof ZipEntryStorage) {
 			ZipEntryStorage storage = (ZipEntryStorage) element;
 			StringBuffer buf = new StringBuffer(storage.getZipResource()
 					.getProjectRelativePath().toString());
 			buf.append(" - " + storage.getFullPath().toString());
 			return buf.toString();
+		} else if (element instanceof BeanClassReferences) {
+			return BeansUIPlugin.getResourceString("BeanClassReferences.label");
 		}
 		return wbLabelProvider.getText(element);
 	}

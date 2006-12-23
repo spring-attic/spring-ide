@@ -27,9 +27,10 @@ import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
 
 /**
  * This content provider is used to display a tree of the beans config sets
- * (and their beans configs) within a given project. 
- * @author Torsten Juergeleit
+ * (and their beans configs) within a given project.
+ * 
  * @see org.springframework.ide.eclipse.beans.ui.properties.ConfigSetDialog
+ * @author Torsten Juergeleit
  */
 public class ConfigSetContentProvider implements ITreeContentProvider {
 
