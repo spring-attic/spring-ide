@@ -61,27 +61,9 @@ public class BeanReference {
 	public final IBean getTarget() {
 		return target;
 	}
-	
+
 	public IModelElement getContext() {
 		return context;
-	}
-
-	/**
-	 * Returns the unique ID of this bean references. The ID is built from the
-	 * type, the source's ID and the target's ID delimited by '|'.
-	 */
-	public final String getID() {
-		StringBuffer id = new StringBuffer();
-		id.append(type).append('|');
-		if (source != null) {
-			id.append(source.getElementID());
-		}
-		id.append('|');
-		if (target != null) {
-			id.append(target.getElementID());
-		}
-		id.append('|').append(context.getElementID());
-		return id.toString();
 	}
 
 	public boolean equals(Object other) {
