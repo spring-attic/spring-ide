@@ -29,7 +29,6 @@
       <viewerContentBinding viewerId="org.springframework.ide.eclipse.beans.ui.navigator.BeansExplorer">
          <includes>
             <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.beansExplorerContent"/>
-            <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.filters.*"/>
             <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.linkHelper"/>
          </includes>
       </viewerContentBinding>
@@ -46,7 +45,6 @@
       <viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
          <includes>
             <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.projectExplorerContent"/>
-            <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.beansReferenceProjectExplorerContent"/>
             <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.filters.*"/>
             <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.linkHelper"/>
          </includes>
@@ -108,6 +106,7 @@
 					<instanceof value="org.eclipse.core.resources.IFile"/>
 					<test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
 				</and>
+				<instanceof value="org.eclipse.jdt.core.IType"/>
 			</or>
 		 </triggerPoints>
          <possibleChildren>
@@ -116,36 +115,6 @@
          <commonSorter
                id="org.springframework.ide.eclipse.beans.ui.navigator.sorter.projectExplorerSorter"
                class="org.springframework.ide.eclipse.beans.ui.navigator.internal.BeansNavigatorSorter"/>
-      </navigatorContent>
-
-      <navigatorContent
-            id="org.springframework.ide.eclipse.beans.ui.navigator.beansReferenceProjectExplorerContent"
-            name="%beanReferenceContentName"
-            contentProvider="org.springframework.ide.eclipse.beans.ui.navigator.internal.BeansNavigatorContentProvider"
-            labelProvider="org.springframework.ide.eclipse.beans.ui.navigator.internal.BeansNavigatorLabelProvider"
-            icon="icons/full/obj16/spring_obj.gif"
-            activeByDefault="true"
-            priority="high">
-		<triggerPoints>
-			<or>
-				<adapt type="org.eclipse.core.resources.IProject">
-					<test property="org.eclipse.core.resources.projectNature"
-						value="org.springframework.ide.eclipse.core.springnature"/>
-				</adapt>
-				<and>
-					<instanceof value="org.eclipse.jdt.core.IType"/>
-				</and>
-			</or>
-		 </triggerPoints>
-         <possibleChildren>
-         	<or>
-				<instanceof value="org.eclipse.jdt.core.IMethod"/>
-				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
-			</or>
-         </possibleChildren>
-         <commonSorter
-               id="org.springframework.ide.eclipse.beans.ui.navigator.sorter.beansReferenceProjectExplorerSorter"
-               class="org.springframework.ide.eclipse.beans.ui.navigator.internal.BeansNavigatorSorter" />
       </navigatorContent>
 
       <actionProvider
@@ -173,6 +142,24 @@
             description="%navigatorfilterHideNonSpringProjectsDescription"
             class="org.springframework.ide.eclipse.beans.ui.navigator.internal.filters.NonSpringProjectFilter"
             activeByDefault="true"/>
+      <commonFilter
+            id="org.springframework.ide.eclipse.beans.ui.navigator.filters.hideBeanClassReferences"
+            name="%navigatorfilterHideBeanClassReferencesName"
+            description="%navigatorfilterHideBeanClassReferencesDescription"
+            activeByDefault="true">
+				<filterExpression>
+					<instanceof value="org.springframework.ide.eclipse.beans.core.internal.model.BeanClassReferences"/>
+				</filterExpression>
+      </commonFilter>
+      <commonFilter
+            id="org.springframework.ide.eclipse.beans.ui.navigator.filters.hideBeansConfigSets"
+            name="%navigatorfilterHideBeansConfigSetsName"
+            description="%navigatorfilterHideBeansConfigSetsDescription"
+            activeByDefault="true">
+				<filterExpression>
+					<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet"/>
+				</filterExpression>
+      </commonFilter>
    </extension>
 
    <extension

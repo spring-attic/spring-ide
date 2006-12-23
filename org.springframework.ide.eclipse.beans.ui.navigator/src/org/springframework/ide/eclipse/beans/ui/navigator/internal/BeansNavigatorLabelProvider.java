@@ -17,16 +17,13 @@
 package org.springframework.ide.eclipse.beans.ui.navigator.internal;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonLabelProvider;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabels;
-import org.springframework.ide.eclipse.beans.ui.navigator.internal.BeansNavigatorContentProvider.BeansReference;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
@@ -40,10 +37,7 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 		implements ICommonLabelProvider {
 
 	public String getDescription(Object element) {
-		if (element instanceof BeansReference) {
-		    // TODO want should go here
-        }
-        else if (element instanceof IModelElement) {
+        if (element instanceof IModelElement) {
 			return BeansModelLabels.getElementLabel((IModelElement) element,
 					BeansModelLabels.APPEND_PATH
 							| BeansModelLabels.DESCRIPTION);
@@ -66,20 +60,6 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 		}
 		return null;
 	}
-    
-    public String getText(Object element) {
-        if (element instanceof BeansReference) {
-            return ((BeansReference) element).getElementName();
-        }
-        return super.getText(element);
-    }
-    
-    public Image getImage(Object element) {
-        if (element instanceof BeansReference) {
-            return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_REFERENCE);
-        }
-        return super.getImage(element);
-    }
 
 	public void init(ICommonContentExtensionSite config) {
 	}
