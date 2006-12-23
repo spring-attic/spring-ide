@@ -22,8 +22,8 @@ import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Node;
 
 /**
- * Storage for an <code>IModelElement</code>'s XML source location
- * retrieved via {@link XmlSourceExtractor}.
+ * Storage for an <code>IModelElement</code>'s XML source location retrieved
+ * via {@link XmlSourceExtractor}.
  * 
  * @author Torsten Juergeleit
  */
@@ -39,11 +39,15 @@ public class XmlSourceLocation implements IModelSourceLocation {
 	public XmlSourceLocation(Resource resource, Node node, int startLine,
 			int endLine) {
 		this.resource = resource;
-		this.localName = node.getLocalName();
-		this.prefix = node.getPrefix();
-		this.namespaceURI = node.getNamespaceURI();
 		this.startLine = startLine;
 		this.endLine = endLine;
+
+		// If a DOM node given then retrieve the relevant information
+		if (node != null) {
+			localName = node.getLocalName();
+			prefix = node.getPrefix();
+			namespaceURI = node.getNamespaceURI();
+		}
 	}
 
 	public Resource getResource() {
@@ -69,7 +73,7 @@ public class XmlSourceLocation implements IModelSourceLocation {
 	public int getStartLine() {
 		return startLine;
 	}
-	
+
 	public int getEndLine() {
 		return endLine;
 	}
