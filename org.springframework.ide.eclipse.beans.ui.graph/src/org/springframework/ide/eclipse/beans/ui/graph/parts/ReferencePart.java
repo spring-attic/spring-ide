@@ -41,6 +41,9 @@ import org.springframework.ide.eclipse.beans.ui.graph.model.ConstructorArgument;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Property;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Reference;
 
+/**
+ * @author Torsten Juergeleit
+ */
 public class ReferencePart extends AbstractConnectionEditPart {
 
 	protected Reference getReference() {
@@ -88,15 +91,15 @@ public class ReferencePart extends AbstractConnectionEditPart {
 
 		// Prepare connection router with corresponding bendpoints
 		conn.setConnectionRouter(new BendpointConnectionRouter());
-		List bends = new ArrayList();
 
 		// Add bend point if source's bean prefered height is different from
 		// heigth calculated by DirectedGraphLayout
+		List<AbsoluteBendpoint> bends = new ArrayList<AbsoluteBendpoint>();
 		Bean source = (Bean) getReference().source;
 		if (source.height > source.preferredHeight) {
 			Rectangle rect = new Rectangle(source.x + GraphPart.MARGIN_SIZE,
-										   source.y + GraphPart.MARGIN_SIZE,
-										   source.width, source.height);
+					source.y + GraphPart.MARGIN_SIZE, source.width,
+					source.height);
 			bends.add(new AbsoluteBendpoint(rect.getBottom()));
 		}
 
@@ -108,24 +111,23 @@ public class ReferencePart extends AbstractConnectionEditPart {
 
 				// Check if edge was inverted (due to broken cycle)
 				if (edge.isFeedback) {
-					bends.add(new AbsoluteBendpoint(
-								node.x + GraphPart.MARGIN_SIZE,
-								node.y + GraphPart.MARGIN_SIZE + node.height));
-					bends.add(new AbsoluteBendpoint(
-											  node.x + GraphPart.MARGIN_SIZE,
-											  node.y + GraphPart.MARGIN_SIZE));
+					bends.add(new AbsoluteBendpoint(node.x
+							+ GraphPart.MARGIN_SIZE, node.y
+							+ GraphPart.MARGIN_SIZE + node.height));
+					bends.add(new AbsoluteBendpoint(node.x
+							+ GraphPart.MARGIN_SIZE, node.y
+							+ GraphPart.MARGIN_SIZE));
 				} else {
-					bends.add(new AbsoluteBendpoint(
-											  node.x + GraphPart.MARGIN_SIZE,
-											  node.y + GraphPart.MARGIN_SIZE));
-					bends.add(new AbsoluteBendpoint(
-								node.x + GraphPart.MARGIN_SIZE,
-								node.y + GraphPart.MARGIN_SIZE + node.height));
+					bends.add(new AbsoluteBendpoint(node.x
+							+ GraphPart.MARGIN_SIZE, node.y
+							+ GraphPart.MARGIN_SIZE));
+					bends.add(new AbsoluteBendpoint(node.x
+							+ GraphPart.MARGIN_SIZE, node.y
+							+ GraphPart.MARGIN_SIZE + node.height));
 				}
 			}
 		}
 		conn.setRoutingConstraint(bends);
-
 		conn.setTargetDecoration(new PolylineDecoration());
 		return conn;
 	}
