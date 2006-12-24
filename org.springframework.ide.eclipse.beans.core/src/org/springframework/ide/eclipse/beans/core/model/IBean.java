@@ -22,10 +22,11 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
  * Holds all data of a Spring bean.
+ * 
  * @author Torsten Juergeleit
  */
 public interface IBean extends ISourceModelElement {
-	
+
 	/**
 	 * Returns the name of the parent bean (in case of a child bean) or null
 	 * (in case of a root bean).
@@ -43,6 +44,8 @@ public interface IBean extends ISourceModelElement {
 	public boolean isAbstract();
 
 	public boolean isLazyInit();
+
+	public boolean isFactory();
 
 	String[] getAliases();
 

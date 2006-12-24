@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.IType;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -34,6 +35,7 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedProperties;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
@@ -51,7 +53,6 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 
 	private BeanDefinition definition;
 	private String[] aliases;
-
 	private Set<IBeanConstructorArgument> constructorArguments;
 	private Map<String, IBeanProperty> properties;
 	private Set<IBean> innerBeans;
@@ -184,6 +185,24 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 			return ((AbstractBeanDefinition) definition).isLazyInit();
 		}
 		return true;
+	}
+
+	public boolean isFactory() {
+		if (definition instanceof AbstractBeanDefinition ) {
+			AbstractBeanDefinition bd = (AbstractBeanDefinition) definition;
+			if (bd.getFactoryBeanName() != null) {
+				return true;
+			}
+			if (isRootBean() && bd.getFactoryMethodName() != null) {
+				return true;
+			}
+			IType type = BeansModelUtils.getBeanType(this, null);
+			if (type != null) {
+				return Introspector.doesImplement(type,
+						"org.springframework.beans.factory.FactoryBean");
+			}
+		}
+		return false;
 	}
 
 	public boolean equals(Object other) {
