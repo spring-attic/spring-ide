@@ -1,30 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <plugin>
-
-   <!--requires>
-      <import plugin="org.eclipse.core.runtime" />
-      <import plugin="org.eclipse.core.resources" />
-      <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.ui.ide" />
-      <import plugin="org.eclipse.ui.views" />
-      <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="org.eclipse.jface.text"/>
-      <import plugin="org.eclipse.ui.editors"/>
-      <import plugin="org.eclipse.ui.workbench.texteditor"/>
-      <import plugin="org.eclipse.jdt.core" />
-      <import plugin="org.eclipse.jdt.ui" />
-      <import plugin="org.eclipse.wst.sse.core" />
-      <import plugin="org.eclipse.wst.sse.ui" />
-      <import plugin="org.eclipse.wst.xml.core" />
-      <import plugin="org.eclipse.wst.xml.ui" />
-      <import plugin="org.eclipse.search"/>
-      <import plugin="org.springframework.ide.eclipse.core" />
-      <import plugin="org.springframework.ide.eclipse.ui" />
-      <import plugin="org.springframework.ide.eclipse.beans.core" />
-      <import plugin="org.springframework.ide.eclipse.beans.ui" />
-      <import plugin="org.springframework.ide.eclipse.beans.ui.search"/>
-   </requires-->
  
    <extension point="org.eclipse.core.runtime.contentTypes">
 		<content-type id="beansConfig"
@@ -39,7 +15,9 @@
 		</content-type>
 	</extension>
 
-	<extension-point id="namespacecontribution" name="&amp;contributionName" schema="schema/namespacecontribution.exsd"/>
+	<extension-point id="namespaceContribution"
+		name="%contributionName"
+		schema="schema/namespaceContribution.exsd"/>
 
 	<extension point="org.eclipse.wst.sse.ui.editorConfiguration">
 		<sourceViewerConfiguration
@@ -75,7 +53,7 @@
              uri="dtds/spring-beans.dtd"
              webURL="http://www.springframework.org/dtd/spring-beans.dtd"/>
        <public
-             publicId="-//SPRING//DTD BEAN//EN"
+             publicId="-//SPRING//DTD BEAN 2.0//EN"
              uri="dtds/spring-beans-2.0.dtd"
              webURL="http://www.springframework.org/dtd/spring-beans-2.0.dtd"/>
        <public
@@ -85,7 +63,7 @@
        <public
              publicId="http://www.springframework.org/schema/util"
              uri="xsd/spring-util-2.0.xsd"
-             webURL="http://www.springframework.org/schema/beans/spring-util-2.0.xsd"/>
+             webURL="http://www.springframework.org/schema/util/spring-util-2.0.xsd"/>
        <public
              publicId="http://www.springframework.org/schema/aop"
              uri="xsd/spring-aop-2.0.xsd"
@@ -200,7 +178,7 @@
 	</extension>
    
    <extension
-         point="org.springframework.ide.eclipse.beans.ui.editor.namespacecontribution">
+         point="org.springframework.ide.eclipse.beans.ui.editor.namespaceContribution">
       <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.BeansNamespaceAwareEditorContribution"/>
       <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.AopNamespaceAwareEditorContribution"/>
       <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.UtilNamespaceAwareEditorContribution"/>

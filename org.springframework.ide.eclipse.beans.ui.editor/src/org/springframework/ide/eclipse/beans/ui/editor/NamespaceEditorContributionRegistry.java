@@ -33,7 +33,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.namespaces.BeansNamespace
 public class NamespaceEditorContributionRegistry {
 
     public static final String EXTENSION_POINT = BeansEditorPlugin.PLUGIN_ID
-            + ".namespacecontribution";
+            + ".namespaceContribution";
 
     private static Map<String, INamespaceAwareEditorContribution> contributions = null;
 
