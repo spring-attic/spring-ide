@@ -16,7 +16,6 @@
 
 package org.springframework.ide.eclipse.beans.ui.views.actions;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.action.Action;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -30,21 +29,20 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
 /**
  * Opens the Java <code>IType</code> at currently selected <code>INode</code>
  * in BeansView.
- * @see IType
- * @see INode
+ * 
  * @author Torsten Juergeleit
  */
 public class OpenBeanClassAction extends Action {
 
 	private static final String PREFIX = "View.OpenBeanClassAction.";
 
-    private BeansView view;
+	private BeansView view;
 
 	public OpenBeanClassAction(BeansView view) {
 		super(BeansUIPlugin.getResourceString(PREFIX + "label"));
 		setToolTipText(BeansUIPlugin.getResourceString(PREFIX + "tooltip"));
 		this.view = view;
-    }
+	}
 
 	public boolean isEnabled() {
 		INode node = view.getSelectedNode();
@@ -54,11 +52,8 @@ public class OpenBeanClassAction extends Action {
 	public void run() {
 		INode node = view.getSelectedNode();
 		if (node instanceof BeanNode) {
-			IProject project = ((BeanNode) node).getConfigNode().
-									getProjectNode().getProject().getProject();
 			IBean bean = ((BeanNode) node).getBean();
-			String className = BeansModelUtils.getBeanClass(bean, null);
-			IType type = BeansModelUtils.getJavaType(project, className);
+			IType type = BeansModelUtils.getBeanType(bean, null);
 			if (type != null) {
 				SpringUIUtils.openInEditor(type);
 			}
