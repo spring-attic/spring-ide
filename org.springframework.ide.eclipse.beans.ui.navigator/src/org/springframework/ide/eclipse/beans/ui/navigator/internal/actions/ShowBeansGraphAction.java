@@ -25,6 +25,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditor;
@@ -59,9 +60,13 @@ public class ShowBeansGraphAction extends Action {
 			ITreeSelection tSelection = (ITreeSelection) selection;
 			if (tSelection.size() == 1) {
 				Object tElement = tSelection.getFirstElement();
-				IModelElement rElement = null;
-				if (tElement instanceof IModelElement) {
-					rElement = (IModelElement) tElement;
+				IResourceModelElement rElement = null;
+				if (tElement instanceof IResourceModelElement) {
+					if (tElement instanceof IBeansConfig
+							|| tElement instanceof IBeansConfigSet
+							|| tElement instanceof IBean) {
+						rElement = (IResourceModelElement) tElement;
+					}
 				} else if (tElement instanceof IFile) {
 					if (site.getViewSite().getId().equals(
 							BeansExplorer.BEANS_EXPLORER_ID)) {
