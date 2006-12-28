@@ -23,7 +23,7 @@ import org.springframework.ide.eclipse.beans.core.BeansTags;
 import org.springframework.ide.eclipse.beans.core.BeansTags.Tag;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.editor.outline.BeansContentOutlineConfiguration;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
+import org.springframework.ide.eclipse.beans.ui.namespaces.beans.BeansNamespaceImages;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
@@ -54,13 +54,13 @@ final class BeansOutlineLabelProvider
         if ("bean".equals(nodeName)) {
             int flags = 0;
             if (attributes.getNamedItem("parent") != null) {
-                flags |= BeansModelImages.FLAG_CHILD;
-            }
-            else if (attributes.getNamedItem("factory-method") != null) {
-                flags |= BeansModelImages.FLAG_FACTORY;
-            }
-            return BeansModelImages.getImage(BeansModelImages.ELEMENT_BEAN,
-                    flags);
+                flags |= BeansNamespaceImages.FLAG_CHILD;
+            } else if (attributes.getNamedItem("factory-bean") != null
+					|| attributes.getNamedItem("factory-method") != null) {
+				flags |= BeansNamespaceImages.FLAG_FACTORY;
+			}
+            Image image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_BEAN);
+            return BeansNamespaceImages.getDecoratedImage(image, flags);
         }
         if ("beans".equals(nodeName)) {
             return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONFIG);
