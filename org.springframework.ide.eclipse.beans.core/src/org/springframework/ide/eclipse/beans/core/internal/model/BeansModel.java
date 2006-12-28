@@ -324,7 +324,9 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 							+ "' added");
 				}
 				BeansProject proj = new BeansProject(project);
-				projects.put(project, proj);
+				synchronized (projects) {
+					projects.put(project, proj);
+				}
 				notifyListeners(proj, Type.ADDED);
 			}
 		}
@@ -336,7 +338,9 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 							+ "' opened");
 				}
 				BeansProject proj = new BeansProject(project);
-				projects.put(project, proj);
+				synchronized (projects) {
+					projects.put(project, proj);
+				}
 				notifyListeners(proj, Type.ADDED);
 			}
 		}

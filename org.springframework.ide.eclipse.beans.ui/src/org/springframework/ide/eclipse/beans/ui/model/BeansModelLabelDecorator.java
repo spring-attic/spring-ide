@@ -17,9 +17,12 @@
 package org.springframework.ide.eclipse.beans.ui.model;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.viewers.IDecoration;
@@ -28,6 +31,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
@@ -38,18 +42,19 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
  * This decorator adds an overlay image to all Spring beans config files and
- * Java source / class files which are used as Spring bean classes.
+ * their corresponding folders and bean classes (Java source and class files).
  * This decoration is refreshed on every modification to the Spring Beans model.
- * Therefore the decorator adds a change listener to the beans model.
+ * Therefore the decorator adds a {@link IModelChangeListener change listener}
+ * to the beans model.
  * 
- * @see org.springframework.ide.eclipse.beans.core.model.IBeansModelChangedListener
- *
  * @author Torsten Juergeleit
  */
-public class BeansModelLabelDecorator extends LabelProvider
-										 implements ILightweightLabelDecorator {
-	public static final String DECORATOR_ID = BeansUIPlugin.PLUGIN_ID +
-											 ".model.beansModelLabelDecorator";
+public class BeansModelLabelDecorator extends LabelProvider implements
+		ILightweightLabelDecorator {
+
+	public static final String DECORATOR_ID = BeansUIPlugin.PLUGIN_ID
+			+ ".model.beansModelLabelDecorator";
+
 	private IModelChangeListener listener;
 
 	public BeansModelLabelDecorator() {
@@ -62,47 +67,94 @@ public class BeansModelLabelDecorator extends LabelProvider
 	}
 
 	public void decorate(Object element, IDecoration decoration) {
-		if (element instanceof IFile) {
-			IBeansModel model = BeansCorePlugin.getModel();
-			if (model.getConfig((IFile) element) != null) {
-				decoration.addOverlay(BeansUIImages.DESC_OVR_SPRING);
-			}
+		if (element instanceof IFolder) {
+			decorateFolder((IFolder) element, decoration);
+		} else if (element instanceof IFile) {
+			decorateFile((IFile) element, decoration);
 		} else if (element instanceof IJavaElement) {
-			IJavaElement javaElement = (IJavaElement) element;
-			int type = javaElement.getElementType();
-			if (type == IJavaElement.COMPILATION_UNIT ||
-											  type == IJavaElement.CLASS_FILE) {
-				IBeansModel model = BeansCorePlugin.getModel();
-				IBeansProject project = model.getProject(
-									 javaElement.getJavaProject().getProject());
-				if (project != null) {
-					try {
-						// Decorate Java source file
-						if (type == IJavaElement.COMPILATION_UNIT) {
-							IType[] javaTypes = ((ICompilationUnit)
-														javaElement).getTypes();
-							for (int i = 0; i < javaTypes.length; i++) {
-								IType javaType = javaTypes[i];
-								if (project.isBeanClass(
-											javaType.getFullyQualifiedName())) {
-									decoration.addOverlay(
-												 BeansUIImages.DESC_OVR_SPRING);
+			decorateJavaElement(((IJavaElement) element), decoration);
+		}
+	}
+
+	protected void decorateFolder(IFolder folder, IDecoration decoration) {
+		IBeansModel model = BeansCorePlugin.getModel();
+		IBeansProject project = model.getProject(folder.getProject());
+		if (project != null) {
+			String path = folder.getProjectRelativePath().toString() + '/';
+			for (IBeansConfig config : project.getConfigs()) {
+				if (config.getElementName().startsWith(path)) {
+					decoration.addOverlay(BeansUIImages.DESC_OVR_SPRING);
+					break;
+				}
+			}
+		}
+	}
+
+	protected void decorateFile(IFile file, IDecoration decoration) {
+		IBeansModel model = BeansCorePlugin.getModel();
+		IBeansProject project = model.getProject(file.getProject());
+		if (project != null) {
+			for (IBeansConfig config : project.getConfigs()) {
+
+				// The following comparison works for archived config files too
+				if (config.getElementResource().equals(file)) {
+					decoration.addOverlay(BeansUIImages.DESC_OVR_SPRING);
+					break;
+				}
+			}
+		}
+	}
+
+	protected void decorateJavaElement(IJavaElement element,
+			IDecoration decoration) {
+		int type = element.getElementType();
+		if (type == IJavaElement.PACKAGE_FRAGMENT_ROOT
+				|| type == IJavaElement.CLASS_FILE
+				|| type == IJavaElement.COMPILATION_UNIT) {
+			IBeansModel model = BeansCorePlugin.getModel();
+			IBeansProject project = model.getProject(element.getJavaProject()
+					.getProject());
+			if (project != null) {
+				try {
+					if (type == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
+
+						// Decorate JAR file
+						IResource resource = ((IPackageFragmentRoot) element)
+								.getResource();
+						if (resource instanceof IFile) {
+							for (IBeansConfig config : project.getConfigs()) {
+								if (config.getElementResource()
+										.equals(resource)) {
+									decoration.addOverlay(BeansUIImages
+											.DESC_OVR_SPRING);
 									break;
 								}
 							}
-						} else {
-							// Decorate Java binary file
-							IType javaType = ((IClassFile)
-														 javaElement).getType();
-							if (project.isBeanClass(
-											javaType.getFullyQualifiedName())) {
-								decoration.addOverlay(
-												 BeansUIImages.DESC_OVR_SPRING);
+						}
+					} else if (type == IJavaElement.CLASS_FILE) {
+
+						// Decorate Java class file
+						IType javaType = ((IClassFile) element).getType();
+						if (project.isBeanClass(javaType
+								.getFullyQualifiedName())) {
+							decoration.addOverlay(BeansUIImages
+									.DESC_OVR_SPRING);
+						}
+					} else if (type == IJavaElement.COMPILATION_UNIT) {
+
+						// Decorate Java source file
+						for (IType javaType : ((ICompilationUnit) element)
+								.getTypes()) {
+							if (project.isBeanClass(javaType
+									.getFullyQualifiedName())) {
+								decoration.addOverlay(BeansUIImages
+										.DESC_OVR_SPRING);
+								break;
 							}
 						}
-					} catch (JavaModelException e) {
-						// Ignore
 					}
+				} catch (JavaModelException e) {
+					// Ignore
 				}
 			}
 		}

@@ -100,7 +100,7 @@ public class SpringProjectBuilder extends IncrementalProjectBuilder {
 
 		public boolean visit(IResource resource) {
 			if (resource instanceof IFile) {
-				build((IFile) resource, monitor);
+				callBuilders((IFile) resource, monitor);
 			}
 			return true;
 		}
@@ -120,8 +120,7 @@ public class SpringProjectBuilder extends IncrementalProjectBuilder {
 			if (resource instanceof IProject) {
 
 				// Only check projects with Spring beans nature
-				visitChildren = SpringCoreUtils
-						.isSpringProject((IProject) resource);
+				visitChildren = SpringCoreUtils.isSpringProject(resource);
 			} else if (resource instanceof IFolder) {
 				visitChildren = true;
 			} else if (resource instanceof IFile) {
@@ -129,7 +128,7 @@ public class SpringProjectBuilder extends IncrementalProjectBuilder {
 				case IResourceDelta.ADDED:
 				case IResourceDelta.CHANGED:
 					if (resource instanceof IFile) {
-						build((IFile) resource, monitor);
+						callBuilders((IFile) resource, monitor);
 					}
 					visitChildren = true;
 					break;
@@ -142,9 +141,8 @@ public class SpringProjectBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
-	private void build(IFile file, IProgressMonitor monitor) {
-		for (Iterator builders = this.builders.iterator(); builders.hasNext();) {
-			IProjectBuilder builder = (IProjectBuilder) builders.next();
+	private void callBuilders(IFile file, IProgressMonitor monitor) {
+		for (IProjectBuilder builder : builders) {
 			builder.build(file, monitor);
 		}
 	}

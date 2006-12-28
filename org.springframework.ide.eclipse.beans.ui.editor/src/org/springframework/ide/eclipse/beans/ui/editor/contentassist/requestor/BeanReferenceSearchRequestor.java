@@ -28,7 +28,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposal;
 import org.springframework.ide.eclipse.beans.ui.editor.outline.DelegatingLabelProvider;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
+import org.springframework.ide.eclipse.beans.ui.namespaces.beans.BeansNamespaceImages;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
@@ -69,7 +69,7 @@ public class BeanReferenceSearchRequestor {
                 buf.append(fileName);
                 String displayText = buf.toString();
 
-                Image image = BeansModelImages.getImage(bean, BeansCorePlugin.getModel()
+                Image image = BeansNamespaceImages.getImage(bean, BeansCorePlugin.getModel()
                         .getConfig(file));
 
                 BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(

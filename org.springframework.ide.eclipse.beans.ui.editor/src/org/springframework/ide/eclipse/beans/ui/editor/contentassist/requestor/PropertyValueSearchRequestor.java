@@ -30,7 +30,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansJavaDocUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposal;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
+import org.springframework.ide.eclipse.beans.ui.namespaces.beans.BeansNamespaceImages;
 
 public class PropertyValueSearchRequestor {
 
@@ -90,8 +90,8 @@ public class PropertyValueSearchRequestor {
 						.getFlags()
 						| JavaElementImageProvider.SMALL_ICONS);
 				if (external) {
-					image = BeansModelImages.getDecoratedImage(image,
-							BeansModelImages.FLAG_EXTERNAL);
+					image = BeansNamespaceImages.getDecoratedImage(image,
+							BeansNamespaceImages.FLAG_EXTERNAL);
 				}
 				BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
 				String javadoc = utils.getJavaDoc();

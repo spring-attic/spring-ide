@@ -1,6 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <plugin>
+
+   <extension-point id="namespaces"
+         name="%extensionNamespaces.name"
+         schema="schema/namespaces.exsd"/>
+
+   <extension
+         point="org.springframework.ide.eclipse.beans.ui.namespaces">
+      <namespace
+            contentProvider="org.springframework.ide.eclipse.beans.ui.namespaces.beans.BeansNamespaceContentProvider"
+            labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.beans.BeansNamespaceLabelProvider"
+            name="Spring Beans"
+            uri="http://www.springframework.org/schema/beans"/>
+      <namespace
+            name="Spring AOP"
+            uri="http://www.springframework.org/schema/aop"
+            labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.aop.AopNamespaceLabelProvider"/>
+      <namespace
+            name="Spring TX"
+            uri="http://www.springframework.org/schema/tx"
+            labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.tx.TxNamespaceLabelProvider"/>
+   </extension>
+
    <extension
          point="org.eclipse.ui.views">
       <category
@@ -39,12 +61,9 @@
          </description>
          <enablement>
             <or>
-               <objectClass
-                    name="org.eclipse.core.resources.IFile">
-               </objectClass>
-               <or>
-                  <objectClass name="org.eclipse.jdt.core.IJavaElement"/>
-              </or>
+               <objectClass name="org.eclipse.core.resources.IFolder"/>
+               <objectClass name="org.eclipse.core.resources.IFile"/>
+               <objectClass name="org.eclipse.jdt.core.IJavaElement"/>
             </or>
          </enablement>
       </decorator>

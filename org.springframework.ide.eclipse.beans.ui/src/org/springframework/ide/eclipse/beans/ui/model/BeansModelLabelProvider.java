@@ -17,6 +17,8 @@
 package org.springframework.ide.eclipse.beans.ui.model;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreePathLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreePath;
@@ -26,57 +28,49 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeanClassReferences;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
+import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceLabelProvider;
+import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 
 /**
- * This class is an <code>ILabelProvider</code> which knows about the beans
- * core model's <code>IModelElement</code>s. If the given element is not of
- * type <code>IModelElement</code> the it tries to adapt it via
- * <code>IAdaptable</code>.
+ * This class is an {@link ILabelProvider} which knows about the beans core
+ * model's {@link IModelElement}s. If the given element is not of type
+ * {@link IModelElement} the it tries to adapt it via {@link IAdaptable}.
  * 
- * @see org.springframework.ide.eclipse.core.model.IModelElement
- * @see org.eclipse.core.runtime.IAdaptable
  * @author Torsten Juergeleit
  */
 public class BeansModelLabelProvider extends LabelProvider implements
 		ITreePathLabelProvider {
 
-	WorkbenchLabelProvider wbLabelProvider;
+	public static final DefaultNamespaceLabelProvider
+		DEFAULT_NAMESPACE_LABEL_PROVIDER = new DefaultNamespaceLabelProvider();
+
+	private WorkbenchLabelProvider wbLabelProvider;
 
 	public BeansModelLabelProvider() {
 		wbLabelProvider = new WorkbenchLabelProvider();
 	}
 
-    public void dispose() {
-    	wbLabelProvider.dispose();
-    	super.dispose();
-    }
-
-	public void updateLabel(ViewerLabel label, TreePath elementPath) {
-		Object element = ModelUtils.adaptToModelElement(elementPath
-				.getLastSegment());
-		if (element instanceof IModelElement
-				&& elementPath.getSegmentCount() > 1) {
-			Object parentElement = elementPath.getParentPath()
-					.getLastSegment();
-			if (parentElement instanceof IModelElement) {
-				label.setImage(BeansModelImages.getImage(
-						(IModelElement) element,
-						(IModelElement) parentElement));
-			} else {
-				label.setImage(getImage(element));
-			}
-		} else {
-			label.setImage(getImage(element));
-		}
-		label.setText(getText(element));
+	public void dispose() {
+		wbLabelProvider.dispose();
+		super.dispose();
 	}
 
-    public Image getImage(Object element) {
+	public Image getImage(Object element) {
 		Object adaptedElement = ModelUtils.adaptToModelElement(element);
-		if (adaptedElement instanceof IModelElement) {
+		if (adaptedElement instanceof ISourceModelElement) {
+			ILabelProvider provider = NamespaceUtils
+					.getLabelProvider((ISourceModelElement) adaptedElement);
+			if (provider != null) {
+				return provider.getImage(adaptedElement);
+			} else {
+				return DEFAULT_NAMESPACE_LABEL_PROVIDER
+						.getImage(adaptedElement);
+			}
+		} else if (adaptedElement instanceof IModelElement) {
 			return BeansModelImages.getImage((IModelElement) adaptedElement);
 		}
 		if (element instanceof ZipEntryStorage) {
@@ -90,7 +84,16 @@ public class BeansModelLabelProvider extends LabelProvider implements
 
 	public String getText(Object element) {
 		Object adaptedElement = ModelUtils.adaptToModelElement(element);
-		if (adaptedElement instanceof IModelElement) {
+		if (adaptedElement instanceof ISourceModelElement) {
+			ILabelProvider provider = NamespaceUtils
+					.getLabelProvider((ISourceModelElement) adaptedElement);
+			if (provider != null) {
+				return provider.getText(adaptedElement);
+			} else {
+				return DEFAULT_NAMESPACE_LABEL_PROVIDER
+						.getText(adaptedElement);
+			}
+		} else if (adaptedElement instanceof IModelElement) {
 			return BeansModelLabels.getElementLabel(
 					(IModelElement) adaptedElement, 0);
 		}
@@ -103,8 +106,29 @@ public class BeansModelLabelProvider extends LabelProvider implements
 			buf.append(" - " + storage.getFullPath().toString());
 			return buf.toString();
 		} else if (element instanceof BeanClassReferences) {
-			return BeansUIPlugin.getResourceString("BeanClassReferences.label");
+			return BeansUIPlugin.getResourceString(
+					"BeanClassReferences.label");
 		}
 		return wbLabelProvider.getText(element);
+	}
+
+	public void updateLabel(ViewerLabel label, TreePath elementPath) {
+		Object element = ModelUtils.adaptToModelElement(elementPath
+				.getLastSegment());
+		if (element instanceof ISourceModelElement) {
+			ILabelProvider provider = NamespaceUtils
+					.getLabelProvider((ISourceModelElement) element);
+			if (provider != null
+					&& provider instanceof ITreePathLabelProvider) {
+				((ITreePathLabelProvider) provider).updateLabel(label,
+						elementPath);
+			} else {
+				DEFAULT_NAMESPACE_LABEL_PROVIDER
+						.updateLabel(label, elementPath);
+			}
+		} else {
+			label.setImage(getImage(element));
+			label.setText(getText(element));
+		}
 	}
 }

@@ -27,7 +27,7 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
 
 /**
- * The images provided by the Spring UI plugin.
+ * The images provided by the Spring Beans UI plugin.
  * Initialize the image registry by declaring all of the required
  * graphics. This involves creating JFace image descriptors describing
  * how to create/find the image should it be needed.
@@ -78,11 +78,8 @@ public class BeansUIImages {
 	/** A table of all the <code>ImageDescriptor</code>s. */
 	private static Map<String, ImageDescriptor> imageDescriptors;
 
-	/**  The image registry containing <code>Image</code>s. */
-	private static ImageRegistry imageRegistry;
-
 	/*
-	 * Available cached Images in the Java plugin image registry.
+	 * Available cached Images in the Spring Beans UI plugin image registry.
 	 */
 	public static final String IMG_OBJS_PROJECT = NAME_PREFIX + "project_obj.gif";
 	public static final String IMG_OBJS_CONFIG = NAME_PREFIX + "config_obj.gif";
@@ -136,12 +133,22 @@ public class BeansUIImages {
 	public static final ImageDescriptor DESC_WIZ_PROJECT = createManaged(WIZBAN, IMG_WIZ_PROJECT);
 	public static final ImageDescriptor DESC_WIZ_CONFIG = createManaged(WIZBAN, IMG_WIZ_CONFIG);
 
+	/*
+	 * Helper method to initialize the image registry from the BeansUIPlugin
+	 * class.
+	 */
+	/* package */ static void initializeImageRegistry(ImageRegistry registry) {
+		for (String key : imageDescriptors.keySet()) {
+			registry.put(key, imageDescriptors.get(key));
+		}
+	}
+
 	/**
-	 * Returns the <code>Image<code> identified by the given key,
+	 * Returns the {@link Image} identified by the given key,
 	 * or <code>null</code> if it does not exist.
 	 */
 	public static Image getImage(String key) {
-		return getImageRegistry().get(key);
+		return BeansUIPlugin.getDefault().getImageRegistry().get(key);
 	}
 	
 	/**
@@ -160,20 +167,6 @@ public class BeansUIImages {
 	public static void setLocalImageDescriptors(IAction action,
 			String iconName) {
 		setImageDescriptors(action, "lcl16", iconName);
-	}
-	
-	/*
-	 * Helper method to access the image registry from the BeansUIPlugin class.
-	 */
-	/* package */ static ImageRegistry getImageRegistry() {
-		if (imageRegistry == null) {
-			imageRegistry = new ImageRegistry();
-			for (String key : imageDescriptors.keySet()) {
-				imageRegistry.put(key, imageDescriptors.get(key));
-			}
-			imageDescriptors = null;
-		}
-		return imageRegistry;
 	}
 
 	//---- Helper methods to access icons on the file system -------------------
@@ -200,9 +193,6 @@ public class BeansUIImages {
 				imageDescriptors = new HashMap<String, ImageDescriptor>();
 			}
 			imageDescriptors.put(name, result);
-			if (imageRegistry != null) {
-				BeansUIPlugin.log("Image registry already defined", null);
-			}
 			return result;
 		} catch (MalformedURLException e) {
 			BeansUIPlugin.log(e);

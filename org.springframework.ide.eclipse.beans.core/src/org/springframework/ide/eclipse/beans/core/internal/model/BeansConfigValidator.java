@@ -59,7 +59,8 @@ import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Validates given beans config file. 
+ * Validates a beans config file.
+ * 
  * @author Torsten Juergeleit
  */
 public class BeansConfigValidator {
@@ -83,7 +84,8 @@ public class BeansConfigValidator {
 	public void validate(IBeansConfig config, IProgressMonitor monitor) {
 		this.monitor = monitor;
 
-		// Validate the config file within all defined config sets
+		// Validate the given config file within all config sets which contains
+		// the given config file
 		boolean isValidated = false;
 		for (IBeansConfigSet configSet : ((IBeansProject) config
 				.getElementParent()).getConfigSets()) {
@@ -91,8 +93,8 @@ public class BeansConfigValidator {
 				throw new OperationCanceledException();
 			}
 			if (configSet.hasConfig(config.getElementName())) {
-				DefaultBeanDefinitionRegistry registry = new DefaultBeanDefinitionRegistry(
-						null);
+				DefaultBeanDefinitionRegistry registry = new
+						DefaultBeanDefinitionRegistry(null);
 				registry.setAllowAliasOverriding(false);
 				registry.setAllowBeanDefinitionOverriding(configSet
 						.isAllowBeanDefinitionOverriding());
@@ -350,7 +352,7 @@ public class BeansConfigValidator {
 		}
 		
 		// Validate this bean's inner beans recursively
-		for (IBean innerBean :bean.getInnerBeans()) {
+		for (IBean innerBean : bean.getInnerBeans()) {
 			validateBean(innerBean, configSet, registry);
 		}
 	}

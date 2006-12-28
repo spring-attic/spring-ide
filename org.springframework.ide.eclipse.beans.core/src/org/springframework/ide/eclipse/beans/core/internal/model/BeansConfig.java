@@ -462,8 +462,8 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		}
 
 		private Problem createProblem(SAXParseException ex) {
-			XmlSourceLocation source = new XmlSourceLocation(resource, null, ex.getLineNumber(),
-						ex.getLineNumber());
+			XmlSourceLocation source = new XmlSourceLocation(resource, null, ex
+					.getLineNumber(), ex.getLineNumber());
 			return new Problem(ex.getMessage(), new Location(resource,
 					source));
 		}

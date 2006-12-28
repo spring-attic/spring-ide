@@ -17,6 +17,7 @@
 package org.springframework.ide.eclipse.core.model;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -25,9 +26,11 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 
 /**
  * Some model-related helper methods.
+ * 
  * @author Torsten Juergeleit
  */
 public final class ModelUtils {
@@ -36,14 +39,37 @@ public final class ModelUtils {
 	 * Trys to adapt given element to <code>IModelElement</code>.
 	 */
 	public static Object adaptToModelElement(Object element) {
-		if (!(element instanceof IModelElement) &&
-											 (element instanceof IAdaptable)) {
-			Object modelElement = ((IAdaptable) element).getAdapter(IModelElement.class);
+		if (!(element instanceof IModelElement)
+				&& (element instanceof IAdaptable)) {
+			Object modelElement = ((IAdaptable) element)
+					.getAdapter(IModelElement.class);
 			if (modelElement != null) {
 				return modelElement;
 			}
 		}
 		return element;
+	}
+
+	/**
+	 * Returns <code>true</code> if a given {@link IModelElement element} is
+	 * not defined within the specified
+	 * {@link IResourceModelElement resource context}.
+	 */
+	public static boolean isExternal(IModelElement element,
+			IModelElement context) {
+		if (context != null) {
+			if (context instanceof IResourceModelElement
+					&& element instanceof IResourceModelElement) {
+				IProject contextProject = ((IResourceModelElement) context)
+						.getElementResource().getProject();
+				IProject elementProject = ((IResourceModelElement) element)
+						.getElementResource().getProject();
+				if (!elementProject.equals(contextProject)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -112,5 +138,33 @@ public final class ModelUtils {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Returns the {@link XmlSourceLocation} of the give element or
+	 * <code>null</code> if no {@link ISourceModelElement} or no
+	 * {@link XmlSourceLocation} found.
+	 */
+	public static XmlSourceLocation getXmlSourceLocation(IModelElement element) {
+		if (element instanceof ISourceModelElement) {
+			IModelSourceLocation location = ((ISourceModelElement) element)
+					.getElementSourceLocation();
+			if (location instanceof XmlSourceLocation) {
+				return (XmlSourceLocation) location;
+			} else if (element.getElementParent() != null) {
+				return getXmlSourceLocation(element.getElementParent());
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the namespace URI for the given element or <code>null</code> if
+	 * no {@link ISourceModelElement} or {@link XmlSourceLocation} with a valid
+	 * namespace URI found.
+	 */
+	public static String getNameSpaceURI(IModelElement element) {
+		XmlSourceLocation location = getXmlSourceLocation(element);
+		return (location != null ? location.getNamespaceURI() : null);
 	}
 }

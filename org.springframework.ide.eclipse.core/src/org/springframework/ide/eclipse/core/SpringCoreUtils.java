@@ -38,6 +38,7 @@ import org.osgi.framework.Bundle;
 
 /**
  * Some helper methods.
+ * 
  * @author Torsten Juergeleit
  */
 public final class SpringCoreUtils {

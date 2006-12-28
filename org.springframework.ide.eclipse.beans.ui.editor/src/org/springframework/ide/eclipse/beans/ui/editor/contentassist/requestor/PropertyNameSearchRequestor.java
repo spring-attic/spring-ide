@@ -31,7 +31,7 @@ import org.eclipse.wst.sse.ui.internal.contentassist.CustomCompletionProposal;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansJavaDocUtils;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
+import org.springframework.ide.eclipse.beans.ui.namespaces.beans.BeansNamespaceImages;
 
 public class PropertyNameSearchRequestor {
 
@@ -123,8 +123,8 @@ public class PropertyNameSearchRequestor {
                 else {
                     cursor = refReplaceText.length() + 2;
                 }
-                image = BeansModelImages.getDecoratedImage(image,
-                        BeansModelImages.FLAG_EXTERNAL);
+                image = BeansNamespaceImages.getDecoratedImage(image,
+                		BeansNamespaceImages.FLAG_EXTERNAL);
                 CustomCompletionProposal proposal2 = new CustomCompletionProposal(
                         refReplaceText, request.getReplacementBeginPosition(),
                         request.getReplacementLength(), cursor, image,

@@ -18,6 +18,7 @@ package org.springframework.ide.eclipse.beans.ui.views.model;
 
 import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
@@ -29,14 +30,12 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
+import org.springframework.ide.eclipse.beans.ui.namespaces.beans.BeansNamespaceImages;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 
 /**
- * This class is an <code>ILabelProvider</code> which knows about the view
- * model's <code>INode</code>s.
- *
- * @see org.springframework.ide.eclipse.beans.ui.views.model.INode
+ * This class is an {@link ILabelProvider} which knows about the view
+ * model's {@link INode}s.
  *
  * @author Torsten Juergeleit
  */
@@ -48,30 +47,29 @@ public class ModelLabelProvider extends LabelProvider {
 		// Find base image for given node
 		Image image;
 		if (obj instanceof ProjectNode) {
-			image = BeansModelImages.getImage(BeansModelImages.ELEMENT_PROJECT);
+			image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_PROJECT);
 		} else if (obj instanceof ConfigSetNode) {
-			image = BeansModelImages.getImage(
-										  BeansModelImages.ELEMENT_CONFIG_SET);
+			image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONFIG_SET);
 		} else if (obj instanceof ConfigNode) {
-			image = BeansModelImages.getImage(BeansModelImages.ELEMENT_CONFIG);
+			image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONFIG);
 		} else if (obj instanceof BeanNode) {
-			image = BeansModelImages.getImage(((BeanNode) obj).getElement());
+			image = BeansNamespaceImages
+					.getImage(((BeanNode) obj).getElement());
 		} else if (obj instanceof ConstructorArgumentNode) {
-			image = BeansModelImages.getImage(
-									 BeansModelImages.ELEMENT_CONSTRUCTOR_ARG);
+			image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONSTRUCTOR);
 		} else if (obj instanceof PropertyNode) {
-			image = BeansModelImages.getImage(
-											BeansModelImages.ELEMENT_PROPERTY);
+			image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_PROPERTY);
 		} else {
 			image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_SPRING);
 		}
 
 		// Decorate images of externally defined configs or beans
-		if (node instanceof ConfigNode && node.getName().charAt(0) == '/' ||
-				node instanceof BeanNode &&
-				((BeanNode) node).getConfigNode().getName().charAt(0) == '/') {
-			image = BeansModelImages.getDecoratedImage(image,
-											   BeansModelImages.FLAG_EXTERNAL);
+		if (node instanceof ConfigNode && node.getName().charAt(0) == '/'
+				|| node instanceof BeanNode
+				&& ((BeanNode) node).getConfigNode().getName()
+						.charAt(0) == '/') {
+			image = BeansNamespaceImages.getDecoratedImage(image,
+					BeansNamespaceImages.FLAG_EXTERNAL);
 		}
 
 		// Decorate images of nodes with flags (error, warning, ...)

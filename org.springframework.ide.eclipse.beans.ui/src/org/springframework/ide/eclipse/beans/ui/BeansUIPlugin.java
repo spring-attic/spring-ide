@@ -48,7 +48,8 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	 */
 	public static final String PLUGIN_ID =
 			"org.springframework.ide.eclipse.beans.ui";
-	private static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
+
+	public static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
 
 	/** The shared instance. */
 	private static BeansUIPlugin plugin;
@@ -73,15 +74,19 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 		}
 	}
 
+	protected void initializeImageRegistry(ImageRegistry registry) {
+		BeansUIImages.initializeImageRegistry(registry);
+	}
+
+	public void start(BundleContext context) throws Exception {
+		super.start(context);
+	}
+
 	public void stop(BundleContext context) throws Exception {
 		if (imageDescriptorRegistry != null) {
 			imageDescriptorRegistry.dispose();
 		}
 		super.stop(context);
-	}
-
-	protected ImageRegistry createImageRegistry() {
-		return BeansUIImages.getImageRegistry();
 	}
 
 	public static ImageDescriptorRegistry getImageDescriptorRegistry() {

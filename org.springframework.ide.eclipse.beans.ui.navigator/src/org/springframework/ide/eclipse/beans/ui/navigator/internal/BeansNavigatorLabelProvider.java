@@ -17,19 +17,24 @@
 package org.springframework.ide.eclipse.beans.ui.navigator.internal;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonLabelProvider;
+import org.eclipse.ui.navigator.IDescriptionProvider;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabels;
+import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
+import org.springframework.ide.eclipse.core.model.ModelUtils;
 
 /**
- * This class is a label provider which knows about the beans core model's
- * <code>IModelElement</code>s.
+ * This class is a label provider for the {@link CommonNavigator} which knows
+ * about the beans core model's {@link IModelElement elements}.
  * 
  * @author Torsten Juergeleit
  */
@@ -37,11 +42,24 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 		implements ICommonLabelProvider {
 
 	public String getDescription(Object element) {
-        if (element instanceof IModelElement) {
-			return BeansModelLabels.getElementLabel((IModelElement) element,
-					BeansModelLabels.APPEND_PATH
-							| BeansModelLabels.DESCRIPTION);
-		} else if (element instanceof IFile) {
+		Object adaptedElement = ModelUtils.adaptToModelElement(element);
+		if (adaptedElement instanceof ISourceModelElement) {
+			ILabelProvider provider = NamespaceUtils
+					.getLabelProvider((ISourceModelElement) adaptedElement);
+			if (provider != null && provider instanceof IDescriptionProvider) {
+				return ((IDescriptionProvider) provider)
+						.getDescription(adaptedElement);
+			} else {
+				return DEFAULT_NAMESPACE_LABEL_PROVIDER
+						.getDescription(adaptedElement);
+			}
+		} else if (adaptedElement instanceof IModelElement) {
+			return BeansModelLabels
+					.getElementLabel((IModelElement) adaptedElement,
+							BeansModelLabels.APPEND_PATH
+									| BeansModelLabels.DESCRIPTION);
+		}
+		if (element instanceof IFile) {
 			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
 					(IFile) element);
 			if (config != null) {
