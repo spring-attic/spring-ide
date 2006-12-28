@@ -17,7 +17,6 @@
 package org.springframework.ide.eclipse.core.internal.project;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +32,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SafeRunner;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
@@ -100,7 +101,7 @@ public class SpringProjectBuilder extends IncrementalProjectBuilder {
 
 		public boolean visit(IResource resource) {
 			if (resource instanceof IFile) {
-				callBuilders((IFile) resource, monitor);
+				runBuilders((IFile) resource, monitor);
 			}
 			return true;
 		}
@@ -128,7 +129,7 @@ public class SpringProjectBuilder extends IncrementalProjectBuilder {
 				case IResourceDelta.ADDED:
 				case IResourceDelta.CHANGED:
 					if (resource instanceof IFile) {
-						callBuilders((IFile) resource, monitor);
+						runBuilders((IFile) resource, monitor);
 					}
 					visitChildren = true;
 					break;
@@ -141,9 +142,19 @@ public class SpringProjectBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
-	private void callBuilders(IFile file, IProgressMonitor monitor) {
-		for (IProjectBuilder builder : builders) {
-			builder.build(file, monitor);
+	private void runBuilders(final IFile file,
+			final IProgressMonitor monitor) {
+		for (final IProjectBuilder builder : builders) {
+			ISafeRunnable code = new ISafeRunnable() {
+				public void run() throws Exception {
+					builder.build(file, monitor);
+				}
+
+				public void handleException(Throwable e) {
+					// nothing to do - exception is already logged
+				}
+			};
+			SafeRunner.run(code);
 		}
 	}
 }
