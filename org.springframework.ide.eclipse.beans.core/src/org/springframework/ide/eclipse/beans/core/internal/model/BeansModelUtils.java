@@ -40,6 +40,7 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -997,5 +998,42 @@ public final class BeansModelUtils {
 			return nameAttribute.getNodeValue();
 		}
 		return null;
+	}
+
+	public static String getValueName(Object value) {
+
+		// Ignore bean name of inner beans
+		if (value instanceof BeanDefinitionHolder) {
+			value = ((BeanDefinitionHolder) value).getBeanDefinition();
+		}
+
+		StringBuffer name = new StringBuffer();
+		if (value instanceof String) {
+			name.append('"').append(value).append('"');
+		} else  if (value instanceof BeanDefinition) {
+			name.append("bean ");
+			if (value instanceof RootBeanDefinition) {
+				name.append('[');
+				name.append(((RootBeanDefinition) value).getBeanClassName());
+				name.append(']');
+			} else {
+				name.append('<');
+				name.append(((ChildBeanDefinition) value).getParentName());
+				name.append('>');
+			}
+		} else if (value instanceof RuntimeBeanReference) {
+			name.append("reference ");
+			String beanName = ((RuntimeBeanReference) value).getBeanName();
+			name.append('<').append(beanName).append(">");
+		} else {
+			String valueName = value.toString();
+			if (valueName.length() > 30) {
+				name.append(valueName.substring(0, 12)).append(" .. ").
+						append(valueName.substring(valueName.length() - 13));
+			} else {
+				name.append(valueName);
+			}
+		}
+		return name.toString();
 	}
 }

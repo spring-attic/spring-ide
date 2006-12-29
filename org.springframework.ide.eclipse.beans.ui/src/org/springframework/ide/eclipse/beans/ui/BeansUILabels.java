@@ -16,8 +16,12 @@
 
 package org.springframework.ide.eclipse.beans.ui;
 
+import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
+import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
+
 /**
- * This class provides constants for the beans UI.
+ * This class provides constants and helper methods for the beans UI.
  * 
  * @author Torsten Juergeleit
  */
@@ -27,7 +31,7 @@ public class BeansUILabels {
 	public final static String CONCAT_STRING = " - ";
 
 	/** String for separating list items (", ") */
-	public final static String COMMA_STRING = ", ";
+	public final static String LIST_DELIMITER_STRING = ", ";
 
 	/** String for ellipsis ("...") */
 	public final static String ELLIPSIS_STRING = "...";
@@ -43,5 +47,13 @@ public class BeansUILabels {
 
 	protected static final boolean isFlagged(int flags, int flag) {
 		return (flags & flag) != 0;
+	}
+
+	protected static void appendNodeName(ISourceModelElement element,
+			StringBuffer buf) {
+		IModelSourceLocation source = element.getElementSourceLocation();
+		if (source instanceof XmlSourceLocation) {
+			buf.append(((XmlSourceLocation) source).getNodeName());
+		}
 	}
 }

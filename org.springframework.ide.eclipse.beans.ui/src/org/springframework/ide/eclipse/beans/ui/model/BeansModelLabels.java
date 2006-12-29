@@ -45,7 +45,7 @@ public final class BeansModelLabels extends BeansUILabels {
 			buf.append(CONCAT_STRING);
 		}
 		if (element instanceof IBeansConfig) {
-			appendBeansConfigLabel(element, flags, buf);
+			appendBeansConfigLabel((IBeansConfig) element, flags, buf);
 		} else {
 			buf.append(element.getElementName());
 		}
@@ -56,10 +56,9 @@ public final class BeansModelLabels extends BeansUILabels {
 		return buf.toString();
 	}
 
-	protected static void appendBeansConfigLabel(IModelElement element,
+	protected static void appendBeansConfigLabel(IBeansConfig config,
 			int flags, StringBuffer buf) {
 		if (isFlagged(flags, DESCRIPTION)) {
-			IBeansConfig config = (IBeansConfig) element;
 			String configName = config.getElementName();
 			if (config.isElementArchived()) {
 				ZipEntryStorage storage = new ZipEntryStorage(config);
