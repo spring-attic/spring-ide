@@ -65,18 +65,8 @@
             labelProvider="org.springframework.ide.eclipse.beans.ui.navigator.internal.BeansNavigatorLabelProvider"
             icon="icons/full/obj16/spring_obj.gif"
             activeByDefault="true">
-		<triggerPoints>
-			<or>
-                <instanceof value="org.eclipse.core.resources.IWorkspaceRoot"/>
-				<adapt type="org.eclipse.core.resources.IProject">
-					<test property="org.eclipse.core.resources.projectNature"
-						value="org.springframework.ide.eclipse.core.springnature"/>
-				</adapt>
-				<and>
-					<instanceof value="org.eclipse.core.resources.IFile"/>
-					<test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
-				</and>
-			</or>
+		 <triggerPoints>
+				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
 		 </triggerPoints>
          <possibleChildren>
 				<instanceof value="org.eclipse.core.resources.IFile"/>
@@ -99,8 +89,12 @@
 		<triggerPoints>
 			<or>
 				<adapt type="org.eclipse.core.resources.IProject">
-					<test property="org.eclipse.core.resources.projectNature"
-						value="org.springframework.ide.eclipse.core.springnature"/>
+					<and>
+						<test property="org.eclipse.core.resources.open"
+							value="true"/>
+						<test property="org.eclipse.core.resources.projectNature"
+							value="org.springframework.ide.eclipse.core.springnature"/>
+					</and>
 				</adapt>
 				<and>
 					<instanceof value="org.eclipse.core.resources.IFile"/>

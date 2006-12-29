@@ -243,8 +243,10 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 		return null;
 	}
 
-    public void elementChanged(ModelChangeEvent event) {
-		IModelElement element = event.getElement();
+	public void elementChanged(ModelChangeEvent event) {
+
+		// Refresh the parent of the changed model element
+		IModelElement element = event.getElement().getElementParent();
 		refreshViewerForElement(element);
 	}
 

@@ -16,12 +16,14 @@
 
 package org.springframework.ide.eclipse.beans.ui.navigator;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.ui.navigator.CommonNavigator;
 import org.eclipse.ui.part.ShowInContext;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
@@ -41,6 +43,10 @@ public class BeansExplorer extends CommonNavigator {
 
 	public static final String BEANS_EXPLORER_ID = Activator.PLUGIN_ID
 			+ ".BeansExplorer";
+
+	protected IAdaptable getInitialInput() {
+		return BeansCorePlugin.getModel();
+	}
 
 	public boolean show(ShowInContext context) {
 
