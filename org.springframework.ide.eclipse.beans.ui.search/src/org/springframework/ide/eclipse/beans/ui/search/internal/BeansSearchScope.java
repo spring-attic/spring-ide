@@ -38,7 +38,6 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
- * 
  * @author Torsten Juergeleit
  */
 public class BeansSearchScope {
@@ -51,7 +50,7 @@ public class BeansSearchScope {
 	 */
 	public static BeansSearchScope newSearchScope() {
 		return new BeansSearchScope(BeansSearchMessages.SearchScope_workspace,
-				  new IModelElement[] { BeansCorePlugin.getModel() }); 
+				new IModelElement[] { BeansCorePlugin.getModel() });
 	}
 
 	/**
@@ -61,9 +60,9 @@ public class BeansSearchScope {
 	 * 							 <code>IProject</code>s
 	 */
 	public static BeansSearchScope newSearchScope(ISelection selection,
-												 boolean isProjectsSelection) {
+			boolean isProjectsSelection) {
 		IModelElement[] elements = convertToElements(selection,
-													  isProjectsSelection); 
+				isProjectsSelection);
 		String description;
 		if (isProjectsSelection) {
 			StringBuffer text = new StringBuffer();
@@ -78,7 +77,7 @@ public class BeansSearchScope {
 			}
 			Object[] args = new Object[] { text.toString() };
 			description = MessageUtils.format(
-					   BeansSearchMessages.SearchScope_selectedProjects, args);
+					BeansSearchMessages.SearchScope_selectedProjects, args);
 		} else {
 			description = BeansSearchMessages.SearchScope_selection;
 		}
@@ -103,8 +102,8 @@ public class BeansSearchScope {
 		}
 		Object[] args = new Object[] { text.toString() };
 		return new BeansSearchScope(MessageUtils.format(
-							BeansSearchMessages.SearchScope_workingSets, args),
-							convertToElements(workingSets));
+				BeansSearchMessages.SearchScope_workingSets, args),
+				convertToElements(workingSets));
 	}
 
 	private BeansSearchScope(String description, IModelElement[] elements) {
@@ -128,43 +127,40 @@ public class BeansSearchScope {
 	}
 
 	private static IModelElement[] convertToElements(IWorkingSet[] workingSets) {
-		List elements = new ArrayList();
-		for (int i= 0; i < workingSets.length; i++) {
+		List<IModelElement> elements = new ArrayList<IModelElement>();
+		for (int i = 0; i < workingSets.length; i++) {
 			IAdaptable[] wsElements = workingSets[i].getElements();
 			for (int j = 0; j < wsElements.length; j++) {
 				addToList(wsElements[j], elements, true);
 			}
 		}
-		return (IModelElement[]) elements.toArray(
-										   new IModelElement[elements.size()]);
+		return elements.toArray(new IModelElement[elements.size()]);
 	}
 
 	private static IModelElement[] convertToElements(ISelection selection,
-												 boolean isProjectsSelection) {
-		List elements = new ArrayList();
+			boolean isProjectsSelection) {
+		List<IModelElement> elements = new ArrayList<IModelElement>();
 		if (selection instanceof IStructuredSelection) {
-			IStructuredSelection structuredSelection = (IStructuredSelection)
-																	 selection;
+			IStructuredSelection structuredSelection = (IStructuredSelection) selection;
 			Iterator selectedElements = structuredSelection.iterator();
 			while (selectedElements.hasNext()) {
 				Object selectedElement = (Object) selectedElements.next();
 				if (selectedElement instanceof IAdaptable) {
 					addToList((IAdaptable) selectedElement, elements,
-							  isProjectsSelection);
+							isProjectsSelection);
 				}
 			}
 		}
-		return (IModelElement[]) elements.toArray(
-										   new IModelElement[elements.size()]);
+		return elements.toArray(new IModelElement[elements.size()]);
 	}
 
-	private static void addToList(IAdaptable adaptable, List elements,
-								  boolean isProjectsList) {
-		IModelElement element = (IModelElement)
-									 adaptable.getAdapter(IModelElement.class);
+	private static void addToList(IAdaptable adaptable,
+			List<IModelElement> elements, boolean isProjectsList) {
+		IModelElement element = (IModelElement) adaptable
+				.getAdapter(IModelElement.class);
 		if (element == null) {
-			IResource resource = (IResource)
-										 adaptable.getAdapter(IResource.class);
+			IResource resource = (IResource) adaptable
+					.getAdapter(IResource.class);
 			if (resource instanceof IProject) {
 				if (SpringCoreUtils.isSpringProject(resource)) {
 					IBeansModel model = BeansCorePlugin.getModel();
@@ -175,8 +171,8 @@ public class BeansSearchScope {
 				element = model.getConfig((IFile) resource);
 			}
 		}
-		if (element != null && !elements.contains(element) &&
-					 (!isProjectsList || (element instanceof IBeansProject))) {
+		if (element != null && !elements.contains(element)
+				&& (!isProjectsList || (element instanceof IBeansProject))) {
 			elements.add(element);
 		}
 	}

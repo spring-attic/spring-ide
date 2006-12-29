@@ -77,7 +77,8 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 	private final static String STORE_HISTORY = "HISTORY";
 	private final static String STORE_HISTORY_SIZE = "HISTORY_SIZE";
 	
-	private final List previousSearchPatterns = new ArrayList();
+	private final List<SearchData> previousSearchPatterns = new
+			ArrayList<SearchData>();
 	
 	private boolean firstTime = true;
 	private IDialogSettings dialogSettings;
@@ -92,11 +93,13 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 	
 	private Button[] searchForButtons;
 	private String[] searchForText = {
-							BeansSearchMessages.SearchPage_searchFor_name,
-							BeansSearchMessages.SearchPage_searchFor_reference, 
-							BeansSearchMessages.SearchPage_searchFor_class, 
-							BeansSearchMessages.SearchPage_searchFor_child, 
-							BeansSearchMessages.SearchPage_searchFor_property };
+			BeansSearchMessages.SearchPage_searchFor_name,
+			BeansSearchMessages.SearchPage_searchFor_reference,
+			BeansSearchMessages.SearchPage_searchFor_class,
+			BeansSearchMessages.SearchPage_searchFor_child,
+			BeansSearchMessages.SearchPage_searchFor_property
+	};
+
 	public BeansSearchPage() {
 		// required
 	}
@@ -113,10 +116,10 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 
 		// Search results are not persistent
 		int patternCount = previousSearchPatterns.size();
-		String [] patterns = new String[patternCount];
-		for (int i= 0; i < patternCount; i++) {
-			patterns[i] = ((SearchData)
-								   previousSearchPatterns.get(i)).getPattern();
+		String[] patterns = new String[patternCount];
+		for (int i = 0; i < patternCount; i++) {
+			patterns[i] = ((SearchData) previousSearchPatterns.get(i))
+					.getPattern();
 		}
 		return patterns;
 	}
@@ -135,9 +138,8 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 	}
 
 	private SearchData findInPrevious(String pattern) {
-		for (Iterator iter = previousSearchPatterns.iterator();
-															iter.hasNext(); ) {
-			SearchData element= (SearchData) iter.next();
+		for (Iterator iter = previousSearchPatterns.iterator(); iter.hasNext();) {
+			SearchData element = (SearchData) iter.next();
 			if (pattern.equals(element.getPattern())) {
 				return element;
 			}
@@ -146,8 +148,8 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 	}
 
 	/**
-	 * Returns search pattern data and update previous searches.
-	 * An existing entry will be updated.
+	 * Returns search pattern data and update previous searches. An existing
+	 * entry will be updated.
 	 */
 	private SearchData getPatternData() {
 		String pattern = getPattern();
@@ -155,12 +157,10 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		if (match != null) {
 			previousSearchPatterns.remove(match);
 		}
-		match = new SearchData(getSearchFor(), pattern,
-							   caseSensitiveCheckbox.getSelection(),
-							   regExCheckbox.getSelection(),
-							   searchContainer.getSelectedScope(),
-							   searchContainer.getSelectedWorkingSets());
-			
+		match = new SearchData(getSearchFor(), pattern, caseSensitiveCheckbox
+				.getSelection(), regExCheckbox.getSelection(), searchContainer
+				.getSelectedScope(), searchContainer.getSelectedWorkingSets());
+
 		previousSearchPatterns.add(0, match); // insert on top
 		return match;
 	}
@@ -189,53 +189,53 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		// Setup search scope
 		BeansSearchScope scope;
 		switch (searchContainer.getSelectedScope()) {
-			case ISearchPageContainer.SELECTION_SCOPE :
-				scope = BeansSearchScope.newSearchScope(
-										searchContainer.getSelection(), false);
-				break;
+		case ISearchPageContainer.SELECTION_SCOPE:
+			scope = BeansSearchScope.newSearchScope(searchContainer
+					.getSelection(), false);
+			break;
 
-			case ISearchPageContainer.WORKING_SET_SCOPE :
-				scope = BeansSearchScope.newSearchScope(
-									 searchContainer.getSelectedWorkingSets());
-				break;
+		case ISearchPageContainer.WORKING_SET_SCOPE:
+			scope = BeansSearchScope.newSearchScope(searchContainer
+					.getSelectedWorkingSets());
+			break;
 
-			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE :
-				
-				scope = BeansSearchScope.newSearchScope(
-										 searchContainer.getSelection(), true);
-				break;
+		case ISearchPageContainer.SELECTED_PROJECTS_SCOPE:
 
-			default:
-				scope = BeansSearchScope.newSearchScope();
+			scope = BeansSearchScope.newSearchScope(searchContainer
+					.getSelection(), true);
+			break;
+
+		default:
+			scope = BeansSearchScope.newSearchScope();
 		}
 
 		ISearchQuery query = null;
 		switch (data.getSearchFor()) {
-			case SEARCH_FOR_BEAN_NAME :
-				query = new BeanNameQuery(scope, data.getPattern(),
-									  data.isCaseSensitive(), data.isRegExp());
-				break;
+		case SEARCH_FOR_BEAN_NAME:
+			query = new BeanNameQuery(scope, data.getPattern(), data
+					.isCaseSensitive(), data.isRegExp());
+			break;
 
-			case SEARCH_FOR_BEAN_REFERENCE :
-				query = new BeanReferenceQuery(scope, data.getPattern(),
-									  data.isCaseSensitive(), data.isRegExp());
-				break;
+		case SEARCH_FOR_BEAN_REFERENCE:
+			query = new BeanReferenceQuery(scope, data.getPattern(), data
+					.isCaseSensitive(), data.isRegExp());
+			break;
 
-			case SEARCH_FOR_BEAN_CLASS :
-				query = new BeanClassQuery(scope, data.getPattern(),
-										   isCaseSensitive, isRegExSearch);
-				break;
+		case SEARCH_FOR_BEAN_CLASS:
+			query = new BeanClassQuery(scope, data.getPattern(),
+					isCaseSensitive, isRegExSearch);
+			break;
 
-			case SEARCH_FOR_BEAN_CHILD :
-				query = new BeanChildQuery(scope, data.getPattern(),
-										   isCaseSensitive, isRegExSearch);
-				break;
+		case SEARCH_FOR_BEAN_CHILD:
+			query = new BeanChildQuery(scope, data.getPattern(),
+					isCaseSensitive, isRegExSearch);
+			break;
 
-			case SEARCH_FOR_BEAN_PROPERTY :
-				query = new BeanPropertyQuery(scope, data.getPattern(),
-											  isCaseSensitive, isRegExSearch);
-				break;
-		} 
+		case SEARCH_FOR_BEAN_PROPERTY:
+			query = new BeanPropertyQuery(scope, data.getPattern(),
+					isCaseSensitive, isRegExSearch);
+			break;
+		}
 
 		NewSearchUI.activateSearchResultView();
 		NewSearchUI.runQueryInBackground(query);
@@ -248,11 +248,11 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 	 * @return the page settings to be used
 	 */
 	private IDialogSettings getDialogSettings() {
-		IDialogSettings settings =
-							BeansSearchPlugin.getDefault().getDialogSettings();
+		IDialogSettings settings = BeansSearchPlugin.getDefault()
+				.getDialogSettings();
 		dialogSettings = settings.getSection(PAGE_NAME);
 		if (dialogSettings == null) {
-			dialogSettings= settings.addNewSection(PAGE_NAME);
+			dialogSettings = settings.addNewSection(PAGE_NAME);
 		}
 		return dialogSettings;
 	}
@@ -267,7 +267,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 
 		try {
 			int historySize = s.getInt(STORE_HISTORY_SIZE);
-			for (int i= 0; i < historySize; i++) {
+			for (int i = 0; i < historySize; i++) {
 				IDialogSettings histSettings = s.getSection(STORE_HISTORY + i);
 				if (histSettings != null) {
 					SearchData data = SearchData.create(histSettings);
@@ -291,7 +291,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 
 		int historySize = Math.min(previousSearchPatterns.size(), HISTORY_SIZE);
 		s.put(STORE_HISTORY_SIZE, historySize);
-		for (int i= 0; i < historySize; i++) {
+		for (int i = 0; i < historySize; i++) {
 			IDialogSettings histSettings = s.addNewSection(STORE_HISTORY + i);
 			SearchData data = ((SearchData) previousSearchPatterns.get(i));
 			data.store(histSettings);
@@ -307,23 +307,23 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 
 		Composite result = new Composite(parent, SWT.NONE);
 
-		GridLayout layout= new GridLayout(2, false);
+		GridLayout layout = new GridLayout(2, false);
 		layout.horizontalSpacing = 10;
 		result.setLayout(layout);
 
 		Control expressionComposite = createExpression(result);
 		expressionComposite.setLayoutData(new GridData(GridData.FILL,
-										  GridData.CENTER, true, false, 2, 1));
+				GridData.CENTER, true, false, 2, 1));
 		Label separator = new Label(result, SWT.NONE);
 		separator.setVisible(false);
 		GridData data = new GridData(GridData.FILL, GridData.FILL, false,
-									 false, 2, 1);
+				false, 2, 1);
 		data.heightHint = convertHeightInCharsToPixels(1) / 3;
 		separator.setLayoutData(data);
-		
+
 		Control searchFor = createSearchFor(result);
 		searchFor.setLayoutData(new GridData(GridData.FILL, GridData.FILL,
-											 false, false, 1, 1));
+				false, false, 1, 1));
 		setControl(result);
 
 		Dialog.applyDialogFont(result);
@@ -339,9 +339,9 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 
 		// Expression text + info
 		Label label = new Label(group, SWT.LEFT);
-		label.setText(BeansSearchMessages.SearchPage_expression); 
+		label.setText(BeansSearchMessages.SearchPage_expression);
 		label.setLayoutData(new GridData(GridData.FILL, GridData.FILL, false,
-										 false, 2, 1));
+				false, 2, 1));
 		// Expression combo
 		expressionCombo = new Combo(group, SWT.SINGLE | SWT.BORDER);
 		expressionCombo.addSelectionListener(new SelectionAdapter() {
@@ -357,30 +357,32 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 			}
 		});
 		GridData data = new GridData(GridData.FILL, GridData.FILL, true, false,
-									 1, 1);
+				1, 1);
 		data.widthHint = convertWidthInCharsToPixels(50);
 		expressionCombo.setLayoutData(data);
 
 		// Ignore case checkbox		
 		caseSensitiveCheckbox = new Button(group, SWT.CHECK);
-		caseSensitiveCheckbox.setText(BeansSearchMessages.SearchPage_caseSensitive); 
+		caseSensitiveCheckbox
+				.setText(BeansSearchMessages.SearchPage_caseSensitive);
 		caseSensitiveCheckbox.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				isCaseSensitive = caseSensitiveCheckbox.getSelection();
 			}
 		});
 		caseSensitiveCheckbox.setLayoutData(new GridData(GridData.FILL,
-										   GridData.FILL, false, false, 1, 1));
+				GridData.FILL, false, false, 1, 1));
 		// Text line which explains the special characters
 		statusLabel = new CLabel(group, SWT.LEAD);
-		statusLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		statusLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
+				false, 1, 1));
 		statusLabel.setFont(group.getFont());
 		statusLabel.setAlignment(SWT.LEFT);
-		statusLabel.setText(BeansSearchMessages.SearchPage_expressionHint); 
+		statusLabel.setText(BeansSearchMessages.SearchPage_expressionHint);
 
 		// RegEx checkbox
 		regExCheckbox = new Button(group, SWT.CHECK);
-		regExCheckbox.setText(BeansSearchMessages.SearchPage_regularExpression); 
+		regExCheckbox.setText(BeansSearchMessages.SearchPage_regularExpression);
 		regExCheckbox.setSelection(isRegExSearch);
 		regExCheckbox.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -389,7 +391,8 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 				writeConfiguration();
 			}
 		});
-		regExCheckbox.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		regExCheckbox.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,
+				false, 1, 1));
 		regExCheckbox.setFont(group.getFont());
 		return group;
 	}
@@ -403,7 +406,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		if (getPattern().length() == 0) {
 			return false;
 		}
-// TODO		return SearchPattern.createPattern(getPattern(), getSearchFor(), getLimitTo(), SearchPattern.R_EXACT_MATCH) != null;		
+		// TODO		return SearchPattern.createPattern(getPattern(), getSearchFor(), getLimitTo(), SearchPattern.R_EXACT_MATCH) != null;		
 		return true;
 	}
 
@@ -418,12 +421,12 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 
 	private void handlePatternSelected() {
 		int selectionIndex = expressionCombo.getSelectionIndex();
-		if (selectionIndex < 0 ||
-							 selectionIndex >= previousSearchPatterns.size()) {
+		if (selectionIndex < 0
+				|| selectionIndex >= previousSearchPatterns.size()) {
 			return;
 		}
-		SearchData data = (SearchData)
-									previousSearchPatterns.get(selectionIndex);
+		SearchData data = (SearchData) previousSearchPatterns
+				.get(selectionIndex);
 		setSearchFor(data.getSearchFor());
 
 		expressionCombo.setText(data.getPattern());
@@ -438,14 +441,14 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 	}
 
 	private void setSearchFor(int searchFor) {
-		for (int i= 0; i < searchForButtons.length; i++) {
+		for (int i = 0; i < searchForButtons.length; i++) {
 			searchForButtons[i].setSelection(searchFor == i);
 		}
 	}
 
 	private Control createSearchFor(Composite parent) {
 		Group group = new Group(parent, SWT.NONE);
-		group.setText(BeansSearchMessages.SearchPage_searchFor); 
+		group.setText(BeansSearchMessages.SearchPage_searchFor);
 		group.setLayout(new GridLayout(2, true));
 
 		SelectionAdapter selectionListener = new SelectionAdapter() {
@@ -463,19 +466,19 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 			button.addSelectionListener(selectionListener);
 			searchForButtons[i] = button;
 		}
-		return group;		
+		return group;
 	}
 
 	private void initSelections() {
 		SearchData initData = null;
 
-// TODO handle seclection
-//		ISelection sel = searchContainer.getSelection();
-//		if (sel instanceof IStructuredSelection) {
-//			initData = tryStructuredSelection((IStructuredSelection) sel);
-//		} else if (sel instanceof ITextSelection) {
-//			initData = trySimpleTextSelection((ITextSelection) sel);
-//		}
+		// TODO handle seclection
+		//		ISelection sel = searchContainer.getSelection();
+		//		if (sel instanceof IStructuredSelection) {
+		//			initData = tryStructuredSelection((IStructuredSelection) sel);
+		//		} else if (sel instanceof ITextSelection) {
+		//			initData = trySimpleTextSelection((ITextSelection) sel);
+		//		}
 
 		if (initData == null) {
 			initData = getDefaultInitValues();
@@ -484,68 +487,73 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		expressionCombo.setText(initData.getPattern());
 		caseSensitiveCheckbox.setSelection(initData.isCaseSensitive());
 		regExCheckbox.setSelection(initData.isRegExp());
-		
+
 		setSearchFor(initData.getSearchFor());
 	}
 
-//	private SearchData tryStructuredSelection(IStructuredSelection selection) {
-//		if (selection == null || selection.size() > 1) {
-//			return null;
-//		}
-//		Object o = selection.getFirstElement();
-//		SearchData res = null;
-//		if (res == null && o instanceof IAdaptable) {
-//			IWorkbenchAdapter adapter = (IWorkbenchAdapter)
-//						   ((IAdaptable)o).getAdapter(IWorkbenchAdapter.class);
-//			if (adapter != null) {
-//				return new SearchData(SEARCH_FOR_BEAN_CLASS, adapter.getLabel(o),
-//									  isCaseSensitive, false);
-//			}
-//		}
-//		return res;
-//	}
+	//	private SearchData tryStructuredSelection(IStructuredSelection selection) {
+	//		if (selection == null || selection.size() > 1) {
+	//			return null;
+	//		}
+	//		Object o = selection.getFirstElement();
+	//		SearchData res = null;
+	//		if (res == null && o instanceof IAdaptable) {
+	//			IWorkbenchAdapter adapter = (IWorkbenchAdapter)
+	//						   ((IAdaptable)o).getAdapter(IWorkbenchAdapter.class);
+	//			if (adapter != null) {
+	//				return new SearchData(SEARCH_FOR_BEAN_CLASS, adapter.getLabel(o),
+	//									  isCaseSensitive, false);
+	//			}
+	//		}
+	//		return res;
+	//	}
 
-//	private SearchData trySimpleTextSelection(ITextSelection selection) {
-//		String selectedText= selection.getText();
-//		if (selectedText != null && selectedText.length() > 0) {
-//			int i = 0;
-// TODO			while (i < selectedText.length() && !StringUtils.isLineDelimiterChar(selectedText.charAt(i))) {
-//			while (i < selectedText.length()) {
-//				i++;
-//			}
-//			if (i > 0) {
-//				return new SearchData(SEARCH_FOR_BEAN_CLASS,
-//						 selectedText.substring(0, i), isCaseSensitive, false);
-//			}
-//		}
-//		return null;
-//	}
-	
+	//	private SearchData trySimpleTextSelection(ITextSelection selection) {
+	//		String selectedText= selection.getText();
+	//		if (selectedText != null && selectedText.length() > 0) {
+	//			int i = 0;
+	// TODO			while (i < selectedText.length() && !StringUtils.isLineDelimiterChar(selectedText.charAt(i))) {
+	//			while (i < selectedText.length()) {
+	//				i++;
+	//			}
+	//			if (i > 0) {
+	//				return new SearchData(SEARCH_FOR_BEAN_CLASS,
+	//						 selectedText.substring(0, i), isCaseSensitive, false);
+	//			}
+	//		}
+	//		return null;
+	//	}
+
 	private SearchData getDefaultInitValues() {
 		if (!previousSearchPatterns.isEmpty()) {
 			return (SearchData) previousSearchPatterns.get(0);
 		}
 		return new SearchData(SEARCH_FOR_BEAN_NAME, "", isCaseSensitive, false);
-	}	
+	}
 
 	private static class SearchData {
 
 		private int searchFor;
+
 		private String pattern;
+
 		private boolean isCaseSensitive;
+
 		private boolean isRegExp;
+
 		private int scope;
+
 		private IWorkingSet[] workingSets;
 
 		public SearchData(int searchFor, String pattern,
-						  boolean isCaseSensitive, boolean isRegExp) {
+				boolean isCaseSensitive, boolean isRegExp) {
 			this(searchFor, pattern, isCaseSensitive, isRegExp,
-				 ISearchPageContainer.WORKSPACE_SCOPE, null);
+					ISearchPageContainer.WORKSPACE_SCOPE, null);
 		}
 
 		public SearchData(int searchFor, String pattern,
-						  boolean isCaseSensitive, boolean isRegExp,
-						  int scope, IWorkingSet[] workingSets) {
+				boolean isCaseSensitive, boolean isRegExp, int scope,
+				IWorkingSet[] workingSets) {
 			this.searchFor = searchFor;
 			this.pattern = pattern;
 			this.isCaseSensitive = isCaseSensitive;
@@ -553,7 +561,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 			this.scope = scope;
 			this.workingSets = workingSets;
 		}
-		
+
 		public String getPattern() {
 			return pattern;
 		}
@@ -565,11 +573,11 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		public boolean isRegExp() {
 			return isRegExp;
 		}
-		
+
 		public int getSearchFor() {
 			return searchFor;
 		}
-		
+
 		public IWorkingSet[] getWorkingSets() {
 			return workingSets;
 		}
@@ -604,10 +612,10 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 			String[] wsIds = settings.getArray("workingSets");
 			IWorkingSet[] workingSets = null;
 			if (wsIds != null && wsIds.length > 0) {
-				IWorkingSetManager workingSetManager =
-							  PlatformUI.getWorkbench().getWorkingSetManager();
+				IWorkingSetManager workingSetManager = PlatformUI
+						.getWorkbench().getWorkingSetManager();
 				workingSets = new IWorkingSet[wsIds.length];
-				for (int i= 0; workingSets != null && i < wsIds.length; i++) {
+				for (int i = 0; workingSets != null && i < wsIds.length; i++) {
 					workingSets[i] = workingSetManager.getWorkingSet(wsIds[i]);
 					if (workingSets[i] == null) {
 						workingSets = null;
@@ -618,11 +626,11 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 			try {
 				int searchFor = settings.getInt("searchFor");
 				int scope = settings.getInt("scope");
-				boolean isCaseSensitive = settings.getBoolean(
-															"isCaseSensitive");
+				boolean isCaseSensitive = settings
+						.getBoolean("isCaseSensitive");
 				boolean isRegExp = settings.getBoolean("isRegExp");
 				return new SearchData(searchFor, pattern, isCaseSensitive,
-									  isRegExp, scope, workingSets);
+						isRegExp, scope, workingSets);
 			} catch (NumberFormatException e) {
 				return null;
 			}

@@ -34,10 +34,8 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 public class BeansSearchContentProvider implements ITreeContentProvider,
 		IStructuredContentProvider {
 
-	private static final Object[] EMPTY = new Object[] {};
-
-	private BeansSearchResult result;
 	private Viewer viewer;
+	private BeansSearchResult result;
 
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		this.viewer = viewer;
@@ -57,38 +55,36 @@ public class BeansSearchContentProvider implements ITreeContentProvider,
 
 		// Create list of projects the matched beans belong to
 		Object[] matches = result.getElements();
-		List projects = new ArrayList();
+		List<IModelElement> projects = new ArrayList<IModelElement>();
 		for (int i = 0; i < matches.length; i++) {
 			IModelElement element = (IModelElement) matches[i];
 			IModelElement project = BeansModelUtils.getChildForElement(
-										  BeansCorePlugin.getModel(), element);
+					BeansCorePlugin.getModel(), element);
 			if (!projects.contains(project)) {
 				projects.add(project);
 			}
 		}
-		return (IModelElement[])
-						  projects.toArray(new IModelElement[projects.size()]);
+		return projects.toArray(new IModelElement[projects.size()]);
 	}
 
 	public Object[] getChildren(Object parentElement) {
 		if (result == null) {
-			return EMPTY;
+			return IModelElement.NO_CHILDREN;
 		}
 
 		// Create list of matched element's child elements which belong to
 		// given parent element
 		Object[] matches = result.getElements();
-		List childs = new ArrayList();
+		List<IModelElement> childs = new ArrayList<IModelElement>();
 		for (int i = 0; i < matches.length; i++) {
 			IModelElement element = (IModelElement) matches[i];
 			IModelElement child = BeansModelUtils.getChildForElement(
-									   (IModelElement) parentElement, element);
+					(IModelElement) parentElement, element);
 			if (child != null && !childs.contains(child)) {
 				childs.add(child);
 			}
 		}
-		return (IModelElement[])
-							  childs.toArray(new IModelElement[childs.size()]);
+		return childs.toArray(new IModelElement[childs.size()]);
 	}
 
 	public Object getParent(Object element) {
