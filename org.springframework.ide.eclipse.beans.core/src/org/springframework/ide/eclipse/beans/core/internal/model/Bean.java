@@ -58,8 +58,8 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 	private Set<IBean> innerBeans;
 
 	public Bean(IModelElement parent, BeanDefinitionHolder bdHolder) {
-		this(parent, bdHolder.getBeanName(), bdHolder.getAliases(),
-				bdHolder.getBeanDefinition());
+		this(parent, bdHolder.getBeanName(), bdHolder.getAliases(), bdHolder
+				.getBeanDefinition());
 	}
 
 	public Bean(IModelElement parent, String name, String[] aliases,
@@ -67,9 +67,20 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		super(parent, name, definition);
 		this.definition = definition;
 		this.aliases = aliases;
+	}
 
+	/**
+	 * Lazily initialize this bean's data (constructor arguments, properties
+	 * and inner beans).
+	 */
+	private void initBean() {
+
+		// First retrieve this bean's constructor arguments and properties
 		constructorArguments = retrieveConstructorArguments(definition);
 		properties = retrieveProperties(definition);
+
+		// AFTER retrieving this bean's constructor arguments and properties
+		// retrieve no the inner beans from the 
 		innerBeans = retrieveInnerBeans();
 	}
 
@@ -81,7 +92,6 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		Set<IModelElement> children = new LinkedHashSet<IModelElement>(
 				getConstructorArguments());
 		children.addAll(getProperties());
-		children.addAll(getInnerBeans());
 		return children.toArray(new IModelElement[children.size()]);
 	}
 
@@ -91,7 +101,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
 			// Now ask this beans's constructor arguments
-			for (IBeanConstructorArgument carg : constructorArguments) {
+			for (IBeanConstructorArgument carg : getConstructorArguments()) {
 				carg.accept(visitor, monitor);
 				if (monitor.isCanceled()) {
 					return;
@@ -99,7 +109,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 			}
 
 			// Then ask this beans's properties
-			for (IBeanProperty property : properties.values()) {
+			for (IBeanProperty property : getProperties()) {
 				property.accept(visitor, monitor);
 				if (monitor.isCanceled()) {
 					return;
@@ -107,7 +117,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 			}
 
 			// Finally ask this bean's inner beans
-			for (IBean bean : innerBeans) {
+			for (IBean bean : getInnerBeans()) {
 				bean.accept(visitor, monitor);
 				if (monitor.isCanceled()) {
 					return;
@@ -125,28 +135,39 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 	}
 
 	public Set<IBeanConstructorArgument> getConstructorArguments() {
+		if (constructorArguments == null) {
+			initBean();
+		}
 		return constructorArguments;
 	}
 
 	public IBeanProperty getProperty(String name) {
 		if (name != null) {
+			if (properties == null) {
+				initBean();
+			}
 			return properties.get(name);
 		}
 		return null;
 	}
 
 	public Set<IBeanProperty> getProperties() {
+		if (properties == null) {
+			initBean();
+		}
 		return new LinkedHashSet<IBeanProperty>(properties.values());
 	}
 
 	public Set<IBean> getInnerBeans() {
+		if (innerBeans == null) {
+			initBean();
+		}
 		return innerBeans;
 	}
 
 	public String getClassName() {
 		if (definition instanceof AbstractBeanDefinition) {
-			return ((AbstractBeanDefinition) definition)
-				.getBeanClassName();
+			return ((AbstractBeanDefinition) definition).getBeanClassName();
 		}
 		return null;
 	}
@@ -188,7 +209,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 	}
 
 	public boolean isFactory() {
-		if (definition instanceof AbstractBeanDefinition ) {
+		if (definition instanceof AbstractBeanDefinition) {
 			AbstractBeanDefinition bd = (AbstractBeanDefinition) definition;
 			if (bd.getFactoryBeanName() != null) {
 				return true;
@@ -279,10 +300,10 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 
 	private Set<IBean> retrieveInnerBeans() {
 		Set<IBean> innerBeans = new LinkedHashSet<IBean>();
-		for (IBeanConstructorArgument carg : constructorArguments) {
+		for (IBeanConstructorArgument carg : getConstructorArguments()) {
 			addInnerBeans(carg, carg.getValue(), innerBeans);
 		}
-		for (IBeanProperty prop : properties.values()) {
+		for (IBeanProperty prop : getProperties()) {
 			addInnerBeans(prop, prop.getValue(), innerBeans);
 		}
 		return innerBeans;
@@ -293,7 +314,6 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		if (value instanceof BeanDefinitionHolder) {
 			IBean bean = new Bean(parent, (BeanDefinitionHolder) value);
 			innerBeans.add(bean);
-			innerBeans.addAll(bean.getInnerBeans());
 		} else if (value instanceof ManagedList) {
 			for (Object element : (ManagedList) value) {
 				addInnerBeans(parent, element, innerBeans);
