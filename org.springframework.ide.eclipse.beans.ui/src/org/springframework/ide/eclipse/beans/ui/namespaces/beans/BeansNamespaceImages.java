@@ -36,7 +36,8 @@ import org.springframework.ide.eclipse.core.model.ModelUtils;
 
 /**
  * This class provides images for the beans core model's
- * {@link ISourceModelElement}s.
+ * {@link ISourceModelElement elements} in the namespace
+ * <code>"http://www.springframework.org/schema/beans"</code>.
  * 
  * @author Torsten Juergeleit
  */
@@ -49,11 +50,11 @@ public class BeansNamespaceImages {
     public static final int FLAG_PROTOTYPE = 1 << 5;
     public static final int FLAG_LAZY_INIT = 1 << 6;
 
-	public static Image getImage(IModelElement element) {
+	public static Image getImage(ISourceModelElement element) {
 		return getImage(element, null);
 	}
 
-	public static Image getImage(IModelElement element,
+	public static Image getImage(ISourceModelElement element,
 			IModelElement context) {
 		if (element instanceof IBeansImport) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_IMPORT);
@@ -70,7 +71,7 @@ public class BeansNamespaceImages {
 		return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_SPRING);
 	}
 
-	private static Image getImage(Image baseImage, IModelElement element,
+	private static Image getImage(Image baseImage, ISourceModelElement element,
 			IModelElement context) {
 		int flags = getFlags(element, context);
 		ImageDescriptor descriptor = new BeansNamespaceCompositeImageDescriptor(
@@ -84,7 +85,8 @@ public class BeansNamespaceImages {
 		return BeansUIPlugin.getImageDescriptorRegistry().get(descriptor);
 	}
 
-	private static int getFlags(IModelElement element, IModelElement context) {
+	private static int getFlags(ISourceModelElement element,
+			IModelElement context) {
 		int flags = 0;
 		if (element instanceof Bean) {
 			Bean bean = (Bean) element;

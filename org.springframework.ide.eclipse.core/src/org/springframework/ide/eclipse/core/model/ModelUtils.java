@@ -145,7 +145,8 @@ public final class ModelUtils {
 	 * <code>null</code> if no {@link ISourceModelElement} or no
 	 * {@link XmlSourceLocation} found.
 	 */
-	public static XmlSourceLocation getXmlSourceLocation(IModelElement element) {
+	public static XmlSourceLocation getXmlSourceLocation(
+			IModelElement element) {
 		if (element instanceof ISourceModelElement) {
 			IModelSourceLocation location = ((ISourceModelElement) element)
 					.getElementSourceLocation();
@@ -160,11 +161,28 @@ public final class ModelUtils {
 
 	/**
 	 * Returns the namespace URI for the given element or <code>null</code> if
-	 * no {@link ISourceModelElement} or {@link XmlSourceLocation} with a valid
-	 * namespace URI found.
+	 * no {@link XmlSourceLocation} with a valid namespace URI found.
 	 */
-	public static String getNameSpaceURI(IModelElement element) {
+	public static String getNameSpaceURI(ISourceModelElement element) {
 		XmlSourceLocation location = getXmlSourceLocation(element);
 		return (location != null ? location.getNamespaceURI() : null);
+	}
+
+	/**
+	 * Returns the node's local name for the given element or <code>null</code>
+	 * if no {@link XmlSourceLocation} with a valid local name found.
+	 */
+	public static String getLocalName(ISourceModelElement element) {
+		XmlSourceLocation location = getXmlSourceLocation(element);
+		return (location != null ? location.getLocalName() : null);
+	}
+
+	/**
+	 * Returns the node name for the given element or <code>null</code>
+	 * if no {@link XmlSourceLocation} with a valid node name found.
+	 */
+	public static String getNodeName(ISourceModelElement element) {
+		XmlSourceLocation location = getXmlSourceLocation(element);
+		return (location != null ? location.getNodeName() : null);
 	}
 }

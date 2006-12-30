@@ -17,46 +17,38 @@
 package org.springframework.ide.eclipse.beans.ui.namespaces.beans;
 
 import org.eclipse.core.runtime.IPath;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.ChildBeanDefinition;
-import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
-import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.BeansUILabels;
-import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
-import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 import org.springframework.util.StringUtils;
 
 /**
  * This class provides labels for the beans core model's
- * {@link ISourceModelElement source elements}.
+ * {@link ISourceModelElement elements} in the namespace
+ * <code>"http://www.springframework.org/schema/beans"</code>.
  * 
  * @author Torsten Juergeleit
  */
 public final class BeansNamespaceLabels extends BeansUILabels {
 
-	public static String getElementLabel(IModelElement element, int flags) {
+	public static String getElementLabel(ISourceModelElement element,
+			int flags) {
 		StringBuffer buf = new StringBuffer(60);
-		getElementLabel(element, flags, buf);
+		appendElementLabel(element, flags, buf);
 		return buf.toString();
 	}
 
-	public static String getElementLabel(IModelElement element, int flags,
-			StringBuffer buf) {
+	public static void appendElementLabel(ISourceModelElement element,
+			int flags, StringBuffer buf) {
 		if (isFlagged(flags, PREPEND_PATH)) {
-			appendPathLabel(element, flags, buf);
+			appendElementPathLabel(element, buf);
 			buf.append(CONCAT_STRING);
 		}
-		if (element instanceof IBeansComponent) {
-			appendBeansComponentLabel((IBeansComponent) element, buf);
-		} else if (element instanceof IBean) {
+		if (element instanceof IBean) {
 			appendBeanLabel((IBean) element, buf);
 		} else if (element instanceof IBeanProperty) {
 			appendBeanPropertyLabel((IBeanProperty) element, buf);
@@ -65,40 +57,28 @@ public final class BeansNamespaceLabels extends BeansUILabels {
 		}
 		if (isFlagged(flags, APPEND_PATH)) {
 			buf.append(CONCAT_STRING);
-			appendPathLabel(element, flags, buf);
+			appendElementPathLabel(element, buf);
 		}
-		return buf.toString();
 	}
 
-	protected static void appendBeansComponentLabel(IBeansComponent component,
+	public static void appendElementPathLabel(ISourceModelElement element,
 			StringBuffer buf) {
-		IModelSourceLocation source = component.getElementSourceLocation();
-		if (source instanceof XmlSourceLocation) {
-			String nodename = ((XmlSourceLocation) source).getNodeName();
-			if (!nodename.equals(component.getElementName())) {
-				buf.append(((XmlSourceLocation) source).getNodeName()).append(
-						' ');
-			}
+			IPath path = ((IResourceModelElement) element).getElementResource()
+				.getFullPath().makeRelative();
+		buf.append(path);
+		if (element instanceof IBeanConstructorArgument
+				|| element instanceof IBeanProperty) {
+			buf.append(CONCAT_STRING);
+			buf.append(element.getElementParent().getElementName());
 		}
-		buf.append(component.getElementName());
 	}
 
 	protected static void appendBeanLabel(IBean bean, StringBuffer buf) {
-		if (bean.getElementParent() instanceof IBeansConfig) {
-			IModelSourceLocation source = bean.getElementSourceLocation();
-			if (source instanceof XmlSourceLocation) {
-				String prefix = ((XmlSourceLocation) source).getPrefix();
-				if (prefix != null && prefix.length() > 0) {
-					buf.append(((XmlSourceLocation) source).getNodeName())
-							.append(' ');
-				}
-			}
-		}
 		buf.append(bean.getElementName());
 		if (bean.getAliases() != null && bean.getAliases().length > 0) {
 			buf.append(" '");
 			buf.append(StringUtils.arrayToDelimitedString(bean.getAliases(),
-					COMMA_STRING));
+					LIST_DELIMITER_STRING));
 			buf.append('\'');
 		}
 		if (bean.getClassName() != null) {
@@ -112,38 +92,6 @@ public final class BeansNamespaceLabels extends BeansUILabels {
 			StringBuffer buf) {
 		buf.append(property.getElementName());
 		Object value = ((IBeanProperty) property).getValue();
-		if (value instanceof String) {
-			buf.append(" \"").append(value).append('"');
-		} else if (value instanceof BeanDefinitionHolder) {
-			BeanDefinition beanDef = ((BeanDefinitionHolder) value)
-					.getBeanDefinition();
-			buf.append(" {");
-			if (beanDef instanceof RootBeanDefinition) {
-				buf.append('[');
-				buf.append(((RootBeanDefinition) beanDef).getBeanClassName());
-				buf.append(']');
-			} else {
-				buf.append('<');
-				buf.append(((ChildBeanDefinition) beanDef).getParentName());
-				buf.append('>');
-			}
-			buf.append('}');
-		} else {
-			buf.append(' ').append(value);
-		}
-	}
-
-	protected static void appendPathLabel(IModelElement element, int flags,
-			StringBuffer buf) {
-		if (element instanceof IResourceModelElement) {
-			IPath path = ((IResourceModelElement) element).getElementResource()
-					.getFullPath().makeRelative();
-			buf.append(path);
-			if (element instanceof IBeanConstructorArgument
-					|| element instanceof IBeanProperty) {
-				buf.append(CONCAT_STRING);
-				buf.append(element.getElementParent().getElementName());
-			}
-		}
+		buf.append(": ").append(BeansModelUtils.getValueName(value));
 	}
 }

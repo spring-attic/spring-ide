@@ -22,33 +22,47 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.ViewerLabel;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.navigator.IDescriptionProvider;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabels;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 
-public class TxNamespaceLabelProvider  extends LabelProvider implements
-	ITreePathLabelProvider, IDescriptionProvider {
+/**
+ * This class is a label provider which knows about the beans core model's
+ * {@link ISourceModelElement elements} in the namespace
+ * <code>"http://www.springframework.org/schema/tx"</code>.
+ * 
+ * @author Torsten Juergeleit
+ */
+public class TxNamespaceLabelProvider extends LabelProvider implements
+		ITreePathLabelProvider, IDescriptionProvider {
 
 	public Image getImage(Object element) {
-		// TODO Auto-generated method stub
+		if (element instanceof ISourceModelElement) {
+			return TxNamespaceImages.getImage((ISourceModelElement)
+					element);
+		}
 		return null;
 	}
 
 	public String getText(Object element) {
-		// TODO Auto-generated method stub
+		if (element instanceof ISourceModelElement) {
+			return TxNamespaceLabels.getElementLabel(
+					(ISourceModelElement) element, 0);
+		}
 		return null;
 	}
 
 	public void updateLabel(ViewerLabel label, TreePath elementPath) {
 		Object element = ModelUtils.adaptToModelElement(elementPath
 				.getLastSegment());
-		if (element instanceof IModelElement
+		if (element instanceof ISourceModelElement
 				&& elementPath.getSegmentCount() > 1) {
 			Object parentElement = elementPath.getParentPath()
 					.getLastSegment();
 			if (parentElement instanceof IModelElement) {
-				label.setImage(BeansModelImages.getImage(
-						(IModelElement) element,
+				label.setImage(TxNamespaceImages.getImage(
+						(ISourceModelElement) element,
 						(IModelElement) parentElement));
 				label.setText(getText(element));
 			}
@@ -56,7 +70,12 @@ public class TxNamespaceLabelProvider  extends LabelProvider implements
 	}
 
 	public String getDescription(Object element) {
-		// TODO Auto-generated method stub
+		if (element instanceof ISourceModelElement) {
+			return TxNamespaceLabels.getElementLabel(
+					(ISourceModelElement) element,
+					TxNamespaceLabels.APPEND_PATH
+							| BeansModelLabels.DESCRIPTION);
+		}
 		return null;
 	}
 }

@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.namespaces.beans.BeansNamespaceImages;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
  * This class is an {@link ILabelProvider} which knows about the view
@@ -54,7 +55,8 @@ public class ModelLabelProvider extends LabelProvider {
 			image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONFIG);
 		} else if (obj instanceof BeanNode) {
 			image = BeansNamespaceImages
-					.getImage(((BeanNode) obj).getElement());
+					.getImage((ISourceModelElement) ((BeanNode) obj)
+							.getElement());
 		} else if (obj instanceof ConstructorArgumentNode) {
 			image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONSTRUCTOR);
 		} else if (obj instanceof PropertyNode) {

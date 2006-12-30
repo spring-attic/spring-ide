@@ -29,7 +29,7 @@ import org.springframework.ide.eclipse.core.model.ModelUtils;
 
 /**
  * This class is a label provider which knows about the beans core model's
- * {@link IModelElement elements} in the namespace
+ * {@link ISourceModelElement elements} in the namespace
  * <code>"http://www.springframework.org/schema/beans"</code>.
  * 
  * @author Torsten Juergeleit
@@ -70,9 +70,10 @@ public class BeansNamespaceLabelProvider extends LabelProvider implements
 	}
 
 	public String getDescription(Object element) {
-		if (element instanceof IModelElement) {
+		if (element instanceof ISourceModelElement) {
 			return BeansNamespaceLabels.getElementLabel(
-					(IModelElement) element, BeansNamespaceLabels.APPEND_PATH
+					(ISourceModelElement) element,
+					BeansNamespaceLabels.APPEND_PATH
 							| BeansModelLabels.DESCRIPTION);
 		}
 		return null;

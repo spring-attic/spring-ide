@@ -34,14 +34,14 @@ public final class BeansModelLabels extends BeansUILabels {
 
 	public static String getElementLabel(IModelElement element, int flags) {
 		StringBuffer buf = new StringBuffer(60);
-		getElementLabel(element, flags, buf);
+		appendElementLabel(element, flags, buf);
 		return buf.toString();
 	}
 
-	public static String getElementLabel(IModelElement element, int flags,
+	public static void appendElementLabel(IModelElement element, int flags,
 			StringBuffer buf) {
 		if (isFlagged(flags, PREPEND_PATH)) {
-			appendPathLabel(element, flags, buf);
+			appendElementPathLabel(element, flags, buf);
 			buf.append(CONCAT_STRING);
 		}
 		if (element instanceof IBeansConfig) {
@@ -51,9 +51,24 @@ public final class BeansModelLabels extends BeansUILabels {
 		}
 		if (isFlagged(flags, APPEND_PATH)) {
 			buf.append(CONCAT_STRING);
-			appendPathLabel(element, flags, buf);
+			appendElementPathLabel(element, flags, buf);
 		}
-		return buf.toString();
+	}
+
+	public static void appendElementPathLabel(IModelElement element,
+			int flags, StringBuffer buf) {
+		if (element instanceof IResourceModelElement) {
+			IResource resource = ((IResourceModelElement) element)
+					.getElementResource();
+			String path;
+			if (element instanceof IBeansConfig
+					&& isFlagged(flags, DESCRIPTION)) {
+				path = resource.getProject().getName();
+			} else {
+				path = resource.getFullPath().makeRelative().toString();
+			}
+			buf.append(path);
+		}
 	}
 
 	protected static void appendBeansConfigLabel(IBeansConfig config,
@@ -70,22 +85,6 @@ public final class BeansModelLabels extends BeansUILabels {
 			}
 		} else {
 			buf.append("beans");
-		}
-	}
-
-	protected static void appendPathLabel(IModelElement element, int flags,
-			StringBuffer buf) {
-		if (element instanceof IResourceModelElement) {
-			IResource resource = ((IResourceModelElement) element)
-					.getElementResource();
-			String path;
-			if (element instanceof IBeansConfig
-					&& isFlagged(flags, DESCRIPTION)) {
-				path = resource.getProject().getName();
-			} else {
-				path = resource.getFullPath().makeRelative().toString();
-			}
-			buf.append(path);
 		}
 	}
 }

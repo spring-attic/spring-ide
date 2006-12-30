@@ -14,31 +14,40 @@
  * limitations under the License.
  */
 
-package org.springframework.ide.eclipse.beans.ui.namespaces;
+package org.springframework.ide.eclipse.beans.ui.namespaces.tx;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
+import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
  * This class is a content provider which knows about the beans core model's
- * {@link ISourceModelElement source elements} which belong to an unsupported
- * namespace.
+ * {@link ISourceModelElement source elements} in the namespace
+ * <code>"http://www.springframework.org/schema/aop"</code>.
  * 
  * @author Torsten Juergeleit
  */
-public class DefaultNamespaceContentProvider implements ITreeContentProvider {
+public class TxNamespaceContentProvider implements ITreeContentProvider {
 
 	public Object[] getElements(Object inputElement) {
 		return getChildren(BeansCorePlugin.getModel());
 	}
 
 	public boolean hasChildren(Object element) {
+		if (element instanceof ISourceModelElement) {
+			return !(element instanceof IBeanProperty
+					|| element instanceof IBeanConstructorArgument);
+		}
 		return false;
 	}
 
 	public Object[] getChildren(Object parentElement) {
+		if (parentElement instanceof ISourceModelElement) {
+			return ((ISourceModelElement) parentElement).getElementChildren();
+		}
 		return ISourceModelElement.NO_CHILDREN;
 	}
 

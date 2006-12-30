@@ -21,11 +21,11 @@ import org.eclipse.jface.viewers.Viewer;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
-import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
  * This class is a content provider which knows about the beans core model's
- * {@link IModelElement elements} in the namespace
+ * {@link ISourceModelElement source elements} in the namespace
  * <code>"http://www.springframework.org/schema/beans"</code>.
  * 
  * @author Torsten Juergeleit
@@ -37,7 +37,7 @@ public class BeansNamespaceContentProvider implements ITreeContentProvider {
 	}
 
 	public boolean hasChildren(Object element) {
-		if (element instanceof IModelElement) {
+		if (element instanceof ISourceModelElement) {
 			return !(element instanceof IBeanProperty
 					|| element instanceof IBeanConstructorArgument);
 		}
@@ -45,12 +45,15 @@ public class BeansNamespaceContentProvider implements ITreeContentProvider {
 	}
 
 	public Object[] getChildren(Object parentElement) {
-		return ((IModelElement) parentElement).getElementChildren();
+		if (parentElement instanceof ISourceModelElement) {
+			return ((ISourceModelElement) parentElement).getElementChildren();
+		}
+		return ISourceModelElement.NO_CHILDREN;
 	}
 
 	public Object getParent(Object element) {
-		if (element instanceof IModelElement) {
-			return ((IModelElement) element).getElementParent();
+		if (element instanceof ISourceModelElement) {
+			return ((ISourceModelElement) element).getElementParent();
 		}
 		return null;
 	}

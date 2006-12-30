@@ -22,34 +22,32 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.ViewerLabel;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.navigator.IDescriptionProvider;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabels;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
-import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 
+/**
+ * This class is a label provider which knows about the beans core model's
+ * {@link ISourceModelElement source elements} in the namespace
+ * <code>"http://www.springframework.org/schema/aop"</code>.
+ * 
+ * @author Torsten Juergeleit
+ */
 public class AopNamespaceLabelProvider extends LabelProvider implements
 		ITreePathLabelProvider, IDescriptionProvider {
 
 	public Image getImage(Object element) {
 		if (element instanceof ISourceModelElement) {
-			return BeansModelImages.getImage((IModelElement) element);
+			return AopNamespaceImages.getImage((ISourceModelElement)
+					element);
 		}
 		return null;
 	}
 
 	public String getText(Object element) {
 		if (element instanceof ISourceModelElement) {
-			StringBuffer buf = new StringBuffer();
-			XmlSourceLocation location = ModelUtils
-					.getXmlSourceLocation((ISourceModelElement) element);
-			if (location != null) {
-				buf.append(location.getNodeName()).append(": ");
-			}
-			buf.append(BeansModelLabels.getElementLabel(
-					(IModelElement) element, 0));
-			return buf.toString();
+			return AopNamespaceLabels.getElementLabel(
+					(ISourceModelElement) element, 0);
 		}
 		return null;
 	}
@@ -57,13 +55,13 @@ public class AopNamespaceLabelProvider extends LabelProvider implements
 	public void updateLabel(ViewerLabel label, TreePath elementPath) {
 		Object element = ModelUtils.adaptToModelElement(elementPath
 				.getLastSegment());
-		if (element instanceof IModelElement
+		if (element instanceof ISourceModelElement
 				&& elementPath.getSegmentCount() > 1) {
 			Object parentElement = elementPath.getParentPath()
 					.getLastSegment();
 			if (parentElement instanceof IModelElement) {
-				label.setImage(BeansModelImages.getImage(
-						(IModelElement) element,
+				label.setImage(AopNamespaceImages.getImage(
+						(ISourceModelElement) element,
 						(IModelElement) parentElement));
 				label.setText(getText(element));
 			}
@@ -71,7 +69,12 @@ public class AopNamespaceLabelProvider extends LabelProvider implements
 	}
 
 	public String getDescription(Object element) {
-		// TODO Auto-generated method stub
+		if (element instanceof ISourceModelElement) {
+			return AopNamespaceLabels.getElementLabel(
+					(ISourceModelElement) element,
+					AopNamespaceLabels.APPEND_PATH
+							| AopNamespaceLabels.DESCRIPTION);
+		}
 		return null;
 	}
 }

@@ -16,9 +16,8 @@
 
 package org.springframework.ide.eclipse.beans.ui;
 
-import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
-import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
+import org.springframework.ide.eclipse.core.model.ModelUtils;
 
 /**
  * This class provides constants and helper methods for the beans UI.
@@ -49,11 +48,13 @@ public class BeansUILabels {
 		return (flags & flag) != 0;
 	}
 
-	protected static void appendNodeName(ISourceModelElement element,
+	protected static boolean appendNodeName(ISourceModelElement element,
 			StringBuffer buf) {
-		IModelSourceLocation source = element.getElementSourceLocation();
-		if (source instanceof XmlSourceLocation) {
-			buf.append(((XmlSourceLocation) source).getNodeName());
+		String nodeName = ModelUtils.getNodeName(element);
+		if (nodeName != null) {
+			buf.append('<').append(nodeName).append("/>");
+			return true;
 		}
+		return false;
 	}
 }
