@@ -38,6 +38,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
@@ -59,9 +60,11 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
+import org.springframework.ide.eclipse.core.io.xml.LineNumberPreservingDOMParser;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
+import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 import org.springframework.util.Assert;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -849,6 +852,23 @@ public final class BeansModelUtils {
 	}
 
 	public static final void createProblemMarker(IModelElement element,
+			String message, int severity, Problem problem,
+			ErrorCode errorCode) {
+		int line;
+		Object source = problem.getLocation().getSource();
+		if (source instanceof XmlSourceLocation) {
+			line = ((XmlSourceLocation) source).getStartLine();
+		} else if (source instanceof Node) {
+			line = LineNumberPreservingDOMParser
+					.getStartLineNumber((Node) source);
+		} else {
+			line = -1;
+		}
+		createProblemMarker(element, message, severity, line, errorCode, null,
+				null);
+	}
+
+	public static final void createProblemMarker(IModelElement element,
 			String message, int severity, int line, ErrorCode errorCode) {
 		createProblemMarker(element, message, severity, line, errorCode, null,
 				null);
@@ -1000,6 +1020,9 @@ public final class BeansModelUtils {
 		return null;
 	}
 
+	/**
+	 * Returns a string representation of the given value object.
+	 */
 	public static String getValueName(Object value) {
 
 		// Ignore bean name of inner beans

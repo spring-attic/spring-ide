@@ -479,16 +479,13 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 		public void error(Problem problem) {
 			BeansModelUtils.createProblemMarker(config, problem.getMessage(),
-					IMarker.SEVERITY_ERROR, ((XmlSourceLocation) problem
-							.getLocation().getSource()).getStartLine(),
-					ErrorCode.PARSING_FAILED);
+					IMarker.SEVERITY_ERROR, problem, ErrorCode.PARSING_FAILED);
 			errors.add(problem);
 		}
 
 		public void warning(Problem problem) {
 			BeansModelUtils.createProblemMarker(config, problem.getMessage(),
-					IMarker.SEVERITY_WARNING, ((XmlSourceLocation) problem
-							.getLocation().getSource()).getStartLine(),
+					IMarker.SEVERITY_WARNING, problem,
 					ErrorCode.PARSING_FAILED);
 			warnings.add(problem);
 		}
