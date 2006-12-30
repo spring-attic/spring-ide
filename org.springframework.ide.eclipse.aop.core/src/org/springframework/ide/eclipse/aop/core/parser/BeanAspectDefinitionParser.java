@@ -47,7 +47,6 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES
 import org.springframework.ide.eclipse.aop.core.model.internal.AnnotationAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.internal.BeanAspectDefinition;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
