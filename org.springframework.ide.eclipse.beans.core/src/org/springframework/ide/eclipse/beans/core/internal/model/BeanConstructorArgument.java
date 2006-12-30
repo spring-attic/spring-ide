@@ -59,7 +59,7 @@ public class BeanConstructorArgument extends AbstractBeansModelElement
 			buf.append(vHolder.getType());
 		}
 		if (buf.length() == 0) {
-			buf.append(vHolder.getValue());
+			buf.append(BeansModelUtils.getValueName(vHolder.getValue()));
 		}
 		return buf.toString();
 	}
