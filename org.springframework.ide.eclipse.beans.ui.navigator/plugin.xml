@@ -66,12 +66,18 @@
             icon="icons/full/obj16/spring_obj.gif"
             activeByDefault="true">
 		 <triggerPoints>
-				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
-		 </triggerPoints>
-         <possibleChildren>
+			<or>
 				<instanceof value="org.eclipse.core.resources.IFile"/>
                 <instanceof value="org.eclipse.core.resources.IStorage"/>
 				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+			</or>
+		 </triggerPoints>
+         <possibleChildren>
+			<or>
+				<instanceof value="org.eclipse.core.resources.IFile"/>
+                <instanceof value="org.eclipse.core.resources.IStorage"/>
+				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+			</or>
          </possibleChildren>
          <commonSorter
                id="org.springframework.ide.eclipse.beans.ui.navigator.sorter.beansExplorerSorter"
@@ -104,7 +110,7 @@
 			</or>
 		 </triggerPoints>
          <possibleChildren>
-				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+			<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
          </possibleChildren>
          <commonSorter
                id="org.springframework.ide.eclipse.beans.ui.navigator.sorter.projectExplorerSorter"

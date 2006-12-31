@@ -48,39 +48,33 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 
 	private String providerID;
 
-	public Object getParent(Object element) {
-
-		// For the ProjectExplorer return the corresponding file for every
-		// IBeansConfig
-		if (element instanceof IBeansConfig
-				&& !providerID.equals(BEANS_EXPLORER_CONTENT_PROVIDER_ID)) {
-			return ((IBeansConfig) element).getElementResource();
-		}
-		return super.getParent(element);
-	}
-
     public void elementChanged(ModelChangeEvent event) {
 		IModelElement element = event.getElement();
 
-		// For a changed Spring project or beans config in the Eclipse Project
-		// Explorer refresh the corresponding beans config file(s) and for a
-		// beans config all corresponding bean classes
-		if (providerID.equals(PROJECT_EXPLORER_CONTENT_PROVIDER_ID)) {
-			if (element instanceof IBeansProject) {
+		if (element instanceof IBeansProject) {
+			if (providerID.equals(PROJECT_EXPLORER_CONTENT_PROVIDER_ID)) {
 				refreshViewerForElement(((IBeansProject) element)
 						.getElementResource());
-			} else if (element instanceof IBeansConfig) {
-				IBeansConfig config = (IBeansConfig) element;
-				refreshViewerForElement(config.getElementResource());
+			} else {
+				super.elementChanged(event);
+			}
+		} else if (element instanceof IBeansConfig) {
+			IBeansConfig config = (IBeansConfig) element;
+			refreshViewerForElement(config.getElementResource());
+
+			// For a changed Spring beans config in the Eclipse Project Explorer
+			// refresh all corresponding bean classes
+			if (providerID.equals(PROJECT_EXPLORER_CONTENT_PROVIDER_ID)) {
 				refreshBeanClasses(config);
 			}
+		} else {
+			super.elementChanged(event);
 		}
-		super.elementChanged(event);
 	}
 
     /**
-     * Refreshes the config file and all bean classes of a given beans config
-     */
+	 * Refreshes the config file and all bean classes of a given beans config
+	 */
 	protected void refreshBeanClasses(IBeansConfig config) {
 		Set<String> classes = config.getBeanClasses();
 		for (String clazz : classes) {
@@ -100,5 +94,9 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 	}
 
 	public void restoreState(IMemento aMemento) {
+	}
+
+	public String toString() {
+		return String.valueOf(providerID);
 	}
 }

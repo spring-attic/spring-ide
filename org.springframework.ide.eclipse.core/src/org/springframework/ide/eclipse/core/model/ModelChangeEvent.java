@@ -26,8 +26,9 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  * This class is not intended to be instantiated or subclassed by clients.
  * Instances of this class are automatically created by the model.
  * </p>
- * @see IModelChangeListener
+ * 
  * @author Torsten Juergeleit
+ * @see IModelChangeListener
  */
 public class ModelChangeEvent extends EventObject {
 
@@ -61,5 +62,13 @@ public class ModelChangeEvent extends EventObject {
 	 */
 	public Type getType() {
 		return type;
+	}
+
+	public String toString() {
+		StringBuffer text = new StringBuffer("Model element '");
+		text.append(getElement().getElementName()).append("' (");
+		text.append(getElement().getClass().getName()).append(") ");
+		text.append(getType());
+		return text.toString();
 	}
 }

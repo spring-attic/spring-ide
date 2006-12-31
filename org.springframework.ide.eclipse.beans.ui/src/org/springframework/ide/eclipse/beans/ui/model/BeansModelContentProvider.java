@@ -41,6 +41,7 @@ import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
+import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 
 /**
  * This class is a content provider which knows about the beans core model's
@@ -139,7 +140,7 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 			}
 		} else if (parentElement instanceof IModelElement) {
 			if (parentElement instanceof IBeansProject) {
-				return getProjectChildren((IBeansProject) parentElement);
+				return getProjectChildren((IBeansProject) parentElement, false);
 			} else if (parentElement instanceof IBeansConfigSet) {
 				return getConfigSetChildren((IBeansConfigSet) parentElement);
 			}
@@ -169,27 +170,26 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 				IBeansProject beansProject = BeansCorePlugin.getModel()
 						.getProject(project);
 				if (beansProject != null) {
-					Set<IBeansConfigSet> configSets = beansProject
-							.getConfigSets();
-					return configSets.toArray(new IBeansConfigSet[configSets
-							.size()]);
+					return getProjectChildren(beansProject, true);
 				}
 			}
 		}
 		return IModelElement.NO_CHILDREN;
 	}
 
-	private Object[] getProjectChildren(IBeansProject project) {
+	private Object[] getProjectChildren(IBeansProject project,
+			boolean onlyConfigSets) {
 		Set<Object> children = new LinkedHashSet<Object>();
-		for (IBeansConfig config : project.getConfigs()) {
-			if (config.isElementArchived()) {
-				children.add(new ZipEntryStorage(config));
-			} else {
-				children.add(config.getElementResource());
+		if (!onlyConfigSets) {
+			for (IBeansConfig config : project.getConfigs()) {
+				if (config.isElementArchived()) {
+					children.add(new ZipEntryStorage(config));
+				} else {
+					children.add(config.getElementResource());
+				}
 			}
 		}
-		children.addAll(((IBeansProject) project)
-				.getConfigSets());
+		children.addAll(((IBeansProject) project).getConfigSets());
 		return children.toArray(new Object[children.size()]);
 	}
 
@@ -229,6 +229,9 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 			}
 			return DEFAULT_NAMESPACE_CONTENT_PROVIDER.getParent(element);
 		} else if (element instanceof IModelElement) {
+			if (element instanceof IBeansConfig) {
+				return ((IBeansConfig) element).getElementResource();
+			}
 			return ((IModelElement) element).getElementParent();
 		} else if (element instanceof IFile) {
 			return BeansCorePlugin.getModel().getConfig((IFile) element)
@@ -244,10 +247,15 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 	}
 
 	public void elementChanged(ModelChangeEvent event) {
+		IModelElement element = event.getElement();
 
-		// Refresh the parent of the changed model element
-		IModelElement element = event.getElement().getElementParent();
-		refreshViewerForElement(element);
+		// For events of type ADDED or REMOVED refresh the parent of the changed
+		// model element
+		if (event.getType() == Type.CHANGED) {
+			refreshViewerForElement(element);
+		} else {
+			refreshViewerForElement(element.getElementParent());
+		}
 	}
 
 	protected final StructuredViewer getViewer() {
