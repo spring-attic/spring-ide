@@ -65,6 +65,7 @@ import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceExtractor;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
+import org.springframework.util.ObjectUtils;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -308,6 +309,28 @@ public class BeansConfig extends AbstractResourceModelElement implements
 					className));
 		}
 		return new HashSet<IBean>();
+	}
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof BeansConfig)) {
+			return false;
+		}
+		BeansConfig that = (BeansConfig) other;
+		if (!ObjectUtils.nullSafeEquals(this.file, that.file))
+			return false;
+		if (!ObjectUtils.nullSafeEquals(this.isArchived, that.isArchived))
+			return false;
+		return super.equals(other);
+	}
+
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(file);
+		hashCode = getElementType() * hashCode
+				+ ObjectUtils.nullSafeHashCode(isArchived);
+		return getElementType() * hashCode + super.hashCode();
 	}
 
 	public String toString() {
