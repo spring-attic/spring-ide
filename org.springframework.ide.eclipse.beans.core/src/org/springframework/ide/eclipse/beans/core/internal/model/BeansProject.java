@@ -40,7 +40,7 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * This class provides information for a Spring Beans project.
- *
+ * 
  * @author Torsten Juergeleit
  */
 public class BeansProject extends AbstractResourceModelElement implements
@@ -73,8 +73,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 		return false;
 	}
 
-	public void accept(IModelElementVisitor visitor,
-			IProgressMonitor monitor) {
+	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 
 		// First visit this project
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
@@ -276,7 +275,8 @@ public class BeansProject extends AbstractResourceModelElement implements
 			return false;
 		}
 		BeansProject that = (BeansProject) other;
-		if (!ObjectUtils.nullSafeEquals(this.project, that.project)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.project, that.project))
+			return false;
 		return super.equals(other);
 	}
 
