@@ -48,16 +48,13 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 import org.springframework.util.ObjectUtils;
 
 /**
- * The <code>BeansModel</code> manages instances of <code>IBeansProject</code>s.
- * <code>IModelChangeListener</code>s register with the
- * <code>BeansModel</code>, and receive <code>ModelChangeEvent</code>s for
- * all changes.
+ * The {@link BeansModel} manages instances of {@link IBeansProject}s.
+ * {@link IModelChangeListener}s register with the {@link BeansModel}, and
+ * receive {@link ModelChangeEvent}s for all changes.
  * <p>
- * The single instance of <code>IBeansModel</code> is available from the
- * static method <code>BeansCorePlugin.getModel()</code>.
+ * The single instance of {@link IBeansModel} is available from the static
+ * method {@link BeansCorePlugin#getModel()}.
  * 
- * @see org.springframework.ide.eclipse.core.model.IModelChangeListener
- * @see org.springframework.ide.eclipse.core.model.ModelChangeEvent
  * @author Torsten Juergeleit
  */
 public class BeansModel extends AbstractModel implements IBeansModel {
@@ -76,7 +73,8 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 
 	public BeansModel() {
 		super(null, IBeansModel.ELEMENT_NAME);
-		projects = new LinkedHashMap<IProject, IBeansProject>();
+		projects = Collections
+				.synchronizedMap(new LinkedHashMap<IProject, IBeansProject>());
 		workspaceListener = new BeansResourceChangeListener(
 				new ResourceChangeEventHandler());
 	}
@@ -116,9 +114,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.removeResourceChangeListener(workspaceListener);
 		workspaceListener = null;
-		synchronized (projects) {
-			projects.clear();
-		}
+		projects.clear();
 	}
 
 	public boolean hasProject(IProject project) {
@@ -198,10 +194,12 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	 */
 	public Set<IBeansConfig> getConfigs(String className) {
 		Set<IBeansConfig> configs = new LinkedHashSet<IBeansConfig>();
-		for (IBeansProject project : projects.values()) { 
-			for (IBeansConfig config : project.getConfigs()) {
-				if (config.isBeanClass(className)) {
-					configs.add(config);
+		synchronized (projects) {
+			for (IBeansProject project : projects.values()) {
+				for (IBeansConfig config : project.getConfigs()) {
+					if (config.isBeanClass(className)) {
+						configs.add(config);
+					}
 				}
 			}
 		}
@@ -324,9 +322,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 							+ "' added");
 				}
 				BeansProject proj = new BeansProject(project);
-				synchronized (projects) {
-					projects.put(project, proj);
-				}
+				projects.put(project, proj);
 				notifyListeners(proj, Type.ADDED);
 			}
 		}
@@ -338,9 +334,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 							+ "' opened");
 				}
 				BeansProject proj = new BeansProject(project);
-				synchronized (projects) {
-					projects.put(project, proj);
-				}
+				projects.put(project, proj);
 				notifyListeners(proj, Type.ADDED);
 			}
 		}
@@ -420,13 +414,14 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				// Before removing the config from it's project keep a copy for
 				// notifying the listeners
 				BeansConfig config = (BeansConfig) project.getConfig(file);
-				((BeansProject)project).removeConfig(file, true);
+				((BeansProject) project).removeConfig(file, true);
 
 				// Remove config from config sets where referenced as external
 				// config
-				for (IBeansProject proj : projects.values()) {
-					((BeansProject) proj).removeConfig(file, true);
-
+				synchronized (projects) {
+					for (IBeansProject proj : projects.values()) {
+						((BeansProject) proj).removeConfig(file, true);
+					}
 				}
 				notifyListeners(config, Type.REMOVED);
 			}
