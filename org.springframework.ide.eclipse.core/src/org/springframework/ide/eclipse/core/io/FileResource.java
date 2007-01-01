@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.ResourceUtils;
 
 /**
- * Resource implementation for Eclipse file handles.
- * Obviously supports resolution as File, and also as URL.
- * @see org.eclipse.core.resources.IFile
+ * Resource implementation for Eclipse {@link IFile file handles}.
+ * Obviously supports resolution as {@link File}, and also as {@link URL}.
+ * 
+ * @author Torsten Juergeleit
  */
 public class FileResource extends AbstractResource {
 
@@ -57,8 +58,8 @@ public class FileResource extends AbstractResource {
 	 */
 	public FileResource(String path) {
 		if (path.charAt(0) != '/') {
-			throw new IllegalArgumentException("Path '" + path + "' has to " +
-										   " be relative to Eclipse workspace");
+			throw new IllegalArgumentException("Path '" + path
+					+ "' has to be relative to Eclipse workspace");
 		}
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IResource member = root.findMember(path);
@@ -82,8 +83,8 @@ public class FileResource extends AbstractResource {
 		if (file == null) {
 			throw new FileNotFoundException("File not found");
 		}
-		return new URL(ResourceUtils.URL_PROTOCOL_FILE + ":" +
-					   file.getAbsolutePath());
+		return new URL(ResourceUtils.URL_PROTOCOL_FILE + ":"
+				+ file.getAbsolutePath());
 	}
 
 	public File getFile() {
@@ -109,8 +110,8 @@ public class FileResource extends AbstractResource {
 	}
 
 	public boolean equals(Object obj) {
-		return (obj == this || (obj instanceof FileResource &&
-									 (((FileResource) obj).file).equals(file)));
+		return (obj == this || (obj instanceof FileResource && (((FileResource) obj).file)
+				.equals(file)));
 	}
 
 	public int hashCode() {

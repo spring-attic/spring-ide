@@ -21,6 +21,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
  * This interface provides information for a Spring beans import.
+ * 
  * @author Torsten Juergeleit
  */
 public interface IBeansImport extends ISourceModelElement {
