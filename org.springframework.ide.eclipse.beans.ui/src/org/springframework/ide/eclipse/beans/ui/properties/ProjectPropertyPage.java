@@ -45,14 +45,19 @@ import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
  */
 public class ProjectPropertyPage extends PropertyPage {
 
-	public static final String ID = BeansUIPlugin.PLUGIN_ID +
-										  ".ui.properties.ProjectPropertyPage";
+	public static final String ID = BeansUIPlugin.PLUGIN_ID
+			+ ".ui.properties.ProjectPropertyPage";
+
 	private static final String PREFIX = "ConfigurationPropertyPage.";
+
 	private static final String TITLE = PREFIX + "title";
-	private static final String CONFIG_FILES_LABEL = PREFIX +
-														"tabConfigFiles.label";
-	private static final String CONFIG_SETS_LABEL = PREFIX +
-														 "tabConfigSets.label";
+
+	private static final String CONFIG_FILES_LABEL = PREFIX
+			+ "tabConfigFiles.label";
+
+	private static final String CONFIG_SETS_LABEL = PREFIX
+			+ "tabConfigSets.label";
+
 	private ProjectNode projectModel;
 	private ConfigFilesTab configFilesTab;
 	private ConfigSetsTab configSetsTab;
@@ -73,7 +78,7 @@ public class ProjectPropertyPage extends PropertyPage {
 		this.selectedTab = selectedTab;
 	}
 
-	protected Control createContents(Composite parent)  {
+	protected Control createContents(Composite parent) {
 
 		// Build project model
 		IBeansProject project = getSpringProject();
@@ -116,8 +121,8 @@ public class ProjectPropertyPage extends PropertyPage {
 
 		// Store modified config sets in project
 		if (configSetsTab.hasUserMadeChanges()) {
-			Set<IBeansConfigSet> configSets =
-					new LinkedHashSet<IBeansConfigSet>();
+			Set<IBeansConfigSet> configSets = new
+					LinkedHashSet<IBeansConfigSet>();
 			for (ConfigSetNode node : projectModel.getConfigSets()) {
 				BeansConfigSet configSet = new BeansConfigSet(project, node
 						.getName(), node.getConfigNames());
@@ -145,7 +150,7 @@ public class ProjectPropertyPage extends PropertyPage {
 
 	protected BeansProject getSpringProject() {
 		return (BeansProject) BeansCorePlugin.getModel().getProject(
-													   (IProject) getElement());
+				(IProject) getElement());
 	}
 
 	public void dispose() {

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -41,16 +42,17 @@ import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 
 /**
  * This content provider is used to display a tree of non-java resources.
+ * 
  * @author Torsten Juergeleit
  */
 public class NonJavaResourceContentProvider implements ITreeContentProvider {
 
-	protected static final Object[] NO_CHILDREN = new Object[0];
-	
+	public static final Object[] NO_CHILDREN = new Object[0];
+
 	public Object[] getElements(Object parent) {
 		return getChildren(parent);
 	}
-	
+
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 	}
 
@@ -68,13 +70,13 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 					element = JavaCore.create(project);
 				}
 			}
-			if (element instanceof IJavaProject) { 
+			if (element instanceof IJavaProject) {
 				return getPackageFragmentRoots((IJavaProject) element);
 			}
 			if (element instanceof IPackageFragmentRoot) {
 				return getPackageFragments((IPackageFragmentRoot) element);
 			}
-			if (element instanceof IPackageFragment) { 
+			if (element instanceof IPackageFragment) {
 				return getPackageContents((IPackageFragment) element);
 			}
 			if (element instanceof IFolder) {
@@ -82,8 +84,8 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 			}
 		} catch (JavaModelException e) {
 			return NO_CHILDREN;
-		}		
-		return NO_CHILDREN;	
+		}
+		return NO_CHILDREN;
 	}
 
 	public boolean hasChildren(Object element) {
@@ -97,7 +99,7 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 			IJavaProject javaProject = (IJavaProject) element;
 			if (!javaProject.getProject().isOpen()) {
 				return false;
-			}	
+			}
 		}
 		if (element instanceof IParent) {
 			try {
@@ -106,7 +108,7 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 				if (((IParent) element).hasChildren()) {
 					return true;
 				}
-			} catch(JavaModelException e) {
+			} catch (JavaModelException e) {
 				return true;
 			}
 		}
@@ -115,7 +117,7 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 	}
 
 	public Object getParent(Object element) {
-		if (!exists(element)){
+		if (!exists(element)) {
 			return null;
 		}
 		return internalGetParent(element);
@@ -133,13 +135,13 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 
 	private Object[] getNonJavaResources(IPackageFragmentRoot root)
 			throws JavaModelException {
-		Object[] nonJavaResources = root.getNonJavaResources(); 
+		Object[] nonJavaResources = root.getNonJavaResources();
 		if (root.getKind() == IPackageFragmentRoot.K_BINARY) {
 			for (int i = 0; i < nonJavaResources.length; i++) {
 				Object resource = nonJavaResources[i];
 				if (resource instanceof IStorage) {
 					IStorage storage = (IStorage) resource;
-					nonJavaResources[i] = new ZipEntryStorage(root
+					nonJavaResources[i] = new ZipEntryStorage((IFile) root
 							.getResource(), storage.getFullPath().toString());
 				}
 			}
@@ -152,19 +154,16 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 		if (!project.getProject().isOpen()) {
 			return NO_CHILDREN;
 		}
-		IPackageFragmentRoot[] roots = project.getPackageFragmentRoots();
 
-		// filter out JARs not contained in the project itself and replace
+		// Filter out JARs not contained in the project itself and replace
 		// package fragment roots that correspond to projects with the package
 		// fragments directly
-		List list = new ArrayList(roots.length);
-		for (int i = 0; i < roots.length; i++) {
-			IPackageFragmentRoot root = roots[i];
+		List<IJavaElement> list = new ArrayList<IJavaElement>();
+		for (IPackageFragmentRoot root : project.getPackageFragmentRoots()) {
 			if (isInternalLibrary(project, root)) {
 				if (isProjectPackageFragmentRoot(root)) {
-					Object[] children = root.getChildren();
-					for (int k = 0; k < children.length; k++) {
-						list.add(children[k]);
+					for (IJavaElement element : root.getChildren()) {
+						list.add(element);
 					}
 				} else if (hasChildren(root)) {
 					list.add(root);
@@ -186,15 +185,15 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 
 	private Object[] getNonJavaResources(IPackageFragment fragment)
 			throws JavaModelException {
-		Object[] nonJavaResources = fragment.getNonJavaResources(); 
-		IPackageFragmentRoot root = (IPackageFragmentRoot)
-				fragment.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+		Object[] nonJavaResources = fragment.getNonJavaResources();
+		IPackageFragmentRoot root = (IPackageFragmentRoot) fragment
+				.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 		if (root != null && root.getKind() == IPackageFragmentRoot.K_BINARY) {
 			for (int i = 0; i < nonJavaResources.length; i++) {
 				Object resource = nonJavaResources[i];
 				if (resource instanceof IStorage) {
 					IStorage storage = (IStorage) resource;
-					nonJavaResources[i] = new ZipEntryStorage(root
+					nonJavaResources[i] = new ZipEntryStorage((IFile) root
 							.getResource(), storage.getFullPath().toString());
 				}
 			}
@@ -210,10 +209,9 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 				return members;
 			}
 			boolean isFolderOnClasspath = javaProject.isOnClasspath(container);
-			List nonJavaResources = new ArrayList();
+			List<IResource> nonJavaResources = new ArrayList<IResource>();
 			// Can be on classpath but as a member of non-java resource folder
-			for (int i = 0; i < members.length; i++) {
-				IResource member = members[i];
+			for (IResource member : members) {
 				// A resource can also be a java element
 				// in the case of exclusion and inclusion filters.
 				// We therefore exclude Java elements from the list
@@ -246,11 +244,11 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 		}
 		return true;
 	}
-	
+
 	protected boolean isClassPathChange(IJavaElementDelta delta) {
 		// need to test the flags only for package fragment roots
-		if (delta.getElement().getElementType() !=
-				IJavaElement.PACKAGE_FRAGMENT_ROOT) {
+		if (delta.getElement().getElementType()
+				!= IJavaElement.PACKAGE_FRAGMENT_ROOT) {
 			return false;
 		}
 
@@ -272,9 +270,8 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 			throws JavaModelException {
 		if (element instanceof IPackageFragment) {
 			IPackageFragment fragment = (IPackageFragment) element;
-			if (fragment.exists() &&
-					!(fragment.hasChildren() ||
-							fragment.getNonJavaResources().length > 0)
+			if (fragment.exists() && !(fragment.hasChildren()
+						|| fragment.getNonJavaResources().length > 0)
 					&& fragment.hasSubpackages()) {
 				return true;
 			}
@@ -286,7 +283,7 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 		IResource resource = root.getResource();
 		return (resource instanceof IProject);
 	}
-	
+
 	protected boolean exists(Object element) {
 		if (element == null) {
 			return false;
@@ -299,7 +296,7 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 		}
 		return true;
 	}
-	
+
 	protected Object internalGetParent(Object element) {
 
 		// try to map resources to the containing package fragment

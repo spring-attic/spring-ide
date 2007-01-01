@@ -18,7 +18,6 @@ package org.springframework.ide.eclipse.beans.ui.properties;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -112,73 +111,70 @@ public class ConfigSetDialog extends Dialog {
 		Composite optionsGroup = new Composite(composite, SWT.NULL);
 		optionsGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		GridLayout layout = new GridLayout();
-		layout.marginHeight = convertVerticalDLUsToPixels( 
-											 IDialogConstants.VERTICAL_MARGIN); 
-		layout.marginWidth = convertHorizontalDLUsToPixels( 
-										   IDialogConstants.HORIZONTAL_MARGIN); 
-		optionsGroup.setLayout(layout); 
-		optionsGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL)); 
+		layout.marginHeight = convertVerticalDLUsToPixels(IDialogConstants
+				.VERTICAL_MARGIN);
+		layout.marginWidth = convertHorizontalDLUsToPixels(IDialogConstants
+				.HORIZONTAL_MARGIN);
+		optionsGroup.setLayout(layout);
+		optionsGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		// labeled name text field
-		nameText = SpringUIUtils.createTextField(optionsGroup, 
-								  BeansUIPlugin.getResourceString(NAME_LABEL)); 
-		nameText.addModifyListener(
-			new ModifyListener() {
-				public void modifyText(ModifyEvent e) {
-					validateName();
-				}
+		nameText = SpringUIUtils.createTextField(optionsGroup, BeansUIPlugin
+				.getResourceString(NAME_LABEL));
+		nameText.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				validateName();
 			}
-		);
+		});
 
 		// labeled checkboxes
-//		Composite checkboxGroup = new Composite(composite, SWT.NULL);
-//		checkboxGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		overrideButton = SpringUIUtils.createCheckBox(optionsGroup, 
-							  BeansUIPlugin.getResourceString(OVERRIDE_LABEL));
+		// Composite checkboxGroup = new Composite(composite, SWT.NULL);
+		// checkboxGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		overrideButton = SpringUIUtils.createCheckBox(optionsGroup,
+				BeansUIPlugin.getResourceString(OVERRIDE_LABEL));
 		overrideButton.setSelection(configSet.isOverrideEnabled());
 
-		incompleteButton = SpringUIUtils.createCheckBox(optionsGroup, 
-							BeansUIPlugin.getResourceString(INCOMPLETE_LABEL));
+		incompleteButton = SpringUIUtils.createCheckBox(optionsGroup,
+				BeansUIPlugin.getResourceString(INCOMPLETE_LABEL));
 		incompleteButton.setSelection(configSet.isIncomplete());
 
 		// config set list viewer
 		Label viewerLabel = new Label(composite, SWT.NONE);
-		GridData gd = new GridData(GridData.GRAB_HORIZONTAL | 
-											   GridData.HORIZONTAL_ALIGN_FILL); 
-		viewerLabel.setLayoutData(gd); 
-		viewerLabel.setText(BeansUIPlugin.getResourceString(VIEWER_LABEL)); 
+		GridData gd = new GridData(GridData.GRAB_HORIZONTAL
+				| GridData.HORIZONTAL_ALIGN_FILL);
+		viewerLabel.setLayoutData(gd);
+		viewerLabel.setText(BeansUIPlugin.getResourceString(VIEWER_LABEL));
 
-		configsViewer = CheckboxTableViewer.newCheckList(composite, 
-														 SWT.BORDER); 
+		configsViewer = CheckboxTableViewer.newCheckList(composite, SWT.BORDER);
 		gd = new GridData(GridData.FILL_BOTH);
 		gd.widthHint = LIST_VIEWER_WIDTH;
 		gd.heightHint = LIST_VIEWER_HEIGHT;
 
 		configsViewer.getTable().setLayoutData(gd);
 		configsViewer.setContentProvider(new ConfigFilesContentProvider(
-														   createConfigList()));
+				createConfigList()));
 		configsViewer.setLabelProvider(new ModelLabelProvider());
 		configsViewer.setSorter(new ModelSorter(true));
-		configsViewer.setInput(this);	// activate content provider
+		configsViewer.setInput(this); // activate content provider
 		configsViewer.setCheckedElements(configSet.getConfigs().toArray());
 
 		// error label
 		errorLabel = new Label(composite, SWT.NONE);
-		errorLabel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL |
-											  GridData.HORIZONTAL_ALIGN_FILL));
+		errorLabel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
+				| GridData.HORIZONTAL_ALIGN_FILL));
 		errorLabel.setForeground(JFaceColors.getErrorText(parent.getDisplay()));
-		errorLabel.setBackground(
-						  JFaceColors.getErrorBackground(parent.getDisplay()));
-		applyDialogFont(composite); 
+		errorLabel.setBackground(JFaceColors.getErrorBackground(parent
+				.getDisplay()));
+		applyDialogFont(composite);
 		return composite;
 	}
 
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
 		okButton = createButton(parent, IDialogConstants.OK_ID,
-								IDialogConstants.OK_LABEL, true);
+				IDialogConstants.OK_LABEL, true);
 		createButton(parent, IDialogConstants.CANCEL_ID,
-					 IDialogConstants.CANCEL_LABEL, false);
+				IDialogConstants.CANCEL_LABEL, false);
 		// do this here because setting the text will set enablement on the
 		// ok button
 		nameText.setFocus();
@@ -235,15 +231,13 @@ public class ConfigSetDialog extends Dialog {
 		super.buttonPressed(buttonId);
 	}
 
-	private List createConfigList() {
+	private List<ConfigNode> createConfigList() {
 
-		// Create new list with config files from this config set 
-		List configs = new ArrayList(configSet.getConfigs());
+		// Create new list with config files from this config set
+		List<ConfigNode> configs = new ArrayList<ConfigNode>();
 
 		// Add missing configs from project
-		Iterator iter = project.getConfigs().iterator();
-		while (iter.hasNext()) {
-			ConfigNode config = (ConfigNode) iter.next();
+		for (ConfigNode config : project.getConfigs()) {
 			if (!configSet.hasConfig(config.getName())) {
 				configs.add(new ConfigNode(configSet, config.getName()));
 			}
@@ -252,16 +246,13 @@ public class ConfigSetDialog extends Dialog {
 		// Add all configs from referenced projects
 		IBeansModel model = BeansCorePlugin.getModel();
 		try {
-			IProject[] projects = project.getProject().getProject()
-					.getReferencedProjects();
-			for (int i = 0; i < projects.length; i++) {
-				IBeansProject project = model.getProject(projects[i]);
-				if (project != null) {
-					iter = project.getConfigs().iterator();
-					while (iter.hasNext()) {
-						IBeansConfig config = (IBeansConfig) iter.next();
-						String projectPath = ModelUtils
-								.getResourcePath(config.getElementParent());
+			for (IProject proj : project.getProject().getProject()
+					.getReferencedProjects()) {
+				IBeansProject bproj = model.getProject(proj);
+				if (bproj != null) {
+					for (IBeansConfig config : bproj.getConfigs()) {
+						String projectPath = ModelUtils.getResourcePath(config
+								.getElementParent());
 						if (projectPath != null) {
 
 							// Create the full qualified path of the config
@@ -285,14 +276,14 @@ public class ConfigSetDialog extends Dialog {
 		boolean isEnabled = false;
 
 		String name = nameText.getText();
-		if (name == null || name.trim().length() == 0 ||
-										   !StringUtils.isAlphaNumeric(name)) {
-			errorLabel.setText(BeansUIPlugin.getResourceString(
-														   ERROR_INVALID_NAME));
+		if (name == null || name.trim().length() == 0
+				|| !StringUtils.isAlphaNumeric(name)) {
+			errorLabel.setText(BeansUIPlugin
+					.getResourceString(ERROR_INVALID_NAME));
 		} else if (configSetName == null || !name.equals(configSetName)) {
 			if (project.hasConfigSet(name)) {
-				errorLabel.setText(BeansUIPlugin.getResourceString(
-															  ERROR_USED_NAME));
+				errorLabel.setText(BeansUIPlugin
+						.getResourceString(ERROR_USED_NAME));
 			} else {
 				errorLabel.setText("");
 				isEnabled = true;
@@ -306,21 +297,21 @@ public class ConfigSetDialog extends Dialog {
 		errorLabel.getParent().update();
 	}
 
-	private class ConfigFilesContentProvider
-										 implements IStructuredContentProvider {
+	private class ConfigFilesContentProvider implements
+			IStructuredContentProvider {
 		private List configs;
-	
+
 		public ConfigFilesContentProvider(List configs) {
 			this.configs = configs;
 		}
-	
+
 		public Object[] getElements(Object obj) {
 			return configs.toArray();
 		}
-	
+
 		public void inputChanged(Viewer arg0, Object arg1, Object arg2) {
 		}
-	
+
 		public void dispose() {
 		}
 	}
