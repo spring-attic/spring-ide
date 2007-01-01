@@ -22,15 +22,17 @@ import java.io.InputStream;
 
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.springframework.core.io.AbstractResource;
+import org.springframework.core.io.Resource;
+import org.springframework.util.ObjectUtils;
 
 /**
- * Resource implementation for Eclipse storage handles.
- * @see org.springframework.core.io.Resource
- * @see org.eclipse.core.resources.IStorage
+ * {@link Resource} implementation for Eclipse {@link IStorage storage} handles.
+ * 
  * @author Torsten Juergeleit
  */
-public class StorageResource extends AbstractResource {
+public class StorageResource extends AbstractResource implements IAdaptable {
 
 	private IStorage storage;
 
@@ -55,5 +57,30 @@ public class StorageResource extends AbstractResource {
 
 	public String getDescription() {
 		return "storage [" + (storage != null ? storage.getName() : "") + "]";
+	}
+
+	/**
+	 * Adapts to {@link IStorage}.
+	 */
+	public Object getAdapter(Class adapter) {
+		if (adapter.equals(IStorage.class)) {
+			return storage;
+		}
+		return null;
+	}
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof StorageResource)) {
+			return false;
+		}
+		StorageResource that = (StorageResource) other;
+		return ObjectUtils.nullSafeEquals(this.storage, that.storage);
+	}
+
+	public int hashCode() {
+		return ObjectUtils.nullSafeHashCode(storage);
 	}
 }
