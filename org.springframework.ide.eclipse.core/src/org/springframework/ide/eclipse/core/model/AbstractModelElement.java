@@ -39,24 +39,18 @@ public abstract class AbstractModelElement implements IModelElement {
 		return null;
 	}
 
-	public final void setElementParent(IModelElement parent) {
-		this.parent = parent;
-	}
-
 	public final IModelElement getElementParent() {
 		return parent;
 	}
+
 	public IModelElement[] getElementChildren() {
 		return NO_CHILDREN;
-	}
-
-	public final void setElementName(String name) {
-		this.name = name;
 	}
 
 	public final String getElementName() {
 		return name;
 	}
+
 	public final String getElementID() {
 		StringBuffer id = new StringBuffer();
 		if (getElementParent() != null) {
@@ -128,8 +122,7 @@ public abstract class AbstractModelElement implements IModelElement {
 		return null;
 	}
 
-	public void accept(IModelElementVisitor visitor,
-			IProgressMonitor monitor) {
+	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 		visitor.visit(this, monitor);
 	}
 
