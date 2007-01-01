@@ -676,7 +676,7 @@ public class BeansEditorUtils {
 		if (input instanceof ZipEntryEditorInput) {
 			ZipEntryStorage storage = (ZipEntryStorage) ((ZipEntryEditorInput) input)
 					.getStorage();
-			project = storage.getZipResource().getProject();
+			project = storage.getFile().getProject();
 		} else {
 			IFile file = BeansEditorUtils.getFile(document);
 			project = file.getProject();

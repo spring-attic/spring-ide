@@ -952,7 +952,7 @@ public final class BeansModelUtils {
 	 */
 	public static final IBeansConfig getConfig(ZipEntryStorage storage) {
 		IBeansProject project = BeansCorePlugin.getModel().getProject(
-				storage.getZipResource().getProject());
+				storage.getFile().getProject());
 		if (project != null) {
 			return project.getConfig(storage.getFullName());
 		}

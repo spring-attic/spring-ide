@@ -97,7 +97,7 @@ public final class BeansUIUtils {
 				ZipEntryStorage storage = (ZipEntryStorage)
 						((ZipEntryEditorInput) input).getStorage();
 				IBeansProject project = BeansCorePlugin.getModel().getProject(
-						storage.getZipResource().getProject());
+						storage.getFile().getProject());
 				if (project != null) {
 					return project.getConfig(storage.getFullName());
 				}

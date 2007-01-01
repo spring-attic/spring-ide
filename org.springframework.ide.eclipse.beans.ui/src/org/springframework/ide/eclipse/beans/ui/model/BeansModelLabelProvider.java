@@ -75,7 +75,7 @@ public class BeansModelLabelProvider extends LabelProvider implements
 		}
 		if (element instanceof ZipEntryStorage) {
 			return wbLabelProvider.getImage(((ZipEntryStorage) element)
-					.getZipResource());
+					.getFile());
 		} else if (element instanceof BeanClassReferences) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_REFERENCE);
 		}
@@ -101,7 +101,7 @@ public class BeansModelLabelProvider extends LabelProvider implements
 			return ((IFile) element).getProjectRelativePath().toString();
 		} else if (element instanceof ZipEntryStorage) {
 			ZipEntryStorage storage = (ZipEntryStorage) element;
-			StringBuffer buf = new StringBuffer(storage.getZipResource()
+			StringBuffer buf = new StringBuffer(storage.getFile()
 					.getProjectRelativePath().toString());
 			buf.append(" - " + storage.getFullPath().toString());
 			return buf.toString();

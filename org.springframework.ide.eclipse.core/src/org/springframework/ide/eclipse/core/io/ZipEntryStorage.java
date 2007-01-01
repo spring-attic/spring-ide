@@ -22,32 +22,33 @@ import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.PlatformObject;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.util.ObjectUtils;
 
 /**
  * Wrapper for an entry in a ZIP file.
+ * 
  * @author Torsten Juergeleit
  */
-public class ZipEntryStorage extends PlatformObject implements IStorage {
+public class ZipEntryStorage implements IStorage, IAdaptable {
 
 	/**
-	 * This string (with the value of "!") is used to delimit ZIP file name
-	 * plus the corresponding ZIP entry (delimited by
-	 * <code>ZipEntryStorage.NAME_DELIMITER</code>)
+	 * This string (with the value of "!") is used to delimit the ZIP file name
+	 * from the corresponding ZIP entry
 	 */
 	public static final String DELIMITER = "!"; 
 
 	private String fullName;
-	private IResource zipResource;
+	private IFile file;
 	private String entryName;
 	private IPath entryPath;
 
@@ -67,8 +68,13 @@ public class ZipEntryStorage extends PlatformObject implements IStorage {
 			throw new IllegalArgumentException("Illegal JAR entry name '"
 					+ fullName + "'");
 		} else {
+			IResource member = project.findMember(fullName.substring(0, pos));
+			if (member == null || !(member instanceof IFile)) {
+				throw new IllegalArgumentException(
+						"Missing or wrong zip file: " + file);
+			}
 			this.fullName = fullName;
-			this.zipResource = project.findMember(fullName.substring(0, pos));
+			this.file = (IFile) member;
 			this.entryName = fullName.substring(pos + DELIMITER.length());
 			this.entryPath = new Path(this.entryName);
 		}
@@ -76,14 +82,17 @@ public class ZipEntryStorage extends PlatformObject implements IStorage {
 
 	/**
 	 * Creates a <code>ZipEntryStorage</code> from a full path of a
-	 * ZIP file entry and the corresponding ZIP file resource.
-	 * @param zipResource  the ZIP file resource
+	 * ZIP file entry and the corresponding ZIP file.
+	 * @param file  the ZIP file
 	 * @param entryName  the full path of the ZIP file entry
 	 */
-	public ZipEntryStorage(IResource zipResource, String entryName) {
-		this.fullName = zipResource.getProjectRelativePath() + DELIMITER
-				+ entryName;
-		this.zipResource = zipResource;
+	public ZipEntryStorage(IFile file, String entryName) {
+		if (file == null || !file.exists()) {
+			throw new IllegalArgumentException("Missing or wrong zip file: "
+					+ file);
+		}
+		this.fullName = file.getProjectRelativePath() + DELIMITER + entryName;
+		this.file = file;
 		this.entryName = entryName;
 		this.entryPath = new Path(entryName);
 	}
@@ -91,14 +100,17 @@ public class ZipEntryStorage extends PlatformObject implements IStorage {
 	/**
 	 * Creates a <code>ZipEntryStorage</code> from a given archived model
 	 * element.
+	 * 
 	 * @param element  the archived model element
 	 */
 	public ZipEntryStorage(IResourceModelElement element) {
-		if (element == null || !element.isElementArchived()) {
-			throw new IllegalArgumentException();
+		if (element == null || !element.isElementArchived()
+				|| !(element.getElementResource() instanceof IFile)) {
+			throw new IllegalArgumentException(
+					"Missing or wrong model element: " + element);
 		}
 		this.fullName = element.getElementName();
-		this.zipResource = element.getElementResource();
+		this.file = (IFile) element.getElementResource();
 		this.entryName = fullName.substring(fullName.indexOf(DELIMITER)
 				+ DELIMITER.length());
 		this.entryPath = new Path(entryName);
@@ -107,19 +119,19 @@ public class ZipEntryStorage extends PlatformObject implements IStorage {
 	/**
 	 * Returns the ZIP file resource of this ZIP file entry.
 	 */
-	public IResource getZipResource() {
-		return zipResource;
+	public IFile getFile() {
+		return file;
 	}
 
 	public InputStream getContents() throws CoreException {
 		try {
-			ZipFile zipFile = new ZipFile(zipResource.getLocation().toFile()); 
-			ZipEntry zipEntry = zipFile.getEntry(this.entryName);
-			if (zipEntry == null) {
+			ZipFile file = new ZipFile(this.file.getLocation().toFile()); 
+			ZipEntry entry = file.getEntry(this.entryName);
+			if (entry == null) {
 				throw new CoreException(SpringCore.createErrorStatus(
 						"Invalid path '" + entryName + "'", null));
 			}
-			return zipFile.getInputStream(zipEntry);
+			return file.getInputStream(entry);
 		} catch (IOException e){
 			throw new CoreException(SpringCore.createErrorStatus(
 					e.getMessage(), e));
@@ -152,7 +164,7 @@ public class ZipEntryStorage extends PlatformObject implements IStorage {
 	 * ZIP file entry delimited by <code>DELIMITER</code>).
 	 */
 	public String getAbsoluteName() {
-		return zipResource.getProject().getFullPath().append(fullName)
+		return file.getProject().getFullPath().append(fullName)
 				.toString();
 	}
 
@@ -164,23 +176,23 @@ public class ZipEntryStorage extends PlatformObject implements IStorage {
 	}
 
 	/**
-	 * Adapts to <code>org.eclipse.core.resources.IResource</code>,
-	 * <code>java.io.File</code> or <code>java.util.zip.ZipFile</code>.
+	 * Adapts to {@link IFile}, {@link File} or {@link ZipFile}.
 	 */
 	public Object getAdapter(Class adapter) {
-		if (adapter.equals(IResource.class)) {
-			return zipResource;
-		} else if (adapter.equals(File.class)) {
-			return zipResource.getFullPath().toFile();
-		} else if (adapter.equals(ZipFile.class)) {
-			try {
-				return new ZipFile(zipResource.getFullPath().toFile());
-			} catch (IOException e) {
-				SpringCore.log(e);
-				return null;
+		if (file != null) {
+			if (adapter.equals(IFile.class)) {
+				return file;
+			} else if (adapter.equals(File.class)) {
+				return file.getFullPath().toFile();
+			} else if (adapter.equals(ZipFile.class)) {
+				try {
+					return new ZipFile(file.getFullPath().toFile());
+				} catch (IOException e) {
+					SpringCore.log(e);
+				}
 			}
 		}
-		return super.getAdapter(adapter);
+		return null;
 	}
 
 	public boolean equals(Object other) {
@@ -193,16 +205,16 @@ public class ZipEntryStorage extends PlatformObject implements IStorage {
 		ZipEntryStorage that = (ZipEntryStorage) other;
 		if (!ObjectUtils.nullSafeEquals(this.fullName, that.fullName))
 			return false;
-		return ObjectUtils.nullSafeEquals(this.zipResource, that.zipResource);
+		return ObjectUtils.nullSafeEquals(this.file, that.file);
 	}
 
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(fullName);
-		return 29 * hashCode + ObjectUtils.nullSafeHashCode(zipResource);
+		return 29 * hashCode + ObjectUtils.nullSafeHashCode(file);
 	}
 
 	public String toString() {
-		return "ZipEntryStorage[" + zipResource.toString() + " - " + entryPath
+		return "ZipEntryStorage[" + file.toString() + " - " + entryPath
 				+ "]";
 	}
 }

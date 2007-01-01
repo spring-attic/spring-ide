@@ -130,7 +130,7 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 					ZipEntryStorage storage = new ZipEntryStorage(config);
 					name = storage.getName();
 					toolTip = toolTipPrefix
-							+ storage.getZipResource().getProjectRelativePath()
+							+ storage.getFile().getProjectRelativePath()
 									.toString() + " - "
 							+ storage.getFullPath().toString();
 				} else {

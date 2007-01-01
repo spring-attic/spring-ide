@@ -94,10 +94,10 @@ public class ModelLabelProvider extends LabelProvider {
 							.getConfig());
 					if (configName.charAt(0) == IBeansConfig
 							.EXTERNAL_FILE_NAME_PREFIX) {
-						label.append(storage.getZipResource()
+						label.append(storage.getFile()
 								.getFullPath().toString());
 					} else {
-						label.append(storage.getZipResource()
+						label.append(storage.getFile()
 								.getProjectRelativePath().toString());
 					}
 					label.append(" - ");

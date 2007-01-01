@@ -79,7 +79,7 @@ public final class BeansModelLabels extends BeansUILabels {
 				ZipEntryStorage storage = new ZipEntryStorage(config);
 				buf.append(storage.getFullPath());
 				buf.append(" - ");
-				buf.append(storage.getZipResource().getName());
+				buf.append(storage.getFile().getName());
 			} else {
 				buf.append(new Path(configName).lastSegment());
 			}
