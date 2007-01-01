@@ -27,29 +27,28 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.Path;
 import org.springframework.core.io.AbstractResource;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ResourceUtils;
 
 /**
- * Resource implementation for Eclipse {@link IFile file handles}.
- * Obviously supports resolution as {@link File}, and also as {@link URL}.
+ * {@link Resource} implementation for Eclipse {@link IFile file} handles.
  * 
  * @author Torsten Juergeleit
  */
-public class FileResource extends AbstractResource {
+public class FileResource extends AbstractResource implements IAdaptable {
 
-	private File file;
+	private IFile file;
 
 	/**
 	 * Create a new FileResource.
-	 * @param file a File handle
+	 * @param file  a file
 	 */
 	public FileResource(IFile file) {
-		if (file != null) {
-			this.file = file.getLocation().toFile();
-		}
+		this.file = file;
 	}
 
 	/**
@@ -63,8 +62,8 @@ public class FileResource extends AbstractResource {
 		}
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IResource member = root.findMember(path);
-		if (member != null) {
-			file = member.getFullPath().toFile();
+		if (member != null && member instanceof IFile) {
+			file = (IFile) member;
 		}
 	}
 
@@ -76,7 +75,7 @@ public class FileResource extends AbstractResource {
 		if (file == null) {
 			throw new FileNotFoundException("File not found");
 		}
-		return new FileInputStream(file);
+		return new FileInputStream(getFile());
 	}
 
 	public URL getURL() throws IOException {
@@ -84,37 +83,62 @@ public class FileResource extends AbstractResource {
 			throw new FileNotFoundException("File not found");
 		}
 		return new URL(ResourceUtils.URL_PROTOCOL_FILE + ":"
-				+ file.getAbsolutePath());
+				+ file.getRawLocation());
 	}
 
-	public File getFile() {
-		return file;
-	}
-
-	public Resource createRelative(String relativePath) {
-		if (file != null) {
-			File parent = file.getParentFile();
-			if (parent != null) {
-				return new FileSystemResource(new File(parent, relativePath));
-			}
+	public File getFile() throws IOException {
+		if (file == null) {
+			throw new FileNotFoundException("File not found");
 		}
-		return new FileResource(relativePath);
+		return file.getLocation().toFile();
+	}
+
+	public Resource createRelative(String relativePath) throws IOException {
+		if (file == null) {
+			throw new IllegalStateException("File not found");
+		}
+		IFile relativeFile = file.getParent().getFile(
+				new Path(relativePath));
+		if (relativeFile != null) {
+			return new FileResource(relativeFile);
+		}
+		throw new FileNotFoundException("Cannot create relative resource '"
+				+ relativePath + "' for " + getDescription());
 	}
 
 	public String getFilename() {
+		if (file == null) {
+			throw new IllegalStateException("File not found");
+		}
 		return file.getName();
 	}
 
 	public String getDescription() {
-		return "file [" + (file != null ? file.getAbsolutePath() : "") + "]";
+		return "file [" + (file != null ? file.getRawLocation() : "") + "]";
 	}
 
-	public boolean equals(Object obj) {
-		return (obj == this || (obj instanceof FileResource && (((FileResource) obj).file)
-				.equals(file)));
+	/**
+	 * Adapts to {@link IResource} or {@link IFile}.
+	 */
+	public Object getAdapter(Class adapter) {
+		if (adapter.equals(IResource.class) || adapter.equals(IFile.class)) {
+			return file;
+		}
+		return null;
+	}
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof FileResource)) {
+			return false;
+		}
+		FileResource that = (FileResource) other;
+		return ObjectUtils.nullSafeEquals(this.file, that.file);
 	}
 
 	public int hashCode() {
-		return (file != null ? file.hashCode() : 0);
+		return ObjectUtils.nullSafeHashCode(file);
 	}
 }
