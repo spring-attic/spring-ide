@@ -21,19 +21,20 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
 /**
- * ResourceLoader implementation that resolves paths as file system resources
- * rather than as class path resources (Spring's DefaultResourceLoader's
- * strategy).
- * @see org.springframework.core.io.DefaultResourceLoader
+ * {@link ResourceLoader} implementation that resolves paths as Eclipse
+ * {@link FileResource file system resources} rather than as class path resources
+ * (Spring's {@link DefaultResourceLoader}'s strategy).
+ * 
  * @author Torsten Juergeleit
  */
 public class FileResourceLoader implements ResourceLoader {
 
 	/**
-	 * Resolve resource paths as file system paths.
-	 * @param path path to the resource
+	 * Resolve resource paths as Eclipse
+	 * {@link FileResource file system resources}.
+	 * 
+	 * @param path  path to the resource
 	 * @return Resource handle
-	 * @see FileResource
 	 */
 	public Resource getResource(String location) {
 		Assert.isNotNull(location, "location is required");
