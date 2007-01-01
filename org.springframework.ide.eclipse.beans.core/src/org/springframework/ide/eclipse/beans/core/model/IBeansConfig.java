@@ -33,6 +33,8 @@ public interface IBeansConfig extends IResourceModelElement, IBeanClassAware {
 
 	Set<Problem> getErrors();
 
+	Set<IBeansImport> getImports();
+
 	Set<IBeanAlias> getAliases();
 
 	IBeanAlias getAlias(String name);
