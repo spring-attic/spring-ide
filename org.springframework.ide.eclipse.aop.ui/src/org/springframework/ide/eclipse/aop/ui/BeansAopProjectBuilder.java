@@ -1,21 +1,21 @@
 /*
  * Copyright 2002-2006 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ 
+
 package org.springframework.ide.eclipse.aop.ui;
 
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -26,7 +26,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.IJavaProject;
@@ -47,14 +46,17 @@ import org.springframework.ide.eclipse.aop.ui.decorator.BeansAdviceImageDecorato
 import org.springframework.ide.eclipse.aop.ui.decorator.BeansAdviceTextDecorator;
 import org.springframework.ide.eclipse.aop.ui.support.AbstractAspectJAdvice;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 
+/**
+ * @author Christian Dupuis
+ */
 @SuppressWarnings("restriction")
 public class BeansAopProjectBuilder implements IProjectBuilder {
 
@@ -106,8 +108,8 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
 
             aopProject.clearReferencesForResource(currentFile);
 
-            ClassLoader weavingClassLoader = BeansAopUtils
-                    .getProjectClassLoader(javaProject);
+            ClassLoader weavingClassLoader = SpringCoreUtils
+					.getClassLoader(javaProject);
             ClassLoader classLoader = Thread.currentThread()
                     .getContextClassLoader();
             Thread.currentThread().setContextClassLoader(weavingClassLoader);
@@ -203,7 +205,7 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
                 return jdtMethod.getParameterNames();
             }
             catch (JavaModelException e) {
-                e.printStackTrace();
+//                e.printStackTrace();
             }
             return null;
         }

@@ -1,32 +1,28 @@
 /*
  * Copyright 2002-2006 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ 
+
 package org.springframework.ide.eclipse.aop.ui;
 
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -46,7 +42,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 /**
  * Some helper methods.
  * 
- * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class BeansAopUtils {
 
@@ -73,8 +69,6 @@ public class BeansAopUtils {
         return je.getElementName();
     }
 
-    /**
-     */
     private static String readableName(IMethod method) {
 
         StringBuffer buffer = new StringBuffer(method.getElementName());
@@ -85,7 +79,7 @@ public class BeansAopUtils {
             for (int i = 0; i < length; i++) {
                 buffer.append(Signature.toString(parameterTypes[i]));
                 if (i < length - 1) {
-                    buffer.append(", "); //$NON-NLS-1$
+                    buffer.append(", ");
                 }
             }
         }
@@ -100,45 +94,6 @@ public class BeansAopUtils {
         buf.append(reference.getResource().getProjectRelativePath().toString());
         buf.append("]");
         return buf.toString();
-    }
-
-    public static URLClassLoader getProjectClassLoader(IJavaProject project) {
-        List<URL> paths = getProjectClassPathURLs(project);
-        URL pathUrls[] = (URL[]) paths.toArray(new URL[0]);
-        return new URLClassLoader(pathUrls, Thread.currentThread()
-                .getContextClassLoader());
-    }
-
-    public static List<URL> getProjectClassPathURLs(IJavaProject project) {
-        List<URL> paths = new ArrayList<URL>();
-        try {
-            // configured classpath
-            IClasspathEntry classpath[] = project.getRawClasspath();
-            for (int i = 0; i < classpath.length; i++) {
-                IClasspathEntry path = classpath[i];
-                if (path.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
-                    URL url = path.getPath().toFile().toURL();
-                    paths.add(url);
-                }
-            }
-            // build output, relative to project
-            IPath location = getProjectLocation(project.getProject());
-            IPath outputPath = location.append(project.getOutputLocation()
-                    .removeFirstSegments(1));
-            paths.add(outputPath.toFile().toURL());
-        }
-        catch (Exception e) {
-        }
-        return paths;
-    }
-
-    public static IPath getProjectLocation(IProject project) {
-        if (project.getRawLocation() == null) {
-            return project.getLocation();
-        }
-        else {
-            return project.getRawLocation();
-        }
     }
 
     public static IMethod getMethod(IType type, String methodName, int argCount) {

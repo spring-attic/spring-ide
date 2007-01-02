@@ -16,6 +16,10 @@
 
 package org.springframework.ide.eclipse.core;
 
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
@@ -28,6 +32,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
@@ -40,6 +45,7 @@ import org.osgi.framework.Bundle;
  * Some helper methods.
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public final class SpringCoreUtils {
 
@@ -180,12 +186,12 @@ public final class SpringCoreUtils {
 	}
 
 	/**
-	 * Returns true if given resource is a Java project.
+	 * Returns true if given resource's project is a Java project.
 	 */
 	public static boolean isJavaProject(IResource resource) {
-		if (resource instanceof IProject && resource.isAccessible()) {
+		if (resource != null && resource.isAccessible()) {
 			try {
-				return ((IProject) resource).hasNature(JavaCore.NATURE_ID);
+				return resource.getProject().hasNature(JavaCore.NATURE_ID);
 			} catch (CoreException e) {
 				SpringCore.log(e);
 			}
@@ -194,12 +200,12 @@ public final class SpringCoreUtils {
 	}
 
 	/**
-	 * Returns true if given resource is a Spring project.
+	 * Returns true if given resource's project is a Spring project.
 	 */
 	public static boolean isSpringProject(IResource resource) {
-		if (resource instanceof IProject && resource.isAccessible()) {
+		if (resource != null && resource.isAccessible()) {
 			try {
-				return ((IProject) resource).hasNature(SpringCore.NATURE_ID);
+				return resource.getProject().hasNature(SpringCore.NATURE_ID);
 			} catch (CoreException e) {
 				SpringCore.log(e);
 			}
@@ -251,5 +257,46 @@ public final class SpringCoreUtils {
 			}
 		}
 		return false;
+	}
+
+	public static ClassLoader getClassLoader(IResource resource) {
+		if (isJavaProject(resource)) {
+			return getClassLoader(JavaCore.create(resource.getProject()));
+		}
+		return Thread.currentThread().getContextClassLoader();
+	}
+
+    public static ClassLoader getClassLoader(IJavaProject project) {
+		List<URL> paths = getClassPathURLs(project);
+		return new URLClassLoader(paths.toArray(new URL[paths.size()]), Thread
+				.currentThread().getContextClassLoader());
+	}
+
+	public static List<URL> getClassPathURLs(IJavaProject project) {
+		List<URL> paths = new ArrayList<URL>();
+		try {
+			// configured classpath
+			IClasspathEntry classpath[] = project.getRawClasspath();
+			for (int i = 0; i < classpath.length; i++) {
+				IClasspathEntry path = classpath[i];
+				if (path.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
+					URL url = path.getPath().toFile().toURL();
+					paths.add(url);
+				}
+			}
+			// build output, relative to project
+			IPath location = getProjectLocation(project.getProject());
+			IPath outputPath = location.append(project.getOutputLocation()
+					.removeFirstSegments(1));
+			paths.add(outputPath.toFile().toURL());
+		} catch (Exception e) {
+			// ignore
+		}
+		return paths;
+	}
+
+	public static IPath getProjectLocation(IProject project) {
+		return (project.getRawLocation() != null ? project.getRawLocation()
+				: project.getLocation());
 	}
 }
