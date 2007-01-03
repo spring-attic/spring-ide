@@ -44,6 +44,7 @@ import org.springframework.beans.factory.xml.DelegatingEntityResolver;
 import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker.ErrorCode;
 import org.springframework.ide.eclipse.beans.core.internal.parser.BeansDtdResolver;
@@ -55,6 +56,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.io.FileResource;
 import org.springframework.ide.eclipse.core.io.StorageResource;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
@@ -132,6 +134,10 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 	public boolean isElementArchived() {
 		return isArchived;
+	}
+
+	public boolean isInitialized() {
+		return beans != null;
 	}
 
 	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
@@ -427,18 +433,22 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			resource = new FileResource(file);
 		}
 
-		DefaultBeanDefinitionRegistry registry =
-				new DefaultBeanDefinitionRegistry();
+		DefaultBeanDefinitionRegistry registry = new
+				DefaultBeanDefinitionRegistry();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(registry);
-		EntityResolver resolver = new DelegatingEntityResolver(
-				new BeansDtdResolver(), new PluggableSchemaResolver(
-						PluggableSchemaResolver.class.getClassLoader()));
-		reader.setEntityResolver(resolver);
+		ClassLoader classLoader = SpringCoreUtils
+				.getClassLoader(getElementResource());
+		reader.setResourceLoader(new PathMatchingResourcePatternResolver(
+				classLoader));
 		reader.setDocumentLoader(new XercesDocumentLoader());
+		EntityResolver resolver = new DelegatingEntityResolver(
+				new BeansDtdResolver(),
+				new PluggableSchemaResolver(classLoader));
+		reader.setEntityResolver(resolver);
 		reader.setSourceExtractor(new XmlSourceExtractor());
-		reader.setErrorHandler(new BeansConfigErrorHandler(this, resource));
-		reader.setProblemReporter(new BeansConfigProblemReporter(this));
 		reader.setEventListener(new BeansConfigReaderEventListener(this));
+		reader.setProblemReporter(new BeansConfigProblemReporter(this));
+		reader.setErrorHandler(new BeansConfigErrorHandler(this, resource));
 		try {
 			reader.loadBeanDefinitions(resource);
 		} catch (BeanDefinitionStoreException e) {
