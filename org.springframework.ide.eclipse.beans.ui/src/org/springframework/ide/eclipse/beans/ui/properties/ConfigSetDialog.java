@@ -128,8 +128,6 @@ public class ConfigSetDialog extends Dialog {
 		});
 
 		// labeled checkboxes
-		// Composite checkboxGroup = new Composite(composite, SWT.NULL);
-		// checkboxGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		overrideButton = SpringUIUtils.createCheckBox(optionsGroup,
 				BeansUIPlugin.getResourceString(OVERRIDE_LABEL));
 		overrideButton.setSelection(configSet.isOverrideEnabled());
@@ -234,7 +232,8 @@ public class ConfigSetDialog extends Dialog {
 	private List<ConfigNode> createConfigList() {
 
 		// Create new list with config files from this config set
-		List<ConfigNode> configs = new ArrayList<ConfigNode>();
+		List<ConfigNode> configs = new ArrayList<ConfigNode>(configSet
+				.getConfigs());
 
 		// Add missing configs from project
 		for (ConfigNode config : project.getConfigs()) {
