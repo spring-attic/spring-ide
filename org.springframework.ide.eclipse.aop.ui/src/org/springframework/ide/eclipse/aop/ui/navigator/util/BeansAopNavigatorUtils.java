@@ -61,19 +61,22 @@ public class BeansAopNavigatorUtils {
 
     public static ILabelProvider JAVA_LABEL_PROVIDER = new DecoratingLabelProvider(
             new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT
-                    | JavaElementLabelProvider.SHOW_SMALL_ICONS),
-            Activator.getDefault().getWorkbench().getDecoratorManager()
+                    | JavaElementLabelProvider.SHOW_SMALL_ICONS), Activator
+                    .getDefault().getWorkbench().getDecoratorManager()
                     .getLabelDecorator());
 
-    public static BeansModelLabelProvider BEAN_LABEL_PROVIDER = 
-        new BeansModelLabelProvider();
+    public static BeansModelLabelProvider BEAN_LABEL_PROVIDER = new BeansModelLabelProvider();
 
     public static Object getSelectedElement(IWorkbenchPart part,
             ISelection selection) {
         Object selectedElement = getSelectedJavaElement(part, selection);
+        
+
         if (selectedElement == null) {
             selectedElement = getSelectedXmlElement(selection);
+            
         }
+
         return selectedElement;
     }
 
@@ -84,7 +87,7 @@ public class BeansAopNavigatorUtils {
             Object obj = structSelection.getFirstElement();
             if (obj instanceof Element) {
                 selectedElement = obj;
-            } 
+            }
             else if (obj instanceof Text) {
                 Node parent = ((Text) obj).getParentNode();
                 if (parent instanceof Element) {

@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.aop.core.model.IAdviceChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.internal.AnnotationAspectDefinition;
 import org.springframework.ide.eclipse.aop.ui.Activator;
+import org.springframework.ide.eclipse.aop.ui.BeansAopUIImages;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceRootAopReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedAopSourceNode;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;

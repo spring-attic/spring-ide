@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorPart;
@@ -89,4 +90,7 @@ public class AdviceAopSourceMethodNode implements IReferenceNode,
         return reference.get(0).getSource().getResource();
     }
 
+    public IMethod getAdviceSourceMethod() {
+        return reference.get(0).getSource();
+    }
 }

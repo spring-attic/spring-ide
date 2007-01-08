@@ -24,24 +24,24 @@ import org.eclipse.ui.navigator.ICommonMenuConstants;
 
 /**
  */
-public class BeansAopNavigatorActionProvider extends CommonActionProvider {
+public class BeansAopNavigatorActionProvider
+        extends CommonActionProvider {
 
-	private OpenConfigFileAction openConfigAction;
+    private OpenConfigFileAction openConfigAction;
+    
+    public BeansAopNavigatorActionProvider() {
+    }
 
-	public BeansAopNavigatorActionProvider() {
-	}
+    public void init(ICommonActionExtensionSite site) {
+        openConfigAction = new OpenConfigFileAction(site);
+    }
 
-	public void init(ICommonActionExtensionSite site) {
-		openConfigAction = new OpenConfigFileAction(site);
-	}
+    public void fillContextMenu(IMenuManager menu) {
+        menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN, openConfigAction);
+    }
 
-	public void fillContextMenu(IMenuManager menu) {
-			menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN,
-					openConfigAction);
-	}
-
-	public void fillActionBars(IActionBars actionBars) {
-			actionBars.setGlobalActionHandler(ICommonActionConstants.OPEN,
-					openConfigAction);
-	}
+    public void fillActionBars(IActionBars actionBars) {
+        actionBars.setGlobalActionHandler(ICommonActionConstants.OPEN,
+                openConfigAction);
+    }
 }
