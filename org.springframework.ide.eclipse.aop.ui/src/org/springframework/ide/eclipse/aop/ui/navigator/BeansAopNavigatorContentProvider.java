@@ -386,10 +386,7 @@ public class BeansAopNavigatorContentProvider implements
 
             // Are we in the UI thread?
             if (ctrl.getDisplay().getThread() == Thread.currentThread()) {
-                ((TreeViewer) viewer).getTree().setRedraw(false);
-                viewer.refresh(element);
-                ((TreeViewer) viewer).expandAll();
-                ((TreeViewer) viewer).getTree().setRedraw(true);
+                BeansAopNavigator.refreshViewer((TreeViewer) viewer, element);
             }
             else {
                 ctrl.getDisplay().asyncExec(new Runnable() {
@@ -400,10 +397,7 @@ public class BeansAopNavigatorContentProvider implements
                         if (ctrl == null || ctrl.isDisposed()) {
                             return;
                         }
-                        ((TreeViewer) viewer).getTree().setRedraw(false);
-                        viewer.refresh(element);
-                        ((TreeViewer) viewer).expandAll();
-                        ((TreeViewer) viewer).getTree().setRedraw(true);
+                        BeansAopNavigator.refreshViewer((TreeViewer) viewer, element);
                     }
                 });
             }

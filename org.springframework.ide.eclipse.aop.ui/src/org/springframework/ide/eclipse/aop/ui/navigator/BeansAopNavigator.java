@@ -52,7 +52,7 @@ public class BeansAopNavigator
             Control ctrl = getCommonViewer().getControl();
             // Are we in the UI thread?
             if (ctrl.getDisplay().getThread() == Thread.currentThread()) {
-                refreshViewer(getCommonViewer(), element, calculateExpandToLevel(element));
+                refreshViewer(getCommonViewer(), element);
             }
             else {
                 ctrl.getDisplay().asyncExec(new Runnable() {
@@ -63,7 +63,7 @@ public class BeansAopNavigator
                         if (ctrl == null || ctrl.isDisposed()) {
                             return;
                         }
-                        refreshViewer(getCommonViewer(), element, calculateExpandToLevel(element));
+                        refreshViewer(getCommonViewer(), element);
                     }
                 });
             }
@@ -84,11 +84,11 @@ public class BeansAopNavigator
         return AbstractTreeViewer.ALL_LEVELS;
     }
 
-    public static void refreshViewer(TreeViewer viewer, final Object javaElement, int expandToLevel) {
+    public static void refreshViewer(TreeViewer viewer, final Object javaElement) {
         viewer.getTree().setRedraw(false);
         viewer.setInput(javaElement);
         viewer.refresh();
-        viewer.expandToLevel(expandToLevel);
+        viewer.expandToLevel(calculateExpandToLevel(javaElement));
         revealSelection(viewer, javaElement);
         viewer.getTree().setRedraw(true);
     }
