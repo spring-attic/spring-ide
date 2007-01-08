@@ -35,6 +35,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.AliasDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
+import org.springframework.beans.factory.parsing.DefaultsDefinition;
 import org.springframework.beans.factory.parsing.ImportDefinition;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
@@ -522,6 +523,11 @@ public class BeansConfig extends AbstractResourceModelElement implements
 					ErrorCode.PARSING_FAILED);
 			warnings.add(problem);
 		}
+
+		public void fatal(Problem arg0) {
+			// TODO Auto-generated method stub
+			
+		}
 	}
 	
 	/**
@@ -564,6 +570,11 @@ public class BeansConfig extends AbstractResourceModelElement implements
 				components.add(comp);
 				innerBeans.addAll(comp.getInnerBeans());
 			}
+		}
+
+		public void defaultsRegistered(DefaultsDefinition arg0) {
+			// TODO Auto-generated method stub
+			
 		}
 	}
 }
