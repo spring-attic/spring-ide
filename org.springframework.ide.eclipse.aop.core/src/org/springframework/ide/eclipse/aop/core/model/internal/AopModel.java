@@ -22,7 +22,7 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaElement;
-import org.springframework.ide.eclipse.aop.core.model.IAdviceChangedListener;
+import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopModel;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
@@ -31,7 +31,7 @@ public class AopModel implements IAopModel {
 
     private Map<IProject, IAopProject> projects = new HashMap<IProject, IAopProject>();
 
-    private List<IAdviceChangedListener> listener = new LinkedList<IAdviceChangedListener>();
+    private List<IAopModelChangedListener> listeners = new LinkedList<IAopModelChangedListener>();
 
     public void addProject(IProject project, IAopProject aopProject) {
         this.projects.put(project, aopProject);
@@ -70,12 +70,12 @@ public class AopModel implements IAopModel {
         return getAdviceDefinition(je).size() > 0;
     }
 
-    public void registerAdivceListener(IAdviceChangedListener listener) {
-        this.listener.add(listener);
+    public void registerAopModelChangedListener(IAopModelChangedListener listener) {
+        this.listeners.add(listener);
     }
 
-    public void unregisterAdivceListener(IAdviceChangedListener listener) {
-        this.listener.remove(listener);
+    public void unregisterAopModelChangedListener(IAopModelChangedListener listener) {
+        this.listeners.remove(listener);
     }
 
     public List<IAopReference> getAdviceDefinition(IJavaElement je) {
@@ -92,5 +92,11 @@ public class AopModel implements IAopModel {
         }
         return advices;
     }
+
+	public void fireModelChanged() {
+		for (IAopModelChangedListener listener : listeners) {
+			listener.changed();
+		}
+	}
 
 }

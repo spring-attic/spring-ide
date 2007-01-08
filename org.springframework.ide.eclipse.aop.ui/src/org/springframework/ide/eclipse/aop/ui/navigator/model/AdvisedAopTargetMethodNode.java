@@ -18,7 +18,7 @@ package org.springframework.ide.eclipse.aop.ui.navigator.model;
 import java.util.List;
 
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.ui.BeansAopUtils;
+import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 
 public class AdvisedAopTargetMethodNode

@@ -34,8 +34,10 @@ public interface IAopModel {
      
     List<IAopReference> getAdviceDefinition(IJavaElement je);
     
-	void registerAdivceListener(IAdviceChangedListener listener);
+	void registerAopModelChangedListener(IAopModelChangedListener listener);
 	
-	void unregisterAdivceListener(IAdviceChangedListener listener);
+	void unregisterAopModelChangedListener(IAopModelChangedListener listener);
+	
+	void fireModelChanged();
     
 }

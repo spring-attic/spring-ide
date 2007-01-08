@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
-Bundle-SymbolicName: org.springframework.ide.eclipse.aop.core
+Bundle-SymbolicName: org.springframework.ide.eclipse.aop.core;singleton:=true
 Bundle-Version: 1.9.0
 Bundle-Activator: org.springframework.ide.eclipse.aop.core.Activator
 Bundle-Localization: plugin
@@ -24,5 +24,6 @@ Bundle-ClassPath: aop-core.jar
 Export-Package: org.springframework.ide.eclipse.aop.core,
  org.springframework.ide.eclipse.aop.core.model,
  org.springframework.ide.eclipse.aop.core.model.internal,
- org.springframework.ide.eclipse.aop.core.parser
+ org.springframework.ide.eclipse.aop.core.parser,
+ org.springframework.ide.eclipse.aop.core.util
 Bundle-Vendor: %providerName

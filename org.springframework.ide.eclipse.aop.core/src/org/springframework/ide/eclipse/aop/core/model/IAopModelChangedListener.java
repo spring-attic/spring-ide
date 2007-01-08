@@ -15,11 +15,11 @@
  */
 package org.springframework.ide.eclipse.aop.core.model;
 
-public interface IAdviceChangedListener {
+public interface IAopModelChangedListener {
 
 	/**
 	 * Indicate that there has been a change in the set of advised elements
 	 * 
 	 */
-	public void adviceChanged();
+	public void changed();
 }

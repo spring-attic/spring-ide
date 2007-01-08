@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.springframework.ide.eclipse.aop.ui.navigator.util;
+package org.springframework.ide.eclipse.aop.core.util;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,11 +22,10 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.aop.core.model.internal.AnnotationAspectDefinition;
-import org.springframework.ide.eclipse.aop.ui.Activator;
-import org.springframework.ide.eclipse.aop.ui.BeansAopUtils;
 import org.springframework.ide.eclipse.core.SpringCore;
 
 @SuppressWarnings("restriction")
