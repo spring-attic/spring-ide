@@ -259,7 +259,7 @@ public class BeanAspectDefinitionParser {
         }
     }
 
-    public static List<IAspectDefinition> parse(
+    public static List<IAspectDefinition> buildAspectDefinitions(
             final IDOMDocument document, IFile file) {
         final List<IAspectDefinition> aspectInfos = new ArrayList<IAspectDefinition>();
 

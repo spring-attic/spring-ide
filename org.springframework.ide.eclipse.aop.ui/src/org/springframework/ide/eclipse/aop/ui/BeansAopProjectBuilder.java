@@ -37,6 +37,7 @@ import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
+import org.springframework.aop.aspectj.AbstractAspectJAdvice;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
@@ -47,7 +48,6 @@ import org.springframework.ide.eclipse.aop.core.parser.BeanAspectDefinitionParse
 import org.springframework.ide.eclipse.aop.ui.decorator.BeansAdviceImageDecorator;
 import org.springframework.ide.eclipse.aop.ui.decorator.BeansAdviceTextDecorator;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopMarkerUtils;
-import org.springframework.ide.eclipse.aop.ui.support.AbstractAspectJAdvice;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -81,7 +81,7 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
                 throw new OperationCanceledException();
             }
 
-            IAopProject aopProject = parseFile(currentFile);
+            IAopProject aopProject = buildAopReferencesFromFile(currentFile);
             if (aopProject != null) {
                 List<IAopReference> references = aopProject.getAllReferences();
                 for (IAopReference reference : references) {
@@ -100,13 +100,15 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
         }
     }
 
-    private IAopProject parseFile(IFile currentFile) {
+    private IAopProject buildAopReferencesFromFile(IFile currentFile) {
         IAopProject aopProject = null;
         IBeansProject project = BeansCorePlugin.getModel().getProject(
                 currentFile.getProject());
+        
         if (project != null) {
             BeansConfig config = (BeansConfig) project.getConfig(currentFile);
             IJavaProject javaProject = BeansAopUtils.getJavaProject(config);
+            
             aopProject = Activator.getModel().getProject(
                     config.getElementResource().getProject());
 
@@ -124,9 +126,9 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
                         .getModelForRead(currentFile);
                 IDOMDocument document = ((DOMModelImpl) model).getDocument();
                 List<IAspectDefinition> aspectInfos = BeanAspectDefinitionParser
-                        .parse(document, currentFile);
+                        .buildAspectDefinitions(document, currentFile);
                 for (IAspectDefinition info : aspectInfos) {
-                    buildModel(weavingClassLoader, config, info);
+                    buildAopReferencesFromAspectDefinition(weavingClassLoader, config, info);
                 }
             }
             catch (IOException e) {
@@ -145,7 +147,7 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
         return aopProject;
     }
 
-    private void buildModel(ClassLoader loader, IBeansConfig config,
+    private void buildAopReferencesFromAspectDefinition(ClassLoader loader, IBeansConfig config,
             IAspectDefinition info) {
 
         IResource file = config.getElementResource();
