@@ -1,21 +1,22 @@
 /*
  * Copyright 2002-2006 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */ 
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
 package org.springframework.ide.eclipse.aop.ui;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.IJavaProject;
@@ -33,6 +35,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.wst.sse.core.StructuredModelManager;
+import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
@@ -44,6 +47,7 @@ import org.springframework.ide.eclipse.aop.core.model.internal.AopReference;
 import org.springframework.ide.eclipse.aop.core.parser.BeanAspectDefinitionParser;
 import org.springframework.ide.eclipse.aop.ui.decorator.BeansAdviceImageDecorator;
 import org.springframework.ide.eclipse.aop.ui.decorator.BeansAdviceTextDecorator;
+import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopMarkerUtils;
 import org.springframework.ide.eclipse.aop.ui.support.AbstractAspectJAdvice;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
@@ -82,13 +86,14 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
             if (aopProject != null) {
                 List<IAopReference> references = aopProject.getAllReferences();
                 for (IAopReference reference : references) {
-                    if (reference.getResource().equals(file)) {
-                        BeansAopMarkerUtils.createMarker(reference, file);
+                    if (reference.getResource().equals(currentFile)) {
+                        BeansAopMarkerUtils
+                                .createMarker(reference, currentFile);
                     }
                 }
             }
 
-            // update images
+            // update images and text decoractions
             BeansAdviceImageDecorator.update();
             BeansAdviceTextDecorator.update();
 
@@ -109,26 +114,33 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
             aopProject.clearReferencesForResource(currentFile);
 
             ClassLoader weavingClassLoader = SpringCoreUtils
-					.getClassLoader(javaProject);
+                    .getClassLoader(javaProject);
             ClassLoader classLoader = Thread.currentThread()
                     .getContextClassLoader();
             Thread.currentThread().setContextClassLoader(weavingClassLoader);
 
+            IStructuredModel model = null;
             try {
-                IDOMDocument document = ((DOMModelImpl) StructuredModelManager
-                        .getModelManager().getModelForRead(currentFile))
-                        .getDocument();
+                model = StructuredModelManager.getModelManager()
+                        .getModelForRead(currentFile);
+                IDOMDocument document = ((DOMModelImpl) model).getDocument();
                 List<IAspectDefinition> aspectInfos = BeanAspectDefinitionParser
                         .parse(document, currentFile);
                 for (IAspectDefinition info : aspectInfos) {
                     buildModel(weavingClassLoader, config, info);
                 }
             }
-            catch (Throwable e) {
+            catch (IOException e) {
+                BeansCorePlugin.log(e);
+            }
+            catch (CoreException e) {
                 BeansCorePlugin.log(e);
             }
             finally {
                 Thread.currentThread().setContextClassLoader(classLoader);
+                if (model != null) {
+                    model.releaseFromRead();
+                }
             }
         }
         return aopProject;
@@ -179,11 +191,19 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
                             BeansAopMarkerUtils.AOP_PROBLEM_MARKER, file);
                 }
                 catch (Exception e) {
-
+                    // suppress this
                 }
             }
-            catch (Exception e) {
-                // SpringCore.log(e);
+            catch (NoClassDefFoundError e) {
+                BeansAopMarkerUtils.createProblemMarker(file,
+                        "Class dependency is missing: " + e.getMessage(),
+                        IMarker.SEVERITY_WARNING, info.getAspectLineNumber(),
+                        BeansAopMarkerUtils.AOP_PROBLEM_MARKER, file);
+            }
+            catch (Throwable t) {
+                BeansAopMarkerUtils.createProblemMarker(file, t.getMessage(),
+                        IMarker.SEVERITY_WARNING, info.getAspectLineNumber(),
+                        BeansAopMarkerUtils.AOP_PROBLEM_MARKER, file);
             }
         }
     }
@@ -205,7 +225,7 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
                 return jdtMethod.getParameterNames();
             }
             catch (JavaModelException e) {
-//                e.printStackTrace();
+                // suppress this
             }
             return null;
         }
