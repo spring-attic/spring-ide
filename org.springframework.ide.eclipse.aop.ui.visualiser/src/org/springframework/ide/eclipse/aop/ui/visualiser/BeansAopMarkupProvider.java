@@ -24,6 +24,7 @@ import java.util.TreeSet;
 import org.eclipse.contribution.visualiser.core.ProviderManager;
 import org.eclipse.contribution.visualiser.core.Stripe;
 import org.eclipse.contribution.visualiser.interfaces.IMember;
+import org.eclipse.contribution.visualiser.jdtImpl.JDTContentProvider;
 import org.eclipse.contribution.visualiser.jdtImpl.JDTMember;
 import org.eclipse.contribution.visualiser.simpleImpl.SimpleMarkupKind;
 import org.eclipse.contribution.visualiser.simpleImpl.SimpleMarkupProvider;
@@ -66,8 +67,8 @@ public class BeansAopMarkupProvider
         }
 
         List<Stripe> stripeList = new ArrayList<Stripe>();
-        if (ProviderManager.getContentProvider() instanceof BeansAopContentProvider) {
-            IJavaProject jp = ((BeansAopContentProvider) ProviderManager
+        if (ProviderManager.getContentProvider() instanceof JDTContentProvider) {
+            IJavaProject jp = ((JDTContentProvider) ProviderManager
                     .getContentProvider()).getCurrentProject();
 
             if (jp != null) {
@@ -115,8 +116,8 @@ public class BeansAopMarkupProvider
     public SortedSet<SimpleMarkupKind> getAllMarkupKinds() {
         SortedSet<SimpleMarkupKind> kinds = new TreeSet<SimpleMarkupKind>();
         List<String> advices = new ArrayList<String>();
-        if (ProviderManager.getContentProvider() instanceof BeansAopContentProvider) {
-            IJavaProject jp = ((BeansAopContentProvider) ProviderManager
+        if (ProviderManager.getContentProvider() instanceof JDTContentProvider) {
+            IJavaProject jp = ((JDTContentProvider) ProviderManager
                     .getContentProvider()).getCurrentProject();
             if (jp != null) {
                 IAopProject aopProject = org.springframework.ide.eclipse.aop.core.Activator
