@@ -72,7 +72,7 @@ public class AdvisedAopSourceNode implements IReferenceNode,
         text += " <";
         text += reference.getDefinition().getAspectName();
         text += "> [";
-        text += reference.getResource().getProjectRelativePath().toString();
+        text += reference.getDefinition().getResource().getProjectRelativePath().toString();
         text += "]";
         return text;
     }
@@ -82,7 +82,7 @@ public class AdvisedAopSourceNode implements IReferenceNode,
     }
 
     public void openAndReveal() {
-        IResource resource = reference.getResource();
+        IResource resource = reference.getDefinition().getResource();
         SpringUIUtils.openInEditor((IFile) resource, reference.getDefinition()
                 .getAspectLineNumber());
     }

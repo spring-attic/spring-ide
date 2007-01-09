@@ -1,35 +1,40 @@
 /*
  * Copyright 2002-2006 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.ide.eclipse.aop.core.model.internal;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
-import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopModel;
+import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
+import org.springframework.ide.eclipse.aop.core.parser.BeanAopModelBuilder;
+import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
 
 public class AopModel implements IAopModel {
 
-    private Map<IProject, IAopProject> projects = new HashMap<IProject, IAopProject>();
+    private Map<IProject, IAopProject> projects = new ConcurrentHashMap<IProject, IAopProject>();
 
     private List<IAopModelChangedListener> listeners = new LinkedList<IAopModelChangedListener>();
 
@@ -38,6 +43,23 @@ public class AopModel implements IAopModel {
     }
 
     public IAopProject getProject(IProject project) {
+        if (this.projects.containsKey(project)) {
+            return this.projects.get(project);
+        }
+        else {
+            createModel(project);
+            return this.projects.get(project);
+        }
+    }
+
+    private void createModel(IProject project) {
+        Set<IFile> resourcesToBuild = BeansAopUtils
+                .getFilesToBuildFromBeansProject(project);
+        BeanAopModelBuilder.buildAopModel(new NullProgressMonitor(),
+                resourcesToBuild);
+    }
+
+    public IAopProject getProjectWithInitialization(IProject project) {
         if (this.projects.containsKey(project)) {
             return this.projects.get(project);
         }
@@ -70,11 +92,13 @@ public class AopModel implements IAopModel {
         return getAdviceDefinition(je).size() > 0;
     }
 
-    public void registerAopModelChangedListener(IAopModelChangedListener listener) {
+    public void registerAopModelChangedListener(
+            IAopModelChangedListener listener) {
         this.listeners.add(listener);
     }
 
-    public void unregisterAopModelChangedListener(IAopModelChangedListener listener) {
+    public void unregisterAopModelChangedListener(
+            IAopModelChangedListener listener) {
         this.listeners.remove(listener);
     }
 
@@ -93,10 +117,9 @@ public class AopModel implements IAopModel {
         return advices;
     }
 
-	public void fireModelChanged() {
-		for (IAopModelChangedListener listener : listeners) {
-			listener.changed();
-		}
-	}
-
+    public void fireModelChanged() {
+        for (IAopModelChangedListener listener : listeners) {
+            listener.changed();
+        }
+    }
 }

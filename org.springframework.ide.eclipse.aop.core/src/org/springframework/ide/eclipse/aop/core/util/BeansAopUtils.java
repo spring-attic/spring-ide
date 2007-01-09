@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -90,7 +91,7 @@ public class BeansAopUtils {
         StringBuffer buf = new StringBuffer(": <");
         buf.append(reference.getDefinition().getAspectName());
         buf.append("> [");
-        buf.append(reference.getResource().getProjectRelativePath().toString());
+        buf.append(reference.getDefinition().getResource().getProjectRelativePath().toString());
         buf.append("]");
         return buf.toString();
     }
@@ -103,6 +104,18 @@ public class BeansAopUtils {
         catch (JavaModelException e) {
         }
         return null;
+    }
+
+    public static Set<IFile> getFilesToBuildFromBeansProject(IProject file) {
+        Set<IFile> resourcesToBuild = new HashSet<IFile>();
+        IBeansProject bp = BeansCorePlugin.getModel().getProject(
+                file.getProject());
+        if (bp != null && bp.getConfigs() != null && bp.getConfigs().size() > 0) {
+            for (IBeansConfig config : bp.getConfigs()) {
+                resourcesToBuild.add((IFile) config.getElementResource());
+            }
+        }
+        return resourcesToBuild;
     }
 
     public static Set<IFile> getFilesToBuild(IFile file) {

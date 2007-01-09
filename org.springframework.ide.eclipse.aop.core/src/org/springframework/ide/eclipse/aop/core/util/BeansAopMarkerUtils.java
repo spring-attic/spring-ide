@@ -107,7 +107,7 @@ public class BeansAopMarkerUtils {
             String markerId, IResource sourceResource) {
         if (reference.getDefinition().getAspectLineNumber() > 0
                 && !(reference.getDefinition() instanceof AnnotationAspectDefinition)) {
-            createProblemMarker(reference.getResource(), "advises "
+            createProblemMarker(reference.getDefinition().getResource(), "advises "
                     + BeansAopUtils.getJavaElementLinkName(reference
                             .getTarget()), 1, reference.getDefinition()
                     .getAspectLineNumber(), markerId, sourceResource);

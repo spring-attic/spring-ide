@@ -233,7 +233,9 @@ public class BeansAopNavigatorContentProvider implements
             Map<IBean, List<IAopReference>> foundTargetReferences = new HashMap<IBean, List<IAopReference>>();
             for (IAopReference reference : references) {
                 if (reference.getDefinition().getAspectLineNumber() >= startLine
-                        && reference.getDefinition().getAspectLineNumber() <= endLine) {
+                        && reference.getDefinition().getAspectLineNumber() <= endLine
+                        && resource.equals(reference.getDefinition()
+                                .getResource())) {
                     if (foundSourceReferences.containsKey(reference
                             .getDefinition())) {
                         foundSourceReferences.get(reference.getDefinition())
@@ -247,7 +249,8 @@ public class BeansAopNavigatorContentProvider implements
                     }
                 }
                 if (reference.getTargetBean().getElementStartLine() >= startLine
-                        && reference.getTargetBean().getElementEndLine() <= endLine) {
+                        && reference.getTargetBean().getElementEndLine() <= endLine
+                        && resource.equals(reference.getResource())) {
                     if (foundTargetReferences.containsKey(reference
                             .getTargetBean())) {
                         foundTargetReferences.get(reference.getTargetBean())

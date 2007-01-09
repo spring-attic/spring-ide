@@ -36,6 +36,7 @@ import org.aspectj.lang.reflect.AjType;
 import org.aspectj.lang.reflect.AjTypeSystem;
 import org.aspectj.lang.reflect.PerClauseKind;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
@@ -168,11 +169,12 @@ public class BeanAspectDefinitionParser {
     private static final String AJC_MAGIC = "ajc$";
 
     private static void addDocument(IDOMDocument document,
-            List<IAspectDefinition> aspectInfos) {
+            List<IAspectDefinition> aspectInfos, IResource file) {
         for (IAspectDefinition info : aspectInfos) {
             if (info instanceof BeanAspectDefinition) {
                 ((BeanAspectDefinition) info).setDocument(document);
             }
+            info.setResource(file);
         }
     }
 
@@ -266,7 +268,7 @@ public class BeanAspectDefinitionParser {
         parseXmlAspects(document, file, aspectInfos);
         parseAnnotationAspects(document, file, aspectInfos);
 
-        addDocument(document, aspectInfos);
+        addDocument(document, aspectInfos, file);
         return aspectInfos;
     }
 
@@ -357,7 +359,6 @@ public class BeanAspectDefinitionParser {
                             def.setPointcut(ajexp);
                             def.setAspectName(id);
                             def.setClassName(className);
-                            def.setDocument(document);
                             def.setNode((IDOMNode) bean);
                             def.setMethod(method.getName());
 

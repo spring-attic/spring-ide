@@ -17,6 +17,7 @@ package org.springframework.ide.eclipse.aop.core.model;
 
 import java.lang.reflect.Method;
 
+import org.eclipse.core.resources.IResource;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 
 public interface IAspectDefinition {
@@ -36,6 +37,8 @@ public interface IAspectDefinition {
     String getThrowing();
     
     String getMethod();
+    
+    IResource getResource();
 
     IAopReference.ADVICE_TYPES getType();
 
@@ -54,6 +57,8 @@ public interface IAspectDefinition {
     void setThrowing(String throwing);
 
     void setType(IAopReference.ADVICE_TYPES type);
+    
+    void setResource(IResource file);
     
     AspectJExpressionPointcut getPointcut() throws ClassNotFoundException;
 

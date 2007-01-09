@@ -1,22 +1,23 @@
 /*
  * Copyright 2002-2006 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.ide.eclipse.aop.core.model.internal;
 
 import java.lang.reflect.Method;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
@@ -53,6 +54,8 @@ public class BeanAspectDefinition implements IAspectDefinition {
     private Class adviceClass;
 
     private Method adviceMethod;
+
+    private IResource file;
 
     /*
      * (non-Javadoc)
@@ -208,6 +211,8 @@ public class BeanAspectDefinition implements IAspectDefinition {
      */
     public void setDocument(IDOMDocument document) {
         this.document = document;
+        this.aspectLineNumber = this.document.getStructuredDocument()
+                .getLineOfOffset(this.node.getStartOffset()) + 1;
     }
 
     /*
@@ -231,10 +236,6 @@ public class BeanAspectDefinition implements IAspectDefinition {
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#getLineNumber()
      */
     public int getAspectLineNumber() {
-        if (this.aspectLineNumber == -1) {
-            this.aspectLineNumber = this.document.getStructuredDocument()
-                    .getLineOfOffset(this.node.getStartOffset()) + 1;
-        }
         return aspectLineNumber;
     }
 
@@ -274,10 +275,18 @@ public class BeanAspectDefinition implements IAspectDefinition {
         }
         return false;
     }
-    
+
     public int hashCode() {
         int hc = node.hashCode();
         hc = 23 * hc + method.hashCode();
         return hc;
+    }
+
+    public IResource getResource() {
+        return file;
+    }
+
+    public void setResource(IResource file) {
+        this.file = file;
     }
 }

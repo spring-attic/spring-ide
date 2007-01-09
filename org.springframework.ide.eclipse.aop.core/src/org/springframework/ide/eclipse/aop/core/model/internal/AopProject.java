@@ -28,11 +28,11 @@ public class AopProject implements IAopProject {
     private List<IAopReference> references = new ArrayList<IAopReference>();
 
     private IProject project;
-    
+
     public AopProject(IProject project) {
         this.project = project;
     }
-    
+
     public void addAopReference(IAopReference reference) {
         this.references.add(reference);
     }
@@ -48,7 +48,7 @@ public class AopProject implements IAopProject {
     public void clearReferencesForResource(IResource resource) {
         List<IAopReference> toRemove = new ArrayList<IAopReference>();
         for (IAopReference reference : this.references) {
-            if (reference.getResource().equals(resource)) {
+            if (reference.getDefinition().getResource().equals(resource)) {
                 toRemove.add(reference);
             }
         }
@@ -58,7 +58,8 @@ public class AopProject implements IAopProject {
     public List<IAopReference> getReferencesForResource(IResource resource) {
         List<IAopReference> list = new ArrayList<IAopReference>();
         for (IAopReference reference : this.references) {
-            if (reference.getResource().equals(resource)) {
+            if (reference.getResource().equals(resource)
+                    || reference.getDefinition().getResource().equals(resource)) {
                 list.add(reference);
             }
         }

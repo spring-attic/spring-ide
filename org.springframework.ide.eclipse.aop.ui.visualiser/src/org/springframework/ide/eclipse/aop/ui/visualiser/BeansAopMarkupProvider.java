@@ -64,10 +64,6 @@ public class BeansAopMarkupProvider
         if (cachedValue != null) {
             return cachedValue;
         }
-        List<Stripe> markupList = super.getMemberMarkups(member);
-        if (markupList != null) {
-            return markupList;
-        }
 
         List<Stripe> stripeList = new ArrayList<Stripe>();
         if (ProviderManager.getContentProvider() instanceof BeansAopContentProvider) {
@@ -189,7 +185,7 @@ public class BeansAopMarkupProvider
         text += " <";
         text += reference.getDefinition().getAspectName();
         text += "> [";
-        text += reference.getResource().getProjectRelativePath().toString();
+        text += reference.getDefinition().getResource().getProjectRelativePath().toString();
         text += "]";
         return text;
     }
