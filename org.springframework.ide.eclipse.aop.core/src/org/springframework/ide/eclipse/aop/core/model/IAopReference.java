@@ -16,24 +16,24 @@
 package org.springframework.ide.eclipse.aop.core.model;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IMember;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 
 public interface IAopReference {
 
     public enum ADVICE_TYPES {
-        BEFORE, AROUND, AFTER, AFTER_RETURNING, AFTER_THROWING
+        BEFORE, AROUND, AFTER, AFTER_RETURNING, AFTER_THROWING, DECLARE_PARENTS
     };
 
     ADVICE_TYPES getAdviceType();
     
-    IMethod getSource();
+    IMember getSource();
     
     IAspectDefinition getDefinition();
     
     IResource getResource();
     
-    IMethod getTarget();
+    IMember getTarget();
     
     IBean getTargetBean();
     

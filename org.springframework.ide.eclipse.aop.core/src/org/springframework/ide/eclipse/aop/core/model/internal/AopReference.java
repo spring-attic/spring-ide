@@ -16,7 +16,7 @@
 package org.springframework.ide.eclipse.aop.core.model.internal;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IMember;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -26,17 +26,17 @@ public class AopReference implements IAopReference {
 
     private ADVICE_TYPES type;
 
-    private IMethod source;
+    private IMember source;
 
-    private IMethod target;
+    private IMember target;
 
     private IAspectDefinition definition;
 
     private IResource file;
-    
+
     private IBean bean;
 
-    public AopReference(ADVICE_TYPES type, IMethod source, IMethod target,
+    public AopReference(ADVICE_TYPES type, IMember source, IMember target,
             IAspectDefinition def, IResource file, IBean bean) {
         this.type = type;
         this.source = source;
@@ -54,11 +54,11 @@ public class AopReference implements IAopReference {
         return this.type;
     }
 
-    public IMethod getSource() {
+    public IMember getSource() {
         return this.source;
     }
 
-    public IMethod getTarget() {
+    public IMember getTarget() {
         return this.target;
     }
 
@@ -70,7 +70,8 @@ public class AopReference implements IAopReference {
         if (obj instanceof AopReference) {
             AopReference other = (AopReference) obj;
             return getTarget().equals(other.getTarget())
-                    && getSource().equals(other.getSource())
+                    && ((getSource() == null && other.getSource() == null)
+                    || (getSource() != null && getSource().equals(other.getSource())))
                     && getResource().equals(other.getResource())
                     && getDefinition().getAspectLineNumber() == other
                             .getDefinition().getAspectLineNumber();

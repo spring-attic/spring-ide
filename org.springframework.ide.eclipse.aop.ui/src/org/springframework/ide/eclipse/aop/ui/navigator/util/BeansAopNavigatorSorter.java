@@ -33,7 +33,7 @@ public class BeansAopNavigatorSorter extends ViewerSorter {
 
     public int compare(Viewer viewer, Object e1, Object e2) {
 		if (e1 instanceof IRevealableReferenceNode
-				|| e2 instanceof IRevealableReferenceNode) {
+				&& e2 instanceof IRevealableReferenceNode) {
             IRevealableReferenceNode ref1 = (IRevealableReferenceNode) e1;
             IRevealableReferenceNode ref2 = (IRevealableReferenceNode) e2;
             if (ref1.getResource().equals(ref2.getResource())) {

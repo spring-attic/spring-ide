@@ -22,7 +22,7 @@ import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 
 public class AdvisedAopTargetMethodNode
-        extends BeanJavaElementReferenceNode implements IReferenceNode,
+        extends BeanClassReferenceNode implements IReferenceNode,
         IRevealableReferenceNode {
 
     private List<IAopReference> reference;
@@ -43,11 +43,7 @@ public class AdvisedAopTargetMethodNode
 
     public String getText() {
         if (isBeanConfig) {
-            return BeansAopUtils.getJavaElementLinkName(reference.get(0)
-                    .getTarget())
-                    + " - "
-                    + BeansAopUtils.getPackageLinkName(reference.get(0)
-                            .getTarget());
+            return BeansAopUtils.getJavaElementLinkName(element);
         }
         else {
             return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(reference

@@ -278,7 +278,8 @@ public class BeanAspectDefinition implements IAspectDefinition {
 
     public int hashCode() {
         int hc = node.hashCode();
-        hc = 23 * hc + method.hashCode();
+        hc = 23 * hc + type.hashCode();
+        hc = 25 * hc + aspectLineNumber;
         return hc;
     }
 

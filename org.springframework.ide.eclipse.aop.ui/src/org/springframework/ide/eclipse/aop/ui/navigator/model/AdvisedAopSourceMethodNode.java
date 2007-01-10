@@ -21,6 +21,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorPart;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 
@@ -43,9 +44,20 @@ public class AdvisedAopSourceMethodNode implements IReferenceNode,
     }
 
     public String getText() {
-        return BeansAopUtils.getJavaElementLinkName(reference.getSource())
-                + " - "
-                + BeansAopUtils.getPackageLinkName(reference.getSource());
+        if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
+            return BeansAopUtils.getJavaElementLinkName(reference.getSource())
+                    + " - "
+                    + BeansAopUtils.getPackageLinkName(reference.getSource());
+        }
+        else {
+            return BeansAopUtils.getJavaElementLinkName(reference.getSource()
+                    .getParent())
+                    + "."
+                    + BeansAopUtils.getJavaElementLinkName(reference
+                            .getSource())
+                    + " - "
+                    + BeansAopUtils.getPackageLinkName(reference.getSource());
+        }
     }
 
     public boolean hasChildren() {

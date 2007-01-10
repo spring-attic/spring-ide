@@ -38,6 +38,7 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.internal.AopModel;
 import org.springframework.ide.eclipse.aop.core.model.internal.AopReference;
+import org.springframework.ide.eclipse.aop.core.model.internal.BeanIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopMarkerUtils;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
@@ -165,40 +166,59 @@ public class BeanAopModelBuilder {
             try {
 
                 Class targetClass = loader.loadClass(bean.getClassName());
-                JdtAwareAspectJAdviceMatcher advice = new JdtAwareAspectJAdviceMatcher(
-                        file.getProject(), info.getAdviceMethod(), info
-                                .getPointcut());
-                if (info.getThrowing() != null) {
-                    advice.setThrowingName(info.getThrowing());
-                }
-                if (info.getReturning() != null) {
-                    advice.setReturningName(info.getReturning());
-                }
-                advice.afterPropertiesSet();
-
-                try {
-                    List<IMethod> matchingMethods = advice
-                            .getMatches(targetClass);
-                    for (IMethod method : matchingMethods) {
+                if (info instanceof BeanIntroductionDefinition) {
+                    if (((BeanIntroductionDefinition) info).getTypeMatcher()
+                            .matches(targetClass)) {
                         IType jdtAspectType = BeansModelUtils.getJavaType(
-                                aopProject.getProject(), info.getClassName());
-                        IMethod jdtAspectMethod = BeansAopUtils
-                                .getMethod(jdtAspectType, info.getMethod(),
-                                        info.getAdviceMethod()
-                                                .getParameterTypes().length);
+                                aopProject.getProject(),
+                                ((BeanIntroductionDefinition) info)
+                                        .getClassName());
+                        IType beanType = BeansModelUtils.getJavaType(aopProject
+                                .getProject(), bean.getClassName());
+
                         IAopReference ref = new AopReference(info.getType(),
-                                jdtAspectMethod, method, info, file, bean);
+                                jdtAspectType, beanType, info, file, bean);
                         aopProject.addAopReference(ref);
                     }
                 }
-                catch (IllegalArgumentException e) {
-                    BeansAopMarkerUtils.createProblemMarker(file, e
-                            .getMessage(), IMarker.SEVERITY_ERROR, info
-                            .getAspectLineNumber(),
-                            BeansAopMarkerUtils.AOP_PROBLEM_MARKER, file);
-                }
-                catch (Exception e) {
-                    // suppress this
+                else {
+                    JdtAwareAspectJAdviceMatcher advice = new JdtAwareAspectJAdviceMatcher(
+                            file.getProject(), info.getAdviceMethod(), info
+                                    .getPointcut());
+                    if (info.getThrowing() != null) {
+                        advice.setThrowingName(info.getThrowing());
+                    }
+                    if (info.getReturning() != null) {
+                        advice.setReturningName(info.getReturning());
+                    }
+                    advice.afterPropertiesSet();
+
+                    try {
+                        List<IMethod> matchingMethods = advice
+                                .getMatches(targetClass);
+                        for (IMethod method : matchingMethods) {
+                            IType jdtAspectType = BeansModelUtils.getJavaType(
+                                    aopProject.getProject(), info
+                                            .getClassName());
+                            IMethod jdtAspectMethod = BeansAopUtils.getMethod(
+                                    jdtAspectType, info.getMethod(), info
+                                            .getAdviceMethod()
+                                            .getParameterTypes().length);
+                            IAopReference ref = new AopReference(
+                                    info.getType(), jdtAspectMethod, method,
+                                    info, file, bean);
+                            aopProject.addAopReference(ref);
+                        }
+                    }
+                    catch (IllegalArgumentException e) {
+                        BeansAopMarkerUtils.createProblemMarker(file, e
+                                .getMessage(), IMarker.SEVERITY_ERROR, info
+                                .getAspectLineNumber(),
+                                BeansAopMarkerUtils.AOP_PROBLEM_MARKER, file);
+                    }
+                    catch (Exception e) {
+                        // suppress this
+                    }
                 }
             }
             catch (NoClassDefFoundError e) {

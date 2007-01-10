@@ -15,10 +15,14 @@
  */
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
+import org.springframework.ide.eclipse.aop.core.model.IIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.AopUIImages;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
@@ -26,18 +30,25 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
 public class AdvisedAopSourceNode implements IReferenceNode,
         IRevealableReferenceNode {
 
-    private IAopReference reference;
+    private List<IAopReference> references;
 
-    public AdvisedAopSourceNode(IAopReference reference) {
-        this.reference = reference;
+    public AdvisedAopSourceNode(List<IAopReference> reference) {
+        this.references = reference;
     }
 
     public IReferenceNode[] getChildren() {
-        return new IReferenceNode[] { new AdvisedAopSourceMethodNode(reference) };
+        List<IReferenceNode> children = new ArrayList<IReferenceNode>();
+        for (IAopReference reference : references) {
+            if (reference.getSource() != null) {
+                children.add(new AdvisedAopSourceMethodNode(reference));
+            }
+            
+        }
+        return children.toArray(new IReferenceNode[children.size()]);
     }
 
     public Image getImage() {
-        ADVICE_TYPES type = reference.getAdviceType();
+        ADVICE_TYPES type = references.get(0).getAdviceType();
         if (type == ADVICE_TYPES.AFTER || type == ADVICE_TYPES.AFTER_RETURNING
                 || type == ADVICE_TYPES.AFTER_THROWING) {
             return AopUIImages.getImage(AopUIImages.IMG_OBJS_AFTER_ADVICE);
@@ -48,11 +59,14 @@ public class AdvisedAopSourceNode implements IReferenceNode,
         else if (type == ADVICE_TYPES.AROUND) {
             return AopUIImages.getImage(AopUIImages.IMG_OBJS_AROUND_ADVICE);
         }
+        else if (type == ADVICE_TYPES.DECLARE_PARENTS) {
+            return AopUIImages.getImage(AopUIImages.IMG_OBJS_INTRODUCTION);
+        }
         return null;
     }
 
     public String getText() {
-        ADVICE_TYPES type = reference.getAdviceType();
+        ADVICE_TYPES type = references.get(0).getAdviceType();
         String text = "";
         if (type == ADVICE_TYPES.AFTER) {
             text += "after()";
@@ -69,34 +83,45 @@ public class AdvisedAopSourceNode implements IReferenceNode,
         else if (type == ADVICE_TYPES.AROUND) {
             text += "around()";
         }
+        else if (type == ADVICE_TYPES.DECLARE_PARENTS) {
+            try {
+                text += "declare parents: implements "
+                        + ((IIntroductionDefinition) references.get(0).getDefinition())
+                                .getImplInterfaceClass().getSimpleName();
+            }
+            catch (ClassNotFoundException e) {
+                text += "declare parents";
+            }
+        }
         text += " <";
-        text += reference.getDefinition().getAspectName();
+        text += references.get(0).getDefinition().getAspectName();
         text += "> [";
-        text += reference.getDefinition().getResource().getProjectRelativePath().toString();
+        text += references.get(0).getDefinition().getResource()
+                .getProjectRelativePath().toString();
         text += "]";
         return text;
     }
 
     public boolean hasChildren() {
-        return true;
+        return references.get(0).getSource() != null;
     }
 
     public void openAndReveal() {
-        IResource resource = reference.getDefinition().getResource();
-        SpringUIUtils.openInEditor((IFile) resource, reference.getDefinition()
+        IResource resource = references.get(0).getDefinition().getResource();
+        SpringUIUtils.openInEditor((IFile) resource, references.get(0).getDefinition()
                 .getAspectLineNumber());
     }
 
     public IAopReference getReference() {
-        return this.reference;
+        return this.references.get(0);
     }
 
     public int getLineNumber() {
-        return reference.getDefinition().getAspectLineNumber();
+        return references.get(0).getDefinition().getAspectLineNumber();
     }
 
     public IResource getResource() {
-        return reference.getResource();
+        return references.get(0).getResource();
     }
 
 }

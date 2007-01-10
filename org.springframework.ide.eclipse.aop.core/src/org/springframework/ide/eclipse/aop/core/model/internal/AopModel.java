@@ -78,11 +78,13 @@ public class AopModel implements IAopModel {
         IProject project = je.getJavaProject().getProject();
 
         IAopProject aopProject = getProject(project);
-        List<IAopReference> references = aopProject.getAllReferences();
+        if (aopProject != null) {
+            List<IAopReference> references = aopProject.getAllReferences();
 
-        for (IAopReference reference : references) {
-            if (reference.getTarget().equals(je)) {
-                return true;
+            for (IAopReference reference : references) {
+                if (reference.getTarget().equals(je)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -107,11 +109,14 @@ public class AopModel implements IAopModel {
         IProject project = je.getJavaProject().getProject();
 
         IAopProject aopProject = getProject(project);
-        List<IAopReference> references = aopProject.getAllReferences();
+        if (aopProject != null) {
+            List<IAopReference> references = aopProject.getAllReferences();
 
-        for (IAopReference reference : references) {
-            if (reference.getSource().equals(je)) {
-                advices.add(reference);
+            for (IAopReference reference : references) {
+                if (reference.getSource() != null
+                        && reference.getSource().equals(je)) {
+                    advices.add(reference);
+                }
             }
         }
         return advices;

@@ -19,11 +19,12 @@ import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorPart;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 
@@ -51,11 +52,23 @@ public class AdviceAopSourceMethodNode implements IReferenceNode,
 
     public String getText() {
         if (isBeanConfig) {
-            return BeansAopUtils.getJavaElementLinkName(reference.get(0)
-                    .getSource())
-                    + " - "
-                    + BeansAopUtils.getPackageLinkName(reference.get(0)
-                            .getSource());
+            if (reference.get(0).getAdviceType() != ADVICE_TYPES.DECLARE_PARENTS) {
+                return BeansAopUtils.getJavaElementLinkName(reference.get(0)
+                        .getSource().getDeclaringType())
+                        + "."
+                        + BeansAopUtils.getJavaElementLinkName(reference.get(0)
+                                .getSource())
+                        + " - "
+                        + BeansAopUtils.getPackageLinkName(reference.get(0)
+                                .getSource());
+            }
+            else {
+                return BeansAopUtils.getJavaElementLinkName(reference.get(0)
+                        .getSource())
+                        + " - "
+                        + BeansAopUtils.getPackageLinkName(reference.get(0)
+                                .getSource());
+            }
         }
         else {
             return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(reference
@@ -90,7 +103,7 @@ public class AdviceAopSourceMethodNode implements IReferenceNode,
         return reference.get(0).getSource().getResource();
     }
 
-    public IMethod getAdviceSourceMethod() {
+    public IMember getAdviceSourceMethod() {
         return reference.get(0).getSource();
     }
 }

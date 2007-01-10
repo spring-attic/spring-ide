@@ -34,7 +34,9 @@ import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.xml.core.internal.document.ElementImpl;
 import org.springframework.ide.eclipse.aop.ui.Activator;
 import org.springframework.ide.eclipse.aop.ui.navigator.action.ToggleShowBeanRefsForFileAction;
+import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceAopReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceAopSourceMethodNode;
+import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedAopReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 import org.w3c.dom.Element;
@@ -48,7 +50,7 @@ public class BeansAopNavigator
     public static final String BEAN_REFS_FOR_FILE_ID = ID + ".beanRefsForFile";
 
     private static boolean showBeansRefsForFileEnabled;
-    
+
     private ToggleShowBeanRefsForFileAction toggleShowBeanRefsForFileAction;
 
     static {
@@ -57,15 +59,6 @@ public class BeansAopNavigator
     }
 
     public static int calculateExpandToLevel(Object element) {
-        if (element instanceof IType) {
-            return 5;
-        }
-        else if (element instanceof IMethod) {
-            return 4;
-        }
-        else if (element instanceof Element) {
-            return 4;
-        }
         return AbstractTreeViewer.ALL_LEVELS;
     }
 
@@ -88,8 +81,27 @@ public class BeansAopNavigator
         viewer.setInput(rootElement);
         viewer.refresh();
         viewer.expandToLevel(calculateExpandToLevel(rootElement));
+        expandTree(viewer.getTree().getItems(), false);
         revealSelection(viewer, element);
         viewer.getTree().setRedraw(true);
+    }
+
+    private static void expandTree(TreeItem[] items, boolean b) {
+        if (items != null) {
+            for (TreeItem item : items) {
+                Object obj = item.getData();
+                if (obj instanceof AdviceAopReferenceNode
+                        || obj instanceof AdvisedAopReferenceNode) {
+                    expandTree(item.getItems(), true);
+                }
+                else {
+                    expandTree(item.getItems(), false);
+                }
+                if (b) {
+                    item.setExpanded(false);
+                }
+            }
+        }
     }
 
     public static void revealSelection(TreeViewer viewer,
@@ -164,7 +176,8 @@ public class BeansAopNavigator
     }
 
     private void makeActions() {
-        this.toggleShowBeanRefsForFileAction = new ToggleShowBeanRefsForFileAction(this);
+        this.toggleShowBeanRefsForFileAction = new ToggleShowBeanRefsForFileAction(
+                this);
         IActionBars bars = getViewSite().getActionBars();
         bars.getToolBarManager().add(toggleShowBeanRefsForFileAction);
         bars.getMenuManager().add(toggleShowBeanRefsForFileAction);

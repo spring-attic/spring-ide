@@ -15,29 +15,32 @@
  */
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.swt.graphics.Image;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
-public class BeanReferenceNode implements IReferenceNode,
-        IRevealableReferenceNode {
+public class BeanReferenceNode implements IReferenceNode, IRevealableReferenceNode {
 
     private IBean bean;
 
-    private boolean showChildren = true;
+    private List<IAopReference> aspectReferences = new ArrayList<IAopReference>();
+
+    private List<IAopReference> adviseReferences = new ArrayList<IAopReference>();
+
+    private List<IAopReference> declareParentReferences = new ArrayList<IAopReference>();
+
+    private List<IAopReference> declaredOnReferences = new ArrayList<IAopReference>();
 
     public BeanReferenceNode(IBean bean) {
-        this(bean, true);
-    }
-
-    public BeanReferenceNode(IBean bean, boolean showChildren) {
         this.bean = bean;
-        this.showChildren = showChildren;
     }
 
     public int getLineNumber() {
@@ -50,20 +53,19 @@ public class BeanReferenceNode implements IReferenceNode,
 
     public void openAndReveal() {
         IResource resource = this.bean.getElementResource();
-        SpringUIUtils.openInEditor((IFile) resource, this.bean
-                .getElementStartLine());
+        SpringUIUtils.openInEditor((IFile) resource, this.bean.getElementStartLine());
     }
 
     public IReferenceNode[] getChildren() {
-        if (showChildren) {
-            IType type = BeansModelUtils.getJavaType(
-                    getResource().getProject(), bean.getClassName());
-            if (type != null) {
-                return new IReferenceNode[] { new BeanJavaElementReferenceNode(
-                        type) };
-            }
+        // TODO
+        if (this.bean.getClassName() != null) {
+            return new IReferenceNode[] { new BeanClassReferenceNode(BeansModelUtils
+                    .getJavaType(this.bean.getElementResource().getProject(), this.bean
+                            .getClassName()), this) };
         }
-        return new IReferenceNode[0];
+        else {
+            return new IReferenceNode[0];
+        }
     }
 
     public Image getImage() {
@@ -71,10 +73,8 @@ public class BeanReferenceNode implements IReferenceNode,
     }
 
     public String getText() {
-        return BeansAopNavigatorUtils.BEAN_LABEL_PROVIDER.getText(this.bean)
-                + " - "
-                + this.bean.getElementResource().getProjectRelativePath()
-                        .toString();
+        return BeansAopNavigatorUtils.BEAN_LABEL_PROVIDER.getText(this.bean) + " - "
+                + this.bean.getElementResource().getProjectRelativePath().toString();
     }
 
     public boolean hasChildren() {
@@ -85,4 +85,19 @@ public class BeanReferenceNode implements IReferenceNode,
         return bean;
     }
 
+    public List<IAopReference> getAdviseReferences() {
+        return adviseReferences;
+    }
+
+    public List<IAopReference> getAspectReferences() {
+        return aspectReferences;
+    }
+
+    public List<IAopReference> getDeclaredOnReferences() {
+        return declaredOnReferences;
+    }
+
+    public List<IAopReference> getDeclareParentReferences() {
+        return declareParentReferences;
+    }
 }

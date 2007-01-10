@@ -49,8 +49,11 @@ public class BeansAopUtils {
     public static String getJavaElementLinkName(IJavaElement je) {
         // use element name instead, qualified with parent
         if (je instanceof IMethod) {
-            return je.getParent().getElementName() + '.'
-                    + readableName((IMethod) je);
+            //return je.getParent().getElementName() + '.' + 
+            return readableName((IMethod) je);
+        }
+        else if (je instanceof IType) {
+            return je.getElementName();
         }
         else if (je.getParent() != null) {
             return je.getParent().getElementName() + '.' + je.getElementName();
@@ -91,7 +94,8 @@ public class BeansAopUtils {
         StringBuffer buf = new StringBuffer(": <");
         buf.append(reference.getDefinition().getAspectName());
         buf.append("> [");
-        buf.append(reference.getDefinition().getResource().getProjectRelativePath().toString());
+        buf.append(reference.getDefinition().getResource()
+                .getProjectRelativePath().toString());
         buf.append("]");
         return buf.toString();
     }
@@ -191,6 +195,28 @@ public class BeansAopUtils {
             }
             catch (JavaModelException e) {
             }
+        }
+        else if (element != null && element instanceof IType) {
+            try {
+                IType type = (IType) element;
+                int lines = 0;
+                String targetsource;
+                targetsource = type.getCompilationUnit().getSource();
+                String sourceuptomethod = targetsource.substring(0, type
+                        .getNameRange().getOffset());
+
+                char[] chars = new char[sourceuptomethod.length()];
+                sourceuptomethod.getChars(0, sourceuptomethod.length(), chars,
+                        0);
+                for (int j = 0; j < chars.length; j++) {
+                    if (chars[j] == '\n') {
+                        lines++;
+                    }
+                }
+                return new Integer(lines + 1);
+            }
+            catch (JavaModelException e) {
+            }   
         }
         return new Integer(-1);
     }

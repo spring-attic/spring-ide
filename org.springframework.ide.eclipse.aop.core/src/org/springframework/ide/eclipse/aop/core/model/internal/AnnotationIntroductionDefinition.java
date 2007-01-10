@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,19 +15,15 @@
  */
 package org.springframework.ide.eclipse.aop.core.model.internal;
 
-import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.ide.eclipse.aop.core.model.IAnnotationAopDefinition;
+import org.springframework.ide.eclipse.aop.core.model.IIntroductionDefinition;
 
-public class AnnotationAspectDefinition
-        extends BeanAspectDefinition implements IAnnotationAopDefinition {
+public class AnnotationIntroductionDefinition
+        extends BeanIntroductionDefinition implements IIntroductionDefinition,
+        IAnnotationAopDefinition {
     
-    private AspectJExpressionPointcut pointcut;
-
-    public AspectJExpressionPointcut getPointcut() {
-        return pointcut;
-    }
-
-    public void setPointcut(AspectJExpressionPointcut pointcut) {
-        this.pointcut = pointcut;
+    public AnnotationIntroductionDefinition(Class interfaceType,
+            String typePattern, Class defaultImpl) {
+        super(interfaceType.getName(), typePattern, defaultImpl.getName());
     }
 }

@@ -50,6 +50,14 @@
             type="org.springframework.ide.eclipse.aop.core.aopmarker">
       </super>
    </extension>
+   <extension
+   	      id="sourceintroductionmarker"
+   	      name="Introduction Marker"
+   	      point="org.eclipse.core.resources.markers">
+      <super
+            type="org.springframework.ide.eclipse.aop.core.aopmarker">
+      </super>
+   </extension>
 
    <extension
    	      id="beforeadvicemarker"
@@ -75,6 +83,14 @@
             type="org.springframework.ide.eclipse.aop.core.aopmarker">
       </super>
    </extension>
+   <extension
+   	      id="introductionmarker"
+   	      name="Introduction Adivce Marker"
+   	      point="org.eclipse.core.resources.markers">
+      <super
+            type="org.springframework.ide.eclipse.aop.core.aopmarker">
+      </super>
+   </extension>
 
 	<extension point="org.eclipse.ui.editors.annotationTypes">
       <type
@@ -93,6 +109,10 @@
             super="org.springframework.ide.eclipse.aop.core.aopannotation"
             markerType="org.springframework.ide.eclipse.aop.core.aroundadvicemarker"
             name="org.springframework.ide.eclipse.aop.core.aroundAdviceAnnotation"/>            
+      <type  
+            super="org.springframework.ide.eclipse.aop.core.aopannotation"
+            markerType="org.springframework.ide.eclipse.aop.core.introductionmarker"
+            name="org.springframework.ide.eclipse.aop.core.introductionAnnotation"/>            
       <type
             super="org.springframework.ide.eclipse.aop.core.aopannotation"
             markerType="org.springframework.ide.eclipse.aop.core.sourcebeforeadvicemarker"
@@ -105,6 +125,10 @@
             super="org.springframework.ide.eclipse.aop.core.aopannotation"
             markerType="org.springframework.ide.eclipse.aop.core.sourcearoundadvicemarker"
             name="org.springframework.ide.eclipse.aop.core.sourceAroundAdviceAnnotation"/>            
+      <type
+            super="org.springframework.ide.eclipse.aop.core.aopannotation"
+            markerType="org.springframework.ide.eclipse.aop.core.sourceintroductionmarker"
+            name="org.springframework.ide.eclipse.aop.core.sourceIntroductionAnnotation"/>            
     </extension>
 
 	<extension
@@ -135,6 +159,10 @@
 			annotationType="org.springframework.ide.eclipse.aop.core.sourceAroundAdviceAnnotation"
 			icon="icons/markers/source_around_advice.gif">
 		</specification>
+		<specification
+			annotationType="org.springframework.ide.eclipse.aop.core.sourceIntroductionAnnotation"
+			icon="icons/markers/source_itd.gif">
+		</specification>
 	    <specification
 			annotationType="org.springframework.ide.eclipse.aop.core.beforeAdviceAnnotation"
 			icon="icons/markers/before_advice.gif">
@@ -146,6 +174,10 @@
 		<specification
 			annotationType="org.springframework.ide.eclipse.aop.core.aroundAdviceAnnotation"
 			icon="icons/markers/around_advice.gif">
+		</specification>
+		<specification
+			annotationType="org.springframework.ide.eclipse.aop.core.introductionAnnotation"
+			icon="icons/markers/itd.gif">
 		</specification>
 	</extension>
     

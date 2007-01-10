@@ -15,18 +15,20 @@
  */
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.graphics.Image;
+import org.springframework.ide.eclipse.aop.core.model.IAnnotationAopDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
+import org.springframework.ide.eclipse.aop.core.model.IIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.AopUIImages;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
-public class AdviceRootAopReferenceNode implements IReferenceNode,
-        IRevealableReferenceNode {
+public class AdviceRootAopReferenceNode implements IReferenceNode, IRevealableReferenceNode {
 
     private List<IAopReference> reference;
 
@@ -36,15 +38,32 @@ public class AdviceRootAopReferenceNode implements IReferenceNode,
         this(reference, false);
     }
 
-    public AdviceRootAopReferenceNode(List<IAopReference> reference,
-            boolean isBeanConfig) {
+    public AdviceRootAopReferenceNode(List<IAopReference> reference, boolean isBeanConfig) {
         this.reference = reference;
         this.isBeanConfig = isBeanConfig;
     }
 
     public IReferenceNode[] getChildren() {
-        return new IReferenceNode[] { new AdviceAopSourceMethodNode(this.reference,
-                this.isBeanConfig) };
+        // new AdviceAopReferenceNode(this.reference)
+        List<IAopReference> introAnnoNodes = new ArrayList<IAopReference>();
+        List<IAopReference> adviceNodes = new ArrayList<IAopReference>();
+        List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
+        for (IAopReference r : this.reference) {
+            if (r.getDefinition() instanceof IIntroductionDefinition
+                    && !(r.getDefinition() instanceof IAnnotationAopDefinition)) {
+                introAnnoNodes.add(r);
+            }
+            else {
+                adviceNodes.add(r);
+            }
+        }
+        if (introAnnoNodes.size() > 0) {
+            nodes.add(new AdviceAopReferenceNode(introAnnoNodes));
+        }
+        if (adviceNodes.size() > 0) {
+            nodes.add(new AdviceAopSourceMethodNode(adviceNodes, isBeanConfig));
+        }
+        return nodes.toArray(new IReferenceNode[nodes.size()]);
     }
 
     public Image getImage() {
@@ -58,6 +77,9 @@ public class AdviceRootAopReferenceNode implements IReferenceNode,
         }
         else if (type == ADVICE_TYPES.AROUND) {
             return AopUIImages.getImage(AopUIImages.IMG_OBJS_AROUND_ADVICE);
+        }
+        else if (type == ADVICE_TYPES.DECLARE_PARENTS) {
+            return AopUIImages.getImage(AopUIImages.IMG_OBJS_INTRODUCTION);
         }
         return null;
     }
@@ -80,11 +102,20 @@ public class AdviceRootAopReferenceNode implements IReferenceNode,
         else if (type == ADVICE_TYPES.AROUND) {
             text += "around()";
         }
+        else if (type == ADVICE_TYPES.DECLARE_PARENTS) {
+            try {
+                text += "declare parents: implements "
+                        + ((IIntroductionDefinition) reference.get(0).getDefinition())
+                                .getImplInterfaceClass().getSimpleName();
+            }
+            catch (ClassNotFoundException e) {
+                text += "declare parents";
+            }
+        }
         text += " <";
         text += reference.get(0).getDefinition().getAspectName();
         text += "> [";
-        text += reference.get(0).getDefinition().getResource().getProjectRelativePath()
-                .toString();
+        text += reference.get(0).getDefinition().getResource().getProjectRelativePath().toString();
         text += "]";
         return text;
     }
@@ -99,8 +130,8 @@ public class AdviceRootAopReferenceNode implements IReferenceNode,
 
     public void openAndReveal() {
         IResource resource = reference.get(0).getDefinition().getResource();
-        SpringUIUtils.openInEditor((IFile) resource, reference.get(0)
-                .getDefinition().getAspectLineNumber());
+        SpringUIUtils.openInEditor((IFile) resource, reference.get(0).getDefinition()
+                .getAspectLineNumber());
     }
 
     public int getLineNumber() {

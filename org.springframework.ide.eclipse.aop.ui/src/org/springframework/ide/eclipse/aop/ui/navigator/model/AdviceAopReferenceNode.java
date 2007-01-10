@@ -33,7 +33,7 @@ public class AdviceAopReferenceNode implements IReferenceNode {
     public IReferenceNode[] getChildren() {
         List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
         for (IAopReference reference : references) {
-            nodes.add(new AdviceAopTargetNode(reference));
+            //nodes.add(new AdviceAopTargetNode(reference));
         }
         return nodes.toArray(new IReferenceNode[nodes.size()]);
     }
@@ -45,7 +45,7 @@ public class AdviceAopReferenceNode implements IReferenceNode {
     public String getText() {
         return "advises";
     }
-    
+
     public boolean hasChildren() {
         return true;
     }

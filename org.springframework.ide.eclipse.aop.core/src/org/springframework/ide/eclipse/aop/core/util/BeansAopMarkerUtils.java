@@ -23,9 +23,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.springframework.ide.eclipse.aop.core.Activator;
+import org.springframework.ide.eclipse.aop.core.model.IAnnotationAopDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
-import org.springframework.ide.eclipse.aop.core.model.internal.AnnotationAspectDefinition;
 import org.springframework.ide.eclipse.core.SpringCore;
 
 @SuppressWarnings("restriction")
@@ -35,8 +35,7 @@ public class BeansAopMarkerUtils {
 
     private static final String MARKER_COUNT = "marker_count";
 
-    public static final String AOP_MARKER = Activator.PLUGIN_ID
-            + ".aopmarker";
+    public static final String AOP_MARKER = Activator.PLUGIN_ID + ".aopmarker";
 
     public static final String AOP_PROBLEM_MARKER = Activator.PLUGIN_ID
             + ".aopproblemmarker";
@@ -50,6 +49,9 @@ public class BeansAopMarkerUtils {
     public static final String AROUND_ADVICE_MARKER = Activator.PLUGIN_ID
             + ".aroundadvicemarker";
 
+    public static final String INTRODUCTION_MARKER = Activator.PLUGIN_ID
+            + ".introductionmarker";
+
     public static final String SOURCE_BEFORE_ADVICE_MARKER = Activator.PLUGIN_ID
             + ".sourcebeforeadvicemarker";
 
@@ -58,6 +60,9 @@ public class BeansAopMarkerUtils {
 
     public static final String SOURCE_AROUND_ADVICE_MARKER = Activator.PLUGIN_ID
             + ".sourcearoundadvicemarker";
+
+    public static final String SOURCE_INTRODUCTION_MARKER = Activator.PLUGIN_ID
+            + ".sourceintroductionmarker";
 
     public static final String ADIVCE_TYPE = "adivice_type";
 
@@ -76,6 +81,8 @@ public class BeansAopMarkerUtils {
                 SOURCE_AFTER_ADVICE_MARKER);
         sourceMarkerMapping.put(ADVICE_TYPES.AROUND,
                 SOURCE_AROUND_ADVICE_MARKER);
+        sourceMarkerMapping.put(ADVICE_TYPES.DECLARE_PARENTS,
+                SOURCE_INTRODUCTION_MARKER);
 
         targetMarkerMapping = new HashMap<ADVICE_TYPES, String>();
         targetMarkerMapping.put(ADVICE_TYPES.BEFORE, BEFORE_ADVICE_MARKER);
@@ -85,6 +92,8 @@ public class BeansAopMarkerUtils {
         targetMarkerMapping.put(ADVICE_TYPES.AFTER_THROWING,
                 AFTER_ADVICE_MARKER);
         targetMarkerMapping.put(ADVICE_TYPES.AROUND, AROUND_ADVICE_MARKER);
+        targetMarkerMapping.put(ADVICE_TYPES.DECLARE_PARENTS,
+                INTRODUCTION_MARKER);
     }
 
     public static void createMarker(IAopReference reference,
@@ -97,25 +106,60 @@ public class BeansAopMarkerUtils {
 
     public static void createTargetMarker(IAopReference reference,
             String markerId, IResource sourceResource) {
-        createProblemMarker(reference.getTarget().getResource(), "adviced by "
-                + BeansAopUtils.getJavaElementLinkName(reference.getSource()),
-                1, BeansAopUtils.getLineNumber(reference.getTarget()),
-                markerId, sourceResource);
+        if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
+            createProblemMarker(reference.getTarget().getResource(),
+                    "aspect declarations <"
+                            + reference.getDefinition().getAspectName() + ">",
+                    1, BeansAopUtils.getLineNumber(reference.getTarget()),
+                    markerId, sourceResource);
+        }
+        else {
+            createProblemMarker(reference.getTarget().getResource(),
+                    "advised by "
+                            + BeansAopUtils.getJavaElementLinkName(reference
+                                    .getSource()), 1, BeansAopUtils
+                            .getLineNumber(reference.getTarget()), markerId,
+                    sourceResource);
+        }
     }
 
     public static void createSourceMarker(IAopReference reference,
             String markerId, IResource sourceResource) {
         if (reference.getDefinition().getAspectLineNumber() > 0
-                && !(reference.getDefinition() instanceof AnnotationAspectDefinition)) {
-            createProblemMarker(reference.getDefinition().getResource(), "advises "
-                    + BeansAopUtils.getJavaElementLinkName(reference
-                            .getTarget()), 1, reference.getDefinition()
-                    .getAspectLineNumber(), markerId, sourceResource);
+                && !(reference.getDefinition() instanceof IAnnotationAopDefinition)) {
+            createProblemMarker(reference.getDefinition().getResource(),
+                    "advises "
+                            + BeansAopUtils.getJavaElementLinkName(reference
+                                    .getTarget()), 1, reference.getDefinition()
+                            .getAspectLineNumber(), markerId, sourceResource);
         }
-        createProblemMarker(reference.getSource().getResource(), "advises "
-                + BeansAopUtils.getJavaElementLinkName(reference.getTarget()),
-                1, BeansAopUtils.getLineNumber(reference.getSource()),
-                markerId, sourceResource);
+        if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
+            if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
+                createProblemMarker(reference.getSource().getResource(),
+                        "declared on "
+                                + BeansAopUtils
+                                        .getJavaElementLinkName(reference
+                                                .getTarget()), 1, BeansAopUtils
+                                .getLineNumber(reference.getSource()),
+                        markerId, sourceResource);
+            }
+            else {
+                createProblemMarker(sourceResource,
+                        "declared on "
+                                + BeansAopUtils
+                                        .getJavaElementLinkName(reference
+                                                .getTarget()), 1, BeansAopUtils
+                                .getLineNumber(reference.getSource()),
+                        markerId, sourceResource);
+            }
+        }
+        else {
+            createProblemMarker(reference.getSource().getResource(), "advises "
+                    + BeansAopUtils.getJavaElementLinkName(reference
+                            .getTarget()), 1, BeansAopUtils
+                    .getLineNumber(reference.getSource()), markerId,
+                    sourceResource);
+        }
     }
 
     public static void deleteProblemMarkers(IResource resource) {
@@ -157,7 +201,7 @@ public class BeansAopMarkerUtils {
         if (resource != null && resource.isAccessible()) {
             try {
                 // First check if specified marker already exists
-                
+
                 if (severity == IMarker.SEVERITY_ERROR) {
                     IMarker[] markers = resource.findMarkers(
                             BeansAopMarkerUtils.AOP_PROBLEM_MARKER, true,
@@ -170,7 +214,7 @@ public class BeansAopMarkerUtils {
                         }
                     }
                 }
-                
+
                 IMarker[] markers = resource.findMarkers(
                         BeansAopMarkerUtils.AOP_MARKER, true,
                         IResource.DEPTH_ZERO);

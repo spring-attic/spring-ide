@@ -92,6 +92,8 @@ public class BeansAopUIImages {
     public static final String IMG_OBJS_AFTER_ADVICE = NAME_PREFIX
             + "after_advice.gif";
 
+    public static final String IMG_OBJS_INTRODUCTION = NAME_PREFIX + "itd.gif";
+
     public static final String IMG_OBJS_CONFIG = NAME_PREFIX + "ajcu_obj.gif";
 
     public static final String IMG_OBJS_POINTCUT = NAME_PREFIX
@@ -127,6 +129,9 @@ public class BeansAopUIImages {
 
     public static final ImageDescriptor DESC_OBJS_AFTER_ADVICE = createManaged(
             STRUCTURE, IMG_OBJS_AFTER_ADVICE);
+
+    public static final ImageDescriptor DESC_OBJS_INTRODUCTION = createManaged(
+            STRUCTURE, IMG_OBJS_INTRODUCTION);
 
     public static final ImageDescriptor DESC_OBJS_CONFIG = createManaged(
             STRUCTURE, IMG_OBJS_CONFIG);
