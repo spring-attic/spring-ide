@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 /**
  * This interface provides information for a Spring beans component defined via
  * an XML namespace.
+ * 
  * @author Torsten Juergeleit
  */
 public interface IBeansComponent extends ISourceModelElement {

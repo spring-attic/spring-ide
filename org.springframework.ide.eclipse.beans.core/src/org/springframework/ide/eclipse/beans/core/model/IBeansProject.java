@@ -24,6 +24,7 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
  * This interface provides information for a Spring Beans project.
+ * 
  * @author Torsten Juergeleit
  */
 public interface IBeansProject extends IResourceModelElement, IBeanClassAware {

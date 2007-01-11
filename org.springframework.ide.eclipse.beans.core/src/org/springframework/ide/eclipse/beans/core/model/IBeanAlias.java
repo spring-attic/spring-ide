@@ -19,7 +19,8 @@ package org.springframework.ide.eclipse.beans.core.model;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
- * Holds an <code>IBean</code>'s alias.
+ * Holds an {@link IBean}'s alias.
+ * 
  * @author Torsten Juergeleit
  */
 public interface IBeanAlias extends ISourceModelElement {

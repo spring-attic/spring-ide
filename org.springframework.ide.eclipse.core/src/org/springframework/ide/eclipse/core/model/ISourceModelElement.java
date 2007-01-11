@@ -17,7 +17,7 @@
 package org.springframework.ide.eclipse.core.model;
 
 /**
- * Common protocol for all model elements related to source code.
+ * Common protocol for all {@link IModelElement}s related to source code.
  * 
  * @author Torsten Juergeleit
  */
@@ -39,7 +39,8 @@ public interface ISourceModelElement extends IResourceModelElement {
 	int getElementStartLine();
 	
 	/**
-	 * Returns the line number with the logical end of the element's source code.
+	 * Returns the line number with the logical end of the element's source
+	 * code.
 	 */
 	int getElementEndLine();
 }

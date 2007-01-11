@@ -20,16 +20,17 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.core.model.IModel;
 
 /**
- * The <code>IBeansModel</code> manages instances of
- * <code>IBeansProject</code>s. <code>IBeansModelChangedListener</code>s
- * register with the <code>IBeansModel</code> and receive
- * <code>BeansModelChangedEvent</code>s for all changes.
+ * The {@link IBeansModel} manages instances of
+ * {@link IBeansProject}s. {@link IBeansModelChangedListener}s
+ * register with the {@link IBeansModel} and receive
+ * {@link BeansModelChangedEvent}s for all changes.
  * <p>
- * The single instance of <code>IBeansModel</code> is available from the
- * static method <code>BeansCorePlugin.getModel()</code>.
+ * The single instance of {@link IBeansModel} is available from the
+ * static method {@link BeansCorePlugin#getModel()}.
  * 
  * @author Torsten Juergeleit
  */

@@ -19,7 +19,7 @@ package org.springframework.ide.eclipse.core.model;
 import org.springframework.core.io.Resource;
 
 /**
- * Defines a storage for source information of <code>IModelElement</code>s.
+ * Defines a storage for source information of {@link IModelElement}s.
  *
  * @author Torsten Juergeleit
  */

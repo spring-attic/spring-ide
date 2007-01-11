@@ -20,7 +20,8 @@ import java.util.Set;
 
 /**
  * Interface to be implemented by model elements that know about
- * <code>IBean</code>s and their full-qualified class name.
+ * {@link IBean}s and their full-qualified class name.
+ * 
  * @author Torsten Juergeleit
  */
 public interface IBeanClassAware {

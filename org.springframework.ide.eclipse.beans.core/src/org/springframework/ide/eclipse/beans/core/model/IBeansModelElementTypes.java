@@ -18,6 +18,7 @@ package org.springframework.ide.eclipse.beans.core.model;
 
 /**
  * Constants for element types defined by the beans model.
+ * 
  * @author Torsten Juergeleit
  */
 public interface IBeansModelElementTypes {
@@ -25,63 +26,63 @@ public interface IBeansModelElementTypes {
 	/**
 	 * Constant representing a Spring project.
 	 * A model element with this type can be safely cast to
-	 * <code>BeansProject</code>.
+	 * {@link BeansProject}.
 	 */
 	int PROJECT_TYPE = 2; // starts with 2 because 1 is reserved for the model
 
 	/**
 	 * Constant representing a Spring beans config.
 	 * A model element with this type can be safely cast to
-	 * <code>BeansConfig</code>.
+	 * {@link BeansConfig}.
 	 */
 	int CONFIG_TYPE = 3;
 
 	/**
 	 * Constant representing a Spring beans config set.
 	 * A model element with this type can be safely cast to
-	 * <code>BeansConfigSet</code>.
+	 * {@link BeansConfigSet}.
 	 */
 	int CONFIG_SET_TYPE = 4;
 
 	/**
-	 * Constant representing a Spring bean.
+	 * Constant representing a Spring beans import.
 	 * A model element with this type can be safely cast to
-	 * <code>Bean</code>.
+	 * {@link BeansImport}.
 	 */
-	int BEAN_TYPE = 5;
-
-	/**
-	 * Constant representing a Spring project bean's property.
-	 * A model element with this type can be safely cast to
-	 * <code>BeanProperty</code>.
-	 */
-	int PROPERTY_TYPE = 6;
-
-	/**
-	 * Constant representing a Spring project bean's constructor argument.
-	 * A model element with this type can be safely cast to
-	 * <code>BeanConstructorArgument</code>.
-	 */
-	int CONSTRUCTOR_ARGUMENT_TYPE = 7;
+	int IMPORT_TYPE = 5;
 
 	/**
 	 * Constant representing a Spring bean alias.
 	 * A model element with this type can be safely cast to
-	 * <code>BeanAlias</code>.
+	 * {@link BeanAlias}.
 	 */
-	int ALIAS_TYPE = 8;
-
-	/**
-	 * Constant representing a Spring beans import.
-	 * A model element with this type can be safely cast to
-	 * <code>BeansImport</code>.
-	 */
-	int IMPORT_TYPE = 9;
+	int ALIAS_TYPE = 6;
 
 	/**
 	 * Constant representing a Spring beans component.
 	 * A model element with this type can be safely cast to
-	 * <code>BeansComponent</code>.
+	 * {@link BeansComponent}.
 	 */
-	int COMPONENT_TYPE = 10;
+	int COMPONENT_TYPE = 7;
+
+	/**
+	 * Constant representing a Spring bean.
+	 * A model element with this type can be safely cast to
+	 * {@link Bean}.
+	 */
+	int BEAN_TYPE = 8;
+
+	/**
+	 * Constant representing a Spring project bean's property.
+	 * A model element with this type can be safely cast to
+	 * {@link BeanProperty}.
+	 */
+	int PROPERTY_TYPE = 9;
+
+	/**
+	 * Constant representing a Spring project bean's constructor argument.
+	 * A model element with this type can be safely cast to
+	 * {@link BeanConstructorArgument}.
+	 */
+	int CONSTRUCTOR_ARGUMENT_TYPE = 10;
 }
