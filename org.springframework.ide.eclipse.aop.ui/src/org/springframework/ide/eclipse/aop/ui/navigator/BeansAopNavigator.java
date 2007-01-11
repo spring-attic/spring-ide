@@ -36,7 +36,9 @@ import org.springframework.ide.eclipse.aop.ui.Activator;
 import org.springframework.ide.eclipse.aop.ui.navigator.action.ToggleShowBeanRefsForFileAction;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceAopReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceAopSourceMethodNode;
+import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceDeclareParentAopReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedAopReferenceNode;
+import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedDeclareParentAopReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 import org.w3c.dom.Element;
@@ -91,7 +93,9 @@ public class BeansAopNavigator
             for (TreeItem item : items) {
                 Object obj = item.getData();
                 if (obj instanceof AdviceAopReferenceNode
-                        || obj instanceof AdvisedAopReferenceNode) {
+                        || obj instanceof AdvisedAopReferenceNode
+                        || obj instanceof AdviceDeclareParentAopReferenceNode
+                        || obj instanceof AdvisedDeclareParentAopReferenceNode) {
                     expandTree(item.getItems(), true);
                 }
                 else {

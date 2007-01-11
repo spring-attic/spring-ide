@@ -1,17 +1,17 @@
 /*
  * Copyright 2002-2006 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
@@ -28,10 +28,12 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorPart;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
+import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 
-public class BeanClassReferenceNode implements IReferenceNode, IRevealableReferenceNode {
+public class BeanClassReferenceNode implements IReferenceNode,
+        IRevealableReferenceNode {
 
     protected IJavaElement element;
 
@@ -52,6 +54,7 @@ public class BeanClassReferenceNode implements IReferenceNode, IRevealableRefere
             else {
                 MethodReference r = new MethodReference();
                 r.setMember(reference.getSource());
+                r.getAspects().add(reference);
                 refs.put(reference.getSource(), r);
             }
         }
@@ -62,13 +65,34 @@ public class BeanClassReferenceNode implements IReferenceNode, IRevealableRefere
             else {
                 MethodReference r = new MethodReference();
                 r.setMember(reference.getTarget());
+                r.getAdvices().add(reference);
                 refs.put(reference.getTarget(), r);
             }
         }
         for (Map.Entry<IMember, MethodReference> entry : refs.entrySet()) {
-            nodes.add(new BeanMethodReferenceNode(entry.getKey(), entry.getValue().getAspects(),
-                    entry.getValue().getAdvices()));
+            nodes.add(new BeanMethodReferenceNode(entry.getKey(), entry
+                    .getValue().getAspects(), entry.getValue().getAdvices()));
         }
+        Map<IAspectDefinition, List<IAopReference>> dRefs = new HashMap<IAspectDefinition, List<IAopReference>>();
+        for (IAopReference r : parent.getDeclareParentReferences()) {
+            if (dRefs.containsKey(r.getDefinition())) {
+                dRefs.get(r.getDefinition()).add(r);
+            }
+            else {
+                List<IAopReference> ref = new ArrayList<IAopReference>();
+                ref.add(r);
+                dRefs.put(r.getDefinition(), ref);
+            }
+        }
+        for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : dRefs
+                .entrySet()) {
+            nodes.add(new AdviceDeclareParentAopSourceNode(entry.getValue()));
+        }
+        if (parent.getDeclaredOnReferences().size() > 0) {
+            nodes.add(new AdvisedDeclareParentAopReferenceNode(parent
+                    .getDeclaredOnReferences()));
+        }
+
         return nodes.toArray(new IReferenceNode[nodes.size()]);
     }
 
@@ -78,8 +102,8 @@ public class BeanClassReferenceNode implements IReferenceNode, IRevealableRefere
 
     public String getText() {
         if (element instanceof IType) {
-            return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element) + " - "
-                    + BeansAopUtils.getPackageLinkName(element);
+            return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element)
+                    + " - " + BeansAopUtils.getPackageLinkName(element);
         }
         else {
             return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element);
@@ -87,7 +111,8 @@ public class BeanClassReferenceNode implements IReferenceNode, IRevealableRefere
     }
 
     public boolean hasChildren() {
-        return parent.getAdviseReferences().size() > 0 || parent.getAspectReferences().size() > 0;
+        return parent.getAdviseReferences().size() > 0
+                || parent.getAspectReferences().size() > 0;
     }
 
     public void openAndReveal() {

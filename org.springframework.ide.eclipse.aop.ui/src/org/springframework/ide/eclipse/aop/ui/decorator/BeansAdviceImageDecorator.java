@@ -31,8 +31,13 @@ import org.springframework.ide.eclipse.aop.core.model.IAnnotationAopDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.ui.BeansAopUIImages;
+import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceAopTargetMethodNode;
+import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceDeclareParentAopSourceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceRootAopReferenceNode;
+import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedAopSourceMethodNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedAopSourceNode;
+import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedDeclareParentAopSourceNode;
+import org.springframework.ide.eclipse.aop.ui.navigator.model.BeanMethodReferenceNode;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
@@ -61,19 +66,30 @@ public class BeansAdviceImageDecorator
             IJavaElement je = (IJavaElement) element;
             IJavaProject jp = je.getJavaProject();
             // only query the model if the element is in an Spring project
-
             if ((jp != null)
                     && SpringCoreUtils.isSpringProject(jp.getProject())) {
                 if (je instanceof IMethod && Activator.getModel().isAdvised(je)) {
                     decoration.addOverlay(BeansAopUIImages.DESC_OVR_ADVICE,
                             IDecoration.TOP_LEFT);
                 }
-                /*
-                 * else if (BeansAopPlugin.getModel().isAdvice(je)) {
-                 * decoration.addOverlay(BeansAopUIImages.DESC_OVR_SPRING,
-                 * IDecoration.TOP_LEFT); }
-                 */
             }
+        }
+        else if (element instanceof BeanMethodReferenceNode
+                && Activator.getModel().isAdvised(
+                        ((BeanMethodReferenceNode) element).getJavaElement())) {
+            decoration.addOverlay(BeansAopUIImages.DESC_OVR_ADVICE,
+                    IDecoration.TOP_LEFT);
+        }
+        else if (element instanceof AdviceAopTargetMethodNode) {
+            decoration.addOverlay(BeansAopUIImages.DESC_OVR_ADVICE,
+                    IDecoration.TOP_LEFT);
+        }
+        else if (element instanceof AdvisedAopSourceMethodNode) {
+            if (Activator.getModel().isAdvised(
+                    ((AdvisedAopSourceMethodNode) element).getReference()
+                            .getSource()))
+                decoration.addOverlay(BeansAopUIImages.DESC_OVR_ADVICE,
+                        IDecoration.TOP_LEFT);
         }
         else if (element instanceof AdviceRootAopReferenceNode) {
             List<IAopReference> references = ((AdviceRootAopReferenceNode) element)
@@ -88,6 +104,22 @@ public class BeansAdviceImageDecorator
         }
         else if (element instanceof AdvisedAopSourceNode) {
             IAopReference reference = ((AdvisedAopSourceNode) element)
+                    .getReference();
+            if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
+                decoration.addOverlay(BeansAopUIImages.DESC_OVR_ANNOTATION,
+                        IDecoration.BOTTOM_LEFT);
+            }
+        }
+        else if (element instanceof AdviceDeclareParentAopSourceNode) {
+            IAopReference reference = ((AdviceDeclareParentAopSourceNode) element)
+                    .getReference();
+            if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
+                decoration.addOverlay(BeansAopUIImages.DESC_OVR_ANNOTATION,
+                        IDecoration.BOTTOM_LEFT);
+            }
+        }
+        else if (element instanceof AdvisedDeclareParentAopSourceNode) {
+            IAopReference reference = ((AdvisedDeclareParentAopSourceNode) element)
                     .getReference();
             if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
                 decoration.addOverlay(BeansAopUIImages.DESC_OVR_ANNOTATION,

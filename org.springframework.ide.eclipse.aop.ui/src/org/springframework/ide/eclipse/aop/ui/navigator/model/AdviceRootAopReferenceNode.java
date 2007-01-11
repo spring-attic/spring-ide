@@ -1,17 +1,17 @@
 /*
  * Copyright 2002-2006 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
@@ -21,7 +21,6 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.graphics.Image;
-import org.springframework.ide.eclipse.aop.core.model.IAnnotationAopDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
@@ -32,36 +31,18 @@ public class AdviceRootAopReferenceNode implements IReferenceNode, IRevealableRe
 
     private List<IAopReference> reference;
 
-    private boolean isBeanConfig = false;
-
     public AdviceRootAopReferenceNode(List<IAopReference> reference) {
         this(reference, false);
     }
 
     public AdviceRootAopReferenceNode(List<IAopReference> reference, boolean isBeanConfig) {
         this.reference = reference;
-        this.isBeanConfig = isBeanConfig;
     }
 
     public IReferenceNode[] getChildren() {
-        // new AdviceAopReferenceNode(this.reference)
-        List<IAopReference> introAnnoNodes = new ArrayList<IAopReference>();
-        List<IAopReference> adviceNodes = new ArrayList<IAopReference>();
         List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
-        for (IAopReference r : this.reference) {
-            if (r.getDefinition() instanceof IIntroductionDefinition
-                    && !(r.getDefinition() instanceof IAnnotationAopDefinition)) {
-                introAnnoNodes.add(r);
-            }
-            else {
-                adviceNodes.add(r);
-            }
-        }
-        if (introAnnoNodes.size() > 0) {
-            nodes.add(new AdviceAopReferenceNode(introAnnoNodes));
-        }
-        if (adviceNodes.size() > 0) {
-            nodes.add(new AdviceAopSourceMethodNode(adviceNodes, isBeanConfig));
+        for (IAopReference r : reference) {
+            nodes.add(new AdviceDeclareParentAopTargetMethodNode(r));
         }
         return nodes.toArray(new IReferenceNode[nodes.size()]);
     }

@@ -1,22 +1,19 @@
 /*
  * Copyright 2002-2006 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -30,25 +27,18 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
 public class AdvisedAopSourceNode implements IReferenceNode,
         IRevealableReferenceNode {
 
-    private List<IAopReference> references;
+    private IAopReference references;
 
-    public AdvisedAopSourceNode(List<IAopReference> reference) {
+    public AdvisedAopSourceNode(IAopReference reference) {
         this.references = reference;
     }
 
     public IReferenceNode[] getChildren() {
-        List<IReferenceNode> children = new ArrayList<IReferenceNode>();
-        for (IAopReference reference : references) {
-            if (reference.getSource() != null) {
-                children.add(new AdvisedAopSourceMethodNode(reference));
-            }
-            
-        }
-        return children.toArray(new IReferenceNode[children.size()]);
+        return new IReferenceNode[] { new AdvisedAopSourceMethodNode(references) };
     }
 
     public Image getImage() {
-        ADVICE_TYPES type = references.get(0).getAdviceType();
+        ADVICE_TYPES type = references.getAdviceType();
         if (type == ADVICE_TYPES.AFTER || type == ADVICE_TYPES.AFTER_RETURNING
                 || type == ADVICE_TYPES.AFTER_THROWING) {
             return AopUIImages.getImage(AopUIImages.IMG_OBJS_AFTER_ADVICE);
@@ -66,7 +56,7 @@ public class AdvisedAopSourceNode implements IReferenceNode,
     }
 
     public String getText() {
-        ADVICE_TYPES type = references.get(0).getAdviceType();
+        ADVICE_TYPES type = references.getAdviceType();
         String text = "";
         if (type == ADVICE_TYPES.AFTER) {
             text += "after()";
@@ -86,42 +76,42 @@ public class AdvisedAopSourceNode implements IReferenceNode,
         else if (type == ADVICE_TYPES.DECLARE_PARENTS) {
             try {
                 text += "declare parents: implements "
-                        + ((IIntroductionDefinition) references.get(0).getDefinition())
-                                .getImplInterfaceClass().getSimpleName();
+                        + ((IIntroductionDefinition) references
+                                .getDefinition()).getImplInterfaceClass()
+                                .getSimpleName();
             }
             catch (ClassNotFoundException e) {
                 text += "declare parents";
             }
         }
         text += " <";
-        text += references.get(0).getDefinition().getAspectName();
+        text += references.getDefinition().getAspectName();
         text += "> [";
-        text += references.get(0).getDefinition().getResource()
+        text += references.getDefinition().getResource()
                 .getProjectRelativePath().toString();
         text += "]";
         return text;
     }
 
     public boolean hasChildren() {
-        return references.get(0).getSource() != null;
+        return references.getSource() != null;
     }
 
     public void openAndReveal() {
-        IResource resource = references.get(0).getDefinition().getResource();
-        SpringUIUtils.openInEditor((IFile) resource, references.get(0).getDefinition()
-                .getAspectLineNumber());
+        IResource resource = references.getDefinition().getResource();
+        SpringUIUtils.openInEditor((IFile) resource, references.getDefinition().getAspectLineNumber());
     }
 
     public IAopReference getReference() {
-        return this.references.get(0);
+        return this.references;
     }
 
     public int getLineNumber() {
-        return references.get(0).getDefinition().getAspectLineNumber();
+        return references.getDefinition().getAspectLineNumber();
     }
 
     public IResource getResource() {
-        return references.get(0).getResource();
+        return references.getResource();
     }
 
 }

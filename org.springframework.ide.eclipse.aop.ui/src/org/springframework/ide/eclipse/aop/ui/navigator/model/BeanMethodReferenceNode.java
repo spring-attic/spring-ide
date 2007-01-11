@@ -1,24 +1,22 @@
 /*
  * Copyright 2002-2006 the original author or authors.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaElement;
@@ -29,10 +27,10 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorPart;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
-import org.springframework.ide.eclipse.aop.ui.navigator.model.BeanClassReferenceNode.MethodReference;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 
-public class BeanMethodReferenceNode implements IReferenceNode, IRevealableReferenceNode {
+public class BeanMethodReferenceNode implements IReferenceNode,
+        IRevealableReferenceNode {
 
     protected IJavaElement element;
 
@@ -40,7 +38,8 @@ public class BeanMethodReferenceNode implements IReferenceNode, IRevealableRefer
 
     private List<IAopReference> adviseReferences = new ArrayList<IAopReference>();
 
-    public BeanMethodReferenceNode(IMember member, List<IAopReference> aspectReferences,
+    public BeanMethodReferenceNode(IMember member,
+            List<IAopReference> aspectReferences,
             List<IAopReference> adviseReferences) {
         this.element = member;
         this.aspectReferences = aspectReferences;
@@ -53,19 +52,19 @@ public class BeanMethodReferenceNode implements IReferenceNode, IRevealableRefer
             nodes.add(new AdviceAopReferenceNode(this.aspectReferences));
         }
         if (this.adviseReferences.size() > 0) {
-            // TODO
+            nodes.add(new AdvisedAopReferenceNode(this.adviseReferences));
         }
         return nodes.toArray(new IReferenceNode[nodes.size()]);
-        
     }
+
     public Image getImage() {
         return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getImage(element);
     }
 
     public String getText() {
         if (element instanceof IType) {
-            return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element) + " - "
-                    + BeansAopUtils.getPackageLinkName(element);
+            return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element)
+                    + " - " + BeansAopUtils.getPackageLinkName(element);
         }
         else {
             return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element);
@@ -73,7 +72,8 @@ public class BeanMethodReferenceNode implements IReferenceNode, IRevealableRefer
     }
 
     public boolean hasChildren() {
-        return this.aspectReferences.size() > 0 || this.adviseReferences.size() > 0;
+        return this.aspectReferences.size() > 0
+                || this.adviseReferences.size() > 0;
     }
 
     public void openAndReveal() {
@@ -93,5 +93,8 @@ public class BeanMethodReferenceNode implements IReferenceNode, IRevealableRefer
     public IResource getResource() {
         return element.getResource();
     }
-
+    
+    public IJavaElement getJavaElement() {
+        return this.element;
+    }
 }
