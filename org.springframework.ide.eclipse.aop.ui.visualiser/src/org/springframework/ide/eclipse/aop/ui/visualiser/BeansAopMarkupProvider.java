@@ -38,6 +38,7 @@ import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
+import org.springframework.ide.eclipse.aop.core.model.IIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 
@@ -48,8 +49,7 @@ public class BeansAopMarkupProvider
         extends SimpleMarkupProvider implements IAopModelChangedListener {
 
     // Cache: IMember -> List(Stripe)
-    private static Hashtable<IMember, List<Stripe>> markupCache = 
-        new Hashtable<IMember, List<Stripe>>();
+    private static Hashtable<IMember, List<Stripe>> markupCache = new Hashtable<IMember, List<Stripe>>();
 
     public static void resetCache() {
         markupCache.clear();
@@ -79,8 +79,14 @@ public class BeansAopMarkupProvider
                             .getAllReferences();
                     if (references != null && references.size() > 0) {
                         for (IAopReference reference : references) {
-                            IType advisedType = reference.getTarget()
-                                    .getDeclaringType();
+                            IType advisedType = null;
+                            if (reference.getTarget() instanceof IType) {
+                                advisedType = (IType) reference.getTarget();
+                            }
+                            else {
+                                advisedType = (IType) reference.getTarget()
+                                        .getDeclaringType();
+                            }
                             ICompilationUnit advisedCu = advisedType
                                     .getCompilationUnit();
                             if (member instanceof JDTMember) {
@@ -108,8 +114,7 @@ public class BeansAopMarkupProvider
     }
 
     /**
-     * Get all the markup kinds - which in this case is the label for the last
-     * run search (if it was a java search)
+     * Get all the markup kinds
      * 
      * @return a Set of Strings
      */
@@ -183,10 +188,21 @@ public class BeansAopMarkupProvider
         else if (type == ADVICE_TYPES.AROUND) {
             text += "around()";
         }
+        else if (type == ADVICE_TYPES.DECLARE_PARENTS) {
+            text += "declare parents:";
+            try {
+                text += " implements "
+                        + ((IIntroductionDefinition) reference.getDefinition())
+                                .getImplInterfaceClass().getSimpleName();
+            }
+            catch (ClassNotFoundException e) {
+            }
+        }
         text += " <";
         text += reference.getDefinition().getAspectName();
         text += "> [";
-        text += reference.getDefinition().getResource().getProjectRelativePath().toString();
+        text += reference.getDefinition().getResource()
+                .getProjectRelativePath().toString();
         text += "]";
         return text;
     }
@@ -194,14 +210,13 @@ public class BeansAopMarkupProvider
     public void changed() {
         resetCache();
     }
-    
+
     /**
      * Activate the provider
      */
     public void activate() {
         Activator.getModel().registerAopModelChangedListener(this);
     }
-
 
     /**
      * Deactivate the provider
