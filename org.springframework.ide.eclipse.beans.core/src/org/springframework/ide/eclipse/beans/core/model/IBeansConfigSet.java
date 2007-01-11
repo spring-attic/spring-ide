@@ -24,10 +24,12 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 /**
  * This interface provides information for a Spring beans config set (a list of
  * beans configs).
+ * 
  * @author Torsten Juergeleit
  */
 public interface IBeansConfigSet extends IResourceModelElement,
-			IBeanClassAware {
+		IBeanClassAware {
+
 	/** Name prefix of a config which belongs to a different project */
 	char EXTERNAL_CONFIG_NAME_PREFIX = '/';
 
