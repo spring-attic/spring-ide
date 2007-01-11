@@ -29,11 +29,14 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.AliasDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
+import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.parsing.DefaultsDefinition;
 import org.springframework.beans.factory.parsing.ImportDefinition;
@@ -42,6 +45,7 @@ import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.ReaderEventListener;
 import org.springframework.beans.factory.xml.DelegatingEntityResolver;
+import org.springframework.beans.factory.xml.DocumentDefaultsDefinition;
 import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
@@ -65,7 +69,9 @@ import org.springframework.ide.eclipse.core.io.xml.XercesDocumentLoader;
 import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
+import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
+import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceExtractor;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 import org.springframework.util.ObjectUtils;
@@ -91,6 +97,8 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	private Set<Problem> warnings = new LinkedHashSet<Problem>();
 	
 	private Set<Problem> errors = new LinkedHashSet<Problem>();
+
+	private DocumentDefaultsDefinition defaults;
 
 	/** List of imports (in registration order) */
 	private Set<IBeansImport> imports;
@@ -135,6 +143,11 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 	public boolean isElementArchived() {
 		return isArchived;
+	}
+
+	public int getElementStartLine() {
+		IModelSourceLocation location = ModelUtils.getSourceLocation(defaults);
+		return (location != null ? location.getStartLine() : -1);
 	}
 
 	public boolean isInitialized() {
@@ -189,6 +202,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		warnings.clear();
 		errors.clear();
 
+		defaults = null;
 		imports = null;
 		aliases = null;
 		beans = null;
@@ -218,6 +232,33 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 	public Set<Problem> getWarnings() {
 		return warnings;
+	}
+
+	public String getDefaultLazyInit() {
+		return (defaults != null ? defaults.getLazyInit() : DEFAULT_LAZY_INIT);
+	}
+
+	public String getDefaultAutowire() {
+		return (defaults != null ? defaults.getAutowire() : DEFAULT_AUTO_WIRE);
+	}
+
+	public String getDefaultDependencyCheck() {
+		return (defaults != null ? defaults.getDependencyCheck()
+				: DEFAULT_DEPENDENCY_CHECK);
+	}
+
+	public String getDefaultInitMethod() {
+		return (defaults != null && defaults.getInitMethod() != null
+				? defaults.getInitMethod() : DEFAULT_INIT_METHOD);
+	}
+
+	public String getDefaultDestroyMethod() {
+		return (defaults != null && defaults.getDestroyMethod() != null
+				? defaults.getDestroyMethod() : DEFAULT_DESTROY_METHOD);
+	}
+
+	public String getDefaultMerge() {
+		return (defaults != null ? defaults.getMerge() : DEFAULT_MERGE);
 	}
 
 	public Set<IBeansImport> getImports() {
@@ -328,15 +369,51 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		BeansConfig that = (BeansConfig) other;
 		if (!ObjectUtils.nullSafeEquals(this.file, that.file))
 			return false;
-		if (!ObjectUtils.nullSafeEquals(this.isArchived, that.isArchived))
-			return false;
+		if (this.defaults != null && that.defaults != null
+				&& this.defaults != that.defaults) {
+			if (!ObjectUtils.nullSafeEquals(this.isArchived, that.isArchived))
+				return false;
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getLazyInit(),
+					that.defaults.getLazyInit()))
+				return false;
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getAutowire(),
+					that.defaults.getAutowire()))
+				return false;
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getDependencyCheck(),
+					that.defaults.getDependencyCheck()))
+				return false;
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getInitMethod(),
+					that.defaults.getInitMethod()))
+				return false;
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getDestroyMethod(),
+					that.defaults.getDestroyMethod()))
+				return false;
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getMerge(),
+					that.defaults.getMerge()))
+				return false;
+		}
 		return super.equals(other);
 	}
 
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(file);
-		hashCode = getElementType() * hashCode
-				+ ObjectUtils.nullSafeHashCode(isArchived);
+		if (defaults != null) {
+			hashCode = getElementType() * hashCode
+					+ ObjectUtils.nullSafeHashCode(isArchived);
+			hashCode = getElementType() * hashCode
+					+ ObjectUtils.nullSafeHashCode(defaults.getLazyInit());
+			hashCode = getElementType() * hashCode
+					+ ObjectUtils.nullSafeHashCode(defaults.getAutowire());
+			hashCode = getElementType() * hashCode
+					+ ObjectUtils.nullSafeHashCode(defaults
+							.getDependencyCheck());
+			hashCode = getElementType() * hashCode
+					+ ObjectUtils.nullSafeHashCode(defaults.getInitMethod());
+			hashCode = getElementType() * hashCode
+					+ ObjectUtils.nullSafeHashCode(defaults.getDestroyMethod());
+			hashCode = getElementType() * hashCode
+					+ ObjectUtils.nullSafeHashCode(defaults.getMerge());
+		}
 		return getElementType() * hashCode + super.hashCode();
 	}
 
@@ -348,6 +425,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	 * Returns the file for given name. If the given name defines an external
 	 * resource (leading '/' -> not part of the project this config belongs to)
 	 * get the file from the workspace else from the project.
+	 * 
 	 * @return the file for given name
 	 */
 	private IFile getFile(String name) {
@@ -511,6 +589,12 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			this.config = config;
 		}
 
+		public void fatal(Problem problem) {
+			BeansModelUtils.createProblemMarker(config, problem.getMessage(),
+					IMarker.SEVERITY_ERROR, problem, ErrorCode.PARSING_FAILED);
+			throw new BeanDefinitionParsingException(problem);
+		}
+
 		public void error(Problem problem) {
 			BeansModelUtils.createProblemMarker(config, problem.getMessage(),
 					IMarker.SEVERITY_ERROR, problem, ErrorCode.PARSING_FAILED);
@@ -522,11 +606,6 @@ public class BeansConfig extends AbstractResourceModelElement implements
 					IMarker.SEVERITY_WARNING, problem,
 					ErrorCode.PARSING_FAILED);
 			warnings.add(problem);
-		}
-
-		public void fatal(Problem arg0) {
-			// TODO Auto-generated method stub
-			
 		}
 	}
 	
@@ -544,37 +623,59 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			this.config = config;
 		}
 
-		public void importProcessed(ImportDefinition importDefinition) {
-			BeansImport imp = new BeansImport(config, importDefinition);
-			imports.add(imp);
-		}
-
-		public void aliasRegistered(AliasDefinition aliasDefinition) {
-			BeanAlias alias = new BeanAlias(config, aliasDefinition);
-			aliases.put(aliasDefinition.getAlias(), alias);
-		}
-
-		public void componentRegistered(ComponentDefinition
-				componentDefinition) {
-			if (componentDefinition instanceof BeanComponentDefinition) {
-				if (componentDefinition.getBeanDefinitions()[0].getRole() !=
-							BeanDefinition.ROLE_INFRASTRUCTURE) {
-					IBean bean = new Bean(config,
-							(BeanComponentDefinition) componentDefinition);
-					beans.put(bean.getElementName(), bean);
-					innerBeans.addAll(bean.getInnerBeans());
-				}
-			} else {
-				IBeansComponent comp = new BeansComponent(config,
-						componentDefinition);
-				components.add(comp);
-				innerBeans.addAll(comp.getInnerBeans());
+		public void defaultsRegistered(DefaultsDefinition defaultsDefinition) {
+			if (!isImported(defaultsDefinition)
+					&& defaultsDefinition instanceof DocumentDefaultsDefinition) {
+				defaults = (DocumentDefaultsDefinition) defaultsDefinition;
 			}
 		}
 
-		public void defaultsRegistered(DefaultsDefinition arg0) {
-			// TODO Auto-generated method stub
-			
+		public void importProcessed(ImportDefinition importDefinition) {
+			if (!isImported(importDefinition)) {
+				BeansImport imp = new BeansImport(config, importDefinition);
+				imports.add(imp);
+			}
+		}
+
+		public void aliasRegistered(AliasDefinition aliasDefinition) {
+			if (!isImported(aliasDefinition)) {
+				BeanAlias alias = new BeanAlias(config, aliasDefinition);
+				aliases.put(aliasDefinition.getAlias(), alias);
+			}
+		}
+
+		public void componentRegistered(
+				ComponentDefinition componentDefinition) {
+			if (!isImported(componentDefinition)) {
+				if (componentDefinition instanceof BeanComponentDefinition) {
+					if (componentDefinition.getBeanDefinitions()[0].getRole()
+							!= BeanDefinition.ROLE_INFRASTRUCTURE) {
+						IBean bean = new Bean(config,
+								(BeanComponentDefinition) componentDefinition);
+						beans.put(bean.getElementName(), bean);
+						innerBeans.addAll(bean.getInnerBeans());
+					}
+				} else {
+					IBeansComponent comp = new BeansComponent(config,
+							componentDefinition);
+					components.add(comp);
+					innerBeans.addAll(comp.getInnerBeans());
+				}
+			}
+		}
+
+		private boolean isImported(BeanMetadataElement element) {
+			IModelSourceLocation location = ModelUtils
+					.getSourceLocation(element);
+			if (location != null) {
+				Resource resource = location.getResource();
+				if (resource instanceof IAdaptable) {
+					IFile file = (IFile) ((IAdaptable) resource)
+							.getAdapter(IFile.class);
+					return !config.getElementResource().equals(file);
+				}
+			}
+			return false;
 		}
 	}
 }

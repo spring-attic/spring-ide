@@ -85,6 +85,42 @@ public final class BeansModelLabels extends BeansUILabels {
 			}
 		} else {
 			buf.append("beans");
+			if (!config.getDefaultLazyInit()
+					.equals(IBeansConfig.DEFAULT_LAZY_INIT)) {
+				buf.append(" lazy-init=\"");
+				buf.append(config.getDefaultLazyInit());
+				buf.append('"');
+			}
+			if (!config.getDefaultAutowire()
+					.equals(IBeansConfig.DEFAULT_AUTO_WIRE)) {
+				buf.append(" autowire=\"");
+				buf.append(config.getDefaultAutowire());
+				buf.append('"');
+			}
+			if (!config.getDefaultDependencyCheck()
+					.equals(IBeansConfig.DEFAULT_DEPENDENCY_CHECK)) {
+				buf.append(" dependency-check=\"");
+				buf.append(config.getDefaultDependencyCheck());
+				buf.append('"');
+			}
+			if (!config.getDefaultInitMethod()
+					.equals(IBeansConfig.DEFAULT_INIT_METHOD)) {
+				buf.append(" init-method=\"");
+				buf.append(config.getDefaultInitMethod());
+				buf.append('"');
+			}
+			if (!config.getDefaultDestroyMethod()
+					.equals(IBeansConfig.DEFAULT_DESTROY_METHOD)) {
+				buf.append(" destroy-method=");
+				buf.append(config.getDefaultDestroyMethod());
+				buf.append('"');
+			}
+			if (!config.getDefaultMerge()
+					.equals(IBeansConfig.DEFAULT_MERGE)) {
+				buf.append(" merge=\"");
+				buf.append(config.getDefaultMerge());
+				buf.append('"');
+			}
 		}
 	}
 }

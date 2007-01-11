@@ -24,6 +24,7 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.springframework.beans.BeanMetadataElement;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
@@ -141,7 +142,23 @@ public final class ModelUtils {
 	}
 
 	/**
-	 * Returns the {@link XmlSourceLocation} of the give element or
+	 * Returns the {@link IModelSourceLocation} of the given
+	 * {@link BeanMetadataElement} or <code>null</code> if no
+	 * {@link ISourceModelElement} found.
+	 */
+	public static IModelSourceLocation getSourceLocation(
+			BeanMetadataElement element) {
+		if (element != null) {
+			Object source = element.getSource();
+			if (source instanceof IModelSourceLocation) {
+				return (IModelSourceLocation) source;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the {@link XmlSourceLocation} of the given element or
 	 * <code>null</code> if no {@link ISourceModelElement} or no
 	 * {@link XmlSourceLocation} found.
 	 */

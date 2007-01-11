@@ -23,15 +23,35 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
  * This interface provides information for a Spring beans configuration.
+ * 
  * @author Torsten Juergeleit
  */
 public interface IBeansConfig extends IResourceModelElement, IBeanClassAware {
 
 	char EXTERNAL_FILE_NAME_PREFIX = '/';
 
+	String DEFAULT_LAZY_INIT = "false";
+	String DEFAULT_AUTO_WIRE = "no";
+	String DEFAULT_DEPENDENCY_CHECK = "none";
+	String DEFAULT_INIT_METHOD = "";
+	String DEFAULT_DESTROY_METHOD = "";
+	String DEFAULT_MERGE = "false";
+
 	Set<Problem> getWarnings();
 
 	Set<Problem> getErrors();
+
+	String getDefaultLazyInit();
+
+	String getDefaultAutowire();
+
+	String getDefaultDependencyCheck();
+
+	String getDefaultInitMethod();
+
+	String getDefaultDestroyMethod();
+
+	String getDefaultMerge();
 
 	Set<IBeansImport> getImports();
 

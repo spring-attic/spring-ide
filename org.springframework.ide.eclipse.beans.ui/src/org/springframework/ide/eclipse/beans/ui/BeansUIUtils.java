@@ -35,6 +35,7 @@ import org.eclipse.ui.views.properties.FilePropertySource;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.ResourcePropertySource;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
@@ -163,8 +164,7 @@ public final class BeansUIUtils {
 	}
 
 	/**
-	 * Opens given <code>IResourceModelElement element</code> in associated
-	 * editor.
+	 * Opens given {@link IResourceModelElement} in associated editor.
 	 */
 	public static IEditorPart openInEditor(IResourceModelElement element) {
 		IResourceModelElement sourceElement;
@@ -173,9 +173,9 @@ public final class BeansUIUtils {
 			ISourceModelElement source = (ISourceModelElement) element;
 			sourceElement = source.getElementSourceElement();
 			line = source.getElementStartLine();
-		} else if (element instanceof IBeansConfig) {
+		} else if (element instanceof BeansConfig) {
 			sourceElement = element;
-			line = -1;
+			line = ((BeansConfig) element).getElementStartLine();
 		} else {
 			return null;
 		}

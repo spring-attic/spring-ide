@@ -29,9 +29,11 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.navigator.ILinkHelper;
 import org.eclipse.ui.part.FileEditorInput;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
@@ -43,17 +45,26 @@ public class BeansNavigatorLinkHelper implements ILinkHelper {
 	public void activateEditor(IWorkbenchPage page,
 			IStructuredSelection selection) {
 		if (selection != null && !selection.isEmpty()) {
-			if (selection.getFirstElement() instanceof ISourceModelElement) {
-				ISourceModelElement element = (ISourceModelElement) selection
-						.getFirstElement();
+			Object sElement = selection.getFirstElement();
+			if (sElement instanceof ISourceModelElement
+					|| sElement instanceof BeansConfig) {
+				IResourceModelElement element = (IResourceModelElement)
+						sElement;
 				IResource resource = element.getElementResource();
 				if (resource instanceof IFile && resource.exists()) {
 					IEditorInput input = new FileEditorInput((IFile) resource);
 					IEditorPart editor = page.findEditor(input);
 					if (editor != null) {
 						page.bringToTop(editor);
-						SpringUIUtils.revealInEditor(editor, element
-								.getElementStartLine());
+						int line;
+						if (element instanceof ISourceModelElement) {
+							line = ((ISourceModelElement) element)
+									.getElementStartLine();
+						} else {
+							line = ((BeansConfig) element)
+									.getElementStartLine();
+						}
+						SpringUIUtils.revealInEditor(editor, line);
 					}
 				}
 			}
