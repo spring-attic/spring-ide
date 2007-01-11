@@ -32,43 +32,52 @@ import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 
-public class BeanMethodReferenceNode implements IReferenceNode,
-        IRevealableReferenceNode {
+public class ClassMethodReferenceNode implements IReferenceNode, IRevealableReferenceNode {
 
     protected IJavaElement element;
 
-    private List<IAopReference> aspectReferences = new ArrayList<IAopReference>();
+    private List<IReferenceNode> children;
 
-    private List<IAopReference> adviseReferences = new ArrayList<IAopReference>();
+    private List<IAopReference> declareParentReferences = new ArrayList<IAopReference>();
 
-    public BeanMethodReferenceNode(IMember member,
-            List<IAopReference> aspectReferences,
-            List<IAopReference> adviseReferences) {
+    private List<IAopReference> declaredOnReferences = new ArrayList<IAopReference>();
+
+    public List<IAopReference> getDeclaredOnReferences() {
+        return declaredOnReferences;
+    }
+
+    public List<IAopReference> getDeclareParentReferences() {
+        return declareParentReferences;
+    }
+
+    @SuppressWarnings("unchecked")
+    public ClassMethodReferenceNode(IMember member, List<?> children) {
         this.element = member;
-        this.aspectReferences = aspectReferences;
-        this.adviseReferences = adviseReferences;
+        this.children = (List<IReferenceNode>) children;
     }
 
     public IReferenceNode[] getChildren() {
         List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
-        if (this.aspectReferences.size() > 0) {
-            Map<IAspectDefinition, List<IAopReference>> refs = new HashMap<IAspectDefinition, List<IAopReference>>();
-            for (IAopReference r : this.aspectReferences) {
-                if (refs.containsKey(r.getDefinition())) {
-                    refs.get(r.getDefinition()).add(r);
-                }
-                else {
-                    List<IAopReference> ref = new ArrayList<IAopReference>();
-                    ref.add(r);
-                    refs.put(r.getDefinition(), ref);
-                }
+        // add method children
+        if (this.children != null && this.children.size() > 0) {
+            nodes.addAll(this.children);
+        }
+        Map<IAspectDefinition, List<IAopReference>> dRefs = new HashMap<IAspectDefinition, List<IAopReference>>();
+        for (IAopReference r : getDeclareParentReferences()) {
+            if (dRefs.containsKey(r.getDefinition())) {
+                dRefs.get(r.getDefinition()).add(r);
             }
-            for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : refs.entrySet()) {
-                nodes.add(new AdviceAopTargetNode(entry.getValue()));
+            else {
+                List<IAopReference> ref = new ArrayList<IAopReference>();
+                ref.add(r);
+                dRefs.put(r.getDefinition(), ref);
             }
         }
-        if (this.adviseReferences.size() > 0) {
-            nodes.add(new AdvisedAopReferenceNode(this.adviseReferences));
+        for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : dRefs.entrySet()) {
+            nodes.add(new AdviceDeclareParentAopSourceNode(entry.getValue()));
+        }
+        if (getDeclaredOnReferences().size() > 0) {
+            nodes.add(new AdvisedDeclareParentAopReferenceNode(getDeclaredOnReferences()));
         }
         return nodes.toArray(new IReferenceNode[nodes.size()]);
     }
@@ -79,8 +88,8 @@ public class BeanMethodReferenceNode implements IReferenceNode,
 
     public String getText() {
         if (element instanceof IType) {
-            return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element)
-                    + " - " + BeansAopUtils.getPackageLinkName(element);
+            return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element) + " - "
+                    + BeansAopUtils.getPackageLinkName(element);
         }
         else {
             return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element);
@@ -88,8 +97,8 @@ public class BeanMethodReferenceNode implements IReferenceNode,
     }
 
     public boolean hasChildren() {
-        return this.aspectReferences.size() > 0
-                || this.adviseReferences.size() > 0;
+        return (children != null && children.size() > 0) || declareParentReferences.size() > 0
+                || declaredOnReferences.size() > 0;
     }
 
     public void openAndReveal() {
@@ -109,8 +118,5 @@ public class BeanMethodReferenceNode implements IReferenceNode,
     public IResource getResource() {
         return element.getResource();
     }
-    
-    public IJavaElement getJavaElement() {
-        return this.element;
-    }
+
 }

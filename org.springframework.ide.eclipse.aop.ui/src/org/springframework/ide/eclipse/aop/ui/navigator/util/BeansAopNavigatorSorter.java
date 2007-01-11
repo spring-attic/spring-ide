@@ -50,7 +50,7 @@ public class BeansAopNavigatorSorter extends ViewerSorter {
                 }
             }
             else {
-                super.compare(viewer, e1, e2);
+                super.compare(viewer, ref1.getResource(), ref2.getResource());
             }
 		}
 		return super.compare(viewer, e1, e2);

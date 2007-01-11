@@ -16,12 +16,15 @@
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
+import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.AopUIImages;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
@@ -37,10 +40,22 @@ public class AdviceAopTargetNode implements IReferenceNode,
 
     public IReferenceNode[] getChildren() {
         List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
+        Map<IAspectDefinition, List<IAopReference>> refs = new HashMap<IAspectDefinition, List<IAopReference>>();
         for (IAopReference r : this.references) {
-            nodes.add(new AdviceAopTargetMethodNode(r));
+            if (refs.containsKey(r.getDefinition())) {
+                refs.get(r.getDefinition()).add(r);
+            }
+            else {
+                List<IAopReference> ref = new ArrayList<IAopReference>();
+                ref.add(r);
+                refs.put(r.getDefinition(), ref);
+            }
+        }
+        for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : refs.entrySet()) {
+            nodes.add(new AdviceAopReferenceNode(entry.getValue()));
         }
         return nodes.toArray(new IReferenceNode[nodes.size()]);
+        //return new IReferenceNode[] {new AdviceAopReferenceNode(references)};
     }
 
     public Image getImage() {

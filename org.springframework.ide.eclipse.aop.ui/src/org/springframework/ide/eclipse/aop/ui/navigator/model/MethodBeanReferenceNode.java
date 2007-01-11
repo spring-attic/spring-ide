@@ -31,8 +31,9 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 
-public class BeanMethodReferenceNode implements IReferenceNode,
+public class MethodBeanReferenceNode implements IReferenceNode,
         IRevealableReferenceNode {
 
     protected IJavaElement element;
@@ -41,7 +42,7 @@ public class BeanMethodReferenceNode implements IReferenceNode,
 
     private List<IAopReference> adviseReferences = new ArrayList<IAopReference>();
 
-    public BeanMethodReferenceNode(IMember member,
+    public MethodBeanReferenceNode(IMember member,
             List<IAopReference> aspectReferences,
             List<IAopReference> adviseReferences) {
         this.element = member;
@@ -68,7 +69,20 @@ public class BeanMethodReferenceNode implements IReferenceNode,
             }
         }
         if (this.adviseReferences.size() > 0) {
-            nodes.add(new AdvisedAopReferenceNode(this.adviseReferences));
+            Map<IBean, List<IAopReference>> refs = new HashMap<IBean, List<IAopReference>>();
+            for (IAopReference r : this.adviseReferences) {
+                if (refs.containsKey(r.getTargetBean())) {
+                    refs.get(r.getTargetBean()).add(r);
+                }
+                else {
+                    List<IAopReference> ref = new ArrayList<IAopReference>();
+                    ref.add(r);
+                    refs.put(r.getTargetBean(), ref);
+                }
+            }
+            for (Map.Entry<IBean, List<IAopReference>> entry : refs.entrySet()) {
+                nodes.add(new AdvisedAopTargetBeanNode(entry.getValue()));
+            }
         }
         return nodes.toArray(new IReferenceNode[nodes.size()]);
     }

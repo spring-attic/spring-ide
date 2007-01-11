@@ -99,7 +99,7 @@ public class BeansAopNavigator
                     expandTree(item.getItems(), true);
                 }
                 else {
-                    expandTree(item.getItems(), false);
+                    expandTree(item.getItems(), b);
                 }
                 if (b) {
                     item.setExpanded(false);
