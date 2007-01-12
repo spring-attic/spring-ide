@@ -46,6 +46,8 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.internal.Workbench;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
+import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
+import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
@@ -773,5 +775,40 @@ public class BeansEditorUtils {
 
     public static String getClassNameForBean(Node bean) {
         return getAttribute(bean, "class");
+    }
+    
+    public static IFile getResource(ContentAssistRequest request) {
+        IResource resource = null;
+        String baselocation = null;
+
+        if (request != null) {
+            IStructuredDocumentRegion region = request.getDocumentRegion();
+            if (region != null) {
+                IDocument document = region.getParentDocument();
+                IStructuredModel model = null;
+                try {
+                    model = org.eclipse.wst.sse.core.StructuredModelManager.getModelManager()
+                            .getExistingModelForRead(document);
+                    if (model != null) {
+                        baselocation = model.getBaseLocation();
+                    }
+                }
+                finally {
+                    if (model != null) {
+                        model.releaseFromRead();
+                    }
+                }
+            }
+        }
+
+        if (baselocation != null) {
+            // copied from JSPTranslationAdapter#getJavaProject
+            IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+            IPath filePath = new Path(baselocation);
+            if (filePath.segmentCount() > 0) {
+                resource = root.getFile(filePath);
+            }
+        }
+        return (IFile) resource;
     }
 }

@@ -32,12 +32,14 @@ import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector.Statics;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorJavaCompletionUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.AbstractContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.INamespaceContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.BeanReferenceSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PointcutReferenceSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PublicMethodSearchRequestor;
+import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -45,6 +47,7 @@ import org.w3c.dom.NodeList;
 /**
  * Main entry point for the Spring beans xml editor's content assist.
  */
+@SuppressWarnings("restriction")
 public class AopContentAssistProcessor
         extends AbstractContentAssistProcessor implements
         INamespaceContentAssistProcessor {
@@ -54,7 +57,7 @@ public class AopContentAssistProcessor
         if (prefix == null) {
             prefix = "";
         }
-        IFile file = getResource(request);
+        IFile file = BeansEditorUtils.getResource(request);
         if (document != null) {
             BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(
                     request);
@@ -98,11 +101,47 @@ public class AopContentAssistProcessor
             addPointcutReferenceProposals(request, matchString, node, node
                     .getOwnerDocument());
         }
+        if ("default-impl".equals(attributeName)) {
+            String implementInterface = BeansEditorUtils.getAttribute(node, "implement-interface");
+            if (StringUtils.hasText(implementInterface)) {
+                addCollectionTypesAttributeValueProposals(request, matchString, implementInterface);
+            }
+            else {
+                addClassAttributeValueProposals(request, matchString, false);
+            }
+        }
+        if ("implement-interface".equals(attributeName)) {
+            addClassAttributeValueProposals(request, matchString, true);
+        }
         if ("method".equals(attributeName)
                 && "aspect".equals(node.getParentNode().getLocalName())
                 && BeansEditorUtils.hasAttribute(node.getParentNode(), "ref")) {
             addMethodAttributeValueProposals(request, matchString, node);
         }
+    }
+    
+    private void addClassAttributeValueProposals(ContentAssistRequest request,
+            String prefix, boolean interfaceRequired) {
+
+        if (prefix == null || prefix.length() == 0) {
+            delegatingContextAssistProcessor
+                    .setErrorMessage("Prefix too short for class content assist");
+            return;
+        }
+        BeansEditorJavaCompletionUtils.addClassValueProposals(request, prefix, interfaceRequired);
+    }
+    
+    private void addCollectionTypesAttributeValueProposals(ContentAssistRequest request,
+            final String prefix, String typeName) {
+
+        if (prefix == null || prefix.length() == 0) {
+            delegatingContextAssistProcessor
+                    .setErrorMessage("Prefix too short for class content assist");
+            return;
+        }
+
+        BeansEditorJavaCompletionUtils.addTypeHierachyAttributeValueProposals(request, prefix,
+                typeName);
     }
 
     private void addPointcutReferenceProposals(ContentAssistRequest request,
@@ -110,7 +149,7 @@ public class AopContentAssistProcessor
         if (prefix == null) {
             prefix = "";
         }
-        IFile file = getResource(request);
+        IFile file = BeansEditorUtils.getResource(request);
         if (document != null) {
             PointcutReferenceSearchRequestor requestor = new PointcutReferenceSearchRequestor(
                     request);
@@ -139,7 +178,7 @@ public class AopContentAssistProcessor
         String ref = BeansEditorUtils.getAttribute(parentNode, "ref");
         
         if (ref != null) {
-            IFile file = (IFile) getResource(request);
+            IFile file = (IFile) BeansEditorUtils.getResource(request);
             String className = BeansEditorUtils.getClassNameForBean(file, node
                     .getOwnerDocument(), ref);
             IType type = BeansModelUtils.getJavaType(file.getProject(),

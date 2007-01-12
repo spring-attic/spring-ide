@@ -16,15 +16,7 @@
 
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegionList;
@@ -38,6 +30,7 @@ import org.w3c.dom.Node;
 /**
  * Main entry point for the Spring beans xml editor's content assist.
  */
+@SuppressWarnings("restriction")
 public abstract class AbstractContentAssistProcessor implements
         INamespaceContentAssistProcessor {
 
@@ -202,41 +195,7 @@ public abstract class AbstractContentAssistProcessor implements
      * @param request
      * @return
      */
-    protected IFile getResource(ContentAssistRequest request) {
-        IResource resource = null;
-        String baselocation = null;
-
-        if (request != null) {
-            IStructuredDocumentRegion region = request.getDocumentRegion();
-            if (region != null) {
-                IDocument document = region.getParentDocument();
-                IStructuredModel model = null;
-                try {
-                    model = org.eclipse.wst.sse.core.StructuredModelManager
-                            .getModelManager()
-                            .getExistingModelForRead(document);
-                    if (model != null) {
-                        baselocation = model.getBaseLocation();
-                    }
-                }
-                finally {
-                    if (model != null) {
-                        model.releaseFromRead();
-                    }
-                }
-            }
-        }
-
-        if (baselocation != null) {
-            // copied from JSPTranslationAdapter#getJavaProject
-            IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-            IPath filePath = new Path(baselocation);
-            if (filePath.segmentCount() > 0) {
-                resource = root.getFile(filePath);
-            }
-        }
-        return (IFile) resource;
-    }
+    
 
     protected BeansTemplateCompletionProcessor getTemplateCompletionProcessor() {
         if (templateProcessor == null) {
@@ -244,4 +203,6 @@ public abstract class AbstractContentAssistProcessor implements
         }
         return templateProcessor;
     }
+    
+    
 } 

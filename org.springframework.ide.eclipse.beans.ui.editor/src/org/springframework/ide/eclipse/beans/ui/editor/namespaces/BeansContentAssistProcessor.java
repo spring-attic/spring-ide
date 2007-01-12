@@ -17,7 +17,6 @@
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -25,20 +24,9 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
-import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
-import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegion;
 import org.eclipse.wst.xml.core.internal.document.AttrImpl;
@@ -48,11 +36,9 @@ import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector.Statics;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorJavaCompletionUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.AbstractContentAssistProcessor;
-import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposal;
-import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposalCollector;
-import org.springframework.ide.eclipse.beans.ui.editor.contentassist.CompilationUnitHelper;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.BeanReferenceSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.FactoryMethodSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PropertyNameSearchRequestor;
@@ -72,23 +58,12 @@ import org.w3c.dom.Node;
 public class BeansContentAssistProcessor
         extends AbstractContentAssistProcessor {
 
-    private static final String CLASS_SOURCE_END = "\n" + "    }\n" + "}";
-
-    private static final String CLASS_SOURCE_START = "public class _xxx {\n"
-            + "    public void main(String[] args) {\n" + "        ";
-
-    private CompletionProposalComparator comparator;
-
-    public BeansContentAssistProcessor() {
-        comparator = new CompletionProposalComparator();
-    }
-
     private void addBeanReferenceProposals(ContentAssistRequest request,
             String prefix, Document document, boolean showExternal) {
         if (prefix == null) {
             prefix = "";
         }
-        IFile file = (IFile) getResource(request);
+        IFile file = (IFile) BeansEditorUtils.getResource(request);
         if (document != null) {
             BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(
                     request);
@@ -115,74 +90,14 @@ public class BeansContentAssistProcessor
                     .setErrorMessage("Prefix too short for class content assist");
             return;
         }
-
-        try {
-            IFile file = (IFile) getResource(request);
-            IJavaProject project = JavaCore.create(file.getProject());
-            IPackageFragment root = project.getPackageFragments()[0];
-            ICompilationUnit unit = root.getCompilationUnit("_xxx.java")
-                    .getWorkingCopy(
-                            CompilationUnitHelper.getInstance()
-                                    .getWorkingCopyOwner(),
-                            CompilationUnitHelper.getInstance()
-                                    .getProblemRequestor(),
-                            BeansEditorUtils.getProgressMonitor());
-            String source = CLASS_SOURCE_START + prefix + CLASS_SOURCE_END;
-            setContents(unit, source);
-
-            BeansJavaCompletionProposalCollector collector = new BeansJavaCompletionProposalCollector(
-                    unit);
-            unit.codeComplete(CLASS_SOURCE_START.length() + prefix.length(),
-                    collector, DefaultWorkingCopyOwner.PRIMARY);
-
-            IJavaCompletionProposal[] props = collector
-                    .getJavaCompletionProposals();
-
-            ICompletionProposal[] proposals = order(props);
-
-            for (int i = 0; i < proposals.length; i++) {
-                ICompletionProposal comProposal = proposals[i];
-                processJavaCompletionProposal(request, comProposal);
-            }
-        }
-        catch (Exception e) {
-            // do nothing
-        }
+        BeansEditorJavaCompletionUtils.addClassValueProposals(request, prefix);
     }
-
-    protected void processJavaCompletionProposal(ContentAssistRequest request,
-            ICompletionProposal comProposal) {
-        if (comProposal instanceof JavaCompletionProposal) {
-            JavaCompletionProposal prop = (JavaCompletionProposal) comProposal;
-            BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-                    prop.getReplacementString(), request
-                            .getReplacementBeginPosition(), request
-                            .getReplacementLength(), prop
-                            .getReplacementString().length(), prop.getImage(),
-                    prop.getDisplayString(), null, prop
-                            .getAdditionalProposalInfo(), prop.getRelevance());
-
-            request.addProposal(proposal);
-        }
-        else if (comProposal instanceof LazyJavaTypeCompletionProposal) {
-            LazyJavaTypeCompletionProposal prop = (LazyJavaTypeCompletionProposal) comProposal;
-            BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-                    prop.getQualifiedTypeName(), request
-                            .getReplacementBeginPosition(), request
-                            .getReplacementLength(), prop
-                            .getQualifiedTypeName().length(), prop.getImage(),
-                    prop.getDisplayString(), null, prop
-                            .getAdditionalProposalInfo(), prop.getRelevance());
-
-            request.addProposal(proposal);
-        }
-    }
-
+    
     private void addFactoryMethodAttributeValueProposals(
             ContentAssistRequest request, String prefix,
             String factoryClassName, boolean isStatic) {
-        if (getResource(request) instanceof IFile) {
-            IFile file = (IFile) getResource(request);
+        if (BeansEditorUtils.getResource(request) instanceof IFile) {
+            IFile file = (IFile) BeansEditorUtils.getResource(request);
             IType type = BeansModelUtils.getJavaType(file.getProject(),
                     factoryClassName);
             if (type != null) {
@@ -212,8 +127,8 @@ public class BeansContentAssistProcessor
 
     private void addInitDestroyAttributeValueProposals(
             ContentAssistRequest request, String prefix, String className) {
-        if (getResource(request) instanceof IFile) {
-            IFile file = (IFile) getResource(request);
+        if (BeansEditorUtils.getResource(request) instanceof IFile) {
+            IFile file = (IFile) BeansEditorUtils.getResource(request);
             IType type = BeansModelUtils.getJavaType(file.getProject(),
                     className);
             if (type != null) {
@@ -268,7 +183,7 @@ public class BeansContentAssistProcessor
                             IMethod method = (IMethod) iterator.next();
                             IType returnType = BeansEditorUtils
                                     .getTypeForMethodReturnType(method, type,
-                                            (IFile) getResource(request));
+                                            (IFile) BeansEditorUtils.getResource(request));
                             if (returnType != null) {
                                 List<IType> typesTemp = new ArrayList<IType>();
                                 typesTemp.add(returnType);
@@ -337,7 +252,7 @@ public class BeansContentAssistProcessor
                 if (factoryBean != null) {
                     // instance factory method
                     factoryClassName = BeansEditorUtils.getClassNameForBean(
-                            (IFile) getResource(request), node
+                            (IFile) BeansEditorUtils.getResource(request), node
                                     .getOwnerDocument(), factoryBean
                                     .getNodeValue());
                     isStatic = false;
@@ -345,7 +260,7 @@ public class BeansContentAssistProcessor
                 else {
                     // static factory method
                     List list = BeansEditorUtils.getClassNamesOfBean(
-                            (IFile) getResource(request), node);
+                            (IFile) BeansEditorUtils.getResource(request), node);
                     factoryClassName = (list.size() != 0 ? ((IType) list.get(0))
                             .getFullyQualifiedName()
                             : null);
@@ -370,7 +285,7 @@ public class BeansContentAssistProcessor
 
             if ("name".equals(attributeName) && parentAttributes != null) {
                 List classNames = BeansEditorUtils.getClassNamesOfBean(
-                        (IFile) getResource(request), parentNode);
+                        (IFile) BeansEditorUtils.getResource(request), parentNode);
                 addPropertyNameAttributeValueProposals(request, matchString,
                         "", parentNode, classNames);
             }
@@ -418,41 +333,7 @@ public class BeansContentAssistProcessor
             }
         }
     }
-
-    /**
-     * Order the given proposals.
-     */
-    @SuppressWarnings("unchecked")
-    private ICompletionProposal[] order(ICompletionProposal[] proposals) {
-        Arrays.sort(proposals, comparator);
-        return proposals;
-    }
-
-    /**
-     * Set contents of the compilation unit to the translated jsp text.
-     * 
-     * @param the ICompilationUnit on which to set the buffer contents
-     */
-    private void setContents(ICompilationUnit cu, String source) {
-        if (cu == null)
-            return;
-
-        synchronized (cu) {
-            IBuffer buffer;
-            try {
-
-                buffer = cu.getBuffer();
-            }
-            catch (JavaModelException e) {
-                e.printStackTrace();
-                buffer = null;
-            }
-
-            if (buffer != null)
-                buffer.setContents(source);
-        }
-    }
-
+    
     @Override
     protected void computeAttributeNameProposals(ContentAssistRequest request,
             String prefix, String namespace, String namespacePrefix,
@@ -482,7 +363,7 @@ public class BeansContentAssistProcessor
             }
 
             List classNames = BeansEditorUtils.getClassNamesOfBean(
-                    getResource(request), attributeNode);
+                    BeansEditorUtils.getResource(request), attributeNode);
             addPropertyNameAttributeNameProposals(request, prefix, "",
                     attributeNode, classNames, attrAtLocationHasValue,
                     namespacePrefix);
@@ -518,7 +399,7 @@ public class BeansContentAssistProcessor
                             IMethod method = (IMethod) iterator.next();
                             IType returnType = BeansEditorUtils
                                     .getTypeForMethodReturnType(method, type,
-                                            getResource(request));
+                                            BeansEditorUtils.getResource(request));
 
                             if (returnType != null) {
                                 List<IType> typesTemp = new ArrayList<IType>();
