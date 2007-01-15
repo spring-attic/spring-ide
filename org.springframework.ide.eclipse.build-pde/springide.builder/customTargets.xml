@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project name="Build specific targets and properties" default="noDefault">
 
 	<!-- ===================================================================== -->
@@ -170,7 +171,7 @@
 		<copy file="${builder}/../site.xml" tofile="${UpdateSiteStagingLocation}/site.xml" />
 	</target>
 	<target name="createNightlyBuildSiteXml" if="isNightlyBuild">
-		<replace file="${UpdateSiteStagingLocation}/site.xml" token="@VERSION@" value="${forceContextQualifier}" />
+		<replace file="${UpdateSiteStagingLocation}/site.xml" token="@VERSION@" value="${forceContextQualifier}" summary="yes"/>
 	</target>
 	<target name="createNightlyBuildDist">
 		<property name="buildDist.name" value="${sitePackagePrefix}_${sitePackageVersion}_${forceContextQualifier}"/>
