@@ -145,6 +145,7 @@
 		<property name="UpdateSiteStagingLocation" value="${buildDirectory}/updatesite_dev" />
 		<property name="sitePackagePrefix" value="springide_updatesite_dev" />
 		<property name="sitePackageVersion" value="2.0-m2" />
+		<property name="featureVersion" value="1.9.1" />
 		<antcall target="generateUpdateSite" />
 	</target>
 	<target name="generateUpdateSite">
@@ -169,16 +170,27 @@
 		</ant>
 	</target>
 	<target name="copyNightlyBuildSiteXml" unless="isNightlyBuild">
-		<copy file="${builder}/../site.xml" tofile="${UpdateSiteStagingLocation}/site.xml" />
+		<copy file="${builder}/../site.xml" tofile="${UpdateSiteStagingLocation}/site.xml" overwrite="false" />
 	</target>
 	<target name="createNightlyBuildSiteXml" unless="isNightlyBuild">
-		<replace file="${UpdateSiteStagingLocation}/site.xml" token="@VERSION@" value="${forceContextQualifier}" summary="yes" />
+		<replace file="${UpdateSiteStagingLocation}/site.xml" summary="yes">
+			<replacetoken>
+				<![CDATA[<category-def name="Spring IDE" label="Spring IDE" />]]>
+			</replacetoken>
+			<replacevalue>
+				<![CDATA[<feature
+				url="features/org.springframework.ide.eclipse.feature_${featureVersion}.${forceContextQualifier}.jar"
+				id="org.springframework.ide.eclipse" version="${featureVersion}.${forceContextQualifier}">
+				<category name="Spring IDE" />
+			</feature>]]>
+			</replacevalue>
+		</replace>
 	</target>
 	<target name="createNightlyBuildDist">
 		<property name="buildDist.name" value="${sitePackagePrefix}_${sitePackageVersion}_${forceContextQualifier}" />
 		<property name="buildDist.file" value="${UpdateSiteStagingLocation}/${buildDist.name}.zip" />
 		<zip zipfile="${buildDist.file}" filesonly="true">
-			<zipfileset dir="${UpdateSiteStagingLocation}" includes="features/*, plugins/*, site.xml" />
+			<zipfileset dir="${UpdateSiteStagingLocation}" includes="features/*${forceContextQualifier}*, plugins/*${forceContextQualifier}*, site.xml" />
 		</zip>
 	</target>
 	<target name="publishToUpdateSiteDev" if="publishToServer">
