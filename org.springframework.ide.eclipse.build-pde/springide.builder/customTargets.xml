@@ -160,6 +160,7 @@
 		<antcall target="copyNightlyBuildSiteXml" />
 		<antcall target="createNightlyBuildSiteXml" />
 		<antcall target="createNightlyBuildDist" />
+		<antcall target="publishToUpdateSiteDev" />
 	</target>
 	<target name="updateSiteExport">
 		<ant antfile="build.xml" dir="${buildDirectory}/features/${id}/" target="build.update.jar">
@@ -171,16 +172,21 @@
 		<copy file="${builder}/../site.xml" tofile="${UpdateSiteStagingLocation}/site.xml" />
 	</target>
 	<target name="createNightlyBuildSiteXml" unless="isNightlyBuild">
-		<replace file="${UpdateSiteStagingLocation}/site.xml" token="@VERSION@" value="${forceContextQualifier}" summary="yes"/>
+		<replace file="${UpdateSiteStagingLocation}/site.xml" token="@VERSION@" value="${forceContextQualifier}" summary="yes" />
 	</target>
 	<target name="createNightlyBuildDist">
-		<property name="buildDist.name" value="${sitePackagePrefix}_${sitePackageVersion}_${forceContextQualifier}"/>
-		<property name="buildDist.file" value="${UpdateSiteStagingLocation}/${buildDist.name}.zip"/>
-	    <zip zipfile="${buildDist.file}" filesonly="true">
-	      <zipfileset dir="${UpdateSiteStagingLocation}"
-	                  includes="features/*, plugins/*, site.xml"/>
-	    </zip>
-	  </target>
+		<property name="buildDist.name" value="${sitePackagePrefix}_${sitePackageVersion}_${forceContextQualifier}" />
+		<property name="buildDist.file" value="${UpdateSiteStagingLocation}/${buildDist.name}.zip" />
+		<zip zipfile="${buildDist.file}" filesonly="true">
+			<zipfileset dir="${UpdateSiteStagingLocation}" includes="features/*, plugins/*, site.xml" />
+		</zip>
+	</target>
+	<target name="publishToUpdateSiteDev" if="publishToServer">
+		<property name="publish.directory" value="${user.home}/htdocs/updatesite_nightly" />
+		<copy todir="${publish.directory}">
+			<fileset dir="${UpdateSiteStagingLocation}" />
+		</copy>
+	</target>
 
 	<!-- ===================================================================== -->
 	<!-- Steps to do to test the build results -->
