@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<?eclipse version="3.0"?>
-<plugin
-   id="org.springframework.ide.eclipse"
-   name="%pluginName"
-   version="1.9.0"
-   provider-name="%providerName">
-
-</plugin>

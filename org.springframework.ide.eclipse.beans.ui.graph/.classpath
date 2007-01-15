@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="/org.springframework.ide.eclipse.core/spring-core.jar" sourcepath="/Users/torsten/Develop/EclipseWorkspace.32/spring/src"/>
-	<classpathentry kind="lib" path="/org.springframework.ide.eclipse.core/spring-beans.jar"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>

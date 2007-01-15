@@ -7,7 +7,5 @@
 			<accessrule kind="accessible" pattern="*"/>
 		</accessrules>
 	</classpathentry>
-	<classpathentry kind="lib" path="/org.springframework.ide.eclipse.core/spring-core.jar"/>
-	<classpathentry kind="lib" path="/org.springframework.ide.eclipse.core/spring-beans.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

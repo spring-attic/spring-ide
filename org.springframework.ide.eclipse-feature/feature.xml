@@ -2,7 +2,7 @@
 <feature
       id="org.springframework.ide.eclipse"
       label="%featureName"
-      version="1.9.0"
+      version="1.9.1"
       provider-name="%providerName">
 
    <description>

@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.springframework.ide.eclipse.ui; singleton:=true
+Bundle-Version: 1.9.1
+Bundle-Localization: plugin
+Bundle-Vendor: %providerName
+Bundle-ClassPath: ui.jar
+Bundle-Activator: org.springframework.ide.eclipse.ui.SpringUIPlugin
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.eclipse.ui,
+ org.eclipse.ui.ide,
+ org.eclipse.jface.text,
+ org.eclipse.ui,
+ org.eclipse.ui.ide,
+ org.eclipse.ui.views,
+ org.eclipse.ui.workbench.texteditor,
+ org.eclipse.ui.editors,
+ org.eclipse.jdt.core,
+ org.eclipse.jdt.ui,
+ org.springframework.ide.eclipse.core
+Export-Package: org.springframework.ide.eclipse.ui,
+ org.springframework.ide.eclipse.ui.dialogs,
+ org.springframework.ide.eclipse.ui.editors,
+ org.springframework.ide.eclipse.ui.viewers
