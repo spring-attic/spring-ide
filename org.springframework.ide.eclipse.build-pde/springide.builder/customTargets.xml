@@ -170,7 +170,7 @@
 	<target name="copyNightlyBuildSiteXml" unless="isNightlyBuild">
 		<copy file="${builder}/../site.xml" tofile="${UpdateSiteStagingLocation}/site.xml" />
 	</target>
-	<target name="createNightlyBuildSiteXml" if="isNightlyBuild">
+	<target name="createNightlyBuildSiteXml" unless="isNightlyBuild">
 		<replace file="${UpdateSiteStagingLocation}/site.xml" token="@VERSION@" value="${forceContextQualifier}" summary="yes"/>
 	</target>
 	<target name="createNightlyBuildDist">
