@@ -182,7 +182,8 @@
 				url="features/org.springframework.ide.eclipse.feature_${featureVersion}.${forceContextQualifier}.jar"
 				id="org.springframework.ide.eclipse" version="${featureVersion}.${forceContextQualifier}">
 				<category name="Spring IDE" />
-			</feature>]]>
+			</feature>
+			<category-def name="Spring IDE" label="Spring IDE" />]]>
 			</replacevalue>
 		</replace>
 	</target>
