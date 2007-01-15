@@ -3,16 +3,16 @@
 ! <type>@<id>=SVN,<tag>[:revision],<svnRepositoryURL>,<preTagPath>,<postTagPath>
 !*******************************************************************************************
  
-feature@org.springframework.ide.eclipse.feature=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.feature
+feature@org.springframework.ide.eclipse.feature=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.feature
 
-plugin@org.springframework.ide.eclipse=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse
-plugin@org.springframework.ide.eclipse.beans.core=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.beans.core
-plugin@org.springframework.ide.eclipse.beans.ui=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.beans.ui
-plugin@org.springframework.ide.eclipse.beans.ui.editor=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.beans.ui.editor
-plugin@org.springframework.ide.eclipse.beans.ui.graph=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.beans.ui.graph
-plugin@org.springframework.ide.eclipse.beans.ui.navigator=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.beans.ui.navigator
-plugin@org.springframework.ide.eclipse.beans.ui.search=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.beans.ui.search
-plugin@org.springframework.ide.eclipse.core.doc=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.core.doc
-plugin@org.springframework.ide.eclipse.core=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.core
-plugin@org.springframework.ide.eclipse.core.doc=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.core.doc
-plugin@org.springframework.ide.eclipse.ui=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.ui
+plugin@org.springframework.ide.eclipse=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse
+plugin@org.springframework.ide.eclipse.beans.core=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.beans.core
+plugin@org.springframework.ide.eclipse.beans.ui=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.beans.ui
+plugin@org.springframework.ide.eclipse.beans.ui.editor=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.beans.ui.editor
+plugin@org.springframework.ide.eclipse.beans.ui.graph=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.beans.ui.graph
+plugin@org.springframework.ide.eclipse.beans.ui.navigator=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.beans.ui.navigator
+plugin@org.springframework.ide.eclipse.beans.ui.search=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.beans.ui.search
+plugin@org.springframework.ide.eclipse.core.doc=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.core.doc
+plugin@org.springframework.ide.eclipse.core=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.core
+plugin@org.springframework.ide.eclipse.core.doc=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.core.doc
+plugin@org.springframework.ide.eclipse.ui=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.ui
