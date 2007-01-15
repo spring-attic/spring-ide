@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.springframework.ide.eclipse"
+      id="org.springframework.ide.eclipse.feature"
       label="%featureName"
       version="1.9.1"
       provider-name="%providerName">
