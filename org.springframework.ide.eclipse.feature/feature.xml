@@ -3,7 +3,8 @@
       id="org.springframework.ide.eclipse.feature"
       label="%featureName"
       version="1.9.1.qualifier"
-      provider-name="%providerName">
+      provider-name="%providerName"
+      plugin="org.springframework.ide.eclipse">
 
    <description>
       %description
@@ -13,19 +14,13 @@
       %copyright
    </copyright>
 
-   <license url="http://www.apache.org/licenses/LICENSE-2.0">
+   <license url="%licenseUrl">
       %license
    </license>
 
    <url>
       <update label="%updateSiteName" url="http://springide.org/updatesite/"/>
    </url>
-
-   <requires>
-      <import feature="org.apache.xerces.feature" version="2.8.0" match="greaterOrEqual"/>
-      <import feature="org.eclipse.wst.xml_ui.feature" version="1.5.0" match="greaterOrEqual"/>
-      <import feature="org.eclipse.jdt" version="3.2.0" match="greaterOrEqual"/>
-   </requires>
 
    <plugin
          id="org.springframework.ide.eclipse"
