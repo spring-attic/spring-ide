@@ -142,7 +142,7 @@
 	<!-- ===================================================================== -->
 	<target name="postBuild">
 		<antcall target="gatherLogs" />
-		<property name="UpdateSiteStagingLocation" value="${buildDirectory}/updatesite_dev" />
+		<property name="UpdateSiteStagingLocation" value="${buildDirectory}/../../updatesite_nightly" />
 		<property name="sitePackagePrefix" value="springide_updatesite_dev" />
 		<property name="sitePackageVersion" value="2.0-m2" />
 		<property name="featureVersion" value="1.9.1" />
@@ -177,12 +177,14 @@
 			<replacetoken><![CDATA[<category-def name="Spring IDE" label="Spring IDE" />]]></replacetoken>
 			<replacevalue><![CDATA[
 	<feature
-		url="features/org.springframework.ide.eclipse.feature_${featureVersion}.${forceContextQualifier}.jar"
-		id="org.springframework.ide.eclipse.feature" version="${featureVersion}.${forceContextQualifier}">
+		url="features/org.springframework.ide.eclipse.feature_@VERSION@.jar"
+		id="org.springframework.ide.eclipse.feature" version="@VERSION@">
 		<category name="Spring IDE" />
 	</feature>
-	<category-def name="Spring IDE" label="Spring IDE" />]]></replacevalue>
+	
+        <category-def name="Spring IDE" label="Spring IDE" />]]></replacevalue>
 		</replace>
+                <replace file="${UpdateSiteStagingLocation}/site.xml" token="@VERSION@" value="${featureVersion}.${forceContextQualifier}" summary="yes"/>
 	</target>
 	<target name="createNightlyBuildDist">
 		<property name="buildDist.name" value="${sitePackagePrefix}_${sitePackageVersion}_${forceContextQualifier}" />
