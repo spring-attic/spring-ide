@@ -16,3 +16,7 @@ plugin@org.springframework.ide.eclipse.core.doc=SVN,trunk,svn://localhost,,org.s
 plugin@org.springframework.ide.eclipse.core=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.core
 plugin@org.springframework.ide.eclipse.core.doc=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.core.doc
 plugin@org.springframework.ide.eclipse.ui=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.ui
+plugin@org.springframework.ide.eclipse.aop.core=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.aop.core
+plugin@org.springframework.ide.eclipse.aop.ui=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.aop.ui
+plugin@org.springframework.ide.eclipse.aop.ui.visualiser=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.aop.ui.visualiser
+plugin@org.springframework.ide.eclipse.aop.ui.xref=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.aop.ui.xref
