@@ -1,0 +1,64 @@
+<project name="packager" default="main" basedir=".">
+	<target name="init">
+		<mkdir dir="${workingDirectory}"/>
+		<mkdir dir="${downloadDirectory}"/>
+		<mkdir dir="${tempDirectory}"/>
+	</target>
+
+	<target name="retrieveMapFiles">
+	    <available property="mapsFetched" file="${workingDirectory}/all.maps"/>
+		<ant antfile="${customTargets}" target="getMapFiles" />
+		<concat destfile="${workingDirectory}/all.maps">
+			<fileset dir="${downloadDirectory}" includes="**/*.map"/>
+		</concat>
+	</target>
+	
+	<!-- take the content of all.maps, retrieve the files according to the filtering options (config, content), 
+	and generate a directory.txt for the rest of the process using config as a key, and containing the name of the zip and the directory -->
+	<target name="retrieveFiles">
+		<eclipse.fetchFilesGenerator map="${workingDirectory}/all.maps"
+									workingDirectory="${workingDirectory}"
+									configInfo="${config}"
+									contentFilter="${contentFilter}"
+									componentFilter="${componentFilter}"/>
+		<ant antfile="fetch.xml" dir="${workingDirectory}" />
+	</target>
+	
+	<!-- Process the directory.txt to create unzipper.xml, and run unzipper.xml-->
+	<target name="prepareResources">
+		<eclipse.unzipperBuilder 	workingDirectory="${workingDirectory}" 
+											configInfo="${config}"
+											packagePropertyFile="${packagingPropertyFile}"/>
+		<ant antfile="${workingDirectory}/unzipper.xml"/>
+	</target>
+
+	<!-- Generate an assemble script (assemble.xml) for the given features -->
+	<target name="generateAssembleScripts">
+		<eclipse.assembler featureList="${featureList}" 
+									workingDirectory="${workingDirectory}" 
+									configInfo="${config}" 
+									baseLocation="${tempDirectory}/${featurePaths}" 
+									packagePropertyFile="${packagingPropertyFile}" 
+									deltaPack="${deltaPack}"
+									archivesFormat="${archivesFormat}"/> 
+	</target>
+
+	<!-- Call the assemble.xml script -->
+	<target name="callAssembleScripts">
+		<ant antfile="package.all.xml" dir="${workingDirectory}"/>
+	</target>
+	
+	
+	<target name="main" description="Start the packager for a given config">
+		<property file="${packagingInfo}/packager.properties"/>
+		<property name="customTargets" location="${packagingInfo}/customTargets.xml"/>
+		<property name="packagingPropertyFile" location="${packagingInfo}/${packagingProperties}"/>
+		
+		<antcall target="init"/>
+		<antcall target="retrieveMapFiles"/>
+		<antcall target="retrieveFiles"/>
+		<antcall target="prepareResources"/>
+		<antcall target="generateAssembleScripts"/>
+		<antcall target="callAssembleScripts"/>
+	</target>
+</project>
