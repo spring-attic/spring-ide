@@ -5,7 +5,7 @@
 		(http://www.springframework.org/) within the Eclipse platform.
 	</description>
 	<feature
-		url="features/org.springframework.ide.eclipse_1.9.1.@VERSION@.jar"
+		url="features/org.springframework.ide.eclipse.feature_1.9.1.@VERSION@.jar"
 		id="org.springframework.ide.eclipse" version="1.9.1.@VERSION@">
 		<category name="Spring IDE" />
 	</feature>
