@@ -176,7 +176,7 @@
 		<property name="buildDist.name" value="${sitePackagePrefix}_${sitePackageVersion}_${forceContextQualifier}"/>
 		<property name="buildDist.file" value="${UpdateSiteStagingLocation}/${buildDist.name}.zip"/>
 	    <zip zipfile="${buildDist.file}" filesonly="true">
-	      <zipfileset dir="."
+	      <zipfileset dir="${UpdateSiteStagingLocation}"
 	                  includes="features/*, plugins/*, site.xml"/>
 	    </zip>
 	  </target>
