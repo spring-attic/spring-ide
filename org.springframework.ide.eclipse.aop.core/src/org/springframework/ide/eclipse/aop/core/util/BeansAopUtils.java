@@ -72,7 +72,7 @@ public class BeansAopUtils {
         return je.getElementName();
     }
 
-    private static String readableName(IMethod method) {
+    public static String readableName(IMethod method) {
 
         StringBuffer buffer = new StringBuffer(method.getElementName());
         buffer.append('(');

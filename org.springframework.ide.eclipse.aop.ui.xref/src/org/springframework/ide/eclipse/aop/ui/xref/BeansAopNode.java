@@ -19,6 +19,7 @@ import org.eclipse.contribution.xref.core.IXReferenceNode;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
@@ -27,7 +28,7 @@ import org.springframework.util.ObjectUtils;
 
 public class BeansAopNode implements IAdaptable, IXReferenceNode {
 
-    public enum TYPE {  
+    public enum TYPE {
         SOURCE, TARGET
     };
 
@@ -44,10 +45,17 @@ public class BeansAopNode implements IAdaptable, IXReferenceNode {
     }
 
     private void computeLabel() {
-        this.label = BeansAopUtils.getJavaElementLinkName(getJavaElement());
-        if (this.type.equals(TYPE.SOURCE)) {
-            this.label = this.label
-                    + BeansAopUtils.getElementDescription(reference);
+        if (getJavaElement() != null) {
+            if (getJavaElement() instanceof IMethod) {
+                this.label = getJavaElement().getParent().getElementName() + '.'
+                        + BeansAopUtils.readableName((IMethod) getJavaElement());
+            }
+            else {
+                this.label = getJavaElement().getElementName();
+            }
+        }
+        else {
+            this.label = reference.getDefinition().getAspectName();
         }
     }
 
@@ -91,21 +99,13 @@ public class BeansAopNode implements IAdaptable, IXReferenceNode {
     public boolean equals(Object obj) {
         if (obj instanceof BeansAopNode) {
             BeansAopNode other = (BeansAopNode) obj;
-            return getJavaElement().equals(other.getJavaElement())
-                    && getLabel().equals(other.getLabel())
-                    && getDefinition().getType() == other.getDefinition()
-                            .getType()
-                    && getDefinition().getAspectLineNumber() == other
-                            .getDefinition().getAspectLineNumber();
+            return getLabel().equals(other.getLabel());
         }
         return false;
     }
-    
+
     public int hashCode() {
-        int hashCode = ObjectUtils.nullSafeHashCode(getJavaElement());
-        hashCode = 29 * hashCode + getDefinition().getType().hashCode();
-        hashCode = 24 * hashCode + ObjectUtils.nullSafeHashCode(getLabel());
-        hashCode = getDefinition().getAspectLineNumber() * 2 + hashCode;
+        int hashCode = ObjectUtils.nullSafeHashCode(getLabel());
         return hashCode;
     }
 }
