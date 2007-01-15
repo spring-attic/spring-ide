@@ -142,7 +142,7 @@
 	<!-- ===================================================================== -->
 	<target name="postBuild">
 		<antcall target="gatherLogs" />
-		<property name="UpdateSiteStagingLocation" value="${buildDirectory}/updateSite" />
+		<property name="UpdateSiteStagingLocation" value="${buildDirectory}/updatesite_dev" />
 		<property name="sitePackagePrefix" value="springide_updatesite_dev" />
 		<property name="sitePackageVersion" value="2.0-m2" />
 		<antcall target="generateUpdateSite" />
