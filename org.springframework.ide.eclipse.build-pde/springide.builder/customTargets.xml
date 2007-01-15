@@ -142,7 +142,8 @@
 	<target name="postBuild">
 		<antcall target="gatherLogs" />
 		<property name="UpdateSiteStagingLocation" value="${buildDirectory}/updateSite" />
-		<property name="sitePackagePrefix" value="org.rubypeople.updatesite" />
+		<property name="sitePackagePrefix" value="springide_updatesite_dev" />
+		<property name="sitePackageVersion" value="2.0-m2" />
 		<antcall target="generateUpdateSite" />
 	</target>
 	<target name="generateUpdateSite">
@@ -157,6 +158,7 @@
 		</antcall>
 		<antcall target="copySiteXmlFromCvs" />
 		<antcall target="createNightlyBuildSiteXml" />
+		<antcall target="createNightlyBuildDist" />
 	</target>
 	<target name="updateSiteExport">
 		<ant antfile="build.xml" dir="${buildDirectory}/features/${id}/" target="build.update.jar">
@@ -170,6 +172,14 @@
 	<target name="createNightlyBuildSiteXml" if="isNightlyBuild">
 		<replace file="${UpdateSiteStagingLocation}/site.xml" token="@VERSION@" value="${forceContextQualifier}" />
 	</target>
+	<target name="createNightlyBuildDist">
+		<property name="buildDist.name" value="${sitePackagePrefix}_${sitePackageVersion}_${forceContextQualifier}"/>
+		<property name="buildDist.file" value="${UpdateSiteStagingLocation}/${buildDist.name}.zip"/>
+	    <zip zipfile="${buildDist.file}" filesonly="true">
+	      <zipfileset dir="."
+	                  includes="features/*, plugins/*, site.xml"/>
+	    </zip>
+	  </target>
 
 	<!-- ===================================================================== -->
 	<!-- Steps to do to test the build results -->
