@@ -176,12 +176,12 @@
 		<replace file="${UpdateSiteStagingLocation}/site.xml" summary="yes">
 			<replacetoken><![CDATA[<category-def name="Spring IDE" label="Spring IDE" />]]></replacetoken>
 			<replacevalue><![CDATA[
-				<feature
-					url="features/org.springframework.ide.eclipse.feature_${featureVersion}.${forceContextQualifier}.jar"
-					id="org.springframework.ide.eclipse.feature" version="${featureVersion}.${forceContextQualifier}">
-					<category name="Spring IDE" />
-				</feature>
-				<category-def name="Spring IDE" label="Spring IDE" />]]></replacevalue>
+	<feature
+		url="features/org.springframework.ide.eclipse.feature_${featureVersion}.${forceContextQualifier}.jar"
+		id="org.springframework.ide.eclipse.feature" version="${featureVersion}.${forceContextQualifier}">
+		<category name="Spring IDE" />
+	</feature>
+	<category-def name="Spring IDE" label="Spring IDE" />]]></replacevalue>
 		</replace>
 	</target>
 	<target name="createNightlyBuildDist">
