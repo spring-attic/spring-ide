@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
+import org.springframework.util.ObjectUtils;
 
 public abstract class AbstractNode implements INode {
 
@@ -248,6 +249,21 @@ public abstract class AbstractNode implements INode {
 			return element;
 		}
 		return null;
+	}
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof AbstractNode)) {
+			return false;
+		}
+		AbstractNode that = (AbstractNode) other;
+		return ObjectUtils.nullSafeEquals(this.name, that.name);
+	}
+
+	public int hashCode() {
+		return 29 * ObjectUtils.nullSafeHashCode(name);
 	}
 
 	public String toString() {
