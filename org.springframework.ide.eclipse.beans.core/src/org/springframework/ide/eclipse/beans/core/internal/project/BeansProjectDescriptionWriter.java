@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,12 +33,15 @@ import org.springframework.ide.eclipse.core.io.xml.XMLWriter;
 
 /**
  * This class saves the description of a Spring Beans project to an XML file.
+ * 
  * @author Torsten Juergeleit
  */
 public class BeansProjectDescriptionWriter implements
 		IBeansProjectDescriptionConstants {
+
 	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID
 			+ "/project/description/debug";
+
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
 
 	public static void write(IProject project,

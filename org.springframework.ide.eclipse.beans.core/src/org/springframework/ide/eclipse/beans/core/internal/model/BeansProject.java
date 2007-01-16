@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectD
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
@@ -49,8 +50,8 @@ public class BeansProject extends AbstractResourceModelElement implements
 	private IProject project;
 	private BeansProjectDescription description;
 
-	public BeansProject(IProject project) {
-		super(BeansCorePlugin.getModel(), project.getName());
+	public BeansProject(IBeansModel model, IProject project) {
+		super(model, project.getName());
 		this.project = project;
 	}
 
@@ -133,6 +134,10 @@ public class BeansProject extends AbstractResourceModelElement implements
 		}
 	}
 
+	public void addConfig(String config) {
+		getDescription().addConfig(config);
+	}
+
 	/**
 	 * Remove the given beans config from the list of configs and from all
 	 * config sets. Optionally (by setting <code>doSaveDescription</code> to
@@ -146,6 +151,10 @@ public class BeansProject extends AbstractResourceModelElement implements
 		if (getDescription().removeConfig(file) && doSaveDescription) {
 			saveDescription();
 		}
+	}
+
+	public void removeConfig(String configName) {
+		getDescription().removeConfig(configName);
 	}
 
 	public boolean hasConfig(IFile file) {
@@ -168,8 +177,16 @@ public class BeansProject extends AbstractResourceModelElement implements
 		}
 	}
 
+	public Set<String> getConfigNames() {
+		return getDescription().getConfigNames();
+	}
+
 	public Set<IBeansConfig> getConfigs() {
 		return getDescription().getConfigs();
+	}
+
+	public void removeConfigSet(String configSetName) {
+		getDescription().removeConfigSet(configSetName);
 	}
 
 	public boolean hasConfigSet(String configSetName) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,17 +57,27 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 			DEFAULT_NAMESPACE_CONTENT_PROVIDER = new
 					DefaultNamespaceContentProvider();
 
+	private boolean refresh;
 	private StructuredViewer viewer;
+
+	public BeansModelContentProvider() {
+		this(true);
+	}
+
+	public BeansModelContentProvider(boolean refresh) {
+		this.refresh = refresh;
+	}
 
 	public final void inputChanged(Viewer viewer, Object oldInput,
 			Object newInput) {
 		if (viewer instanceof StructuredViewer) {
 			this.viewer = (StructuredViewer) viewer;
-
-			if (oldInput == null && newInput != null) {
-				BeansCorePlugin.getModel().addChangeListener(this);
-			} else if (oldInput != null && newInput == null) {
-				BeansCorePlugin.getModel().removeChangeListener(this);
+			if (refresh) {
+				if (oldInput == null && newInput != null) {
+					BeansCorePlugin.getModel().addChangeListener(this);
+				} else if (oldInput != null && newInput == null) {
+					BeansCorePlugin.getModel().removeChangeListener(this);
+				}
 			}
 		} else {
 			this.viewer = null;
@@ -75,7 +85,7 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 	}
 
 	public final void dispose() {
-		if (viewer != null && viewer.getInput() != null) {
+		if (viewer != null && viewer.getInput() != null && refresh) {
 			BeansCorePlugin.getModel().removeChangeListener(this);
 		}
 	}
@@ -190,7 +200,7 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 			}
 		}
 		children.addAll(((IBeansProject) project).getConfigSets());
-		return children.toArray(new Object[children.size()]);
+		return children.toArray();
 	}
 
 	private Object[] getConfigSetChildren(IBeansConfigSet configSet) {
@@ -203,7 +213,7 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 				}
 			}
 		}
-		return beans.toArray(new IBean[beans.size()]);
+		return beans.toArray();
 	}
 
 	private Object[] getJavaTypeChildren(IType type) {
@@ -263,7 +273,7 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 	}
 
 	protected final void refreshViewerForElement(final Object element) {
-		if (viewer instanceof StructuredViewer) {
+		if (viewer instanceof StructuredViewer && element != null) {
 			Control ctrl = viewer.getControl();
 
 			// Are we in the UI thread?

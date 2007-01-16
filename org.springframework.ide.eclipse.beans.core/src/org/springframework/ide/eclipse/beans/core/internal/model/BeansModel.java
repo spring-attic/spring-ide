@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,10 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.AbstractModel;
+import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
+import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 import org.springframework.util.ObjectUtils;
@@ -76,7 +78,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		projects = Collections
 				.synchronizedMap(new LinkedHashMap<IProject, IBeansProject>());
 		workspaceListener = new BeansResourceChangeListener(
-				new ResourceChangeEventHandler());
+				new ResourceChangeEventHandler(this));
 	}
 
 	public IModelElement[] getElementChildren() {
@@ -261,7 +263,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		synchronized (projects) {
 			projects.clear();
 			for (IProject project : getSpringProjects()) {
-				projects.put(project, new BeansProject(project));
+				projects.put(project, new BeansProject(this, project));
 			}
 		}
 	}
@@ -286,6 +288,12 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	private class ResourceChangeEventHandler implements
 			IBeansResourceChangeEvents {
 
+		private IBeansModel model;
+
+		public ResourceChangeEventHandler(IBeansModel model) {
+			this.model = model;
+		}
+
 		public boolean isSpringProject(IProject project, int eventType) {
 			return getProject(project) != null;
 		}
@@ -296,10 +304,8 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 					System.out.println("Spring beans nature added to "
 							+ "project '" + project.getName() + "'");
 				}
-				BeansProject proj = new BeansProject(project);
-				synchronized (projects) {
-					projects.put(project, proj);
-				}
+				BeansProject proj = new BeansProject(model, project);
+				projects.put(project, proj);
 				notifyListeners(proj, Type.ADDED);
 			}
 		}
@@ -321,7 +327,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 					System.out.println("Project '" + project.getName()
 							+ "' added");
 				}
-				BeansProject proj = new BeansProject(project);
+				BeansProject proj = new BeansProject(model, project);
 				projects.put(project, proj);
 				notifyListeners(proj, Type.ADDED);
 			}
@@ -333,7 +339,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 					System.out.println("Project '" + project.getName()
 							+ "' opened");
 				}
-				BeansProject proj = new BeansProject(project);
+				BeansProject proj = new BeansProject(model, project);
 				projects.put(project, proj);
 				notifyListeners(proj, Type.ADDED);
 			}

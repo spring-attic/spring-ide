@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 
 /**
  * This class holds the configuration for a Spring Beans project.
+ * 
  * @author Torsten Juergeleit
  */
 public class BeansProjectDescription {
@@ -114,8 +115,8 @@ public class BeansProjectDescription {
 		return configs.get(getConfigName(file));
 	}
 
-	public IBeansConfig getConfig(String name) {
-		return configs.get(name);
+	public IBeansConfig getConfig(String configName) {
+		return configs.get(configName);
 	}
 
 	public Set<IBeansConfig> getConfigs() {
@@ -135,19 +136,19 @@ public class BeansProjectDescription {
 		return removeConfigFromConfigSets(file.getFullPath().toString());
 	}
 
-	public boolean removeConfig(String name) {
-		if (hasConfig(name)) {
-			configs.remove(name);
-			removeConfigFromConfigSets(name);
+	public boolean removeConfig(String configName) {
+		if (hasConfig(configName)) {
+			configs.remove(configName);
+			removeConfigFromConfigSets(configName);
 			return true;
 		}
 		return false;
 	}
 
-	private boolean removeConfigFromConfigSets(String name) {
+	private boolean removeConfigFromConfigSets(String configName) {
 		for (IBeansConfigSet configSet : configSets.values()) {
-			if (configSet.hasConfig(name)) {
-				((BeansConfigSet) configSet).removeConfig(name);
+			if (configSet.hasConfig(configName)) {
+				((BeansConfigSet) configSet).removeConfig(configName);
 				return true;
 			}
 		}
@@ -158,6 +159,10 @@ public class BeansProjectDescription {
 		configSets.put(configSet.getElementName(), configSet);
 	}
 
+	public void removeConfigSet(String configSetName) {
+		configSets.remove(configSetName);
+	}
+
 	public void setConfigSets(Set<IBeansConfigSet> configSets) {
 		this.configSets.clear();
 		for (IBeansConfigSet configSet : configSets) {
@@ -165,8 +170,8 @@ public class BeansProjectDescription {
 		}
 	}
 
-	public IBeansConfigSet getConfigSet(String name) {
-		return configSets.get(name);
+	public IBeansConfigSet getConfigSet(String configSetName) {
+		return configSets.get(configSetName);
 	}
 
 	public Set<IBeansConfigSet> getConfigSets() {
