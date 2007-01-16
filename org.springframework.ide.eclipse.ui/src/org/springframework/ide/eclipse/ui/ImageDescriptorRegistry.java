@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,21 @@
 package org.springframework.ide.eclipse.ui;
 
 import java.util.HashMap;
-import java.util.Iterator;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
 /**
- * A registry that maps <code>ImageDescriptor</code>s to <code>Image</code>.
- * @see org.eclipse.jface.resource.ImageDescriptor
- * @see org.eclipse.swt.graphics.Image
+ * A registry that maps {@link ImageDescriptor}s to {@link Image}.
+ * 
+ * @author Torsten Juergeleit
  */
 public class ImageDescriptorRegistry {
 
-	private HashMap registry = new HashMap(10);
+	private HashMap<ImageDescriptor, Image> registry =
+			new HashMap<ImageDescriptor, Image>(10);
 	private Display display;
 
 	/**
@@ -73,7 +73,7 @@ public class ImageDescriptorRegistry {
 			return result;
 		}
 		Assert.isTrue(display == SpringUIUtils.getStandardDisplay(),
-						SpringUIMessages.ImageDescriptorRegistry_wrongDisplay);
+				SpringUIMessages.ImageDescriptorRegistry_wrongDisplay);
 		result = descriptor.createImage();
 		if (result != null) {
 			registry.put(descriptor, result);
@@ -85,8 +85,7 @@ public class ImageDescriptorRegistry {
 	 * Disposes all images managed by this registry.
 	 */
 	public void dispose() {
-		for (Iterator iter = registry.values().iterator(); iter.hasNext(); ) {
-			Image image = (Image) iter.next();
+		for (Image image : registry.values()) {
 			image.dispose();
 		}
 		registry.clear();

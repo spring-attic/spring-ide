@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,10 @@ import org.eclipse.jface.viewers.Viewer;
 import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 
 /**
- * Viewer filter for file selection dialogs.
- * The filter is not case sensitive.
- * Java fragments and folders are only shown if, searched recursivly, contain
- * at least one file which has one of the specified file extensions.
- *
+ * Viewer filter for file selection dialogs. The filter is not case sensitive.
+ * Java fragments and folders are only shown if, searched recursivly, contain at
+ * least one file which has one of the specified file extensions.
+ * 
  * @author Torsten Juergeleit
  */
 public class JavaFileExtensionFilter extends FileExtensionFilter {
@@ -47,9 +46,9 @@ public class JavaFileExtensionFilter extends FileExtensionFilter {
 		super(allowedFileExtensions);
 	}
 
-	public JavaFileExtensionFilter(Collection allowedFileExtensions) {
-		super((String[]) allowedFileExtensions.toArray(
-									new String[allowedFileExtensions.size()]));
+	public JavaFileExtensionFilter(Collection<String> allowedFileExtensions) {
+		super(allowedFileExtensions.toArray(new String[allowedFileExtensions
+				.size()]));
 	}
 
 	public JavaFileExtensionFilter() {
@@ -60,17 +59,15 @@ public class JavaFileExtensionFilter extends FileExtensionFilter {
 		if (element instanceof IPackageFragmentRoot) {
 			IPackageFragmentRoot root = (IPackageFragmentRoot) element;
 			try {
-				IJavaElement[] children = root.getChildren();
-				for (int i = 0; i < children.length; i++) {
+				for (IJavaElement child : root.getChildren()) {
 					// recursive! Only show containers that contain a configs
-					if (select(viewer, parent, children[i])) {
+					if (select(viewer, parent, child)) {
 						return true;
 					}
 				}
-				Object[] nonJavaResources = root.getNonJavaResources();
-				for (int i = 0; i < nonJavaResources.length; i++) {
+				for (Object nonJavaResource : root.getNonJavaResources()) {
 					// recursive! Only show containers that contain a configs
-					if (select(viewer, parent, nonJavaResources[i])) {
+					if (select(viewer, parent, nonJavaResource)) {
 						return true;
 					}
 				}
@@ -81,17 +78,15 @@ public class JavaFileExtensionFilter extends FileExtensionFilter {
 		} else if (element instanceof IPackageFragment) {
 			IPackageFragment fragment = (IPackageFragment) element;
 			try {
-				IJavaElement[] children = fragment.getChildren();
-				for (int i = 0; i < children.length; i++) {
+				for (IJavaElement child : fragment.getChildren()) {
 					// recursive! Only show containers that contain a configs
-					if (select(viewer, parent, children[i])) {
+					if (select(viewer, parent, child)) {
 						return true;
 					}
 				}
-				Object[] nonJavaResources = fragment.getNonJavaResources();
-				for (int i = 0; i < nonJavaResources.length; i++) {
+				for (Object nonJavaResource : fragment.getNonJavaResources()) {
 					// recursive! Only show containers that contain a configs
-					if (select(viewer, parent, nonJavaResources[i])) {
+					if (select(viewer, parent, nonJavaResource)) {
 						return true;
 					}
 				}
@@ -99,8 +94,7 @@ public class JavaFileExtensionFilter extends FileExtensionFilter {
 				SpringUIPlugin.log(e.getStatus());
 			}
 			return false;
-		} else if (element instanceof IStorage &&
-				!(element instanceof IFile)) {
+		} else if (element instanceof IStorage && !(element instanceof IFile)) {
 			return hasAllowedFileExtension(((IStorage) element).getFullPath());
 		}
 		return super.select(viewer, parent, element);

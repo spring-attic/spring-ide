@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,10 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 
 /**
- * Viewer filter for file selection dialogs.
- * The filter is not case sensitive.
+ * Viewer filter for file selection dialogs. The filter is not case sensitive.
  * Folders are only shown if, searched recursivly, contain at least one file
  * which has one of the specified file extensions.
- *
+ * 
  * @author Torsten Juergeleit
  */
 public class FileExtensionFilter extends ViewerFilter {
@@ -49,9 +48,9 @@ public class FileExtensionFilter extends ViewerFilter {
 		this.allowedFileExtensions = allowedFileExtensions;
 	}
 
-	public FileExtensionFilter(Collection allowedFileExtensions) {
-		this((String[]) allowedFileExtensions.toArray(
-									new String[allowedFileExtensions.size()]));
+	public FileExtensionFilter(Collection<String> allowedFileExtensions) {
+		this(allowedFileExtensions.toArray(new String[allowedFileExtensions
+				.size()]));
 	}
 
 	public FileExtensionFilter() {
@@ -63,28 +62,27 @@ public class FileExtensionFilter extends ViewerFilter {
 			return hasAllowedFileExtension(((IFile) element).getFullPath());
 		} else if (element instanceof IContainer) { // IProject, IFolder
 			try {
-				IResource[] resources = ((IContainer) element).members();
-				for (int i = 0; i < resources.length; i++) {
+				for (IResource resource : ((IContainer) element).members()) {
 					// recursive! Only show containers that contain a configs
-					if (select(viewer, parent, resources[i])) {
+					if (select(viewer, parent, resource)) {
 						return true;
 					}
 				}
 			} catch (CoreException e) {
 				SpringUIPlugin.log(e.getStatus());
-			}				
+			}
 		}
 		return false;
 	}
-	
+
 	protected boolean hasAllowedFileExtension(IPath path) {
 		if (allowedFileExtensions == null) {
 			return true;
 		}
 		String extension = path.getFileExtension();
 		if (extension != null) {
-			for (int i = 0; i < allowedFileExtensions.length; i++) {
-				if (extension.equalsIgnoreCase(allowedFileExtensions[i])) {
+			for (String allowedExtension : allowedFileExtensions) {
+				if (extension.equalsIgnoreCase(allowedExtension)) {
 					return true;
 				}
 			}
