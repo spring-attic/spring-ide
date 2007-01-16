@@ -155,7 +155,7 @@ public class BeansAopNavigatorContentProvider implements ICommonContentProvider,
                     }
                 }
             }
-            return new Object[] {node};
+            return new Object[] { node };
         }
         else if (parentElement instanceof IMethod && parentElement instanceof SourceMethod) {
             IMethod method = (IMethod) parentElement;
@@ -340,16 +340,22 @@ public class BeansAopNavigatorContentProvider implements ICommonContentProvider,
     }
 
     private IResource getResource(IStructuredDocument document) {
-        IStructuredModel model = StructuredModelManager.getModelManager().getExistingModelForEdit(
-                document);
-        String baselocation = model.getBaseLocation();
+        IStructuredModel model = StructuredModelManager.getModelManager().getModelForRead(document);
         IResource resource = null;
-        if (baselocation != null) {
-            // copied from JSPTranslationAdapter#getJavaProject
-            IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-            IPath filePath = new Path(baselocation);
-            if (filePath.segmentCount() > 0) {
-                resource = root.getFile(filePath);
+        try {
+            String baselocation = model.getBaseLocation();
+            if (baselocation != null) {
+                // copied from JSPTranslationAdapter#getJavaProject
+                IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+                IPath filePath = new Path(baselocation);
+                if (filePath.segmentCount() > 0) {
+                    resource = root.getFile(filePath);
+                }
+            }
+        }
+        finally {
+            if (model != null) {
+                model.releaseFromRead();
             }
         }
         return resource;
