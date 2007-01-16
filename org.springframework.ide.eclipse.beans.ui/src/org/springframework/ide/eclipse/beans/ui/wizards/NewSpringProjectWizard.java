@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,9 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.core.SpringCore;
@@ -233,7 +235,8 @@ public class NewSpringProjectWizard extends Wizard
 				throw new OperationCanceledException();
 			}
 
-			BeansProject project = new BeansProject(projectHandle);
+			IBeansModel model = BeansCorePlugin.getModel();
+			BeansProject project = new BeansProject(model, projectHandle);
 			project.setConfigExtensions(configExtensions);
 			project.saveDescription();
 			monitor.worked(2);
