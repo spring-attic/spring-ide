@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.ui.navigator.CommonNavigator;
+import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.ShowInContext;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -33,13 +34,12 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.w3c.dom.Element;
 
 /**
- * Overwriting <code>CommonNavigator</code>'s implementation of
- * <code>IShowInTarget</code> to select and reveal a <code>IModelElement</code>
- * for a selection provided by the Beans XML Editor.
- *
+ * Adds an implementation of {@link IShowInTarget} to select and reveal a
+ * {@link IModelElement} for a selection provided by the Beans XML Editor.
+ * 
  * @author Torsten Juergeleit
  */
-public class BeansExplorer extends CommonNavigator {
+public class BeansExplorer extends CommonNavigator implements IShowInTarget {
 
 	public static final String BEANS_EXPLORER_ID = Activator.PLUGIN_ID
 			+ ".BeansExplorer";
@@ -80,7 +80,7 @@ public class BeansExplorer extends CommonNavigator {
 				return true;
 			}
 		}
-		return super.show(context);
+		return false;
 	}
 
 	protected boolean showElement(Object element) {
