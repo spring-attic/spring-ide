@@ -6,11 +6,7 @@
 	<classpathentry exported="true" kind="lib" path="aopalliance.jar"/>
 	<classpathentry exported="true" kind="lib" path="aspectjweaver.jar"/>
 	<classpathentry exported="true" kind="lib" path="commons-logging.jar"/>
-	<classpathentry exported="true" kind="lib" path="spring-aop.jar"/>
-	<classpathentry exported="true" kind="lib" path="spring-beans.jar"/>
-	<classpathentry exported="true" kind="lib" path="spring-core.jar"/>
-	<classpathentry exported="true" kind="lib" path="spring-dao.jar"/>
-	<classpathentry exported="true" kind="lib" path="spring-remoting.jar"/>
-	<classpathentry exported="true" kind="lib" path="spring-support.jar"/>
+	<classpathentry exported="true" kind="lib" path="spring-aspects.jar"/>
+	<classpathentry exported="true" kind="lib" path="spring.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

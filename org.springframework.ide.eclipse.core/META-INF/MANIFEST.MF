@@ -8,14 +8,10 @@ Bundle-Vendor: %providerName
 Bundle-Activator: org.springframework.ide.eclipse.core.SpringCore
 Bundle-ClassPath: core.jar,
  commons-logging.jar,
- spring-beans.jar,
- spring-core.jar,
  aopalliance.jar,
  aspectjweaver.jar,
- spring-aop.jar,
- spring-dao.jar,
- spring-remoting.jar,
- spring-support.jar
+ spring.jar,
+ spring-aspects.jar
 Export-Package: org.apache.commons.logging,
  org.apache.commons.logging.impl,
  org.aspectj.lang.annotation,
@@ -57,3 +53,5 @@ Require-Bundle: org.eclipse.core.runtime,
 Import-Package: org.apache.xerces.dom,
  org.apache.xerces.parsers,
  org.apache.xerces.xni
+Eclipse-LazyStart: true
+
