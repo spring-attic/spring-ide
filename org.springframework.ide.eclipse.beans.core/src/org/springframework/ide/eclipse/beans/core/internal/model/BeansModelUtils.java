@@ -795,12 +795,11 @@ public final class BeansModelUtils {
 	 * Returns the given bean's class name.
 	 * 
 	 * @param bean  the bean to lookup the bean class name for
-	 * @param context  the context (<code>IBeanConfig</code> or
-	 *            <code>IBeanConfigSet</code>) the beans are looked-up; if
+	 * @param context  the context ({@link IBeanConfig} or
+	 *            {@link IBeanConfigSet}) the beans are looked-up; if
 	 *            <code>null</code> then the bean's config is used
 	 */
-	public static final String getBeanClass(IBean bean,
-			IModelElement context) {
+	public static final String getBeanClass(IBean bean, IModelElement context) {
 		Assert.notNull(bean);
 		if (bean.isRootBean()) {
 			return bean.getClassName();
@@ -808,9 +807,15 @@ public final class BeansModelUtils {
 			if (context == null) {
 				context = bean.getElementParent();
 			}
+			Set<String> beanNames = new HashSet<String>();
 			do {
+				beanNames.add(bean.getElementName());
 				String parentName = bean.getParentName();
 				if (parentName != null) {
+					if (beanNames.contains(parentName)) {
+						// Break cyclic references
+						break;
+					}
 					bean = getBean(parentName, context);
 					if (bean != null && bean.isRootBean()) {
 						return bean.getClassName();
