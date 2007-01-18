@@ -21,7 +21,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.aop.core.parser.BeanAopModelBuilder;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 
 /**
@@ -31,13 +30,9 @@ import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 public class BeansAopProjectBuilder implements IProjectBuilder {
 
     public void build(IFile file, IProgressMonitor monitor) {
-
         Set<IFile> filesToBuild = BeansAopUtils.getFilesToBuild(file);
-
-        monitor.beginTask(BeansCorePlugin.getFormattedMessage(
-                "BeansProjectValidator.validateFile", file.getFullPath()
-                        .toString()), filesToBuild.size());
-        BeanAopModelBuilder.buildAopModel(monitor, filesToBuild);
+        monitor.beginTask("Parsing Spring AOP", filesToBuild.size());
+        BeanAopModelBuilder.buildAopModel(filesToBuild);
         monitor.done();
     }
 }

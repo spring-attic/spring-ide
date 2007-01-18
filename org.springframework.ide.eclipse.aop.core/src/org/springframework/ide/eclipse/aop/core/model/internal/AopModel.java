@@ -23,7 +23,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.springframework.ide.eclipse.aop.core.model.IAopModel;
 import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
@@ -55,8 +54,7 @@ public class AopModel implements IAopModel {
     private void createModel(IProject project) {
         Set<IFile> resourcesToBuild = BeansAopUtils
                 .getFilesToBuildFromBeansProject(project);
-        BeanAopModelBuilder.buildAopModel(new NullProgressMonitor(),
-                resourcesToBuild);
+        BeanAopModelBuilder.buildAopModel(resourcesToBuild);
     }
 
     public IAopProject getProjectWithInitialization(IProject project) {
