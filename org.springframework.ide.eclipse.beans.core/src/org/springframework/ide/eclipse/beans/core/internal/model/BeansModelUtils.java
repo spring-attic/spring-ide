@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -542,11 +542,12 @@ public final class BeansModelUtils {
 		} else if (value instanceof BeanDefinitionHolder) {
 			String beanName = ((BeanDefinitionHolder) value).getBeanName();
 			IBean bean = getInnerBean(beanName, context);
-			addBeanReference(BeanType.INNER, bean
-					.getElementParent(), bean, context, references,
-					referencedBeans);
-			addBeanReferencesForBean(bean, context, recursive, references,
-					referencedBeans);
+			if (bean != null) {
+				addBeanReference(BeanType.INNER, bean.getElementParent(), bean,
+						context, references, referencedBeans);
+				addBeanReferencesForBean(bean, context, recursive, references,
+						referencedBeans);
+			}
 		} else if (value instanceof List) {
 
 			// Add bean property's interceptors
@@ -699,17 +700,26 @@ public final class BeansModelUtils {
 	}
 
 	/**
-	 * Returns the inner <code>IBean</code> for a given bean name from
-	 * specified context (<code>IBeansConfig</code> or
-	 * <code>IBeansConfigSet</code>).
-	 * @param context  the context (<code>IBeanConfig</code> or
-	 * 		  <code>IBeanConfigSet</code>) the beans are looked-up
-	 * @return <code>IBean</code> or <code>null</code> if bean not found
-	 * @throws IllegalArgumentException if unsupported context specified 
+	 * Returns the inner {@link IBean} for a given bean name from specified
+	 * context.
+	 * 
+	 * @param context
+	 *            the context ({@link IBean}, {@link IBeanConfig} or
+	 *            {@link IBeanConfigSet}) the beans are looked-up
+	 * @return {@link IBean} or <code>null</code> if bean not found
+	 * @throws {@link IllegalArgumentException}
+	 *             if unsupported context specified
 	 */
 	public static final IBean getInnerBean(String beanName,
 			IModelElement context) {
-		if (context instanceof IBeansConfig) {
+		if (context instanceof IBean) {
+			for (IBean bean : ((IBean) context).getInnerBeans()) {
+				if (beanName.equals(bean.getElementName())) {
+					return bean;
+				}
+			}
+			return null;
+		} else if (context instanceof IBeansConfig) {
 			for (IBean bean : ((IBeansConfig) context).getInnerBeans()) {
 				if (beanName.equals(bean.getElementName())) {
 					return bean;
