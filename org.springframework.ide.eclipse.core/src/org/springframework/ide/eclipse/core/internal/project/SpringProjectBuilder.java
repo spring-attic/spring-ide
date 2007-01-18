@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
@@ -147,7 +148,9 @@ public class SpringProjectBuilder extends IncrementalProjectBuilder {
 		for (final IProjectBuilder builder : builders) {
 			ISafeRunnable code = new ISafeRunnable() {
 				public void run() throws Exception {
-					builder.build(file, monitor);
+                    SubProgressMonitor subMonitor = 
+                        new SubProgressMonitor(monitor, 1);
+					builder.build(file, subMonitor);
 				}
 
 				public void handleException(Throwable e) {
