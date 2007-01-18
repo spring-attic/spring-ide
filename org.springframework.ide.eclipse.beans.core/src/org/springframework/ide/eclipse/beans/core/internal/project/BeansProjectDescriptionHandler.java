@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
@@ -31,6 +32,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * This class provides a SAX handler for a Spring project's description file.
+ * 
  * @author Torsten Juergeleit
  */
 public class BeansProjectDescriptionHandler extends DefaultHandler implements
@@ -40,30 +42,24 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 		CONFIG_SET_NAME, CONFIG_SET_OVERRIDING, CONFIG_SET_INCOMPLETE,
 		CONFIG_SET_CONFIGS,CONFIG_SET_CONFIG
 	}
-	protected IBeansProject project;
+	protected BeansProject project;
 	protected MultiStatus problems;
-	protected BeansProjectDescription description;
 	protected State state;
 	protected BeansConfigSet configSet;
 
 	protected final StringBuffer charBuffer = new StringBuffer();
 	protected Locator locator;
 
-	public BeansProjectDescriptionHandler(IBeansProject project) {
+	public BeansProjectDescriptionHandler(BeansProject project) {
 		this.project = project;
 		problems = new MultiStatus(BeansCorePlugin.PLUGIN_ID,
 				IResourceStatus.FAILED_READ_METADATA,
 				"Error reading Spring project description", null);
-		description = new BeansProjectDescription(project);
 		state = State.INITIAL;
 	}
 
 	public IStatus getStatus() {
 		return problems;
-	}
-
-	public BeansProjectDescription getDescription() {
-		return description;
 	}
 
 	public void startElement(String uri, String elementName, String qname,
@@ -120,8 +116,8 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 
 			// make sure that at least the default config extension is in
 			// the list of config extensions
-			if (description.getConfigExtensions().isEmpty()) {
-				description.addConfigExtension(IBeansProject
+			if (project.getConfigExtensions().isEmpty()) {
+				project.addConfigExtension(IBeansProject
 						.DEFAULT_CONFIG_EXTENSION);
 			}
 		} else if (state == State.CONFIG_EXTENSIONS) {
@@ -131,7 +127,7 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 		} else if (state == State.CONFIG_EXTENSION) {
 			if (elementName.equals(CONFIG_EXTENSION)) {
 				String extension = charBuffer.toString().trim();
-				description.addConfigExtension(extension);
+				project.addConfigExtension(extension);
 				state = State.CONFIG_EXTENSIONS;
 			}
 		} else if (state == State.CONFIGS) {
@@ -150,7 +146,7 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 						config = config.substring(projectPath.length());
 					}
 				}
-				description.addConfig(config);
+				project.addConfig(config);
 				state = State.CONFIGS;
 			}
 		} else if (state == State.CONFIG_SETS) {
@@ -159,7 +155,7 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 			}
 		} else if (state == State.CONFIG_SET) {
 			if (elementName.equals(CONFIG_SET)) {
-				description.addConfigSet(configSet);
+				project.addConfigSet(configSet);
 				state = State.CONFIG_SETS;
 			}
 		} else if (state == State.CONFIG_SET_NAME) {

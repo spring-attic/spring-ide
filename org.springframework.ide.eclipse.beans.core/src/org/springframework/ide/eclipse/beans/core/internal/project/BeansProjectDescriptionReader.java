@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,14 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
- * This class reads the description for a Spring Beans project from an XML
- * file.
+ * This class reads the description for a Spring Beans project from an XML file.
+ * 
  * @author Torsten Juergeleit
  */
 public class BeansProjectDescriptionReader {
@@ -45,9 +46,9 @@ public class BeansProjectDescriptionReader {
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
 
 	/**
-	 * Reads project description for given project.
+	 * Reads project description for given Spring project.
 	 */
-	public static BeansProjectDescription read(IBeansProject project) {
+	public static void read(BeansProject project) {
 		IFile file = ((IProject) project.getElementResource())
 				.getFile(new Path(IBeansProject.DESCRIPTION_FILE));
 		if (file.isAccessible()) {
@@ -81,10 +82,6 @@ public class BeansProjectDescriptionReader {
 				case IStatus.WARNING:
 				case IStatus.INFO:
 					BeansCorePlugin.log(status);
-
-				case IStatus.OK:
-				default:
-					return handler.getDescription();
 				}
 			} catch (CoreException e) {
 				BeansCorePlugin.log(e.getStatus());
@@ -99,10 +96,7 @@ public class BeansProjectDescriptionReader {
 			}
 		}
 
-		// Return empty project description with default config extension
-		BeansProjectDescription description = new BeansProjectDescription(
-				project);
-		description.addConfigExtension(IBeansProject.DEFAULT_CONFIG_EXTENSION);
-		return description;
+		// Add default config extension to project
+		project.addConfigExtension(IBeansProject.DEFAULT_CONFIG_EXTENSION);
 	}
 }

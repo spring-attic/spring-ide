@@ -16,7 +16,10 @@
 
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -24,7 +27,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescription;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionReader;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionWriter;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -48,7 +50,27 @@ public class BeansProject extends AbstractResourceModelElement implements
 		IBeansProject {
 
 	private IProject project;
-	private BeansProjectDescription description;
+	private Set<String> configExtensions;
+	private Map<String, IBeansConfig> configs;
+	private Map<String, IBeansConfigSet> configSets;
+
+	/**
+	 * Create a deep copy of given project associated with the given model.
+	 */
+	public BeansProject(IBeansModel model, IBeansProject project) {
+		this(model, project.getProject());
+
+		configExtensions = new LinkedHashSet<String>();
+		configExtensions.addAll(project.getConfigExtensions());
+
+		configs = new LinkedHashMap<String, IBeansConfig>();
+		for (IBeansConfig config : project.getConfigs()) {
+			addConfig(config.getElementName());
+		}
+
+		configSets = new LinkedHashMap<String, IBeansConfigSet>();
+		setConfigSets(project.getConfigSets());
+	}
 
 	public BeansProject(IBeansModel model, IProject project) {
 		super(model, project.getName());
@@ -61,8 +83,8 @@ public class BeansProject extends AbstractResourceModelElement implements
 
 	public IModelElement[] getElementChildren() {
 		Set<IModelElement> children = new LinkedHashSet<IModelElement>(
-				getDescription().getConfigs());
-		children.addAll(getDescription().getConfigSets());
+				getConfigs());
+		children.addAll(getConfigSets());
 		return children.toArray(new IModelElement[children.size()]);
 	}
 
@@ -80,7 +102,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
 			// Now ask this project's configs
-			for (IBeansConfig config : getDescription().getConfigs()) {
+			for (IBeansConfig config : getConfigs()) {
 				config.accept(visitor, monitor);
 				if (monitor.isCanceled()) {
 					return;
@@ -88,7 +110,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 			}
 
 			// Finally ask this project's config sets
-			for (IBeansConfigSet configSet : getDescription().getConfigSets()) {
+			for (IBeansConfigSet configSet : getConfigSets()) {
 				configSet.accept(visitor, monitor);
 				if (monitor.isCanceled()) {
 					return;
@@ -101,22 +123,74 @@ public class BeansProject extends AbstractResourceModelElement implements
 		return project;
 	}
 
+	/**
+	 * Updates the list of config extensions belonging to this project.
+	 * <p>
+	 * The modified project description has to be saved to disk by calling
+	 * {@link #saveDescription()}.
+	 * @param extensions  list of config extensions
+	 */
+	public void setConfigExtensions(Set<String> extensions) {
+		if (configExtensions == null) {
+			readDescription();
+		}
+		configExtensions.clear();
+		configExtensions.addAll(extensions);
+	}
+
+	public boolean addConfigExtension(String extension) {
+		if (extension != null && extension.length() > 0) {
+			if (configExtensions == null) {
+				readDescription();
+			}
+			if (!configExtensions.contains(extension)) {
+				configExtensions.add(extension);
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public Set<String> getConfigExtensions() {
-		return getDescription().getConfigExtensions();
+		if (configExtensions == null) {
+			readDescription();
+		}
+		return Collections.unmodifiableSet(configExtensions);
 	}
 
 	public boolean hasConfigExtension(String extension) {
-		return getDescription().getConfigExtensions().contains(extension);
+		return getConfigExtensions().contains(extension);
 	}
 
 	/**
-	 * Sets internal <code>BeansProjectDescription</code> to <code>null</code>.
-	 * Any further access to the data of this instance of
-	 * <code>BeansProject</code> leads to reloading of this beans project's
-	 * config description file.
+	 * Updates the list of configs (by name) belonging to this project.
+	 * From all removed configs the Spring IDE problem markers are deleted.
+	 * <p>
+	 * The modified project description has to be saved to disk by calling
+	 * {@link #saveDescription()}.
+	 * @param configNames  list of config names
 	 */
-	public void reset() {
-		description = null;
+	public void setConfigs(Set<String> configNames) {
+		if (configs == null) {
+			readDescription();
+		}
+
+		// Look for removed configs and
+		// 1. delete all problem markers from them
+		// 2. remove config from any config set
+		for (IBeansConfig config : configs.values()) {
+			String configName = config.getElementName();
+			if (!configNames.contains(configName)) {
+				ModelUtils.deleteProblemMarkers(config);
+				removeConfig(configName);
+			}
+		}
+
+		// Create new list of configs
+		configs.clear();
+		for (String configName : configNames){
+			configs.put(configName, new BeansConfig(this, configName));
+		}
 	}
 
 	/**
@@ -126,16 +200,25 @@ public class BeansProject extends AbstractResourceModelElement implements
 	 * @param file  the config file to add
 	 * @param doSaveDescription  if <code>true</code> then the project's
 	 * 				modified configuration is saved to the config file
-	 * 				<code>IBeansProject.DESCRIPTION_FILE</code>
+	 * 				{@link IBeansProject.DESCRIPTION_FILE}
 	 */
-	public void addConfig(IFile file, boolean doSaveDescription) {
-		if (getDescription().addConfig(file) && doSaveDescription) {
+	public boolean addConfig(IFile file, boolean doSaveDescription) {
+		if (addConfig(getConfigName(file)) && doSaveDescription) {
 			saveDescription();
+			return true;
 		}
+		return false;
 	}
 
-	public void addConfig(String config) {
-		getDescription().addConfig(config);
+	public boolean addConfig(String configName) {
+		if (configs == null) {
+			readDescription();
+		}
+		if (configName.length() > 0 && !configs.containsKey(configName)) {
+			configs.put(configName, new BeansConfig(this, configName));
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -145,66 +228,133 @@ public class BeansProject extends AbstractResourceModelElement implements
 	 * @param file  the config file to remove
 	 * @param doSaveDescription  if <code>true</code> then the project's
 	 * 				modified configuration is saved to the config file
-	 * 				<code>IBeansProject.DESCRIPTION_FILE</code>
+	 * 				{@link IBeansProject.DESCRIPTION_FILE}
 	 */
-	public void removeConfig(IFile file, boolean doSaveDescription) {
-		if (getDescription().removeConfig(file) && doSaveDescription) {
-			saveDescription();
+	public boolean removeConfig(IFile file, boolean doSaveDescription) {
+		if (file.getProject().equals(project)) {
+			if (removeConfig(file.getProjectRelativePath().toString())
+					&& doSaveDescription) {
+				saveDescription();
+				return true;
+			}
+			return false;
 		}
+
+		// External configs only remove from all config sets
+		if (removeConfigFromConfigSets(file.getFullPath().toString())
+				&& doSaveDescription) {
+			saveDescription();
+			return true;
+		}
+		return false;
 	}
 
-	public void removeConfig(String configName) {
-		getDescription().removeConfig(configName);
+	public boolean removeConfig(String configName) {
+		if (hasConfig(configName)) {
+			configs.remove(configName);
+			removeConfigFromConfigSets(configName);
+			return true;
+		}
+		return false;
 	}
 
 	public boolean hasConfig(IFile file) {
-		return getDescription().hasConfig(file);
+		return hasConfig(getConfigName(file));
 	}
 
 	public boolean hasConfig(String configName) {
-		return getDescription().hasConfig(configName);
+		if (configs == null) {
+			readDescription();
+		}
+		return configs.containsKey(configName);
 	}
 
-	public IBeansConfig getConfig(IFile configFile) {
-		return getDescription().getConfig(configFile);
+	public IBeansConfig getConfig(IFile file) {
+		return getConfig(getConfigName(file));
 	}
 
 	public IBeansConfig getConfig(String configName) {
 		if (configName != null && configName.charAt(0) == '/') {
 			return BeansCorePlugin.getModel().getConfig(configName);
 		} else {
-			return getDescription().getConfig(configName);
+			if (configs == null) {
+				readDescription();
+			}
+			return configs.get(configName);
 		}
 	}
 
 	public Set<String> getConfigNames() {
-		return getDescription().getConfigNames();
+		if (configs == null) {
+			readDescription();
+		}
+		return new LinkedHashSet<String>(configs.keySet());
 	}
 
 	public Set<IBeansConfig> getConfigs() {
-		return getDescription().getConfigs();
+		if (configs == null) {
+			readDescription();
+		}
+		return new LinkedHashSet<IBeansConfig>(configs.values());
+	}
+
+	/**
+	 * Updates the {@link BeansConfigSet}s defined within this project.
+	 * <p>
+	 * The modified project description has to be saved to disk by calling
+	 * {@link #saveDescription()}.
+	 * @param configSets  list of {@link BeansConfigSet} instances
+	 */
+	public void setConfigSets(Set<IBeansConfigSet> configSets) {
+		if (this.configSets == null) {
+			readDescription();
+		}
+		this.configSets.clear();
+		for (IBeansConfigSet configSet : configSets) {
+			this.configSets.put(configSet.getElementName(), new BeansConfigSet(
+					this, configSet));
+		}
+	}
+
+	public boolean addConfigSet(IBeansConfigSet configSet) {
+		if (configSets == null) {
+			readDescription();
+		}
+		if (!configSets.values().contains(configSet)) {
+			configSets.put(configSet.getElementName(), new BeansConfigSet(this,
+					configSet));
+			return true;
+		}
+		return false;
 	}
 
 	public void removeConfigSet(String configSetName) {
-		getDescription().removeConfigSet(configSetName);
+		configSets.remove(configSetName);
 	}
 
 	public boolean hasConfigSet(String configSetName) {
-		IBeansConfigSet configSet = getDescription()
-				.getConfigSet(configSetName);
-		return configSet != null;
+		if (configSets == null) {
+			readDescription();
+		}
+		return configSets.containsKey(configSetName);
 	}
 
 	public IBeansConfigSet getConfigSet(String configSetName) {
-		return getDescription().getConfigSet(configSetName);
+		if (configSets == null) {
+			readDescription();
+		}
+		return configSets.get(configSetName);
 	}
 
 	public Set<IBeansConfigSet> getConfigSets() {
-		return getDescription().getConfigSets();
+		if (configSets == null) {
+			readDescription();
+		}
+		return new LinkedHashSet<IBeansConfigSet>(configSets.values());
 	}
 
 	public boolean isBeanClass(String className) {
-		for (IBeansConfig config : getDescription().getConfigs()) {
+		for (IBeansConfig config : getConfigs()) {
 			if (config.isBeanClass(className)) {
 				return true;
 			}
@@ -214,7 +364,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 
 	public Set<String> getBeanClasses() {
 		Set<String> beanClasses = new LinkedHashSet<String>();
-		for (IBeansConfig config : getDescription().getConfigs()) {
+		for (IBeansConfig config : getConfigs()) {
 			beanClasses.addAll(config.getBeanClasses());
 		}
 		return beanClasses;
@@ -222,7 +372,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 
 	public Set<IBean> getBeans(String className) {
 		Set<IBean> beans = new LinkedHashSet<IBean>();
-		for (IBeansConfig config : getDescription().getConfigs()) {
+		for (IBeansConfig config : getConfigs()) {
 			if (config.isBeanClass(className)) {
 				beans.addAll(config.getBeans(className));
 			}
@@ -231,57 +381,22 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	/**
-	 * Updates the list of config extensions belonging to this project.
-	 * <p>
-	 * The modified project description has to be saved to disk by calling
-	 * <code>saveDescription()</code>.
-	 * @param extensions  list of config extensions
-	 */
-	public void setConfigExtensions(Set<String> extensions) {
-		getDescription().setConfigExtensions(extensions);
-	}
-
-	/**
-	 * Updates the list of configs (by name) belonging to this project.
-	 * From all removed configs the Spring IDE problem markers are deleted.
-	 * <p>
-	 * The modified project description has to be saved to disk by calling
-	 * <code>saveDescription()</code>.
-	 * @param configs  list of config names
-	 */
-	public void setConfigs(Set<String> configs) {
-		BeansProjectDescription description = getDescription();
-
-		// Look for removed configs and
-		// 1. delete all problem markers from them
-		// 2. remove config from any config set
-		for (IBeansConfig config : getDescription().getConfigs()) {
-			if (!configs.contains(config.getElementName())) {
-				ModelUtils.deleteProblemMarkers(config);
-				description.removeConfig(config.getElementName());
-			}
-		}
-		description.setConfigNames(configs);
-	}
-
-	/**
-	 * Updates the <code>BeansConfigSet</code>s defined within this project.
-	 * <p>
-	 * The modified project description has to be saved to disk by calling
-	 * <code>saveDescription()</code>.
-	 * @param configSets  list of <code>BeansConfigSet</code> instances
-	 * @see org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet
-	 */
-	public void setConfigSets(Set<IBeansConfigSet> configSets) {
-		getDescription().setConfigSets(configSets);
-	}
-
-	/**
 	 * Writes the current project description to the corresponding XML file
-	 * defined in <code>IBeansProject.DESCRIPTION_FILE</code>.
+	 * defined in {@link IBeansProject.DESCRIPTION_FILE}.
 	 */
 	public void saveDescription() {
-		BeansProjectDescriptionWriter.write(project, getDescription());
+		BeansProjectDescriptionWriter.write(this);
+	}
+
+	/**
+	 * Resets the internal data. Any further access to the data of this instance
+	 * of {@link BeansProject} leads to reloading of this beans project's config
+	 * description file.
+	 */
+	public void reset() {
+		configExtensions.clear();
+		configs.clear();
+		configSets.clear();
 	}
 
 	public boolean equals(Object other) {
@@ -303,19 +418,49 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	public String toString() {
-		return getElementName();
+		return "Project=" + getElementName() + "ConfigExtensions="
+				+ configExtensions + ", Configs=" + configs.values()
+				+ ", ConfigsSets=" + configSets;
+	}
+
+	private boolean removeConfigFromConfigSets(String configName) {
+		if (configSets == null) {
+			readDescription();
+		}
+		for (IBeansConfigSet configSet : configSets.values()) {
+			if (configSet.hasConfig(configName)) {
+				((BeansConfigSet) configSet).removeConfig(configName);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Returns the config name from given file. If the file belongs to this
+	 * project then the config name is the project-relativ path of the given
+	 * file otherwise it's the workspace-relativ path with a leading '/'.
+	 */
+	private String getConfigName(IFile file) {
+		String configName;
+		if (file.getProject().equals(project.getProject())) {
+			configName = file.getProjectRelativePath().toString();
+		} else {
+			configName = file.getFullPath().toString();
+		}
+		return configName;
 	}
 
 	/**
 	 * Returns the project description lazily loaded from the XML file defined
-	 * in <code>IBeansProject.DESCRIPTION_FILE</code>.
+	 * in {@link IBeansProject.DESCRIPTION_FILE}.
 	 * <p>
 	 * <b>This project's nature has to be set first!!!</b> 
 	 */
-	private BeansProjectDescription getDescription() {
-		if (description == null) {
-			description = BeansProjectDescriptionReader.read(this);
-		}
-		return description;
+	private void readDescription() {
+		configExtensions = new LinkedHashSet<String>();
+		configs = new LinkedHashMap<String, IBeansConfig>();
+		configSets = new LinkedHashMap<String, IBeansConfigSet>();
+		BeansProjectDescriptionReader.read(this);
 	}
 }

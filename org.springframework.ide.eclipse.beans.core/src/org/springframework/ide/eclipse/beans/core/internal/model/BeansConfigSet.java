@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,14 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 	private Set<IBeansComponent> components;
 	private Map<String, IBean> beansMap;
 	private Map<String, Set<IBean>> beanClassesMap;
+
+	/**
+	 * Creates a deep copy of given config set associated with the given
+	 * project.
+	 */
+	public BeansConfigSet(IBeansProject project, IBeansConfigSet configSet) {
+		this(project, configSet.getElementName(), configSet.getConfigNames());
+	}
 
 	public BeansConfigSet(IBeansProject project, String name) {
 		this(project, name, new HashSet<String>());

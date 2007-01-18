@@ -22,11 +22,11 @@ import java.io.IOException;
 import java.util.Collection;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.io.xml.XMLWriter;
@@ -44,9 +44,9 @@ public class BeansProjectDescriptionWriter implements
 
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
 
-	public static void write(IProject project,
-			BeansProjectDescription description) {
-		IFile file = project.getFile(new Path(IBeansProject.DESCRIPTION_FILE));
+	public static void write(BeansProject project) {
+		IFile file = project.getProject().getFile(
+				new Path(IBeansProject.DESCRIPTION_FILE));
 		if (DEBUG) {
 			System.out.println("Writing project description to "
 					+ file.getLocation().toString());
@@ -55,7 +55,7 @@ public class BeansProjectDescriptionWriter implements
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
 			try {
 				XMLWriter writer = new XMLWriter(os);
-				write(description, writer);
+				write(project, writer);
 				writer.flush();
 				writer.close();
 			} finally {
@@ -75,13 +75,13 @@ public class BeansProjectDescriptionWriter implements
 		}
 	}
 
-	protected static void write(BeansProjectDescription description,
-			XMLWriter writer) throws IOException {
+	protected static void write(BeansProject project, XMLWriter writer)
+			throws IOException {
 		writer.startTag(PROJECT_DESCRIPTION, null);
-		write(CONFIG_EXTENSIONS, CONFIG_EXTENSION, description
+		write(CONFIG_EXTENSIONS, CONFIG_EXTENSION, project
 				.getConfigExtensions(), writer);
-		write(CONFIGS, CONFIG, description.getConfigNames(), writer);
-		write(CONFIG_SETS, description.getConfigSets(), writer);
+		write(CONFIGS, CONFIG, project.getConfigNames(), writer);
+		write(CONFIG_SETS, project.getConfigSets(), writer);
 		writer.endTag(PROJECT_DESCRIPTION);
 	}
 
