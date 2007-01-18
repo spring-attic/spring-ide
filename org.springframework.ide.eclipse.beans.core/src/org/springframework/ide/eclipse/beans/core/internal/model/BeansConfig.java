@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,7 +121,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 	public BeansConfig(IBeansProject project, String name) {
 		super(project, name);
-		file = getFile(name);
+		init(name);
 	}
 
 	public int getElementType() {
@@ -258,7 +258,10 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	}
 
 	public String getDefaultMerge() {
-		return (defaults != null ? defaults.getMerge() : DEFAULT_MERGE);
+		// This default value was introduced with Spring 2.0 -> so we have
+		// to check for an empty string here as well
+		return (defaults != null && defaults.getMerge().length() > 0 ? defaults
+				.getMerge() : DEFAULT_MERGE);
 	}
 
 	public Set<IBeansImport> getImports() {
@@ -422,15 +425,15 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	}
 
 	/**
-	 * Returns the file for given name. If the given name defines an external
+	 * Checks the file for the given name. If the given name defines an external
 	 * resource (leading '/' -> not part of the project this config belongs to)
-	 * get the file from the workspace else from the project.
-	 * 
-	 * @return the file for given name
+	 * get the file from the workspace else from the project. If the name
+	 * specifies an entry in an archive then the {@link #isArchived} flag is
+	 * set. If the corresponding file is not available or accessible then an
+	 * entry is added to the config's list of errors.
 	 */
-	private IFile getFile(String name) {
+	private void init(String name) {
 		IContainer container;
-		IFile file;
 		String fullPath;
 
 		// At first check for a config file in a JAR
@@ -452,12 +455,12 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			fullPath = container.getFullPath().append(name).toString();
 		}
 		file = (IFile) container.findMember(name);
-		if (file == null) {
-			Problem problem = new Problem("File '" + fullPath + "' not found",
-					new Location(new FileResource(fullPath), null));
+		if (file == null || !file.isAccessible()) {
+			Problem problem = new Problem("File '" + fullPath
+					+ "' not accessible", new Location(new FileResource(
+					fullPath), null));
 			errors.add(problem);
 		}
-		return file;
 	}
 
 	/**
@@ -610,9 +613,9 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	}
 	
 	/**
-	 * Implementation of <code>ReaderEventListener</code> which populates the
-	 * current instance of <code>IBeansConfig</code> with data from the XML
-	 * bean definition reader events.
+	 * Implementation of {@link ReaderEventListener} which populates the current
+	 * instance of {@link IBeansConfig} with data from the XML bean definition
+	 * reader events.
 	 */
 	private final class BeansConfigReaderEventListener implements
 			ReaderEventListener {
