@@ -61,7 +61,9 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 public class BeanAopModelBuilder {
 
     public static void buildAopModel(Set<IFile> filesToBuild) {
-        getBuildJob(filesToBuild).schedule();
+        if (filesToBuild.size() > 0) {
+            getBuildJob(filesToBuild).schedule();
+        }
     }
 
     protected static void buildAopModel(IProgressMonitor monitor, Set<IFile> filesToBuild) {
@@ -70,7 +72,7 @@ public class BeanAopModelBuilder {
             if (monitor.isCanceled()) {
                 throw new OperationCanceledException();
             }
-            monitor.setTaskName("Parsing Spring AOP ["
+            monitor.setTaskName("Building Spring AOP model ["
                     + currentFile.getProjectRelativePath().toString() + "]");
             BeansAopMarkerUtils.deleteProblemMarkers(currentFile);
 
@@ -95,13 +97,15 @@ public class BeanAopModelBuilder {
     private static IAopProject buildAopReferencesFromFile(IFile currentFile) {
         IAopProject aopProject = null;
         IBeansProject project = BeansCorePlugin.getModel().getProject(currentFile.getProject());
+        
         IJobManager jobMan = Platform.getJobManager();
         ILock lock = jobMan.newLock();
+        lock.acquire();
+        
         if (project != null) {
             BeansConfig config = (BeansConfig) project.getConfig(currentFile);
             IJavaProject javaProject = BeansAopUtils.getJavaProject(config);
 
-            lock.acquire();
             aopProject = ((AopModel) Activator.getModel()).getProjectWithInitialization(config
                     .getElementResource().getProject());
 
@@ -232,7 +236,7 @@ public class BeanAopModelBuilder {
     }
 
     public static Job getBuildJob(final Set<IFile> filesToBuild) {
-        Job buildJob = new BuildJob("Parsing Spring AOP", filesToBuild);
+        Job buildJob = new BuildJob("Building Spring AOP model", filesToBuild);
         buildJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
         buildJob.setUser(true);
         return buildJob;
