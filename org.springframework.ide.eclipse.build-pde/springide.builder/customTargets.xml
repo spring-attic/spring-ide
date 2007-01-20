@@ -143,10 +143,12 @@
 	<target name="postBuild">
 		<antcall target="gatherLogs" />
 		<property name="UpdateSiteStagingLocation" value="${buildDirectory}/../../updatesite_nightly" />
+		<delete dir="${UpdateSiteStagingLocation}" />
 		<property name="sitePackagePrefix" value="springide_updatesite_dev" />
 		<property name="sitePackageVersion" value="2.0-m2" />
-		<property name="featureVersion" value="1.9.1" />
+		<property name="featureVersion" value="2.0.0" />
 		<antcall target="generateUpdateSite" />
+		<antcall target="publishToUpdateSiteDev" />
 	</target>
 	<target name="generateUpdateSite">
 		<!-- Create the directory structure -->
@@ -161,7 +163,15 @@
 		<antcall target="copyNightlyBuildSiteXml" />
 		<antcall target="createNightlyBuildSiteXml" />
 		<antcall target="createNightlyBuildDist" />
-		<antcall target="publishToUpdateSiteDev" />
+	</target>
+	<target name="publishToUpdateSiteDev" if="publishToServer">
+		<property name="publish.directory" value="${user.home}/htdocs/updatesite_nightly" />
+		<copy todir="${publish.directory}">
+			<fileset dir="${UpdateSiteStagingLocation}" />
+		</copy>
+		<property name="UpdateSiteStagingLocation" value="${publish.directory}" />
+		<antcall target="copyNightlyBuildSiteXml" />
+		<antcall target="createNightlyBuildSiteXml" />
 	</target>
 	<target name="updateSiteExport">
 		<ant antfile="build.xml" dir="${buildDirectory}/features/${id}/" target="build.update.jar">
@@ -174,49 +184,46 @@
 	</target>
 	<target name="createNightlyBuildSiteXml" unless="isNightlyBuild">
 		<replace file="${UpdateSiteStagingLocation}/site.xml" summary="yes">
-			<replacetoken><![CDATA[<category-def name="Spring IDE" label="Spring IDE" />]]></replacetoken>
-			<replacevalue><![CDATA[
+			<replacetoken>
+				<![CDATA[<category-def name="Spring IDE" label="Spring IDE" />]]></replacetoken>
+			<replacevalue>
+				<![CDATA[
 	<feature
 		url="features/org.springframework.ide.eclipse.feature_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.feature" version="@VERSION@">
-		<category name="Spring IDE" />
-	</feature>
-	
-        <category-def name="Spring IDE" label="Spring IDE" />]]></replacevalue>
-		</replace>
-                <replace file="${UpdateSiteStagingLocation}/site.xml" token="@VERSION@" value="${featureVersion}.${forceContextQualifier}" summary="yes"/>
-	</target>
-	<target name="createNightlyBuildDist">
-		<property name="buildDist.name" value="${sitePackagePrefix}_${sitePackageVersion}_${forceContextQualifier}" />
-		<property name="buildDist.file" value="${UpdateSiteStagingLocation}/${buildDist.name}.zip" />
-		<zip zipfile="${buildDist.file}" filesonly="true">
-			<zipfileset dir="${UpdateSiteStagingLocation}" includes="features/*${forceContextQualifier}*, plugins/*${forceContextQualifier}*, site.xml" />
-		</zip>
-	</target>
-	<target name="publishToUpdateSiteDev" if="publishToServer">
-		<property name="publish.directory" value="${user.home}/htdocs/updatesite_nightly" />
-		<copy todir="${publish.directory}">
-			<fileset dir="${UpdateSiteStagingLocation}" />
-		</copy>
-	</target>
+				<category name="Spring IDE" />
+			</feature>
 
-	<!-- ===================================================================== -->
-	<!-- Steps to do to test the build results -->
-	<!-- ===================================================================== -->
-	<target name="test">
-	</target>
+			<category-def name="Spring IDE" label="Spring IDE" />]]></replacevalue>
+	</replace>
+	<replace file="${UpdateSiteStagingLocation}/site.xml" token="@VERSION@" value="${featureVersion}.${forceContextQualifier}" summary="yes" />
+</target>
+<target name="createNightlyBuildDist">
+	<property name="buildDist.name" value="${sitePackagePrefix}_${sitePackageVersion}_${forceContextQualifier}" />
+	<property name="buildDist.file" value="${UpdateSiteStagingLocation}/${buildDist.name}.zip" />
+	<zip zipfile="${buildDist.file}" filesonly="true">
+		<zipfileset dir="${UpdateSiteStagingLocation}" includes="features/*${forceContextQualifier}*, plugins/*${forceContextQualifier}*, site.xml" />
+	</zip>
+</target>
 
-	<!-- ===================================================================== -->
-	<!-- Steps to do to publish the build results -->
-	<!-- ===================================================================== -->
-	<target name="publish">
-	</target>
 
-	<!-- ===================================================================== -->
-	<!-- Default target                                                        -->
-	<!-- ===================================================================== -->
-	<target name="noDefault">
-		<echo message="You must specify a target when invoking this file" />
-	</target>
+<!-- ===================================================================== -->
+<!-- Steps to do to test the build results -->
+<!-- ===================================================================== -->
+<target name="test">
+</target>
+
+<!-- ===================================================================== -->
+<!-- Steps to do to publish the build results -->
+<!-- ===================================================================== -->
+<target name="publish">
+</target>
+
+<!-- ===================================================================== -->
+<!-- Default target                                                        -->
+<!-- ===================================================================== -->
+<target name="noDefault">
+	<echo message="You must specify a target when invoking this file" />
+</target>
 
 </project>
