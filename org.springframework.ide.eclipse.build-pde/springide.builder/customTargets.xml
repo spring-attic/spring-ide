@@ -167,7 +167,9 @@
 	<target name="publishToUpdateSiteDev" if="publishToServer">
 		<property name="publish.directory" value="${user.home}/htdocs/updatesite_nightly" />
 		<copy todir="${publish.directory}">
-			<fileset dir="${UpdateSiteStagingLocation}" />
+			<fileset dir="${UpdateSiteStagingLocation}">
+				<exclude name="site.xml"/>
+			</fileset>
 		</copy>
 		<property name="UpdateSiteStagingLocation" value="${publish.directory}" />
 		<antcall target="copyNightlyBuildSiteXml" />
@@ -190,10 +192,10 @@
 	<feature
 		url="features/org.springframework.ide.eclipse.feature_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.feature" version="@VERSION@">
-				<category name="Spring IDE" />
-			</feature>
+		<category name="Spring IDE" />
+	</feature>
 
-			<category-def name="Spring IDE" label="Spring IDE" />]]></replacevalue>
+	<category-def name="Spring IDE" label="Spring IDE" />]]></replacevalue>
 	</replace>
 	<replace file="${UpdateSiteStagingLocation}/site.xml" token="@VERSION@" value="${featureVersion}.${forceContextQualifier}" summary="yes" />
 </target>
