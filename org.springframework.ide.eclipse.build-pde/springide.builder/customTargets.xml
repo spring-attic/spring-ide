@@ -184,8 +184,7 @@
 	</target>
 	<target name="createNightlyBuildSiteXml" unless="isNightlyBuild">
 		<replace file="${UpdateSiteStagingLocation}/site.xml" summary="yes">
-			<replacetoken>
-				<![CDATA[<category-def name="Spring IDE" label="Spring IDE" />]]></replacetoken>
+			<replacetoken><![CDATA[<category-def name="Spring IDE" label="Spring IDE" />]]></replacetoken>
 			<replacevalue>
 				<![CDATA[
 	<feature
