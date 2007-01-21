@@ -20,3 +20,12 @@ plugin@org.springframework.ide.eclipse.aop.core=SVN,trunk,svn://localhost,,org.s
 plugin@org.springframework.ide.eclipse.aop.ui=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.aop.ui
 plugin@org.springframework.ide.eclipse.aop.ui.visualiser=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.aop.ui.visualiser
 plugin@org.springframework.ide.eclipse.aop.ui.xref=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.aop.ui.xref
+
+# required osgi bundles
+plugin@org.aopalliance=SVN,trunk,svn://localhost,,required-bundles/aopalliance.osgi
+plugin@org.aspectj.aspectjrt=SVN,trunk,svn://localhost,,required-bundles/aspectjrt.osgi
+plugin@org.aspectj.aspectjweaver=SVN,trunk,svn://localhost,,required-bundles/aspectjweaver.osgi
+plugin@jakarta.commons.collections=SVN,trunk,svn://localhost,,required-bundles/commons-collections.osgi
+plugin@jakarta.commons.logging=SVN,trunk,svn://localhost,,required-bundles/commons-logging.osgi
+plugin@org.springframework=SVN,trunk,svn://localhost,,required-bundles/spring.osgi
+
