@@ -171,9 +171,21 @@
 				<exclude name="site.xml"/>
 			</fileset>
 		</copy>
-		<property name="UpdateSiteStagingLocation" value="${publish.directory}" />
-		<antcall target="copyNightlyBuildSiteXml" />
-		<antcall target="createNightlyBuildSiteXml" />
+		<copy file="${builder}/../site.xml" tofile="${publish.directory}/site.xml" overwrite="false" />
+		<replace file="${publish.directory}/site.xml" summary="yes">
+			<replacetoken><![CDATA[<category-def name="Spring IDE" label="Spring IDE" />]]></replacetoken>
+			<replacevalue>
+				<![CDATA[
+	<feature
+		url="features/org.springframework.ide.eclipse.feature_@VERSION@.jar"
+		id="org.springframework.ide.eclipse.feature" version="@VERSION@">
+		<category name="Spring IDE" />
+    <feature>
+
+	<category-def name="Spring IDE" label="Spring IDE" />]]></replacevalue>
+		</replace>
+		<replace file="${publish.directory}/site.xml" token="@VERSION@" value="${featureVersion}.${forceContextQualifier}" summary="yes" />
+
 	</target>
 	<target name="updateSiteExport">
 		<ant antfile="build.xml" dir="${buildDirectory}/features/${id}/" target="build.update.jar">
@@ -193,7 +205,7 @@
 		url="features/org.springframework.ide.eclipse.feature_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.feature" version="@VERSION@">
 		<category name="Spring IDE" />
-	</feature>
+    <feature>
 
 	<category-def name="Spring IDE" label="Spring IDE" />]]></replacevalue>
 	</replace>
