@@ -180,7 +180,7 @@
 		url="features/org.springframework.ide.eclipse.feature_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.feature" version="@VERSION@">
 		<category name="Spring IDE" />
-	<feature>
+	</feature>
 
 	<category-def name="Spring IDE" label="Spring IDE" />]]></replacevalue>
 		</replace>
@@ -205,7 +205,7 @@
 		url="features/org.springframework.ide.eclipse.feature_@VERSION@.jar"
 		id="org.springframework.ide.eclipse.feature" version="@VERSION@">
 		<category name="Spring IDE" />
-	<feature>
+	</feature>
 
 	<category-def name="Spring IDE" label="Spring IDE" />]]></replacevalue>
 	</replace>
