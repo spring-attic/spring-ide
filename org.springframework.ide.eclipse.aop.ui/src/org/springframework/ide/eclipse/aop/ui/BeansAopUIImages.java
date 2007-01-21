@@ -178,7 +178,7 @@ public class BeansAopUIImages {
     /* package */static ImageRegistry getImageRegistry() {
         if (imageRegistry == null) {
             imageRegistry = new ImageRegistry();
-            for (Iterator iter = imageDescriptors.keySet().iterator(); iter
+            for (Iterator<String> iter = imageDescriptors.keySet().iterator(); iter
                     .hasNext();) {
                 String key = (String) iter.next();
                 imageRegistry.put(key, (ImageDescriptor) imageDescriptors

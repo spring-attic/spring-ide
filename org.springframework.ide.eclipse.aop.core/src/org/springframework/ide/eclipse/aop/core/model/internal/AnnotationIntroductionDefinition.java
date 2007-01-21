@@ -22,8 +22,8 @@ public class AnnotationIntroductionDefinition
         extends BeanIntroductionDefinition implements IIntroductionDefinition,
         IAnnotationAopDefinition {
     
-    public AnnotationIntroductionDefinition(Class interfaceType,
-            String typePattern, Class defaultImpl) {
+    public AnnotationIntroductionDefinition(Class<?> interfaceType,
+            String typePattern, Class<?> defaultImpl) {
         super(interfaceType.getName(), typePattern, defaultImpl.getName());
     }
 }

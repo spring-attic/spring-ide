@@ -22,7 +22,7 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 
 public interface IAspectDefinition {
 
-    Class getAdviceClass() throws ClassNotFoundException;
+    Class<?> getAdviceClass() throws ClassNotFoundException;
 
     Method getAdviceMethod() throws ClassNotFoundException;
 

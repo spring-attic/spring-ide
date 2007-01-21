@@ -46,7 +46,7 @@ class JdtAwareAspectJAdviceMatcher
         this.project = project;
     }
 
-    public List<IMethod> getMatches(Class clazz) {
+    public List<IMethod> getMatches(Class<?> clazz) {
         IType jdtTargetClass = BeansModelUtils.getJavaType(project, clazz
                 .getName());
         Method[] methods = clazz.getDeclaredMethods();
@@ -106,7 +106,8 @@ class JdtAwareAspectJAdviceMatcher
             return null;
         }
 
-        public String[] getParameterNames(Constructor ctor) {
+        @SuppressWarnings("unchecked")
+		public String[] getParameterNames(Constructor ctor) {
             return null;
         }
     }

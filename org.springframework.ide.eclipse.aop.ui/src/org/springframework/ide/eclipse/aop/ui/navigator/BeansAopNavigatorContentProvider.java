@@ -212,7 +212,11 @@ public class BeansAopNavigatorContentProvider implements ICommonContentProvider,
             String id = BeansEditorUtils.getAttribute(element, "id");
             IResource resource = getResource(document);
             IAopProject project = Activator.getModel().getProject(resource.getProject());
-            List<IAopReference> references = project.getReferencesForResource(resource);
+            List<IAopReference> references = new ArrayList<IAopReference>();
+            if (project != null) {
+            	references = project.getReferencesForResource(resource);
+            	
+            }
             Map<IAspectDefinition, List<IAopReference>> foundSourceReferences = new HashMap<IAspectDefinition, List<IAopReference>>();
             Map<IAspectDefinition, List<IAopReference>> foundIntroductionSourceReferences = new HashMap<IAspectDefinition, List<IAopReference>>();
             Map<IBean, List<IAopReference>> foundTargetReferences = new HashMap<IBean, List<IAopReference>>();

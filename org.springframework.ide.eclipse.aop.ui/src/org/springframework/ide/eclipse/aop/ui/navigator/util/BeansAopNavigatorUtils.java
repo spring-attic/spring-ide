@@ -174,7 +174,7 @@ public class BeansAopNavigatorUtils {
         return (ISourceReference) element;
     }
 
-    private static Map workingCopyManagersForEditors = new HashMap();
+    private static Map<Object, Object> workingCopyManagersForEditors = new HashMap<Object, Object>();
 
     @SuppressWarnings("unused")
     private static boolean selectedOutsideJavaElement = false;

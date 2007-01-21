@@ -33,7 +33,8 @@ public class BeanIntroductionDefinition
 
         // Excludes methods implemented.
         ClassFilter exclusion = new ClassFilter() {
-            public boolean matches(Class clazz) {
+            @SuppressWarnings("unchecked")
+			public boolean matches(Class clazz) {
                 try {
                     return !(getImplInterfaceClass().isAssignableFrom(clazz));
                 }
@@ -104,7 +105,7 @@ public class BeanIntroductionDefinition
         throw new IllegalArgumentException();
     }
 
-    public Class getDefaultImplClass() throws ClassNotFoundException {
+    public Class<?> getDefaultImplClass() throws ClassNotFoundException {
         if (this.defaultImpl == null) {
             this.defaultImpl = Thread.currentThread().getContextClassLoader()
                     .loadClass(this.defaultImplName);

@@ -66,10 +66,10 @@ public class BeanAspectDefinitionParser {
      */
     protected static class AspectJAnnotation<A extends Annotation> {
 
-        private static Map<Class, AspectJAnnotationType> annotationTypes = null;
+        private static Map<Class<?>, AspectJAnnotationType> annotationTypes = null;
 
         static {
-            annotationTypes = new HashMap<Class, AspectJAnnotationType>();
+            annotationTypes = new HashMap<Class<?>, AspectJAnnotationType>();
             annotationTypes.put(Pointcut.class, AspectJAnnotationType.AtPointcut);
             annotationTypes.put(After.class, AspectJAnnotationType.AtAfter);
             annotationTypes.put(AfterReturning.class, AspectJAnnotationType.AtAfterReturning);
@@ -90,7 +90,7 @@ public class BeanAspectDefinitionParser {
 
         public AspectJAnnotation(A aspectjAnnotation) {
             this.annotation = aspectjAnnotation;
-            for (Class c : annotationTypes.keySet()) {
+            for (Class<?> c : annotationTypes.keySet()) {
                 if (c.isInstance(this.annotation)) {
                     this.annotationType = annotationTypes.get(c);
                     break;
@@ -180,7 +180,8 @@ public class BeanAspectDefinitionParser {
      * Find and return the first AspectJ annotation on the given method (there <i>should</i> only
      * be one anyway...)
      */
-    protected static AspectJAnnotation findAspectJAnnotationOnMethod(Method aMethod) {
+    @SuppressWarnings("unchecked")
+	protected static AspectJAnnotation<?> findAspectJAnnotationOnMethod(Method aMethod) {
         Class<? extends Annotation>[] classesToLookFor = (Class<? extends Annotation>[]) new Class[] {
                 Before.class, Around.class, After.class, AfterReturning.class, AfterThrowing.class,
                 Pointcut.class };
@@ -293,7 +294,7 @@ public class BeanAspectDefinitionParser {
                 final String className = BeansEditorUtils.getClassNameForBean(bean);
                 if (className != null && isIncluded(patternList, id)) {
                     try {
-                        final Class aspectClass = Thread.currentThread().getContextClassLoader()
+                        final Class<?> aspectClass = Thread.currentThread().getContextClassLoader()
                                 .loadClass(className);
                         if (isAspect(aspectClass) && validate(aspectClass)) {
                             createAnnotationAspectDefinition(document, bean, id, className,
@@ -330,7 +331,7 @@ public class BeanAspectDefinitionParser {
     }
 
     private static void createAnnotationAspectDefinition(final IDOMDocument document,
-            final Node bean, final String id, final String className, final Class aspectClass,
+            final Node bean, final String id, final String className, final Class<?> aspectClass,
             final List<IAspectDefinition> aspectInfos) {
         ReflectionUtils.doWithMethods(aspectClass, new ReflectionUtils.MethodCallback() {
             public void doWith(Method method) throws IllegalArgumentException {
@@ -348,7 +349,7 @@ public class BeanAspectDefinitionParser {
                     def.setNode((IDOMNode) bean);
                     def.setMethod(method.getName());
 
-                    AspectJAnnotation aspectJAnnotation = findAspectJAnnotationOnMethod(method);
+                    AspectJAnnotation<?> aspectJAnnotation = findAspectJAnnotationOnMethod(method);
                     if (aspectJAnnotation.getArgNames() != null) {
                         def.setArgNames(StringUtils
                                 .commaDelimitedListToStringArray(aspectJAnnotation.getArgNames()));

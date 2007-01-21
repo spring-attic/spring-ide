@@ -51,7 +51,7 @@ public class BeanAspectDefinition implements IAspectDefinition {
 
     private String aspectName;
 
-    private Class adviceClass;
+    private Class<?> adviceClass;
 
     private Method adviceMethod;
 
@@ -243,7 +243,7 @@ public class BeanAspectDefinition implements IAspectDefinition {
      * (non-Javadoc)
      * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#getAdviceClass()
      */
-    public Class getAdviceClass() throws ClassNotFoundException {
+    public Class<?> getAdviceClass() throws ClassNotFoundException {
         if (this.adviceClass == null) {
             this.adviceClass = Thread.currentThread().getContextClassLoader()
                     .loadClass(this.className);
