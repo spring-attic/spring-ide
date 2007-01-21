@@ -1,0 +1,12 @@
+Implementation-Title: commons-logging
+Implementation-Version: 1.1
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: jakarta.commons.logging
+Bundle-Name: commons-logging
+Bundle-Version: 1.1
+Bundle-Vendor: Apache Jakarta Commons
+Export-Package: org.apache.commons.logging
+Import-Package: org.apache.log4j;resolution:=optional
+Bundle-ClassPath: commons-logging.jar
+
+

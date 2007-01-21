@@ -1,0 +1,22 @@
+Implementation-Title: commons-attributes
+Implementation-Version: 1.1
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: jakarta.commons.collections
+Bundle-Name: commons-collections
+Bundle-Version: 1.1
+Bundle-Vendor: Apache Jakarta Commons
+Export-Package: org.apache.commons.collections,
+ org.apache.commons.collections.bag,
+ org.apache.commons.collections.bidimap,
+ org.apache.commons.collections.buffer,
+ org.apache.commons.collections.collection,
+ org.apache.commons.collections.comparators,
+ org.apache.commons.collections.functors,
+ org.apache.commons.collections.iterators,
+ org.apache.commons.collections.keyvalue,
+ org.apache.commons.collections.list,
+ org.apache.commons.collections.map,
+ org.apache.commons.collections.set
+Bundle-ClassPath: commons-collections.jar
+
+

@@ -1,0 +1,10 @@
+Implementation-Title: AOP Alliance
+Implementation-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.aopalliance
+Bundle-Name: aopalliance
+Bundle-Version: 1.0
+Bundle-Vendor: AOP Alliance
+Export-Package: org.aopalliance.aop, org.aopalliance.intercept
+Bundle-ClassPath: aopalliance.jar
+

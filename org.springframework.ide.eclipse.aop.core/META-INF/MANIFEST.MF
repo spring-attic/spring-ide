@@ -18,7 +18,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jface.text,
  org.springframework.ide.eclipse.core,
  org.springframework.ide.eclipse.beans.ui,
- org.springframework.ide.eclipse.beans.core
+ org.springframework.ide.eclipse.beans.core,
+ org.aspectj.aspectjweaver
 Eclipse-LazyStart: true
 Bundle-ClassPath: aop-core.jar
 Export-Package: org.springframework.ide.eclipse.aop.core,

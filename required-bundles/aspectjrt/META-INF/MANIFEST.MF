@@ -1,0 +1,19 @@
+Implementation-Title: aspectjrt
+Implementation-Version: 1.5.3
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.aspectj.aspectjrt
+Bundle-Name: aspecjrt
+Bundle-Version: 1.5.3
+Bundle-Vendor: Eclipse.org
+Bundle-Localization: plugin
+Export-Package: org.aspectj.internal.lang.annotation,
+ org.aspectj.internal.lang.reflect,
+ org.aspectj.lang,
+ org.aspectj.lang.annotation,
+ org.aspectj.lang.internal.lang,
+ org.aspectj.lang.reflect,
+ org.aspectj.runtime,
+ org.aspectj.runtime.internal,
+ org.aspectj.runtime.internal.cflowstack,
+ org.aspectj.runtime.reflect
+
