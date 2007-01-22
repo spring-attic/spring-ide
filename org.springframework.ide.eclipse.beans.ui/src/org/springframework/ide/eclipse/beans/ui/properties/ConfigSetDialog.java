@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.eclipse.jface.resource.JFaceColors;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -42,58 +43,69 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.views.model.ConfigNode;
-import org.springframework.ide.eclipse.beans.ui.views.model.ConfigSetNode;
-import org.springframework.ide.eclipse.beans.ui.views.model.ModelLabelProvider;
-import org.springframework.ide.eclipse.beans.ui.views.model.ModelSorter;
-import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
+import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesConfigSet;
+import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModelLabelProvider;
+import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesProject;
 import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
+/**
+ * Dialog for creating a beans config set.
+ * 
+ * @author Torsten Juergeleit
+ */
 public class ConfigSetDialog extends Dialog {
 
 	private static final String PREFIX = "ConfigSetDialog.";
 
 	private static final String TITLE_NEW = PREFIX + "title.new";
 	private static final String TITLE_EDIT = PREFIX + "title.edit";
-	private static final String ERROR_INVALID_NAME =
-												  PREFIX + "error.invalidName";
+
+	private static final String ERROR_INVALID_NAME = PREFIX
+			+ "error.invalidName";
 	private static final String ERROR_USED_NAME = PREFIX + "error.usedName";
+
 	private static final String NAME_LABEL = PREFIX + "name.label";
 	private static final String OVERRIDE_LABEL = PREFIX + "override.label";
 	private static final String INCOMPLETE_LABEL = PREFIX + "incomplete.label";
 	private static final String VIEWER_LABEL = PREFIX + "viewer.label";
+
 	private static final int LIST_VIEWER_WIDTH = 400;
 	private static final int LIST_VIEWER_HEIGHT = 250;
 
 	private Text nameText;
+
 	private Button overrideButton;
 	private Button incompleteButton;
 	private CheckboxTableViewer configsViewer;
 	private Label errorLabel;
 	private Button okButton;
 
-	private ProjectNode project;
-	private ConfigSetNode configSet;
-	private String configSetName;
+	private PropertiesProject project;
+	private PropertiesConfigSet configSet;
 	private String title;
 
-	public ConfigSetDialog(Shell parent, ProjectNode project,
-						   String configSetName) {
+	private enum Mode { NEW, EDIT };
+	private Mode mode;
+
+	public ConfigSetDialog(Shell parent, PropertiesProject project,
+			String configSetName) {
 		super(parent);
 		this.project = project;
-		this.configSetName = configSetName;
 		if (configSetName == null) {
-			configSet = new ConfigSetNode(project);
+			configSet = new PropertiesConfigSet(project, (String) null);
 			title = BeansUIPlugin.getResourceString(TITLE_NEW);
+			mode = Mode.NEW;
 		} else {
-			configSet = project.getConfigSet(configSetName);
+			configSet = (PropertiesConfigSet) project.getConfigSet(configSetName);
 			title = BeansUIPlugin.getResourceString(TITLE_EDIT);
+			mode = Mode.EDIT;
 		}
 	}
 
@@ -106,7 +118,7 @@ public class ConfigSetDialog extends Dialog {
 
 	protected Control createDialogArea(Composite parent) {
 
-		// group composite for options
+		// Create group composite for options
 		Composite composite = (Composite) super.createDialogArea(parent);
 		Composite optionsGroup = new Composite(composite, SWT.NULL);
 		optionsGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -118,7 +130,7 @@ public class ConfigSetDialog extends Dialog {
 		optionsGroup.setLayout(layout);
 		optionsGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		// labeled name text field
+		// Create labeled name text field
 		nameText = SpringUIUtils.createTextField(optionsGroup, BeansUIPlugin
 				.getResourceString(NAME_LABEL));
 		nameText.addModifyListener(new ModifyListener() {
@@ -127,16 +139,16 @@ public class ConfigSetDialog extends Dialog {
 			}
 		});
 
-		// labeled checkboxes
+		// Create labeled checkboxes
 		overrideButton = SpringUIUtils.createCheckBox(optionsGroup,
 				BeansUIPlugin.getResourceString(OVERRIDE_LABEL));
-		overrideButton.setSelection(configSet.isOverrideEnabled());
-
+		overrideButton.setSelection(configSet
+				.isAllowBeanDefinitionOverriding());
 		incompleteButton = SpringUIUtils.createCheckBox(optionsGroup,
 				BeansUIPlugin.getResourceString(INCOMPLETE_LABEL));
 		incompleteButton.setSelection(configSet.isIncomplete());
 
-		// config set list viewer
+		// Create config set list viewer
 		Label viewerLabel = new Label(composite, SWT.NONE);
 		GridData gd = new GridData(GridData.GRAB_HORIZONTAL
 				| GridData.HORIZONTAL_ALIGN_FILL);
@@ -151,12 +163,12 @@ public class ConfigSetDialog extends Dialog {
 		configsViewer.getTable().setLayoutData(gd);
 		configsViewer.setContentProvider(new ConfigFilesContentProvider(
 				createConfigList()));
-		configsViewer.setLabelProvider(new ModelLabelProvider());
-		configsViewer.setSorter(new ModelSorter(true));
+		configsViewer.setLabelProvider(new PropertiesModelLabelProvider());
+		configsViewer.setSorter(new ConfigFilesSorter());
 		configsViewer.setInput(this); // activate content provider
 		configsViewer.setCheckedElements(configSet.getConfigs().toArray());
 
-		// error label
+		// Create error label
 		errorLabel = new Label(composite, SWT.NONE);
 		errorLabel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
 				| GridData.HORIZONTAL_ALIGN_FILL));
@@ -168,15 +180,16 @@ public class ConfigSetDialog extends Dialog {
 	}
 
 	protected void createButtonsForButtonBar(Composite parent) {
-		// create OK and Cancel buttons by default
+
+		// Create OK and Cancel buttons by default
 		okButton = createButton(parent, IDialogConstants.OK_ID,
 				IDialogConstants.OK_LABEL, true);
 		createButton(parent, IDialogConstants.CANCEL_ID,
 				IDialogConstants.CANCEL_LABEL, false);
-		// do this here because setting the text will set enablement on the
+		// Do this here because setting the text will set enablement on the
 		// ok button
 		nameText.setFocus();
-		String name = configSet.getName();
+		String name = configSet.getElementName();
 		if (name != null && name.trim().length() != 0) {
 			nameText.setText(name);
 			okButton.setEnabled(true);
@@ -187,58 +200,56 @@ public class ConfigSetDialog extends Dialog {
 
 	protected void buttonPressed(int buttonId) {
 		if (buttonId == IDialogConstants.OK_ID) {
-			String name = nameText.getText();
 
-			// Keep a copy of the original list of configs in the config set
-			Set<ConfigNode> oldConfigs = new LinkedHashSet<ConfigNode>(
-					configSet.getConfigs());
+			// Remove old config set from project
+			if (mode == Mode.EDIT) {
+				project.removeConfigSet(configSet.getElementName());
+			}
 
 			// Update config set
-			configSet.clear();
-			configSet.setName(name);
-			configSet.setOverrideEnabled(overrideButton.getSelection());
+			configSet.setElementName(nameText.getText());
+			configSet.setAllowBeanDefinitionOverriding(overrideButton
+					.getSelection());
 			configSet.setIncomplete(incompleteButton.getSelection());
+
+			// Keep a copy of the original list of configs in the config set
+			Set<IBeansConfig> oldConfigs = new LinkedHashSet<IBeansConfig>(
+					configSet.getConfigs());
 
 			// At first add the originally and still selected configs to the
 			// config set to preserve their order
 			List newConfigs = Arrays.asList(configsViewer.getCheckedElements());
-			for (ConfigNode config : oldConfigs) {
+			for (IBeansConfig config : oldConfigs) {
 				if (newConfigs.contains(config)) {
-					configSet.addConfig(config);
+					configSet.addConfig(config.getElementName());
 				}
 			}
 
 			// Finally add the newly selected configs to the config set
 			for (Object newConfig : newConfigs) {
-				ConfigNode config = (ConfigNode) newConfig;
-				if (!configSet.hasConfig(config.getName())) {
-					configSet.addConfig(config);
+				IBeansConfig config = (IBeansConfig) newConfig;
+				String configName = config.getElementName();
+				if (!configSet.hasConfig(configName)) {
+					configSet.addConfig(configName);
 				}
 			}
 
-			// Add newly created config set to project or re-add existing one
-			if (configSetName == null) {
-				configSet.setParent(project);
-				configSet.setOverrideEnabled(overrideButton.getSelection());
-				configSet.setIncomplete(incompleteButton.getSelection());
-			} else if (!configSetName.equals(name)) {
-				project.removeConfigSet(configSetName);
-			}
+			// Readd updated or newly created config set
 			project.addConfigSet(configSet);
 		}
 		super.buttonPressed(buttonId);
 	}
 
-	private List<ConfigNode> createConfigList() {
+	private List<IBeansConfig> createConfigList() {
 
-		// Create new list with config files from this config set
-		List<ConfigNode> configs = new ArrayList<ConfigNode>(configSet
+		// Create new list with all config files from this config set
+		List<IBeansConfig> configs = new ArrayList<IBeansConfig>(configSet
 				.getConfigs());
 
 		// Add missing configs from project
-		for (ConfigNode config : project.getConfigs()) {
-			if (!configSet.hasConfig(config.getName())) {
-				configs.add(new ConfigNode(configSet, config.getName()));
+		for (IBeansConfig config : project.getConfigs()) {
+			if (!configSet.hasConfig(config.getElementName())) {
+				configs.add(new BeansConfig(project, config.getElementName()));
 			}
 		}
 
@@ -259,14 +270,14 @@ public class ConfigSetDialog extends Dialog {
 							String name = projectPath + "/"
 									+ config.getElementName();
 							if (!configSet.hasConfig(name)) {
-								configs.add(new ConfigNode(configSet, name));
+								configs.add(new BeansConfig(project, name));
 							}
 						}
 					}
 				}
 			}
 		} catch (CoreException e) {
-			// we can't do anything here
+			// We can't do anything here
 		}
 		return configs;
 	}
@@ -279,7 +290,8 @@ public class ConfigSetDialog extends Dialog {
 				|| !StringUtils.isAlphaNumeric(name)) {
 			errorLabel.setText(BeansUIPlugin
 					.getResourceString(ERROR_INVALID_NAME));
-		} else if (configSetName == null || !name.equals(configSetName)) {
+		} else if (mode == Mode.NEW
+				|| !name.equals(configSet.getElementName())) {
 			if (project.hasConfigSet(name)) {
 				errorLabel.setText(BeansUIPlugin
 						.getResourceString(ERROR_USED_NAME));
@@ -296,11 +308,12 @@ public class ConfigSetDialog extends Dialog {
 		errorLabel.getParent().update();
 	}
 
-	private class ConfigFilesContentProvider implements
+	private static class ConfigFilesContentProvider implements
 			IStructuredContentProvider {
-		private List configs;
 
-		public ConfigFilesContentProvider(List configs) {
+		private List<IBeansConfig> configs;
+
+		public ConfigFilesContentProvider(List<IBeansConfig> configs) {
 			this.configs = configs;
 		}
 
@@ -308,10 +321,29 @@ public class ConfigSetDialog extends Dialog {
 			return configs.toArray();
 		}
 
-		public void inputChanged(Viewer arg0, Object arg1, Object arg2) {
+		public void inputChanged(Viewer viewer, Object oldInput,
+				Object newInput) {
 		}
 
 		public void dispose() {
+		}
+	}
+
+	private static class ConfigFilesSorter extends ViewerSorter {
+
+		private enum Category {
+			SUB_DIR, ROOT_DIR, OTHER
+		};
+
+		public int category(Object element) {
+			if (element instanceof IBeansConfig) {
+				if (((IBeansConfig) element).getElementName()
+						.indexOf('/') == -1) {
+					return Category.ROOT_DIR.ordinal();
+				}
+				return Category.SUB_DIR.ordinal();
+			}
+			return Category.OTHER.ordinal();
 		}
 	}
 }

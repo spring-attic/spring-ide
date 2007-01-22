@@ -42,7 +42,10 @@ import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * This class provides information for a Spring Beans project.
+ * This class holds information for a Spring Beans project. The information is
+ * lazily read from the corresponding project description XML file defined in
+ * {@link IBeansProject#DESCRIPTION_FILE}. The information can be persisted by
+ * calling the method {@link #saveDescription()}.
  * 
  * @author Torsten Juergeleit
  */
@@ -50,27 +53,10 @@ public class BeansProject extends AbstractResourceModelElement implements
 		IBeansProject {
 
 	private IProject project;
-	private Set<String> configExtensions;
-	private Map<String, IBeansConfig> configs;
-	private Map<String, IBeansConfigSet> configSets;
 
-	/**
-	 * Create a deep copy of given project associated with the given model.
-	 */
-	public BeansProject(IBeansModel model, IBeansProject project) {
-		this(model, project.getProject());
-
-		configExtensions = new LinkedHashSet<String>();
-		configExtensions.addAll(project.getConfigExtensions());
-
-		configs = new LinkedHashMap<String, IBeansConfig>();
-		for (IBeansConfig config : project.getConfigs()) {
-			addConfig(config.getElementName());
-		}
-
-		configSets = new LinkedHashMap<String, IBeansConfigSet>();
-		setConfigSets(project.getConfigSets());
-	}
+	protected Set<String> configExtensions;
+	protected Map<String, IBeansConfig> configs;
+	protected Map<String, IBeansConfigSet> configSets;
 
 	public BeansProject(IBeansModel model, IProject project) {
 		super(model, project.getName());
@@ -194,22 +180,26 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	/**
-	 * Adds the given beans config to the list of configs.
-	 * Optionally (by setting <code>doSaveDescription</code> to
-	 * <code>true</code> the modified project description is saved to disk.
+	 * Adds the given beans config file's name to the list of configs.
+	 * <p>
+	 * The modified project description has to be saved to disk by calling
+	 * {@link #saveDescription()}.
 	 * @param file  the config file to add
-	 * @param doSaveDescription  if <code>true</code> then the project's
-	 * 				modified configuration is saved to the config file
-	 * 				{@link IBeansProject.DESCRIPTION_FILE}
+	 * @return <code>true</code> if config file was added to this project
 	 */
-	public boolean addConfig(IFile file, boolean doSaveDescription) {
-		if (addConfig(getConfigName(file)) && doSaveDescription) {
-			saveDescription();
-			return true;
-		}
-		return false;
+	public boolean addConfig(IFile file) {
+		return addConfig(getConfigName(file));
 	}
 
+
+	/**
+	 * Adds the given beans config to the list of configs.
+	 * <p>
+	 * The modified project description has to be saved to disk by calling
+	 * {@link #saveDescription()}.
+	 * @param configName  the config name to add
+	 * @return <code>true</code> if config was added to this project
+	 */
 	public boolean addConfig(String configName) {
 		if (configs == null) {
 			readDescription();
@@ -222,33 +212,32 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	/**
-	 * Remove the given beans config from the list of configs and from all
-	 * config sets. Optionally (by setting <code>doSaveDescription</code> to
-	 * <code>true</code> the modified project description is saved to disk.
+	 * Removes the given beans config from the list of configs and from all
+	 * config sets.
+	 * <p>
+	 * The modified project description has to be saved to disk by calling
+	 * {@link #saveDescription()}.
 	 * @param file  the config file to remove
-	 * @param doSaveDescription  if <code>true</code> then the project's
-	 * 				modified configuration is saved to the config file
-	 * 				{@link IBeansProject.DESCRIPTION_FILE}
+	 * @return <code>true</code> if config was removed to this project
 	 */
-	public boolean removeConfig(IFile file, boolean doSaveDescription) {
+	public boolean removeConfig(IFile file) {
 		if (file.getProject().equals(project)) {
-			if (removeConfig(file.getProjectRelativePath().toString())
-					&& doSaveDescription) {
-				saveDescription();
-				return true;
-			}
-			return false;
+			return removeConfig(file.getProjectRelativePath().toString());
 		}
 
 		// External configs only remove from all config sets
-		if (removeConfigFromConfigSets(file.getFullPath().toString())
-				&& doSaveDescription) {
-			saveDescription();
-			return true;
-		}
-		return false;
+		return removeConfigFromConfigSets(file.getFullPath().toString());
 	}
 
+	/**
+	 * Removes the given beans config from the list of configs and from all
+	 * config sets.
+	 * <p>
+	 * The modified project description has to be saved to disk by calling
+	 * {@link #saveDescription()}.
+	 * @param configName  the config name to remove
+	 * @return <code>true</code> if config was removed to this project
+	 */
 	public boolean removeConfig(String configName) {
 		if (hasConfig(configName)) {
 			configs.remove(configName);
@@ -311,8 +300,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 		}
 		this.configSets.clear();
 		for (IBeansConfigSet configSet : configSets) {
-			this.configSets.put(configSet.getElementName(), new BeansConfigSet(
-					this, configSet));
+			this.configSets.put(configSet.getElementName(), configSet);
 		}
 	}
 
@@ -321,8 +309,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 			readDescription();
 		}
 		if (!configSets.values().contains(configSet)) {
-			configSets.put(configSet.getElementName(), new BeansConfigSet(this,
-					configSet));
+			configSets.put(configSet.getElementName(), configSet);
 			return true;
 		}
 		return false;
@@ -382,7 +369,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 
 	/**
 	 * Writes the current project description to the corresponding XML file
-	 * defined in {@link IBeansProject.DESCRIPTION_FILE}.
+	 * defined in {@link IBeansProject#DESCRIPTION_FILE}.
 	 */
 	public void saveDescription() {
 		BeansProjectDescriptionWriter.write(this);
@@ -394,9 +381,9 @@ public class BeansProject extends AbstractResourceModelElement implements
 	 * description file.
 	 */
 	public void reset() {
-		configExtensions.clear();
-		configs.clear();
-		configSets.clear();
+		configExtensions = null;
+		configs = null;
+		configSets = null;
 	}
 
 	public boolean equals(Object other) {
@@ -427,13 +414,14 @@ public class BeansProject extends AbstractResourceModelElement implements
 		if (configSets == null) {
 			readDescription();
 		}
+		boolean hasRemoved = false;
 		for (IBeansConfigSet configSet : configSets.values()) {
 			if (configSet.hasConfig(configName)) {
 				((BeansConfigSet) configSet).removeConfig(configName);
-				return true;
+				hasRemoved = true;
 			}
 		}
-		return false;
+		return hasRemoved;
 	}
 
 	/**

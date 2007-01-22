@@ -44,7 +44,8 @@ import org.springframework.util.ObjectUtils;
 public class BeansConfigSet extends AbstractResourceModelElement implements
 		IBeansConfigSet {
 
-	private Set<String> configNames;
+	protected Set<String> configNames;
+
 	private boolean allowAliasOverriding;
 	private boolean allowBeanDefinitionOverriding;
 	private boolean isIncomplete;
@@ -53,14 +54,6 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 	private Set<IBeansComponent> components;
 	private Map<String, IBean> beansMap;
 	private Map<String, Set<IBean>> beanClassesMap;
-
-	/**
-	 * Creates a deep copy of given config set associated with the given
-	 * project.
-	 */
-	public BeansConfigSet(IBeansProject project, IBeansConfigSet configSet) {
-		this(project, configSet.getElementName(), configSet.getConfigNames());
-	}
 
 	public BeansConfigSet(IBeansProject project, String name) {
 		this(project, name, new HashSet<String>());
@@ -90,13 +83,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 	}
 
 	public IModelElement[] getElementChildren() {
-		Set<IModelElement> children = new LinkedHashSet<IModelElement>();
-		for (String configName : configNames) {
-			IBeansConfig config = BeansModelUtils.getConfig(configName, this);
-			if (config != null) {
-				children.add(config);
-			}
-		}
+		Set<IBeansConfig> children = getConfigs();
 		return children.toArray(new IModelElement[children.size()]);
 	}
 
@@ -135,7 +122,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 		return isIncomplete;
 	}
 
-	public void addConfigName(String configName) {
+	public void addConfig(String configName) {
 		if (configName.length() > 0 && !configNames.contains(configName)) {
 			configNames.add(configName);
 			reset();

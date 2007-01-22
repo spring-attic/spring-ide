@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,7 @@
 
 package org.springframework.ide.eclipse.core.model;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import org.eclipse.core.runtime.ListenerList;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 
 /**
@@ -29,11 +27,11 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 public abstract class AbstractModel extends AbstractModelElement implements
 		IModel {
 
-	private Set<IModelChangeListener> listeners;
+	private ListenerList listeners;
 
 	public AbstractModel(IModelElement parent, String name) {
 		super(parent, name);
-		listeners = new HashSet<IModelChangeListener>();
+		listeners = new ListenerList();
 	}
 
 	public int getElementType() {
@@ -41,19 +39,17 @@ public abstract class AbstractModel extends AbstractModelElement implements
 	}
 
 	public final void addChangeListener(IModelChangeListener listener) {
-		if (!listeners.contains(listener)) {
-			listeners.add(listener);
-		}
+		listeners.add(listener);
 	}
 
 	public final void removeChangeListener(IModelChangeListener listener) {
 		listeners.remove(listener);
 	}
 
-	protected final void notifyListeners(IModelElement element, Type type) {
+	public final void notifyListeners(IModelElement element, Type type) {
 		ModelChangeEvent event = new ModelChangeEvent(element, type);
-		for (IModelChangeListener listener : listeners) {
-			listener.elementChanged(event);
+		for (Object listener : listeners.getListeners()) {
+			((IModelChangeListener) listener).elementChanged(event);
 		}
 	}
 }

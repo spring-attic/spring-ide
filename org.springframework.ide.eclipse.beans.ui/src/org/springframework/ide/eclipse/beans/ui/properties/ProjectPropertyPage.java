@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.ide.eclipse.beans.ui.properties;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
@@ -29,14 +26,10 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
-import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
-import org.springframework.ide.eclipse.beans.ui.views.model.ConfigSetNode;
-import org.springframework.ide.eclipse.beans.ui.views.model.ProjectNode;
+import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModel;
+import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesProject;
 
 /**
  * Spring project property page.
@@ -58,7 +51,7 @@ public class ProjectPropertyPage extends PropertyPage {
 	private static final String CONFIG_SETS_LABEL = PREFIX
 			+ "tabConfigSets.label";
 
-	private ProjectNode projectModel;
+	private PropertiesModel model;
 	private ConfigFilesTab configFilesTab;
 	private ConfigSetsTab configSetsTab;
 	private int selectedTab;
@@ -80,23 +73,24 @@ public class ProjectPropertyPage extends PropertyPage {
 
 	protected Control createContents(Composite parent) {
 
-		// Build project model
-		IBeansProject project = getSpringProject();
-		projectModel = new ProjectNode(null, project.getElementName());
-		projectModel.setConfigExtensions(project.getConfigExtensions());
-		projectModel.setConfigs(project.getConfigs());
-		projectModel.setConfigSets(project.getConfigSets());
+		// Build temporary beans core model with a cloned "real" Spring project
+		IProject project = (IProject) getElement();
+		model = new PropertiesModel();
+		PropertiesProject modelProject = new PropertiesProject(BeansCorePlugin
+				.getModel().getProject(project));
+		modelProject.setElementParent(model);
+		model.addProject(modelProject);
 
 		// Build folder with tabs
 		TabFolder folder = new TabFolder(parent, SWT.NONE);
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		configFilesTab = new ConfigFilesTab(projectModel, getElement());
+		configFilesTab = new ConfigFilesTab(model, project);
 		TabItem item = new TabItem(folder, SWT.NONE);
 		item.setText(BeansUIPlugin.getResourceString(CONFIG_FILES_LABEL));
 		item.setControl(configFilesTab.createControl(folder));
 
-		configSetsTab = new ConfigSetsTab(projectModel, getElement());
+		configSetsTab = new ConfigSetsTab(model, project);
 		item = new TabItem(folder, SWT.NONE);
 		item.setText(BeansUIPlugin.getResourceString(CONFIG_SETS_LABEL));
 		item.setControl(configSetsTab.createControl(folder));
@@ -109,34 +103,12 @@ public class ProjectPropertyPage extends PropertyPage {
 	}
 
 	public boolean performOk() {
-		BeansProject project = getSpringProject();
-		boolean hasChanged = false;
-
-		// Store config files from model in project
-		if (configFilesTab.hasUserMadeChanges()) {
-			project.setConfigExtensions(projectModel.getConfigExtensions());
-			project.setConfigs(projectModel.getConfigNames());
-			hasChanged = true;
-		}
-
-		// Store modified config sets in project
-		if (configSetsTab.hasUserMadeChanges()) {
-			Set<IBeansConfigSet> configSets = new
-					LinkedHashSet<IBeansConfigSet>();
-			for (ConfigSetNode node : projectModel.getConfigSets()) {
-				BeansConfigSet configSet = new BeansConfigSet(project, node
-						.getName(), node.getConfigNames());
-				configSet.setAllowBeanDefinitionOverriding(node
-						.isOverrideEnabled());
-				configSet.setIncomplete(node.isIncomplete());
-				configSets.add(configSet);
-			}
-			project.setConfigSets(configSets);
-			hasChanged = true;
-		}
 
 		// Save modified project description
-		if (hasChanged) {
+		if (configFilesTab.hasUserMadeChanges()
+				|| configSetsTab.hasUserMadeChanges()) {
+			PropertiesProject project = (PropertiesProject) model
+					.getProject((IProject) getElement());
 			project.saveDescription();
 		}
 
@@ -148,19 +120,12 @@ public class ProjectPropertyPage extends PropertyPage {
 		return super.performOk();
 	}
 
-	protected BeansProject getSpringProject() {
-		return (BeansProject) BeansCorePlugin.getModel().getProject(
-				(IProject) getElement());
-	}
-
 	public void dispose() {
 		if (configFilesTab != null) {
 			configFilesTab.dispose();
-			configFilesTab = null;
 		}
-		if (configSetsTab != null) {
+		if (configSetsTab!= null) {
 			configSetsTab.dispose();
-			configSetsTab = null;
 		}
 		super.dispose();
 	}

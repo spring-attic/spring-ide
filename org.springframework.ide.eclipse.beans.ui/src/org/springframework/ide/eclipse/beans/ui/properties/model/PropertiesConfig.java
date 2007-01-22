@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,20 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.beans.ui.actions;
+package org.springframework.ide.eclipse.beans.ui.properties.model;
 
-import org.eclipse.jface.action.Action;
-import org.springframework.ide.eclipse.beans.ui.views.BeansView;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 
 /**
- * This <code>IAction</code> opens the Spring beans view.
+ * This class defines a Spring beans configuration.
+ * 
  * @author Torsten Juergeleit
  */
-public class OpenBeansViewAction extends Action {
+public class PropertiesConfig extends BeansConfig {
 
-	public void run() {
-		BeansView.showView();
+	public PropertiesConfig(PropertiesConfigSet configSet, String configName) {
+		super((IBeansProject) configSet.getElementParent(), configName);
+		setElementParent(configSet);
 	}
 }

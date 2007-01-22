@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,16 +39,24 @@ public abstract class AbstractModelElement implements IModelElement {
 		return null;
 	}
 
-	public final IModelElement getElementParent() {
+	public IModelElement getElementParent() {
 		return parent;
+	}
+
+	public void setElementParent(IModelElement parent) {
+		this.parent = parent;
 	}
 
 	public IModelElement[] getElementChildren() {
 		return NO_CHILDREN;
 	}
 
-	public final String getElementName() {
+	public String getElementName() {
 		return name;
+	}
+
+	public void setElementName(String name) {
+		this.name = name;
 	}
 
 	public final String getElementID() {
@@ -70,8 +78,8 @@ public abstract class AbstractModelElement implements IModelElement {
 	/**
 	 * Overwrite this method if the element's name is not unique.
 	 * <p>
-	 * This method is called by <code>getElementID()</code>. The default
-	 * implementation returns <code>getElementName()</code>.
+	 * This method is called by {@link #getElementID}. The default
+	 * implementation returns {@link #getElementName()}>.
 	 * 
 	 * @see #getElementID()
 	 */
@@ -84,7 +92,7 @@ public abstract class AbstractModelElement implements IModelElement {
 	 *
 	 * @param id the element's unique ID
 	 */
-	public final IModelElement getElement(String id) {
+	public IModelElement getElement(String id) {
 		int sepPos = id.indexOf(ID_SEPARATOR);
 		if (sepPos > 0) {
 			try {
@@ -101,7 +109,7 @@ public abstract class AbstractModelElement implements IModelElement {
 								if (child instanceof AbstractModelElement) {
 									IModelElement element =
 											((AbstractModelElement) child)
-												.getElement(id);
+													.getElement(id);
 									if (element != null) {
 										return element;
 									}

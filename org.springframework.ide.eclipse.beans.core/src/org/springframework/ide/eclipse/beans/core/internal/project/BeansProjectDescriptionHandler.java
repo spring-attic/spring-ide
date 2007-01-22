@@ -194,7 +194,7 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 						config = config.substring(projectPath.length());
 					}
 				}
-				configSet.addConfigName(config);
+				configSet.addConfig(config);
 				state = State.CONFIG_SET_CONFIGS;
 			}
 		}
