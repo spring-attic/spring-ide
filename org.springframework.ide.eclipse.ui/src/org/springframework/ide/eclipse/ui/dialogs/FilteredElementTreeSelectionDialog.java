@@ -56,7 +56,7 @@ public class FilteredElementTreeSelectionDialog extends SelectionStatusDialog {
     private IStatus fCurrStatus = new Status(IStatus.OK, PlatformUI.PLUGIN_ID,
             IStatus.OK, "", null); //$NON-NLS-1$
 
-    private List fFilters;
+    private List<ViewerFilter> fFilters;
 
     private Object fInput;
 
@@ -133,7 +133,7 @@ public class FilteredElementTreeSelectionDialog extends SelectionStatusDialog {
      */
     public void addFilter(ViewerFilter filter) {
         if (fFilters == null) {
-			fFilters = new ArrayList(4);
+			fFilters = new ArrayList<ViewerFilter>(4);
 		}
 
         fFilters.add(filter);
