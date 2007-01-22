@@ -15,6 +15,7 @@
  */
 package org.springframework.ide.eclipse.aop.ui.navigator;
 
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -44,208 +45,194 @@ import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUt
 import org.w3c.dom.Element;
 
 @SuppressWarnings("restriction")
-public class BeansAopNavigator
-        extends CommonNavigator implements ISelectionListener {
+public class BeansAopNavigator extends CommonNavigator implements ISelectionListener {
 
-    public static final String ID = "org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigator";
+	public static final String ID = "org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigator";
 
-    public static final String BEAN_REFS_FOR_FILE_ID = ID + ".beanRefsForFile";
+	public static final String BEAN_REFS_FOR_FILE_ID = ID + ".beanRefsForFile";
 
-    private static boolean showBeansRefsForFileEnabled;
+	private static boolean showBeansRefsForFileEnabled;
 
-    private ToggleShowBeanRefsForFileAction toggleShowBeanRefsForFileAction;
+	private ToggleShowBeanRefsForFileAction toggleShowBeanRefsForFileAction;
 
-    static {
-        IPreferenceStore pstore = Activator.getDefault().getPreferenceStore();
-        showBeansRefsForFileEnabled = pstore.getBoolean(BEAN_REFS_FOR_FILE_ID);
-    }
+	static {
+		IPreferenceStore pstore = Activator.getDefault().getPreferenceStore();
+		showBeansRefsForFileEnabled = pstore.getBoolean(BEAN_REFS_FOR_FILE_ID);
+	}
 
-    public static int calculateExpandToLevel(Object element) {
-        return AbstractTreeViewer.ALL_LEVELS;
-    }
+	public static int calculateExpandToLevel(Object element) {
+		return AbstractTreeViewer.ALL_LEVELS;
+	}
 
-    public static Object calculateRootElement(Object element) {
-        if (showBeansRefsForFileEnabled && element != null) {
-            if (element instanceof IMethod) {
-                element = ((IMethod) element).getDeclaringType();
-            }
-            if (element instanceof Element) {
-                element = ((Element) element).getOwnerDocument()
-                        .getDocumentElement();
-            }
-        }
-        return element;
-    }
+	public static Object calculateRootElement(Object element) {
+		if (showBeansRefsForFileEnabled && element != null) {
+			if (element instanceof IMethod) {
+				element = ((IMethod) element).getDeclaringType();
+			}
+			else if (element instanceof Element) {
+				element = ((Element) element).getOwnerDocument().getDocumentElement();
+			}
+			else if (element instanceof IField) {
+				element = ((IField) element).getDeclaringType();
+			}
+		}
+		return element;
+	}
 
-    public static void refreshViewer(TreeViewer viewer,
-            final Object rootElement, Object element) {
-        viewer.getTree().setRedraw(false);
-        viewer.setInput(rootElement);
-        viewer.refresh();
-        viewer.expandToLevel(calculateExpandToLevel(rootElement));
-        expandTree(viewer.getTree().getItems(), false);
-        revealSelection(viewer, element);
-        viewer.getTree().setRedraw(true);
-    }
+	public static void refreshViewer(TreeViewer viewer, final Object rootElement, Object element) {
+		viewer.getTree().setRedraw(false);
+		viewer.setInput(rootElement);
+		viewer.refresh();
+		viewer.expandToLevel(calculateExpandToLevel(rootElement));
+		expandTree(viewer.getTree().getItems(), false);
+		revealSelection(viewer, element);
+		viewer.getTree().setRedraw(true);
+	}
 
-    private static void expandTree(TreeItem[] items, boolean b) {
-        if (items != null) {
-            for (TreeItem item : items) {
-                Object obj = item.getData();
-                if (obj instanceof AdviceAopReferenceNode
-                        || obj instanceof AdvisedAopReferenceNode
-                        || obj instanceof AdviceDeclareParentAopReferenceNode
-                        || obj instanceof AdvisedDeclareParentAopReferenceNode) {
-                    expandTree(item.getItems(), true);
-                }
-                else {
-                    expandTree(item.getItems(), b);
-                }
-                if (b) {
-                    item.setExpanded(false);
-                }
-            }
-        }
-    }
+	private static void expandTree(TreeItem[] items, boolean b) {
+		if (items != null) {
+			for (TreeItem item : items) {
+				Object obj = item.getData();
+				if (obj instanceof AdviceAopReferenceNode || obj instanceof AdvisedAopReferenceNode
+						|| obj instanceof AdviceDeclareParentAopReferenceNode
+						|| obj instanceof AdvisedDeclareParentAopReferenceNode) {
+					expandTree(item.getItems(), true);
+				} else {
+					expandTree(item.getItems(), b);
+				}
+				if (b) {
+					item.setExpanded(false);
+				}
+			}
+		}
+	}
 
-    public static void revealSelection(TreeViewer viewer,
-            final Object javaElement) {
-        TreeItem[] items = viewer.getTree().getItems();
-        Object wr = null;
+	public static void revealSelection(TreeViewer viewer, final Object javaElement) {
+		TreeItem[] items = viewer.getTree().getItems();
+		Object wr = null;
 
-        if (javaElement instanceof IJavaElement) {
-            if (showBeansRefsForFileEnabled && javaElement instanceof IMethod) {
-                // we have one root element
-                TreeItem[] aspectChildren = items[0].getItems();
-                for (int i = 0; i < aspectChildren.length; i++) {
-                    Object obj = aspectChildren[i].getItem(0).getData();
-                    if (obj instanceof AdviceAopSourceMethodNode
-                            && ((AdviceAopSourceMethodNode) obj)
-                                    .getAdviceSourceMethod()
-                                    .equals(javaElement)) {
-                        wr = obj;
-                        break;
-                    }
-                }
-            }
-            else {
-                if (items != null && items.length > 0) {
-                    wr = items[0].getData();
-                }
-            }
-        }
-        else if (javaElement instanceof ElementImpl) {
-            if (!showBeansRefsForFileEnabled) {
-                if (items != null && items.length > 0) {
-                    wr = items[0].getData();
-                }
-            }
-            else {
-                ElementImpl element = (ElementImpl) javaElement;
-                IStructuredDocument document = element.getStructuredDocument();
-                int startLine = document.getLineOfOffset(element
-                        .getStartOffset()) + 1;
-                int endLine = document.getLineOfOffset(element.getEndOffset()) + 1;
-                for (int i = 0; i < items.length; i++) {
-                    Object obj = items[i].getData();
-                    if (obj instanceof IRevealableReferenceNode
-                            && ((IRevealableReferenceNode) obj).getLineNumber() >= startLine
-                            && ((IRevealableReferenceNode) obj).getLineNumber() <= endLine) {
-                        wr = obj;
-                        break;
-                    }
-                }
-            }
-        }
+		if (javaElement instanceof IJavaElement) {
+			if (showBeansRefsForFileEnabled && javaElement instanceof IMethod) {
+				// we have one root element
+				TreeItem[] aspectChildren = items[0].getItems();
+				for (int i = 0; i < aspectChildren.length; i++) {
+					Object obj = aspectChildren[i].getItem(0).getData();
+					if (obj instanceof AdviceAopSourceMethodNode
+							&& ((AdviceAopSourceMethodNode) obj).getAdviceSourceMethod().equals(
+									javaElement)) {
+						wr = obj;
+						break;
+					}
+				}
+			} else {
+				if (items != null && items.length > 0) {
+					wr = items[0].getData();
+				}
+			}
+		} else if (javaElement instanceof ElementImpl) {
+			if (!showBeansRefsForFileEnabled) {
+				if (items != null && items.length > 0) {
+					wr = items[0].getData();
+				}
+			} else {
+				ElementImpl element = (ElementImpl) javaElement;
+				IStructuredDocument document = element.getStructuredDocument();
+				int startLine = document.getLineOfOffset(element.getStartOffset()) + 1;
+				int endLine = document.getLineOfOffset(element.getEndOffset()) + 1;
+				for (int i = 0; i < items.length; i++) {
+					Object obj = items[i].getData();
+					if (obj instanceof IRevealableReferenceNode
+							&& ((IRevealableReferenceNode) obj).getLineNumber() >= startLine
+							&& ((IRevealableReferenceNode) obj).getLineNumber() <= endLine) {
+						wr = obj;
+						break;
+					}
+				}
+			}
+		}
 
-        if (wr != null) {
-            viewer.setSelection(new StructuredSelection(wr), true);
-            viewer.reveal(wr);
-        }
+		if (wr != null) {
+			viewer.setSelection(new StructuredSelection(wr), true);
+			viewer.reveal(wr);
+		}
 
-    }
+	}
 
-    private Object lastElement;
+	private Object lastElement;
 
-    private ISelection lastSelection;
+	private ISelection lastSelection;
 
-    private IWorkbenchPart lastWorkbenchPart;
+	private IWorkbenchPart lastWorkbenchPart;
 
-    public void createPartControl(Composite aParent) {
-        super.createPartControl(aParent);
-        getSite().getWorkbenchWindow().getSelectionService()
-                .addPostSelectionListener(this);
+	public void createPartControl(Composite aParent) {
+		super.createPartControl(aParent);
+		getSite().getWorkbenchWindow().getSelectionService().addPostSelectionListener(this);
 
-        makeActions();
-    }
+		makeActions();
+	}
 
-    private void makeActions() {
-        this.toggleShowBeanRefsForFileAction = new ToggleShowBeanRefsForFileAction(
-                this);
-        IActionBars bars = getViewSite().getActionBars();
-        bars.getToolBarManager().add(toggleShowBeanRefsForFileAction);
-        bars.getMenuManager().add(toggleShowBeanRefsForFileAction);
-    }
+	private void makeActions() {
+		this.toggleShowBeanRefsForFileAction = new ToggleShowBeanRefsForFileAction(this);
+		IActionBars bars = getViewSite().getActionBars();
+		bars.getToolBarManager().add(toggleShowBeanRefsForFileAction);
+		bars.getMenuManager().add(toggleShowBeanRefsForFileAction);
+	}
 
-    public void dispose() {
-        super.dispose();
-        getSite().getWorkbenchWindow().getSelectionService()
-                .removeSelectionListener(this);
-    }
+	public void dispose() {
+		super.dispose();
+		getSite().getWorkbenchWindow().getSelectionService().removeSelectionListener(this);
+	}
 
-    public boolean isShowBeansRefsForFileEnabled() {
-        return showBeansRefsForFileEnabled;
-    }
+	public boolean isShowBeansRefsForFileEnabled() {
+		return showBeansRefsForFileEnabled;
+	}
 
-    public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-        updateTreeViewer(part, selection, true);
-    }
+	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+		updateTreeViewer(part, selection, true);
+	}
 
-    public void setShowBeansRefsForFileEnabled(
-            boolean showBeansRefsForFileEnabled) {
-        BeansAopNavigator.showBeansRefsForFileEnabled = showBeansRefsForFileEnabled;
+	public void setShowBeansRefsForFileEnabled(boolean showBeansRefsForFileEnabled) {
+		BeansAopNavigator.showBeansRefsForFileEnabled = showBeansRefsForFileEnabled;
 
-        IPreferenceStore pstore = Activator.getDefault().getPreferenceStore();
-        pstore.setValue(BEAN_REFS_FOR_FILE_ID, showBeansRefsForFileEnabled);
-        Activator.getDefault().savePluginPreferences();
+		IPreferenceStore pstore = Activator.getDefault().getPreferenceStore();
+		pstore.setValue(BEAN_REFS_FOR_FILE_ID, showBeansRefsForFileEnabled);
+		Activator.getDefault().savePluginPreferences();
 
-        updateTreeViewer(lastWorkbenchPart, lastSelection, false);
-    }
+		updateTreeViewer(lastWorkbenchPart, lastSelection, false);
+	}
 
-    private void updateTreeViewer(IWorkbenchPart part, ISelection selection,
-            boolean ignoreSameSelection) {
-        final Object element = BeansAopNavigatorUtils.getSelectedElement(part,
-                selection);
-        if (element == null
-                || (element.equals(lastElement) && ignoreSameSelection)) {
-            return;
-        }
-        if ((element instanceof IType || element instanceof IMethod || element instanceof Element)
-                && isLinkingEnabled()) {
+	private void updateTreeViewer(IWorkbenchPart part, ISelection selection,
+			boolean ignoreSameSelection) {
+		final Object element = BeansAopNavigatorUtils.getSelectedElement(part, selection);
+		if (element == null || (element.equals(lastElement) && ignoreSameSelection)) {
+			return;
+		}
+		if ((element instanceof IType || element instanceof IMethod || element instanceof IField 
+				|| element instanceof Element)
+				&& isLinkingEnabled()) {
 
-            final Object rootElement = calculateRootElement(element);
+			final Object rootElement = calculateRootElement(element);
 
-            Control ctrl = getCommonViewer().getControl();
-            // Are we in the UI thread?
-            if (ctrl.getDisplay().getThread() == Thread.currentThread()) {
-                refreshViewer(getCommonViewer(), rootElement, element);
-            }
-            else {
-                ctrl.getDisplay().asyncExec(new Runnable() {
-                    public void run() {
+			Control ctrl = getCommonViewer().getControl();
+			// Are we in the UI thread?
+			if (ctrl.getDisplay().getThread() == Thread.currentThread()) {
+				refreshViewer(getCommonViewer(), rootElement, element);
+			} else {
+				ctrl.getDisplay().asyncExec(new Runnable() {
+					public void run() {
 
-                        // Abort if this happens after disposes
-                        Control ctrl = getCommonViewer().getControl();
-                        if (ctrl == null || ctrl.isDisposed()) {
-                            return;
-                        }
-                        refreshViewer(getCommonViewer(), rootElement, element);
-                    }
-                });
-            }
-            lastElement = element;
-            lastSelection = selection;
-            lastWorkbenchPart = part;
-        }
-    }
+						// Abort if this happens after disposes
+						Control ctrl = getCommonViewer().getControl();
+						if (ctrl == null || ctrl.isDisposed()) {
+							return;
+						}
+						refreshViewer(getCommonViewer(), rootElement, element);
+					}
+				});
+			}
+			lastElement = element;
+			lastSelection = selection;
+			lastWorkbenchPart = part;
+		}
+	}
 }

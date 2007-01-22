@@ -393,7 +393,7 @@ public class BeanAspectDefinitionParser {
             if (declareParents != null) {
                 if (declareParents.defaultImpl() != DeclareParents.class) {
                     AnnotationIntroductionDefinition def = new AnnotationIntroductionDefinition(
-                            field.getType(), declareParents.value(), declareParents.defaultImpl());
+                            field.getType(), declareParents.value(), declareParents.defaultImpl(), field);
                     def.setAspectName(id);
                     def.setClassName(className);
                     def.setNode((IDOMNode) bean);

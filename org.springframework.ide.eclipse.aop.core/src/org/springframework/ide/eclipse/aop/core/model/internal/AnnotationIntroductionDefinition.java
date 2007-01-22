@@ -15,6 +15,8 @@
  */
 package org.springframework.ide.eclipse.aop.core.model.internal;
 
+import java.lang.reflect.Field;
+
 import org.springframework.ide.eclipse.aop.core.model.IAnnotationAopDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IIntroductionDefinition;
 
@@ -22,8 +24,15 @@ public class AnnotationIntroductionDefinition
         extends BeanIntroductionDefinition implements IIntroductionDefinition,
         IAnnotationAopDefinition {
     
+	private Field definingField;
+	
     public AnnotationIntroductionDefinition(Class<?> interfaceType,
-            String typePattern, Class<?> defaultImpl) {
+            String typePattern, Class<?> defaultImpl, Field definingField) {
         super(interfaceType.getName(), typePattern, defaultImpl.getName());
+        this.definingField = definingField;
     }
+
+	public Field getDefiningField() {
+		return definingField;
+	}
 }

@@ -16,9 +16,7 @@
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaElement;
@@ -28,7 +26,6 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorPart;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 
@@ -38,7 +35,7 @@ public class ClassMethodReferenceNode implements IReferenceNode, IRevealableRefe
 
     private List<IReferenceNode> children;
 
-    private List<IAopReference> declareParentReferences = new ArrayList<IAopReference>();
+    private List<IReferenceNode> declareParentReferences = new ArrayList<IReferenceNode>();
 
     private List<IAopReference> declaredOnReferences = new ArrayList<IAopReference>();
 
@@ -46,7 +43,7 @@ public class ClassMethodReferenceNode implements IReferenceNode, IRevealableRefe
         return declaredOnReferences;
     }
 
-    public List<IAopReference> getDeclareParentReferences() {
+    public List<IReferenceNode> getDeclareParentReferences() {
         return declareParentReferences;
     }
 
@@ -62,20 +59,11 @@ public class ClassMethodReferenceNode implements IReferenceNode, IRevealableRefe
         if (this.children != null && this.children.size() > 0) {
             nodes.addAll(this.children);
         }
-        Map<IAspectDefinition, List<IAopReference>> dRefs = new HashMap<IAspectDefinition, List<IAopReference>>();
-        for (IAopReference r : getDeclareParentReferences()) {
-            if (dRefs.containsKey(r.getDefinition())) {
-                dRefs.get(r.getDefinition()).add(r);
-            }
-            else {
-                List<IAopReference> ref = new ArrayList<IAopReference>();
-                ref.add(r);
-                dRefs.put(r.getDefinition(), ref);
-            }
+        
+        if (getDeclareParentReferences().size() > 0) {
+        	nodes.addAll(getDeclareParentReferences());
         }
-        for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : dRefs.entrySet()) {
-            nodes.add(new AdviceDeclareParentAopSourceNode(entry.getValue()));
-        }
+        
         if (getDeclaredOnReferences().size() > 0) {
             nodes.add(new AdvisedDeclareParentAopReferenceNode(getDeclaredOnReferences()));
         }

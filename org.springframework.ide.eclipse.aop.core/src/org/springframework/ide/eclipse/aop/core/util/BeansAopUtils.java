@@ -24,6 +24,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -53,6 +54,8 @@ public class BeansAopUtils {
 			return readableName((IMethod) je);
 		} else if (je instanceof IType) {
 			return je.getElementName();
+		} else if (je instanceof IField) {
+			return je.getElementName() + " - " + ((IType) je.getParent()).getFullyQualifiedName();
 		} else if (je.getParent() != null) {
 			return je.getParent().getElementName() + '.' + je.getElementName();
 		}
@@ -61,8 +64,7 @@ public class BeansAopUtils {
 
 	public static String getPackageLinkName(IJavaElement je) {
 		if (je instanceof IMethod) {
-			return ((IMethod) je).getDeclaringType().getPackageFragment()
-					.getElementName();
+			return ((IMethod) je).getDeclaringType().getPackageFragment().getElementName();
 		} else if (je instanceof IType) {
 			return ((IType) je).getPackageFragment().getElementName();
 		}
@@ -91,16 +93,14 @@ public class BeansAopUtils {
 		StringBuffer buf = new StringBuffer(": <");
 		buf.append(reference.getDefinition().getAspectName());
 		buf.append("> [");
-		buf.append(reference.getDefinition().getResource()
-				.getProjectRelativePath().toString());
+		buf.append(reference.getDefinition().getResource().getProjectRelativePath().toString());
 		buf.append("]");
 		return buf.toString();
 	}
 
 	public static IMethod getMethod(IType type, String methodName, int argCount) {
 		try {
-			return Introspector.findMethod(type, methodName, argCount, true,
-					Statics.DONT_CARE);
+			return Introspector.findMethod(type, methodName, argCount, true, Statics.DONT_CARE);
 		} catch (JavaModelException e) {
 		}
 		return null;
@@ -108,8 +108,7 @@ public class BeansAopUtils {
 
 	public static Set<IFile> getFilesToBuildFromBeansProject(IProject file) {
 		Set<IFile> resourcesToBuild = new HashSet<IFile>();
-		IBeansProject bp = BeansCorePlugin.getModel().getProject(
-				file.getProject());
+		IBeansProject bp = BeansCorePlugin.getModel().getProject(file.getProject());
 		if (bp != null && bp.getConfigs() != null && bp.getConfigs().size() > 0) {
 			for (IBeansConfig config : bp.getConfigs()) {
 				resourcesToBuild.add((IFile) config.getElementResource());
@@ -121,26 +120,22 @@ public class BeansAopUtils {
 	public static Set<IFile> getFilesToBuild(IFile file) {
 		Set<IFile> resourcesToBuild = new HashSet<IFile>();
 		if (file.getName().endsWith(".java")) {
-			IBeansProject project = BeansCorePlugin.getModel().getProject(
-					file.getProject());
+			IBeansProject project = BeansCorePlugin.getModel().getProject(file.getProject());
 			if (project != null) {
 				Set<IBeansConfig> configs = project.getConfigs();
 				IJavaElement element = JavaCore.create(file);
 				if (element instanceof ICompilationUnit) {
 					try {
-						IType[] types = ((ICompilationUnit) element)
-								.getAllTypes();
+						IType[] types = ((ICompilationUnit) element).getAllTypes();
 						List<String> typeNames = new ArrayList<String>();
 						for (IType type : types) {
 							typeNames.add(type.getFullyQualifiedName());
 						}
 						for (IBeansConfig config : configs) {
-							Set<String> allBeanClasses = config
-									.getBeanClasses();
+							Set<String> allBeanClasses = config.getBeanClasses();
 							for (String className : allBeanClasses) {
 								if (typeNames.contains(className)) {
-									resourcesToBuild.add((IFile) config
-											.getElementResource());
+									resourcesToBuild.add((IFile) config.getElementResource());
 								}
 							}
 						}
@@ -156,8 +151,7 @@ public class BeansAopUtils {
 
 	public static IJavaProject getJavaProject(IBeansConfig config) {
 		if (config != null) {
-			IJavaProject project = JavaCore.create(config.getElementResource()
-					.getProject());
+			IJavaProject project = JavaCore.create(config.getElementResource().getProject());
 			return project;
 		} else {
 			return null;
@@ -176,14 +170,12 @@ public class BeansAopUtils {
 				IMethod method = (IMethod) element;
 				int lines = 0;
 				String targetsource;
-				targetsource = method.getDeclaringType().getCompilationUnit()
-						.getSource();
-				String sourceuptomethod = targetsource.substring(0, method
-						.getNameRange().getOffset());
+				targetsource = method.getDeclaringType().getCompilationUnit().getSource();
+				String sourceuptomethod = targetsource.substring(0, method.getNameRange()
+						.getOffset());
 
 				char[] chars = new char[sourceuptomethod.length()];
-				sourceuptomethod.getChars(0, sourceuptomethod.length(), chars,
-						0);
+				sourceuptomethod.getChars(0, sourceuptomethod.length(), chars, 0);
 				for (int j = 0; j < chars.length; j++) {
 					if (chars[j] == '\n') {
 						lines++;
@@ -198,12 +190,30 @@ public class BeansAopUtils {
 				int lines = 0;
 				String targetsource;
 				targetsource = type.getCompilationUnit().getSource();
-				String sourceuptomethod = targetsource.substring(0, type
-						.getNameRange().getOffset());
+				String sourceuptomethod = targetsource
+						.substring(0, type.getNameRange().getOffset());
 
 				char[] chars = new char[sourceuptomethod.length()];
-				sourceuptomethod.getChars(0, sourceuptomethod.length(), chars,
-						0);
+				sourceuptomethod.getChars(0, sourceuptomethod.length(), chars, 0);
+				for (int j = 0; j < chars.length; j++) {
+					if (chars[j] == '\n') {
+						lines++;
+					}
+				}
+				return new Integer(lines + 1);
+			} catch (JavaModelException e) {
+			}
+		} else if (element != null && element instanceof IField) {
+			try {
+				IField type = (IField) element;
+				int lines = 0;
+				String targetsource;
+				targetsource = type.getCompilationUnit().getSource();
+				String sourceuptomethod = targetsource
+						.substring(0, type.getNameRange().getOffset());
+
+				char[] chars = new char[sourceuptomethod.length()];
+				sourceuptomethod.getChars(0, sourceuptomethod.length(), chars, 0);
 				for (int j = 0; j < chars.length; j++) {
 					if (chars[j] == '\n') {
 						lines++;

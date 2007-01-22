@@ -28,10 +28,12 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.SourceField;
 import org.eclipse.jdt.internal.core.SourceMethod;
 import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -51,6 +53,7 @@ import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceDeclareParentAopSourceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.BeanReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.ClassMethodReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.IReferenceNode;
@@ -101,11 +104,14 @@ public class BeansAopNavigatorContentProvider implements ICommonContentProvider,
     }
 
     public Object[] getElements(Object inputElement) {
-        if (inputElement instanceof IType) {
+        if (inputElement instanceof SourceType) {
             return getChildren(inputElement);
         }
         else if (inputElement instanceof SourceMethod) {
             return getChildren(inputElement);
+        }
+        else if (inputElement instanceof SourceField) {
+        	return getChildren(inputElement);
         }
         else if (inputElement instanceof JavaElementReferenceNode) {
             return getChildren(((JavaElementReferenceNode) inputElement).getJavaElement());
@@ -144,12 +150,23 @@ public class BeansAopNavigatorContentProvider implements ICommonContentProvider,
             IAopProject project = Activator.getModel().getProject(
                     type.getJavaProject().getProject());
             List<IAopReference> references = project.getAllReferences();
-
+            
+            // fields
+            try {
+				for (IField field : type.getFields()) {
+					Object[] obj = getChildren(field);
+					if (obj != null && obj.length > 0) {
+						for (Object o : obj) {
+							node.getDeclareParentReferences().add((IReferenceNode) o);
+						}
+					}
+				}
+			} catch (JavaModelException e) {
+			}
+            
+            
             for (IAopReference reference : references) {
                 if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
-                    if (reference.getSource() != null && reference.getSource().equals(type)) {
-                        node.getDeclareParentReferences().add(reference);
-                    }
                     if (reference.getTarget().equals(type)) {
                         node.getDeclaredOnReferences().add(reference);
                     }
@@ -203,6 +220,36 @@ public class BeansAopNavigatorContentProvider implements ICommonContentProvider,
                 }
                 return nodes.toArray();
             }
+        }
+        else if (parentElement instanceof IField && parentElement instanceof SourceField) {
+        	IField method = (IField) parentElement;
+        	IAopProject project = Activator.getModel().getProject(
+        			method.getJavaProject().getProject());
+        	if (project != null && project.getAllReferences().size() > 0) {
+        		List<IAopReference> references = project.getAllReferences();
+        		List<IAopReference> foundSourceReferences = new ArrayList<IAopReference>();
+        		for (IAopReference reference : references) {
+        			if (reference.getSource() != null && reference.getSource().equals(method)) {
+        				foundSourceReferences.add(reference);
+        			}
+        		}
+        		List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
+        		Map<IMember, List<IAopReference>> refs = new HashMap<IMember, List<IAopReference>>();
+        		for (IAopReference reference : foundSourceReferences) {
+        			if (refs.containsKey(reference.getSource())) {
+        				refs.get(reference.getSource()).add(reference);
+        			}
+        			else {
+        				List<IAopReference> f = new ArrayList<IAopReference>();
+        				f.add(reference);
+        				refs.put(reference.getSource(), f);
+        			}
+        		}
+        		for (Map.Entry<IMember, List<IAopReference>> entry : refs.entrySet()) {
+        			nodes.add(new AdviceDeclareParentAopSourceNode(entry.getValue()));
+        		}
+        		return nodes.toArray();
+        	}
         }
         else if (parentElement instanceof ElementImpl) {
             ElementImpl element = (ElementImpl) parentElement;
