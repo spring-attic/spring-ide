@@ -15,19 +15,8 @@
  */
 package org.springframework.ide.eclipse.aop.core.model.internal;
 
-import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.ide.eclipse.aop.core.model.IAnnotationAopDefinition;
 
 public class AnnotationAspectDefinition
-        extends BeanAspectDefinition implements IAnnotationAopDefinition {
-    
-    private AspectJExpressionPointcut pointcut;
-
-    public AspectJExpressionPointcut getPointcut() {
-        return pointcut;
-    }
-
-    public void setPointcut(AspectJExpressionPointcut pointcut) {
-        this.pointcut = pointcut;
-    }
+        extends JavaAspectDefinition implements IAnnotationAopDefinition {
 }

@@ -125,14 +125,14 @@ public class BeansAopMarkerUtils {
 
     public static void createSourceMarker(IAopReference reference,
             String markerId, IResource sourceResource) {
-        if (reference.getDefinition().getAspectLineNumber() > 0
-                && !(reference.getDefinition() instanceof IAnnotationAopDefinition)) {
+        //if (reference.getDefinition().getAspectLineNumber() > 0
+        //        && !(reference.getDefinition() instanceof JavaAspectDefinition)) {
             createProblemMarker(reference.getDefinition().getResource(),
                     "advises "
                             + BeansAopUtils.getJavaElementLinkName(reference
                                     .getTarget()), 1, reference.getDefinition()
                             .getAspectLineNumber(), markerId, sourceResource);
-        }
+        //}
         if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
             if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
                 createProblemMarker(reference.getSource().getResource(),
@@ -223,7 +223,7 @@ public class BeansAopMarkerUtils {
                     int count = marker.getAttribute(MARKER_COUNT, 1);
                     String msg = marker.getAttribute(IMarker.MESSAGE, "");
                     count++;
-                    if (l == line && message.equals(msg)) {
+                    if (l == line && message.equals(msg) && marker.getType() == markerId) {
                         return;
                     }
                     if (l == line && marker.getType() != markerId) {

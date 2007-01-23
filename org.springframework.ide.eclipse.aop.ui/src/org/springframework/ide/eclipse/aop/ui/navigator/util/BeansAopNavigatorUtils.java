@@ -91,10 +91,13 @@ public class BeansAopNavigatorUtils {
 
 				if ("http://www.springframework.org/schema/aop".equals(elem.getNamespaceURI())) {
 					if ("aspect".equals(elem.getLocalName())) {
-						selectedElement = locateAspectReference(elem);
+						selectedElement = locateAspectReference(elem, BeansEditorUtils.getAttribute(elem, "ref"));
+					}
+					else if ("advisor".equals(elem.getLocalName())) {
+						selectedElement = locateAspectReference(elem, BeansEditorUtils.getAttribute(elem, "advice-ref"));
 					}
 					else if (!"config".equals(elem.getLocalName())) {
-						selectedElement = locateAspectReference(elem.getParentNode());
+						selectedElement = locateAspectReference(elem, BeansEditorUtils.getAttribute(elem, "ref"));
 					}
 				}
 
@@ -108,15 +111,14 @@ public class BeansAopNavigatorUtils {
 		return selectedElement;
 	}
 
-	private static Object locateAspectReference(Node elem) {
+	private static Object locateAspectReference(Node elem, String ref) {
 		Object selectedElement = null;
-		String aspectId = BeansEditorUtils.getAttribute(elem, "ref");
-		if (StringUtils.hasText(aspectId)) {
+		if (StringUtils.hasText(ref)) {
 			NodeList beans = elem.getOwnerDocument().getElementsByTagName("bean");
 			if (beans != null && beans.getLength() > 0) {
 				for (int i = 0; i < beans.getLength(); i++) {
 					Node node =  beans.item(i);
-					if (aspectId.equals(BeansEditorUtils.getAttribute(node, "id"))) {
+					if (ref.equals(BeansEditorUtils.getAttribute(node, "id"))) {
 						selectedElement = node;
 						break;
 					}

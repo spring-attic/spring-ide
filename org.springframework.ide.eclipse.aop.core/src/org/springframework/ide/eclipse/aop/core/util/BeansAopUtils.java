@@ -15,6 +15,7 @@
  */
 package org.springframework.ide.eclipse.aop.core.util;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -32,11 +33,13 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.springframework.aop.MethodMatcher;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector.Statics;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 
@@ -224,6 +227,23 @@ public class BeansAopUtils {
 			}
 		}
 		return new Integer(-1);
+	}
+
+	public static List<IMethod> getMatches(Class<?> clazz, MethodMatcher methodMatcher,
+			IProject project) {
+		IType jdtTargetClass = BeansModelUtils.getJavaType(project, clazz.getName());
+		Method[] methods = clazz.getDeclaredMethods();
+		List<IMethod> matchingMethod = new ArrayList<IMethod>();
+		for (Method method : methods) {
+			if (methodMatcher.matches(method, clazz)) {
+				IMethod jdtMethod = BeansAopUtils.getMethod(jdtTargetClass, method.getName(),
+						method.getParameterTypes().length);
+				if (jdtMethod != null) {
+					matchingMethod.add(jdtMethod);
+				}
+			}
+		}
+		return matchingMethod;
 	}
 
 }
