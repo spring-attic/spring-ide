@@ -15,32 +15,22 @@
  */
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.IEditorPart;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
-import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 
-public class AdviceAopTargetMethodNode implements IReferenceNode,
+public class AdviceAopTargetMethodNode extends AbstractJavaElementRefeerenceNode implements IReferenceNode,
         IRevealableReferenceNode {
 
     private IAopReference reference;
 
     public AdviceAopTargetMethodNode(IAopReference reference) {
-        this.reference = reference;
+        super(reference.getTarget());
+    	this.reference = reference;
     }
 
     public IReferenceNode[] getChildren() {
         return new IReferenceNode[0];
-    }
-
-    public Image getImage() {
-        return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getImage(reference
-                .getTarget());
     }
 
     public String getText() {
@@ -63,24 +53,4 @@ public class AdviceAopTargetMethodNode implements IReferenceNode,
     public boolean hasChildren() {
         return false;
     }
-
-    public void openAndReveal() {
-        IEditorPart p;
-        try {
-            IJavaElement element = reference.getTarget();
-            p = JavaUI.openInEditor(element);
-            JavaUI.revealInEditor(p, element);
-        }
-        catch (Exception e) {
-        }
-    }
-
-    public int getLineNumber() {
-        return BeansAopNavigatorUtils.getLineNumber(reference.getTarget());
-    }
-
-    public IResource getResource() {
-        return reference.getTarget().getResource();
-    }
-
 }

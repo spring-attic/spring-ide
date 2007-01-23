@@ -17,67 +17,24 @@ package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
 import java.util.List;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.IEditorPart;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
-import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 
-public class AdviceAopSourceMethodNode implements IReferenceNode,
-        IRevealableReferenceNode {
+public class AdviceAopSourceMethodNode extends AbstractJavaElementRefeerenceNode implements
+		IReferenceNode, IRevealableReferenceNode {
 
-    private List<IAopReference> reference;
+	private List<IAopReference> reference;
 
-    public AdviceAopSourceMethodNode(List<IAopReference> reference) {
-        this.reference = reference;
-    }
+	public AdviceAopSourceMethodNode(List<IAopReference> reference) {
+		super(reference.get(0).getSource());
+		this.reference = reference;
+	}
 
-    public IReferenceNode[] getChildren() {
-        return new IReferenceNode[] { new AdviceAopReferenceNode(this.reference) };
-    }
+	public IReferenceNode[] getChildren() {
+		return new IReferenceNode[] { new AdviceAopReferenceNode(this.reference) };
+	}
 
-    public Image getImage() {
-        return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getImage(reference
-                .get(0).getSource());
-    }
-
-    public String getText() {
-        return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(reference
-                .get(0).getSource())
-                + " - "
-                + BeansAopUtils
-                        .getPackageLinkName(reference.get(0).getSource());
-    }
-
-    public boolean hasChildren() {
-        return true;
-    }
-
-    public void openAndReveal() {
-        IEditorPart p;
-        try {
-            IJavaElement element = reference.get(0).getSource();
-            p = JavaUI.openInEditor(element);
-            JavaUI.revealInEditor(p, element);
-        }
-        catch (Exception e) {
-        }
-    }
-
-    public int getLineNumber() {
-        return BeansAopNavigatorUtils.getLineNumber(reference.get(0)
-                .getSource());
-    }
-
-    public IResource getResource() {
-        return reference.get(0).getSource().getResource();
-    }
-
-    public IMember getAdviceSourceMethod() {
-        return reference.get(0).getSource();
-    }
+	public IMember getAdviceSourceMethod() {
+		return reference.get(0).getSource();
+	}
 }

@@ -15,72 +15,36 @@
  */
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.IEditorPart;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
-import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 
-public class AdviceDeclareParentAopTargetMethodNode implements IReferenceNode,
-        IRevealableReferenceNode {
+public class AdviceDeclareParentAopTargetMethodNode extends AbstractJavaElementRefeerenceNode
+		implements IReferenceNode, IRevealableReferenceNode {
 
-    private IAopReference reference;
+	private IAopReference reference;
 
-    public AdviceDeclareParentAopTargetMethodNode(IAopReference reference) {
-        this.reference = reference;
-    }
+	public AdviceDeclareParentAopTargetMethodNode(IAopReference reference) {
+		super(reference.getTarget());
+		this.reference = reference;
+	}
 
-    public IReferenceNode[] getChildren() {
-        return new IReferenceNode[0];
-    }
+	public IReferenceNode[] getChildren() {
+		return new IReferenceNode[0];
+	}
 
-    public Image getImage() {
-        return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getImage(reference
-                .getTarget());
-    }
+	public String getText() {
+		if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
+			return BeansAopUtils.getJavaElementLinkName(reference.getTarget()) + " - "
+					+ BeansAopUtils.getPackageLinkName(reference.getTarget());
+		} else {
+			return BeansAopUtils.getJavaElementLinkName(reference.getTarget().getParent()) + "."
+					+ BeansAopUtils.getJavaElementLinkName(reference.getTarget()) + " - "
+					+ BeansAopUtils.getPackageLinkName(reference.getTarget());
+		}
+	}
 
-    public String getText() {
-        if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
-            return BeansAopUtils.getJavaElementLinkName(reference.getTarget())
-                    + " - "
-                    + BeansAopUtils.getPackageLinkName(reference.getTarget());
-        }
-        else {
-            return BeansAopUtils.getJavaElementLinkName(reference.getTarget()
-                    .getParent())
-                    + "."
-                    + BeansAopUtils.getJavaElementLinkName(reference
-                            .getTarget())
-                    + " - "
-                    + BeansAopUtils.getPackageLinkName(reference.getTarget());
-        }
-    }
-
-    public boolean hasChildren() {
-        return false;
-    }
-
-    public void openAndReveal() {
-        IEditorPart p;
-        try {
-            IJavaElement element = reference.getTarget();
-            p = JavaUI.openInEditor(element);
-            JavaUI.revealInEditor(p, element);
-        }
-        catch (Exception e) {
-        }
-    }
-
-    public int getLineNumber() {
-        return BeansAopNavigatorUtils.getLineNumber(reference.getTarget());
-    }
-
-    public IResource getResource() {
-        return reference.getTarget().getResource();
-    }
-
+	public boolean hasChildren() {
+		return false;
+	}
 }

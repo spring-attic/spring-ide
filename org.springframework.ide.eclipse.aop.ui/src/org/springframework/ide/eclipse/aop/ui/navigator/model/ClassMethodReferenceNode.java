@@ -18,93 +18,63 @@ package org.springframework.ide.eclipse.aop.ui.navigator.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.IEditorPart;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 
-public class ClassMethodReferenceNode implements IReferenceNode, IRevealableReferenceNode {
+public class ClassMethodReferenceNode extends AbstractJavaElementRefeerenceNode implements
+		IReferenceNode, IRevealableReferenceNode {
 
-    protected IJavaElement element;
+	private List<IReferenceNode> children;
 
-    private List<IReferenceNode> children;
+	private List<IReferenceNode> declareParentReferences = new ArrayList<IReferenceNode>();
 
-    private List<IReferenceNode> declareParentReferences = new ArrayList<IReferenceNode>();
+	private List<IAopReference> declaredOnReferences = new ArrayList<IAopReference>();
 
-    private List<IAopReference> declaredOnReferences = new ArrayList<IAopReference>();
+	public List<IAopReference> getDeclaredOnReferences() {
+		return declaredOnReferences;
+	}
 
-    public List<IAopReference> getDeclaredOnReferences() {
-        return declaredOnReferences;
-    }
+	public List<IReferenceNode> getDeclareParentReferences() {
+		return declareParentReferences;
+	}
 
-    public List<IReferenceNode> getDeclareParentReferences() {
-        return declareParentReferences;
-    }
+	@SuppressWarnings("unchecked")
+	public ClassMethodReferenceNode(IMember member, List<?> children) {
+		super(member);
+		this.children = (List<IReferenceNode>) children;
+	}
 
-    @SuppressWarnings("unchecked")
-    public ClassMethodReferenceNode(IMember member, List<?> children) {
-        this.element = member;
-        this.children = (List<IReferenceNode>) children;
-    }
+	public IReferenceNode[] getChildren() {
+		List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
+		// add method children
+		if (this.children != null && this.children.size() > 0) {
+			nodes.addAll(this.children);
+		}
 
-    public IReferenceNode[] getChildren() {
-        List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
-        // add method children
-        if (this.children != null && this.children.size() > 0) {
-            nodes.addAll(this.children);
-        }
-        
-        if (getDeclareParentReferences().size() > 0) {
-        	nodes.addAll(getDeclareParentReferences());
-        }
-        
-        if (getDeclaredOnReferences().size() > 0) {
-            nodes.add(new AdvisedDeclareParentAopReferenceNode(getDeclaredOnReferences()));
-        }
-        return nodes.toArray(new IReferenceNode[nodes.size()]);
-    }
+		if (getDeclareParentReferences().size() > 0) {
+			nodes.addAll(getDeclareParentReferences());
+		}
 
-    public Image getImage() {
-        return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getImage(element);
-    }
+		if (getDeclaredOnReferences().size() > 0) {
+			nodes.add(new AdvisedDeclareParentAopReferenceNode(getDeclaredOnReferences()));
+		}
+		return nodes.toArray(new IReferenceNode[nodes.size()]);
+	}
 
-    public String getText() {
-        if (element instanceof IType) {
-            return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element) + " - "
-                    + BeansAopUtils.getPackageLinkName(element);
-        }
-        else {
-            return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element);
-        }
-    }
+	public String getText() {
+		if (element instanceof IType) {
+			return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element) + " - "
+					+ BeansAopUtils.getPackageLinkName(element);
+		} else {
+			return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element);
+		}
+	}
 
-    public boolean hasChildren() {
-        return (children != null && children.size() > 0) || declareParentReferences.size() > 0
-                || declaredOnReferences.size() > 0;
-    }
-
-    public void openAndReveal() {
-        IEditorPart p;
-        try {
-            p = JavaUI.openInEditor(element);
-            JavaUI.revealInEditor(p, element);
-        }
-        catch (Exception e) {
-        }
-    }
-
-    public int getLineNumber() {
-        return BeansAopNavigatorUtils.getLineNumber((IMember) element);
-    }
-
-    public IResource getResource() {
-        return element.getResource();
-    }
-
+	public boolean hasChildren() {
+		return (children != null && children.size() > 0) || declareParentReferences.size() > 0
+				|| declaredOnReferences.size() > 0;
+	}
 }

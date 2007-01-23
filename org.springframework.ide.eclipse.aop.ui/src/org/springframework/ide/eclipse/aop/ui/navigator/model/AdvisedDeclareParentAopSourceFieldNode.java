@@ -15,60 +15,29 @@
  */
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.IEditorPart;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
-import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 
-public class AdvisedDeclareParentAopSourceFieldNode implements IReferenceNode,
-        IRevealableReferenceNode {
+public class AdvisedDeclareParentAopSourceFieldNode extends AbstractJavaElementRefeerenceNode
+		implements IReferenceNode, IRevealableReferenceNode {
 
-    private IAopReference references;
+	private IAopReference references;
 
-    public AdvisedDeclareParentAopSourceFieldNode(IAopReference reference) {
-        this.references = reference;
-    }
+	public AdvisedDeclareParentAopSourceFieldNode(IAopReference reference) {
+		super(reference.getSource());
+		this.references = reference;
+	}
 
-    public IReferenceNode[] getChildren() {
-        return new IReferenceNode[0];
-    }
+	public IReferenceNode[] getChildren() {
+		return new IReferenceNode[0];
+	}
 
-    public Image getImage() {
-        return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getImage(references
-                .getSource());
-    }
+	public String getText() {
+		return BeansAopUtils.getJavaElementLinkName(references.getSource()) + " - "
+				+ BeansAopUtils.getPackageLinkName(references.getSource());
+	}
 
-    public String getText() {
-        return BeansAopUtils.getJavaElementLinkName(references.getSource())
-                + " - "
-                + BeansAopUtils.getPackageLinkName(references.getSource());
-    }
-
-    public boolean hasChildren() {
-        return false;
-    }
-
-    public void openAndReveal() {
-        IEditorPart p;
-        try {
-            IJavaElement element = references.getSource();
-            p = JavaUI.openInEditor(element);
-            JavaUI.revealInEditor(p, element);
-        }
-        catch (Exception e) {
-        }
-    }
-
-    public int getLineNumber() {
-        return BeansAopNavigatorUtils.getLineNumber(references.getSource());
-    }
-
-    public IResource getResource() {
-        return references.getSource().getResource();
-    }
-
+	public boolean hasChildren() {
+		return false;
+	}
 }

@@ -17,21 +17,16 @@ package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
 import java.util.List;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.IEditorPart;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
-import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 
-public class AdviceDeclareParentAopSourceFieldNode implements IReferenceNode,
-		IRevealableReferenceNode {
+public class AdviceDeclareParentAopSourceFieldNode extends AbstractJavaElementRefeerenceNode
+		implements IReferenceNode, IRevealableReferenceNode {
 
 	private List<IAopReference> references;
 
 	public AdviceDeclareParentAopSourceFieldNode(List<IAopReference> reference) {
+		super(reference.get(9).getSource());
 		this.references = reference;
 	}
 
@@ -39,34 +34,7 @@ public class AdviceDeclareParentAopSourceFieldNode implements IReferenceNode,
 		return new IReferenceNode[] { new AdviceDeclareParentAopReferenceNode(references) };
 	}
 
-	public Image getImage() {
-		return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getImage(references.get(0).getSource());
-	}
-
 	public String getText() {
 		return BeansAopUtils.getJavaElementLinkName(references.get(0).getSource());
 	}
-
-	public boolean hasChildren() {
-		return true;
-	}
-
-	public void openAndReveal() {
-		IEditorPart p;
-		try {
-			IJavaElement element = references.get(0).getSource();
-			p = JavaUI.openInEditor(element);
-			JavaUI.revealInEditor(p, element);
-		} catch (Exception e) {
-		}
-	}
-
-	public int getLineNumber() {
-		return BeansAopNavigatorUtils.getLineNumber(references.get(0).getSource());
-	}
-
-	public IResource getResource() {
-		return references.get(0).getSource().getResource();
-	}
-
 }
