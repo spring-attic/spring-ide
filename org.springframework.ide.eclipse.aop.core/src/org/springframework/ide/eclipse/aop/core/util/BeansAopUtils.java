@@ -173,18 +173,21 @@ public class BeansAopUtils {
 				IMethod method = (IMethod) element;
 				int lines = 0;
 				String targetsource;
-				targetsource = method.getDeclaringType().getCompilationUnit().getSource();
-				String sourceuptomethod = targetsource.substring(0, method.getNameRange()
-						.getOffset());
+				if (method.getDeclaringType() != null
+						&& method.getDeclaringType().getCompilationUnit() != null) {
+					targetsource = method.getDeclaringType().getCompilationUnit().getSource();
+					String sourceuptomethod = targetsource.substring(0, method.getNameRange()
+							.getOffset());
 
-				char[] chars = new char[sourceuptomethod.length()];
-				sourceuptomethod.getChars(0, sourceuptomethod.length(), chars, 0);
-				for (int j = 0; j < chars.length; j++) {
-					if (chars[j] == '\n') {
-						lines++;
+					char[] chars = new char[sourceuptomethod.length()];
+					sourceuptomethod.getChars(0, sourceuptomethod.length(), chars, 0);
+					for (int j = 0; j < chars.length; j++) {
+						if (chars[j] == '\n') {
+							lines++;
+						}
 					}
+					return new Integer(lines + 1);
 				}
-				return new Integer(lines + 1);
 			} catch (JavaModelException e) {
 			}
 		} else if (element != null && element instanceof IType) {

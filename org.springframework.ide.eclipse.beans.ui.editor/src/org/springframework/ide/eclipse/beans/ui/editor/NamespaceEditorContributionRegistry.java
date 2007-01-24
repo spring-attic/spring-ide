@@ -32,69 +32,70 @@ import org.springframework.ide.eclipse.beans.ui.editor.namespaces.BeansNamespace
 
 public class NamespaceEditorContributionRegistry {
 
-    public static final String EXTENSION_POINT = BeansEditorPlugin.PLUGIN_ID
-            + ".namespaceContribution";
+	public static final String EXTENSION_POINT = BeansEditorPlugin.PLUGIN_ID
+			+ ".namespaceContribution";
 
-    private static Map<String, INamespaceAwareEditorContribution> contributions = null;
+	private static Map<String, INamespaceAwareEditorContribution> contributions = null;
 
-    private static List<IHyperlinkDetector> hyperLinkDetectors = null;
+	private static List<IHyperlinkDetector> hyperLinkDetectors = null;
 
-    private static INamespaceAwareEditorContribution beansEditorContribution = new BeansNamespaceAwareEditorContribution();
+	private static INamespaceAwareEditorContribution beansEditorContribution = new BeansNamespaceAwareEditorContribution();
 
-    public static INamespaceAwareEditorContribution getNamespaceAwareEditorContribution(
-            String namespace) {
+	public static INamespaceAwareEditorContribution getNamespaceAwareEditorContribution(
+			String namespace) {
 
-        if (namespace == null) {
-            return beansEditorContribution;
-        }
-        else {
-            return (INamespaceAwareEditorContribution) contributions
-                    .get(namespace);
-        }
-    }
+		if (namespace == null) {
+			return beansEditorContribution;
+		} else {
+			return (INamespaceAwareEditorContribution) contributions.get(namespace);
+		}
+	}
 
-    public static List<IHyperlinkDetector> getHyperLinkDetectors() {
-        return hyperLinkDetectors;
-    }
+	public static List<IHyperlinkDetector> getHyperLinkDetectors() {
+		return hyperLinkDetectors;
+	}
 
-    public static Collection<INamespaceAwareEditorContribution> getNamespaceAwareEditorContributions() {
-        return contributions.values();
-    }
+	public static Collection<INamespaceAwareEditorContribution> getNamespaceAwareEditorContributions() {
+		return contributions.values();
+	}
 
-    public static void init() {
+	public static IExtendedNamespaceAwareEditorContribution getExtendedNamespaceEditorContribution(
+			String namespace) {
+		INamespaceAwareEditorContribution cont = getNamespaceAwareEditorContribution(namespace);
+		if (cont instanceof IExtendedNamespaceAwareEditorContribution) {
+			return (IExtendedNamespaceAwareEditorContribution) cont;
+		}
+		return null;
+	}
 
-        contributions = new HashMap<String, INamespaceAwareEditorContribution>();
-        hyperLinkDetectors = new ArrayList<IHyperlinkDetector>();
-        IExtensionRegistry registry = Platform.getExtensionRegistry();
+	public static void init() {
 
-        IExtension[] extensions = registry.getExtensionPoint(EXTENSION_POINT)
-                .getExtensions();
-        for (int i = 0; i < extensions.length; i++) {
-            IExtension extension = extensions[i];
-            IConfigurationElement[] elements = extension
-                    .getConfigurationElements();
-            for (int j = 0; j < elements.length; j++) {
-                try {
-                    IConfigurationElement element = elements[j];
-                    Object namespaceContribution = element
-                            .createExecutableExtension("class");
-                    if (namespaceContribution instanceof INamespaceAwareEditorContribution) {
-                        INamespaceAwareEditorContribution contribution = (INamespaceAwareEditorContribution) namespaceContribution;
-                        contributions.put(contribution.getNamespaceUri(),
-                                contribution);
-                    }
-                }
-                catch (CoreException e) {
-                }
-            }
-        }
+		contributions = new HashMap<String, INamespaceAwareEditorContribution>();
+		hyperLinkDetectors = new ArrayList<IHyperlinkDetector>();
+		IExtensionRegistry registry = Platform.getExtensionRegistry();
 
-        for (Map.Entry<String, INamespaceAwareEditorContribution> contribution : contributions
-                .entrySet()) {
-            if (contribution.getValue().getHyperLinkDetector() != null) {
-                hyperLinkDetectors.add(contribution.getValue()
-                        .getHyperLinkDetector());
-            }
-        }
-    }
+		IExtension[] extensions = registry.getExtensionPoint(EXTENSION_POINT).getExtensions();
+		for (int i = 0; i < extensions.length; i++) {
+			IExtension extension = extensions[i];
+			IConfigurationElement[] elements = extension.getConfigurationElements();
+			for (int j = 0; j < elements.length; j++) {
+				try {
+					IConfigurationElement element = elements[j];
+					Object namespaceContribution = element.createExecutableExtension("class");
+					if (namespaceContribution instanceof INamespaceAwareEditorContribution) {
+						INamespaceAwareEditorContribution contribution = (INamespaceAwareEditorContribution) namespaceContribution;
+						contributions.put(contribution.getNamespaceUri(), contribution);
+					}
+				} catch (CoreException e) {
+				}
+			}
+		}
+
+		for (Map.Entry<String, INamespaceAwareEditorContribution> contribution : contributions
+				.entrySet()) {
+			if (contribution.getValue().getHyperLinkDetector() != null) {
+				hyperLinkDetectors.add(contribution.getValue().getHyperLinkDetector());
+			}
+		}
+	}
 }

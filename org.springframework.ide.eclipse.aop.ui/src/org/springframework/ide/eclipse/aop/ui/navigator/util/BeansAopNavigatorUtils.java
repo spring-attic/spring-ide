@@ -124,6 +124,10 @@ public class BeansAopNavigatorUtils {
 					}
 				}
 			}
+			
+			if (selectedElement == null) {
+				selectedElement = elem.getOwnerDocument().getElementById(ref);
+			}
 		}
 		return selectedElement;
 	}

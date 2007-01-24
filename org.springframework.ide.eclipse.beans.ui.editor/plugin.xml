@@ -182,6 +182,7 @@
       <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.BeansNamespaceAwareEditorContribution"/>
       <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.AopNamespaceAwareEditorContribution"/>
       <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.UtilNamespaceAwareEditorContribution"/>
+      <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.TxNamespaceAwareEditorContribution"/>
    </extension>
 
 </plugin>

@@ -76,6 +76,8 @@ final class UtilOutlineLabelProvider
         if (prefix != null) {
             shortNodeName = nodeName.substring(prefix.length() + 1);
         }
+        nodeName = "<" + node.getNodeName() + "/>";
+
         String text = "";
         if ("properties".equals(shortNodeName)) {
             text = nodeName + " ";
