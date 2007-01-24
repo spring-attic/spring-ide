@@ -1,605 +1,929 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<toc label="Spring - Java/J2EE Application Framework" topic="index.html">
+<toc label="The Spring Framework - Reference Documentation" topic="index.html">
    <topic label="Preface" href="preface.html"/>
    <topic label="Introduction" href="introduction.html">
       <topic label="Overview" href="introduction.html#introduction-overview"/>
       <topic label="Usage scenarios" href="introduction.html#overview-usagescenarios"/>
    </topic>
-   <topic label="Background information" href="background.html">
-      <topic label="Inversion of Control / Dependency Injection" href="background.html#background-ioc"/>
+   <topic label="What's new in Spring 2.0?" href="new-in-2.html">
+      <topic label="Introduction" href="new-in-2.html#new-in-2-intro"/>
+      <topic label="The Inversion of Control (IoC) container" href="new-in-2.html#new-in-2-ioc">
+         <topic label="Easier XML configuration" href="new-in-2.html#new-in-2-ioc-configuration"/>
+         <topic label="New bean scopes" href="new-in-2.html#new-in-2-ioc-scopes"/>
+         <topic label="Extensible XML authoring" href="new-in-2.html#new-in-2-ioc-custom-configuration"/>
+      </topic>
+      <topic label="Aspect Oriented Programming (AOP)" href="new-in-2.html#new-in-2-aop">
+         <topic label="Easier AOP XML configuration" href="new-in-2.html#new-in-2-aop-configuration"/>
+         <topic label="Support for @AspectJ aspects" href="new-in-2.html#new-in-2-aop-aspectJ"/>
+      </topic>
+      <topic label="The Middle Tier" href="new-in-2.html#new-in-2-middle-tier">
+         <topic label="Easier configuration of declarative transactions in XML" href="new-in-2.html#new-in-2-middle-tier-transaction-configuration"/>
+         <topic label="JPA" href="new-in-2.html#new-in-2-middle-tier-jpa"/>
+         <topic label="Asynchronous JMS" href="new-in-2.html#new-in-2-middle-tier-async-jms"/>
+         <topic label="JDBC" href="new-in-2.html#new-in-2-middle-tier-jdbc"/>
+      </topic>
+      <topic label="The Web Tier" href="new-in-2.html#new-in-2-web">
+         <topic label="A form tag library for Spring MVC" href="new-in-2.html#new-in-2-web-form-tags"/>
+         <topic label="Sensible defaulting in Spring MVC" href="new-in-2.html#new-in-2-web-convention"/>
+         <topic label="Portlet framework" href="new-in-2.html#new-in-2-web-portlet"/>
+      </topic>
+      <topic label="Everything else" href="new-in-2.html#new-in-2-other">
+         <topic label="Dynamic language support" href="new-in-2.html#new-in-2-other-dynamic-language-support"/>
+         <topic label="JMX" href="new-in-2.html#new-in-2-other-jmx"/>
+         <topic label="Task scheduling" href="new-in-2.html#new-in-2-other-taskexecutor"/>
+         <topic label="Java 5 (Tiger) support" href="new-in-2.html#new-in-2-other-java5"/>
+      </topic>
+      <topic label="Migrating to Spring 2.0" href="new-in-2.html#new-in-2-migrating">
+         <topic label="Changes" href="new-in-2.html#new-in-2-migrating-changes">
+            <topic label="Jar packaging" href="new-in-2.html#new-in-2-migrating-packaging"/>
+            <topic label="XML configuration" href="new-in-2.html#new-in-2-migrating-xml-configuration"/>
+            <topic label="Deprecated classes and methods" href="new-in-2.html#new-in-2-migrating-deprecated"/>
+            <topic label="Apache OJB" href="new-in-2.html#new-in-2-migrating-ojb"/>
+            <topic label="iBatis" href="new-in-2.html#new-in-2-migrating-ibatis"/>
+            <topic label="UrlFilenameViewController" href="new-in-2.html#new-in-2-migrating-UrlFilenameViewController"/>
+         </topic>
+      </topic>
+      <topic label="Updated sample applications" href="new-in-2.html#new-in-2-other-applications"/>
+      <topic label="Improved documentation" href="new-in-2.html#new-in-2-other-documentation"/>
    </topic>
-   <topic label="Beans, BeanFactory and the ApplicationContext" href="beans.html">
-      <topic label="Introduction" href="beans.html#beans-introduction"/>
-      <topic label="BeanFactory and BeanDefinitions - the basics" href="beans.html#beans-basics">
-         <topic label="The BeanFactory" href="beans.html#beans-factory"/>
-         <topic label="The BeanDefinition" href="beans.html#beans-definition"/>
-         <topic label="The bean class" href="beans.html#beans-factory-class">
-            <topic label="Bean creation via constructor" href="beans.html#d0e479"/>
-            <topic label="Bean creation via static factory method" href="beans.html#d0e495"/>
-            <topic label="Bean creation via instance factory method" href="beans.html#beans-instance-factory-method"/>
-         </topic>
-         <topic label="The bean identifiers (id and&#xA;      name)" href="beans.html#beans-beanname"/>
-         <topic label="To singleton or not to singleton" href="beans.html#beans-factory-modes"/>
-      </topic>
-      <topic label="Properties, collaborators, autowiring and dependency&#xA;    checking" href="beans.html#beans-dependencies">
-         <topic label="Setting bean properties and collaborators" href="beans.html#beans-factory-collaborators"/>
-         <topic label="Constructor Argument Resolution" href="beans.html#d0e746">
-            <topic label="Constructor Argument Type Matching" href="beans.html#d0e756"/>
-            <topic label="Constructor Argument Index" href="beans.html#d0e769"/>
-         </topic>
-         <topic label="Bean properties and constructor arguments detailed" href="beans.html#beans-factory-properties-detailed">
-            <topic label="The value element" href="beans.html#beans-value-element"/>
-            <topic label="The null element" href="beans.html#beans-null-element"/>
-            <topic label="The collection elements" href="beans.html#beans-collection-elements"/>
-            <topic label="Inner bean definitions via nested bean elements" href="beans.html#beans-inner-beans"/>
-            <topic label="The idref element" href="beans.html#beans-idref-element"/>
-            <topic label="The ref element" href="beans.html#beans-ref-element"/>
-            <topic label="Value and Ref shortcut&#xA;        forms" href="beans.html#d0e1000"/>
-            <topic label="Compound property names" href="beans.html#d0e1106"/>
-         </topic>
-         <topic label="Method Injection" href="beans.html#beans-factory-method-injection">
-            <topic label="Lookup method Injection" href="beans.html#d0e1161"/>
-            <topic label="Arbitrary method replacement" href="beans.html#d0e1197"/>
-         </topic>
-         <topic label="Using depends-on" href="beans.html#beans-factory-dependson"/>
-         <topic label="Autowiring collaborators" href="beans.html#beans-factory-autowire"/>
-         <topic label="Checking for dependencies" href="beans.html#beans-factory-dependencies"/>
-      </topic>
-      <topic label="Customizing the nature of a bean" href="beans.html#beans-factory-nature">
-         <topic label="Lifecycle interfaces" href="beans.html#beans-factory-lifecycle">
-            <topic label="InitializingBean / init-method" href="beans.html#beans-factory-lifecycle-initializingbean"/>
-            <topic label="DisposableBean / destroy-method" href="beans.html#beans-factory-lifecycle-disposablebean"/>
-         </topic>
-         <topic label="Knowing who you are" href="beans.html#beans-factory-aware">
-            <topic label="BeanFactoryAware" href="beans.html#beans-factory-aware-beanfactoryaware"/>
-            <topic label="BeanNameAware" href="beans.html#beans-factory-aware-beannameaware"/>
-         </topic>
-         <topic label="FactoryBean" href="beans.html#beans-factory-lifecycle-factorybean"/>
-      </topic>
-      <topic label="Abstract and child bean definitions" href="beans.html#beans-child-bean-definitions"/>
-      <topic label="Interacting with the BeanFactory" href="beans.html#beans-factory-client">
-         <topic label="Obtaining a FactoryBean, not its product" href="beans.html#d0e1704"/>
-      </topic>
-      <topic label="Customizing beans with BeanPostProcessors" href="beans.html#beans-factory-customizing"/>
-      <topic label="Customizing bean factories with BeanFactoryPostProcessors" href="beans.html#beans-factory-customizing-factory-postprocessors">
-         <topic label="The PropertyPlaceholderConfigurer" href="beans.html#beans-factory-placeholderconfigurer"/>
-         <topic label="The PropertyOverrideConfigurer" href="beans.html#beans-factory-overrideconfigurer"/>
-      </topic>
-      <topic label="Registering additional custom PropertyEditors" href="beans.html#beans-beanfactory-customeditors"/>
-      <topic label="Using the alias element to add aliases for existing beans" href="beans.html#beans-beanfactory-alias"/>
-      <topic label="Introduction to the ApplicationContext" href="beans.html#context-introduction"/>
-      <topic label="Added functionality of the&#xA;    ApplicationContext" href="beans.html#context-functionality">
-         <topic label="Using the MessageSource" href="beans.html#context-functionality-messagesource"/>
-         <topic label="Propagating events" href="beans.html#context-functionality-events"/>
-         <topic label="Low-level resources and the application context" href="beans.html#context-functionality-resources"/>
-      </topic>
-      <topic label="Customized behavior in the ApplicationContext" href="beans.html#beans-context-customization">
-         <topic label="ApplicationContextAware marker&#xA;      interface" href="beans.html#beans-context-applicationcontextaware"/>
-         <topic label="The BeanPostProcessor" href="beans.html#beans-context-beanpostprocessor"/>
-         <topic label="The BeanFactoryPostProcessor" href="beans.html#beans-context-beanfactorypostprocessor"/>
-         <topic label="The PropertyPlaceholderConfigurer" href="beans.html#beans-context-placeholderconfigurer"/>
-      </topic>
-      <topic label="Registering additional custom PropertyEditors" href="beans.html#beans-applicationcontext-customeditors"/>
-      <topic label="Setting a bean property or constructor arg from a property&#xA;    expression" href="beans.html#d0e2303"/>
-      <topic label="Setting a bean property or constructor arg from a field&#xA;    value" href="beans.html#d0e2331"/>
-      <topic label="Invoking another method and optionally using the return&#xA;    value." href="beans.html#d0e2351"/>
-      <topic label="Importing Bean Definitions from One File Into Another" href="beans.html#context-import"/>
-      <topic label="Creating an ApplicationContext from a web application" href="beans.html#context-create"/>
-      <topic label="Glue code and the evil singleton" href="beans.html#d0e2507">
-         <topic label="Using SingletonBeanFactoryLocator and&#xA;      ContextSingletonBeanFactoryLocator" href="beans.html#d0e2525"/>
-      </topic>
-   </topic>
-   <topic label="Abstracting Access to Low-Level Resources" href="resources.html">
-      <topic label="Overview" href="resources.html#d0e2552"/>
-      <topic label="The Resource interface" href="resources.html#d0e2572"/>
-      <topic label="Built-in Resource implementations" href="resources.html#d0e2660">
-         <topic label="UrlResource" href="resources.html#d0e2665"/>
-         <topic label="ClassPathResource" href="resources.html#d0e2703"/>
-         <topic label="FileSystemResource" href="resources.html#d0e2740"/>
-         <topic label="ServletContextResource" href="resources.html#d0e2758"/>
-         <topic label="InputStreamResource" href="resources.html#d0e2772"/>
-         <topic label="ByteArrayResource" href="resources.html#d0e2789"/>
-      </topic>
-      <topic label="The ResourceLoader Interface" href="resources.html#d0e2803"/>
-      <topic label="The ResourceLoaderAware interface" href="resources.html#d0e2858"/>
-      <topic label="Setting Resources as properties" href="resources.html#d0e2887"/>
-      <topic label="Application contexts and Resource paths" href="resources.html#d0e2938">
-         <topic label="Constructing application contexts" href="resources.html#d0e2944"/>
-         <topic label="The classpath*: prefix" href="resources.html#d0e2977"/>
-         <topic label="Unexpected application context handling of FileSystemResource&#xA;      absolute paths" href="resources.html#d0e3008"/>
-      </topic>
-   </topic>
-   <topic label="PropertyEditors, data binding, validation and the BeanWrapper" href="validation.html">
-      <topic label="Introduction" href="validation.html#validation-introduction"/>
-      <topic label="Binding data using the DataBinder" href="validation.html#validation-databinding"/>
-      <topic label="Bean manipulation and the BeanWrapper" href="validation.html#beans-beans">
-         <topic label="Setting and getting basic and nested properties" href="validation.html#beans-beans-conventions"/>
-         <topic label="Built-in PropertyEditors, converting&#xA;      types" href="validation.html#beans-beans-conversion"/>
-         <topic label="Other features worth mentioning" href="validation.html#beans-beans-other"/>
-      </topic>
-      <topic label="Validation using Spring's Validator interface" href="validation.html#validator"/>
-      <topic label="The Errors interface" href="validation.html#validation-errors"/>
-      <topic label="Resolving codes to error messages" href="validation.html#validation-conversion"/>
-   </topic>
-   <topic label="Spring AOP: Aspect Oriented Programming with Spring" href="aop.html">
-      <topic label="Concepts" href="aop.html#aop-introduction">
-         <topic label="AOP concepts" href="aop.html#aop-introduction-defn"/>
-         <topic label="Spring AOP capabilities and goals" href="aop.html#aop-introduction-spring-defn"/>
-         <topic label="AOP Proxies in Spring" href="aop.html#aop-introduction-proxies"/>
-      </topic>
-      <topic label="Pointcuts in Spring" href="aop.html#aop-introduction-pointcuts">
-         <topic label="Concepts" href="aop.html#d0e3772"/>
-         <topic label="Operations on pointcuts" href="aop.html#d0e3821"/>
-         <topic label="Convenience pointcut implementations" href="aop.html#d0e3846">
-            <topic label="Static pointcuts" href="aop.html#d0e3851">
-               <topic label="Regular expression pointcuts" href="aop.html#d0e3858"/>
-               <topic label="Attribute-driven pointcuts" href="aop.html#d0e3909"/>
+   <topic label="Core Technologies" href="spring-core.html">
+      <topic label="The IoC container" href="beans.html">
+         <topic label="Introduction" href="beans.html#beans-introduction"/>
+         <topic label="Basics - containers and beans" href="beans.html#beans-basics">
+            <topic label="The container" href="beans.html#beans-factory">
+               <topic label="Configuration metadata" href="beans.html#beans-factory-metadata"/>
             </topic>
-            <topic label="Dynamic pointcuts" href="aop.html#d0e3917">
-               <topic label="Control flow pointcuts" href="aop.html#d0e3930"/>
+            <topic label="Instantiating a container" href="beans.html#beans-factory-instantiation">
+               <topic label="Composing XML-based configuration metadata" href="beans.html#beans-factory-xml-import"/>
+            </topic>
+            <topic label="The beans" href="beans.html#beans-definition">
+               <topic label="Naming beans" href="beans.html#beans-beanname">
+                  <topic label="Aliasing beans" href="beans.html#beans-beanname-alias"/>
+               </topic>
+               <topic label="Instantiating beans" href="beans.html#beans-factory-class">
+                  <topic label="Instantiation using a constructor" href="beans.html#beans-factory-class-ctor"/>
+                  <topic label="Instantiation using a static factory method" href="beans.html#beans-factory-class-static-factory-method"/>
+                  <topic label="Instantiation using an instance factory method" href="beans.html#beans-factory-class-instance-factory-method"/>
+               </topic>
+            </topic>
+            <topic label="Using the container" href="beans.html#beans-factory-client"/>
+         </topic>
+         <topic label="Dependencies" href="beans.html#beans-dependencies">
+            <topic label="Injecting dependencies" href="beans.html#beans-factory-collaborators">
+               <topic label="Setter Injection" href="beans.html#beans-setter-injection"/>
+               <topic label="Constructor Injection" href="beans.html#beans-constructor-injection"/>
+               <topic label="Some examples" href="beans.html#beans-some-examples"/>
+            </topic>
+            <topic label="Constructor Argument Resolution" href="beans.html#beans-factory-ctor-arguments-resolution">
+               <topic label="Constructor Argument Type Matching" href="beans.html#beans-factory-ctor-arguments-type"/>
+               <topic label="Constructor Argument Index" href="beans.html#beans-factory-ctor-arguments-index"/>
+            </topic>
+            <topic label="Bean properties and constructor arguments detailed" href="beans.html#beans-factory-properties-detailed">
+               <topic label="Straight values (primitives, Strings, etc.)" href="beans.html#beans-value-element">
+                  <topic label="The idref element" href="beans.html#beans-idref-element"/>
+               </topic>
+               <topic label="References to other beans (collaborators)" href="beans.html#beans-ref-element"/>
+               <topic label="Inner beans" href="beans.html#beans-inner-beans"/>
+               <topic label="Collections" href="beans.html#beans-collection-elements">
+                  <topic label="Collection merging" href="beans.html#beans-collection-elements-merging"/>
+                  <topic label="Strongly-typed collection (Java5+ only)" href="beans.html#beans-collection-elements-strongly-typed"/>
+               </topic>
+               <topic label="Nulls" href="beans.html#beans-null-element"/>
+               <topic label="XML-based configuration metadata shortcuts" href="beans.html#beans-value-ref-shortcuts"/>
+               <topic label="Compound property names" href="beans.html#beans-compound-property-names"/>
+            </topic>
+            <topic label="Using depends-on" href="beans.html#beans-factory-dependson"/>
+            <topic label="Lazily-instantiating beans" href="beans.html#beans-factory-lazy-init"/>
+            <topic label="Autowiring collaborators" href="beans.html#beans-factory-autowire">
+               <topic label="Excluding a bean from being available for autowiring" href="beans.html#beans-factory-autowire-candidate"/>
+            </topic>
+            <topic label="Checking for dependencies" href="beans.html#beans-factory-dependencies"/>
+            <topic label="Method Injection" href="beans.html#beans-factory-method-injection">
+               <topic label="Lookup method injection" href="beans.html#beans-factory-lookup-method-injection"/>
+               <topic label="Arbitrary method replacement" href="beans.html#beans-factory-arbitrary-method-replacement"/>
             </topic>
          </topic>
-         <topic label="Pointcut superclasses" href="aop.html#d0e3950"/>
-         <topic label="Custom pointcuts" href="aop.html#d0e3963"/>
-      </topic>
-      <topic label="Advice types in Spring" href="aop.html#d0e3970">
-         <topic label="Advice lifecycles" href="aop.html#d0e3975"/>
-         <topic label="Advice types in Spring" href="aop.html#aop-introduction-advice-types">
-            <topic label="Interception around advice" href="aop.html#d0e3997"/>
-            <topic label="Before advice" href="aop.html#d0e4034"/>
-            <topic label="Throws advice" href="aop.html#d0e4068"/>
-            <topic label="After Returning advice" href="aop.html#d0e4108"/>
-            <topic label="Introduction advice" href="aop.html#d0e4128"/>
-         </topic>
-      </topic>
-      <topic label="Advisors in Spring" href="aop.html#d0e4291"/>
-      <topic label="Using the ProxyFactoryBean to create AOP proxies" href="aop.html#aop-pfb">
-         <topic label="Basics" href="aop.html#aop-pfb-1"/>
-         <topic label="JavaBean properties" href="aop.html#aop-pfb-2"/>
-         <topic label="Proxying interfaces" href="aop.html#d0e4440"/>
-         <topic label="Proxying classes" href="aop.html#d0e4507"/>
-         <topic label="Using 'global' advisors" href="aop.html#d0e4543"/>
-      </topic>
-      <topic label="Convenient proxy creation" href="aop.html#aop-tfb">
-         <topic label="TransactionProxyFactoryBean" href="aop.html#d0e4561"/>
-         <topic label="EJB proxies" href="aop.html#d0e4642"/>
-      </topic>
-      <topic label="Concise proxy definitions" href="aop.html#aop-concise-proxy"/>
-      <topic label="Creating AOP proxies programmatically with the ProxyFactory" href="aop.html#aop-prog"/>
-      <topic label="Manipulating advised objects" href="aop.html#d0e4708"/>
-      <topic label="Using the &#34;autoproxy&#34; facility" href="aop.html#aop-autoproxy">
-         <topic label="Autoproxy bean definitions" href="aop.html#aop-autoproxy-choices">
-            <topic label="BeanNameAutoProxyCreator" href="aop.html#d0e4798"/>
-            <topic label="DefaultAdvisorAutoProxyCreator" href="aop.html#d0e4821"/>
-            <topic label="AbstractAdvisorAutoProxyCreator" href="aop.html#d0e4869"/>
-         </topic>
-         <topic label="Using metadata-driven auto-proxying" href="aop.html#aop-autoproxy-metadata"/>
-      </topic>
-      <topic label="Using TargetSources" href="aop.html#aop-targetsource">
-         <topic label="Hot swappable target sources" href="aop.html#aop-ts-swap"/>
-         <topic label="Pooling target sources" href="aop.html#aop-ts-pool"/>
-         <topic label="Prototype target sources" href="aop.html#aop-ts-prototype"/>
-         <topic label="ThreadLocal target sources" href="aop.html#aop-ts-threadlocal"/>
-      </topic>
-      <topic label="Defining new Advice types" href="aop.html#aop-extensibility"/>
-      <topic label="Further reading and resources" href="aop.html#d0e5144"/>
-   </topic>
-   <topic label="AspectJ Integration" href="aspectj.html">
-      <topic label="Overview" href="aspectj.html#d0e5169"/>
-      <topic label="Configuring AspectJ aspects using Spring IoC" href="aspectj.html#d0e5176">
-         <topic label="&#34;Singleton&#34; aspects" href="aspectj.html#d0e5198">
-            <topic label="Example" href="aspectj.html#d0e5208"/>
-            <topic label="Ordering issues" href="aspectj.html#d0e5246"/>
-         </topic>
-         <topic label="Non-singleton aspects" href="aspectj.html#d0e5251"/>
-         <topic label="Gotchas" href="aspectj.html#d0e5256"/>
-      </topic>
-      <topic label="Using AspectJ pointcuts to target Spring advice" href="aspectj.html#d0e5263"/>
-      <topic label="Spring aspects for AspectJ" href="aspectj.html#d0e5270"/>
-   </topic>
-   <topic label="Transaction management" href="transaction.html">
-      <topic label="The Spring transaction abstraction" href="transaction.html#d0e5280"/>
-      <topic label="Transaction strategies" href="transaction.html#d0e5337"/>
-      <topic label="Resource synchronization with transactions" href="transaction.html#d0e5480">
-         <topic label="High-level approach" href="transaction.html#d0e5500"/>
-         <topic label="Low-level approach" href="transaction.html#d0e5517"/>
-         <topic label="TransactionAwareDataSourceProxy" href="transaction.html#d0e5564"/>
-      </topic>
-      <topic label="Programmatic transaction management" href="transaction.html#d0e5591">
-         <topic label="Using the TransactionTemplate" href="transaction.html#d0e5615"/>
-         <topic label="Using the PlatformTransactionManager" href="transaction.html#d0e5671"/>
-      </topic>
-      <topic label="Declarative transaction management" href="transaction.html#d0e5690">
-         <topic label="Source Annotations for Transaction Demarcation" href="transaction.html#d0e5910">
-            <topic label="The Transactional Annotation" href="transaction.html#d0e5917">
-               <topic label="Transactional annotation examples" href="transaction.html#d0e6015"/>
-               <topic label="Telling Spring to apply the Transactional&#xA;          annotation" href="transaction.html#d0e6036"/>
-               <topic label="Using AOP to ensure the Transactional&#xA;          annotation is applied" href="transaction.html#d0e6062"/>
+         <topic label="Bean scopes" href="beans.html#beans-factory-scopes">
+            <topic label="The singleton scope" href="beans.html#beans-factory-scopes-singleton"/>
+            <topic label="The prototype scope" href="beans.html#beans-factory-scopes-prototype"/>
+            <topic label="The other scopes" href="beans.html#beans-factory-scopes-other">
+               <topic label="Initial web configuration" href="beans.html#beans-factory-scopes-other-web-configuration"/>
+               <topic label="The request scope" href="beans.html#beans-factory-scopes-request"/>
+               <topic label="The session scope" href="beans.html#beans-factory-scopes-session"/>
+               <topic label="The global session scope" href="beans.html#beans-factory-scopes-global-session"/>
+               <topic label="Scoped beans as dependencies" href="beans.html#beans-factory-scopes-other-injection"/>
+            </topic>
+            <topic label="Custom scopes" href="beans.html#beans-factory-scopes-custom">
+               <topic label="Creating your own custom scope" href="beans.html#beans-factory-scopes-custom-creating"/>
+               <topic label="Using a custom scope" href="beans.html#beans-factory-scopes-custom-using"/>
             </topic>
          </topic>
-         <topic label="BeanNameAutoProxyCreator,&#xA;      another declarative approach" href="transaction.html#d0e6107"/>
-         <topic label="AOP and Transactions" href="transaction.html#d0e6201"/>
-      </topic>
-      <topic label="Choosing between programmatic and declarative transaction&#xA;    management" href="transaction.html#d0e6206"/>
-      <topic label="Do you need an application server for transaction&#xA;    management?" href="transaction.html#d0e6213"/>
-      <topic label="AppServer-specific integration" href="transaction.html#d0e6230">
-         <topic label="BEA WebLogic" href="transaction.html#d0e6250"/>
-         <topic label="IBM WebSphere" href="transaction.html#d0e6266"/>
-      </topic>
-      <topic label="Common problems" href="transaction.html#d0e6290">
-         <topic label="Use of the wrong transaction manager for a specific&#xA;      DataSource" href="transaction.html#d0e6293"/>
-         <topic label="Spurious AppServer warnings about the transaction or DataSource&#xA;      no longer being active" href="transaction.html#d0e6312"/>
-      </topic>
-   </topic>
-   <topic label="Source Level Metadata Support" href="metadata.html">
-      <topic label="Source-level metadata" href="metadata.html#metadata-concepts"/>
-      <topic label="Spring's metadata support" href="metadata.html#metadata-spring"/>
-      <topic label="Integration with Jakarta Commons Attributes" href="metadata.html#metadata-commons"/>
-      <topic label="Metadata and Spring AOP autoproxying" href="metadata.html#metadata-uses">
-         <topic label="Fundamentals" href="metadata.html#d0e6526"/>
-         <topic label="Declarative transaction management" href="metadata.html#metadata-tx"/>
-         <topic label="Pooling" href="metadata.html#metadata-pool"/>
-         <topic label="Custom metadata" href="metadata.html#metadata-arbitrary"/>
-      </topic>
-      <topic label="Using attributes to minimize MVC web tier configuration" href="metadata.html#d0e6619"/>
-      <topic label="Other uses of metadata attributes" href="metadata.html#d0e6729"/>
-      <topic label="Adding support for additional metadata APIs" href="metadata.html#d0e6734"/>
-   </topic>
-   <topic label="DAO support" href="dao.html">
-      <topic label="Introduction" href="dao.html#dao-introduction"/>
-      <topic label="Consistent Exception Hierarchy" href="dao.html#dao-exceptions"/>
-      <topic label="Consistent Abstract Classes for DAO Support" href="dao.html#d0e6784"/>
-   </topic>
-   <topic label="Data Access using JDBC" href="jdbc.html">
-      <topic label="Introduction" href="jdbc.html#jdbc-introduction"/>
-      <topic label="Using the JDBC Core classes to control basic JDBC processing and&#xA;    error handling" href="jdbc.html#jdbc-core">
-         <topic label="JdbcTemplate" href="jdbc.html#jdbc-JdbcTemplate"/>
-         <topic label="DataSource" href="jdbc.html#d0e6886"/>
-         <topic label="SQLExceptionTranslator" href="jdbc.html#jdbc-SQLExceptionTranslator"/>
-         <topic label="Executing Statements" href="jdbc.html#d0e6977"/>
-         <topic label="Running Queries" href="jdbc.html#d0e6993"/>
-         <topic label="Updating the database" href="jdbc.html#d0e7035"/>
-      </topic>
-      <topic label="Controlling how we connect to the database" href="jdbc.html#jdbc-datasource">
-         <topic label="DataSourceUtils" href="jdbc.html#jdbc-DataSourceUtils"/>
-         <topic label="SmartDataSource" href="jdbc.html#jdbc-SmartDataSource"/>
-         <topic label="AbstractDataSource" href="jdbc.html#jdbc-AbstractDataSource"/>
-         <topic label="SingleConnectionDataSource" href="jdbc.html#jdbc-SingleConnectionDataSource"/>
-         <topic label="DriverManagerDataSource" href="jdbc.html#jdbc-DriverManagerDataSource"/>
-         <topic label="TransactionAwareDataSourceProxy" href="jdbc.html#jdbc-TransactionAwareDataSourceProxy"/>
-         <topic label="DataSourceTransactionManager" href="jdbc.html#jdbc-DataSourceTransactionManager"/>
-      </topic>
-      <topic label="Modeling JDBC operations as Java objects" href="jdbc.html#jdbc-object">
-         <topic label="SqlQuery" href="jdbc.html#jdbc-SqlQuery"/>
-         <topic label="MappingSqlQuery" href="jdbc.html#jdbc-MappingSqlQuery"/>
-         <topic label="SqlUpdate" href="jdbc.html#jdbc-SqlUpdate"/>
-         <topic label="StoredProcedure" href="jdbc.html#jdbc-StoredProcedure"/>
-         <topic label="SqlFunction" href="jdbc.html#jdbc-SqlFunction"/>
-      </topic>
-   </topic>
-   <topic label="Data Access using O/R Mappers" href="orm.html">
-      <topic label="Introduction" href="orm.html#orm-introduction"/>
-      <topic label="Hibernate" href="orm.html#orm-hibernate">
-         <topic label="Resource management" href="orm.html#d0e7437"/>
-         <topic label="SessionFactory setup in a Spring application context" href="orm.html#d0e7468"/>
-         <topic label="Inversion of Control: HibernateTemplate and&#xA;      HibernateCallback" href="orm.html#d0e7496"/>
-         <topic label="Implementing Spring-based DAOs without callbacks" href="orm.html#d0e7542"/>
-         <topic label="Implementing DAOs based on plain Hibernate3 API" href="orm.html#d0e7576"/>
-         <topic label="Programmatic transaction demarcation" href="orm.html#d0e7641"/>
-         <topic label="Declarative transaction demarcation" href="orm.html#d0e7662"/>
-         <topic label="Transaction management strategies" href="orm.html#d0e7696"/>
-         <topic label="Container resources versus local resources" href="orm.html#d0e7751"/>
-         <topic label="Spurious AppServer warnings about the transaction or DataSource&#xA;      no longer being active" href="orm.html#orm-hibernate-invalid-jdbc-access-error"/>
-      </topic>
-      <topic label="JDO" href="orm.html#orm-jdo">
-         <topic label="PersistenceManagerFactory setup" href="orm.html#d0e7895"/>
-         <topic label="JdoTemplate and JdoDaoSupport" href="orm.html#d0e7942"/>
-         <topic label="Implementing DAOs based on plain JDO API" href="orm.html#d0e8015"/>
-         <topic label="Transaction management" href="orm.html#d0e8100"/>
-         <topic label="JdoDialect" href="orm.html#d0e8138"/>
-      </topic>
-      <topic label="Oracle TopLink" href="orm.html#orm-toplink">
-         <topic label="SessionFactory abstraction" href="orm.html#d0e8216"/>
-         <topic label="TopLinkTemplate and TopLinkDaoSupport" href="orm.html#d0e8272"/>
-         <topic label="Implementing DAOs based on plain TopLink API" href="orm.html#d0e8350"/>
-         <topic label="Transaction management" href="orm.html#d0e8453"/>
-      </topic>
-      <topic label="Apache OJB" href="orm.html#orm-ojb">
-         <topic label="OJB setup in a Spring environment" href="orm.html#d0e8518"/>
-         <topic label="PersistenceBrokerTemplate and PersistenceBrokerDaoSupport" href="orm.html#d0e8542"/>
-         <topic label="Transaction management" href="orm.html#d0e8606"/>
-      </topic>
-      <topic label="iBATIS SQL Maps" href="orm.html#orm-ibatis">
-         <topic label="Overview and differences between iBATIS 1.x and 2.x" href="orm.html#d0e8653"/>
-         <topic label="iBATIS SQL Maps 1.x" href="orm.html#d0e8712">
-            <topic label="Setting up the SqlMap" href="orm.html#d0e8715"/>
-            <topic label="Using SqlMapTemplate and&#xA;        SqlMapDaoSupport" href="orm.html#d0e8755"/>
-         </topic>
-         <topic label="iBATIS SQL Maps 2.x" href="orm.html#d0e8811">
-            <topic label="Setting up the SqlMapClient" href="orm.html#d0e8814"/>
-            <topic label="Using SqlMapClientTemplate and&#xA;        SqlMapClientDaoSupport" href="orm.html#d0e8847"/>
-            <topic label="Implementing DAOs based on plain iBATIS API" href="orm.html#d0e8914"/>
-         </topic>
-      </topic>
-   </topic>
-   <topic label="Web MVC framework" href="mvc.html">
-      <topic label="Introduction to the web MVC framework" href="mvc.html#mvc-introduction">
-         <topic label="Pluggability of other MVC implementations" href="mvc.html#mvc-introduction-pluggability"/>
-         <topic label="Features of Spring MVC" href="mvc.html#mvc-features"/>
-      </topic>
-      <topic label="The DispatcherServlet" href="mvc.html#mvc-servlet"/>
-      <topic label="Controllers" href="mvc.html#mvc-controller">
-         <topic label="AbstractController and WebContentGenerator" href="mvc.html#mvc-controller-abstractcontroller"/>
-         <topic label="Other simple controllers" href="mvc.html#mvc-controller-othersimplecontrollers"/>
-         <topic label="The MultiActionController" href="mvc.html#mvc-controller-multiaction"/>
-         <topic label="CommandControllers" href="mvc.html#mvc-controller-command"/>
-      </topic>
-      <topic label="Handler mappings" href="mvc.html#mvc-handlermapping">
-         <topic label="BeanNameUrlHandlerMapping" href="mvc.html#mvc-handlermapping-beanname"/>
-         <topic label="SimpleUrlHandlerMapping" href="mvc.html#mvc-handlermapping-urlhandlermapping"/>
-         <topic label="Adding HandlerInterceptors" href="mvc.html#mvc-handlermapping-interceptor"/>
-      </topic>
-      <topic label="Views and resolving them" href="mvc.html#mvc-viewresolver">
-         <topic label="ViewResolvers" href="mvc.html#mvc-viewresolver-resolver"/>
-         <topic label="Chaining ViewResolvers" href="mvc.html#mvc-viewresolver-chaining"/>
-         <topic label="Redirecting to views" href="mvc.html#d0e9984">
-            <topic label="RedirectView" href="mvc.html#d0e10003"/>
-            <topic label="The redirect: prefix" href="mvc.html#d0e10025"/>
-            <topic label="The forward: prefix" href="mvc.html#d0e10055"/>
-         </topic>
-      </topic>
-      <topic label="Using locales" href="mvc.html#mvc-localeresolver">
-         <topic label="AcceptHeaderLocaleResolver" href="mvc.html#mvc-localeresolver-acceptheader"/>
-         <topic label="CookieLocaleResolver" href="mvc.html#mvc-localeresolver-cookie"/>
-         <topic label="SessionLocaleResolver" href="mvc.html#mvc-localeresolver-session"/>
-         <topic label="LocaleChangeInterceptor" href="mvc.html#mvc-localeresolver-interceptor"/>
-      </topic>
-      <topic label="Using themes" href="mvc.html#mvc-themeresolver">
-         <topic label="Introduction" href="mvc.html#mvc-themeresolver-introduction"/>
-         <topic label="Defining themes" href="mvc.html#mvc-themeresolver-defining"/>
-         <topic label="Theme resolvers" href="mvc.html#mvc-themeresolver-resolving"/>
-      </topic>
-      <topic label="Spring's multipart (fileupload) support" href="mvc.html#mvc-multipart">
-         <topic label="Introduction" href="mvc.html#mvc-multipart-introduction"/>
-         <topic label="Using the MultipartResolver" href="mvc.html#mvc-multipart-resolver"/>
-         <topic label="Handling a fileupload in a form" href="mvc.html#mvc-multipart-forms"/>
-      </topic>
-      <topic label="Handling exceptions" href="mvc.html#mvc-exceptionhandlers"/>
-   </topic>
-   <topic label="Integrating view technologies" href="view.html">
-      <topic label="Introduction" href="view.html#view-introduction"/>
-      <topic label="JSP &amp; JSTL" href="view.html#view-jsp">
-         <topic label="View resolvers" href="view.html#view-jsp-resolver"/>
-         <topic label="'Plain-old' JSPs versus JSTL" href="view.html#view-jsp-jstl"/>
-         <topic label="Additional tags facilitating development" href="view.html#view-jsp-tags"/>
-      </topic>
-      <topic label="Tiles" href="view.html#view-tiles">
-         <topic label="Dependencies" href="view.html#view-tiles-dependencies"/>
-         <topic label="How to integrate Tiles" href="view.html#view-tiles-integrate">
-            <topic label="InternalResourceViewResolver" href="view.html#view-tiles-internal"/>
-            <topic label="ResourceBundleViewResolver" href="view.html#view-tiles-resource"/>
-         </topic>
-      </topic>
-      <topic label="Velocity &amp; FreeMarker" href="view.html#view-velocity">
-         <topic label="Dependencies" href="view.html#view-velocity-dependencies"/>
-         <topic label="Context configuration" href="view.html#view-velocity-contextconfig"/>
-         <topic label="Creating templates" href="view.html#view-velocity-createtemplates"/>
-         <topic label="Advanced configuration" href="view.html#view-velocity-advancedconfig">
-            <topic label="velocity.properties" href="view.html#view-velocity-example-velocityproperties"/>
-            <topic label="FreeMarker" href="view.html#d0e10678"/>
-         </topic>
-         <topic label="Bind support and form handling" href="view.html#view-velocity-forms">
-            <topic label="the bind macros" href="view.html#view-velocity-validation"/>
-            <topic label="simple binding" href="view.html#view-velocity-validationmessages"/>
-            <topic label="form input generation macros" href="view.html#d0e10793">
-               <topic label="Input Fields" href="view.html#d0e10992"/>
-               <topic label="Selection Fields" href="view.html#d0e11012"/>
+         <topic label="Customizing the nature of a bean" href="beans.html#beans-factory-nature">
+            <topic label="Lifecycle interfaces" href="beans.html#beans-factory-lifecycle">
+               <topic label="Initialization callbacks" href="beans.html#beans-factory-lifecycle-initializingbean"/>
+               <topic label="Destruction callbacks" href="beans.html#beans-factory-lifecycle-disposablebean">
+                  <topic label="Default initialization &amp; destroy methods" href="beans.html#beans-factory-lifecycle-default-init-destroy-methods"/>
+                  <topic label="Shutting down the Spring IoC container gracefully in non-web applications" href="beans.html#beans-factory-shutdown"/>
+               </topic>
             </topic>
-            <topic label="Overriding HTML escaping and making tags XHTML&#xA;        compliant" href="view.html#d0e11051"/>
-         </topic>
-      </topic>
-      <topic label="XSLT" href="view.html#view-xslt">
-         <topic label="My First Words" href="view.html#view-xslt-firstwords">
-            <topic label="Bean definitions" href="view.html#view-xslt-beandefs"/>
-            <topic label="Standard MVC controller code" href="view.html#view-xslt-controllercode"/>
-            <topic label="Convert the model data to XML" href="view.html#view-xslt-subclassing">
-               <topic label="Adding stylesheet parameters" href="view.html#d0e11114"/>
-               <topic label="Formatting dates and currency" href="view.html#view-xslt-formathelper"/>
+            <topic label="Knowing who you are" href="beans.html#beans-factory-aware">
+               <topic label="&#xA;                    BeanFactoryAware&#xA;                " href="beans.html#beans-factory-aware-beanfactoryaware"/>
+               <topic label="BeanNameAware" href="beans.html#beans-factory-aware-beannameaware"/>
             </topic>
-            <topic label="Defining the view properties" href="view.html#view-xslt-viewdefinitions"/>
-            <topic label="Document transformation" href="view.html#view-xslt-transforming"/>
          </topic>
-         <topic label="Summary" href="view.html#view-xslt-summary"/>
-      </topic>
-      <topic label="Document views (PDF/Excel)" href="view.html#view-document">
-         <topic label="Introduction" href="view.html#view-document-intro"/>
-         <topic label="Configuration and setup" href="view.html#view-document-config">
-            <topic label="Document view definitions" href="view.html#view-document-configviews"/>
-            <topic label="Controller code" href="view.html#view-document-configcontroller"/>
-            <topic label="Subclassing for Excel views" href="view.html#view-document-configsubclasses"/>
-            <topic label="Subclassing for PDF views" href="view.html#view-document-configsubclasspdf"/>
+         <topic label="Bean definition inheritance" href="beans.html#beans-child-bean-definitions"/>
+         <topic label="Container extension points" href="beans.html#beans-factory-extension">
+            <topic label="Customizing beans using BeanPostProcessors" href="beans.html#beans-factory-extension-bpp">
+               <topic label="Example: Hello World, BeanPostProcessor-style" href="beans.html#beans-factory-extension-bpp-examples-hw"/>
+               <topic label="Example: The RequiredAnnotationBeanPostProcessor" href="beans.html#beans-factory-extension-bpp-examples-rabpp"/>
+            </topic>
+            <topic label="Customizing configuration metadata with BeanFactoryPostProcessors" href="beans.html#beans-factory-extension-factory-postprocessors">
+               <topic label="Example: the PropertyPlaceholderConfigurer" href="beans.html#beans-factory-placeholderconfigurer"/>
+               <topic label="Example: the PropertyOverrideConfigurer" href="beans.html#beans-factory-overrideconfigurer"/>
+            </topic>
+            <topic label="Customizing instantiation logic using FactoryBeans" href="beans.html#beans-factory-extension-factorybean"/>
+         </topic>
+         <topic label="The ApplicationContext" href="beans.html#context-introduction">
+            <topic label="Internationalization using MessageSources" href="beans.html#context-functionality-messagesource"/>
+            <topic label="Events" href="beans.html#context-functionality-events"/>
+            <topic label="Convenient access to low-level resources" href="beans.html#context-functionality-resources"/>
+            <topic label="Convenient ApplicationContext instantiation for web applications" href="beans.html#context-create"/>
+         </topic>
+         <topic label="Glue code and the evil singleton" href="beans.html#beans-glue-code-and-singletons">
+            <topic label="Using the Singleton-helper classes" href="beans.html#beans-singleton-helper"/>
          </topic>
       </topic>
-      <topic label="JasperReports" href="view.html#view-jasper-reports">
-         <topic label="Dependencies" href="view.html#view-jasper-reports-dependencies"/>
-         <topic label="Configuration" href="view.html#view-jasper-reports-configuration">
-            <topic label="Configuring the ViewResolver" href="view.html#view-jasper-reports-configuration-resolver"/>
-            <topic label="Configuring the Views" href="view.html#view-jasper-reports-configuration-views"/>
-            <topic label="About Report Files" href="view.html#view-jasper-reports-configuration-report-files"/>
-            <topic label="Using JasperReportsMultiFormatView" href="view.html#view-jasper-reports-configuration-multiformat-view"/>
+      <topic label="Resources" href="resources.html">
+         <topic label="Introduction" href="resources.html#resources-introduction"/>
+         <topic label="The Resource interface" href="resources.html#resources-resource"/>
+         <topic label="Built-in Resource implementations" href="resources.html#resources-implementations">
+            <topic label="UrlResource" href="resources.html#resources-implementations-urlresource"/>
+            <topic label="ClassPathResource" href="resources.html#resources-implementations-classpathresource"/>
+            <topic label="FileSystemResource" href="resources.html#resources-implementations-filesystemresource"/>
+            <topic label="ServletContextResource" href="resources.html#resources-implementations-servletcontextresource"/>
+            <topic label="InputStreamResource" href="resources.html#resources-implementations-inputstreamresource"/>
+            <topic label="ByteArrayResource" href="resources.html#resources-implementations-bytearrayresource"/>
          </topic>
-         <topic label="Populating the ModelAndView" href="view.html#view-jasper-reports-model"/>
-         <topic label="Working with Sub-Reports" href="view.html#view-jasper-reports-subreports">
-            <topic label="Configuring Sub-Report Files" href="view.html#view-jasper-reports-subreports-config-reports"/>
-            <topic label="Configuring Sub-Report Data Sources" href="view.html#view-jasper-reports-subreports-config-datasources"/>
+         <topic label="The ResourceLoader" href="resources.html#resources-resourceloader"/>
+         <topic label="The ResourceLoaderAware interface" href="resources.html#resources-resourceloaderaware"/>
+         <topic label="Resources as dependencies" href="resources.html#resources-as-dependencies"/>
+         <topic label="Application contexts and Resource paths" href="resources.html#resources-app-ctx">
+            <topic label="Constructing application contexts" href="resources.html#resources-app-ctx-construction">
+               <topic label="Constructing ClassPathXmlApplicationContext instances - shortcuts" href="resources.html#resources-app-ctx-classpathxml"/>
+            </topic>
+            <topic label="Wildcards in application context constructor resource paths" href="resources.html#resources-app-ctx-wildcards-in-resource-paths">
+               <topic label="Ant-style Patterns" href="resources.html#resources-app-ctx-ant-patterns-in-paths">
+                  <topic label="Implications on portability" href="resources.html#resources-app-ctx-portability"/>
+               </topic>
+               <topic label="The classpath*: prefix" href="resources.html#resources-classpath-wildcards"/>
+               <topic label="Other notes relating to wildcards" href="resources.html#resources-wildcards-in-path-other-stuff"/>
+            </topic>
+            <topic label="FileSystemResource caveats" href="resources.html#resources-filesystemresource-caveats"/>
          </topic>
-         <topic label="Configuring Exporter Parameters" href="view.html#view-jasper-reports-exporter-parameters"/>
       </topic>
-   </topic>
-   <topic label="Integrating with other web frameworks" href="webintegration.html">
-      <topic label="Introduction" href="webintegration.html#intro"/>
-      <topic label="JavaServer Faces" href="webintegration.html#jsf">
-         <topic label="DelegatingVariableResolver" href="webintegration.html#jsf-delegatingvariableresolver"/>
-         <topic label="FacesContextUtils" href="webintegration.html#jsf-facescontextutils"/>
-      </topic>
-      <topic label="Struts" href="webintegration.html#struts">
-         <topic label="ContextLoaderPlugin" href="webintegration.html#struts-contextloaderplugin">
-            <topic label="DelegatingRequestProcessor" href="webintegration.html#struts-delegatingrequestprocessor"/>
-            <topic label="DelegatingActionProxy" href="webintegration.html#struts-delegatingactionproxy"/>
+      <topic label="Validation, Data-binding, the BeanWrapper, and PropertyEditors" href="validation.html">
+         <topic label="Introduction" href="validation.html#validation-introduction"/>
+         <topic label="Validation using Spring's Validator interface" href="validation.html#validator"/>
+         <topic label="Resolving codes to error messages" href="validation.html#validation-conversion"/>
+         <topic label="Bean manipulation and the BeanWrapper" href="validation.html#beans-beans">
+            <topic label="Setting and getting basic and nested properties" href="validation.html#beans-beans-conventions"/>
+            <topic label="Built-in PropertyEditor implementations" href="validation.html#beans-beans-conversion">
+               <topic label="Registering additional custom PropertyEditors" href="validation.html#beans-beans-conversion-customeditor-registration"/>
+            </topic>
          </topic>
-         <topic label="ActionSupport Classes" href="webintegration.html#struts-actionsupport"/>
       </topic>
-      <topic label="Tapestry" href="webintegration.html#view-tapestry">
-         <topic label="Architecture" href="webintegration.html#view-tapestry-architecture"/>
-         <topic label="Implementation" href="webintegration.html#view-tapestry-implementation">
-            <topic label="Sample application context" href="webintegration.html#view-tapestry-context"/>
-            <topic label="Obtaining beans in Tapestry pages" href="webintegration.html#view-tapestry-appctx"/>
-            <topic label="Exposing the application context to Tapestry" href="webintegration.html#view-tapestry-exposeappctx"/>
-            <topic label="Component definition files" href="webintegration.html#view-tapestry-componentdefs"/>
-            <topic label="Adding abstract accessors" href="webintegration.html#view-tapestry-getters"/>
+      <topic label="Aspect Oriented Programming with Spring" href="aop.html">
+         <topic label="Introduction" href="aop.html#aop-introduction">
+            <topic label="AOP concepts" href="aop.html#aop-introduction-defn"/>
+            <topic label="Spring AOP capabilities and goals" href="aop.html#aop-introduction-spring-defn"/>
+            <topic label="AOP Proxies" href="aop.html#aop-introduction-proxies"/>
          </topic>
-         <topic label="Summary" href="webintegration.html#view-tapestry-summary"/>
+         <topic label="@AspectJ support" href="aop.html#aop-ataspectj">
+            <topic label="Enabling @AspectJ Support" href="aop.html#aop-aspectj-support"/>
+            <topic label="Declaring an aspect" href="aop.html#aop-at-aspectj"/>
+            <topic label="Declaring a pointcut" href="aop.html#aop-pointcuts">
+               <topic label="Supported Pointcut Designators" href="aop.html#aop-pointcuts-designators"/>
+               <topic label="Combining pointcut expressions" href="aop.html#aop-pointcuts-combining"/>
+               <topic label="Sharing common pointcut definitions" href="aop.html#aop-common-pointcuts"/>
+               <topic label="Examples" href="aop.html#aop-pointcuts-examples"/>
+            </topic>
+            <topic label="Declaring advice" href="aop.html#aop-advice">
+               <topic label="Before advice" href="aop.html#aop-advice-before"/>
+               <topic label="After returning advice" href="aop.html#aop-advice-after-returning"/>
+               <topic label="After throwing advice" href="aop.html#aop-advice-after-throwing"/>
+               <topic label="After (finally) advice" href="aop.html#aop-advice-after-finally"/>
+               <topic label="Around advice" href="aop.html#aop-ataspectj-around-advice"/>
+               <topic label="Advice parameters" href="aop.html#aop-ataspectj-advice-params">
+                  <topic label="Access to the current JoinPoint" href="aop.html#aop-ataspectj-advice-params-the-joinpoint"/>
+                  <topic label="Passing parameters to advice" href="aop.html#aop-ataspectj-advice-params-passing"/>
+                  <topic label="Determining argument names" href="aop.html#aop-ataspectj-advice-params-names"/>
+                  <topic label="Proceeding with arguments" href="aop.html#aop-ataspectj-advice-proceeding-with-the-call"/>
+               </topic>
+               <topic label="Advice ordering" href="aop.html#aop-ataspectj-advice-ordering"/>
+            </topic>
+            <topic label="Introductions" href="aop.html#aop-introductions"/>
+            <topic label="Aspect instantiation models" href="aop.html#aop-instantiation-models"/>
+            <topic label="Example" href="aop.html#aop-ataspectj-example"/>
+         </topic>
+         <topic label="Schema-based AOP support" href="aop.html#aop-schema">
+            <topic label="Declaring an aspect" href="aop.html#aop-schema-declaring-an-aspect"/>
+            <topic label="Declaring a pointcut" href="aop.html#aop-schema-pointcuts"/>
+            <topic label="Declaring advice" href="aop.html#aop-schema-advice">
+               <topic label="Before advice" href="aop.html#aop-schema-advice-before"/>
+               <topic label="After returning advice" href="aop.html#aop-schema-advice-after-returning"/>
+               <topic label="After throwing advice" href="aop.html#aop-schema-advice-after-throwing"/>
+               <topic label="After (finally) advice" href="aop.html#aop-schema-advice-after-finally"/>
+               <topic label="Around advice" href="aop.html#aop-schema-advice-around"/>
+               <topic label="Advice parameters" href="aop.html#aop-schema-params"/>
+               <topic label="Advice ordering" href="aop.html#aop-ordering"/>
+            </topic>
+            <topic label="Introductions" href="aop.html#aop-schema-introductions"/>
+            <topic label="Aspect instantiation models" href="aop.html#aop-schema-instatiation-models"/>
+            <topic label="Advisors" href="aop.html#aop-schema-advisors"/>
+            <topic label="Example" href="aop.html#aop-schema-example"/>
+         </topic>
+         <topic label="Choosing which AOP declaration style to use" href="aop.html#aop-choosing">
+            <topic label="Spring AOP or full AspectJ?" href="aop.html#aop-spring-or-aspectj"/>
+            <topic label="@AspectJ or XML for Spring AOP?" href="aop.html#aop-ataspectj-or-xml"/>
+         </topic>
+         <topic label="Mixing aspect types" href="aop.html#aop-mixing-styles"/>
+         <topic label="Proxying mechanisms" href="aop.html#aop-proxying">
+            <topic label="Understanding AOP proxies" href="aop.html#aop-understanding-aop-proxies"/>
+         </topic>
+         <topic label="Programmatic creation of @AspectJ Proxies" href="aop.html#aop-aspectj-programmatic"/>
+         <topic label="Using AspectJ with Spring applications" href="aop.html#aop-using-aspectj">
+            <topic label="Using AspectJ to dependency inject domain objects with Spring" href="aop.html#aop-atconfigurable">
+               <topic label="Unit testing @Configurable objects" href="aop.html#aop-configurable-testing"/>
+               <topic label="Working with multiple application contexts" href="aop.html#aop-configurable-container"/>
+            </topic>
+            <topic label="Other Spring aspects for AspectJ" href="aop.html#aop-ajlib-other"/>
+            <topic label="Configuring AspectJ aspects using Spring IoC" href="aop.html#aop-aj-configure"/>
+            <topic label="Using AspectJ Load-time weaving (LTW) with Spring applications" href="aop.html#aop-aj-ltw"/>
+         </topic>
+         <topic label="Further Resources" href="aop.html#aop-resources"/>
       </topic>
-      <topic label="WebWork" href="webintegration.html#webwork"/>
-   </topic>
-   <topic label="Remoting and web services using Spring" href="remoting.html">
-      <topic label="Introduction" href="remoting.html#d0e12311"/>
-      <topic label="Exposing services using RMI" href="remoting.html#d0e12394">
-         <topic label="Exporting the service using the RmiServiceExporter" href="remoting.html#d0e12399"/>
-         <topic label="Linking in the service at the client" href="remoting.html#d0e12439"/>
+      <topic label="Spring AOP APIs" href="aop-api.html">
+         <topic label="Introduction" href="aop-api.html#aop-api-introduction"/>
+         <topic label="Pointcut API in Spring" href="aop-api.html#aop-api-pointcuts">
+            <topic label="Concepts" href="aop-api.html#aop-api-concepts"/>
+            <topic label="Operations on pointcuts" href="aop-api.html#aop-api-pointcut-ops"/>
+            <topic label="AspectJ expression pointcuts" href="aop-api.html#aop-api-pointcuts-aspectj"/>
+            <topic label="Convenience pointcut implementations" href="aop-api.html#aop-api-pointcuts-impls">
+               <topic label="Static pointcuts" href="aop-api.html#aop-api-pointcuts-static">
+                  <topic label="Regular expression pointcuts" href="aop-api.html#aop-api-pointcuts-regex"/>
+                  <topic label="Attribute-driven pointcuts" href="aop-api.html#aop-api-pointcuts-attribute-driven"/>
+               </topic>
+               <topic label="Dynamic pointcuts" href="aop-api.html#aop-api-pointcuts-dynamic">
+                  <topic label="Control flow pointcuts" href="aop-api.html#aop-api-pointcuts-cflow"/>
+               </topic>
+            </topic>
+            <topic label="Pointcut superclasses" href="aop-api.html#aop-api-pointcuts-superclasses"/>
+            <topic label="Custom pointcuts" href="aop-api.html#aop-api-pointcuts-custom"/>
+         </topic>
+         <topic label="Advice API in Spring" href="aop-api.html#aop-api-advice">
+            <topic label="Advice lifecycles" href="aop-api.html#aop-api-advice-lifecycle"/>
+            <topic label="Advice types in Spring" href="aop-api.html#aop-api-advice-types">
+               <topic label="Interception around advice" href="aop-api.html#aop-api-advice-around"/>
+               <topic label="Before advice" href="aop-api.html#aop-api-advice-before"/>
+               <topic label="Throws advice" href="aop-api.html#aop-api-advice-throws"/>
+               <topic label="After Returning advice" href="aop-api.html#aop-api-advice-after-returning"/>
+               <topic label="Introduction advice" href="aop-api.html#aop-api-advice-introduction"/>
+            </topic>
+         </topic>
+         <topic label="Advisor API in Spring" href="aop-api.html#aop-api-advisor"/>
+         <topic label="Using the ProxyFactoryBean to create AOP proxies" href="aop-api.html#aop-pfb">
+            <topic label="Basics" href="aop-api.html#aop-pfb-1"/>
+            <topic label="JavaBean properties" href="aop-api.html#aop-pfb-2"/>
+            <topic label="JDK- and CGLIB-based proxies" href="aop-api.html#aop-pfb-proxy-types"/>
+            <topic label="Proxying interfaces" href="aop-api.html#aop-api-proxying-intf"/>
+            <topic label="Proxying classes" href="aop-api.html#aop-api-proxying-class"/>
+            <topic label="Using 'global' advisors" href="aop-api.html#aop-global-advisors"/>
+         </topic>
+         <topic label="Concise proxy definitions" href="aop-api.html#aop-concise-proxy"/>
+         <topic label="Creating AOP proxies programmatically with the ProxyFactory" href="aop-api.html#aop-prog"/>
+         <topic label="Manipulating advised objects" href="aop-api.html#aop-api-advised"/>
+         <topic label="Using the &#34;autoproxy&#34; facility" href="aop-api.html#aop-autoproxy">
+            <topic label="Autoproxy bean definitions" href="aop-api.html#aop-autoproxy-choices">
+               <topic label="BeanNameAutoProxyCreator" href="aop-api.html#aop-api-autoproxy"/>
+               <topic label="DefaultAdvisorAutoProxyCreator" href="aop-api.html#aop-api-autoproxy-default"/>
+               <topic label="AbstractAdvisorAutoProxyCreator" href="aop-api.html#aop-api-autoproxy-abstract"/>
+            </topic>
+            <topic label="Using metadata-driven auto-proxying" href="aop-api.html#aop-autoproxy-metadata"/>
+         </topic>
+         <topic label="Using TargetSources" href="aop-api.html#aop-targetsource">
+            <topic label="Hot swappable target sources" href="aop-api.html#aop-ts-swap"/>
+            <topic label="Pooling target sources" href="aop-api.html#aop-ts-pool"/>
+            <topic label="Prototype target sources" href="aop-api.html#aop-ts-prototype"/>
+            <topic label="ThreadLocal target sources" href="aop-api.html#aop-ts-threadlocal"/>
+         </topic>
+         <topic label="Defining new Advice types" href="aop-api.html#aop-extensibility"/>
+         <topic label="Further resources" href="aop-api.html#aop-api-resources"/>
       </topic>
-      <topic label="Using Hessian or Burlap to remotely call services via HTTP" href="remoting.html#d0e12452">
-         <topic label="Wiring up the DispatcherServlet for Hessian" href="remoting.html#d0e12459"/>
-         <topic label="Exposing your beans by using the HessianServiceExporter" href="remoting.html#d0e12478"/>
-         <topic label="Linking in the service on the client" href="remoting.html#d0e12492"/>
-         <topic label="Using Burlap" href="remoting.html#d0e12503"/>
-         <topic label="Applying HTTP basic authentication to a service exposed through Hessian or Burlap" href="remoting.html#d0e12514"/>
-      </topic>
-      <topic label="Exposing services using HTTP invokers" href="remoting.html#d0e12536">
-         <topic label="Exposing the service object" href="remoting.html#d0e12546"/>
-         <topic label="Linking in the service at the client" href="remoting.html#d0e12563"/>
-      </topic>
-      <topic label="Web Services" href="remoting.html#d0e12579">
-         <topic label="Exposing services using JAX-RPC" href="remoting.html#d0e12595"/>
-         <topic label="Accessing Web Services" href="remoting.html#d0e12606"/>
-         <topic label="Register Bean Mappings" href="remoting.html#d0e12666"/>
-         <topic label="Registering our own Handler" href="remoting.html#d0e12678"/>
-         <topic label="Exposing web services using XFire" href="remoting.html#d0e12707"/>
-      </topic>
-      <topic label="Auto-detection is not implemented for remote interfaces" href="remoting.html#d0e12738"/>
-      <topic label="Considerations when choosing a technology" href="remoting.html#d0e12750"/>
-   </topic>
-   <topic label="Accessing and implementing EJBs" href="ejb.html">
-      <topic label="Accessing EJBs" href="ejb.html#ejb-access">
-         <topic label="Concepts" href="ejb.html#ejb-access-concepts"/>
-         <topic label="Accessing local SLSBs" href="ejb.html#ejb-access-local"/>
-         <topic label="Accessing remote SLSBs" href="ejb.html#ejb-access-remote"/>
-      </topic>
-      <topic label="Using Spring convenience EJB implementation classes" href="ejb.html#ejb-implementation"/>
-   </topic>
-   <topic label="JMS" href="jms.html">
-      <topic label="Introduction" href="jms.html#d0e12980"/>
-      <topic label="Domain unification" href="jms.html#d0e13014"/>
-      <topic label="JmsTemplate" href="jms.html#d0e13024">
-         <topic label="ConnectionFactory" href="jms.html#d0e13058"/>
-         <topic label="Transaction Management" href="jms.html#d0e13085"/>
-         <topic label="Destination Management" href="jms.html#d0e13128"/>
-      </topic>
-      <topic label="Using the JmsTemplate" href="jms.html#d0e13184">
-         <topic label="Sending a message" href="jms.html#d0e13195"/>
-         <topic label="Synchronous Receiving" href="jms.html#d0e13240"/>
-         <topic label="Using Message Converters" href="jms.html#d0e13251"/>
-         <topic label="SessionCallback and ProducerCallback" href="jms.html#d0e13311"/>
-      </topic>
-   </topic>
-   <topic label="JMX Support" href="jmx.html">
-      <topic label="Introduction" href="jmx.html#jmx-introduction"/>
-      <topic label="Exporting your Beans to JMX" href="jmx.html#jmx-exporting">
-         <topic label="Creating an MBeanServer" href="jmx.html#jmx-exporting-mbeanserver"/>
-         <topic label="Lazy-Initialized MBeans" href="jmx.html#jmx-exporting-lazy"/>
-         <topic label="Automatic Registration of MBeans" href="jmx.html#jmx-exporting-auto"/>
-      </topic>
-      <topic label="Controlling the Management Interface of Your Beans" href="jmx.html#jmx-interface">
-         <topic label="The MBeanInfoAssembler Interface" href="jmx.html#jmx-interface-assembler"/>
-         <topic label="Using Source-Level Metadata" href="jmx.html#jmx-interface-metadata"/>
-         <topic label="Using JDK 5.0 Annotations" href="jmx.html#jmx-interface-annotations"/>
-         <topic label="Source-Level Metadata Types" href="jmx.html#jmx-interface-metadata-types"/>
-         <topic label="The AutodetectCapableMBeanInfoAssembler&#xA;      Interface" href="jmx.html#jmx-interface-autodetect"/>
-         <topic label="Defining Management Interfaces using Java Interfaces" href="jmx.html#jmx-interface-java"/>
-         <topic label="Using&#xA;      MethodNameBasedMBeanInfoAssembler&#xA;			" href="jmx.html#jmx-interface-methodnames"/>
-      </topic>
-      <topic label="Controlling the ObjectNames for your&#xA;    Beans" href="jmx.html#jmx-naming">
-         <topic label="Reading ObjectNames from&#xA;      Properties&#xA;			" href="jmx.html#jmx-naming-properties"/>
-         <topic label="Using the MetadataNamingStrategy&#xA;			" href="jmx.html#jmx-naiming-metadata"/>
-      </topic>
-      <topic label="Exporting your Beans with JSR-160 Connectors" href="jmx.html#jmx-jsr160">
-         <topic label="Server-side Connectors" href="jmx.html#jmx-jsr160-server"/>
-         <topic label="Client-side Connectors" href="jmx.html#jmx-jsr160-client"/>
-         <topic label="JMX over Burlap/Hessian/SOAP" href="jmx.html#jmx-jsr160-protocols"/>
-      </topic>
-      <topic label="Accessing MBeans via Proxies" href="jmx.html#jmx-proxy"/>
-   </topic>
-   <topic label="JCA CCI" href="cci.html">
-      <topic label="Introduction" href="cci.html#d0e14400"/>
-      <topic label="Configuring CCI" href="cci.html#d0e14418">
-         <topic label="Connector configuration" href="cci.html#d0e14421"/>
-         <topic label="ConnectionFactory configuration in Spring" href="cci.html#d0e14460"/>
-         <topic label="Configuring CCI connections" href="cci.html#d0e14495"/>
-         <topic label="Using a single CCI connection" href="cci.html#d0e14544"/>
-      </topic>
-      <topic label="Using Spring's CCI access support" href="cci.html#d0e14579">
-         <topic label="Record conversion" href="cci.html#d0e14582"/>
-         <topic label="CciTemplate" href="cci.html#d0e14636"/>
-         <topic label="DAO support" href="cci.html#d0e14743"/>
-         <topic label="Automatic output record generation" href="cci.html#automatic-output-generation"/>
-         <topic label="Summary" href="cci.html#template-summary"/>
-         <topic label="Using a CCI Connection and Interaction directly" href="cci.html#d0e14909"/>
-         <topic label="Example for CciTemplate usage" href="cci.html#d0e14961"/>
-      </topic>
-      <topic label="Modeling CCI access as operation objects" href="cci.html#d0e15018">
-         <topic label="MappingRecordOperation" href="cci.html#d0e15039"/>
-         <topic label="MappingCommAreaOperation" href="cci.html#d0e15091"/>
-         <topic label="Automatic output record generation" href="cci.html#d0e15107"/>
-         <topic label="Summary" href="cci.html#d0e15124"/>
-         <topic label="Example for MappingRecordOperation usage" href="cci.html#d0e15159"/>
-         <topic label="Example for MappingCommAreaOperation usage" href="cci.html#d0e15193"/>
-      </topic>
-      <topic label="Transactions" href="cci.html#d0e15226"/>
-   </topic>
-   <topic label="Sending Email with Spring mail abstraction layer" href="mail.html">
-      <topic label="Introduction" href="mail.html#mail-introduction"/>
-      <topic label="Spring mail abstraction structure" href="mail.html#mail-structure"/>
-      <topic label="Using Spring mail abstraction" href="mail.html#mail-usage">
-         <topic label="Pluggable MailSender implementations" href="mail.html#d0e15385"/>
-      </topic>
-      <topic label="Using the JavaMail MimeMessageHelper" href="mail.html#d0e15396">
-         <topic label="Creating a simple MimeMessage and sending it" href="mail.html#d0e15407"/>
-         <topic label="Sending attachments and inline resources" href="mail.html#d0e15415"/>
-      </topic>
-   </topic>
-   <topic label="Scheduling jobs using Quartz or Timer" href="scheduling.html">
-      <topic label="Introduction" href="scheduling.html#d0e15432"/>
-      <topic label="Using the OpenSymphony Quartz Scheduler" href="scheduling.html#d0e15442">
-         <topic label="Using the JobDetailBean" href="scheduling.html#d0e15458"/>
-         <topic label="Using the MethodInvokingJobDetailFactoryBean" href="scheduling.html#d0e15495"/>
-         <topic label="Wiring up jobs using triggers and the SchedulerFactoryBean" href="scheduling.html#d0e15532"/>
-      </topic>
-      <topic label="Using JDK Timer support" href="scheduling.html#d0e15558">
-         <topic label="Creating custom timers" href="scheduling.html#d0e15565"/>
-         <topic label="Using the MethodInvokingTimerTaskFactoryBean" href="scheduling.html#d0e15587"/>
-         <topic label="Wrapping up: setting up the tasks using the TimerFactoryBean" href="scheduling.html#d0e15607"/>
-      </topic>
-   </topic>
-   <topic label="Testing" href="testing.html">
-      <topic label="Unit testing" href="testing.html#unit-testing"/>
-      <topic label="Integration testing" href="testing.html#integration-testing">
-         <topic label="Context management and caching" href="testing.html#d0e15674"/>
-         <topic label="Dependency Injection of test class instances" href="testing.html#d0e15702"/>
-         <topic label="Transaction management" href="testing.html#d0e15735"/>
-         <topic label="Convenience variables" href="testing.html#d0e15787"/>
-         <topic label="Example" href="testing.html#d0e15817"/>
-         <topic label="Running integration tests" href="testing.html#d0e15896"/>
+      <topic label="Testing" href="testing.html">
+         <topic label="Introduction" href="testing.html#testing-introduction"/>
+         <topic label="Unit testing" href="testing.html#unit-testing"/>
+         <topic label="Integration testing" href="testing.html#integration-testing">
+            <topic label="Context management and caching" href="testing.html#testing-ctx-management"/>
+            <topic label="Dependency Injection of test fixtures" href="testing.html#testing-fixture-di"/>
+            <topic label="Transaction management" href="testing.html#testing-tx"/>
+            <topic label="Convenience variables" href="testing.html#testing-superclasses"/>
+            <topic label="Example" href="testing.html#testing-example"/>
+            <topic label="Running integration tests" href="testing.html#testing-integration"/>
+         </topic>
+         <topic label="Further Resources" href="testing.html#testing-resources"/>
       </topic>
    </topic>
-   <topic label="spring-beans.dtd" href="springbeansdtd.html"/>
+   <topic label="Middle Tier Data Access" href="spring-middle-tier.html">
+      <topic label="Transaction management" href="transaction.html">
+         <topic label="Introduction" href="transaction.html#transaction-intro"/>
+         <topic label="Motivations" href="transaction.html#transaction-motivation"/>
+         <topic label="Key abstractions" href="transaction.html#transaction-strategies"/>
+         <topic label="Resource synchronization with transactions" href="transaction.html#tx-resource-synchronization">
+            <topic label="High-level approach" href="transaction.html#tx-resource-synchronization-high"/>
+            <topic label="Low-level approach" href="transaction.html#tx-resource-synchronization-low"/>
+            <topic label="TransactionAwareDataSourceProxy" href="transaction.html#tx-resource-synchronization-tadsp"/>
+         </topic>
+         <topic label="Declarative transaction management" href="transaction.html#transaction-declarative">
+            <topic label="Understanding Spring's declarative transaction implementation" href="transaction.html#tx-decl-explained"/>
+            <topic label="A first example" href="transaction.html#transaction-declarative-first-example"/>
+            <topic label="Rolling back" href="transaction.html#transaction-declarative-rolling-back"/>
+            <topic label="Configuring different transactional semantics for different beans" href="transaction.html#transaction-declarative-diff-tx"/>
+            <topic label="&lt;tx:advice/&gt; settings" href="transaction.html#transaction-declarative-txadvice-settings"/>
+            <topic label="Using @Transactional" href="transaction.html#transaction-declarative-annotations">
+               <topic label="@Transactional settings" href="transaction.html#transaction-declarative-attransactional-settings"/>
+            </topic>
+            <topic label="Advising transactional operations" href="transaction.html#transaction-declarative-applying-more-than-just-tx-advice"/>
+            <topic label="Using @Transactional with AspectJ" href="transaction.html#transaction-declarative-aspectj"/>
+         </topic>
+         <topic label="Programmatic transaction management" href="transaction.html#transaction-programmatic">
+            <topic label="Using the TransactionTemplate" href="transaction.html#tx-prog-template"/>
+            <topic label="Using the PlatformTransactionManager" href="transaction.html#transaction-programmatic-ptm"/>
+         </topic>
+         <topic label="Choosing between programmatic and declarative transaction management" href="transaction.html#tx-decl-vs-prog"/>
+         <topic label="Application server-specific integration" href="transaction.html#transaction-application-server-integration">
+            <topic label="BEA WebLogic" href="transaction.html#transaction-application-server-integration-weblogic"/>
+            <topic label="IBM WebSphere" href="transaction.html#transaction-application-server-integration-websphere"/>
+         </topic>
+         <topic label="Solutions to common problems" href="transaction.html#transaction-solutions-to-common-problems">
+            <topic label="Use of the wrong transaction manager for a specific DataSource" href="transaction.html#transaction-solutions-to-common-problems-wrong-ptm"/>
+         </topic>
+         <topic label="Further Resources" href="transaction.html#transaction-resources"/>
+      </topic>
+      <topic label="DAO support" href="dao.html">
+         <topic label="Introduction" href="dao.html#dao-introduction"/>
+         <topic label="Consistent exception hierarchy" href="dao.html#dao-exceptions"/>
+         <topic label="Consistent abstract classes for DAO support" href="dao.html#dao-abstract-superclasses"/>
+      </topic>
+      <topic label="Data access using JDBC" href="jdbc.html">
+         <topic label="Introduction" href="jdbc.html#jdbc-introduction">
+            <topic label="The package hierarchy" href="jdbc.html#jdbc-packages"/>
+         </topic>
+         <topic label="Using the JDBC Core classes to control basic JDBC processing and error handling" href="jdbc.html#jdbc-core">
+            <topic label="JdbcTemplate" href="jdbc.html#jdbc-JdbcTemplate"/>
+            <topic label="NamedParameterJdbcTemplate" href="jdbc.html#jdbc-NamedParameterJdbcTemplate"/>
+            <topic label="SimpleJdbcTemplate" href="jdbc.html#jdbc-SimpleJdbcTemplate"/>
+            <topic label="DataSource" href="jdbc.html#jdbc-datasource"/>
+            <topic label="SQLExceptionTranslator" href="jdbc.html#jdbc-SQLExceptionTranslator"/>
+            <topic label="Executing statements" href="jdbc.html#jdbc-statements-executing"/>
+            <topic label="Running Queries" href="jdbc.html#jdbc-statements-querying"/>
+            <topic label="Updating the database" href="jdbc.html#jdbc-updates"/>
+         </topic>
+         <topic label="Controlling database connections" href="jdbc.html#jdbc-connections">
+            <topic label="DataSourceUtils" href="jdbc.html#jdbc-DataSourceUtils"/>
+            <topic label="SmartDataSource" href="jdbc.html#jdbc-SmartDataSource"/>
+            <topic label="AbstractDataSource" href="jdbc.html#jdbc-AbstractDataSource"/>
+            <topic label="SingleConnectionDataSource" href="jdbc.html#jdbc-SingleConnectionDataSource"/>
+            <topic label="DriverManagerDataSource" href="jdbc.html#jdbc-DriverManagerDataSource"/>
+            <topic label="TransactionAwareDataSourceProxy" href="jdbc.html#jdbc-TransactionAwareDataSourceProxy"/>
+            <topic label="DataSourceTransactionManager" href="jdbc.html#jdbc-DataSourceTransactionManager"/>
+         </topic>
+         <topic label="Modeling JDBC operations as Java objects" href="jdbc.html#jdbc-object">
+            <topic label="SqlQuery" href="jdbc.html#jdbc-SqlQuery"/>
+            <topic label="MappingSqlQuery" href="jdbc.html#jdbc-MappingSqlQuery"/>
+            <topic label="SqlUpdate" href="jdbc.html#jdbc-SqlUpdate"/>
+            <topic label="StoredProcedure" href="jdbc.html#jdbc-StoredProcedure"/>
+            <topic label="SqlFunction" href="jdbc.html#jdbc-SqlFunction"/>
+         </topic>
+      </topic>
+      <topic label="Object Relational Mapping (ORM) data access" href="orm.html">
+         <topic label="Introduction" href="orm.html#orm-introduction"/>
+         <topic label="Hibernate" href="orm.html#orm-hibernate">
+            <topic label="Resource management" href="orm.html#orm-resource-mngmnt"/>
+            <topic label="SessionFactory setup in a Spring container" href="orm.html#orm-session-factory-setup"/>
+            <topic label="The HibernateTemplate" href="orm.html#orm-hibernate-template"/>
+            <topic label="Implementing Spring-based DAOs without callbacks" href="orm.html#orm-hibernate-daos"/>
+            <topic label="Implementing DAOs based on plain Hibernate3 API" href="orm.html#orm-hibernate-straight"/>
+            <topic label="Programmatic transaction demarcation" href="orm.html#orm-hibernate-tx-programmatic"/>
+            <topic label="Declarative transaction demarcation" href="orm.html#orm-hibernate-tx-declarative"/>
+            <topic label="Transaction management strategies" href="orm.html#orm-hibernate-tx-strategies"/>
+            <topic label="Container resources versus local resources" href="orm.html#orm-hibernate-resources"/>
+            <topic label="Spurious application server warnings when using Hibernate" href="orm.html#orm-hibernate-invalid-jdbc-access-error"/>
+         </topic>
+         <topic label="JDO" href="orm.html#orm-jdo">
+            <topic label="PersistenceManagerFactory setup" href="orm.html#orm-jdo-setup"/>
+            <topic label="JdoTemplate and JdoDaoSupport" href="orm.html#orm-jdo-template"/>
+            <topic label="Implementing DAOs based on the plain JDO API" href="orm.html#orm-jdo-daos-straight"/>
+            <topic label="Transaction management" href="orm.html#orm-jdo-tx"/>
+            <topic label="JdoDialect" href="orm.html#orm-jdo-dialect"/>
+         </topic>
+         <topic label="Oracle TopLink" href="orm.html#orm-toplink">
+            <topic label="SessionFactory abstraction" href="orm.html#orm-toplink-abstraction"/>
+            <topic label="TopLinkTemplate and TopLinkDaoSupport" href="orm.html#orm-toplink-template"/>
+            <topic label="Implementing DAOs based on plain TopLink API" href="orm.html#orm-toplink-straight"/>
+            <topic label="Transaction management" href="orm.html#orm-toplink-tx"/>
+         </topic>
+         <topic label="iBATIS SQL Maps" href="orm.html#orm-ibatis">
+            <topic label="Setting up the SqlMapClient" href="orm.html#orm-ibatis-setup"/>
+            <topic label="Using SqlMapClientTemplate and SqlMapClientDaoSupport" href="orm.html#orm-ibatis-template"/>
+            <topic label="Implementing DAOs based on plain iBATIS API" href="orm.html#orm-ibatis-straight"/>
+         </topic>
+         <topic label="JPA" href="orm.html#orm-jpa">
+            <topic label="JPA setup in a Spring environment" href="orm.html#orm-jpa-setup">
+               <topic label="LocalEntityManagerFactoryBean" href="orm.html#orm-jpa-setup-lemfb"/>
+               <topic label="LocalContainerEntityManagerFactoryBean" href="orm.html#orm-jpa-setup-lcemfb">
+                  <topic label="Tomcat setup" href="orm.html#orm-jpa-setup-lcemfb-tomcat"/>
+                  <topic label="OC4J setup (10.1.3.1+)" href="orm.html#orm-jpa-oc4j"/>
+                  <topic label="GlassFish" href="orm.html#orm-jpa-glassfish"/>
+                  <topic label="Resin setup (3.1.0+)" href="orm.html#orm-jpa-resin"/>
+                  <topic label="General LoadTimeWeaver" href="orm.html#orm-jpa-loadtimeweaver"/>
+               </topic>
+               <topic label="Dealing with multiple persistence units" href="orm.html#orm-jpa-multiple-pu"/>
+            </topic>
+            <topic label="JpaTemplate and JpaDaoSupport" href="orm.html#orm-jpa-template"/>
+            <topic label="Implementing DAOs based on plain JPA" href="orm.html#orm-jpa-straight"/>
+            <topic label="Exception Translation" href="orm.html#orm-jpa-exceptions"/>
+         </topic>
+         <topic label="Transaction Management" href="orm.html#orm-jpa-tx"/>
+         <topic label="JpaDialect" href="orm.html#orm-jpa-dialect"/>
+      </topic>
+   </topic>
+   <topic label="The Web" href="spring-web.html">
+      <topic label="Web MVC framework" href="mvc.html">
+         <topic label="Introduction" href="mvc.html#mvc-introduction">
+            <topic label="Pluggability of other MVC implementations" href="mvc.html#mvc-introduction-pluggability"/>
+            <topic label="Features of Spring Web MVC" href="mvc.html#mvc-features"/>
+         </topic>
+         <topic label="The DispatcherServlet" href="mvc.html#mvc-servlet"/>
+         <topic label="Controllers" href="mvc.html#mvc-controller">
+            <topic label="AbstractController and WebContentGenerator" href="mvc.html#mvc-controller-abstractcontroller"/>
+            <topic label="Other simple controllers" href="mvc.html#mvc-controller-othersimplecontrollers"/>
+            <topic label="The MultiActionController" href="mvc.html#mvc-controller-multiaction"/>
+            <topic label="Command controllers" href="mvc.html#mvc-controller-command"/>
+         </topic>
+         <topic label="Handler mappings" href="mvc.html#mvc-handlermapping">
+            <topic label="BeanNameUrlHandlerMapping" href="mvc.html#mvc-handlermapping-beanname"/>
+            <topic label="SimpleUrlHandlerMapping" href="mvc.html#mvc-handlermapping-urlhandlermapping"/>
+            <topic label="Intercepting requests - the HandlerInterceptor interface" href="mvc.html#mvc-handlermapping-interceptor"/>
+         </topic>
+         <topic label="Views and resolving them" href="mvc.html#mvc-viewresolver">
+            <topic label="Resolving views - the ViewResolver interface" href="mvc.html#mvc-viewresolver-resolver"/>
+            <topic label="Chaining ViewResolvers" href="mvc.html#mvc-viewresolver-chaining"/>
+            <topic label="Redirecting to views" href="mvc.html#mvc-redirecting">
+               <topic label="RedirectView" href="mvc.html#mvc-redirecting-redirect-view"/>
+               <topic label="The redirect: prefix" href="mvc.html#mvc-redirecting-redirect-prefix"/>
+               <topic label="The forward: prefix" href="mvc.html#mvc-redirecting-forward-prefix"/>
+            </topic>
+         </topic>
+         <topic label="Using locales" href="mvc.html#mvc-localeresolver">
+            <topic label="AcceptHeaderLocaleResolver" href="mvc.html#mvc-localeresolver-acceptheader"/>
+            <topic label="CookieLocaleResolver" href="mvc.html#mvc-localeresolver-cookie"/>
+            <topic label="SessionLocaleResolver" href="mvc.html#mvc-localeresolver-session"/>
+            <topic label="LocaleChangeInterceptor" href="mvc.html#mvc-localeresolver-interceptor"/>
+         </topic>
+         <topic label="Using themes" href="mvc.html#mvc-themeresolver">
+            <topic label="Introduction" href="mvc.html#mvc-themeresolver-introduction"/>
+            <topic label="Defining themes" href="mvc.html#mvc-themeresolver-defining"/>
+            <topic label="Theme resolvers" href="mvc.html#mvc-themeresolver-resolving"/>
+         </topic>
+         <topic label="Spring's multipart (fileupload) support" href="mvc.html#mvc-multipart">
+            <topic label="Introduction" href="mvc.html#mvc-multipart-introduction"/>
+            <topic label="Using the MultipartResolver" href="mvc.html#mvc-multipart-resolver"/>
+            <topic label="Handling a file upload in a form" href="mvc.html#mvc-multipart-forms"/>
+         </topic>
+         <topic label="Using Spring's form tag library" href="mvc.html#mvc-formtaglib">
+            <topic label="Configuration" href="mvc.html#mvc-formtaglib-configuration"/>
+            <topic label="The form tag" href="mvc.html#mvc-formtaglib-formtag"/>
+            <topic label="The input tag" href="mvc.html#mvc-formtaglib-inputtag"/>
+            <topic label="The checkbox tag" href="mvc.html#mvc-formtaglib-checkboxtag"/>
+            <topic label="The radiobutton tag" href="mvc.html#mvc-formtaglib-radiobuttontag"/>
+            <topic label="The password tag" href="mvc.html#mvc-formtaglib-passwordtag"/>
+            <topic label="The select tag" href="mvc.html#mvc-formtaglib-selecttag"/>
+            <topic label="The option tag" href="mvc.html#mvc-formtaglib-optiontag"/>
+            <topic label="The options tag" href="mvc.html#mvc-formtaglib-optionstag"/>
+            <topic label="The textarea tag" href="mvc.html#mvc-formtaglib-textAreatag"/>
+            <topic label="The hidden tag" href="mvc.html#mvc-formtaglib-hiddeninputtag"/>
+            <topic label="The errors tag" href="mvc.html#mvc-formtaglib-errorstag"/>
+         </topic>
+         <topic label="Handling exceptions" href="mvc.html#mvc-exceptionhandlers"/>
+         <topic label="Convention over configuration" href="mvc.html#mvc-coc">
+            <topic label="The Controller - ControllerClassNameHandlerMapping" href="mvc.html#mvc-coc-ccnhm"/>
+            <topic label="The Model - ModelMap (ModelAndView)" href="mvc.html#mvc-coc-modelmap"/>
+            <topic label="The View - RequestToViewNameTranslator" href="mvc.html#mvc-coc-r2vnt"/>
+         </topic>
+         <topic label="Further Resources" href="mvc.html#mvc-resources"/>
+      </topic>
+      <topic label="Integrating view technologies" href="view.html">
+         <topic label="Introduction" href="view.html#view-introduction"/>
+         <topic label="JSP &amp; JSTL" href="view.html#view-jsp">
+            <topic label="View resolvers" href="view.html#view-jsp-resolver"/>
+            <topic label="'Plain-old' JSPs versus JSTL" href="view.html#view-jsp-jstl"/>
+            <topic label="Additional tags facilitating development" href="view.html#view-jsp-tags"/>
+         </topic>
+         <topic label="Tiles" href="view.html#view-tiles">
+            <topic label="Dependencies" href="view.html#view-tiles-dependencies"/>
+            <topic label="How to integrate Tiles" href="view.html#view-tiles-integrate">
+               <topic label="InternalResourceViewResolver" href="view.html#view-tiles-internal"/>
+               <topic label="ResourceBundleViewResolver" href="view.html#view-tiles-resource"/>
+            </topic>
+         </topic>
+         <topic label="Velocity &amp; FreeMarker" href="view.html#view-velocity">
+            <topic label="Dependencies" href="view.html#view-velocity-dependencies"/>
+            <topic label="Context configuration" href="view.html#view-velocity-contextconfig"/>
+            <topic label="Creating templates" href="view.html#view-velocity-createtemplates"/>
+            <topic label="Advanced configuration" href="view.html#view-velocity-advancedconfig">
+               <topic label="velocity.properties" href="view.html#view-velocity-example-velocityproperties"/>
+               <topic label="FreeMarker" href="view.html#views-freemarker"/>
+            </topic>
+            <topic label="Bind support and form handling" href="view.html#view-velocity-forms">
+               <topic label="The bind macros" href="view.html#view-velocity-validation"/>
+               <topic label="simple binding" href="view.html#view-velocity-validationmessages"/>
+               <topic label="form input generation macros" href="view.html#views-form-macros">
+                  <topic label="Input Fields" href="view.html#views-form-macros-input"/>
+                  <topic label="Selection Fields" href="view.html#views-form-macros-select"/>
+               </topic>
+               <topic label="HTML escaping and XHTML compliance" href="view.html#views-form-macros-html-escaping"/>
+            </topic>
+         </topic>
+         <topic label="XSLT" href="view.html#view-xslt">
+            <topic label="My First Words" href="view.html#view-xslt-firstwords">
+               <topic label="Bean definitions" href="view.html#view-xslt-beandefs"/>
+               <topic label="Standard MVC controller code" href="view.html#view-xslt-controllercode"/>
+               <topic label="Convert the model data to XML" href="view.html#view-xslt-subclassing"/>
+               <topic label="Defining the view properties" href="view.html#view-xslt-viewdefinitions"/>
+               <topic label="Document transformation" href="view.html#view-xslt-transforming"/>
+            </topic>
+            <topic label="Summary" href="view.html#view-xslt-summary"/>
+         </topic>
+         <topic label="Document views (PDF/Excel)" href="view.html#view-document">
+            <topic label="Introduction" href="view.html#view-document-intro"/>
+            <topic label="Configuration and setup" href="view.html#view-document-config">
+               <topic label="Document view definitions" href="view.html#view-document-configviews"/>
+               <topic label="Controller code" href="view.html#view-document-configcontroller"/>
+               <topic label="Subclassing for Excel views" href="view.html#view-document-configsubclasses"/>
+               <topic label="Subclassing for PDF views" href="view.html#view-document-configsubclasspdf"/>
+            </topic>
+         </topic>
+         <topic label="JasperReports" href="view.html#view-jasper-reports">
+            <topic label="Dependencies" href="view.html#view-jasper-reports-dependencies"/>
+            <topic label="Configuration" href="view.html#view-jasper-reports-configuration">
+               <topic label="Configuring the ViewResolver" href="view.html#view-jasper-reports-configuration-resolver"/>
+               <topic label="Configuring the Views" href="view.html#view-jasper-reports-configuration-views"/>
+               <topic label="About Report Files" href="view.html#view-jasper-reports-configuration-report-files"/>
+               <topic label="Using JasperReportsMultiFormatView" href="view.html#view-jasper-reports-configuration-multiformat-view"/>
+            </topic>
+            <topic label="Populating the ModelAndView" href="view.html#view-jasper-reports-model"/>
+            <topic label="Working with Sub-Reports" href="view.html#view-jasper-reports-subreports">
+               <topic label="Configuring Sub-Report Files" href="view.html#view-jasper-reports-subreports-config-reports"/>
+               <topic label="Configuring Sub-Report Data Sources" href="view.html#view-jasper-reports-subreports-config-datasources"/>
+            </topic>
+            <topic label="Configuring Exporter Parameters" href="view.html#view-jasper-reports-exporter-parameters"/>
+         </topic>
+      </topic>
+      <topic label="Integrating with other web frameworks" href="webintegration.html">
+         <topic label="Introduction" href="webintegration.html#intro"/>
+         <topic label="Common configuration" href="webintegration.html#webintegration-common"/>
+         <topic label="JavaServer Faces" href="webintegration.html#jsf">
+            <topic label="DelegatingVariableResolver" href="webintegration.html#jsf-delegatingvariableresolver"/>
+            <topic label="FacesContextUtils" href="webintegration.html#jsf-facescontextutils"/>
+         </topic>
+         <topic label="Struts" href="webintegration.html#struts">
+            <topic label="ContextLoaderPlugin" href="webintegration.html#struts-contextloaderplugin">
+               <topic label="DelegatingRequestProcessor" href="webintegration.html#struts-delegatingrequestprocessor"/>
+               <topic label="DelegatingActionProxy" href="webintegration.html#struts-delegatingactionproxy"/>
+            </topic>
+            <topic label="ActionSupport Classes" href="webintegration.html#struts-actionsupport"/>
+         </topic>
+         <topic label="Tapestry" href="webintegration.html#view-tapestry">
+            <topic label="Injecting Spring-managed beans" href="webintegration.html#view-tapestry-di">
+               <topic label="Dependency Injecting Spring Beans into Tapestry pages" href="webintegration.html#view-tapestry-pre40-style-di"/>
+               <topic label="Component definition files" href="webintegration.html#view-tapestry-componentdefs"/>
+               <topic label="Adding abstract accessors" href="webintegration.html#view-tapestry-getters"/>
+               <topic label="Dependency Injecting Spring Beans into Tapestry pages - Tapestry 4.0+ style" href="webintegration.html#view-tapestry-40-style-di"/>
+            </topic>
+         </topic>
+         <topic label="WebWork" href="webintegration.html#webwork"/>
+         <topic label="Further Resources" href="webintegration.html#webintegration-resources"/>
+      </topic>
+      <topic label="Portlet MVC Framework" href="portlet.html">
+         <topic label="Introduction" href="portlet.html#portlet-introduction">
+            <topic label="Controllers - The C in MVC" href="portlet.html#portlet-introduction-controller"/>
+            <topic label="Views - The V in MVC" href="portlet.html#portlet-introduction-view"/>
+            <topic label="Web-scoped beans" href="portlet.html#portlet-introduction-scope"/>
+         </topic>
+         <topic label="The DispatcherPortlet" href="portlet.html#portlet-dispatcher"/>
+         <topic label="The ViewRendererServlet" href="portlet.html#portlet-viewservlet"/>
+         <topic label="Controllers" href="portlet.html#portlet-controller">
+            <topic label="AbstractController and PortletContentGenerator" href="portlet.html#portlet-controller-abstractcontroller"/>
+            <topic label="Other simple controllers" href="portlet.html#portlet-controller-simple"/>
+            <topic label="Command Controllers" href="portlet.html#portlet-controller-command"/>
+            <topic label="PortletWrappingController" href="portlet.html#portlet-controller-wrapping"/>
+         </topic>
+         <topic label="Handler mappings" href="portlet.html#portlet-handlermapping">
+            <topic label="PortletModeHandlerMapping" href="portlet.html#portlet-handlermapping-portletmode"/>
+            <topic label="ParameterHandlerMapping" href="portlet.html#portlet-handlermapping-parameter"/>
+            <topic label="PortletModeParameterHandlerMapping" href="portlet.html#portlet-handlermapping-portletmodeparameter"/>
+            <topic label="Adding HandlerInterceptors" href="portlet.html#portlet-handlermapping-interceptor"/>
+            <topic label="HandlerInterceptorAdapter" href="portlet.html#portlet-handlermapping-interceptoradapter"/>
+            <topic label="ParameterMappingInterceptor" href="portlet.html#portlet-handlermapping-parameterinterceptor"/>
+         </topic>
+         <topic label="Views and resolving them" href="portlet.html#portlet-viewresolver"/>
+         <topic label="Multipart (file upload) support" href="portlet.html#portlet-multipart">
+            <topic label="Using the PortletMultipartResolver" href="portlet.html#portlet-multipart-resolver"/>
+            <topic label="Handling a file upload in a form" href="portlet.html#portlet-multipart-forms"/>
+         </topic>
+         <topic label="Handling exceptions" href="portlet.html#portlet-exceptionresolver"/>
+         <topic label="Portlet application deployment" href="portlet.html#portlet-deployment"/>
+      </topic>
+   </topic>
+   <topic label="Integration" href="spring-integration.html">
+      <topic label="Remoting and web services using Spring" href="remoting.html">
+         <topic label="Introduction" href="remoting.html#remoting-introduction"/>
+         <topic label="Exposing services using RMI" href="remoting.html#remoting-rmi">
+            <topic label="Exporting the service using the RmiServiceExporter" href="remoting.html#remoting-rmi-server"/>
+            <topic label="Linking in the service at the client" href="remoting.html#remoting-rmi-client"/>
+         </topic>
+         <topic label="Using Hessian or Burlap to remotely call services via HTTP" href="remoting.html#remoting-caucho-protocols">
+            <topic label="Wiring up the DispatcherServlet for Hessian" href="remoting.html#remoting-caucho-protocols-hessian"/>
+            <topic label="Exposing your beans by using the HessianServiceExporter" href="remoting.html#remoting-caucho-protocols-hessian-server"/>
+            <topic label="Linking in the service on the client" href="remoting.html#remoting-caucho-protocols-hessian-client"/>
+            <topic label="Using Burlap" href="remoting.html#remoting-caucho-protocols-burlap"/>
+            <topic label="Applying HTTP basic authentication to a service exposed through Hessian or Burlap" href="remoting.html#remoting-caucho-protocols-securoty"/>
+         </topic>
+         <topic label="Exposing services using HTTP invokers" href="remoting.html#remoting-httpinvoker">
+            <topic label="Exposing the service object" href="remoting.html#remoting-httpinvoker-server"/>
+            <topic label="Linking in the service at the client" href="remoting.html#remoting-httpinvoker-client"/>
+         </topic>
+         <topic label="Web services" href="remoting.html#remoting-web-services">
+            <topic label="Exposing services using JAX-RPC" href="remoting.html#remoting-web-services-jaxrpc"/>
+            <topic label="Accessing web services" href="remoting.html#remoting-web-services-jaxrpc-access"/>
+            <topic label="Register Bean Mappings" href="remoting.html#remoting-web-services-jaxrpc-mapping-registration"/>
+            <topic label="Registering our own Handler" href="remoting.html#remoting-web-services-jaxrpc-handler-registration"/>
+            <topic label="Exposing web services using XFire" href="remoting.html#remoting-web-services-xfire"/>
+         </topic>
+         <topic label="JMS" href="remoting.html#remoting-jms">
+            <topic label="Server-side configuration" href="remoting.html#remoting-jms-server"/>
+            <topic label="Client-side configuration" href="remoting.html#remoting-jms-client"/>
+         </topic>
+         <topic label="Auto-detection is not implemented for remote interfaces" href="remoting.html#remoting-autodection-remote-interfaces"/>
+         <topic label="Considerations when choosing a technology" href="remoting.html#remoting-considerations"/>
+      </topic>
+      <topic label="Enterprise Java Bean (EJB) integration" href="ejb.html">
+         <topic label="Introduction" href="ejb.html#ejb-introduction"/>
+         <topic label="Accessing EJBs" href="ejb.html#ejb-access">
+            <topic label="Concepts" href="ejb.html#ejb-access-concepts"/>
+            <topic label="Accessing local SLSBs" href="ejb.html#ejb-access-local"/>
+            <topic label="Accessing remote SLSBs" href="ejb.html#ejb-access-remote"/>
+         </topic>
+         <topic label="Using Spring's convenience EJB implementation classes" href="ejb.html#ejb-implementation"/>
+      </topic>
+      <topic label="JMS" href="jms.html">
+         <topic label="Introduction" href="jms.html#jms-introduction"/>
+         <topic label="Using Spring JMS" href="jms.html#jms-using">
+            <topic label="JmsTemplate" href="jms.html#jms-jmstemplate"/>
+            <topic label="Connections" href="jms.html#jms-connections"/>
+            <topic label="Destination Management" href="jms.html#jms-destinations"/>
+            <topic label="Message Listener Containers" href="jms.html#jms-mdp">
+               <topic label="SimpleMessageListenerContainer" href="jms.html#jms-mdp-simple"/>
+               <topic label="DefaultMessageListenerContainer" href="jms.html#jms-mdp-default"/>
+               <topic label="ServerSessionMessageListenerContainer" href="jms.html#jms-mdp-server-session"/>
+            </topic>
+            <topic label="Transaction management" href="jms.html#jms-tx"/>
+         </topic>
+         <topic label="Sending a Message" href="jms.html#jms-sending">
+            <topic label="Using Message Converters" href="jms.html#jms-msg-conversion"/>
+            <topic label="SessionCallback and ProducerCallback" href="jms.html#jms-callbacks"/>
+         </topic>
+         <topic label="Receiving a message" href="jms.html#jms-receiving">
+            <topic label="Synchronous Reception" href="jms.html#jms-receiving-sync"/>
+            <topic label="Asynchronous Reception - Message-Driven POJOs" href="jms.html#jms-asynchronousMessageReception"/>
+            <topic label="The SessionAwareMessageListener interface" href="jms.html#jms-receiving-async-session-aware-message-listener"/>
+            <topic label="The MessageListenerAdapter" href="jms.html#jms-receiving-async-message-listener-adapter"/>
+            <topic label="Participating in transactions" href="jms.html#jms-tx-participation"/>
+         </topic>
+      </topic>
+      <topic label="JMX" href="jmx.html">
+         <topic label="Introduction" href="jmx.html#jmx-introduction"/>
+         <topic label="Exporting your beans to JMX" href="jmx.html#jmx-exporting">
+            <topic label="Creating an MBeanServer" href="jmx.html#jmx-exporting-mbeanserver"/>
+            <topic label="Reusing an existing MBeanServer" href="jmx.html#jmx-mbean-server"/>
+            <topic label="Lazy-initialized MBeans" href="jmx.html#jmx-exporting-lazy"/>
+            <topic label="Automatic registration of MBeans" href="jmx.html#jmx-exporting-auto"/>
+            <topic label="Controlling the registration behavior" href="jmx.html#jmx-exporting-registration-behavior"/>
+         </topic>
+         <topic label="Controlling the management interface of your beans" href="jmx.html#jmx-interface">
+            <topic label="The MBeanInfoAssembler&#xA;      Interface" href="jmx.html#jmx-interface-assembler"/>
+            <topic label="Using source-Level metadata" href="jmx.html#jmx-interface-metadata"/>
+            <topic label="Using JDK 5.0 Annotations" href="jmx.html#jmx-interface-annotations"/>
+            <topic label="Source-Level Metadata Types" href="jmx.html#jmx-interface-metadata-types"/>
+            <topic label="The AutodetectCapableMBeanInfoAssembler&#xA;      interface" href="jmx.html#jmx-interface-autodetect"/>
+            <topic label="Defining Management interfaces using Java interfaces" href="jmx.html#jmx-interface-java"/>
+            <topic label="Using&#xA;      MethodNameBasedMBeanInfoAssembler" href="jmx.html#jmx-interface-methodnames"/>
+         </topic>
+         <topic label="Controlling the ObjectNames for your beans" href="jmx.html#jmx-naming">
+            <topic label="Reading ObjectNames from Properties" href="jmx.html#jmx-naming-properties"/>
+            <topic label="Using the MetadataNamingStrategy" href="jmx.html#jmx-naming-metadata"/>
+         </topic>
+         <topic label="JSR-160 Connectors" href="jmx.html#jmx-jsr160">
+            <topic label="Server-side Connectors" href="jmx.html#jmx-jsr160-server"/>
+            <topic label="Client-side Connectors" href="jmx.html#jmx-jsr160-client"/>
+            <topic label="JMX over Burlap/Hessian/SOAP" href="jmx.html#jmx-jsr160-protocols"/>
+         </topic>
+         <topic label="Accessing MBeans via Proxies" href="jmx.html#jmx-proxy"/>
+         <topic label="Notifications" href="jmx.html#jmx-notifications">
+            <topic label="Registering Listeners for Notifications" href="jmx.html#jmx-notifications-listeners"/>
+            <topic label="Publishing Notifications" href="jmx.html#jmx-notifications-publishing"/>
+         </topic>
+         <topic label="Further Resources" href="jmx.html#jmx-resources"/>
+      </topic>
+      <topic label="JCA CCI" href="cci.html">
+         <topic label="Introduction" href="cci.html#cci-introduction"/>
+         <topic label="Configuring CCI" href="cci.html#cci-config">
+            <topic label="Connector configuration" href="cci.html#cci-config-connector"/>
+            <topic label="ConnectionFactory configuration in Spring" href="cci.html#cci-config-connectionfactory"/>
+            <topic label="Configuring CCI connections" href="cci.html#cci-config-cci-connections"/>
+            <topic label="Using a single CCI connection" href="cci.html#cci-config-single-connection"/>
+         </topic>
+         <topic label="Using Spring's CCI access support" href="cci.html#cci-using">
+            <topic label="Record conversion" href="cci.html#cci-record-creator"/>
+            <topic label="The CciTemplate" href="cci.html#cci-using-template"/>
+            <topic label="DAO support" href="cci.html#cci-using-dao"/>
+            <topic label="Automatic output record generation" href="cci.html#automatic-output-generation"/>
+            <topic label="Summary" href="cci.html#template-summary"/>
+            <topic label="Using a CCI Connection and Interaction directly" href="cci.html#cci-straight"/>
+            <topic label="Example for CciTemplate usage" href="cci.html#cci-template-example"/>
+         </topic>
+         <topic label="Modeling CCI access as operation objects" href="cci.html#cci-object">
+            <topic label="MappingRecordOperation" href="cci.html#cci-object-mapping-record"/>
+            <topic label="MappingCommAreaOperation" href="cci.html#cci-object-mapping-comm-area"/>
+            <topic label="Automatic output record generation" href="cci.html#cci-automatic-record-gen"/>
+            <topic label="Summary" href="cci.html#cci-object-summary"/>
+            <topic label="Example for MappingRecordOperation usage" href="cci.html#cci-objects-mappring-record-example"/>
+            <topic label="Example for MappingCommAreaOperation usage" href="cci.html#cci-objects-mapping-comm-area-example"/>
+         </topic>
+         <topic label="Transactions" href="cci.html#cci-tx"/>
+      </topic>
+      <topic label="Email" href="mail.html">
+         <topic label="Introduction" href="mail.html#mail-introduction"/>
+         <topic label="Usage" href="mail.html#mail-usage">
+            <topic label="Basic MailSender and SimpleMailMessage usage" href="mail.html#mail-usage-simple"/>
+            <topic label="Using the JavaMailSender and the MimeMessagePreparator" href="mail.html#mail-usage-mime"/>
+         </topic>
+         <topic label="Using the JavaMail MimeMessageHelper" href="mail.html#mail-javamail-mime">
+            <topic label="Sending attachments and inline resources" href="mail.html#mail-javamail-mime-attachments">
+               <topic label="Attachments" href="mail.html#mail-javamail-mime-attachments-attachment"/>
+               <topic label="Inline resources" href="mail.html#mail-javamail-mime-attachments-inline"/>
+            </topic>
+            <topic label="Creating email content using a templating library" href="mail.html#mail-templates">
+               <topic label="A Velocity-based example" href="mail.html#mail-templates-example"/>
+            </topic>
+         </topic>
+      </topic>
+      <topic label="Scheduling and Thread Pooling" href="scheduling.html">
+         <topic label="Introduction" href="scheduling.html#scheduling-introduction"/>
+         <topic label="Using the OpenSymphony Quartz Scheduler" href="scheduling.html#scheduling-quartz">
+            <topic label="Using the JobDetailBean" href="scheduling.html#scheduling-quartz-jobdetail"/>
+            <topic label="Using the MethodInvokingJobDetailFactoryBean" href="scheduling.html#scheduling-quartz-method-invoking-job"/>
+            <topic label="Wiring up jobs using triggers and the SchedulerFactoryBean" href="scheduling.html#scheduling-quartz-cron"/>
+         </topic>
+         <topic label="Using JDK Timer support" href="scheduling.html#scheduling-jdk-timer">
+            <topic label="Creating custom timers" href="scheduling.html#scheduling-jdk-timer-creating"/>
+            <topic label="Using the MethodInvokingTimerTaskFactoryBean" href="scheduling.html#scheduling-jdk-timer-method-invoking-task"/>
+            <topic label="Wrapping up: setting up the tasks using the TimerFactoryBean" href="scheduling.html#scheduling-jdk-timer-factory-bean"/>
+         </topic>
+         <topic label="The Spring TaskExecutor abstraction" href="scheduling.html#scheduling-task-executor">
+            <topic label="TaskExecutor types" href="scheduling.html#scheduling-task-executor-types"/>
+            <topic label="Using a TaskExecutor" href="scheduling.html#scheduling-task-executor-usage"/>
+         </topic>
+      </topic>
+      <topic label="Dynamic language support" href="dynamic-language.html">
+         <topic label="Introduction" href="dynamic-language.html#dynamic-language-introduction"/>
+         <topic label="A first example" href="dynamic-language.html#dynamic-language-a-first-example"/>
+         <topic label="Defining beans that are backed by dynamic languages" href="dynamic-language.html#dynamic-language-beans">
+            <topic label="Common concepts" href="dynamic-language.html#dynamic-language-beans-concepts">
+               <topic label="The &lt;lang:language/&gt; element" href="dynamic-language.html#dynamic-language-beans-concepts-xml-language-element"/>
+               <topic label="Refreshable beans" href="dynamic-language.html#dynamic-language-refreshable-beans"/>
+               <topic label="Inline dynamic language source files" href="dynamic-language.html#dynamic-language-beans-inline"/>
+               <topic label="Understanding Constructor Injection in the context of dynamic-language-backed beans" href="dynamic-language.html#dynamic-language-beans-ctor-injection"/>
+            </topic>
+            <topic label="JRuby beans" href="dynamic-language.html#dynamic-language-beans-jruby"/>
+            <topic label="Groovy beans" href="dynamic-language.html#dynamic-language-beans-groovy">
+               <topic label="Customising Groovy objects via a callback" href="dynamic-language.html#dynamic-language-beans-groovy-customizer"/>
+            </topic>
+            <topic label="BeanShell beans" href="dynamic-language.html#dynamic-language-beans-bsh"/>
+         </topic>
+         <topic label="Scenarios" href="dynamic-language.html#dynamic-language-scenarios">
+            <topic label="Scripted Spring MVC Controllers" href="dynamic-language.html#dynamic-language-scenarios-controllers"/>
+            <topic label="Scripted Validators" href="dynamic-language.html#dynamic-language-scenarios-validators"/>
+         </topic>
+         <topic label="Further Resources" href="dynamic-language.html#dynamic-language-resources"/>
+      </topic>
+      <topic label="Annotations and Source Level Metadata Support" href="metadata.html">
+         <topic label="Introduction" href="metadata.html#metadata-introduction"/>
+         <topic label="Spring's metadata support" href="metadata.html#metadata-spring"/>
+         <topic label="Annotations" href="metadata.html#metadata-annotations">
+            <topic label="@Required" href="metadata.html#metadata-annotations-required"/>
+            <topic label="Other @Annotations in Spring" href="metadata.html#metadata-annotations-other"/>
+         </topic>
+         <topic label="Integration with Jakarta Commons Attributes" href="metadata.html#metadata-commons"/>
+         <topic label="Metadata and Spring AOP autoproxying" href="metadata.html#metadata-uses">
+            <topic label="Fundamentals" href="metadata.html#metadata-fundamentals"/>
+            <topic label="Declarative transaction management" href="metadata.html#metadata-tx"/>
+            <topic label="Pooling" href="metadata.html#metadata-pool"/>
+            <topic label="Custom metadata" href="metadata.html#metadata-arbitrary"/>
+         </topic>
+         <topic label="Using attributes to minimize MVC web tier configuration" href="metadata.html#metadata-attributes-mvc"/>
+      </topic>
+   </topic>
+   <topic label="XML Schema-based configuration" href="xsd-config.html">
+      <topic label="Introduction" href="xsd-config.html#xsd-config-introduction"/>
+      <topic label="XML Schema-based configuration" href="xsd-config.html#xsd-config-body">
+         <topic label="Referencing the schemas" href="xsd-config.html#xsd-config-body-referencing"/>
+         <topic label="The util schema" href="xsd-config.html#xsd-config-body-schemas-util">
+            <topic label="&lt;util:constant/&gt;" href="xsd-config.html#xsd-config-body-schemas-util-constant">
+               <topic label="Setting a bean property or constructor arg from a field value" href="xsd-config.html#xsd-config-body-schemas-util-frfb"/>
+            </topic>
+            <topic label="&lt;util:property-path/&gt;" href="xsd-config.html#xsd-config-body-schemas-util-property-path">
+               <topic label="Using &lt;util:property-path/&gt; to set a bean property or constructor-argument" href="xsd-config.html#xsd-config-body-schemas-util-property-path-dependency"/>
+            </topic>
+            <topic label="&lt;util:properties/&gt;" href="xsd-config.html#xsd-config-body-schemas-util-properties"/>
+            <topic label="&lt;util:list/&gt;" href="xsd-config.html#xsd-config-body-schemas-util-list"/>
+            <topic label="&lt;util:map/&gt;" href="xsd-config.html#xsd-config-body-schemas-util-map"/>
+            <topic label="&lt;util:set/&gt;" href="xsd-config.html#xsd-config-body-schemas-util-set"/>
+         </topic>
+         <topic label="The jee schema" href="xsd-config.html#xsd-config-body-schemas-jee">
+            <topic label="&lt;jee:jndi-lookup/&gt; (simple)" href="xsd-config.html#xsd-config-body-schemas-jee-jndi-lookup"/>
+            <topic label="&lt;jee:jndi-lookup/&gt; (with single JNDI environment setting)" href="xsd-config.html#xsd-config-body-schemas-jee-jndi-lookup-environment-single"/>
+            <topic label="&lt;jee:jndi-lookup/&gt; (with multiple JNDI environment settings)" href="xsd-config.html#xsd-config-body-schemas-jee-jndi-lookup-evironment-multiple"/>
+            <topic label="&lt;jee:jndi-lookup/&gt; (complex)" href="xsd-config.html#xsd-config-body-schemas-jee-jndi-lookup-complex"/>
+            <topic label="&lt;jee:local-slsb/&gt; (simple)" href="xsd-config.html#xsd-config-body-schemas-jee-local-slsb"/>
+            <topic label="&lt;jee:local-slsb/&gt; (complex)" href="xsd-config.html#xsd-config-body-schemas-jee-local-slsb-complex"/>
+            <topic label="&lt;jee:remote-slsb/&gt;" href="xsd-config.html#xsd-config-body-schemas-jee-remote-slsb"/>
+         </topic>
+         <topic label="The lang schema" href="xsd-config.html#xsd-config-body-schemas-lang"/>
+         <topic label="The tx (transaction) schema" href="xsd-config.html#xsd-config-body-schemas-tx"/>
+         <topic label="The aop schema" href="xsd-config.html#xsd-config-body-schemas-aop"/>
+         <topic label="The tool schema" href="xsd-config.html#xsd-config-body-schemas-tool"/>
+         <topic label="The beans schema" href="xsd-config.html#xsd-config-body-schemas-beans"/>
+      </topic>
+      <topic label="Setting up your IDE" href="xsd-config.html#xsd-config-setup">
+         <topic label="Setting up Eclipse" href="xsd-config.html#xsd-config-setup-eclipse"/>
+         <topic label="Setting up IntelliJ IDEA" href="xsd-config.html#xsd-config-setup-idea"/>
+         <topic label="Integration issues" href="xsd-config.html#xsd-config-integration">
+            <topic label="XML parsing errors in the Resin v.3 application server" href="xsd-config.html#xsd-config-integration-resin"/>
+         </topic>
+      </topic>
+   </topic>
+   <topic label="Extensible XML authoring" href="extensible-xml.html">
+      <topic label="Introduction" href="extensible-xml.html#extensible-xml-introduction"/>
+      <topic label="Authoring the schema" href="extensible-xml.html#extensible-xml-schema"/>
+      <topic label="Coding a NamespaceHandler" href="extensible-xml.html#extensible-xml-namespacehandler"/>
+      <topic label="Coding a BeanDefinitionParser" href="extensible-xml.html#extensible-xml-parser"/>
+      <topic label="Registering the handler and the schema" href="extensible-xml.html#extensible-xml-registration">
+         <topic label="'META-INF/spring.handlers'" href="extensible-xml.html#extensible-xml-registration-spring-handlers"/>
+         <topic label="'META-INF/spring.schemas'" href="extensible-xml.html#extensible-xml-registration-spring-schemas"/>
+      </topic>
+      <topic label="Using a custom extension in your Spring XML configuration" href="extensible-xml.html#extensible-xml-using"/>
+      <topic label="Meatier examples" href="extensible-xml.html#extensible-xml-meat">
+         <topic label="Nesting custom tags within custom tags" href="extensible-xml.html#extensible-xml-custom-nested"/>
+         <topic label="Custom attributes on 'normal' elements" href="extensible-xml.html#extensible-xml-custom-just-attributes"/>
+      </topic>
+      <topic label="Further Resources" href="extensible-xml.html#extensible-xml-resources"/>
+   </topic>
+   <topic label="spring-beans-2.0.dtd" href="springbeansdtd.html"/>
+   <topic label="spring.tld" href="spring.tld.html">
+      <topic label="Introduction" href="spring.tld.html#spring.tld-intro"/>
+      <topic label="The bind tag" href="spring.tld.html#spring.tld.bind"/>
+      <topic label="The escapeBody tag" href="spring.tld.html#spring.tld.escapeBody"/>
+      <topic label="The hasBindErrors tag" href="spring.tld.html#spring.tld.hasBindErrors"/>
+      <topic label="The htmlEscape tag" href="spring.tld.html#spring.tld.htmlEscape"/>
+      <topic label="The message tag" href="spring.tld.html#spring.tld.message"/>
+      <topic label="The nestedPath tag" href="spring.tld.html#spring.tld.nestedPath"/>
+      <topic label="The theme tag" href="spring.tld.html#spring.tld.theme"/>
+      <topic label="The transform tag" href="spring.tld.html#spring.tld.transform"/>
+   </topic>
+   <topic label="spring-form.tld" href="spring-form.tld.html">
+      <topic label="Introduction" href="spring-form.tld.html#spring-form.tld-intro"/>
+      <topic label="The checkbox tag" href="spring-form.tld.html#spring-form.tld.checkbox"/>
+      <topic label="The errors tag" href="spring-form.tld.html#spring-form.tld.errors"/>
+      <topic label="The form tag" href="spring-form.tld.html#spring-form.tld.form"/>
+      <topic label="The hidden tag" href="spring-form.tld.html#spring-form.tld.hidden"/>
+      <topic label="The input tag" href="spring-form.tld.html#spring-form.tld.input"/>
+      <topic label="The label tag" href="spring-form.tld.html#spring-form.tld.label"/>
+      <topic label="The option tag" href="spring-form.tld.html#spring-form.tld.option"/>
+      <topic label="The options tag" href="spring-form.tld.html#spring-form.tld.options"/>
+      <topic label="The password tag" href="spring-form.tld.html#spring-form.tld.password"/>
+      <topic label="The radiobutton tag" href="spring-form.tld.html#spring-form.tld.radiobutton"/>
+      <topic label="The select tag" href="spring-form.tld.html#spring-form.tld.select"/>
+      <topic label="The textarea tag" href="spring-form.tld.html#spring-form.tld.textarea"/>
+   </topic>
 </toc>

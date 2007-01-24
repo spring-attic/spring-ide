@@ -37,13 +37,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.springframework.ide.eclipse.core.doc"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.springframework.ide.eclipse.ui"
          download-size="0"
          install-size="0"
@@ -122,6 +115,13 @@
 
    <plugin
          id="org.springframework"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.doc"
          download-size="0"
          install-size="0"
          version="0.0.0"
