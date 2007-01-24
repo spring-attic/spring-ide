@@ -99,10 +99,12 @@ public class BeanAopModelBuilder {
 		Activator.getModel().fireModelChanged();
 	}
 
+	@SuppressWarnings("deprecation")
 	private static IAopProject buildAopReferencesFromFile(IFile currentFile) {
 		IAopProject aopProject = null;
 		IBeansProject project = BeansCorePlugin.getModel().getProject(currentFile.getProject());
 
+		// change to Job.getJobManager as soon as we only use Eclipse 3.3
 		IJobManager jobMan = Platform.getJobManager();
 		ILock lock = jobMan.newLock();
 		lock.acquire();
