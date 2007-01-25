@@ -28,7 +28,7 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
-import org.springframework.ide.eclipse.beans.ui.editor.namespaces.BeansNamespaceAwareEditorContribution;
+import org.springframework.ide.eclipse.beans.ui.editor.namespaces.bean.BeansNamespaceAwareEditorContribution;
 
 public class NamespaceEditorContributionRegistry {
 

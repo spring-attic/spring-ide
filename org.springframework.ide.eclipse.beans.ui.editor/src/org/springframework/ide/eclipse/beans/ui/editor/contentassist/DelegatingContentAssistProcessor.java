@@ -14,12 +14,14 @@
  * the License.
  */
 
-package org.springframework.ide.eclipse.beans.ui.editor;
+package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
+import org.springframework.ide.eclipse.beans.ui.editor.INamespaceAwareEditorContribution;
+import org.springframework.ide.eclipse.beans.ui.editor.NamespaceEditorContributionRegistry;
 
 @SuppressWarnings("restriction")
 public class DelegatingContentAssistProcessor

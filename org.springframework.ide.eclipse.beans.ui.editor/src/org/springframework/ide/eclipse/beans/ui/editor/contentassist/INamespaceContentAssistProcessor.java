@@ -16,24 +16,25 @@
 
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
+import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
-import org.springframework.ide.eclipse.beans.ui.editor.DelegatingContentAssistProcessor;
 
+@SuppressWarnings("restriction")
 public interface INamespaceContentAssistProcessor {
 
     void addAttributeValueProposals(
-            DelegatingContentAssistProcessor delegatingContentAssistProcessor,
+    		IContentAssistProcessor delegatingContentAssistProcessor,
             ContentAssistRequest request);
 
     void addAttributeNameProposals(
-            DelegatingContentAssistProcessor delegatingContentAssistProcessor,
+    		IContentAssistProcessor delegatingContentAssistProcessor,
             ContentAssistRequest request);
 
     void addTagCloseProposals(
-            DelegatingContentAssistProcessor delegatingContentAssistProcessor,
+    		IContentAssistProcessor delegatingContentAssistProcessor,
             ContentAssistRequest request);
 
-    void addTagInsertionProposals(
-            DelegatingContentAssistProcessor delegatingContentAssistProcessor,
+	void addTagInsertionProposals(
+			IContentAssistProcessor delegatingContentAssistProcessor,
             ContentAssistRequest request, int childPosition);
 }

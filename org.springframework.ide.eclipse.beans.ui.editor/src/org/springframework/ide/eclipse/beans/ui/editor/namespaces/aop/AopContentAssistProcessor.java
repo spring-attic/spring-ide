@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
+package org.springframework.ide.eclipse.beans.ui.editor.namespaces.aop;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -67,7 +67,7 @@ public class AopContentAssistProcessor
                 requestor.acceptSearchMatch(node.getKey(), beanNode, file, prefix);
             }
             if (showExternal) {
-                List beans = BeansEditorUtils.getBeansFromConfigSets(file);
+                List<?> beans = BeansEditorUtils.getBeansFromConfigSets(file);
                 for (int i = 0; i < beans.size(); i++) {
                     IBean bean = (IBean) beans.get(i);
                     requestor.acceptSearchMatch(bean, file, prefix);
@@ -122,24 +122,11 @@ public class AopContentAssistProcessor
     
     private void addClassAttributeValueProposals(ContentAssistRequest request,
             String prefix, boolean interfaceRequired) {
-
-        if (prefix == null || prefix.length() == 0) {
-            delegatingContextAssistProcessor
-                    .setErrorMessage("Prefix too short for class content assist");
-            return;
-        }
         BeansEditorJavaCompletionUtils.addClassValueProposals(request, prefix, interfaceRequired);
     }
     
     private void addCollectionTypesAttributeValueProposals(ContentAssistRequest request,
             final String prefix, String typeName) {
-
-        if (prefix == null || prefix.length() == 0) {
-            delegatingContextAssistProcessor
-                    .setErrorMessage("Prefix too short for class content assist");
-            return;
-        }
-
         BeansEditorJavaCompletionUtils.addTypeHierachyAttributeValueProposals(request, prefix,
                 typeName);
     }
@@ -185,12 +172,12 @@ public class AopContentAssistProcessor
                     className);
             if (type != null) {
                 try {
-                    Collection methods = Introspector.findAllMethods(type,
+                    Collection<?> methods = Introspector.findAllMethods(type,
                             prefix, -1, true, Statics.DONT_CARE);
                     if (methods != null && methods.size() > 0) {
                         PublicMethodSearchRequestor requestor = new PublicMethodSearchRequestor(
                                 request);
-                        Iterator iterator = methods.iterator();
+                        Iterator<?> iterator = methods.iterator();
                         while (iterator.hasNext()) {
                             requestor.acceptSearchMatch((IMethod) iterator
                                     .next());

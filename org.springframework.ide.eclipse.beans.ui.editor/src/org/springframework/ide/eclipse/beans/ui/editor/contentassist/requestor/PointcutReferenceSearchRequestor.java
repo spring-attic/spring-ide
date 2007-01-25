@@ -24,7 +24,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposal;
-import org.springframework.ide.eclipse.beans.ui.editor.namespaces.AopUIImages;
+import org.springframework.ide.eclipse.beans.ui.editor.namespaces.aop.AopUIImages;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 

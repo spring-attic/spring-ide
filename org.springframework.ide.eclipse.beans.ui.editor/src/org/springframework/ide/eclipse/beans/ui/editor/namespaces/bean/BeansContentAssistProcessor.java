@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
+package org.springframework.ide.eclipse.beans.ui.editor.namespaces.bean;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,7 +54,7 @@ import org.w3c.dom.Node;
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  */
-@SuppressWarnings("restriction")
+@SuppressWarnings({"restriction", "unchecked" })
 public class BeansContentAssistProcessor
         extends AbstractContentAssistProcessor {
 
@@ -73,7 +73,7 @@ public class BeansContentAssistProcessor
                 requestor.acceptSearchMatch(node.getKey(), beanNode, file, prefix);
             }
             if (showExternal) {
-                List beans = BeansEditorUtils.getBeansFromConfigSets(file);
+                List<?> beans = BeansEditorUtils.getBeansFromConfigSets(file);
                 for (int i = 0; i < beans.size(); i++) {
                     IBean bean = (IBean) beans.get(i);
                     requestor.acceptSearchMatch(bean, file, prefix);
@@ -84,12 +84,6 @@ public class BeansContentAssistProcessor
 
     private void addClassAttributeValueProposals(ContentAssistRequest request,
             String prefix) {
-
-        if (prefix == null || prefix.length() == 0) {
-            delegatingContextAssistProcessor
-                    .setErrorMessage("Prefix too short for class content assist");
-            return;
-        }
         BeansEditorJavaCompletionUtils.addClassValueProposals(request, prefix);
     }
     
@@ -102,13 +96,13 @@ public class BeansContentAssistProcessor
                     factoryClassName);
             if (type != null) {
                 try {
-                    Collection methods = Introspector.findAllMethods(type,
+                    Collection<?> methods = Introspector.findAllMethods(type,
                             prefix, -1, true, (isStatic ? Statics.YES
                                     : Statics.DONT_CARE));
                     if (methods != null && methods.size() > 0) {
                         FactoryMethodSearchRequestor requestor = new FactoryMethodSearchRequestor(
                                 request);
-                        Iterator iterator = methods.iterator();
+                        Iterator<?> iterator = methods.iterator();
                         while (iterator.hasNext()) {
                             requestor.acceptSearchMatch((IMethod) iterator
                                     .next());
@@ -133,12 +127,12 @@ public class BeansContentAssistProcessor
                     className);
             if (type != null) {
                 try {
-                    Collection methods = Introspector
+                    Collection<?> methods = Introspector
                             .findAllNoParameterMethods(type, prefix);
                     if (methods != null && methods.size() > 0) {
                         VoidMethodSearchRequestor requestor = new VoidMethodSearchRequestor(
                                 request);
-                        Iterator iterator = methods.iterator();
+                        Iterator<?> iterator = methods.iterator();
                         while (iterator.hasNext()) {
                             requestor.acceptSearchMatch((IMethod) iterator
                                     .next());
@@ -157,7 +151,7 @@ public class BeansContentAssistProcessor
 
     private void addPropertyNameAttributeValueProposals(
             ContentAssistRequest request, String prefix, String oldPrefix,
-            Node node, List classNames) {
+            Node node, List<IType> classNames) {
 
         PropertyValueSearchRequestor requestor = new PropertyValueSearchRequestor(
                 request, oldPrefix);
@@ -174,11 +168,11 @@ public class BeansContentAssistProcessor
             for (int i = 0; i < classNames.size(); i++) {
                 IType type = (IType) classNames.get(i);
                 try {
-                    Collection methods = Introspector.findReadableProperties(
+                    Collection<?> methods = Introspector.findReadableProperties(
                             type, firstPrefix);
                     if (methods != null && methods.size() == 1) {
 
-                        Iterator iterator = methods.iterator();
+                        Iterator<?> iterator = methods.iterator();
                         while (iterator.hasNext()) {
                             IMethod method = (IMethod) iterator.next();
                             IType returnType = BeansEditorUtils
@@ -207,11 +201,11 @@ public class BeansContentAssistProcessor
             for (int i = 0; i < classNames.size(); i++) {
                 IType type = (IType) classNames.get(i);
                 try {
-                    Collection methods = Introspector.findWritableProperties(
+                    Collection<?> methods = Introspector.findWritableProperties(
                             type, prefix);
                     if (methods != null && methods.size() > 0) {
 
-                        Iterator iterator = methods.iterator();
+                        Iterator<?> iterator = methods.iterator();
                         while (iterator.hasNext()) {
                             requestor.acceptSearchMatch((IMethod) iterator
                                     .next(), false);
@@ -228,7 +222,7 @@ public class BeansContentAssistProcessor
         }
     }
 
-    protected void computeAttributeValueProposals(ContentAssistRequest request,
+	protected void computeAttributeValueProposals(ContentAssistRequest request,
             IDOMNode node, String matchString, String attributeName) {
 
         if ("bean".equals(node.getNodeName())) {
@@ -259,7 +253,7 @@ public class BeansContentAssistProcessor
                 }
                 else {
                     // static factory method
-                    List list = BeansEditorUtils.getClassNamesOfBean(
+                    List<?> list = BeansEditorUtils.getClassNamesOfBean(
                             (IFile) BeansEditorUtils.getResource(request), node);
                     factoryClassName = (list.size() != 0 ? ((IType) list.get(0))
                             .getFullyQualifiedName()

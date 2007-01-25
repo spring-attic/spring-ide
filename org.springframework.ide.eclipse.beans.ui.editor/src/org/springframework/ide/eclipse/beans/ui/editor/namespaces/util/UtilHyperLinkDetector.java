@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
+package org.springframework.ide.eclipse.beans.ui.editor.namespaces.util;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IType;

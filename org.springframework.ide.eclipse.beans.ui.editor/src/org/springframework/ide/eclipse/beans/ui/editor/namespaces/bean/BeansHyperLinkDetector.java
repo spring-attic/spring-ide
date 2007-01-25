@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
+package org.springframework.ide.eclipse.beans.ui.editor.namespaces.bean;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -116,7 +116,7 @@ public class BeansHyperLinkDetector extends AbstractHyperLinkDetector implements
 							cursor, target, propertyPaths);
 			if ("bean".equals(parentName)) {
 				IFile file = BeansEditorUtils.getFile(document);
-				List classNames = BeansEditorUtils.getClassNamesOfBean(file,
+				List<?> classNames = BeansEditorUtils.getClassNamesOfBean(file,
 						parentNode);
 
 				IMethod method = BeansEditorUtils
@@ -191,7 +191,7 @@ public class BeansHyperLinkDetector extends AbstractHyperLinkDetector implements
 			} else {
 				IFile file = BeansEditorUtils.getFile(document);
 				// assume this is an external reference
-				Iterator beans = BeansEditorUtils.getBeansFromConfigSets(file)
+				Iterator<?> beans = BeansEditorUtils.getBeansFromConfigSets(file)
 						.iterator();
 				while (beans.hasNext()) {
 					IBean modelBean = (IBean) beans.next();

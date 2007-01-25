@@ -24,7 +24,7 @@ import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
-import org.springframework.ide.eclipse.beans.ui.editor.namespaces.AopUIImages;
+import org.springframework.ide.eclipse.beans.ui.editor.namespaces.aop.AopUIImages;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class AdviceRootAopReferenceNode implements IReferenceNode, IRevealableReferenceNode {

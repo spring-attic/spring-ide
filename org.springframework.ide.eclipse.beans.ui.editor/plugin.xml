@@ -179,10 +179,10 @@
    
    <extension
          point="org.springframework.ide.eclipse.beans.ui.editor.namespaceContribution">
-      <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.BeansNamespaceAwareEditorContribution"/>
-      <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.AopNamespaceAwareEditorContribution"/>
-      <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.UtilNamespaceAwareEditorContribution"/>
-      <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.TxNamespaceAwareEditorContribution"/>
+      <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.bean.BeansNamespaceAwareEditorContribution"/>
+      <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.aop.AopNamespaceAwareEditorContribution"/>
+      <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.util.UtilNamespaceAwareEditorContribution"/>
+      <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.tx.TxNamespaceAwareEditorContribution"/>
    </extension>
 
 </plugin>

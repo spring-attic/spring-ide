@@ -14,11 +14,12 @@
  * the License.
  */
 
-package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
+package org.springframework.ide.eclipse.beans.ui.editor.namespaces.aop;
 
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.INamespaceContentAssistProcessor;
+import org.springframework.ide.eclipse.beans.ui.editor.namespaces.AbstractNamespaceAwareEditorContribution;
 import org.springframework.ide.eclipse.beans.ui.editor.outline.BeansContentOutlineConfiguration;
 
 public class AopNamespaceAwareEditorContribution

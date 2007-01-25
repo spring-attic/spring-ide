@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
+package org.springframework.ide.eclipse.beans.ui.editor.namespaces.aop;
 
 import java.util.Iterator;
 
@@ -127,7 +127,7 @@ public class AopHyperLinkDetector
             else {
                 IFile file = BeansEditorUtils.getFile(document);
                 // assume this is an external reference
-                Iterator beans = BeansEditorUtils.getBeansFromConfigSets(file).iterator();
+                Iterator<?> beans = BeansEditorUtils.getBeansFromConfigSets(file).iterator();
                 while (beans.hasNext()) {
                     IBean modelBean = (IBean) beans.next();
                     if (modelBean.getElementName().equals(target)) {

@@ -30,4 +30,5 @@ Eclipse-LazyStart: true
 Bundle-Vendor: %providerName
 Bundle-ClassPath: beans-editor.jar
 Export-Package: org.springframework.ide.eclipse.beans.ui.editor,
- org.springframework.ide.eclipse.beans.ui.editor.namespaces
+ org.springframework.ide.eclipse.beans.ui.editor.namespaces,
+ org.springframework.ide.eclipse.beans.ui.editor.namespaces.aop

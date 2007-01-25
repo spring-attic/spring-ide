@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
+package org.springframework.ide.eclipse.beans.ui.editor.namespaces.util;
 
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
@@ -31,24 +31,11 @@ public class UtilContentAssistProcessor
         extends AbstractContentAssistProcessor {
 
     private void addClassAttributeValueProposals(ContentAssistRequest request, String prefix) {
-
-        if (prefix == null || prefix.length() == 0) {
-            delegatingContextAssistProcessor
-                    .setErrorMessage("Prefix too short for class content assist");
-            return;
-        }
         BeansEditorJavaCompletionUtils.addClassValueProposals(request, prefix);
     }
 
     private void addCollectionTypesAttributeValueProposals(ContentAssistRequest request,
             final String prefix, String typeName) {
-
-        if (prefix == null || prefix.length() == 0) {
-            delegatingContextAssistProcessor
-                    .setErrorMessage("Prefix too short for class content assist");
-            return;
-        }
-
         BeansEditorJavaCompletionUtils.addTypeHierachyAttributeValueProposals(request, prefix,
                 typeName);
     }

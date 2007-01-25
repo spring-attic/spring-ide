@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
+package org.springframework.ide.eclipse.beans.ui.editor.namespaces.util;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -126,7 +126,7 @@ public class UtilUIImages {
 	/* package */static ImageRegistry getImageRegistry() {
 		if (imageRegistry == null) {
 			imageRegistry = new ImageRegistry();
-			for (Iterator iter = imageDescriptors.keySet().iterator(); iter
+			for (Iterator<String> iter = imageDescriptors.keySet().iterator(); iter
 					.hasNext();) {
 				String key = (String) iter.next();
 				imageRegistry.put(key, (ImageDescriptor) imageDescriptors
