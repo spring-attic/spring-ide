@@ -138,6 +138,12 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	}
 
 	public IResource getElementResource() {
+		// If config file not exists then return the corresponding project
+		// instead
+		if (file == null) {
+			return ((IResourceModelElement) getElementParent())
+					.getElementResource();
+		}
 		return file;
 	}
 
@@ -370,8 +376,6 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			return false;
 		}
 		BeansConfig that = (BeansConfig) other;
-		if (!ObjectUtils.nullSafeEquals(this.file, that.file))
-			return false;
 		if (this.defaults != null && that.defaults != null
 				&& this.defaults != that.defaults) {
 			if (!ObjectUtils.nullSafeEquals(this.isArchived, that.isArchived))
@@ -399,7 +403,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	}
 
 	public int hashCode() {
-		int hashCode = ObjectUtils.nullSafeHashCode(file);
+		int hashCode = 1;
 		if (defaults != null) {
 			hashCode = getElementType() * hashCode
 					+ ObjectUtils.nullSafeHashCode(isArchived);
@@ -456,8 +460,10 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		}
 		file = (IFile) container.findMember(name);
 		if (file == null || !file.isAccessible()) {
-			Problem problem = new Problem("File '" + fullPath
-					+ "' not accessible", new Location(new FileResource(
+			String msg = "Beans config file '" + fullPath + "' not accessible";
+			BeansModelUtils.createProblemMarker(this, msg,
+					IMarker.SEVERITY_ERROR, -1, ErrorCode.PARSING_FAILED);
+			Problem problem = new Problem(msg, new Location(new FileResource(
 					fullPath), null));
 			errors.add(problem);
 		}
@@ -503,43 +509,46 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	private void readConfig() {
 		imports = new LinkedHashSet<IBeansImport>();
 		aliases = new LinkedHashMap<String, IBeanAlias>();
-		components  = new LinkedHashSet<IBeansComponent>();
+		components = new LinkedHashSet<IBeansComponent>();
 		beans = new LinkedHashMap<String, IBean>();
 		innerBeans = new LinkedHashSet<IBean>();
+		if (file != null && file.isAccessible()) {
+			Resource resource;
+			if (isArchived) {
+				resource = new StorageResource(new ZipEntryStorage(file
+						.getProject(), getElementName()));
+			} else {
+				resource = new FileResource(file);
+			}
 
-		Resource resource;
-		if (isArchived) {
-			resource = new StorageResource(new ZipEntryStorage(file
-					.getProject(), getElementName()));
-		} else {
-			resource = new FileResource(file);
-		}
-
-		DefaultBeanDefinitionRegistry registry = new
-				DefaultBeanDefinitionRegistry();
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(registry);
-		ClassLoader classLoader = SpringCoreUtils
-				.getClassLoader(getElementResource());
-		reader.setResourceLoader(new PathMatchingResourcePatternResolver(
-				classLoader));
-		reader.setDocumentLoader(new XercesDocumentLoader());
-		EntityResolver resolver = new DelegatingEntityResolver(
-				new BeansDtdResolver(),
-				new PluggableSchemaResolver(classLoader));
-		reader.setEntityResolver(resolver);
-		reader.setSourceExtractor(new XmlSourceExtractor());
-		reader.setEventListener(new BeansConfigReaderEventListener(this));
-		reader.setProblemReporter(new BeansConfigProblemReporter(this));
-		reader.setErrorHandler(new BeansConfigErrorHandler(this, resource));
-		try {
-			reader.loadBeanDefinitions(resource);
-		} catch (BeanDefinitionStoreException e) {
-			if (!(e.getCause() instanceof SAXParseException)) {
-				BeansModelUtils.createProblemMarker(this, e.getMessage(),
-						IMarker.SEVERITY_ERROR, -1, ErrorCode.PARSING_FAILED);
-				Problem problem = new Problem(e.getMessage(), new Location(
-						resource, null));
-				errors.add(problem);
+			DefaultBeanDefinitionRegistry registry =
+					new DefaultBeanDefinitionRegistry();
+			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
+					registry);
+			ClassLoader classLoader = SpringCoreUtils
+					.getClassLoader(getElementResource());
+			reader.setResourceLoader(new PathMatchingResourcePatternResolver(
+					classLoader));
+			reader.setDocumentLoader(new XercesDocumentLoader());
+			EntityResolver resolver = new DelegatingEntityResolver(
+					new BeansDtdResolver(), new PluggableSchemaResolver(
+							classLoader));
+			reader.setEntityResolver(resolver);
+			reader.setSourceExtractor(new XmlSourceExtractor());
+			reader.setEventListener(new BeansConfigReaderEventListener(this));
+			reader.setProblemReporter(new BeansConfigProblemReporter(this));
+			reader.setErrorHandler(new BeansConfigErrorHandler(this, resource));
+			try {
+				reader.loadBeanDefinitions(resource);
+			} catch (BeanDefinitionStoreException e) {
+				if (!(e.getCause() instanceof SAXParseException)) {
+					BeansModelUtils.createProblemMarker(this, e.getMessage(),
+							IMarker.SEVERITY_ERROR, -1,
+							ErrorCode.PARSING_FAILED);
+					Problem problem = new Problem(e.getMessage(), new Location(
+							resource, null));
+					errors.add(problem);
+				}
 			}
 		}
 	}
