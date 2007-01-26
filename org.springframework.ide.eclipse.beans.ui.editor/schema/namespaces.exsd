@@ -68,10 +68,10 @@
          <attribute name="contentAssistProcessor" type="string" use="required">
             <annotation>
                <documentation>
-                  an instance of &lt;samp&gt;org.springframework.ide.eclipse.beans.ui.editor.contentassist.INamespaceContentAssistProcessor&lt;/samp&gt;
+                  an instance of &lt;samp&gt;org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceContentAssistProcessor&lt;/samp&gt;
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.beans.ui.editor.contentassist.INamespaceContentAssistProcessor"/>
+                  <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.beans.ui.editor.namespacess.INamespaceContentAssistProcessor"/>
                </appInfo>
             </annotation>
          </attribute>

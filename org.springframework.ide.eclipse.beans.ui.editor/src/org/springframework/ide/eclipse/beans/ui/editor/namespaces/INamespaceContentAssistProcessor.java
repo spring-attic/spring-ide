@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
+package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;

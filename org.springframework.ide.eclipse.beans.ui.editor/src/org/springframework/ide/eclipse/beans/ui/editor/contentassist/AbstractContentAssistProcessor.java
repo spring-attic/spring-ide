@@ -24,6 +24,7 @@ import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegionList;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.core.internal.regions.DOMRegionContext;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
+import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateCompletionProcessor;
 import org.w3c.dom.Node;
 

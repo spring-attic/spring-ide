@@ -27,7 +27,6 @@ import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.editor.Activator;
-import org.springframework.ide.eclipse.beans.ui.editor.contentassist.INamespaceContentAssistProcessor;
 import org.w3c.dom.Element;
 
 public class NamespaceUtils {
@@ -84,7 +83,8 @@ public class NamespaceUtils {
 								return (T) config.createExecutableExtension(attributeName);
 							}
 						} catch (Exception e) {
-							BeansUIPlugin.log(e);
+							// log classcast to log file
+							Activator.log(e);
 						}
 					}
 				}
