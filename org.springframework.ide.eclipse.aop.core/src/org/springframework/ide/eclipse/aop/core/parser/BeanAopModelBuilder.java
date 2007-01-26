@@ -253,6 +253,10 @@ public class BeanAopModelBuilder {
 				BeansAopMarkerUtils.createProblemMarker(file, "Class dependency is missing: "
 						+ e.getMessage(), IMarker.SEVERITY_WARNING, info.getAspectLineNumber(),
 						BeansAopMarkerUtils.AOP_PROBLEM_MARKER, file);
+			} catch (ClassNotFoundException e) {
+				BeansAopMarkerUtils.createProblemMarker(file, "Class dependency is missing: "
+						+ e.getMessage(), IMarker.SEVERITY_WARNING, info.getAspectLineNumber(),
+						BeansAopMarkerUtils.AOP_PROBLEM_MARKER, file);
 			} catch (Throwable t) {
 				BeansAopMarkerUtils.createProblemMarker(file, t.getMessage(),
 						IMarker.SEVERITY_WARNING, info.getAspectLineNumber(),
