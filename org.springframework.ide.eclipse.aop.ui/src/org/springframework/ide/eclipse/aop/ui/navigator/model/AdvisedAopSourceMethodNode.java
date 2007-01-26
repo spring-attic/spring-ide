@@ -34,13 +34,17 @@ public class AdvisedAopSourceMethodNode extends AbstractJavaElementRefeerenceNod
 	}
 
 	public String getText() {
-		if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
-			return BeansAopUtils.getJavaElementLinkName(reference.getSource()) + " - "
-					+ BeansAopUtils.getPackageLinkName(reference.getSource());
+		if (reference.getSource() != null) {
+			if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
+				return BeansAopUtils.getJavaElementLinkName(reference.getSource()) + " - "
+						+ BeansAopUtils.getPackageLinkName(reference.getSource());
+			} else {
+				return BeansAopUtils.getJavaElementLinkName(reference.getSource().getParent())
+						+ "." + BeansAopUtils.getJavaElementLinkName(reference.getSource()) + " - "
+						+ BeansAopUtils.getPackageLinkName(reference.getSource());
+			}
 		} else {
-			return BeansAopUtils.getJavaElementLinkName(reference.getSource().getParent()) + "."
-					+ BeansAopUtils.getJavaElementLinkName(reference.getSource()) + " - "
-					+ BeansAopUtils.getPackageLinkName(reference.getSource());
+			return "";
 		}
 	}
 
