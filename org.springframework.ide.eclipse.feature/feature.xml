@@ -22,6 +22,11 @@
       <update label="%updateSiteName" url="http://springide.org/updatesite/"/>
    </url>
 
+   <requires>
+      <import feature="org.eclipse.wst.xml_ui.feature" version="1.5.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.jdt" version="3.2.0" match="greaterOrEqual"/>
+   </requires>
+
    <plugin
          id="org.springframework.ide.eclipse"
          download-size="0"
@@ -124,8 +129,7 @@
          id="org.springframework.doc"
          download-size="0"
          install-size="0"
-         version="0.0.0"
-         unpack="true"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.aspectj.aspectjweaver"
