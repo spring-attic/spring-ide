@@ -12,10 +12,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.core;
 
+import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -52,9 +53,8 @@ public final class SpringCoreUtils {
 	/**
 	 * Creates specified simple project.
 	 */
-	public static IProject createProject(String projectName,
-				IProjectDescription description, IProgressMonitor monitor)
-				throws CoreException {
+	public static IProject createProject(String projectName, IProjectDescription description,
+			IProgressMonitor monitor) throws CoreException {
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IProject project = root.getProject(projectName);
 		if (!project.exists()) {
@@ -72,14 +72,14 @@ public final class SpringCoreUtils {
 		if (!project.isOpen()) {
 			project.open(monitor);
 		}
-		return project;	
+		return project;
 	}
 
 	/**
 	 * Creates specified Java project.
 	 */
-	public static IJavaProject createJavaProject(String projectName,
-							   IProgressMonitor monitor) throws CoreException {
+	public static IJavaProject createJavaProject(String projectName, IProgressMonitor monitor)
+			throws CoreException {
 		IProject project = createProject(projectName, null, monitor);
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
@@ -92,14 +92,13 @@ public final class SpringCoreUtils {
 			throw new OperationCanceledException();
 		}
 		jproject.setRawClasspath(new IClasspathEntry[0], monitor);
-		return jproject;	
+		return jproject;
 	}
 
 	/**
 	 * Creates given folder and (if necessary) all of it's parents.
 	 */
-	public static void createFolder(IFolder folder, IProgressMonitor monitor)
-													   throws CoreException {
+	public static void createFolder(IFolder folder, IProgressMonitor monitor) throws CoreException {
 		if (!folder.exists()) {
 			IContainer parent = folder.getParent();
 			if (parent instanceof IFolder) {
@@ -111,9 +110,9 @@ public final class SpringCoreUtils {
 
 	/**
 	 * Adds given nature as first nature to specified project.
-	 */	
-	public static void addProjectNature(IProject project, String nature,
-							   IProgressMonitor monitor) throws CoreException {
+	 */
+	public static void addProjectNature(IProject project, String nature, IProgressMonitor monitor)
+			throws CoreException {
 		if (project != null && nature != null) {
 			if (!project.hasNature(nature)) {
 				IProjectDescription desc = project.getDescription();
@@ -121,8 +120,7 @@ public final class SpringCoreUtils {
 				String[] newNatures = new String[oldNatures.length + 1];
 				newNatures[0] = nature;
 				if (oldNatures.length > 0) {
-					System.arraycopy(oldNatures, 0, newNatures, 1,
-									 oldNatures.length);
+					System.arraycopy(oldNatures, 0, newNatures, 1, oldNatures.length);
 				}
 				desc.setNatureIds(newNatures);
 				project.setDescription(desc, monitor);
@@ -132,17 +130,16 @@ public final class SpringCoreUtils {
 
 	/**
 	 * Removes given nature from specified project.
-	 */	
-	public static void removeProjectNature(IProject project, String nature,
-							   IProgressMonitor monitor) throws CoreException {
+	 */
+	public static void removeProjectNature(IProject project, String nature, IProgressMonitor monitor)
+			throws CoreException {
 		if (project != null && nature != null) {
 			if (project.exists() && project.hasNature(nature)) {
 
 				// first remove all problem markers (including the
 				// inherited ones) from Spring beans project
 				if (nature.equals(SpringCore.NATURE_ID)) {
-					project.deleteMarkers(SpringCore.MARKER_ID, true,
-										  IResource.DEPTH_INFINITE);
+					project.deleteMarkers(SpringCore.MARKER_ID, true, IResource.DEPTH_INFINITE);
 				}
 
 				// now remove project nature
@@ -150,7 +147,7 @@ public final class SpringCoreUtils {
 				String[] oldNatures = desc.getNatureIds();
 				String[] newNatures = new String[oldNatures.length - 1];
 				int newIndex = oldNatures.length - 2;
-				for (int i =  oldNatures.length - 1; i >= 0; i--) {
+				for (int i = oldNatures.length - 1; i >= 0; i--) {
 					if (!oldNatures[i].equals(nature)) {
 						newNatures[newIndex--] = oldNatures[i];
 					}
@@ -158,24 +155,22 @@ public final class SpringCoreUtils {
 				desc.setNatureIds(newNatures);
 				project.setDescription(desc, monitor);
 			}
-		} 
+		}
 	}
 
 	/**
 	 * Removes given builder from specified project.
 	 */
 	public static void removeProjectBuilder(IProject project, String builder,
-							   IProgressMonitor monitor) throws CoreException {
+			IProgressMonitor monitor) throws CoreException {
 		if (project != null && builder != null) {
 			IProjectDescription desc = project.getDescription();
 			ICommand[] commands = desc.getBuildSpec();
 			for (int i = commands.length - 1; i >= 0; i--) {
 				if (commands[i].getBuilderName().equals(builder)) {
-					ICommand[] newCommands = new ICommand[commands.length -
-														  1];
+					ICommand[] newCommands = new ICommand[commands.length - 1];
 					System.arraycopy(commands, 0, newCommands, 0, i);
-					System.arraycopy(commands, i + 1, newCommands, i,
-									 commands.length - i - 1);
+					System.arraycopy(commands, i + 1, newCommands, i, commands.length - i - 1);
 					// Commit the spec change into the project
 					desc.setBuildSpec(newCommands);
 					project.setDescription(desc, monitor);
@@ -214,14 +209,12 @@ public final class SpringCoreUtils {
 	}
 
 	/**
-	 * Removes all Spring problem markers (including the inherited ones) from
-	 * given resource.
+	 * Removes all Spring problem markers (including the inherited ones) from given resource.
 	 */
 	public static void deleteProblemMarkers(IResource resource) {
 		if (resource != null && resource.isAccessible()) {
 			try {
-				resource.deleteMarkers(SpringCore.MARKER_ID, true,
-						IResource.DEPTH_ZERO);
+				resource.deleteMarkers(SpringCore.MARKER_ID, true, IResource.DEPTH_ZERO);
 			} catch (CoreException e) {
 				SpringCore.log(e);
 			}
@@ -229,11 +222,9 @@ public final class SpringCoreUtils {
 	}
 
 	/**
-	 * Returns true if Eclipse's runtime bundle has the same or a newer than
-	 * given version.
+	 * Returns true if Eclipse's runtime bundle has the same or a newer than given version.
 	 */
-	public static boolean isEclipseSameOrNewer(int majorVersion,
-			int minorVersion) {
+	public static boolean isEclipseSameOrNewer(int majorVersion, int minorVersion) {
 		Bundle bundle = Platform.getBundle(Platform.PI_RUNTIME);
 		if (bundle != null) {
 			String version = (String) bundle.getHeaders().get(
@@ -266,10 +257,10 @@ public final class SpringCoreUtils {
 		return Thread.currentThread().getContextClassLoader();
 	}
 
-    public static ClassLoader getClassLoader(IJavaProject project) {
+	public static ClassLoader getClassLoader(IJavaProject project) {
 		List<URL> paths = getClassPathURLs(project);
-		return new URLClassLoader(paths.toArray(new URL[paths.size()]), Thread
-				.currentThread().getContextClassLoader());
+		return new URLClassLoader(paths.toArray(new URL[paths.size()]), Thread.currentThread()
+				.getContextClassLoader());
 	}
 
 	public static List<URL> getClassPathURLs(IJavaProject project) {
@@ -277,17 +268,24 @@ public final class SpringCoreUtils {
 		try {
 			// configured classpath
 			IClasspathEntry classpath[] = project.getRawClasspath();
+			// build output, relative to project
+			IPath location = getProjectLocation(project.getProject());
+			IPath outputPath = location.append(project.getOutputLocation().removeFirstSegments(1));
 			for (int i = 0; i < classpath.length; i++) {
 				IClasspathEntry path = classpath[i];
 				if (path.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
-					URL url = path.getPath().toFile().toURL();
-					paths.add(url);
+					File file = path.getPath().toFile();
+					if (file.exists()) {
+						URL url = path.getPath().toFile().toURL();
+						paths.add(url);
+					} else {
+						IPath relPath = path.getPath().removeFirstSegments(1);
+						URL url = new URL("file:" + location + File.separator
+								+ relPath.toOSString());
+						paths.add(url);
+					}
 				}
 			}
-			// build output, relative to project
-			IPath location = getProjectLocation(project.getProject());
-			IPath outputPath = location.append(project.getOutputLocation()
-					.removeFirstSegments(1));
 			paths.add(outputPath.toFile().toURL());
 		} catch (Exception e) {
 			// ignore
@@ -296,7 +294,6 @@ public final class SpringCoreUtils {
 	}
 
 	public static IPath getProjectLocation(IProject project) {
-		return (project.getRawLocation() != null ? project.getRawLocation()
-				: project.getLocation());
+		return (project.getRawLocation() != null ? project.getRawLocation() : project.getLocation());
 	}
 }
