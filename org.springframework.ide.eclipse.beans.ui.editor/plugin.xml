@@ -206,11 +206,13 @@
         	name="Spring Util"
         	uri="http://www.springframework.org/schema/util"/>
 		<namespace
-        	classNameProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.tx.TxClassNameProvider"
-        	contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.namespaces.tx.TxContextAssistProcessor"
-        	labelProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.tx.TxOutlineLabelProvider"
-        	name="Spring Tx"
-        	uri="http://www.springframework.org/schema/tx"/>
+        classNameProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.tx.TxClassNameProvider"
+        contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.namespaces.tx.TxContextAssistProcessor"
+        elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
+        hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.namespaces.tx.TxHyperLinkDetector"
+        labelProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.tx.TxOutlineLabelProvider"
+        name="Spring Tx"
+        uri="http://www.springframework.org/schema/tx"/>
 
    </extension>
 

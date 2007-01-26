@@ -98,7 +98,7 @@ public class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 		if ("config".equals(shortNodeName)) {
 			text = nodeName + " ";
 		}
-		if ("aspect".equals(shortNodeName)) {
+		else if ("aspect".equals(shortNodeName)) {
 			text = nodeName + " ";
 			if (BeansContentOutlineConfiguration.isShowAttributes()) {
 				attr = attrs.getNamedItem("id");
@@ -111,7 +111,7 @@ public class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 				}
 			}
 		}
-		if ("advisor".equals(shortNodeName)) {
+		else if ("advisor".equals(shortNodeName)) {
 		    text = nodeName + " ";
 		    if (BeansContentOutlineConfiguration.isShowAttributes()) {
 		        attr = attrs.getNamedItem("id");
@@ -128,7 +128,7 @@ public class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 		        }
 		    }
 		}
-		if ("before".equals(shortNodeName) || "after".equals(shortNodeName)
+		else if ("before".equals(shortNodeName) || "after".equals(shortNodeName)
 				|| "after-returning".equals(shortNodeName)
 				|| "after-throwing".equals(shortNodeName)
 				|| "around".equals(shortNodeName)) {
@@ -144,7 +144,7 @@ public class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 				}
 			}
 		}
-		if ("pointcut".equals(shortNodeName)) {
+		else if ("pointcut".equals(shortNodeName)) {
 			text = nodeName + " ";
 			if (BeansContentOutlineConfiguration.isShowAttributes()) {
 				attr = attrs.getNamedItem("id");
@@ -153,7 +153,7 @@ public class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 				}
 			}
 		}
-		if ("include".equals(shortNodeName)) {
+		else if ("include".equals(shortNodeName)) {
 		    text = nodeName + " ";
 		    if (BeansContentOutlineConfiguration.isShowAttributes()) {
 		        attr = attrs.getNamedItem("name");
@@ -162,10 +162,10 @@ public class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 		        }
 		    }
 		}
-        if ("aspectj-autoproxy".equals(shortNodeName)) {
+		else if ("aspectj-autoproxy".equals(shortNodeName)) {
             text = nodeName;
         }
-        if ("declare-parents".equals(shortNodeName)) {
+		else if ("declare-parents".equals(shortNodeName)) {
             text = nodeName;
         }
 

@@ -18,38 +18,43 @@ package org.springframework.ide.eclipse.beans.ui.editor.namespaces.tx;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider;
-import org.w3c.dom.NamedNodeMap;
+import org.springframework.ide.eclipse.beans.ui.editor.outline.BeansContentOutlineConfiguration;
+import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.w3c.dom.Node;
 
 @SuppressWarnings("restriction")
-public class TxOutlineLabelProvider
-        extends JFaceNodeLabelProvider {
+public class TxOutlineLabelProvider extends JFaceNodeLabelProvider {
 
-    public Image getImage(Object object) {
+	public Image getImage(Object object) {
 
-        Node node = (Node) object;
-        String prefix = node.getPrefix();
-        String nodeName = node.getNodeName();
-        if (prefix != null) {
-            nodeName = nodeName.substring(prefix.length() + 1);
-        }
-        return null;
-    }
+		Node node = (Node) object;
+		String prefix = node.getPrefix();
+		String nodeName = node.getNodeName();
+		if (prefix != null) {
+			nodeName = nodeName.substring(prefix.length() + 1);
+		}
+		return null;
+	}
 
-    public String getText(Object o) {
+	public String getText(Object o) {
 
-        // Create Spring beans label text
-        Node node = (Node) o;
-        NamedNodeMap attrs = node.getAttributes();
-        Node attr;
-        String prefix = node.getPrefix();
-        String nodeName = node.getNodeName();
+		// Create Spring beans label text
+		Node node = (Node) o;
+		String prefix = node.getPrefix();
+		String nodeName = node.getNodeName();
 		String shortNodeName = node.getNodeName();
-        if (prefix != null) {
-            shortNodeName = nodeName.substring(prefix.length() + 1);
-        }
-        nodeName = "<" + node.getNodeName() + "/>";
-        String text = null;
-        return text;
-    }
+		if (prefix != null) {
+			shortNodeName = nodeName.substring(prefix.length() + 1);
+		}
+		nodeName = "<" + node.getNodeName() + "/>";
+		String text = null;
+		if ("advice".equals(shortNodeName)) {
+			text = nodeName;
+			if (BeansContentOutlineConfiguration.isShowAttributes()
+					&& BeansEditorUtils.hasAttribute(node, "transaction-manager")) {
+				text += " <" + BeansEditorUtils.getAttribute(node, "transaction-manager") + ">";
+			}
+		}
+		return text;
+	}
 }
