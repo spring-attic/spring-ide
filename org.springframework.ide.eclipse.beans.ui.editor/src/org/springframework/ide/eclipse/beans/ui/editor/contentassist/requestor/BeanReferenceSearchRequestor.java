@@ -16,10 +16,13 @@
 
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
@@ -32,17 +35,25 @@ import org.springframework.ide.eclipse.beans.ui.namespaces.beans.BeansNamespaceI
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
+@SuppressWarnings("restriction")
 public class BeanReferenceSearchRequestor {
 
-    public static final int EXTERNAL_BEAN_RELEVANCE = 10;
-    public static final int LOCAL_BEAN_RELEVANCE = 20;
+    public static final int TYPE_MATCHING_RELEVANCE = 20;
+    public static final int RELEVANCE = 10;
 
     protected Set<String> beans;
     protected ContentAssistRequest request;
+    
+    protected List<String> requiredTypes = null;
 
-    public BeanReferenceSearchRequestor(ContentAssistRequest request) {
-        this.request = request;
-        this.beans = new HashSet<String>();
+	public BeanReferenceSearchRequestor(ContentAssistRequest request) {
+    	this(request, new ArrayList<String>());
+    }
+
+    public BeanReferenceSearchRequestor(ContentAssistRequest request, List<String> requiredTypes) {
+    	this.request = request;
+    	this.beans = new HashSet<String>();
+    	this.requiredTypes = requiredTypes;
     }
 
     public void acceptSearchMatch(IBean bean, IFile file, String prefix) {
@@ -71,12 +82,22 @@ public class BeanReferenceSearchRequestor {
 
                 Image image = BeansNamespaceImages.getImage(bean, BeansCorePlugin.getModel()
                         .getConfig(file));
-
-                BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-                        replaceText, request.getReplacementBeginPosition(), request
-                                .getReplacementLength(), replaceText.length(), image,
-                        displayText, null, BeansEditorUtils.createAdditionalProposalInfo(bean),
-                        BeanReferenceSearchRequestor.EXTERNAL_BEAN_RELEVANCE);
+                BeansJavaCompletionProposal proposal = null;
+                if (this.requiredTypes.contains(bean.getClassName())) {
+                	proposal = new BeansJavaCompletionProposal(
+                			replaceText, request.getReplacementBeginPosition(), request
+                			.getReplacementLength(), replaceText.length(), image,
+                			displayText, null, BeansEditorUtils.createAdditionalProposalInfo(bean),
+                			BeanReferenceSearchRequestor.TYPE_MATCHING_RELEVANCE);
+                }
+                else {
+                	proposal = new BeansJavaCompletionProposal(
+                			replaceText, request.getReplacementBeginPosition(), request
+                			.getReplacementLength(), replaceText.length(), image,
+                			displayText, null, BeansEditorUtils.createAdditionalProposalInfo(bean),
+                			BeanReferenceSearchRequestor.RELEVANCE);
+                }
+                
 
                 request.addProposal(proposal);
                 beans.add(key);
@@ -112,13 +133,27 @@ public class BeanReferenceSearchRequestor {
                     buf.append(fileName);
                     String displayText = buf.toString();
                     Image image = new DelegatingLabelProvider().getImage(beanNode);
-
-                    BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-                            replaceText, request.getReplacementBeginPosition(), request
-                                    .getReplacementLength(), replaceText.length(), image,
-                            displayText, null, BeansEditorUtils.createAdditionalProposalInfo(
-                                    beanNode, file),
-                            BeanReferenceSearchRequestor.LOCAL_BEAN_RELEVANCE);
+                    
+                    BeansJavaCompletionProposal proposal = null;
+                    
+                    String className = BeansEditorUtils.getClassNameForBean(beanNode);
+                    if (this.requiredTypes.contains(className)) {
+                    	proposal = new BeansJavaCompletionProposal(
+                    			replaceText, request.getReplacementBeginPosition(), request
+                    			.getReplacementLength(), replaceText.length(), image,
+                    			displayText, null, BeansEditorUtils.createAdditionalProposalInfo(
+                    					beanNode, file),
+                    					TYPE_MATCHING_RELEVANCE);
+                    }
+                    else {
+                    	proposal = new BeansJavaCompletionProposal(
+                    			replaceText, request.getReplacementBeginPosition(), request
+                    			.getReplacementLength(), replaceText.length(), image,
+                    			displayText, null, BeansEditorUtils.createAdditionalProposalInfo(
+                    					beanNode, file),
+                    					RELEVANCE);
+                    }
+                    
 
                     request.addProposal(proposal);
                     beans.add(key);

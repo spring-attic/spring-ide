@@ -23,6 +23,7 @@ import org.eclipse.jface.text.contentassist.CompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -35,7 +36,7 @@ import org.eclipse.wst.sse.ui.internal.contentassist.IRelevanceConstants;
  * creation.
  */
 public class BeansJavaCompletionProposal implements ICompletionProposal,
-		ICompletionProposalExtension, ICompletionProposalExtension2,
+		ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension4,
 		IRelevanceCompletionProposal {
 
 	private String fAdditionalProposalInfo;
@@ -392,5 +393,9 @@ public class BeansJavaCompletionProposal implements ICompletionProposal,
 	 */
 	public void setReplacementString(String replacementString) {
 		fReplacementString = replacementString;
+	}
+
+	public boolean isAutoInsertable() {
+		return true;
 	}
 }

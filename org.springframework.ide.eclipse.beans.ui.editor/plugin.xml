@@ -193,14 +193,14 @@
         	uri="http://www.springframework.org/schema/p"/>
 		<namespace
         	contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.namespaces.aop.AopContentAssistProcessor"
-        	elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableNodesLocator"
+        	elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
         	hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.namespaces.aop.AopHyperLinkDetector"
         	labelProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.aop.AopOutlineLabelProvider"
         	name="Spring AOP"
         	uri="http://www.springframework.org/schema/aop"/>
 		<namespace
         	contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.namespaces.util.UtilContentAssistProcessor"
-        	elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableNodesLocator"
+        	elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
         	hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.namespaces.util.UtilHyperLinkDetector"
         	labelProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.util.UtilOutlineLabelProvider"
         	name="Spring Util"

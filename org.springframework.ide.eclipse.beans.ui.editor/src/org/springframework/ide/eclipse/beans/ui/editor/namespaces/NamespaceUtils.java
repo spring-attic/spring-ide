@@ -57,8 +57,10 @@ public class NamespaceUtils {
 			for (IExtension extension : point.getExtensions()) {
 				for (IConfigurationElement config : extension.getConfigurationElements()) {
 					try {
-						locators.add(((IReferenceableElementsLocator) config
-								.createExecutableExtension("elementLocator")));
+						if (config.getAttribute("elementLocator") != null) {
+							locators.add(((IReferenceableElementsLocator) config
+									.createExecutableExtension("elementLocator")));
+						}
 					} catch (Exception e) {
 						BeansUIPlugin.log(e);
 					}
@@ -78,7 +80,9 @@ public class NamespaceUtils {
 				for (IConfigurationElement config : extension.getConfigurationElements()) {
 					if (namespaceUri.equals(config.getAttribute("uri"))) {
 						try {
-							return (T) config.createExecutableExtension(attributeName);
+							if (config.getAttribute(attributeName) != null) {
+								return (T) config.createExecutableExtension(attributeName);
+							}
 						} catch (Exception e) {
 							BeansUIPlugin.log(e);
 						}

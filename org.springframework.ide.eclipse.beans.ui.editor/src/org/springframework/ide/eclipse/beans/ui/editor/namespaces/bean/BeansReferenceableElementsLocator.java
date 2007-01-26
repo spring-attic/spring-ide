@@ -24,7 +24,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-class BeansReferenceableElementsLocator implements
+public class BeansReferenceableElementsLocator implements
         IReferenceableElementsLocator {
 
     public Map<String, Node> getReferenceableElements(Document document) {
