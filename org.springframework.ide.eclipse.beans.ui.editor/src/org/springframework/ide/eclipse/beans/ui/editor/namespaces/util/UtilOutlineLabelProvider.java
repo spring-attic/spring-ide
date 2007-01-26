@@ -23,15 +23,8 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 @SuppressWarnings("restriction")
-final class UtilOutlineLabelProvider
+public class UtilOutlineLabelProvider
         extends JFaceNodeLabelProvider {
-
-    private BeansContentOutlineConfiguration configuration;
-
-    public UtilOutlineLabelProvider(
-            BeansContentOutlineConfiguration configuration) {
-        this.configuration = configuration;
-    }
 
     public Image getImage(Object object) {
 
@@ -81,7 +74,7 @@ final class UtilOutlineLabelProvider
         String text = "";
         if ("properties".equals(shortNodeName)) {
             text = nodeName + " ";
-            if (this.configuration.isShowAttributes()) {
+            if (BeansContentOutlineConfiguration.isShowAttributes()) {
                 attr = attrs.getNamedItem("id");
                 if (attr != null) {
                     text += attr.getNodeValue() + " ";
@@ -94,7 +87,7 @@ final class UtilOutlineLabelProvider
         }
         else if ("property-path".equals(shortNodeName)) {
             text = nodeName + " ";
-            if (this.configuration.isShowAttributes()) {
+            if (BeansContentOutlineConfiguration.isShowAttributes()) {
                 attr = attrs.getNamedItem("id");
                 if (attr != null) {
                     text += attr.getNodeValue() + " ";
@@ -107,7 +100,7 @@ final class UtilOutlineLabelProvider
         }
         else if ("constant".equals(shortNodeName)) {
             text = nodeName + " ";
-            if (this.configuration.isShowAttributes()) {
+            if (BeansContentOutlineConfiguration.isShowAttributes()) {
                 attr = attrs.getNamedItem("id");
                 if (attr != null) {
                     text += attr.getNodeValue() + " ";
@@ -120,7 +113,7 @@ final class UtilOutlineLabelProvider
         }
         else if ("set".equals(shortNodeName)) {
             text = nodeName + " ";
-            if (this.configuration.isShowAttributes()) {
+            if (BeansContentOutlineConfiguration.isShowAttributes()) {
                 attr = attrs.getNamedItem("id");
                 if (attr != null) {
                     text += attr.getNodeValue() + " ";
@@ -133,7 +126,7 @@ final class UtilOutlineLabelProvider
         }
         else if ("list".equals(shortNodeName)) {
             text = nodeName + " ";
-            if (this.configuration.isShowAttributes()) {
+            if (BeansContentOutlineConfiguration.isShowAttributes()) {
                 attr = attrs.getNamedItem("id");
                 if (attr != null) {
                     text += attr.getNodeValue() + " ";
@@ -146,7 +139,7 @@ final class UtilOutlineLabelProvider
         }
         else if ("map".equals(shortNodeName)) {
             text = nodeName + " ";
-            if (this.configuration.isShowAttributes()) {
+            if (BeansContentOutlineConfiguration.isShowAttributes()) {
                 attr = attrs.getNamedItem("id");
                 if (attr != null) {
                     text += attr.getNodeValue() + " ";

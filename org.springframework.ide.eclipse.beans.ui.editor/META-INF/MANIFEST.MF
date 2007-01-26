@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.ide.eclipse.beans.ui.editor; singleton:=true
 Bundle-Version: 2.0.0.qualifier
-Bundle-Activator: org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin
+Bundle-Activator: org.springframework.ide.eclipse.beans.ui.editor.Activator
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
@@ -30,5 +30,16 @@ Eclipse-LazyStart: true
 Bundle-Vendor: %providerName
 Bundle-ClassPath: beans-editor.jar
 Export-Package: org.springframework.ide.eclipse.beans.ui.editor,
+ org.springframework.ide.eclipse.beans.ui.editor.actions,
+ org.springframework.ide.eclipse.beans.ui.editor.contentassist,
+ org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor,
+ org.springframework.ide.eclipse.beans.ui.editor.hover,
+ org.springframework.ide.eclipse.beans.ui.editor.hyperlink,
  org.springframework.ide.eclipse.beans.ui.editor.namespaces,
- org.springframework.ide.eclipse.beans.ui.editor.namespaces.aop
+ org.springframework.ide.eclipse.beans.ui.editor.namespaces.aop,
+ org.springframework.ide.eclipse.beans.ui.editor.namespaces.bean,
+ org.springframework.ide.eclipse.beans.ui.editor.namespaces.tx,
+ org.springframework.ide.eclipse.beans.ui.editor.namespaces.util,
+ org.springframework.ide.eclipse.beans.ui.editor.outline,
+ org.springframework.ide.eclipse.beans.ui.editor.templates,
+ org.springframework.ide.eclipse.beans.ui.editor.util

@@ -15,9 +15,9 @@
 		</content-type>
 	</extension>
 
-	<extension-point id="namespaceContribution"
+	<extension-point id="namespaces"
 		name="%contributionName"
-		schema="schema/namespaceContribution.exsd"/>
+		schema="schema/namespaces.exsd"/>
 
 	<extension point="org.eclipse.wst.sse.ui.editorConfiguration">
 		<sourceViewerConfiguration
@@ -178,11 +178,40 @@
 	</extension>
    
    <extension
-         point="org.springframework.ide.eclipse.beans.ui.editor.namespaceContribution">
-      <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.bean.BeansNamespaceAwareEditorContribution"/>
-      <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.aop.AopNamespaceAwareEditorContribution"/>
-      <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.util.UtilNamespaceAwareEditorContribution"/>
-      <run class="org.springframework.ide.eclipse.beans.ui.editor.namespaces.tx.TxNamespaceAwareEditorContribution"/>
+         point="org.springframework.ide.eclipse.beans.ui.editor.namespaces">
+		<namespace
+        	contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.namespaces.bean.BeansContentAssistProcessor"
+        	elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.bean.BeansReferenceableElementsLocator"
+        	hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.namespaces.bean.BeansHyperLinkDetector"
+        	labelProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.bean.BeansOutlineLabelProvider"
+        	name="Spring Beans"
+        	uri="http://www.springframework.org/schema/beans"/>
+		<namespace
+        	contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.namespaces.bean.BeansContentAssistProcessor"
+        	labelProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.bean.BeansOutlineLabelProvider"
+        	name="Spring P"
+        	uri="http://www.springframework.org/schema/p"/>
+		<namespace
+        	contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.namespaces.aop.AopContentAssistProcessor"
+        	elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableNodesLocator"
+        	hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.namespaces.aop.AopHyperLinkDetector"
+        	labelProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.aop.AopOutlineLabelProvider"
+        	name="Spring AOP"
+        	uri="http://www.springframework.org/schema/aop"/>
+		<namespace
+        	contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.namespaces.util.UtilContentAssistProcessor"
+        	elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableNodesLocator"
+        	hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.namespaces.util.UtilHyperLinkDetector"
+        	labelProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.util.UtilOutlineLabelProvider"
+        	name="Spring Util"
+        	uri="http://www.springframework.org/schema/util"/>
+		<namespace
+        	classNameProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.tx.TxClassNameProvider"
+        	contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.namespaces.tx.TxContextAssistProcessor"
+        	labelProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.tx.TxOutlineLabelProvider"
+        	name="Spring Tx"
+        	uri="http://www.springframework.org/schema/tx"/>
+
    </extension>
 
 </plugin>

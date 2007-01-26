@@ -20,71 +20,60 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
-import org.springframework.ide.eclipse.beans.ui.editor.INamespaceAwareEditorContribution;
-import org.springframework.ide.eclipse.beans.ui.editor.NamespaceEditorContributionRegistry;
+import org.springframework.ide.eclipse.beans.ui.editor.namespaces.NamespaceUtils;
 
 @SuppressWarnings("restriction")
-public class DelegatingContentAssistProcessor
-        extends XMLContentAssistProcessor {
+public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor {
 
-    protected void addAttributeValueProposals(ContentAssistRequest request) {
-        IDOMNode node = (IDOMNode) request.getNode();
-        String namespace = node.getNamespaceURI();
-        INamespaceAwareEditorContribution contribution = NamespaceEditorContributionRegistry
-                .getNamespaceAwareEditorContribution(namespace);
+	protected void addAttributeValueProposals(ContentAssistRequest request) {
+		IDOMNode node = (IDOMNode) request.getNode();
+		String namespace = node.getNamespaceURI();
+		INamespaceContentAssistProcessor processor = NamespaceUtils
+				.getContentAssistProcessor(namespace);
+		if (processor != null) {
+			processor.addAttributeValueProposals(this, request);
+		}
+		super.addAttributeValueProposals(request);
+	}
 
-        if (contribution != null
-                && contribution.getContentAssistProcessor() != null) {
-            contribution.getContentAssistProcessor()
-                    .addAttributeValueProposals(this, request);
-        }
-        super.addAttributeValueProposals(request);
-    }
+	protected void addAttributeNameProposals(ContentAssistRequest request) {
+		IDOMNode node = (IDOMNode) request.getNode();
+		String namespace = node.getNamespaceURI();
+		INamespaceContentAssistProcessor processor = NamespaceUtils
+				.getContentAssistProcessor(namespace);
+		if (processor != null) {
+			processor.addAttributeNameProposals(this, request);
+		}
+		super.addAttributeNameProposals(request);
+	}
 
-    protected void addAttributeNameProposals(ContentAssistRequest request) {
-        IDOMNode node = (IDOMNode) request.getNode();
-        String namespace = node.getNamespaceURI();
-        INamespaceAwareEditorContribution contribution = NamespaceEditorContributionRegistry
-                .getNamespaceAwareEditorContribution(namespace);
-        if (contribution != null
-                && contribution.getContentAssistProcessor() != null) {
-            contribution.getContentAssistProcessor().addAttributeNameProposals(
-                    this, request);
-        }
-        super.addAttributeNameProposals(request);
-    }
+	protected void addTagCloseProposals(ContentAssistRequest request) {
+		IDOMNode node = (IDOMNode) request.getNode();
+		String namespace = node.getNamespaceURI();
+		INamespaceContentAssistProcessor processor = NamespaceUtils
+				.getContentAssistProcessor(namespace);
+		if (processor != null) {
+			processor.addTagCloseProposals(this, request);
+		}
+		super.addTagCloseProposals(request);
+	}
 
-    protected void addTagCloseProposals(ContentAssistRequest request) {
-        IDOMNode node = (IDOMNode) request.getNode();
-        String namespace = node.getNamespaceURI();
-        INamespaceAwareEditorContribution contribution = NamespaceEditorContributionRegistry
-                .getNamespaceAwareEditorContribution(namespace);
-        if (contribution != null
-                && contribution.getContentAssistProcessor() != null) {
-            contribution.getContentAssistProcessor().addTagCloseProposals(this,
-                    request);
-        }
-        super.addTagCloseProposals(request);
-    }
+	protected void addTagInsertionProposals(ContentAssistRequest request, int childPosition) {
+		IDOMNode node = (IDOMNode) request.getNode();
+		String namespace = node.getNamespaceURI();
+		INamespaceContentAssistProcessor processor = NamespaceUtils
+				.getContentAssistProcessor(namespace);
+		if (processor != null) {
+			processor.addTagInsertionProposals(this, request, childPosition);
+		}
+		super.addTagInsertionProposals(request, childPosition);
+	}
 
-    protected void addTagInsertionProposals(ContentAssistRequest request,
-            int childPosition) {
-        IDOMNode node = (IDOMNode) request.getNode();
-        String namespace = node.getNamespaceURI();
-        INamespaceAwareEditorContribution contribution = NamespaceEditorContributionRegistry
-                .getNamespaceAwareEditorContribution(namespace);
-        if (contribution != null) {
-            contribution.getContentAssistProcessor().addTagInsertionProposals(
-                    this, request, childPosition);
-        }
-        super.addTagInsertionProposals(request, childPosition);
-    }
+	public ITextViewer getTextViewer() {
+		return fTextViewer;
+	}
 
-    public ITextViewer getTextViewer() {
-        return fTextViewer;
-    }
-
-    public char[] getCompletionProposalAutoActivationCharacters() {
-        return new char[] { '.', '=', '\"', '<' };
-    }
+	public char[] getCompletionProposalAutoActivationCharacters() {
+		return new char[] { '.', '=', '\"', '<' };
+	}
 }

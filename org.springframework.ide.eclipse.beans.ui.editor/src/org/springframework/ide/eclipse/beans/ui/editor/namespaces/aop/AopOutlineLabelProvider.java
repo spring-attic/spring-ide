@@ -23,14 +23,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 @SuppressWarnings("restriction")
-final class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
-
-	private BeansContentOutlineConfiguration configuration;
-
-	public AopOutlineLabelProvider(
-			BeansContentOutlineConfiguration configuration) {
-		this.configuration = configuration;
-	}
+public class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 
 	public Image getImage(Object object) {
 
@@ -107,7 +100,7 @@ final class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 		}
 		if ("aspect".equals(shortNodeName)) {
 			text = nodeName + " ";
-			if (this.configuration.isShowAttributes()) {
+			if (BeansContentOutlineConfiguration.isShowAttributes()) {
 				attr = attrs.getNamedItem("id");
 				if (attr != null) {
 					text += attr.getNodeValue() + " ";
@@ -120,7 +113,7 @@ final class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 		}
 		if ("advisor".equals(shortNodeName)) {
 		    text = nodeName + " ";
-		    if (this.configuration.isShowAttributes()) {
+		    if (BeansContentOutlineConfiguration.isShowAttributes()) {
 		        attr = attrs.getNamedItem("id");
 		        if (attr != null) {
 		            text += attr.getNodeValue() + " ";
@@ -140,7 +133,7 @@ final class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 				|| "after-throwing".equals(shortNodeName)
 				|| "around".equals(shortNodeName)) {
 			text = nodeName + " ";
-			if (this.configuration.isShowAttributes()) {
+			if (BeansContentOutlineConfiguration.isShowAttributes()) {
 				attr = attrs.getNamedItem("method");
 				if (attr != null) {
 					text += attr.getNodeValue() + " ";
@@ -153,7 +146,7 @@ final class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 		}
 		if ("pointcut".equals(shortNodeName)) {
 			text = nodeName + " ";
-			if (this.configuration.isShowAttributes()) {
+			if (BeansContentOutlineConfiguration.isShowAttributes()) {
 				attr = attrs.getNamedItem("id");
 				if (attr != null) {
 					text += attr.getNodeValue() + " ";
@@ -162,7 +155,7 @@ final class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 		}
 		if ("include".equals(shortNodeName)) {
 		    text = nodeName + " ";
-		    if (this.configuration.isShowAttributes()) {
+		    if (BeansContentOutlineConfiguration.isShowAttributes()) {
 		        attr = attrs.getNamedItem("name");
 		        if (attr != null) {
 		            text += "[" + attr.getNodeValue() + "]";

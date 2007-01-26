@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.Preferences;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin;
+import org.springframework.ide.eclipse.beans.ui.editor.Activator;
 import org.springframework.ide.eclipse.beans.ui.editor.IPreferencesConstants;
 import org.springframework.ide.eclipse.beans.ui.editor.outline.OutlineSorter;
 
@@ -31,10 +31,10 @@ public class OutlineStyleAction extends Action {
 	private TreeViewer viewer;
 
 	public OutlineStyleAction(TreeViewer viewer) {
-		super(BeansEditorPlugin.getResourceString(PREFIX + "label"),
+		super(Activator.getResourceString(PREFIX + "label"),
 				AS_CHECK_BOX);
 		this.viewer = viewer;
-		Preferences prefs = BeansEditorPlugin.getDefault()
+		Preferences prefs = Activator.getDefault()
 				.getPluginPreferences();
 		boolean checked = prefs
 				.getBoolean(IPreferencesConstants.OUTLINE_SPRING);
@@ -48,21 +48,21 @@ public class OutlineStyleAction extends Action {
 
 	public void update(boolean value, boolean doStore) {
 		setChecked(value);
-		Preferences prefs = BeansEditorPlugin.getDefault()
+		Preferences prefs = Activator.getDefault()
 				.getPluginPreferences();
 		boolean sort = prefs.getBoolean(IPreferencesConstants.OUTLINE_SORT);
 		if (sort) {
 			viewer.setSorter(value ? new OutlineSorter() : null);
 		}
-		setToolTipText(value ? BeansEditorPlugin.getResourceString(PREFIX
-				+ "tooltip.checked") : BeansEditorPlugin
+		setToolTipText(value ? Activator.getResourceString(PREFIX
+				+ "tooltip.checked") : Activator
 				.getResourceString(PREFIX + "tooltip.unchecked"));
-		setDescription(value ? BeansEditorPlugin.getResourceString(PREFIX
-				+ "description.checked") : BeansEditorPlugin
+		setDescription(value ? Activator.getResourceString(PREFIX
+				+ "description.checked") : Activator
 				.getResourceString(PREFIX + "description.unchecked"));
 		if (doStore) {
 			prefs.setValue(IPreferencesConstants.OUTLINE_SPRING, value);
-			BeansEditorPlugin.getDefault().savePluginPreferences();
+			Activator.getDefault().savePluginPreferences();
 			viewer.refresh();
 		}
 	}

@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.springframework.ide.eclipse.beans.ui.editor;
+package org.springframework.ide.eclipse.beans.ui.editor.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,6 +58,11 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.ui.editor.Activator;
+import org.springframework.ide.eclipse.beans.ui.editor.IPreferencesConstants;
+import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceAwareEditorContribution;
+import org.springframework.ide.eclipse.beans.ui.editor.namespaces.IReferenceableElementsLocator;
+import org.springframework.ide.eclipse.beans.ui.editor.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.ui.editors.ZipEntryEditorInput;
 import org.w3c.dom.Attr;
@@ -202,7 +207,7 @@ public class BeansEditorUtils {
 	}
 
 	public static final boolean isSpringStyleOutline() {
-		return BeansEditorPlugin.getDefault().getPreferenceStore().getBoolean(
+		return Activator.getDefault().getPreferenceStore().getBoolean(
 				IPreferencesConstants.OUTLINE_SPRING);
 	}
 
@@ -381,12 +386,10 @@ public class BeansEditorUtils {
 		// fi we reach this point we haven't found a class name. so try to locate the xml element
 		// and calculate the class from there
 		Element node = document.getElementById(id);
-		if (node != null
-				&& node.getNamespaceURI() != null
-				&& NamespaceEditorContributionRegistry.getExtendedNamespaceEditorContribution(node
-						.getNamespaceURI()) != null) {
-			return NamespaceEditorContributionRegistry.getExtendedNamespaceEditorContribution(
-					node.getNamespaceURI()).getClassNameForElement(node);
+		if (node != null && node.getNamespaceURI() != null
+				&& NamespaceUtils.getClassNameProvider(node.getNamespaceURI()) != null) {
+			return NamespaceUtils.getClassNameProvider(node.getNamespaceURI())
+					.getClassNameForElement(node);
 		}
 
 		return null;
@@ -398,7 +401,7 @@ public class BeansEditorUtils {
 	 * @return the progress monitor
 	 */
 	public static final IProgressMonitor getProgressMonitor() {
-		IEditorPart editor = BeansEditorPlugin.getActiveWorkbenchPage().getActiveEditor();
+		IEditorPart editor = Activator.getActiveWorkbenchPage().getActiveEditor();
 		if (editor != null
 				&& editor.getEditorSite() != null
 				&& editor.getEditorSite().getActionBars() != null
@@ -715,15 +718,11 @@ public class BeansEditorUtils {
 
 	public static final Map<String, Node> getReferenceableNodes(Document document) {
 		Map<String, Node> nodes = new HashMap<String, Node>();
-		for (INamespaceAwareEditorContribution contribution : NamespaceEditorContributionRegistry
-				.getNamespaceAwareEditorContributions()) {
-			if (contribution.getReferenceableElementsLocator() != null) {
+		for (IReferenceableElementsLocator locator : NamespaceUtils.getAllElementsLocators()) {
 
-				Map<String, Node> tempNodes = contribution.getReferenceableElementsLocator()
-						.getReferenceableElements(document);
-				if (tempNodes != null) {
-					nodes.putAll(tempNodes);
-				}
+			Map<String, Node> tempNodes = locator.getReferenceableElements(document);
+			if (tempNodes != null) {
+				nodes.putAll(tempNodes);
 			}
 		}
 		return nodes;

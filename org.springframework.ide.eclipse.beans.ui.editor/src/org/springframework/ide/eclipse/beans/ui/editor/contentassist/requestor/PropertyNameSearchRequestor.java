@@ -29,8 +29,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.sse.ui.internal.contentassist.CustomCompletionProposal;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansJavaDocUtils;
+import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
+import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaDocUtils;
 import org.springframework.ide.eclipse.beans.ui.namespaces.beans.BeansNamespaceImages;
 
 public class PropertyNameSearchRequestor {

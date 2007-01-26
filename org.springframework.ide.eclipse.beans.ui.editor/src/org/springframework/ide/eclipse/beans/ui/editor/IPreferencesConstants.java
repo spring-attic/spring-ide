@@ -21,7 +21,7 @@ package org.springframework.ide.eclipse.beans.ui.editor;
  * preference bundle.
  */
 public interface IPreferencesConstants {
-	String PREFIX = BeansEditorPlugin.PLUGIN_ID + ".";
+	String PREFIX = Activator.PLUGIN_ID + ".";
 
 	String OUTLINE_SPRING = PREFIX + "outline.spring";
 	String OUTLINE_SORT = PREFIX + "outline.sort";

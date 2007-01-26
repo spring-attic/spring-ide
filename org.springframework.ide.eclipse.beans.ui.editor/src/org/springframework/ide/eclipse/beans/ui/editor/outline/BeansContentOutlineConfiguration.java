@@ -22,19 +22,20 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.wst.xml.ui.views.contentoutline.XMLContentOutlineConfiguration;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin;
+import org.springframework.ide.eclipse.beans.ui.editor.Activator;
 import org.springframework.ide.eclipse.beans.ui.editor.actions.LexicalSortingAction;
 import org.springframework.ide.eclipse.beans.ui.editor.actions.OutlineStyleAction;
 
 public class BeansContentOutlineConfiguration
         extends XMLContentOutlineConfiguration {
-    boolean showAttributes;
+    
+	static boolean showAttributes;
 
     /**
      * Returns the bean editor plugin's preference store.
      */
     protected IPreferenceStore getPreferenceStore() {
-        return BeansEditorPlugin.getDefault().getPreferenceStore();
+        return Activator.getDefault().getPreferenceStore();
     }
 
     /**
@@ -77,7 +78,7 @@ public class BeansContentOutlineConfiguration
 
     protected void enableShowAttributes(boolean showAttributes,
             TreeViewer treeViewer) {
-        this.showAttributes = showAttributes;
+        BeansContentOutlineConfiguration.showAttributes = showAttributes;
     }
 
     /**
@@ -89,10 +90,10 @@ public class BeansContentOutlineConfiguration
      * @see BeansOutlineLabelProvider
      */
     public ILabelProvider getLabelProvider(TreeViewer viewer) {
-        return new DelegatingLabelProvider(this, super.getLabelProvider(viewer));
+        return new DelegatingLabelProvider(super.getLabelProvider(viewer));
     }
 
-    public boolean isShowAttributes() {
+    public static boolean isShowAttributes() {
         return showAttributes;
     }
 }

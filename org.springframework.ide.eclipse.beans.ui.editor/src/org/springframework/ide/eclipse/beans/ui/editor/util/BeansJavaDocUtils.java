@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.springframework.ide.eclipse.beans.ui.editor;
+package org.springframework.ide.eclipse.beans.ui.editor.util;
 
 import java.io.IOException;
 import java.io.Reader;

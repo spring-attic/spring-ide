@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.beans.ui.editor;
+package org.springframework.ide.eclipse.beans.ui.editor.util;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,7 +46,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCo
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.CompilationUnitHelper;
 
 @SuppressWarnings("restriction")
-public class BeansEditorJavaCompletionUtils {
+public class BeansJavaCompletionUtils {
 
     private static CompletionProposalComparator comparator = new CompletionProposalComparator();
 

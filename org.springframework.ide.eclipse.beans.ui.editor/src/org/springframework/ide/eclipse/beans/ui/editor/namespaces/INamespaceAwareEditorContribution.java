@@ -14,7 +14,7 @@
  * limitations under the License.
  */ 
 
-package org.springframework.ide.eclipse.beans.ui.editor;
+package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -32,6 +32,6 @@ public interface INamespaceAwareEditorContribution {
     
     IHyperlinkDetector getHyperLinkDetector();
     
-    IReferenceableNodesLocator getReferenceableElementsLocator();
+    IReferenceableElementsLocator getReferenceableElementsLocator();
     
 }

@@ -18,8 +18,8 @@ package org.springframework.ide.eclipse.beans.ui.editor.namespaces.util;
 
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorJavaCompletionUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.AbstractContentAssistProcessor;
+import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionUtils;
 import org.w3c.dom.Node;
 
 /**
@@ -31,12 +31,12 @@ public class UtilContentAssistProcessor
         extends AbstractContentAssistProcessor {
 
     private void addClassAttributeValueProposals(ContentAssistRequest request, String prefix) {
-        BeansEditorJavaCompletionUtils.addClassValueProposals(request, prefix);
+        BeansJavaCompletionUtils.addClassValueProposals(request, prefix);
     }
 
     private void addCollectionTypesAttributeValueProposals(ContentAssistRequest request,
             final String prefix, String typeName) {
-        BeansEditorJavaCompletionUtils.addTypeHierachyAttributeValueProposals(request, prefix,
+        BeansJavaCompletionUtils.addTypeHierachyAttributeValueProposals(request, prefix,
                 typeName);
     }
 

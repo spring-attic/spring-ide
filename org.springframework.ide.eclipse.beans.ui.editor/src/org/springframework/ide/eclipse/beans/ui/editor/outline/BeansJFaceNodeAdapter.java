@@ -23,9 +23,9 @@ import org.eclipse.core.runtime.Preferences;
 import org.eclipse.wst.sse.ui.internal.contentoutline.IJFaceNodeAdapter;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeAdapter;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeAdapterFactory;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
+import org.springframework.ide.eclipse.beans.ui.editor.Activator;
 import org.springframework.ide.eclipse.beans.ui.editor.IPreferencesConstants;
+import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.w3c.dom.Node;
 
 /**
@@ -35,7 +35,7 @@ import org.w3c.dom.Node;
 public class BeansJFaceNodeAdapter
         extends JFaceNodeAdapter {
 
-    public static final Class ADAPTER_KEY = IJFaceNodeAdapter.class;
+    public static final Class<?> ADAPTER_KEY = IJFaceNodeAdapter.class;
 
     public BeansJFaceNodeAdapter(JFaceNodeAdapterFactory adapterFactory) {
         super(adapterFactory);
@@ -43,7 +43,7 @@ public class BeansJFaceNodeAdapter
 
     public Object[] getChildren(Object object) {
         if (BeansEditorUtils.isSpringStyleOutline()) {
-            Preferences prefs = BeansEditorPlugin.getDefault()
+            Preferences prefs = Activator.getDefault()
                     .getPluginPreferences();
             boolean sort = prefs.getBoolean(IPreferencesConstants.OUTLINE_SORT);
 

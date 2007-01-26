@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.ide.eclipse.beans.ui.editor;
+package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 
 import org.w3c.dom.Element;
 
-public interface IExtendedNamespaceAwareEditorContribution extends
-		INamespaceAwareEditorContribution {
+public interface IClassNameProvider {
 	
 	String getClassNameForElement(Element elem);
 	

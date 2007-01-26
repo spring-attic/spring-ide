@@ -17,7 +17,7 @@
 package org.springframework.ide.eclipse.beans.ui.editor.templates;
 
 import org.eclipse.ui.texteditor.templates.TemplatePreferencePage;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin;
+import org.springframework.ide.eclipse.beans.ui.editor.Activator;
 
 /**
  * Preference page for Spring beans config templates.
@@ -25,13 +25,13 @@ import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin;
 public class BeanTemplatePreferencePage extends TemplatePreferencePage {
 
     public BeanTemplatePreferencePage() {
-        BeansEditorPlugin plugin = BeansEditorPlugin.getDefault();
+        Activator plugin = Activator.getDefault();
 
         setPreferenceStore(plugin.getPreferenceStore());
         setTemplateStore(plugin.getTemplateStore());
         setContextTypeRegistry(plugin.getTemplateContextRegistry());
         
-        setMessage(BeansEditorPlugin.getResourceString("preferences.message"));
+        setMessage(Activator.getResourceString("preferences.message"));
     }
 //
 //	protected Control createContents(Composite ancestor) {
@@ -49,7 +49,7 @@ public class BeanTemplatePreferencePage extends TemplatePreferencePage {
 
     public boolean performOk() {
         boolean ok = super.performOk();
-        BeansEditorPlugin.getDefault().savePluginPreferences();
+        Activator.getDefault().savePluginPreferences();
         return ok;
     }
 }

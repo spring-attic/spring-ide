@@ -33,6 +33,7 @@ import org.eclipse.wst.xml.core.text.IXMLPartitions;
 import org.eclipse.wst.xml.ui.StructuredTextViewerConfigurationXML;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.DelegatingContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.hover.BeansTextHoverProcessor;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.DelegatingHyperLinkDetector;
 
 public class BeansStructuredTextViewerConfiguration
         extends StructuredTextViewerConfigurationXML {
@@ -57,9 +58,9 @@ public class BeansStructuredTextViewerConfiguration
             contentAssistant.enableAutoActivation(true);
             contentAssistant.setAutoActivationDelay(50);
             contentAssistant.setProposalSelectorBackground(new Color(
-                    BeansEditorPlugin.getActiveWorkbenchShell().getDisplay(),
+                    Activator.getActiveWorkbenchShell().getDisplay(),
                     new RGB(255, 255, 255)));
-            contentAssistant.setRestoreCompletionProposalSize(BeansEditorPlugin
+            contentAssistant.setRestoreCompletionProposalSize(Activator
                     .getDefault().getDialogSettings());
         }
         return processors;

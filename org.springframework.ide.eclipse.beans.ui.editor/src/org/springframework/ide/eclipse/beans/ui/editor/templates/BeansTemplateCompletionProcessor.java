@@ -27,7 +27,7 @@ import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin;
+import org.springframework.ide.eclipse.beans.ui.editor.Activator;
 
 /**
  * Completion processor for Spring beans config templates. Most of the work is
@@ -61,7 +61,7 @@ public class BeansTemplateCompletionProcessor extends TemplateCompletionProcesso
     }
 
     private ContextTypeRegistry getTemplateContextRegistry() {
-        return BeansEditorPlugin.getDefault().getTemplateContextRegistry();
+        return Activator.getDefault().getTemplateContextRegistry();
     }
 
     protected Template[] getTemplates(String contextTypeId) {
@@ -73,7 +73,7 @@ public class BeansTemplateCompletionProcessor extends TemplateCompletionProcesso
     }
 
     private TemplateStore getTemplateStore() {
-        return BeansEditorPlugin.getDefault().getTemplateStore();
+        return Activator.getDefault().getTemplateStore();
     }
 
     public void setContextType(String contextTypeId) {

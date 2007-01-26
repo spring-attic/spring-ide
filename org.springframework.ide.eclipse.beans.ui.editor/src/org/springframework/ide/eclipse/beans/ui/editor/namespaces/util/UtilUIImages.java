@@ -26,7 +26,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin;
+import org.springframework.ide.eclipse.beans.ui.editor.Activator;
 
 /**
  * The images provided by the Spring UI plugin. Initialize the image registry by
@@ -52,7 +52,7 @@ public class UtilUIImages {
 
 	private static final String ICON_PATH_PREFIX = "";
 
-	private static final String NAME_PREFIX = BeansEditorPlugin.PLUGIN_ID + '.';
+	private static final String NAME_PREFIX = Activator.PLUGIN_ID + '.';
 
 	private static final int NAME_PREFIX_LENGTH = NAME_PREFIX.length();
     
@@ -63,10 +63,10 @@ public class UtilUIImages {
 
 	static {
 		try {
-			ICON_BASE_URL = new URL(BeansEditorPlugin.getDefault().getBundle()
+			ICON_BASE_URL = new URL(Activator.getDefault().getBundle()
 					.getEntry("/"), ICON_PATH_PREFIX);
 		} catch (MalformedURLException e) {
-			BeansEditorPlugin.log(e);
+			Activator.log(e);
 		}
 	}
 
@@ -149,7 +149,7 @@ public class UtilUIImages {
 				action.setDisabledImageDescriptor(id);
 			}
 		} catch (MalformedURLException e) {
-			BeansEditorPlugin.log(e);
+			Activator.log(e);
 		}
 		/*
 		 * try { ImageDescriptor id =
@@ -170,11 +170,11 @@ public class UtilUIImages {
 			}
 			imageDescriptors.put(name, result);
 			if (imageRegistry != null) {
-				BeansEditorPlugin.log("Image registry already defined", null);
+				Activator.log("Image registry already defined", null);
 			}
 			return result;
 		} catch (MalformedURLException e) {
-			BeansEditorPlugin.log(e);
+			Activator.log(e);
 			return ImageDescriptor.getMissingImageDescriptor();
 		}
 	}
@@ -183,7 +183,7 @@ public class UtilUIImages {
 		try {
 			return ImageDescriptor.createFromURL(makeIconFileURL(prefix, name));
 		} catch (MalformedURLException e) {
-			BeansEditorPlugin.log(e);
+			Activator.log(e);
 			return ImageDescriptor.getMissingImageDescriptor();
 		}
 	}

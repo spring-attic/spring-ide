@@ -19,72 +19,55 @@ package org.springframework.ide.eclipse.beans.ui.editor.outline;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
-import org.springframework.ide.eclipse.beans.ui.editor.INamespaceAwareEditorContribution;
-import org.springframework.ide.eclipse.beans.ui.editor.NamespaceEditorContributionRegistry;
+import org.springframework.ide.eclipse.beans.ui.editor.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.w3c.dom.Node;
 
 @SuppressWarnings("restriction")
-public class DelegatingLabelProvider
-        extends JFaceNodeLabelProvider {
+public class DelegatingLabelProvider extends JFaceNodeLabelProvider {
 
-    private static ILabelProvider xmlProvider;
+	private static ILabelProvider xmlProvider;
 
-    private static BeansContentOutlineConfiguration configuration;
+	public DelegatingLabelProvider(ILabelProvider xmlProvider) {
+		DelegatingLabelProvider.xmlProvider = xmlProvider;
+	}
 
-    public DelegatingLabelProvider(
-            BeansContentOutlineConfiguration configuration,
-            ILabelProvider xmlProvider) {
-        DelegatingLabelProvider.xmlProvider = xmlProvider;
-        DelegatingLabelProvider.configuration = configuration;
-    }
+	public DelegatingLabelProvider() {
+	}
 
-    public DelegatingLabelProvider() {
-    }
+	public Image getImage(Object object) {
+		if (!BeansEditorUtils.isSpringStyleOutline()) {
+			return xmlProvider.getImage(object);
+		}
 
-    public Image getImage(Object object) {
-        if (!BeansEditorUtils.isSpringStyleOutline()) {
-            return xmlProvider.getImage(object);
-        }
+		Node node = (Node) object;
+		String namespace = node.getNamespaceURI();
 
-        Node node = (Node) object;
-        String namespace = node.getNamespaceURI();
+		ILabelProvider labelProvider = NamespaceUtils.getLabelProvider(namespace);
+		if (labelProvider != null) {
+			Image image = labelProvider.getImage(object);
+			if (image != null) {
+				return image;
+			}
+		}
+		return xmlProvider.getImage(object);
+	}
 
-        INamespaceAwareEditorContribution contribution = NamespaceEditorContributionRegistry
-                .getNamespaceAwareEditorContribution(namespace);
-        if (contribution != null
-                && contribution
-                        .getLabelProvider(configuration) != null) {
-            Image image = contribution
-                    .getLabelProvider(configuration).getImage(
-                            object);
-            if (image != null) {
-                return image;
-            }
-        }
-        return xmlProvider.getImage(object);
-    }
+	public String getText(Object object) {
+		if (!BeansEditorUtils.isSpringStyleOutline()) {
+			return xmlProvider.getText(object);
+		}
 
-    public String getText(Object object) {
-        if (!BeansEditorUtils.isSpringStyleOutline()) {
-            return xmlProvider.getText(object);
-        }
+		Node node = (Node) object;
+		String namespace = node.getNamespaceURI();
 
-        Node node = (Node) object;
-        String namespace = node.getNamespaceURI();
-
-        INamespaceAwareEditorContribution contribution = NamespaceEditorContributionRegistry
-                .getNamespaceAwareEditorContribution(namespace);
-        if (contribution != null
-                && contribution
-                        .getLabelProvider(configuration) != null) {
-            String text = contribution
-                    .getLabelProvider(configuration).getText(
-                            object);
-            if (text != null) {
-                return text;
-            }
-        }
-        return xmlProvider.getText(object);
-    }
+		ILabelProvider labelProvider = NamespaceUtils.getLabelProvider(namespace);
+		if (labelProvider != null) {
+			String text = labelProvider.getText(object);
+			if (text != null) {
+				return text;
+			}
+		}
+		return xmlProvider.getText(object);
+	}
 }

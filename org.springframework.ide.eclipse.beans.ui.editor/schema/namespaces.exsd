@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.springframework.ide.eclipse.beans.ui">
+<schema targetNamespace="org.springframework.ide.eclipse.beans.ui.editor">
 <annotation>
       <appInfo>
-         <meta.schema plugin="org.springframework.ide.eclipse.beans.ui" id="namespaces" name="Namespaces"/>
+         <meta.schema plugin="org.springframework.ide.eclipse.beans.ui.editor" id="namespaceContributions" name="Spring IDE XML Editor Namespace Contribution"/>
       </appInfo>
       <documentation>
-         This extension point is used to add content providers and label providers for Spring 2.0 namespace implementations.
+         Extension point for third-party Spring 2.0 namespace implementors that want to provide content assist in Spring IDE&apos;s XML Editor. The extension point povides means to register a INamespaceAwareEditorContribution implementation.
       </documentation>
    </annotation>
 
@@ -58,20 +58,50 @@
          <attribute name="labelProvider" type="string" use="required">
             <annotation>
                <documentation>
-                  an instance of &lt;samp&gt;org.eclipse.jface.viewers.ILabelProvider&lt;/samp&gt;
+                  an instance of &lt;samp&gt;org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider&lt;/samp&gt;
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceLabelProvider"/>
+                  <meta.attribute kind="java" basedOn="org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider"/>
                </appInfo>
             </annotation>
          </attribute>
-         <attribute name="contentProvider" type="string">
+         <attribute name="contentAssistProcessor" type="string" use="required">
             <annotation>
                <documentation>
-                  an optional instance of &lt;samp&gt;org.eclipse.jface.viewers.ITreeContentProvider&lt;/samp&gt;
+                  an instance of &lt;samp&gt;org.springframework.ide.eclipse.beans.ui.editor.contentassist.INamespaceContentAssistProcessor&lt;/samp&gt;
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn="org.eclipse.jface.viewers.ITreeContentProvider"/>
+                  <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.beans.ui.editor.contentassist.INamespaceContentAssistProcessor"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="hyperLinkDetector" type="string">
+            <annotation>
+               <documentation>
+                  an instance of &lt;samp&gt;org.eclipse.jface.text.hyperlink.IHyperlinkDetector&lt;/samp&gt;
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn="org.eclipse.jface.text.hyperlink.IHyperlinkDetector"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="elementLocator" type="string">
+            <annotation>
+               <documentation>
+                  an instance of &lt;samp&gt;org.springframework.ide.eclipse.beans.ui.editor.namespaces.IReferenceableElementsLocator&lt;/samp&gt;
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.beans.ui.editor.namespaces.IReferenceableElementsLocator"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="classNameProvider" type="string">
+            <annotation>
+               <documentation>
+                  an instance of &lt;samp&gt;org.springframework.ide.eclipse.beans.ui.editor.namespaces.IClassNameProvider&lt;/samp&gt;
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.beans.ui.editor.namespaces.IClassNameProvider"/>
                </appInfo>
             </annotation>
          </attribute>
@@ -101,7 +131,7 @@
          <meta.section type="apiInfo"/>
       </appInfo>
       <documentation>
-         Each provider must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.eclipse.jface.viewers.ILabelProvider&lt;/samp&gt; or &lt;samp&gt;org.eclipse.jface.viewers.ITreeContentProvider&lt;/samp&gt;.
+         Each namespace contribution must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.springframework.ide.eclipse.beans.ui.editor.INamespaceAwareEditorContribution&lt;/samp&gt;.
       </documentation>
    </annotation>
 
@@ -110,7 +140,7 @@
          <meta.section type="implementation"/>
       </appInfo>
       <documentation>
-         This plugin itself comes with a set of predefined namespace contributions.
+         This plugin itself does not have any predefined builders.
       </documentation>
    </annotation>
 

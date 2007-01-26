@@ -22,7 +22,7 @@ import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateProposal;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.sse.ui.internal.contentassist.IRelevanceCompletionProposal;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
+import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 
 /**
  * Purpose of this class is to make the additional proposal info into content

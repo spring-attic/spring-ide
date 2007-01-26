@@ -44,7 +44,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateCo
  * The main plugin class
  */
 @SuppressWarnings("restriction")
-public class BeansEditorPlugin extends AbstractUIPlugin {
+public class Activator extends AbstractUIPlugin {
 
 	/**
 	 * Plugin identifier for Spring Beans UI (value
@@ -58,7 +58,7 @@ public class BeansEditorPlugin extends AbstractUIPlugin {
 	private static final String TEMPLATES_KEY = PLUGIN_ID + ".templates";
 
 	/** The shared instance. */
-	private static BeansEditorPlugin plugin;
+	private static Activator plugin;
 
 	private ResourceBundle resourceBundle;
 	private ContextTypeRegistry contextTypeRegistry;
@@ -72,7 +72,7 @@ public class BeansEditorPlugin extends AbstractUIPlugin {
 	 * The plug-in instance is created automatically by the Eclipse platform.
 	 * Clients must not call.
 	 */
-	public BeansEditorPlugin() {
+	public Activator() {
 		plugin = this;
 
 		try {
@@ -89,7 +89,6 @@ public class BeansEditorPlugin extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		this.context = context;
-        NamespaceEditorContributionRegistry.init();
 	}
 
 	/**
@@ -105,7 +104,7 @@ public class BeansEditorPlugin extends AbstractUIPlugin {
 	/**
 	 * Returns the shared instance.
 	 */
-	public static BeansEditorPlugin getDefault() {
+	public static Activator getDefault() {
 		return plugin;
 	}
 

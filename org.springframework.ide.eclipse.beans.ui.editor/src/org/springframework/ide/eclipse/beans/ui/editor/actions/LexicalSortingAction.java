@@ -21,7 +21,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.editor.IPreferencesConstants;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorPlugin;
+import org.springframework.ide.eclipse.beans.ui.editor.Activator;
 import org.springframework.ide.eclipse.beans.ui.editor.outline.OutlineSorter;
 
 public class LexicalSortingAction extends Action {
@@ -32,9 +32,9 @@ public class LexicalSortingAction extends Action {
 
 	public LexicalSortingAction(TreeViewer viewer) {
 		this.viewer = viewer;
-		setText(BeansEditorPlugin.getResourceString(PREFIX + "label"));
+		setText(Activator.getResourceString(PREFIX + "label"));
 		BeansUIImages.setLocalImageDescriptors(this, "alphab_sort_co.gif");
-		Preferences prefs = BeansEditorPlugin.getDefault()
+		Preferences prefs = Activator.getDefault()
 				.getPluginPreferences();
 		boolean checked = prefs.getBoolean(IPreferencesConstants.OUTLINE_SORT);
 		update(checked, false);
@@ -46,21 +46,21 @@ public class LexicalSortingAction extends Action {
 
 	public void update(boolean value, boolean doStore) {
 		setChecked(value);
-		Preferences prefs = BeansEditorPlugin.getDefault()
+		Preferences prefs = Activator.getDefault()
 				.getPluginPreferences();
 		boolean spring = prefs.getBoolean(IPreferencesConstants.OUTLINE_SPRING);
 		if (spring) {
 			viewer.setSorter(value ? new OutlineSorter() : null);
 		}
-		setToolTipText(value ? BeansEditorPlugin.getResourceString(PREFIX
-				+ "tooltip.checked") : BeansEditorPlugin
+		setToolTipText(value ? Activator.getResourceString(PREFIX
+				+ "tooltip.checked") : Activator
 				.getResourceString(PREFIX + "tooltip.unchecked"));
-		setDescription(value ? BeansEditorPlugin.getResourceString(PREFIX
-				+ "description.checked") : BeansEditorPlugin
+		setDescription(value ? Activator.getResourceString(PREFIX
+				+ "description.checked") : Activator
 				.getResourceString(PREFIX + "description.unchecked"));
 		if (doStore) {
 			prefs.setValue(IPreferencesConstants.OUTLINE_SORT, value);
-			BeansEditorPlugin.getDefault().savePluginPreferences();
+			Activator.getDefault().savePluginPreferences();
 			viewer.refresh(true);
 		}
 	}

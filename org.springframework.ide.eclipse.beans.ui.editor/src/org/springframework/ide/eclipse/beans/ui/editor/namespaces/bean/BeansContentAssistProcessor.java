@@ -36,8 +36,6 @@ import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector.Statics;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorJavaCompletionUtils;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.AbstractContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.BeanReferenceSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.FactoryMethodSearchRequestor;
@@ -45,6 +43,8 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.P
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PropertyValueSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.VoidMethodSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextTypeIds;
+import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
+import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -84,7 +84,7 @@ public class BeansContentAssistProcessor
 
     private void addClassAttributeValueProposals(ContentAssistRequest request,
             String prefix) {
-        BeansEditorJavaCompletionUtils.addClassValueProposals(request, prefix);
+        BeansJavaCompletionUtils.addClassValueProposals(request, prefix);
     }
     
     private void addFactoryMethodAttributeValueProposals(

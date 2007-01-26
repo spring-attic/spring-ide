@@ -28,15 +28,8 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 @SuppressWarnings("restriction")
-final class BeansOutlineLabelProvider
+public class BeansOutlineLabelProvider
         extends JFaceNodeLabelProvider {
-
-    private BeansContentOutlineConfiguration configuration;
-
-    public BeansOutlineLabelProvider(
-            BeansContentOutlineConfiguration configuration) {
-        this.configuration = configuration;
-    }
 
     public Image getImage(Object object) {
         // Create Spring beans label image
@@ -108,7 +101,7 @@ final class BeansOutlineLabelProvider
             if (attr != null) {
                 text = attr.getNodeValue();
             }
-            if (configuration.isShowAttributes()) {
+            if (BeansContentOutlineConfiguration.isShowAttributes()) {
                 attr = attrs.getNamedItem("alias");
                 if (attr != null) {
                     text += " \"" + attr.getNodeValue() + "\"";
@@ -137,7 +130,7 @@ final class BeansOutlineLabelProvider
                     }
                 }
             }
-            if (configuration.isShowAttributes()) {
+            if (BeansContentOutlineConfiguration.isShowAttributes()) {
                 attr = attrs.getNamedItem("class");
                 if (attr != null) {
                     if (text.length() > 0) {
@@ -179,7 +172,7 @@ final class BeansOutlineLabelProvider
             if (attr != null) {
                 text = attr.getNodeValue();
             }
-            if (configuration.isShowAttributes()) {
+            if (BeansContentOutlineConfiguration.isShowAttributes()) {
                 attr = attrs.getNamedItem("ref");
                 if (attr != null) {
                     text += " <" + attr.getNodeValue() + ">";
@@ -206,7 +199,7 @@ final class BeansOutlineLabelProvider
         }
         else if (tag == Tag.VALUE) {
             text = node.getNodeName();
-            if (configuration.isShowAttributes()) {
+            if (BeansContentOutlineConfiguration.isShowAttributes()) {
                 attr = attrs.getNamedItem("type");
                 if (attr != null) {
                     text += " [" + attr.getNodeValue() + "]";
@@ -225,7 +218,7 @@ final class BeansOutlineLabelProvider
                     text += " <" + attr.getNodeValue() + ">";
                 }
             }
-            if (configuration.isShowAttributes()) {
+            if (BeansContentOutlineConfiguration.isShowAttributes()) {
                 attr = attrs.getNamedItem("value");
                 if (attr != null) {
                     text += " \"" + attr.getNodeValue() + "\"";

@@ -35,6 +35,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.outline.BeansJFaceNodeAda
 @SuppressWarnings("restriction")
 public class BeansAdapterFactoryProvider extends AdapterFactoryProviderForXML {
 
+	@SuppressWarnings("deprecation")
 	protected void addContentBasedFactories(IStructuredModel structuredModel) {
 		FactoryRegistry factoryRegistry = structuredModel.getFactoryRegistry();
 		Assert.isNotNull(factoryRegistry, "No factory registered");

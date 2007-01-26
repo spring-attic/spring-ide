@@ -42,7 +42,7 @@ public class BeansModelHandler extends AbstractModelHandler
 	 * at run time with what's in registry! (so should never be 'final')
 	 */
 	private static String associatedContentTypeID =
-								  BeansEditorPlugin.PLUGIN_ID + ".beansConfig";
+								  Activator.PLUGIN_ID + ".beansConfig";
 
 	public BeansModelHandler() {
 		setId(modelHandlerID);

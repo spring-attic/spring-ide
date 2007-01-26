@@ -3,15 +3,13 @@ package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
-import org.springframework.ide.eclipse.beans.ui.editor.INamespaceAwareEditorContribution;
-import org.springframework.ide.eclipse.beans.ui.editor.IReferenceableNodesLocator;
+import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class DefaultReferenceableNodesLocator implements
-		IReferenceableNodesLocator {
+		IReferenceableElementsLocator {
 
 	private INamespaceAwareEditorContribution contribution;
 

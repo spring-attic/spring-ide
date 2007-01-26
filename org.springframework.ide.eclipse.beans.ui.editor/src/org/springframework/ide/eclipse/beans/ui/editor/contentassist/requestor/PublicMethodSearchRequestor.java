@@ -25,8 +25,8 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansJavaDocUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposal;
+import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaDocUtils;
 
 public class PublicMethodSearchRequestor
         extends MethodSearchRequestor {

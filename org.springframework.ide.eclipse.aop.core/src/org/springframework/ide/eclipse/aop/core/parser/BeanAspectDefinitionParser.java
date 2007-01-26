@@ -48,7 +48,7 @@ import org.springframework.ide.eclipse.aop.core.model.internal.JavaAspectDefinit
 import org.springframework.ide.eclipse.aop.core.parser.BeanAspectDefinitionParserUtils.AspectJAnnotation;
 import org.springframework.ide.eclipse.aop.core.parser.BeanAspectDefinitionParserUtils.AspectJAnnotationType;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
+import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;

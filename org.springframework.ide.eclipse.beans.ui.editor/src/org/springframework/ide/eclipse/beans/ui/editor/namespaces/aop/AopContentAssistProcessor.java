@@ -32,13 +32,13 @@ import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector.Statics;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorJavaCompletionUtils;
-import org.springframework.ide.eclipse.beans.ui.editor.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.AbstractContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.INamespaceContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.BeanReferenceSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PointcutReferenceSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PublicMethodSearchRequestor;
+import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
+import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionUtils;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -122,12 +122,12 @@ public class AopContentAssistProcessor
     
     private void addClassAttributeValueProposals(ContentAssistRequest request,
             String prefix, boolean interfaceRequired) {
-        BeansEditorJavaCompletionUtils.addClassValueProposals(request, prefix, interfaceRequired);
+        BeansJavaCompletionUtils.addClassValueProposals(request, prefix, interfaceRequired);
     }
     
     private void addCollectionTypesAttributeValueProposals(ContentAssistRequest request,
             final String prefix, String typeName) {
-        BeansEditorJavaCompletionUtils.addTypeHierachyAttributeValueProposals(request, prefix,
+        BeansJavaCompletionUtils.addTypeHierachyAttributeValueProposals(request, prefix,
                 typeName);
     }
 
