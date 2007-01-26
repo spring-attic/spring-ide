@@ -64,6 +64,9 @@ public class AopHyperLinkDetector
         else if ("pointcut-ref".equals(attrName)) {
             return true;
         }
+        else if ("advice-ref".equals(attrName)) {
+        	return true;
+        }
         else if ("implement-interface".equals(attrName) || "default-impl".equals(attrName)) {
             return true;
         }
@@ -117,7 +120,7 @@ public class AopHyperLinkDetector
             }
             return hyperlink;
         }
-        else if ("adivce-ref".equals(name)) {
+        else if ("advice-ref".equals(name)) {
             Node bean = BeansEditorUtils.getFirstReferenceableNodeById(node.getOwnerDocument(),
                     target);
             if (bean != null) {
