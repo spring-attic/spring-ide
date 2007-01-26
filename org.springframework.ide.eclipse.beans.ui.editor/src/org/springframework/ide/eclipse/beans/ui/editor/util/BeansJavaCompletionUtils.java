@@ -202,32 +202,31 @@ public class BeansJavaCompletionUtils {
 		List<String> requiredTypes = new ArrayList<String>();
 		String className = BeansEditorUtils.getClassNameForBean(node.getParentNode());
 		String propertyName = BeansEditorUtils.getAttribute(node, "name");
-		if (className != null && propertyName != null) {
+		if (className != null && propertyName != null && project != null) {
 			IType type = BeansModelUtils.getJavaType(project, className);
 			if (type != null) {
 				try {
 					IMethod method = Introspector.getWritableProperty(type, propertyName);
+					if (method != null) {
+						String signature = method.getParameterTypes()[0];
+						String packageName = Signature.getSignatureQualifier(signature);
+						String fullName = (packageName.trim().equals("") ? "" : packageName + ".")
+								+ Signature.getSignatureSimpleName(signature);
+						String[][] resolvedTypeNames = type.resolveType(fullName);
 
-					String signature = method.getParameterTypes()[0];
-					String packageName = Signature.getSignatureQualifier(signature);
-					String fullName = (packageName.trim().equals("") ? "" : packageName + ".")
-							+ Signature.getSignatureSimpleName(signature);
-					String[][] resolvedTypeNames = type.resolveType(fullName);
+						if (resolvedTypeNames != null && resolvedTypeNames.length > 0
+								&& resolvedTypeNames[0].length > 0) {
+							IType propertyType = BeansModelUtils.getJavaType(project,
+									resolvedTypeNames[0][0] + "." + resolvedTypeNames[0][1]);
+							ITypeHierarchy hierachy = propertyType.newTypeHierarchy(JavaCore
+									.create(project), new NullProgressMonitor());
 
-					if (resolvedTypeNames != null && resolvedTypeNames.length > 0
-							&& resolvedTypeNames[0].length > 0) {
-						IType propertyType = BeansModelUtils.getJavaType(project,
-								resolvedTypeNames[0][0] + "." + resolvedTypeNames[0][1]);
-						ITypeHierarchy hierachy = propertyType.newTypeHierarchy(JavaCore
-								.create(project),
-								new NullProgressMonitor());
-
-						requiredTypes.add(propertyType.getFullyQualifiedName());
-						IType[] subTypes = hierachy.getAllSubtypes(propertyType);
-						for (IType subType : subTypes) {
-							requiredTypes.add(subType.getFullyQualifiedName());
+							requiredTypes.add(propertyType.getFullyQualifiedName());
+							IType[] subTypes = hierachy.getAllSubtypes(propertyType);
+							for (IType subType : subTypes) {
+								requiredTypes.add(subType.getFullyQualifiedName());
+							}
 						}
-
 					}
 				} catch (JavaModelException e) {
 				}
