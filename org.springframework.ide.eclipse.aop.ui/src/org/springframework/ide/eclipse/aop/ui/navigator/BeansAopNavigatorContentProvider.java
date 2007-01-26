@@ -476,7 +476,7 @@ public class BeansAopNavigatorContentProvider implements ICommonContentProvider,
                 IType type = BeansModelUtils.getJavaType(config.getElementResource().getProject(),
                         clz);
                 if (type != null && type instanceof SourceType) {
-                    refreshViewer(type);
+                    //refreshViewer(type);
                 }
             }
         }
