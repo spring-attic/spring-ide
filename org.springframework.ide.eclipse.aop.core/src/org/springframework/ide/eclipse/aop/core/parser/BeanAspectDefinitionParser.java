@@ -37,6 +37,7 @@ import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.ThrowsAdvice;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
@@ -47,7 +48,6 @@ import org.springframework.ide.eclipse.aop.core.model.internal.BeanIntroductionD
 import org.springframework.ide.eclipse.aop.core.model.internal.JavaAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.parser.BeanAspectDefinitionParserUtils.AspectJAnnotation;
 import org.springframework.ide.eclipse.aop.core.parser.BeanAspectDefinitionParserUtils.AspectJAnnotationType;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -130,7 +130,7 @@ public class BeanAspectDefinitionParser {
 									aspectClass, aspectInfos);
 						}
 					} catch (Throwable e) {
-						BeansCorePlugin.log(e);
+						Activator.log(e);
 					}
 				}
 			}
@@ -402,7 +402,7 @@ public class BeanAspectDefinitionParser {
 					aspectInfos.add(info);
 				}
 			} catch (Throwable e) {
-				BeansCorePlugin.log(e);
+				Activator.log(e);
 			}
 		}
 	}

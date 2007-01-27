@@ -1,5 +1,7 @@
 package org.springframework.ide.eclipse.aop.core;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.aop.core.model.IAopModel;
@@ -55,4 +57,32 @@ public class Activator extends AbstractUIPlugin {
 	public static IAopModel getModel() {
         return model;
     }
+	
+	public static void log(IStatus status) {
+		getDefault().getLog().log(status);
+	}
+
+	/**
+	 * Writes the message to the plug-in's log
+	 * 
+	 * @param message the text to write to the log
+	 */
+	public static void log(String message, Throwable exception) {
+		IStatus status = createErrorStatus(message, exception);
+		getDefault().getLog().log(status);
+	}
+	
+	public static void log(Throwable exception) {
+		getDefault().getLog().log(createErrorStatus("Internal Error", exception));
+	}
+	/**
+	 * Returns a new <code>IStatus</code> for this plug-in
+	 */
+	public static IStatus createErrorStatus(String message,
+											Throwable exception) {
+		if (message == null) {
+			message= ""; 
+		}		
+		return new Status(Status.ERROR, PLUGIN_ID, 0, message, exception);
+	}
 }

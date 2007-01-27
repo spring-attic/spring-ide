@@ -157,9 +157,9 @@ public class BeanAopModelBuilder {
 						}
 					}
 				} catch (IOException e) {
-					BeansCorePlugin.log(e);
+					Activator.log(e);
 				} catch (CoreException e) {
-					BeansCorePlugin.log(e);
+					Activator.log(e);
 				} finally {
 					Thread.currentThread().setContextClassLoader(classLoader);
 					lock.release();
