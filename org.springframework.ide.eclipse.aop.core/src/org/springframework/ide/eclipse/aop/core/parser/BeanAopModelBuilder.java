@@ -118,7 +118,7 @@ public class BeanAopModelBuilder {
 
 				aopProject.clearReferencesForResource(currentFile);
 
-				ClassLoader weavingClassLoader = SpringCoreUtils.getClassLoader(javaProject);
+				ClassLoader weavingClassLoader = SpringCoreUtils.getClassLoader(javaProject, false);
 				ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 				Thread.currentThread().setContextClassLoader(weavingClassLoader);
 
@@ -161,7 +161,7 @@ public class BeanAopModelBuilder {
 				} catch (CoreException e) {
 					Activator.log(e);
 				} finally {
-					Thread.currentThread().setContextClassLoader(classLoader);
+ 					Thread.currentThread().setContextClassLoader(classLoader);
 					lock.release();
 				}
 			}

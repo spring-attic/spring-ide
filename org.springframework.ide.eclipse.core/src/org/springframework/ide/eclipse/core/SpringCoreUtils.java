@@ -257,10 +257,18 @@ public final class SpringCoreUtils {
 		return Thread.currentThread().getContextClassLoader();
 	}
 
-	public static ClassLoader getClassLoader(IJavaProject project) {
+	public static ClassLoader getClassLoader(IJavaProject project, boolean useParentClassLoader) {
 		List<URL> paths = getClassPathURLs(project);
-		return new URLClassLoader(paths.toArray(new URL[paths.size()]), Thread.currentThread()
-				.getContextClassLoader());
+		if (useParentClassLoader) {
+			return new URLClassLoader(paths.toArray(new URL[paths.size()]), Thread.currentThread()
+					.getContextClassLoader());
+		} else {
+			return new URLClassLoader(paths.toArray(new URL[paths.size()]));
+		}
+	}
+
+	public static ClassLoader getClassLoader(IJavaProject project) {
+		return getClassLoader(project, true);
 	}
 
 	public static List<URL> getClassPathURLs(IJavaProject project) {

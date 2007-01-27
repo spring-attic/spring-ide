@@ -160,13 +160,18 @@ public class BeanAspectDefinitionParser {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private static void createAnnotationAspectDefinition(final IDOMDocument document,
 			final Node bean, final String id, final String className, final Class<?> aspectClass,
-			final List<IAspectDefinition> aspectInfos) {
+			final List<IAspectDefinition> aspectInfos) throws Throwable {
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		final Class pointcutAnnotationClass = classLoader.loadClass(Pointcut.class.getName());
+		
 		ReflectionUtils.doWithMethods(aspectClass, new ReflectionUtils.MethodCallback() {
+			@SuppressWarnings("unchecked")
 			public void doWith(Method method) throws IllegalArgumentException {
 				// Exclude pointcuts
-				if (AnnotationUtils.getAnnotation(method, Pointcut.class) == null) {
+				if (AnnotationUtils.getAnnotation(method, pointcutAnnotationClass) == null) {
 					AspectJExpressionPointcut ajexp = BeanAspectDefinitionParserUtils.getPointcut(
 							method, aspectClass);
 					if (ajexp == null) {
@@ -350,10 +355,11 @@ public class BeanAspectDefinitionParser {
 			}
 
 			try {
-				Class<?> advisorClass = Thread.currentThread().getContextClassLoader().loadClass(
-						className);
+				ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+				Class<?> advisorClass = classLoader.loadClass(className);
 
-				if (MethodInterceptor.class.isAssignableFrom(advisorClass)) {
+				if (classLoader.loadClass(MethodInterceptor.class.getName()).isAssignableFrom(
+						advisorClass)) {
 					JavaAspectDefinition info = new JavaAspectDefinition();
 					info.setNode((IDOMNode) aspectNode);
 					info.setPointcut(pointcut);
@@ -365,7 +371,8 @@ public class BeanAspectDefinitionParser {
 							pointcut));
 					info.setMethod("invoke");
 				}
-				if (MethodBeforeAdvice.class.isAssignableFrom(advisorClass)) {
+				if (classLoader.loadClass(MethodBeforeAdvice.class.getName()).isAssignableFrom(
+						advisorClass)) {
 					JavaAspectDefinition info = new JavaAspectDefinition();
 					info.setNode((IDOMNode) aspectNode);
 					info.setPointcut(pointcut);
@@ -377,7 +384,8 @@ public class BeanAspectDefinitionParser {
 							pointcut));
 					aspectInfos.add(info);
 				}
-				if (ThrowsAdvice.class.isAssignableFrom(advisorClass)) {
+				if (classLoader.loadClass(ThrowsAdvice.class.getName()).isAssignableFrom(
+						advisorClass)) {
 					JavaAspectDefinition info = new JavaAspectDefinition();
 					info.setNode((IDOMNode) aspectNode);
 					info.setPointcut(pointcut);
@@ -389,7 +397,8 @@ public class BeanAspectDefinitionParser {
 							pointcut));
 					aspectInfos.add(info);
 				}
-				if (AfterReturningAdvice.class.isAssignableFrom(advisorClass)) {
+				if (classLoader.loadClass(AfterReturningAdvice.class.getName()).isAssignableFrom(
+						advisorClass)) {
 					JavaAspectDefinition info = new JavaAspectDefinition();
 					info.setNode((IDOMNode) aspectNode);
 					info.setPointcut(pointcut);

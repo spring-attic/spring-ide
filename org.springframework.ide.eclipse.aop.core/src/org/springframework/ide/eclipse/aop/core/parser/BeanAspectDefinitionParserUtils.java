@@ -29,12 +29,11 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.AjType;
 import org.aspectj.lang.reflect.AjTypeSystem;
 import org.aspectj.lang.reflect.PerClauseKind;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
-import org.springframework.aop.framework.AopConfigException;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.util.StringUtils;
 
 @SuppressWarnings("restriction")
@@ -47,16 +46,22 @@ class BeanAspectDefinitionParserUtils {
 	 */
 	protected static class AspectJAnnotation<A extends Annotation> {
 
-		private static Map<Class<?>, AspectJAnnotationType> annotationTypes = null;
+		private Map<Class<?>, AspectJAnnotationType> annotationTypes = null;
 
-		static {
+		private void init() throws ClassNotFoundException  {
+			ClassLoader cl = Thread.currentThread().getContextClassLoader();
 			annotationTypes = new HashMap<Class<?>, AspectJAnnotationType>();
-			annotationTypes.put(Pointcut.class, AspectJAnnotationType.AtPointcut);
-			annotationTypes.put(After.class, AspectJAnnotationType.AtAfter);
-			annotationTypes.put(AfterReturning.class, AspectJAnnotationType.AtAfterReturning);
-			annotationTypes.put(AfterThrowing.class, AspectJAnnotationType.AtAfterThrowing);
-			annotationTypes.put(Around.class, AspectJAnnotationType.AtAround);
-			annotationTypes.put(Before.class, AspectJAnnotationType.AtBefore);
+			annotationTypes.put(cl.loadClass(Pointcut.class.getName()),
+					AspectJAnnotationType.AtPointcut);
+			annotationTypes.put(cl.loadClass(After.class.getName()), AspectJAnnotationType.AtAfter);
+			annotationTypes.put(cl.loadClass(AfterReturning.class.getName()),
+					AspectJAnnotationType.AtAfterReturning);
+			annotationTypes.put(cl.loadClass(AfterThrowing.class.getName()),
+					AspectJAnnotationType.AtAfterThrowing);
+			annotationTypes.put(cl.loadClass(Around.class.getName()),
+					AspectJAnnotationType.AtAround);
+			annotationTypes.put(cl.loadClass(Before.class.getName()),
+					AspectJAnnotationType.AtBefore);
 		}
 
 		private static final String[] EXPRESSION_PROPERTIES = new String[] { "value", "pointcut" };
@@ -69,7 +74,8 @@ class BeanAspectDefinitionParserUtils {
 
 		private final String expression;
 
-		public AspectJAnnotation(A aspectjAnnotation) {
+		public AspectJAnnotation(A aspectjAnnotation) throws ClassNotFoundException {
+			init();
 			this.annotation = aspectjAnnotation;
 			for (Class<?> c : annotationTypes.keySet()) {
 				if (c.isInstance(this.annotation)) {
@@ -143,8 +149,15 @@ class BeanAspectDefinitionParserUtils {
 		AtAfter, AtAfterReturning, AtAfterThrowing, AtAround, AtBefore, AtPointcut
 	}
 
-	protected static boolean isAspect(Class<?> clazz) {
-		boolean couldBeAtAspectJAspect = AjTypeSystem.getAjType(clazz).isAspect();
+	protected static boolean isAspect(Class<?> clazz) throws Throwable {
+
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		Class<?> aspectTypeSystemClass = classLoader.loadClass(AjTypeSystem.class.getName());
+		Method getAjTypeMethod = aspectTypeSystemClass.getMethod("getAjType", Class.class);
+		Object aspectJTypeSystem = getAjTypeMethod.invoke(null, clazz);
+
+		Method isAspectMethod = aspectJTypeSystem.getClass().getMethod("isAspect", (Class[]) null);
+		boolean couldBeAtAspectJAspect = (Boolean) isAspectMethod.invoke(aspectJTypeSystem, (Object[]) null);
 		if (!couldBeAtAspectJAspect) {
 			return false;
 		} else {
@@ -166,23 +179,35 @@ class BeanAspectDefinitionParserUtils {
 	/**
 	 * Find and return the first AspectJ annotation on the given method (there <i>should</i> only
 	 * be one anyway...)
+	 * 
+	 * @throws ClassNotFoundException
 	 */
 	@SuppressWarnings("unchecked")
 	protected static AspectJAnnotation<?> findAspectJAnnotationOnMethod(Method aMethod) {
-		Class<? extends Annotation>[] classesToLookFor = (Class<? extends Annotation>[]) new Class[] {
-				Before.class, Around.class, After.class, AfterReturning.class, AfterThrowing.class,
-				Pointcut.class };
-		for (Class<? extends Annotation> c : classesToLookFor) {
-			AspectJAnnotation foundAnnotation = findAnnotation(aMethod, c);
-			if (foundAnnotation != null) {
-				return foundAnnotation;
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		Class<? extends Annotation>[] classesToLookFor;
+		try {
+			classesToLookFor = (Class<? extends Annotation>[]) new Class[] {
+					classLoader.loadClass(Before.class.getName()),
+					classLoader.loadClass(Around.class.getName()),
+					classLoader.loadClass(After.class.getName()),
+					classLoader.loadClass(AfterReturning.class.getName()),
+					classLoader.loadClass(AfterThrowing.class.getName()),
+					classLoader.loadClass(Pointcut.class.getName()) };
+			for (Class<? extends Annotation> c : classesToLookFor) {
+				AspectJAnnotation foundAnnotation = findAnnotation(aMethod, c);
+				if (foundAnnotation != null) {
+					return foundAnnotation;
+				}
 			}
+		} catch (ClassNotFoundException e) {
+			Activator.log(e);
 		}
 		return null;
 	}
 
 	protected static <A extends Annotation> AspectJAnnotation<A> findAnnotation(Method method,
-			Class<A> toLookFor) {
+			Class<A> toLookFor) throws ClassNotFoundException {
 		A result = AnnotationUtils.findAnnotation(method, toLookFor);
 		if (result != null) {
 			return new AspectJAnnotation<A>(result);
@@ -201,7 +226,8 @@ class BeanAspectDefinitionParserUtils {
 
 	protected static AspectJExpressionPointcut getPointcut(Method candidateAspectJAdviceMethod,
 			Class<?> candidateAspectClass) {
-		AspectJAnnotation<?> aspectJAnnotation = findAspectJAnnotationOnMethod(candidateAspectJAdviceMethod);
+		AspectJAnnotation<?> aspectJAnnotation;
+		aspectJAnnotation = findAspectJAnnotationOnMethod(candidateAspectJAdviceMethod);
 		if (aspectJAnnotation == null) {
 			return null;
 		}
@@ -210,36 +236,31 @@ class BeanAspectDefinitionParserUtils {
 		ajexp.setExpression(aspectJAnnotation.getPointcutExpression());
 		return ajexp;
 	}
-	
-	protected static boolean validate(Class<?> aspectClass) throws AopConfigException {
-		// If the parent has the annotation and isn't abstract it's an error
-		if (aspectClass.getSuperclass().getAnnotation(Aspect.class) != null
+
+	@SuppressWarnings("unchecked")
+	protected static boolean validate(Class<?> aspectClass) throws Throwable {
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		Class annotationClass = classLoader.loadClass(Aspect.class.getName());
+		if (aspectClass.getSuperclass().getAnnotation(annotationClass) != null
 				&& !Modifier.isAbstract(aspectClass.getSuperclass().getModifiers())) {
 			return false;
-			// throw new AopConfigException(aspectClass.getName() + " cannot
-			// extend concrete aspect " +
-			// aspectClass.getSuperclass().getName());
 		}
+		Class aspectTypeSystemClass = classLoader.loadClass(AjTypeSystem.class.getName());
+		Method getAjTypeMethod = aspectTypeSystemClass.getMethod("getAjType", Class.class);
+		Object aspectJType = getAjTypeMethod.invoke(null, aspectClass);
 
-		AjType<?> ajType = AjTypeSystem.getAjType(aspectClass);
-		if (!ajType.isAspect()) {
+		Method perClauseMethod = aspectJType.getClass().getMethod("getPerClause", (Class[]) null);
+		Object perClauseType = perClauseMethod.invoke(aspectJType, (Object[]) null);
+		Method getKindMethod = perClauseType.getClass().getMethod("getKind", (Class[]) null);
+		Object getKind = getKindMethod.invoke(perClauseType, (Object[]) null);
+
+		if (getKind.toString().equals(PerClauseKind.PERCFLOW.toString())) {
 			return false;
-			// throw new NotAnAtAspectException(aspectClass);
 		}
-		if (ajType.getPerClause().getKind() == PerClauseKind.PERCFLOW) {
+		if (getKind.toString().equals(PerClauseKind.PERCFLOWBELOW.toString())) {
 			return false;
-			// throw new AopConfigException(aspectClass.getName() + " uses
-			// percflow instantiation model: " +
-			// "This is not supported in Spring AOP");
-		}
-		if (ajType.getPerClause().getKind() == PerClauseKind.PERCFLOWBELOW) {
-			return false;
-			// throw new AopConfigException(aspectClass.getName() + " uses
-			// percflowbelow instantiation model: " +
-			// "This is not supported in Spring AOP");
 		}
 		return true;
 	}
-
 
 }
