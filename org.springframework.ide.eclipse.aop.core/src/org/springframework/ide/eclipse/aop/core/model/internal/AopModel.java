@@ -28,7 +28,7 @@ import org.springframework.ide.eclipse.aop.core.model.IAopModel;
 import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.core.parser.BeanAopModelBuilder;
+import org.springframework.ide.eclipse.aop.core.parser.BeansAopModelBuilder;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
 
 public class AopModel implements IAopModel {
@@ -54,7 +54,7 @@ public class AopModel implements IAopModel {
     private void createModel(IProject project) {
         Set<IFile> resourcesToBuild = BeansAopUtils
                 .getFilesToBuildFromBeansProject(project);
-        BeanAopModelBuilder.buildAopModel(resourcesToBuild);
+        BeansAopModelBuilder.buildAopModel(resourcesToBuild);
     }
 
     public IAopProject getProjectWithInitialization(IProject project) {

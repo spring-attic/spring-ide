@@ -46,8 +46,8 @@ import org.springframework.ide.eclipse.aop.core.model.internal.AnnotationIntrodu
 import org.springframework.ide.eclipse.aop.core.model.internal.BeanAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.internal.BeanIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.model.internal.JavaAspectDefinition;
-import org.springframework.ide.eclipse.aop.core.parser.BeanAspectDefinitionParserUtils.AspectJAnnotation;
-import org.springframework.ide.eclipse.aop.core.parser.BeanAspectDefinitionParserUtils.AspectJAnnotationType;
+import org.springframework.ide.eclipse.aop.core.parser.BeansAopModelUtils.AspectJAnnotation;
+import org.springframework.ide.eclipse.aop.core.parser.BeansAopModelUtils.AspectJAnnotationType;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -55,7 +55,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 @SuppressWarnings("restriction")
-public class BeanAspectDefinitionParser {
+public class BeansAspectDefinitionParser {
 
 	private static void addDocument(IDOMDocument document, List<IAspectDefinition> aspectInfos,
 			IResource file) {
@@ -124,8 +124,8 @@ public class BeanAspectDefinitionParser {
 					try {
 						final Class<?> aspectClass = Thread.currentThread().getContextClassLoader()
 								.loadClass(className);
-						if (BeanAspectDefinitionParserUtils.isAspect(aspectClass)
-								&& BeanAspectDefinitionParserUtils.validate(aspectClass)) {
+						if (BeansAopModelUtils.isAspect(aspectClass)
+								&& BeansAopModelUtils.validate(aspectClass)) {
 							createAnnotationAspectDefinition(document, bean, id, className,
 									aspectClass, aspectInfos);
 						}
@@ -172,7 +172,7 @@ public class BeanAspectDefinitionParser {
 			public void doWith(Method method) throws IllegalArgumentException {
 				// Exclude pointcuts
 				if (AnnotationUtils.getAnnotation(method, pointcutAnnotationClass) == null) {
-					AspectJExpressionPointcut ajexp = BeanAspectDefinitionParserUtils.getPointcut(
+					AspectJExpressionPointcut ajexp = BeansAopModelUtils.getPointcut(
 							method, aspectClass);
 					if (ajexp == null) {
 						return;
@@ -185,7 +185,7 @@ public class BeanAspectDefinitionParser {
 					def.setNode((IDOMNode) bean);
 					def.setMethod(method.getName());
 
-					AspectJAnnotation<?> aspectJAnnotation = BeanAspectDefinitionParserUtils
+					AspectJAnnotation<?> aspectJAnnotation = BeansAopModelUtils
 							.findAspectJAnnotationOnMethod(method);
 					if (aspectJAnnotation.getArgNames() != null) {
 						def.setArgNames(StringUtils
@@ -367,7 +367,7 @@ public class BeanAspectDefinitionParser {
 					info.setAspectName(beanRef);
 					info.setType(ADVICE_TYPES.AROUND);
 					aspectInfos.add(info);
-					info.setPointcut(BeanAspectDefinitionParserUtils.getPointcut(advisorClass,
+					info.setPointcut(BeansAopModelUtils.getPointcut(advisorClass,
 							pointcut));
 					info.setMethod("invoke");
 				}
@@ -380,7 +380,7 @@ public class BeanAspectDefinitionParser {
 					info.setAspectName(beanRef);
 					info.setType(ADVICE_TYPES.BEFORE);
 					info.setMethod("before");
-					info.setPointcut(BeanAspectDefinitionParserUtils.getPointcut(advisorClass,
+					info.setPointcut(BeansAopModelUtils.getPointcut(advisorClass,
 							pointcut));
 					aspectInfos.add(info);
 				}
@@ -393,7 +393,7 @@ public class BeanAspectDefinitionParser {
 					info.setAspectName(beanRef);
 					info.setType(ADVICE_TYPES.AFTER_THROWING);
 					info.setMethod("afterThrowing");
-					info.setPointcut(BeanAspectDefinitionParserUtils.getPointcut(advisorClass,
+					info.setPointcut(BeansAopModelUtils.getPointcut(advisorClass,
 							pointcut));
 					aspectInfos.add(info);
 				}
@@ -406,7 +406,7 @@ public class BeanAspectDefinitionParser {
 					info.setAspectName(beanRef);
 					info.setType(ADVICE_TYPES.AFTER_RETURNING);
 					info.setMethod("afterReturning");
-					info.setPointcut(BeanAspectDefinitionParserUtils.getPointcut(advisorClass,
+					info.setPointcut(BeansAopModelUtils.getPointcut(advisorClass,
 							pointcut));
 					aspectInfos.add(info);
 				}

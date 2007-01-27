@@ -16,6 +16,7 @@
 package org.springframework.ide.eclipse.aop.core.parser;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -31,13 +32,22 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.AjTypeSystem;
 import org.aspectj.lang.reflect.PerClauseKind;
+import org.eclipse.jdt.core.IType;
+import org.springframework.aop.aspectj.AspectJAfterAdvice;
+import org.springframework.aop.aspectj.AspectJAfterReturningAdvice;
+import org.springframework.aop.aspectj.AspectJAfterThrowingAdvice;
+import org.springframework.aop.aspectj.AspectJAroundAdvice;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
+import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.ide.eclipse.aop.core.Activator;
+import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.core.parser.BeansAopModelBuilder.JdtParameterNameDiscoverer;
 import org.springframework.util.StringUtils;
 
 @SuppressWarnings("restriction")
-class BeanAspectDefinitionParserUtils {
+class BeansAopModelUtils {
 
 	private static final String AJC_MAGIC = "ajc$";
 
@@ -262,5 +272,64 @@ class BeanAspectDefinitionParserUtils {
 		}
 		return true;
 	}
+	
+	public static Object initAspectJExpressionPointcut(IAspectDefinition info,
+			IType jdtAspectType, Class<?> expressionPointcutClass) throws InstantiationException,
+			IllegalAccessException, InvocationTargetException, ClassNotFoundException {
+		Object pc = expressionPointcutClass.newInstance();
+		for (Method m : expressionPointcutClass.getMethods()) {
+			if (m.getName().equals("setExpression")) {
+				m.invoke(pc, info.getPointcut().getExpression());
+			} else if (m.getName().equals("setParameterNames")) {
+				m.invoke(pc, new Object[] { new JdtParameterNameDiscoverer(jdtAspectType)
+						.getParameterNames(info.getAdviceMethod()) });
+			}
+		}
+		return pc;
+	}
+
+	public static Class<?> getAspectJAdviceClass(IAspectDefinition info)
+			throws ClassNotFoundException {
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		Class<?> aspectJAdviceClass = null;
+		if (info.getType() == ADVICE_TYPES.AROUND) {
+			aspectJAdviceClass = loader.loadClass(AspectJAroundAdvice.class.getName());
+		} else if (info.getType() == ADVICE_TYPES.AFTER) {
+			aspectJAdviceClass = loader.loadClass(AspectJAfterAdvice.class.getName());
+		} else if (info.getType() == ADVICE_TYPES.AFTER_RETURNING) {
+			aspectJAdviceClass = loader.loadClass(AspectJAfterReturningAdvice.class.getName());
+		} else if (info.getType() == ADVICE_TYPES.AFTER_THROWING) {
+			aspectJAdviceClass = loader.loadClass(AspectJAfterThrowingAdvice.class.getName());
+		} else if (info.getType() == ADVICE_TYPES.BEFORE) {
+			aspectJAdviceClass = loader.loadClass(AspectJMethodBeforeAdvice.class.getName());
+		}
+		return aspectJAdviceClass;
+	}
+
+	public static Object createAspectJAdvice(IAspectDefinition info, Class<?> aspectJAdviceClass,
+			Object pc) throws Throwable {
+		Constructor<?> ctor = aspectJAdviceClass.getConstructors()[0];
+		Method afterPropertiesSetMethod = aspectJAdviceClass.getMethod("afterPropertiesSet",
+				(Class[]) null);
+		Object aspectJAdvice = ctor.newInstance(new Object[] { info.getAdviceMethod(), pc, null });
+		if (info.getType() == ADVICE_TYPES.AFTER_RETURNING) {
+			if (info.getReturning() != null) {
+				Method setReturningNameMethod = aspectJAdviceClass.getMethod("setReturningName",
+						String.class);
+				setReturningNameMethod.invoke(aspectJAdvice, info.getReturning());
+			}
+		} else if (info.getType() == ADVICE_TYPES.AFTER_THROWING) {
+			if (info.getThrowing() != null) {
+				Method setThrowingNameMethod = aspectJAdviceClass.getMethod("setThrowingName",
+						String.class);
+				setThrowingNameMethod.invoke(aspectJAdvice, info.getThrowing());
+			}
+		}
+
+		afterPropertiesSetMethod.invoke(aspectJAdvice, (Object[]) null);
+		return aspectJAdvice;
+
+	}
+
 
 }

@@ -19,7 +19,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.springframework.ide.eclipse.aop.core.parser.BeanAopModelBuilder;
+import org.springframework.ide.eclipse.aop.core.parser.BeansAopModelBuilder;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 
@@ -32,7 +32,7 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
     public void build(IFile file, IProgressMonitor monitor) {
         Set<IFile> filesToBuild = BeansAopUtils.getFilesToBuild(file);
         monitor.beginTask("Parsing Spring AOP", filesToBuild.size());
-        BeanAopModelBuilder.buildAopModel(filesToBuild);
+        BeansAopModelBuilder.buildAopModel(filesToBuild);
         monitor.done();
     }
 }
