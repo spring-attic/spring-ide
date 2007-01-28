@@ -186,7 +186,8 @@ public class BeansAopMarkerUtils {
 					int count = marker.getAttribute(MARKER_COUNT, 1);
 					String msg = marker.getAttribute(IMarker.MESSAGE, "");
 					count++;
-					if (l == line && message.equals(msg) && marker.getType() == markerId) {
+					if (l == line && message != null && message.equals(msg)
+							&& marker.getType() == markerId) {
 						return;
 					}
 					if (l == line && marker.getType() != markerId) {

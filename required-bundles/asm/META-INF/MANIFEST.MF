@@ -1,0 +1,15 @@
+Implementation-Title: asm
+Implementation-Version: 2.2.2
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.objectweb.asm
+Bundle-Name: asm
+Bundle-Version: 2.2.2
+Bundle-Vendor: ObjectWeb
+Bundle-ClassPath: asm-2.2.2.jar, 
+ asm-commons-2.2.2.jar,
+ asm-util-2.2.2.jar
+Export-Package: org.objectweb.asm,
+ org.objectweb.asm.commons,
+ org.objectweb.asm.signature,
+ org.objectweb.asm.util,
+ org.objectweb.asm.util.attrs

@@ -18,6 +18,7 @@ package org.springframework.ide.eclipse.aop.core.parser;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
@@ -183,7 +184,8 @@ public class BeansAopModelBuilder {
 
 	private static void buildAopReferencesFromAspectDefinition(ClassLoader loader,
 			IBeansConfig config, IAspectDefinition info) {
-
+		
+		
 		IResource file = config.getElementResource();
 		IAopProject aopProject = ((AopModel) Activator.getModel())
 				.getProjectWithInitialization(config.getElementResource().getProject());
@@ -191,7 +193,12 @@ public class BeansAopModelBuilder {
 		Set<IBean> beans = config.getBeans();
 		for (IBean bean : beans) {
 			try {
-
+				
+				// validate the aspect definition
+				if (info.getAdviceClass() == null || info.getAdviceMethod() == null) {
+					return;
+				}
+				
 				Class<?> targetClass = loader.loadClass(bean.getClassName());
 				if (info instanceof BeanIntroductionDefinition) {
 					BeanIntroductionDefinition intro = (BeanIntroductionDefinition) info;
@@ -243,14 +250,12 @@ public class BeansAopModelBuilder {
 
 					Class<?> expressionPointcutClass = loader
 							.loadClass(AspectJExpressionPointcut.class.getName());
-					Class<?> aspectJAdviceClass = BeansAopModelUtils
-							.getAspectJAdviceClass(info);
+					Class<?> aspectJAdviceClass = BeansAopModelUtils.getAspectJAdviceClass(info);
 
 					Object pc = BeansAopModelUtils.initAspectJExpressionPointcut(info,
 							jdtAspectType, expressionPointcutClass);
 
-					BeansAopModelUtils.createAspectJAdvice(info, aspectJAdviceClass,
-							pc);
+					BeansAopModelUtils.createAspectJAdvice(info, aspectJAdviceClass, pc);
 
 					Method matchesMethod = expressionPointcutClass.getMethod("matches",
 							Method.class, Class.class);
@@ -272,16 +277,16 @@ public class BeansAopModelBuilder {
 					}
 				}
 			} catch (NoClassDefFoundError e) {
-				BeansAopMarkerUtils.createProblemMarker(file, "Build path is incomplete. Cannot find class file for "
-						+ e.getMessage(), IMarker.SEVERITY_WARNING, info.getAspectLineNumber(),
+				BeansAopMarkerUtils.createProblemMarker(file,
+						"Build path is incomplete. Cannot find class file for " + e.getMessage(),
+						IMarker.SEVERITY_ERROR, info.getAspectLineNumber(),
 						BeansAopMarkerUtils.AOP_PROBLEM_MARKER, file);
 			} catch (ClassNotFoundException e) {
 				BeansAopMarkerUtils.createProblemMarker(file,
-						"Build path is incomplete. Cannot find class file for "
-						+ e.getMessage(), IMarker.SEVERITY_WARNING, info.getAspectLineNumber(),
+						"Build path is incomplete. Cannot find class file for " + e.getMessage(),
+						IMarker.SEVERITY_ERROR, info.getAspectLineNumber(),
 						BeansAopMarkerUtils.AOP_PROBLEM_MARKER, file);
 			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
 				BeansAopMarkerUtils.createProblemMarker(file, e.getMessage(),
 						IMarker.SEVERITY_ERROR, info.getAspectLineNumber(),
 						BeansAopMarkerUtils.AOP_PROBLEM_MARKER, file);
@@ -332,14 +337,16 @@ public class BeansAopModelBuilder {
 		}
 
 		public String[] getParameterNames(Method method) {
-			String methodName = method.getName();
-			int argCount = method.getParameterTypes().length;
-			IMethod jdtMethod;
-			try {
-				jdtMethod = BeansAopUtils.getMethod(type, methodName, argCount);
-				return jdtMethod.getParameterNames();
-			} catch (JavaModelException e) {
-				// suppress this
+			if (method != null) {
+				String methodName = method.getName();
+				int argCount = method.getParameterTypes().length;
+				IMethod jdtMethod;
+				try {
+					jdtMethod = BeansAopUtils.getMethod(type, methodName, argCount);
+					return jdtMethod.getParameterNames();
+				} catch (JavaModelException e) {
+					// suppress this
+				}
 			}
 			return null;
 		}

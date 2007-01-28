@@ -17,6 +17,8 @@
 package org.springframework.ide.eclipse.core;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -33,6 +35,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -273,6 +276,25 @@ public final class SpringCoreUtils {
 
 	public static List<URL> getClassPathURLs(IJavaProject project) {
 		List<URL> paths = new ArrayList<URL>();
+		
+		// add required libraries from osgi bundles
+		try {
+			Bundle springBundle = Platform.getBundle("org.springframework");
+			Bundle aspectjBundle = Platform.getBundle("org.aspectj.aspectjweaver");
+			Bundle asmBundle = Platform.getBundle("org.objectweb.asm");
+			Bundle commonsLoggingBundle = Platform.getBundle("jakarta.commons.logging");
+			paths.add(FileLocator.toFileURL(new URL(springBundle.getEntry("/"), "/spring.jar")));
+			paths.add(FileLocator.toFileURL(new URL(aspectjBundle.getEntry("/"), "/aspectjweaver.jar")));
+			paths.add(FileLocator.toFileURL(new URL(asmBundle.getEntry("/"), "/asm-2.2.2.jar")));
+			paths.add(FileLocator.toFileURL(new URL(asmBundle.getEntry("/"), "/asm-commons-2.2.2.jar")));
+			paths.add(FileLocator.toFileURL(new URL(asmBundle.getEntry("/"), "/asm-util-2.2.2.jar")));
+			paths.add(FileLocator.toFileURL(new URL(commonsLoggingBundle.getEntry("/"), "/commons-logging.jar")));
+		} catch (MalformedURLException e) {
+			SpringCore.log(e);
+		} catch (IOException e) {
+			SpringCore.log(e);
+		}
+		
 		try {
 			// configured classpath
 			IClasspathEntry classpath[] = project.getRawClasspath();

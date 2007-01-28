@@ -58,7 +58,7 @@ class BeansAopModelUtils {
 
 		private Map<Class<?>, AspectJAnnotationType> annotationTypes = null;
 
-		private void init() throws ClassNotFoundException  {
+		private void init() throws ClassNotFoundException {
 			ClassLoader cl = Thread.currentThread().getContextClassLoader();
 			annotationTypes = new HashMap<Class<?>, AspectJAnnotationType>();
 			annotationTypes.put(cl.loadClass(Pointcut.class.getName()),
@@ -167,7 +167,8 @@ class BeansAopModelUtils {
 		Object aspectJTypeSystem = getAjTypeMethod.invoke(null, clazz);
 
 		Method isAspectMethod = aspectJTypeSystem.getClass().getMethod("isAspect", (Class[]) null);
-		boolean couldBeAtAspectJAspect = (Boolean) isAspectMethod.invoke(aspectJTypeSystem, (Object[]) null);
+		boolean couldBeAtAspectJAspect = (Boolean) isAspectMethod.invoke(aspectJTypeSystem,
+				(Object[]) null);
 		if (!couldBeAtAspectJAspect) {
 			return false;
 		} else {
@@ -272,9 +273,9 @@ class BeansAopModelUtils {
 		}
 		return true;
 	}
-	
-	public static Object initAspectJExpressionPointcut(IAspectDefinition info,
-			IType jdtAspectType, Class<?> expressionPointcutClass) throws InstantiationException,
+
+	public static Object initAspectJExpressionPointcut(IAspectDefinition info, IType jdtAspectType,
+			Class<?> expressionPointcutClass) throws InstantiationException,
 			IllegalAccessException, InvocationTargetException, ClassNotFoundException {
 		Object pc = expressionPointcutClass.newInstance();
 		for (Method m : expressionPointcutClass.getMethods()) {
@@ -308,28 +309,32 @@ class BeansAopModelUtils {
 
 	public static Object createAspectJAdvice(IAspectDefinition info, Class<?> aspectJAdviceClass,
 			Object pc) throws Throwable {
-		Constructor<?> ctor = aspectJAdviceClass.getConstructors()[0];
-		Method afterPropertiesSetMethod = aspectJAdviceClass.getMethod("afterPropertiesSet",
-				(Class[]) null);
-		Object aspectJAdvice = ctor.newInstance(new Object[] { info.getAdviceMethod(), pc, null });
-		if (info.getType() == ADVICE_TYPES.AFTER_RETURNING) {
-			if (info.getReturning() != null) {
-				Method setReturningNameMethod = aspectJAdviceClass.getMethod("setReturningName",
-						String.class);
-				setReturningNameMethod.invoke(aspectJAdvice, info.getReturning());
+		try {
+			Constructor<?> ctor = aspectJAdviceClass.getConstructors()[0];
+			Method afterPropertiesSetMethod = aspectJAdviceClass.getMethod("afterPropertiesSet",
+					(Class[]) null);
+			Object aspectJAdvice = ctor
+					.newInstance(new Object[] { info.getAdviceMethod(), pc, null });
+			if (info.getType() == ADVICE_TYPES.AFTER_RETURNING) {
+				if (info.getReturning() != null) {
+					Method setReturningNameMethod = aspectJAdviceClass.getMethod(
+							"setReturningName", String.class);
+					setReturningNameMethod.invoke(aspectJAdvice, info.getReturning());
+				}
+			} else if (info.getType() == ADVICE_TYPES.AFTER_THROWING) {
+				if (info.getThrowing() != null) {
+					Method setThrowingNameMethod = aspectJAdviceClass.getMethod("setThrowingName",
+							String.class);
+					setThrowingNameMethod.invoke(aspectJAdvice, info.getThrowing());
+				}
 			}
-		} else if (info.getType() == ADVICE_TYPES.AFTER_THROWING) {
-			if (info.getThrowing() != null) {
-				Method setThrowingNameMethod = aspectJAdviceClass.getMethod("setThrowingName",
-						String.class);
-				setThrowingNameMethod.invoke(aspectJAdvice, info.getThrowing());
-			}
+
+			afterPropertiesSetMethod.invoke(aspectJAdvice, (Object[]) null);
+			return aspectJAdvice;
+		} catch (InvocationTargetException e) {
+			throw e.getCause();
 		}
 
-		afterPropertiesSetMethod.invoke(aspectJAdvice, (Object[]) null);
-		return aspectJAdvice;
-
 	}
-
 
 }
