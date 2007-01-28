@@ -261,7 +261,7 @@ public final class SpringCoreUtils {
 	}
 
 	public static ClassLoader getClassLoader(IJavaProject project, boolean useParentClassLoader) {
-		List<URL> paths = getClassPathURLs(project);
+		List<URL> paths = getClassPathURLs(project, useParentClassLoader);
 		if (useParentClassLoader) {
 			return new URLClassLoader(paths.toArray(new URL[paths.size()]), Thread.currentThread()
 					.getContextClassLoader());
@@ -274,27 +274,38 @@ public final class SpringCoreUtils {
 		return getClassLoader(project, true);
 	}
 
-	public static List<URL> getClassPathURLs(IJavaProject project) {
+	public static List<URL> getClassPathURLs(IJavaProject project, boolean useParentClassLoader) {
 		List<URL> paths = new ArrayList<URL>();
-		
-		// add required libraries from osgi bundles
-		try {
-			Bundle springBundle = Platform.getBundle("org.springframework");
-			Bundle aspectjBundle = Platform.getBundle("org.aspectj.aspectjweaver");
-			Bundle asmBundle = Platform.getBundle("org.objectweb.asm");
-			Bundle commonsLoggingBundle = Platform.getBundle("jakarta.commons.logging");
-			paths.add(FileLocator.toFileURL(new URL(springBundle.getEntry("/"), "/spring.jar")));
-			paths.add(FileLocator.toFileURL(new URL(aspectjBundle.getEntry("/"), "/aspectjweaver.jar")));
-			paths.add(FileLocator.toFileURL(new URL(asmBundle.getEntry("/"), "/asm-2.2.2.jar")));
-			paths.add(FileLocator.toFileURL(new URL(asmBundle.getEntry("/"), "/asm-commons-2.2.2.jar")));
-			paths.add(FileLocator.toFileURL(new URL(asmBundle.getEntry("/"), "/asm-util-2.2.2.jar")));
-			paths.add(FileLocator.toFileURL(new URL(commonsLoggingBundle.getEntry("/"), "/commons-logging.jar")));
-		} catch (MalformedURLException e) {
-			SpringCore.log(e);
-		} catch (IOException e) {
-			SpringCore.log(e);
+
+		if (!useParentClassLoader) {
+			// add required libraries from osgi bundles
+			// TODO externalizes String
+			try {
+				Bundle springBundle = Platform.getBundle("org.springframework");
+				Bundle aspectjBundle = Platform.getBundle("org.aspectj.aspectjweaver");
+				Bundle asmBundle = Platform.getBundle("org.objectweb.asm");
+				Bundle commonsLoggingBundle = Platform.getBundle("jakarta.commons.logging");
+				paths
+						.add(FileLocator.toFileURL(new URL(springBundle.getEntry("/"),
+								"/spring.jar")));
+				paths.add(FileLocator.toFileURL(new URL(aspectjBundle.getEntry("/"),
+						"/aspectjweaver.jar")));
+				paths
+						.add(FileLocator.toFileURL(new URL(asmBundle.getEntry("/"),
+								"/asm-2.2.2.jar")));
+				paths.add(FileLocator.toFileURL(new URL(asmBundle.getEntry("/"),
+						"/asm-commons-2.2.2.jar")));
+				paths.add(FileLocator.toFileURL(new URL(asmBundle.getEntry("/"),
+						"/asm-util-2.2.2.jar")));
+				paths.add(FileLocator.toFileURL(new URL(commonsLoggingBundle.getEntry("/"),
+						"/commons-logging.jar")));
+			} catch (MalformedURLException e) {
+				SpringCore.log(e);
+			} catch (IOException e) {
+				SpringCore.log(e);
+			}
 		}
-		
+
 		try {
 			// configured classpath
 			IClasspathEntry classpath[] = project.getRawClasspath();
