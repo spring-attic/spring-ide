@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Bundle;
+import org.springframework.util.StringUtils;
 
 /**
  * Some helper methods.
@@ -274,15 +275,26 @@ public final class SpringCoreUtils {
 		return getClassLoader(project, true);
 	}
 
-	private static void addBundlePathToClassPath(String bundleId, String path, List<URL> paths) {
+	private static List<URL> getBundleClassPath(String bundleId) {
+		List<URL> paths = new ArrayList<URL>();
 		try {
 			Bundle bundle = Platform.getBundle(bundleId);
-			paths.add(FileLocator.toFileURL(new URL(bundle.getEntry("/"), "/" + path)));
+			if (bundle != null) {
+				String bundleClassPath = (String) bundle.getHeaders().get(
+						org.osgi.framework.Constants.BUNDLE_CLASSPATH);
+				String[] classPathEntries = StringUtils.delimitedListToStringArray(bundleClassPath,
+						",");
+				for (String classPathEntry : classPathEntries) {
+					paths.add(FileLocator.toFileURL(new URL(bundle.getEntry("/"), "/"
+							+ classPathEntry.trim())));
+				}
+			}
 		} catch (MalformedURLException e) {
 			SpringCore.log(e);
 		} catch (IOException e) {
 			SpringCore.log(e);
 		}
+		return paths;
 	}
 
 	public static List<URL> getClassPathURLs(IJavaProject project, boolean useParentClassLoader) {
@@ -290,13 +302,10 @@ public final class SpringCoreUtils {
 
 		if (!useParentClassLoader) {
 			// add required libraries from osgi bundles
-			// TODO externalizes String
-			addBundlePathToClassPath("org.springframework", "spring.jar", paths);
-			addBundlePathToClassPath("org.aspectj.aspectjweaver", "aspectjweaver.jar", paths);
-			addBundlePathToClassPath("jakarta.commons.logging", "commons-logging.jar", paths);
-			addBundlePathToClassPath("org.objectweb.asm", "asm-2.2.2.jar", paths);
-			addBundlePathToClassPath("org.objectweb.asm", "asm-commons-2.2.2.jar", paths);
-			addBundlePathToClassPath("org.objectweb.asm", "asm-utils-2.2.2.jar", paths);
+			paths.addAll(getBundleClassPath("org.springframework"));
+			paths.addAll(getBundleClassPath("org.aspectj.aspectjweaver"));
+			paths.addAll(getBundleClassPath("jakarta.commons.logging"));
+			paths.addAll(getBundleClassPath("org.objectweb.asm"));
 		}
 
 		try {
