@@ -141,7 +141,7 @@
             name="%navigatorfilterHideNonSpringProjectsName"
             description="%navigatorfilterHideNonSpringProjectsDescription"
             class="org.springframework.ide.eclipse.beans.ui.navigator.internal.filters.NonSpringProjectFilter"
-            activeByDefault="true"/>
+            activeByDefault="false"/>
       <commonFilter
             id="org.springframework.ide.eclipse.beans.ui.navigator.filters.hideBeanClassReferences"
             name="%navigatorfilterHideBeanClassReferencesName"
