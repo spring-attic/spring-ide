@@ -405,7 +405,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	public String toString() {
-		return "Project=" + getElementName() + "ConfigExtensions="
+		return "Project=" + getElementName() + ", ConfigExtensions="
 				+ configExtensions + ", Configs=" + configs.values()
 				+ ", ConfigsSets=" + configSets;
 	}
