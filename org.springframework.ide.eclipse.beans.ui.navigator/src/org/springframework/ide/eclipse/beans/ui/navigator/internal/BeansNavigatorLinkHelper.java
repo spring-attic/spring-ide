@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,15 +75,17 @@ public class BeansNavigatorLinkHelper implements ILinkHelper {
 		if (input instanceof IFileEditorInput) {
 			IFile file = ((IFileEditorInput) input).getFile();
 			IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
-			IEditorPart editor = SpringUIUtils.getActiveEditor();
-			if (editor.getEditorInput() == input) {
-				ISelection selection = editor.getSite().getSelectionProvider()
-						.getSelection();
-				IModelElement element = BeansUIUtils.getSelectedElement(
-						selection, config);
-				if (element != null) {
-					return new TreeSelection(BeansUIUtils
-							.createTreePath(element));
+			if (config != null) {
+				IEditorPart editor = SpringUIUtils.getActiveEditor();
+				if (editor.getEditorInput() == input) {
+					ISelection selection = editor.getSite()
+							.getSelectionProvider().getSelection();
+					IModelElement element = BeansUIUtils.getSelectedElement(
+							selection, config);
+					if (element != null) {
+						return new TreeSelection(BeansUIUtils
+								.createTreePath(element));
+					}
 				}
 			}
 		}
