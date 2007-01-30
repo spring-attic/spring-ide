@@ -32,7 +32,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.beans.BeanMetadataElement;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.AliasDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -49,7 +48,6 @@ import org.springframework.beans.factory.xml.DocumentDefaultsDefinition;
 import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker.ErrorCode;
 import org.springframework.ide.eclipse.beans.core.internal.parser.BeansDtdResolver;
@@ -61,7 +59,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.io.FileResource;
 import org.springframework.ide.eclipse.core.io.StorageResource;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
@@ -525,14 +522,10 @@ public class BeansConfig extends AbstractResourceModelElement implements
 					new DefaultBeanDefinitionRegistry();
 			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
 					registry);
-			ClassLoader classLoader = SpringCoreUtils
-					.getClassLoader(getElementResource());
-			reader.setResourceLoader(new PathMatchingResourcePatternResolver(
-					classLoader));
 			reader.setDocumentLoader(new XercesDocumentLoader());
 			EntityResolver resolver = new DelegatingEntityResolver(
 					new BeansDtdResolver(), new PluggableSchemaResolver(
-							classLoader));
+							PluggableSchemaResolver.class.getClassLoader()));
 			reader.setEntityResolver(resolver);
 			reader.setSourceExtractor(new XmlSourceExtractor());
 			reader.setEventListener(new BeansConfigReaderEventListener(this));
@@ -540,7 +533,10 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			reader.setErrorHandler(new BeansConfigErrorHandler(this, resource));
 			try {
 				reader.loadBeanDefinitions(resource);
-			} catch (BeanDefinitionStoreException e) {
+			} catch (Throwable e) {	// handle ALL exceptions
+
+				// Skip SAXParseExceptions because they're already handled by
+				// the SAX ErrorHandler
 				if (!(e.getCause() instanceof SAXParseException)) {
 					BeansModelUtils.createProblemMarker(this, e.getMessage(),
 							IMarker.SEVERITY_ERROR, -1,
