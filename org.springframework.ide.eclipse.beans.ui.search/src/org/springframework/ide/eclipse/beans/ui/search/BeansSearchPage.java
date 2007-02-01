@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.ide.eclipse.beans.ui.search;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -54,14 +53,15 @@ import org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanProp
 import org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanReferenceQuery;
 
 /**
- * Implementation of <code>ISearchPage</code> which provides the UI for
- * searching the BeansCoreModel.
+ * Implementation of {@link ISearchPage} which provides the UI for searching the
+ * BeansCoreModel.
+ * 
  * @author Torsten Juergeleit
  */
 public class BeansSearchPage extends DialogPage implements ISearchPage {
 
-	public static final String EXTENSION_POINT_ID = "org.springframework." +
-									  "ide.eclipse.beans.ui.search.searchPage";
+	public static final String EXTENSION_POINT_ID = "org.springframework."
+			+ "ide.eclipse.beans.ui.search.searchPage";
 	public static final int SEARCH_FOR_BEAN_NAME = 0;
 	public static final int SEARCH_FOR_BEAN_REFERENCE = 1; 
 	public static final int SEARCH_FOR_BEAN_CLASS = 2;
@@ -138,8 +138,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 	}
 
 	private SearchData findInPrevious(String pattern) {
-		for (Iterator iter = previousSearchPatterns.iterator(); iter.hasNext();) {
-			SearchData element = (SearchData) iter.next();
+		for (SearchData element : previousSearchPatterns) {
 			if (pattern.equals(element.getPattern())) {
 				return element;
 			}
@@ -166,7 +165,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 	}
 
 	public void setContainer(ISearchPageContainer container) {
-		this.searchContainer = container;
+		searchContainer = container;
 	}
 
 	public void setVisible(boolean visible) {
@@ -243,7 +242,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 	}
 
 	/**
-	 * Returns the page settings for this Java search page.
+	 * Returns the page settings for this search page.
 	 * 
 	 * @return the page settings to be used
 	 */
@@ -361,7 +360,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		data.widthHint = convertWidthInCharsToPixels(50);
 		expressionCombo.setLayoutData(data);
 
-		// Ignore case checkbox		
+		// Ignore case checkbox
 		caseSensitiveCheckbox = new Button(group, SWT.CHECK);
 		caseSensitiveCheckbox
 				.setText(BeansSearchMessages.SearchPage_caseSensitive);
@@ -534,15 +533,10 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 	private static class SearchData {
 
 		private int searchFor;
-
 		private String pattern;
-
 		private boolean isCaseSensitive;
-
 		private boolean isRegExp;
-
 		private int scope;
-
 		private IWorkingSet[] workingSets;
 
 		public SearchData(int searchFor, String pattern,

@@ -32,3 +32,4 @@ Export-Package: org.springframework.ide.eclipse.beans.ui.search,
  org.springframework.ide.eclipse.beans.ui.search.actions,
  org.springframework.ide.eclipse.beans.ui.search.internal,
  org.springframework.ide.eclipse.beans.ui.search.internal.queries
+Eclipse-LazyStart: true
