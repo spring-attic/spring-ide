@@ -107,9 +107,6 @@ public class BeansAopMarkerUtils {
 			IResource sourceResource) {
 		// if (reference.getDefinition().getAspectLineNumber() > 0
 		// && !(reference.getDefinition() instanceof JavaAspectDefinition)) {
-		createProblemMarker(reference.getDefinition().getResource(), "advises "
-				+ BeansAopUtils.getJavaElementLinkName(reference.getTarget()), 1, reference
-				.getDefinition().getAspectLineNumber(), markerId, sourceResource);
 		// }
 		if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
 			if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
@@ -120,7 +117,7 @@ public class BeansAopMarkerUtils {
 			} else {
 				createProblemMarker(sourceResource, "declared on "
 						+ BeansAopUtils.getJavaElementLinkName(reference.getTarget()), 1,
-						BeansAopUtils.getLineNumber(reference.getSource()), markerId,
+						reference.getDefinition().getAspectLineNumber(), markerId,
 						sourceResource);
 			}
 		} else {
@@ -130,6 +127,9 @@ public class BeansAopMarkerUtils {
 						BeansAopUtils.getLineNumber(reference.getSource()), markerId,
 						sourceResource);
 			}
+			createProblemMarker(reference.getDefinition().getResource(), "advises "
+			        + BeansAopUtils.getJavaElementLinkName(reference.getTarget()), 1, reference
+			        .getDefinition().getAspectLineNumber(), markerId, sourceResource);
 		}
 	}
 

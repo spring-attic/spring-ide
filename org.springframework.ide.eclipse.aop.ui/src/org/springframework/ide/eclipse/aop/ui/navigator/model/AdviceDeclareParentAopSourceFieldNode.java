@@ -26,7 +26,7 @@ public class AdviceDeclareParentAopSourceFieldNode extends AbstractJavaElementRe
 	private List<IAopReference> references;
 
 	public AdviceDeclareParentAopSourceFieldNode(List<IAopReference> reference) {
-		super(reference.get(9).getSource());
+		super(reference.get(0).getSource());
 		this.references = reference;
 	}
 

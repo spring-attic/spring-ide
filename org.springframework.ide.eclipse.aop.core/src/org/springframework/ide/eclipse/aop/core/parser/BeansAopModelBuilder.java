@@ -18,7 +18,6 @@ package org.springframework.ide.eclipse.aop.core.parser;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
@@ -193,12 +192,6 @@ public class BeansAopModelBuilder {
 		Set<IBean> beans = config.getBeans();
 		for (IBean bean : beans) {
 			try {
-				
-				// validate the aspect definition
-				if (info.getAdviceClass() == null || info.getAdviceMethod() == null) {
-					return;
-				}
-				
 				Class<?> targetClass = loader.loadClass(bean.getClassName());
 				if (info instanceof BeanIntroductionDefinition) {
 					BeanIntroductionDefinition intro = (BeanIntroductionDefinition) info;
@@ -243,7 +236,12 @@ public class BeansAopModelBuilder {
 						}
 					}
 				} else {
-					IType jdtTargetType = BeansModelUtils.getJavaType(file.getProject(),
+				    // validate the aspect definition
+				    if (info.getAdviceClass() == null || info.getAdviceMethod() == null) {
+				        return;
+				    }
+
+                    IType jdtTargetType = BeansModelUtils.getJavaType(file.getProject(),
 							targetClass.getName());
 					IType jdtAspectType = BeansModelUtils.getJavaType(file.getProject(), info
 							.getClassName());
@@ -254,7 +252,7 @@ public class BeansAopModelBuilder {
 
 					Object pc = BeansAopModelUtils.initAspectJExpressionPointcut(info,
 							jdtAspectType, expressionPointcutClass);
-
+					
 					BeansAopModelUtils.createAspectJAdvice(info, aspectJAdviceClass, pc);
 
 					Method matchesMethod = expressionPointcutClass.getMethod("matches",
