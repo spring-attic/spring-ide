@@ -341,7 +341,9 @@ public class BeansAopModelBuilder {
 				IMethod jdtMethod;
 				try {
 					jdtMethod = BeansAopUtils.getMethod(type, methodName, argCount);
-					return jdtMethod.getParameterNames();
+					if (jdtMethod != null) {
+                        return jdtMethod.getParameterNames();
+                    }
 				} catch (JavaModelException e) {
 					// suppress this
 				}
