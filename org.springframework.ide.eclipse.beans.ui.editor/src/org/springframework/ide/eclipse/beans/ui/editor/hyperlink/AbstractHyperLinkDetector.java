@@ -37,6 +37,7 @@ import org.w3c.dom.Node;
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  */
+@SuppressWarnings("restriction")
 public abstract class AbstractHyperLinkDetector implements IHyperlinkDetector {
 
     public final IHyperlink[] detectHyperlinks(ITextViewer textViewer,

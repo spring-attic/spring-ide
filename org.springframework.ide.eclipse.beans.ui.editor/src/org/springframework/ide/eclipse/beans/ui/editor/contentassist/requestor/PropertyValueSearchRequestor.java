@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCo
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaDocUtils;
 import org.springframework.ide.eclipse.beans.ui.namespaces.beans.BeansNamespaceImages;
 
+@SuppressWarnings("restriction")
 public class PropertyValueSearchRequestor {
 
 	public static final int METHOD_RELEVANCE = 10;
@@ -40,7 +41,7 @@ public class PropertyValueSearchRequestor {
 
 	protected Map<String, IMethod> methods;
 
-	protected ContentAssistRequest request;
+    protected ContentAssistRequest request;
 
 	private String prefix;
     

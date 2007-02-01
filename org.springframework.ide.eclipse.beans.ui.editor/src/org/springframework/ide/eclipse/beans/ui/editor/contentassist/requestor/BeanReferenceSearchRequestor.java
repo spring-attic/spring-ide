@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor;
 
@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
@@ -39,25 +38,28 @@ import org.w3c.dom.Node;
 public class BeanReferenceSearchRequestor {
 
     public static final int TYPE_MATCHING_RELEVANCE = 20;
+
     public static final int RELEVANCE = 10;
 
     protected Set<String> beans;
+
     protected ContentAssistRequest request;
-    
+
     protected List<String> requiredTypes = null;
 
-	public BeanReferenceSearchRequestor(ContentAssistRequest request) {
-    	this(request, new ArrayList<String>());
+    public BeanReferenceSearchRequestor(ContentAssistRequest request) {
+        this(request, new ArrayList<String>());
     }
 
     public BeanReferenceSearchRequestor(ContentAssistRequest request, List<String> requiredTypes) {
-    	this.request = request;
-    	this.beans = new HashSet<String>();
-    	this.requiredTypes = requiredTypes;
+        this.request = request;
+        this.beans = new HashSet<String>();
+        this.requiredTypes = requiredTypes;
     }
 
     public void acceptSearchMatch(IBean bean, IFile file, String prefix) {
-        if (bean.getElementName() != null && bean.getElementName().startsWith(prefix)) {
+        if (bean.getElementName() != null
+                && bean.getElementName().toLowerCase().startsWith(prefix.toLowerCase())) {
             String beanName = bean.getElementName();
             String replaceText = beanName;
             String fileName = bean.getElementResource().getProjectRelativePath().toString();
@@ -84,20 +86,19 @@ public class BeanReferenceSearchRequestor {
                         .getConfig(file));
                 BeansJavaCompletionProposal proposal = null;
                 if (this.requiredTypes.contains(bean.getClassName())) {
-                	proposal = new BeansJavaCompletionProposal(
-                			replaceText, request.getReplacementBeginPosition(), request
-                			.getReplacementLength(), replaceText.length(), image,
-                			displayText, null, BeansEditorUtils.createAdditionalProposalInfo(bean),
-                			BeanReferenceSearchRequestor.TYPE_MATCHING_RELEVANCE);
+                    proposal = new BeansJavaCompletionProposal(replaceText, request
+                            .getReplacementBeginPosition(), request.getReplacementLength(),
+                            replaceText.length(), image, displayText, null, BeansEditorUtils
+                                    .createAdditionalProposalInfo(bean),
+                            BeanReferenceSearchRequestor.TYPE_MATCHING_RELEVANCE);
                 }
                 else {
-                	proposal = new BeansJavaCompletionProposal(
-                			replaceText, request.getReplacementBeginPosition(), request
-                			.getReplacementLength(), replaceText.length(), image,
-                			displayText, null, BeansEditorUtils.createAdditionalProposalInfo(bean),
-                			BeanReferenceSearchRequestor.RELEVANCE);
+                    proposal = new BeansJavaCompletionProposal(replaceText, request
+                            .getReplacementBeginPosition(), request.getReplacementLength(),
+                            replaceText.length(), image, displayText, null, BeansEditorUtils
+                                    .createAdditionalProposalInfo(bean),
+                            BeanReferenceSearchRequestor.RELEVANCE);
                 }
-                
 
                 request.addProposal(proposal);
                 beans.add(key);
@@ -107,7 +108,7 @@ public class BeanReferenceSearchRequestor {
 
     public void acceptSearchMatch(String beanId, Node beanNode, IFile file, String prefix) {
         NamedNodeMap attributes = beanNode.getAttributes();
-        if (beanId.startsWith(prefix)) {
+        if (beanId.toLowerCase().startsWith(prefix.toLowerCase())) {
             if (beanNode.getParentNode() != null
                     && "beans".equals(beanNode.getParentNode().getNodeName())) {
                 String beanName = beanId;
@@ -133,27 +134,23 @@ public class BeanReferenceSearchRequestor {
                     buf.append(fileName);
                     String displayText = buf.toString();
                     Image image = new DelegatingLabelProvider().getImage(beanNode);
-                    
+
                     BeansJavaCompletionProposal proposal = null;
-                    
+
                     String className = BeansEditorUtils.getClassNameForBean(beanNode);
                     if (this.requiredTypes.contains(className)) {
-                    	proposal = new BeansJavaCompletionProposal(
-                    			replaceText, request.getReplacementBeginPosition(), request
-                    			.getReplacementLength(), replaceText.length(), image,
-                    			displayText, null, BeansEditorUtils.createAdditionalProposalInfo(
-                    					beanNode, file),
-                    					TYPE_MATCHING_RELEVANCE);
+                        proposal = new BeansJavaCompletionProposal(replaceText, request
+                                .getReplacementBeginPosition(), request.getReplacementLength(),
+                                replaceText.length(), image, displayText, null, BeansEditorUtils
+                                        .createAdditionalProposalInfo(beanNode, file),
+                                TYPE_MATCHING_RELEVANCE);
                     }
                     else {
-                    	proposal = new BeansJavaCompletionProposal(
-                    			replaceText, request.getReplacementBeginPosition(), request
-                    			.getReplacementLength(), replaceText.length(), image,
-                    			displayText, null, BeansEditorUtils.createAdditionalProposalInfo(
-                    					beanNode, file),
-                    					RELEVANCE);
+                        proposal = new BeansJavaCompletionProposal(replaceText, request
+                                .getReplacementBeginPosition(), request.getReplacementLength(),
+                                replaceText.length(), image, displayText, null, BeansEditorUtils
+                                        .createAdditionalProposalInfo(beanNode, file), RELEVANCE);
                     }
-                    
 
                     request.addProposal(proposal);
                     beans.add(key);

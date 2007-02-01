@@ -38,13 +38,22 @@ import org.springframework.ide.eclipse.core.StringUtils;
 public final class Introspector {
 
 	public enum Statics { YES, NO, DONT_CARE }
-
+	
+    /**
+     * Returns a list of all methods from given type with specified features.
+     */
+    public static Set<IMethod> findAllMethods(IType type,
+            String methodPrefix, int argCount, boolean isPublic,
+            Statics statics) throws JavaModelException {
+        return findAllMethods(type, methodPrefix, argCount, isPublic, statics, false);
+    }
+    
 	/**
 	 * Returns a list of all methods from given type with specified features.
 	 */
 	public static Set<IMethod> findAllMethods(IType type,
 			String methodPrefix, int argCount, boolean isPublic,
-			Statics statics) throws JavaModelException {
+			Statics statics, boolean ignoreCase) throws JavaModelException {
 		Map<String, IMethod> allMethods = new HashMap<String, IMethod>();
 		while (type != null) {
 			for (IMethod method : type.getMethods()) {
@@ -53,13 +62,14 @@ public final class Introspector {
 				if (!allMethods.containsKey(key)
 						&& Flags.isPublic(flags) == isPublic
 						&& (statics == Statics.DONT_CARE
-								|| (statics == Statics.YES
+						 		|| (statics == Statics.YES
 										&& Flags.isStatic(flags))
 										|| (statics == Statics.NO
 												&& !Flags.isStatic(flags)))
 						&& (argCount == -1
 								|| method.getNumberOfParameters() == argCount)
-						&& method.getElementName().startsWith(methodPrefix)) {
+						&& ((!ignoreCase && method.getElementName().startsWith(methodPrefix))) 
+                        || (ignoreCase && method.getElementName().toLowerCase().startsWith(methodPrefix.toLowerCase()))) {
 					allMethods.put(key, method);
 				}
 			}
@@ -141,6 +151,15 @@ public final class Introspector {
 		return findAllMethods(type, "set" + base, 1, true, Statics.NO);
 	}
 
+    /**
+	 * Returns a list of all setters with the given prefix.
+	 */
+	public static Set<IMethod> findWritableProperties(IType type,
+	        String methodPrefix, boolean ignoreCase) throws JavaModelException {
+	    String base = StringUtils.capitalize(methodPrefix);
+	    return findAllMethods(type, "set" + base, 1, true, Statics.NO, ignoreCase);
+	}
+
 	/**
 	 * Returns a list of all getters with the given prefix.
 	 */
@@ -148,6 +167,15 @@ public final class Introspector {
 			String methodPrefix) throws JavaModelException {
 		String base = StringUtils.capitalize(methodPrefix);
 		return findAllMethods(type, "get" + base, 0, true, Statics.NO);
+	}
+
+    /**
+	 * Returns a list of all getters with the given prefix.
+	 */
+	public static Set<IMethod> findReadableProperties(IType type,
+	        String methodPrefix, boolean ignoreCase) throws JavaModelException {
+	    String base = StringUtils.capitalize(methodPrefix);
+	    return findAllMethods(type, "get" + base, 0, true, Statics.NO, ignoreCase);
 	}
 
 	/**
