@@ -122,8 +122,11 @@ public class BeansAspectDefinitionParser {
                 final String className = BeansEditorUtils.getClassNameForBean(bean);
                 if (className != null && isIncluded(patternList, id)) {
                     try {
-                        final Class<?> aspectClass = Class.forName(className, true, Thread
-                                .currentThread().getContextClassLoader());
+                        // final Class<?> aspectClass = Class.forName(className, true, Thread
+                        // .currentThread().getContextClassLoader());
+
+                        final Class<?> aspectClass = Thread.currentThread().getContextClassLoader()
+                                .loadClass(className);
                         if (BeansAopModelUtils.isAspect(aspectClass)
                                 && BeansAopModelUtils.validate(aspectClass)) {
                             createAnnotationAspectDefinition(document, bean, id, className,
@@ -187,7 +190,7 @@ public class BeansAspectDefinitionParser {
                     def.setNode((IDOMNode) bean);
                     def.setMethod(method.getName());
                     ajexp.setPointcutDeclarationScope(aspectClass);
-                    
+
                     AspectJAnnotation<?> aspectJAnnotation = BeansAopModelUtils
                             .findAspectJAnnotationOnMethod(method);
                     if (aspectJAnnotation.getArgNames() != null) {
@@ -246,7 +249,6 @@ public class BeansAspectDefinitionParser {
                 Class declareParentsClass = classLoader.loadClass(DeclareParents.class.getName());
                 Annotation declareParents = field.getAnnotation(declareParentsClass);
                 if (declareParents != null) {
-
                     Method defaultImplMethod = declareParents.annotationType().getMethod(
                             "defaultImpl", (Class[]) null);
                     Method valueMethod = declareParents.annotationType().getMethod("value",

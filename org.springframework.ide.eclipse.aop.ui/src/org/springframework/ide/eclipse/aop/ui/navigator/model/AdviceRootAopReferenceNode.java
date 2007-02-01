@@ -84,14 +84,9 @@ public class AdviceRootAopReferenceNode implements IReferenceNode, IRevealableRe
             text += "around()";
         }
         else if (type == ADVICE_TYPES.DECLARE_PARENTS) {
-            try {
-                text += "declare parents: implements "
-                        + ((IIntroductionDefinition) reference.get(0).getDefinition())
-                                .getImplInterfaceClass().getSimpleName();
-            }
-            catch (ClassNotFoundException e) {
-                text += "declare parents";
-            }
+            text += "declare parents: implements "
+                    + ((IIntroductionDefinition) reference.get(0).getDefinition())
+                            .getImplInterfaceName();
         }
         text += " <";
         text += reference.get(0).getDefinition().getAspectName();

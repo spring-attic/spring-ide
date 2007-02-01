@@ -24,8 +24,7 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.aop.AopUIImages;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
-public class AdvisedAopSourceNode implements IReferenceNode,
-        IRevealableReferenceNode {
+public class AdvisedAopSourceNode implements IReferenceNode, IRevealableReferenceNode {
 
     private IAopReference references;
 
@@ -74,21 +73,13 @@ public class AdvisedAopSourceNode implements IReferenceNode,
             text += "around()";
         }
         else if (type == ADVICE_TYPES.DECLARE_PARENTS) {
-            try {
-                text += "declare parents: implements "
-                        + ((IIntroductionDefinition) references
-                                .getDefinition()).getImplInterfaceClass()
-                                .getSimpleName();
-            }
-            catch (ClassNotFoundException e) {
-                text += "declare parents";
-            }
+            text += "declare parents: implements "
+                    + ((IIntroductionDefinition) references.getDefinition()).getImplInterfaceName();
         }
         text += " <";
         text += references.getDefinition().getAspectName();
         text += "> [";
-        text += references.getDefinition().getResource()
-                .getProjectRelativePath().toString();
+        text += references.getDefinition().getResource().getProjectRelativePath().toString();
         text += "]";
         return text;
     }
@@ -99,7 +90,8 @@ public class AdvisedAopSourceNode implements IReferenceNode,
 
     public void openAndReveal() {
         IResource resource = references.getDefinition().getResource();
-        SpringUIUtils.openInEditor((IFile) resource, references.getDefinition().getAspectLineNumber());
+        SpringUIUtils.openInEditor((IFile) resource, references.getDefinition()
+                .getAspectLineNumber());
     }
 
     public IAopReference getReference() {

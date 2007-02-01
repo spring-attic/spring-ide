@@ -68,15 +68,14 @@ public class BeansAopMarkupProvider
 
         List<Stripe> stripeList = new ArrayList<Stripe>();
         if (ProviderManager.getContentProvider() instanceof JDTContentProvider) {
-            IJavaProject jp = ((JDTContentProvider) ProviderManager
-                    .getContentProvider()).getCurrentProject();
+            IJavaProject jp = ((JDTContentProvider) ProviderManager.getContentProvider())
+                    .getCurrentProject();
 
             if (jp != null) {
                 IAopProject aopProject = org.springframework.ide.eclipse.aop.core.Activator
                         .getModel().getProject(jp.getProject());
                 if (aopProject != null) {
-                    List<IAopReference> references = aopProject
-                            .getAllReferences();
+                    List<IAopReference> references = aopProject.getAllReferences();
                     if (references != null && references.size() > 0) {
                         for (IAopReference reference : references) {
                             IType advisedType = null;
@@ -84,21 +83,16 @@ public class BeansAopMarkupProvider
                                 advisedType = (IType) reference.getTarget();
                             }
                             else {
-                                advisedType = (IType) reference.getTarget()
-                                        .getDeclaringType();
+                                advisedType = (IType) reference.getTarget().getDeclaringType();
                             }
-                            ICompilationUnit advisedCu = advisedType
-                                    .getCompilationUnit();
+                            ICompilationUnit advisedCu = advisedType.getCompilationUnit();
                             if (member instanceof JDTMember) {
-                                IJavaElement je = ((JDTMember) member)
-                                        .getResource();
+                                IJavaElement je = ((JDTMember) member).getResource();
                                 if (je.equals(advisedCu)) {
                                     String label = getText(reference);
-                                    Stripe stripe = new Stripe(
-                                            new SimpleMarkupKind(label),
-                                            BeansAopNavigatorUtils
-                                                    .getLineNumber(reference
-                                                            .getTarget()) + 1);
+                                    Stripe stripe = new Stripe(new SimpleMarkupKind(label),
+                                            BeansAopNavigatorUtils.getLineNumber(reference
+                                                    .getTarget()) + 1);
                                     stripeList.add(stripe);
                                     addMarkup(member.getFullname(), stripe);
                                 }
@@ -122,14 +116,13 @@ public class BeansAopMarkupProvider
         SortedSet<SimpleMarkupKind> kinds = new TreeSet<SimpleMarkupKind>();
         List<String> advices = new ArrayList<String>();
         if (ProviderManager.getContentProvider() instanceof JDTContentProvider) {
-            IJavaProject jp = ((JDTContentProvider) ProviderManager
-                    .getContentProvider()).getCurrentProject();
+            IJavaProject jp = ((JDTContentProvider) ProviderManager.getContentProvider())
+                    .getCurrentProject();
             if (jp != null) {
                 IAopProject aopProject = org.springframework.ide.eclipse.aop.core.Activator
                         .getModel().getProject(jp.getProject());
                 if (aopProject != null) {
-                    List<IAopReference> references = aopProject
-                            .getAllReferences();
+                    List<IAopReference> references = aopProject.getAllReferences();
                     if (references != null && references.size() > 0) {
                         for (IAopReference reference : references) {
                             String label = getText(reference);
@@ -149,20 +142,18 @@ public class BeansAopMarkupProvider
     }
 
     /**
-     * Process a mouse click on a stripe. This method opens the editor at the
-     * line of the stripe clicked.
+     * Process a mouse click on a stripe. This method opens the editor at the line of the stripe
+     * clicked.
      * 
      * @see org.eclipse.contribution.visualiser.interfaces.IMarkupProvider#processMouseclick(org.eclipse.contribution.visualiser.interfaces.IMember,
      *      org.eclipse.contribution.visualiser.core.Stripe, int)
      */
-    public boolean processMouseclick(IMember member, Stripe stripe,
-            int buttonClicked) {
+    public boolean processMouseclick(IMember member, Stripe stripe, int buttonClicked) {
         if (buttonClicked == 1) {
             if (member instanceof JDTMember) {
                 IJavaElement jEl = ((JDTMember) member).getResource();
                 if (jEl != null) {
-                    JDTUtils
-                            .openInEditor(jEl.getResource(), stripe.getOffset());
+                    JDTUtils.openInEditor(jEl.getResource(), stripe.getOffset());
                 }
             }
             return false;
@@ -190,19 +181,13 @@ public class BeansAopMarkupProvider
         }
         else if (type == ADVICE_TYPES.DECLARE_PARENTS) {
             text += "declare parents:";
-            try {
-                text += " implements "
-                        + ((IIntroductionDefinition) reference.getDefinition())
-                                .getImplInterfaceClass().getSimpleName();
-            }
-            catch (ClassNotFoundException e) {
-            }
+            text += " implements "
+                    + ((IIntroductionDefinition) reference.getDefinition()).getImplInterfaceName();
         }
         text += " <";
         text += reference.getDefinition().getAspectName();
         text += "> [";
-        text += reference.getDefinition().getResource()
-                .getProjectRelativePath().toString();
+        text += reference.getDefinition().getResource().getProjectRelativePath().toString();
         text += "]";
         return text;
     }
