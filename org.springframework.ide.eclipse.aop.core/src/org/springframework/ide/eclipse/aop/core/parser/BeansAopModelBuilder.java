@@ -19,6 +19,7 @@ package org.springframework.ide.eclipse.aop.core.parser;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Set;
 
@@ -192,6 +193,13 @@ public class BeansAopModelBuilder {
         Set<IBean> beans = config.getBeans();
         for (IBean bean : beans) {
             try {
+                if (info.getAspectName() != null
+                        && info.getAspectName().equals(bean.getElementName())
+                        && info.getResource() != null
+                        && info.getResource().equals(bean.getElementResource())) {
+                    // don't check advice backing bean itself
+                    continue;
+                }
                 Class<?> targetClass = loader.loadClass(bean.getClassName());
                 if (info instanceof BeanIntroductionDefinition) {
                     BeanIntroductionDefinition intro = (BeanIntroductionDefinition) info;
@@ -228,8 +236,9 @@ public class BeansAopModelBuilder {
                     for (IMethod method : matchingMethods) {
                         IType jdtAspectType = BeansModelUtils.getJavaType(aopProject.getProject(),
                                 info.getAspectClassName());
-                        IMethod jdtAspectMethod = BeansAopUtils.getMethod(jdtAspectType, info
-                                .getAdviceMethodName(), info.getAdviceMethodParameterTypes().length);
+                        IMethod jdtAspectMethod = BeansAopUtils
+                                .getMethod(jdtAspectType, info.getAdviceMethodName(), info
+                                        .getAdviceMethodParameterTypes().length);
                         if (jdtAspectMethod.getResource() != null
                                 && jdtAspectMethod.getResource().isAccessible()) {
                             IAopReference ref = new AopReference(info.getType(), jdtAspectMethod,
@@ -249,26 +258,29 @@ public class BeansAopModelBuilder {
                     IType jdtAspectType = BeansModelUtils.getJavaType(file.getProject(), info
                             .getAspectClassName());
                     Class<?> aspectJAdviceClass = BeansAopModelUtils.getAspectJAdviceClass(info);
-                    
+
                     Object pc = info.getAspectJPointcutExpression();
-                    
+
                     BeansAopModelUtils.createAspectJAdvice(info, aspectJAdviceClass, pc);
 
-                    Method matchesMethod = pc.getClass().getMethod("matches",
-                            Method.class, Class.class);
+                    Method matchesMethod = pc.getClass().getMethod("matches", Method.class,
+                            Class.class);
                     for (Method m : targetClass.getDeclaredMethods()) {
-                        boolean matches = (Boolean) matchesMethod.invoke(pc, m, targetClass);
-                        if (matches) {
-                            IMethod jdtMethod = BeansAopUtils.getMethod(jdtTargetType, m.getName(),
-                                    m.getParameterTypes().length);
-                            IMethod jdtAspectMethod = BeansAopUtils
-                                    .getMethod(jdtAspectType, info.getAdviceMethodName(), info
-                                            .getAdviceMethod().getParameterTypes().length);
-                            if (jdtAspectMethod.getResource() != null
-                                    && jdtAspectMethod.getResource().isAccessible()) {
-                                IAopReference ref = new AopReference(info.getType(),
-                                        jdtAspectMethod, jdtMethod, info, file, bean);
-                                aopProject.addAopReference(ref);
+                        // Spring only allows proxying of public classes
+                        if (Modifier.isPublic(m.getModifiers())) {
+                            boolean matches = (Boolean) matchesMethod.invoke(pc, m, targetClass);
+                            if (matches) {
+                                IMethod jdtMethod = BeansAopUtils.getMethod(jdtTargetType, m
+                                        .getName(), m.getParameterTypes().length);
+                                IMethod jdtAspectMethod = BeansAopUtils.getMethod(jdtAspectType,
+                                        info.getAdviceMethodName(), info.getAdviceMethod()
+                                                .getParameterTypes().length);
+                                if (jdtAspectMethod.getResource() != null
+                                        && jdtAspectMethod.getResource().isAccessible()) {
+                                    IAopReference ref = new AopReference(info.getType(),
+                                            jdtAspectMethod, jdtMethod, info, file, bean);
+                                    aopProject.addAopReference(ref);
+                                }
                             }
                         }
                     }
@@ -304,9 +316,8 @@ public class BeansAopModelBuilder {
         }
         else {
             Activator.log(t);
-            BeansAopMarkerUtils.createProblemMarker(file, t.getMessage(),
-                    IMarker.SEVERITY_WARNING, info.getAspectLineNumber(),
-                    BeansAopMarkerUtils.AOP_PROBLEM_MARKER, file);
+            BeansAopMarkerUtils.createProblemMarker(file, t.getMessage(), IMarker.SEVERITY_WARNING,
+                    info.getAspectLineNumber(), BeansAopMarkerUtils.AOP_PROBLEM_MARKER, file);
         }
     }
 

@@ -127,8 +127,8 @@ public class BeansAspectDefinitionParser {
 
                         final Class<?> aspectClass = Thread.currentThread().getContextClassLoader()
                                 .loadClass(className);
-                        if (BeansAopModelUtils.isAspect(aspectClass)
-                                && BeansAopModelUtils.validate(aspectClass)) {
+                        
+                        if (BeansAopModelUtils.validateAspect(className)) {
                             createAnnotationAspectDefinition(document, bean, id, className,
                                     aspectClass, aspectInfos);
                         }
@@ -171,7 +171,8 @@ public class BeansAspectDefinitionParser {
             final List<IAspectDefinition> aspectInfos) throws Throwable {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         final Class pointcutAnnotationClass = classLoader.loadClass(Pointcut.class.getName());
-
+        
+        // TODO rework to leverage ASM
         ReflectionUtils.doWithMethods(aspectClass, new ReflectionUtils.MethodCallback() {
             @SuppressWarnings("unchecked")
             public void doWith(Method method) throws IllegalArgumentException {

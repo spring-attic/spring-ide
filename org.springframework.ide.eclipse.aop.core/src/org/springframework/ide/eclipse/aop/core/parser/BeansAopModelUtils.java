@@ -19,7 +19,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,14 +26,14 @@ import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.AjTypeSystem;
 import org.aspectj.lang.reflect.PerClauseKind;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Opcodes;
 import org.springframework.aop.aspectj.AspectJAfterAdvice;
 import org.springframework.aop.aspectj.AspectJAfterReturningAdvice;
 import org.springframework.aop.aspectj.AspectJAfterThrowingAdvice;
@@ -46,6 +45,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.core.parser.asm.AspectAnnotationVisitor;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.util.StringUtils;
@@ -54,6 +54,9 @@ import org.springframework.util.StringUtils;
 public class BeansAopModelUtils {
 
     private static final String AJC_MAGIC = "ajc$";
+
+    /** The ".class" file suffix */
+    private static final String CLASS_FILE_SUFFIX = ".class";
 
     /**
      * Class modelling an AspectJ annotation, exposing its type enumeration and pointcut String.
@@ -165,17 +168,14 @@ public class BeansAopModelUtils {
         AtAfter, AtAfterReturning, AtAfterThrowing, AtAround, AtBefore, AtPointcut
     }
 
-    protected static boolean isAspect(Class<?> clazz) throws Throwable {
-
+    protected static boolean validateAspect(String className) throws Throwable {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        Class<?> aspectTypeSystemClass = classLoader.loadClass(AjTypeSystem.class.getName());
-        Method getAjTypeMethod = aspectTypeSystemClass.getMethod("getAjType", Class.class);
-        Object aspectJTypeSystem = getAjTypeMethod.invoke(null, clazz);
+        ClassReader reader = new ClassReader(classLoader.getResourceAsStream(BeansAopModelUtils
+                .getClassFileName(className)));
+        AspectAnnotationVisitor v = new AspectAnnotationVisitor();
+        reader.accept(v, false);
 
-        Method isAspectMethod = aspectJTypeSystem.getClass().getMethod("isAspect", (Class[]) null);
-        boolean couldBeAtAspectJAspect = (Boolean) isAspectMethod.invoke(aspectJTypeSystem,
-                (Object[]) null);
-        if (!couldBeAtAspectJAspect) {
+        if (!v.getClassInfo().hasAspectAnnotation()) {
             return false;
         }
         else {
@@ -183,10 +183,33 @@ public class BeansAopModelUtils {
             // @AspectJ aspect or a code style aspect.
             // This is an *unclean* test whilst waiting for AspectJ to provide
             // us with something better
-            Method[] methods = clazz.getDeclaredMethods();
-            for (Method m : methods) {
-                if (m.getName().startsWith(AJC_MAGIC)) {
+            for (String m : v.getClassInfo().getMethodNames()) {
+                if (m.startsWith(AJC_MAGIC)) {
                     // must be a code style aspect
+                    return false;
+                }
+            }
+            // validate supported instantiation models
+            if (v.getClassInfo().getAspectAnnotation().getValue() != null) {
+                if (v.getClassInfo().getAspectAnnotation().getValue().toUpperCase().equals(
+                        PerClauseKind.PERCFLOW.toString())) {
+                    return false;
+                }
+                if (v.getClassInfo().getAspectAnnotation().getValue().toUpperCase().toString()
+                        .equals(PerClauseKind.PERCFLOWBELOW.toString())) {
+                    return false;
+                }
+            }
+
+            // check if super class is Aspect as well and abstract
+            if (v.getClassInfo().getSuperType() != null) {
+                reader = new ClassReader(classLoader.getResourceAsStream(BeansAopModelUtils
+                        .getClassFileName(v.getClassInfo().getSuperType())));
+                AspectAnnotationVisitor sv = new AspectAnnotationVisitor();
+                reader.accept(sv, false);
+
+                if (sv.getClassInfo().getAspectAnnotation() != null
+                        && !((sv.getClassInfo().getModifier() & Opcodes.ACC_ABSTRACT) != 0)) {
                     return false;
                 }
             }
@@ -255,32 +278,6 @@ public class BeansAopModelUtils {
                 new String[0], new Class[0]);
         ajexp.setExpression(aspectJAnnotation.getPointcutExpression());
         return ajexp;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected static boolean validate(Class<?> aspectClass) throws Throwable {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        Class annotationClass = classLoader.loadClass(Aspect.class.getName());
-        if (aspectClass.getSuperclass().getAnnotation(annotationClass) != null
-                && !Modifier.isAbstract(aspectClass.getSuperclass().getModifiers())) {
-            return false;
-        }
-        Class aspectTypeSystemClass = classLoader.loadClass(AjTypeSystem.class.getName());
-        Method getAjTypeMethod = aspectTypeSystemClass.getMethod("getAjType", Class.class);
-        Object aspectJType = getAjTypeMethod.invoke(null, aspectClass);
-
-        Method perClauseMethod = aspectJType.getClass().getMethod("getPerClause", (Class[]) null);
-        Object perClauseType = perClauseMethod.invoke(aspectJType, (Object[]) null);
-        Method getKindMethod = perClauseType.getClass().getMethod("getKind", (Class[]) null);
-        Object getKind = getKindMethod.invoke(perClauseType, (Object[]) null);
-
-        if (getKind.toString().equals(PerClauseKind.PERCFLOW.toString())) {
-            return false;
-        }
-        if (getKind.toString().equals(PerClauseKind.PERCFLOWBELOW.toString())) {
-            return false;
-        }
-        return true;
     }
 
     public static Object initAspectJExpressionPointcut(IAspectDefinition info)
@@ -416,5 +413,15 @@ public class BeansAopModelUtils {
         public String[] getParameterNames(Constructor ctor) {
             return null;
         }
+    }
+
+    /**
+     * Determine the name of the class file, relative to the containing package: e.g. "String.class"
+     * @param clazz the class
+     * @return the file name of the ".class" file
+     */
+    public static String getClassFileName(String className) {
+        className = StringUtils.replace(className, ".", "/");
+        return className + CLASS_FILE_SUFFIX;
     }
 }

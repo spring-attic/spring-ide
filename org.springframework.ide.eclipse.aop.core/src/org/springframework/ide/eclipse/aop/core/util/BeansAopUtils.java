@@ -16,6 +16,7 @@
 package org.springframework.ide.eclipse.aop.core.util;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -50,6 +51,9 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 public class BeansAopUtils {
 
     public static String getJavaElementLinkName(IJavaElement je) {
+        if (je == null) {
+            return "";
+        }
         // use element name instead, qualified with parent
         if (je instanceof IMethod) {
             // return je.getParent().getElementName() + '.' +
@@ -263,7 +267,8 @@ public class BeansAopUtils {
         Method[] methods = clazz.getDeclaredMethods();
         List<IMethod> matchingMethod = new ArrayList<IMethod>();
         for (Method method : methods) {
-            if ((Boolean) matchesMethod.invoke(methodMatcher, method, clazz)) {
+            if (Modifier.isPublic(method.getModifiers())
+                    && (Boolean) matchesMethod.invoke(methodMatcher, method, clazz)) {
                 IMethod jdtMethod = BeansAopUtils.getMethod(jdtTargetClass, method.getName(),
                         method.getParameterTypes().length);
                 if (jdtMethod != null) {
