@@ -1,12 +1,21 @@
 /*
- * Copyright 2004 DekaBank Deutsche Girozentrale. All rights reserved.
+ * Copyright 2002-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.springframework.ide.eclipse.aop.core.model.internal;
 
-import java.lang.reflect.Method;
-
 import org.springframework.aop.ClassFilter;
-import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.TypePatternClassFilter;
 import org.springframework.aop.support.ClassFilters;
 import org.springframework.ide.eclipse.aop.core.model.IIntroductionDefinition;
@@ -15,28 +24,26 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES
 public class BeanIntroductionDefinition
         extends BeanAspectDefinition implements IIntroductionDefinition {
 
-    private Class<?> introducedInterface;
-
     private final String introducedInterfaceName;
 
     private final ClassFilter typePatternClassFilter;
 
-    private Class<?> defaultImpl;
-
     private final String defaultImplName;
-    
+
     private final String typePattern;
 
-    public BeanIntroductionDefinition(String interfaceTypeName,
-            String typePattern, String defaultImplName) {
+    public BeanIntroductionDefinition(String interfaceTypeName, String typePattern,
+            String defaultImplName) {
         ClassFilter typePatternFilter = new TypePatternClassFilter(typePattern);
 
         // Excludes methods implemented.
         ClassFilter exclusion = new ClassFilter() {
             @SuppressWarnings("unchecked")
-			public boolean matches(Class clazz) {
+            public boolean matches(Class clazz) {
                 try {
-                    return !(getImplInterfaceClass().isAssignableFrom(clazz));
+                    Class<?> implInterfaceClass = Thread.currentThread().getContextClassLoader()
+                            .loadClass(introducedInterfaceName);
+                    return !(implInterfaceClass.isAssignableFrom(clazz));
                 }
                 catch (ClassNotFoundException e) {
                     return false;
@@ -44,8 +51,7 @@ public class BeanIntroductionDefinition
             }
         };
 
-        this.typePatternClassFilter = ClassFilters.intersection(
-                typePatternFilter, exclusion);
+        this.typePatternClassFilter = ClassFilters.intersection(typePatternFilter, exclusion);
         this.defaultImplName = defaultImplName;
         this.introducedInterfaceName = interfaceTypeName;
         this.typePattern = typePattern;
@@ -60,24 +66,7 @@ public class BeanIntroductionDefinition
         return this.typePattern;
     }
 
-    public Method getAdviceMethod() throws ClassNotFoundException {
-        throw new IllegalArgumentException();
-    }
-
-    public String getMethod() {
-        throw new IllegalArgumentException();
-    }
-
-    public AspectJExpressionPointcut getPointcut()
-            throws ClassNotFoundException {
-        throw new IllegalArgumentException();
-    }
-
-    public String getReturning() {
-        throw new IllegalArgumentException();
-    }
-
-    public String getThrowing() {
+    public String getAdviceMethodName() {
         throw new IllegalArgumentException();
     }
 
@@ -85,46 +74,8 @@ public class BeanIntroductionDefinition
         return ADVICE_TYPES.DECLARE_PARENTS;
     }
 
-    public void setArgNames(String[] argNames) {
-        throw new IllegalArgumentException();
-    }
-
-    public void setMethod(String method) {
-        throw new IllegalArgumentException();
-    }
-
-    public void setPointcut(String pointcut) {
-        throw new IllegalArgumentException();
-    }
-
-    public void setReturning(String returning) {
-        throw new IllegalArgumentException();
-    }
-
-    public void setThrowing(String throwing) {
-        throw new IllegalArgumentException();
-    }
-
-    public Class<?> getDefaultImplClass() throws ClassNotFoundException {
-        if (this.defaultImpl == null) {
-            this.defaultImpl = Thread.currentThread().getContextClassLoader()
-                    .loadClass(this.defaultImplName);
-        }
-        return this.defaultImpl;
-    }
-
     public String getDefaultImplName() {
         return this.defaultImplName;
-    }
-
-    public Class<?> getImplInterfaceClass() throws ClassNotFoundException {
-        if (this.introducedInterface == null) {
-            this.introducedInterface = Thread.currentThread()
-                    .getContextClassLoader().loadClass(
-                            this.introducedInterfaceName);
-
-        }
-        return this.introducedInterface;
     }
 
     public String getImplInterfaceName() {

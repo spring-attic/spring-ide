@@ -18,48 +18,53 @@ package org.springframework.ide.eclipse.aop.core.model;
 import java.lang.reflect.Method;
 
 import org.eclipse.core.resources.IResource;
-import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 
 public interface IAspectDefinition {
 
-    Class<?> getAdviceClass() throws ClassNotFoundException;
+    //Class<?> getAdviceClass() throws ClassNotFoundException;
 
-    Method getAdviceMethod() throws ClassNotFoundException;
+    Method getAdviceMethod();
 
     String getAspectName();
 
-    String getClassName();
+    String getAspectClassName();
 
     int getAspectLineNumber();
     
-    String getReturning();
-
-    String getThrowing();
+    String getAdviceMethodName();
     
-    String getMethod();
+    String[] getAdviceMethodParameterTypes();
     
     IResource getResource();
 
     IAopReference.ADVICE_TYPES getType();
 
-    void setArgNames(String[] argNames);
-
     void setAspectName(String aspectName);
 
-    void setClassName(String className);
-
-    void setMethod(String method);
-
-    void setPointcut(String pointcut);
-
-    void setReturning(String returning);
-
-    void setThrowing(String throwing);
+    void setAspectClassName(String className);
+    
+    void setAdviceMethodName(String methodname);
+    
+    void setAdviceMethodParameterTypes(String[] params);
 
     void setType(IAopReference.ADVICE_TYPES type);
     
     void setResource(IResource file);
     
-    AspectJExpressionPointcut getPointcut() throws ClassNotFoundException;
+    Object getAspectJPointcutExpression() throws Throwable;
+    
+    String getReturning();
+    
+    void setReturning(String returning);
+    
+    String getThrowing();
+    
+    void setThrowing(String throwable);
 
+    String[] getArgNames();
+    
+    void setArgNames(String[] argNames);
+    
+    String getPointcutExpression();
+    
 }

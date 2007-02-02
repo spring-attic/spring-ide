@@ -184,12 +184,11 @@ public class BeansAspectDefinitionParser {
                     }
 
                     AnnotationAspectDefinition def = new AnnotationAspectDefinition();
-                    def.setPointcut(ajexp);
                     def.setAspectName(id);
-                    def.setClassName(className);
+                    def.setAspectClassName(className);
                     def.setNode((IDOMNode) bean);
-                    def.setMethod(method.getName());
-                    ajexp.setPointcutDeclarationScope(aspectClass);
+                    def.setAdviceMethodName(BeansAopModelUtils.methodToSignatureString(method));
+                    def.setPointcutExpression(ajexp.getExpression());
 
                     AspectJAnnotation<?> aspectJAnnotation = BeansAopModelUtils
                             .findAspectJAnnotationOnMethod(method);
@@ -244,34 +243,29 @@ public class BeansAspectDefinitionParser {
             }
         });
 
-        try {
-            for (Field field : aspectClass.getDeclaredFields()) {
-                Class declareParentsClass = classLoader.loadClass(DeclareParents.class.getName());
-                Annotation declareParents = field.getAnnotation(declareParentsClass);
-                if (declareParents != null) {
-                    Method defaultImplMethod = declareParents.annotationType().getMethod(
-                            "defaultImpl", (Class[]) null);
-                    Method valueMethod = declareParents.annotationType().getMethod("value",
-                            (Class[]) null);
-                    Class defaultImpl = (Class) defaultImplMethod.invoke(declareParents,
-                            (Object[]) null);
-                    String value = (String) valueMethod.invoke(declareParents, (Object[]) null);
-                    Class type = field.getType();
+        for (Field field : aspectClass.getDeclaredFields()) {
+            Class declareParentsClass = classLoader.loadClass(DeclareParents.class.getName());
+            Annotation declareParents = field.getAnnotation(declareParentsClass);
+            if (declareParents != null) {
+                Method defaultImplMethod = declareParents.annotationType().getMethod("defaultImpl",
+                        (Class[]) null);
+                Method valueMethod = declareParents.annotationType().getMethod("value",
+                        (Class[]) null);
+                Class defaultImpl = (Class) defaultImplMethod.invoke(declareParents,
+                        (Object[]) null);
+                String value = (String) valueMethod.invoke(declareParents, (Object[]) null);
+                Class type = field.getType();
 
-                    if (defaultImpl != null && defaultImpl != declareParentsClass
-                            && !defaultImpl.equals(declareParentsClass)) {
-                        AnnotationIntroductionDefinition def = new AnnotationIntroductionDefinition(
-                                type, value, defaultImpl, field);
-                        def.setAspectName(id);
-                        def.setClassName(className);
-                        def.setNode((IDOMNode) bean);
-                        aspectInfos.add(def);
-                    }
+                if (defaultImpl != null && defaultImpl != declareParentsClass
+                        && !defaultImpl.equals(declareParentsClass)) {
+                    AnnotationIntroductionDefinition def = new AnnotationIntroductionDefinition(
+                            type.getName(), value, defaultImpl.getName(), field.getName());
+                    def.setAspectName(id);
+                    def.setAspectClassName(className);
+                    def.setNode((IDOMNode) bean);
+                    aspectInfos.add(def);
                 }
             }
-        }
-        catch (Throwable e) {
-            e.printStackTrace();
         }
     }
 
@@ -294,9 +288,9 @@ public class BeansAspectDefinitionParser {
         }
         info.setArgNames(argNamesArray);
         info.setNode((IDOMNode) aspectNode);
-        info.setPointcut(pointcut);
+        info.setPointcutExpression(pointcut);
         info.setType(type);
-        info.setMethod(method);
+        info.setAdviceMethodName(method);
         return info;
     }
 
@@ -322,7 +316,7 @@ public class BeansAspectDefinitionParser {
                             && StringUtils.hasText(implementInterface)) {
                         BeanIntroductionDefinition info = new BeanIntroductionDefinition(
                                 implementInterface, typesMatching, defaultImpl);
-                        info.setClassName(defaultImpl);
+                        info.setAspectClassName(defaultImpl);
                         info.setAspectName(beanRef);
                         info.setNode((IDOMNode) aspectNode);
                         aspectInfos.add(info);
@@ -331,21 +325,21 @@ public class BeansAspectDefinitionParser {
                 else if ("before".equals(aspectNode.getLocalName())) {
                     BeanAspectDefinition info = parseAspect(pointcuts, rootPointcuts, aspectNode,
                             IAopReference.ADVICE_TYPES.BEFORE);
-                    info.setClassName(className);
+                    info.setAspectClassName(className);
                     info.setAspectName(beanRef);
                     aspectInfos.add(info);
                 }
                 else if ("around".equals(aspectNode.getLocalName())) {
                     BeanAspectDefinition info = parseAspect(pointcuts, rootPointcuts, aspectNode,
                             IAopReference.ADVICE_TYPES.AROUND);
-                    info.setClassName(className);
+                    info.setAspectClassName(className);
                     info.setAspectName(beanRef);
                     aspectInfos.add(info);
                 }
                 else if ("after".equals(aspectNode.getLocalName())) {
                     BeanAspectDefinition info = parseAspect(pointcuts, rootPointcuts, aspectNode,
                             IAopReference.ADVICE_TYPES.AFTER);
-                    info.setClassName(className);
+                    info.setAspectClassName(className);
                     info.setAspectName(beanRef);
                     aspectInfos.add(info);
                 }
@@ -354,7 +348,7 @@ public class BeansAspectDefinitionParser {
                             IAopReference.ADVICE_TYPES.AFTER_RETURNING);
                     String returning = BeansEditorUtils.getAttribute(aspectNode, "returning");
                     info.setReturning(returning);
-                    info.setClassName(className);
+                    info.setAspectClassName(className);
                     info.setAspectName(beanRef);
                     aspectInfos.add(info);
                 }
@@ -363,14 +357,14 @@ public class BeansAspectDefinitionParser {
                             IAopReference.ADVICE_TYPES.AFTER_THROWING);
                     String throwing = BeansEditorUtils.getAttribute(aspectNode, "throwing");
                     info.setThrowing(throwing);
-                    info.setClassName(className);
+                    info.setAspectClassName(className);
                     info.setAspectName(beanRef);
                     aspectInfos.add(info);
                 }
                 else if ("around".equals(aspectNode.getLocalName())) {
                     BeanAspectDefinition info = parseAspect(pointcuts, rootPointcuts, aspectNode,
                             IAopReference.ADVICE_TYPES.AROUND);
-                    info.setClassName(className);
+                    info.setAspectClassName(className);
                     info.setAspectName(beanRef);
                     aspectInfos.add(info);
                 }
@@ -405,48 +399,48 @@ public class BeansAspectDefinitionParser {
                         advisorClass)) {
                     JavaAspectDefinition info = new JavaAspectDefinition();
                     info.setNode((IDOMNode) aspectNode);
-                    info.setPointcut(pointcut);
-                    info.setClassName(className);
+                    info.setPointcutExpression(pointcut);
+                    info.setAspectClassName(className);
                     info.setAspectName(beanRef);
                     info.setType(ADVICE_TYPES.AROUND);
+                    info.setAspectClassName(className);
+                    info.setAdviceMethodName("invoke");
                     aspectInfos.add(info);
-                    info.setPointcut(BeansAopModelUtils.getPointcut(advisorClass, pointcut));
-                    info.setMethod("invoke");
                 }
                 if (classLoader.loadClass(MethodBeforeAdvice.class.getName()).isAssignableFrom(
                         advisorClass)) {
                     JavaAspectDefinition info = new JavaAspectDefinition();
                     info.setNode((IDOMNode) aspectNode);
-                    info.setPointcut(pointcut);
-                    info.setClassName(className);
+                    info.setPointcutExpression(pointcut);
+                    info.setAspectClassName(className);
                     info.setAspectName(beanRef);
                     info.setType(ADVICE_TYPES.BEFORE);
-                    info.setMethod("before");
-                    info.setPointcut(BeansAopModelUtils.getPointcut(advisorClass, pointcut));
+                    info.setAdviceMethodName("before");
+                    info.setAspectClassName(className);
                     aspectInfos.add(info);
                 }
                 if (classLoader.loadClass(ThrowsAdvice.class.getName()).isAssignableFrom(
                         advisorClass)) {
                     JavaAspectDefinition info = new JavaAspectDefinition();
                     info.setNode((IDOMNode) aspectNode);
-                    info.setPointcut(pointcut);
-                    info.setClassName(className);
+                    info.setPointcutExpression(pointcut);
+                    info.setAspectClassName(className);
                     info.setAspectName(beanRef);
                     info.setType(ADVICE_TYPES.AFTER_THROWING);
-                    info.setMethod("afterThrowing");
-                    info.setPointcut(BeansAopModelUtils.getPointcut(advisorClass, pointcut));
+                    info.setAdviceMethodName("afterThrowing");
+                    info.setAspectClassName(className);
                     aspectInfos.add(info);
                 }
                 if (classLoader.loadClass(AfterReturningAdvice.class.getName()).isAssignableFrom(
                         advisorClass)) {
                     JavaAspectDefinition info = new JavaAspectDefinition();
                     info.setNode((IDOMNode) aspectNode);
-                    info.setPointcut(pointcut);
-                    info.setClassName(className);
+                    info.setPointcutExpression(pointcut);
+                    info.setAspectClassName(className);
                     info.setAspectName(beanRef);
                     info.setType(ADVICE_TYPES.AFTER_RETURNING);
-                    info.setMethod("afterReturning");
-                    info.setPointcut(BeansAopModelUtils.getPointcut(advisorClass, pointcut));
+                    info.setAdviceMethodName("afterReturning");
+                    info.setAspectClassName(className);
                     aspectInfos.add(info);
                 }
             }

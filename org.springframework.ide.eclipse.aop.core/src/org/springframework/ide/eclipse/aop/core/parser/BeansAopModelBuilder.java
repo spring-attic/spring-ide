@@ -17,7 +17,6 @@
 package org.springframework.ide.eclipse.aop.core.parser;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -40,13 +39,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
-import org.springframework.aop.aspectj.AspectJExpressionPointcut;
-import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
@@ -201,11 +197,11 @@ public class BeansAopModelBuilder {
                     BeanIntroductionDefinition intro = (BeanIntroductionDefinition) info;
                     if (intro.getTypeMatcher().matches(targetClass)) {
                         IType jdtAspectType = BeansModelUtils.getJavaType(aopProject.getProject(),
-                                ((BeanIntroductionDefinition) info).getClassName());
+                                ((BeanIntroductionDefinition) info).getAspectClassName());
                         IMember jdtAspectMember = null;
                         if (intro instanceof AnnotationIntroductionDefinition) {
                             String fieldName = ((AnnotationIntroductionDefinition) intro)
-                                    .getDefiningField().getName();
+                                    .getDefiningField();
                             jdtAspectMember = jdtAspectType.getField(fieldName);
                         }
                         else {
@@ -227,13 +223,13 @@ public class BeansAopModelBuilder {
                     JavaAspectDefinition intro = (JavaAspectDefinition) info;
 
                     List<IMethod> matchingMethods = BeansAopUtils.getMatches(targetClass, intro
-                            .getPointcut().getMethodMatcher(), aopProject.getProject());
+                            .getPointcutExpression(), aopProject.getProject());
 
                     for (IMethod method : matchingMethods) {
                         IType jdtAspectType = BeansModelUtils.getJavaType(aopProject.getProject(),
-                                info.getClassName());
+                                info.getAspectClassName());
                         IMethod jdtAspectMethod = BeansAopUtils.getMethod(jdtAspectType, info
-                                .getMethod(), info.getAdviceMethod().getParameterTypes().length);
+                                .getAdviceMethodName(), info.getAdviceMethodParameterTypes().length);
                         if (jdtAspectMethod.getResource() != null
                                 && jdtAspectMethod.getResource().isAccessible()) {
                             IAopReference ref = new AopReference(info.getType(), jdtAspectMethod,
@@ -244,25 +240,21 @@ public class BeansAopModelBuilder {
                 }
                 else {
                     // validate the aspect definition
-                    if (info.getAdviceClass() == null || info.getAdviceMethod() == null) {
+                    if (info.getAdviceMethod() == null) {
                         return;
                     }
 
                     IType jdtTargetType = BeansModelUtils.getJavaType(file.getProject(),
                             targetClass.getName());
                     IType jdtAspectType = BeansModelUtils.getJavaType(file.getProject(), info
-                            .getClassName());
-
-                    Class<?> expressionPointcutClass = loader
-                            .loadClass(AspectJExpressionPointcut.class.getName());
+                            .getAspectClassName());
                     Class<?> aspectJAdviceClass = BeansAopModelUtils.getAspectJAdviceClass(info);
-
-                    Object pc = BeansAopModelUtils.initAspectJExpressionPointcut(info,
-                            jdtAspectType, expressionPointcutClass);
-
+                    
+                    Object pc = info.getAspectJPointcutExpression();
+                    
                     BeansAopModelUtils.createAspectJAdvice(info, aspectJAdviceClass, pc);
 
-                    Method matchesMethod = expressionPointcutClass.getMethod("matches",
+                    Method matchesMethod = pc.getClass().getMethod("matches",
                             Method.class, Class.class);
                     for (Method m : targetClass.getDeclaredMethods()) {
                         boolean matches = (Boolean) matchesMethod.invoke(pc, m, targetClass);
@@ -270,7 +262,7 @@ public class BeansAopModelBuilder {
                             IMethod jdtMethod = BeansAopUtils.getMethod(jdtTargetType, m.getName(),
                                     m.getParameterTypes().length);
                             IMethod jdtAspectMethod = BeansAopUtils
-                                    .getMethod(jdtAspectType, info.getMethod(), info
+                                    .getMethod(jdtAspectType, info.getAdviceMethodName(), info
                                             .getAdviceMethod().getParameterTypes().length);
                             if (jdtAspectMethod.getResource() != null
                                     && jdtAspectMethod.getResource().isAccessible()) {
@@ -347,38 +339,6 @@ public class BeansAopModelBuilder {
                 monitor.done();
             }
             return Status.OK_STATUS;
-        }
-    }
-
-    static class JdtParameterNameDiscoverer implements ParameterNameDiscoverer {
-
-        private IType type;
-
-        public JdtParameterNameDiscoverer(IType type) {
-            this.type = type;
-        }
-
-        public String[] getParameterNames(Method method) {
-            if (method != null) {
-                String methodName = method.getName();
-                int argCount = method.getParameterTypes().length;
-                IMethod jdtMethod;
-                try {
-                    jdtMethod = BeansAopUtils.getMethod(type, methodName, argCount);
-                    if (jdtMethod != null) {
-                        return jdtMethod.getParameterNames();
-                    }
-                }
-                catch (JavaModelException e) {
-                    // suppress this
-                }
-            }
-            return null;
-        }
-
-        @SuppressWarnings("unchecked")
-        public String[] getParameterNames(Constructor ctor) {
-            return null;
         }
     }
 }

@@ -32,22 +32,26 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.AjTypeSystem;
 import org.aspectj.lang.reflect.PerClauseKind;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.aop.aspectj.AspectJAfterAdvice;
 import org.springframework.aop.aspectj.AspectJAfterReturningAdvice;
 import org.springframework.aop.aspectj.AspectJAfterThrowingAdvice;
 import org.springframework.aop.aspectj.AspectJAroundAdvice;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
+import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
-import org.springframework.ide.eclipse.aop.core.parser.BeansAopModelBuilder.JdtParameterNameDiscoverer;
+import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.util.StringUtils;
 
 @SuppressWarnings("restriction")
-class BeansAopModelUtils {
+public class BeansAopModelUtils {
 
     private static final String AJC_MAGIC = "ajc$";
 
@@ -279,13 +283,16 @@ class BeansAopModelUtils {
         return true;
     }
 
-    public static Object initAspectJExpressionPointcut(IAspectDefinition info, IType jdtAspectType,
-            Class<?> expressionPointcutClass) throws InstantiationException,
-            IllegalAccessException, InvocationTargetException, ClassNotFoundException, NoSuchMethodException {
+    public static Object initAspectJExpressionPointcut(IAspectDefinition info)
+            throws InstantiationException, IllegalAccessException, InvocationTargetException,
+            ClassNotFoundException, NoSuchMethodException {
+        IType jdtAspectType = BeansModelUtils.getJavaType(info.getResource().getProject(), info
+                .getAspectClassName());
+        Class<?> expressionPointcutClass = loadClass(AspectJExpressionPointcut.class.getName());
         Object pc = expressionPointcutClass.newInstance();
         for (Method m : expressionPointcutClass.getMethods()) {
             if (m.getName().equals("setExpression")) {
-                m.invoke(pc, info.getPointcut().getExpression());
+                m.invoke(pc, info.getPointcutExpression());
             }
             else if (m.getName().equals("setParameterNames")) {
                 m.invoke(pc, new Object[] { new JdtParameterNameDiscoverer(jdtAspectType)
@@ -294,8 +301,13 @@ class BeansAopModelUtils {
         }
         Method setDeclarationScopeMethod = expressionPointcutClass.getMethod(
                 "setPointcutDeclarationScope", Class.class);
-        setDeclarationScopeMethod.invoke(pc, info.getAdviceClass());
+        setDeclarationScopeMethod.invoke(pc, loadClass(info.getAspectClassName()));
         return pc;
+    }
+
+    public static Class<?> loadClass(String className) throws ClassNotFoundException {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        return loader.loadClass(className);
     }
 
     public static Class<?> getAspectJAdviceClass(IAspectDefinition info)
@@ -343,13 +355,66 @@ class BeansAopModelUtils {
                 }
             }
 
+            if (info.getArgNames() != null && info.getArgNames().length > 0) {
+                Method setArgumentNamesFromStringArrayMethod = aspectJAdviceClass.getMethod(
+                        "setArgumentNamesFromStringArray", String[].class);
+                setArgumentNamesFromStringArrayMethod.invoke(aspectJAdvice, new Object[] { info
+                        .getArgNames() });
+            }
+
             afterPropertiesSetMethod.invoke(aspectJAdvice, (Object[]) null);
             return aspectJAdvice;
         }
         catch (InvocationTargetException e) {
             throw e.getCause();
         }
-
     }
 
+    public static String methodToSignatureString(Method method) {
+        StringBuffer buf = new StringBuffer(method.getName());
+        if (method.getParameterTypes() != null && method.getParameterTypes().length > 0) {
+            buf.append("(");
+            for (int i = 0; i < method.getParameterTypes().length; i++) {
+                Class<?> cls = method.getParameterTypes()[i];
+                buf.append(cls.getName());
+                if (i < (method.getParameterTypes().length - 1)) {
+                    buf.append(", ");
+                }
+            }
+            buf.append(")");
+        }
+        return buf.toString();
+    }
+
+    static class JdtParameterNameDiscoverer implements ParameterNameDiscoverer {
+
+        private IType type;
+
+        public JdtParameterNameDiscoverer(IType type) {
+            this.type = type;
+        }
+
+        public String[] getParameterNames(Method method) {
+            if (method != null) {
+                String methodName = method.getName();
+                int argCount = method.getParameterTypes().length;
+                IMethod jdtMethod;
+                try {
+                    jdtMethod = BeansAopUtils.getMethod(type, methodName, argCount);
+                    if (jdtMethod != null) {
+                        return jdtMethod.getParameterNames();
+                    }
+                }
+                catch (JavaModelException e) {
+                    // suppress this
+                }
+            }
+            return null;
+        }
+
+        @SuppressWarnings("unchecked")
+        public String[] getParameterNames(Constructor ctor) {
+            return null;
+        }
+    }
 }
