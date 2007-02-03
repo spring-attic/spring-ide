@@ -77,7 +77,8 @@ public class BeansNavigatorLinkHelper implements ILinkHelper {
 			IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
 			if (config != null) {
 				IEditorPart editor = SpringUIUtils.getActiveEditor();
-				if (editor.getEditorInput() == input) {
+				if (editor.getEditorInput() == input
+						&& editor.getSite() != null) {
 					ISelection selection = editor.getSite()
 							.getSelectionProvider().getSelection();
 					IModelElement element = BeansUIUtils.getSelectedElement(

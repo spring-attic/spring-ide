@@ -135,12 +135,6 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	}
 
 	public IResource getElementResource() {
-		// If config file not exists then return the corresponding project
-		// instead
-		if (file == null) {
-			return ((IResourceModelElement) getElementParent())
-					.getElementResource();
-		}
 		return file;
 	}
 

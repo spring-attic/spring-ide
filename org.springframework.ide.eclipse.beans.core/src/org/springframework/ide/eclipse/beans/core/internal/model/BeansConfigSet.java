@@ -16,7 +16,6 @@
 
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -159,7 +158,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 	}
 
 	public Set<String> getConfigNames() {
-		return Collections.unmodifiableSet(configNames);
+		return new LinkedHashSet<String>(configNames);
 	}
 
 	public boolean hasAlias(String name) {
