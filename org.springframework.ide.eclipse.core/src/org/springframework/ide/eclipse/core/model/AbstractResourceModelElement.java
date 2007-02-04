@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.ide.eclipse.core.model;
 
-import org.eclipse.core.resources.IResource;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -30,16 +29,6 @@ public abstract class AbstractResourceModelElement extends AbstractModelElement
 
 	protected AbstractResourceModelElement(IModelElement parent, String name) {
 		super(parent, name);
-	}
-
-	/**
-	 * Returns an adapter for <code>IResource.class</code>.
-	 */
-	public Object getAdapter(Class adapter) {
-		if (adapter == IResource.class) {
-			return getElementResource();
-		}
-		return super.getAdapter(adapter);
 	}
 
 	public boolean equals(Object other) {
