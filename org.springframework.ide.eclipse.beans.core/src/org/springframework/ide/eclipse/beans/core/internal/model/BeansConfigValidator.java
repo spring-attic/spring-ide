@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -308,16 +308,6 @@ public class BeansConfigValidator {
 				if (bd.hasConstructorArgumentValues() && !bean.isAbstract()) {
 					validateConstructorArguments(bean, type, mergedBd
 							.getConstructorArgumentValues());
-				}
-
-				// For non-factory beans validate bean's init-method and
-				// destroy-method
-				if (!Introspector.doesImplement(type, FactoryBean.class
-						.getName())) {
-					validateMethod(bean, type, METHOD_TYPE_INIT, bd
-							.getInitMethodName(), 0, false);
-					validateMethod(bean, type, METHOD_TYPE_DESTROY, bd
-							.getDestroyMethodName(), 0, false);
 				}
 
 				// Validate bean's properties
