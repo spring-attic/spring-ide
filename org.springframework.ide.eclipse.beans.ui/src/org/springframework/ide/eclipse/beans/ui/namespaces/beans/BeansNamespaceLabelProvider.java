@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,14 +58,16 @@ public class BeansNamespaceLabelProvider extends LabelProvider implements
 				.getLastSegment());
 		if (element instanceof ISourceModelElement
 				&& elementPath.getSegmentCount() > 1) {
-			Object parentElement = elementPath.getParentPath()
-					.getLastSegment();
-			if (parentElement instanceof IModelElement) {
-				label.setImage(BeansNamespaceImages.getImage(
-						(ISourceModelElement) element,
-						(IModelElement) parentElement));
-				label.setText(getText(element));
+			IModelElement parentElement;
+			Object parent = elementPath.getParentPath().getLastSegment();
+			if (parent instanceof IModelElement) {
+				parentElement = (IModelElement) parent;
+			} else {
+				parentElement = null;
 			}
+			label.setImage(BeansNamespaceImages.getImage(
+					(ISourceModelElement) element, parentElement));
+			label.setText(getText(element));
 		}
 	}
 

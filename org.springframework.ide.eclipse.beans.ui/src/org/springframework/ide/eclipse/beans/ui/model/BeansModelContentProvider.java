@@ -168,7 +168,7 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 				return new IBeansConfig[] { config };
 			}
 		} else if (parentElement instanceof IType) {
-			getJavaTypeChildren((IType) parentElement);
+			return getJavaTypeChildren((IType) parentElement);
 		} else if (parentElement instanceof BeanClassReferences) {
 			Set<IBean> beans = ((BeanClassReferences) parentElement)
 					.getBeans();
