@@ -23,6 +23,9 @@ import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.commons.EmptyVisitor;
 
+/**
+ * ASM-based visitor that checks if a certain class has the @Aspect annotation
+ */
 public class AspectAnnotationVisitor
         extends EmptyVisitor {
 

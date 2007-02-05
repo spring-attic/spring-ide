@@ -24,41 +24,38 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES
 public class BeanIntroductionDefinition
         extends BeanAspectDefinition implements IIntroductionDefinition {
 
-    private final String introducedInterfaceName;
+    private String introducedInterfaceName;
 
-    private final ClassFilter typePatternClassFilter;
+    private ClassFilter typePatternClassFilter;
 
-    private final String defaultImplName;
+    private String defaultImplName;
 
-    private final String typePattern;
+    private String typePattern;
 
-    public BeanIntroductionDefinition(String interfaceTypeName, String typePattern,
-            String defaultImplName) {
-        ClassFilter typePatternFilter = new TypePatternClassFilter(typePattern);
-
-        // Excludes methods implemented.
-        ClassFilter exclusion = new ClassFilter() {
-            @SuppressWarnings("unchecked")
-            public boolean matches(Class clazz) {
-                try {
-                    Class<?> implInterfaceClass = Thread.currentThread().getContextClassLoader()
-                            .loadClass(introducedInterfaceName);
-                    return !(implInterfaceClass.isAssignableFrom(clazz));
-                }
-                catch (ClassNotFoundException e) {
-                    return false;
-                }
-            }
-        };
-
-        this.typePatternClassFilter = ClassFilters.intersection(typePatternFilter, exclusion);
-        this.defaultImplName = defaultImplName;
-        this.introducedInterfaceName = interfaceTypeName;
-        this.typePattern = typePattern;
+    public BeanIntroductionDefinition() {
         setType(ADVICE_TYPES.DECLARE_PARENTS);
     }
 
     public ClassFilter getTypeMatcher() {
+        if (this.typePatternClassFilter == null) {
+            ClassFilter typePatternFilter = new TypePatternClassFilter(typePattern);
+
+            // Excludes methods implemented.
+            ClassFilter exclusion = new ClassFilter() {
+                @SuppressWarnings("unchecked")
+                public boolean matches(Class clazz) {
+                    try {
+                        Class<?> implInterfaceClass = Thread.currentThread()
+                                .getContextClassLoader().loadClass(introducedInterfaceName);
+                        return !(implInterfaceClass.isAssignableFrom(clazz));
+                    }
+                    catch (ClassNotFoundException e) {
+                        return false;
+                    }
+                }
+            };
+            this.typePatternClassFilter = ClassFilters.intersection(typePatternFilter, exclusion);
+        }
         return this.typePatternClassFilter;
     }
 
@@ -80,6 +77,18 @@ public class BeanIntroductionDefinition
 
     public String getImplInterfaceName() {
         return this.introducedInterfaceName;
+    }
+
+    public void setDefaultImplName(String defaultImplName) {
+        this.defaultImplName = defaultImplName;
+    }
+
+    public void setIntroducedInterfaceName(String introducedInterfaceName) {
+        this.introducedInterfaceName = introducedInterfaceName;
+    }
+
+    public void setTypePattern(String typePattern) {
+        this.typePattern = typePattern;
     }
 
 }

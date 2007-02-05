@@ -24,13 +24,11 @@ public class AnnotationIntroductionDefinition
     
 	private String definingField;
 	
-    public AnnotationIntroductionDefinition(String interfaceType,
-            String typePattern,String defaultImpl, String definingField) {
-        super(interfaceType, typePattern, defaultImpl);
-        this.definingField = definingField;
-    }
-
 	public String getDefiningField() {
 		return definingField;
 	}
+
+    public void setDefiningField(String definingField) {
+        this.definingField = definingField;
+    }
 }

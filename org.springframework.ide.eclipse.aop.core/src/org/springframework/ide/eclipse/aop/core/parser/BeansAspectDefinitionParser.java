@@ -15,9 +15,6 @@
  */
 package org.springframework.ide.eclipse.aop.core.parser;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,30 +22,23 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.aopalliance.intercept.MethodInterceptor;
-import org.aspectj.lang.annotation.DeclareParents;
-import org.aspectj.lang.annotation.Pointcut;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.objectweb.asm.ClassReader;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.ThrowsAdvice;
-import org.springframework.aop.aspectj.AspectJExpressionPointcut;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
-import org.springframework.ide.eclipse.aop.core.model.internal.AnnotationAspectDefinition;
-import org.springframework.ide.eclipse.aop.core.model.internal.AnnotationIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.model.internal.BeanAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.internal.BeanIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.model.internal.JavaAspectDefinition;
-import org.springframework.ide.eclipse.aop.core.parser.BeansAopModelUtils.AspectJAnnotation;
-import org.springframework.ide.eclipse.aop.core.parser.BeansAopModelUtils.AspectJAnnotationType;
+import org.springframework.ide.eclipse.aop.core.parser.asm.AdviceAnnotationVisitor;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -122,15 +112,9 @@ public class BeansAspectDefinitionParser {
                 final String className = BeansEditorUtils.getClassNameForBean(bean);
                 if (className != null && isIncluded(patternList, id)) {
                     try {
-                        // final Class<?> aspectClass = Class.forName(className, true, Thread
-                        // .currentThread().getContextClassLoader());
-
-                        final Class<?> aspectClass = Thread.currentThread().getContextClassLoader()
-                                .loadClass(className);
-                        
                         if (BeansAopModelUtils.validateAspect(className)) {
                             createAnnotationAspectDefinition(document, bean, id, className,
-                                    aspectClass, aspectInfos);
+                                    aspectInfos);
                         }
                     }
                     catch (Throwable e) {
@@ -167,107 +151,17 @@ public class BeansAspectDefinitionParser {
 
     @SuppressWarnings("unchecked")
     private static void createAnnotationAspectDefinition(final IDOMDocument document,
-            final Node bean, final String id, final String className, final Class<?> aspectClass,
+            final Node bean, final String id, final String className,
             final List<IAspectDefinition> aspectInfos) throws Throwable {
+
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        final Class pointcutAnnotationClass = classLoader.loadClass(Pointcut.class.getName());
-        
-        // TODO rework to leverage ASM
-        ReflectionUtils.doWithMethods(aspectClass, new ReflectionUtils.MethodCallback() {
-            @SuppressWarnings("unchecked")
-            public void doWith(Method method) throws IllegalArgumentException {
-                // Exclude pointcuts
-                if (AnnotationUtils.getAnnotation(method, pointcutAnnotationClass) == null) {
-                    AspectJExpressionPointcut ajexp = BeansAopModelUtils.getPointcut(method,
-                            aspectClass);
-                    if (ajexp == null) {
-                        return;
-                    }
+        ClassReader reader = new ClassReader(classLoader.getResourceAsStream(BeansAopModelUtils
+                .getClassFileName(className)));
+        AdviceAnnotationVisitor v = new AdviceAnnotationVisitor((IDOMNode) bean, id, className);
+        reader.accept(v, false);
 
-                    AnnotationAspectDefinition def = new AnnotationAspectDefinition();
-                    def.setAspectName(id);
-                    def.setAspectClassName(className);
-                    def.setNode((IDOMNode) bean);
-                    def.setAdviceMethodName(BeansAopModelUtils.methodToSignatureString(method));
-                    def.setPointcutExpression(ajexp.getExpression());
-
-                    AspectJAnnotation<?> aspectJAnnotation = BeansAopModelUtils
-                            .findAspectJAnnotationOnMethod(method);
-                    if (aspectJAnnotation.getArgNames() != null) {
-                        def.setArgNames(StringUtils
-                                .commaDelimitedListToStringArray(aspectJAnnotation.getArgNames()));
-                    }
-                    if (AspectJAnnotationType.AtBefore == aspectJAnnotation.getAnnotationType()) {
-                        def.setType(ADVICE_TYPES.BEFORE);
-                    }
-                    else if (AspectJAnnotationType.AtAfter == aspectJAnnotation.getAnnotationType()) {
-                        def.setType(ADVICE_TYPES.AFTER);
-                    }
-                    else if (AspectJAnnotationType.AtAfterReturning == aspectJAnnotation
-                            .getAnnotationType()) {
-                        def.setType(ADVICE_TYPES.AFTER_RETURNING);
-                        try {
-                            Annotation afterReturningAnnotation = aspectJAnnotation.getAnnotation();
-                            Method returningMethod = afterReturningAnnotation.annotationType()
-                                    .getMethod("returning", (Class[]) null);
-                            String returning = (String) returningMethod.invoke(
-                                    afterReturningAnnotation, (Object[]) null);
-                            if (StringUtils.hasText(returning)) {
-                                def.setReturning(returning);
-                            }
-                        }
-                        catch (Throwable e) {
-                        }
-                    }
-                    else if (AspectJAnnotationType.AtAfterThrowing == aspectJAnnotation
-                            .getAnnotationType()) {
-                        def.setType(ADVICE_TYPES.AFTER_THROWING);
-                        try {
-                            Annotation afterThrowingAnnotation = aspectJAnnotation.getAnnotation();
-                            Method afterThrowingMethod = afterThrowingAnnotation.annotationType()
-                                    .getMethod("throwing", (Class[]) null);
-                            String throwing = (String) afterThrowingMethod.invoke(
-                                    afterThrowingAnnotation, (Object[]) null);
-                            if (StringUtils.hasText(throwing)) {
-                                def.setThrowing(throwing);
-                            }
-                        }
-                        catch (Throwable e) {
-                        }
-                    }
-                    else if (AspectJAnnotationType.AtAround == aspectJAnnotation
-                            .getAnnotationType()) {
-                        def.setType(ADVICE_TYPES.AROUND);
-                    }
-                    aspectInfos.add(def);
-                }
-            }
-        });
-
-        for (Field field : aspectClass.getDeclaredFields()) {
-            Class declareParentsClass = classLoader.loadClass(DeclareParents.class.getName());
-            Annotation declareParents = field.getAnnotation(declareParentsClass);
-            if (declareParents != null) {
-                Method defaultImplMethod = declareParents.annotationType().getMethod("defaultImpl",
-                        (Class[]) null);
-                Method valueMethod = declareParents.annotationType().getMethod("value",
-                        (Class[]) null);
-                Class defaultImpl = (Class) defaultImplMethod.invoke(declareParents,
-                        (Object[]) null);
-                String value = (String) valueMethod.invoke(declareParents, (Object[]) null);
-                Class type = field.getType();
-
-                if (defaultImpl != null && defaultImpl != declareParentsClass
-                        && !defaultImpl.equals(declareParentsClass)) {
-                    AnnotationIntroductionDefinition def = new AnnotationIntroductionDefinition(
-                            type.getName(), value, defaultImpl.getName(), field.getName());
-                    def.setAspectName(id);
-                    def.setAspectClassName(className);
-                    def.setNode((IDOMNode) bean);
-                    aspectInfos.add(def);
-                }
-            }
-        }
+        List<IAspectDefinition> aspectDefinitions = v.getAspectDefinitions();
+        aspectInfos.addAll(aspectDefinitions);
     }
 
     private static BeanAspectDefinition parseAspect(Map<String, String> pointcuts,
@@ -315,8 +209,10 @@ public class BeansAspectDefinitionParser {
                             "implement-interface");
                     if (StringUtils.hasText(typesMatching) && StringUtils.hasText(defaultImpl)
                             && StringUtils.hasText(implementInterface)) {
-                        BeanIntroductionDefinition info = new BeanIntroductionDefinition(
-                                implementInterface, typesMatching, defaultImpl);
+                        BeanIntroductionDefinition info = new BeanIntroductionDefinition();
+                        info.setIntroducedInterfaceName(implementInterface);
+                        info.setTypePattern(typesMatching);
+                        info.setDefaultImplName(defaultImpl);
                         info.setAspectClassName(defaultImpl);
                         info.setAspectName(beanRef);
                         info.setNode((IDOMNode) aspectNode);

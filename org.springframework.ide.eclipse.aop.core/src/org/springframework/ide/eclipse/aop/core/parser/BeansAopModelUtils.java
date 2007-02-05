@@ -15,19 +15,11 @@
  */
 package org.springframework.ide.eclipse.aop.core.parser;
 
-import java.lang.annotation.Annotation;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 
-import org.aspectj.lang.annotation.After;
-import org.aspectj.lang.annotation.AfterReturning;
-import org.aspectj.lang.annotation.AfterThrowing;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Before;
-import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.PerClauseKind;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -41,8 +33,6 @@ import org.springframework.aop.aspectj.AspectJAroundAdvice;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.aop.core.parser.asm.AspectAnnotationVisitor;
@@ -58,123 +48,20 @@ public class BeansAopModelUtils {
     /** The ".class" file suffix */
     private static final String CLASS_FILE_SUFFIX = ".class";
 
-    /**
-     * Class modelling an AspectJ annotation, exposing its type enumeration and pointcut String.
-     */
-    protected static class AspectJAnnotation<A extends Annotation> {
-
-        private Map<Class<?>, AspectJAnnotationType> annotationTypes = null;
-
-        private void init() throws ClassNotFoundException {
-            ClassLoader cl = Thread.currentThread().getContextClassLoader();
-            annotationTypes = new HashMap<Class<?>, AspectJAnnotationType>();
-            annotationTypes.put(cl.loadClass(Pointcut.class.getName()),
-                    AspectJAnnotationType.AtPointcut);
-            annotationTypes.put(cl.loadClass(After.class.getName()), AspectJAnnotationType.AtAfter);
-            annotationTypes.put(cl.loadClass(AfterReturning.class.getName()),
-                    AspectJAnnotationType.AtAfterReturning);
-            annotationTypes.put(cl.loadClass(AfterThrowing.class.getName()),
-                    AspectJAnnotationType.AtAfterThrowing);
-            annotationTypes.put(cl.loadClass(Around.class.getName()),
-                    AspectJAnnotationType.AtAround);
-            annotationTypes.put(cl.loadClass(Before.class.getName()),
-                    AspectJAnnotationType.AtBefore);
-        }
-
-        private static final String[] EXPRESSION_PROPERTIES = new String[] { "value", "pointcut" };
-
-        private final A annotation;
-
-        private AspectJAnnotationType annotationType;
-
-        private final String argNames;
-
-        private final String expression;
-
-        public AspectJAnnotation(A aspectjAnnotation) throws ClassNotFoundException {
-            init();
-            this.annotation = aspectjAnnotation;
-            for (Class<?> c : annotationTypes.keySet()) {
-                if (c.isInstance(this.annotation)) {
-                    this.annotationType = annotationTypes.get(c);
-                    break;
-                }
-            }
-            if (this.annotationType == null) {
-                throw new IllegalStateException("unknown annotation type: "
-                        + this.annotation.toString());
-            }
-
-            // We know these methods exist with the same name on each object,
-            // but need to invoke them reflectively as there isn't a common
-            // interfaces
-            try {
-                this.expression = resolveExpression();
-                this.argNames = (String) annotation.getClass()
-                        .getMethod("argNames", (Class[]) null).invoke(this.annotation);
-            }
-            catch (Exception ex) {
-                throw new IllegalArgumentException(aspectjAnnotation
-                        + " cannot be an AspectJ annotation", ex);
-            }
-        }
-
-        public A getAnnotation() {
-            return this.annotation;
-        }
-
-        public AspectJAnnotationType getAnnotationType() {
-            return this.annotationType;
-        }
-
-        public String getArgNames() {
-            return this.argNames;
-        }
-
-        public String getPointcutExpression() {
-            return this.expression;
-        }
-
-        private String resolveExpression() throws IllegalAccessException,
-                InvocationTargetException, NoSuchMethodException {
-            String expression = null;
-            for (int i = 0; i < EXPRESSION_PROPERTIES.length; i++) {
-                String methodName = EXPRESSION_PROPERTIES[i];
-                Method method;
-                try {
-                    method = annotation.getClass().getDeclaredMethod(methodName);
-                }
-                catch (NoSuchMethodException ex) {
-                    method = null;
-                }
-
-                if (method != null) {
-                    String candidate = (String) method.invoke(this.annotation);
-
-                    if (StringUtils.hasText(candidate)) {
-                        expression = candidate;
-                    }
-                }
-            }
-            return expression;
-        }
-
-        public String toString() {
-            return this.annotation.toString();
-        }
-    }
-
-    public enum AspectJAnnotationType {
-        AtAfter, AtAfterReturning, AtAfterThrowing, AtAround, AtBefore, AtPointcut
-    }
-
-    protected static boolean validateAspect(String className) throws Throwable {
+    public static boolean validateAspect(String className) throws Throwable {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        ClassReader reader = new ClassReader(classLoader.getResourceAsStream(BeansAopModelUtils
-                .getClassFileName(className)));
+        InputStream is = classLoader.getResourceAsStream(BeansAopModelUtils
+                .getClassFileName(className));
+
+        // check if class exists on class path
+        if (is == null) {
+            return false;
+        }
+        
+        ClassReader reader = new ClassReader(is);
         AspectAnnotationVisitor v = new AspectAnnotationVisitor();
         reader.accept(v, false);
-
+        
         if (!v.getClassInfo().hasAspectAnnotation()) {
             return false;
         }
@@ -215,69 +102,6 @@ public class BeansAopModelUtils {
             }
             return true;
         }
-    }
-
-    /**
-     * Find and return the first AspectJ annotation on the given method (there <i>should</i> only
-     * be one anyway...)
-     * 
-     * @throws ClassNotFoundException
-     */
-    @SuppressWarnings("unchecked")
-    protected static AspectJAnnotation<?> findAspectJAnnotationOnMethod(Method aMethod) {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        Class<? extends Annotation>[] classesToLookFor;
-        try {
-            classesToLookFor = (Class<? extends Annotation>[]) new Class[] {
-                    classLoader.loadClass(Before.class.getName()),
-                    classLoader.loadClass(Around.class.getName()),
-                    classLoader.loadClass(After.class.getName()),
-                    classLoader.loadClass(AfterReturning.class.getName()),
-                    classLoader.loadClass(AfterThrowing.class.getName()),
-                    classLoader.loadClass(Pointcut.class.getName()) };
-            for (Class<? extends Annotation> c : classesToLookFor) {
-                AspectJAnnotation foundAnnotation = findAnnotation(aMethod, c);
-                if (foundAnnotation != null) {
-                    return foundAnnotation;
-                }
-            }
-        }
-        catch (ClassNotFoundException e) {
-            Activator.log(e);
-        }
-        return null;
-    }
-
-    protected static <A extends Annotation> AspectJAnnotation<A> findAnnotation(Method method,
-            Class<A> toLookFor) throws ClassNotFoundException {
-        A result = AnnotationUtils.findAnnotation(method, toLookFor);
-        if (result != null) {
-            return new AspectJAnnotation<A>(result);
-        }
-        else {
-            return null;
-        }
-    }
-
-    protected static AspectJExpressionPointcut getPointcut(Class<?> candidateAspectClass,
-            String pointcut) {
-        AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut(candidateAspectClass,
-                new String[0], new Class[0]);
-        ajexp.setExpression(pointcut);
-        return ajexp;
-    }
-
-    protected static AspectJExpressionPointcut getPointcut(Method candidateAspectJAdviceMethod,
-            Class<?> candidateAspectClass) {
-        AspectJAnnotation<?> aspectJAnnotation;
-        aspectJAnnotation = findAspectJAnnotationOnMethod(candidateAspectJAdviceMethod);
-        if (aspectJAnnotation == null) {
-            return null;
-        }
-        AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut(candidateAspectClass,
-                new String[0], new Class[0]);
-        ajexp.setExpression(aspectJAnnotation.getPointcutExpression());
-        return ajexp;
     }
 
     public static Object initAspectJExpressionPointcut(IAspectDefinition info)
@@ -365,22 +189,6 @@ public class BeansAopModelUtils {
         catch (InvocationTargetException e) {
             throw e.getCause();
         }
-    }
-
-    public static String methodToSignatureString(Method method) {
-        StringBuffer buf = new StringBuffer(method.getName());
-        if (method.getParameterTypes() != null && method.getParameterTypes().length > 0) {
-            buf.append("(");
-            for (int i = 0; i < method.getParameterTypes().length; i++) {
-                Class<?> cls = method.getParameterTypes()[i];
-                buf.append(cls.getName());
-                if (i < (method.getParameterTypes().length - 1)) {
-                    buf.append(", ");
-                }
-            }
-            buf.append(")");
-        }
-        return buf.toString();
     }
 
     static class JdtParameterNameDiscoverer implements ParameterNameDiscoverer {
