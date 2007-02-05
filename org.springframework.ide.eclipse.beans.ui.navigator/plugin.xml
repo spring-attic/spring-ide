@@ -146,7 +146,7 @@
             id="org.springframework.ide.eclipse.beans.ui.navigator.filters.hideBeanClassReferences"
             name="%navigatorfilterHideBeanClassReferencesName"
             description="%navigatorfilterHideBeanClassReferencesDescription"
-            activeByDefault="true">
+            activeByDefault="false">
 				<filterExpression>
 					<instanceof value="org.springframework.ide.eclipse.beans.core.internal.model.BeanClassReferences"/>
 				</filterExpression>
@@ -155,7 +155,7 @@
             id="org.springframework.ide.eclipse.beans.ui.navigator.filters.hideBeansConfigSets"
             name="%navigatorfilterHideBeansConfigSetsName"
             description="%navigatorfilterHideBeansConfigSetsDescription"
-            activeByDefault="true">
+            activeByDefault="false">
 				<filterExpression>
 					<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet"/>
 				</filterExpression>
