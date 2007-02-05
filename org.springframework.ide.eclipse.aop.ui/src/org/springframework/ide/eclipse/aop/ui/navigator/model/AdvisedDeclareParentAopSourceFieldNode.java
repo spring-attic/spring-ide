@@ -18,7 +18,7 @@ package org.springframework.ide.eclipse.aop.ui.navigator.model;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
 
-public class AdvisedDeclareParentAopSourceFieldNode extends AbstractJavaElementRefeerenceNode
+public class AdvisedDeclareParentAopSourceFieldNode extends AbstractJavaElementReferenceNode
 		implements IReferenceNode, IRevealableReferenceNode {
 
 	private IAopReference references;

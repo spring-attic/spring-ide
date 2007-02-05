@@ -27,7 +27,7 @@ import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 
-public class BeanClassReferenceNode extends AbstractJavaElementRefeerenceNode implements
+public class BeanClassReferenceNode extends AbstractJavaElementReferenceNode implements
 		IReferenceNode, IRevealableReferenceNode {
 
 	protected BeanReferenceNode parent;

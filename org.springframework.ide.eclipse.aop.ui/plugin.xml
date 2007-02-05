@@ -22,22 +22,6 @@
       </decorator>
    </extension>
    
-   <!--extension
-         point="org.eclipse.ui.navigator.viewer">
-      <viewer viewerId="org.eclipse.ui.navigator.ProjectExplorer"/>
-      <viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
-         <includes>
-            <contentExtension pattern="org.springframework.ide.eclipse.aop.ui.navigator.projectExplorerContent"/>
-            <contentExtension pattern="org.springframework.ide.eclipse.aop.ui.navigator.linkHelper"/>
-         </includes>
-      </viewerContentBinding>
-      <viewerActionBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
-         <includes>
-            <actionExtension pattern="org.springframework.ide.eclipse.aop.ui.navigator.actions"/>
-         </includes>
-      </viewerActionBinding>
-   </extension-->
-   
    <extension
          point="org.eclipse.ui.navigator.navigatorContent">
   		<navigatorContent
@@ -45,7 +29,7 @@
             name="Spring AOP Cross Reference"
             contentProvider="org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigatorContentProvider"
             labelProvider="org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigatorLabelProvider"
-            icon="icons/full/obj16/spring_obj.gif"
+            icon="icons/full/obj16/xref_obj.gif"
             activeByDefault="true"
             priority="high">
 	     <triggerPoints>
@@ -62,8 +46,7 @@
 			</or>
 		 </triggerPoints>
          <possibleChildren>
-				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
-				<instanceof value="org.eclipse.core.resources.IFile"/>
+				<instanceof value="org.springframework.ide.eclipse.aop.ui.navigator.model.IReferenceNode"/>
          </possibleChildren>
 	    <commonSorter 
                id="org.springframework.ide.eclipse.aop.ui.navigator.projectExplorerContent"
@@ -77,7 +60,53 @@
              <instanceof value="org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferenceNode"/>
          </enablement>
       </actionProvider>
-	       
+	  
+	  <commonFilter
+            id="org.springframework.ide.eclipse.aop.ui.navigator.filters.hideAspectDeclarations"
+            name="aspect declarations"
+            description="declare parents desc"
+            activeByDefault="false">
+				<filterExpression>
+					<instanceof value="org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedDeclareParentAopReferenceNode"/>
+				</filterExpression>
+      </commonFilter>
+
+	  <commonFilter
+            id="org.springframework.ide.eclipse.aop.ui.navigator.filters.hideDeclareParents"
+            name="declared on"
+            description="declare parents desc"
+            activeByDefault="false">
+				<filterExpression>
+					<or>
+						<instanceof value="org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceDeclareParentAopSourceFieldNode"/>
+						<instanceof value="org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceDeclareParentAopSourceNode"/>
+					</or>  
+				</filterExpression>
+      </commonFilter>
+
+	  <commonFilter
+            id="org.springframework.ide.eclipse.aop.ui.navigator.filters.hideAdvises"
+            name="advises"
+            description="declare parents desc"
+            activeByDefault="false">
+				<filterExpression>
+					<instanceof value="org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceAopTargetNode"/>
+				</filterExpression>
+      </commonFilter>
+
+	  <commonFilter
+            id="org.springframework.ide.eclipse.aop.ui.navigator.filters.hideAdvisedBy"
+            name="advised by"
+            description="declare parents desc"
+            activeByDefault="false">
+				<filterExpression>
+					<or>
+						<instanceof value="org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedAopTargetBeanNode"/>
+						<instanceof value="org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedAopReferenceNode"/>
+					</or>
+				</filterExpression>
+      </commonFilter>
+      
     </extension>
     
     <extension
@@ -114,6 +143,7 @@
                   isRoot="true"
                   pattern="org.springframework.ide.eclipse.aop.ui.navigator.projectExplorerContent"/>
             <contentExtension pattern="org.springframework.ide.eclipse.aop.ui.navigator.linkHelper"/>
+            <contentExtension pattern="org.springframework.ide.eclipse.aop.ui.navigator.filters.*"/>
          </includes>
       </viewerContentBinding>
       <viewerActionBinding viewerId="org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigator">

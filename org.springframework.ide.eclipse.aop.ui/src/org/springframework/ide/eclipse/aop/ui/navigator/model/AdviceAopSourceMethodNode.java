@@ -20,7 +20,7 @@ import java.util.List;
 import org.eclipse.jdt.core.IMember;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 
-public class AdviceAopSourceMethodNode extends AbstractJavaElementRefeerenceNode implements
+public class AdviceAopSourceMethodNode extends AbstractJavaElementReferenceNode implements
 		IReferenceNode, IRevealableReferenceNode {
 
 	private List<IAopReference> reference;

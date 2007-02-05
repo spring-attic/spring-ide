@@ -24,7 +24,7 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 
-public class ClassMethodReferenceNode extends AbstractJavaElementRefeerenceNode implements
+public class ClassMethodReferenceNode extends AbstractJavaElementReferenceNode implements
 		IReferenceNode, IRevealableReferenceNode {
 
 	private List<IReferenceNode> children;

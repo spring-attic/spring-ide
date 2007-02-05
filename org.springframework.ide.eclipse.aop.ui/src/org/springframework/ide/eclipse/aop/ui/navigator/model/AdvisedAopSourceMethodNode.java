@@ -19,7 +19,7 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
 
-public class AdvisedAopSourceMethodNode extends AbstractJavaElementRefeerenceNode implements
+public class AdvisedAopSourceMethodNode extends AbstractJavaElementReferenceNode implements
 		IReferenceNode, IRevealableReferenceNode {
 
 	private IAopReference reference;

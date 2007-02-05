@@ -20,23 +20,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.IEditorPart;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 
-public class MethodBeanReferenceNode implements IReferenceNode,
+public class MethodBeanReferenceNode extends AbstractJavaElementReferenceNode implements IReferenceNode,
         IRevealableReferenceNode {
 
-    protected IJavaElement element;
 
     private List<IAopReference> aspectReferences = new ArrayList<IAopReference>();
 
@@ -45,7 +39,7 @@ public class MethodBeanReferenceNode implements IReferenceNode,
     public MethodBeanReferenceNode(IMember member,
             List<IAopReference> aspectReferences,
             List<IAopReference> adviseReferences) {
-        this.element = member;
+        super(member);
         this.aspectReferences = aspectReferences;
         this.adviseReferences = adviseReferences;
     }
@@ -87,10 +81,6 @@ public class MethodBeanReferenceNode implements IReferenceNode,
         return nodes.toArray(new IReferenceNode[nodes.size()]);
     }
 
-    public Image getImage() {
-        return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getImage(element);
-    }
-
     public String getText() {
         if (element instanceof IType) {
             return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element)
@@ -104,27 +94,5 @@ public class MethodBeanReferenceNode implements IReferenceNode,
     public boolean hasChildren() {
         return this.aspectReferences.size() > 0
                 || this.adviseReferences.size() > 0;
-    }
-
-    public void openAndReveal() {
-        IEditorPart p;
-        try {
-            p = JavaUI.openInEditor(element);
-            JavaUI.revealInEditor(p, element);
-        }
-        catch (Exception e) {
-        }
-    }
-
-    public int getLineNumber() {
-        return BeansAopNavigatorUtils.getLineNumber((IMember) element);
-    }
-
-    public IResource getResource() {
-        return element.getResource();
-    }
-    
-    public IJavaElement getJavaElement() {
-        return this.element;
     }
 }

@@ -28,7 +28,7 @@ import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 
-public class BeanMethodReferenceNode extends AbstractJavaElementRefeerenceNode implements IReferenceNode,
+public class BeanMethodReferenceNode extends AbstractJavaElementReferenceNode implements IReferenceNode,
         IRevealableReferenceNode {
 
     private List<IAopReference> aspectReferences = new ArrayList<IAopReference>();
