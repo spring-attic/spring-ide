@@ -107,6 +107,7 @@
 					<test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
 				</and>
 				<instanceof value="org.eclipse.jdt.core.IType"/>
+				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
 			</or>
 		 </triggerPoints>
          <possibleChildren>
