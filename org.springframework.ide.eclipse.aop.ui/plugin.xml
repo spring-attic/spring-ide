@@ -6,7 +6,7 @@
          point="org.eclipse.ui.decorators">
       <decorator
             lightweight="true"
-            label="Spring Advice decorator"
+            label="%advisesDecorator.label"
             class="org.springframework.ide.eclipse.aop.ui.decorator.BeansAdviceImageDecorator"
             state="true"
             adaptable="true"
@@ -26,7 +26,7 @@
          point="org.eclipse.ui.navigator.navigatorContent">
   		<navigatorContent
             id="org.springframework.ide.eclipse.aop.ui.navigator.projectExplorerContent"
-            name="Spring AOP Cross Reference"
+            name="%beansCrossReferenceView.content"
             contentProvider="org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigatorContentProvider"
             labelProvider="org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigatorLabelProvider"
             icon="icons/full/obj16/xref_obj.gif"
@@ -63,8 +63,8 @@
 	  
 	  <commonFilter
             id="org.springframework.ide.eclipse.aop.ui.navigator.filters.hideAspectDeclarations"
-            name="aspect declarations"
-            description="declare parents desc"
+            name="%filter.aspectDeclarations.label"
+            description="%filter.aspectDeclarations.description"
             activeByDefault="false">
 				<filterExpression>
 					<instanceof value="org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedDeclareParentAopReferenceNode"/>
@@ -73,8 +73,8 @@
 
 	  <commonFilter
             id="org.springframework.ide.eclipse.aop.ui.navigator.filters.hideDeclareParents"
-            name="declared on"
-            description="declare parents desc"
+            name="%filter.declaredOn.label"
+            description="%filter.declaredOn.description"
             activeByDefault="false">
 				<filterExpression>
 					<or>
@@ -86,8 +86,8 @@
 
 	  <commonFilter
             id="org.springframework.ide.eclipse.aop.ui.navigator.filters.hideAdvises"
-            name="advises"
-            description="declare parents desc"
+            name="%filter.advises.label"
+            description="%filter.advises.description"
             activeByDefault="false">
 				<filterExpression>
 					<instanceof value="org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceAopTargetNode"/>
@@ -96,8 +96,8 @@
 
 	  <commonFilter
             id="org.springframework.ide.eclipse.aop.ui.navigator.filters.hideAdvisedBy"
-            name="advised by"
-            description="declare parents desc"
+            name="%filter.advisedBy.label"
+            description="%filter.advisedBy.description"
             activeByDefault="false">
 				<filterExpression>
 					<or>
@@ -126,7 +126,7 @@
   <extension
      point="org.eclipse.ui.views">
       <view
-            name="Beans Cross References"
+            name="%beansCrossReferenceView.label"
             icon="icons/full/obj16/xref_obj.gif"
             category="org.springframework.ide.eclipse.beans.ui.views"
             class="org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigator"
