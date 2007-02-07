@@ -136,27 +136,32 @@ public class BeansAopUtils {
     public static Set<IFile> getFilesToBuild(IFile file) {
         Set<IFile> resourcesToBuild = new HashSet<IFile>();
         if (file.getName().endsWith(".java")) {
-            IBeansProject project = BeansCorePlugin.getModel().getProject(file.getProject());
-            if (project != null) {
-                Set<IBeansConfig> configs = project.getConfigs();
-                IJavaElement element = JavaCore.create(file);
-                if (element instanceof ICompilationUnit) {
-                    try {
-                        IType[] types = ((ICompilationUnit) element).getAllTypes();
-                        List<String> typeNames = new ArrayList<String>();
-                        for (IType type : types) {
-                            typeNames.add(type.getFullyQualifiedName());
-                        }
-                        for (IBeansConfig config : configs) {
-                            Set<String> allBeanClasses = config.getBeanClasses();
-                            for (String className : allBeanClasses) {
-                                if (typeNames.contains(className)) {
-                                    resourcesToBuild.add((IFile) config.getElementResource());
+            Set<IBeansProject> projects = BeansCorePlugin.getModel().getProjects();
+            if (projects != null) {
+                for (IBeansProject project : projects) {
+                    if (project != null) {
+                        Set<IBeansConfig> configs = project.getConfigs();
+                        IJavaElement element = JavaCore.create(file);
+                        if (element instanceof ICompilationUnit) {
+                            try {
+                                IType[] types = ((ICompilationUnit) element).getAllTypes();
+                                List<String> typeNames = new ArrayList<String>();
+                                for (IType type : types) {
+                                    typeNames.add(type.getFullyQualifiedName());
+                                }
+                                for (IBeansConfig config : configs) {
+                                    Set<String> allBeanClasses = config.getBeanClasses();
+                                    for (String className : allBeanClasses) {
+                                        if (typeNames.contains(className)) {
+                                            resourcesToBuild.add((IFile) config
+                                                    .getElementResource());
+                                        }
+                                    }
                                 }
                             }
+                            catch (JavaModelException e) {
+                            }
                         }
-                    }
-                    catch (JavaModelException e) {
                     }
                 }
             }
