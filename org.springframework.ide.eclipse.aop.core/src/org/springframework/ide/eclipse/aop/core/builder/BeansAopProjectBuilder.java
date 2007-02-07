@@ -32,7 +32,7 @@ public class BeansAopProjectBuilder implements IProjectBuilder {
     public void build(IFile file, IProgressMonitor monitor) {
         Set<IFile> filesToBuild = BeansAopUtils.getFilesToBuild(file);
         monitor.beginTask("Parsing Spring AOP", filesToBuild.size());
-        BeansAopModelBuilder.buildAopModel(filesToBuild);
+        BeansAopModelBuilder.buildAopModel(file.getProject(), filesToBuild);
         monitor.done();
     }
 }

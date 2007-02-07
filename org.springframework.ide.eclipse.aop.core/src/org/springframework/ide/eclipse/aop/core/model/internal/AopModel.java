@@ -55,7 +55,7 @@ public class AopModel implements IAopModel {
     private void createModel(IJavaProject project) {
         Set<IFile> resourcesToBuild = BeansAopUtils.getFilesToBuildFromBeansProject(project
                 .getProject());
-        BeansAopModelBuilder.buildAopModel(resourcesToBuild);
+        BeansAopModelBuilder.buildAopModel(project.getProject(), resourcesToBuild);
     }
 
     public IAopProject getProjectWithInitialization(IJavaProject project) {

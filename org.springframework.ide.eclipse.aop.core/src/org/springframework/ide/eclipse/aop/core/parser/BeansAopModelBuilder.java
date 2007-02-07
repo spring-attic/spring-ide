@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -68,9 +69,9 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 @SuppressWarnings("restriction")
 public class BeansAopModelBuilder {
 
-    public static void buildAopModel(Set<IFile> filesToBuild) {
+    public static void buildAopModel(IProject project, Set<IFile> filesToBuild) {
         if (filesToBuild.size() > 0) {
-            getBuildJob(filesToBuild).schedule();
+            getBuildJob(project, filesToBuild).schedule();
         }
     }
 
@@ -324,8 +325,8 @@ public class BeansAopModelBuilder {
         }
     }
 
-    public static Job getBuildJob(final Set<IFile> filesToBuild) {
-        Job buildJob = new BuildJob("Building Spring AOP model", filesToBuild);
+    public static Job getBuildJob(final IProject project, final Set<IFile> filesToBuild) {
+        Job buildJob = new BuildJob("Building Spring AOP model", project, filesToBuild);
         buildJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
         buildJob.setUser(false);
         return buildJob;
@@ -334,14 +335,40 @@ public class BeansAopModelBuilder {
     private static final class BuildJob
             extends Job {
 
+        private final IProject project;
+        
         private final Set<IFile> filesToBuild;
 
-        private BuildJob(String name, Set<IFile> filesToBuild) {
+        private BuildJob(String name, IProject project, Set<IFile> filesToBuild) {
             super(name);
+            this.project = project;
             this.filesToBuild = filesToBuild;
+        }
+        
+        public boolean isCoveredBy(BuildJob other) {
+            if (other.project == null) {
+                return true;
+            }
+            return project != null && project.equals(other.project);
         }
 
         protected IStatus run(IProgressMonitor monitor) {
+            synchronized (getClass()) {
+                if (monitor.isCanceled()) {
+                    return Status.CANCEL_STATUS;
+                }
+                Job[] buildJobs = Platform.getJobManager()
+                        .find(ResourcesPlugin.FAMILY_MANUAL_BUILD);
+                for (int i = 0; i < buildJobs.length; i++) {
+                    Job curr = buildJobs[i];
+                    if (curr != this && curr instanceof BuildJob) {
+                        BuildJob job = (BuildJob) curr;
+                        if (job.isCoveredBy(this)) {
+                            curr.cancel(); // cancel all other build jobs of our kind
+                        }
+                    }
+                }
+            }
             try {
                 monitor.beginTask("Parsing Spring AOP", filesToBuild.size());
                 buildAopModel(monitor, filesToBuild);
@@ -353,6 +380,10 @@ public class BeansAopModelBuilder {
                 monitor.done();
             }
             return Status.OK_STATUS;
+        }
+
+        public boolean belongsTo(Object family) {
+            return ResourcesPlugin.FAMILY_MANUAL_BUILD == family;
         }
     }
 }
