@@ -17,16 +17,16 @@ package org.springframework.ide.eclipse.aop.core.model;
 
 import java.util.List;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 
 public interface IAopModel {
     
-    IAopProject getProject(IProject project);
+    IAopProject getProject(IJavaProject project);
     
     List<IAopProject> getProjects();
     
-    void addProject(IProject project, IAopProject aopProject);
+    void addProject(IJavaProject project, IAopProject aopProject);
 
 	boolean isAdvised(IJavaElement je);
     
@@ -39,5 +39,7 @@ public interface IAopModel {
 	void unregisterAopModelChangedListener(IAopModelChangedListener listener);
 	
 	void fireModelChanged();
+    
+    public List<IAopReference> getAllReferences(IJavaProject project);
     
 }

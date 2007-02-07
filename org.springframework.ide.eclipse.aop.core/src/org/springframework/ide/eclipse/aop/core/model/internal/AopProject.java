@@ -18,8 +18,8 @@ package org.springframework.ide.eclipse.aop.core.model.internal;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 
@@ -27,9 +27,9 @@ public class AopProject implements IAopProject {
 
     private List<IAopReference> references = new ArrayList<IAopReference>();
 
-    private IProject project;
+    private IJavaProject project;
 
-    public AopProject(IProject project) {
+    public AopProject(IJavaProject project) {
         this.project = project;
     }
 
@@ -41,7 +41,7 @@ public class AopProject implements IAopProject {
         return this.references;
     }
 
-    public IProject getProject() {
+    public IJavaProject getProject() {
         return this.project;
     }
 

@@ -182,6 +182,11 @@ public class BeansAopUtils {
         return project;
     }
 
+    public static IJavaProject getJavaProject(IProject project) {
+        IJavaProject jp = JavaCore.create(project);
+        return jp;
+    }
+
     public static int getLineNumber(IJavaElement element) {
 
         if (element != null && element instanceof IMethod) {

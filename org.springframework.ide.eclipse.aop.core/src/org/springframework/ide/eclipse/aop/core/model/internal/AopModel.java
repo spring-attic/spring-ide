@@ -15,6 +15,7 @@
  */
 package org.springframework.ide.eclipse.aop.core.model.internal;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -22,8 +23,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopModel;
 import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
@@ -33,15 +34,15 @@ import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
 
 public class AopModel implements IAopModel {
 
-    private Map<IProject, IAopProject> projects = new ConcurrentHashMap<IProject, IAopProject>();
+    private Map<IJavaProject, IAopProject> projects = new ConcurrentHashMap<IJavaProject, IAopProject>();
 
     private List<IAopModelChangedListener> listeners = new LinkedList<IAopModelChangedListener>();
 
-    public void addProject(IProject project, IAopProject aopProject) {
+    public void addProject(IJavaProject project, IAopProject aopProject) {
         this.projects.put(project, aopProject);
     }
 
-    public IAopProject getProject(IProject project) {
+    public IAopProject getProject(IJavaProject project) {
         if (this.projects.containsKey(project)) {
             return this.projects.get(project);
         }
@@ -51,13 +52,13 @@ public class AopModel implements IAopModel {
         }
     }
 
-    private void createModel(IProject project) {
-        Set<IFile> resourcesToBuild = BeansAopUtils
-                .getFilesToBuildFromBeansProject(project);
+    private void createModel(IJavaProject project) {
+        Set<IFile> resourcesToBuild = BeansAopUtils.getFilesToBuildFromBeansProject(project
+                .getProject());
         BeansAopModelBuilder.buildAopModel(resourcesToBuild);
     }
 
-    public IAopProject getProjectWithInitialization(IProject project) {
+    public IAopProject getProjectWithInitialization(IJavaProject project) {
         if (this.projects.containsKey(project)) {
             return this.projects.get(project);
         }
@@ -72,17 +73,21 @@ public class AopModel implements IAopModel {
         return null;
     }
 
+    public List<IAopReference> getAllReferences(IJavaProject project) {
+        List<IAopReference> refs = new ArrayList<IAopReference>();
+        for (Map.Entry<IJavaProject, IAopProject> e : projects.entrySet()) {
+            refs.addAll(e.getValue().getAllReferences());
+        }
+        return refs;
+    }
+
     public boolean isAdvised(IJavaElement je) {
-        IProject project = je.getJavaProject().getProject();
+        IJavaProject project = je.getJavaProject();
+        List<IAopReference> references = getAllReferences(project);
 
-        IAopProject aopProject = getProject(project);
-        if (aopProject != null) {
-            List<IAopReference> references = aopProject.getAllReferences();
-
-            for (IAopReference reference : references) {
-                if (reference.getTarget().equals(je)) {
-                    return true;
-                }
+        for (IAopReference reference : references) {
+            if (reference.getTarget().equals(je)) {
+                return true;
             }
         }
         return false;
@@ -92,29 +97,22 @@ public class AopModel implements IAopModel {
         return getAdviceDefinition(je).size() > 0;
     }
 
-    public void registerAopModelChangedListener(
-            IAopModelChangedListener listener) {
+    public void registerAopModelChangedListener(IAopModelChangedListener listener) {
         this.listeners.add(listener);
     }
 
-    public void unregisterAopModelChangedListener(
-            IAopModelChangedListener listener) {
+    public void unregisterAopModelChangedListener(IAopModelChangedListener listener) {
         this.listeners.remove(listener);
     }
 
     public List<IAopReference> getAdviceDefinition(IJavaElement je) {
         List<IAopReference> advices = new LinkedList<IAopReference>();
-        IProject project = je.getJavaProject().getProject();
+        IJavaProject project = je.getJavaProject();
 
-        IAopProject aopProject = getProject(project);
-        if (aopProject != null) {
-            List<IAopReference> references = aopProject.getAllReferences();
-
-            for (IAopReference reference : references) {
-                if (reference.getSource() != null
-                        && reference.getSource().equals(je)) {
-                    advices.add(reference);
-                }
+        List<IAopReference> references = getAllReferences(project);
+        for (IAopReference reference : references) {
+            if (reference.getSource() != null && reference.getSource().equals(je)) {
+                advices.add(reference);
             }
         }
         return advices;

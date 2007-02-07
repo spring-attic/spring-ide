@@ -36,7 +36,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
-import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
@@ -72,30 +71,27 @@ public class BeansAopMarkupProvider
                     .getCurrentProject();
 
             if (jp != null) {
-                IAopProject aopProject = org.springframework.ide.eclipse.aop.core.Activator
-                        .getModel().getProject(jp.getProject());
-                if (aopProject != null) {
-                    List<IAopReference> references = aopProject.getAllReferences();
-                    if (references != null && references.size() > 0) {
-                        for (IAopReference reference : references) {
-                            IType advisedType = null;
-                            if (reference.getTarget() instanceof IType) {
-                                advisedType = (IType) reference.getTarget();
-                            }
-                            else {
-                                advisedType = (IType) reference.getTarget().getDeclaringType();
-                            }
-                            ICompilationUnit advisedCu = advisedType.getCompilationUnit();
-                            if (member instanceof JDTMember) {
-                                IJavaElement je = ((JDTMember) member).getResource();
-                                if (je.equals(advisedCu)) {
-                                    String label = getText(reference);
-                                    Stripe stripe = new Stripe(new SimpleMarkupKind(label),
-                                            BeansAopNavigatorUtils.getLineNumber(reference
-                                                    .getTarget()) + 1);
-                                    stripeList.add(stripe);
-                                    addMarkup(member.getFullname(), stripe);
-                                }
+                List<IAopReference> references = org.springframework.ide.eclipse.aop.core.Activator
+                        .getModel().getAllReferences(jp.getJavaProject());
+                if (references != null && references.size() > 0) {
+                    for (IAopReference reference : references) {
+                        IType advisedType = null;
+                        if (reference.getTarget() instanceof IType) {
+                            advisedType = (IType) reference.getTarget();
+                        }
+                        else {
+                            advisedType = (IType) reference.getTarget().getDeclaringType();
+                        }
+                        ICompilationUnit advisedCu = advisedType.getCompilationUnit();
+                        if (member instanceof JDTMember) {
+                            IJavaElement je = ((JDTMember) member).getResource();
+                            if (je.equals(advisedCu)) {
+                                String label = getText(reference);
+                                Stripe stripe = new Stripe(
+                                        new SimpleMarkupKind(label),
+                                        BeansAopNavigatorUtils.getLineNumber(reference.getTarget()) + 1);
+                                stripeList.add(stripe);
+                                addMarkup(member.getFullname(), stripe);
                             }
                         }
                     }
@@ -119,17 +115,13 @@ public class BeansAopMarkupProvider
             IJavaProject jp = ((JDTContentProvider) ProviderManager.getContentProvider())
                     .getCurrentProject();
             if (jp != null) {
-                IAopProject aopProject = org.springframework.ide.eclipse.aop.core.Activator
-                        .getModel().getProject(jp.getProject());
-                if (aopProject != null) {
-                    List<IAopReference> references = aopProject.getAllReferences();
-                    if (references != null && references.size() > 0) {
-                        for (IAopReference reference : references) {
-                            String label = getText(reference);
-                            if (!advices.contains(label)) {
-                                kinds.add(new SimpleMarkupKind(label));
-                                advices.add(label);
-                            }
+                List<IAopReference> references = Activator.getModel().getAllReferences(jp);
+                if (references != null && references.size() > 0) {
+                    for (IAopReference reference : references) {
+                        String label = getText(reference);
+                        if (!advices.contains(label)) {
+                            kinds.add(new SimpleMarkupKind(label));
+                            advices.add(label);
                         }
                     }
                 }

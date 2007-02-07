@@ -116,8 +116,9 @@ public class BeansAopModelBuilder {
             BeansConfig config = (BeansConfig) project.getConfig(currentFile);
             IJavaProject javaProject = BeansAopUtils.getJavaProject(config);
             if (javaProject != null) {
-                aopProject = ((AopModel) Activator.getModel()).getProjectWithInitialization(config
-                        .getElementResource().getProject());
+                aopProject = ((AopModel) Activator.getModel())
+                        .getProjectWithInitialization(BeansAopUtils.getJavaProject(config
+                                .getElementResource().getProject()));
 
                 aopProject.clearReferencesForResource(currentFile);
 
@@ -188,7 +189,8 @@ public class BeansAopModelBuilder {
 
         IResource file = config.getElementResource();
         IAopProject aopProject = ((AopModel) Activator.getModel())
-                .getProjectWithInitialization(config.getElementResource().getProject());
+                .getProjectWithInitialization(BeansAopUtils.getJavaProject(config
+                        .getElementResource().getProject()));
 
         Set<IBean> beans = config.getBeans();
         for (IBean bean : beans) {
@@ -204,8 +206,9 @@ public class BeansAopModelBuilder {
                 if (info instanceof BeanIntroductionDefinition) {
                     BeanIntroductionDefinition intro = (BeanIntroductionDefinition) info;
                     if (intro.getTypeMatcher().matches(targetClass)) {
-                        IType jdtAspectType = BeansModelUtils.getJavaType(aopProject.getProject(),
-                                ((BeanIntroductionDefinition) info).getAspectClassName());
+                        IType jdtAspectType = BeansModelUtils.getJavaType(aopProject.getProject()
+                                .getProject(), ((BeanIntroductionDefinition) info)
+                                .getAspectClassName());
                         IMember jdtAspectMember = null;
                         if (intro instanceof AnnotationIntroductionDefinition) {
                             String fieldName = ((AnnotationIntroductionDefinition) intro)
@@ -216,8 +219,8 @@ public class BeansAopModelBuilder {
                             jdtAspectMember = jdtAspectType;
                         }
 
-                        IType beanType = BeansModelUtils.getJavaType(aopProject.getProject(), bean
-                                .getClassName());
+                        IType beanType = BeansModelUtils.getJavaType(aopProject.getProject()
+                                .getProject(), bean.getClassName());
                         if (jdtAspectMember.getResource() != null
                                 && jdtAspectMember.getResource().isAccessible()) {
                             IAopReference ref = new AopReference(info.getType(), jdtAspectMember,
@@ -231,11 +234,11 @@ public class BeansAopModelBuilder {
                     JavaAspectDefinition intro = (JavaAspectDefinition) info;
 
                     List<IMethod> matchingMethods = BeansAopUtils.getMatches(targetClass, intro
-                            .getPointcutExpression(), aopProject.getProject());
+                            .getPointcutExpression(), aopProject.getProject().getProject());
 
                     for (IMethod method : matchingMethods) {
-                        IType jdtAspectType = BeansModelUtils.getJavaType(aopProject.getProject(),
-                                info.getAspectClassName());
+                        IType jdtAspectType = BeansModelUtils.getJavaType(aopProject.getProject()
+                                .getProject(), info.getAspectClassName());
                         IMethod jdtAspectMethod = BeansAopUtils
                                 .getMethod(jdtAspectType, info.getAdviceMethodName(), info
                                         .getAdviceMethodParameterTypes().length);
