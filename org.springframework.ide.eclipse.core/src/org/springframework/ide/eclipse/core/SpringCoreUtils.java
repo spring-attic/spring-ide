@@ -322,7 +322,7 @@ public final class SpringCoreUtils {
 
         try {
             // configured classpath
-            IClasspathEntry[] classpath = project.getRawClasspath();
+            IClasspathEntry[] classpath = project.getResolvedClasspath(true);
             // build output, relative to project
             IPath location = getProjectLocation(project.getProject());
             IPath outputPath = location.append(project.getOutputLocation().removeFirstSegments(1));
