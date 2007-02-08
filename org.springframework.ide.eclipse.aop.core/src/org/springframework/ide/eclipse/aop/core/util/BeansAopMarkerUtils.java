@@ -99,11 +99,22 @@ public class BeansAopMarkerUtils {
             createProblemMarker(reference.getTarget().getResource(), "aspect declarations <"
                     + reference.getDefinition().getAspectName() + ">", 1, BeansAopUtils
                     .getLineNumber(reference.getTarget()), markerId, sourceResource);
+            if (reference.getTargetBean() != null) {
+                createProblemMarker(reference.getTargetBean().getElementResource(),
+                        "aspect declarations <" + reference.getDefinition().getAspectName() + ">",
+                        1, reference.getTargetBean().getElementStartLine(), markerId,
+                        sourceResource);
+            }
         }
         else {
             createProblemMarker(reference.getTarget().getResource(), "advised by "
                     + BeansAopUtils.getJavaElementLinkName(reference.getSource()), 1, BeansAopUtils
                     .getLineNumber(reference.getTarget()), markerId, sourceResource);
+            if (reference.getTargetBean() != null) {
+                createProblemMarker(reference.getTargetBean().getElementResource(), "advised by "
+                        + BeansAopUtils.getJavaElementLinkName(reference.getSource()), 1, reference
+                        .getTargetBean().getElementStartLine(), markerId, sourceResource);
+            }
         }
     }
 
@@ -145,12 +156,11 @@ public class BeansAopMarkerUtils {
                         IResource.DEPTH_INFINITE);
 
                 IProject project = resource.getProject();
-                String resourceName = resource.getProjectRelativePath().toString();
+                String resourceName = resource.getFullPath().toString();
                 IMarker[] markers = project.findMarkers(BeansAopMarkerUtils.AOP_MARKER, true,
                         IResource.DEPTH_INFINITE);
                 for (IMarker marker : markers) {
-                    String sourceResourceName = marker.getAttribute(SOURCE_RESOURCE, resource
-                            .getProjectRelativePath().toString());
+                    String sourceResourceName = marker.getAttribute(SOURCE_RESOURCE, "");
                     if (resourceName.equals(sourceResourceName)) {
                         marker.delete();
                     }
