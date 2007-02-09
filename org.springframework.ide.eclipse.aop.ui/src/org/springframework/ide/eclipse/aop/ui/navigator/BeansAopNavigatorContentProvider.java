@@ -62,6 +62,7 @@ import org.springframework.ide.eclipse.aop.ui.navigator.model.JavaElementReferen
 import org.springframework.ide.eclipse.aop.ui.navigator.model.MethodBeanReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.MethodReference;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -248,10 +249,17 @@ public class BeansAopNavigatorContentProvider implements ICommonContentProvider,
         else if (parentElement instanceof ElementImpl) {
             ElementImpl element = (ElementImpl) parentElement;
             IStructuredDocument document = element.getStructuredDocument();
+            List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
+            
+            IResource resource = getResource(document);
+            // check if resource is a Beans Config
+            if (!BeansCoreUtils.isBeansConfig(resource)) {
+                return nodes.toArray();
+            }
+
             int startLine = document.getLineOfOffset(element.getStartOffset()) + 1;
             int endLine = document.getLineOfOffset(element.getEndOffset()) + 1;
             String id = BeansEditorUtils.getAttribute(element, "id");
-            IResource resource = getResource(document);
             IAopProject project = Activator.getModel().getProject(
                     BeansAopUtils.getJavaProject(resource));
             List<IAopReference> references = new ArrayList<IAopReference>();
@@ -321,7 +329,7 @@ public class BeansAopNavigatorContentProvider implements ICommonContentProvider,
                     }
                 }
             }
-            List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
+            
             // add normal beans
             IBeansConfig beansConfig = BeansCorePlugin.getModel().getProject(resource.getProject())
                     .getConfig((IFile) resource);
