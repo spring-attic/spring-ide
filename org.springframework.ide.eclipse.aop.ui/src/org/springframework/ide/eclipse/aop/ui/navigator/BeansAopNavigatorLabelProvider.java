@@ -33,7 +33,7 @@ public class BeansAopNavigatorLabelProvider
 
     public String getDescription(Object element) {
         // TODO add descrption here
-        return null;
+        return null; //element.toString();
     }
 
     public Image getImage(Object element) {

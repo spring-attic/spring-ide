@@ -15,6 +15,7 @@
  */
 package org.springframework.ide.eclipse.aop.core.parser;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
@@ -302,6 +304,8 @@ public class BeansAspectDefinitionParser {
                     info.setType(ADVICE_TYPES.AROUND);
                     info.setAspectClassName(className);
                     info.setAdviceMethodName("invoke");
+                    info.setAdviceMethodParameterTypes(new String[] { MethodInvocation.class
+                            .getName() });
                     aspectInfos.add(info);
                 }
                 if (classLoader.loadClass(MethodBeforeAdvice.class.getName()).isAssignableFrom(
@@ -314,6 +318,8 @@ public class BeansAspectDefinitionParser {
                     info.setType(ADVICE_TYPES.BEFORE);
                     info.setAdviceMethodName("before");
                     info.setAspectClassName(className);
+                    info.setAdviceMethodParameterTypes(new String[] { Method.class.getName(),
+                            Object[].class.getName(), Object.class.getName() });
                     aspectInfos.add(info);
                 }
                 if (classLoader.loadClass(ThrowsAdvice.class.getName()).isAssignableFrom(
@@ -326,6 +332,9 @@ public class BeansAspectDefinitionParser {
                     info.setType(ADVICE_TYPES.AFTER_THROWING);
                     info.setAdviceMethodName("afterThrowing");
                     info.setAspectClassName(className);
+                    info.setAdviceMethodParameterTypes(new String[] { Method.class.getName(),
+                            Object[].class.getName(), Object.class.getName(),
+                            Exception.class.getName() });
                     aspectInfos.add(info);
                 }
                 if (classLoader.loadClass(AfterReturningAdvice.class.getName()).isAssignableFrom(
@@ -338,6 +347,9 @@ public class BeansAspectDefinitionParser {
                     info.setType(ADVICE_TYPES.AFTER_RETURNING);
                     info.setAdviceMethodName("afterReturning");
                     info.setAspectClassName(className);
+                    info.setAdviceMethodParameterTypes(new String[] { Object.class.getName(),
+                            Method.class.getName(), Object[].class.getName(),
+                            Object.class.getName() });
                     aspectInfos.add(info);
                 }
             }

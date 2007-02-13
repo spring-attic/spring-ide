@@ -222,8 +222,7 @@ public class BeansAopModelBuilder {
 
                         IType beanType = BeansModelUtils.getJavaType(aopProject.getProject()
                                 .getProject(), bean.getClassName());
-                        if (jdtAspectMember.getResource() != null
-                                && jdtAspectMember.getResource().isAccessible()) {
+                        if (jdtAspectMember != null) {
                             IAopReference ref = new AopReference(info.getType(), jdtAspectMember,
                                     beanType, info, file, bean);
                             aopProject.addAopReference(ref);
@@ -235,7 +234,7 @@ public class BeansAopModelBuilder {
                     JavaAspectDefinition intro = (JavaAspectDefinition) info;
 
                     List<IMethod> matchingMethods = BeansAopUtils.getMatches(targetClass, intro
-                            .getPointcutExpression(), aopProject.getProject().getProject());
+                            .getAspectJPointcutExpression(), aopProject.getProject().getProject());
 
                     for (IMethod method : matchingMethods) {
                         IType jdtAspectType = BeansModelUtils.getJavaType(aopProject.getProject()
@@ -243,8 +242,7 @@ public class BeansAopModelBuilder {
                         IMethod jdtAspectMethod = BeansAopUtils
                                 .getMethod(jdtAspectType, info.getAdviceMethodName(), info
                                         .getAdviceMethodParameterTypes().length);
-                        if (jdtAspectMethod.getResource() != null
-                                && jdtAspectMethod.getResource().isAccessible()) {
+                        if (jdtAspectMethod != null) {
                             IAopReference ref = new AopReference(info.getType(), jdtAspectMethod,
                                     method, info, file, bean);
                             aopProject.addAopReference(ref);
@@ -279,8 +277,7 @@ public class BeansAopModelBuilder {
                                 IMethod jdtAspectMethod = BeansAopUtils.getMethod(jdtAspectType,
                                         info.getAdviceMethodName(), info.getAdviceMethod()
                                                 .getParameterTypes().length);
-                                if (jdtAspectMethod.getResource() != null
-                                        && jdtAspectMethod.getResource().isAccessible()) {
+                                if (jdtAspectMethod != null) {
                                     IAopReference ref = new AopReference(info.getType(),
                                             jdtAspectMethod, jdtMethod, info, file, bean);
                                     aopProject.addAopReference(ref);
@@ -336,7 +333,7 @@ public class BeansAopModelBuilder {
             extends Job {
 
         private final IProject project;
-        
+
         private final Set<IFile> filesToBuild;
 
         private BuildJob(String name, IProject project, Set<IFile> filesToBuild) {
@@ -344,7 +341,7 @@ public class BeansAopModelBuilder {
             this.project = project;
             this.filesToBuild = filesToBuild;
         }
-        
+
         public boolean isCoveredBy(BuildJob other) {
             if (other.project == null) {
                 return true;

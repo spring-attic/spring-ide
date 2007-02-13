@@ -18,41 +18,46 @@ package org.springframework.ide.eclipse.aop.ui.navigator.model;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
+import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
 
-public class AdvisedAopSourceMethodNode extends AbstractJavaElementReferenceNode implements
-		IReferenceNode, IRevealableReferenceNode {
+public class AdvisedAopSourceMethodNode
+        extends AbstractJavaElementReferenceNode implements IReferenceNode,
+        IRevealableReferenceNode {
 
-	private IAopReference reference;
+    private IAopReference reference;
 
-	public AdvisedAopSourceMethodNode(IAopReference reference) {
-		super(reference.getSource());
-		this.reference = reference;
-	}
+    public AdvisedAopSourceMethodNode(IAopReference reference) {
+        super(reference.getSource());
+        this.reference = reference;
+    }
 
-	public IReferenceNode[] getChildren() {
-		return new IReferenceNode[0];
-	}
+    public IReferenceNode[] getChildren() {
+        return new IReferenceNode[0];
+    }
 
-	public String getText() {
-		if (reference.getSource() != null) {
-			if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
-				return BeansAopUtils.getJavaElementLinkName(reference.getSource()) + " - "
-						+ BeansAopUtils.getPackageLinkName(reference.getSource());
-			} else {
-				return BeansAopUtils.getJavaElementLinkName(reference.getSource().getParent())
-						+ "." + BeansAopUtils.getJavaElementLinkName(reference.getSource()) + " - "
-						+ BeansAopUtils.getPackageLinkName(reference.getSource());
-			}
-		} else {
-			return "";
-		}
-	}
+    public String getText() {
+        if (reference.getSource() != null) {
+            if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
+                return BeansAopUtils.getJavaElementLinkName(reference.getSource()) + " - "
+                        + BeansAopUtils.getPackageLinkName(reference.getSource());
+            }
+            else {
+                return BeansAopUtils.getJavaElementLinkName(reference.getSource().getParent())
+                        + "."
+                        + BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(reference.getSource())
+                        + " - " + BeansAopUtils.getPackageLinkName(reference.getSource());
+            }
+        }
+        else {
+            return "";
+        }
+    }
 
-	public boolean hasChildren() {
-		return false;
-	}
+    public boolean hasChildren() {
+        return false;
+    }
 
-	public IAopReference getReference() {
-		return this.reference;
-	}
+    public IAopReference getReference() {
+        return this.reference;
+    }
 }

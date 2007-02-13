@@ -35,6 +35,7 @@ import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.core.model.internal.JavaAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.parser.asm.AspectAnnotationVisitor;
 import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -57,11 +58,11 @@ public class BeansAopModelUtils {
         if (is == null) {
             return false;
         }
-        
+
         ClassReader reader = new ClassReader(is);
         AspectAnnotationVisitor v = new AspectAnnotationVisitor();
         reader.accept(v, false);
-        
+
         if (!v.getClassInfo().hasAspectAnnotation()) {
             return false;
         }
@@ -115,7 +116,8 @@ public class BeansAopModelUtils {
             if (m.getName().equals("setExpression")) {
                 m.invoke(pc, info.getPointcutExpression());
             }
-            else if (m.getName().equals("setParameterNames")) {
+            else if (m.getName().equals("setParameterNames")
+                    && !(info instanceof JavaAspectDefinition)) {
                 m.invoke(pc, new Object[] { new JdtParameterNameDiscoverer(jdtAspectType)
                         .getParameterNames(info.getAdviceMethod()) });
             }
