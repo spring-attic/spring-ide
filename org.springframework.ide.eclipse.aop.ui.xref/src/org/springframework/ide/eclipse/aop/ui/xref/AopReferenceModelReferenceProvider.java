@@ -29,15 +29,17 @@ import org.eclipse.contribution.xref.core.IXReference;
 import org.eclipse.contribution.xref.core.IXReferenceProvider;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
-import org.springframework.ide.eclipse.aop.core.model.IAopModel;
+import org.springframework.ide.eclipse.aop.core.model.IAopReferenceModel;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 
-public class BeansAopReferenceProvider implements IXReferenceProvider {
+public class AopReferenceModelReferenceProvider implements IXReferenceProvider {
 
-    private static final Class[] CLASSES = new Class[] { IJavaElement.class };
+    @SuppressWarnings("unchecked")
+	private static final Class[] CLASSES = new Class[] { IJavaElement.class };
 
-    public Class[] getClasses() {
+    @SuppressWarnings("unchecked")
+	public Class[] getClasses() {
         return CLASSES;
     }
 
@@ -45,12 +47,14 @@ public class BeansAopReferenceProvider implements IXReferenceProvider {
         return null;
     }
 
-    public void setCheckedFilters(List l) {
-        BeansAopPreferenceUtils.setCheckedFilters(l);
+    @SuppressWarnings("unchecked")
+	public void setCheckedFilters(List l) {
+        CrossReferenceViewPreferenceUtils.setCheckedFilters(l);
     }
 
-    public List getFilterCheckedList() {
-        List checked = BeansAopPreferenceUtils.getFilterCheckedList();
+    @SuppressWarnings("unchecked")
+	public List getFilterCheckedList() {
+        List checked = CrossReferenceViewPreferenceUtils.getFilterCheckedList();
         if (checked != null) {
             return checked;
         }
@@ -58,12 +62,14 @@ public class BeansAopReferenceProvider implements IXReferenceProvider {
         return getFilterDefaultList();
     }
 
-    public void setCheckedInplaceFilters(List l) {
-        BeansAopPreferenceUtils.setCheckedInplaceFilters(l);
+    @SuppressWarnings("unchecked")
+	public void setCheckedInplaceFilters(List l) {
+        CrossReferenceViewPreferenceUtils.setCheckedInplaceFilters(l);
     }
 
-    public List getFilterCheckedInplaceList() {
-        List checked = BeansAopPreferenceUtils.getFilterCheckedInplaceList();
+    @SuppressWarnings("unchecked")
+	public List getFilterCheckedInplaceList() {
+        List checked = CrossReferenceViewPreferenceUtils.getFilterCheckedInplaceList();
         if (checked != null) {
             return checked;
         }
@@ -76,7 +82,8 @@ public class BeansAopReferenceProvider implements IXReferenceProvider {
      * 
      * @see org.eclipse.contribution.xref.core.IXReferenceProvider#getFilterList()
      */
-    public List getFilterList() {
+    @SuppressWarnings("unchecked")
+	public List getFilterList() {
         List<String> populatingList = new ArrayList<String>();
         populatingList.add("advises");
         populatingList.add("advised by");
@@ -90,7 +97,8 @@ public class BeansAopReferenceProvider implements IXReferenceProvider {
      * 
      * @see org.eclipse.contribution.xref.core.IXReferenceProvider#getFilterDefaultList()
      */
-    public List getFilterDefaultList() {
+    @SuppressWarnings("unchecked")
+	public List getFilterDefaultList() {
         List defaultFilterList = new ArrayList();
         return defaultFilterList;
     }
@@ -112,7 +120,7 @@ public class BeansAopReferenceProvider implements IXReferenceProvider {
         IJavaElement je = (IJavaElement) o;
         List<XRef> xrefs = new ArrayList<XRef>();
 
-        IAopModel model = org.springframework.ide.eclipse.aop.core.Activator.getModel();
+        IAopReferenceModel model = org.springframework.ide.eclipse.aop.core.Activator.getModel();
         List<IAopReference> references = model.getAllReferences(je.getJavaProject());
         Map<IMember, XRef> refsAdvised = new HashMap<IMember, XRef>();
         Map<IMember, XRef> refsAdvises = new HashMap<IMember, XRef>();
@@ -127,11 +135,11 @@ public class BeansAopReferenceProvider implements IXReferenceProvider {
                         ref = refsDeclaredOn.get(reference.getSource());
                     }
                     else {
-                        ref = new XRef("advises", new HashSet<BeansAopNode>());
+                        ref = new XRef("advises", new HashSet<AopReferenceModelNode>());
                         refsDeclaredOn.put(reference.getSource(), ref);
                         xrefs.add(ref);
                     }
-                    BeansAopNode associate = new BeansAopNode(BeansAopNode.TYPE.TARGET, reference);
+                    AopReferenceModelNode associate = new AopReferenceModelNode(AopReferenceModelNode.TYPE.TARGET, reference);
                     if (!ref.getAssociatesList().contains(associate)) {
                         ref.getAssociatesList().add(associate);
                     }
@@ -143,11 +151,11 @@ public class BeansAopReferenceProvider implements IXReferenceProvider {
                         ref = refsAspectDeclarations.get(reference.getTarget());
                     }
                     else {
-                        ref = new XRef("advised by", new HashSet<BeansAopNode>());
+                        ref = new XRef("advised by", new HashSet<AopReferenceModelNode>());
                         refsAspectDeclarations.put(reference.getTarget(), ref);
                         xrefs.add(ref);
                     }
-                    BeansAopNode associate = new BeansAopNode(BeansAopNode.TYPE.SOURCE, reference);
+                    AopReferenceModelNode associate = new AopReferenceModelNode(AopReferenceModelNode.TYPE.SOURCE, reference);
                     if (!ref.getAssociatesList().contains(associate)) {
                         ref.getAssociatesList().add(associate);
                     }
@@ -161,11 +169,11 @@ public class BeansAopReferenceProvider implements IXReferenceProvider {
                         ref = refsAdvises.get(reference.getSource());
                     }
                     else {
-                        ref = new XRef("declared on", new HashSet<BeansAopNode>());
+                        ref = new XRef("declared on", new HashSet<AopReferenceModelNode>());
                         refsAdvises.put(reference.getSource(), ref);
                         xrefs.add(ref);
                     }
-                    BeansAopNode associate = new BeansAopNode(BeansAopNode.TYPE.TARGET, reference);
+                    AopReferenceModelNode associate = new AopReferenceModelNode(AopReferenceModelNode.TYPE.TARGET, reference);
                     if (!ref.getAssociatesList().contains(associate)) {
                         ref.getAssociatesList().add(associate);
                     }
@@ -177,11 +185,11 @@ public class BeansAopReferenceProvider implements IXReferenceProvider {
                         ref = refsAdvised.get(reference.getTarget());
                     }
                     else {
-                        ref = new XRef("aspect declarations", new HashSet<BeansAopNode>());
+                        ref = new XRef("aspect declarations", new HashSet<AopReferenceModelNode>());
                         refsAdvised.put(reference.getTarget(), ref);
                         xrefs.add(ref);
                     }
-                    BeansAopNode associate = new BeansAopNode(BeansAopNode.TYPE.SOURCE, reference);
+                    AopReferenceModelNode associate = new AopReferenceModelNode(AopReferenceModelNode.TYPE.SOURCE, reference);
                     if (!ref.getAssociatesList().contains(associate)) {
                         ref.getAssociatesList().add(associate);
                     }
@@ -191,7 +199,8 @@ public class BeansAopReferenceProvider implements IXReferenceProvider {
         return xrefs;
     }
 
-    private boolean checkFilter(List checkedRelNames, String relName) {
+    @SuppressWarnings("unchecked")
+	private boolean checkFilter(List checkedRelNames, String relName) {
         return checkedRelNames == null
                 || (checkedRelNames != null && !checkedRelNames.contains(relName));
     }
@@ -200,9 +209,9 @@ public class BeansAopReferenceProvider implements IXReferenceProvider {
 
         private String name;
 
-        private Set<BeansAopNode> associates;
+        private Set<AopReferenceModelNode> associates;
 
-        public XRef(String name, Set<BeansAopNode> associates) {
+        public XRef(String name, Set<AopReferenceModelNode> associates) {
             this.name = name;
             this.associates = associates;
         }
@@ -211,11 +220,11 @@ public class BeansAopReferenceProvider implements IXReferenceProvider {
             return name;
         }
 
-        public Iterator<BeansAopNode> getAssociates() {
+        public Iterator<AopReferenceModelNode> getAssociates() {
             return associates.iterator();
         }
 
-        public Set<BeansAopNode> getAssociatesList() {
+        public Set<AopReferenceModelNode> getAssociatesList() {
             return associates;
         }
     }

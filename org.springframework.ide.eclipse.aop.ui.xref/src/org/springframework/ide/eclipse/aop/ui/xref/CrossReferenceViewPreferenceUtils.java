@@ -22,14 +22,15 @@ import java.util.StringTokenizer;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
-public class BeansAopPreferenceUtils {
+public class CrossReferenceViewPreferenceUtils {
 
     public static final String XREF_CHECKED_FILTERS = Activator.PLUGIN_ID + ".checked.filters"; //$NON-NLS-1$
 
     public static final String XREF_CHECKED_FILTERS_INPLACE = Activator.PLUGIN_ID
             + ".checked.filters.inplace";
 
-    public static void setCheckedInplaceFilters(List l) {
+    @SuppressWarnings("unchecked")
+	public static void setCheckedInplaceFilters(List l) {
         StringBuffer sb = new StringBuffer();
         sb.append("set: "); //$NON-NLS-1$
         for (Iterator iter = l.iterator(); iter.hasNext();) {
@@ -58,7 +59,8 @@ public class BeansAopPreferenceUtils {
         return checkedList;
     }
  
-    public static void setCheckedFilters(List l) {
+    @SuppressWarnings("unchecked")
+	public static void setCheckedFilters(List l) {
 
         StringBuffer sb = new StringBuffer();
         sb.append("set: "); //$NON-NLS-1$

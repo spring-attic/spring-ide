@@ -17,7 +17,7 @@ package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
-import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
+import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 
 public class AdviceAopTargetMethodNode extends AbstractJavaElementReferenceNode implements IReferenceNode,
         IRevealableReferenceNode {
@@ -35,18 +35,18 @@ public class AdviceAopTargetMethodNode extends AbstractJavaElementReferenceNode 
 
     public String getText() {
         if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
-            return BeansAopUtils.getJavaElementLinkName(reference.getTarget())
+            return AopReferenceModelUtils.getJavaElementLinkName(reference.getTarget())
                     + " - "
-                    + BeansAopUtils.getPackageLinkName(reference.getTarget());
+                    + AopReferenceModelUtils.getPackageLinkName(reference.getTarget());
         }
         else {
-            return BeansAopUtils.getJavaElementLinkName(reference.getTarget()
+            return AopReferenceModelUtils.getJavaElementLinkName(reference.getTarget()
                     .getParent())
                     + "."
-                    + BeansAopUtils.getJavaElementLinkName(reference
+                    + AopReferenceModelUtils.getJavaElementLinkName(reference
                             .getTarget())
                     + " - "
-                    + BeansAopUtils.getPackageLinkName(reference.getTarget());
+                    + AopReferenceModelUtils.getPackageLinkName(reference.getTarget());
         }
     }
 

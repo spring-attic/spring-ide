@@ -60,7 +60,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 @SuppressWarnings("restriction")
-public class BeansAopNavigatorUtils {
+public class AopReferenceModelNavigatorUtils {
 
 	public static ILabelProvider JAVA_LABEL_PROVIDER = new DecoratingLabelProvider(
 			new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT

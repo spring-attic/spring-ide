@@ -7,7 +7,7 @@
          name="%aopValidator.name"
          point="org.springframework.ide.eclipse.core.builders">
       <run
-            class="org.springframework.ide.eclipse.aop.core.builder.BeansAopProjectBuilder">
+            class="org.springframework.ide.eclipse.aop.core.builder.AopReferenceModelProjectBuilder">
       </run>
    </extension>
    

@@ -25,14 +25,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.springframework.ide.eclipse.aop.core.model.IAopModel;
+import org.springframework.ide.eclipse.aop.core.model.IAopReferenceModel;
 import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.core.parser.BeansAopModelBuilder;
-import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
+import org.springframework.ide.eclipse.aop.core.model.builder.AopReferenceModelBuilder;
+import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 
-public class AopModel implements IAopModel {
+public class AopReferenceModel implements IAopReferenceModel {
 
     private Map<IJavaProject, IAopProject> projects = new ConcurrentHashMap<IJavaProject, IAopProject>();
 
@@ -53,9 +53,9 @@ public class AopModel implements IAopModel {
     }
 
     private void createModel(IJavaProject project) {
-        Set<IFile> resourcesToBuild = BeansAopUtils.getFilesToBuildFromBeansProject(project
+        Set<IFile> resourcesToBuild = AopReferenceModelUtils.getFilesToBuildFromBeansProject(project
                 .getProject());
-        BeansAopModelBuilder.buildAopModel(project.getProject(), resourcesToBuild);
+        AopReferenceModelBuilder.buildAopModel(project.getProject(), resourcesToBuild);
     }
 
     public IAopProject getProjectWithInitialization(IJavaProject project) {

@@ -6,7 +6,7 @@
          name="%visualiserProviders"
          point="org.eclipse.contribution.visualiser.providers">
       <provider
-            markupProviderClass="org.springframework.ide.eclipse.aop.ui.visualiser.BeansAopMarkupProvider"
+            markupProviderClass="org.springframework.ide.eclipse.aop.ui.visualiser.AopReferenceModelMarkupProvider"
             name="%provider.name"
             priority="5"
             description="%provider.description"

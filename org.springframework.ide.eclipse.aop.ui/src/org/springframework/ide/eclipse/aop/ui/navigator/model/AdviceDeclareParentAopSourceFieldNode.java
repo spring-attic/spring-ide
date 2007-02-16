@@ -18,7 +18,7 @@ package org.springframework.ide.eclipse.aop.ui.navigator.model;
 import java.util.List;
 
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
+import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 
 public class AdviceDeclareParentAopSourceFieldNode extends AbstractJavaElementReferenceNode
 		implements IReferenceNode, IRevealableReferenceNode {
@@ -35,6 +35,6 @@ public class AdviceDeclareParentAopSourceFieldNode extends AbstractJavaElementRe
 	}
 
 	public String getText() {
-		return BeansAopUtils.getJavaElementLinkName(references.get(0).getSource());
+		return AopReferenceModelUtils.getJavaElementLinkName(references.get(0).getSource());
 	}
 }

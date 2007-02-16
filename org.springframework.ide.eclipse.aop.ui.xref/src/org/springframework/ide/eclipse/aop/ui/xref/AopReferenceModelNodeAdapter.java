@@ -18,16 +18,16 @@ package org.springframework.ide.eclipse.aop.ui.xref;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
-class BeansAopNodeAdapter implements IWorkbenchAdapter {
+class AopReferenceModelNodeAdapter implements IWorkbenchAdapter {
 
-    protected BeansAopNodeAdapter() {
+    protected AopReferenceModelNodeAdapter() {
     }
 
-    private static BeansAopNodeAdapter instance = null;
+    private static AopReferenceModelNodeAdapter instance = null;
 
-    public static BeansAopNodeAdapter getDefault() {
+    public static AopReferenceModelNodeAdapter getDefault() {
         if (instance == null) {
-            instance = new BeansAopNodeAdapter();
+            instance = new AopReferenceModelNodeAdapter();
         }
         return instance;
     }
@@ -54,8 +54,8 @@ class BeansAopNodeAdapter implements IWorkbenchAdapter {
      * @see org.eclipse.ui.model.IWorkbenchAdapter#getLabel(java.lang.Object)
      */
     public String getLabel(Object o) {
-        if (o instanceof BeansAopNode) {
-            BeansAopNode node = (BeansAopNode) o;
+        if (o instanceof AopReferenceModelNode) {
+            AopReferenceModelNode node = (AopReferenceModelNode) o;
             return node.getLabel();
         }
         return null;

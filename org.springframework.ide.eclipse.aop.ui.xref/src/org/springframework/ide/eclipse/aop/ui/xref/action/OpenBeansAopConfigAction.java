@@ -24,14 +24,14 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
-import org.springframework.ide.eclipse.aop.ui.xref.BeansAopNode;
+import org.springframework.ide.eclipse.aop.ui.xref.AopReferenceModelNode;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 @SuppressWarnings("restriction")
 public class OpenBeansAopConfigAction extends Action implements
 		IViewActionDelegate {
 
-	private BeansAopNode aopNode;
+	private AopReferenceModelNode aopNode;
 
 	public void init(IViewPart view) {
 	}
@@ -41,8 +41,8 @@ public class OpenBeansAopConfigAction extends Action implements
 		Object node = ((IStructuredSelection) selection).getFirstElement();
 		if (node instanceof TreeObject) {
 			Object obj = ((TreeObject) node).getData();
-			if (obj instanceof BeansAopNode) {
-				aopNode = (BeansAopNode) obj;
+			if (obj instanceof AopReferenceModelNode) {
+				aopNode = (AopReferenceModelNode) obj;
 				setEnabled(true);
 			}
 		}

@@ -19,20 +19,20 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.springframework.ide.eclipse.aop.core.parser.BeansAopModelBuilder;
-import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
+import org.springframework.ide.eclipse.aop.core.model.builder.AopReferenceModelBuilder;
+import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 
 /**
  * @author Christian Dupuis
  */
 @SuppressWarnings("restriction")
-public class BeansAopProjectBuilder implements IProjectBuilder {
+public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 
     public void build(IFile file, IProgressMonitor monitor) {
-        Set<IFile> filesToBuild = BeansAopUtils.getFilesToBuild(file);
+        Set<IFile> filesToBuild = AopReferenceModelUtils.getFilesToBuild(file);
         monitor.beginTask("Parsing Spring AOP", filesToBuild.size());
-        BeansAopModelBuilder.buildAopModel(file.getProject(), filesToBuild);
+        AopReferenceModelBuilder.buildAopModel(file.getProject(), filesToBuild);
         monitor.done();
     }
 }

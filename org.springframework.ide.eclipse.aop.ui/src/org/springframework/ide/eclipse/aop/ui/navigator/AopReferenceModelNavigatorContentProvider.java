@@ -53,7 +53,7 @@ import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
-import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
+import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceDeclareParentAopSourceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.BeanReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.ClassMethodReferenceNode;
@@ -75,7 +75,7 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 /**
  */
 @SuppressWarnings("restriction")
-public class BeansAopNavigatorContentProvider implements ICommonContentProvider,
+public class AopReferenceModelNavigatorContentProvider implements ICommonContentProvider,
         IModelChangeListener {
 
     @SuppressWarnings("unused")
@@ -261,7 +261,7 @@ public class BeansAopNavigatorContentProvider implements ICommonContentProvider,
             int endLine = document.getLineOfOffset(element.getEndOffset()) + 1;
             String id = BeansEditorUtils.getAttribute(element, "id");
             IAopProject project = Activator.getModel().getProject(
-                    BeansAopUtils.getJavaProject(resource));
+                    AopReferenceModelUtils.getJavaProject(resource));
             List<IAopReference> references = new ArrayList<IAopReference>();
             if (project != null) {
                 references = project.getReferencesForResource(resource);
@@ -485,7 +485,7 @@ public class BeansAopNavigatorContentProvider implements ICommonContentProvider,
 
             // Are we in the UI thread?
             if (ctrl.getDisplay().getThread() == Thread.currentThread()) {
-                BeansAopNavigator.refreshViewer((TreeViewer) viewer, BeansAopNavigator
+                AopReferenceModelNavigator.refreshViewer((TreeViewer) viewer, AopReferenceModelNavigator
                         .calculateRootElement(element), element);
             }
             else {
@@ -497,7 +497,7 @@ public class BeansAopNavigatorContentProvider implements ICommonContentProvider,
                         if (ctrl == null || ctrl.isDisposed()) {
                             return;
                         }
-                        BeansAopNavigator.refreshViewer((TreeViewer) viewer, BeansAopNavigator
+                        AopReferenceModelNavigator.refreshViewer((TreeViewer) viewer, AopReferenceModelNavigator
                                 .calculateRootElement(element), element);
                     }
                 });

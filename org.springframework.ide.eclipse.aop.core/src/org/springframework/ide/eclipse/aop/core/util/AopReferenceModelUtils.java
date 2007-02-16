@@ -48,7 +48,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
  * 
  * @author Christian Dupuis
  */
-public class BeansAopUtils {
+public class AopReferenceModelUtils {
 
     public static String getJavaElementLinkName(IJavaElement je) {
         if (je == null) {
@@ -279,7 +279,7 @@ public class BeansAopUtils {
         for (Method method : methods) {
             if (Modifier.isPublic(method.getModifiers())
                     && (Boolean) matchesMethod.invoke(methodMatcher, method, clazz)) {
-                IMethod jdtMethod = BeansAopUtils.getMethod(jdtTargetClass, method.getName(),
+                IMethod jdtMethod = AopReferenceModelUtils.getMethod(jdtTargetClass, method.getName(),
                         method.getParameterTypes().length);
                 if (jdtMethod != null) {
                     matchingMethod.add(jdtMethod);

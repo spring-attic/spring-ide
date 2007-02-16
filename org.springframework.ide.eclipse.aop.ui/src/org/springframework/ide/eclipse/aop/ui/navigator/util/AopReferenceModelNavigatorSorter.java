@@ -22,7 +22,7 @@ import org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferen
 
 /**
  */
-public class BeansAopNavigatorSorter extends ViewerSorter {
+public class AopReferenceModelNavigatorSorter extends ViewerSorter {
 
 	public int category(Object element) {
 		if (element instanceof IAopReference) {

@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.ui.IEditorPart;
-import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
+import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 
 public class JavaElementReferenceNode implements IRevealableReferenceNode {
     
@@ -53,7 +53,7 @@ public class JavaElementReferenceNode implements IRevealableReferenceNode {
 
     public int getLineNumber() {
         if (method instanceof IMember) {
-            return BeansAopNavigatorUtils.getLineNumber((IMember) method);
+            return AopReferenceModelNavigatorUtils.getLineNumber((IMember) method);
         }
         else {
             return -1;

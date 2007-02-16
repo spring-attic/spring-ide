@@ -4,8 +4,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
-import org.springframework.ide.eclipse.aop.core.model.IAopModel;
-import org.springframework.ide.eclipse.aop.core.model.internal.AopModel;
+import org.springframework.ide.eclipse.aop.core.model.IAopReferenceModel;
+import org.springframework.ide.eclipse.aop.core.model.internal.AopReferenceModel;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -18,14 +18,14 @@ public class Activator extends AbstractUIPlugin {
 	// The shared instance
 	private static Activator plugin;
 	
-	private static AopModel model;
+	private static AopReferenceModel model;
 	
 	/**
 	 * The constructor
 	 */
 	public Activator() {
 		plugin = this;
-		model = new AopModel();
+		model = new AopReferenceModel();
 	}
 
 	/*
@@ -54,7 +54,7 @@ public class Activator extends AbstractUIPlugin {
 		return plugin;
 	}
 	
-	public static IAopModel getModel() {
+	public static IAopReferenceModel getModel() {
         return model;
     }
 	

@@ -41,14 +41,14 @@ import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceDeclareParen
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedAopReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedDeclareParentAopReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferenceNode;
-import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
+import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 import org.w3c.dom.Element;
 
 @SuppressWarnings("restriction")
-public class BeansAopNavigator
+public class AopReferenceModelNavigator
         extends CommonNavigator implements ISelectionListener {
 
-    public static final String ID = "org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigator";
+    public static final String ID = "org.springframework.ide.eclipse.aop.ui.navigator.AopReferenceModelNavigator";
 
     public static final String BEAN_REFS_FOR_FILE_ID = ID + ".beanRefsForFile";
 
@@ -197,7 +197,7 @@ public class BeansAopNavigator
     }
 
     public void setShowBeansRefsForFileEnabled(boolean showBeansRefsForFileEnabled) {
-        BeansAopNavigator.showBeansRefsForFileEnabled = showBeansRefsForFileEnabled;
+        AopReferenceModelNavigator.showBeansRefsForFileEnabled = showBeansRefsForFileEnabled;
 
         IPreferenceStore pstore = Activator.getDefault().getPreferenceStore();
         pstore.setValue(BEAN_REFS_FOR_FILE_ID, showBeansRefsForFileEnabled);
@@ -208,7 +208,7 @@ public class BeansAopNavigator
 
     private void updateTreeViewer(IWorkbenchPart part, ISelection selection,
             boolean ignoreSameSelection) {
-        final Object element = BeansAopNavigatorUtils.getSelectedElement(part, selection);
+        final Object element = AopReferenceModelNavigatorUtils.getSelectedElement(part, selection);
         if (element == null || (element.equals(lastElement) && ignoreSameSelection)) {
             return;
         }

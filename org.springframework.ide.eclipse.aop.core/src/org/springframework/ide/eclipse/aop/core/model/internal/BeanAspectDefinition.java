@@ -23,7 +23,7 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.beans.BeanUtils;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
-import org.springframework.ide.eclipse.aop.core.parser.BeansAopModelUtils;
+import org.springframework.ide.eclipse.aop.core.model.builder.AopReferenceModelBuilderUtils;
 import org.springframework.util.StringUtils;
 
 @SuppressWarnings("restriction")
@@ -106,7 +106,7 @@ public class BeanAspectDefinition implements IAspectDefinition {
     }
 
     public Object getAspectJPointcutExpression() throws Throwable {
-        return BeansAopModelUtils.initAspectJExpressionPointcut(this);
+        return AopReferenceModelBuilderUtils.initAspectJExpressionPointcut(this);
     }
 
     public IResource getResource() {
@@ -197,7 +197,7 @@ public class BeanAspectDefinition implements IAspectDefinition {
 
     public Method getAdviceMethod() {
         try {
-            Class<?> aspectClass = BeansAopModelUtils.loadClass(this.aspectClassName);
+            Class<?> aspectClass = AopReferenceModelBuilderUtils.loadClass(this.aspectClassName);
             Method method = BeanUtils.resolveSignature(this.adivceMethodName, aspectClass);
             return method;
         }

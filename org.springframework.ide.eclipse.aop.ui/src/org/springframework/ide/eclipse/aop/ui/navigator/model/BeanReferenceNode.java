@@ -22,7 +22,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
+import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
@@ -69,11 +69,11 @@ public class BeanReferenceNode implements IReferenceNode, IRevealableReferenceNo
     }
 
     public Image getImage() {
-        return BeansAopNavigatorUtils.BEAN_LABEL_PROVIDER.getImage(this.bean);
+        return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getImage(this.bean);
     }
 
     public String getText() {
-        return BeansAopNavigatorUtils.BEAN_LABEL_PROVIDER.getText(this.bean) + " - "
+        return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getText(this.bean) + " - "
                 + this.bean.getElementResource().getProjectRelativePath().toString();
     }
 

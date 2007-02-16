@@ -20,20 +20,20 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonLabelProvider;
-import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
+import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.IReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.JavaElementReferenceNode;
-import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
+import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 
 /**
  */
-public class BeansAopNavigatorLabelProvider
+public class AopReferenceModelNavigatorLabelProvider
         extends BeansModelLabelProvider implements ICommonLabelProvider {
 
     public String getDescription(Object element) {
         // TODO add descrption here
-        return null; //element.toString();
+        return null;
     }
 
     public Image getImage(Object element) {
@@ -41,10 +41,10 @@ public class BeansAopNavigatorLabelProvider
             return ((IReferenceNode) element).getImage();
         }
         else if (element instanceof IJavaElement) {
-            return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getImage(element);
+            return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER.getImage(element);
         }
         else if (element instanceof JavaElementReferenceNode) {
-            return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER
+            return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER
                     .getImage(((JavaElementReferenceNode) element)
                             .getJavaElement());
         }
@@ -56,16 +56,16 @@ public class BeansAopNavigatorLabelProvider
             return ((IReferenceNode) element).getText();
         }
         else if (element instanceof IJavaElement) {
-            return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element)
+            return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element)
                     + " - "
-                    + BeansAopUtils.getPackageLinkName((IJavaElement) element);
+                    + AopReferenceModelUtils.getPackageLinkName((IJavaElement) element);
         }
         else if (element instanceof JavaElementReferenceNode) {
-            return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER
+            return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER
                     .getText(((JavaElementReferenceNode) element)
                             .getJavaElement())
                     + " - "
-                    + BeansAopUtils
+                    + AopReferenceModelUtils
                             .getPackageLinkName(((JavaElementReferenceNode) element)
                                     .getJavaElement());
         }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.ide.eclipse.aop.core.parser;
+package org.springframework.ide.eclipse.aop.core.model.builder;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -39,14 +39,13 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES
 import org.springframework.ide.eclipse.aop.core.model.internal.BeanAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.internal.BeanIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.model.internal.JavaAspectDefinition;
-import org.springframework.ide.eclipse.aop.core.parser.asm.AdviceAnnotationVisitor;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 @SuppressWarnings("restriction")
-public class BeansAspectDefinitionParser {
+public class AspectDefinitionBuilder {
 
     private static void addDocument(IDOMDocument document, List<IAspectDefinition> aspectInfos,
             IResource file) {
@@ -114,7 +113,7 @@ public class BeansAspectDefinitionParser {
                 final String className = BeansEditorUtils.getClassNameForBean(bean);
                 if (className != null && isIncluded(patternList, id)) {
                     try {
-                        if (BeansAopModelUtils.validateAspect(className)) {
+                        if (AopReferenceModelBuilderUtils.validateAspect(className)) {
                             createAnnotationAspectDefinition(document, bean, id, className,
                                     aspectInfos);
                         }
@@ -157,7 +156,7 @@ public class BeansAspectDefinitionParser {
             final List<IAspectDefinition> aspectInfos) throws Throwable {
 
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        ClassReader reader = new ClassReader(classLoader.getResourceAsStream(BeansAopModelUtils
+        ClassReader reader = new ClassReader(classLoader.getResourceAsStream(AopReferenceModelBuilderUtils
                 .getClassFileName(className)));
         AdviceAnnotationVisitor v = new AdviceAnnotationVisitor((IDOMNode) bean, id, className);
         reader.accept(v, false);

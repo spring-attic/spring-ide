@@ -24,7 +24,7 @@ import org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferen
 
 /**
  */
-public class BeansAopNavigatorLinkHelper implements ILinkHelper {
+public class AopReferenceModelNavigatorLinkHelper implements ILinkHelper {
 
     public void activateEditor(IWorkbenchPage page,
             IStructuredSelection selection) {

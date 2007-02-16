@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.ide.eclipse.aop.core.parser;
+package org.springframework.ide.eclipse.aop.core.model.builder;
 
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
@@ -36,13 +36,12 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.aop.core.model.internal.JavaAspectDefinition;
-import org.springframework.ide.eclipse.aop.core.parser.asm.AspectAnnotationVisitor;
-import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
+import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.util.StringUtils;
 
 @SuppressWarnings("restriction")
-public class BeansAopModelUtils {
+public class AopReferenceModelBuilderUtils {
 
     private static final String AJC_MAGIC = "ajc$";
 
@@ -51,7 +50,7 @@ public class BeansAopModelUtils {
 
     public static boolean validateAspect(String className) throws Throwable {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        InputStream is = classLoader.getResourceAsStream(BeansAopModelUtils
+        InputStream is = classLoader.getResourceAsStream(AopReferenceModelBuilderUtils
                 .getClassFileName(className));
 
         // check if class exists on class path
@@ -91,7 +90,7 @@ public class BeansAopModelUtils {
 
             // check if super class is Aspect as well and abstract
             if (v.getClassInfo().getSuperType() != null) {
-                reader = new ClassReader(classLoader.getResourceAsStream(BeansAopModelUtils
+                reader = new ClassReader(classLoader.getResourceAsStream(AopReferenceModelBuilderUtils
                         .getClassFileName(v.getClassInfo().getSuperType())));
                 AspectAnnotationVisitor sv = new AspectAnnotationVisitor();
                 reader.accept(sv, false);
@@ -207,7 +206,7 @@ public class BeansAopModelUtils {
                 int argCount = method.getParameterTypes().length;
                 IMethod jdtMethod;
                 try {
-                    jdtMethod = BeansAopUtils.getMethod(type, methodName, argCount);
+                    jdtMethod = AopReferenceModelUtils.getMethod(type, methodName, argCount);
                     if (jdtMethod != null) {
                         return jdtMethod.getParameterNames();
                     }

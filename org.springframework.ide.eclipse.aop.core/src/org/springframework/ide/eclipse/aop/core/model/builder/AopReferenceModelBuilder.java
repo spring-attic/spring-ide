@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.ide.eclipse.aop.core.parser;
+package org.springframework.ide.eclipse.aop.core.model.builder;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -51,12 +51,12 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.internal.AnnotationAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.internal.AnnotationIntroductionDefinition;
-import org.springframework.ide.eclipse.aop.core.model.internal.AopModel;
 import org.springframework.ide.eclipse.aop.core.model.internal.AopReference;
+import org.springframework.ide.eclipse.aop.core.model.internal.AopReferenceModel;
 import org.springframework.ide.eclipse.aop.core.model.internal.BeanIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.model.internal.JavaAspectDefinition;
-import org.springframework.ide.eclipse.aop.core.util.BeansAopMarkerUtils;
-import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
+import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelMarkerUtils;
+import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -67,7 +67,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
 @SuppressWarnings("restriction")
-public class BeansAopModelBuilder {
+public class AopReferenceModelBuilder {
 
     public static void buildAopModel(IProject project, Set<IFile> filesToBuild) {
         if (filesToBuild.size() > 0) {
@@ -81,9 +81,9 @@ public class BeansAopModelBuilder {
             if (monitor.isCanceled()) {
                 throw new OperationCanceledException();
             }
-            monitor.setTaskName("Building Spring AOP model ["
+            monitor.setTaskName("Building Spring AOP reference model ["
                     + currentFile.getProjectRelativePath().toString() + "]");
-            BeansAopMarkerUtils.deleteProblemMarkers(currentFile);
+            AopReferenceModelMarkerUtils.deleteProblemMarkers(currentFile);
 
             IAopProject aopProject = buildAopReferencesFromFile(currentFile);
             if (aopProject != null) {
@@ -91,7 +91,7 @@ public class BeansAopModelBuilder {
                 for (IAopReference reference : references) {
                     if (reference.getDefinition().getResource().equals(currentFile)
                             || reference.getResource().equals(currentFile)) {
-                        BeansAopMarkerUtils.createMarker(reference, currentFile);
+                    	AopReferenceModelMarkerUtils.createMarker(reference, currentFile);
                     }
                 }
             }
@@ -115,10 +115,10 @@ public class BeansAopModelBuilder {
 
         if (project != null) {
             BeansConfig config = (BeansConfig) project.getConfig(currentFile);
-            IJavaProject javaProject = BeansAopUtils.getJavaProject(config);
+            IJavaProject javaProject = AopReferenceModelUtils.getJavaProject(config);
             if (javaProject != null) {
-                aopProject = ((AopModel) Activator.getModel())
-                        .getProjectWithInitialization(BeansAopUtils.getJavaProject(config
+                aopProject = ((AopReferenceModel) Activator.getModel())
+                        .getProjectWithInitialization(AopReferenceModelUtils.getJavaProject(config
                                 .getElementResource().getProject()));
 
                 aopProject.clearReferencesForResource(currentFile);
@@ -136,7 +136,7 @@ public class BeansAopModelBuilder {
                         ClassLoader weavingClassLoader = SpringCoreUtils.getClassLoader(
                                 javaProject, false);
                         Thread.currentThread().setContextClassLoader(weavingClassLoader);
-                        aspectInfos = BeansAspectDefinitionParser.buildAspectDefinitions(document,
+                        aspectInfos = AspectDefinitionBuilder.buildAspectDefinitions(document,
                                 currentFile);
                     }
                     finally {
@@ -189,8 +189,8 @@ public class BeansAopModelBuilder {
             IBeansConfig config, IAspectDefinition info) {
 
         IResource file = config.getElementResource();
-        IAopProject aopProject = ((AopModel) Activator.getModel())
-                .getProjectWithInitialization(BeansAopUtils.getJavaProject(config
+        IAopProject aopProject = ((AopReferenceModel) Activator.getModel())
+                .getProjectWithInitialization(AopReferenceModelUtils.getJavaProject(config
                         .getElementResource().getProject()));
 
         Set<IBean> beans = config.getBeans();
@@ -233,13 +233,13 @@ public class BeansAopModelBuilder {
                         && !(info instanceof AnnotationAspectDefinition)) {
                     JavaAspectDefinition intro = (JavaAspectDefinition) info;
 
-                    List<IMethod> matchingMethods = BeansAopUtils.getMatches(targetClass, intro
+                    List<IMethod> matchingMethods = AopReferenceModelUtils.getMatches(targetClass, intro
                             .getAspectJPointcutExpression(), aopProject.getProject().getProject());
 
                     for (IMethod method : matchingMethods) {
                         IType jdtAspectType = BeansModelUtils.getJavaType(aopProject.getProject()
                                 .getProject(), info.getAspectClassName());
-                        IMethod jdtAspectMethod = BeansAopUtils
+                        IMethod jdtAspectMethod = AopReferenceModelUtils
                                 .getMethod(jdtAspectType, info.getAdviceMethodName(), info
                                         .getAdviceMethodParameterTypes().length);
                         if (jdtAspectMethod != null) {
@@ -259,11 +259,11 @@ public class BeansAopModelBuilder {
                             targetClass.getName());
                     IType jdtAspectType = BeansModelUtils.getJavaType(file.getProject(), info
                             .getAspectClassName());
-                    Class<?> aspectJAdviceClass = BeansAopModelUtils.getAspectJAdviceClass(info);
+                    Class<?> aspectJAdviceClass = AopReferenceModelBuilderUtils.getAspectJAdviceClass(info);
 
                     Object pc = info.getAspectJPointcutExpression();
 
-                    BeansAopModelUtils.createAspectJAdvice(info, aspectJAdviceClass, pc);
+                    AopReferenceModelBuilderUtils.createAspectJAdvice(info, aspectJAdviceClass, pc);
 
                     Method matchesMethod = pc.getClass().getMethod("matches", Method.class,
                             Class.class);
@@ -272,9 +272,9 @@ public class BeansAopModelBuilder {
                         if (Modifier.isPublic(m.getModifiers())) {
                             boolean matches = (Boolean) matchesMethod.invoke(pc, m, targetClass);
                             if (matches) {
-                                IMethod jdtMethod = BeansAopUtils.getMethod(jdtTargetType, m
+                                IMethod jdtMethod = AopReferenceModelUtils.getMethod(jdtTargetType, m
                                         .getName(), m.getParameterTypes().length);
-                                IMethod jdtAspectMethod = BeansAopUtils.getMethod(jdtAspectType,
+                                IMethod jdtAspectMethod = AopReferenceModelUtils.getMethod(jdtAspectType,
                                         info.getAdviceMethodName(), info.getAdviceMethod()
                                                 .getParameterTypes().length);
                                 if (jdtAspectMethod != null) {
@@ -295,14 +295,14 @@ public class BeansAopModelBuilder {
 
     private static void handleException(Throwable t, IAspectDefinition info, IResource file) {
         if (t instanceof NoClassDefFoundError || t instanceof ClassNotFoundException) {
-            BeansAopMarkerUtils.createProblemMarker(file,
+        	AopReferenceModelMarkerUtils.createProblemMarker(file,
                     "Build path is incomplete. Cannot find class file for " + t.getMessage(),
                     IMarker.SEVERITY_ERROR, info.getAspectLineNumber(),
-                    BeansAopMarkerUtils.AOP_PROBLEM_MARKER, file);
+                    AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
         }
         else if (t instanceof IllegalArgumentException) {
-            BeansAopMarkerUtils.createProblemMarker(file, t.getMessage(), IMarker.SEVERITY_ERROR,
-                    info.getAspectLineNumber(), BeansAopMarkerUtils.AOP_PROBLEM_MARKER, file);
+            AopReferenceModelMarkerUtils.createProblemMarker(file, t.getMessage(), IMarker.SEVERITY_ERROR,
+                    info.getAspectLineNumber(), AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
         }
         else if (t instanceof InvocationTargetException) {
             if (t.getCause() != null) {
@@ -310,20 +310,20 @@ public class BeansAopModelBuilder {
             }
             else {
                 Activator.log(t);
-                BeansAopMarkerUtils.createProblemMarker(file, t.getMessage(),
+                AopReferenceModelMarkerUtils.createProblemMarker(file, t.getMessage(),
                         IMarker.SEVERITY_WARNING, info.getAspectLineNumber(),
-                        BeansAopMarkerUtils.AOP_PROBLEM_MARKER, file);
+                        AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
             }
         }
         else {
             Activator.log(t);
-            BeansAopMarkerUtils.createProblemMarker(file, t.getMessage(), IMarker.SEVERITY_WARNING,
-                    info.getAspectLineNumber(), BeansAopMarkerUtils.AOP_PROBLEM_MARKER, file);
+            AopReferenceModelMarkerUtils.createProblemMarker(file, t.getMessage(), IMarker.SEVERITY_WARNING,
+                    info.getAspectLineNumber(), AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
         }
     }
 
     public static Job getBuildJob(final IProject project, final Set<IFile> filesToBuild) {
-        Job buildJob = new BuildJob("Building Spring AOP model", project, filesToBuild);
+        Job buildJob = new BuildJob("Building Spring AOP reference model", project, filesToBuild);
         buildJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
         buildJob.setUser(false);
         return buildJob;
@@ -349,7 +349,8 @@ public class BeansAopModelBuilder {
             return project != null && project.equals(other.project);
         }
 
-        protected IStatus run(IProgressMonitor monitor) {
+        @SuppressWarnings("deprecation")
+		protected IStatus run(IProgressMonitor monitor) {
             synchronized (getClass()) {
                 if (monitor.isCanceled()) {
                     return Status.CANCEL_STATUS;
@@ -367,7 +368,7 @@ public class BeansAopModelBuilder {
                 }
             }
             try {
-                monitor.beginTask("Parsing Spring AOP", filesToBuild.size());
+                monitor.beginTask("Builder Spring AOP reference model", filesToBuild.size());
                 buildAopModel(monitor, filesToBuild);
             }
             catch (OperationCanceledException e) {

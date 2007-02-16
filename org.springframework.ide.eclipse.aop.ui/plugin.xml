@@ -7,7 +7,7 @@
       <decorator
             lightweight="true"
             label="%advisesDecorator.label"
-            class="org.springframework.ide.eclipse.aop.ui.decorator.BeansAdviceImageDecorator"
+            class="org.springframework.ide.eclipse.aop.ui.decorator.AopReferenceModelImageDecorator"
             state="true"
             adaptable="true"
             id="org.springframework.ide.eclipse.aop.ui.decorator.advicedecorator">
@@ -27,8 +27,8 @@
   		<navigatorContent
             id="org.springframework.ide.eclipse.aop.ui.navigator.projectExplorerContent"
             name="%beansCrossReferenceView.content"
-            contentProvider="org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigatorContentProvider"
-            labelProvider="org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigatorLabelProvider"
+            contentProvider="org.springframework.ide.eclipse.aop.ui.navigator.AopReferenceModelNavigatorContentProvider"
+            labelProvider="org.springframework.ide.eclipse.aop.ui.navigator.AopReferenceModelNavigatorLabelProvider"
             icon="icons/full/obj16/xref_obj.gif"
             activeByDefault="true"
             priority="high">
@@ -50,12 +50,12 @@
          </possibleChildren>
 	    <commonSorter 
                id="org.springframework.ide.eclipse.aop.ui.navigator.projectExplorerContent"
-               class="org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorSorter"/>
+               class="org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorSorter"/>
 	   </navigatorContent>
 	    
 	   <actionProvider
             id="org.springframework.ide.eclipse.aop.ui.navigator.actions"
-            class="org.springframework.ide.eclipse.aop.ui.navigator.action.BeansAopNavigatorActionProvider">
+            class="org.springframework.ide.eclipse.aop.ui.navigator.action.AopReferenceModelNavigatorActionProvider">
          <enablement>
              <instanceof value="org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferenceNode"/>
          </enablement>
@@ -113,7 +113,7 @@
           point="org.eclipse.ui.navigator.linkHelper">
        <linkHelper
              id="org.springframework.ide.eclipse.aop.ui.navigator.linkHelper"
-             class="org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigatorLinkHelper">
+             class="org.springframework.ide.eclipse.aop.ui.navigator.AopReferenceModelNavigatorLinkHelper">
           <selectionEnablement>
 			 <instanceof value="org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferenceNode"/>
           </selectionEnablement>
@@ -129,7 +129,7 @@
             name="%beansCrossReferenceView.label"
             icon="icons/full/obj16/xref_obj.gif"
             category="org.springframework.ide.eclipse.beans.ui.views"
-            class="org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigator"
+            class="org.springframework.ide.eclipse.aop.ui.navigator.AopReferenceModelNavigator"
             id="org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigator">
       </view>
    </extension> 

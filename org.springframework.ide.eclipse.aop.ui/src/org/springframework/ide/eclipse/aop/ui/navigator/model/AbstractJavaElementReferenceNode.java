@@ -21,8 +21,8 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorPart;
-import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
-import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
+import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
+import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 
 public class AbstractJavaElementReferenceNode {
 
@@ -33,12 +33,12 @@ public class AbstractJavaElementReferenceNode {
 	}
 
 	public Image getImage() {
-		return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getImage(this.element);
+		return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER.getImage(this.element);
 	}
 
 	public String getText() {
-		return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(this.element) + " - "
-				+ BeansAopUtils.getPackageLinkName(this.element);
+		return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER.getText(this.element) + " - "
+				+ AopReferenceModelUtils.getPackageLinkName(this.element);
 	}
 
 	public boolean hasChildren() {
@@ -55,7 +55,7 @@ public class AbstractJavaElementReferenceNode {
 	}
 
 	public int getLineNumber() {
-		return BeansAopNavigatorUtils.getLineNumber(this.element);
+		return AopReferenceModelNavigatorUtils.getLineNumber(this.element);
 	}
 
 	public IResource getResource() {

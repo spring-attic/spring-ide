@@ -23,10 +23,10 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
-import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
+import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.util.ObjectUtils;
 
-public class BeansAopNode implements IAdaptable, IXReferenceNode {
+public class AopReferenceModelNode implements IAdaptable, IXReferenceNode {
 
     public enum TYPE {
         SOURCE, TARGET
@@ -38,7 +38,7 @@ public class BeansAopNode implements IAdaptable, IXReferenceNode {
 
     private TYPE type;
 
-    public BeansAopNode(TYPE type, IAopReference reference) {
+    public AopReferenceModelNode(TYPE type, IAopReference reference) {
         this.reference = reference;
         this.type = type;
         computeLabel();
@@ -48,7 +48,7 @@ public class BeansAopNode implements IAdaptable, IXReferenceNode {
         if (getJavaElement() != null) {
             if (getJavaElement() instanceof IMethod) {
                 this.label = getJavaElement().getParent().getElementName() + '.'
-                        + BeansAopUtils.readableName((IMethod) getJavaElement());
+                        + AopReferenceModelUtils.readableName((IMethod) getJavaElement());
             }
             else {
                 this.label = getJavaElement().getElementName();
@@ -62,9 +62,10 @@ public class BeansAopNode implements IAdaptable, IXReferenceNode {
     /**
      * @see IAdaptable#getAdapter(Class)
      */
-    public Object getAdapter(Class adapter) {
+    @SuppressWarnings("unchecked")
+	public Object getAdapter(Class adapter) {
         if (adapter == IWorkbenchAdapter.class) {
-            return BeansAopNodeAdapter.getDefault();
+            return AopReferenceModelNodeAdapter.getDefault();
         }
         return null;
     }
@@ -97,8 +98,8 @@ public class BeansAopNode implements IAdaptable, IXReferenceNode {
     }
 
     public boolean equals(Object obj) {
-        if (obj instanceof BeansAopNode) {
-            BeansAopNode other = (BeansAopNode) obj;
+        if (obj instanceof AopReferenceModelNode) {
+            AopReferenceModelNode other = (AopReferenceModelNode) obj;
             return getLabel().equals(other.getLabel());
         }
         return false;

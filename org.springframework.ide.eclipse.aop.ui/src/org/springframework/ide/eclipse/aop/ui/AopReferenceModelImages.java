@@ -42,7 +42,7 @@ import org.eclipse.swt.graphics.Image;
  * 
  * @see org.eclipse.jface.resource.ImageRegistry
  */
-public class BeansAopUIImages {
+public class AopReferenceModelImages {
 
 	private static final String ICON_PATH_PREFIX = "icons/";
 

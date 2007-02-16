@@ -19,7 +19,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
+import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class AdviceDeclareParentAopTargetNode implements IReferenceNode,
@@ -37,12 +37,12 @@ public class AdviceDeclareParentAopTargetNode implements IReferenceNode,
     }
 
     public Image getImage() {
-        return BeansAopNavigatorUtils.BEAN_LABEL_PROVIDER
+        return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER
                 .getImage(this.reference.getTargetBean());
     }
 
     public String getText() {
-        return BeansAopNavigatorUtils.BEAN_LABEL_PROVIDER
+        return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER
                 .getText(this.reference.getTargetBean())
                 + " - "
                 + this.reference.getTargetBean().getElementResource()
@@ -61,7 +61,7 @@ public class AdviceDeclareParentAopTargetNode implements IReferenceNode,
     }
 
     public int getLineNumber() {
-        return BeansAopNavigatorUtils.getLineNumber(reference.getTarget());
+        return AopReferenceModelNavigatorUtils.getLineNumber(reference.getTarget());
     }
 
     public IResource getResource() {

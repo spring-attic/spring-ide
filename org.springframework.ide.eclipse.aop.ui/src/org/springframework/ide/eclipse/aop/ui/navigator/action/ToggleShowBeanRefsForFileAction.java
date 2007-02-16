@@ -16,8 +16,8 @@
 package org.springframework.ide.eclipse.aop.ui.navigator.action;
 
 import org.eclipse.jface.action.Action;
-import org.springframework.ide.eclipse.aop.ui.BeansAopUIImages;
-import org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigator;
+import org.springframework.ide.eclipse.aop.ui.AopReferenceModelImages;
+import org.springframework.ide.eclipse.aop.ui.navigator.AopReferenceModelNavigator;
 
 /**
  * This action toggles whether the cross reference view displays 
@@ -26,16 +26,16 @@ import org.springframework.ide.eclipse.aop.ui.navigator.BeansAopNavigator;
  */
 public class ToggleShowBeanRefsForFileAction extends Action {
 
-    private BeansAopNavigator aopNavigator;
+    private AopReferenceModelNavigator aopNavigator;
     
 	/**
 	 * Constructs a new action.
 	 */
-	public ToggleShowBeanRefsForFileAction(BeansAopNavigator aopNavigator) {
+	public ToggleShowBeanRefsForFileAction(AopReferenceModelNavigator aopNavigator) {
 		super("&Show the Beans Cross References for the entire file");
 		setDescription("Show the Beans Cross References for the entire file");
 		setToolTipText("Show the Beans Cross References for the entire file");
-		setImageDescriptor(BeansAopUIImages.DESC_OBJS_FILE);
+		setImageDescriptor(AopReferenceModelImages.DESC_OBJS_FILE);
 		setChecked(aopNavigator.isShowBeansRefsForFileEnabled());
         this.aopNavigator = aopNavigator;
 	}

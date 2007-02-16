@@ -24,8 +24,8 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
-import org.springframework.ide.eclipse.aop.core.util.BeansAopUtils;
-import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
+import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
+import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 
 public class MethodBeanReferenceNode extends AbstractJavaElementReferenceNode implements IReferenceNode,
@@ -83,11 +83,11 @@ public class MethodBeanReferenceNode extends AbstractJavaElementReferenceNode im
 
     public String getText() {
         if (element instanceof IType) {
-            return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element)
-                    + " - " + BeansAopUtils.getPackageLinkName(element);
+            return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element)
+                    + " - " + AopReferenceModelUtils.getPackageLinkName(element);
         }
         else {
-            return BeansAopNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element);
+            return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element);
         }
     }
 

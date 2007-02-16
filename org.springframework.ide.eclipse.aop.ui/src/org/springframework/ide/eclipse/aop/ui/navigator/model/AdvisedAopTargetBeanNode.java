@@ -21,7 +21,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
+import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class AdvisedAopTargetBeanNode implements IReferenceNode, IRevealableReferenceNode {
@@ -37,12 +37,12 @@ public class AdvisedAopTargetBeanNode implements IReferenceNode, IRevealableRefe
     }
 
     public Image getImage() {
-        return BeansAopNavigatorUtils.BEAN_LABEL_PROVIDER.getImage(this.references.get(0)
+        return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getImage(this.references.get(0)
                 .getTargetBean());
     }
 
     public String getText() {
-        return BeansAopNavigatorUtils.BEAN_LABEL_PROVIDER.getText(this.references.get(0)
+        return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getText(this.references.get(0)
                 .getTargetBean())
                 + " - "
                 + this.references.get(0).getTargetBean().getElementResource()

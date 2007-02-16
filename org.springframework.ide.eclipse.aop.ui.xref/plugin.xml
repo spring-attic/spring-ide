@@ -5,7 +5,7 @@
 	<extension
            point="org.eclipse.contribution.xref.core.providers">
            <xrefProvider
-                 class="org.springframework.ide.eclipse.aop.ui.xref.BeansAopReferenceProvider"
+                 class="org.springframework.ide.eclipse.aop.ui.xref.AopReferenceModelReferenceProvider"
                  id="org.springframework.ide.eclipse.aop.ui.xref.BeansAopReferenceProvider"
                  label="extends/implements"
                  enabled="true">

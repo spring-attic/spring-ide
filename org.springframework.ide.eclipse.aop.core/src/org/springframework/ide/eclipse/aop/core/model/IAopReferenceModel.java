@@ -20,7 +20,7 @@ import java.util.List;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 
-public interface IAopModel {
+public interface IAopReferenceModel {
     
     IAopProject getProject(IJavaProject project);
     

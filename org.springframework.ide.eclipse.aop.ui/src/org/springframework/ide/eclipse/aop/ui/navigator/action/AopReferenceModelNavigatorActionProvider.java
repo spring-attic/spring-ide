@@ -24,12 +24,12 @@ import org.eclipse.ui.navigator.ICommonMenuConstants;
 
 /**
  */
-public class BeansAopNavigatorActionProvider
+public class AopReferenceModelNavigatorActionProvider
         extends CommonActionProvider {
 
     private OpenConfigFileAction openConfigAction;
     
-    public BeansAopNavigatorActionProvider() {
+    public AopReferenceModelNavigatorActionProvider() {
     }
 
     public void init(ICommonActionExtensionSite site) {

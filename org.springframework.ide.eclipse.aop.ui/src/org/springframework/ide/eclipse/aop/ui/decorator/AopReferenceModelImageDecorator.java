@@ -30,7 +30,7 @@ import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAnnotationAopDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.ui.BeansAopUIImages;
+import org.springframework.ide.eclipse.aop.ui.AopReferenceModelImages;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceAopTargetMethodNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceDeclareParentAopSourceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceRootAopReferenceNode;
@@ -42,7 +42,7 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 @SuppressWarnings("restriction")
-public class BeansAdviceImageDecorator
+public class AopReferenceModelImageDecorator
         extends LabelProvider implements ILightweightLabelDecorator {
 
     public static final String DECORATOR_ID = org.springframework.ide.eclipse.aop.ui.Activator.PLUGIN_ID
@@ -50,7 +50,7 @@ public class BeansAdviceImageDecorator
 
     private IAopModelChangedListener listener;
 
-    public BeansAdviceImageDecorator() {
+    public AopReferenceModelImageDecorator() {
         listener = new IAopModelChangedListener() {
             public void changed() {
                 update();
@@ -69,7 +69,7 @@ public class BeansAdviceImageDecorator
             if ((jp != null)
                     && SpringCoreUtils.isSpringProject(jp.getProject())) {
                 if (je instanceof IMethod && Activator.getModel().isAdvised(je)) {
-                    decoration.addOverlay(BeansAopUIImages.DESC_OVR_ADVICE,
+                    decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE,
                             IDecoration.TOP_LEFT);
                 }
             }
@@ -77,18 +77,18 @@ public class BeansAdviceImageDecorator
         else if (element instanceof BeanMethodReferenceNode
                 && Activator.getModel().isAdvised(
                         ((BeanMethodReferenceNode) element).getJavaElement())) {
-            decoration.addOverlay(BeansAopUIImages.DESC_OVR_ADVICE,
+            decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE,
                     IDecoration.TOP_LEFT);
         }
         else if (element instanceof AdviceAopTargetMethodNode) {
-            decoration.addOverlay(BeansAopUIImages.DESC_OVR_ADVICE,
+            decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE,
                     IDecoration.TOP_LEFT);
         }
         else if (element instanceof AdvisedAopSourceMethodNode) {
             if (Activator.getModel().isAdvised(
                     ((AdvisedAopSourceMethodNode) element).getReference()
                             .getSource()))
-                decoration.addOverlay(BeansAopUIImages.DESC_OVR_ADVICE,
+                decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE,
                         IDecoration.TOP_LEFT);
         }
         else if (element instanceof AdviceRootAopReferenceNode) {
@@ -96,7 +96,7 @@ public class BeansAdviceImageDecorator
                     .getReference();
             for (IAopReference reference : references) {
                 if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
-                    decoration.addOverlay(BeansAopUIImages.DESC_OVR_ANNOTATION,
+                    decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ANNOTATION,
                             IDecoration.BOTTOM_LEFT);
                     break;
                 }
@@ -106,7 +106,7 @@ public class BeansAdviceImageDecorator
             IAopReference reference = ((AdvisedAopSourceNode) element)
                     .getReference();
             if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
-                decoration.addOverlay(BeansAopUIImages.DESC_OVR_ANNOTATION,
+                decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ANNOTATION,
                         IDecoration.BOTTOM_LEFT);
             }
         }
@@ -114,7 +114,7 @@ public class BeansAdviceImageDecorator
             IAopReference reference = ((AdviceDeclareParentAopSourceNode) element)
                     .getReference();
             if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
-                decoration.addOverlay(BeansAopUIImages.DESC_OVR_ANNOTATION,
+                decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ANNOTATION,
                         IDecoration.BOTTOM_LEFT);
             }
         }
@@ -122,7 +122,7 @@ public class BeansAdviceImageDecorator
             IAopReference reference = ((AdvisedDeclareParentAopSourceNode) element)
                     .getReference();
             if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
-                decoration.addOverlay(BeansAopUIImages.DESC_OVR_ANNOTATION,
+                decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ANNOTATION,
                         IDecoration.BOTTOM_LEFT);
             }
         }

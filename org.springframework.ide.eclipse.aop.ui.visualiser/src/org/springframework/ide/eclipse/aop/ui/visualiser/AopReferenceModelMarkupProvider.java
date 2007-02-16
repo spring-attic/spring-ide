@@ -39,12 +39,12 @@ import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
-import org.springframework.ide.eclipse.aop.ui.navigator.util.BeansAopNavigatorUtils;
+import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 
 /**
  * The Beans AOP Markup Provider
  */
-public class BeansAopMarkupProvider
+public class AopReferenceModelMarkupProvider
         extends SimpleMarkupProvider implements IAopModelChangedListener {
 
     // Cache: IMember -> List(Stripe)
@@ -89,7 +89,7 @@ public class BeansAopMarkupProvider
                                 String label = getText(reference);
                                 Stripe stripe = new Stripe(
                                         new SimpleMarkupKind(label),
-                                        BeansAopNavigatorUtils.getLineNumber(reference.getTarget()) + 1);
+                                        AopReferenceModelNavigatorUtils.getLineNumber(reference.getTarget()) + 1);
                                 stripeList.add(stripe);
                                 addMarkup(member.getFullname(), stripe);
                             }
