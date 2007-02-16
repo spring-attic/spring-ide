@@ -152,4 +152,62 @@
          </includes>
       </viewerActionBinding>
    </extension>
+   
+   <extension
+       	 point="org.eclipse.ui.actionSets">
+   	  <actionSet
+            label="%beansCrossReferenceNavigation.label"
+            description="beansCrossReferenceNavigation.content"
+            visible="true"
+            id="org.springframework.ide.eclipse.aop.ui.ActionSet">
+         <action
+               definitionId="org.springframework.ide.eclipse.aop.ui.inplace.show"
+               label="%beansCrossReferenceViewInplace.label"
+               class="org.springframework.ide.eclipse.aop.ui.inplace.OpenAopModelReferenceInplaceDialogAction"
+               menubarPath="navigate/showIn"
+               id="openInplace">
+               <enablement>
+                  <or>
+                    <or>
+                      <objectClass name="org.w3c.dom.Node"/>
+		                <and>
+	               		  <objectClass name="org.eclipse.jdt.core.IJavaElement"/>
+	               			<not>
+	               			  <or>
+	               			    <objectClass name="org.eclipse.jdt.core.ICompilationUnit"/>
+	               			    <objectClass name="org.eclipse.jdt.core.IJavaProject"/>
+	               			    <objectClass name="org.eclipse.jdt.core.IPackageFragmentRoot"/>
+	               			    <objectClass name="org.eclipse.jdt.core.IPackageFragment"/>
+	               			  </or>   
+	               			</not>
+	               		</and>	
+                      </or>
+               		<objectClass name="org.eclipse.jface.text.TextSelection"/>
+               	  </or>
+               </enablement>
+         </action>
+             
+      </actionSet>
+   </extension> 
+
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            name="%beansCrossReferenceViewInplace.label"
+            description="%beansCrossReferenceViewInplace.content"
+            categoryId="org.eclipse.ui.category.navigate"
+            id="org.springframework.ide.eclipse.aop.ui.inplace.show">
+      </command>
+   </extension>
+	
+   <extension point="org.eclipse.ui.bindings">
+   <!-- Key binding for the inplace view (Alt+Shift+S)-->
+        <key
+            sequence="M3+M2+S" 
+            contextId="org.eclipse.ui.textEditorScope"
+            commandId="org.springframework.ide.eclipse.aop.ui.inplace.show"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </key>
+   </extension> 
+   
 </plugin>

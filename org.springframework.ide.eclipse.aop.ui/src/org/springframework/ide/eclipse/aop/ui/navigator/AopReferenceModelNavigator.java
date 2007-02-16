@@ -66,7 +66,11 @@ public class AopReferenceModelNavigator
     }
 
     public static Object calculateRootElement(Object element) {
-        if (showBeansRefsForFileEnabled && element != null) {
+        return calculateRootElement(element, showBeansRefsForFileEnabled);
+    }
+    
+    public static Object calculateRootElement(Object element, boolean showBeansRefsForFile) {
+        if (showBeansRefsForFile && element != null) {
             if (element instanceof IMethod) {
                 element = ((IMethod) element).getDeclaringType();
             }
@@ -90,7 +94,7 @@ public class AopReferenceModelNavigator
         viewer.getTree().setRedraw(true);
     }
 
-    private static void expandTree(TreeItem[] items, boolean b) {
+    public static void expandTree(TreeItem[] items, boolean b) {
         if (items != null) {
             for (TreeItem item : items) {
                 Object obj = item.getData();
@@ -110,11 +114,14 @@ public class AopReferenceModelNavigator
     }
 
     public static void revealSelection(TreeViewer viewer, final Object javaElement) {
+        revealSelection(viewer, javaElement, showBeansRefsForFileEnabled);
+    }
+    public static void revealSelection(TreeViewer viewer, final Object javaElement, boolean showBeansRefsForFile) {
         TreeItem[] items = viewer.getTree().getItems();
         Object wr = null;
 
         if (javaElement instanceof IJavaElement) {
-            if (showBeansRefsForFileEnabled && javaElement instanceof IMethod) {
+            if (showBeansRefsForFile && javaElement instanceof IMethod) {
                 // we have one root element
                 TreeItem[] aspectChildren = items[0].getItems();
                 for (int i = 0; i < aspectChildren.length; i++) {
@@ -134,7 +141,7 @@ public class AopReferenceModelNavigator
             }
         }
         else if (javaElement instanceof ElementImpl) {
-            if (!showBeansRefsForFileEnabled) {
+            if (!showBeansRefsForFile) {
                 if (items != null && items.length > 0) {
                     wr = items[0].getData();
                 }
@@ -215,7 +222,7 @@ public class AopReferenceModelNavigator
         if ((element instanceof IType || element instanceof IMethod || element instanceof IField || element instanceof Element)
                 && isLinkingEnabled()) {
 
-            final Object rootElement = calculateRootElement(element);
+            final Object rootElement = calculateRootElement(element, showBeansRefsForFileEnabled);
 
             Control ctrl = getCommonViewer().getControl();
             // Are we in the UI thread?

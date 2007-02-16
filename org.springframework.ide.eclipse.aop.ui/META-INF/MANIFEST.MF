@@ -22,7 +22,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.ui.editors,
  org.eclipse.jface.text,
- org.springframework.ide.eclipse.aop.core
+ org.springframework.ide.eclipse.aop.core,
+ org.eclipse.core.expressions
 Eclipse-LazyStart: true
 Bundle-ClassPath: aop-ui.jar
 Export-Package: org.springframework.ide.eclipse.aop.ui,
