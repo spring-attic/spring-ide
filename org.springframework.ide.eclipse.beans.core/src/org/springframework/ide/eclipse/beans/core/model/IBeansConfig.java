@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.ide.eclipse.beans.core.model;
 
 import java.util.Set;
 
-import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
@@ -36,10 +35,6 @@ public interface IBeansConfig extends IResourceModelElement, IBeanClassAware {
 	String DEFAULT_INIT_METHOD = "";
 	String DEFAULT_DESTROY_METHOD = "";
 	String DEFAULT_MERGE = "false";
-
-	Set<Problem> getWarnings();
-
-	Set<Problem> getErrors();
 
 	String getDefaultLazyInit();
 
