@@ -69,22 +69,6 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		this.aliases = aliases;
 	}
 
-	/**
-	 * Lazily initialize this bean's data (constructor arguments, properties
-	 * and inner beans).
-	 */
-	private void initBean() {
-
-		// First retrieve this bean's constructor arguments and properties
-		constructorArguments = retrieveConstructorArguments(definition);
-		properties = retrieveProperties(definition);
-
-		// AFTER retrieving this bean's constructor arguments and properties
-		// retrieve now the inner beans from the bean's constructor arguments
-		// and properties
-		innerBeans = retrieveInnerBeans();
-	}
-
 	public int getElementType() {
 		return IBeansModelElementTypes.BEAN_TYPE;
 	}
@@ -188,6 +172,11 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		return (definition instanceof ChildBeanDefinition);
 	}
 
+	public boolean isInnerBean() {
+		return ((getElementParent() instanceof IBeanConstructorArgument)
+				|| (getElementParent() instanceof IBeanProperty));
+	}
+
 	public boolean isSingleton() {
 		if (definition instanceof AbstractBeanDefinition) {
 			return ((AbstractBeanDefinition) definition).isSingleton();
@@ -250,10 +239,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 	}
 
 	public String toString() {
-		StringBuffer text = new StringBuffer(getElementName());
-		text.append(" (");
-		text.append(getElementSourceLocation().getStartLine());
-		text.append(')');
+		StringBuffer text = new StringBuffer(super.toString());
 		if (getClassName() != null) {
 			text.append(" [");
 			text.append(getClassName());
@@ -264,6 +250,22 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 			text.append('>');
 		}
 		return text.toString();
+	}
+
+	/**
+	 * Lazily initialize this bean's data (constructor arguments, properties
+	 * and inner beans).
+	 */
+	private void initBean() {
+
+		// First retrieve this bean's constructor arguments and properties
+		constructorArguments = retrieveConstructorArguments(definition);
+		properties = retrieveProperties(definition);
+
+		// AFTER retrieving this bean's constructor arguments and properties
+		// retrieve now the inner beans from the bean's constructor arguments
+		// and properties
+		innerBeans = retrieveInnerBeans();
 	}
 
 	private Set<IBeanConstructorArgument> retrieveConstructorArguments(
