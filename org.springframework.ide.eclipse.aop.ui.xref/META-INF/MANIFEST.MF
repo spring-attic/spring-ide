@@ -8,26 +8,12 @@ Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-ClassPath: aop-ui-xref.jar
 Require-Bundle: org.eclipse.contribution.xref.ui,
- org.eclipse.contribution.xref.core,
- org.eclipse.ui,
  org.eclipse.core.runtime,
- org.springframework.ide.eclipse.beans.ui,
- org.springframework.ide.eclipse.beans.core,
- org.springframework.ide.eclipse.core,
- org.eclipse.jdt.core,
  org.eclipse.core.resources,
- org.eclipse.wst.sse.core,
- org.eclipse.wst.xml.core,
- org.springframework.ide.eclipse.beans.ui.editor,
- org.eclipse.ui.ide,
- org.eclipse.ajdt.ui,
- org.eclipse.ajdt.core,
+ org.eclipse.ui,
+ org.eclipse.jdt.core,
+ org.springframework.ide.eclipse.core,
  org.springframework.ide.eclipse.ui,
- org.eclipse.ui.navigator,
- org.eclipse.jdt.ui,
- org.eclipse.ui.workbench.texteditor,
- org.eclipse.ui.editors,
- org.eclipse.jface.text,
  org.springframework.ide.eclipse.aop.core,
- org.springframework.ide.eclipse.aop.ui
+ org.eclipse.contribution.xref.core
 Eclipse-LazyStart: true
