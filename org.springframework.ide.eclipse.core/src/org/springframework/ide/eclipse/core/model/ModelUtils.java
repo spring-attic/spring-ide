@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,16 +58,14 @@ public final class ModelUtils {
 	 */
 	public static boolean isExternal(IModelElement element,
 			IModelElement context) {
-		if (context != null) {
-			if (context instanceof IResourceModelElement
-					&& element instanceof IResourceModelElement) {
-				IProject contextProject = ((IResourceModelElement) context)
-						.getElementResource().getProject();
-				IProject elementProject = ((IResourceModelElement) element)
-						.getElementResource().getProject();
-				if (!elementProject.equals(contextProject)) {
-					return true;
-				}
+		if (context instanceof IResourceModelElement
+				&& element instanceof IResourceModelElement) {
+			IProject contextProject = ((IResourceModelElement) context)
+					.getElementResource().getProject();
+			IProject elementProject = ((IResourceModelElement) element)
+					.getElementResource().getProject();
+			if (!elementProject.equals(contextProject)) {
+				return true;
 			}
 		}
 		return false;
