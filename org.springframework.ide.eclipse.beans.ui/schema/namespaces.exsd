@@ -6,14 +6,15 @@
          <meta.schema plugin="org.springframework.ide.eclipse.beans.ui" id="namespaces" name="Namespaces"/>
       </appInfo>
       <documentation>
-         This extension point is used to add content providers and label providers for Spring 2.0 namespace implementations.
+         &lt;p&gt;
+This extension point is used to add content providers and label providers for Spring 2.0 namespace implementations.
       </documentation>
    </annotation>
 
    <element name="extension">
       <complexType>
-         <sequence minOccurs="1" maxOccurs="unbounded">
-            <element ref="namespace"/>
+         <sequence>
+            <element ref="namespace" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -40,6 +41,11 @@
    </element>
 
    <element name="namespace">
+      <annotation>
+         <appInfo>
+            <meta.element labelAttribute="uri"/>
+         </appInfo>
+      </annotation>
       <complexType>
          <attribute name="name" type="string">
             <annotation>
@@ -61,7 +67,7 @@
                   an instance of &lt;samp&gt;org.eclipse.jface.viewers.ILabelProvider&lt;/samp&gt;
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceLabelProvider"/>
+                  <meta.attribute kind="java" basedOn="org.eclipse.jface.viewers.ILabelProvider"/>
                </appInfo>
             </annotation>
          </attribute>
@@ -92,7 +98,16 @@
          <meta.section type="examples"/>
       </appInfo>
       <documentation>
-         
+         &lt;pre&gt;
+&lt;extension point=&quot;org.springframework.ide.eclipse.beans.ui.namespaces&quot;&gt;
+   &lt;namespace name=&quot;Spring Beans&quot;
+      uri=&quot;http://www.springframework.org/schema/beans&quot;
+      labelProvider=&quot;org.springframework.ide.eclipse.beans.ui.namespaces.beans.BeansNamespaceLabelProvider&quot;/&gt;
+   &lt;namespace name=&quot;Spring AOP&quot;
+      uri=&quot;http://www.springframework.org/schema/aop&quot;
+      labelProvider=&quot;org.springframework.ide.eclipse.beans.ui.namespaces.aop.AopNamespaceLabelProvider&quot;/&gt;
+&lt;/extension&gt;
+&lt;/pre&gt;
       </documentation>
    </annotation>
 
@@ -101,7 +116,8 @@
          <meta.section type="apiInfo"/>
       </appInfo>
       <documentation>
-         Each provider must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.eclipse.jface.viewers.ILabelProvider&lt;/samp&gt; or &lt;samp&gt;org.eclipse.jface.viewers.ITreeContentProvider&lt;/samp&gt;.
+         &lt;p&gt;
+Each provider must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.eclipse.jface.viewers.ILabelProvider&lt;/samp&gt; or &lt;samp&gt;org.eclipse.jface.viewers.ITreeContentProvider&lt;/samp&gt;.
       </documentation>
    </annotation>
 
@@ -110,7 +126,8 @@
          <meta.section type="implementation"/>
       </appInfo>
       <documentation>
-         This plugin itself comes with a set of predefined namespace contributions.
+         &lt;p&gt;
+This plugin itself comes with a set of predefined namespace contributions.
       </documentation>
    </annotation>
 
@@ -119,14 +136,14 @@
          <meta.section type="copyright"/>
       </appInfo>
       <documentation>
-         Copyright 2002-2006 the original author or authors.
-
+         Copyright 2002-2007 the original author or authors.
+&lt;br&gt;
 Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
+&lt;br&gt;
+&lt;a href=&quot;http://www.apache.org/licenses/LICENSE-2.0&quot;&gt;http://www.apache.org/licenses/LICENSE-2.0&lt;/a&gt;
+&lt;br&gt;
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
