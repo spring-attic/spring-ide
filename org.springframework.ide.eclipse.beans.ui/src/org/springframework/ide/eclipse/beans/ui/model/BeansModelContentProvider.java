@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeanClassReferences;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
@@ -204,16 +205,18 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 	}
 
 	private Object[] getConfigSetChildren(IBeansConfigSet configSet) {
-		Set<IBean> beans = new LinkedHashSet<IBean>();
+		Set<ISourceModelElement> children =
+				new LinkedHashSet<ISourceModelElement>();
 		for (IBeansConfig config : configSet.getConfigs()) {
-			Object[] children = getChildren(config);
-			for (Object child : children) {
-				if (child instanceof IBean) {
-					beans.add((IBean) child);
+			Object[] configChildren = getChildren(config);
+			for (Object child : configChildren) {
+				if (child instanceof IBean
+						|| child instanceof IBeansComponent) {
+					children.add((ISourceModelElement) child);
 				}
 			}
 		}
-		return beans.toArray();
+		return children.toArray();
 	}
 
 	private Object[] getJavaTypeChildren(IType type) {
@@ -274,7 +277,12 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 
 	protected final void refreshViewerForElement(final Object element) {
 		if (viewer instanceof StructuredViewer && element != null) {
+
+			// Abort if this happens after disposes
 			Control ctrl = viewer.getControl();
+			if (ctrl == null || ctrl.isDisposed()) {
+				return;
+			}
 
 			// Are we in the UI thread?
 			if (ctrl.getDisplay().getThread() == Thread.currentThread()) {
