@@ -6,7 +6,8 @@
          <meta.schema plugin="org.springframework.ide.eclipse.core" id="builders" name="Spring Project Builders"/>
       </appInfo>
       <documentation>
-         This extension-point is used to add one or more builders to the list of Spring project builders. These builders are called for every modified file during incremental build of a Spring project.
+         &lt;p&gt;
+This extension-point is used to add one or more builders to the list of Spring project builders. These builders are called for every modified file during incremental build of a Spring project.
       </documentation>
    </annotation>
 
@@ -48,7 +49,7 @@
 &lt;samp&gt;org.springframework.ide.eclipse.core.project.IProjectBuilder&lt;/samp&gt;
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java"/>
+                  <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.core.project.IProjectBuilder"/>
                </appInfo>
             </annotation>
          </attribute>
@@ -69,16 +70,12 @@
          <meta.section type="examples"/>
       </appInfo>
       <documentation>
-         Following is an example of a builder configuration: 
-
-&lt;p&gt;
-&lt;pre&gt;
-   &lt;extension point=&quot;org.springframework.ide.eclipse.core.builders&quot;
-         id=&quot;beansvalidator&quot; name=&quot;Spring Beans Config Validator&quot;&gt; 
-      &lt;run class=&quot;org.springframework.ide.eclipse.beans.core.internal.project.BeansConfigValidator&quot;/&gt; 
-   &lt;/extension&gt; 
+         &lt;pre&gt;
+&lt;extension point=&quot;org.springframework.ide.eclipse.core.builders&quot;
+      id=&quot;beansvalidator&quot; name=&quot;Spring Beans Config Validator&quot;&gt; 
+   &lt;run class=&quot;org.springframework.ide.eclipse.beans.core.internal.project.BeansConfigValidator&quot;/&gt; 
+&lt;/extension&gt; 
 &lt;/pre&gt;
-&lt;/p&gt;
 
 If this extension was defined in a plug-in with id &lt;samp&gt;org.springframework.ide.eclipse.beans.core&lt;/samp&gt;, the fully qualified name of this builder would be &lt;samp&gt;org.springframework.ide.eclipse.beans.core.beansvalidator&lt;/samp&gt;.
       </documentation>
@@ -89,7 +86,8 @@ If this extension was defined in a plug-in with id &lt;samp&gt;org.springframewo
          <meta.section type="apiInfo"/>
       </appInfo>
       <documentation>
-         Each builder must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.springframework.ide.eclipse.core.project.IProjectBuilder&lt;/samp&gt;.
+         &lt;p&gt;
+Each builder must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.springframework.ide.eclipse.core.project.IProjectBuilder&lt;/samp&gt;.
       </documentation>
    </annotation>
 
@@ -98,7 +96,8 @@ If this extension was defined in a plug-in with id &lt;samp&gt;org.springframewo
          <meta.section type="implementation"/>
       </appInfo>
       <documentation>
-         This plugin itself does not have any predefined builders.
+         &lt;p&gt;
+This plugin itself does not have any predefined builders.
       </documentation>
    </annotation>
 
@@ -107,14 +106,14 @@ If this extension was defined in a plug-in with id &lt;samp&gt;org.springframewo
          <meta.section type="copyright"/>
       </appInfo>
       <documentation>
-         Copyright 2002-2004 the original author or authors.
-
+         Copyright 2002-2007 the original author or authors.
+&lt;br&gt;
 Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
+&lt;br&gt;
+&lt;a href=&quot;http://www.apache.org/licenses/LICENSE-2.0&quot;&gt;http://www.apache.org/licenses/LICENSE-2.0&lt;/a&gt;
+&lt;br&gt;
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
