@@ -19,7 +19,7 @@
 	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
 	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
 
-	<xsd:element name="groovy" type="simpleScriptType">
+	<xsd:element name="groovy" type="customizableScriptType">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
 	A Spring bean backed by a Groovy class definition.
@@ -97,10 +97,24 @@
 	<xsd:complexType name="dynamicScriptType">
 		<xsd:complexContent>
 			<xsd:extension base="simpleScriptType">
-				<xsd:attribute name="script-interfaces" use="required">
+				<xsd:attribute name="script-interfaces">
 					<xsd:annotation>
 						<xsd:documentation source="java:java.lang.Class"><![CDATA[
 	The Java interfaces that the dynamic language-backed object is to expose; comma-delimited.
+						]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="customizableScriptType">
+		<xsd:complexContent>
+			<xsd:extension base="simpleScriptType">
+				<xsd:attribute name="customizer-ref">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Reference to a GroovyObjectCustomizer or similar customizer bean.
 						]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:attribute>
