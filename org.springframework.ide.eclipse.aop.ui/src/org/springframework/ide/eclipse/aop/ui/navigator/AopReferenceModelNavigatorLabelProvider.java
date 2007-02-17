@@ -33,7 +33,7 @@ public class AopReferenceModelNavigatorLabelProvider
 
     public String getDescription(Object element) {
         // TODO add descrption here
-        return null;
+        return element.toString();
     }
 
     public Image getImage(Object element) {

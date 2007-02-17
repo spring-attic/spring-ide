@@ -1267,6 +1267,7 @@ public class AopReferenceModelInplaceDialog {
         if (lastSelection != null && workbenchPart != null) {
             Object element = AopReferenceModelNavigatorUtils.getSelectedElement(workbenchPart,
                     lastSelection);
+            
             viewer.setInput(element);
         }
         filterText.setText(""); //$NON-NLS-1$

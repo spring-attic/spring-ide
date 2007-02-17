@@ -29,75 +29,81 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class BeanReferenceNode implements IReferenceNode, IRevealableReferenceNode {
 
-    private IBean bean;
+	private IBean bean;
 
-    private List<IAopReference> aspectReferences = new ArrayList<IAopReference>();
+	private boolean showChildren = true;
 
-    private List<IAopReference> adviseReferences = new ArrayList<IAopReference>();
+	private List<IAopReference> aspectReferences = new ArrayList<IAopReference>();
 
-    private List<IAopReference> declareParentReferences = new ArrayList<IAopReference>();
+	private List<IAopReference> adviseReferences = new ArrayList<IAopReference>();
 
-    private List<IAopReference> declaredOnReferences = new ArrayList<IAopReference>();
+	private List<IAopReference> declareParentReferences = new ArrayList<IAopReference>();
 
-    public BeanReferenceNode(IBean bean) {
-        this.bean = bean;
-    }
+	private List<IAopReference> declaredOnReferences = new ArrayList<IAopReference>();
 
-    public int getLineNumber() {
-        return this.bean.getElementStartLine();
-    }
+	public BeanReferenceNode(IBean bean, boolean showChildren) {
+		this.bean = bean;
+		this.showChildren = showChildren;
+	}
 
-    public IResource getResource() {
-        return this.bean.getElementResource();
-    }
+	public BeanReferenceNode(IBean bean) {
+		this.bean = bean;
+	}
 
-    public void openAndReveal() {
-        IResource resource = this.bean.getElementResource();
-        SpringUIUtils.openInEditor((IFile) resource, this.bean.getElementStartLine());
-    }
+	public int getLineNumber() {
+		return this.bean.getElementStartLine();
+	}
 
-    public IReferenceNode[] getChildren() {
-        // TODO
-        if (this.bean.getClassName() != null) {
-            return new IReferenceNode[] { new BeanClassReferenceNode(BeansModelUtils
-                    .getJavaType(this.bean.getElementResource().getProject(), this.bean
-                            .getClassName()), this) };
-        }
-        else {
-            return new IReferenceNode[0];
-        }
-    }
+	public IResource getResource() {
+		return this.bean.getElementResource();
+	}
 
-    public Image getImage() {
-        return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getImage(this.bean);
-    }
+	public void openAndReveal() {
+		IResource resource = this.bean.getElementResource();
+		SpringUIUtils.openInEditor((IFile) resource, this.bean.getElementStartLine());
+	}
 
-    public String getText() {
-        return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getText(this.bean) + " - "
-                + this.bean.getElementResource().getProjectRelativePath().toString();
-    }
+	public IReferenceNode[] getChildren() {
+		// TODO
+		if (this.bean.getClassName() != null && this.showChildren) {
+			return new IReferenceNode[] { new BeanClassReferenceNode1(
+					new BeanClassTargetReferenceNode(BeansModelUtils.getJavaType(this.bean
+							.getElementResource().getProject(), this.bean.getClassName()), this)) };
+		} else {
+			return new IReferenceNode[0];
+		}
+	}
 
-    public boolean hasChildren() {
-        return getChildren() != null && getChildren().length > 0;
-    }
+	public Image getImage() {
+		return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getImage(this.bean);
+	}
 
-    public IBean getBean() {
-        return bean;
-    }
+	public String getText() {
+		return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getText(this.bean) + " - "
+				+ this.bean.getElementResource().getProjectRelativePath().toString();
+	}
 
-    public List<IAopReference> getAdviseReferences() {
-        return adviseReferences;
-    }
+	public boolean hasChildren() {
+		return getChildren() != null && getChildren().length > 0;
+	}
 
-    public List<IAopReference> getAspectReferences() {
-        return aspectReferences;
-    }
+	public IBean getBean() {
+		return bean;
+	}
 
-    public List<IAopReference> getDeclaredOnReferences() {
-        return declaredOnReferences;
-    }
+	public List<IAopReference> getAdviseReferences() {
+		return adviseReferences;
+	}
 
-    public List<IAopReference> getDeclareParentReferences() {
-        return declareParentReferences;
-    }
+	public List<IAopReference> getAspectReferences() {
+		return aspectReferences;
+	}
+
+	public List<IAopReference> getDeclaredOnReferences() {
+		return declaredOnReferences;
+	}
+
+	public List<IAopReference> getDeclareParentReferences() {
+		return declareParentReferences;
+	}
 }
