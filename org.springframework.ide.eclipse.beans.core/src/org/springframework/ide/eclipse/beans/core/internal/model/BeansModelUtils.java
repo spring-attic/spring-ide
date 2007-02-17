@@ -55,6 +55,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
@@ -85,7 +86,7 @@ public final class BeansModelUtils {
 	 * @param context  the context used for config look-up
 	 * @throws IllegalArgumentException  if unsupported context specified 
 	 */
-	public static final IBeansConfig getConfig(String configName,
+	public static IBeansConfig getConfig(String configName,
 			IModelElement context) {
 		// For external project get the corresponding project from beans model
 		if (configName.charAt(0) ==
@@ -109,16 +110,17 @@ public final class BeansModelUtils {
 	}
 
 	/**
-	 * Returns the <code>IBeanConfig</code> the given model element
-	 * (<code>IBean</code>, <code>IBeanConstructorArgument</code> or
-	 * <code>IBeanProperty</code>) belongs to.
+	 * Returns the {@link IBeanConfig} the given model element
+	 * ({@link IBean}, {@link IBeanAlias}, {@link IBeansComponent},
+	 * {@link IBeanConstructorArgument} or {@link IBeanProperty}) belongs to.
 	 * 
 	 * @param element  the model element to get the beans config for
 	 * @throws IllegalArgumentException  if unsupported model element specified
 	 */
-	public static final IBeansConfig getConfig(IModelElement element) {
+	public static IBeansConfig getConfig(IModelElement element) {
 		IModelElement parent;
-		if (element instanceof IBean || element instanceof IBeanAlias) {
+		if (element instanceof IBean || element instanceof IBeanAlias
+				|| element instanceof IBeansComponent) {
 			parent = element.getElementParent();
 		} else if (element instanceof IBeanConstructorArgument
 				|| element instanceof IBeanProperty) {
@@ -138,7 +140,7 @@ public final class BeansModelUtils {
 	 * @param element  the model element to get the beans project for
 	 * @throws IllegalArgumentException  if unsupported model element specified
 	 */
-	public static final IBeansProject getProject(IModelElement element) {
+	public static IBeansProject getProject(IModelElement element) {
 		if (element instanceof IResourceModelElement) {
 			IResource resource = ((IResourceModelElement) element)
 					.getElementResource();
@@ -161,7 +163,7 @@ public final class BeansModelUtils {
 	 *					monitor done after completing the work
 	 * @throws IllegalArgumentException if unsupported model element specified
 	 */
-	public static final Set<IBean> getBeans(IModelElement element,
+	public static Set<IBean> getBeans(IModelElement element,
 			IProgressMonitor monitor) {
 		if (monitor == null) {
 			monitor = new NullProgressMonitor();
@@ -234,7 +236,7 @@ public final class BeansModelUtils {
 	 * 		  <code>IBeanConfigSet</code>) the referencing beans are looked-up
 	 * @throws IllegalArgumentException if unsupported context specified 
 	 */
-	public static final Set<BeanReference> getBeanReferences(String beanID,
+	public static Set<BeanReference> getBeanReferences(String beanID,
 			IModelElement context) {
 		Set<BeanReference> references = new LinkedHashSet<BeanReference>();
 		if (context instanceof IBeansConfig) {
@@ -263,9 +265,8 @@ public final class BeansModelUtils {
 	 * Check given beans for a reference to a bean with given ID and add these
 	 * references to the specified list.
 	 */
-	private static final void addBeanReferences(Set<IBean> beans,
-			String beanID, IModelElement context,
-			Set<BeanReference> references) {
+	private static void addBeanReferences(Set<IBean> beans, String beanID,
+			IModelElement context, Set<BeanReference> references) {
 		for (IBean bean : beans) {
 			for (BeanReference reference : getBeanReferences(bean, context,
 					false)) {
@@ -283,8 +284,7 @@ public final class BeansModelUtils {
 	/**
 	 * Returns a list of config sets a given config belongs to.
 	 */
-	public static final Set<IBeansConfigSet> getConfigSets(
-			IBeansConfig config) {
+	public static Set<IBeansConfigSet> getConfigSets(IBeansConfig config) {
 		Set<IBeansConfigSet> configSets = new LinkedHashSet<IBeansConfigSet>();
 		for (IBeansConfigSet configSet : ((IBeansProject) config
 				.getElementParent()).getConfigSets()) {
@@ -316,8 +316,8 @@ public final class BeansModelUtils {
 	 * @throws IllegalArgumentException  if unsupported model element specified
 	 * @see BeanReference
 	 */
-	public static final Set<BeanReference> getBeanReferences(
-			IModelElement element, IModelElement context, boolean recursive) {
+	public static Set<BeanReference> getBeanReferences(IModelElement element,
+			IModelElement context, boolean recursive) {
 		Set<BeanReference> references = new LinkedHashSet<BeanReference>();
 		Set<IBean> referencedBeans = new HashSet<IBean>(); // used to break
 															// from cycles
@@ -493,8 +493,8 @@ public final class BeansModelUtils {
 	 *            looked-up
 	 * @param referencedBeans  used to break from cycles
 	 */
-	private static final void addBeanReferencesForBean(
-			IBean element, IModelElement context, boolean recursive,
+	private static void addBeanReferencesForBean(IBean element,
+			IModelElement context, boolean recursive,
 			Set<BeanReference> references, Set<IBean> referencedBeans) {
 		if (!referencedBeans.contains(element)) {
 
@@ -526,10 +526,9 @@ public final class BeansModelUtils {
 	 *            <code>IBeanConfigSet</code>) the referenced beans are
 	 *            looked-up
 	 */
-	private static final void addBeanReferencesForValue(IModelElement element,
-			Object value, IModelElement context,
-			Set<BeanReference> references, Set<IBean> referencedBeans,
-			boolean recursive) {
+	private static void addBeanReferencesForValue(IModelElement element,
+			Object value, IModelElement context, Set<BeanReference> references,
+			Set<IBean> referencedBeans, boolean recursive) {
 		if (value instanceof RuntimeBeanReference) {
 			String beanName = ((RuntimeBeanReference) value).getBeanName();
 			IBean bean = getBean(beanName, context);
@@ -557,7 +556,7 @@ public final class BeansModelUtils {
 						context);
 				if (type != null) {
 					if (type.getFullyQualifiedName().equals(
-								"org.springframework.aop.framework.ProxyFactoryBean")) {
+							"org.springframework.aop.framework.ProxyFactoryBean")) {
 						for (Object obj : (List) value) {
 							if (obj instanceof String) {
 								IBean interceptor = getBean((String) obj,
@@ -605,7 +604,7 @@ public final class BeansModelUtils {
 	 * @return given bean's merged bean definition
 	 * @throws IllegalArgumentException  if unsupported context specified
 	 */
-	public static final BeanDefinition getMergedBeanDefinition(IBean bean,
+	public static BeanDefinition getMergedBeanDefinition(IBean bean,
 			IModelElement context) {
 		BeanDefinition bd = ((Bean) bean).getBeanDefinition();
 		if (bean.isChildBean()) {
@@ -643,8 +642,8 @@ public final class BeansModelUtils {
 		return bd;
 	}
 
-	private static final void addBeanDefinition(IBean bean,
-			IModelElement context, List<BeanDefinition> beanDefinitions) {
+	private static void addBeanDefinition(IBean bean, IModelElement context,
+			List<BeanDefinition> beanDefinitions) {
 		String parentName = bean.getParentName();
 		Bean parentBean = (Bean) getBean(parentName, context);
 		if (parentBean != null) {
@@ -672,7 +671,7 @@ public final class BeansModelUtils {
 	 * @return <code>IBean</code> or <code>null</code> if bean not found
 	 * @throws IllegalArgumentException  if unsupported context specified
 	 */
-	public static final IBean getBean(String name, IModelElement context) {
+	public static IBean getBean(String name, IModelElement context) {
 		if (context instanceof IBeansConfig) {
 			IBeansConfig config = (IBeansConfig) context;
 			IBean bean = config.getBean(name);
@@ -710,8 +709,7 @@ public final class BeansModelUtils {
 	 * @throws {@link IllegalArgumentException}
 	 *             if unsupported context specified
 	 */
-	public static final IBean getInnerBean(String beanName,
-			IModelElement context) {
+	public static IBean getInnerBean(String beanName, IModelElement context) {
 		if (context instanceof IBean) {
 			for (IBean bean : ((IBean) context).getInnerBeans()) {
 				if (beanName.equals(bean.getElementName())) {
@@ -751,7 +749,7 @@ public final class BeansModelUtils {
 	 * @return the requested Java type or null if the class is not defined or
 	 *         the project is not accessible
 	 */
-	public static final IType getJavaType(IProject project, String className) {
+	public static IType getJavaType(IProject project, String className) {
 		if (className != null && project.isAccessible()) {
 
 			// For inner classes replace '$' by '.'
@@ -799,7 +797,7 @@ public final class BeansModelUtils {
 	 *            {@link IBeanConfigSet}) the beans are looked-up; if
 	 *            <code>null</code> then the bean's config is used
 	 */
-	public static final String getBeanClass(IBean bean, IModelElement context) {
+	public static String getBeanClass(IBean bean, IModelElement context) {
 		Assert.notNull(bean);
 		if (bean.isRootBean()) {
 			return bean.getClassName();
@@ -838,7 +836,7 @@ public final class BeansModelUtils {
 	 * @return the Java type of given bean's class or <code>null</code> if no
 	 *         bean class defined or type not found
 	 */
-	public static final IType getBeanType(IBean bean, IModelElement context) {
+	public static IType getBeanType(IBean bean, IModelElement context) {
 		Assert.notNull(bean);
 		String className = getBeanClass(bean, context);
 		if (className != null) {
@@ -853,7 +851,7 @@ public final class BeansModelUtils {
 	 * @return the first constructor argument or <code>null</code> if no
 	 * 			constructor argument is defined
 	 */
-	public static final IBeanConstructorArgument getFirstConstructorArgument(
+	public static IBeanConstructorArgument getFirstConstructorArgument(
 			IBean bean) {
 		IBeanConstructorArgument firstCarg = null;
 		int firstCargStartLine = Integer.MAX_VALUE;
@@ -866,7 +864,7 @@ public final class BeansModelUtils {
 		return firstCarg;
 	}
 
-	public static final void createProblemMarker(IModelElement element,
+	public static void createProblemMarker(IModelElement element,
 			String message, int severity, Problem problem,
 			ErrorCode errorCode) {
 		int line;
@@ -883,13 +881,13 @@ public final class BeansModelUtils {
 				null);
 	}
 
-	public static final void createProblemMarker(IModelElement element,
+	public static void createProblemMarker(IModelElement element,
 			String message, int severity, int line, ErrorCode errorCode) {
 		createProblemMarker(element, message, severity, line, errorCode, null,
 				null);
 	}
 
-	public static final void createProblemMarker(IModelElement element,
+	public static void createProblemMarker(IModelElement element,
 			String message, int severity, int line, ErrorCode errorCode,
 			String beanID, String errorData) {
 		if (element instanceof IResourceModelElement) {
@@ -900,7 +898,7 @@ public final class BeansModelUtils {
 		}
 	}
 
-	public static final void deleteProblemMarkers(IModelElement element) {
+	public static void deleteProblemMarkers(IModelElement element) {
 		if (element instanceof IBeansProject) {
 			for (IBeansConfig config : ((IBeansProject) element)
 					.getConfigs()) {
@@ -913,10 +911,11 @@ public final class BeansModelUtils {
 
 	/**
 	 * Registers all bean definitions and aliases from given
-	 * <code>IBeansConfig</code> in specified
-	 * <code>BeanDefinitionRegistry</code>.
+	 * {@link IBeansConfig} in specified {@link BeanDefinitionRegistry}. All
+	 * {@link BeansException}s thrown by the {@link BeanDefinitionRegistry} are
+	 * ignored.
 	 */
-	public static final void registerBeanConfig(IBeansConfig config,
+	public static void registerBeanConfig(IBeansConfig config,
 			BeanDefinitionRegistry registry) {
 		// Register bean definitions
 		for (IBean bean : config.getBeans()) {
@@ -941,7 +940,12 @@ public final class BeansModelUtils {
 
 		// Register bean aliases
 		for (IBeanAlias alias : config.getAliases()) {
-			registry.registerAlias(alias.getBeanName(), alias.getElementName());
+			try {
+				registry.registerAlias(alias.getBeanName(), alias
+						.getElementName());
+			} catch (BeansException e) {
+				// ignore - continue with next alias
+			}
 		}
 	}
 
@@ -950,7 +954,7 @@ public final class BeansModelUtils {
 	 * belongs to. If the given element does not belong to the subtree of the
 	 * specified parent element <code>null</code> is returned.
 	 */
-	public static final IModelElement getChildForElement(IModelElement parent,
+	public static IModelElement getChildForElement(IModelElement parent,
 			IModelElement element) {
 		while (element != null) {
 			IModelElement elementParent = element.getElementParent();
@@ -965,7 +969,7 @@ public final class BeansModelUtils {
 	/**
 	 * Returns the beans config for a given ZIP file entry.
 	 */
-	public static final IBeansConfig getConfig(ZipEntryStorage storage) {
+	public static IBeansConfig getConfig(ZipEntryStorage storage) {
 		IBeansProject project = BeansCorePlugin.getModel().getProject(
 				storage.getFile().getProject());
 		if (project != null) {
@@ -977,7 +981,7 @@ public final class BeansModelUtils {
 	/**
 	 * Returns the <code>IResourceModelElement</code> for a given object.
 	 */
-	public static final IResourceModelElement getResourceModelElement(
+	public static IResourceModelElement getResourceModelElement(
 			Object obj) {
 		if (obj instanceof IFile) {
 			return BeansCorePlugin.getModel().getConfig((IFile) obj);
@@ -995,7 +999,7 @@ public final class BeansModelUtils {
 		return null;
 	}
 
-	public static final IModelElement getModelElement(Element element,
+	public static IModelElement getModelElement(Element element,
 			IModelElement context) {
 		Node parent = element.getParentNode();
 		if (BeansTags.isTag(element, Tag.BEAN)
@@ -1023,7 +1027,7 @@ public final class BeansModelUtils {
 		return null;
 	}
 
-	private static final String getBeanName(Element element) {
+	private static String getBeanName(Element element) {
 		Node idAttribute = element.getAttributeNode("id");
 		if (idAttribute != null && idAttribute.getNodeValue() != null) {
 			return idAttribute.getNodeValue();
