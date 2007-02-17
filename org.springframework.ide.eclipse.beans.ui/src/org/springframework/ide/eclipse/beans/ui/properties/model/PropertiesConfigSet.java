@@ -77,6 +77,11 @@ public class PropertiesConfigSet extends BeansConfigSet {
 		notifyListeners();
 	}
 
+	public void removeAllConfigs() {
+		super.removeAllConfigs();
+		notifyListeners();
+	}
+
 	public Set<IBeansConfig> getConfigs() {
 		Set<IBeansConfig> configs = new LinkedHashSet<IBeansConfig>();
 		for (String configName : configNames) {

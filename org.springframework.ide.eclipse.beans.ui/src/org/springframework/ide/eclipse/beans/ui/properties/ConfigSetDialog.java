@@ -212,9 +212,11 @@ public class ConfigSetDialog extends Dialog {
 					.getSelection());
 			configSet.setIncomplete(incompleteButton.getSelection());
 
-			// Keep a copy of the original list of configs in the config set
+			// Before removing all configs from this config set keep a copy of
+			// the original list of configs in the config set
 			Set<IBeansConfig> oldConfigs = new LinkedHashSet<IBeansConfig>(
 					configSet.getConfigs());
+			configSet.removeAllConfigs();
 
 			// At first add the originally and still selected configs to the
 			// config set to preserve their order
