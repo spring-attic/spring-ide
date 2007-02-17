@@ -45,6 +45,7 @@ import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
@@ -188,105 +189,128 @@ public class AopReferenceModelBuilder {
                 .getProjectWithInitialization(AopReferenceModelUtils.getJavaProject(config
                         .getElementResource().getProject()));
 
+        
         Set<IBean> beans = config.getBeans();
         for (IBean bean : beans) {
-            try {
-                if (info.getAspectName() != null
-                        && info.getAspectName().equals(bean.getElementName())
-                        && info.getResource() != null
-                        && info.getResource().equals(bean.getElementResource())) {
-                    // don't check advice backing bean itself
-                    continue;
-                }
-                
-                Class<?> targetClass = loader.loadClass(bean.getClassName());
-                if (info instanceof BeanIntroductionDefinition) {
-                    BeanIntroductionDefinition intro = (BeanIntroductionDefinition) info;
-                    if (intro.getTypeMatcher().matches(targetClass)) {
-                        IType jdtAspectType = BeansModelUtils.getJavaType(aopProject.getProject()
-                                .getProject(), ((BeanIntroductionDefinition) info)
-                                .getAspectClassName());
-                        IMember jdtAspectMember = null;
-                        if (intro instanceof AnnotationIntroductionDefinition) {
-                            String fieldName = ((AnnotationIntroductionDefinition) intro)
-                                    .getDefiningField();
-                            jdtAspectMember = jdtAspectType.getField(fieldName);
-                        }
-                        else {
-                            jdtAspectMember = jdtAspectType;
-                        }
-
-                        IType beanType = BeansModelUtils.getJavaType(aopProject.getProject()
-                                .getProject(), bean.getClassName());
-                        if (jdtAspectMember != null) {
-                            IAopReference ref = new AopReference(info.getType(), jdtAspectMember,
-                                    beanType, info, file, bean);
-                            aopProject.addAopReference(ref);
-                        }
-                    }
-                }
-                else if (info instanceof JavaAspectDefinition
-                        && !(info instanceof AnnotationAspectDefinition)) {
-                    JavaAspectDefinition intro = (JavaAspectDefinition) info;
-
-                    List<IMethod> matchingMethods = AopReferenceModelUtils.getMatches(targetClass, intro
-                            .getAspectJPointcutExpression(), aopProject.getProject().getProject());
-
-                    for (IMethod method : matchingMethods) {
-                        IType jdtAspectType = BeansModelUtils.getJavaType(aopProject.getProject()
-                                .getProject(), info.getAspectClassName());
-                        IMethod jdtAspectMethod = AopReferenceModelUtils
-                                .getMethod(jdtAspectType, info.getAdviceMethodName(), info
-                                        .getAdviceMethodParameterTypes().length);
-                        if (jdtAspectMethod != null) {
-                            IAopReference ref = new AopReference(info.getType(), jdtAspectMethod,
-                                    method, info, file, bean);
-                            aopProject.addAopReference(ref);
-                        }
-                    }
-                }
-                else {
-                    // validate the aspect definition
-                    if (info.getAdviceMethod() == null) {
-                        return;
-                    }
-
-                    IType jdtTargetType = BeansModelUtils.getJavaType(file.getProject(),
-                            targetClass.getName());
-                    IType jdtAspectType = BeansModelUtils.getJavaType(file.getProject(), info
+        	buildAopReferenceForBean(loader, bean, info, file, aopProject);
+        }
+    }
+    
+    private static void buildAopReferenceForBean(ClassLoader loader,
+            IBean bean, IAspectDefinition info, IResource file,  IAopProject aopProject) {
+    	try {
+        	Class<?> factoryBeanClass = loader.loadClass(FactoryBean.class.getName());
+        	
+        	// TODO get className along the beans hierachy
+        	if (bean.getClassName() != null && info.getAspectName() != null
+                    && info.getAspectName().equals(bean.getElementName())
+                    && info.getResource() != null
+                    && info.getResource().equals(bean.getElementResource())) {
+                // don't check advice backing bean itself
+                return;
+            }
+            
+            Class<?> targetClass = loader.loadClass(bean.getClassName());
+            IType jdtTargetType = BeansModelUtils.getJavaType(file.getProject(),
+                    targetClass.getName());
+            
+            // check type not found and exclude factory beans
+            if (jdtTargetType == null || factoryBeanClass.isAssignableFrom(targetClass)) {
+            	return;
+            }
+            
+            
+            
+            if (info instanceof BeanIntroductionDefinition) {
+                BeanIntroductionDefinition intro = (BeanIntroductionDefinition) info;
+                if (intro.getTypeMatcher().matches(targetClass)) {
+                    IType jdtAspectType = BeansModelUtils.getJavaType(aopProject.getProject()
+                            .getProject(), ((BeanIntroductionDefinition) info)
                             .getAspectClassName());
-                    Class<?> aspectJAdviceClass = AopReferenceModelBuilderUtils.getAspectJAdviceClass(info);
+                    IMember jdtAspectMember = null;
+                    if (intro instanceof AnnotationIntroductionDefinition) {
+                        String fieldName = ((AnnotationIntroductionDefinition) intro)
+                                .getDefiningField();
+                        jdtAspectMember = jdtAspectType.getField(fieldName);
+                    }
+                    else {
+                        jdtAspectMember = jdtAspectType;
+                    }
 
-                    Object pc = info.getAspectJPointcutExpression();
+                    if (jdtAspectMember != null) {
+                        IAopReference ref = new AopReference(info.getType(), jdtAspectMember,
+                        		jdtTargetType, info, file, bean);
+                        aopProject.addAopReference(ref);
+                    }
+                }
+            }
+            else if (info instanceof JavaAspectDefinition
+                    && !(info instanceof AnnotationAspectDefinition)) {
+                JavaAspectDefinition intro = (JavaAspectDefinition) info;
 
-                    AopReferenceModelBuilderUtils.createAspectJAdvice(info, aspectJAdviceClass, pc);
+                List<IMethod> matchingMethods = AopReferenceModelUtils.getMatches(targetClass, intro
+                        .getAspectJPointcutExpression(), aopProject.getProject().getProject());
 
-                    Method matchesMethod = pc.getClass().getMethod("matches", Method.class,
-                            Class.class);
-                    for (Method m : targetClass.getDeclaredMethods()) {
-                        // Spring only allows proxying of public classes
-                        if (Modifier.isPublic(m.getModifiers())) {
-                            boolean matches = (Boolean) matchesMethod.invoke(pc, m, targetClass);
-                            if (matches) {
-                                IMethod jdtMethod = AopReferenceModelUtils.getMethod(jdtTargetType, m
-                                        .getName(), m.getParameterTypes().length);
-                                IMethod jdtAspectMethod = AopReferenceModelUtils.getMethod(jdtAspectType,
-                                        info.getAdviceMethodName(), info.getAdviceMethod()
-                                                .getParameterTypes().length);
-                                if (jdtAspectMethod != null) {
-                                    IAopReference ref = new AopReference(info.getType(),
-                                            jdtAspectMethod, jdtMethod, info, file, bean);
-                                    aopProject.addAopReference(ref);
-                                }
+                for (IMethod method : matchingMethods) {
+                    IType jdtAspectType = BeansModelUtils.getJavaType(aopProject.getProject()
+                            .getProject(), info.getAspectClassName());
+                    IMethod jdtAspectMethod = AopReferenceModelUtils
+                            .getMethod(jdtAspectType, info.getAdviceMethodName(), info
+                                    .getAdviceMethodParameterTypes().length);
+                    if (jdtAspectMethod != null) {
+                        IAopReference ref = new AopReference(info.getType(), jdtAspectMethod,
+                                method, info, file, bean);
+                        aopProject.addAopReference(ref);
+                    }
+                }
+            }
+            else {
+                // validate the aspect definition
+                if (info.getAdviceMethod() == null) {
+                    return;
+                }
+               
+                IType jdtAspectType = BeansModelUtils.getJavaType(file.getProject(), info
+                        .getAspectClassName());
+                Class<?> aspectJAdviceClass = AopReferenceModelBuilderUtils.getAspectJAdviceClass(info);
+
+                Object pc = info.getAspectJPointcutExpression();
+
+                AopReferenceModelBuilderUtils.createAspectJAdvice(info, aspectJAdviceClass, pc);
+
+                Method matchesMethod = pc.getClass().getMethod("matches", Method.class,
+                        Class.class);
+                for (Method m : targetClass.getDeclaredMethods()) {
+                    // Spring only allows proxying of public classes
+                    if (Modifier.isPublic(m.getModifiers())) {
+                        boolean matches = (Boolean) matchesMethod.invoke(pc, m, targetClass);
+                        if (matches) {
+                            IMethod jdtMethod = AopReferenceModelUtils.getMethod(jdtTargetType, m
+                                    .getName(), m.getParameterTypes().length);
+                            IMethod jdtAspectMethod = AopReferenceModelUtils.getMethod(jdtAspectType,
+                                    info.getAdviceMethodName(), info.getAdviceMethod()
+                                            .getParameterTypes().length);
+                            if (jdtAspectMethod != null) {
+                                IAopReference ref = new AopReference(info.getType(),
+                                        jdtAspectMethod, jdtMethod, info, file, bean);
+                                aopProject.addAopReference(ref);
                             }
                         }
                     }
                 }
             }
-            catch (Throwable t) {
-                handleException(t, info, file);
-            }
         }
+        catch (Throwable t) {
+            handleException(t, info, file);
+        }
+        
+        Set<IBean> innerBeans = bean.getInnerBeans();
+        if (innerBeans != null && innerBeans.size() > 0) {
+        	for (IBean innerBean : innerBeans) {
+        		buildAopReferenceForBean(loader, innerBean, info, file, aopProject);
+        	}
+        }
+        
     }
 
     private static void handleException(Throwable t, IAspectDefinition info, IResource file) {

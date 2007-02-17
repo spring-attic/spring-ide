@@ -62,7 +62,7 @@ public class AspectDefinitionBuilder {
      * are included. If includePatterns is non-null, then one of the patterns must match.
      */
     private static boolean isIncluded(List<Pattern> includePatterns, String beanName) {
-        if (includePatterns == null || includePatterns.size() == 0) {
+    	if (beanName == null || includePatterns == null || includePatterns.size() == 0) {
             return false;
         }
         else {
