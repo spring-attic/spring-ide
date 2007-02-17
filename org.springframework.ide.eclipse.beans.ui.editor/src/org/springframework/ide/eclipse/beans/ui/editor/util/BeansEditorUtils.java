@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -60,7 +60,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.editor.Activator;
 import org.springframework.ide.eclipse.beans.ui.editor.IPreferencesConstants;
-import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceAwareEditorContribution;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.IReferenceableElementsLocator;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
