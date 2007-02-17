@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,25 +18,32 @@ package org.springframework.ide.eclipse.beans.ui.navigator.internal;
 
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
+ * Sorter for Spring beans {@link ISourceModelElement}s. It keeps them in the
+ * order found in the corresponding {@link IBeansConfig} file.
+ * 
  * @author Torsten Juergeleit
  */
 public class BeansNavigatorSorter extends ViewerSorter {
 
-    public int category(Object element) {
+	public int category(Object element) {
+
+		// Keep the config sets separate
 		if (element instanceof IBeansConfigSet) {
 			return 1;
 		}
 		return 0;
-    }
+	}
 
-    public int compare(Viewer viewer, Object e1, Object e2) {
+	public int compare(Viewer viewer, Object e1, Object e2) {
 		if (e1 instanceof ISourceModelElement
 				|| e2 instanceof ISourceModelElement) {
-			// we don't want to sort it, just show it in the order it's found
+
+			// We don't want to sort it, just show it in the order it's found
 			// in the file
 			return 0;
 		}
