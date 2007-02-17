@@ -146,6 +146,11 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 		reset();
 	}
 
+	public void removeAllConfigs() {
+		configNames.clear();
+		reset();
+	}
+
 	public Set<IBeansConfig> getConfigs() {
 		Set<IBeansConfig> configs = new LinkedHashSet<IBeansConfig>();
 		for (String configName : configNames) {
@@ -314,7 +319,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 			beanClassesMap = new LinkedHashMap<String, Set<IBean>>();
 			for (IBean bean : getBeansMap().values()) {
 				addBeanClassToMap(bean);
-				for (IBean innerBean :bean.getInnerBeans()) {
+				for (IBean innerBean : bean.getInnerBeans()) {
 					addBeanClassToMap(innerBean);
 				}
 			}
