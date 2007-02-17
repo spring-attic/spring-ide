@@ -51,6 +51,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
@@ -75,8 +76,8 @@ public class BeansConfigValidator {
 	private static final int METHOD_TYPE_INIT = 2;
 	private static final int METHOD_TYPE_DESTROY = 3;
 
-	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID +
-													  "/model/validator/debug";
+	public static final String DEBUG_OPTION = BeansCorePlugin.PLUGIN_ID
+			+ "/model/validator/debug";
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
 
 	private IProgressMonitor monitor;
@@ -84,8 +85,8 @@ public class BeansConfigValidator {
 	public void validate(IBeansConfig config, IProgressMonitor monitor) {
 		this.monitor = monitor;
 
-		// Validate the given config file within all config sets which contains
-		// the given config file
+		// Validate the given config within all config sets which contain the
+		// given config
 		boolean isValidated = false;
 		for (IBeansConfigSet configSet : ((IBeansProject) config
 				.getElementParent()).getConfigSets()) {
@@ -99,33 +100,33 @@ public class BeansConfigValidator {
 				registry.setAllowBeanDefinitionOverriding(configSet
 						.isAllowBeanDefinitionOverriding());
 				for (IBeansConfig cfg : configSet.getConfigs()) {
-					if (cfg != null) {
-						if (cfg.getElementName()
-								.equals(config.getElementName())) {
-							validateConfig(config, configSet, registry);
-						} else {
-							BeansModelUtils.registerBeanConfig(cfg, registry);
-						}
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+					if (cfg.getElementName().equals(config.getElementName())) {
+						validateConfig(config, configSet, registry);
+					} else {
+						BeansModelUtils.registerBeanConfig(cfg, registry);
 					}
 				}
 
-				// If the config set is complete the check all bean references
-				// of given config
+				// If the config set is complete then check all bean references
+				// of the given config
 				if (!configSet.isIncomplete()) {
-					validateConfigReferences(config, configSet, registry);
+					validateConfigReferences(config, registry);
 				}
 				isValidated = true;
 			}
 		}
 
-		// If not already validated then validate config file now
+		// If not already validated then validate the given config on it's own
 		if (!isValidated) {
 			DefaultBeanDefinitionRegistry registry =
 					new DefaultBeanDefinitionRegistry(null);
 			registry.setAllowAliasOverriding(false);
 			registry.setAllowBeanDefinitionOverriding(false);
 			validateConfig(config, null, registry);
-			validateConfigReferences(config, null, registry);
+			validateConfigReferences(config, registry);
 		}
 		monitor.worked(1);
 	}
@@ -155,6 +156,11 @@ public class BeansConfigValidator {
 		// Validate all beans
 		for (IBean bean : config.getBeans()) {
 			validateBean(bean, configSet, registry);
+		}
+
+		// Validate all components
+		for (IBeansComponent component : config.getComponents()) {
+			validateBeansComponent(component, configSet, registry);
 		}
 
 		// Finally validate all aliases
@@ -190,7 +196,7 @@ public class BeansConfigValidator {
 			}
 		}
 
-		// Validate alias overriding within config file
+		// Validate alias overriding within config
 		for (IBeanAlias al : BeansModelUtils.getConfig(alias).getAliases()) {
 			if (al == alias) {
 				break;
@@ -208,22 +214,25 @@ public class BeansConfigValidator {
 		if (configSet != null) {
 
 			// Validate alias overriding
-			for (IBeansConfig config : configSet.getConfigs()) {
-				if (config == BeansModelUtils.getConfig(alias)) {
-					break;
-				}
-				if (config.getAlias(alias.getElementName()) != null) {
-					BeansModelUtils.createProblemMarker(alias,
-							"Overrides another alias in config set '"
-									+ configSet.getElementName() + "'",
-							IMarker.SEVERITY_ERROR,
-							alias.getElementStartLine(),
-							ErrorCode.ALIAS_OVERRIDE, alias.getElementName(),
-							configSet.getElementName());
-					break;
+			if (!configSet.isAllowAliasOverriding()) {
+				for (IBeansConfig config : configSet.getConfigs()) {
+					if (config == BeansModelUtils.getConfig(alias)) {
+						break;
+					}
+					if (config.getAlias(alias.getElementName()) != null) {
+						BeansModelUtils.createProblemMarker(alias,
+								"Overrides another alias in config set '"
+										+ configSet.getElementName() + "'",
+								IMarker.SEVERITY_ERROR,
+								alias.getElementStartLine(),
+								ErrorCode.ALIAS_OVERRIDE,
+								alias.getElementName(),
+								configSet.getElementName());
+						break;
+					}
 				}
 			}
-			
+
 			// Check if corresponding bean exists
 			if (!configSet.isIncomplete()
 					&& !registry.containsBeanDefinition(alias.getBeanName())) {
@@ -237,6 +246,26 @@ public class BeansConfigValidator {
 		}
 	}
 
+	protected void validateBeansComponent(IBeansComponent component,
+			IBeansConfigSet configSet, BeanDefinitionRegistry registry) {
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+		monitor.subTask(BeansCorePlugin.getFormattedMessage(
+				"BeansConfigValidator.validateBeansComponent", component
+						.getElementName()));
+
+		// Validate all beans
+		for (IBean bean : component.getBeans()) {
+			validateBean(bean, configSet, registry);
+		}
+
+		// Validate all inner components
+		for (IBeansComponent innerComponent : component.getComponents()) {
+			validateBeansComponent(innerComponent, configSet, registry);
+		}
+	}
+
 	protected void validateBean(IBean bean, IBeansConfigSet configSet,
 			BeanDefinitionRegistry registry) {
 		if (monitor.isCanceled()) {
@@ -245,8 +274,10 @@ public class BeansConfigValidator {
 		monitor.subTask(BeansCorePlugin.getFormattedMessage(
 				"BeansConfigValidator.validateBean", bean.getElementName()));
 
-		// Validate bean's name and aliases
-		validateBeanDefinitionHolder(bean, configSet, registry);
+		// Validate bean's name and aliases of non-inner beans
+		if (!bean.isInnerBean()) {
+			validateBeanDefinitionHolder(bean, configSet, registry);
+		}
 
 		// Get bean's definition and the one merged with it's parent bean(s)
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) ((Bean) bean)
@@ -340,7 +371,7 @@ public class BeansConfigValidator {
 						argCount, true);
 			}
 		}
-		
+
 		// Validate this bean's inner beans recursively
 		for (IBean innerBean : bean.getInnerBeans()) {
 			validateBean(innerBean, configSet, registry);
@@ -356,13 +387,14 @@ public class BeansConfigValidator {
 		} catch (BeanDefinitionStoreException e) {
 			if (configSet == null) {
 				BeansModelUtils.createProblemMarker(bean,
-						"Overrides another bean in the same config file",
+						"Overrides another bean named '" + bean.getElementName()
+						+ " in the same config file",
 						IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
 						ErrorCode.BEAN_OVERRIDE, bean.getElementName(), null);
 			} else if (!configSet.isAllowBeanDefinitionOverriding()) {
 				BeansModelUtils.createProblemMarker(bean,
-						"Overrides another bean in config set '"
-								+ configSet.getElementName() + "'",
+						"Overrides another bean named '" + bean.getElementName()
+						+ " in config set '" + configSet.getElementName() + "'",
 						IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
 						ErrorCode.BEAN_OVERRIDE, bean.getElementName(),
 						configSet.getElementName());
@@ -520,7 +552,7 @@ public class BeansConfigValidator {
 	}
 
 	protected void validateConfigReferences(IBeansConfig config,
-			IBeansConfigSet configSet, BeanDefinitionRegistry registry) {
+			BeanDefinitionRegistry registry) {
 		if (DEBUG) {
 			System.out.println("Validating references of bean config '"
 					+ ModelUtils.getResourcePath(config) + "'");
@@ -684,7 +716,8 @@ public class BeansConfigValidator {
 											element,
 											"Referenced factory bean '"
 											+ tempBeanName
-											+ "' does not implement the FactoryBean interface",
+											+ "' does not implement the "
+											+ "interface 'FactoryBean'",
 											IMarker.SEVERITY_ERROR,
 											((ISourceModelElement) element)
 													.getElementStartLine(),
