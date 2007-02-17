@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
@@ -51,9 +53,11 @@ public class BeansComponent extends AbstractBeansModelElement implements
 		super(parent, definition.getName(), definition);
 		beans = new LinkedHashSet<IBean>();
 		for (BeanDefinition beanDef : definition.getBeanDefinitions()) {
-			if (beanDef.getRole() != BeanDefinition.ROLE_INFRASTRUCTURE) {
-				IBean bean = new Bean(this, beanDef.getBeanClassName(),
-						null, beanDef);
+			if (beanDef instanceof AbstractBeanDefinition && beanDef
+					.getRole() != BeanDefinition.ROLE_INFRASTRUCTURE) {
+				String beanName = BeanDefinitionReaderUtils.generateBeanName(
+						(AbstractBeanDefinition) beanDef, null, true);
+				IBean bean = new Bean(this, beanName, null, beanDef);
 				beans.add(bean);
 			}
 		}
@@ -131,10 +135,8 @@ public class BeansComponent extends AbstractBeansModelElement implements
 	}
 
 	public String toString() {
-		StringBuffer text = new StringBuffer(getElementName());
-		text.append(" (");
-		text.append(getElementSourceLocation().getStartLine());
-		text.append("): beans=");
+		StringBuffer text = new StringBuffer(super.toString());
+		text.append(": beans=");
 		text.append(beans);
 		text.append(", components=");
 		text.append(components);
