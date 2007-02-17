@@ -18,11 +18,11 @@ package org.springframework.ide.eclipse.aop.ui.navigator.model;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 
-public class BeanClassReferenceNode1 implements IReferenceNode {
+public class BeanClassReferenceNode implements IReferenceNode {
 
 	private IReferenceNode child;
 
-	public BeanClassReferenceNode1(IReferenceNode child) {
+	public BeanClassReferenceNode(IReferenceNode child) {
 		this.child = child;
 	}
 

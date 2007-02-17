@@ -66,7 +66,7 @@ public class BeanReferenceNode implements IReferenceNode, IRevealableReferenceNo
 	public IReferenceNode[] getChildren() {
 		// TODO
 		if (this.bean.getClassName() != null && this.showChildren) {
-			return new IReferenceNode[] { new BeanClassReferenceNode1(
+			return new IReferenceNode[] { new BeanClassReferenceNode(
 					new BeanClassTargetReferenceNode(BeansModelUtils.getJavaType(this.bean
 							.getElementResource().getProject(), this.bean.getClassName()), this)) };
 		} else {
