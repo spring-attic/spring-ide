@@ -124,6 +124,9 @@ public class AopReferenceModelBuilder {
                 aopProject.clearReferencesForResource(currentFile);
 
                 ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+                ClassLoader weavingClassLoader = SpringCoreUtils.getClassLoader(
+                		javaProject, false);
+                Thread.currentThread().setContextClassLoader(weavingClassLoader);
 
                 IStructuredModel model = null;
                 List<IAspectDefinition> aspectInfos = null;
@@ -133,22 +136,14 @@ public class AopReferenceModelBuilder {
                                 currentFile);
                         IDOMDocument document = ((DOMModelImpl) model).getDocument();
 
-                        ClassLoader weavingClassLoader = SpringCoreUtils.getClassLoader(
-                                javaProject, false);
-                        Thread.currentThread().setContextClassLoader(weavingClassLoader);
                         aspectInfos = AspectDefinitionBuilder.buildAspectDefinitions(document,
                                 currentFile);
                     }
                     finally {
-                        Thread.currentThread().setContextClassLoader(classLoader);
                         if (model != null) {
                             model.releaseFromRead();
                         }
                     }
-
-                    ClassLoader weavingClassLoader = SpringCoreUtils.getClassLoader(javaProject,
-                            false);
-                    Thread.currentThread().setContextClassLoader(weavingClassLoader);
 
                     for (IAspectDefinition info : aspectInfos) {
 
@@ -203,6 +198,7 @@ public class AopReferenceModelBuilder {
                     // don't check advice backing bean itself
                     continue;
                 }
+                
                 Class<?> targetClass = loader.loadClass(bean.getClassName());
                 if (info instanceof BeanIntroductionDefinition) {
                     BeanIntroductionDefinition intro = (BeanIntroductionDefinition) info;

@@ -63,7 +63,7 @@ public class AspectDefinitionBuilder {
      */
     private static boolean isIncluded(List<Pattern> includePatterns, String beanName) {
         if (includePatterns == null || includePatterns.size() == 0) {
-            return true;
+            return false;
         }
         else {
             for (Pattern pattern : includePatterns) {
