@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import org.eclipse.core.resources.IResource;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Default implementation of the common protocol for all model elements related
- * to source code.
+ * Default implementation of the common protocol for all {@link IModelElement}s
+ * related to source code.
  * 
  * @author Torsten Juergeleit
  */
@@ -39,8 +39,8 @@ public abstract class AbstractSourceModelElement extends
 
 	/**
 	 * Traverses this model element's parent chain until the first
-	 * non-<code>IResourceModelElement</code> and returns this
-	 * <code>IResourceModelElement</code>.
+	 * non-{@link ISourceModelElement} and returns this
+	 * {@link IResourceModelElement}.
 	 */
 	public IResourceModelElement getElementSourceElement() {
 		for (IModelElement parent = getElementParent(); parent != null;
@@ -71,14 +71,34 @@ public abstract class AbstractSourceModelElement extends
 	}
 
 	public final IModelSourceLocation getElementSourceLocation() {
-		return location;
+		if (location != null) {
+			return location;
+		}
+
+		// Traverses this model element's parent chain until the first source
+		// location is found
+		for (IModelElement parent = getElementParent(); parent != null;
+				parent = parent.getElementParent()) {
+			if (parent instanceof ISourceModelElement) {
+				IModelSourceLocation location = ((ISourceModelElement) parent)
+						.getElementSourceLocation();
+				if (location != null) {
+					return location;
+				}
+			} else {
+				break;
+			}
+		}
+		return null;
 	}
 
 	public int getElementStartLine() {
+		IModelSourceLocation location = getElementSourceLocation();
 		return (location != null ? location.getStartLine() : -1);
 	}
 
 	public int getElementEndLine() {
+		IModelSourceLocation location = getElementSourceLocation();
 		return (location != null ? location.getEndLine() : -1);
 	}
 
@@ -108,6 +128,14 @@ public abstract class AbstractSourceModelElement extends
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(location);
 		return getElementType() * hashCode + super.hashCode();
+	}
+
+	public String toString() {
+		StringBuffer text = new StringBuffer(getElementName());
+		text.append(" (");
+		text.append(getElementSourceLocation().getStartLine());
+		text.append(')');
+		return text.toString();
 	}
 
 	/**
