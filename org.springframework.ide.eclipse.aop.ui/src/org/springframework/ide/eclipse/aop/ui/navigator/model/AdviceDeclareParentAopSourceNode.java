@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
 import java.util.List;
@@ -23,7 +24,7 @@ import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.aop.core.model.IAnnotationAopDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IIntroductionDefinition;
-import org.springframework.ide.eclipse.beans.ui.editor.namespaces.aop.AopUIImages;
+import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class AdviceDeclareParentAopSourceNode implements IReferenceNode, IRevealableReferenceNode {
@@ -45,7 +46,7 @@ public class AdviceDeclareParentAopSourceNode implements IReferenceNode, IReveal
     }
 
     public Image getImage() {
-        return AopUIImages.getImage(AopUIImages.IMG_OBJS_INTRODUCTION);
+        return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_INTRODUCTION);
     }
 
     public String getText() {

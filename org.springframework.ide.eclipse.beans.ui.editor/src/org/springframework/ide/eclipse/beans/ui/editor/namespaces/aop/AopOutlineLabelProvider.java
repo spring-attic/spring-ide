@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.ide.eclipse.beans.ui.editor.namespaces.aop;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider;
+import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.editor.outline.BeansContentOutlineConfiguration;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -36,45 +37,45 @@ public class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 		}
 
 		if ("config".equals(nodeName)) {
-			return AopUIImages.getImage(AopUIImages.IMG_OBJS_CONFIG);
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_AOP_CONFIG);
 		}
 		if ("aspect".equals(nodeName)) {
-			return AopUIImages.getImage(AopUIImages.IMG_OBJS_ASPECT);
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ASPECT);
 		}
 		if ("before".equals(nodeName)) {
-			return AopUIImages
-					.getImage(AopUIImages.IMG_OBJS_BEFORE_ADVICE);
+			return BeansUIImages
+					.getImage(BeansUIImages.IMG_OBJS_BEFORE_ADVICE);
 		}
 		if ("after".equals(nodeName)) {
-			return AopUIImages
-					.getImage(AopUIImages.IMG_OBJS_AFTER_ADVICE);
+			return BeansUIImages
+					.getImage(BeansUIImages.IMG_OBJS_AFTER_ADVICE);
 		}
 		if ("around".equals(nodeName)) {
-			return AopUIImages
-					.getImage(AopUIImages.IMG_OBJS_AROUND_ADVICE);
+			return BeansUIImages
+					.getImage(BeansUIImages.IMG_OBJS_AROUND_ADVICE);
 		}
 		if ("after-returning".equals(nodeName)) {
-			return AopUIImages
-					.getImage(AopUIImages.IMG_OBJS_AFTER_ADVICE);
+			return BeansUIImages
+					.getImage(BeansUIImages.IMG_OBJS_AFTER_ADVICE);
 		}
 		if ("after-throwing".equals(nodeName)) {
-			return AopUIImages
-					.getImage(AopUIImages.IMG_OBJS_AFTER_ADVICE);
+			return BeansUIImages
+					.getImage(BeansUIImages.IMG_OBJS_AFTER_ADVICE);
 		}
 		if ("pointcut".equals(nodeName)) {
-			return AopUIImages.getImage(AopUIImages.IMG_OBJS_POINTCUT);
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_POINTCUT);
 		}
 		if ("advisor".equals(nodeName)) {
-		    return AopUIImages.getImage(AopUIImages.IMG_OBJS_ADVICE);
+		    return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ADVICE);
 		}
         if ("aspectj-autoproxy".equals(nodeName)) {
-            return AopUIImages.getImage(AopUIImages.IMG_OBJS_CONFIG);
+            return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_AOP_CONFIG);
         }
         if ("include".equals(nodeName)) {
-            return AopUIImages.getImage(AopUIImages.IMG_OBJS_CONFIG);
+            return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_AOP_CONFIG);
         }
         if ("declare-parents".equals(nodeName)) {
-            return AopUIImages.getImage(AopUIImages.IMG_OBJS_INTRODUCTION);
+            return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_INTRODUCTION);
         }
 
 		return null;

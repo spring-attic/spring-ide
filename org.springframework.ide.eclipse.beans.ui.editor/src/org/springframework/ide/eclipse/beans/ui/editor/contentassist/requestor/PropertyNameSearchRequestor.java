@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.eclipse.wst.sse.ui.internal.contentassist.CustomCompletionProposal;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaDocUtils;
-import org.springframework.ide.eclipse.beans.ui.namespaces.beans.BeansNamespaceImages;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
 
 public class PropertyNameSearchRequestor {
 
@@ -123,8 +123,8 @@ public class PropertyNameSearchRequestor {
                 else {
                     cursor = refReplaceText.length() + 2;
                 }
-                image = BeansNamespaceImages.getDecoratedImage(image,
-                		BeansNamespaceImages.FLAG_EXTERNAL);
+                image = BeansModelImages.getDecoratedImage(image,
+                		BeansModelImages.FLAG_EXTERNAL);
                 CustomCompletionProposal proposal2 = new CustomCompletionProposal(
                         refReplaceText, request.getReplacementBeginPosition(),
                         request.getReplacementLength(), cursor, image,

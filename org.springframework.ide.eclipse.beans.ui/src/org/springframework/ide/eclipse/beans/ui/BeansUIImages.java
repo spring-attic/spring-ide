@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,6 +96,14 @@ public class BeansUIImages {
 	public static final String IMG_OBJS_SPRING = NAME_PREFIX + "spring_obj.gif";
 	public static final String IMG_OBJS_ERROR = NAME_PREFIX + "error_obj.gif";
 	public static final String IMG_OBJS_REFERENCE = NAME_PREFIX + "arrow_obj.gif";
+	public static final String IMG_OBJS_AOP_CONFIG = NAME_PREFIX + "aop_config_obj.gif";
+    public static final String IMG_OBJS_ASPECT = NAME_PREFIX + "aspect_obj.gif";
+    public static final String IMG_OBJS_ADVICE = NAME_PREFIX + "advice_obj.gif";
+    public static final String IMG_OBJS_AROUND_ADVICE = NAME_PREFIX + "around_advice_obj.gif";
+    public static final String IMG_OBJS_BEFORE_ADVICE = NAME_PREFIX + "before_advice_obj.gif";
+    public static final String IMG_OBJS_AFTER_ADVICE = NAME_PREFIX + "after_advice_obj.gif";
+    public static final String IMG_OBJS_INTRODUCTION = NAME_PREFIX + "introduction_obj.gif";
+    public static final String IMG_OBJS_POINTCUT = NAME_PREFIX + "pointcut_obj.gif";
 
 	public static final String IMG_WIZ_PROJECT = NAME_PREFIX + "project_wiz.png";
 	public static final String IMG_WIZ_CONFIG = NAME_PREFIX + "config_wiz.png";
@@ -120,6 +128,14 @@ public class BeansUIImages {
 	public static final ImageDescriptor DESC_OBJS_SPRING = createManaged(OBJECT, IMG_OBJS_SPRING);
 	public static final ImageDescriptor DESC_OBJS_ERROR = createManaged(OBJECT, IMG_OBJS_ERROR);
 	public static final ImageDescriptor DESC_OBJS_REFERENCE = createManaged(OBJECT, IMG_OBJS_REFERENCE);
+	public static final ImageDescriptor DESC_OBJS_AOP_CONFIG = createManaged(OBJECT, IMG_OBJS_AOP_CONFIG);
+	public static final ImageDescriptor DESC_OBJS_ASPECT = createManaged(OBJECT, IMG_OBJS_ASPECT);
+	public static final ImageDescriptor DESC_OBJS_ADVICE = createManaged(OBJECT, IMG_OBJS_ADVICE);
+	public static final ImageDescriptor DESC_OBJS_AROUND_ADVICE = createManaged(OBJECT, IMG_OBJS_AROUND_ADVICE);
+	public static final ImageDescriptor DESC_OBJS_BEFORE_ADVICE = createManaged(OBJECT, IMG_OBJS_BEFORE_ADVICE);
+	public static final ImageDescriptor DESC_OBJS_AFTER_ADVICE = createManaged(OBJECT, IMG_OBJS_AFTER_ADVICE);
+	public static final ImageDescriptor DESC_OBJS_INTRODUCTION = createManaged(OBJECT, IMG_OBJS_INTRODUCTION);
+	public static final ImageDescriptor DESC_OBJS_POINTCUT = createManaged(OBJECT, IMG_OBJS_POINTCUT);
 
 	public static final ImageDescriptor DESC_OVR_SPRING = create(OVR, "spring_ovr.gif");
 	public static final ImageDescriptor DESC_OVR_ERROR = create(OVR, "error_ovr.gif");

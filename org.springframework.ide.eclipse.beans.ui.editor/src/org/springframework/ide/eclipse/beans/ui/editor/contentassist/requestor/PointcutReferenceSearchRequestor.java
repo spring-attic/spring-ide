@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,19 +22,20 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
+import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposal;
-import org.springframework.ide.eclipse.beans.ui.editor.namespaces.aop.AopUIImages;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
+@SuppressWarnings("restriction")
 public class PointcutReferenceSearchRequestor {
 
     public static final int LOCAL_BEAN_RELEVANCE = 20;
 
     protected Set<String> beans;
 
-    protected ContentAssistRequest request;
+	protected ContentAssistRequest request;
 
     public PointcutReferenceSearchRequestor(ContentAssistRequest request) {
         this.request = request;
@@ -61,8 +62,8 @@ public class PointcutReferenceSearchRequestor {
                 }
 
                 String displayText = buf.toString();
-                Image image = AopUIImages
-                        .getImage(AopUIImages.IMG_OBJS_POINTCUT);
+                Image image = BeansUIImages
+						.getImage(BeansUIImages.IMG_OBJS_POINTCUT);
 
                 BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
                         replaceText, request.getReplacementBeginPosition(),

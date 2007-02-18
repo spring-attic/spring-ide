@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposal;
 import org.springframework.ide.eclipse.beans.ui.editor.outline.DelegatingLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
-import org.springframework.ide.eclipse.beans.ui.namespaces.beans.BeansNamespaceImages;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
@@ -82,8 +82,8 @@ public class BeanReferenceSearchRequestor {
                 buf.append(fileName);
                 String displayText = buf.toString();
 
-                Image image = BeansNamespaceImages.getImage(bean, BeansCorePlugin.getModel()
-                        .getConfig(file));
+                Image image = BeansModelImages.getImage(bean, BeansCorePlugin
+						.getModel().getConfig(file));
                 BeansJavaCompletionProposal proposal = null;
                 if (this.requiredTypes.contains(bean.getClassName())) {
                     proposal = new BeansJavaCompletionProposal(replaceText, request

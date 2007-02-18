@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
-import org.springframework.ide.eclipse.beans.ui.editor.namespaces.aop.AopUIImages;
+import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class AdviceRootAopReferenceNode implements IReferenceNode, IRevealableReferenceNode {
@@ -51,16 +52,16 @@ public class AdviceRootAopReferenceNode implements IReferenceNode, IRevealableRe
         ADVICE_TYPES type = reference.get(0).getAdviceType();
         if (type == ADVICE_TYPES.AFTER || type == ADVICE_TYPES.AFTER_RETURNING
                 || type == ADVICE_TYPES.AFTER_THROWING) {
-            return AopUIImages.getImage(AopUIImages.IMG_OBJS_AFTER_ADVICE);
+            return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_AFTER_ADVICE);
         }
         else if (type == ADVICE_TYPES.BEFORE) {
-            return AopUIImages.getImage(AopUIImages.IMG_OBJS_BEFORE_ADVICE);
+            return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_BEFORE_ADVICE);
         }
         else if (type == ADVICE_TYPES.AROUND) {
-            return AopUIImages.getImage(AopUIImages.IMG_OBJS_AROUND_ADVICE);
+            return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_AROUND_ADVICE);
         }
         else if (type == ADVICE_TYPES.DECLARE_PARENTS) {
-            return AopUIImages.getImage(AopUIImages.IMG_OBJS_INTRODUCTION);
+            return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_INTRODUCTION);
         }
         return null;
     }

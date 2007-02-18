@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposal;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaDocUtils;
-import org.springframework.ide.eclipse.beans.ui.namespaces.beans.BeansNamespaceImages;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
 
 @SuppressWarnings("restriction")
 public class PropertyValueSearchRequestor {
@@ -91,8 +91,8 @@ public class PropertyValueSearchRequestor {
 						.getFlags()
 						| JavaElementImageProvider.SMALL_ICONS);
 				if (external) {
-					image = BeansNamespaceImages.getDecoratedImage(image,
-							BeansNamespaceImages.FLAG_EXTERNAL);
+					image = BeansModelImages.getDecoratedImage(image,
+							BeansModelImages.FLAG_EXTERNAL);
 				}
 				BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
 				String javadoc = utils.getJavaDoc();
