@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,14 @@ import org.eclipse.jface.viewers.ViewerLabel;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.navigator.IDescriptionProvider;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabels;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 
 /**
  * This class is a label provider which knows about the beans core model's
- * {@link ISourceModelElement source elements}.
+ * {@link ISourceModelElement source elements} which belong to a namespace.
  * 
  * @author Torsten Juergeleit
  */
@@ -37,13 +38,15 @@ public class DefaultNamespaceLabelProvider extends LabelProvider implements
 		ITreePathLabelProvider, IDescriptionProvider {
 
 	public Image getImage(Object element) {
+		if (element instanceof ISourceModelElement) {
+			return getImage((ISourceModelElement) element, null);
+		}
 		return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_SPRING);
 	}
 
 	public String getText(Object element) {
 		if (element instanceof ISourceModelElement) {
-			return BeansModelLabels.getElementLabel(
-					(ISourceModelElement) element, 0);
+			return getElementLabel((ISourceModelElement) element, 0);
 		}
 		return null;
 	}
@@ -53,12 +56,30 @@ public class DefaultNamespaceLabelProvider extends LabelProvider implements
 				.getLastSegment());
 		if (element instanceof ISourceModelElement
 				&& elementPath.getSegmentCount() > 1) {
-			label.setImage(getImage(element));
+			Object parent = elementPath.getParentPath().getLastSegment();
+			IModelElement parentElement = (parent instanceof IModelElement
+					? (IModelElement) parent : null);
+			label.setImage(getImage((ISourceModelElement) element,
+					parentElement));
 			label.setText(getText(element));
 		}
 	}
 
 	public String getDescription(Object element) {
+		if (element instanceof ISourceModelElement) {
+			return getElementLabel((ISourceModelElement) element,
+					DefaultNamespaceLabels.APPEND_PATH
+							| DefaultNamespaceLabels.DESCRIPTION);
+		}
 		return null;
+	}
+
+	protected Image getImage(ISourceModelElement element,
+			IModelElement context) {
+		return BeansModelImages.getImage(element, context);
+	}
+
+	protected String getElementLabel(ISourceModelElement element, int flags) {
+		return DefaultNamespaceLabels.getElementLabel(element, flags);
 	}
 }

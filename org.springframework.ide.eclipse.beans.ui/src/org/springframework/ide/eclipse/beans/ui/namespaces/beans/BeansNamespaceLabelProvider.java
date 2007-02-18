@@ -16,16 +16,8 @@
 
 package org.springframework.ide.eclipse.beans.ui.namespaces.beans;
 
-import org.eclipse.jface.viewers.ITreePathLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.TreePath;
-import org.eclipse.jface.viewers.ViewerLabel;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.navigator.IDescriptionProvider;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabels;
-import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceLabelProvider;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
-import org.springframework.ide.eclipse.core.model.ModelUtils;
 
 /**
  * This class is a label provider which knows about the beans core model's
@@ -34,50 +26,9 @@ import org.springframework.ide.eclipse.core.model.ModelUtils;
  * 
  * @author Torsten Juergeleit
  */
-public class BeansNamespaceLabelProvider extends LabelProvider implements
-		ITreePathLabelProvider, IDescriptionProvider {
+public class BeansNamespaceLabelProvider extends DefaultNamespaceLabelProvider {
 
-	public Image getImage(Object element) {
-		if (element instanceof ISourceModelElement) {
-			return BeansNamespaceImages.getImage((ISourceModelElement)
-					element);
-		}
-		return null;
-	}
-
-	public String getText(Object element) {
-		if (element instanceof ISourceModelElement) {
-			return BeansNamespaceLabels.getElementLabel(
-					(ISourceModelElement) element, 0);
-		}
-		return null;
-	}
-
-	public void updateLabel(ViewerLabel label, TreePath elementPath) {
-		Object element = ModelUtils.adaptToModelElement(elementPath
-				.getLastSegment());
-		if (element instanceof ISourceModelElement
-				&& elementPath.getSegmentCount() > 1) {
-			IModelElement parentElement;
-			Object parent = elementPath.getParentPath().getLastSegment();
-			if (parent instanceof IModelElement) {
-				parentElement = (IModelElement) parent;
-			} else {
-				parentElement = null;
-			}
-			label.setImage(BeansNamespaceImages.getImage(
-					(ISourceModelElement) element, parentElement));
-			label.setText(getText(element));
-		}
-	}
-
-	public String getDescription(Object element) {
-		if (element instanceof ISourceModelElement) {
-			return BeansNamespaceLabels.getElementLabel(
-					(ISourceModelElement) element,
-					BeansNamespaceLabels.APPEND_PATH
-							| BeansModelLabels.DESCRIPTION);
-		}
-		return null;
+	protected String getElementLabel(ISourceModelElement element, int flags) {
+		return BeansNamespaceLabels.getElementLabel(element, flags);
 	}
 }
