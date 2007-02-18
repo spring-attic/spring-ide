@@ -106,6 +106,30 @@
 					</or>
 				</filterExpression>
       </commonFilter>
+
+	  <commonFilter
+            id="org.springframework.ide.eclipse.aop.ui.navigator.filters.innerBeans"
+            name="%filter.innerBeans.label"
+            description="%filter.innerBeans.description"
+            activeByDefault="false">
+				<filterExpression>
+					<or>
+						<instanceof value="org.springframework.ide.eclipse.aop.ui.navigator.model.InnerBeansReferenceNode"/>
+					</or>
+				</filterExpression>
+      </commonFilter>
+
+	  <commonFilter
+            id="org.springframework.ide.eclipse.aop.ui.navigator.filters.classOf"
+            name="%filter.classOf.label"
+            description="%filter.classOf.description"
+            activeByDefault="false">
+				<filterExpression>
+					<or>
+						<instanceof value="org.springframework.ide.eclipse.aop.ui.navigator.model.ClassBeanReferenceNode"/>
+					</or>
+				</filterExpression>
+      </commonFilter>
       
     </extension>
     

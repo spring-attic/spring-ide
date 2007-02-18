@@ -16,11 +16,15 @@
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.graphics.Image;
+import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -41,13 +45,36 @@ public class BeanReferenceNode implements IReferenceNode, IRevealableReferenceNo
 
 	private List<IAopReference> declaredOnReferences = new ArrayList<IAopReference>();
 
+	private List<IReferenceNode> innerBeanNodes = new ArrayList<IReferenceNode>();
+
 	public BeanReferenceNode(IBean bean, boolean showChildren) {
 		this.bean = bean;
 		this.showChildren = showChildren;
+
+		List<IAopReference> references = Activator.getModel().getAllReferences(
+				BeansModelUtils.getJavaType(this.bean.getElementResource().getProject(),
+						this.bean.getClassName()).getJavaProject());
+
+		Set<IBean> innerBeans = bean.getInnerBeans();
+
+		Map<IBean, BeanReferenceNode> refs = new HashMap<IBean, BeanReferenceNode>();
+		for (IBean innerBean : innerBeans) {
+			BeanReferenceNode n = new BeanReferenceNode(innerBean, true);
+			refs.put(innerBean, n);
+
+			for (IAopReference r : references) {
+				if (innerBean.equals(r.getTargetBean())) {
+					refs.get(r.getTargetBean()).getAdviseReferences().add(r);
+				}
+			}
+		}
+		for (Map.Entry<IBean, BeanReferenceNode> e : refs.entrySet()) {
+			innerBeanNodes.add(e.getValue());
+		}
 	}
 
 	public BeanReferenceNode(IBean bean) {
-		this.bean = bean;
+		this(bean, true);
 	}
 
 	public int getLineNumber() {
@@ -64,11 +91,16 @@ public class BeanReferenceNode implements IReferenceNode, IRevealableReferenceNo
 	}
 
 	public IReferenceNode[] getChildren() {
-		// TODO
 		if (this.bean.getClassName() != null && this.showChildren) {
-			return new IReferenceNode[] { new BeanClassReferenceNode(
-					new BeanClassTargetReferenceNode(BeansModelUtils.getJavaType(this.bean
-							.getElementResource().getProject(), this.bean.getClassName()), this)) };
+
+			List<IReferenceNode> children = new ArrayList<IReferenceNode>();
+			children.add(new BeanClassReferenceNode(new BeanClassTargetReferenceNode(
+					BeansModelUtils.getJavaType(this.bean.getElementResource().getProject(),
+							this.bean.getClassName()), this)));
+			if (this.innerBeanNodes.size() > 0) {
+				children.add(new InnerBeansReferenceNode(this.innerBeanNodes));
+			}
+			return children.toArray(new IReferenceNode[children.size()]);
 		} else {
 			return new IReferenceNode[0];
 		}

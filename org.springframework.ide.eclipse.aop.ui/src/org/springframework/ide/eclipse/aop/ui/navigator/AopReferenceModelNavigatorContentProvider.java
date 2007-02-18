@@ -248,135 +248,142 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 			if (!BeansCoreUtils.isBeansConfig(resource)) {
 				return nodes.toArray();
 			}
+			IBeansConfig beansConfig = BeansCorePlugin.getModel().getProject(resource.getProject())
+					.getConfig((IFile) resource);
 
 			int startLine = document.getLineOfOffset(element.getStartOffset()) + 1;
 			int endLine = document.getLineOfOffset(element.getEndOffset()) + 1;
 			String id = BeansEditorUtils.getAttribute(element, "id");
-			IAopProject project = Activator.getModel().getProject(
-					AopReferenceModelUtils.getJavaProject(resource));
-			List<IAopReference> references = new ArrayList<IAopReference>();
-			if (project != null) {
-				references = project.getReferencesForResource(resource);
 
+			nodes.addAll(getChildrenFromXmlLocation(resource, startLine, endLine, id, beansConfig
+					.getBeans()));
+			
+			// add inner beans
+			if (nodes.size() == 0) {
+				nodes.addAll(getChildrenFromXmlLocation(resource, startLine, endLine, id, beansConfig
+						.getInnerBeans()));
 			}
-			Map<IAspectDefinition, List<IAopReference>> foundSourceReferences = new HashMap<IAspectDefinition, List<IAopReference>>();
-			Map<IAspectDefinition, List<IAopReference>> foundIntroductionSourceReferences = new HashMap<IAspectDefinition, List<IAopReference>>();
-			Map<IBean, List<IAopReference>> foundTargetReferences = new HashMap<IBean, List<IAopReference>>();
-			Map<IBean, List<IAopReference>> foundIntroductionTargetReferences = new HashMap<IBean, List<IAopReference>>();
 
-			for (IAopReference reference : references) {
-				if (reference.getDefinition().getAspectName().equals(id)
-						|| (reference.getDefinition().getAspectLineNumber() >= startLine
-								&& reference.getDefinition().getAspectLineNumber() <= endLine && resource
-								.equals(reference.getDefinition().getResource()))) {
-					if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
-						if (foundIntroductionSourceReferences
-								.containsKey(reference.getDefinition())) {
-							foundIntroductionSourceReferences.get(reference.getDefinition()).add(
-									reference);
-						} else {
-							List<IAopReference> tmp = new ArrayList<IAopReference>();
-							tmp.add(reference);
-							foundIntroductionSourceReferences.put(reference.getDefinition(), tmp);
-						}
+			return nodes.toArray();
+		}
+		return IModelElement.NO_CHILDREN;
+	}
 
+	private List<IReferenceNode> getChildrenFromXmlLocation(IResource resource, int startLine,
+			int endLine, String id, Set<IBean> beans) {
+		List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
+		IAopProject project = Activator.getModel().getProject(
+				AopReferenceModelUtils.getJavaProject(resource));
+		List<IAopReference> references = new ArrayList<IAopReference>();
+		if (project != null) {
+			references = project.getReferencesForResource(resource);
+
+		}
+		Map<IAspectDefinition, List<IAopReference>> foundSourceReferences = new HashMap<IAspectDefinition, List<IAopReference>>();
+		Map<IAspectDefinition, List<IAopReference>> foundIntroductionSourceReferences = new HashMap<IAspectDefinition, List<IAopReference>>();
+		Map<IBean, List<IAopReference>> foundTargetReferences = new HashMap<IBean, List<IAopReference>>();
+		Map<IBean, List<IAopReference>> foundIntroductionTargetReferences = new HashMap<IBean, List<IAopReference>>();
+
+		for (IAopReference reference : references) {
+			if (reference.getDefinition().getAspectName().equals(id)
+					|| (reference.getDefinition().getAspectLineNumber() >= startLine
+							&& reference.getDefinition().getAspectLineNumber() <= endLine && resource
+							.equals(reference.getDefinition().getResource()))) {
+				if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
+					if (foundIntroductionSourceReferences.containsKey(reference.getDefinition())) {
+						foundIntroductionSourceReferences.get(reference.getDefinition()).add(
+								reference);
 					} else {
-						if (foundSourceReferences.containsKey(reference.getDefinition())) {
-							foundSourceReferences.get(reference.getDefinition()).add(reference);
-						} else {
-							List<IAopReference> tmp = new ArrayList<IAopReference>();
-							tmp.add(reference);
-							foundSourceReferences.put(reference.getDefinition(), tmp);
-						}
+						List<IAopReference> tmp = new ArrayList<IAopReference>();
+						tmp.add(reference);
+						foundIntroductionSourceReferences.put(reference.getDefinition(), tmp);
 					}
-				}
-				if (reference.getDefinition().getAspectName().equals(id)
-						|| (reference.getTargetBean().getElementStartLine() >= startLine
-								&& reference.getTargetBean().getElementEndLine() <= endLine && resource
-								.equals(reference.getResource()))) {
-					if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
-						if (foundIntroductionTargetReferences
-								.containsKey(reference.getTargetBean())) {
-							foundIntroductionTargetReferences.get(reference.getTargetBean()).add(
-									reference);
-						} else {
-							List<IAopReference> tmp = new ArrayList<IAopReference>();
-							tmp.add(reference);
-							foundIntroductionTargetReferences.put(reference.getTargetBean(), tmp);
-						}
-					} else {
-						if (foundTargetReferences.containsKey(reference.getTargetBean())) {
-							foundTargetReferences.get(reference.getTargetBean()).add(reference);
-						} else {
-							List<IAopReference> tmp = new ArrayList<IAopReference>();
-							tmp.add(reference);
-							foundTargetReferences.put(reference.getTargetBean(), tmp);
-						}
-					}
-				}
-			}
 
-			// add normal beans
-			IBeansConfig beansConfig = BeansCorePlugin.getModel().getProject(resource.getProject())
-					.getConfig((IFile) resource);
-			Set<IBean> beans = beansConfig.getBeans();
-			Map<IBean, BeanReferenceNode> beansRefs = new HashMap<IBean, BeanReferenceNode>();
-			for (IBean bean : beans) {
-				if (bean.getElementStartLine() >= startLine && bean.getElementEndLine() <= endLine) {
-					BeanReferenceNode rn = new BeanReferenceNode(bean);
-					nodes.add(rn);
-					beansRefs.put(bean, rn);
-				}
-			}
-			// add found references
-			if (foundTargetReferences.size() > 0) {
-				for (Map.Entry<IBean, List<IAopReference>> entry : foundTargetReferences.entrySet()) {
-					if (beansRefs.containsKey(entry.getKey())) {
-						beansRefs.get(entry.getKey()).getAdviseReferences()
-								.addAll(entry.getValue());
+				} else {
+					if (foundSourceReferences.containsKey(reference.getDefinition())) {
+						foundSourceReferences.get(reference.getDefinition()).add(reference);
+					} else {
+						List<IAopReference> tmp = new ArrayList<IAopReference>();
+						tmp.add(reference);
+						foundSourceReferences.put(reference.getDefinition(), tmp);
 					}
 				}
 			}
-			if (foundIntroductionTargetReferences.size() > 0) {
-				for (Map.Entry<IBean, List<IAopReference>> entry : foundIntroductionTargetReferences
-						.entrySet()) {
-					if (beansRefs.containsKey(entry.getKey())) {
-						beansRefs.get(entry.getKey()).getDeclaredOnReferences().addAll(
+			if (reference.getDefinition().getAspectName().equals(id)
+					|| (reference.getTargetBean().getElementStartLine() >= startLine
+							&& reference.getTargetBean().getElementEndLine() <= endLine && resource
+							.equals(reference.getResource()))) {
+				if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
+					if (foundIntroductionTargetReferences.containsKey(reference.getTargetBean())) {
+						foundIntroductionTargetReferences.get(reference.getTargetBean()).add(
+								reference);
+					} else {
+						List<IAopReference> tmp = new ArrayList<IAopReference>();
+						tmp.add(reference);
+						foundIntroductionTargetReferences.put(reference.getTargetBean(), tmp);
+					}
+				} else {
+					if (foundTargetReferences.containsKey(reference.getTargetBean())) {
+						foundTargetReferences.get(reference.getTargetBean()).add(reference);
+					} else {
+						List<IAopReference> tmp = new ArrayList<IAopReference>();
+						tmp.add(reference);
+						foundTargetReferences.put(reference.getTargetBean(), tmp);
+					}
+				}
+			}
+		}
+
+		// add normal beans
+		Map<IBean, BeanReferenceNode> beansRefs = new HashMap<IBean, BeanReferenceNode>();
+		for (IBean bean : beans) {
+			if (bean.getElementStartLine() >= startLine && bean.getElementEndLine() <= endLine) {
+				BeanReferenceNode rn = new BeanReferenceNode(bean);
+				nodes.add(rn);
+				beansRefs.put(bean, rn);
+			}
+		}
+		// add found references
+		if (foundTargetReferences.size() > 0) {
+			for (Map.Entry<IBean, List<IAopReference>> entry : foundTargetReferences.entrySet()) {
+				if (beansRefs.containsKey(entry.getKey())) {
+					beansRefs.get(entry.getKey()).getAdviseReferences().addAll(entry.getValue());
+				}
+			}
+		}
+		if (foundIntroductionTargetReferences.size() > 0) {
+			for (Map.Entry<IBean, List<IAopReference>> entry : foundIntroductionTargetReferences
+					.entrySet()) {
+				if (beansRefs.containsKey(entry.getKey())) {
+					beansRefs.get(entry.getKey()).getDeclaredOnReferences()
+							.addAll(entry.getValue());
+				}
+			}
+		}
+		if (foundSourceReferences.size() > 0) {
+			for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : foundSourceReferences
+					.entrySet()) {
+				for (Map.Entry<IBean, BeanReferenceNode> n : beansRefs.entrySet()) {
+					if (n.getKey().getElementStartLine() == entry.getKey().getAspectLineNumber()
+							|| entry.getKey().getAspectName().equals(n.getKey().getElementName())) {
+						beansRefs.get(n.getKey()).getAspectReferences().addAll(entry.getValue());
+					}
+				}
+			}
+		}
+		if (foundIntroductionSourceReferences.size() > 0) {
+			for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : foundIntroductionSourceReferences
+					.entrySet()) {
+				for (Map.Entry<IBean, BeanReferenceNode> n : beansRefs.entrySet()) {
+					if (n.getKey().getElementStartLine() == entry.getKey().getAspectLineNumber()
+							|| entry.getKey().getAspectName().equals(n.getKey().getElementName())) {
+						beansRefs.get(n.getKey()).getDeclareParentReferences().addAll(
 								entry.getValue());
 					}
 				}
 			}
-			if (foundSourceReferences.size() > 0) {
-				for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : foundSourceReferences
-						.entrySet()) {
-					for (Map.Entry<IBean, BeanReferenceNode> n : beansRefs.entrySet()) {
-						if (n.getKey().getElementStartLine() == entry.getKey()
-								.getAspectLineNumber()
-								|| entry.getKey().getAspectName().equals(
-										n.getKey().getElementName())) {
-							beansRefs.get(n.getKey()).getAspectReferences()
-									.addAll(entry.getValue());
-						}
-					}
-				}
-			}
-			if (foundIntroductionSourceReferences.size() > 0) {
-				for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : foundIntroductionSourceReferences
-						.entrySet()) {
-					for (Map.Entry<IBean, BeanReferenceNode> n : beansRefs.entrySet()) {
-						if (n.getKey().getElementStartLine() == entry.getKey()
-								.getAspectLineNumber()
-								|| entry.getKey().getAspectName().equals(
-										n.getKey().getElementName())) {
-							beansRefs.get(n.getKey()).getDeclareParentReferences().addAll(
-									entry.getValue());
-						}
-					}
-				}
-			}
-			return nodes.toArray();
 		}
-		return IModelElement.NO_CHILDREN;
+		return nodes;
 	}
 
 	private IResource getResource(IStructuredDocument document) {
