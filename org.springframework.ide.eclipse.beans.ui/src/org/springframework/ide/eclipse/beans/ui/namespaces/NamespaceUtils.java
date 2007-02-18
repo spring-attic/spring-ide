@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,10 @@ public class NamespaceUtils {
 		return namespaceURI;
 	}
 
+	/**
+	 * Returns the {@link ILabelProvider} for the given
+	 * {@link ISourceModelElement}'s namespace.
+	 */
 	public static ILabelProvider getLabelProvider(
 			ISourceModelElement element) {
 		IExtensionPoint point = Platform.getExtensionRegistry()
@@ -73,6 +77,7 @@ public class NamespaceUtils {
 						} catch (CoreException e) {
 							BeansUIPlugin.log(e);
 						}
+						return null;
 					}
 				}
 			}
@@ -80,6 +85,10 @@ public class NamespaceUtils {
 		return null;
 	}
 
+	/**
+	 * Returns the {@link ITreeContentProvider} for the given
+	 * {@link ISourceModelElement}'s namespace.
+	 */
 	public static ITreeContentProvider getContentProvider(
 			ISourceModelElement element) {
 		IExtensionPoint point = Platform.getExtensionRegistry()
@@ -90,15 +99,19 @@ public class NamespaceUtils {
 				for (IConfigurationElement config : extension
 						.getConfigurationElements()) {
 					if (namespaceURI.equals(config.getAttribute("uri"))) {
-						try {
-							Object provider = config
-								.createExecutableExtension("contentProvider");
-							if (provider instanceof IContentProvider) {
-								return (ITreeContentProvider) provider;
+						if (config.getAttribute("contentProvider") != null) {
+							try {
+								Object provider = config
+										.createExecutableExtension(
+												"contentProvider");
+								if (provider instanceof IContentProvider) {
+									return (ITreeContentProvider) provider;
+								}
+							} catch (CoreException e) {
+								BeansUIPlugin.log(e);
 							}
-						} catch (CoreException e) {
-							BeansUIPlugin.log(e);
 						}
+						return null;
 					}
 				}
 			}
