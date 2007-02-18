@@ -41,6 +41,10 @@ import org.springframework.ide.eclipse.core.model.ModelUtils;
 public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 		implements ICommonLabelProvider {
 
+	public BeansNavigatorLabelProvider() {
+		super(true);
+	}
+
 	public String getDescription(Object element) {
 		Object adaptedElement = ModelUtils.adaptToModelElement(element);
 		if (adaptedElement instanceof ISourceModelElement) {
