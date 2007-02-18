@@ -18,11 +18,16 @@ package org.springframework.ide.eclipse.beans.ui.model;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Path;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
+import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.BeansUILabels;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
+import org.springframework.util.StringUtils;
 
 /**
  * This class provides labels for the beans core model's
@@ -46,6 +51,10 @@ public final class BeansModelLabels extends BeansUILabels {
 		}
 		if (element instanceof IBeansConfig) {
 			appendBeansConfigLabel((IBeansConfig) element, flags, buf);
+		} else if (element instanceof IBean) {
+			appendBeanLabel((IBean) element, buf);
+		} else if (element instanceof IBeanProperty) {
+			appendBeanPropertyLabel((IBeanProperty) element, buf);
 		} else {
 			buf.append(element.getElementName());
 		}
@@ -68,10 +77,15 @@ public final class BeansModelLabels extends BeansUILabels {
 				path = resource.getFullPath().makeRelative().toString();
 			}
 			buf.append(path);
+			if (element instanceof IBeanConstructorArgument
+					|| element instanceof IBeanProperty) {
+				buf.append(CONCAT_STRING);
+				buf.append(element.getElementParent().getElementName());
+			}
 		}
 	}
 
-	protected static void appendBeansConfigLabel(IBeansConfig config,
+	public static void appendBeansConfigLabel(IBeansConfig config,
 			int flags, StringBuffer buf) {
 		if (isFlagged(flags, DESCRIPTION)) {
 			String configName = config.getElementName();
@@ -122,5 +136,27 @@ public final class BeansModelLabels extends BeansUILabels {
 				buf.append('"');
 			}
 		}
+	}
+
+	public static void appendBeanLabel(IBean bean, StringBuffer buf) {
+		buf.append(bean.getElementName());
+		if (bean.getAliases() != null && bean.getAliases().length > 0) {
+			buf.append(" '");
+			buf.append(StringUtils.arrayToDelimitedString(bean.getAliases(),
+					LIST_DELIMITER_STRING));
+			buf.append('\'');
+		}
+		if (bean.getClassName() != null) {
+			buf.append(" [").append(bean.getClassName()).append(']');
+		} else if (bean.getParentName() != null) {
+			buf.append(" <").append(bean.getParentName()).append('>');
+		}
+	}
+
+	public static void appendBeanPropertyLabel(IBeanProperty property,
+			StringBuffer buf) {
+		buf.append(property.getElementName());
+		Object value = ((IBeanProperty) property).getValue();
+		buf.append(": ").append(BeansModelUtils.getValueName(value));
 	}
 }

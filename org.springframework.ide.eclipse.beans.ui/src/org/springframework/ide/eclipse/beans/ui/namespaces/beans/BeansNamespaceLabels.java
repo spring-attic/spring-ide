@@ -16,13 +16,10 @@
 
 package org.springframework.ide.eclipse.beans.ui.namespaces.beans;
 
-import org.eclipse.core.runtime.IPath;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.ui.BeansUILabels;
-import org.springframework.ide.eclipse.core.model.IResourceModelElement;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabels;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.util.StringUtils;
 
@@ -45,35 +42,24 @@ public final class BeansNamespaceLabels extends BeansUILabels {
 	public static void appendElementLabel(ISourceModelElement element,
 			int flags, StringBuffer buf) {
 		if (isFlagged(flags, PREPEND_PATH)) {
-			appendElementPathLabel(element, buf);
+			BeansModelLabels.appendElementPathLabel(element, flags, buf);
 			buf.append(CONCAT_STRING);
 		}
 		if (element instanceof IBean) {
 			appendBeanLabel((IBean) element, buf);
 		} else if (element instanceof IBeanProperty) {
-			appendBeanPropertyLabel((IBeanProperty) element, buf);
+			BeansModelLabels.appendBeanPropertyLabel((IBeanProperty) element,
+					buf);
 		} else {
 			buf.append(element.getElementName());
 		}
 		if (isFlagged(flags, APPEND_PATH)) {
 			buf.append(CONCAT_STRING);
-			appendElementPathLabel(element, buf);
+			BeansModelLabels.appendElementPathLabel(element, flags, buf);
 		}
 	}
 
-	public static void appendElementPathLabel(ISourceModelElement element,
-			StringBuffer buf) {
-			IPath path = ((IResourceModelElement) element).getElementResource()
-				.getFullPath().makeRelative();
-		buf.append(path);
-		if (element instanceof IBeanConstructorArgument
-				|| element instanceof IBeanProperty) {
-			buf.append(CONCAT_STRING);
-			buf.append(element.getElementParent().getElementName());
-		}
-	}
-
-	protected static void appendBeanLabel(IBean bean, StringBuffer buf) {
+	public static void appendBeanLabel(IBean bean, StringBuffer buf) {
 		buf.append(bean.getElementName());
 		if (bean.getAliases() != null && bean.getAliases().length > 0) {
 			buf.append(" '");
@@ -86,12 +72,5 @@ public final class BeansNamespaceLabels extends BeansUILabels {
 		} else if (bean.getParentName() != null) {
 			buf.append(" <").append(bean.getParentName()).append('>');
 		}
-	}
-
-	protected static void appendBeanPropertyLabel(IBeanProperty property,
-			StringBuffer buf) {
-		buf.append(property.getElementName());
-		Object value = ((IBeanProperty) property).getValue();
-		buf.append(": ").append(BeansModelUtils.getValueName(value));
 	}
 }
