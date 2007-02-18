@@ -70,338 +70,314 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 @SuppressWarnings("restriction")
 public class AopReferenceModelBuilder {
 
-    public static void buildAopModel(IProject project, Set<IFile> filesToBuild) {
-        if (filesToBuild.size() > 0) {
-            getBuildJob(project, filesToBuild).schedule();
-        }
-    }
+	public static void buildAopModel(IProject project, Set<IFile> filesToBuild) {
+		if (filesToBuild.size() > 0) {
+			getBuildJob(project, filesToBuild).schedule();
+		}
+	}
 
-    protected static void buildAopModel(IProgressMonitor monitor, Set<IFile> filesToBuild) {
-        int worked = 0;
-        for (IFile currentFile : filesToBuild) {
-            if (monitor.isCanceled()) {
-                throw new OperationCanceledException();
-            }
-            monitor.setTaskName("Building Spring AOP reference model ["
-                    + currentFile.getProjectRelativePath().toString() + "]");
-            AopReferenceModelMarkerUtils.deleteProblemMarkers(currentFile);
+	protected static void buildAopModel(IProgressMonitor monitor, Set<IFile> filesToBuild) {
+		int worked = 0;
+		for (IFile currentFile : filesToBuild) {
+			if (monitor.isCanceled()) {
+				throw new OperationCanceledException();
+			}
+			monitor.setTaskName("Building Spring AOP reference model ["
+					+ currentFile.getProjectRelativePath().toString() + "]");
+			AopReferenceModelMarkerUtils.deleteProblemMarkers(currentFile);
 
-            IAopProject aopProject = buildAopReferencesFromFile(currentFile);
-            if (aopProject != null) {
-                List<IAopReference> references = aopProject.getAllReferences();
-                for (IAopReference reference : references) {
-                    if (reference.getDefinition().getResource().equals(currentFile)
-                            || reference.getResource().equals(currentFile)) {
-                    	AopReferenceModelMarkerUtils.createMarker(reference, currentFile);
-                    }
-                }
-            }
-            worked++;
-            monitor.worked(worked);
+			IAopProject aopProject = buildAopReferencesFromFile(currentFile);
+			if (aopProject != null) {
+				List<IAopReference> references = aopProject.getAllReferences();
+				for (IAopReference reference : references) {
+					if (reference.getDefinition().getResource().equals(currentFile)
+							|| reference.getResource().equals(currentFile)) {
+						AopReferenceModelMarkerUtils.createMarker(reference, currentFile);
+					}
+				}
+			}
+			worked++;
+			monitor.worked(worked);
 
-        }
-        // update images and text decoractions
-        Activator.getModel().fireModelChanged();
-    }
+		}
+		// update images and text decoractions
+		Activator.getModel().fireModelChanged();
+	}
 
-    @SuppressWarnings("deprecation")
-    private static IAopProject buildAopReferencesFromFile(IFile currentFile) {
-        IAopProject aopProject = null;
-        IBeansProject project = BeansCorePlugin.getModel().getProject(currentFile.getProject());
+	@SuppressWarnings("deprecation")
+	private static IAopProject buildAopReferencesFromFile(IFile currentFile) {
+		IAopProject aopProject = null;
+		IBeansProject project = BeansCorePlugin.getModel().getProject(currentFile.getProject());
 
-        // change to Job.getJobManager as soon as we only use Eclipse 3.3
-        IJobManager jobMan = Platform.getJobManager();
-        ILock lock = jobMan.newLock();
-        lock.acquire();
+		// change to Job.getJobManager as soon as we only use Eclipse 3.3
+		IJobManager jobMan = Platform.getJobManager();
+		ILock lock = jobMan.newLock();
+		lock.acquire();
 
-        if (project != null) {
-            BeansConfig config = (BeansConfig) project.getConfig(currentFile);
-            IJavaProject javaProject = AopReferenceModelUtils.getJavaProject(config);
-            if (javaProject != null) {
-                aopProject = ((AopReferenceModel) Activator.getModel())
-                        .getProjectWithInitialization(AopReferenceModelUtils.getJavaProject(config
-                                .getElementResource().getProject()));
+		if (project != null) {
+			BeansConfig config = (BeansConfig) project.getConfig(currentFile);
+			IJavaProject javaProject = AopReferenceModelUtils.getJavaProject(config);
+			if (javaProject != null) {
+				aopProject = ((AopReferenceModel) Activator.getModel())
+						.getProjectWithInitialization(AopReferenceModelUtils.getJavaProject(config
+								.getElementResource().getProject()));
 
-                aopProject.clearReferencesForResource(currentFile);
+				aopProject.clearReferencesForResource(currentFile);
 
-                ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-                ClassLoader weavingClassLoader = SpringCoreUtils.getClassLoader(
-                		javaProject, false);
-                Thread.currentThread().setContextClassLoader(weavingClassLoader);
+				ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+				ClassLoader weavingClassLoader = SpringCoreUtils.getClassLoader(javaProject, false);
+				Thread.currentThread().setContextClassLoader(weavingClassLoader);
 
-                IStructuredModel model = null;
-                List<IAspectDefinition> aspectInfos = null;
-                try {
-                    try {
-                        model = StructuredModelManager.getModelManager().getModelForRead(
-                                currentFile);
-                        IDOMDocument document = ((DOMModelImpl) model).getDocument();
+				IStructuredModel model = null;
+				List<IAspectDefinition> aspectInfos = null;
+				try {
+					try {
+						model = StructuredModelManager.getModelManager().getModelForRead(
+								currentFile);
+						IDOMDocument document = ((DOMModelImpl) model).getDocument();
 
-                        aspectInfos = AspectDefinitionBuilder.buildAspectDefinitions(document,
-                                currentFile);
-                    }
-                    finally {
-                        if (model != null) {
-                            model.releaseFromRead();
-                        }
-                    }
+						aspectInfos = AspectDefinitionBuilder.buildAspectDefinitions(document,
+								currentFile);
+					} finally {
+						if (model != null) {
+							model.releaseFromRead();
+						}
+					}
 
-                    for (IAspectDefinition info : aspectInfos) {
+					for (IAspectDefinition info : aspectInfos) {
 
-                        // build model for config
-                        buildAopReferencesFromAspectDefinition(weavingClassLoader, config, info);
+						// build model for config
+						buildAopReferencesFromAspectDefinition(config, info);
 
-                        // check config sets as well
-                        Set<IBeansConfigSet> configSets = project.getConfigSets();
-                        for (IBeansConfigSet configSet : configSets) {
-                            if (configSet.getConfigs().contains(config)) {
-                                Set<IBeansConfig> configs = configSet.getConfigs();
-                                for (IBeansConfig configSetConfig : configs) {
-                                    if (!config.equals(configSetConfig)) {
-                                        buildAopReferencesFromAspectDefinition(weavingClassLoader,
-                                                configSetConfig, info);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                catch (IOException e) {
-                    Activator.log(e);
-                }
-                catch (CoreException e) {
-                    Activator.log(e);
-                }
-                finally {
-                    Thread.currentThread().setContextClassLoader(classLoader);
-                    lock.release();
-                }
-            }
-        }
-        return aopProject;
-    }
+						// check config sets as well
+						Set<IBeansConfigSet> configSets = project.getConfigSets();
+						for (IBeansConfigSet configSet : configSets) {
+							if (configSet.getConfigs().contains(config)) {
+								Set<IBeansConfig> configs = configSet.getConfigs();
+								for (IBeansConfig configSetConfig : configs) {
+									if (!config.equals(configSetConfig)) {
+										buildAopReferencesFromAspectDefinition(configSetConfig,
+												info);
+									}
+								}
+							}
+						}
+					}
+				} catch (IOException e) {
+					Activator.log(e);
+				} catch (CoreException e) {
+					Activator.log(e);
+				} finally {
+					Thread.currentThread().setContextClassLoader(classLoader);
+					lock.release();
+				}
+			}
+		}
+		return aopProject;
+	}
 
-    private static void buildAopReferencesFromAspectDefinition(ClassLoader loader,
-            IBeansConfig config, IAspectDefinition info) {
+	private static void buildAopReferencesFromAspectDefinition(IBeansConfig config,
+			IAspectDefinition info) {
 
-        IResource file = config.getElementResource();
-        IAopProject aopProject = ((AopReferenceModel) Activator.getModel())
-                .getProjectWithInitialization(AopReferenceModelUtils.getJavaProject(config
-                        .getElementResource().getProject()));
+		IResource file = config.getElementResource();
+		IAopProject aopProject = ((AopReferenceModel) Activator.getModel())
+				.getProjectWithInitialization(AopReferenceModelUtils.getJavaProject(config
+						.getElementResource().getProject()));
 
-        
-        Set<IBean> beans = config.getBeans();
-        for (IBean bean : beans) {
-        	buildAopReferenceForBean(loader, bean, info, file, aopProject);
-        }
-    }
-    
-    private static void buildAopReferenceForBean(ClassLoader loader,
-            IBean bean, IAspectDefinition info, IResource file,  IAopProject aopProject) {
-    	try {
-        	Class<?> factoryBeanClass = loader.loadClass(FactoryBean.class.getName());
-        	
-        	// TODO get className along the beans hierachy
-        	if (bean.getClassName() != null && info.getAspectName() != null
-                    && info.getAspectName().equals(bean.getElementName())
-                    && info.getResource() != null
-                    && info.getResource().equals(bean.getElementResource())) {
-                // don't check advice backing bean itself
-                return;
-            }
-            
-            Class<?> targetClass = loader.loadClass(bean.getClassName());
-            IType jdtTargetType = BeansModelUtils.getJavaType(file.getProject(),
-                    targetClass.getName());
-            
-            // check type not found and exclude factory beans
-            if (jdtTargetType == null || factoryBeanClass.isAssignableFrom(targetClass)) {
-            	return;
-            }
-            
-            
-            
-            if (info instanceof BeanIntroductionDefinition) {
-                BeanIntroductionDefinition intro = (BeanIntroductionDefinition) info;
-                if (intro.getTypeMatcher().matches(targetClass)) {
-                    IType jdtAspectType = BeansModelUtils.getJavaType(aopProject.getProject()
-                            .getProject(), ((BeanIntroductionDefinition) info)
-                            .getAspectClassName());
-                    IMember jdtAspectMember = null;
-                    if (intro instanceof AnnotationIntroductionDefinition) {
-                        String fieldName = ((AnnotationIntroductionDefinition) intro)
-                                .getDefiningField();
-                        jdtAspectMember = jdtAspectType.getField(fieldName);
-                    }
-                    else {
-                        jdtAspectMember = jdtAspectType;
-                    }
+		Set<IBean> beans = config.getBeans();
+		for (IBean bean : beans) {
+			buildAopReferencesForBean(bean, info, file, aopProject);
+		}
+	}
 
-                    if (jdtAspectMember != null) {
-                        IAopReference ref = new AopReference(info.getType(), jdtAspectMember,
-                        		jdtTargetType, info, file, bean);
-                        aopProject.addAopReference(ref);
-                    }
-                }
-            }
-            else if (info instanceof JavaAspectDefinition
-                    && !(info instanceof AnnotationAspectDefinition)) {
-                JavaAspectDefinition intro = (JavaAspectDefinition) info;
+	private static void buildAopReferencesForBean(IBean bean, IAspectDefinition info,
+			IResource file, IAopProject aopProject) {
+		try {
+			Class<?> factoryBeanClass = AopReferenceModelBuilderUtils.loadClass(FactoryBean.class
+					.getName());
 
-                List<IMethod> matchingMethods = AopReferenceModelUtils.getMatches(targetClass, intro
-                        .getAspectJPointcutExpression(), aopProject.getProject().getProject());
+			// TODO get className along the beans hierachy
+			if (bean.getClassName() != null && info.getAspectName() != null
+					&& info.getAspectName().equals(bean.getElementName())
+					&& info.getResource() != null
+					&& info.getResource().equals(bean.getElementResource())) {
+				// don't check advice backing bean itself
+				return;
+			}
 
-                for (IMethod method : matchingMethods) {
-                    IType jdtAspectType = BeansModelUtils.getJavaType(aopProject.getProject()
-                            .getProject(), info.getAspectClassName());
-                    IMethod jdtAspectMethod = AopReferenceModelUtils
-                            .getMethod(jdtAspectType, info.getAdviceMethodName(), info
-                                    .getAdviceMethodParameterTypes().length);
-                    if (jdtAspectMethod != null) {
-                        IAopReference ref = new AopReference(info.getType(), jdtAspectMethod,
-                                method, info, file, bean);
-                        aopProject.addAopReference(ref);
-                    }
-                }
-            }
-            else {
-                // validate the aspect definition
-                if (info.getAdviceMethod() == null) {
-                    return;
-                }
-               
-                IType jdtAspectType = BeansModelUtils.getJavaType(file.getProject(), info
-                        .getAspectClassName());
-                Class<?> aspectJAdviceClass = AopReferenceModelBuilderUtils.getAspectJAdviceClass(info);
+			Class<?> targetClass = AopReferenceModelBuilderUtils.loadClass(bean.getClassName());
+			IType jdtTargetType = BeansModelUtils.getJavaType(file.getProject(), targetClass
+					.getName());
 
-                Object pc = info.getAspectJPointcutExpression();
+			IType jdtAspectType = BeansModelUtils.getJavaType(aopProject.getProject().getProject(),
+					info.getAspectClassName());
+			// check type not found and exclude factory beans
+			if (jdtTargetType == null || factoryBeanClass.isAssignableFrom(targetClass)) {
+				return;
+			}
 
-                AopReferenceModelBuilderUtils.createAspectJAdvice(info, aspectJAdviceClass, pc);
+			if (info instanceof BeanIntroductionDefinition) {
+				BeanIntroductionDefinition intro = (BeanIntroductionDefinition) info;
+				if (intro.getTypeMatcher().matches(targetClass)) {
+					IMember jdtAspectMember = null;
+					if (intro instanceof AnnotationIntroductionDefinition) {
+						String fieldName = ((AnnotationIntroductionDefinition) intro)
+								.getDefiningField();
+						jdtAspectMember = jdtAspectType.getField(fieldName);
+					} else {
+						jdtAspectMember = jdtAspectType;
+					}
 
-                Method matchesMethod = pc.getClass().getMethod("matches", Method.class,
-                        Class.class);
-                for (Method m : targetClass.getDeclaredMethods()) {
-                    // Spring only allows proxying of public classes
-                    if (Modifier.isPublic(m.getModifiers())) {
-                        boolean matches = (Boolean) matchesMethod.invoke(pc, m, targetClass);
-                        if (matches) {
-                            IMethod jdtMethod = AopReferenceModelUtils.getMethod(jdtTargetType, m
-                                    .getName(), m.getParameterTypes().length);
-                            IMethod jdtAspectMethod = AopReferenceModelUtils.getMethod(jdtAspectType,
-                                    info.getAdviceMethodName(), info.getAdviceMethod()
-                                            .getParameterTypes().length);
-                            if (jdtAspectMethod != null) {
-                                IAopReference ref = new AopReference(info.getType(),
-                                        jdtAspectMethod, jdtMethod, info, file, bean);
-                                aopProject.addAopReference(ref);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        catch (Throwable t) {
-            handleException(t, info, file);
-        }
-        
-        Set<IBean> innerBeans = bean.getInnerBeans();
-        if (innerBeans != null && innerBeans.size() > 0) {
-        	for (IBean innerBean : innerBeans) {
-        		buildAopReferenceForBean(loader, innerBean, info, file, aopProject);
-        	}
-        }
-        
-    }
+					if (jdtAspectMember != null) {
+						IAopReference ref = new AopReference(info.getType(), jdtAspectMember,
+								jdtTargetType, info, file, bean);
+						aopProject.addAopReference(ref);
+					}
+				}
+			} else if (info instanceof JavaAspectDefinition
+					&& !(info instanceof AnnotationAspectDefinition)) {
+				JavaAspectDefinition intro = (JavaAspectDefinition) info;
 
-    private static void handleException(Throwable t, IAspectDefinition info, IResource file) {
-        if (t instanceof NoClassDefFoundError || t instanceof ClassNotFoundException) {
-        	AopReferenceModelMarkerUtils.createProblemMarker(file,
-                    "Build path is incomplete. Cannot find class file for " + t.getMessage(),
-                    IMarker.SEVERITY_ERROR, info.getAspectLineNumber(),
-                    AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
-        }
-        else if (t instanceof IllegalArgumentException) {
-            AopReferenceModelMarkerUtils.createProblemMarker(file, t.getMessage(), IMarker.SEVERITY_ERROR,
-                    info.getAspectLineNumber(), AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
-        }
-        else if (t instanceof InvocationTargetException) {
-            if (t.getCause() != null) {
-                handleException(t.getCause(), info, file);
-            }
-            else {
-                Activator.log(t);
-                AopReferenceModelMarkerUtils.createProblemMarker(file, t.getMessage(),
-                        IMarker.SEVERITY_WARNING, info.getAspectLineNumber(),
-                        AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
-            }
-        }
-        else {
-            Activator.log(t);
-            AopReferenceModelMarkerUtils.createProblemMarker(file, t.getMessage(), IMarker.SEVERITY_WARNING,
-                    info.getAspectLineNumber(), AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
-        }
-    }
+				IMethod jdtAspectMethod = AopReferenceModelUtils.getMethod(jdtAspectType, info
+						.getAdviceMethodName(), info.getAdviceMethodParameterTypes().length);
+				if (jdtAspectMethod != null) {
 
-    public static Job getBuildJob(final IProject project, final Set<IFile> filesToBuild) {
-        Job buildJob = new BuildJob("Building Spring AOP reference model", project, filesToBuild);
-        buildJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
-        buildJob.setUser(false);
-        return buildJob;
-    }
+					List<IMethod> matchingMethods = AopReferenceModelUtils.getMatches(targetClass,
+							intro.getAspectJPointcutExpression(), aopProject.getProject()
+									.getProject());
+					for (IMethod method : matchingMethods) {
+						IAopReference ref = new AopReference(info.getType(), jdtAspectMethod,
+								method, info, file, bean);
+						aopProject.addAopReference(ref);
+					}
+				}
+			} else {
+				// validate the aspect definition
+				if (info.getAdviceMethod() == null) {
+					return;
+				}
 
-    private static final class BuildJob
-            extends Job {
+				IMethod jdtAspectMethod = AopReferenceModelUtils.getMethod(jdtAspectType, info
+						.getAdviceMethodName(), info.getAdviceMethod().getParameterTypes().length);
+				if (jdtAspectMethod != null) {
 
-        private final IProject project;
+					Object pc = AopReferenceModelBuilderUtils.createAspectJPointcutExpression(info);
 
-        private final Set<IFile> filesToBuild;
+					Method matchesMethod = pc.getClass().getMethod("matches", Method.class,
+							Class.class);
+					for (Method m : targetClass.getDeclaredMethods()) {
+						// Spring only allows proxying of public classes
+						if (Modifier.isPublic(m.getModifiers())) {
+							boolean matches = (Boolean) matchesMethod.invoke(pc, m, targetClass);
+							if (matches) {
+								IMethod jdtMethod = AopReferenceModelUtils.getMethod(jdtTargetType,
+										m.getName(), m.getParameterTypes().length);
+								IAopReference ref = new AopReference(info.getType(),
+										jdtAspectMethod, jdtMethod, info, file, bean);
+								aopProject.addAopReference(ref);
+							}
+						}
+					}
+				}
+			}
+		} catch (Throwable t) {
+			handleException(t, info, file);
+		}
+		
+		// Make sure that inner beans are handled as well
+		Set<IBean> innerBeans = bean.getInnerBeans();
+		if (innerBeans != null && innerBeans.size() > 0) {
+			for (IBean innerBean : innerBeans) {
+				buildAopReferencesForBean(innerBean, info, file, aopProject);
+			}
+		}
 
-        private BuildJob(String name, IProject project, Set<IFile> filesToBuild) {
-            super(name);
-            this.project = project;
-            this.filesToBuild = filesToBuild;
-        }
+	}
 
-        public boolean isCoveredBy(BuildJob other) {
-            if (other.project == null) {
-                return true;
-            }
-            return project != null && project.equals(other.project);
-        }
+	private static void handleException(Throwable t, IAspectDefinition info, IResource file) {
+		if (t instanceof NoClassDefFoundError || t instanceof ClassNotFoundException) {
+			AopReferenceModelMarkerUtils.createProblemMarker(file,
+					"Build path is incomplete. Cannot find class file for " + t.getMessage(),
+					IMarker.SEVERITY_ERROR, info.getAspectLineNumber(),
+					AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
+		} else if (t instanceof IllegalArgumentException) {
+			AopReferenceModelMarkerUtils.createProblemMarker(file, t.getMessage(),
+					IMarker.SEVERITY_ERROR, info.getAspectLineNumber(),
+					AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
+		} else if (t instanceof InvocationTargetException) {
+			if (t.getCause() != null) {
+				handleException(t.getCause(), info, file);
+			} else {
+				Activator.log(t);
+				AopReferenceModelMarkerUtils.createProblemMarker(file, t.getMessage(),
+						IMarker.SEVERITY_WARNING, info.getAspectLineNumber(),
+						AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
+			}
+		} else {
+			Activator.log(t);
+			AopReferenceModelMarkerUtils.createProblemMarker(file, t.getMessage(),
+					IMarker.SEVERITY_WARNING, info.getAspectLineNumber(),
+					AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
+		}
+	}
 
-        @SuppressWarnings("deprecation")
+	public static Job getBuildJob(final IProject project, final Set<IFile> filesToBuild) {
+		Job buildJob = new BuildJob("Building Spring AOP reference model", project, filesToBuild);
+		buildJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
+		buildJob.setUser(false);
+		return buildJob;
+	}
+
+	private static final class BuildJob extends Job {
+
+		private final IProject project;
+
+		private final Set<IFile> filesToBuild;
+
+		private BuildJob(String name, IProject project, Set<IFile> filesToBuild) {
+			super(name);
+			this.project = project;
+			this.filesToBuild = filesToBuild;
+		}
+
+		public boolean isCoveredBy(BuildJob other) {
+			if (other.project == null) {
+				return true;
+			}
+			return project != null && project.equals(other.project);
+		}
+
+		@SuppressWarnings("deprecation")
 		protected IStatus run(IProgressMonitor monitor) {
-            synchronized (getClass()) {
-                if (monitor.isCanceled()) {
-                    return Status.CANCEL_STATUS;
-                }
-                Job[] buildJobs = Platform.getJobManager()
-                        .find(ResourcesPlugin.FAMILY_MANUAL_BUILD);
-                for (int i = 0; i < buildJobs.length; i++) {
-                    Job curr = buildJobs[i];
-                    if (curr != this && curr instanceof BuildJob) {
-                        BuildJob job = (BuildJob) curr;
-                        if (job.isCoveredBy(this)) {
-                            curr.cancel(); // cancel all other build jobs of our kind
-                        }
-                    }
-                }
-            }
-            try {
-                monitor.beginTask("Builder Spring AOP reference model", filesToBuild.size());
-                buildAopModel(monitor, filesToBuild);
-            }
-            catch (OperationCanceledException e) {
-                return Status.CANCEL_STATUS;
-            }
-            finally {
-                monitor.done();
-            }
-            return Status.OK_STATUS;
-        }
+			synchronized (getClass()) {
+				if (monitor.isCanceled()) {
+					return Status.CANCEL_STATUS;
+				}
+				Job[] buildJobs = Platform.getJobManager()
+						.find(ResourcesPlugin.FAMILY_MANUAL_BUILD);
+				for (int i = 0; i < buildJobs.length; i++) {
+					Job curr = buildJobs[i];
+					if (curr != this && curr instanceof BuildJob) {
+						BuildJob job = (BuildJob) curr;
+						if (job.isCoveredBy(this)) {
+							curr.cancel(); // cancel all other build jobs of our kind
+						}
+					}
+				}
+			}
+			try {
+				monitor.beginTask("Builder Spring AOP reference model", filesToBuild.size());
+				buildAopModel(monitor, filesToBuild);
+			} catch (OperationCanceledException e) {
+				return Status.CANCEL_STATUS;
+			} finally {
+				monitor.done();
+			}
+			return Status.OK_STATUS;
+		}
 
-        public boolean belongsTo(Object family) {
-            return ResourcesPlugin.FAMILY_MANUAL_BUILD == family;
-        }
-    }
+		public boolean belongsTo(Object family) {
+			return ResourcesPlugin.FAMILY_MANUAL_BUILD == family;
+		}
+	}
 }
