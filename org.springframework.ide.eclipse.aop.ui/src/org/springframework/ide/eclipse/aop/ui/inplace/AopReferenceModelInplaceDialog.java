@@ -677,11 +677,8 @@ public class AopReferenceModelInplaceDialog {
                                 lastSelection), false);
             }
             if (element != null) {
-                ISelection sel = viewer.getSelection();
-                if (sel == null) {
-                    sel = lastSelection;
-                }
                 viewer.setInput(element);
+                viewer.refresh();
                 AopReferenceModelNavigator.revealSelection(viewer, AopReferenceModelNavigatorUtils
                         .getSelectedElement(workbenchPart, lastSelection), !isShowingParentCrosscutting);
             }
@@ -702,13 +699,14 @@ public class AopReferenceModelInplaceDialog {
                                 lastSelection), false);
             }
             if (element != null) {
-                ISelection sel = viewer.getSelection();
-                if (sel == null) {
-                    sel = lastSelection;
-                }
+            	viewer.getControl().setRedraw(false);
                 viewer.setInput(element);
+                viewer.refresh();
+                viewer.expandToLevel(AbstractTreeViewer.ALL_LEVELS);
+                AopReferenceModelNavigator.expandTree(viewer.getTree().getItems(), false);
                 AopReferenceModelNavigator.revealSelection(viewer, AopReferenceModelNavigatorUtils
                         .getSelectedElement(workbenchPart, lastSelection), !isShowingParentCrosscutting);
+                viewer.getControl().setRedraw(true);
             }
         }
 
