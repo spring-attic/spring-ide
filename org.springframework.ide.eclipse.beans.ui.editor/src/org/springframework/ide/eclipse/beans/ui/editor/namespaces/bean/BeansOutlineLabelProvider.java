@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.springframework.ide.eclipse.beans.core.BeansTags;
 import org.springframework.ide.eclipse.beans.core.BeansTags.Tag;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.editor.outline.BeansContentOutlineConfiguration;
-import org.springframework.ide.eclipse.beans.ui.namespaces.beans.BeansNamespaceImages;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
@@ -47,13 +47,13 @@ public class BeansOutlineLabelProvider
         if ("bean".equals(nodeName)) {
             int flags = 0;
             if (attributes.getNamedItem("parent") != null) {
-                flags |= BeansNamespaceImages.FLAG_CHILD;
+                flags |= BeansModelImages.FLAG_CHILD;
             } else if (attributes.getNamedItem("factory-bean") != null
 					|| attributes.getNamedItem("factory-method") != null) {
-				flags |= BeansNamespaceImages.FLAG_FACTORY;
+				flags |= BeansModelImages.FLAG_FACTORY;
 			}
             Image image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_BEAN);
-            return BeansNamespaceImages.getDecoratedImage(image, flags);
+            return BeansModelImages.getDecoratedImage(image, flags);
         }
         if ("beans".equals(nodeName)) {
             return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONFIG);
