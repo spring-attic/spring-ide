@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,10 @@
 
 package org.springframework.ide.eclipse.beans.ui.namespaces.aop;
 
-import org.eclipse.jface.viewers.ITreePathLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.TreePath;
-import org.eclipse.jface.viewers.ViewerLabel;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.navigator.IDescriptionProvider;
+import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceLabelProvider;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
-import org.springframework.ide.eclipse.core.model.ModelUtils;
 
 /**
  * This class is a label provider which knows about the beans core model's
@@ -33,48 +28,10 @@ import org.springframework.ide.eclipse.core.model.ModelUtils;
  * 
  * @author Torsten Juergeleit
  */
-public class AopNamespaceLabelProvider extends LabelProvider implements
-		ITreePathLabelProvider, IDescriptionProvider {
+public class AopNamespaceLabelProvider extends DefaultNamespaceLabelProvider {
 
-	public Image getImage(Object element) {
-		if (element instanceof ISourceModelElement) {
-			return AopNamespaceImages.getImage((ISourceModelElement)
-					element);
-		}
-		return null;
-	}
-
-	public String getText(Object element) {
-		if (element instanceof ISourceModelElement) {
-			return AopNamespaceLabels.getElementLabel(
-					(ISourceModelElement) element, 0);
-		}
-		return null;
-	}
-
-	public void updateLabel(ViewerLabel label, TreePath elementPath) {
-		Object element = ModelUtils.adaptToModelElement(elementPath
-				.getLastSegment());
-		if (element instanceof ISourceModelElement
-				&& elementPath.getSegmentCount() > 1) {
-			Object parentElement = elementPath.getParentPath()
-					.getLastSegment();
-			if (parentElement instanceof IModelElement) {
-				label.setImage(AopNamespaceImages.getImage(
-						(ISourceModelElement) element,
-						(IModelElement) parentElement));
-				label.setText(getText(element));
-			}
-		}
-	}
-
-	public String getDescription(Object element) {
-		if (element instanceof ISourceModelElement) {
-			return AopNamespaceLabels.getElementLabel(
-					(ISourceModelElement) element,
-					AopNamespaceLabels.APPEND_PATH
-							| AopNamespaceLabels.DESCRIPTION);
-		}
-		return null;
+	protected Image getImage(ISourceModelElement element,
+			IModelElement context) {
+		return AopNamespaceImages.getImage(element, context);
 	}
 }
