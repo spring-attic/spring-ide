@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.search.ui.ISearchQuery;
@@ -46,14 +47,14 @@ public abstract class AbstractBeansQuery implements ISearchQuery {
 	private ISearchResult result;
 
 	public AbstractBeansQuery(BeansSearchScope scope, String pattern,
-							  boolean isCaseSensitive, boolean isRegexSearch) {
+			boolean isCaseSensitive, boolean isRegexSearch) {
 		Assert.isNotNull(scope);
 		this.scope = scope;
 		this.pattern = pattern;
 		this.compiledPattern = PatternUtils.createPattern(pattern,
-											   isCaseSensitive, isRegexSearch);
+				isCaseSensitive, isRegexSearch);
 	}
-	
+
 	public BeansSearchScope getScope() {
 		return scope;
 	}
@@ -80,27 +81,28 @@ public abstract class AbstractBeansQuery implements ISearchQuery {
 	public final IStatus run(IProgressMonitor monitor) {
 		final BeansSearchResult result = (BeansSearchResult) getSearchResult();
 		result.removeAll();
-		IModelElement[] elements = scope.getModelElements();
-		for (int i = 0; !monitor.isCanceled() && i < elements.length; i++) {
-			IModelElement element = elements[i];
+		for (IModelElement element : scope.getModelElements()) {
+			if (monitor.isCanceled()) {
+				throw new OperationCanceledException();
+			}
 			IModelElementVisitor visitor = new IModelElementVisitor() {
 				public boolean visit(IModelElement element,
-													IProgressMonitor monitor) {
+						IProgressMonitor monitor) {
 					if (doesMatch(element, compiledPattern, monitor)) {
 						int startLine;
 						int lines;
 						if (element instanceof ISourceModelElement) {
 							ISourceModelElement sourceElement =
-												 (ISourceModelElement) element;
+								(ISourceModelElement) element;
 							startLine = sourceElement.getElementStartLine();
-							lines = sourceElement.getElementEndLine() -
-															   startLine + 1;
+							lines = sourceElement.getElementEndLine()
+									- startLine + 1;
 						} else {
 							startLine = -1;
 							lines = -1;
 						}
 						Match match = new Match(element, Match.UNIT_LINE,
-												startLine, lines);
+								startLine, lines);
 						result.addMatch(match);
 					}
 					return true;
@@ -110,15 +112,15 @@ public abstract class AbstractBeansQuery implements ISearchQuery {
 		}
 		Object[] args = new Object[] { new Integer(result.getMatchCount()) };
 		String message = MessageUtils.format(
-								 BeansSearchMessages.SearchQuery_status, args);
+				BeansSearchMessages.SearchQuery_status, args);
 		return new Status(IStatus.OK, BeansSearchPlugin.PLUGIN_ID, 0, message,
-						  null);
+				null);
 	}
 
 	/**
-	 * Returns <code>true</code> if given <code>IModelElement</code> matches
+	 * Returns <code>true</code> if given {@link IModelElement} matches
 	 * this query. 
 	 */
 	protected abstract boolean doesMatch(IModelElement element,
-									Pattern pattern, IProgressMonitor monitor);
+			Pattern pattern, IProgressMonitor monitor);
 }
