@@ -23,6 +23,7 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.beans.BeanUtils;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
+import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.aop.core.model.builder.AopReferenceModelBuilderUtils;
 import org.springframework.util.StringUtils;
 
@@ -208,5 +209,45 @@ public class BeanAspectDefinition implements IAspectDefinition {
 
     public void setAdviceMethodParameterTypes(String[] params) {
         this.adivceMethodParameterTypes = params;
+    }
+
+    public String toString() {
+        StringBuffer buf = new StringBuffer();
+        buf.append("Aspect definition");
+        if (this.file != null) {
+            buf.append(" [");
+            buf.append(this.file.getFullPath().toFile());
+            buf.append(":");
+            buf.append(getAspectLineNumber());
+            buf.append("]");
+        }
+        buf.append(" advise type [");
+        ADVICE_TYPES type = getType();
+        if (type == ADVICE_TYPES.AFTER) {
+            buf.append("after");
+        }
+        else if (type == ADVICE_TYPES.AFTER_RETURNING) {
+            buf.append("after-returning");
+        }
+        else if (type == ADVICE_TYPES.AFTER_THROWING) {
+            buf.append("after-throwing");
+        }
+        else if (type == ADVICE_TYPES.BEFORE) {
+            buf.append("before");
+        }
+        else if (type == ADVICE_TYPES.AROUND) {
+            buf.append("after");
+        }
+        else if (type == ADVICE_TYPES.DECLARE_PARENTS) {
+            buf.append("delcare parents");
+        }
+        buf.append("] advise [");
+        buf.append(getAspectClassName());
+        if (type != ADVICE_TYPES.DECLARE_PARENTS) {
+            buf.append(".");
+            buf.append(getAdviceMethodName());
+        }
+        buf.append("]");
+        return buf.toString();
     }
 }

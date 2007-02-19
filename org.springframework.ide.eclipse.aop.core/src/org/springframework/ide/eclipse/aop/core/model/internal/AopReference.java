@@ -91,4 +91,18 @@ public class AopReference implements IAopReference {
     public IBean getTargetBean() {
         return bean;
     }
+    
+    public String toString() {
+        StringBuffer buf = new StringBuffer();
+        buf.append("Bean definition [");
+        buf.append(this.bean);
+        buf.append("] advise target [");
+        buf.append(this.target);
+        buf.append("] advise source [");
+        buf.append(this.source);
+        buf.append(" ] aspect definition [");
+        buf.append(this.definition);
+        buf.append("]");
+        return buf.toString();
+    }
 }

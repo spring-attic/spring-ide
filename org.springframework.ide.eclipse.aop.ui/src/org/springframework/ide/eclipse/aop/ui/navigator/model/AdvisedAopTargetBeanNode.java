@@ -46,7 +46,7 @@ public class AdvisedAopTargetBeanNode implements IReferenceNode, IRevealableRefe
                 .getTargetBean())
                 + " - "
                 + this.references.get(0).getTargetBean().getElementResource()
-                        .getProjectRelativePath().toString();
+                        .getFullPath().toString();
     }
 
     public boolean hasChildren() {

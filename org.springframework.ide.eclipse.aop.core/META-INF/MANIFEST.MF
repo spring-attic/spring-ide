@@ -24,6 +24,7 @@ Require-Bundle: org.eclipse.ui,
 Eclipse-LazyStart: true
 Bundle-ClassPath: aop-core.jar
 Export-Package: org.springframework.ide.eclipse.aop.core,
+ org.springframework.ide.eclipse.aop.core.logging,
  org.springframework.ide.eclipse.aop.core.model,
  org.springframework.ide.eclipse.aop.core.model.builder,
  org.springframework.ide.eclipse.aop.core.model.internal,

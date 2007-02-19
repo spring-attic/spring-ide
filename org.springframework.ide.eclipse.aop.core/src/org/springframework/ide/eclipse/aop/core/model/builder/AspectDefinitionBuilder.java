@@ -25,7 +25,6 @@ import java.util.regex.Pattern;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.objectweb.asm.ClassReader;
@@ -33,6 +32,7 @@ import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.ThrowsAdvice;
 import org.springframework.ide.eclipse.aop.core.Activator;
+import org.springframework.ide.eclipse.aop.core.logging.AopLog;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
@@ -47,16 +47,6 @@ import org.w3c.dom.NodeList;
 @SuppressWarnings("restriction")
 public class AspectDefinitionBuilder {
 
-    private static void addDocument(IDOMDocument document, List<IAspectDefinition> aspectInfos,
-            IResource file) {
-        for (IAspectDefinition info : aspectInfos) {
-            if (info instanceof BeanAspectDefinition) {
-                ((BeanAspectDefinition) info).setDocument(document);
-            }
-            info.setResource(file);
-        }
-    }
-
     public static List<IAspectDefinition> buildAspectDefinitions(final IDOMDocument document,
             IFile file) {
         final List<IAspectDefinition> aspectInfos = new ArrayList<IAspectDefinition>();
@@ -64,23 +54,26 @@ public class AspectDefinitionBuilder {
         parseXmlAspects(document, file, aspectInfos);
         parseAnnotationAspects(document, file, aspectInfos);
 
-        addDocument(document, aspectInfos, file);
         return aspectInfos;
     }
 
     @SuppressWarnings("unchecked")
-    private static void createAnnotationAspectDefinition(final IDOMDocument document,
+    private static void createAnnotationAspectDefinition(final IDOMDocument document, IFile file,
             final Node bean, final String id, final String className,
             final List<IAspectDefinition> aspectInfos) throws Throwable {
 
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        ClassReader reader = new ClassReader(classLoader.getResourceAsStream(AopReferenceModelBuilderUtils
-                .getClassFileName(className)));
+        ClassReader reader = new ClassReader(classLoader
+                .getResourceAsStream(AopReferenceModelBuilderUtils.getClassFileName(className)));
         AdviceAnnotationVisitor v = new AdviceAnnotationVisitor((IDOMNode) bean, id, className);
         reader.accept(v, false);
 
         List<IAspectDefinition> aspectDefinitions = v.getAspectDefinitions();
-        aspectInfos.addAll(aspectDefinitions);
+        for (IAspectDefinition def : aspectDefinitions) {
+            def.setResource(file);
+            def.setDocument(document);
+            addAspectDefinition(def, aspectInfos);
+        }
     }
 
     /**
@@ -88,11 +81,17 @@ public class AspectDefinitionBuilder {
      * are included. If includePatterns is non-null, then one of the patterns must match.
      */
     private static boolean isIncluded(List<Pattern> includePatterns, String beanName) {
-    	if (beanName == null || includePatterns == null || includePatterns.size() == 0) {
+        if (includePatterns == null) {
+            return true;
+        }
+        else if (includePatterns != null && includePatterns.size() == 0) {
             return false;
         }
         else {
             for (Pattern pattern : includePatterns) {
+                if (beanName == null) {
+                    return false;
+                }
                 if (pattern.matcher(beanName).matches()) {
                     return true;
                 }
@@ -136,7 +135,9 @@ public class AspectDefinitionBuilder {
                     info.setAdviceMethodName("invoke");
                     info.setAdviceMethodParameterTypes(new String[] { MethodInvocation.class
                             .getName() });
-                    aspectInfos.add(info);
+                    info.setResource(file);
+                    info.setDocument((IDOMDocument) aspectNode.getOwnerDocument());
+                    addAspectDefinition(info, aspectInfos);
                 }
                 if (classLoader.loadClass(MethodBeforeAdvice.class.getName()).isAssignableFrom(
                         advisorClass)) {
@@ -150,7 +151,9 @@ public class AspectDefinitionBuilder {
                     info.setAspectClassName(className);
                     info.setAdviceMethodParameterTypes(new String[] { Method.class.getName(),
                             Object[].class.getName(), Object.class.getName() });
-                    aspectInfos.add(info);
+                    info.setResource(file);
+                    info.setDocument((IDOMDocument) aspectNode.getOwnerDocument());
+                    addAspectDefinition(info, aspectInfos);
                 }
                 if (classLoader.loadClass(ThrowsAdvice.class.getName()).isAssignableFrom(
                         advisorClass)) {
@@ -165,7 +168,9 @@ public class AspectDefinitionBuilder {
                     info.setAdviceMethodParameterTypes(new String[] { Method.class.getName(),
                             Object[].class.getName(), Object.class.getName(),
                             Exception.class.getName() });
-                    aspectInfos.add(info);
+                    info.setResource(file);
+                    info.setDocument((IDOMDocument) aspectNode.getOwnerDocument());
+                    addAspectDefinition(info, aspectInfos);
                 }
                 if (classLoader.loadClass(AfterReturningAdvice.class.getName()).isAssignableFrom(
                         advisorClass)) {
@@ -180,10 +185,14 @@ public class AspectDefinitionBuilder {
                     info.setAdviceMethodParameterTypes(new String[] { Object.class.getName(),
                             Method.class.getName(), Object[].class.getName(),
                             Object.class.getName() });
-                    aspectInfos.add(info);
+                    info.setResource(file);
+                    info.setDocument((IDOMDocument) aspectNode.getOwnerDocument());
+                    addAspectDefinition(info, aspectInfos);
                 }
             }
             catch (Throwable e) {
+                AopLog.log(AopLog.BUILDER_MESSAGES,
+                        "Exception occured while processing advisor node [" + aspectNode + "]");
                 Activator.log(e);
             }
         }
@@ -196,10 +205,11 @@ public class AspectDefinitionBuilder {
                 "http://www.springframework.org/schema/aop", "aspectj-autoproxy");
         if (list.getLength() > 0) {
             Node item = list.item(0);
-            List<Pattern> patternList = new ArrayList<Pattern>();
+            List<Pattern> patternList = null;
             NodeList include = item.getChildNodes();
             for (int j = 0; j < include.getLength(); j++) {
                 if ("include".equals(include.item(j).getLocalName())) {
+                    patternList = new ArrayList<Pattern>();
                     String pattern = BeansEditorUtils.getAttribute(include.item(j), "name");
                     if (StringUtils.hasText(pattern)) {
                         patternList.add(Pattern.compile(pattern));
@@ -217,11 +227,13 @@ public class AspectDefinitionBuilder {
                 if (className != null && isIncluded(patternList, id)) {
                     try {
                         if (AopReferenceModelBuilderUtils.validateAspect(className)) {
-                            createAnnotationAspectDefinition(document, bean, id, className,
+                            createAnnotationAspectDefinition(document, file, bean, id, className,
                                     aspectInfos);
                         }
                     }
                     catch (Throwable e) {
+                        AopLog.log(AopLog.BUILDER_MESSAGES,
+                                "Exception occured while processing node [" + item + "]");
                         Activator.log(e);
                     }
                 }
@@ -266,6 +278,7 @@ public class AspectDefinitionBuilder {
 
             for (int g = 0; g < aspectChildren.getLength(); g++) {
                 Node aspectNode = aspectChildren.item(g);
+                IAspectDefinition info = null;
                 if ("declare-parents".equals(aspectNode.getLocalName())) {
                     String typesMatching = BeansEditorUtils.getAttribute(aspectNode,
                             "types-matching");
@@ -274,64 +287,61 @@ public class AspectDefinitionBuilder {
                             "implement-interface");
                     if (StringUtils.hasText(typesMatching) && StringUtils.hasText(defaultImpl)
                             && StringUtils.hasText(implementInterface)) {
-                        BeanIntroductionDefinition info = new BeanIntroductionDefinition();
-                        info.setIntroducedInterfaceName(implementInterface);
-                        info.setTypePattern(typesMatching);
-                        info.setDefaultImplName(defaultImpl);
-                        info.setAspectClassName(defaultImpl);
-                        info.setAspectName(beanRef);
-                        info.setNode((IDOMNode) aspectNode);
-                        aspectInfos.add(info);
+                        info = new BeanIntroductionDefinition();
+                        ((BeanIntroductionDefinition) info)
+                                .setIntroducedInterfaceName(implementInterface);
+                        ((BeanIntroductionDefinition) info).setTypePattern(typesMatching);
+                        ((BeanIntroductionDefinition) info).setDefaultImplName(defaultImpl);
+                        ((BeanIntroductionDefinition) info).setAspectClassName(defaultImpl);
+                        ((BeanIntroductionDefinition) info).setAspectName(beanRef);
+                        ((BeanIntroductionDefinition) info).setNode((IDOMNode) aspectNode);
                     }
                 }
                 else if ("before".equals(aspectNode.getLocalName())) {
-                    BeanAspectDefinition info = parseAspect(pointcuts, rootPointcuts, aspectNode,
+                    info = parseAspect(pointcuts, rootPointcuts, aspectNode,
                             IAopReference.ADVICE_TYPES.BEFORE);
-                    info.setAspectClassName(className);
-                    info.setAspectName(beanRef);
-                    aspectInfos.add(info);
                 }
                 else if ("around".equals(aspectNode.getLocalName())) {
-                    BeanAspectDefinition info = parseAspect(pointcuts, rootPointcuts, aspectNode,
+                    info = parseAspect(pointcuts, rootPointcuts, aspectNode,
                             IAopReference.ADVICE_TYPES.AROUND);
-                    info.setAspectClassName(className);
-                    info.setAspectName(beanRef);
-                    aspectInfos.add(info);
                 }
                 else if ("after".equals(aspectNode.getLocalName())) {
-                    BeanAspectDefinition info = parseAspect(pointcuts, rootPointcuts, aspectNode,
+                    info = parseAspect(pointcuts, rootPointcuts, aspectNode,
                             IAopReference.ADVICE_TYPES.AFTER);
-                    info.setAspectClassName(className);
-                    info.setAspectName(beanRef);
-                    aspectInfos.add(info);
                 }
                 else if ("after-returning".equals(aspectNode.getLocalName())) {
-                    BeanAspectDefinition info = parseAspect(pointcuts, rootPointcuts, aspectNode,
+                    info = parseAspect(pointcuts, rootPointcuts, aspectNode,
                             IAopReference.ADVICE_TYPES.AFTER_RETURNING);
                     String returning = BeansEditorUtils.getAttribute(aspectNode, "returning");
                     info.setReturning(returning);
-                    info.setAspectClassName(className);
-                    info.setAspectName(beanRef);
-                    aspectInfos.add(info);
                 }
                 else if ("after-throwing".equals(aspectNode.getLocalName())) {
-                    BeanAspectDefinition info = parseAspect(pointcuts, rootPointcuts, aspectNode,
+                    info = parseAspect(pointcuts, rootPointcuts, aspectNode,
                             IAopReference.ADVICE_TYPES.AFTER_THROWING);
                     String throwing = BeansEditorUtils.getAttribute(aspectNode, "throwing");
                     info.setThrowing(throwing);
-                    info.setAspectClassName(className);
-                    info.setAspectName(beanRef);
-                    aspectInfos.add(info);
                 }
                 else if ("around".equals(aspectNode.getLocalName())) {
-                    BeanAspectDefinition info = parseAspect(pointcuts, rootPointcuts, aspectNode,
+                    info = parseAspect(pointcuts, rootPointcuts, aspectNode,
                             IAopReference.ADVICE_TYPES.AROUND);
-                    info.setAspectClassName(className);
+                }
+                if (info != null) {
+                    if (info.getAspectClassName() == null) {
+                        info.setAspectClassName(className);
+                    }
                     info.setAspectName(beanRef);
-                    aspectInfos.add(info);
+                    info.setResource(file);
+                    info.setDocument((IDOMDocument) child.getOwnerDocument());
+                    addAspectDefinition(info, aspectInfos);
                 }
             }
         }
+    }
+
+    private static void addAspectDefinition(IAspectDefinition info,
+            List<IAspectDefinition> aspectInfos) {
+        AopLog.log(AopLog.BUILDER_MESSAGES, info.toString());
+        aspectInfos.add(info);
     }
 
     private static void parsePointcuts(Map<String, String> rootPointcuts, NodeList children) {

@@ -46,7 +46,7 @@ public class AdviceDeclareParentAopTargetNode implements IReferenceNode,
                 .getText(this.reference.getTargetBean())
                 + " - "
                 + this.reference.getTargetBean().getElementResource()
-                        .getProjectRelativePath().toString();
+                        .getFullPath().toString();
     }
 
     public boolean hasChildren() {

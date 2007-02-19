@@ -18,7 +18,9 @@ package org.springframework.ide.eclipse.aop.core.model;
 import java.lang.reflect.Method;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 
+@SuppressWarnings("restriction")
 public interface IAspectDefinition {
 
     //Class<?> getAdviceClass() throws ClassNotFoundException;
@@ -50,6 +52,8 @@ public interface IAspectDefinition {
     void setType(IAopReference.ADVICE_TYPES type);
     
     void setResource(IResource file);
+    
+    void setDocument(IDOMDocument document);
     
     Object getAspectJPointcutExpression() throws Throwable;
     

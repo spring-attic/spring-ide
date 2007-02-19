@@ -42,14 +42,16 @@ public class AdviceAopTargetBeanNode implements IReferenceNode, IRevealableRefer
     }
 
     public Image getImage() {
-        return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getImage(this.references.get(0).getTargetBean());
+        return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getImage(this.references.get(0)
+                .getTargetBean());
     }
 
     public String getText() {
-        return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getText(this.references.get(0).getTargetBean())
+        return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getText(this.references.get(0)
+                .getTargetBean())
                 + " - "
-                + this.references.get(0).getTargetBean().getElementResource().getProjectRelativePath()
-                        .toString();
+                + this.references.get(0).getTargetBean().getElementResource()
+                        .getFullPath().toString();
     }
 
     public boolean hasChildren() {
@@ -58,8 +60,8 @@ public class AdviceAopTargetBeanNode implements IReferenceNode, IRevealableRefer
 
     public void openAndReveal() {
         IResource resource = references.get(0).getDefinition().getResource();
-        SpringUIUtils.openInEditor((IFile) resource, references.get(0).getDefinition()
-                .getAspectLineNumber());
+        SpringUIUtils.openInEditor((IFile) resource, references.get(0).getTargetBean()
+                .getElementEndLine());
     }
 
     public IAopReference getReference() {

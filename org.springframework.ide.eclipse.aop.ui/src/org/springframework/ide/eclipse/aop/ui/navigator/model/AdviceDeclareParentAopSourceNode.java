@@ -57,9 +57,8 @@ public class AdviceDeclareParentAopSourceNode implements IReferenceNode, IReveal
                         .getImplInterfaceName();
         text += " <";
         text += references.get(0).getDefinition().getAspectName();
-        text += "> [";
-        text += references.get(0).getDefinition().getResource().getProjectRelativePath().toString();
-        text += "]";
+        text += "> - ";
+        text += references.get(0).getDefinition().getResource().getFullPath().toString();
         return text;
     }
 

@@ -84,7 +84,7 @@ public class AopReferenceModelNavigator extends CommonNavigator implements ISele
 	public static void refreshViewer(TreeViewer viewer, final Object rootElement, Object element) {
 		viewer.getTree().setRedraw(false);
 		viewer.setInput(rootElement);
-		viewer.refresh();
+		//viewer.refresh();
 		viewer.expandToLevel(calculateExpandToLevel(rootElement));
 		expandTree(viewer.getTree().getItems(), false);
 		revealSelection(viewer, element);

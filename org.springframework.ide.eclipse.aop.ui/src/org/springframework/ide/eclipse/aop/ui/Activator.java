@@ -19,6 +19,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.springframework.ide.eclipse.aop.core.logging.AopLog;
+import org.springframework.ide.eclipse.aop.ui.tracing.EventTraceLogger;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -45,6 +47,9 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+        
+		// set the UI version of core operations
+        AopLog.setLogger(new EventTraceLogger());
 	}
 
 	/*

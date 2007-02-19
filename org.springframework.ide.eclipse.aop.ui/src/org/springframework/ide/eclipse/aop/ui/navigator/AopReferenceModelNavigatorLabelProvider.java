@@ -15,15 +15,11 @@
  */
 package org.springframework.ide.eclipse.aop.ui.navigator;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonLabelProvider;
-import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.IReferenceNode;
-import org.springframework.ide.eclipse.aop.ui.navigator.model.JavaElementReferenceNode;
-import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 
 /**
@@ -33,20 +29,12 @@ public class AopReferenceModelNavigatorLabelProvider
 
     public String getDescription(Object element) {
         // TODO add descrption here
-        return null;
+        return element.toString();
     }
 
     public Image getImage(Object element) {
         if (element instanceof IReferenceNode) {
             return ((IReferenceNode) element).getImage();
-        }
-        else if (element instanceof IJavaElement) {
-            return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER.getImage(element);
-        }
-        else if (element instanceof JavaElementReferenceNode) {
-            return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER
-                    .getImage(((JavaElementReferenceNode) element)
-                            .getJavaElement());
         }
         return super.getImage(element);
     }
@@ -54,20 +42,6 @@ public class AopReferenceModelNavigatorLabelProvider
     public String getText(Object element) {
         if (element instanceof IReferenceNode) {
             return ((IReferenceNode) element).getText();
-        }
-        else if (element instanceof IJavaElement) {
-            return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element)
-                    + " - "
-                    + AopReferenceModelUtils.getPackageLinkName((IJavaElement) element);
-        }
-        else if (element instanceof JavaElementReferenceNode) {
-            return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER
-                    .getText(((JavaElementReferenceNode) element)
-                            .getJavaElement())
-                    + " - "
-                    + AopReferenceModelUtils
-                            .getPackageLinkName(((JavaElementReferenceNode) element)
-                                    .getJavaElement());
         }
         return super.getText(element);
     }

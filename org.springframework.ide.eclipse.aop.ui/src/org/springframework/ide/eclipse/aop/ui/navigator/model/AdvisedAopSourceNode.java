@@ -79,9 +79,8 @@ public class AdvisedAopSourceNode implements IReferenceNode, IRevealableReferenc
         }
         text += " <";
         text += references.getDefinition().getAspectName();
-        text += "> [";
-        text += references.getDefinition().getResource().getProjectRelativePath().toString();
-        text += "]";
+        text += "> - ";
+        text += references.getDefinition().getResource().getFullPath().toString();
         return text;
     }
 

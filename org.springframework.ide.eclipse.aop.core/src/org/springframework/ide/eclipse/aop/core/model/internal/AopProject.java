@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaProject;
+import org.springframework.ide.eclipse.aop.core.logging.AopLog;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 
@@ -34,6 +35,7 @@ public class AopProject implements IAopProject {
     }
 
     public void addAopReference(IAopReference reference) {
+        AopLog.log(AopLog.BUILDER_MESSAGES, "Created AOP reference [" + reference + "]");
         this.references.add(reference);
     }
 

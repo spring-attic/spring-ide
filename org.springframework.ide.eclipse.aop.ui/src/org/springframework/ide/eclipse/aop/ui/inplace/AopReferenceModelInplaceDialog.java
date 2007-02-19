@@ -677,10 +677,13 @@ public class AopReferenceModelInplaceDialog {
                                 lastSelection), false);
             }
             if (element != null) {
+                viewer.getControl().setRedraw(false);
                 viewer.setInput(element);
-                viewer.refresh();
+                viewer.expandToLevel(AbstractTreeViewer.ALL_LEVELS);
+                AopReferenceModelNavigator.expandTree(viewer.getTree().getItems(), false);
                 AopReferenceModelNavigator.revealSelection(viewer, AopReferenceModelNavigatorUtils
                         .getSelectedElement(workbenchPart, lastSelection), !isShowingParentCrosscutting);
+                viewer.getControl().setRedraw(true);
             }
         }
     }
@@ -701,7 +704,6 @@ public class AopReferenceModelInplaceDialog {
             if (element != null) {
             	viewer.getControl().setRedraw(false);
                 viewer.setInput(element);
-                viewer.refresh();
                 viewer.expandToLevel(AbstractTreeViewer.ALL_LEVELS);
                 AopReferenceModelNavigator.expandTree(viewer.getTree().getItems(), false);
                 AopReferenceModelNavigator.revealSelection(viewer, AopReferenceModelNavigatorUtils
@@ -1142,7 +1144,6 @@ public class AopReferenceModelInplaceDialog {
         viewMenuManager = null;
         labelProvider.dispose();
         contentProvider.dispose();
-        // XReferenceProviderManager.getManager().setIsInplace(false);
     }
 
     public void dispose() {
@@ -1167,7 +1168,6 @@ public class AopReferenceModelInplaceDialog {
             fKeyBindingService = null;
         }
 
-        // XReferenceProviderManager.getManager().setIsInplace(false);
     }
 
     // ------------------ moving actions --------------------------
@@ -1255,7 +1255,6 @@ public class AopReferenceModelInplaceDialog {
 
         if (tracker.open()) {
             dialogShell.setBounds(tracker.getRectangles()[0]);
-
         }
     }
 
@@ -1287,31 +1286,5 @@ public class AopReferenceModelInplaceDialog {
 
     public boolean isOpen() {
         return dialogShell != null;
-    }
-
-    // -------- the following methods are all for testing purposes --------
-
-    /**
-     * Returns the dialog for the xref inplace view - this method is for testing purposes and not
-     * part of the published API.
-     */
-    public static AopReferenceModelInplaceDialog getInplaceDialog() {
-        return dialog;
-    }
-
-    /**
-     * Returns the shell for the xref inplace view - this method is for testing purposes and not
-     * part of the published API.
-     */
-    public Shell getShell() {
-        return dialogShell;
-    }
-
-    /**
-     * Returns the tree viewer for the xref inplace view - this method is for testing purposes and
-     * not part of the published API.
-     */
-    public TreeViewer getTreeViewer() {
-        return viewer;
     }
 }
