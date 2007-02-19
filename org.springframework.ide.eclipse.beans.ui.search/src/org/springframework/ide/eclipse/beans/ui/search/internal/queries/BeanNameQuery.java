@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,28 +27,27 @@ import org.springframework.ide.eclipse.core.MessageUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
- * This implementation of <code>ISearchQuery</code> looks for all
- * <code>IBean</code>s which ID or alias names match a given name.
- * @see org.eclipse.search.ui.ISearchQuery
- * @see org.springframework.ide.eclipse.beans.core.model.IBean
+ * This implementation of {@link ISearchQuery} looks for all {@link IBean}s
+ * which ID or alias names match a given name.
+ * 
  * @author Torsten Juergeleit
  */
 public class BeanNameQuery extends AbstractBeansQuery {
 
 	public BeanNameQuery(BeansSearchScope scope, String pattern,
-						 boolean isCaseSensitive, boolean isRegexSearch) {
+			boolean isCaseSensitive, boolean isRegexSearch) {
 		super(scope, pattern, isCaseSensitive, isRegexSearch);
 	}
 
 	public String getLabel() {
 		Object[] args = new Object[] { getPattern(),
-									   getScope().getDescription() };
+				getScope().getDescription() };
 		return MessageUtils.format(
-						 BeansSearchMessages.SearchQuery_searchFor_name, args);
+				BeansSearchMessages.SearchQuery_searchFor_name, args);
 	}
 
 	protected boolean doesMatch(IModelElement element, Pattern pattern,
-								IProgressMonitor monitor) {
+			IProgressMonitor monitor) {
 		if (element instanceof IBean) {
 			Bean bean = (Bean) element;
 
@@ -60,11 +59,11 @@ public class BeanNameQuery extends AbstractBeansQuery {
 			// Now compare aliases
 			String[] aliases = bean.getAliases();
 			if (aliases != null) {
-				for (int i = 0; i < aliases.length; i++) {
-					if (pattern.matcher(aliases[i]).matches()) {
+				for (String alias : aliases) {
+					if (pattern.matcher(alias).matches()) {
 						return true;
 					}
-					
+
 				}
 			}
 		}
