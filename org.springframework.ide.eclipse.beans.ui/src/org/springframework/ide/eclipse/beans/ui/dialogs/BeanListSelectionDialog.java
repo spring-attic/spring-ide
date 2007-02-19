@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 
 /**
  * Spring Bean selection dialog.
+ * 
  * @author Christian Dupuis
  */
 public class BeanListSelectionDialog extends ElementListSelectionDialog {
@@ -64,9 +65,12 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 				if (fMatcher.match(bean.getElementName())) {
 					return true;
 				}
-				for (String token : bean.getAliases()) {
-					if (fMatcher.match(token)) {
-						return true;
+				String[] aliases = bean.getAliases();
+				if (aliases != null) {
+					for (String alias : aliases) {
+						if (fMatcher.match(alias)) {
+							return true;
+						}
 					}
 				}
 				

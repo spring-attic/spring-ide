@@ -49,6 +49,10 @@ public interface IBean extends ISourceModelElement {
 
 	public boolean isFactory();
 
+	/**
+	 * Returns array of aliases defined for this bean or <code>null</code> if
+	 * no alias is defined.
+	 */
 	String[] getAliases();
 
 	Set<IBeanConstructorArgument> getConstructorArguments();
