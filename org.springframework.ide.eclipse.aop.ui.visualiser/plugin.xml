@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <plugin>
-   <extension
-         id="org.springframework.ide.eclipse.aop.ui.visualiser.providers"
-         name="%visualiserProviders"
-         point="org.eclipse.contribution.visualiser.providers">
-      <provider
-            markupProviderClass="org.springframework.ide.eclipse.aop.ui.visualiser.AopReferenceModelMarkupProvider"
-            name="%provider.name"
-            priority="5"
-            description="%provider.description"
-            emptyMessage="%provider.empty"
-            contentProviderClass="org.eclipse.contribution.visualiser.jdtImpl.JDTContentProvider"
-            id="org.springframework.ide.eclipse.aop.ui.visualiser.providers.beansaopprovider">
-      </provider>
-   </extension>
+	
+	<extension
+		id="org.springframework.ide.eclipse.aop.ui.visualiser.providers"
+		name="%visualiserProviders"
+		point="org.eclipse.contribution.visualiser.providers">
+		<provider
+			markupProviderClass="org.springframework.ide.eclipse.aop.ui.visualiser.AopReferenceModelMarkupProvider"
+			name="%provider.name" priority="5"
+			description="%provider.description" emptyMessage="%provider.empty"
+			contentProviderClass="org.eclipse.contribution.visualiser.jdtImpl.JDTContentProvider"
+			id="org.springframework.ide.eclipse.aop.ui.visualiser.providers.beansaopprovider">
+		</provider>
+	</extension>
+	
 </plugin>
