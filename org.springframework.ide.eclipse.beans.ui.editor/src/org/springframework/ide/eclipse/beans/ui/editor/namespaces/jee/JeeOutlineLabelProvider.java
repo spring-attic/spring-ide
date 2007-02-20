@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.ide.eclipse.beans.ui.editor.namespaces.tx;
+package org.springframework.ide.eclipse.beans.ui.editor.namespaces.jee;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider;
@@ -24,7 +24,7 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
 
 @SuppressWarnings("restriction")
-public class TxOutlineLabelProvider
+public class JeeOutlineLabelProvider
         extends JFaceNodeLabelProvider {
 
     public Image getImage(Object object) {
@@ -35,8 +35,9 @@ public class TxOutlineLabelProvider
         if (prefix != null) {
             nodeName = nodeName.substring(prefix.length() + 1);
         }
-        if ("advice".equals(nodeName) || "annotation-driven".equals(nodeName)) {
-            return TxUIImages.getImage(TxUIImages.IMG_OBJS_TX);
+        if ("jndi-lookup".equals(nodeName) || "local-slsb".equals(nodeName)
+                || "remote-slsb".equals(nodeName) || "entity-manager-factory".equals(nodeName)) {
+            return JeeUIImages.getImage(JeeUIImages.IMG_OBJS_JEE);
         }
         return null;
     }
@@ -53,15 +54,27 @@ public class TxOutlineLabelProvider
         }
         nodeName = "<" + node.getNodeName() + "/>";
         String text = null;
-        if ("advice".equals(shortNodeName) || "annotation-driven".equals(shortNodeName)) {
+        if ("jndi-lookup".equals(shortNodeName) || "local-slsb".equals(shortNodeName)
+                || "remote-slsb".equals(shortNodeName)) {
             text = nodeName;
             String id = BeansEditorUtils.getAttribute(node, "id");
             if (StringUtils.hasText(id)) {
                 text += " " + id; 
             }
             if (BeansContentOutlineConfiguration.isShowAttributes()
-                    && BeansEditorUtils.hasAttribute(node, "transaction-manager")) {
-                text += " <" + BeansEditorUtils.getAttribute(node, "transaction-manager") + ">";
+                    && BeansEditorUtils.hasAttribute(node, "jndi-name")) {
+                text += " [" + BeansEditorUtils.getAttribute(node, "jndi-name") + "]";
+            }
+        }
+        else if ("entity-manager-factory".equals(shortNodeName)) {
+            text = nodeName;
+            String id = BeansEditorUtils.getAttribute(node, "id");
+            if (StringUtils.hasText(id)) {
+                text += " " + id; 
+            }
+            if (BeansContentOutlineConfiguration.isShowAttributes()
+                    && BeansEditorUtils.hasAttribute(node, "persistence-unit-name")) {
+                text += " [" + BeansEditorUtils.getAttribute(node, "persistence-unit-name") + "]";
             }
         }
         return text;
