@@ -26,25 +26,23 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Node;
 
 /**
- * Detects hyperlinks in XML tags. Includes detection of bean classes and bean properties in
- * attribute values. Resolves bean references (including references to parent beans or factory
- * beans).
+ * Detects hyperlinks in XML tags. Includes detection of bean classes and bean
+ * properties in attribute values. Resolves bean references (including
+ * references to parent beans or factory beans).
  * 
  * @author Christian Dupuis
  */
-public class WebflowHyperLinkDetector
-        extends AbstractHyperLinkDetector implements IHyperlinkDetector {
+public class WebflowHyperLinkDetector extends AbstractHyperLinkDetector implements IHyperlinkDetector {
 
-    /**
-     * Returns <code>true</code> if given attribute is openable.
-     */
-    protected boolean isLinkableAttr(Attr attr) {
-        return false;
-    }
+	/**
+	 * Returns <code>true</code> if given attribute is openable.
+	 */
+	protected boolean isLinkableAttr(Attr attr) {
+		return false;
+	}
 
-    protected IHyperlink createHyperlink(String name, String target, Node parentNode,
-            IRegion hyperlinkRegion, IDocument document, Node node, ITextViewer textViewer,
-            IRegion cursor) {
-        return null;
-    }
+	protected IHyperlink createHyperlink(String name, String target, Node parentNode, IRegion hyperlinkRegion,
+			IDocument document, Node node, ITextViewer textViewer, IRegion cursor) {
+		return null;
+	}
 }

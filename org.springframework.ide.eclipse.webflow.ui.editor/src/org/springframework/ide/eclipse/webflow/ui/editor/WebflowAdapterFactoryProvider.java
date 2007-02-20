@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.webflow.ui.editor;
 
@@ -39,8 +39,7 @@ public class WebflowAdapterFactoryProvider extends AdapterFactoryProviderForXML 
 	protected void addContentBasedFactories(IStructuredModel structuredModel) {
 		FactoryRegistry factoryRegistry = structuredModel.getFactoryRegistry();
 		Assert.isNotNull(factoryRegistry, "No factory registered");
-		INodeAdapterFactory factory = factoryRegistry.getFactoryFor(
-													  IJFaceNodeAdapter.class);
+		INodeAdapterFactory factory = factoryRegistry.getFactoryFor(IJFaceNodeAdapter.class);
 		if (factory == null) {
 			factory = new BeansJFaceNodeAdapterFactory();
 			factoryRegistry.addFactory(factory);
@@ -53,7 +52,8 @@ public class WebflowAdapterFactoryProvider extends AdapterFactoryProviderForXML 
 				CMDocumentManager documentManager = modelQuery.getCMDocumentManager();
 				if (documentManager != null) {
 					IPreferenceStore store = XMLUIPlugin.getDefault().getPreferenceStore();
-					boolean useInferredGrammar = (store != null) ? store.getBoolean(XMLUIPreferenceNames.USE_INFERRED_GRAMMAR) : true;
+					boolean useInferredGrammar = (store != null) ? store
+							.getBoolean(XMLUIPreferenceNames.USE_INFERRED_GRAMMAR) : true;
 
 					documentManager.setPropertyEnabled(CMDocumentManager.PROPERTY_ASYNC_LOAD, true);
 					documentManager.setPropertyEnabled(CMDocumentManager.PROPERTY_AUTO_LOAD, false);

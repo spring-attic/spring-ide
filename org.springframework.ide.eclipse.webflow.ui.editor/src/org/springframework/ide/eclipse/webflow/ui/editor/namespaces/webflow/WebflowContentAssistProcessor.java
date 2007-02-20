@@ -33,6 +33,7 @@ public class WebflowContentAssistProcessor extends AbstractContentAssistProcesso
 	}
 
 	@Override
-	protected void computeAttributeNameProposals(ContentAssistRequest request, String prefix, String namespace, String namespacePrefix, Node attributeNode) {
+	protected void computeAttributeNameProposals(ContentAssistRequest request, String prefix, String namespace,
+			String namespacePrefix, Node attributeNode) {
 	}
 }

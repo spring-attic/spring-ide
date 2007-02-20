@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.webflow.ui.editor;
 
@@ -26,23 +26,21 @@ import org.eclipse.wst.xml.core.internal.encoding.XMLDocumentLoader;
 import org.eclipse.wst.xml.core.internal.modelhandler.XMLModelLoader;
 
 /**
- * Provides model handling for Spring beans config files. 
+ * Provides model handling for Spring beans config files.
  */
 @SuppressWarnings("restriction")
-public class WebflowModelHandler extends AbstractModelHandler
-													 implements IModelHandler {
+public class WebflowModelHandler extends AbstractModelHandler implements IModelHandler {
 	/**
-	 * Needs to match what's in plugin registry. In fact, can be overwritten
-	 * at run time with what's in registry! (so should never be 'final')
+	 * Needs to match what's in plugin registry. In fact, can be overwritten at
+	 * run time with what's in registry! (so should never be 'final')
 	 */
-	private static String modelHandlerID =
-								"org.eclipse.wst.sse.core.handler.webflowConfig";
+	private static String modelHandlerID = "org.eclipse.wst.sse.core.handler.webflowConfig";
+
 	/**
-	 * Needs to match what's in plugin registry. In fact, can be overwritten
-	 * at run time with what's in registry! (so should never be 'final')
+	 * Needs to match what's in plugin registry. In fact, can be overwritten at
+	 * run time with what's in registry! (so should never be 'final')
 	 */
-	private static String associatedContentTypeID =
-								  Activator.PLUGIN_ID + ".webflowConfig";
+	private static String associatedContentTypeID = Activator.PLUGIN_ID + ".webflowConfig";
 
 	public WebflowModelHandler() {
 		setId(modelHandlerID);

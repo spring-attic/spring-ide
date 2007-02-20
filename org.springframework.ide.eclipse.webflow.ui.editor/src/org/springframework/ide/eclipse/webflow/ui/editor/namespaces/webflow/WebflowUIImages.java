@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow;
 
@@ -55,17 +55,17 @@ public class WebflowUIImages {
 	private static final String NAME_PREFIX = Activator.PLUGIN_ID + '.';
 
 	private static final int NAME_PREFIX_LENGTH = NAME_PREFIX.length();
-    
-    private static final String STRUCTURE = "icons/full/obj16/";
+
+	private static final String STRUCTURE = "icons/full/obj16/";
 
 	/* Declare Common paths */
 	private static URL ICON_BASE_URL = null;
 
 	static {
 		try {
-			ICON_BASE_URL = new URL(Activator.getDefault().getBundle()
-					.getEntry("/"), ICON_PATH_PREFIX);
-		} catch (MalformedURLException e) {
+			ICON_BASE_URL = new URL(Activator.getDefault().getBundle().getEntry("/"), ICON_PATH_PREFIX);
+		}
+		catch (MalformedURLException e) {
 		}
 	}
 
@@ -80,8 +80,7 @@ public class WebflowUIImages {
 	 */
 	public static final String IMG_OBJS_WEBFLOW = NAME_PREFIX + "spring_webflow_obj.gif";
 
-	public static final ImageDescriptor DESC_OBJS_WEBFLOW = createManaged(
-            STRUCTURE, IMG_OBJS_WEBFLOW);
+	public static final ImageDescriptor DESC_OBJS_WEBFLOW = createManaged(STRUCTURE, IMG_OBJS_WEBFLOW);
 
 	/**
 	 * Returns the <code>Image<code> identified by the given key,
@@ -113,11 +112,9 @@ public class WebflowUIImages {
 	/* package */static ImageRegistry getImageRegistry() {
 		if (imageRegistry == null) {
 			imageRegistry = new ImageRegistry();
-			for (Iterator<String> iter = imageDescriptors.keySet().iterator(); iter
-					.hasNext();) {
+			for (Iterator<String> iter = imageDescriptors.keySet().iterator(); iter.hasNext();) {
 				String key = (String) iter.next();
-				imageRegistry.put(key, (ImageDescriptor) imageDescriptors
-						.get(key));
+				imageRegistry.put(key, (ImageDescriptor) imageDescriptors.get(key));
 			}
 			imageDescriptors = null;
 		}
@@ -127,15 +124,14 @@ public class WebflowUIImages {
 	// ---- Helper methods to access icons on the file system
 	// -------------------
 
-	private static void setImageDescriptors(IAction action, String type,
-			String relPath) {
+	private static void setImageDescriptors(IAction action, String type, String relPath) {
 		try {
-			ImageDescriptor id = ImageDescriptor.createFromURL(makeIconFileURL(
-					"d" + type, relPath));
+			ImageDescriptor id = ImageDescriptor.createFromURL(makeIconFileURL("d" + type, relPath));
 			if (id != null) {
 				action.setDisabledImageDescriptor(id);
 			}
-		} catch (MalformedURLException e) {
+		}
+		catch (MalformedURLException e) {
 		}
 		/*
 		 * try { ImageDescriptor id =
@@ -148,9 +144,8 @@ public class WebflowUIImages {
 
 	private static ImageDescriptor createManaged(String prefix, String name) {
 		try {
-			ImageDescriptor result = ImageDescriptor
-					.createFromURL(makeIconFileURL(prefix, name
-							.substring(NAME_PREFIX_LENGTH)));
+			ImageDescriptor result = ImageDescriptor.createFromURL(makeIconFileURL(prefix, name
+					.substring(NAME_PREFIX_LENGTH)));
 			if (imageDescriptors == null) {
 				imageDescriptors = new HashMap<String, ImageDescriptor>();
 			}
@@ -158,7 +153,8 @@ public class WebflowUIImages {
 			if (imageRegistry != null) {
 			}
 			return result;
-		} catch (MalformedURLException e) {
+		}
+		catch (MalformedURLException e) {
 			return ImageDescriptor.getMissingImageDescriptor();
 		}
 	}
@@ -166,13 +162,13 @@ public class WebflowUIImages {
 	private static ImageDescriptor create(String prefix, String name) {
 		try {
 			return ImageDescriptor.createFromURL(makeIconFileURL(prefix, name));
-		} catch (MalformedURLException e) {
+		}
+		catch (MalformedURLException e) {
 			return ImageDescriptor.getMissingImageDescriptor();
 		}
 	}
 
-	private static URL makeIconFileURL(String prefix, String name)
-			throws MalformedURLException {
+	private static URL makeIconFileURL(String prefix, String name) throws MalformedURLException {
 		if (ICON_BASE_URL == null) {
 			throw new MalformedURLException();
 		}

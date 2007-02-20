@@ -26,7 +26,6 @@ import org.w3c.dom.Node;
 public class WebflowConfigOutlineLabelProvider extends JFaceNodeLabelProvider {
 
 	public Image getImage(Object object) {
-
 		Node node = (Node) object;
 		String ns = node.getNamespaceURI();
 		if ("http://www.springframework.org/schema/webflow-config".equals(ns)) {

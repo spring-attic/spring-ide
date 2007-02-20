@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow;
 
 import org.eclipse.swt.graphics.Image;
@@ -24,24 +23,17 @@ import org.w3c.dom.Node;
 public class WebflowOutlineLabelProvider extends JFaceNodeLabelProvider {
 
 	public Image getImage(Object object) {
-
 		Node node = (Node) object;
-		String prefix = node.getPrefix();
-		String nodeName = node.getNodeName();
-		if (prefix != null) {
-			nodeName = nodeName.substring(prefix.length() + 1);
-		}
+		String nodeName = node.getLocalName();
 		return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW);
 	}
 
 	public String getText(Object o) {
-
-		// Create Spring beans label text
 		Node node = (Node) o;
 		String nodeName = node.getNodeName();
 		String shortNodeName = node.getLocalName();
-
 		String text = null;
+
 		return text;
 	}
 }
