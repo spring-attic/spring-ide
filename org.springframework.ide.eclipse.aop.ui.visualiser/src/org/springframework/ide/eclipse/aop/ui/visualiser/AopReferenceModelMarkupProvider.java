@@ -44,162 +44,157 @@ import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNa
 /**
  * The Beans AOP Markup Provider
  */
-public class AopReferenceModelMarkupProvider
-        extends SimpleMarkupProvider implements IAopModelChangedListener {
+public class AopReferenceModelMarkupProvider extends SimpleMarkupProvider implements IAopModelChangedListener {
 
-    // Cache: IMember -> List(Stripe)
-    private static Hashtable<IMember, List<Stripe>> markupCache = new Hashtable<IMember, List<Stripe>>();
+	// Cache: IMember -> List(Stripe)
+	private static Hashtable<IMember, List<Stripe>> markupCache = new Hashtable<IMember, List<Stripe>>();
 
-    public static void resetCache() {
-        markupCache.clear();
-    }
+	public static void resetCache() {
+		markupCache.clear();
+	}
 
-    /**
-     * Get a List of Stripes for the given member, which are its markups.
-     */
-    @SuppressWarnings("unchecked")
-    public List<Stripe> getMemberMarkups(IMember member) {
+	/**
+	 * Get a List of Stripes for the given member, which are its markups.
+	 */
+	@SuppressWarnings("unchecked")
+	public List<Stripe> getMemberMarkups(IMember member) {
 
-        List<Stripe> cachedValue = markupCache.get(member);
-        if (cachedValue != null) {
-            return cachedValue;
-        }
+		List<Stripe> cachedValue = markupCache.get(member);
+		if (cachedValue != null) {
+			return cachedValue;
+		}
 
-        List<Stripe> stripeList = new ArrayList<Stripe>();
-        if (ProviderManager.getContentProvider() instanceof JDTContentProvider) {
-            IJavaProject jp = ((JDTContentProvider) ProviderManager.getContentProvider())
-                    .getCurrentProject();
+		List<Stripe> stripeList = new ArrayList<Stripe>();
+		if (ProviderManager.getContentProvider() instanceof JDTContentProvider) {
+			IJavaProject jp = ((JDTContentProvider) ProviderManager.getContentProvider()).getCurrentProject();
 
-            if (jp != null) {
-                List<IAopReference> references = org.springframework.ide.eclipse.aop.core.Activator
-                        .getModel().getAllReferences(jp.getJavaProject());
-                if (references != null && references.size() > 0) {
-                    for (IAopReference reference : references) {
-                        IType advisedType = null;
-                        if (reference.getTarget() instanceof IType) {
-                            advisedType = (IType) reference.getTarget();
-                        }
-                        else {
-                            advisedType = (IType) reference.getTarget().getDeclaringType();
-                        }
-                        ICompilationUnit advisedCu = advisedType.getCompilationUnit();
-                        if (member instanceof JDTMember) {
-                            IJavaElement je = ((JDTMember) member).getResource();
-                            if (je.equals(advisedCu)) {
-                                String label = getText(reference);
-                                Stripe stripe = new Stripe(
-                                        new SimpleMarkupKind(label),
-                                        AopReferenceModelNavigatorUtils.getLineNumber(reference.getTarget()) + 1);
-                                stripeList.add(stripe);
-                                addMarkup(member.getFullname(), stripe);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        MarkupUtils.processStripes(stripeList);
-        markupCache.put(member, stripeList);
-        return stripeList;
-    }
+			if (jp != null) {
+				List<IAopReference> references = org.springframework.ide.eclipse.aop.core.Activator.getModel()
+						.getAllReferences(jp.getJavaProject());
+				if (references != null && references.size() > 0) {
+					for (IAopReference reference : references) {
+						IType advisedType = null;
+						if (reference.getTarget() instanceof IType) {
+							advisedType = (IType) reference.getTarget();
+						}
+						else {
+							advisedType = (IType) reference.getTarget().getDeclaringType();
+						}
+						ICompilationUnit advisedCu = advisedType.getCompilationUnit();
+						if (member instanceof JDTMember) {
+							IJavaElement je = ((JDTMember) member).getResource();
+							if (je.equals(advisedCu)) {
+								String label = getText(reference);
+								Stripe stripe = new Stripe(new SimpleMarkupKind(label), AopReferenceModelNavigatorUtils
+										.getLineNumber(reference.getTarget()) + 1);
+								stripeList.add(stripe);
+								addMarkup(member.getFullname(), stripe);
+							}
+						}
+					}
+				}
+			}
+		}
+		MarkupUtils.processStripes(stripeList);
+		markupCache.put(member, stripeList);
+		return stripeList;
+	}
 
-    /**
-     * Get all the markup kinds
-     * 
-     * @return a Set of Strings
-     */
-    public SortedSet<SimpleMarkupKind> getAllMarkupKinds() {
-        SortedSet<SimpleMarkupKind> kinds = new TreeSet<SimpleMarkupKind>();
-        List<String> advices = new ArrayList<String>();
-        if (ProviderManager.getContentProvider() instanceof JDTContentProvider) {
-            IJavaProject jp = ((JDTContentProvider) ProviderManager.getContentProvider())
-                    .getCurrentProject();
-            if (jp != null) {
-                List<IAopReference> references = Activator.getModel().getAllReferences(jp);
-                if (references != null && references.size() > 0) {
-                    for (IAopReference reference : references) {
-                        String label = getText(reference);
-                        if (!advices.contains(label)) {
-                            kinds.add(new SimpleMarkupKind(label));
-                            advices.add(label);
-                        }
-                    }
-                }
-            }
-        }
-        if (kinds.size() > 0) {
-            return kinds;
-        }
-        return null;
-    }
+	/**
+	 * Get all the markup kinds
+	 * 
+	 * @return a Set of Strings
+	 */
+	public SortedSet<SimpleMarkupKind> getAllMarkupKinds() {
+		SortedSet<SimpleMarkupKind> kinds = new TreeSet<SimpleMarkupKind>();
+		List<String> advices = new ArrayList<String>();
+		if (ProviderManager.getContentProvider() instanceof JDTContentProvider) {
+			IJavaProject jp = ((JDTContentProvider) ProviderManager.getContentProvider()).getCurrentProject();
+			if (jp != null) {
+				List<IAopReference> references = Activator.getModel().getAllReferences(jp);
+				if (references != null && references.size() > 0) {
+					for (IAopReference reference : references) {
+						String label = getText(reference);
+						if (!advices.contains(label)) {
+							kinds.add(new SimpleMarkupKind(label));
+							advices.add(label);
+						}
+					}
+				}
+			}
+		}
+		if (kinds.size() > 0) {
+			return kinds;
+		}
+		return null;
+	}
 
-    /**
-     * Process a mouse click on a stripe. This method opens the editor at the line of the stripe
-     * clicked.
-     * 
-     * @see org.eclipse.contribution.visualiser.interfaces.IMarkupProvider#processMouseclick(org.eclipse.contribution.visualiser.interfaces.IMember,
-     *      org.eclipse.contribution.visualiser.core.Stripe, int)
-     */
-    public boolean processMouseclick(IMember member, Stripe stripe, int buttonClicked) {
-        if (buttonClicked == 1) {
-            if (member instanceof JDTMember) {
-                IJavaElement jEl = ((JDTMember) member).getResource();
-                if (jEl != null) {
-                    JDTUtils.openInEditor(jEl.getResource(), stripe.getOffset());
-                }
-            }
-            return false;
-        }
-        return true;
-    }
+	/**
+	 * Process a mouse click on a stripe. This method opens the editor at the
+	 * line of the stripe clicked.
+	 * 
+	 * @see org.eclipse.contribution.visualiser.interfaces.IMarkupProvider#processMouseclick(org.eclipse.contribution.visualiser.interfaces.IMember,
+	 * org.eclipse.contribution.visualiser.core.Stripe, int)
+	 */
+	public boolean processMouseclick(IMember member, Stripe stripe, int buttonClicked) {
+		if (buttonClicked == 1) {
+			if (member instanceof JDTMember) {
+				IJavaElement jEl = ((JDTMember) member).getResource();
+				if (jEl != null) {
+					JDTUtils.openInEditor(jEl.getResource(), stripe.getOffset());
+				}
+			}
+			return false;
+		}
+		return true;
+	}
 
-    private String getText(IAopReference reference) {
-        ADVICE_TYPES type = reference.getAdviceType();
-        String text = "";
-        if (type == ADVICE_TYPES.AFTER) {
-            text += "after()";
-        }
-        else if (type == ADVICE_TYPES.AFTER_RETURNING) {
-            text += "after-returning()";
-        }
-        else if (type == ADVICE_TYPES.AFTER_THROWING) {
-            text += "after-throwing()";
-        }
-        else if (type == ADVICE_TYPES.BEFORE) {
-            text += "before()";
-        }
-        else if (type == ADVICE_TYPES.AROUND) {
-            text += "around()";
-        }
-        else if (type == ADVICE_TYPES.DECLARE_PARENTS) {
-            text += "declare parents:";
-            text += " implements "
-                    + ((IIntroductionDefinition) reference.getDefinition()).getImplInterfaceName();
-        }
-        text += " <";
-        text += reference.getDefinition().getAspectName();
-        text += "> [";
-        text += reference.getDefinition().getResource().getProjectRelativePath().toString();
-        text += "]";
-        return text;
-    }
+	private String getText(IAopReference reference) {
+		ADVICE_TYPES type = reference.getAdviceType();
+		String text = "";
+		if (type == ADVICE_TYPES.AFTER) {
+			text += "after()";
+		}
+		else if (type == ADVICE_TYPES.AFTER_RETURNING) {
+			text += "after-returning()";
+		}
+		else if (type == ADVICE_TYPES.AFTER_THROWING) {
+			text += "after-throwing()";
+		}
+		else if (type == ADVICE_TYPES.BEFORE) {
+			text += "before()";
+		}
+		else if (type == ADVICE_TYPES.AROUND) {
+			text += "around()";
+		}
+		else if (type == ADVICE_TYPES.DECLARE_PARENTS) {
+			text += "declare parents:";
+			text += " implements " + ((IIntroductionDefinition) reference.getDefinition()).getImplInterfaceName();
+		}
+		text += " <";
+		text += reference.getDefinition().getAspectName();
+		text += "> [";
+		text += reference.getDefinition().getResource().getProjectRelativePath().toString();
+		text += "]";
+		return text;
+	}
 
-    public void changed() {
-        resetCache();
-    }
+	public void changed() {
+		resetCache();
+	}
 
-    /**
-     * Activate the provider
-     */
-    public void activate() {
-        Activator.getModel().registerAopModelChangedListener(this);
-    }
+	/**
+	 * Activate the provider
+	 */
+	public void activate() {
+		Activator.getModel().registerAopModelChangedListener(this);
+	}
 
-    /**
-     * Deactivate the provider
-     */
-    public void deactivate() {
-        super.deactivate();
-        Activator.getModel().unregisterAopModelChangedListener(this);
-    }
+	/**
+	 * Deactivate the provider
+	 */
+	public void deactivate() {
+		super.deactivate();
+		Activator.getModel().unregisterAopModelChangedListener(this);
+	}
 }
