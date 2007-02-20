@@ -29,10 +29,10 @@ import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 @SuppressWarnings("restriction")
 public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 
-    public void build(IFile file, IProgressMonitor monitor) {
-        Set<IFile> filesToBuild = AopReferenceModelUtils.getFilesToBuild(file);
-        monitor.beginTask("Parsing Spring AOP", filesToBuild.size());
-        AopReferenceModelBuilder.buildAopModel(file.getProject(), filesToBuild);
-        monitor.done();
-    }
+	public void build(IFile file, IProgressMonitor monitor) {
+		Set<IFile> filesToBuild = AopReferenceModelUtils.getFilesToBuild(file);
+		monitor.beginTask("Parsing Spring AOP", filesToBuild.size());
+		AopReferenceModelBuilder.buildAopModel(file.getProject(), filesToBuild);
+		monitor.done();
+	}
 }

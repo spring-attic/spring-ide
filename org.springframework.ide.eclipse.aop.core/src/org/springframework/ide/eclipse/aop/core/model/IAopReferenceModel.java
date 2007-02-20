@@ -21,25 +21,25 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 
 public interface IAopReferenceModel {
-    
-    IAopProject getProject(IJavaProject project);
-    
-    List<IAopProject> getProjects();
-    
-    void addProject(IJavaProject project, IAopProject aopProject);
+
+	IAopProject getProject(IJavaProject project);
+
+	List<IAopProject> getProjects();
+
+	void addProject(IJavaProject project, IAopProject aopProject);
 
 	boolean isAdvised(IJavaElement je);
-    
-    boolean isAdvice(IJavaElement je);
-     
-    List<IAopReference> getAdviceDefinition(IJavaElement je);
-    
+
+	boolean isAdvice(IJavaElement je);
+
+	List<IAopReference> getAdviceDefinition(IJavaElement je);
+
 	void registerAopModelChangedListener(IAopModelChangedListener listener);
-	
+
 	void unregisterAopModelChangedListener(IAopModelChangedListener listener);
-	
+
 	void fireModelChanged();
-    
-    public List<IAopReference> getAllReferences(IJavaProject project);
-    
+
+	public List<IAopReference> getAllReferences(IJavaProject project);
+
 }

@@ -17,9 +17,9 @@ public class Activator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static Activator plugin;
-	
+
 	private static AopReferenceModel model;
-	
+
 	/**
 	 * The constructor
 	 */
@@ -47,17 +47,17 @@ public class Activator extends AbstractUIPlugin {
 
 	/**
 	 * Returns the shared instance
-	 *
+	 * 
 	 * @return the shared instance
 	 */
 	public static Activator getDefault() {
 		return plugin;
 	}
-	
+
 	public static IAopReferenceModel getModel() {
-        return model;
-    }
-	
+		return model;
+	}
+
 	public static void log(IStatus status) {
 		getDefault().getLog().log(status);
 	}
@@ -71,18 +71,18 @@ public class Activator extends AbstractUIPlugin {
 		IStatus status = createErrorStatus(message, exception);
 		getDefault().getLog().log(status);
 	}
-	
+
 	public static void log(Throwable exception) {
 		getDefault().getLog().log(createErrorStatus("Internal Error", exception));
 	}
+
 	/**
 	 * Returns a new <code>IStatus</code> for this plug-in
 	 */
-	public static IStatus createErrorStatus(String message,
-											Throwable exception) {
+	public static IStatus createErrorStatus(String message, Throwable exception) {
 		if (message == null) {
-			message= ""; 
-		}		
+			message = "";
+		}
 		return new Status(Status.ERROR, PLUGIN_ID, 0, message, exception);
 	}
 }

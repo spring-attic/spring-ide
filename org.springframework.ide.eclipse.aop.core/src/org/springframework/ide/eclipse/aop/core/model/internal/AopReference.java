@@ -24,85 +24,82 @@ import org.springframework.util.ObjectUtils;
 
 public class AopReference implements IAopReference {
 
-    private ADVICE_TYPES type;
+	private ADVICE_TYPES type;
 
-    private IMember source;
+	private IMember source;
 
-    private IMember target;
+	private IMember target;
 
-    private IAspectDefinition definition;
+	private IAspectDefinition definition;
 
-    private IResource file;
+	private IResource file;
 
-    private IBean bean;
+	private IBean bean;
 
-    public AopReference(ADVICE_TYPES type, IMember source, IMember target,
-            IAspectDefinition def, IResource file, IBean bean) {
-        this.type = type;
-        this.source = source;
-        this.target = target;
-        this.definition = def;
-        this.file = file;
-        this.bean = bean;
-    }
+	public AopReference(ADVICE_TYPES type, IMember source, IMember target, IAspectDefinition def, IResource file,
+			IBean bean) {
+		this.type = type;
+		this.source = source;
+		this.target = target;
+		this.definition = def;
+		this.file = file;
+		this.bean = bean;
+	}
 
-    public IAspectDefinition getDefinition() {
-        return definition;
-    }
+	public IAspectDefinition getDefinition() {
+		return definition;
+	}
 
-    public ADVICE_TYPES getAdviceType() {
-        return this.type;
-    }
+	public ADVICE_TYPES getAdviceType() {
+		return this.type;
+	}
 
-    public IMember getSource() {
-        return this.source;
-    }
+	public IMember getSource() {
+		return this.source;
+	}
 
-    public IMember getTarget() {
-        return this.target;
-    }
+	public IMember getTarget() {
+		return this.target;
+	}
 
-    public IResource getResource() {
-        return file;
-    }
+	public IResource getResource() {
+		return file;
+	}
 
-    public boolean equals(Object obj) {
-        if (obj instanceof AopReference) {
-            AopReference other = (AopReference) obj;
-            return getTarget().equals(other.getTarget())
-                    && ((getSource() == null && other.getSource() == null)
-                    || (getSource() != null && getSource().equals(other.getSource())))
-                    && getResource().equals(other.getResource())
-                    && getDefinition().getAspectLineNumber() == other
-                            .getDefinition().getAspectLineNumber();
-        }
-        return false;
-    }
+	public boolean equals(Object obj) {
+		if (obj instanceof AopReference) {
+			AopReference other = (AopReference) obj;
+			return getTarget().equals(other.getTarget())
+					&& ((getSource() == null && other.getSource() == null) || (getSource() != null && getSource()
+							.equals(other.getSource()))) && getResource().equals(other.getResource())
+					&& getDefinition().getAspectLineNumber() == other.getDefinition().getAspectLineNumber();
+		}
+		return false;
+	}
 
-    public int hashCode() {
-        int hashCode = ObjectUtils.nullSafeHashCode(source);
-        hashCode = 21 + ObjectUtils.nullSafeHashCode(target);
-        hashCode = 24 + ObjectUtils.nullSafeHashCode(file);
-        hashCode = 12 + ObjectUtils.nullSafeHashCode(definition
-                .getAspectLineNumber());
-        return hashCode;
-    }
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(source);
+		hashCode = 21 + ObjectUtils.nullSafeHashCode(target);
+		hashCode = 24 + ObjectUtils.nullSafeHashCode(file);
+		hashCode = 12 + ObjectUtils.nullSafeHashCode(definition.getAspectLineNumber());
+		return hashCode;
+	}
 
-    public IBean getTargetBean() {
-        return bean;
-    }
-    
-    public String toString() {
-        StringBuffer buf = new StringBuffer();
-        buf.append("Bean definition [");
-        buf.append(this.bean);
-        buf.append("] advise target [");
-        buf.append(this.target);
-        buf.append("] advise source [");
-        buf.append(this.source);
-        buf.append(" ] aspect definition [");
-        buf.append(this.definition);
-        buf.append("]");
-        return buf.toString();
-    }
+	public IBean getTargetBean() {
+		return bean;
+	}
+
+	public String toString() {
+		StringBuffer buf = new StringBuffer();
+		buf.append("Bean definition [");
+		buf.append(this.bean);
+		buf.append("] advise target [");
+		buf.append(this.target);
+		buf.append("] advise source [");
+		buf.append(this.source);
+		buf.append(" ] aspect definition [");
+		buf.append(this.definition);
+		buf.append("]");
+		return buf.toString();
+	}
 }

@@ -19,9 +19,9 @@ package org.springframework.ide.eclipse.aop.core.logging;
  * Minimal logging interface
  */
 public interface IAopLogger {
-	
+
 	public void log(String msg);
 
 	public void log(int category, String msg);
-	
+
 }

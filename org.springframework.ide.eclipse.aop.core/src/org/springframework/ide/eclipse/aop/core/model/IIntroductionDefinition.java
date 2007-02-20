@@ -19,15 +19,15 @@ import org.springframework.aop.ClassFilter;
 
 public interface IIntroductionDefinition extends IAspectDefinition {
 
-    //Class<?> getImplInterfaceClass() throws ClassNotFoundException;
-    
-    String getImplInterfaceName();
-    
-    ClassFilter getTypeMatcher();
-    
-    String getTypePattern();
+	// Class<?> getImplInterfaceClass() throws ClassNotFoundException;
 
-    String getDefaultImplName();
+	String getImplInterfaceName();
 
-    //Class<?> getDefaultImplClass() throws ClassNotFoundException;
+	ClassFilter getTypeMatcher();
+
+	String getTypePattern();
+
+	String getDefaultImplName();
+
+	// Class<?> getDefaultImplClass() throws ClassNotFoundException;
 }

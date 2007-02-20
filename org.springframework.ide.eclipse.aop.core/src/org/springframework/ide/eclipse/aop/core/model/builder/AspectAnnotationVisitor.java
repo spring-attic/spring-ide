@@ -24,108 +24,105 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.commons.EmptyVisitor;
 
 /**
- * ASM-based visitor that checks if a certain class has the @Aspect annotation
+ * ASM-based visitor that checks if a certain class has the
+ * @Aspect annotation
  */
-public class AspectAnnotationVisitor
-        extends EmptyVisitor {
+public class AspectAnnotationVisitor extends EmptyVisitor {
 
-    private ClassInfo classInfo = new ClassInfo();
+	private ClassInfo classInfo = new ClassInfo();
 
-    private static final String ASPECT_ANNOTATION_DESC = "L"
-            + Aspect.class.getName().replace('.', '/') + ";";
+	private static final String ASPECT_ANNOTATION_DESC = "L" + Aspect.class.getName().replace('.', '/') + ";";
 
-    private static final String OBJECT_CLASS = "java/lang/Object";
-    
-    public void visit(int version, int access, String name, String signature, String superName,
-            String[] interfaces) {
-        classInfo.setModifier(access);
-        if (!OBJECT_CLASS.equals(superName)) {
-            classInfo.setSuperType(superName);
-        }
-    }
+	private static final String OBJECT_CLASS = "java/lang/Object";
 
-    public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-        if (visible && ASPECT_ANNOTATION_DESC.equals(desc)) {
-            classInfo.setAspectAnnotation(new AspectAnnotation());
-            return this;
-        }
-        return new EmptyVisitor();
-    }
+	public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+		classInfo.setModifier(access);
+		if (!OBJECT_CLASS.equals(superName)) {
+			classInfo.setSuperType(superName);
+		}
+	}
 
-    public void visit(String name, Object value) {
-        if ("value".equals(name) && classInfo.hasAspectAnnotation()) {
-            classInfo.getAspectAnnotation().setValue((String) value);
-        }
-    }
+	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+		if (visible && ASPECT_ANNOTATION_DESC.equals(desc)) {
+			classInfo.setAspectAnnotation(new AspectAnnotation());
+			return this;
+		}
+		return new EmptyVisitor();
+	}
 
-    public MethodVisitor visitMethod(int access, String name, String desc, String signature,
-            String[] exceptions) {
-        classInfo.getMethodNames().add(name);
-        return new EmptyVisitor();
-    }
+	public void visit(String name, Object value) {
+		if ("value".equals(name) && classInfo.hasAspectAnnotation()) {
+			classInfo.getAspectAnnotation().setValue((String) value);
+		}
+	}
 
-    public static class ClassInfo {
-        
-        private int modifier;
-        
-        private String superType = null;
+	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+		classInfo.getMethodNames().add(name);
+		return new EmptyVisitor();
+	}
 
-        private List<String> methodNames = new ArrayList<String>();
+	public static class ClassInfo {
 
-        private AspectAnnotation aspectAnnotation;
+		private int modifier;
 
-        public AspectAnnotation getAspectAnnotation() {
-            return aspectAnnotation;
-        }
+		private String superType = null;
 
-        public void setAspectAnnotation(AspectAnnotation aspectAnnotation) {
-            this.aspectAnnotation = aspectAnnotation;
-        }
+		private List<String> methodNames = new ArrayList<String>();
 
-        public String getSuperType() {
-            return superType;
-        }
+		private AspectAnnotation aspectAnnotation;
 
-        public void setSuperType(String superType) {
-            this.superType = superType;
-        }
+		public AspectAnnotation getAspectAnnotation() {
+			return aspectAnnotation;
+		}
 
-        public List<String> getMethodNames() {
-            return methodNames;
-        }
+		public void setAspectAnnotation(AspectAnnotation aspectAnnotation) {
+			this.aspectAnnotation = aspectAnnotation;
+		}
 
-        public void setMethodNames(List<String> methodNames) {
-            this.methodNames = methodNames;
-        }
+		public String getSuperType() {
+			return superType;
+		}
 
-        public boolean hasAspectAnnotation() {
-            return this.aspectAnnotation != null;
-        }
+		public void setSuperType(String superType) {
+			this.superType = superType;
+		}
 
-        public int getModifier() {
-            return modifier;
-        }
+		public List<String> getMethodNames() {
+			return methodNames;
+		}
 
-        public void setModifier(int modifier) {
-            this.modifier = modifier;
-        }
-    }
+		public void setMethodNames(List<String> methodNames) {
+			this.methodNames = methodNames;
+		}
 
-    public static class AspectAnnotation {
+		public boolean hasAspectAnnotation() {
+			return this.aspectAnnotation != null;
+		}
 
-        private String value;
+		public int getModifier() {
+			return modifier;
+		}
 
-        public String getValue() {
-            return value;
-        }
+		public void setModifier(int modifier) {
+			this.modifier = modifier;
+		}
+	}
 
-        public void setValue(String value) {
-            this.value = value;
-        }
+	public static class AspectAnnotation {
 
-    }
+		private String value;
 
-    public ClassInfo getClassInfo() {
-        return classInfo;
-    }
+		public String getValue() {
+			return value;
+		}
+
+		public void setValue(String value) {
+			this.value = value;
+		}
+
+	}
+
+	public ClassInfo getClassInfo() {
+		return classInfo;
+	}
 }

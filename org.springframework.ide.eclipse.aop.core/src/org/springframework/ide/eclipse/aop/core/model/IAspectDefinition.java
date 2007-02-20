@@ -23,52 +23,52 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 @SuppressWarnings("restriction")
 public interface IAspectDefinition {
 
-    //Class<?> getAdviceClass() throws ClassNotFoundException;
+	// Class<?> getAdviceClass() throws ClassNotFoundException;
 
-    Method getAdviceMethod();
+	Method getAdviceMethod();
 
-    String getAspectName();
+	String getAspectName();
 
-    String getAspectClassName();
+	String getAspectClassName();
 
-    int getAspectLineNumber();
-    
-    String getAdviceMethodName();
-    
-    String[] getAdviceMethodParameterTypes();
-    
-    IResource getResource();
+	int getAspectLineNumber();
 
-    IAopReference.ADVICE_TYPES getType();
+	String getAdviceMethodName();
 
-    void setAspectName(String aspectName);
+	String[] getAdviceMethodParameterTypes();
 
-    void setAspectClassName(String className);
-    
-    void setAdviceMethodName(String methodname);
-    
-    void setAdviceMethodParameterTypes(String[] params);
+	IResource getResource();
 
-    void setType(IAopReference.ADVICE_TYPES type);
-    
-    void setResource(IResource file);
-    
-    void setDocument(IDOMDocument document);
-    
-    Object getAspectJPointcutExpression() throws Throwable;
-    
-    String getReturning();
-    
-    void setReturning(String returning);
-    
-    String getThrowing();
-    
-    void setThrowing(String throwable);
+	IAopReference.ADVICE_TYPES getType();
 
-    String[] getArgNames();
-    
-    void setArgNames(String[] argNames);
-    
-    String getPointcutExpression();
-    
+	void setAspectName(String aspectName);
+
+	void setAspectClassName(String className);
+
+	void setAdviceMethodName(String methodname);
+
+	void setAdviceMethodParameterTypes(String[] params);
+
+	void setType(IAopReference.ADVICE_TYPES type);
+
+	void setResource(IResource file);
+
+	void setDocument(IDOMDocument document);
+
+	Object getAspectJPointcutExpression() throws Throwable;
+
+	String getReturning();
+
+	void setReturning(String returning);
+
+	String getThrowing();
+
+	void setThrowing(String throwable);
+
+	String[] getArgNames();
+
+	void setArgNames(String[] argNames);
+
+	String getPointcutExpression();
+
 }

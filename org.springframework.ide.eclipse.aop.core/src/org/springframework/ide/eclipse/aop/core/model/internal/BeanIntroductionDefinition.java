@@ -21,74 +21,73 @@ import org.springframework.aop.support.ClassFilters;
 import org.springframework.ide.eclipse.aop.core.model.IIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 
-public class BeanIntroductionDefinition
-        extends BeanAspectDefinition implements IIntroductionDefinition {
+public class BeanIntroductionDefinition extends BeanAspectDefinition implements IIntroductionDefinition {
 
-    private String introducedInterfaceName;
+	private String introducedInterfaceName;
 
-    private ClassFilter typePatternClassFilter;
+	private ClassFilter typePatternClassFilter;
 
-    private String defaultImplName;
+	private String defaultImplName;
 
-    private String typePattern;
+	private String typePattern;
 
-    public BeanIntroductionDefinition() {
-        setType(ADVICE_TYPES.DECLARE_PARENTS);
-    }
+	public BeanIntroductionDefinition() {
+		setType(ADVICE_TYPES.DECLARE_PARENTS);
+	}
 
-    public ClassFilter getTypeMatcher() {
-        if (this.typePatternClassFilter == null) {
-            ClassFilter typePatternFilter = new TypePatternClassFilter(typePattern);
+	public ClassFilter getTypeMatcher() {
+		if (this.typePatternClassFilter == null) {
+			ClassFilter typePatternFilter = new TypePatternClassFilter(typePattern);
 
-            // Excludes methods implemented.
-            ClassFilter exclusion = new ClassFilter() {
-                @SuppressWarnings("unchecked")
-                public boolean matches(Class clazz) {
-                    try {
-                        Class<?> implInterfaceClass = Thread.currentThread()
-                                .getContextClassLoader().loadClass(introducedInterfaceName);
-                        return !(implInterfaceClass.isAssignableFrom(clazz));
-                    }
-                    catch (ClassNotFoundException e) {
-                        return false;
-                    }
-                }
-            };
-            this.typePatternClassFilter = ClassFilters.intersection(typePatternFilter, exclusion);
-        }
-        return this.typePatternClassFilter;
-    }
+			// Excludes methods implemented.
+			ClassFilter exclusion = new ClassFilter() {
+				@SuppressWarnings("unchecked")
+				public boolean matches(Class clazz) {
+					try {
+						Class<?> implInterfaceClass = Thread.currentThread().getContextClassLoader().loadClass(
+								introducedInterfaceName);
+						return !(implInterfaceClass.isAssignableFrom(clazz));
+					}
+					catch (ClassNotFoundException e) {
+						return false;
+					}
+				}
+			};
+			this.typePatternClassFilter = ClassFilters.intersection(typePatternFilter, exclusion);
+		}
+		return this.typePatternClassFilter;
+	}
 
-    public String getTypePattern() {
-        return this.typePattern;
-    }
+	public String getTypePattern() {
+		return this.typePattern;
+	}
 
-    public String getAdviceMethodName() {
-        throw new IllegalArgumentException();
-    }
+	public String getAdviceMethodName() {
+		throw new IllegalArgumentException();
+	}
 
-    public ADVICE_TYPES getType() {
-        return ADVICE_TYPES.DECLARE_PARENTS;
-    }
+	public ADVICE_TYPES getType() {
+		return ADVICE_TYPES.DECLARE_PARENTS;
+	}
 
-    public String getDefaultImplName() {
-        return this.defaultImplName;
-    }
+	public String getDefaultImplName() {
+		return this.defaultImplName;
+	}
 
-    public String getImplInterfaceName() {
-        return this.introducedInterfaceName;
-    }
+	public String getImplInterfaceName() {
+		return this.introducedInterfaceName;
+	}
 
-    public void setDefaultImplName(String defaultImplName) {
-        this.defaultImplName = defaultImplName;
-    }
+	public void setDefaultImplName(String defaultImplName) {
+		this.defaultImplName = defaultImplName;
+	}
 
-    public void setIntroducedInterfaceName(String introducedInterfaceName) {
-        this.introducedInterfaceName = introducedInterfaceName;
-    }
+	public void setIntroducedInterfaceName(String introducedInterfaceName) {
+		this.introducedInterfaceName = introducedInterfaceName;
+	}
 
-    public void setTypePattern(String typePattern) {
-        this.typePattern = typePattern;
-    }
+	public void setTypePattern(String typePattern) {
+		this.typePattern = typePattern;
+	}
 
 }

@@ -26,45 +26,44 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 
 public class AopProject implements IAopProject {
 
-    private List<IAopReference> references = new ArrayList<IAopReference>();
+	private List<IAopReference> references = new ArrayList<IAopReference>();
 
-    private IJavaProject project;
+	private IJavaProject project;
 
-    public AopProject(IJavaProject project) {
-        this.project = project;
-    }
+	public AopProject(IJavaProject project) {
+		this.project = project;
+	}
 
-    public void addAopReference(IAopReference reference) {
-        AopLog.log(AopLog.BUILDER_MESSAGES, "Created AOP reference [" + reference + "]");
-        this.references.add(reference);
-    }
+	public void addAopReference(IAopReference reference) {
+		AopLog.log(AopLog.BUILDER_MESSAGES, "Created AOP reference [" + reference + "]");
+		this.references.add(reference);
+	}
 
-    public List<IAopReference> getAllReferences() {
-        return this.references;
-    }
+	public List<IAopReference> getAllReferences() {
+		return this.references;
+	}
 
-    public IJavaProject getProject() {
-        return this.project;
-    }
+	public IJavaProject getProject() {
+		return this.project;
+	}
 
-    public void clearReferencesForResource(IResource resource) {
-        List<IAopReference> toRemove = new ArrayList<IAopReference>();
-        for (IAopReference reference : this.references) {
-            if (reference.getDefinition().getResource().equals(resource)) {
-                toRemove.add(reference);
-            }
-        }
-        this.references.removeAll(toRemove);
-    }
+	public void clearReferencesForResource(IResource resource) {
+		List<IAopReference> toRemove = new ArrayList<IAopReference>();
+		for (IAopReference reference : this.references) {
+			if (reference.getDefinition().getResource().equals(resource)) {
+				toRemove.add(reference);
+			}
+		}
+		this.references.removeAll(toRemove);
+	}
 
-    public List<IAopReference> getReferencesForResource(IResource resource) {
-        List<IAopReference> list = new ArrayList<IAopReference>();
-        for (IAopReference reference : this.references) {
-            if (reference.getResource().equals(resource)
-                    || reference.getDefinition().getResource().equals(resource)) {
-                list.add(reference);
-            }
-        }
-        return list;
-    }
+	public List<IAopReference> getReferencesForResource(IResource resource) {
+		List<IAopReference> list = new ArrayList<IAopReference>();
+		for (IAopReference reference : this.references) {
+			if (reference.getResource().equals(resource) || reference.getDefinition().getResource().equals(resource)) {
+				list.add(reference);
+			}
+		}
+		return list;
+	}
 }

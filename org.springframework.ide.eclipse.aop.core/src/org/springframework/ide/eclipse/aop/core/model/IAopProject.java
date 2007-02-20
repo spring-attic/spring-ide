@@ -21,14 +21,14 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaProject;
 
 public interface IAopProject {
-    
-    List<IAopReference> getAllReferences();
-    
-    void addAopReference(IAopReference reference);
-    
-    IJavaProject getProject();
-    
-    void clearReferencesForResource(IResource resource);
-    
-    List<IAopReference> getReferencesForResource(IResource resource);
+
+	List<IAopReference> getAllReferences();
+
+	void addAopReference(IAopReference reference);
+
+	IJavaProject getProject();
+
+	void clearReferencesForResource(IResource resource);
+
+	List<IAopReference> getReferencesForResource(IResource resource);
 }

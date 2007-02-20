@@ -15,7 +15,6 @@
  */
 package org.springframework.ide.eclipse.aop.core.model.internal;
 
-
 public class JavaAspectDefinition extends BeanAspectDefinition {
-	
+
 }

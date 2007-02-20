@@ -21,20 +21,20 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 
 public interface IAopReference {
 
-    public enum ADVICE_TYPES {
-        BEFORE, AROUND, AFTER, AFTER_RETURNING, AFTER_THROWING, DECLARE_PARENTS
-    };
+	public enum ADVICE_TYPES {
+		BEFORE, AROUND, AFTER, AFTER_RETURNING, AFTER_THROWING, DECLARE_PARENTS
+	};
 
-    ADVICE_TYPES getAdviceType();
-    
-    IMember getSource();
-    
-    IAspectDefinition getDefinition();
-    
-    IResource getResource();
-    
-    IMember getTarget();
-    
-    IBean getTargetBean();
-    
+	ADVICE_TYPES getAdviceType();
+
+	IMember getSource();
+
+	IAspectDefinition getDefinition();
+
+	IResource getResource();
+
+	IMember getTarget();
+
+	IBean getTargetBean();
+
 }
