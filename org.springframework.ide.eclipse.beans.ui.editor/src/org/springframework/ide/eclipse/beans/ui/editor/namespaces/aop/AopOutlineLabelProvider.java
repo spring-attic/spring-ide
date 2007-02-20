@@ -98,6 +98,12 @@ public class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 
 		if ("config".equals(shortNodeName)) {
 			text = nodeName + " ";
+            if (BeansContentOutlineConfiguration.isShowAttributes()) {
+                attr = attrs.getNamedItem("proxy-target-class");
+                if (attr != null) {
+                    text += attr.getNodeValue();
+                }
+            }
 		}
 		else if ("aspect".equals(shortNodeName)) {
 			text = nodeName + " ";

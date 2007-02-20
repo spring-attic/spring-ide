@@ -29,7 +29,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 @SuppressWarnings("restriction")
-public class TxContextAssistProcessor extends AbstractContentAssistProcessor {
+public class TxContentAssistProcessor extends AbstractContentAssistProcessor {
 
 	private void addBeanReferenceProposals(ContentAssistRequest request,
             String prefix, Document document, boolean showExternal) {
@@ -69,7 +69,7 @@ public class TxContextAssistProcessor extends AbstractContentAssistProcessor {
             nodeName = nodeName.substring(prefix.length() + 1);
         }
 
-        if ("advice".equals(nodeName)) {
+        if ("advice".equals(nodeName) || "annotation-driven".equals(nodeName)) {
             if ("transaction-manager".equals(attributeName)) {
                 addBeanReferenceProposals(request, matchString, node
                         .getOwnerDocument(), true);
@@ -80,5 +80,4 @@ public class TxContextAssistProcessor extends AbstractContentAssistProcessor {
 	@Override
 	protected void computeTagInsertionProposals(ContentAssistRequest request, IDOMNode node) {
 	}
-
 }

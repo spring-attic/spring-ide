@@ -23,38 +23,42 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.w3c.dom.Node;
 
 @SuppressWarnings("restriction")
-public class TxOutlineLabelProvider extends JFaceNodeLabelProvider {
+public class TxOutlineLabelProvider
+        extends JFaceNodeLabelProvider {
 
-	public Image getImage(Object object) {
+    public Image getImage(Object object) {
 
-		Node node = (Node) object;
-		String prefix = node.getPrefix();
-		String nodeName = node.getNodeName();
-		if (prefix != null) {
-			nodeName = nodeName.substring(prefix.length() + 1);
-		}
-		return null;
-	}
+        Node node = (Node) object;
+        String prefix = node.getPrefix();
+        String nodeName = node.getNodeName();
+        if (prefix != null) {
+            nodeName = nodeName.substring(prefix.length() + 1);
+        }
+        if ("advice".equals(nodeName) || "annotation-driven".equals(nodeName)) {
+            return TxUIImages.getImage(TxUIImages.IMG_OBJS_TX);
+        }
+        return null;
+    }
 
-	public String getText(Object o) {
+    public String getText(Object o) {
 
-		// Create Spring beans label text
-		Node node = (Node) o;
-		String prefix = node.getPrefix();
-		String nodeName = node.getNodeName();
-		String shortNodeName = node.getNodeName();
-		if (prefix != null) {
-			shortNodeName = nodeName.substring(prefix.length() + 1);
-		}
-		nodeName = "<" + node.getNodeName() + "/>";
-		String text = null;
-		if ("advice".equals(shortNodeName)) {
-			text = nodeName;
-			if (BeansContentOutlineConfiguration.isShowAttributes()
-					&& BeansEditorUtils.hasAttribute(node, "transaction-manager")) {
-				text += " <" + BeansEditorUtils.getAttribute(node, "transaction-manager") + ">";
-			}
-		}
-		return text;
-	}
+        // Create Spring beans label text
+        Node node = (Node) o;
+        String prefix = node.getPrefix();
+        String nodeName = node.getNodeName();
+        String shortNodeName = node.getNodeName();
+        if (prefix != null) {
+            shortNodeName = nodeName.substring(prefix.length() + 1);
+        }
+        nodeName = "<" + node.getNodeName() + "/>";
+        String text = null;
+        if ("advice".equals(shortNodeName) || "annotation-driven".equals(shortNodeName)) {
+            text = nodeName;
+            if (BeansContentOutlineConfiguration.isShowAttributes()
+                    && BeansEditorUtils.hasAttribute(node, "transaction-manager")) {
+                text += " <" + BeansEditorUtils.getAttribute(node, "transaction-manager") + ">";
+            }
+        }
+        return text;
+    }
 }
