@@ -28,85 +28,85 @@ import org.springframework.util.ObjectUtils;
 
 public class AopReferenceModelNode implements IAdaptable, IXReferenceNode {
 
-    public enum TYPE {
-        SOURCE, TARGET
-    };
+	public enum TYPE {
+		SOURCE, TARGET
+	};
 
-    private String label;
+	private String label;
 
-    private IAopReference reference;
+	private IAopReference reference;
 
-    private TYPE type;
+	private TYPE type;
 
-    public AopReferenceModelNode(TYPE type, IAopReference reference) {
-        this.reference = reference;
-        this.type = type;
-        computeLabel();
-    }
+	public AopReferenceModelNode(TYPE type, IAopReference reference) {
+		this.reference = reference;
+		this.type = type;
+		computeLabel();
+	}
 
-    private void computeLabel() {
-        if (getJavaElement() != null) {
-            if (getJavaElement() instanceof IMethod) {
-                this.label = getJavaElement().getParent().getElementName() + '.'
-                        + AopReferenceModelUtils.readableName((IMethod) getJavaElement());
-            }
-            else {
-                this.label = getJavaElement().getElementName();
-            }
-        }
-        else {
-            this.label = reference.getDefinition().getAspectName();
-        }
-    }
+	private void computeLabel() {
+		if (getJavaElement() != null) {
+			if (getJavaElement() instanceof IMethod) {
+				this.label = getJavaElement().getParent().getElementName() + '.'
+						+ AopReferenceModelUtils.readableName((IMethod) getJavaElement());
+			}
+			else {
+				this.label = getJavaElement().getElementName();
+			}
+		}
+		else {
+			this.label = reference.getDefinition().getAspectName();
+		}
+	}
 
-    /**
-     * @see IAdaptable#getAdapter(Class)
-     */
-    @SuppressWarnings("unchecked")
+	/**
+	 * @see IAdaptable#getAdapter(Class)
+	 */
+	@SuppressWarnings("unchecked")
 	public Object getAdapter(Class adapter) {
-        if (adapter == IWorkbenchAdapter.class) {
-            return AopReferenceModelNodeAdapter.getDefault();
-        }
-        return null;
-    }
+		if (adapter == IWorkbenchAdapter.class) {
+			return AopReferenceModelNodeAdapter.getDefault();
+		}
+		return null;
+	}
 
-    public String getLabel() {
-        return this.label;
-    }
+	public String getLabel() {
+		return this.label;
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.contribution.xref.core.IXReferenceNode#getJavaElement()
-     */
-    public IJavaElement getJavaElement() {
-        if (this.type.equals(TYPE.SOURCE)) {
-            return this.reference.getSource();
-        }
-        else if (this.type.equals(TYPE.TARGET)) {
-            return this.reference.getTarget();
-        }
-        return null;
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.contribution.xref.core.IXReferenceNode#getJavaElement()
+	 */
+	public IJavaElement getJavaElement() {
+		if (this.type.equals(TYPE.SOURCE)) {
+			return this.reference.getSource();
+		}
+		else if (this.type.equals(TYPE.TARGET)) {
+			return this.reference.getTarget();
+		}
+		return null;
+	}
 
-    public IAspectDefinition getDefinition() {
-        return this.reference.getDefinition();
-    }
+	public IAspectDefinition getDefinition() {
+		return this.reference.getDefinition();
+	}
 
-    public IResource getResouce() {
-        return this.reference.getResource();
-    }
+	public IResource getResouce() {
+		return this.reference.getResource();
+	}
 
-    public boolean equals(Object obj) {
-        if (obj instanceof AopReferenceModelNode) {
-            AopReferenceModelNode other = (AopReferenceModelNode) obj;
-            return getLabel().equals(other.getLabel());
-        }
-        return false;
-    }
+	public boolean equals(Object obj) {
+		if (obj instanceof AopReferenceModelNode) {
+			AopReferenceModelNode other = (AopReferenceModelNode) obj;
+			return getLabel().equals(other.getLabel());
+		}
+		return false;
+	}
 
-    public int hashCode() {
-        int hashCode = ObjectUtils.nullSafeHashCode(getLabel());
-        return hashCode;
-    }
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(getLabel());
+		return hashCode;
+	}
 }

@@ -28,8 +28,7 @@ import org.springframework.ide.eclipse.aop.ui.xref.AopReferenceModelNode;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 @SuppressWarnings("restriction")
-public class OpenBeansAopConfigAction extends Action implements
-		IViewActionDelegate {
+public class OpenBeansAopConfigAction extends Action implements IViewActionDelegate {
 
 	private AopReferenceModelNode aopNode;
 

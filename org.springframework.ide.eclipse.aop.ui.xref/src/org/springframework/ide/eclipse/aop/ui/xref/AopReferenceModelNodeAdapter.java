@@ -20,53 +20,53 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
 
 class AopReferenceModelNodeAdapter implements IWorkbenchAdapter {
 
-    protected AopReferenceModelNodeAdapter() {
-    }
+	protected AopReferenceModelNodeAdapter() {
+	}
 
-    private static AopReferenceModelNodeAdapter instance = null;
+	private static AopReferenceModelNodeAdapter instance = null;
 
-    public static AopReferenceModelNodeAdapter getDefault() {
-        if (instance == null) {
-            instance = new AopReferenceModelNodeAdapter();
-        }
-        return instance;
-    }
+	public static AopReferenceModelNodeAdapter getDefault() {
+		if (instance == null) {
+			instance = new AopReferenceModelNodeAdapter();
+		}
+		return instance;
+	}
 
-    /*
-     * (non-Javadoc)
-     * @see org.eclipse.ui.model.IWorkbenchAdapter#getChildren(java.lang.Object)
-     */
-    public Object[] getChildren(Object o) {
-        return null;
-    }
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ui.model.IWorkbenchAdapter#getChildren(java.lang.Object)
+	 */
+	public Object[] getChildren(Object o) {
+		return null;
+	}
 
-    /*
-     * (non-Javadoc)
-     * @see org.eclipse.ui.model.IWorkbenchAdapter#getImageDescriptor(java.lang.Object)
-     */
-    public ImageDescriptor getImageDescriptor(Object object) {
-        // For the moment we're leaving getting the icon to the decorator
-        return null;
-    }
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ui.model.IWorkbenchAdapter#getImageDescriptor(java.lang.Object)
+	 */
+	public ImageDescriptor getImageDescriptor(Object object) {
+		// For the moment we're leaving getting the icon to the decorator
+		return null;
+	}
 
-    /*
-     * (non-Javadoc)
-     * @see org.eclipse.ui.model.IWorkbenchAdapter#getLabel(java.lang.Object)
-     */
-    public String getLabel(Object o) {
-        if (o instanceof AopReferenceModelNode) {
-            AopReferenceModelNode node = (AopReferenceModelNode) o;
-            return node.getLabel();
-        }
-        return null;
-    }
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ui.model.IWorkbenchAdapter#getLabel(java.lang.Object)
+	 */
+	public String getLabel(Object o) {
+		if (o instanceof AopReferenceModelNode) {
+			AopReferenceModelNode node = (AopReferenceModelNode) o;
+			return node.getLabel();
+		}
+		return null;
+	}
 
-    /*
-     * (non-Javadoc)
-     * @see org.eclipse.ui.model.IWorkbenchAdapter#getParent(java.lang.Object)
-     */
-    public Object getParent(Object o) {
-        return null;
-    }
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ui.model.IWorkbenchAdapter#getParent(java.lang.Object)
+	 */
+	public Object getParent(Object o) {
+		return null;
+	}
 
 }
