@@ -23,81 +23,75 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
 
 @SuppressWarnings("restriction")
-public class WebflowConfigOutlineLabelProvider
-        extends JFaceNodeLabelProvider {
+public class WebflowConfigOutlineLabelProvider extends JFaceNodeLabelProvider {
 
-    public Image getImage(Object object) {
+	public Image getImage(Object object) {
 
-        Node node = (Node) object;
-        String ns = node.getNamespaceURI();
-        if ("http://www.springframework.org/schema/webflow-config".equals(ns)) {
-            return WebflowConfigUIImages.getImage(WebflowConfigUIImages.IMG_OBJS_WEBFLOW);
-        }
-        return null;
-    }
+		Node node = (Node) object;
+		String ns = node.getNamespaceURI();
+		if ("http://www.springframework.org/schema/webflow-config".equals(ns)) {
+			return WebflowConfigUIImages.getImage(WebflowConfigUIImages.IMG_OBJS_WEBFLOW);
+		}
+		return null;
+	}
 
-    public String getText(Object o) {
+	public String getText(Object o) {
 
-        // Create Spring beans label text
-        Node node = (Node) o;
-        String nodeName = node.getNodeName();
-        String shortNodeName = node.getLocalName();
+		// Create Spring beans label text
+		Node node = (Node) o;
+		String nodeName = node.getNodeName();
+		String shortNodeName = node.getLocalName();
 
-        String text = null;
-        if ("executor".equals(shortNodeName)) {
-            text = nodeName;
-            String id = BeansEditorUtils.getAttribute(node, "id");
-            if (StringUtils.hasText(id)) {
-                text += " " + id;
-            }
-            if (BeansContentOutlineConfiguration.isShowAttributes()
-                    && BeansEditorUtils.hasAttribute(node, "registry-ref")) {
-                text += " <" + BeansEditorUtils.getAttribute(node, "registry-ref") + ">";
-            }
-        }
-        else if ("registry".equals(shortNodeName)) {
-            text = nodeName;
-            String id = BeansEditorUtils.getAttribute(node, "id");
-            if (StringUtils.hasText(id)) {
-                text += " " + id;
-            }
-        }
-        else if ("location".equals(shortNodeName)) {
-            text = nodeName;
-            if (BeansContentOutlineConfiguration.isShowAttributes()
-                    && BeansEditorUtils.hasAttribute(node, "path")) {
-                text += " [" + BeansEditorUtils.getAttribute(node, "path") + "]";
-            }
-        }
-        else if ("listener".equals(shortNodeName)) {
-            text = nodeName;
-            if (BeansContentOutlineConfiguration.isShowAttributes()
-                    && BeansEditorUtils.hasAttribute(node, "ref")) {
-                text += " <" + BeansEditorUtils.getAttribute(node, "ref") + ">";
-            }
-        }
-        else if ("attribute".equals(shortNodeName)) {
-            text = nodeName;
-            if (BeansContentOutlineConfiguration.isShowAttributes()
-                    && BeansEditorUtils.hasAttribute(node, "name")) {
-                text += " " + BeansEditorUtils.getAttribute(node, "name") + "="
-                        + BeansEditorUtils.getAttribute(node, "value");
-            }
-        }
-        else if ("repository".equals(shortNodeName)) {
-            text = nodeName;
-            if (BeansContentOutlineConfiguration.isShowAttributes()
-                    && BeansEditorUtils.hasAttribute(node, "type")) {
-                text += " " + BeansEditorUtils.getAttribute(node, "type");
-            }
-        }
-        else if ("alwaysRedirectOnPause".equals(shortNodeName)) {
-            text = nodeName;
-            if (BeansContentOutlineConfiguration.isShowAttributes()
-                    && BeansEditorUtils.hasAttribute(node, "value")) {
-                text += " " + BeansEditorUtils.getAttribute(node, "value");
-            }
-        }
-        return text;
-    }
+		String text = null;
+		if ("executor".equals(shortNodeName)) {
+			text = nodeName;
+			String id = BeansEditorUtils.getAttribute(node, "id");
+			if (StringUtils.hasText(id)) {
+				text += " " + id;
+			}
+			if (BeansContentOutlineConfiguration.isShowAttributes()
+					&& BeansEditorUtils.hasAttribute(node, "registry-ref")) {
+				text += " <" + BeansEditorUtils.getAttribute(node, "registry-ref") + ">";
+			}
+		}
+		else if ("registry".equals(shortNodeName)) {
+			text = nodeName;
+			String id = BeansEditorUtils.getAttribute(node, "id");
+			if (StringUtils.hasText(id)) {
+				text += " " + id;
+			}
+		}
+		else if ("location".equals(shortNodeName)) {
+			text = nodeName;
+			if (BeansContentOutlineConfiguration.isShowAttributes() && BeansEditorUtils.hasAttribute(node, "path")) {
+				text += " [" + BeansEditorUtils.getAttribute(node, "path") + "]";
+			}
+		}
+		else if ("listener".equals(shortNodeName)) {
+			text = nodeName;
+			if (BeansContentOutlineConfiguration.isShowAttributes() && BeansEditorUtils.hasAttribute(node, "ref")) {
+				text += " <" + BeansEditorUtils.getAttribute(node, "ref") + ">";
+			}
+		}
+		else if ("attribute".equals(shortNodeName)) {
+			text = nodeName;
+			if (BeansContentOutlineConfiguration.isShowAttributes() && BeansEditorUtils.hasAttribute(node, "name")) {
+				text += " " + BeansEditorUtils.getAttribute(node, "name") + "="
+						+ BeansEditorUtils.getAttribute(node, "value");
+			}
+		}
+		else if ("repository".equals(shortNodeName)) {
+			text = nodeName;
+			if (BeansContentOutlineConfiguration.isShowAttributes() && BeansEditorUtils.hasAttribute(node, "type")) {
+				text += " " + BeansEditorUtils.getAttribute(node, "type");
+			}
+		}
+		else if ("alwaysRedirectOnPause".equals(shortNodeName)) {
+			text = nodeName;
+			if (BeansContentOutlineConfiguration.isShowAttributes() && BeansEditorUtils.hasAttribute(node, "value")) {
+				text += " " + BeansEditorUtils.getAttribute(node, "value");
+			}
+		}
+		return text;
+	}
 }

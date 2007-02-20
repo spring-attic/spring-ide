@@ -29,76 +29,73 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionU
 import org.w3c.dom.Node;
 
 @SuppressWarnings("restriction")
-public class WebflowConfigContentAssistProcessor
-        extends AbstractContentAssistProcessor {
+public class WebflowConfigContentAssistProcessor extends AbstractContentAssistProcessor {
 
-    private void addBeanReferenceProposals(ContentAssistRequest request, String prefix, Node node,
-            boolean showExternal) {
-        if (prefix == null) {
-            prefix = "";
-        }
+	private void addBeanReferenceProposals(ContentAssistRequest request, String prefix, Node node, boolean showExternal) {
+		if (prefix == null) {
+			prefix = "";
+		}
 
-        IFile file = (IFile) BeansEditorUtils.getResource(request);
-        if (node.getOwnerDocument() != null) {
-            BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(request,
-                    BeansJavaCompletionUtils.getPropertyTypes(node, file.getProject()));
-            Map<String, Node> beanNodes = BeansEditorUtils.getReferenceableNodes(node
-                    .getOwnerDocument());
-            for (Map.Entry<String, Node> n : beanNodes.entrySet()) {
-                Node beanNode = n.getValue();
-                requestor.acceptSearchMatch(n.getKey(), beanNode, file, prefix);
-            }
-            if (showExternal) {
-                List<?> beans = BeansEditorUtils.getBeansFromConfigSets(file);
-                for (int i = 0; i < beans.size(); i++) {
-                    IBean bean = (IBean) beans.get(i);
-                    requestor.acceptSearchMatch(bean, file, prefix);
-                }
-            }
-        }
-    }
+		IFile file = (IFile) BeansEditorUtils.getResource(request);
+		if (node.getOwnerDocument() != null) {
+			BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(request, BeansJavaCompletionUtils
+					.getPropertyTypes(node, file.getProject()));
+			Map<String, Node> beanNodes = BeansEditorUtils.getReferenceableNodes(node.getOwnerDocument());
+			for (Map.Entry<String, Node> n : beanNodes.entrySet()) {
+				Node beanNode = n.getValue();
+				requestor.acceptSearchMatch(n.getKey(), beanNode, file, prefix);
+			}
+			if (showExternal) {
+				List<?> beans = BeansEditorUtils.getBeansFromConfigSets(file);
+				for (int i = 0; i < beans.size(); i++) {
+					IBean bean = (IBean) beans.get(i);
+					requestor.acceptSearchMatch(bean, file, prefix);
+				}
+			}
+		}
+	}
 
-    private void addClassAttributeValueProposals(ContentAssistRequest request, String prefix) {
-        BeansJavaCompletionUtils.addClassValueProposals(request, prefix);
-    }
+	private void addClassAttributeValueProposals(ContentAssistRequest request, String prefix) {
+		BeansJavaCompletionUtils.addClassValueProposals(request, prefix);
+	}
 
-    @Override
-    protected void computeAttributeNameProposals(ContentAssistRequest request, String prefix,
-            String namespace, String namespacePrefix, Node attributeNode) {
-    }
+	@Override
+	protected void computeAttributeNameProposals(ContentAssistRequest request, String prefix, String namespace,
+			String namespacePrefix, Node attributeNode) {
+	}
 
-    @Override
-    protected void computeAttributeValueProposals(ContentAssistRequest request, IDOMNode node,
-            String matchString, String attributeName) {
-        String nodeName = node.getNodeName();
-        String prefix = node.getPrefix();
-        if (prefix != null) {
-            nodeName = nodeName.substring(prefix.length() + 1);
-        }
+	@Override
+	protected void computeAttributeValueProposals(ContentAssistRequest request, IDOMNode node, String matchString,
+			String attributeName) {
+		String nodeName = node.getNodeName();
+		String prefix = node.getPrefix();
+		if (prefix != null) {
+			nodeName = nodeName.substring(prefix.length() + 1);
+		}
 
-        if ("executor".equals(nodeName)) {
-            if ("registry-ref".equals(attributeName)) {
-                addBeanReferenceProposals(request, matchString, node, true);
-            }
-        }
-        else if ("repository".equals(nodeName)) {
-            if ("conversation-manager-ref".equals(attributeName)) {
-                addBeanReferenceProposals(request, matchString, node, true);
-            }
-        }
-        else if ("listener".equals(nodeName)) {
-            if ("ref".equals(attributeName)) {
-                addBeanReferenceProposals(request, matchString, node, true);
-            }
-        }
-        else if ("attribute".equals(nodeName)) {
-            if ("type".equals(attributeName)) {
-                addClassAttributeValueProposals(request, matchString);
-            }
-        }
-    }
+		if ("executor".equals(nodeName)) {
+			if ("registry-ref".equals(attributeName)) {
+				addBeanReferenceProposals(request, matchString, node, true);
+			}
+		}
+		else if ("repository".equals(nodeName)) {
+			if ("conversation-manager-ref".equals(attributeName)) {
+				addBeanReferenceProposals(request, matchString, node, true);
+			}
+		}
+		else if ("listener".equals(nodeName)) {
+			if ("ref".equals(attributeName)) {
+				addBeanReferenceProposals(request, matchString, node, true);
+			}
+		}
+		else if ("attribute".equals(nodeName)) {
+			if ("type".equals(attributeName)) {
+				addClassAttributeValueProposals(request, matchString);
+			}
+		}
+	}
 
-    @Override
-    protected void computeTagInsertionProposals(ContentAssistRequest request, IDOMNode node) {
-    }
+	@Override
+	protected void computeTagInsertionProposals(ContentAssistRequest request, IDOMNode node) {
+	}
 }
