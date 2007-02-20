@@ -23,44 +23,44 @@ import org.eclipse.ui.IEditorPart;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 
 public class JavaElementReferenceNode implements IRevealableReferenceNode {
-    
-    private IJavaElement method;
-    
-    private boolean isRoot = false;
-    
-    public JavaElementReferenceNode(IJavaElement elem, boolean isRoot) {
-        this.method = elem;
-        this.isRoot = isRoot;
-    }
 
-    public IJavaElement getJavaElement() {
-        return method;
-    }
+	private IJavaElement method;
 
-    public boolean isRoot() {
-        return isRoot;
-    }
+	private boolean isRoot = false;
 
-    public void openAndReveal() {
-        IEditorPart p;
-        try {
-            p = JavaUI.openInEditor(method);
-            JavaUI.revealInEditor(p, method);
-        }
-        catch (Exception e) {
-        }   
-    }
+	public JavaElementReferenceNode(IJavaElement elem, boolean isRoot) {
+		this.method = elem;
+		this.isRoot = isRoot;
+	}
 
-    public int getLineNumber() {
-        if (method instanceof IMember) {
-            return AopReferenceModelNavigatorUtils.getLineNumber((IMember) method);
-        }
-        else {
-            return -1;
-        }
-    }
+	public IJavaElement getJavaElement() {
+		return method;
+	}
 
-    public IResource getResource() {
-        return method.getResource();
-    }
+	public boolean isRoot() {
+		return isRoot;
+	}
+
+	public void openAndReveal() {
+		IEditorPart p;
+		try {
+			p = JavaUI.openInEditor(method);
+			JavaUI.revealInEditor(p, method);
+		}
+		catch (Exception e) {
+		}
+	}
+
+	public int getLineNumber() {
+		if (method instanceof IMember) {
+			return AopReferenceModelNavigatorUtils.getLineNumber((IMember) method);
+		}
+		else {
+			return -1;
+		}
+	}
+
+	public IResource getResource() {
+		return method.getResource();
+	}
 }

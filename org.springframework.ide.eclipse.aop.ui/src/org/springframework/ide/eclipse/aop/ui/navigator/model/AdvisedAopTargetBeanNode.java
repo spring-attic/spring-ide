@@ -26,48 +26,43 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class AdvisedAopTargetBeanNode implements IReferenceNode, IRevealableReferenceNode {
 
-    private List<IAopReference> references;
+	private List<IAopReference> references;
 
-    public AdvisedAopTargetBeanNode(List<IAopReference> reference) {
-        this.references = reference;
-    }
+	public AdvisedAopTargetBeanNode(List<IAopReference> reference) {
+		this.references = reference;
+	}
 
-    public IReferenceNode[] getChildren() {
-        return new IReferenceNode[] { new AdvisedAopReferenceNode(references) };
-    }
+	public IReferenceNode[] getChildren() {
+		return new IReferenceNode[] { new AdvisedAopReferenceNode(references) };
+	}
 
-    public Image getImage() {
-        return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getImage(this.references.get(0)
-                .getTargetBean());
-    }
+	public Image getImage() {
+		return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getImage(this.references.get(0).getTargetBean());
+	}
 
-    public String getText() {
-        return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getText(this.references.get(0)
-                .getTargetBean())
-                + " - "
-                + this.references.get(0).getTargetBean().getElementResource()
-                        .getFullPath().toString();
-    }
+	public String getText() {
+		return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getText(this.references.get(0).getTargetBean())
+				+ " - " + this.references.get(0).getTargetBean().getElementResource().getFullPath().toString();
+	}
 
-    public boolean hasChildren() {
-        return true;
-    }
+	public boolean hasChildren() {
+		return true;
+	}
 
-    public void openAndReveal() {
-        IResource resource = references.get(0).getTargetBean().getElementResource();
-        SpringUIUtils.openInEditor((IFile) resource, references.get(0).getTargetBean()
-                .getElementStartLine());
-    }
+	public void openAndReveal() {
+		IResource resource = references.get(0).getTargetBean().getElementResource();
+		SpringUIUtils.openInEditor((IFile) resource, references.get(0).getTargetBean().getElementStartLine());
+	}
 
-    public IAopReference getReference() {
-        return this.references.get(0);
-    }
+	public IAopReference getReference() {
+		return this.references.get(0);
+	}
 
-    public int getLineNumber() {
-        return references.get(0).getTargetBean().getElementStartLine();
-    }
+	public int getLineNumber() {
+		return references.get(0).getTargetBean().getElementStartLine();
+	}
 
-    public IResource getResource() {
-        return references.get(0).getTargetBean().getElementResource();
-    }
+	public IResource getResource() {
+		return references.get(0).getTargetBean().getElementResource();
+	}
 }

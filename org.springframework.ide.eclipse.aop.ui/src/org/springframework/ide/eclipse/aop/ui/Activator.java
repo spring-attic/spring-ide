@@ -47,9 +47,9 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-        
+
 		// set the UI version of core operations
-        AopLog.setLogger(new EventTraceLogger());
+		AopLog.setLogger(new EventTraceLogger());
 	}
 
 	/*
@@ -74,8 +74,7 @@ public class Activator extends AbstractUIPlugin {
 	/**
 	 * Writes the message to the plug-in's log
 	 * 
-	 * @param message
-	 *            the text to write to the log
+	 * @param message the text to write to the log
 	 */
 	public static void log(String message, Throwable exception) {
 		IStatus status = createErrorStatus(message, exception);
@@ -83,8 +82,7 @@ public class Activator extends AbstractUIPlugin {
 	}
 
 	public static void log(Throwable exception) {
-		getDefault().getLog().log(
-				createErrorStatus("Plugin internal error", exception));
+		getDefault().getLog().log(createErrorStatus("Plugin internal error", exception));
 	}
 
 	/**

@@ -27,18 +27,22 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
 
 /**
- * The images provided by the Spring UI plugin. Initialize the image registry by declaring all of
- * the required graphics. This involves creating JFace image descriptors describing how to
- * create/find the image should it be needed. The image is not actually allocated until requested.
+ * The images provided by the Spring UI plugin. Initialize the image registry by
+ * declaring all of the required graphics. This involves creating JFace image
+ * descriptors describing how to create/find the image should it be needed. The
+ * image is not actually allocated until requested.
  * 
- * Prefix conventions Wizard Banners WIZBAN_ Preference Banners PREF_BAN_ Property Page Banners
- * PROPBAN_ Color toolbar CTOOL_ Enable toolbar ETOOL_ Disable toolbar DTOOL_ Local enabled toolbar
- * ELCL_ Local Disable toolbar DLCL_ Object large OBJL_ Object small OBJS_ View VIEW_ Product images
- * PROD_ Misc images MISC_
+ * Prefix conventions Wizard Banners WIZBAN_ Preference Banners PREF_BAN_
+ * Property Page Banners PROPBAN_ Color toolbar CTOOL_ Enable toolbar ETOOL_
+ * Disable toolbar DTOOL_ Local enabled toolbar ELCL_ Local Disable toolbar
+ * DLCL_ Object large OBJL_ Object small OBJS_ View VIEW_ Product images PROD_
+ * Misc images MISC_
  * 
- * Where are the images? The images (typically gifs) are found in the same location as this plugin
- * class. This may mean the same package directory as the package holding this class. The images are
- * declared using <code>this.getClass()</code> to ensure they are looked up via this plugin class.
+ * Where are the images? The images (typically gifs) are found in the same
+ * location as this plugin class. This may mean the same package directory as
+ * the package holding this class. The images are declared using
+ * <code>this.getClass()</code> to ensure they are looked up via this plugin
+ * class.
  * 
  * @see org.eclipse.jface.resource.ImageRegistry
  */
@@ -55,9 +59,9 @@ public class AopReferenceModelImages {
 
 	static {
 		try {
-			ICON_BASE_URL = new URL(Activator.getDefault().getBundle().getEntry("/"),
-					ICON_PATH_PREFIX);
-		} catch (MalformedURLException e) {
+			ICON_BASE_URL = new URL(Activator.getDefault().getBundle().getEntry("/"), ICON_PATH_PREFIX);
+		}
+		catch (MalformedURLException e) {
 			Activator.log(e);
 		}
 	}
@@ -105,29 +109,23 @@ public class AopReferenceModelImages {
 
 	public static final ImageDescriptor DESC_OBJS_ADVICE = createManaged(STRUCTURE, IMG_OBJS_ADVICE);
 
-	public static final ImageDescriptor DESC_OBJS_AROUND_ADVICE = createManaged(STRUCTURE,
-			IMG_OBJS_AROUND_ADVICE);
+	public static final ImageDescriptor DESC_OBJS_AROUND_ADVICE = createManaged(STRUCTURE, IMG_OBJS_AROUND_ADVICE);
 
-	public static final ImageDescriptor DESC_OBJS_BEFORE_ADVICE = createManaged(STRUCTURE,
-			IMG_OBJS_BEFORE_ADVICE);
+	public static final ImageDescriptor DESC_OBJS_BEFORE_ADVICE = createManaged(STRUCTURE, IMG_OBJS_BEFORE_ADVICE);
 
-	public static final ImageDescriptor DESC_OBJS_AFTER_ADVICE = createManaged(STRUCTURE,
-			IMG_OBJS_AFTER_ADVICE);
+	public static final ImageDescriptor DESC_OBJS_AFTER_ADVICE = createManaged(STRUCTURE, IMG_OBJS_AFTER_ADVICE);
 
-	public static final ImageDescriptor DESC_OBJS_INTRODUCTION = createManaged(STRUCTURE,
-			IMG_OBJS_INTRODUCTION);
+	public static final ImageDescriptor DESC_OBJS_INTRODUCTION = createManaged(STRUCTURE, IMG_OBJS_INTRODUCTION);
 
 	public static final ImageDescriptor DESC_OBJS_CONFIG = createManaged(STRUCTURE, IMG_OBJS_CONFIG);
 
-	public static final ImageDescriptor DESC_OBJS_POINTCUT = createManaged(STRUCTURE,
-			IMG_OBJS_POINTCUT);
+	public static final ImageDescriptor DESC_OBJS_POINTCUT = createManaged(STRUCTURE, IMG_OBJS_POINTCUT);
 
 	public static final ImageDescriptor DESC_OVR_ADVICE = createManaged(STRUCTURE, IMG_OVR_ADVICE);
 
 	public static final ImageDescriptor DESC_OVR_SPRING = createManaged(STRUCTURE, IMG_OVR_SPRING);
 
-	public static final ImageDescriptor DESC_OVR_ANNOTATION = createManaged(STRUCTURE,
-			IMG_OVR_ANNOTATION);
+	public static final ImageDescriptor DESC_OVR_ANNOTATION = createManaged(STRUCTURE, IMG_OVR_ANNOTATION);
 
 	/**
 	 * Returns the <code>Image<code> identified by the given key,
@@ -138,16 +136,16 @@ public class AopReferenceModelImages {
 	}
 
 	/**
-	 * Sets the three image descriptors for enabled, disabled, and hovered to an action. The actions
-	 * are retrieved from the *tool16 folders.
+	 * Sets the three image descriptors for enabled, disabled, and hovered to an
+	 * action. The actions are retrieved from the *tool16 folders.
 	 */
 	public static void setToolImageDescriptors(IAction action, String iconName) {
 		setImageDescriptors(action, "tool16", iconName);
 	}
 
 	/**
-	 * Sets the three image descriptors for enabled, disabled, and hovered to an action. The actions
-	 * are retrieved from the *lcl16 folders.
+	 * Sets the three image descriptors for enabled, disabled, and hovered to an
+	 * action. The actions are retrieved from the *lcl16 folders.
 	 */
 	public static void setLocalImageDescriptors(IAction action, String iconName) {
 		setImageDescriptors(action, "lcl16", iconName);
@@ -173,17 +171,18 @@ public class AopReferenceModelImages {
 
 	private static void setImageDescriptors(IAction action, String type, String relPath) {
 		try {
-			ImageDescriptor id = ImageDescriptor
-					.createFromURL(makeIconFileURL("d" + type, relPath));
+			ImageDescriptor id = ImageDescriptor.createFromURL(makeIconFileURL("d" + type, relPath));
 			if (id != null) {
 				action.setDisabledImageDescriptor(id);
 			}
-		} catch (MalformedURLException e) {
+		}
+		catch (MalformedURLException e) {
 			Activator.log(e);
 		}
 		/*
-		 * try { ImageDescriptor id = ImageDescriptor.createFromURL(makeIconFileURL( "c" + type,
-		 * relPath)); if (id != null) { action.setHoverImageDescriptor(id); } } catch
+		 * try { ImageDescriptor id =
+		 * ImageDescriptor.createFromURL(makeIconFileURL( "c" + type, relPath));
+		 * if (id != null) { action.setHoverImageDescriptor(id); } } catch
 		 * (MalformedURLException e) { BeansUIPlugin.log(e); }
 		 */
 		action.setImageDescriptor(create("e" + type, relPath));
@@ -201,7 +200,8 @@ public class AopReferenceModelImages {
 				Activator.log("Image registry already defined", null);
 			}
 			return result;
-		} catch (MalformedURLException e) {
+		}
+		catch (MalformedURLException e) {
 			Activator.log(e);
 			return ImageDescriptor.getMissingImageDescriptor();
 		}
@@ -210,7 +210,8 @@ public class AopReferenceModelImages {
 	private static ImageDescriptor create(String prefix, String name) {
 		try {
 			return ImageDescriptor.createFromURL(makeIconFileURL(prefix, name));
-		} catch (MalformedURLException e) {
+		}
+		catch (MalformedURLException e) {
 			Activator.log(e);
 			return ImageDescriptor.getMissingImageDescriptor();
 		}

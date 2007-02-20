@@ -24,34 +24,33 @@ import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 
 /**
  */
-public class AopReferenceModelNavigatorLabelProvider
-        extends BeansModelLabelProvider implements ICommonLabelProvider {
+public class AopReferenceModelNavigatorLabelProvider extends BeansModelLabelProvider implements ICommonLabelProvider {
 
-    public String getDescription(Object element) {
-        // TODO add descrption here
-        return element.toString();
-    }
+	public String getDescription(Object element) {
+		// TODO add descrption here
+		return element.toString();
+	}
 
-    public Image getImage(Object element) {
-        if (element instanceof IReferenceNode) {
-            return ((IReferenceNode) element).getImage();
-        }
-        return super.getImage(element);
-    }
+	public Image getImage(Object element) {
+		if (element instanceof IReferenceNode) {
+			return ((IReferenceNode) element).getImage();
+		}
+		return super.getImage(element);
+	}
 
-    public String getText(Object element) {
-        if (element instanceof IReferenceNode) {
-            return ((IReferenceNode) element).getText();
-        }
-        return super.getText(element);
-    }
+	public String getText(Object element) {
+		if (element instanceof IReferenceNode) {
+			return ((IReferenceNode) element).getText();
+		}
+		return super.getText(element);
+	}
 
-    public void init(ICommonContentExtensionSite config) {
-    }
+	public void init(ICommonContentExtensionSite config) {
+	}
 
-    public void restoreState(IMemento memento) {
-    }
+	public void restoreState(IMemento memento) {
+	}
 
-    public void saveState(IMemento memento) {
-    }
+	public void saveState(IMemento memento) {
+	}
 }

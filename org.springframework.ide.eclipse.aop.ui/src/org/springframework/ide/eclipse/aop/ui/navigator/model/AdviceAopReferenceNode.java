@@ -27,41 +27,41 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 
 public class AdviceAopReferenceNode implements IReferenceNode {
 
-    private List<IAopReference> references;
+	private List<IAopReference> references;
 
-    public AdviceAopReferenceNode(List<IAopReference> reference) {
-        this.references = reference;
-    }
+	public AdviceAopReferenceNode(List<IAopReference> reference) {
+		this.references = reference;
+	}
 
-    public IReferenceNode[] getChildren() {
-        List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
-        Map<IBean, List<IAopReference>> refs = new HashMap<IBean, List<IAopReference>>();
-        for (IAopReference r : this.references) {
-            if (refs.containsKey(r.getTargetBean())) {
-                refs.get(r.getTargetBean()).add(r);
-            }
-            else {
-                List<IAopReference> ref = new ArrayList<IAopReference>();
-                ref.add(r);
-                refs.put(r.getTargetBean(), ref);
-            }
-        }
-        for (Map.Entry<IBean, List<IAopReference>> entry : refs.entrySet()) {
-            nodes.add(new AdviceAopTargetBeanNode(entry.getValue()));
-        }
-        return nodes.toArray(new IReferenceNode[nodes.size()]);
-    }
+	public IReferenceNode[] getChildren() {
+		List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
+		Map<IBean, List<IAopReference>> refs = new HashMap<IBean, List<IAopReference>>();
+		for (IAopReference r : this.references) {
+			if (refs.containsKey(r.getTargetBean())) {
+				refs.get(r.getTargetBean()).add(r);
+			}
+			else {
+				List<IAopReference> ref = new ArrayList<IAopReference>();
+				ref.add(r);
+				refs.put(r.getTargetBean(), ref);
+			}
+		}
+		for (Map.Entry<IBean, List<IAopReference>> entry : refs.entrySet()) {
+			nodes.add(new AdviceAopTargetBeanNode(entry.getValue()));
+		}
+		return nodes.toArray(new IReferenceNode[nodes.size()]);
+	}
 
-    public Image getImage() {
-        return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_REFERENCE);
-    }
+	public Image getImage() {
+		return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_REFERENCE);
+	}
 
-    public String getText() {
-        return "advises";
-    }
+	public String getText() {
+		return "advises";
+	}
 
-    public boolean hasChildren() {
-        return true;
-    }
+	public boolean hasChildren() {
+		return true;
+	}
 
 }

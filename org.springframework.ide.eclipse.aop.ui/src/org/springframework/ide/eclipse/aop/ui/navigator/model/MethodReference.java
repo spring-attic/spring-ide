@@ -11,33 +11,33 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 
 public class MethodReference {
 
-    List<IAopReference> aspects = new ArrayList<IAopReference>();
+	List<IAopReference> aspects = new ArrayList<IAopReference>();
 
-    List<IAopReference> advices = new ArrayList<IAopReference>();
+	List<IAopReference> advices = new ArrayList<IAopReference>();
 
-    IMember member;
+	IMember member;
 
-    public List<IAopReference> getAdvices() {
-        return advices;
-    }
+	public List<IAopReference> getAdvices() {
+		return advices;
+	}
 
-    public void setAdvices(List<IAopReference> advices) {
-        this.advices = advices;
-    }
+	public void setAdvices(List<IAopReference> advices) {
+		this.advices = advices;
+	}
 
-    public List<IAopReference> getAspects() {
-        return aspects;
-    }
+	public List<IAopReference> getAspects() {
+		return aspects;
+	}
 
-    public void setAspects(List<IAopReference> aspects) {
-        this.aspects = aspects;
-    }
+	public void setAspects(List<IAopReference> aspects) {
+		this.aspects = aspects;
+	}
 
-    public IMember getMember() {
-        return member;
-    }
+	public IMember getMember() {
+		return member;
+	}
 
-    public void setMember(IMember member) {
-        this.member = member;
-    }
+	public void setMember(IMember member) {
+		this.member = member;
+	}
 }

@@ -40,12 +40,15 @@ public class AopReferenceModelNavigatorSorter extends ViewerSorter {
 				int l2 = ref2.getLineNumber();
 				if (l1 < l2) {
 					return -1;
-				} else if (l1 == l2) {
+				}
+				else if (l1 == l2) {
 					return 0;
-				} else if (l1 > l2) {
+				}
+				else if (l1 > l2) {
 					return 1;
 				}
-			} else {
+			}
+			else {
 				super.compare(viewer, ref1.getResource(), ref2.getResource());
 			}
 		}

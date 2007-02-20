@@ -27,8 +27,8 @@ import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 
-public class BeanClassTargetReferenceNode extends AbstractJavaElementReferenceNode implements
-		IReferenceNode, IRevealableReferenceNode {
+public class BeanClassTargetReferenceNode extends AbstractJavaElementReferenceNode implements IReferenceNode,
+		IRevealableReferenceNode {
 
 	protected BeanReferenceNode parent;
 
@@ -43,7 +43,8 @@ public class BeanClassTargetReferenceNode extends AbstractJavaElementReferenceNo
 		for (IAopReference reference : parent.getAspectReferences()) {
 			if (refs.containsKey(reference.getSource())) {
 				refs.get(reference.getSource()).getAspects().add(reference);
-			} else {
+			}
+			else {
 				MethodReference r = new MethodReference();
 				r.setMember(reference.getSource());
 				r.getAspects().add(reference);
@@ -53,7 +54,8 @@ public class BeanClassTargetReferenceNode extends AbstractJavaElementReferenceNo
 		for (IAopReference reference : parent.getAdviseReferences()) {
 			if (refs.containsKey(reference.getTarget())) {
 				refs.get(reference.getTarget()).getAdvices().add(reference);
-			} else {
+			}
+			else {
 				MethodReference r = new MethodReference();
 				r.setMember(reference.getTarget());
 				r.getAdvices().add(reference);
@@ -61,14 +63,15 @@ public class BeanClassTargetReferenceNode extends AbstractJavaElementReferenceNo
 			}
 		}
 		for (Map.Entry<IMember, MethodReference> entry : refs.entrySet()) {
-			nodes.add(new BeanMethodReferenceNode(entry.getKey(), entry.getValue().getAspects(),
-					entry.getValue().getAdvices()));
+			nodes.add(new BeanMethodReferenceNode(entry.getKey(), entry.getValue().getAspects(), entry.getValue()
+					.getAdvices()));
 		}
 		Map<IAspectDefinition, List<IAopReference>> dRefs = new HashMap<IAspectDefinition, List<IAopReference>>();
 		for (IAopReference r : parent.getDeclareParentReferences()) {
 			if (dRefs.containsKey(r.getDefinition())) {
 				dRefs.get(r.getDefinition()).add(r);
-			} else {
+			}
+			else {
 				List<IAopReference> ref = new ArrayList<IAopReference>();
 				ref.add(r);
 				dRefs.put(r.getDefinition(), ref);
@@ -88,7 +91,8 @@ public class BeanClassTargetReferenceNode extends AbstractJavaElementReferenceNo
 		if (element instanceof IType) {
 			return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element) + " - "
 					+ AopReferenceModelUtils.getPackageLinkName(element);
-		} else {
+		}
+		else {
 			return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element);
 		}
 	}

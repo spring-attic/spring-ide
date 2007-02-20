@@ -20,37 +20,32 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 
 public class AdviceAopTargetMethodNode extends AbstractJavaElementReferenceNode implements IReferenceNode,
-        IRevealableReferenceNode {
+		IRevealableReferenceNode {
 
-    private IAopReference reference;
+	private IAopReference reference;
 
-    public AdviceAopTargetMethodNode(IAopReference reference) {
-        super(reference.getTarget());
-    	this.reference = reference;
-    }
+	public AdviceAopTargetMethodNode(IAopReference reference) {
+		super(reference.getTarget());
+		this.reference = reference;
+	}
 
-    public IReferenceNode[] getChildren() {
-        return new IReferenceNode[0];
-    }
+	public IReferenceNode[] getChildren() {
+		return new IReferenceNode[0];
+	}
 
-    public String getText() {
-        if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
-            return AopReferenceModelUtils.getJavaElementLinkName(reference.getTarget())
-                    + " - "
-                    + AopReferenceModelUtils.getPackageLinkName(reference.getTarget());
-        }
-        else {
-            return AopReferenceModelUtils.getJavaElementLinkName(reference.getTarget()
-                    .getParent())
-                    + "."
-                    + AopReferenceModelUtils.getJavaElementLinkName(reference
-                            .getTarget())
-                    + " - "
-                    + AopReferenceModelUtils.getPackageLinkName(reference.getTarget());
-        }
-    }
+	public String getText() {
+		if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
+			return AopReferenceModelUtils.getJavaElementLinkName(reference.getTarget()) + " - "
+					+ AopReferenceModelUtils.getPackageLinkName(reference.getTarget());
+		}
+		else {
+			return AopReferenceModelUtils.getJavaElementLinkName(reference.getTarget().getParent()) + "."
+					+ AopReferenceModelUtils.getJavaElementLinkName(reference.getTarget()) + " - "
+					+ AopReferenceModelUtils.getPackageLinkName(reference.getTarget());
+		}
+	}
 
-    public boolean hasChildren() {
-        return false;
-    }
+	public boolean hasChildren() {
+		return false;
+	}
 }

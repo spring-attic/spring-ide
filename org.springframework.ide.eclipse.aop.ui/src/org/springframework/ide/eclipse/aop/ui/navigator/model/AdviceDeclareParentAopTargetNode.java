@@ -22,50 +22,42 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
-public class AdviceDeclareParentAopTargetNode implements IReferenceNode,
-        IRevealableReferenceNode {
+public class AdviceDeclareParentAopTargetNode implements IReferenceNode, IRevealableReferenceNode {
 
-    private IAopReference reference;
+	private IAopReference reference;
 
-    public AdviceDeclareParentAopTargetNode(IAopReference reference) {
-        this.reference = reference;
-    }
+	public AdviceDeclareParentAopTargetNode(IAopReference reference) {
+		this.reference = reference;
+	}
 
-    public IReferenceNode[] getChildren() {
-        return new IReferenceNode[] { new AdviceDeclareParentAopTargetMethodNode(
-                reference) };
-    }
+	public IReferenceNode[] getChildren() {
+		return new IReferenceNode[] { new AdviceDeclareParentAopTargetMethodNode(reference) };
+	}
 
-    public Image getImage() {
-        return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER
-                .getImage(this.reference.getTargetBean());
-    }
+	public Image getImage() {
+		return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getImage(this.reference.getTargetBean());
+	}
 
-    public String getText() {
-        return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER
-                .getText(this.reference.getTargetBean())
-                + " - "
-                + this.reference.getTargetBean().getElementResource()
-                        .getFullPath().toString();
-    }
+	public String getText() {
+		return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getText(this.reference.getTargetBean()) + " - "
+				+ this.reference.getTargetBean().getElementResource().getFullPath().toString();
+	}
 
-    public boolean hasChildren() {
-        return true;
-    }
+	public boolean hasChildren() {
+		return true;
+	}
 
-    public void openAndReveal() {
-        IResource resource = this.reference.getTargetBean()
-                .getElementResource();
-        SpringUIUtils.openInEditor((IFile) resource, this.reference
-                .getTargetBean().getElementStartLine());
-    }
+	public void openAndReveal() {
+		IResource resource = this.reference.getTargetBean().getElementResource();
+		SpringUIUtils.openInEditor((IFile) resource, this.reference.getTargetBean().getElementStartLine());
+	}
 
-    public int getLineNumber() {
-        return AopReferenceModelNavigatorUtils.getLineNumber(reference.getTarget());
-    }
+	public int getLineNumber() {
+		return AopReferenceModelNavigatorUtils.getLineNumber(reference.getTarget());
+	}
 
-    public IResource getResource() {
-        return reference.getTarget().getResource();
-    }
+	public IResource getResource() {
+		return reference.getTarget().getResource();
+	}
 
 }

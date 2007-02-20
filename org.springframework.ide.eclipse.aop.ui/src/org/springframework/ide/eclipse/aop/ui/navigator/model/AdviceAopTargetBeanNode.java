@@ -27,53 +27,48 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class AdviceAopTargetBeanNode implements IReferenceNode, IRevealableReferenceNode {
 
-    private List<IAopReference> references;
+	private List<IAopReference> references;
 
-    public AdviceAopTargetBeanNode(List<IAopReference> reference) {
-        this.references = reference;
-    }
+	public AdviceAopTargetBeanNode(List<IAopReference> reference) {
+		this.references = reference;
+	}
 
-    public IReferenceNode[] getChildren() {
-        List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
-        for (IAopReference r : this.references) {
-            nodes.add(new AdviceAopTargetMethodNode(r));
-        }
-        return nodes.toArray(new IReferenceNode[nodes.size()]);
-    }
+	public IReferenceNode[] getChildren() {
+		List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
+		for (IAopReference r : this.references) {
+			nodes.add(new AdviceAopTargetMethodNode(r));
+		}
+		return nodes.toArray(new IReferenceNode[nodes.size()]);
+	}
 
-    public Image getImage() {
-        return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getImage(this.references.get(0)
-                .getTargetBean());
-    }
+	public Image getImage() {
+		return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getImage(this.references.get(0).getTargetBean());
+	}
 
-    public String getText() {
-        return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getText(this.references.get(0)
-                .getTargetBean())
-                + " - "
-                + this.references.get(0).getTargetBean().getElementResource()
-                        .getFullPath().toString();
-    }
+	public String getText() {
+		return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getText(this.references.get(0).getTargetBean())
+				+ " - " + this.references.get(0).getTargetBean().getElementResource().getFullPath().toString();
+	}
 
-    public boolean hasChildren() {
-        return true;
-    }
+	public boolean hasChildren() {
+		return true;
+	}
 
-    public void openAndReveal() {
-        IResource resource = references.get(0).getDefinition().getResource();
-        SpringUIUtils.openInEditor((IFile) resource, references.get(0).getTargetBean()
-                .getElementEndLine());
-    }
+	public void openAndReveal() {
+		IResource resource = references.get(0).getDefinition().getResource();
+		SpringUIUtils.openInEditor((IFile) resource, references.get(0).getTargetBean().getElementEndLine());
+	}
 
-    public IAopReference getReference() {
-        return this.references.get(0);
-    }
+	public IAopReference getReference() {
+		return this.references.get(0);
+	}
 
-    public int getLineNumber() {
-        return references.get(0).getDefinition().getAspectLineNumber();
-    }
+	public int getLineNumber() {
+		return references.get(0).getDefinition().getAspectLineNumber();
+	}
 
-    public IResource getResource() {
-        return references.get(0).getResource();
-    }
+	public IResource getResource() {
+		return references.get(0).getResource();
+	}
 
 }

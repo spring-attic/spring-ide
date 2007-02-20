@@ -27,83 +27,81 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class AdvisedAopSourceNode implements IReferenceNode, IRevealableReferenceNode {
 
-    private IAopReference references;
+	private IAopReference references;
 
-    public AdvisedAopSourceNode(IAopReference reference) {
-        this.references = reference;
-    }
+	public AdvisedAopSourceNode(IAopReference reference) {
+		this.references = reference;
+	}
 
-    public IReferenceNode[] getChildren() {
-        return new IReferenceNode[] { new AdvisedAopSourceMethodNode(references) };
-    }
+	public IReferenceNode[] getChildren() {
+		return new IReferenceNode[] { new AdvisedAopSourceMethodNode(references) };
+	}
 
-    public Image getImage() {
-        ADVICE_TYPES type = references.getAdviceType();
-        if (type == ADVICE_TYPES.AFTER || type == ADVICE_TYPES.AFTER_RETURNING
-                || type == ADVICE_TYPES.AFTER_THROWING) {
-            return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_AFTER_ADVICE);
-        }
-        else if (type == ADVICE_TYPES.BEFORE) {
-            return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_BEFORE_ADVICE);
-        }
-        else if (type == ADVICE_TYPES.AROUND) {
-            return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_AROUND_ADVICE);
-        }
-        else if (type == ADVICE_TYPES.DECLARE_PARENTS) {
-            return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_INTRODUCTION);
-        }
-        return null;
-    }
+	public Image getImage() {
+		ADVICE_TYPES type = references.getAdviceType();
+		if (type == ADVICE_TYPES.AFTER || type == ADVICE_TYPES.AFTER_RETURNING || type == ADVICE_TYPES.AFTER_THROWING) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_AFTER_ADVICE);
+		}
+		else if (type == ADVICE_TYPES.BEFORE) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_BEFORE_ADVICE);
+		}
+		else if (type == ADVICE_TYPES.AROUND) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_AROUND_ADVICE);
+		}
+		else if (type == ADVICE_TYPES.DECLARE_PARENTS) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_INTRODUCTION);
+		}
+		return null;
+	}
 
-    public String getText() {
-        ADVICE_TYPES type = references.getAdviceType();
-        String text = "";
-        if (type == ADVICE_TYPES.AFTER) {
-            text += "after()";
-        }
-        else if (type == ADVICE_TYPES.AFTER_RETURNING) {
-            text += "after-returning()";
-        }
-        else if (type == ADVICE_TYPES.AFTER_THROWING) {
-            text += "after-throwing()";
-        }
-        else if (type == ADVICE_TYPES.BEFORE) {
-            text += "before()";
-        }
-        else if (type == ADVICE_TYPES.AROUND) {
-            text += "around()";
-        }
-        else if (type == ADVICE_TYPES.DECLARE_PARENTS) {
-            text += "declare parents: implements "
-                    + ((IIntroductionDefinition) references.getDefinition()).getImplInterfaceName();
-        }
-        text += " <";
-        text += references.getDefinition().getAspectName();
-        text += "> - ";
-        text += references.getDefinition().getResource().getFullPath().toString();
-        return text;
-    }
+	public String getText() {
+		ADVICE_TYPES type = references.getAdviceType();
+		String text = "";
+		if (type == ADVICE_TYPES.AFTER) {
+			text += "after()";
+		}
+		else if (type == ADVICE_TYPES.AFTER_RETURNING) {
+			text += "after-returning()";
+		}
+		else if (type == ADVICE_TYPES.AFTER_THROWING) {
+			text += "after-throwing()";
+		}
+		else if (type == ADVICE_TYPES.BEFORE) {
+			text += "before()";
+		}
+		else if (type == ADVICE_TYPES.AROUND) {
+			text += "around()";
+		}
+		else if (type == ADVICE_TYPES.DECLARE_PARENTS) {
+			text += "declare parents: implements "
+					+ ((IIntroductionDefinition) references.getDefinition()).getImplInterfaceName();
+		}
+		text += " <";
+		text += references.getDefinition().getAspectName();
+		text += "> - ";
+		text += references.getDefinition().getResource().getFullPath().toString();
+		return text;
+	}
 
-    public boolean hasChildren() {
-        return references.getSource() != null;
-    }
+	public boolean hasChildren() {
+		return references.getSource() != null;
+	}
 
-    public void openAndReveal() {
-        IResource resource = references.getDefinition().getResource();
-        SpringUIUtils.openInEditor((IFile) resource, references.getDefinition()
-                .getAspectLineNumber());
-    }
+	public void openAndReveal() {
+		IResource resource = references.getDefinition().getResource();
+		SpringUIUtils.openInEditor((IFile) resource, references.getDefinition().getAspectLineNumber());
+	}
 
-    public IAopReference getReference() {
-        return this.references;
-    }
+	public IAopReference getReference() {
+		return this.references;
+	}
 
-    public int getLineNumber() {
-        return references.getDefinition().getAspectLineNumber();
-    }
+	public int getLineNumber() {
+		return references.getDefinition().getAspectLineNumber();
+	}
 
-    public IResource getResource() {
-        return references.getResource();
-    }
+	public IResource getResource() {
+		return references.getResource();
+	}
 
 }

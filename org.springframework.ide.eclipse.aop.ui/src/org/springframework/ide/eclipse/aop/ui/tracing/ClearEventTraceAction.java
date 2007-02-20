@@ -39,17 +39,13 @@ public class ClearEventTraceAction extends Action {
 	 * 
 	 * @since 3.1
 	 */
-    private ClearEventTraceAction() {
+	private ClearEventTraceAction() {
 		super(ConsoleMessages.ClearOutputAction_title); //$NON-NLS-1$
 		setToolTipText(ConsoleMessages.ClearOutputAction_toolTipText); //$NON-NLS-1$
-		setHoverImageDescriptor(ConsolePluginImages
-				.getImageDescriptor(IConsoleConstants.IMG_LCL_CLEAR));
-		setDisabledImageDescriptor(ConsolePluginImages
-				.getImageDescriptor(IInternalConsoleConstants.IMG_DLCL_CLEAR));
-		setImageDescriptor(ConsolePluginImages
-				.getImageDescriptor(IInternalConsoleConstants.IMG_ELCL_CLEAR));
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this,
-				IConsoleHelpContextIds.CLEAR_CONSOLE_ACTION);
+		setHoverImageDescriptor(ConsolePluginImages.getImageDescriptor(IConsoleConstants.IMG_LCL_CLEAR));
+		setDisabledImageDescriptor(ConsolePluginImages.getImageDescriptor(IInternalConsoleConstants.IMG_DLCL_CLEAR));
+		setImageDescriptor(ConsolePluginImages.getImageDescriptor(IInternalConsoleConstants.IMG_ELCL_CLEAR));
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IConsoleHelpContextIds.CLEAR_CONSOLE_ACTION);
 	}
 
 	/**
@@ -66,11 +62,10 @@ public class ClearEventTraceAction extends Action {
 	 * @see org.eclipse.jface.action.IAction#run()
 	 */
 	public void run() {
-		BusyIndicator.showWhile(ConsolePlugin.getStandardDisplay(),
-				new Runnable() {
-					public void run() {
-						fText.setText(""); //$NON-NLS-1$
-					}
-				});
+		BusyIndicator.showWhile(ConsolePlugin.getStandardDisplay(), new Runnable() {
+			public void run() {
+				fText.setText(""); //$NON-NLS-1$
+			}
+		});
 	}
 }

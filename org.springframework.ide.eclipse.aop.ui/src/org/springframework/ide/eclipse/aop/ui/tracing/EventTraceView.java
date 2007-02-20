@@ -40,126 +40,126 @@ import org.springframework.ide.eclipse.aop.ui.Activator;
 /**
  * Displays and configures debug tracing for AJDT
  */
-public class EventTraceView
-        extends ViewPart implements EventTrace.EventListener {
+public class EventTraceView extends ViewPart implements EventTrace.EventListener {
 
-    StyledText text;
+	StyledText text;
 
-    private ClearEventTraceAction clearEventTraceAction;
+	private ClearEventTraceAction clearEventTraceAction;
 
-    private Font font = JFaceResources.getFont(JFaceResources.TEXT_FONT);
+	private Font font = JFaceResources.getFont(JFaceResources.TEXT_FONT);
 
-    /**
-     * Constructor for AJDTEventTraceView.
-     */
-    public EventTraceView() {
-        super();
-    }
+	/**
+	 * Constructor for AJDTEventTraceView.
+	 */
+	public EventTraceView() {
+		super();
+	}
 
-    public void dispose() {
-        EventTrace.removeListener(this);
-        DebugTracing.DEBUG = false;
-    }
+	public void dispose() {
+		EventTrace.removeListener(this);
+		DebugTracing.DEBUG = false;
+	}
 
-    /**
-     * @see IWorkbenchPart#createPartControl(Composite)
-     */
-    public void createPartControl(Composite parent) {
-        text = new StyledText(parent, SWT.MULTI | SWT.READ_ONLY | SWT.VERTICAL | SWT.HORIZONTAL);
-        startup();
-        EventTrace.addListener(this);
+	/**
+	 * @see IWorkbenchPart#createPartControl(Composite)
+	 */
+	public void createPartControl(Composite parent) {
+		text = new StyledText(parent, SWT.MULTI | SWT.READ_ONLY | SWT.VERTICAL | SWT.HORIZONTAL);
+		startup();
+		EventTrace.addListener(this);
 
-        makeActions();
-        contributeToActionBars();
+		makeActions();
+		contributeToActionBars();
 
-        // Add an empty ISelectionProvider so that this view works with dynamic help (bug 104331)
-        getSite().setSelectionProvider(new ISelectionProvider() {
-            public void addSelectionChangedListener(ISelectionChangedListener listener) {
-            }
+		// Add an empty ISelectionProvider so that this view works with dynamic
+		// help (bug 104331)
+		getSite().setSelectionProvider(new ISelectionProvider() {
+			public void addSelectionChangedListener(ISelectionChangedListener listener) {
+			}
 
-            public ISelection getSelection() {
-                return null;
-            }
+			public ISelection getSelection() {
+				return null;
+			}
 
-            public void removeSelectionChangedListener(ISelectionChangedListener listener) {
-            }
+			public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+			}
 
-            public void setSelection(ISelection selection) {
-            }
-        });
-    }
+			public void setSelection(ISelection selection) {
+			}
+		});
+	}
 
-    /**
-     * record version information & content of the preference store
-     */
-    private void startup() {
-        DebugTracing.DEBUG = true;
-        aopEvent(DebugTracing.startupInfo(), AopLog.DEFAULT, new Date());
-    }
+	/**
+	 * record version information & content of the preference store
+	 */
+	private void startup() {
+		DebugTracing.DEBUG = true;
+		aopEvent(DebugTracing.startupInfo(), AopLog.DEFAULT, new Date());
+	}
 
-    /**
-     * @see IWorkbenchPart#setFocus()
-     */
-    public void setFocus() {
-        text.setFocus();
-    }
+	/**
+	 * @see IWorkbenchPart#setFocus()
+	 */
+	public void setFocus() {
+		text.setFocus();
+	}
 
-    public void aopEvent(String msg, final int category, Date time) {
-        final String txt = DateFormat.getTimeInstance().format(time) + " " + msg + "\n";
-        Activator.getDefault().getWorkbench().getDisplay().asyncExec(new Runnable() {
-            public void run() {
-                appendEventText(txt, category);
-            }
-        });
-    }
+	public void aopEvent(String msg, final int category, Date time) {
+		final String txt = DateFormat.getTimeInstance().format(time) + " " + msg + "\n";
+		Activator.getDefault().getWorkbench().getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				appendEventText(txt, category);
+			}
+		});
+	}
 
-    private void appendEventText(String msg, int category) {
-        IViewSite site = getViewSite();
-        if (site == null) {
-            return;
-        }
-        Shell shell = site.getShell();
-        if (shell == null) {
-            return;
-        }
-        Display display = shell.getDisplay();
-        if (display == null) {
-            return;
-        }
+	private void appendEventText(String msg, int category) {
+		IViewSite site = getViewSite();
+		if (site == null) {
+			return;
+		}
+		Shell shell = site.getShell();
+		if (shell == null) {
+			return;
+		}
+		Display display = shell.getDisplay();
+		if (display == null) {
+			return;
+		}
 
-        StyleRange styleRange = new StyleRange();
-        styleRange.font = font;
-        styleRange.start = text.getText().length();
-        styleRange.length = msg.length();
-        if (category == AopLog.BUILDER) {
-            styleRange.foreground = display.getSystemColor(SWT.COLOR_DARK_BLUE);
-        }
-        else if (category == AopLog.BUILDER_CLASSPATH) {
-            styleRange.foreground = display.getSystemColor(SWT.COLOR_DARK_RED);
-        }
-        else if ((category == AopLog.BUILDER) || (category == AopLog.BUILDER_PROGRESS)
-                || (category == AopLog.BUILDER_MESSAGES)) {
-            styleRange.foreground = display.getSystemColor(SWT.COLOR_DARK_GREEN);
-        }
-        else {
-            styleRange.foreground = display.getSystemColor(SWT.COLOR_BLACK);
-        }
+		StyleRange styleRange = new StyleRange();
+		styleRange.font = font;
+		styleRange.start = text.getText().length();
+		styleRange.length = msg.length();
+		if (category == AopLog.BUILDER) {
+			styleRange.foreground = display.getSystemColor(SWT.COLOR_DARK_BLUE);
+		}
+		else if (category == AopLog.BUILDER_CLASSPATH) {
+			styleRange.foreground = display.getSystemColor(SWT.COLOR_DARK_RED);
+		}
+		else if ((category == AopLog.BUILDER) || (category == AopLog.BUILDER_PROGRESS)
+				|| (category == AopLog.BUILDER_MESSAGES)) {
+			styleRange.foreground = display.getSystemColor(SWT.COLOR_DARK_GREEN);
+		}
+		else {
+			styleRange.foreground = display.getSystemColor(SWT.COLOR_BLACK);
+		}
 
-        text.append(msg);
-        text.setStyleRange(styleRange);
-        text.setTopIndex(text.getLineCount() - 1);
-    }
+		text.append(msg);
+		text.setStyleRange(styleRange);
+		text.setTopIndex(text.getLineCount() - 1);
+	}
 
-    private void makeActions() {
-        clearEventTraceAction = new ClearEventTraceAction(text);
-    }
+	private void makeActions() {
+		clearEventTraceAction = new ClearEventTraceAction(text);
+	}
 
-    private void contributeToActionBars() {
-        IActionBars bars = getViewSite().getActionBars();
-        fillLocalToolBar(bars.getToolBarManager());
-    }
+	private void contributeToActionBars() {
+		IActionBars bars = getViewSite().getActionBars();
+		fillLocalToolBar(bars.getToolBarManager());
+	}
 
-    private void fillLocalToolBar(IToolBarManager manager) {
-        manager.add(clearEventTraceAction);
-    }
+	private void fillLocalToolBar(IToolBarManager manager) {
+		manager.add(clearEventTraceAction);
+	}
 }

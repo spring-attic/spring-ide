@@ -50,7 +50,8 @@ public class AbstractJavaElementReferenceNode {
 		try {
 			p = JavaUI.openInEditor(this.element);
 			JavaUI.revealInEditor(p, (IJavaElement) this.element);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 		}
 	}
 
@@ -63,8 +64,8 @@ public class AbstractJavaElementReferenceNode {
 
 	}
 
-    public IMember getElement() {
-        return element;
-    }
+	public IMember getElement() {
+		return element;
+	}
 
 }

@@ -25,61 +25,60 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 @SuppressWarnings("restriction")
 public class OpenAopModelReferenceInplaceDialogAction implements IWorkbenchWindowActionDelegate {
 
-    private AopReferenceModelInplaceDialog xrefDialog;
+	private AopReferenceModelInplaceDialog xrefDialog;
 
-    /*
-     * (non-Javadoc)
-     * @see org.eclipse.ui.IWorkbenchWindowActionDelegate#dispose()
-     */
-    public void dispose() {
-        xrefDialog = null;
-    }
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ui.IWorkbenchWindowActionDelegate#dispose()
+	 */
+	public void dispose() {
+		xrefDialog = null;
+	}
 
-    /*
-     * (non-Javadoc)
-     * @see org.eclipse.ui.IWorkbenchWindowActionDelegate#init(org.eclipse.ui.IWorkbenchWindow)
-     */
-    public void init(IWorkbenchWindow window) {
-    }
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ui.IWorkbenchWindowActionDelegate#init(org.eclipse.ui.IWorkbenchWindow)
+	 */
+	public void init(IWorkbenchWindow window) {
+	}
 
-    /*
-     * (non-Javadoc)
-     * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
-     */
-    public void run(IAction action) {
-        Shell parent = JavaPlugin.getActiveWorkbenchShell();
-        xrefDialog = new AopReferenceModelInplaceDialog(parent);
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
+	 */
+	public void run(IAction action) {
+		Shell parent = JavaPlugin.getActiveWorkbenchShell();
+		xrefDialog = new AopReferenceModelInplaceDialog(parent);
 
-        xrefDialog.setLastSelection(getCurrentSelection());
-        xrefDialog.setWorkbenchPart(JavaPlugin.getActiveWorkbenchWindow().getActivePage()
-                .getActivePart());
-        xrefDialog.open();
-    }
+		xrefDialog.setLastSelection(getCurrentSelection());
+		xrefDialog.setWorkbenchPart(JavaPlugin.getActiveWorkbenchWindow().getActivePage().getActivePart());
+		xrefDialog.open();
+	}
 
-    /*
-     * (non-Javadoc)
-     * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction,
-     *      org.eclipse.jface.viewers.ISelection)
-     */
-    public void selectionChanged(IAction action, ISelection selection) {
-        // Have selected something in the editor - therefore
-        // want to close the inplace view if haven't already done so
-        if (xrefDialog != null && xrefDialog.isOpen()) {
-            xrefDialog.dispose();
-            xrefDialog = null;
-        }
-    }
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction,
+	 * org.eclipse.jface.viewers.ISelection)
+	 */
+	public void selectionChanged(IAction action, ISelection selection) {
+		// Have selected something in the editor - therefore
+		// want to close the inplace view if haven't already done so
+		if (xrefDialog != null && xrefDialog.isOpen()) {
+			xrefDialog.dispose();
+			xrefDialog = null;
+		}
+	}
 
-    /**
-     * Returns the current selection in the workbench
-     */
-    @SuppressWarnings("restriction")
-    public static ISelection getCurrentSelection() {
-        IWorkbenchWindow window = JavaPlugin.getActiveWorkbenchWindow();
-        if (window != null) {
-            return window.getSelectionService().getSelection();
-        }
-        return null;
-    }
+	/**
+	 * Returns the current selection in the workbench
+	 */
+	@SuppressWarnings("restriction")
+	public static ISelection getCurrentSelection() {
+		IWorkbenchWindow window = JavaPlugin.getActiveWorkbenchWindow();
+		if (window != null) {
+			return window.getSelectionService().getSelection();
+		}
+		return null;
+	}
 
 }

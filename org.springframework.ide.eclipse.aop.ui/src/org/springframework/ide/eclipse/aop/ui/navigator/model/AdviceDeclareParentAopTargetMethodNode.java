@@ -19,8 +19,8 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 
-public class AdviceDeclareParentAopTargetMethodNode extends AbstractJavaElementReferenceNode
-		implements IReferenceNode, IRevealableReferenceNode {
+public class AdviceDeclareParentAopTargetMethodNode extends AbstractJavaElementReferenceNode implements IReferenceNode,
+		IRevealableReferenceNode {
 
 	private IAopReference reference;
 
@@ -37,7 +37,8 @@ public class AdviceDeclareParentAopTargetMethodNode extends AbstractJavaElementR
 		if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
 			return AopReferenceModelUtils.getJavaElementLinkName(reference.getTarget()) + " - "
 					+ AopReferenceModelUtils.getPackageLinkName(reference.getTarget());
-		} else {
+		}
+		else {
 			return AopReferenceModelUtils.getJavaElementLinkName(reference.getTarget().getParent()) + "."
 					+ AopReferenceModelUtils.getJavaElementLinkName(reference.getTarget()) + " - "
 					+ AopReferenceModelUtils.getPackageLinkName(reference.getTarget());

@@ -15,7 +15,6 @@
  */
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
-
 import java.util.List;
 
 import org.eclipse.swt.graphics.Image;

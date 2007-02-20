@@ -25,19 +25,19 @@ import org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferen
 public class OpenRevealableReferenceNodeAction extends Action {
 
 	private TreeViewer viewer;
-	
+
 	public OpenRevealableReferenceNodeAction(Shell shell, TreeViewer viewer) {
 		this.viewer = viewer;
 	}
-	
+
 	public void run() {
 		ISelection selection = viewer.getSelection();
 		if (selection instanceof IStructuredSelection) {
 			Object obj = ((IStructuredSelection) selection).getFirstElement();
-            if (obj instanceof IRevealableReferenceNode) {
-                ((IRevealableReferenceNode) obj).openAndReveal();
-            }
+			if (obj instanceof IRevealableReferenceNode) {
+				((IRevealableReferenceNode) obj).openAndReveal();
+			}
 		}
 	}
-	
+
 }

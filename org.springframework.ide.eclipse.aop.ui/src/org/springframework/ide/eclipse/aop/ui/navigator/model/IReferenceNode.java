@@ -19,12 +19,12 @@ import org.eclipse.swt.graphics.Image;
 
 public interface IReferenceNode {
 
-    IReferenceNode[] getChildren();
-    
-    boolean hasChildren();
-    
-    String getText();
-    
-    Image getImage();
-    
+	IReferenceNode[] getChildren();
+
+	boolean hasChildren();
+
+	String getText();
+
+	Image getImage();
+
 }

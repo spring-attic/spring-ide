@@ -25,36 +25,34 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 /**
  * Opens the file for currently selected {@link IBeansConfig}.
  */
-public class OpenConfigFileAction
-        extends Action {
+public class OpenConfigFileAction extends Action {
 
-    private ICommonActionExtensionSite site;
+	private ICommonActionExtensionSite site;
 
-    private IRevealableReferenceNode element;
+	private IRevealableReferenceNode element;
 
-    public OpenConfigFileAction(ICommonActionExtensionSite site) {
-        this.site = site;
-        setText("Op&en"); // TODO externalize text
-    }
+	public OpenConfigFileAction(ICommonActionExtensionSite site) {
+		this.site = site;
+		setText("Op&en"); // TODO externalize text
+	}
 
-    public boolean isEnabled() {
-        ISelection selection = site.getViewSite().getSelectionProvider()
-                .getSelection();
-        if (selection instanceof IStructuredSelection) {
-            IStructuredSelection sSelection = (IStructuredSelection) selection;
-            if (sSelection.size() == 1) {
-                if (sSelection.getFirstElement() instanceof IRevealableReferenceNode) {
-                    element = (IRevealableReferenceNode) sSelection.getFirstElement();
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+	public boolean isEnabled() {
+		ISelection selection = site.getViewSite().getSelectionProvider().getSelection();
+		if (selection instanceof IStructuredSelection) {
+			IStructuredSelection sSelection = (IStructuredSelection) selection;
+			if (sSelection.size() == 1) {
+				if (sSelection.getFirstElement() instanceof IRevealableReferenceNode) {
+					element = (IRevealableReferenceNode) sSelection.getFirstElement();
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
-    public void run() {
-        if (isEnabled()) {
-            element.openAndReveal();
-        }
-    }
+	public void run() {
+		if (isEnabled()) {
+			element.openAndReveal();
+		}
+	}
 }

@@ -23,35 +23,35 @@ import org.springframework.ide.eclipse.aop.core.logging.IAopLogger;
  */
 public class EventTraceLogger implements IAopLogger {
 
-    /*
-     * (non-Javadoc)
-     * @see org.eclipse.ajdt.internal.core.AJLogger#log(java.lang.String)
-     */
-    public void log(String msg) {
-        if (DebugTracing.DEBUG) {
-            EventTrace.postEvent(msg, AopLog.DEFAULT);
-        }
-    }
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ajdt.internal.core.AJLogger#log(java.lang.String)
+	 */
+	public void log(String msg) {
+		if (DebugTracing.DEBUG) {
+			EventTrace.postEvent(msg, AopLog.DEFAULT);
+		}
+	}
 
-    public void log(int category, String msg) {
-        if (DebugTracing.DEBUG) {
-            boolean doit = true;
-            if (category == AopLog.BUILDER) {
-                doit = DebugTracing.DEBUG_BUILDER;
-            }
-            else if (category == AopLog.BUILDER_CLASSPATH) {
-                doit = DebugTracing.DEBUG_BUILDER_CLASSPATH;
-            }
-            else if (category == AopLog.BUILDER_PROGRESS) {
-                doit = DebugTracing.DEBUG_BUILDER_PROGRESS;
-            }
-            else if (category == AopLog.BUILDER_MESSAGES) {
-                doit = DebugTracing.DEBUG_BUILDER_MESSAGES;
-            }
-            if (doit) {
-                EventTrace.postEvent(msg, category);
-            }
-        }
-    }
+	public void log(int category, String msg) {
+		if (DebugTracing.DEBUG) {
+			boolean doit = true;
+			if (category == AopLog.BUILDER) {
+				doit = DebugTracing.DEBUG_BUILDER;
+			}
+			else if (category == AopLog.BUILDER_CLASSPATH) {
+				doit = DebugTracing.DEBUG_BUILDER_CLASSPATH;
+			}
+			else if (category == AopLog.BUILDER_PROGRESS) {
+				doit = DebugTracing.DEBUG_BUILDER_PROGRESS;
+			}
+			else if (category == AopLog.BUILDER_MESSAGES) {
+				doit = DebugTracing.DEBUG_BUILDER_MESSAGES;
+			}
+			if (doit) {
+				EventTrace.postEvent(msg, category);
+			}
+		}
+	}
 
 }

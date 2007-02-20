@@ -27,42 +27,41 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 
 public class AdvisedDeclareParentAopReferenceNode implements IReferenceNode {
 
-    private List<IAopReference> references;
+	private List<IAopReference> references;
 
-    public AdvisedDeclareParentAopReferenceNode(List<IAopReference> reference) {
-        this.references = reference;
-    }
+	public AdvisedDeclareParentAopReferenceNode(List<IAopReference> reference) {
+		this.references = reference;
+	}
 
-    public IReferenceNode[] getChildren() {
-        List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
-        Map<IAspectDefinition, List<IAopReference>> dRefs = new HashMap<IAspectDefinition, List<IAopReference>>();
-        for (IAopReference r : references) {
-            if (dRefs.containsKey(r.getDefinition())) {
-                dRefs.get(r.getDefinition()).add(r);
-            }
-            else {
-                List<IAopReference> ref = new ArrayList<IAopReference>();
-                ref.add(r);
-                dRefs.put(r.getDefinition(), ref);
-            }
-        }
-        for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : dRefs
-                .entrySet()) {
-            nodes.add(new AdvisedDeclareParentAopSourceNode(entry.getValue()));
-        }
-        return nodes.toArray(new IReferenceNode[nodes.size()]);
-    }
+	public IReferenceNode[] getChildren() {
+		List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
+		Map<IAspectDefinition, List<IAopReference>> dRefs = new HashMap<IAspectDefinition, List<IAopReference>>();
+		for (IAopReference r : references) {
+			if (dRefs.containsKey(r.getDefinition())) {
+				dRefs.get(r.getDefinition()).add(r);
+			}
+			else {
+				List<IAopReference> ref = new ArrayList<IAopReference>();
+				ref.add(r);
+				dRefs.put(r.getDefinition(), ref);
+			}
+		}
+		for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : dRefs.entrySet()) {
+			nodes.add(new AdvisedDeclareParentAopSourceNode(entry.getValue()));
+		}
+		return nodes.toArray(new IReferenceNode[nodes.size()]);
+	}
 
-    public Image getImage() {
-        return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_REFERENCE);
-    }
+	public Image getImage() {
+		return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_REFERENCE);
+	}
 
-    public String getText() {
-        return "aspect declarations";
-    }
+	public String getText() {
+		return "aspect declarations";
+	}
 
-    public boolean hasChildren() {
-        return true;
-    }
+	public boolean hasChildren() {
+		return true;
+	}
 
 }

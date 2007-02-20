@@ -72,9 +72,11 @@ public class AopReferenceModelNavigator extends CommonNavigator implements ISele
 		if (showBeansRefsForFile && element != null) {
 			if (element instanceof IMethod) {
 				element = ((IMethod) element).getDeclaringType();
-			} else if (element instanceof Element) {
+			}
+			else if (element instanceof Element) {
 				element = ((Element) element).getOwnerDocument().getDocumentElement();
-			} else if (element instanceof IField) {
+			}
+			else if (element instanceof IField) {
 				element = ((IField) element).getDeclaringType();
 			}
 		}
@@ -84,7 +86,7 @@ public class AopReferenceModelNavigator extends CommonNavigator implements ISele
 	public static void refreshViewer(TreeViewer viewer, final Object rootElement, Object element) {
 		viewer.getTree().setRedraw(false);
 		viewer.setInput(rootElement);
-		//viewer.refresh();
+		// viewer.refresh();
 		viewer.expandToLevel(calculateExpandToLevel(rootElement));
 		expandTree(viewer.getTree().getItems(), false);
 		revealSelection(viewer, element);
@@ -99,7 +101,8 @@ public class AopReferenceModelNavigator extends CommonNavigator implements ISele
 						|| obj instanceof AdviceDeclareParentAopReferenceNode
 						|| obj instanceof AdvisedDeclareParentAopReferenceNode) {
 					expandTree(item.getItems(), true);
-				} else {
+				}
+				else {
 					expandTree(item.getItems(), b);
 				}
 				if (b) {
@@ -113,8 +116,7 @@ public class AopReferenceModelNavigator extends CommonNavigator implements ISele
 		revealSelection(viewer, javaElement, showBeansRefsForFileEnabled);
 	}
 
-	public static void revealSelection(TreeViewer viewer, final Object javaElement,
-			boolean showBeansRefsForFile) {
+	public static void revealSelection(TreeViewer viewer, final Object javaElement, boolean showBeansRefsForFile) {
 		TreeItem[] items = viewer.getTree().getItems();
 		Object wr = null;
 
@@ -125,23 +127,25 @@ public class AopReferenceModelNavigator extends CommonNavigator implements ISele
 				for (int i = 0; i < aspectChildren.length; i++) {
 					Object obj = aspectChildren[i].getData();
 					if (obj instanceof AbstractJavaElementReferenceNode
-							&& ((AbstractJavaElementReferenceNode) obj).getElement().equals(
-									javaElement)) {
+							&& ((AbstractJavaElementReferenceNode) obj).getElement().equals(javaElement)) {
 						wr = obj;
 						break;
 					}
 				}
-			} else {
+			}
+			else {
 				if (items != null && items.length > 0) {
 					wr = items[0].getData();
 				}
 			}
-		} else if (javaElement instanceof ElementImpl) {
+		}
+		else if (javaElement instanceof ElementImpl) {
 			if (!showBeansRefsForFile) {
 				if (items != null && items.length > 0) {
 					wr = items[0].getData();
 				}
-			} else {
+			}
+			else {
 				ElementImpl element = (ElementImpl) javaElement;
 				IStructuredDocument document = element.getStructuredDocument();
 				int startLine = document.getLineOfOffset(element.getStartOffset()) + 1;
@@ -208,8 +212,7 @@ public class AopReferenceModelNavigator extends CommonNavigator implements ISele
 		updateTreeViewer(lastWorkbenchPart, lastSelection, false);
 	}
 
-	private void updateTreeViewer(IWorkbenchPart part, ISelection selection,
-			boolean ignoreSameSelection) {
+	private void updateTreeViewer(IWorkbenchPart part, ISelection selection, boolean ignoreSameSelection) {
 		final Object element = AopReferenceModelNavigatorUtils.getSelectedElement(part, selection);
 		if (element == null || (element.equals(lastElement) && ignoreSameSelection)) {
 			return;
@@ -228,7 +231,8 @@ public class AopReferenceModelNavigator extends CommonNavigator implements ISele
 			// Are we in the UI thread?
 			if (ctrl.getDisplay().getThread() == Thread.currentThread()) {
 				refreshViewer(getCommonViewer(), rootElement, element);
-			} else {
+			}
+			else {
 				ctrl.getDisplay().asyncExec(new Runnable() {
 					public void run() {
 

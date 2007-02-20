@@ -27,15 +27,15 @@ import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 
-public class ClassMethodReferenceNode extends AbstractJavaElementReferenceNode implements
-		IReferenceNode, IRevealableReferenceNode {
+public class ClassMethodReferenceNode extends AbstractJavaElementReferenceNode implements IReferenceNode,
+		IRevealableReferenceNode {
 
 	private List<IReferenceNode> children;
 
 	private List<IReferenceNode> declareParentReferences = new ArrayList<IReferenceNode>();
 
 	private List<IAopReference> declaredOnReferences = new ArrayList<IAopReference>();
-	
+
 	private Set<IBean> beans = new HashSet<IBean>();
 
 	public List<IAopReference> getDeclaredOnReferences() {
@@ -76,7 +76,8 @@ public class ClassMethodReferenceNode extends AbstractJavaElementReferenceNode i
 		if (element instanceof IType) {
 			return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element) + " - "
 					+ AopReferenceModelUtils.getPackageLinkName(element);
-		} else {
+		}
+		else {
 			return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element);
 		}
 	}

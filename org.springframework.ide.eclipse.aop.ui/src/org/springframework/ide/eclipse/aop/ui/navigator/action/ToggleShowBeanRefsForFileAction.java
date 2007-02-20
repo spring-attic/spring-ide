@@ -20,14 +20,14 @@ import org.springframework.ide.eclipse.aop.ui.AopReferenceModelImages;
 import org.springframework.ide.eclipse.aop.ui.navigator.AopReferenceModelNavigator;
 
 /**
- * This action toggles whether the cross reference view displays 
- * the cross references for the current selection in the active 
- * editor, or for the file which is shown in the active editor.
+ * This action toggles whether the cross reference view displays the cross
+ * references for the current selection in the active editor, or for the file
+ * which is shown in the active editor.
  */
 public class ToggleShowBeanRefsForFileAction extends Action {
 
-    private AopReferenceModelNavigator aopNavigator;
-    
+	private AopReferenceModelNavigator aopNavigator;
+
 	/**
 	 * Constructs a new action.
 	 */
@@ -37,13 +37,13 @@ public class ToggleShowBeanRefsForFileAction extends Action {
 		setToolTipText("Show the Beans Cross References for the entire file");
 		setImageDescriptor(AopReferenceModelImages.DESC_OBJS_FILE);
 		setChecked(aopNavigator.isShowBeansRefsForFileEnabled());
-        this.aopNavigator = aopNavigator;
+		this.aopNavigator = aopNavigator;
 	}
 
 	/**
 	 * Runs the action.
 	 */
 	public void run() {
-        aopNavigator.setShowBeansRefsForFileEnabled(isChecked());
+		aopNavigator.setShowBeansRefsForFileEnabled(isChecked());
 	}
 }

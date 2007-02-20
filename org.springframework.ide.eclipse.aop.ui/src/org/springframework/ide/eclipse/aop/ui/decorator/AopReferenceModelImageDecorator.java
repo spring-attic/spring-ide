@@ -42,110 +42,93 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 @SuppressWarnings("restriction")
-public class AopReferenceModelImageDecorator
-        extends LabelProvider implements ILightweightLabelDecorator {
+public class AopReferenceModelImageDecorator extends LabelProvider implements ILightweightLabelDecorator {
 
-    public static final String DECORATOR_ID = org.springframework.ide.eclipse.aop.ui.Activator.PLUGIN_ID
-            + ".decorator.adviceimagedecorator";
+	public static final String DECORATOR_ID = org.springframework.ide.eclipse.aop.ui.Activator.PLUGIN_ID
+			+ ".decorator.adviceimagedecorator";
 
-    private IAopModelChangedListener listener;
+	private IAopModelChangedListener listener;
 
-    public AopReferenceModelImageDecorator() {
-        listener = new IAopModelChangedListener() {
-            public void changed() {
-                update();
-            }
-        };
-        Activator.getModel().registerAopModelChangedListener(listener);
-    }
+	public AopReferenceModelImageDecorator() {
+		listener = new IAopModelChangedListener() {
+			public void changed() {
+				update();
+			}
+		};
+		Activator.getModel().registerAopModelChangedListener(listener);
+	}
 
-    public void decorate(Object element, IDecoration decoration) {
-        // add the orange triangle to the icon if this method,
-        // class or aspect is advised
-        if ((element instanceof IMethod || element instanceof SourceType)) {
-            IJavaElement je = (IJavaElement) element;
-            IJavaProject jp = je.getJavaProject();
-            // only query the model if the element is in an Spring project
-            if ((jp != null)
-                    && SpringCoreUtils.isSpringProject(jp.getProject())) {
-                if (je instanceof IMethod && Activator.getModel().isAdvised(je)) {
-                    decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE,
-                            IDecoration.TOP_LEFT);
-                }
-            }
-        }
-        else if (element instanceof BeanMethodReferenceNode
-                && Activator.getModel().isAdvised(
-                        ((BeanMethodReferenceNode) element).getJavaElement())) {
-            decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE,
-                    IDecoration.TOP_LEFT);
-        }
-        else if (element instanceof AdviceAopTargetMethodNode) {
-            decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE,
-                    IDecoration.TOP_LEFT);
-        }
-        else if (element instanceof AdvisedAopSourceMethodNode) {
-            if (Activator.getModel().isAdvised(
-                    ((AdvisedAopSourceMethodNode) element).getReference()
-                            .getSource()))
-                decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE,
-                        IDecoration.TOP_LEFT);
-        }
-        else if (element instanceof AdviceRootAopReferenceNode) {
-            List<IAopReference> references = ((AdviceRootAopReferenceNode) element)
-                    .getReference();
-            for (IAopReference reference : references) {
-                if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
-                    decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ANNOTATION,
-                            IDecoration.BOTTOM_LEFT);
-                    break;
-                }
-            }
-        }
-        else if (element instanceof AdvisedAopSourceNode) {
-            IAopReference reference = ((AdvisedAopSourceNode) element)
-                    .getReference();
-            if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
-                decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ANNOTATION,
-                        IDecoration.BOTTOM_LEFT);
-            }
-        }
-        else if (element instanceof AdviceDeclareParentAopSourceNode) {
-            IAopReference reference = ((AdviceDeclareParentAopSourceNode) element)
-                    .getReference();
-            if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
-                decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ANNOTATION,
-                        IDecoration.BOTTOM_LEFT);
-            }
-        }
-        else if (element instanceof AdvisedDeclareParentAopSourceNode) {
-            IAopReference reference = ((AdvisedDeclareParentAopSourceNode) element)
-                    .getReference();
-            if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
-                decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ANNOTATION,
-                        IDecoration.BOTTOM_LEFT);
-            }
-        }
-    }
+	public void decorate(Object element, IDecoration decoration) {
+		// add the orange triangle to the icon if this method,
+		// class or aspect is advised
+		if ((element instanceof IMethod || element instanceof SourceType)) {
+			IJavaElement je = (IJavaElement) element;
+			IJavaProject jp = je.getJavaProject();
+			// only query the model if the element is in an Spring project
+			if ((jp != null) && SpringCoreUtils.isSpringProject(jp.getProject())) {
+				if (je instanceof IMethod && Activator.getModel().isAdvised(je)) {
+					decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE, IDecoration.TOP_LEFT);
+				}
+			}
+		}
+		else if (element instanceof BeanMethodReferenceNode
+				&& Activator.getModel().isAdvised(((BeanMethodReferenceNode) element).getJavaElement())) {
+			decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE, IDecoration.TOP_LEFT);
+		}
+		else if (element instanceof AdviceAopTargetMethodNode) {
+			decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE, IDecoration.TOP_LEFT);
+		}
+		else if (element instanceof AdvisedAopSourceMethodNode) {
+			if (Activator.getModel().isAdvised(((AdvisedAopSourceMethodNode) element).getReference().getSource()))
+				decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE, IDecoration.TOP_LEFT);
+		}
+		else if (element instanceof AdviceRootAopReferenceNode) {
+			List<IAopReference> references = ((AdviceRootAopReferenceNode) element).getReference();
+			for (IAopReference reference : references) {
+				if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
+					decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ANNOTATION, IDecoration.BOTTOM_LEFT);
+					break;
+				}
+			}
+		}
+		else if (element instanceof AdvisedAopSourceNode) {
+			IAopReference reference = ((AdvisedAopSourceNode) element).getReference();
+			if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
+				decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ANNOTATION, IDecoration.BOTTOM_LEFT);
+			}
+		}
+		else if (element instanceof AdviceDeclareParentAopSourceNode) {
+			IAopReference reference = ((AdviceDeclareParentAopSourceNode) element).getReference();
+			if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
+				decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ANNOTATION, IDecoration.BOTTOM_LEFT);
+			}
+		}
+		else if (element instanceof AdvisedDeclareParentAopSourceNode) {
+			IAopReference reference = ((AdvisedDeclareParentAopSourceNode) element).getReference();
+			if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
+				decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ANNOTATION, IDecoration.BOTTOM_LEFT);
+			}
+		}
+	}
 
-    public void dispose() {
-        if (listener != null) {
-            Activator.getModel().unregisterAopModelChangedListener(listener);
-            listener = null;
-        }
-    }
+	public void dispose() {
+		if (listener != null) {
+			Activator.getModel().unregisterAopModelChangedListener(listener);
+			listener = null;
+		}
+	}
 
-    public boolean isLabelProperty(Object element, String property) {
-        return false;
-    }
+	public boolean isLabelProperty(Object element, String property) {
+		return false;
+	}
 
-    public static final void update() {
-        SpringUIUtils.getStandardDisplay().asyncExec(new Runnable() {
-            public void run() {
-                IWorkbench workbench = PlatformUI.getWorkbench();
-                workbench.getDecoratorManager().update(DECORATOR_ID);
-            }
-        });
-    }
+	public static final void update() {
+		SpringUIUtils.getStandardDisplay().asyncExec(new Runnable() {
+			public void run() {
+				IWorkbench workbench = PlatformUI.getWorkbench();
+				workbench.getDecoratorManager().update(DECORATOR_ID);
+			}
+		});
+	}
 
 }

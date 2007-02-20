@@ -26,23 +26,22 @@ import org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferen
  */
 public class AopReferenceModelNavigatorLinkHelper implements ILinkHelper {
 
-    public void activateEditor(IWorkbenchPage page,
-            IStructuredSelection selection) {
-        if (selection != null && !selection.isEmpty()) {
-            if (selection.getFirstElement() instanceof IRevealableReferenceNode) {
-                // TODO fix selection hen & egg problem with ISelectionListener
-                /*IRevealableReferenceNode method = (IRevealableReferenceNode) selection
-                        .getFirstElement();
-                IEditorInput input = new FileEditorInput((IFile) method.getResource());
-                IEditorPart editor = page.findEditor(input);
-                if (editor != null) {
-                    method.openAndReveal();
-                }*/
-            }
-        }
-    }
+	public void activateEditor(IWorkbenchPage page, IStructuredSelection selection) {
+		if (selection != null && !selection.isEmpty()) {
+			if (selection.getFirstElement() instanceof IRevealableReferenceNode) {
+				// TODO fix selection hen & egg problem with ISelectionListener
+				/*
+				 * IRevealableReferenceNode method = (IRevealableReferenceNode)
+				 * selection .getFirstElement(); IEditorInput input = new
+				 * FileEditorInput((IFile) method.getResource()); IEditorPart
+				 * editor = page.findEditor(input); if (editor != null) {
+				 * method.openAndReveal(); }
+				 */
+			}
+		}
+	}
 
-    public IStructuredSelection findSelection(IEditorInput input) {
-        return StructuredSelection.EMPTY;
-    }
+	public IStructuredSelection findSelection(IEditorInput input) {
+		return StructuredSelection.EMPTY;
+	}
 }
