@@ -39,43 +39,42 @@ import org.w3c.dom.Node;
  * 
  * @author Christian Dupuis
  */
-public class TxHyperLinkDetector extends AbstractHyperLinkDetector implements IHyperlinkDetector {
+public class TxHyperLinkDetector
+        extends AbstractHyperLinkDetector implements IHyperlinkDetector {
 
-	/**
-	 * Returns <code>true</code> if given attribute is openable.
-	 */
-	protected boolean isLinkableAttr(Attr attr) {
-		String attrName = attr.getName();
-		if ("transaction-manager".equals(attrName)) {
-			return true;
-		}
-		return false;
-	}
+    /**
+     * Returns <code>true</code> if given attribute is openable.
+     */
+    protected boolean isLinkableAttr(Attr attr) {
+        String attrName = attr.getName();
+        return ("transaction-manager".equals(attrName));
+    }
 
-	protected IHyperlink createHyperlink(String name, String target, Node parentNode,
-			IRegion hyperlinkRegion, IDocument document, Node node, ITextViewer textViewer,
-			IRegion cursor) {
-		if (name == null) {
-			return null;
-		}
-		if ("transaction-manager".equals(name)) {
-			Node bean = BeansEditorUtils.getFirstReferenceableNodeById(node.getOwnerDocument(),
-					target);
-			if (bean != null) {
-				IRegion region = getHyperlinkRegion(bean);
-				return new NodeElementHyperlink(hyperlinkRegion, region, textViewer);
-			} else {
-				IFile file = BeansEditorUtils.getFile(document);
-				// assume this is an external reference
-				Iterator<?> beans = BeansEditorUtils.getBeansFromConfigSets(file).iterator();
-				while (beans.hasNext()) {
-					IBean modelBean = (IBean) beans.next();
-					if (modelBean.getElementName().equals(target)) {
-						return new ExternalBeanHyperlink(modelBean, hyperlinkRegion);
-					}
-				}
-			}
-		}
-		return null;
-	}
+    protected IHyperlink createHyperlink(String name, String target, Node parentNode,
+            IRegion hyperlinkRegion, IDocument document, Node node, ITextViewer textViewer,
+            IRegion cursor) {
+        if (name == null) {
+            return null;
+        }
+        if ("transaction-manager".equals(name)) {
+            Node bean = BeansEditorUtils.getFirstReferenceableNodeById(node.getOwnerDocument(),
+                    target);
+            if (bean != null) {
+                IRegion region = getHyperlinkRegion(bean);
+                return new NodeElementHyperlink(hyperlinkRegion, region, textViewer);
+            }
+            else {
+                IFile file = BeansEditorUtils.getFile(document);
+                // assume this is an external reference
+                Iterator<?> beans = BeansEditorUtils.getBeansFromConfigSets(file).iterator();
+                while (beans.hasNext()) {
+                    IBean modelBean = (IBean) beans.next();
+                    if (modelBean.getElementName().equals(target)) {
+                        return new ExternalBeanHyperlink(modelBean, hyperlinkRegion);
+                    }
+                }
+            }
+        }
+        return null;
+    }
 }

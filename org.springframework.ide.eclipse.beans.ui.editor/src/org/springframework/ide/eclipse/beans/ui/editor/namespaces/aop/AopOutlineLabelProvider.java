@@ -86,15 +86,10 @@ public class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 		Node node = (Node) o;
 		NamedNodeMap attrs = node.getAttributes();
 		Node attr;
-		String text = "";
 
-		String prefix = node.getPrefix();
-		String shortNodeName = node.getNodeName();
 		String nodeName = node.getNodeName();
-		if (prefix != null) {
-			shortNodeName = nodeName.substring(prefix.length() + 1);
-		}
-		nodeName = "<" + node.getNodeName() + "/>";
+        String shortNodeName = node.getLocalName();
+        String text = "";
 
 		if ("config".equals(shortNodeName)) {
 			text = nodeName + " ";

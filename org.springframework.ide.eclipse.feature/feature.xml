@@ -174,4 +174,11 @@
          version="0.0.0"
          unpack="true"/>
 
+   <plugin
+         id="org.springframework.ide.eclipse.webflow.ui.editor"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>

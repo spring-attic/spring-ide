@@ -45,13 +45,9 @@ public class TxOutlineLabelProvider
 
         // Create Spring beans label text
         Node node = (Node) o;
-        String prefix = node.getPrefix();
         String nodeName = node.getNodeName();
-        String shortNodeName = node.getNodeName();
-        if (prefix != null) {
-            shortNodeName = nodeName.substring(prefix.length() + 1);
-        }
-        nodeName = "<" + node.getNodeName() + "/>";
+        String shortNodeName = node.getLocalName();
+        
         String text = null;
         if ("advice".equals(shortNodeName) || "annotation-driven".equals(shortNodeName)) {
             text = nodeName;

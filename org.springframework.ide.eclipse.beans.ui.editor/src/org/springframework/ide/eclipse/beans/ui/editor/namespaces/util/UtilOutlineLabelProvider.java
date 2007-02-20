@@ -63,13 +63,8 @@ public class UtilOutlineLabelProvider
         Node node = (Node) o;
         NamedNodeMap attrs = node.getAttributes();
         Node attr;
-        String prefix = node.getPrefix();
         String nodeName = node.getNodeName();
-        String shortNodeName = node.getNodeName();
-        if (prefix != null) {
-            shortNodeName = nodeName.substring(prefix.length() + 1);
-        }
-        nodeName = "<" + node.getNodeName() + "/>";
+        String shortNodeName = node.getLocalName();
 
         String text = "";
         if ("properties".equals(shortNodeName)) {

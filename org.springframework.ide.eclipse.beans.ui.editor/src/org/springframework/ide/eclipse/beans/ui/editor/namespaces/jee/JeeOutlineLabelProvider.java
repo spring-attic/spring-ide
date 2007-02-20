@@ -46,13 +46,9 @@ public class JeeOutlineLabelProvider
 
         // Create Spring beans label text
         Node node = (Node) o;
-        String prefix = node.getPrefix();
         String nodeName = node.getNodeName();
-        String shortNodeName = node.getNodeName();
-        if (prefix != null) {
-            shortNodeName = nodeName.substring(prefix.length() + 1);
-        }
-        nodeName = "<" + node.getNodeName() + "/>";
+        String shortNodeName = node.getLocalName();
+
         String text = null;
         if ("jndi-lookup".equals(shortNodeName) || "local-slsb".equals(shortNodeName)
                 || "remote-slsb".equals(shortNodeName)) {

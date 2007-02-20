@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+	<extension
+		point="org.springframework.ide.eclipse.beans.ui.editor.namespaces">
+		<namespace
+			contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.namespaces.webflow.WebflowConfigContentAssistProcessor"
+			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
+			hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.namespaces.webflow.WebflowConfigHyperLinkDetector"
+			labelProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.webflow.WebflowConfigOutlineLabelProvider"
+			name="Spring Web Flow"
+			uri="http://www.springframework.org/schema/webflow-config" />
+	</extension>
+
+	<extension point="org.eclipse.wst.xml.core.catalogContributions">
+		<catalogContribution>
+			<public
+				publicId="http://www.springframework.org/schema/webflow-config"
+				uri="xsd/spring-webflow-config-1.0.xsd"
+				webURL="http://www.springframework.org/schema/webflow-config/spring-webflow-config-1.0.xsd" />
+		</catalogContribution>
+	</extension>
+
+</plugin>

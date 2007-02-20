@@ -19,6 +19,7 @@ plugin@org.springframework.ide.eclipse.aop.ui=SVN,trunk,svn://localhost,,org.spr
 plugin@org.springframework.ide.eclipse.aop.ui.visualiser=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.aop.ui.visualiser
 plugin@org.springframework.ide.eclipse.aop.ui.xref=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.aop.ui.xref
 plugin@org.springframework.doc=SVN,trunk,svn://localhost,,org.springframework.doc
+plugin@org.springframework.ide.eclipse.webflow.ui.editor=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.webflow.ui.editor
 
 # required osgi bundles
 plugin@org.aopalliance=SVN,trunk,svn://localhost,,required-bundles/aopalliance

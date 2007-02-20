@@ -55,22 +55,9 @@ public class AopHyperLinkDetector
      */
     protected boolean isLinkableAttr(Attr attr) {
         String attrName = attr.getName();
-        if ("method".equals(attrName)) {
-            return true;
-        }
-        else if ("ref".equals(attrName)) {
-            return true;
-        }
-        else if ("pointcut-ref".equals(attrName)) {
-            return true;
-        }
-        else if ("advice-ref".equals(attrName)) {
-        	return true;
-        }
-        else if ("implement-interface".equals(attrName) || "default-impl".equals(attrName)) {
-            return true;
-        }
-        return false;
+        return ("method".equals(attrName) || "ref".equals(attrName)
+                || "pointcut-ref".equals(attrName) || "advice-ref".equals(attrName)
+                || "implement-interface".equals(attrName) || "default-impl".equals(attrName));
     }
 
     protected IHyperlink createHyperlink(String name, String target, Node parentNode,

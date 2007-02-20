@@ -50,10 +50,7 @@ public class LangHyperLinkDetector
      */
     protected boolean isLinkableAttr(Attr attr) {
         String attrName = attr.getName();
-        if ("script-interfaces".equals(attrName) || "customizer-ref".equals(attrName)) {
-            return true;
-        }
-        return false;
+        return ("script-interfaces".equals(attrName) || "customizer-ref".equals(attrName));
     }
 
     protected IHyperlink createHyperlink(String name, String target, Node parentNode,

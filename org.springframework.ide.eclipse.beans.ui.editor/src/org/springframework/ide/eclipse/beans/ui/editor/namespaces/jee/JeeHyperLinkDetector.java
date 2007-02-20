@@ -45,11 +45,8 @@ public class JeeHyperLinkDetector
      */
     protected boolean isLinkableAttr(Attr attr) {
         String attrName = attr.getName();
-        if ("expected-type".equals(attrName) || "proxy-interface".equals(attrName)
-                || "business-interface".equals(attrName) || "home-interface".equals(attrName)) {
-            return true;
-        }
-        return false;
+        return ("expected-type".equals(attrName) || "proxy-interface".equals(attrName)
+                || "business-interface".equals(attrName) || "home-interface".equals(attrName));
     }
 
     protected IHyperlink createHyperlink(String name, String target, Node parentNode,

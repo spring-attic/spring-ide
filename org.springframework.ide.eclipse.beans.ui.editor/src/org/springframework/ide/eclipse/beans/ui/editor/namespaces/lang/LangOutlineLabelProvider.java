@@ -47,14 +47,9 @@ public class LangOutlineLabelProvider
 
         // Create Spring beans label text
         Node node = (Node) o;
-        String prefix = node.getPrefix();
         String nodeName = node.getNodeName();
-        String shortNodeName = node.getNodeName();
-        if (prefix != null) {
-            shortNodeName = nodeName.substring(prefix.length() + 1);
-        }
-        nodeName = "<" + node.getNodeName() + "/>";
-
+        String shortNodeName = node.getLocalName();
+        
         String text = "";
         if ("groovy".equals(shortNodeName) || "bsh".equals(shortNodeName)
                 || "jruby".equals(shortNodeName)) {
