@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 
@@ -22,19 +22,14 @@ import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 @SuppressWarnings("restriction")
 public interface INamespaceContentAssistProcessor {
 
-    void addAttributeValueProposals(
-    		IContentAssistProcessor delegatingContentAssistProcessor,
-            ContentAssistRequest request);
+	void addAttributeValueProposals(IContentAssistProcessor delegatingContentAssistProcessor,
+			ContentAssistRequest request);
 
-    void addAttributeNameProposals(
-    		IContentAssistProcessor delegatingContentAssistProcessor,
-            ContentAssistRequest request);
+	void addAttributeNameProposals(IContentAssistProcessor delegatingContentAssistProcessor,
+			ContentAssistRequest request);
 
-    void addTagCloseProposals(
-    		IContentAssistProcessor delegatingContentAssistProcessor,
-            ContentAssistRequest request);
+	void addTagCloseProposals(IContentAssistProcessor delegatingContentAssistProcessor, ContentAssistRequest request);
 
-	void addTagInsertionProposals(
-			IContentAssistProcessor delegatingContentAssistProcessor,
-            ContentAssistRequest request, int childPosition);
+	void addTagInsertionProposals(IContentAssistProcessor delegatingContentAssistProcessor,
+			ContentAssistRequest request, int childPosition);
 }

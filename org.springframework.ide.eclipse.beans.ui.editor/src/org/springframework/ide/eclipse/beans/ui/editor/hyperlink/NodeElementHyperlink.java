@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor.hyperlink;
 
@@ -28,11 +28,12 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 public class NodeElementHyperlink implements IHyperlink {
 
 	private final IRegion region;
+
 	private final IRegion targetRegion;
+
 	private final ITextViewer viewer;
 
-	public NodeElementHyperlink(IRegion region, IRegion targetRegion,
-			ITextViewer viewer) {
+	public NodeElementHyperlink(IRegion region, IRegion targetRegion, ITextViewer viewer) {
 		this.region = region;
 		this.targetRegion = targetRegion;
 		this.viewer = viewer;

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor.templates;
 
@@ -38,45 +38,43 @@ import org.springframework.ide.eclipse.beans.ui.editor.Activator;
  */
 public class BeansTemplateCompletionProcessor extends TemplateCompletionProcessor {
 
-    private String contextTypeId = null;
+	private String contextTypeId = null;
 
-    protected ICompletionProposal createProposal(Template template,
-    				  TemplateContext context, IRegion region, int relevance) {
-        return new BeansCustomTemplateProposal(template, context, region,
-        										getImage(template), relevance);
-    }
+	protected ICompletionProposal createProposal(Template template, TemplateContext context, IRegion region,
+			int relevance) {
+		return new BeansCustomTemplateProposal(template, context, region, getImage(template), relevance);
+	}
 
-    protected TemplateContextType getContextType(ITextViewer viewer,
-    											 IRegion region) {
-        ContextTypeRegistry registry = getTemplateContextRegistry();
-        if (registry != null) {
-            return registry.getContextType(contextTypeId);
-        }
-        return null;
-    }
+	protected TemplateContextType getContextType(ITextViewer viewer, IRegion region) {
+		ContextTypeRegistry registry = getTemplateContextRegistry();
+		if (registry != null) {
+			return registry.getContextType(contextTypeId);
+		}
+		return null;
+	}
 
-    protected Image getImage(Template template) {
-        // just return the same image for now
-        return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_SPRING);
-    }
+	protected Image getImage(Template template) {
+		// just return the same image for now
+		return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_SPRING);
+	}
 
-    private ContextTypeRegistry getTemplateContextRegistry() {
-        return Activator.getDefault().getTemplateContextRegistry();
-    }
+	private ContextTypeRegistry getTemplateContextRegistry() {
+		return Activator.getDefault().getTemplateContextRegistry();
+	}
 
-    protected Template[] getTemplates(String contextTypeId) {
-        TemplateStore store = getTemplateStore();
-        if (store != null) {
-            return store.getTemplates(contextTypeId);
-        }
-        return null;
-    }
+	protected Template[] getTemplates(String contextTypeId) {
+		TemplateStore store = getTemplateStore();
+		if (store != null) {
+			return store.getTemplates(contextTypeId);
+		}
+		return null;
+	}
 
-    private TemplateStore getTemplateStore() {
-        return Activator.getDefault().getTemplateStore();
-    }
+	private TemplateStore getTemplateStore() {
+		return Activator.getDefault().getTemplateStore();
+	}
 
-    public void setContextType(String contextTypeId) {
-        this.contextTypeId = contextTypeId;
-    }
+	public void setContextType(String contextTypeId) {
+		this.contextTypeId = contextTypeId;
+	}
 }

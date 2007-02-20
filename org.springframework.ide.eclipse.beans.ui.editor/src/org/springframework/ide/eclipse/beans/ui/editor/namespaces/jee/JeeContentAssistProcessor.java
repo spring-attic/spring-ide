@@ -22,46 +22,45 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionU
 import org.w3c.dom.Node;
 
 @SuppressWarnings("restriction")
-public class JeeContentAssistProcessor
-        extends AbstractContentAssistProcessor {
+public class JeeContentAssistProcessor extends AbstractContentAssistProcessor {
 
-    private void addInterfaceAttributeValueProposals(ContentAssistRequest request, String prefix) {
-        BeansJavaCompletionUtils.addClassValueProposals(request, prefix, true);
-    }
+	private void addInterfaceAttributeValueProposals(ContentAssistRequest request, String prefix) {
+		BeansJavaCompletionUtils.addClassValueProposals(request, prefix, true);
+	}
 
-    @Override
-    protected void computeAttributeNameProposals(ContentAssistRequest request, String prefix,
-            String namespace, String namespacePrefix, Node attributeNode) {
-    }
+	@Override
+	protected void computeAttributeNameProposals(ContentAssistRequest request, String prefix, String namespace,
+			String namespacePrefix, Node attributeNode) {
+	}
 
-    @Override
-    protected void computeAttributeValueProposals(ContentAssistRequest request, IDOMNode node,
-            String matchString, String attributeName) {
-        String nodeName = node.getNodeName();
-        String prefix = node.getPrefix();
-        if (prefix != null) {
-            nodeName = nodeName.substring(prefix.length() + 1);
-        }
+	@Override
+	protected void computeAttributeValueProposals(ContentAssistRequest request, IDOMNode node, String matchString,
+			String attributeName) {
+		String nodeName = node.getNodeName();
+		String prefix = node.getPrefix();
+		if (prefix != null) {
+			nodeName = nodeName.substring(prefix.length() + 1);
+		}
 
-        if ("jndi-lookup".equals(nodeName)) {
-            if ("expected-type".equals(attributeName)) {
-                addInterfaceAttributeValueProposals(request, matchString);
-            }
-            else if ("proxy-interface".equals(attributeName)) {
-                addInterfaceAttributeValueProposals(request, matchString);
-            }
-        }
-        else if ("remote-slsb".equals(nodeName) || "local-slsb".equals(nodeName)) {
-            if ("business-interface".equals(attributeName)) {
-                addInterfaceAttributeValueProposals(request, matchString);
-            }
-            else if ("home-interface".equals(attributeName)) {
-                addInterfaceAttributeValueProposals(request, matchString);
-            }
-        }
-    }
+		if ("jndi-lookup".equals(nodeName)) {
+			if ("expected-type".equals(attributeName)) {
+				addInterfaceAttributeValueProposals(request, matchString);
+			}
+			else if ("proxy-interface".equals(attributeName)) {
+				addInterfaceAttributeValueProposals(request, matchString);
+			}
+		}
+		else if ("remote-slsb".equals(nodeName) || "local-slsb".equals(nodeName)) {
+			if ("business-interface".equals(attributeName)) {
+				addInterfaceAttributeValueProposals(request, matchString);
+			}
+			else if ("home-interface".equals(attributeName)) {
+				addInterfaceAttributeValueProposals(request, matchString);
+			}
+		}
+	}
 
-    @Override
-    protected void computeTagInsertionProposals(ContentAssistRequest request, IDOMNode node) {
-    }
+	@Override
+	protected void computeTagInsertionProposals(ContentAssistRequest request, IDOMNode node) {
+	}
 }

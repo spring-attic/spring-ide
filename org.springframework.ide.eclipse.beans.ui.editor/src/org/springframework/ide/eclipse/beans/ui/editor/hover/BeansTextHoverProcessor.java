@@ -59,8 +59,7 @@ import org.w3c.dom.Node;
  * @author Christian Dupuis
  */
 @SuppressWarnings("restriction")
-public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
-		ITextHover {
+public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements ITextHover {
 
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 		String displayText = null;
@@ -76,32 +75,27 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 	 * Retrieves documentation to display in the hover help popup.
 	 * 
 	 * @return String any documentation information to display <code>null</code>
-	 *         if there is nothing to display.
+	 * if there is nothing to display.
 	 * 
 	 */
-	protected String computeHoverHelp(ITextViewer textViewer,
-			int documentPosition) {
+	protected String computeHoverHelp(ITextViewer textViewer, int documentPosition) {
 		String result = null;
 
-		IndexedRegion treeNode = ContentAssistUtils.getNodeAt(
-				(StructuredTextViewer) textViewer, documentPosition);
+		IndexedRegion treeNode = ContentAssistUtils.getNodeAt((StructuredTextViewer) textViewer, documentPosition);
 		if (treeNode == null)
 			return null;
 		Node node = (Node) treeNode;
 
-		while (node != null && node.getNodeType() == Node.TEXT_NODE
-				&& node.getParentNode() != null)
+		while (node != null && node.getNodeType() == Node.TEXT_NODE && node.getParentNode() != null)
 			node = node.getParentNode();
 		IDOMNode parentNode = (IDOMNode) node;
 
-		IStructuredDocumentRegion flatNode = ((IStructuredDocument) textViewer
-				.getDocument()).getRegionAtCharacterOffset(documentPosition);
+		IStructuredDocumentRegion flatNode = ((IStructuredDocument) textViewer.getDocument())
+				.getRegionAtCharacterOffset(documentPosition);
 		if (flatNode != null) {
-			ITextRegion region = flatNode
-					.getRegionAtCharacterOffset(documentPosition);
+			ITextRegion region = flatNode.getRegionAtCharacterOffset(documentPosition);
 			if (region != null) {
-				result = computeRegionHelp(treeNode, parentNode, flatNode,
-						region, textViewer.getDocument());
+				result = computeRegionHelp(treeNode, parentNode, flatNode, region, textViewer.getDocument());
 			}
 		}
 
@@ -113,22 +107,18 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 	 * 
 	 * @return String hoverhelp
 	 */
-	protected String computeRegionHelp(IndexedRegion treeNode,
-			IDOMNode parentNode, IStructuredDocumentRegion flatNode,
+	protected String computeRegionHelp(IndexedRegion treeNode, IDOMNode parentNode, IStructuredDocumentRegion flatNode,
 			ITextRegion region, IDocument document) {
 		String result = null;
 		if (region == null)
 			return null;
 		String regionType = region.getType();
 		if (regionType == DOMRegionContext.XML_TAG_NAME)
-			result = computeTagNameHelp((IDOMNode) treeNode, parentNode,
-					flatNode, region);
+			result = computeTagNameHelp((IDOMNode) treeNode, parentNode, flatNode, region);
 		else if (regionType == DOMRegionContext.XML_TAG_ATTRIBUTE_NAME)
-			result = computeTagAttNameHelp((IDOMNode) treeNode, parentNode,
-					flatNode, region);
+			result = computeTagAttNameHelp((IDOMNode) treeNode, parentNode, flatNode, region);
 		else if (regionType == DOMRegionContext.XML_TAG_ATTRIBUTE_VALUE)
-			result = computeTagAttValueHelp((IDOMNode) treeNode, parentNode,
-					flatNode, region, document);
+			result = computeTagAttValueHelp((IDOMNode) treeNode, parentNode, flatNode, region, document);
 		return result;
 	}
 
@@ -138,8 +128,7 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 	 * 
 	 * @throws JavaModelException
 	 */
-	protected String computeTagAttValueHelp(IDOMNode xmlnode,
-			IDOMNode parentNode, IStructuredDocumentRegion flatNode,
+	protected String computeTagAttValueHelp(IDOMNode xmlnode, IDOMNode parentNode, IStructuredDocumentRegion flatNode,
 			ITextRegion region, IDocument document) {
 		IFile file = this.getResource(document);
 
@@ -150,29 +139,25 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 		if ("class".equals(attName) && attributes.getNamedItem("class") != null) {
 			String className = attributes.getNamedItem("class").getNodeValue();
 			if (className != null) {
-				IType type = BeansModelUtils.getJavaType(this.getResource(
-						document).getProject(), className);
+				IType type = BeansModelUtils.getJavaType(this.getResource(document).getProject(), className);
 				if (type != null) {
 					BeansJavaDocUtils utils = new BeansJavaDocUtils(type);
 					result = utils.getJavaDoc();
 				}
 			}
-		} else if ("name".equals(attName)
-				&& "property".equals(xmlnode.getNodeName())) {
+		}
+		else if ("name".equals(attName) && "property".equals(xmlnode.getNodeName())) {
 
-			String propertyName = attributes.getNamedItem(attName)
-					.getNodeValue();
+			String propertyName = attributes.getNamedItem(attName).getNodeValue();
 			String[] paths = StringUtils.split(propertyName, ".");
 			if (paths == null) {
 				paths = new String[] { propertyName };
 			}
 			List<String> propertyPaths = Arrays.asList(paths);
-			List classNames = BeansEditorUtils.getClassNamesOfBean(file,
-					xmlnode.getParentNode());
+			List classNames = BeansEditorUtils.getClassNamesOfBean(file, xmlnode.getParentNode());
 			List<IMethod> methods = new ArrayList<IMethod>();
-			BeansEditorUtils.extractAllMethodsFromPropertyPathElements(
-					propertyPaths, classNames, this.getResource(document), 0,
-					methods);
+			BeansEditorUtils.extractAllMethodsFromPropertyPathElements(propertyPaths, classNames, this
+					.getResource(document), 0, methods);
 
 			StringBuffer buf = new StringBuffer();
 			for (int i = 0; i < methods.size(); i++) {
@@ -184,90 +169,76 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 				}
 			}
 			result = buf.toString();
-		} else if ("local".equals(attName)
-				&& attributes.getNamedItem(attName) != null) {
-			Element ref = xmlnode.getOwnerDocument().getElementById(
-					attributes.getNamedItem(attName).getNodeValue());
+		}
+		else if ("local".equals(attName) && attributes.getNamedItem(attName) != null) {
+			Element ref = xmlnode.getOwnerDocument().getElementById(attributes.getNamedItem(attName).getNodeValue());
 			result = BeansEditorUtils.createAdditionalProposalInfo(ref, file);
-		} else if ("bean".equals(attName)
-				&& attributes.getNamedItem(attName) != null) {
+		}
+		else if ("bean".equals(attName) && attributes.getNamedItem(attName) != null) {
 			String target = attributes.getNamedItem(attName).getNodeValue();
 			// assume this is an external reference
-			Iterator beans = BeansEditorUtils.getBeansFromConfigSets(file)
-					.iterator();
+			Iterator beans = BeansEditorUtils.getBeansFromConfigSets(file).iterator();
 			while (beans.hasNext()) {
 				IBean modelBean = (IBean) beans.next();
 				if (modelBean.getElementName().equals(target)) {
-					result = BeansEditorUtils
-							.createAdditionalProposalInfo(modelBean);
+					result = BeansEditorUtils.createAdditionalProposalInfo(modelBean);
 				}
 			}
-		} else if (("ref".equals(attName)
-				|| "local".equals(attName)
-				|| "parent".equals(attName)
-				|| "depends-on".equals(attName)
-				|| "factory-bean".equals(attName)
-				|| "key-ref".equals(attName)
-				|| "value-ref".equals(attName)
-                || attName.endsWith("-ref")
-				|| ("name".equals(attName) && "alias".equals(xmlnode
-						.getNodeName())) || ("bean".equals(attName) && "ref"
+		}
+		else if (("ref".equals(attName) || "local".equals(attName) || "parent".equals(attName)
+				|| "depends-on".equals(attName) || "factory-bean".equals(attName) || "key-ref".equals(attName)
+				|| "value-ref".equals(attName) || attName.endsWith("-ref")
+				|| ("name".equals(attName) && "alias".equals(xmlnode.getNodeName())) || ("bean".equals(attName) && "ref"
 				.equals(xmlnode.getNodeName())))
 				&& attributes.getNamedItem(attName) != null) {
-			Element ref = xmlnode.getOwnerDocument().getElementById(
-					attributes.getNamedItem(attName).getNodeValue());
+			Element ref = xmlnode.getOwnerDocument().getElementById(attributes.getNamedItem(attName).getNodeValue());
 			if (ref != null) {
-				result = BeansEditorUtils.createAdditionalProposalInfo(ref,
-						file);
-			} else {
+				result = BeansEditorUtils.createAdditionalProposalInfo(ref, file);
+			}
+			else {
 				String target = attributes.getNamedItem(attName).getNodeValue();
 				// assume this is an external reference
-				Iterator beans = BeansEditorUtils.getBeansFromConfigSets(file)
-						.iterator();
+				Iterator beans = BeansEditorUtils.getBeansFromConfigSets(file).iterator();
 				while (beans.hasNext()) {
 					IBean modelBean = (IBean) beans.next();
 					if (modelBean.getElementName().equals(target)) {
-						result = BeansEditorUtils
-								.createAdditionalProposalInfo(modelBean);
+						result = BeansEditorUtils.createAdditionalProposalInfo(modelBean);
 					}
 				}
 			}
-		} else if (("factory-method").equals(attName)) {
-			String factoryMethod = attributes.getNamedItem(attName)
-					.getNodeValue();
+		}
+		else if (("factory-method").equals(attName)) {
+			String factoryMethod = attributes.getNamedItem(attName).getNodeValue();
 			String className = null;
 			if (attributes.getNamedItem("class") != null) {
 				className = attributes.getNamedItem("class").getNodeValue();
 			}
 			if (attributes.getNamedItem("factory-bean") != null) {
-				className = BeansEditorUtils.getClassNameForBean(file, xmlnode
-						.getOwnerDocument(), attributes.getNamedItem(
-						"factory-bean").getNodeValue());
+				className = BeansEditorUtils.getClassNameForBean(file, xmlnode.getOwnerDocument(), attributes
+						.getNamedItem("factory-bean").getNodeValue());
 			}
-			IType type = BeansModelUtils.getJavaType(this.getResource(document)
-					.getProject(), className);
+			IType type = BeansModelUtils.getJavaType(this.getResource(document).getProject(), className);
 			if (type != null) {
 				try {
 					IMethod[] methods = type.getMethods();
 					for (int i = 0; i < methods.length; i++) {
 						IMethod method = methods[i];
-						if (method.getElementName().equals(factoryMethod)
-								&& Flags.isStatic(method.getFlags())) {
-							BeansJavaDocUtils utils = new BeansJavaDocUtils(
-									method);
+						if (method.getElementName().equals(factoryMethod) && Flags.isStatic(method.getFlags())) {
+							BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
 							result = utils.getJavaDoc();
 						}
 					}
-				} catch (JavaModelException e) {
+				}
+				catch (JavaModelException e) {
 				}
 			}
 
 		}
 		if (result != null && !"".equals(result)) {
 			return result;
-		} else {
-			return super.computeTagAttValueHelp(xmlnode, parentNode, flatNode,
-					attrNameRegion);
+		}
+		else {
+			return super.computeTagAttValueHelp(xmlnode, parentNode, flatNode, attrNameRegion);
 		}
 	}
 
@@ -284,12 +255,12 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 		if (document != null) {
 			IStructuredModel model = null;
 			try {
-				model = StructuredModelManager.getModelManager()
-						.getExistingModelForRead(document);
+				model = StructuredModelManager.getModelManager().getExistingModelForRead(document);
 				if (model != null) {
 					baselocation = model.getBaseLocation();
 				}
-			} finally {
+			}
+			finally {
 				if (model != null)
 					model.releaseFromRead();
 			}

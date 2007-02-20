@@ -25,31 +25,30 @@ import org.eclipse.jdt.ui.JavadocContentAccess;
 
 public class BeansJavaDocUtils {
 
-    private final IMember element;
+	private final IMember element;
 
-    public BeansJavaDocUtils(IMember element) {
-        this.element = element;
-    }
+	public BeansJavaDocUtils(IMember element) {
+		this.element = element;
+	}
 
-    public String getJavaDoc() {
+	public String getJavaDoc() {
 
-        try {
-            StringBuffer buf = new StringBuffer();
-            Reader reader = JavadocContentAccess.getHTMLContentReader(element,
-                    false, false);
-            if (reader != null) {
-                int charValue = 0;
-                while ((charValue = reader.read()) != -1) {
-                    buf.append((char) charValue);
-                }
-                return buf.toString();
-            }
-        }
-        catch (JavaModelException e) {
-        }
-        catch (IOException e) {
-        }
+		try {
+			StringBuffer buf = new StringBuffer();
+			Reader reader = JavadocContentAccess.getHTMLContentReader(element, false, false);
+			if (reader != null) {
+				int charValue = 0;
+				while ((charValue = reader.read()) != -1) {
+					buf.append((char) charValue);
+				}
+				return buf.toString();
+			}
+		}
+		catch (JavaModelException e) {
+		}
+		catch (IOException e) {
+		}
 
-        return "";
-    }
+		return "";
+	}
 }

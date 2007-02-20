@@ -31,37 +31,34 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Node;
 
 /**
- * Detects hyperlinks in XML tags. Includes detection of bean classes and bean properties in
- * attribute values. Resolves bean references (including references to parent beans or factory
- * beans).
+ * Detects hyperlinks in XML tags. Includes detection of bean classes and bean
+ * properties in attribute values. Resolves bean references (including
+ * references to parent beans or factory beans).
  * 
  * @author Christian Dupuis
  */
-public class UtilHyperLinkDetector
-        extends AbstractHyperLinkDetector implements IHyperlinkDetector {
+public class UtilHyperLinkDetector extends AbstractHyperLinkDetector implements IHyperlinkDetector {
 
-    /**
-     * Returns <code>true</code> if given attribute is openable.
-     */
-    protected boolean isLinkableAttr(Attr attr) {
-        String attrName = attr.getName();
-        return ("list-class".equals(attrName) || "map-class".equals(attrName)
-                || "set-class".equals(attrName) || "value-type".equals(attrName) || "key-type"
-                .equals(attrName));
+	/**
+	 * Returns <code>true</code> if given attribute is openable.
+	 */
+	protected boolean isLinkableAttr(Attr attr) {
+		String attrName = attr.getName();
+		return ("list-class".equals(attrName) || "map-class".equals(attrName) || "set-class".equals(attrName)
+				|| "value-type".equals(attrName) || "key-type".equals(attrName));
 
-    }
+	}
 
-    protected IHyperlink createHyperlink(String name, String target, Node parentNode,
-            IRegion hyperlinkRegion, IDocument document, Node node, ITextViewer textViewer,
-            IRegion cursor) {
-        if (name == null) {
-            return null;
-        }
-        IFile file = BeansEditorUtils.getFile(document);
-        IType type = BeansModelUtils.getJavaType(file.getProject(), target);
-        if (type != null) {
-            return new JavaElementHyperlink(hyperlinkRegion, type);
-        }
-        return null;
-    }
+	protected IHyperlink createHyperlink(String name, String target, Node parentNode, IRegion hyperlinkRegion,
+			IDocument document, Node node, ITextViewer textViewer, IRegion cursor) {
+		if (name == null) {
+			return null;
+		}
+		IFile file = BeansEditorUtils.getFile(document);
+		IType type = BeansModelUtils.getJavaType(file.getProject(), target);
+		if (type != null) {
+			return new JavaElementHyperlink(hyperlinkRegion, type);
+		}
+		return null;
+	}
 }

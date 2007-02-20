@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 
@@ -24,5 +24,5 @@ import org.w3c.dom.Node;
 public interface IReferenceableElementsLocator {
 
 	Map<String, Node> getReferenceableElements(Document document);
-	
+
 }

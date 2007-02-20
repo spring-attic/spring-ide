@@ -22,77 +22,76 @@ import org.eclipse.jdt.core.compiler.IProblem;
 
 public class CompilationProblemRequestor implements IProblemRequestor {
 
-    private boolean fIsActive = false;
+	private boolean fIsActive = false;
 
-    private boolean fIsRunning = false;
+	private boolean fIsRunning = false;
 
-    private List<IProblem> fCollectedProblems;
+	private List<IProblem> fCollectedProblems;
 
-    public void beginReporting() {
+	public void beginReporting() {
 
-        fIsRunning = true;
-        fCollectedProblems = new ArrayList<IProblem>();
-    }
+		fIsRunning = true;
+		fCollectedProblems = new ArrayList<IProblem>();
+	}
 
-    public void acceptProblem(IProblem problem) {
+	public void acceptProblem(IProblem problem) {
 
-        if (isActive())
-            fCollectedProblems.add(problem);
-    }
+		if (isActive())
+			fCollectedProblems.add(problem);
+	}
 
-    public void endReporting() {
+	public void endReporting() {
 
-        fIsRunning = false;
-    }
+		fIsRunning = false;
+	}
 
-    public boolean isActive() {
+	public boolean isActive() {
 
-        return fIsActive && fCollectedProblems != null;
-    }
+		return fIsActive && fCollectedProblems != null;
+	}
 
-    /**
-     * Sets the active state of this problem requestor.
-     * 
-     * @param isActive
-     *            the state of this problem requestor
-     */
-    public void setIsActive(boolean isActive) {
+	/**
+	 * Sets the active state of this problem requestor.
+	 * 
+	 * @param isActive the state of this problem requestor
+	 */
+	public void setIsActive(boolean isActive) {
 
-        if (fIsActive != isActive) {
-            fIsActive = isActive;
-            if (fIsActive)
-                startCollectingProblems();
-            else
-                stopCollectingProblems();
-        }
-    }
+		if (fIsActive != isActive) {
+			fIsActive = isActive;
+			if (fIsActive)
+				startCollectingProblems();
+			else
+				stopCollectingProblems();
+		}
+	}
 
-    /**
-     * Tells this annotation model to collect temporary problems from now on.
-     */
-    private void startCollectingProblems() {
+	/**
+	 * Tells this annotation model to collect temporary problems from now on.
+	 */
+	private void startCollectingProblems() {
 
-        fCollectedProblems = new ArrayList<IProblem>();
-    }
+		fCollectedProblems = new ArrayList<IProblem>();
+	}
 
-    /**
-     * Tells this annotation model to no longer collect temporary problems.
-     */
-    private void stopCollectingProblems() {
+	/**
+	 * Tells this annotation model to no longer collect temporary problems.
+	 */
+	private void stopCollectingProblems() {
 
-        // do nothing
-    }
+		// do nothing
+	}
 
-    /**
-     * @return the list of collected problems
-     */
-    public List getCollectedProblems() {
+	/**
+	 * @return the list of collected problems
+	 */
+	public List getCollectedProblems() {
 
-        return fCollectedProblems;
-    }
+		return fCollectedProblems;
+	}
 
-    public boolean isRunning() {
+	public boolean isRunning() {
 
-        return fIsRunning;
-    }
+		return fIsRunning;
+	}
 }

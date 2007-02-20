@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 
@@ -24,13 +24,12 @@ public interface INamespaceAwareEditorContribution {
 
 	String getNamespaceUri();
 
-	LabelProvider getLabelProvider(
-			BeansContentOutlineConfiguration configuration);
+	LabelProvider getLabelProvider(BeansContentOutlineConfiguration configuration);
 
 	INamespaceContentAssistProcessor getContentAssistProcessor();
-    
-    IHyperlinkDetector getHyperLinkDetector();
-    
-    IReferenceableElementsLocator getReferenceableElementsLocator();
-    
+
+	IHyperlinkDetector getHyperLinkDetector();
+
+	IReferenceableElementsLocator getReferenceableElementsLocator();
+
 }

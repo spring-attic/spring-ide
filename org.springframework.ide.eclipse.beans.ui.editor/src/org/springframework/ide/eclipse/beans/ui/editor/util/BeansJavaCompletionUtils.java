@@ -66,8 +66,7 @@ public class BeansJavaCompletionUtils {
 		addClassValueProposals(request, prefix, false);
 	}
 
-	public static void addClassValueProposals(ContentAssistRequest request, String prefix,
-			boolean interfaceRequired) {
+	public static void addClassValueProposals(ContentAssistRequest request, String prefix, boolean interfaceRequired) {
 
 		if (prefix == null || prefix.length() == 0) {
 			return;
@@ -79,15 +78,15 @@ public class BeansJavaCompletionUtils {
 			IPackageFragment root = project.getPackageFragments()[0];
 			ICompilationUnit unit = root.getCompilationUnit("_xxx.java").getWorkingCopy(
 					CompilationUnitHelper.getInstance().getWorkingCopyOwner(),
-					CompilationUnitHelper.getInstance().getProblemRequestor(),
-					BeansEditorUtils.getProgressMonitor());
+					CompilationUnitHelper.getInstance().getProblemRequestor(), BeansEditorUtils.getProgressMonitor());
 			String source = CLASS_SOURCE_START + prefix + CLASS_SOURCE_END;
 			setContents(unit, source);
 
-			BeansJavaCompletionProposalCollector collector = new BeansJavaCompletionProposalCollector(
-					unit, interfaceRequired);
-			unit.codeComplete(CLASS_SOURCE_START.length() + prefix.length(), collector,
-					DefaultWorkingCopyOwner.PRIMARY);
+			BeansJavaCompletionProposalCollector collector = new BeansJavaCompletionProposalCollector(unit,
+					interfaceRequired);
+			unit
+					.codeComplete(CLASS_SOURCE_START.length() + prefix.length(), collector,
+							DefaultWorkingCopyOwner.PRIMARY);
 
 			IJavaCompletionProposal[] props = collector.getJavaCompletionProposals();
 
@@ -97,29 +96,28 @@ public class BeansJavaCompletionUtils {
 				ICompletionProposal comProposal = proposals[i];
 				processJavaCompletionProposal(request, comProposal);
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			// do nothing
 		}
 	}
 
-	protected static void processJavaCompletionProposal(ContentAssistRequest request,
-			ICompletionProposal comProposal) {
+	protected static void processJavaCompletionProposal(ContentAssistRequest request, ICompletionProposal comProposal) {
 		if (comProposal instanceof JavaCompletionProposal) {
 			JavaCompletionProposal prop = (JavaCompletionProposal) comProposal;
-			BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(prop
-					.getReplacementString(), request.getReplacementBeginPosition(), request
-					.getReplacementLength(), prop.getReplacementString().length(), prop.getImage(),
-					prop.getDisplayString(), null, prop.getAdditionalProposalInfo(), prop
-							.getRelevance());
+			BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(prop.getReplacementString(), request
+					.getReplacementBeginPosition(), request.getReplacementLength(), prop.getReplacementString()
+					.length(), prop.getImage(), prop.getDisplayString(), null, prop.getAdditionalProposalInfo(), prop
+					.getRelevance());
 
 			request.addProposal(proposal);
-		} else if (comProposal instanceof LazyJavaTypeCompletionProposal) {
+		}
+		else if (comProposal instanceof LazyJavaTypeCompletionProposal) {
 			LazyJavaTypeCompletionProposal prop = (LazyJavaTypeCompletionProposal) comProposal;
-			BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(prop
-					.getQualifiedTypeName(), request.getReplacementBeginPosition(), request
-					.getReplacementLength(), prop.getQualifiedTypeName().length(), prop.getImage(),
-					prop.getDisplayString(), null, prop.getAdditionalProposalInfo(), prop
-							.getRelevance());
+			BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(prop.getQualifiedTypeName(), request
+					.getReplacementBeginPosition(), request.getReplacementLength(), prop.getQualifiedTypeName()
+					.length(), prop.getImage(), prop.getDisplayString(), null, prop.getAdditionalProposalInfo(), prop
+					.getRelevance());
 
 			request.addProposal(proposal);
 		}
@@ -137,8 +135,7 @@ public class BeansJavaCompletionUtils {
 	/**
 	 * Set contents of the compilation unit to the translated jsp text.
 	 * 
-	 * @param the
-	 *            ICompilationUnit on which to set the buffer contents
+	 * @param the ICompilationUnit on which to set the buffer contents
 	 */
 	private static void setContents(ICompilationUnit cu, String source) {
 		if (cu == null)
@@ -149,7 +146,8 @@ public class BeansJavaCompletionUtils {
 			try {
 
 				buffer = cu.getBuffer();
-			} catch (JavaModelException e) {
+			}
+			catch (JavaModelException e) {
 				e.printStackTrace();
 				buffer = null;
 			}
@@ -159,42 +157,38 @@ public class BeansJavaCompletionUtils {
 		}
 	}
 
-	public static void addTypeHierachyAttributeValueProposals(ContentAssistRequest request,
-			final String prefix, String typeName) {
+	public static void addTypeHierachyAttributeValueProposals(ContentAssistRequest request, final String prefix,
+			String typeName) {
 
 		if (prefix == null || prefix.length() == 0) {
 			return;
 		}
 
-		IType type = BeansModelUtils.getJavaType(
-				BeansEditorUtils.getResource(request).getProject(), typeName);
+		IType type = BeansModelUtils.getJavaType(BeansEditorUtils.getResource(request).getProject(), typeName);
 		try {
 			if (BeansEditorUtils.getResource(request).getProject().hasNature(JavaCore.NATURE_ID)) {
 
-				ITypeHierarchy hierachy = type.newTypeHierarchy(JavaCore.create(BeansEditorUtils
-						.getResource(request).getProject()), new NullProgressMonitor());
+				ITypeHierarchy hierachy = type.newTypeHierarchy(JavaCore.create(BeansEditorUtils.getResource(request)
+						.getProject()), new NullProgressMonitor());
 				IType[] types = hierachy.getAllSubtypes(type);
 				Map<String, IType> sortMap = new HashMap<String, IType>();
 				for (IType foundType : types) {
 					if (!sortMap.containsKey(foundType.getFullyQualifiedName())
-							&& !Flags.isAbstract(foundType.getFlags())
-							&& Flags.isPublic(foundType.getFlags())) {
-						BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-								foundType.getFullyQualifiedName(), request
-										.getReplacementBeginPosition(), request
-										.getReplacementLength(), foundType.getFullyQualifiedName()
-										.length(), JavaPluginImages
-										.get(JavaPluginImages.IMG_OBJS_CLASS), foundType
-										.getElementName()
-										+ " - " + foundType.getPackageFragment().getElementName(),
-								null, null, 10);
+							&& !Flags.isAbstract(foundType.getFlags()) && Flags.isPublic(foundType.getFlags())) {
+						BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(foundType
+								.getFullyQualifiedName(), request.getReplacementBeginPosition(), request
+								.getReplacementLength(), foundType.getFullyQualifiedName().length(), JavaPluginImages
+								.get(JavaPluginImages.IMG_OBJS_CLASS), foundType.getElementName() + " - "
+								+ foundType.getPackageFragment().getElementName(), null, null, 10);
 						request.addProposal(proposal);
 						sortMap.put(foundType.getFullyQualifiedName(), foundType);
 					}
 				}
 			}
-		} catch (JavaModelException e) {
-		} catch (CoreException e) {
+		}
+		catch (JavaModelException e) {
+		}
+		catch (CoreException e) {
 		}
 	}
 
@@ -216,10 +210,10 @@ public class BeansJavaCompletionUtils {
 
 						if (resolvedTypeNames != null && resolvedTypeNames.length > 0
 								&& resolvedTypeNames[0].length > 0) {
-							IType propertyType = BeansModelUtils.getJavaType(project,
-									resolvedTypeNames[0][0] + "." + resolvedTypeNames[0][1]);
-							ITypeHierarchy hierachy = propertyType.newTypeHierarchy(JavaCore
-									.create(project), new NullProgressMonitor());
+							IType propertyType = BeansModelUtils.getJavaType(project, resolvedTypeNames[0][0] + "."
+									+ resolvedTypeNames[0][1]);
+							ITypeHierarchy hierachy = propertyType.newTypeHierarchy(JavaCore.create(project),
+									new NullProgressMonitor());
 
 							requiredTypes.add(propertyType.getFullyQualifiedName());
 							IType[] subTypes = hierachy.getAllSubtypes(propertyType);
@@ -228,7 +222,8 @@ public class BeansJavaCompletionUtils {
 							}
 						}
 					}
-				} catch (JavaModelException e) {
+				}
+				catch (JavaModelException e) {
 				}
 			}
 		}

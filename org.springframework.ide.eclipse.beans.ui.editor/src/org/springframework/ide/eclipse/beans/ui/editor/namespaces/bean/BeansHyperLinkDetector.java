@@ -52,8 +52,7 @@ import org.w3c.dom.Node;
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  */
-public class BeansHyperLinkDetector extends AbstractHyperLinkDetector implements
-		IHyperlinkDetector {
+public class BeansHyperLinkDetector extends AbstractHyperLinkDetector implements IHyperlinkDetector {
 
 	/**
 	 * Returns <code>true</code> if given attribute is openable.
@@ -63,39 +62,46 @@ public class BeansHyperLinkDetector extends AbstractHyperLinkDetector implements
 		String ownerName = attr.getOwnerElement().getNodeName();
 		if ("class".equals(attrName)) {
 			return true;
-		} else if ("name".equals(attrName) && "property".equals(ownerName)) {
+		}
+		else if ("name".equals(attrName) && "property".equals(ownerName)) {
 			return true;
-		} else if ("init-method".equals(attrName)) {
+		}
+		else if ("init-method".equals(attrName)) {
 			return true;
-		} else if ("destroy-method".equals(attrName)) {
+		}
+		else if ("destroy-method".equals(attrName)) {
 			return true;
-		} else if ("factory-method".equals(attrName)) {
+		}
+		else if ("factory-method".equals(attrName)) {
 			return true;
-		} else if ("factory-bean".equals(attrName)) {
+		}
+		else if ("factory-bean".equals(attrName)) {
 			return true;
-		} else if ("parent".equals(attrName)) {
+		}
+		else if ("parent".equals(attrName)) {
 			return true;
-		} else if ("depends-on".equals(attrName)) {
+		}
+		else if ("depends-on".equals(attrName)) {
 			return true;
-		} else if ("bean".equals(attrName) || "local".equals(attrName)
-				|| "parent".equals(attrName) || "ref".equals(attrName)
-				|| ("name".equals(attrName) && "alias".equals(ownerName))) {
+		}
+		else if ("bean".equals(attrName) || "local".equals(attrName) || "parent".equals(attrName)
+				|| "ref".equals(attrName) || ("name".equals(attrName) && "alias".equals(ownerName))) {
 			return true;
-		} else if ("value".equals(attrName)) {
+		}
+		else if ("value".equals(attrName)) {
 			return true;
-		} else if ("value-ref".equals(attrName) || "key-ref".equals(attrName)) {
+		}
+		else if ("value-ref".equals(attrName) || "key-ref".equals(attrName)) {
 			return true;
-		} else if ("http://www.springframework.org/schema/p".equals(attr
-				.getNamespaceURI())
-				&& attrName.endsWith("-ref")) {
+		}
+		else if ("http://www.springframework.org/schema/p".equals(attr.getNamespaceURI()) && attrName.endsWith("-ref")) {
 			return true;
 		}
 		return false;
 	}
 
-	protected IHyperlink createHyperlink(String name, String target,
-			Node parentNode, IRegion hyperlinkRegion, IDocument document,
-			Node node, ITextViewer textViewer, IRegion cursor) {
+	protected IHyperlink createHyperlink(String name, String target, Node parentNode, IRegion hyperlinkRegion,
+			IDocument document, Node node, ITextViewer textViewer, IRegion cursor) {
 		if (name == null) {
 			return null;
 		}
@@ -109,45 +115,42 @@ public class BeansHyperLinkDetector extends AbstractHyperLinkDetector implements
 			if (type != null) {
 				return new JavaElementHyperlink(hyperlinkRegion, type);
 			}
-		} else if ("name".equals(name) && "property".equals(node.getNodeName())) {
+		}
+		else if ("name".equals(name) && "property".equals(node.getNodeName())) {
 			List<String> propertyPaths = new ArrayList<String>();
-			hyperlinkRegion = BeansEditorUtils
-					.extractPropertyPathFromCursorPosition(hyperlinkRegion,
-							cursor, target, propertyPaths);
+			hyperlinkRegion = BeansEditorUtils.extractPropertyPathFromCursorPosition(hyperlinkRegion, cursor, target,
+					propertyPaths);
 			if ("bean".equals(parentName)) {
 				IFile file = BeansEditorUtils.getFile(document);
-				List<?> classNames = BeansEditorUtils.getClassNamesOfBean(file,
-						parentNode);
+				List<?> classNames = BeansEditorUtils.getClassNamesOfBean(file, parentNode);
 
-				IMethod method = BeansEditorUtils
-						.extractMethodFromPropertyPathElements(propertyPaths,
-								classNames, file, 0);
+				IMethod method = BeansEditorUtils.extractMethodFromPropertyPathElements(propertyPaths, classNames,
+						file, 0);
 				if (method != null) {
 					return new JavaElementHyperlink(hyperlinkRegion, method);
 				}
 			}
-		} else if ("init-method".equals(name) || "destroy-method".equals(name)) {
+		}
+		else if ("init-method".equals(name) || "destroy-method".equals(name)) {
 			NamedNodeMap attributes = node.getAttributes();
 			if (attributes != null && attributes.getNamedItem("class") != null) {
-				String className = attributes.getNamedItem("class")
-						.getNodeValue();
+				String className = attributes.getNamedItem("class").getNodeValue();
 				IFile file = BeansEditorUtils.getFile(document);
-				IType type = BeansModelUtils.getJavaType(file.getProject(),
-						className);
+				IType type = BeansModelUtils.getJavaType(file.getProject(), className);
 				try {
-					IMethod method = Introspector.findMethod(type, target, 0,
-							true, Statics.DONT_CARE);
+					IMethod method = Introspector.findMethod(type, target, 0, true, Statics.DONT_CARE);
 					if (method != null) {
 						return new JavaElementHyperlink(hyperlinkRegion, method);
 					}
-				} catch (JavaModelException e) {
+				}
+				catch (JavaModelException e) {
 				}
 			}
-		} else if ("factory-method".equals(name)) {
+		}
+		else if ("factory-method".equals(name)) {
 			NamedNodeMap attributes = node.getAttributes();
 			String className = null;
-			if (attributes != null
-					&& attributes.getNamedItem("factory-bean") != null) {
+			if (attributes != null && attributes.getNamedItem("factory-bean") != null) {
 				Node factoryBean = attributes.getNamedItem("factory-bean");
 				if (factoryBean != null) {
 					String factoryBeanId = factoryBean.getNodeValue();
@@ -158,46 +161,40 @@ public class BeansHyperLinkDetector extends AbstractHyperLinkDetector implements
 					Element bean = doc.getElementById(factoryBeanId);
 					if (bean != null && bean instanceof Node) {
 						NamedNodeMap attribute = ((Node) bean).getAttributes();
-						className = attribute.getNamedItem("class")
-								.getNodeValue();
+						className = attribute.getNamedItem("class").getNodeValue();
 					}
 				}
-			} else if (attributes != null
-					&& attributes.getNamedItem("class") != null) {
+			}
+			else if (attributes != null && attributes.getNamedItem("class") != null) {
 				className = attributes.getNamedItem("class").getNodeValue();
 			}
 			try {
 				IFile file = BeansEditorUtils.getFile(document);
-				IType type = BeansModelUtils.getJavaType(file.getProject(),
-						className);
-				IMethod method = Introspector.findMethod(type, target, -1,
-						true, Statics.YES);
+				IType type = BeansModelUtils.getJavaType(file.getProject(), className);
+				IMethod method = Introspector.findMethod(type, target, -1, true, Statics.YES);
 				if (method != null) {
 					return new JavaElementHyperlink(hyperlinkRegion, method);
 				}
-			} catch (JavaModelException e) {
 			}
-		} else if ("factory-bean".equals(name) || "depends-on".equals(name)
-				|| "bean".equals(name) || "local".equals(name)
-				|| "parent".equals(name) || "ref".equals(name)
-				|| "name".equals(name) || "key-ref".equals(name)
-				|| "value-ref".equals(name) || name.endsWith("-ref")) {
-			Node bean = BeansEditorUtils.getFirstReferenceableNodeById(node
-					.getOwnerDocument(), target);
+			catch (JavaModelException e) {
+			}
+		}
+		else if ("factory-bean".equals(name) || "depends-on".equals(name) || "bean".equals(name)
+				|| "local".equals(name) || "parent".equals(name) || "ref".equals(name) || "name".equals(name)
+				|| "key-ref".equals(name) || "value-ref".equals(name) || name.endsWith("-ref")) {
+			Node bean = BeansEditorUtils.getFirstReferenceableNodeById(node.getOwnerDocument(), target);
 			if (bean != null) {
 				IRegion region = getHyperlinkRegion(bean);
-				return new NodeElementHyperlink(hyperlinkRegion, region,
-						textViewer);
-			} else {
+				return new NodeElementHyperlink(hyperlinkRegion, region, textViewer);
+			}
+			else {
 				IFile file = BeansEditorUtils.getFile(document);
 				// assume this is an external reference
-				Iterator<?> beans = BeansEditorUtils.getBeansFromConfigSets(file)
-						.iterator();
+				Iterator<?> beans = BeansEditorUtils.getBeansFromConfigSets(file).iterator();
 				while (beans.hasNext()) {
 					IBean modelBean = (IBean) beans.next();
 					if (modelBean.getElementName().equals(target)) {
-						return new ExternalBeanHyperlink(modelBean,
-								hyperlinkRegion);
+						return new ExternalBeanHyperlink(modelBean, hyperlinkRegion);
 					}
 				}
 			}

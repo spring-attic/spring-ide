@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor;
 
@@ -28,50 +28,49 @@ import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 @SuppressWarnings("restriction")
 public abstract class MethodSearchRequestor {
 
-    public static final int METHOD_RELEVANCE = 10;
+	public static final int METHOD_RELEVANCE = 10;
 
-    protected ContentAssistRequest request;
-    protected JavaElementImageProvider imageProvider;
-    protected Set<String> methods;
+	protected ContentAssistRequest request;
 
-    public MethodSearchRequestor(ContentAssistRequest request) {
-        this.request = request;
-        this.methods = new HashSet<String>();
-        this.imageProvider = new JavaElementImageProvider();
-    }
+	protected JavaElementImageProvider imageProvider;
 
-    protected String[] getParameterTypes(IMethod method) {
-        try {
-            String[] parameterQualifiedTypes = Signature.getParameterTypes(method
-                    .getSignature());
-            int length = parameterQualifiedTypes == null ? 0 : parameterQualifiedTypes.length;
-            String[] parameterPackages = new String[length];
-            for (int i = 0; i < length; i++) {
-                parameterQualifiedTypes[i] = parameterQualifiedTypes[i].replace('/', '.');
-                parameterPackages[i] = Signature
-                        .getSignatureSimpleName(parameterQualifiedTypes[i]);
-            }
-            return parameterPackages;
-        }
-        catch (IllegalArgumentException e) {
-        }
-        catch (JavaModelException e) {
-        }
-        return null;
-    }
+	protected Set<String> methods;
 
-    protected String getReturnType(IMethod method, boolean classTypesOnly) {
-        try {
-            String qualifiedReturnType = Signature.getReturnType(method.getSignature());
-            if (!classTypesOnly || qualifiedReturnType.startsWith("L")
-            		|| qualifiedReturnType.startsWith("Q")) {
-            	return Signature.getSignatureSimpleName(qualifiedReturnType.replace('/', '.'));
-            }
-        }
-        catch (IllegalArgumentException e) {
-        }
-        catch (JavaModelException e) {
-        }
-        return null;
-    }
+	public MethodSearchRequestor(ContentAssistRequest request) {
+		this.request = request;
+		this.methods = new HashSet<String>();
+		this.imageProvider = new JavaElementImageProvider();
+	}
+
+	protected String[] getParameterTypes(IMethod method) {
+		try {
+			String[] parameterQualifiedTypes = Signature.getParameterTypes(method.getSignature());
+			int length = parameterQualifiedTypes == null ? 0 : parameterQualifiedTypes.length;
+			String[] parameterPackages = new String[length];
+			for (int i = 0; i < length; i++) {
+				parameterQualifiedTypes[i] = parameterQualifiedTypes[i].replace('/', '.');
+				parameterPackages[i] = Signature.getSignatureSimpleName(parameterQualifiedTypes[i]);
+			}
+			return parameterPackages;
+		}
+		catch (IllegalArgumentException e) {
+		}
+		catch (JavaModelException e) {
+		}
+		return null;
+	}
+
+	protected String getReturnType(IMethod method, boolean classTypesOnly) {
+		try {
+			String qualifiedReturnType = Signature.getReturnType(method.getSignature());
+			if (!classTypesOnly || qualifiedReturnType.startsWith("L") || qualifiedReturnType.startsWith("Q")) {
+				return Signature.getSignatureSimpleName(qualifiedReturnType.replace('/', '.'));
+			}
+		}
+		catch (IllegalArgumentException e) {
+		}
+		catch (JavaModelException e) {
+		}
+		return null;
+	}
 }

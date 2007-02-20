@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor.outline;
 
@@ -23,8 +23,8 @@ import org.eclipse.wst.sse.ui.internal.contentoutline.IJFaceNodeAdapter;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeAdapterFactory;
 
 /**
- * An adapter factory to create JFaceNodeAdapters. Use this adapter factory
- * with a JFaceAdapterContentProvider to display DOM nodes in a tree.
+ * An adapter factory to create JFaceNodeAdapters. Use this adapter factory with
+ * a JFaceAdapterContentProvider to display DOM nodes in a tree.
  */
 @SuppressWarnings("restriction")
 public class BeansJFaceNodeAdapterFactory extends JFaceNodeAdapterFactory {

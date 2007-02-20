@@ -63,8 +63,7 @@ public abstract class AbstractContentAssistProcessor implements INamespaceConten
 		if (matchString == null) {
 			matchString = "";
 		}
-		if (matchString.length() > 0
-				&& (matchString.startsWith("\"") || matchString.startsWith("'"))) {
+		if (matchString.length() > 0 && (matchString.startsWith("\"") || matchString.startsWith("'"))) {
 			matchString = matchString.substring(1);
 		}
 
@@ -84,8 +83,8 @@ public abstract class AbstractContentAssistProcessor implements INamespaceConten
 		// super.addAttributeNameProposals(request);
 	}
 
-	public void addAttributeValueProposals(
-			IContentAssistProcessor delegatingContextAssistProcessor, ContentAssistRequest request) {
+	public void addAttributeValueProposals(IContentAssistProcessor delegatingContextAssistProcessor,
+			ContentAssistRequest request) {
 		this.delegatingContextAssistProcessor = delegatingContextAssistProcessor;
 		IDOMNode node = (IDOMNode) request.getNode();
 
@@ -109,8 +108,7 @@ public abstract class AbstractContentAssistProcessor implements INamespaceConten
 		if (matchString == null) {
 			matchString = "";
 		}
-		if (matchString.length() > 0
-				&& (matchString.startsWith("\"") || matchString.startsWith("'"))) {
+		if (matchString.length() > 0 && (matchString.startsWith("\"") || matchString.startsWith("'"))) {
 			matchString = matchString.substring(1);
 		}
 
@@ -153,11 +151,9 @@ public abstract class AbstractContentAssistProcessor implements INamespaceConten
 
 		if (getTemplateCompletionProcessor() != null) {
 			getTemplateCompletionProcessor().setContextType(context);
-			ICompletionProposal[] proposals = getTemplateCompletionProcessor()
-					.computeCompletionProposals(
-							((DelegatingContentAssistProcessor) this.delegatingContextAssistProcessor)
-									.getTextViewer(),
-							contentAssistRequest.getReplacementBeginPosition());
+			ICompletionProposal[] proposals = getTemplateCompletionProcessor().computeCompletionProposals(
+					((DelegatingContentAssistProcessor) this.delegatingContextAssistProcessor).getTextViewer(),
+					contentAssistRequest.getReplacementBeginPosition());
 			for (int i = 0; i < proposals.length; ++i) {
 				if (useProposalList)
 					contentAssistRequest.addProposal(proposals[i]);
@@ -167,11 +163,11 @@ public abstract class AbstractContentAssistProcessor implements INamespaceConten
 		}
 	}
 
-	protected abstract void computeAttributeNameProposals(ContentAssistRequest request,
-			String prefix, String namespace, String namespacePrefix, Node attributeNode);
+	protected abstract void computeAttributeNameProposals(ContentAssistRequest request, String prefix,
+			String namespace, String namespacePrefix, Node attributeNode);
 
-	protected abstract void computeAttributeValueProposals(ContentAssistRequest request,
-			IDOMNode node, String matchString, String attributeName);
+	protected abstract void computeAttributeValueProposals(ContentAssistRequest request, IDOMNode node,
+			String matchString, String attributeName);
 
 	protected abstract void computeTagInsertionProposals(ContentAssistRequest request, IDOMNode node);
 

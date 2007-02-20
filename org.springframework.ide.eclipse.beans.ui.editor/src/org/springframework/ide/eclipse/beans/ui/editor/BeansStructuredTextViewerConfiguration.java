@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor;
 
@@ -35,64 +35,54 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.DelegatingC
 import org.springframework.ide.eclipse.beans.ui.editor.hover.BeansTextHoverProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.DelegatingHyperLinkDetector;
 
-public class BeansStructuredTextViewerConfiguration
-        extends StructuredTextViewerConfigurationXML {
+public class BeansStructuredTextViewerConfiguration extends StructuredTextViewerConfigurationXML {
 
-    public IContentAssistProcessor[] getContentAssistProcessors(
-            ISourceViewer sourceViewer, String partitionType) {
+	public IContentAssistProcessor[] getContentAssistProcessors(ISourceViewer sourceViewer, String partitionType) {
 
-        IContentAssistProcessor[] processors;
+		IContentAssistProcessor[] processors;
 
-        if (partitionType == IStructuredPartitions.DEFAULT_PARTITION
-                || partitionType == IXMLPartitions.XML_DEFAULT) {
-            processors = new IContentAssistProcessor[] { new DelegatingContentAssistProcessor() };
-        }
-        else {
-            processors = super.getContentAssistProcessors(sourceViewer,
-                    partitionType);
-        }
+		if (partitionType == IStructuredPartitions.DEFAULT_PARTITION || partitionType == IXMLPartitions.XML_DEFAULT) {
+			processors = new IContentAssistProcessor[] { new DelegatingContentAssistProcessor() };
+		}
+		else {
+			processors = super.getContentAssistProcessors(sourceViewer, partitionType);
+		}
 
-        IContentAssistant ca = super.getContentAssistant(sourceViewer);
-        if (ca != null && ca instanceof ContentAssistant) {
-            ContentAssistant contentAssistant = (ContentAssistant) ca;
-            contentAssistant.enableAutoActivation(true);
-            contentAssistant.setAutoActivationDelay(50);
-            contentAssistant.setProposalSelectorBackground(new Color(
-                    Activator.getActiveWorkbenchShell().getDisplay(),
-                    new RGB(255, 255, 255)));
-            contentAssistant.setRestoreCompletionProposalSize(Activator
-                    .getDefault().getDialogSettings());
-        }
-        return processors;
-    }
+		IContentAssistant ca = super.getContentAssistant(sourceViewer);
+		if (ca != null && ca instanceof ContentAssistant) {
+			ContentAssistant contentAssistant = (ContentAssistant) ca;
+			contentAssistant.enableAutoActivation(true);
+			contentAssistant.setAutoActivationDelay(50);
+			contentAssistant.setProposalSelectorBackground(new Color(Activator.getActiveWorkbenchShell().getDisplay(),
+					new RGB(255, 255, 255)));
+			contentAssistant.setRestoreCompletionProposalSize(Activator.getDefault().getDialogSettings());
+		}
+		return processors;
+	}
 
-    public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
-        if (sourceViewer == null
-                || !fPreferenceStore
-                        .getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_HYPERLINKS_ENABLED))
-            return null;
+	public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
+		if (sourceViewer == null
+				|| !fPreferenceStore
+						.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_HYPERLINKS_ENABLED))
+			return null;
 
-        List<IHyperlinkDetector> allDetectors = new ArrayList<IHyperlinkDetector>();
-        allDetectors.add(new DelegatingHyperLinkDetector());
-        IHyperlinkDetector[] superDetectors = super
-                .getHyperlinkDetectors(sourceViewer);
-        for (int m = 0; m < superDetectors.length; m++) {
-            IHyperlinkDetector detector = superDetectors[m];
-            if (!allDetectors.contains(detector)) {
-                allDetectors.add(detector);
-            }
-        }
-        return (IHyperlinkDetector[]) allDetectors
-                .toArray(new IHyperlinkDetector[0]);
-    }
+		List<IHyperlinkDetector> allDetectors = new ArrayList<IHyperlinkDetector>();
+		allDetectors.add(new DelegatingHyperLinkDetector());
+		IHyperlinkDetector[] superDetectors = super.getHyperlinkDetectors(sourceViewer);
+		for (int m = 0; m < superDetectors.length; m++) {
+			IHyperlinkDetector detector = superDetectors[m];
+			if (!allDetectors.contains(detector)) {
+				allDetectors.add(detector);
+			}
+		}
+		return (IHyperlinkDetector[]) allDetectors.toArray(new IHyperlinkDetector[0]);
+	}
 
-    public ITextHover getTextHover(ISourceViewer sourceViewer,
-            String contentType, int stateMask) {
-        if ((contentType == IStructuredPartitions.DEFAULT_PARTITION)
-                || (contentType == IXMLPartitions.XML_DEFAULT)) {
-            return new BeansTextHoverProcessor();
-        }
-        return super.getTextHover(sourceViewer, contentType, stateMask);
-    }
+	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
+		if ((contentType == IStructuredPartitions.DEFAULT_PARTITION) || (contentType == IXMLPartitions.XML_DEFAULT)) {
+			return new BeansTextHoverProcessor();
+		}
+		return super.getTextHover(sourceViewer, contentType, stateMask);
+	}
 
 }

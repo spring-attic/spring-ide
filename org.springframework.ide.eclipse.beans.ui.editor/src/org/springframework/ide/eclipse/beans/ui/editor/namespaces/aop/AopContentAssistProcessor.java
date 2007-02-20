@@ -48,161 +48,141 @@ import org.w3c.dom.NodeList;
  * Main entry point for the Spring beans xml editor's content assist.
  */
 @SuppressWarnings("restriction")
-public class AopContentAssistProcessor
-        extends AbstractContentAssistProcessor implements
-        INamespaceContentAssistProcessor {
+public class AopContentAssistProcessor extends AbstractContentAssistProcessor implements
+		INamespaceContentAssistProcessor {
 
-    private void addBeanReferenceProposals(ContentAssistRequest request,
-            String prefix, Document document, boolean showExternal) {
-        if (prefix == null) {
-            prefix = "";
-        }
-        IFile file = BeansEditorUtils.getResource(request);
-        if (document != null) {
-            BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(
-                    request);
-            Map<String, Node> beanNodes = BeansEditorUtils.getReferenceableNodes(document);
-            for (Map.Entry<String, Node> node : beanNodes.entrySet()) {
-                Node beanNode = node.getValue();
-                requestor.acceptSearchMatch(node.getKey(), beanNode, file, prefix);
-            }
-            if (showExternal) {
-                List<?> beans = BeansEditorUtils.getBeansFromConfigSets(file);
-                for (int i = 0; i < beans.size(); i++) {
-                    IBean bean = (IBean) beans.get(i);
-                    requestor.acceptSearchMatch(bean, file, prefix);
-                }
-            }
-        }
-    }
+	private void addBeanReferenceProposals(ContentAssistRequest request, String prefix, Document document,
+			boolean showExternal) {
+		if (prefix == null) {
+			prefix = "";
+		}
+		IFile file = BeansEditorUtils.getResource(request);
+		if (document != null) {
+			BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(request);
+			Map<String, Node> beanNodes = BeansEditorUtils.getReferenceableNodes(document);
+			for (Map.Entry<String, Node> node : beanNodes.entrySet()) {
+				Node beanNode = node.getValue();
+				requestor.acceptSearchMatch(node.getKey(), beanNode, file, prefix);
+			}
+			if (showExternal) {
+				List<?> beans = BeansEditorUtils.getBeansFromConfigSets(file);
+				for (int i = 0; i < beans.size(); i++) {
+					IBean bean = (IBean) beans.get(i);
+					requestor.acceptSearchMatch(bean, file, prefix);
+				}
+			}
+		}
+	}
 
-    protected void computeAttributeValueProposals(ContentAssistRequest request,
-            IDOMNode node, String matchString, String attributeName) {
+	protected void computeAttributeValueProposals(ContentAssistRequest request, IDOMNode node, String matchString,
+			String attributeName) {
 
-        String nodeName = node.getNodeName();
-        String prefix = node.getPrefix();
-        if (prefix != null) {
-            nodeName = nodeName.substring(prefix.length() + 1);
-        }
+		String nodeName = node.getNodeName();
+		String prefix = node.getPrefix();
+		if (prefix != null) {
+			nodeName = nodeName.substring(prefix.length() + 1);
+		}
 
-        if ("aspect".equals(nodeName)) {
-            if ("ref".equals(attributeName)) {
-                addBeanReferenceProposals(request, matchString, node
-                        .getOwnerDocument(), true);
-            }
-        }
-        else if ("advisor".equals(nodeName)) {
-            if ("advice-ref".equals(attributeName)) {
-                addBeanReferenceProposals(request, matchString, node
-                        .getOwnerDocument(), true);
-            }
-        }
-        if ("pointcut-ref".equals(attributeName)) {
-            addPointcutReferenceProposals(request, matchString, node, node
-                    .getOwnerDocument());
-        }
-        if ("default-impl".equals(attributeName)) {
-            String implementInterface = BeansEditorUtils.getAttribute(node, "implement-interface");
-            if (StringUtils.hasText(implementInterface)) {
-                addCollectionTypesAttributeValueProposals(request, matchString, implementInterface);
-            }
-            else {
-                addClassAttributeValueProposals(request, matchString, false);
-            }
-        }
-        if ("implement-interface".equals(attributeName)) {
-            addClassAttributeValueProposals(request, matchString, true);
-        }
-        if ("method".equals(attributeName)
-                && "aspect".equals(node.getParentNode().getLocalName())
-                && BeansEditorUtils.hasAttribute(node.getParentNode(), "ref")) {
-            addMethodAttributeValueProposals(request, matchString, node);
-        }
-    }
-    
-    private void addClassAttributeValueProposals(ContentAssistRequest request,
-            String prefix, boolean interfaceRequired) {
-        BeansJavaCompletionUtils.addClassValueProposals(request, prefix, interfaceRequired);
-    }
-    
-    private void addCollectionTypesAttributeValueProposals(ContentAssistRequest request,
-            final String prefix, String typeName) {
-        BeansJavaCompletionUtils.addTypeHierachyAttributeValueProposals(request, prefix,
-                typeName);
-    }
+		if ("aspect".equals(nodeName)) {
+			if ("ref".equals(attributeName)) {
+				addBeanReferenceProposals(request, matchString, node.getOwnerDocument(), true);
+			}
+		}
+		else if ("advisor".equals(nodeName)) {
+			if ("advice-ref".equals(attributeName)) {
+				addBeanReferenceProposals(request, matchString, node.getOwnerDocument(), true);
+			}
+		}
+		if ("pointcut-ref".equals(attributeName)) {
+			addPointcutReferenceProposals(request, matchString, node, node.getOwnerDocument());
+		}
+		if ("default-impl".equals(attributeName)) {
+			String implementInterface = BeansEditorUtils.getAttribute(node, "implement-interface");
+			if (StringUtils.hasText(implementInterface)) {
+				addCollectionTypesAttributeValueProposals(request, matchString, implementInterface);
+			}
+			else {
+				addClassAttributeValueProposals(request, matchString, false);
+			}
+		}
+		if ("implement-interface".equals(attributeName)) {
+			addClassAttributeValueProposals(request, matchString, true);
+		}
+		if ("method".equals(attributeName) && "aspect".equals(node.getParentNode().getLocalName())
+				&& BeansEditorUtils.hasAttribute(node.getParentNode(), "ref")) {
+			addMethodAttributeValueProposals(request, matchString, node);
+		}
+	}
 
-    private void addPointcutReferenceProposals(ContentAssistRequest request,
-            String prefix, IDOMNode node, Document document) {
-        if (prefix == null) {
-            prefix = "";
-        }
-        IFile file = BeansEditorUtils.getResource(request);
-        if (document != null) {
-            PointcutReferenceSearchRequestor requestor = new PointcutReferenceSearchRequestor(
-                    request);
-            searchPointcutElements(prefix, node.getParentNode(), requestor,
-                    file);
-            searchPointcutElements(prefix,
-                    node.getParentNode().getParentNode(), requestor, file);
-        }
-    }
+	private void addClassAttributeValueProposals(ContentAssistRequest request, String prefix, boolean interfaceRequired) {
+		BeansJavaCompletionUtils.addClassValueProposals(request, prefix, interfaceRequired);
+	}
 
-    private void searchPointcutElements(String prefix, Node node,
-            PointcutReferenceSearchRequestor requestor, IFile file) {
-        NodeList beanNodes = node.getChildNodes();
-        for (int i = 0; i < beanNodes.getLength(); i++) {
-            Node beanNode = beanNodes.item(i);
-            if ("pointcut".equals(beanNode.getLocalName())) {
-                requestor.acceptSearchMatch(beanNode, file, prefix);
-            }
-        }
-    }
+	private void addCollectionTypesAttributeValueProposals(ContentAssistRequest request, final String prefix,
+			String typeName) {
+		BeansJavaCompletionUtils.addTypeHierachyAttributeValueProposals(request, prefix, typeName);
+	}
 
-    private void addMethodAttributeValueProposals(ContentAssistRequest request,
-            String prefix, IDOMNode node) {
+	private void addPointcutReferenceProposals(ContentAssistRequest request, String prefix, IDOMNode node,
+			Document document) {
+		if (prefix == null) {
+			prefix = "";
+		}
+		IFile file = BeansEditorUtils.getResource(request);
+		if (document != null) {
+			PointcutReferenceSearchRequestor requestor = new PointcutReferenceSearchRequestor(request);
+			searchPointcutElements(prefix, node.getParentNode(), requestor, file);
+			searchPointcutElements(prefix, node.getParentNode().getParentNode(), requestor, file);
+		}
+	}
 
-        Node parentNode = node.getParentNode();
-        String ref = BeansEditorUtils.getAttribute(parentNode, "ref");
-        
-        if (ref != null) {
-            IFile file = (IFile) BeansEditorUtils.getResource(request);
-            String className = BeansEditorUtils.getClassNameForBean(file, node
-                    .getOwnerDocument(), ref);
-            IType type = BeansModelUtils.getJavaType(file.getProject(),
-                    className);
-            if (type != null) {
-                try {
-                    Collection<?> methods = Introspector.findAllMethods(type,
-                            prefix, -1, true, Statics.DONT_CARE);
-                    if (methods != null && methods.size() > 0) {
-                        PublicMethodSearchRequestor requestor = new PublicMethodSearchRequestor(
-                                request);
-                        Iterator<?> iterator = methods.iterator();
-                        while (iterator.hasNext()) {
-                            requestor.acceptSearchMatch((IMethod) iterator
-                                    .next());
-                        }
-                    }
-                }
-                catch (JavaModelException e1) {
-                    // do nothing
-                }
-                catch (CoreException e) {
-                    // // do nothing
-                }
-            }
-        }
-    }
+	private void searchPointcutElements(String prefix, Node node, PointcutReferenceSearchRequestor requestor, IFile file) {
+		NodeList beanNodes = node.getChildNodes();
+		for (int i = 0; i < beanNodes.getLength(); i++) {
+			Node beanNode = beanNodes.item(i);
+			if ("pointcut".equals(beanNode.getLocalName())) {
+				requestor.acceptSearchMatch(beanNode, file, prefix);
+			}
+		}
+	}
 
-    protected void computeAttributeNameProposals(ContentAssistRequest request,
-            String prefix, String namespace, String namespacePrefix,
-            Node attributeNode) {
+	private void addMethodAttributeValueProposals(ContentAssistRequest request, String prefix, IDOMNode node) {
 
-    }
+		Node parentNode = node.getParentNode();
+		String ref = BeansEditorUtils.getAttribute(parentNode, "ref");
 
-    @Override
-    protected void computeTagInsertionProposals(ContentAssistRequest request,
-            IDOMNode node) {
+		if (ref != null) {
+			IFile file = (IFile) BeansEditorUtils.getResource(request);
+			String className = BeansEditorUtils.getClassNameForBean(file, node.getOwnerDocument(), ref);
+			IType type = BeansModelUtils.getJavaType(file.getProject(), className);
+			if (type != null) {
+				try {
+					Collection<?> methods = Introspector.findAllMethods(type, prefix, -1, true, Statics.DONT_CARE);
+					if (methods != null && methods.size() > 0) {
+						PublicMethodSearchRequestor requestor = new PublicMethodSearchRequestor(request);
+						Iterator<?> iterator = methods.iterator();
+						while (iterator.hasNext()) {
+							requestor.acceptSearchMatch((IMethod) iterator.next());
+						}
+					}
+				}
+				catch (JavaModelException e1) {
+					// do nothing
+				}
+				catch (CoreException e) {
+					// // do nothing
+				}
+			}
+		}
+	}
 
-    }
+	protected void computeAttributeNameProposals(ContentAssistRequest request, String prefix, String namespace,
+			String namespacePrefix, Node attributeNode) {
+
+	}
+
+	@Override
+	protected void computeTagInsertionProposals(ContentAssistRequest request, IDOMNode node) {
+
+	}
 }

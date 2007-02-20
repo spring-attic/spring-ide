@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor.actions;
 
@@ -30,20 +30,16 @@ import org.w3c.dom.Element;
 
 /**
  * Starts a search for bean references with bean in current selection.
- * @see org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanReferenceQuery 
+ * @see org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanReferenceQuery
  * @author Christian Dupuis
  */
-public class SearchBeanReferencesAction
-									  extends AbstractBeansConfigEditorAction {
+public class SearchBeanReferencesAction extends AbstractBeansConfigEditorAction {
 	public void run(IAction action) {
 		if (getTextEditor() != null) {
-			ISelection selection =
-						 getTextEditor().getSelectionProvider().getSelection();
+			ISelection selection = getTextEditor().getSelectionProvider().getSelection();
 			String beanId = extractBeanId(selection);
 			if (beanId != null) {
-				ISearchQuery query = new BeanReferenceQuery(
-						BeansSearchScope.newSearchScope(),
-						beanId, true, true);
+				ISearchQuery query = new BeanReferenceQuery(BeansSearchScope.newSearchScope(), beanId, true, true);
 				NewSearchUI.activateSearchResultView();
 				NewSearchUI.runQueryInBackground(query);
 			}
@@ -53,7 +49,7 @@ public class SearchBeanReferencesAction
 	/**
 	 * Extracts a regexp expression with the bean ID from the bean tag in the
 	 * given selection's first element.
-	 * @param selection  the current text selection
+	 * @param selection the current text selection
 	 * @return a string containing the pattern
 	 */
 	private String extractBeanId(ISelection selection) {
@@ -78,12 +74,12 @@ public class SearchBeanReferencesAction
 					// reg exp
 					attribute = elem.getAttributeNode("name");
 					if (attribute != null && attribute.getValue() != null) {
-						String[] tokens = StringUtils.tokenizeToStringArray(
-								attribute.getValue(), ",; ");
+						String[] tokens = StringUtils.tokenizeToStringArray(attribute.getValue(), ",; ");
 						for (int i = 0; i < tokens.length; i++) {
 							if (beanId != null) {
 								beanId += "|" + tokens[i];
-							} else {
+							}
+							else {
 								beanId = tokens[i];
 							}
 						}

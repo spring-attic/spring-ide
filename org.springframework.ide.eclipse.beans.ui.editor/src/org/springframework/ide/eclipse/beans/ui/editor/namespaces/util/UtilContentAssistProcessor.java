@@ -27,42 +27,40 @@ import org.w3c.dom.Node;
  * @author Christian Dupuis
  */
 @SuppressWarnings("restriction")
-public class UtilContentAssistProcessor
-        extends AbstractContentAssistProcessor {
+public class UtilContentAssistProcessor extends AbstractContentAssistProcessor {
 
-    private void addClassAttributeValueProposals(ContentAssistRequest request, String prefix) {
-        BeansJavaCompletionUtils.addClassValueProposals(request, prefix);
-    }
+	private void addClassAttributeValueProposals(ContentAssistRequest request, String prefix) {
+		BeansJavaCompletionUtils.addClassValueProposals(request, prefix);
+	}
 
-    private void addCollectionTypesAttributeValueProposals(ContentAssistRequest request,
-            final String prefix, String typeName) {
-        BeansJavaCompletionUtils.addTypeHierachyAttributeValueProposals(request, prefix,
-                typeName);
-    }
+	private void addCollectionTypesAttributeValueProposals(ContentAssistRequest request, final String prefix,
+			String typeName) {
+		BeansJavaCompletionUtils.addTypeHierachyAttributeValueProposals(request, prefix, typeName);
+	}
 
-    @Override
-    protected void computeAttributeNameProposals(ContentAssistRequest request, String prefix,
-            String namespace, String namespacePrefix, Node attributeNode) {
-    }
+	@Override
+	protected void computeAttributeNameProposals(ContentAssistRequest request, String prefix, String namespace,
+			String namespacePrefix, Node attributeNode) {
+	}
 
-    protected void computeAttributeValueProposals(ContentAssistRequest request, IDOMNode node,
-            String matchString, String attributeName) {
+	protected void computeAttributeValueProposals(ContentAssistRequest request, IDOMNode node, String matchString,
+			String attributeName) {
 
-        if ("list-class".equals(attributeName)) {
-            addCollectionTypesAttributeValueProposals(request, matchString, "java.util.List");
-        }
-        else if ("map-class".equals(attributeName)) {
-            addCollectionTypesAttributeValueProposals(request, matchString, "java.util.Map");
-        }
-        else if ("set-class".equals(attributeName)) {
-            addCollectionTypesAttributeValueProposals(request, matchString, "java.util.Set");
-        }
-        else if ("value-type".equals(attributeName) || "key-type".equals(attributeName)) {
-            addClassAttributeValueProposals(request, matchString);
-        }
-    }
+		if ("list-class".equals(attributeName)) {
+			addCollectionTypesAttributeValueProposals(request, matchString, "java.util.List");
+		}
+		else if ("map-class".equals(attributeName)) {
+			addCollectionTypesAttributeValueProposals(request, matchString, "java.util.Map");
+		}
+		else if ("set-class".equals(attributeName)) {
+			addCollectionTypesAttributeValueProposals(request, matchString, "java.util.Set");
+		}
+		else if ("value-type".equals(attributeName) || "key-type".equals(attributeName)) {
+			addClassAttributeValueProposals(request, matchString);
+		}
+	}
 
-    @Override
-    protected void computeTagInsertionProposals(ContentAssistRequest request, IDOMNode node) {
-    }
+	@Override
+	protected void computeTagInsertionProposals(ContentAssistRequest request, IDOMNode node) {
+	}
 }

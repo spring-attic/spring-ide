@@ -29,8 +29,7 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 	protected void addAttributeValueProposals(ContentAssistRequest request) {
 		IDOMNode node = (IDOMNode) request.getNode();
 		String namespace = node.getNamespaceURI();
-		INamespaceContentAssistProcessor processor = NamespaceUtils
-				.getContentAssistProcessor(namespace);
+		INamespaceContentAssistProcessor processor = NamespaceUtils.getContentAssistProcessor(namespace);
 		if (processor != null) {
 			processor.addAttributeValueProposals(this, request);
 		}
@@ -40,8 +39,7 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 	protected void addAttributeNameProposals(ContentAssistRequest request) {
 		IDOMNode node = (IDOMNode) request.getNode();
 		String namespace = node.getNamespaceURI();
-		INamespaceContentAssistProcessor processor = NamespaceUtils
-				.getContentAssistProcessor(namespace);
+		INamespaceContentAssistProcessor processor = NamespaceUtils.getContentAssistProcessor(namespace);
 		if (processor != null) {
 			processor.addAttributeNameProposals(this, request);
 		}
@@ -51,8 +49,7 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 	protected void addTagCloseProposals(ContentAssistRequest request) {
 		IDOMNode node = (IDOMNode) request.getNode();
 		String namespace = node.getNamespaceURI();
-		INamespaceContentAssistProcessor processor = NamespaceUtils
-				.getContentAssistProcessor(namespace);
+		INamespaceContentAssistProcessor processor = NamespaceUtils.getContentAssistProcessor(namespace);
 		if (processor != null) {
 			processor.addTagCloseProposals(this, request);
 		}
@@ -62,8 +59,7 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 	protected void addTagInsertionProposals(ContentAssistRequest request, int childPosition) {
 		IDOMNode node = (IDOMNode) request.getNode();
 		String namespace = node.getNamespaceURI();
-		INamespaceContentAssistProcessor processor = NamespaceUtils
-				.getContentAssistProcessor(namespace);
+		INamespaceContentAssistProcessor processor = NamespaceUtils.getContentAssistProcessor(namespace);
 		if (processor != null) {
 			processor.addTagInsertionProposals(this, request, childPosition);
 		}

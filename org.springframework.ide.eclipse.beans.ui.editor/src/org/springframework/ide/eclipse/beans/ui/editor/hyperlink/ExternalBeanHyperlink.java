@@ -23,33 +23,32 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class ExternalBeanHyperlink implements IHyperlink {
 
-    private final IRegion region;
+	private final IRegion region;
 
-    private final ISourceModelElement modelElement;
+	private final ISourceModelElement modelElement;
 
-    /**
-     * Creates a new Java element hyperlink.
-     */
-    public ExternalBeanHyperlink(IBean bean, IRegion region) {
-        this.region = region;
-        this.modelElement = bean;
-    }
+	/**
+	 * Creates a new Java element hyperlink.
+	 */
+	public ExternalBeanHyperlink(IBean bean, IRegion region) {
+		this.region = region;
+		this.modelElement = bean;
+	}
 
-    public IRegion getHyperlinkRegion() {
-        return this.region;
-    }
+	public IRegion getHyperlinkRegion() {
+		return this.region;
+	}
 
-    public String getTypeLabel() {
-        return null;
-    }
+	public String getTypeLabel() {
+		return null;
+	}
 
-    public String getHyperlinkText() {
-        return null;
-    }
+	public String getHyperlinkText() {
+		return null;
+	}
 
-    public void open() {
-        SpringUIUtils.openInEditor((IFile) modelElement.getElementResource(), modelElement
-                .getElementStartLine());
-    }
+	public void open() {
+		SpringUIUtils.openInEditor((IFile) modelElement.getElementResource(), modelElement.getElementStartLine());
+	}
 
 }

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor;
 
@@ -50,8 +50,8 @@ public class Activator extends AbstractUIPlugin {
 	 * Plugin identifier for Spring Beans UI (value
 	 * <code>org.springframework.ide.eclipse.beans.ui</code>).
 	 */
-	public static final String PLUGIN_ID =
-							 "org.springframework.ide.eclipse.beans.ui.editor";
+	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.beans.ui.editor";
+
 	private static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
 
 	/** Key to store our templates. */
@@ -61,9 +61,11 @@ public class Activator extends AbstractUIPlugin {
 	private static Activator plugin;
 
 	private ResourceBundle resourceBundle;
+
 	private ContextTypeRegistry contextTypeRegistry;
+
 	private TemplateStore templateStore;
-	
+
 	private BundleContext context;
 
 	/**
@@ -77,7 +79,8 @@ public class Activator extends AbstractUIPlugin {
 
 		try {
 			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);
-		} catch (MissingResourceException e) {
+		}
+		catch (MissingResourceException e) {
 			log(e);
 			resourceBundle = null;
 		}
@@ -111,7 +114,7 @@ public class Activator extends AbstractUIPlugin {
 	public ResourceBundle getResourceBundle() {
 		return resourceBundle;
 	}
-	
+
 	public BundleContext getBundleContext() {
 		return context;
 	}
@@ -128,8 +131,7 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public ContextTypeRegistry getTemplateContextRegistry() {
 		if (contextTypeRegistry == null) {
-			ContributionContextTypeRegistry registry =
-										 new ContributionContextTypeRegistry();
+			ContributionContextTypeRegistry registry = new ContributionContextTypeRegistry();
 			registry.addContextType(BeansTemplateContextTypeIds.ALL);
 			registry.addContextType(BeansTemplateContextTypeIds.PROPERTY);
 			registry.addContextType(BeansTemplateContextTypeIds.BEAN);
@@ -145,12 +147,12 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public TemplateStore getTemplateStore() {
 		if (templateStore == null) {
-			templateStore = new ContributionTemplateStore(
-							getTemplateContextRegistry(), getPreferenceStore(),
-							TEMPLATES_KEY);
+			templateStore = new ContributionTemplateStore(getTemplateContextRegistry(), getPreferenceStore(),
+					TEMPLATES_KEY);
 			try {
 				templateStore.load();
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				log(e);
 			}
 		}
@@ -160,7 +162,7 @@ public class Activator extends AbstractUIPlugin {
 	/**
 	 * Returns an image descriptor for the image file at the given plug-in
 	 * relative path.
-	 * @param path  the path of the image file
+	 * @param path the path of the image file
 	 * @return the image descriptor
 	 */
 	public static ImageDescriptor getImageDescriptor(String path) {
@@ -184,20 +186,22 @@ public class Activator extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Returns the string from the plugin's resource bundle,
-	 * or 'key' if not found.
+	 * Returns the string from the plugin's resource bundle, or 'key' if not
+	 * found.
 	 */
 	public static String getResourceString(String key) {
-	    String bundleString;
+		String bundleString;
 		ResourceBundle bundle = getDefault().getResourceBundle();
 		if (bundle != null) {
 			try {
 				bundleString = bundle.getString(key);
-			} catch (MissingResourceException e) {
-			    log(e);
+			}
+			catch (MissingResourceException e) {
+				log(e);
 				bundleString = "!" + key + "!";
 			}
-		} else {
+		}
+		else {
 			bundleString = "!" + key + "!";
 		}
 		return bundleString;
@@ -229,19 +233,18 @@ public class Activator extends AbstractUIPlugin {
 		IStatus status = createErrorStatus(message, exception);
 		getDefault().getLog().log(status);
 	}
-	
+
 	public static void log(Throwable exception) {
-		getDefault().getLog().log(createErrorStatus(
-						getResourceString("Plugin.internal_error"), exception));
+		getDefault().getLog().log(createErrorStatus(getResourceString("Plugin.internal_error"), exception));
 	}
+
 	/**
 	 * Returns a new <code>IStatus</code> for this plug-in
 	 */
-	public static IStatus createErrorStatus(String message,
-											Throwable exception) {
+	public static IStatus createErrorStatus(String message, Throwable exception) {
 		if (message == null) {
-			message= ""; 
-		}		
+			message = "";
+		}
 		return new Status(Status.ERROR, PLUGIN_ID, 0, message, exception);
 	}
 }

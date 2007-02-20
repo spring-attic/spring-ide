@@ -24,32 +24,33 @@ import org.springframework.ide.eclipse.beans.ui.editor.Activator;
  */
 public class BeanTemplatePreferencePage extends TemplatePreferencePage {
 
-    public BeanTemplatePreferencePage() {
-        Activator plugin = Activator.getDefault();
+	public BeanTemplatePreferencePage() {
+		Activator plugin = Activator.getDefault();
 
-        setPreferenceStore(plugin.getPreferenceStore());
-        setTemplateStore(plugin.getTemplateStore());
-        setContextTypeRegistry(plugin.getTemplateContextRegistry());
-        
-        setMessage(Activator.getResourceString("preferences.message"));
-    }
-//
-//	protected Control createContents(Composite ancestor) {
-//		IWorkbenchHelpSystem helpSystem = BeansEditorPlugin.getDefault()
-//				.getWorkbench().getHelpSystem();
-//		Control c = super.createContents(ancestor);
-//		helpSystem.setHelp(c, IHelpContextIds.XML_PREFWEBX_TEMPLATES_HELPID);
-//		return c;
-//	}
+		setPreferenceStore(plugin.getPreferenceStore());
+		setTemplateStore(plugin.getTemplateStore());
+		setContextTypeRegistry(plugin.getTemplateContextRegistry());
 
-    protected boolean isShowFormatterSetting() {
-        // template formatting has not been implemented
-        return false;
-    }
+		setMessage(Activator.getResourceString("preferences.message"));
+	}
 
-    public boolean performOk() {
-        boolean ok = super.performOk();
-        Activator.getDefault().savePluginPreferences();
-        return ok;
-    }
+	//
+	// protected Control createContents(Composite ancestor) {
+	// IWorkbenchHelpSystem helpSystem = BeansEditorPlugin.getDefault()
+	// .getWorkbench().getHelpSystem();
+	// Control c = super.createContents(ancestor);
+	// helpSystem.setHelp(c, IHelpContextIds.XML_PREFWEBX_TEMPLATES_HELPID);
+	// return c;
+	// }
+
+	protected boolean isShowFormatterSetting() {
+		// template formatting has not been implemented
+		return false;
+	}
+
+	public boolean performOk() {
+		boolean ok = super.performOk();
+		Activator.getDefault().savePluginPreferences();
+		return ok;
+	}
 }

@@ -24,47 +24,37 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
 
 @SuppressWarnings("restriction")
-public class LangOutlineLabelProvider
-        extends JFaceNodeLabelProvider {
+public class LangOutlineLabelProvider extends JFaceNodeLabelProvider {
 
-    public Image getImage(Object object) {
+	public Image getImage(Object object) {
+		Node node = (Node) object;
+		String nodeName = node.getLocalName();
+		if ("groovy".equals(nodeName) || "bsh".equals(nodeName) || "jruby".equals(nodeName)
+				|| "inline-script".equals(nodeName)) {
+			return LangUIImages.getImage(LangUIImages.IMG_OBJS_LANG);
+		}
+		return null;
+	}
 
-        Node node = (Node) object;
-        String prefix = node.getPrefix();
-        String nodeName = node.getNodeName();
-        if (prefix != null) {
-            nodeName = nodeName.substring(prefix.length() + 1);
-        }
+	public String getText(Object o) {
+		Node node = (Node) o;
+		String nodeName = node.getNodeName();
+		String shortNodeName = node.getLocalName();
 
-        if ("groovy".equals(nodeName) || "bsh".equals(nodeName) || "jruby".equals(nodeName)
-                || "inline-script".equals(nodeName)) {
-            return LangUIImages.getImage(LangUIImages.IMG_OBJS_LANG);
-        }
-        return null;
-    }
-
-    public String getText(Object o) {
-
-        // Create Spring beans label text
-        Node node = (Node) o;
-        String nodeName = node.getNodeName();
-        String shortNodeName = node.getLocalName();
-        
-        String text = "";
-        if ("groovy".equals(shortNodeName) || "bsh".equals(shortNodeName)
-                || "jruby".equals(shortNodeName)) {
-            text = nodeName;
-            String id = BeansEditorUtils.getAttribute(node, "id");
-            if (StringUtils.hasText(id)) {
-                text += " " + id; 
-            }
-            if (BeansContentOutlineConfiguration.isShowAttributes()) {
-                String ss = BeansEditorUtils.getAttribute(node, "script-source");
-                if (StringUtils.hasText(ss)) {
-                    text += " [" + ss + "]";
-                }
-            }
-        }
-        return text;
-    }
+		String text = null;
+		if ("groovy".equals(shortNodeName) || "bsh".equals(shortNodeName) || "jruby".equals(shortNodeName)) {
+			text = nodeName;
+			String id = BeansEditorUtils.getAttribute(node, "id");
+			if (StringUtils.hasText(id)) {
+				text += " " + id;
+			}
+			if (BeansContentOutlineConfiguration.isShowAttributes()) {
+				String ss = BeansEditorUtils.getAttribute(node, "script-source");
+				if (StringUtils.hasText(ss)) {
+					text += " [" + ss + "]";
+				}
+			}
+		}
+		return text;
+	}
 }

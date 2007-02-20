@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor.templates;
 
@@ -30,13 +30,14 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
  */
 @SuppressWarnings("restriction")
 public class BeansCustomTemplateProposal extends TemplateProposal implements IRelevanceCompletionProposal {
-    
-    public BeansCustomTemplateProposal(Template template, TemplateContext context, IRegion region, Image image, int relevance) {
-        super(template, context, region, image, relevance);
-    }
 
-    public String getAdditionalProposalInfo() {
-        String additionalInfo = super.getAdditionalProposalInfo();
-        return BeansEditorUtils.convertToHTMLContent(additionalInfo);
-    }
+	public BeansCustomTemplateProposal(Template template, TemplateContext context, IRegion region, Image image,
+			int relevance) {
+		super(template, context, region, image, relevance);
+	}
+
+	public String getAdditionalProposalInfo() {
+		String additionalInfo = super.getAdditionalProposalInfo();
+		return BeansEditorUtils.convertToHTMLContent(additionalInfo);
+	}
 }

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor;
 
@@ -26,23 +26,21 @@ import org.eclipse.wst.xml.core.internal.encoding.XMLDocumentLoader;
 import org.eclipse.wst.xml.core.internal.modelhandler.XMLModelLoader;
 
 /**
- * Provides model handling for Spring beans config files. 
+ * Provides model handling for Spring beans config files.
  */
 @SuppressWarnings("restriction")
-public class BeansModelHandler extends AbstractModelHandler
-													 implements IModelHandler {
+public class BeansModelHandler extends AbstractModelHandler implements IModelHandler {
 	/**
-	 * Needs to match what's in plugin registry. In fact, can be overwritten
-	 * at run time with what's in registry! (so should never be 'final')
+	 * Needs to match what's in plugin registry. In fact, can be overwritten at
+	 * run time with what's in registry! (so should never be 'final')
 	 */
-	private static String modelHandlerID =
-								"org.eclipse.wst.sse.core.handler.beansConfig";
+	private static String modelHandlerID = "org.eclipse.wst.sse.core.handler.beansConfig";
+
 	/**
-	 * Needs to match what's in plugin registry. In fact, can be overwritten
-	 * at run time with what's in registry! (so should never be 'final')
+	 * Needs to match what's in plugin registry. In fact, can be overwritten at
+	 * run time with what's in registry! (so should never be 'final')
 	 */
-	private static String associatedContentTypeID =
-								  Activator.PLUGIN_ID + ".beansConfig";
+	private static String associatedContentTypeID = Activator.PLUGIN_ID + ".beansConfig";
 
 	public BeansModelHandler() {
 		setId(modelHandlerID);

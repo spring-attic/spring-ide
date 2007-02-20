@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces.util;
 
 import org.eclipse.swt.graphics.Image;
@@ -23,128 +22,119 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 @SuppressWarnings("restriction")
-public class UtilOutlineLabelProvider
-        extends JFaceNodeLabelProvider {
+public class UtilOutlineLabelProvider extends JFaceNodeLabelProvider {
 
-    public Image getImage(Object object) {
+	public Image getImage(Object object) {
+		Node node = (Node) object;
+		String nodeName = node.getLocalName();
 
-        Node node = (Node) object;
-        String prefix = node.getPrefix();
-        String nodeName = node.getNodeName();
-        if (prefix != null) {
-            nodeName = nodeName.substring(prefix.length() + 1);
-        }
+		if ("properties".equals(nodeName)) {
+			return UtilUIImages.getImage(UtilUIImages.IMG_OBJS_PROPERTIES);
+		}
+		else if ("property-path".equals(nodeName)) {
+			return UtilUIImages.getImage(UtilUIImages.IMG_OBJS_PROPERTIES);
+		}
+		else if ("constant".equals(nodeName)) {
+			return UtilUIImages.getImage(UtilUIImages.IMG_OBJS_CONSTANT);
+		}
+		else if ("set".equals(nodeName)) {
+			return UtilUIImages.getImage(UtilUIImages.IMG_OBJS_SET);
+		}
+		else if ("list".equals(nodeName)) {
+			return UtilUIImages.getImage(UtilUIImages.IMG_OBJS_LIST);
+		}
+		else if ("map".equals(nodeName)) {
+			return UtilUIImages.getImage(UtilUIImages.IMG_OBJS_MAP);
+		}
+		return null;
+	}
 
-        // Root elements (alias, import and bean)
-        if ("properties".equals(nodeName)) {
-            return UtilUIImages.getImage(UtilUIImages.IMG_OBJS_PROPERTIES);
-        }
-        else if ("property-path".equals(nodeName)) {
-            return UtilUIImages.getImage(UtilUIImages.IMG_OBJS_PROPERTIES);
-        }
-        else if ("constant".equals(nodeName)) {
-            return UtilUIImages.getImage(UtilUIImages.IMG_OBJS_CONSTANT);
-        }
-        else if ("set".equals(nodeName)) {
-            return UtilUIImages.getImage(UtilUIImages.IMG_OBJS_SET);
-        }
-        else if ("list".equals(nodeName)) {
-            return UtilUIImages.getImage(UtilUIImages.IMG_OBJS_LIST);
-        }
-        else if ("map".equals(nodeName)) {
-            return UtilUIImages.getImage(UtilUIImages.IMG_OBJS_MAP);
-        }
-        return null;
-    }
+	public String getText(Object o) {
+		Node node = (Node) o;
+		NamedNodeMap attrs = node.getAttributes();
+		Node attr;
+		String nodeName = node.getNodeName();
+		String shortNodeName = node.getLocalName();
 
-    public String getText(Object o) {
-
-        // Create Spring beans label text
-        Node node = (Node) o;
-        NamedNodeMap attrs = node.getAttributes();
-        Node attr;
-        String nodeName = node.getNodeName();
-        String shortNodeName = node.getLocalName();
-
-        String text = "";
-        if ("properties".equals(shortNodeName)) {
-            text = nodeName + " ";
-            if (BeansContentOutlineConfiguration.isShowAttributes()) {
-                attr = attrs.getNamedItem("id");
-                if (attr != null) {
-                    text += attr.getNodeValue() + " ";
-                }
-                attr = attrs.getNamedItem("location");
-                if (attr != null) {
-                    text += "[" + attr.getNodeValue() + "]";
-                }
-            }
-        }
-        else if ("property-path".equals(shortNodeName)) {
-            text = nodeName + " ";
-            if (BeansContentOutlineConfiguration.isShowAttributes()) {
-                attr = attrs.getNamedItem("id");
-                if (attr != null) {
-                    text += attr.getNodeValue() + " ";
-                }
-                attr = attrs.getNamedItem("path");
-                if (attr != null) {
-                    text += "[" + attr.getNodeValue() + "]";
-                }
-            }
-        }
-        else if ("constant".equals(shortNodeName)) {
-            text = nodeName + " ";
-            if (BeansContentOutlineConfiguration.isShowAttributes()) {
-                attr = attrs.getNamedItem("id");
-                if (attr != null) {
-                    text += attr.getNodeValue() + " ";
-                }
-                attr = attrs.getNamedItem("static-field");
-                if (attr != null) {
-                    text += "[" + attr.getNodeValue() + "]";
-                }
-            }
-        }
-        else if ("set".equals(shortNodeName)) {
-            text = nodeName + " ";
-            if (BeansContentOutlineConfiguration.isShowAttributes()) {
-                attr = attrs.getNamedItem("id");
-                if (attr != null) {
-                    text += attr.getNodeValue() + " ";
-                }
-                attr = attrs.getNamedItem("set-class");
-                if (attr != null) {
-                    text += "[" + attr.getNodeValue() + "]";
-                }
-            }
-        }
-        else if ("list".equals(shortNodeName)) {
-            text = nodeName + " ";
-            if (BeansContentOutlineConfiguration.isShowAttributes()) {
-                attr = attrs.getNamedItem("id");
-                if (attr != null) {
-                    text += attr.getNodeValue() + " ";
-                }
-                attr = attrs.getNamedItem("list-class");
-                if (attr != null) {
-                    text += "[" + attr.getNodeValue() + "]";
-                }
-            }
-        }
-        else if ("map".equals(shortNodeName)) {
-            text = nodeName + " ";
-            if (BeansContentOutlineConfiguration.isShowAttributes()) {
-                attr = attrs.getNamedItem("id");
-                if (attr != null) {
-                    text += attr.getNodeValue() + " ";
-                }
-                attr = attrs.getNamedItem("map-class");
-                if (attr != null) {
-                    text += "[" + attr.getNodeValue() + "]";
-                }
-            }
-        }
-        return text;
-    }
+		String text = null;
+		if ("properties".equals(shortNodeName)) {
+			text = nodeName + " ";
+			if (BeansContentOutlineConfiguration.isShowAttributes()) {
+				attr = attrs.getNamedItem("id");
+				if (attr != null) {
+					text += attr.getNodeValue() + " ";
+				}
+				attr = attrs.getNamedItem("location");
+				if (attr != null) {
+					text += "[" + attr.getNodeValue() + "]";
+				}
+			}
+		}
+		else if ("property-path".equals(shortNodeName)) {
+			text = nodeName + " ";
+			if (BeansContentOutlineConfiguration.isShowAttributes()) {
+				attr = attrs.getNamedItem("id");
+				if (attr != null) {
+					text += attr.getNodeValue() + " ";
+				}
+				attr = attrs.getNamedItem("path");
+				if (attr != null) {
+					text += "[" + attr.getNodeValue() + "]";
+				}
+			}
+		}
+		else if ("constant".equals(shortNodeName)) {
+			text = nodeName + " ";
+			if (BeansContentOutlineConfiguration.isShowAttributes()) {
+				attr = attrs.getNamedItem("id");
+				if (attr != null) {
+					text += attr.getNodeValue() + " ";
+				}
+				attr = attrs.getNamedItem("static-field");
+				if (attr != null) {
+					text += "[" + attr.getNodeValue() + "]";
+				}
+			}
+		}
+		else if ("set".equals(shortNodeName)) {
+			text = nodeName + " ";
+			if (BeansContentOutlineConfiguration.isShowAttributes()) {
+				attr = attrs.getNamedItem("id");
+				if (attr != null) {
+					text += attr.getNodeValue() + " ";
+				}
+				attr = attrs.getNamedItem("set-class");
+				if (attr != null) {
+					text += "[" + attr.getNodeValue() + "]";
+				}
+			}
+		}
+		else if ("list".equals(shortNodeName)) {
+			text = nodeName + " ";
+			if (BeansContentOutlineConfiguration.isShowAttributes()) {
+				attr = attrs.getNamedItem("id");
+				if (attr != null) {
+					text += attr.getNodeValue() + " ";
+				}
+				attr = attrs.getNamedItem("list-class");
+				if (attr != null) {
+					text += "[" + attr.getNodeValue() + "]";
+				}
+			}
+		}
+		else if ("map".equals(shortNodeName)) {
+			text = nodeName + " ";
+			if (BeansContentOutlineConfiguration.isShowAttributes()) {
+				attr = attrs.getNamedItem("id");
+				if (attr != null) {
+					text += attr.getNodeValue() + " ";
+				}
+				attr = attrs.getNamedItem("map-class");
+				if (attr != null) {
+					text += "[" + attr.getNodeValue() + "]";
+				}
+			}
+		}
+		return text;
+	}
 }

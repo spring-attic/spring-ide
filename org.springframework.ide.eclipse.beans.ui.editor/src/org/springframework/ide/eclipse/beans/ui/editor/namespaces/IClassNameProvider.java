@@ -18,7 +18,7 @@ package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 import org.w3c.dom.Element;
 
 public interface IClassNameProvider {
-	
+
 	String getClassNameForElement(Element elem);
-	
+
 }

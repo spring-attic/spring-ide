@@ -40,13 +40,11 @@ public class NamespaceUtils {
 	}
 
 	public static INamespaceContentAssistProcessor getContentAssistProcessor(String namespaceUri) {
-		return getExecutableExtension(namespaceUri, "contentAssistProcessor",
-				INamespaceContentAssistProcessor.class);
+		return getExecutableExtension(namespaceUri, "contentAssistProcessor", INamespaceContentAssistProcessor.class);
 	}
 
 	public static IReferenceableElementsLocator getElementsLocator(String namespaceUri) {
-		return getExecutableExtension(namespaceUri, "elementLocator",
-				IReferenceableElementsLocator.class);
+		return getExecutableExtension(namespaceUri, "elementLocator", IReferenceableElementsLocator.class);
 	}
 
 	public static List<IReferenceableElementsLocator> getAllElementsLocators() {
@@ -60,7 +58,8 @@ public class NamespaceUtils {
 							locators.add(((IReferenceableElementsLocator) config
 									.createExecutableExtension("elementLocator")));
 						}
-					} catch (Exception e) {
+					}
+					catch (Exception e) {
 						BeansUIPlugin.log(e);
 					}
 				}
@@ -70,8 +69,7 @@ public class NamespaceUtils {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T> T getExecutableExtension(String namespaceUri, String attributeName,
-			Class<T> requiredType) {
+	private static <T> T getExecutableExtension(String namespaceUri, String attributeName, Class<T> requiredType) {
 		namespaceUri = checkNameSpaceUri(namespaceUri);
 		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(EXTENSION_POINT);
 		if (point != null) {
@@ -82,7 +80,8 @@ public class NamespaceUtils {
 							if (config.getAttribute(attributeName) != null) {
 								return (T) config.createExecutableExtension(attributeName);
 							}
-						} catch (Exception e) {
+						}
+						catch (Exception e) {
 							// log classcast to log file
 							Activator.log(e);
 						}

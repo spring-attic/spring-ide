@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor;
 
@@ -29,77 +29,71 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCo
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaDocUtils;
 
 @SuppressWarnings("restriction")
-public class PublicMethodSearchRequestor
-        extends MethodSearchRequestor {
+public class PublicMethodSearchRequestor extends MethodSearchRequestor {
 
-    public PublicMethodSearchRequestor(ContentAssistRequest request) {
-        super(request);
-    }
+	public PublicMethodSearchRequestor(ContentAssistRequest request) {
+		super(request);
+	}
 
-    public void acceptSearchMatch(IMethod method) throws CoreException {
-        if (Flags.isPublic(method.getFlags())
-                && !Flags.isInterface(method.getFlags()) && method.exists()
-                && ((IType) method.getParent()).isClass()
-                && !method.isConstructor()) {
-            createMethodProposal(method);
-        }
-    }
+	public void acceptSearchMatch(IMethod method) throws CoreException {
+		if (Flags.isPublic(method.getFlags()) && !Flags.isInterface(method.getFlags()) && method.exists()
+				&& ((IType) method.getParent()).isClass() && !method.isConstructor()) {
+			createMethodProposal(method);
+		}
+	}
 
-    protected void createMethodProposal(IMethod method) {
-        try {
-            String[] parameterNames = method.getParameterNames();
-            String[] parameterTypes = getParameterTypes(method);
-            String returnType = getReturnType(method, true);
-            String key = method.getElementName() + method.getSignature();
-            if (!methods.contains(key)) {
-                String methodName = method.getElementName();
-                String replaceText = methodName;
-                StringBuffer buf = new StringBuffer();
-                if (parameterTypes.length > 0 && parameterNames.length > 0) {
-                    buf.append(replaceText + "(");
-                    for (int i = 0; i < parameterTypes.length; i++) {
-                        buf.append(parameterTypes[i]);
-                        buf.append(' ');
-                        buf.append(parameterNames[i]);
-                        if (i < (parameterTypes.length - 1)) {
-                            buf.append(", ");
-                        }
-                    }
-                    buf.append(") ");
-                }
-                else {
-                    buf.append(replaceText);
-                    buf.append("() ");
-                }
+	protected void createMethodProposal(IMethod method) {
+		try {
+			String[] parameterNames = method.getParameterNames();
+			String[] parameterTypes = getParameterTypes(method);
+			String returnType = getReturnType(method, true);
+			String key = method.getElementName() + method.getSignature();
+			if (!methods.contains(key)) {
+				String methodName = method.getElementName();
+				String replaceText = methodName;
+				StringBuffer buf = new StringBuffer();
+				if (parameterTypes.length > 0 && parameterNames.length > 0) {
+					buf.append(replaceText + "(");
+					for (int i = 0; i < parameterTypes.length; i++) {
+						buf.append(parameterTypes[i]);
+						buf.append(' ');
+						buf.append(parameterNames[i]);
+						if (i < (parameterTypes.length - 1)) {
+							buf.append(", ");
+						}
+					}
+					buf.append(") ");
+				}
+				else {
+					buf.append(replaceText);
+					buf.append("() ");
+				}
 
-                if (returnType != null) {
-                    buf.append(Signature.getSimpleName(returnType));
-                    buf.append(" - ");
-                }
-                else {
-                    buf.append(" void - ");
-                }
-                buf.append(method.getParent().getElementName());
+				if (returnType != null) {
+					buf.append(Signature.getSimpleName(returnType));
+					buf.append(" - ");
+				}
+				else {
+					buf.append(" void - ");
+				}
+				buf.append(method.getParent().getElementName());
 
-                String displayText = buf.toString();
-                Image image = imageProvider.getImageLabel(method, method
-                        .getFlags()
-                        | JavaElementImageProvider.SMALL_ICONS);
-                BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
-                String javadoc = utils.getJavaDoc();
+				String displayText = buf.toString();
+				Image image = imageProvider.getImageLabel(method, method.getFlags()
+						| JavaElementImageProvider.SMALL_ICONS);
+				BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
+				String javadoc = utils.getJavaDoc();
 
-                BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-                        replaceText, request.getReplacementBeginPosition(),
-                        request.getReplacementLength(), replaceText.length(),
-                        image, displayText, null, javadoc,
-                        MethodSearchRequestor.METHOD_RELEVANCE);
+				BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(replaceText, request
+						.getReplacementBeginPosition(), request.getReplacementLength(), replaceText.length(), image,
+						displayText, null, javadoc, MethodSearchRequestor.METHOD_RELEVANCE);
 
-                request.addProposal(proposal);
-                methods.add(method.getSignature());
-            }
-        }
-        catch (JavaModelException e) {
-            // do nothing
-        }
-    }
+				request.addProposal(proposal);
+				methods.add(method.getSignature());
+			}
+		}
+		catch (JavaModelException e) {
+			// do nothing
+		}
+	}
 }

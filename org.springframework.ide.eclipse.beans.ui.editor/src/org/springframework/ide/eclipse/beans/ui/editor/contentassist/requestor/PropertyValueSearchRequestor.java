@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor;
 
@@ -41,27 +41,22 @@ public class PropertyValueSearchRequestor {
 
 	protected Map<String, IMethod> methods;
 
-    protected ContentAssistRequest request;
+	protected ContentAssistRequest request;
 
 	private String prefix;
-    
-	public PropertyValueSearchRequestor(ContentAssistRequest request,
-			String prefix) {
+
+	public PropertyValueSearchRequestor(ContentAssistRequest request, String prefix) {
 		this.request = request;
 		this.methods = new HashMap<String, IMethod>();
 		this.imageProvider = new JavaElementImageProvider();
 		this.prefix = prefix;
 	}
 
-	public void acceptSearchMatch(IMethod method, boolean external)
-			throws CoreException {
+	public void acceptSearchMatch(IMethod method, boolean external) throws CoreException {
 		int parameterCount = method.getNumberOfParameters();
 		String returnType = method.getReturnType();
-		if (Flags.isPublic(method.getFlags())
-				&& !Flags.isInterface(method.getFlags())
-				&& parameterCount == 1 && "V".equals(returnType)
-				&& method.exists()
-				&& ((IType) method.getParent()).isClass()
+		if (Flags.isPublic(method.getFlags()) && !Flags.isInterface(method.getFlags()) && parameterCount == 1
+				&& "V".equals(returnType) && method.exists() && ((IType) method.getParent()).isClass()
 				&& !method.isConstructor()) {
 			createMethodProposal(method, external);
 		}
@@ -87,55 +82,48 @@ public class PropertyValueSearchRequestor {
 				buf.append(parameterNames[0]);
 				buf.append(')');
 				String displayText = buf.toString();
-				Image image = imageProvider.getImageLabel(method, method
-						.getFlags()
+				Image image = imageProvider.getImageLabel(method, method.getFlags()
 						| JavaElementImageProvider.SMALL_ICONS);
 				if (external) {
-					image = BeansModelImages.getDecoratedImage(image,
-							BeansModelImages.FLAG_EXTERNAL);
+					image = BeansModelImages.getDecoratedImage(image, BeansModelImages.FLAG_EXTERNAL);
 				}
 				BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
 				String javadoc = utils.getJavaDoc();
 
-				BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-						replaceText, request.getReplacementBeginPosition(),
-						request.getReplacementLength(), replaceText
-								.length(), image, displayText, null,
-						javadoc,
-						PropertyValueSearchRequestor.METHOD_RELEVANCE);
+				BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(replaceText, request
+						.getReplacementBeginPosition(), request.getReplacementLength(), replaceText.length(), image,
+						displayText, null, javadoc, PropertyValueSearchRequestor.METHOD_RELEVANCE);
 
 				request.addProposal(proposal);
 				methods.put(key, method);
 			}
-		} catch (JavaModelException e) {
+		}
+		catch (JavaModelException e) {
 			// do nothing
 		}
 	}
 
 	protected String[] getParameterTypes(IMethod method) {
 		try {
-			String[] parameterQualifiedTypes = Signature
-					.getParameterTypes(method.getSignature());
-			int length = parameterQualifiedTypes == null ? 0
-					: parameterQualifiedTypes.length;
+			String[] parameterQualifiedTypes = Signature.getParameterTypes(method.getSignature());
+			int length = parameterQualifiedTypes == null ? 0 : parameterQualifiedTypes.length;
 			String[] parameterPackages = new String[length];
 			for (int i = 0; i < length; i++) {
-				parameterQualifiedTypes[i] = parameterQualifiedTypes[i]
-						.replace('/', '.');
-				parameterPackages[i] = Signature
-						.getSignatureSimpleName(parameterQualifiedTypes[i]);
+				parameterQualifiedTypes[i] = parameterQualifiedTypes[i].replace('/', '.');
+				parameterPackages[i] = Signature.getSignatureSimpleName(parameterQualifiedTypes[i]);
 			}
 
 			return parameterPackages;
-		} catch (IllegalArgumentException e) {
-		} catch (JavaModelException e) {
+		}
+		catch (IllegalArgumentException e) {
+		}
+		catch (JavaModelException e) {
 		}
 		return null;
 	}
 
 	protected String getPropertyNameFromMethodName(IMethod method) {
-		String replaceText = method.getElementName().substring(
-				"set".length(), method.getElementName().length());
+		String replaceText = method.getElementName().substring("set".length(), method.getElementName().length());
 		if (replaceText != null) {
 			char c = replaceText.charAt(0);
 			replaceText = replaceText.substring(1, replaceText.length());
@@ -146,22 +134,22 @@ public class PropertyValueSearchRequestor {
 
 	protected String getReturnType(IMethod method) {
 		try {
-			String parameterQualifiedTypes = Signature.getReturnType(method
-					.getSignature());
+			String parameterQualifiedTypes = Signature.getReturnType(method.getSignature());
 			IType type = (IType) method.getParent();
-			String tempString = Signature
-					.getSignatureSimpleName(parameterQualifiedTypes);
+			String tempString = Signature.getSignatureSimpleName(parameterQualifiedTypes);
 			String[][] parameterPackages = type.resolveType(tempString);
 			if (parameterPackages != null) {
 				if (parameterPackages[0][0].length() > 0) {
-					return parameterPackages[0][0] + "."
-							+ parameterPackages[0][1];
-				} else {
+					return parameterPackages[0][0] + "." + parameterPackages[0][1];
+				}
+				else {
 					return parameterPackages[0][1];
 				}
 			}
-		} catch (IllegalArgumentException e) {
-		} catch (JavaModelException e) {
+		}
+		catch (IllegalArgumentException e) {
+		}
+		catch (JavaModelException e) {
 		}
 		return null;
 	}

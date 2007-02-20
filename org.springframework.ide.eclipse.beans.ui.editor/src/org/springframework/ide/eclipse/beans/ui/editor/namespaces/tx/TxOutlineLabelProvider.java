@@ -24,42 +24,34 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
 
 @SuppressWarnings("restriction")
-public class TxOutlineLabelProvider
-        extends JFaceNodeLabelProvider {
+public class TxOutlineLabelProvider extends JFaceNodeLabelProvider {
 
-    public Image getImage(Object object) {
+	public Image getImage(Object object) {
+		Node node = (Node) object;
+		String nodeName = node.getLocalName();
+		if ("advice".equals(nodeName) || "annotation-driven".equals(nodeName)) {
+			return TxUIImages.getImage(TxUIImages.IMG_OBJS_TX);
+		}
+		return null;
+	}
 
-        Node node = (Node) object;
-        String prefix = node.getPrefix();
-        String nodeName = node.getNodeName();
-        if (prefix != null) {
-            nodeName = nodeName.substring(prefix.length() + 1);
-        }
-        if ("advice".equals(nodeName) || "annotation-driven".equals(nodeName)) {
-            return TxUIImages.getImage(TxUIImages.IMG_OBJS_TX);
-        }
-        return null;
-    }
+	public String getText(Object o) {
+		Node node = (Node) o;
+		String nodeName = node.getNodeName();
+		String shortNodeName = node.getLocalName();
 
-    public String getText(Object o) {
-
-        // Create Spring beans label text
-        Node node = (Node) o;
-        String nodeName = node.getNodeName();
-        String shortNodeName = node.getLocalName();
-        
-        String text = null;
-        if ("advice".equals(shortNodeName) || "annotation-driven".equals(shortNodeName)) {
-            text = nodeName;
-            String id = BeansEditorUtils.getAttribute(node, "id");
-            if (StringUtils.hasText(id)) {
-                text += " " + id; 
-            }
-            if (BeansContentOutlineConfiguration.isShowAttributes()
-                    && BeansEditorUtils.hasAttribute(node, "transaction-manager")) {
-                text += " <" + BeansEditorUtils.getAttribute(node, "transaction-manager") + ">";
-            }
-        }
-        return text;
-    }
+		String text = null;
+		if ("advice".equals(shortNodeName) || "annotation-driven".equals(shortNodeName)) {
+			text = nodeName;
+			String id = BeansEditorUtils.getAttribute(node, "id");
+			if (StringUtils.hasText(id)) {
+				text += " " + id;
+			}
+			if (BeansContentOutlineConfiguration.isShowAttributes()
+					&& BeansEditorUtils.hasAttribute(node, "transaction-manager")) {
+				text += " <" + BeansEditorUtils.getAttribute(node, "transaction-manager") + ">";
+			}
+		}
+		return text;
+	}
 }

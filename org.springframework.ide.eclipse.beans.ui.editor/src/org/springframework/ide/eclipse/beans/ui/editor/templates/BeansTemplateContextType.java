@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor.templates;
 
@@ -25,14 +25,14 @@ import org.eclipse.jface.text.templates.TemplateContextType;
  */
 public class BeansTemplateContextType extends TemplateContextType {
 
-    public BeansTemplateContextType() {
-        addResolver(new GlobalTemplateVariables.Cursor());
-        addResolver(new GlobalTemplateVariables.Date());
-        addResolver(new GlobalTemplateVariables.Dollar());
-        addResolver(new GlobalTemplateVariables.LineSelection());
-        addResolver(new GlobalTemplateVariables.Time());
-        addResolver(new GlobalTemplateVariables.User());
-        addResolver(new GlobalTemplateVariables.WordSelection());
-        addResolver(new GlobalTemplateVariables.Year());
-    }
+	public BeansTemplateContextType() {
+		addResolver(new GlobalTemplateVariables.Cursor());
+		addResolver(new GlobalTemplateVariables.Date());
+		addResolver(new GlobalTemplateVariables.Dollar());
+		addResolver(new GlobalTemplateVariables.LineSelection());
+		addResolver(new GlobalTemplateVariables.Time());
+		addResolver(new GlobalTemplateVariables.User());
+		addResolver(new GlobalTemplateVariables.WordSelection());
+		addResolver(new GlobalTemplateVariables.Year());
+	}
 }

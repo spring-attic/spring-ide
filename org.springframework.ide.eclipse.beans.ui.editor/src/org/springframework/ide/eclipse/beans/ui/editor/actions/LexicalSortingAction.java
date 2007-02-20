@@ -34,8 +34,7 @@ public class LexicalSortingAction extends Action {
 		this.viewer = viewer;
 		setText(Activator.getResourceString(PREFIX + "label"));
 		BeansUIImages.setLocalImageDescriptors(this, "alphab_sort_co.gif");
-		Preferences prefs = Activator.getDefault()
-				.getPluginPreferences();
+		Preferences prefs = Activator.getDefault().getPluginPreferences();
 		boolean checked = prefs.getBoolean(IPreferencesConstants.OUTLINE_SORT);
 		update(checked, false);
 	}
@@ -46,17 +45,14 @@ public class LexicalSortingAction extends Action {
 
 	public void update(boolean value, boolean doStore) {
 		setChecked(value);
-		Preferences prefs = Activator.getDefault()
-				.getPluginPreferences();
+		Preferences prefs = Activator.getDefault().getPluginPreferences();
 		boolean spring = prefs.getBoolean(IPreferencesConstants.OUTLINE_SPRING);
 		if (spring) {
 			viewer.setSorter(value ? new OutlineSorter() : null);
 		}
-		setToolTipText(value ? Activator.getResourceString(PREFIX
-				+ "tooltip.checked") : Activator
+		setToolTipText(value ? Activator.getResourceString(PREFIX + "tooltip.checked") : Activator
 				.getResourceString(PREFIX + "tooltip.unchecked"));
-		setDescription(value ? Activator.getResourceString(PREFIX
-				+ "description.checked") : Activator
+		setDescription(value ? Activator.getResourceString(PREFIX + "description.checked") : Activator
 				.getResourceString(PREFIX + "description.unchecked"));
 		if (doStore) {
 			prefs.setValue(IPreferencesConstants.OUTLINE_SORT, value);

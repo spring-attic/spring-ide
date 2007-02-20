@@ -18,37 +18,39 @@ import org.eclipse.jdt.core.WorkingCopyOwner;
 
 public class CompilationUnitHelper {
 
-    private CompilationProblemRequestor fProblemRequestor = null;
-    private WorkingCopyOwner fWorkingCopyOwner = null;
-    private static CompilationUnitHelper instance;
+	private CompilationProblemRequestor fProblemRequestor = null;
 
-    private CompilationUnitHelper() {
-        // force use of instance
-    }
+	private WorkingCopyOwner fWorkingCopyOwner = null;
 
-    public synchronized static final CompilationUnitHelper getInstance() {
+	private static CompilationUnitHelper instance;
 
-        if (instance == null)
-            instance = new CompilationUnitHelper();
-        return instance;
-    }
+	private CompilationUnitHelper() {
+		// force use of instance
+	}
 
-    public CompilationProblemRequestor getProblemRequestor() {
+	public synchronized static final CompilationUnitHelper getInstance() {
 
-        if (fProblemRequestor == null)
-            fProblemRequestor = new CompilationProblemRequestor();
-        return fProblemRequestor;
-    }
+		if (instance == null)
+			instance = new CompilationUnitHelper();
+		return instance;
+	}
 
-    public WorkingCopyOwner getWorkingCopyOwner() {
+	public CompilationProblemRequestor getProblemRequestor() {
 
-        if (fWorkingCopyOwner == null) {
-            fWorkingCopyOwner = new WorkingCopyOwner() {
-                public String toString() {
-                    return "Spring Beans IDE Working copy owner"; //$NON-NLS-1$
-                }
-            };
-        }
-        return fWorkingCopyOwner;
-    }
+		if (fProblemRequestor == null)
+			fProblemRequestor = new CompilationProblemRequestor();
+		return fProblemRequestor;
+	}
+
+	public WorkingCopyOwner getWorkingCopyOwner() {
+
+		if (fWorkingCopyOwner == null) {
+			fWorkingCopyOwner = new WorkingCopyOwner() {
+				public String toString() {
+					return "Spring Beans IDE Working copy owner"; //$NON-NLS-1$
+				}
+			};
+		}
+		return fWorkingCopyOwner;
+	}
 }

@@ -24,20 +24,18 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class BeansReferenceableElementsLocator implements
-        IReferenceableElementsLocator {
+public class BeansReferenceableElementsLocator implements IReferenceableElementsLocator {
 
-    public Map<String, Node> getReferenceableElements(Document document) {
-        Map<String, Node> nodes = new HashMap<String, Node>();
-        NodeList childNodes = document.getDocumentElement().getChildNodes();
+	public Map<String, Node> getReferenceableElements(Document document) {
+		Map<String, Node> nodes = new HashMap<String, Node>();
+		NodeList childNodes = document.getDocumentElement().getChildNodes();
 
-        for (int i = 0; i < childNodes.getLength(); i++) {
-            Node node = childNodes.item(i);
-            if ("bean".equals(node.getNodeName())
-                    && BeansEditorUtils.hasAttribute(node, "id")) {
-                nodes.put(BeansEditorUtils.getAttribute(node, "id"), node);
-            }
-        }
-        return nodes;
-    }
+		for (int i = 0; i < childNodes.getLength(); i++) {
+			Node node = childNodes.item(i);
+			if ("bean".equals(node.getNodeName()) && BeansEditorUtils.hasAttribute(node, "id")) {
+				nodes.put(BeansEditorUtils.getAttribute(node, "id"), node);
+			}
+		}
+		return nodes;
+	}
 }

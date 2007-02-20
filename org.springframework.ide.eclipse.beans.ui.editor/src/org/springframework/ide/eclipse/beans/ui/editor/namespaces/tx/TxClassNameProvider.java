@@ -22,16 +22,15 @@ import org.springframework.ide.eclipse.beans.ui.editor.namespaces.IClassNameProv
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 import org.w3c.dom.Element;
 
-public class TxClassNameProvider implements
-		IClassNameProvider {
+public class TxClassNameProvider implements IClassNameProvider {
 
 	private static Map<String, String> elementToClassNameMapping;
-	
+
 	static {
 		elementToClassNameMapping = new HashMap<String, String>();
 		elementToClassNameMapping.put("advice", TransactionInterceptor.class.getName());
 	}
-	
+
 	public String getClassNameForElement(Element elem) {
 		return elementToClassNameMapping.get(elem.getLocalName());
 	}

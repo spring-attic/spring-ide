@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.editor.actions;
 
@@ -31,13 +31,10 @@ public class OutlineStyleAction extends Action {
 	private TreeViewer viewer;
 
 	public OutlineStyleAction(TreeViewer viewer) {
-		super(Activator.getResourceString(PREFIX + "label"),
-				AS_CHECK_BOX);
+		super(Activator.getResourceString(PREFIX + "label"), AS_CHECK_BOX);
 		this.viewer = viewer;
-		Preferences prefs = Activator.getDefault()
-				.getPluginPreferences();
-		boolean checked = prefs
-				.getBoolean(IPreferencesConstants.OUTLINE_SPRING);
+		Preferences prefs = Activator.getDefault().getPluginPreferences();
+		boolean checked = prefs.getBoolean(IPreferencesConstants.OUTLINE_SPRING);
 		update(checked, false);
 		setImageDescriptor(BeansUIImages.DESC_OBJS_SPRING);
 	}
@@ -48,17 +45,14 @@ public class OutlineStyleAction extends Action {
 
 	public void update(boolean value, boolean doStore) {
 		setChecked(value);
-		Preferences prefs = Activator.getDefault()
-				.getPluginPreferences();
+		Preferences prefs = Activator.getDefault().getPluginPreferences();
 		boolean sort = prefs.getBoolean(IPreferencesConstants.OUTLINE_SORT);
 		if (sort) {
 			viewer.setSorter(value ? new OutlineSorter() : null);
 		}
-		setToolTipText(value ? Activator.getResourceString(PREFIX
-				+ "tooltip.checked") : Activator
+		setToolTipText(value ? Activator.getResourceString(PREFIX + "tooltip.checked") : Activator
 				.getResourceString(PREFIX + "tooltip.unchecked"));
-		setDescription(value ? Activator.getResourceString(PREFIX
-				+ "description.checked") : Activator
+		setDescription(value ? Activator.getResourceString(PREFIX + "description.checked") : Activator
 				.getResourceString(PREFIX + "description.unchecked"));
 		if (doStore) {
 			prefs.setValue(IPreferencesConstants.OUTLINE_SPRING, value);

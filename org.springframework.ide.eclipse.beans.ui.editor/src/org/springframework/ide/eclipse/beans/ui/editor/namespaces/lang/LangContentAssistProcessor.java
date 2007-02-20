@@ -34,60 +34,57 @@ import org.w3c.dom.Node;
  * @author Christian Dupuis
  */
 @SuppressWarnings("restriction")
-public class LangContentAssistProcessor
-        extends AbstractContentAssistProcessor {
+public class LangContentAssistProcessor extends AbstractContentAssistProcessor {
 
-    private void addInterfaceAttributeValueProposals(ContentAssistRequest request, String prefix) {
-        BeansJavaCompletionUtils.addClassValueProposals(request, prefix, true);
-    }
+	private void addInterfaceAttributeValueProposals(ContentAssistRequest request, String prefix) {
+		BeansJavaCompletionUtils.addClassValueProposals(request, prefix, true);
+	}
 
-    private void addBeanReferenceProposals(ContentAssistRequest request, String prefix, Node node,
-            boolean showExternal) {
-        if (prefix == null) {
-            prefix = "";
-        }
+	private void addBeanReferenceProposals(ContentAssistRequest request, String prefix, Node node, boolean showExternal) {
+		if (prefix == null) {
+			prefix = "";
+		}
 
-        IFile file = (IFile) BeansEditorUtils.getResource(request);
-        if (node.getOwnerDocument() != null) {
-            BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(request,
-                    BeansJavaCompletionUtils.getPropertyTypes(node, file.getProject()));
-            Map<String, Node> beanNodes = BeansEditorUtils.getReferenceableNodes(node
-                    .getOwnerDocument());
-            for (Map.Entry<String, Node> n : beanNodes.entrySet()) {
-                Node beanNode = n.getValue();
-                requestor.acceptSearchMatch(n.getKey(), beanNode, file, prefix);
-            }
-            if (showExternal) {
-                List<?> beans = BeansEditorUtils.getBeansFromConfigSets(file);
-                for (int i = 0; i < beans.size(); i++) {
-                    IBean bean = (IBean) beans.get(i);
-                    requestor.acceptSearchMatch(bean, file, prefix);
-                }
-            }
-        }
-    }
+		IFile file = (IFile) BeansEditorUtils.getResource(request);
+		if (node.getOwnerDocument() != null) {
+			BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(request, BeansJavaCompletionUtils
+					.getPropertyTypes(node, file.getProject()));
+			Map<String, Node> beanNodes = BeansEditorUtils.getReferenceableNodes(node.getOwnerDocument());
+			for (Map.Entry<String, Node> n : beanNodes.entrySet()) {
+				Node beanNode = n.getValue();
+				requestor.acceptSearchMatch(n.getKey(), beanNode, file, prefix);
+			}
+			if (showExternal) {
+				List<?> beans = BeansEditorUtils.getBeansFromConfigSets(file);
+				for (int i = 0; i < beans.size(); i++) {
+					IBean bean = (IBean) beans.get(i);
+					requestor.acceptSearchMatch(bean, file, prefix);
+				}
+			}
+		}
+	}
 
-    @Override
-    protected void computeAttributeNameProposals(ContentAssistRequest request, String prefix,
-            String namespace, String namespacePrefix, Node attributeNode) {
-    }
+	@Override
+	protected void computeAttributeNameProposals(ContentAssistRequest request, String prefix, String namespace,
+			String namespacePrefix, Node attributeNode) {
+	}
 
-    protected void computeAttributeValueProposals(ContentAssistRequest request, IDOMNode node,
-            String matchString, String attributeName) {
+	protected void computeAttributeValueProposals(ContentAssistRequest request, IDOMNode node, String matchString,
+			String attributeName) {
 
-        if ("jruby".equals(node.getLocalName()) || "bsh".equals(node.getLocalName())) {
-            if ("script-interfaces".equals(attributeName)) {
-                addInterfaceAttributeValueProposals(request, matchString);
-            }
-        }
-        else if ("groovy".equals(node.getLocalName())) {
-            if ("customizer-ref".equals(attributeName)) {
-                addBeanReferenceProposals(request, matchString, node, true);
-            }
-        }
-    }
+		if ("jruby".equals(node.getLocalName()) || "bsh".equals(node.getLocalName())) {
+			if ("script-interfaces".equals(attributeName)) {
+				addInterfaceAttributeValueProposals(request, matchString);
+			}
+		}
+		else if ("groovy".equals(node.getLocalName())) {
+			if ("customizer-ref".equals(attributeName)) {
+				addBeanReferenceProposals(request, matchString, node, true);
+			}
+		}
+	}
 
-    @Override
-    protected void computeTagInsertionProposals(ContentAssistRequest request, IDOMNode node) {
-    }
+	@Override
+	protected void computeTagInsertionProposals(ContentAssistRequest request, IDOMNode node) {
+	}
 }

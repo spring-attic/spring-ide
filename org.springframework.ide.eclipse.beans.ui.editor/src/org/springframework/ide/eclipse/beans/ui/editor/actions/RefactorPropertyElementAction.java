@@ -44,25 +44,21 @@ import org.w3c.dom.NodeList;
  * @author Christian Dupuis
  */
 @SuppressWarnings("restriction")
-public class RefactorPropertyElementAction extends
-		AbstractBeansConfigEditorAction {
+public class RefactorPropertyElementAction extends AbstractBeansConfigEditorAction {
 
-    void processAction(IDocument document, ITextSelection textSelection) {
-		IStructuredModel model = StructuredModelManager.getModelManager()
-				.getExistingModelForEdit(document);
+	void processAction(IDocument document, ITextSelection textSelection) {
+		IStructuredModel model = StructuredModelManager.getModelManager().getExistingModelForEdit(document);
 		if (model != null) {
-			IndexedRegion region = model.getIndexedRegion(textSelection
-					.getOffset());
+			IndexedRegion region = model.getIndexedRegion(textSelection.getOffset());
 			if (region instanceof Element) {
 				Element elem = (Element) region;
 
 				if (elem.getOwnerDocument() instanceof IDOMDocument) {
 
-					if ("property".equals(elem.getTagName())
-							|| "constructor-arg".equals(elem.getTagName())) {
+					if ("property".equals(elem.getTagName()) || "constructor-arg".equals(elem.getTagName())) {
 						processNode(model, elem);
-					} else if ("ref".equals(elem.getTagName())
-							|| "value".equals(elem.getTagName())) {
+					}
+					else if ("ref".equals(elem.getTagName()) || "value".equals(elem.getTagName())) {
 						processNode(model, (Element) elem.getParentNode());
 					}
 				}
@@ -84,16 +80,13 @@ public class RefactorPropertyElementAction extends
 						NamedNodeMap attributes = valueElement.getAttributes();
 						if (attributes != null) {
 							if (attributes.getNamedItem("bean") != null) {
-								beanRef = attributes.getNamedItem("bean")
-										.getNodeValue();
+								beanRef = attributes.getNamedItem("bean").getNodeValue();
 							}
 							if (attributes.getNamedItem("parent") != null) {
-								beanRef = attributes.getNamedItem("parent")
-										.getNodeValue();
+								beanRef = attributes.getNamedItem("parent").getNodeValue();
 							}
 							if (attributes.getNamedItem("local") != null) {
-								beanRef = attributes.getNamedItem("local")
-										.getNodeValue();
+								beanRef = attributes.getNamedItem("local").getNodeValue();
 							}
 							if (beanRef != null) {
 								elem.setAttribute("ref", beanRef);
@@ -103,11 +96,11 @@ public class RefactorPropertyElementAction extends
 							}
 						}
 
-					} else if ("value".equals(valueElement.getNodeName())) {
+					}
+					else if ("value".equals(valueElement.getNodeName())) {
 
 						if (valueElement.getFirstChild() != null) {
-							String value = valueElement.getFirstChild()
-									.getNodeValue();
+							String value = valueElement.getFirstChild().getNodeValue();
 							if (value != null) {
 								elem.setAttribute("value", value);
 								elem.removeChild(valueElement);
@@ -124,20 +117,21 @@ public class RefactorPropertyElementAction extends
 				if (elem.hasAttribute("ref")) {
 					String beanRef = elem.getAttribute("ref");
 					if (beanRef != null) {
-						Element refElem = elem.getOwnerDocument()
-								.createElement("ref");
+						Element refElem = elem.getOwnerDocument().createElement("ref");
 						refElem.setAttribute("bean", beanRef);
 						elem.appendChild(refElem);
 						elem.removeAttribute("ref");
 						removeTextChildren(elem);
 						formatElement(elem);
 					}
-				} else if (elem.hasAttribute("value")) {
+				}
+				else if (elem.hasAttribute("value")) {
 
 				}
 			}
 
-		} finally {
+		}
+		finally {
 			model.changedModel();
 			model.endRecording(this);
 			model.releaseFromEdit();
@@ -162,8 +156,7 @@ public class RefactorPropertyElementAction extends
 	}
 
 	public void run(IAction action) {
-		IDocument document = getTextEditor().getDocumentProvider().getDocument(
-				getTextEditor().getEditorInput());
+		IDocument document = getTextEditor().getDocumentProvider().getDocument(getTextEditor().getEditorInput());
 		if (document != null) {
 			// get current text selection
 			ITextSelection textSelection = getCurrentSelection();
@@ -204,18 +197,17 @@ public class RefactorPropertyElementAction extends
 				Object obj = structSelection.getFirstElement();
 				if (obj instanceof Element) {
 					Element elem = (Element) obj;
-					if ("property".equals(elem.getTagName())
-							|| "constructor-arg".equals(elem.getTagName())) {
+					if ("property".equals(elem.getTagName()) || "constructor-arg".equals(elem.getTagName())) {
 						NodeList children = elem.getChildNodes();
 
 						for (int i = 0; i < children.getLength(); i++) {
 							Node child = children.item(i);
 							if (child != null) {
-								if ("value".equals(child.getNodeName())
-										|| "ref".equals(child.getNodeName())) {
+								if ("value".equals(child.getNodeName()) || "ref".equals(child.getNodeName())) {
 									enabled = true;
 								}
-							} else {
+							}
+							else {
 								enabled = true;
 							}
 						}
@@ -223,11 +215,10 @@ public class RefactorPropertyElementAction extends
 						if (children.getLength() == 0) {
 							enabled = true;
 						}
-					} else if (("ref".equals(elem.getTagName()) || "value"
-							.equals(elem.getTagName()))
-							&& ("property".equals(elem.getParentNode()
-									.getNodeName()) || "constructor-arg"
-									.equals(elem.getParentNode().getNodeName()))) {
+					}
+					else if (("ref".equals(elem.getTagName()) || "value".equals(elem.getTagName()))
+							&& ("property".equals(elem.getParentNode().getNodeName()) || "constructor-arg".equals(elem
+									.getParentNode().getNodeName()))) {
 						enabled = true;
 					}
 				}
