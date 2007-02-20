@@ -205,7 +205,7 @@
         	labelProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.util.UtilOutlineLabelProvider"
         	name="Spring Util"
         	uri="http://www.springframework.org/schema/util"/>
-		<namespace
+		<namespace  
         	classNameProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.tx.TxClassNameProvider"
 	        contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.namespaces.tx.TxContentAssistProcessor"
     	    elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
@@ -220,6 +220,13 @@
 	        labelProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.jee.JeeOutlineLabelProvider"
     	    name="Spring Jee"
         	uri="http://www.springframework.org/schema/jee"/>
+		<namespace
+	        contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.namespaces.lang.LangContentAssistProcessor"
+       	    elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
+        	hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.namespaces.lang.LangHyperLinkDetector"
+	        labelProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.lang.LangOutlineLabelProvider"
+    	    name="Spring Lang"
+        	uri="http://www.springframework.org/schema/lang"/>
 
    </extension>
 

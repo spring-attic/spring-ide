@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 
+@SuppressWarnings("restriction")
 public abstract class MethodSearchRequestor {
 
     public static final int METHOD_RELEVANCE = 10;

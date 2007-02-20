@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaDocUtils;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
 
+@SuppressWarnings("restriction")
 public class PropertyNameSearchRequestor {
 
     public static final int METHOD_RELEVANCE = 10;

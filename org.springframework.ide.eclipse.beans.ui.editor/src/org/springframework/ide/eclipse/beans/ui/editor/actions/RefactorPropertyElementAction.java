@@ -43,10 +43,11 @@ import org.w3c.dom.NodeList;
  * 
  * @author Christian Dupuis
  */
+@SuppressWarnings("restriction")
 public class RefactorPropertyElementAction extends
 		AbstractBeansConfigEditorAction {
 
-	void processAction(IDocument document, ITextSelection textSelection) {
+    void processAction(IDocument document, ITextSelection textSelection) {
 		IStructuredModel model = StructuredModelManager.getModelManager()
 				.getExistingModelForEdit(document);
 		if (model != null) {

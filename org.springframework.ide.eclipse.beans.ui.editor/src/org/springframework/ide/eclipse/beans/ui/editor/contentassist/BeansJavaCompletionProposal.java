@@ -35,6 +35,7 @@ import org.eclipse.wst.sse.ui.internal.contentassist.IRelevanceConstants;
  * An implementation of ICompletionProposal whose values can be read after
  * creation.
  */
+@SuppressWarnings("restriction")
 public class BeansJavaCompletionProposal implements ICompletionProposal,
 		ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension4,
 		IRelevanceCompletionProposal {

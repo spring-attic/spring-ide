@@ -58,6 +58,7 @@ import org.w3c.dom.Node;
  * 
  * @author Christian Dupuis
  */
+@SuppressWarnings("restriction")
 public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 		ITextHover {
 
