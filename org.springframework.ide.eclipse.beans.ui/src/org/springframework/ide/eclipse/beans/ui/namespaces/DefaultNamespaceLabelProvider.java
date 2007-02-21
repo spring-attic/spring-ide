@@ -22,6 +22,7 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.ViewerLabel;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.navigator.IDescriptionProvider;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -76,6 +77,13 @@ public class DefaultNamespaceLabelProvider extends LabelProvider implements
 
 	protected Image getImage(ISourceModelElement element,
 			IModelElement context) {
+		if (element instanceof IBean
+				&& !NamespaceUtils.getNameSpaceURI(element).equals(
+						NamespaceUtils.DEFAULT_NAMESPACE_URI)) {
+			return BeansModelImages.getDecoratedImage(BeansUIImages
+					.getImage(BeansUIImages.IMG_OBJS_NAMESPACE), element,
+					context);
+		}
 		return BeansModelImages.getImage(element, context);
 	}
 

@@ -96,6 +96,7 @@ public class BeansUIImages {
 	public static final String IMG_OBJS_SPRING = NAME_PREFIX + "spring_obj.gif";
 	public static final String IMG_OBJS_ERROR = NAME_PREFIX + "error_obj.gif";
 	public static final String IMG_OBJS_REFERENCE = NAME_PREFIX + "arrow_obj.gif";
+	public static final String IMG_OBJS_NAMESPACE = NAME_PREFIX + "namespace_obj.gif";
 	public static final String IMG_OBJS_AOP_CONFIG = NAME_PREFIX + "aop_config_obj.gif";
     public static final String IMG_OBJS_ASPECT = NAME_PREFIX + "aspect_obj.gif";
     public static final String IMG_OBJS_ADVICE = NAME_PREFIX + "advice_obj.gif";
@@ -104,6 +105,10 @@ public class BeansUIImages {
     public static final String IMG_OBJS_AFTER_ADVICE = NAME_PREFIX + "after_advice_obj.gif";
     public static final String IMG_OBJS_INTRODUCTION = NAME_PREFIX + "introduction_obj.gif";
     public static final String IMG_OBJS_POINTCUT = NAME_PREFIX + "pointcut_obj.gif";
+    public static final String IMG_OBJS_SCRIPT = NAME_PREFIX + "script_obj.gif";
+    public static final String IMG_OBJS_TX = NAME_PREFIX + "tx_obj.gif";
+    public static final String IMG_OBJS_EJB = NAME_PREFIX + "ejb_obj.gif";
+    public static final String IMG_OBJS_PROPERTIES = NAME_PREFIX + "properties_obj.gif";
 
 	public static final String IMG_WIZ_PROJECT = NAME_PREFIX + "project_wiz.png";
 	public static final String IMG_WIZ_CONFIG = NAME_PREFIX + "config_wiz.png";
@@ -128,6 +133,7 @@ public class BeansUIImages {
 	public static final ImageDescriptor DESC_OBJS_SPRING = createManaged(OBJECT, IMG_OBJS_SPRING);
 	public static final ImageDescriptor DESC_OBJS_ERROR = createManaged(OBJECT, IMG_OBJS_ERROR);
 	public static final ImageDescriptor DESC_OBJS_REFERENCE = createManaged(OBJECT, IMG_OBJS_REFERENCE);
+	public static final ImageDescriptor DESC_OBJS_NAMESPACE = createManaged(OBJECT, IMG_OBJS_NAMESPACE);
 	public static final ImageDescriptor DESC_OBJS_AOP_CONFIG = createManaged(OBJECT, IMG_OBJS_AOP_CONFIG);
 	public static final ImageDescriptor DESC_OBJS_ASPECT = createManaged(OBJECT, IMG_OBJS_ASPECT);
 	public static final ImageDescriptor DESC_OBJS_ADVICE = createManaged(OBJECT, IMG_OBJS_ADVICE);
@@ -136,6 +142,10 @@ public class BeansUIImages {
 	public static final ImageDescriptor DESC_OBJS_AFTER_ADVICE = createManaged(OBJECT, IMG_OBJS_AFTER_ADVICE);
 	public static final ImageDescriptor DESC_OBJS_INTRODUCTION = createManaged(OBJECT, IMG_OBJS_INTRODUCTION);
 	public static final ImageDescriptor DESC_OBJS_POINTCUT = createManaged(OBJECT, IMG_OBJS_POINTCUT);
+	public static final ImageDescriptor DESC_OBJS_SCRIPT = createManaged(OBJECT, IMG_OBJS_SCRIPT);
+	public static final ImageDescriptor DESC_OBJS_TX = createManaged(OBJECT, IMG_OBJS_TX);
+	public static final ImageDescriptor DESC_OBJS_EJB = createManaged(OBJECT, IMG_OBJS_EJB);
+	public static final ImageDescriptor DESC_OBJS_PROPERTIES = createManaged(OBJECT, IMG_OBJS_PROPERTIES);
 
 	public static final ImageDescriptor DESC_OVR_SPRING = create(OVR, "spring_ovr.gif");
 	public static final ImageDescriptor DESC_OVR_ERROR = create(OVR, "error_ovr.gif");

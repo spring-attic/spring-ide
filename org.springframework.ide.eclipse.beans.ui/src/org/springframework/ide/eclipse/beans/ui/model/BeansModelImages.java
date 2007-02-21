@@ -61,8 +61,8 @@ public final class BeansModelImages {
 		if (element instanceof IBeansProject) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_PROJECT);
 		} else if (element instanceof IBeansConfig) {
-			return getImage(BeansUIImages.getImage(
-					BeansUIImages.IMG_OBJS_CONFIG), element, context);
+			return getDecoratedImage(BeansUIImages
+					.getImage(BeansUIImages.IMG_OBJS_CONFIG), element, context);
 		} else if (element instanceof IBeansConfigSet) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONFIG_SET);
 		} else if (element instanceof IBeansImport) {
@@ -70,8 +70,8 @@ public final class BeansModelImages {
 		} else if (element instanceof IBeanAlias) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ALIAS);
 		} else if (element instanceof IBean) {
-			return getImage(BeansUIImages.getImage(
-					BeansUIImages.IMG_OBJS_BEAN), element, context);
+			return getDecoratedImage(BeansUIImages
+					.getImage(BeansUIImages.IMG_OBJS_BEAN), element, context);
 		} else if (element instanceof IBeanConstructorArgument) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONSTRUCTOR);
 		} else if (element instanceof IBeanProperty) {
@@ -80,8 +80,8 @@ public final class BeansModelImages {
 		return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_SPRING);
 	}
 
-	private static Image getImage(Image baseImage, IModelElement element,
-			IModelElement context) {
+	public static Image getDecoratedImage(Image baseImage,
+			IModelElement element, IModelElement context) {
 		int flags = getFlags(element, context);
 		ImageDescriptor descriptor = new BeansModelCompositeImageDescriptor(
 				baseImage, flags);

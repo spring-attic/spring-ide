@@ -84,8 +84,14 @@ public final class AopNamespaceImages {
 				} else if ("around".equals(localName)) {
 					return BeansUIImages
 							.getImage(BeansUIImages.IMG_OBJS_AROUND_ADVICE);
+				} else if ("pointcut".equals(localName)) {
+					return BeansUIImages
+							.getImage(BeansUIImages.IMG_OBJS_POINTCUT);
 				}
 			}
+			return BeansModelImages.getDecoratedImage(BeansUIImages
+					.getImage(BeansUIImages.IMG_OBJS_NAMESPACE), element,
+					context);
 		}
 		return BeansModelImages.getImage(element, context);
 	}
