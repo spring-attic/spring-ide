@@ -28,6 +28,11 @@
 				webURL="http://www.springframework.org/schema/webflow-config/spring-webflow-config-1.0.xsd" />
 		</catalogContribution>
 		<catalogContribution>
+			<system 
+				systemId="http://www.springframework.org/schema/webflow-config/spring-webflow-config-1.0.xsd" 
+				uri="xsd/spring-webflow-config-1.0.xsd"/>
+		</catalogContribution>
+		<catalogContribution>
 			<public
 				publicId="http://www.springframework.org/schema/webflow"
 				uri="xsd/spring-webflow-1.0.xsd"

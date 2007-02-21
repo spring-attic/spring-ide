@@ -10,7 +10,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.core.expressions,
  org.eclipse.jdt.core,
- org.springframework.ide.eclipse.core
+ org.springframework.ide.eclipse.core,
+ org.eclipse.wst.xml.core
 Eclipse-LazyStart: true
 Bundle-ClassPath: beans-core.jar
 Export-Package: org.springframework.ide.eclipse.beans.core,

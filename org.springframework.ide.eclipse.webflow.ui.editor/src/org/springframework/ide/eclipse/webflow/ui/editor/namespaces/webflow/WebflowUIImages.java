@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,8 @@ public class WebflowUIImages {
 
 	static {
 		try {
-			ICON_BASE_URL = new URL(Activator.getDefault().getBundle().getEntry("/"), ICON_PATH_PREFIX);
+			ICON_BASE_URL = new URL(Activator.getDefault().getBundle()
+					.getEntry("/"), ICON_PATH_PREFIX);
 		}
 		catch (MalformedURLException e) {
 		}
@@ -78,9 +79,63 @@ public class WebflowUIImages {
 	/*
 	 * Available cached Images in the Java plugin image registry.
 	 */
-	public static final String IMG_OBJS_WEBFLOW = NAME_PREFIX + "spring_webflow_obj.gif";
+	public static final String IMG_OBJS_WEBFLOW = NAME_PREFIX
+			+ "spring_webflow_obj.gif";
 
-	public static final ImageDescriptor DESC_OBJS_WEBFLOW = createManaged(STRUCTURE, IMG_OBJS_WEBFLOW);
+	public static final String IMG_OBJS_ACTION = NAME_PREFIX + "action_obj.gif";
+
+	public static final String IMG_OBJS_ACTION_STATE = NAME_PREFIX
+			+ "action_state_obj.gif";
+
+	public static final String IMG_OBJS_DECISION_STATE = NAME_PREFIX
+			+ "decision_state_obj.gif";
+
+	public static final String IMG_OBJS_END_STATE = NAME_PREFIX
+			+ "end_state_obj.gif";
+
+	public static final String IMG_OBJS_SUBFLOW_STATE = NAME_PREFIX
+			+ "subflow_state_obj.gif";
+
+	public static final String IMG_OBJS_VIEW_STATE = NAME_PREFIX
+			+ "view_state_obj.gif";
+
+	public static final String IMG_OBJS_ATTRIBUTE_MAPPER = NAME_PREFIX
+			+ "attribute_mapper_obj.gif";
+
+	public static final String IMG_OBJS_TRANSITION = NAME_PREFIX
+			+ "connection_obj.gif";
+
+	public static final String IMG_OBJS_IF = NAME_PREFIX + "if_obj.gif";
+
+	public static final ImageDescriptor DESC_OBJS_WEBFLOW = createManaged(
+			STRUCTURE, IMG_OBJS_WEBFLOW);
+
+	public static final ImageDescriptor DESC_OBJS_ACTION = createManaged(
+			STRUCTURE, IMG_OBJS_ACTION);
+
+	public static final ImageDescriptor DESC_OBJS_ACTION_STATE = createManaged(
+			STRUCTURE, IMG_OBJS_ACTION_STATE);
+
+	public static final ImageDescriptor DESC_OBJS_DECISION_STATE = createManaged(
+			STRUCTURE, IMG_OBJS_DECISION_STATE);
+
+	public static final ImageDescriptor DESC_OBJS_END_STATE = createManaged(
+			STRUCTURE, IMG_OBJS_END_STATE);
+
+	public static final ImageDescriptor DESC_OBJS_SUBFLOW_STATE = createManaged(
+			STRUCTURE, IMG_OBJS_SUBFLOW_STATE);
+
+	public static final ImageDescriptor DESC_OBJS_VIEW_STATE = createManaged(
+			STRUCTURE, IMG_OBJS_VIEW_STATE);
+
+	public static final ImageDescriptor DESC_OBJS_ATTRIBUTE_MAPPER = createManaged(
+			STRUCTURE, IMG_OBJS_ATTRIBUTE_MAPPER);
+
+	public static final ImageDescriptor DESC_TRANSITION_OBJS = createManaged(
+			STRUCTURE, IMG_OBJS_TRANSITION);
+
+	public static final ImageDescriptor DESC_OBJS_IF = createManaged(
+			STRUCTURE, IMG_OBJS_IF);
 
 	/**
 	 * Returns the <code>Image<code> identified by the given key,
@@ -112,9 +167,11 @@ public class WebflowUIImages {
 	/* package */static ImageRegistry getImageRegistry() {
 		if (imageRegistry == null) {
 			imageRegistry = new ImageRegistry();
-			for (Iterator<String> iter = imageDescriptors.keySet().iterator(); iter.hasNext();) {
+			for (Iterator<String> iter = imageDescriptors.keySet().iterator(); iter
+					.hasNext();) {
 				String key = (String) iter.next();
-				imageRegistry.put(key, (ImageDescriptor) imageDescriptors.get(key));
+				imageRegistry.put(key, (ImageDescriptor) imageDescriptors
+						.get(key));
 			}
 			imageDescriptors = null;
 		}
@@ -124,9 +181,11 @@ public class WebflowUIImages {
 	// ---- Helper methods to access icons on the file system
 	// -------------------
 
-	private static void setImageDescriptors(IAction action, String type, String relPath) {
+	private static void setImageDescriptors(IAction action, String type,
+			String relPath) {
 		try {
-			ImageDescriptor id = ImageDescriptor.createFromURL(makeIconFileURL("d" + type, relPath));
+			ImageDescriptor id = ImageDescriptor.createFromURL(makeIconFileURL(
+					"d" + type, relPath));
 			if (id != null) {
 				action.setDisabledImageDescriptor(id);
 			}
@@ -144,8 +203,9 @@ public class WebflowUIImages {
 
 	private static ImageDescriptor createManaged(String prefix, String name) {
 		try {
-			ImageDescriptor result = ImageDescriptor.createFromURL(makeIconFileURL(prefix, name
-					.substring(NAME_PREFIX_LENGTH)));
+			ImageDescriptor result = ImageDescriptor
+					.createFromURL(makeIconFileURL(prefix, name
+							.substring(NAME_PREFIX_LENGTH)));
 			if (imageDescriptors == null) {
 				imageDescriptors = new HashMap<String, ImageDescriptor>();
 			}
@@ -168,7 +228,8 @@ public class WebflowUIImages {
 		}
 	}
 
-	private static URL makeIconFileURL(String prefix, String name) throws MalformedURLException {
+	private static URL makeIconFileURL(String prefix, String name)
+			throws MalformedURLException {
 		if (ICON_BASE_URL == null) {
 			throw new MalformedURLException();
 		}
