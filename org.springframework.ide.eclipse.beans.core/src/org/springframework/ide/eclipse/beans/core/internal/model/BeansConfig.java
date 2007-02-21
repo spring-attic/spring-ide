@@ -12,10 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,8 +36,11 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.wst.xml.core.internal.XMLCorePlugin;
+import org.eclipse.wst.xml.core.internal.catalog.provisional.ICatalog;
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.AliasDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
@@ -45,8 +50,11 @@ import org.springframework.beans.factory.parsing.ImportDefinition;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.ReaderEventListener;
+import org.springframework.beans.factory.xml.DefaultNamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.DelegatingEntityResolver;
 import org.springframework.beans.factory.xml.DocumentDefaultsDefinition;
+import org.springframework.beans.factory.xml.NamespaceHandler;
+import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
@@ -75,8 +83,11 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceExtractor;
 import org.springframework.util.ObjectUtils;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
@@ -85,9 +96,10 @@ import org.xml.sax.SAXParseException;
  * 
  * @author Torsten Juergeleit
  */
+@SuppressWarnings("restriction")
 public class BeansConfig extends AbstractResourceModelElement implements
 		IBeansConfig {
-	
+
 	/** This bean's config file */
 	private IFile file;
 
@@ -112,8 +124,10 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	/** List of inner beans (in registration order) */
 	private Set<IBean> innerBeans;
 
-	/** List of bean class names mapped to list of beans implementing the
-	 * corresponding class */
+	/**
+	 * List of bean class names mapped to list of beans implementing the
+	 * corresponding class
+	 */
 	private Map<String, Set<IBean>> beanClassesMap;
 
 	public BeansConfig(IBeansProject project, String name) {
@@ -203,9 +217,9 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	}
 
 	/**
-	 * Sets internal list of <code>IBean</code>s to <code>null</code>.
-	 * Any further access to the data of this instance of
-	 * <code>IBeansConfig</code> leads to reloading of this beans config file.
+	 * Sets internal list of <code>IBean</code>s to <code>null</code>. Any
+	 * further access to the data of this instance of <code>IBeansConfig</code>
+	 * leads to reloading of this beans config file.
 	 */
 	public void reset() {
 		defaults = null;
@@ -268,8 +282,9 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			// Lazily initialization of this config
 			readConfig();
 		}
-		return (defaults != null && defaults.getDestroyMethod() != null
-				? defaults.getDestroyMethod() : DEFAULT_DESTROY_METHOD);
+		return (defaults != null && defaults.getDestroyMethod() != null ? defaults
+				.getDestroyMethod()
+				: DEFAULT_DESTROY_METHOD);
 	}
 
 	public String getDefaultMerge() {
@@ -282,8 +297,8 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		// This default value was introduced with Spring 2.0 -> so we have
 		// to check for an empty string here as well
 		return (defaults != null && defaults.getMerge() != null
-				&& defaults.getMerge().length() > 0 ? defaults
-						.getMerge() : DEFAULT_MERGE);
+				&& defaults.getMerge().length() > 0 ? defaults.getMerge()
+				: DEFAULT_MERGE);
 	}
 
 	public Set<IBeansImport> getImports() {
@@ -427,7 +442,8 @@ public class BeansConfig extends AbstractResourceModelElement implements
 					+ ObjectUtils.nullSafeHashCode(defaults.getLazyInit());
 			hashCode = getElementType() * hashCode
 					+ ObjectUtils.nullSafeHashCode(defaults.getAutowire());
-			hashCode = getElementType() * hashCode
+			hashCode = getElementType()
+					* hashCode
 					+ ObjectUtils.nullSafeHashCode(defaults
 							.getDependencyCheck());
 			hashCode = getElementType() * hashCode
@@ -465,11 +481,13 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			name = name.substring(0, pos);
 			fullPath = container.getFullPath().append(name).toString();
 
-		// Now check for an external config file
-		} else if (name.charAt(0) == '/') {
+			// Now check for an external config file
+		}
+		else if (name.charAt(0) == '/') {
 			container = ResourcesPlugin.getWorkspace().getRoot();
 			fullPath = name;
-		} else {
+		}
+		else {
 			container = (IProject) ((IResourceModelElement) getElementParent())
 					.getElementResource();
 			fullPath = container.getFullPath().append(name).toString();
@@ -508,8 +526,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		}
 	}
 
-	private void addBeanClasses(IBean bean, Map<String,
-			Set<IBean>> beanClasses) {
+	private void addBeanClasses(IBean bean, Map<String, Set<IBean>> beanClasses) {
 		addBeanClass(bean, beanClasses);
 		for (IBean innerBean : bean.getInnerBeans()) {
 			addBeanClass(innerBean, beanClasses);
@@ -522,7 +539,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		String className = bean.getClassName();
 		if (className != null) {
 			int pos = className.indexOf('$');
-			if  (pos > 0) {
+			if (pos > 0) {
 				className = className.substring(0, pos);
 			}
 
@@ -548,16 +565,16 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			if (isArchived) {
 				resource = new StorageResource(new ZipEntryStorage(file
 						.getProject(), getElementName()));
-			} else {
+			}
+			else {
 				resource = new FileResource(file);
 			}
 
-			DefaultBeanDefinitionRegistry registry =
-					new DefaultBeanDefinitionRegistry();
+			DefaultBeanDefinitionRegistry registry = new DefaultBeanDefinitionRegistry();
 			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
 					registry);
 			reader.setDocumentLoader(new XercesDocumentLoader());
-			EntityResolver resolver = new DelegatingEntityResolver(
+			EntityResolver resolver = new CatalogDelegatingEntityResolver(
 					new BeansDtdResolver(), new PluggableSchemaResolver(
 							PluggableSchemaResolver.class.getClassLoader()));
 			reader.setEntityResolver(resolver);
@@ -565,9 +582,12 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			reader.setEventListener(new BeansConfigReaderEventListener(this));
 			reader.setProblemReporter(new BeansConfigProblemReporter(this));
 			reader.setErrorHandler(new BeansConfigErrorHandler(this));
+			reader.setNamespaceHandlerResolver(new NamespaceHandlerResolver(
+					PluggableSchemaResolver.class.getClassLoader()));
 			try {
 				reader.loadBeanDefinitions(resource);
-			} catch (Throwable e) {	// handle ALL exceptions
+			}
+			catch (Throwable e) { // handle ALL exceptions
 
 				// Skip SAXParseExceptions because they're already handled by
 				// the SAX ErrorHandler
@@ -588,7 +608,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		public BeansConfigErrorHandler(IBeansConfig config) {
 			this.config = config;
 		}
-		
+
 		public void warning(SAXParseException ex) throws SAXException {
 			BeansModelUtils.createProblemMarker(config, ex.getMessage(),
 					IMarker.SEVERITY_WARNING, ex.getLineNumber(),
@@ -628,12 +648,13 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		}
 
 		public void warning(Problem problem) {
-			BeansModelUtils.createProblemMarker(config, problem.getMessage(),
-					IMarker.SEVERITY_WARNING, problem,
-					ErrorCode.PARSING_FAILED);
+			BeansModelUtils
+					.createProblemMarker(config, problem.getMessage(),
+							IMarker.SEVERITY_WARNING, problem,
+							ErrorCode.PARSING_FAILED);
 		}
 	}
-	
+
 	/**
 	 * Implementation of {@link ReaderEventListener} which populates the current
 	 * instance of {@link IBeansConfig} with data from the XML bean definition
@@ -669,18 +690,17 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			}
 		}
 
-		public void componentRegistered(
-				ComponentDefinition componentDefinition) {
+		public void componentRegistered(ComponentDefinition componentDefinition) {
 			if (!isImported(componentDefinition)) {
 				if (componentDefinition instanceof BeanComponentDefinition) {
-					if (componentDefinition.getBeanDefinitions()[0].getRole()
-							!= BeanDefinition.ROLE_INFRASTRUCTURE) {
+					if (componentDefinition.getBeanDefinitions()[0].getRole() != BeanDefinition.ROLE_INFRASTRUCTURE) {
 						IBean bean = new Bean(config,
 								(BeanComponentDefinition) componentDefinition);
 						beans.put(bean.getElementName(), bean);
 						innerBeans.addAll(bean.getInnerBeans());
 					}
-				} else {
+				}
+				else {
 					IBeansComponent comp = new BeansComponent(config,
 							componentDefinition);
 					components.add(comp);
@@ -701,6 +721,119 @@ public class BeansConfig extends AbstractResourceModelElement implements
 				}
 			}
 			return false;
+		}
+	}
+
+	static class NamespaceHandlerResolver extends
+			DefaultNamespaceHandlerResolver {
+
+		public NamespaceHandlerResolver(ClassLoader classLoader) {
+			super(classLoader);
+		}
+
+		/**
+		 * Locate the {@link NamespaceHandler} for the supplied namespace URI
+		 * from the configured mappings.
+		 * @param namespaceUri the relevant namespace URI
+		 * @return the located {@link NamespaceHandler}, or <code>null</code>
+		 * if none found
+		 */
+		public NamespaceHandler resolve(String namespaceUri) {
+			NamespaceHandler namespaceHandler = super.resolve(namespaceUri);
+			if (namespaceHandler != null) {
+				return namespaceHandler;
+			}
+			return new NamespaceHandler() {
+
+				public BeanDefinitionHolder decorate(Node source,
+						BeanDefinitionHolder definition,
+						ParserContext parserContext) {
+					parserContext.getReaderContext().warning("blbla", source);
+					return null;
+				}
+
+				public void init() {
+
+				}
+
+				public BeanDefinition parse(Element element,
+						ParserContext parserContext) {
+					parserContext.getReaderContext().warning("blbla", element);
+					return null;
+				}
+			};
+		}
+	}
+
+	static class CatalogDelegatingEntityResolver extends
+			DelegatingEntityResolver {
+
+		/**
+		 * Create a new DelegatingEntityResolver that delegates to the given
+		 * {@link EntityResolver EntityResolvers}.
+		 * @param dtdResolver the EntityResolver to resolve DTDs with
+		 * @param schemaResolver the EntityResolver to resolve XML schemas with
+		 * @throws IllegalArgumentException if either of the supplied resolvers
+		 * is <code>null</code>
+		 */
+		public CatalogDelegatingEntityResolver(EntityResolver dtdResolver,
+				EntityResolver schemaResolver) {
+			super(dtdResolver, schemaResolver);
+		}
+
+		public InputSource resolveEntity(String publicId, String systemId)
+				throws SAXException, IOException {
+			InputSource inputSource = super.resolveEntity(publicId, systemId);
+			if (inputSource != null) {
+				return inputSource;
+			}
+			else {
+				String resolved = resolve(publicId, systemId);
+				if (resolved != null) {
+					return new InputSource(resolved);
+				}
+				return null;
+			}
+		}
+
+		public String resolve(String publicId, String systemId) {
+			ICatalog catalog = XMLCorePlugin.getDefault()
+					.getDefaultXMLCatalog();
+			String resolved = null;
+			if (systemId != null) {
+				try {
+					resolved = catalog.resolveSystem(systemId);
+					if (resolved == null) {
+						resolved = catalog.resolveURI(systemId);
+					}
+				}
+				catch (MalformedURLException me) {
+					resolved = null;
+				}
+				catch (IOException ie) {
+					resolved = null;
+				}
+			}
+			if (resolved == null) {
+				if (publicId != null) {
+					if (!(systemId != null && systemId.endsWith(".xsd"))) {
+						try {
+							resolved = catalog
+									.resolvePublic(publicId, systemId);
+							if (resolved == null) {
+								resolved = catalog.resolveURI(publicId);
+							}
+						}
+						catch (MalformedURLException me) {
+							resolved = null;
+						}
+						catch (IOException ie) {
+							resolved = null;
+						}
+					}
+				}
+			}
+			return resolved;
 		}
 	}
 }
