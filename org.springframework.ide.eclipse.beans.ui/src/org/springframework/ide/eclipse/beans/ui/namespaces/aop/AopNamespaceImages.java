@@ -49,13 +49,19 @@ public final class AopNamespaceImages {
 			if ("config".equals(localName)) {
 				return BeansUIImages
 						.getImage(BeansUIImages.IMG_OBJS_AOP_CONFIG);
-			} else if ("advisor".equals(localName)) {
+			}
+			if ("advisor".equals(localName)) {
 				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ADVICE);
-			} else if ("aspect".equals(localName)) {
+			}
+			if ("aspect".equals(localName)) {
 				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ASPECT);
-			} else if ("pointcut".equals(localName)) {
+			}
+			if ("pointcut".equals(localName)) {
 				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_POINTCUT);
 			}
+			return BeansModelImages.getDecoratedImage(BeansUIImages
+					.getImage(BeansUIImages.IMG_OBJS_NAMESPACE_COMPONENT),
+					element, context);
 		} else if (element instanceof IBean
 				&& context instanceof IBeansComponent) {
 			String localName = ModelUtils.getLocalName((IBean) element);
@@ -78,19 +84,42 @@ public final class AopNamespaceImages {
 				if ("before".equals(localName)) {
 					return BeansUIImages
 							.getImage(BeansUIImages.IMG_OBJS_BEFORE_ADVICE);
-				} else if ("after".equals(localName)) {
+				}
+				if ("after".equals(localName)) {
 					return BeansUIImages
 							.getImage(BeansUIImages.IMG_OBJS_AFTER_ADVICE);
-				} else if ("around".equals(localName)) {
+				}
+				if ("around".equals(localName)) {
 					return BeansUIImages
 							.getImage(BeansUIImages.IMG_OBJS_AROUND_ADVICE);
-				} else if ("pointcut".equals(localName)) {
+				}
+				if ("after-returning".equals(localName)) {
+					return BeansUIImages
+							.getImage(BeansUIImages.IMG_OBJS_AFTER_ADVICE);
+				}
+				if ("after-throwing".equals(localName)) {
+					return BeansUIImages
+							.getImage(BeansUIImages.IMG_OBJS_AFTER_ADVICE);
+				}
+				if ("pointcut".equals(localName)) {
 					return BeansUIImages
 							.getImage(BeansUIImages.IMG_OBJS_POINTCUT);
 				}
+				if ("aspectj-autoproxy".equals(localName)) {
+					return BeansUIImages
+							.getImage(BeansUIImages.IMG_OBJS_AOP_CONFIG);
+				}
+				if ("include".equals(localName)) {
+					return BeansUIImages
+							.getImage(BeansUIImages.IMG_OBJS_AOP_CONFIG);
+				}
+				if ("declare-parents".equals(localName)) {
+					return BeansUIImages
+							.getImage(BeansUIImages.IMG_OBJS_INTRODUCTION);
+				}
 			}
 			return BeansModelImages.getDecoratedImage(BeansUIImages
-					.getImage(BeansUIImages.IMG_OBJS_NAMESPACE), element,
+					.getImage(BeansUIImages.IMG_OBJS_NAMESPACE_BEAN), element,
 					context);
 		}
 		return BeansModelImages.getImage(element, context);

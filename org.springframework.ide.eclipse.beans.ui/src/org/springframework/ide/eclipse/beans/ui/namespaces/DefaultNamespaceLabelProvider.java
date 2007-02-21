@@ -23,6 +23,7 @@ import org.eclipse.jface.viewers.ViewerLabel;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.navigator.IDescriptionProvider;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -75,14 +76,19 @@ public class DefaultNamespaceLabelProvider extends LabelProvider implements
 		return null;
 	}
 
-	protected Image getImage(ISourceModelElement element,
-			IModelElement context) {
-		if (element instanceof IBean
-				&& !NamespaceUtils.getNameSpaceURI(element).equals(
-						NamespaceUtils.DEFAULT_NAMESPACE_URI)) {
+	protected Image getImage(ISourceModelElement element, IModelElement context) {
+		if (element instanceof IBean) {
+			if (!NamespaceUtils.DEFAULT_NAMESPACE_URI.equals(NamespaceUtils
+					.getNameSpaceURI(element))) {
+				return BeansModelImages.getDecoratedImage(BeansUIImages
+						.getImage(BeansUIImages.IMG_OBJS_NAMESPACE_BEAN),
+						element, context);
+			}
+		}
+		else if (element instanceof IBeansComponent) {
 			return BeansModelImages.getDecoratedImage(BeansUIImages
-					.getImage(BeansUIImages.IMG_OBJS_NAMESPACE), element,
-					context);
+					.getImage(BeansUIImages.IMG_OBJS_NAMESPACE_COMPONENT),
+					element, context);
 		}
 		return BeansModelImages.getImage(element, context);
 	}
