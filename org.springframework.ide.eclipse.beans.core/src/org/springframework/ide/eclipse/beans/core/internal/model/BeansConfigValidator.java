@@ -388,13 +388,13 @@ public class BeansConfigValidator {
 			if (configSet == null) {
 				BeansModelUtils.createProblemMarker(bean,
 						"Overrides another bean named '" + bean.getElementName()
-						+ " in the same config file",
+						+ "' in the same config file",
 						IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
 						ErrorCode.BEAN_OVERRIDE, bean.getElementName(), null);
 			} else if (!configSet.isAllowBeanDefinitionOverriding()) {
 				BeansModelUtils.createProblemMarker(bean,
 						"Overrides another bean named '" + bean.getElementName()
-						+ " in config set '" + configSet.getElementName() + "'",
+						+ "' in config set '" + configSet.getElementName() + "'",
 						IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
 						ErrorCode.BEAN_OVERRIDE, bean.getElementName(),
 						configSet.getElementName());
