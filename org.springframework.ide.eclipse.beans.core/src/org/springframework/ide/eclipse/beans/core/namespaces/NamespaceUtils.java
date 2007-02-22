@@ -75,12 +75,15 @@ public class NamespaceUtils {
 						.getConfigurationElements()) {
 					String uri = config.getAttribute("uri");
 					if (uri != null
-							&& config.getAttribute("elementProvider") != null) {
+							&& config.getAttribute("namespaceHandler") != null) {
 						try {
 							Object handler = config.createExecutableExtension(
 									"namespaceHandler");
 							if (handler instanceof NamespaceHandler) {
-								handlers.put(uri, (NamespaceHandler) handler);
+								NamespaceHandler namespaceHandler = 
+									(NamespaceHandler) handler;
+								namespaceHandler.init();
+								handlers.put(uri, namespaceHandler);
 							}
 						}
 						catch (CoreException e) {

@@ -71,10 +71,10 @@ This extension point is used to add namespace handlers and model element provide
                </appInfo>
             </annotation>
          </attribute>
-         <attribute name="elementProvider" type="string" use="required">
+         <attribute name="elementProvider" type="string">
             <annotation>
                <documentation>
-                  an instance of &lt;samp&gt;org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider&lt;/samp&gt;
+                  an optional instance of &lt;samp&gt;org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider&lt;/samp&gt;
                </documentation>
                <appInfo>
                   <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider"/>
