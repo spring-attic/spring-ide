@@ -1314,12 +1314,13 @@ public class AopReferenceModelInplaceDialog {
 
 	private void createContents() {
 		if (lastSelection != null && workbenchPart != null) {
-			Object element = AopReferenceModelNavigatorUtils
-					.getSelectedElement(workbenchPart, lastSelection);
-
+			Object element = AopReferenceModelNavigator.calculateRootElement(
+					AopReferenceModelNavigatorUtils.getSelectedElement(
+							workbenchPart, lastSelection),
+					isShowingParentCrosscutting);
 			viewer.setInput(element);
 		}
-		filterText.setText(""); //$NON-NLS-1$
+		filterText.setText("");
 	}
 
 	/**
