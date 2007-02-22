@@ -48,7 +48,8 @@ import org.w3c.dom.Element;
 public class AopReferenceModelNavigator extends CommonNavigator implements
 		ISelectionListener {
 
-	public static final String ID = "org.springframework.ide.eclipse.aop.ui.navigator.AopReferenceModelNavigator";
+	public static final String ID = 
+		"org.springframework.ide.eclipse.aop.ui.navigator.AopReferenceModelNavigator";
 
 	public static final String BEAN_REFS_FOR_FILE_ID = ID + ".beanRefsForFile";
 
