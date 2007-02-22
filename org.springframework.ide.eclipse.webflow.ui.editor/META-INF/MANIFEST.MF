@@ -6,9 +6,7 @@ Bundle-Version: 2.0.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.webflow.ui.editor.Activator
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Bundle-ClassPath: webflow-editor.jar, 
- spring-webflow-1.0.1.jar,
- spring-binding-1.0.1.jar
+Bundle-ClassPath: webflow-editor.jar
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.core.runtime,
@@ -27,48 +25,12 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.ui,
  org.springframework.ide.eclipse.beans.core,
  org.springframework.ide.eclipse.beans.ui,
- org.springframework.ide.eclipse.beans.ui.editor
+ org.springframework.ide.eclipse.beans.ui.editor,
+ org.springframework.webflow;bundle-version="1.0.1";visibility:=reexport
 Eclipse-LazyStart: true
-Export-Package: org.springframework.binding.collection,
- org.springframework.binding.convert,
- org.springframework.binding.convert.support,
- org.springframework.binding.expression,
- org.springframework.binding.expression.support,
- org.springframework.binding.format,
- org.springframework.binding.format.support,
- org.springframework.binding.mapping,
- org.springframework.binding.method,
+Export-Package: 
  org.springframework.ide.eclipse.beans.ui.editor.namespaces.webflow,
+ org.springframework.ide.eclipse.beans.ui.namespaces,
  org.springframework.ide.eclipse.webflow.ui.editor,
- org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow,
- org.springframework.webflow.action,
- org.springframework.webflow.action.portlet,
- org.springframework.webflow.config,
- org.springframework.webflow.context,
- org.springframework.webflow.context.portlet,
- org.springframework.webflow.context.servlet,
- org.springframework.webflow.conversation,
- org.springframework.webflow.conversation.impl,
- org.springframework.webflow.core,
- org.springframework.webflow.core.collection,
- org.springframework.webflow.definition,
- org.springframework.webflow.definition.registry,
- org.springframework.webflow.engine,
- org.springframework.webflow.engine.builder,
- org.springframework.webflow.engine.builder.xml,
- org.springframework.webflow.engine.impl,
- org.springframework.webflow.engine.support,
- org.springframework.webflow.execution,
- org.springframework.webflow.execution.factory,
- org.springframework.webflow.execution.repository,
- org.springframework.webflow.execution.repository.continuation,
- org.springframework.webflow.execution.repository.support,
- org.springframework.webflow.execution.support,
- org.springframework.webflow.executor,
- org.springframework.webflow.executor.jsf,
- org.springframework.webflow.executor.mvc,
- org.springframework.webflow.executor.struts,
- org.springframework.webflow.executor.support,
- org.springframework.webflow.test,
- org.springframework.webflow.test.execution,
- org.springframework.webflow.util
+ org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow
+

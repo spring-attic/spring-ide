@@ -17,14 +17,14 @@
 package org.springframework.ide.eclipse.beans.ui.editor.outline;
 
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.w3c.dom.Node;
 
 @SuppressWarnings("restriction")
-public class DelegatingLabelProvider extends JFaceNodeLabelProvider {
+public class DelegatingLabelProvider extends LabelProvider {
 
 	private static ILabelProvider xmlProvider;
 

@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Implementation-Title: Spring Binding
+Implementation-Version: 1.0.1
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.springframework.binding
+Bundle-Name: org.springframework.binding
+Bundle-Version: 1.0.1
+Bundle-Vendor: Spring Binding
+Bundle-ClassPath: spring-binding.jar
+Bundle-Localization: plugin
+Export-Package: 
+ org.springframework.binding.collection,
+ org.springframework.binding.convert,
+ org.springframework.binding.convert.support,
+ org.springframework.binding.expression,
+ org.springframework.binding.expression.support,
+ org.springframework.binding.format,
+ org.springframework.binding.format.support,
+ org.springframework.binding.mapping,
+ org.springframework.binding.method
+

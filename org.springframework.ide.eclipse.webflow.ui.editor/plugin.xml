@@ -2,44 +2,26 @@
 <?eclipse version="3.0"?>
 <plugin>
 
-	<extension
-		point="org.springframework.ide.eclipse.beans.ui.editor.namespaces">
-		<namespace
-			contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.namespaces.webflow.WebflowConfigContentAssistProcessor"
-			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
-			hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.namespaces.webflow.WebflowConfigHyperLinkDetector"
-			labelProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.webflow.WebflowConfigOutlineLabelProvider"
-			name="Spring Web Flow Config"
-			uri="http://www.springframework.org/schema/webflow-config" />
-		<namespace
-			contentAssistProcessor="org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowContentAssistProcessor"
-			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
-			hyperLinkDetector="org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowHyperLinkDetector"
-			labelProvider="org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowOutlineLabelProvider"
-			name="Spring Web Flow" 
-			uri="http://www.springframework.org/schema/webflow" />
-	</extension>
-
 	<extension point="org.eclipse.wst.xml.core.catalogContributions">
 		<catalogContribution>
 			<public
 				publicId="http://www.springframework.org/schema/webflow-config"
-				uri="xsd/spring-webflow-config-1.0.xsd"
+				uri="jar:platform:/plugin/org.springframework.webflow/spring-webflow.jar!/org/springframework/webflow/config/spring-webflow-config-1.0.xsd"
 				webURL="http://www.springframework.org/schema/webflow-config/spring-webflow-config-1.0.xsd" />
 		</catalogContribution>
 		<catalogContribution>
-			<system 
-				systemId="http://www.springframework.org/schema/webflow-config/spring-webflow-config-1.0.xsd" 
-				uri="xsd/spring-webflow-config-1.0.xsd"/>
+			<system
+				systemId="http://www.springframework.org/schema/webflow-config/spring-webflow-config-1.0.xsd"
+				uri="jar:platform:/plugin/org.springframework.webflow/spring-webflow.jar!/org/springframework/webflow/config/spring-webflow-config-1.0.xsd" />
 		</catalogContribution>
 		<catalogContribution>
 			<public
 				publicId="http://www.springframework.org/schema/webflow"
-				uri="xsd/spring-webflow-1.0.xsd"
+				uri="jar:platform:/plugin/org.springframework.webflow/spring-webflow.jar!/org/springframework/webflow/engine/builder/xml/spring-webflow-1.0.xsd"
 				webURL="http://www.springframework.org/schema/webflow/spring-webflow-1.0.xsd" />
 		</catalogContribution>
 	</extension>
-	
+
 	<extension point="org.eclipse.core.runtime.contentTypes">
 		<content-type id="webflowConfig" name="%contentTypeName"
 			base-type="org.eclipse.core.runtime.xml" priority="high"
@@ -71,21 +53,41 @@
 
 	<extension
 		point="org.eclipse.wst.sse.ui.adapterFactoryDescription">
-		<adapterFactoryDescription 
+		<adapterFactoryDescription
 			class="org.springframework.ide.eclipse.webflow.ui.editor.WebflowAdapterFactoryProvider">
 		</adapterFactoryDescription>
 	</extension>
- <extension
-       point="org.springframework.ide.eclipse.beans.core.namespaces">
-    <namespace
-          namespaceHandler="org.springframework.webflow.config.WebFlowConfigNamespaceHandler"
-          uri="http://www.springframework.org/schema/webflow-config"/>
- </extension>
- <extension
-       point="org.springframework.ide.eclipse.beans.ui.namespaces">
-    <namespace
-          labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.WebflowLabelProvider"
-          uri="http://www.springframework.org/schema/webflow-config"/>
- </extension>
+
+	<extension
+		point="org.springframework.ide.eclipse.beans.core.namespaces">
+		<namespace
+			namespaceHandler="org.springframework.webflow.config.WebFlowConfigNamespaceHandler"
+			uri="http://www.springframework.org/schema/webflow-config" />
+	</extension>
+
+	<extension
+		point="org.springframework.ide.eclipse.beans.ui.namespaces">
+		<namespace
+			labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.WebflowLabelProvider"
+			uri="http://www.springframework.org/schema/webflow-config" />
+	</extension>
+
+	<extension
+		point="org.springframework.ide.eclipse.beans.ui.editor.namespaces">
+		<namespace
+			contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.namespaces.webflow.WebflowConfigContentAssistProcessor"
+			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
+			hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.namespaces.webflow.WebflowConfigHyperLinkDetector"
+			labelProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.webflow.WebflowConfigOutlineLabelProvider"
+			name="Spring Web Flow Config"
+			uri="http://www.springframework.org/schema/webflow-config" />
+		<namespace
+			contentAssistProcessor="org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowContentAssistProcessor"
+			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
+			hyperLinkDetector="org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowHyperLinkDetector"
+			labelProvider="org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowOutlineLabelProvider"
+			name="Spring Web Flow"
+			uri="http://www.springframework.org/schema/webflow" />
+	</extension>
 
 </plugin>

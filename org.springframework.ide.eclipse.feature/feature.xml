@@ -126,6 +126,20 @@
          unpack="true"/>
 
    <plugin
+         id="org.springframework.webflow"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="true"/>
+
+   <plugin
+         id="org.springframework.binding"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="true"/>
+
+   <plugin
          id="org.springframework.doc"
          download-size="0"
          install-size="0"
