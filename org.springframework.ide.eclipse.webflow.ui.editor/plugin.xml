@@ -75,5 +75,17 @@
 			class="org.springframework.ide.eclipse.webflow.ui.editor.WebflowAdapterFactoryProvider">
 		</adapterFactoryDescription>
 	</extension>
+ <extension
+       point="org.springframework.ide.eclipse.beans.core.namespaces">
+    <namespace
+          namespaceHandler="org.springframework.webflow.config.WebFlowConfigNamespaceHandler"
+          uri="http://www.springframework.org/schema/webflow-config"/>
+ </extension>
+ <extension
+       point="org.springframework.ide.eclipse.beans.ui.namespaces">
+    <namespace
+          labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.WebflowLabelProvider"
+          uri="http://www.springframework.org/schema/webflow-config"/>
+ </extension>
 
 </plugin>

@@ -3,5 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="lib" path="spring-webflow-1.0.1.jar" sourcepath="D:/lib/spring-webflow-1.0.1/projects/spring-webflow/src/main/java"/>
+	<classpathentry kind="lib" path="spring-binding-1.0.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
