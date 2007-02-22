@@ -25,8 +25,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.beans.BeanMetadataElement;
+import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.SpringCore;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 
 /**
@@ -119,7 +119,7 @@ public final class ModelUtils {
 		if (element instanceof IResourceModelElement) {
 			IResource resource = ((IResourceModelElement) element)
 					.getElementResource();
-			SpringCoreUtils.deleteProblemMarkers(resource);
+			MarkerUtils.deleteMarkers(resource, SpringCore.MARKER_ID);
 		}
 	}
 

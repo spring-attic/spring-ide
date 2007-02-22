@@ -24,7 +24,8 @@ import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigValidator;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.core.MarkerUtils;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 
 /**
@@ -38,7 +39,7 @@ public class BeansProjectValidator implements IProjectBuilder {
 					"BeansProjectValidator.validateFile", file.getFullPath()
 							.toString()), IProgressMonitor.UNKNOWN);
 			// Delete all problem markers created by Spring IDE
-			SpringCoreUtils.deleteProblemMarkers(file);
+			MarkerUtils.deleteMarkers(file, SpringCore.MARKER_ID);
 			monitor.worked(1);
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
