@@ -27,12 +27,16 @@ import org.w3c.dom.Node;
 
 public class DelegatingHyperLinkDetector implements IHyperlinkDetector {
 
-	public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
+	public IHyperlink[] detectHyperlinks(ITextViewer textViewer,
+			IRegion region, boolean canShowMultipleHyperlinks) {
 
 		IDocument document = textViewer.getDocument();
-		Node currentNode = BeansEditorUtils.getNodeByOffset(document, region.getOffset());
+		Node currentNode = BeansEditorUtils.getNodeByOffset(document, region
+				.getOffset());
 
-		IHyperlinkDetector detector = NamespaceUtils.getHyperlinkDetector(currentNode.getNamespaceURI());
-		return detector.detectHyperlinks(textViewer, region, canShowMultipleHyperlinks);
+		IHyperlinkDetector detector = NamespaceUtils
+				.getHyperlinkDetector(currentNode.getNamespaceURI());
+		return detector.detectHyperlinks(textViewer, region,
+				canShowMultipleHyperlinks);
 	}
 }

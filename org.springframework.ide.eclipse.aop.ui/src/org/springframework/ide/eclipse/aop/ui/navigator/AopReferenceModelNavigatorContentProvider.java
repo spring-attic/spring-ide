@@ -106,13 +106,13 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 	}
 
 	public Object[] getElements(Object inputElement) {
-		if (inputElement instanceof SourceType) {
+		if (inputElement instanceof IType) {
 			return getChildren(inputElement);
 		}
-		else if (inputElement instanceof SourceMethod) {
+		else if (inputElement instanceof IMethod) {
 			return getChildren(inputElement);
 		}
-		else if (inputElement instanceof SourceField) {
+		else if (inputElement instanceof IField) {
 			return getChildren(inputElement);
 		}
 		else if (inputElement instanceof JavaElementReferenceNode) {
@@ -451,7 +451,7 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 			catch (JavaModelException e) {
 			}
 		}
-		else if (element instanceof IMethod && element instanceof SourceMethod) {
+		else if (element instanceof IMethod) {
 			IMethod method = (IMethod) element;
 			List<IAopReference> references = Activator.getModel().getAllReferences(method.getJavaProject());
 			for (IAopReference reference : references) {

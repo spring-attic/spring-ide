@@ -40,24 +40,31 @@ import org.w3c.dom.Node;
 @SuppressWarnings("restriction")
 public abstract class AbstractHyperLinkDetector implements IHyperlinkDetector {
 
-	public final IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
+	public final IHyperlink[] detectHyperlinks(ITextViewer textViewer,
+			IRegion region, boolean canShowMultipleHyperlinks) {
 		if (region == null || textViewer == null) {
 			return null;
 		}
 
 		IDocument document = textViewer.getDocument();
-		Node currentNode = BeansEditorUtils.getNodeByOffset(document, region.getOffset());
+		Node currentNode = BeansEditorUtils.getNodeByOffset(document, region
+				.getOffset());
 		if (currentNode != null) {
 			switch (currentNode.getNodeType()) {
 			case Node.ELEMENT_NODE:
 				// at first try to handle selected attribute value
-				Attr currentAttr = BeansEditorUtils.getAttrByOffset(currentNode, region.getOffset());
+				Attr currentAttr = BeansEditorUtils.getAttrByOffset(
+						currentNode, region.getOffset());
 				IDOMAttr attr = (IDOMAttr) currentAttr;
-				if (currentAttr != null && region.getOffset() >= attr.getValueRegionStartOffset()) {
+				if (currentAttr != null
+						&& region.getOffset() >= attr
+								.getValueRegionStartOffset()) {
 					if (isLinkableAttr(currentAttr)) {
 						IRegion hyperlinkRegion = getHyperlinkRegion(currentAttr);
-						IHyperlink hyperLink = createHyperlink(currentAttr.getName(), currentAttr.getNodeValue(),
-								currentNode.getParentNode(), hyperlinkRegion, document, currentNode, textViewer, region);
+						IHyperlink hyperLink = createHyperlink(currentAttr
+								.getName(), currentAttr.getNodeValue(),
+								currentNode.getParentNode(), hyperlinkRegion,
+								document, currentNode, textViewer, region);
 						if (hyperLink != null) {
 							return new IHyperlink[] { hyperLink };
 						}
@@ -69,8 +76,10 @@ public abstract class AbstractHyperLinkDetector implements IHyperlinkDetector {
 				IRegion hyperlinkRegion = getHyperlinkRegion(currentNode);
 				Node parentNode = currentNode.getParentNode();
 				if (parentNode != null) {
-					IHyperlink hyperLink = createHyperlink(parentNode.getNodeName(), currentNode.getNodeValue(),
-							parentNode, hyperlinkRegion, document, currentNode, textViewer, region);
+					IHyperlink hyperLink = createHyperlink(parentNode
+							.getNodeName(), currentNode.getNodeValue(),
+							parentNode, hyperlinkRegion, document, currentNode,
+							textViewer, region);
 					if (hyperLink != null) {
 						return new IHyperlink[] { hyperLink };
 					}
@@ -90,7 +99,9 @@ public abstract class AbstractHyperLinkDetector implements IHyperlinkDetector {
 			case Node.DOCUMENT_TYPE_NODE:
 			case Node.TEXT_NODE:
 				IDOMNode docNode = (IDOMNode) node;
-				return new Region(docNode.getStartOffset(), docNode.getEndOffset() - docNode.getStartOffset());
+				return new Region(docNode.getStartOffset(), docNode
+						.getEndOffset()
+						- docNode.getStartOffset());
 
 			case Node.ELEMENT_NODE:
 				IDOMElement element = (IDOMElement) node;
@@ -101,7 +112,8 @@ public abstract class AbstractHyperLinkDetector implements IHyperlinkDetector {
 				else {
 					endOffset = element.getEndOffset();
 				}
-				return new Region(element.getStartOffset(), endOffset - element.getStartOffset());
+				return new Region(element.getStartOffset(), endOffset
+						- element.getStartOffset());
 
 			case Node.ATTRIBUTE_NODE:
 				IDOMAttr att = (IDOMAttr) node;
@@ -124,7 +136,8 @@ public abstract class AbstractHyperLinkDetector implements IHyperlinkDetector {
 	 */
 	protected abstract boolean isLinkableAttr(Attr attr);
 
-	protected abstract IHyperlink createHyperlink(String name, String target, Node parentNode, IRegion hyperlinkRegion,
-			IDocument document, Node node, ITextViewer textViewer, IRegion cursor);
+	protected abstract IHyperlink createHyperlink(String name, String target,
+			Node parentNode, IRegion hyperlinkRegion, IDocument document,
+			Node node, ITextViewer textViewer, IRegion cursor);
 
 }

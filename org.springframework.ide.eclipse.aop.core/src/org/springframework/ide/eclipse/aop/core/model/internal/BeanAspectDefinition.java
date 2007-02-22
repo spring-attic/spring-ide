@@ -59,8 +59,10 @@ public class BeanAspectDefinition implements IAspectDefinition {
 	public boolean equals(Object obj) {
 		if (obj instanceof BeanAspectDefinition) {
 			BeanAspectDefinition other = (BeanAspectDefinition) obj;
-			return other.getNode().equals(node) && other.getAdviceMethodName().equals(adivceMethodName)
-					&& other.getAdviceMethodParameterTypes().equals(adivceMethodParameterTypes);
+			return other.getNode().equals(node)
+					&& other.getAdviceMethodName().equals(adivceMethodName)
+					&& other.getAdviceMethodParameterTypes().equals(
+							adivceMethodParameterTypes);
 		}
 		return false;
 	}
@@ -106,7 +108,8 @@ public class BeanAspectDefinition implements IAspectDefinition {
 	}
 
 	public Object getAspectJPointcutExpression() throws Throwable {
-		return AopReferenceModelBuilderUtils.initAspectJExpressionPointcut(this);
+		return AopReferenceModelBuilderUtils
+				.initAspectJExpressionPointcut(this);
 	}
 
 	public IResource getResource() {
@@ -163,7 +166,8 @@ public class BeanAspectDefinition implements IAspectDefinition {
 	 */
 	public void setDocument(IDOMDocument document) {
 		this.document = document;
-		this.aspectLineNumber = this.document.getStructuredDocument().getLineOfOffset(this.node.getStartOffset()) + 1;
+		this.aspectLineNumber = this.document.getStructuredDocument()
+				.getLineOfOffset(this.node.getStartOffset()) + 1;
 	}
 
 	public void setNode(IDOMNode node) {
@@ -196,8 +200,10 @@ public class BeanAspectDefinition implements IAspectDefinition {
 
 	public Method getAdviceMethod() {
 		try {
-			Class<?> aspectClass = AopReferenceModelBuilderUtils.loadClass(this.aspectClassName);
-			Method method = BeanUtils.resolveSignature(this.adivceMethodName, aspectClass);
+			Class<?> aspectClass = AopReferenceModelBuilderUtils
+					.loadClass(this.aspectClassName);
+			Method method = BeanUtils.resolveSignature(this.adivceMethodName,
+					aspectClass);
 			return method;
 		}
 		catch (ClassNotFoundException e) {

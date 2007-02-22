@@ -45,17 +45,20 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("restriction")
 public class AdviceAnnotationVisitor extends EmptyVisitor {
 
-	private static final String BEFORE_ANNOTATION_DESC = "L" + Before.class.getName().replace('.', '/') + ";";
+	private static final String BEFORE_ANNOTATION_DESC = "L"
+			+ Before.class.getName().replace('.', '/') + ";";
 
-	private static final String AFTER_ANNOTATION_DESC = "L" + After.class.getName().replace('.', '/') + ";";
+	private static final String AFTER_ANNOTATION_DESC = "L"
+			+ After.class.getName().replace('.', '/') + ";";
 
-	private static final String AFTERRETURNING_ANNOTATION_DESC = "L" + AfterReturning.class.getName().replace('.', '/')
-			+ ";";
+	private static final String AFTERRETURNING_ANNOTATION_DESC = "L"
+			+ AfterReturning.class.getName().replace('.', '/') + ";";
 
-	private static final String AFTERTHROWING_ANNOTATION_DESC = "L" + AfterThrowing.class.getName().replace('.', '/')
-			+ ";";
+	private static final String AFTERTHROWING_ANNOTATION_DESC = "L"
+			+ AfterThrowing.class.getName().replace('.', '/') + ";";
 
-	private static final String AROUND_ANNOTATION_DESC = "L" + Around.class.getName().replace('.', '/') + ";";
+	private static final String AROUND_ANNOTATION_DESC = "L"
+			+ Around.class.getName().replace('.', '/') + ";";
 
 	private static final String DECLARE_PARENTS_ANNOTATION_DESC = "L"
 			+ DeclareParents.class.getName().replace('.', '/') + ";";
@@ -66,10 +69,13 @@ public class AdviceAnnotationVisitor extends EmptyVisitor {
 		ANNOTATION_TYPES = new HashMap<String, ADVICE_TYPES>();
 		ANNOTATION_TYPES.put(BEFORE_ANNOTATION_DESC, ADVICE_TYPES.BEFORE);
 		ANNOTATION_TYPES.put(AFTER_ANNOTATION_DESC, ADVICE_TYPES.AFTER);
-		ANNOTATION_TYPES.put(AFTERRETURNING_ANNOTATION_DESC, ADVICE_TYPES.AFTER_RETURNING);
-		ANNOTATION_TYPES.put(AFTERTHROWING_ANNOTATION_DESC, ADVICE_TYPES.AFTER_THROWING);
+		ANNOTATION_TYPES.put(AFTERRETURNING_ANNOTATION_DESC,
+				ADVICE_TYPES.AFTER_RETURNING);
+		ANNOTATION_TYPES.put(AFTERTHROWING_ANNOTATION_DESC,
+				ADVICE_TYPES.AFTER_THROWING);
 		ANNOTATION_TYPES.put(AROUND_ANNOTATION_DESC, ADVICE_TYPES.AROUND);
-		ANNOTATION_TYPES.put(DECLARE_PARENTS_ANNOTATION_DESC, ADVICE_TYPES.DECLARE_PARENTS);
+		ANNOTATION_TYPES.put(DECLARE_PARENTS_ANNOTATION_DESC,
+				ADVICE_TYPES.DECLARE_PARENTS);
 	}
 
 	private String visitedMethod = null;
@@ -88,14 +94,16 @@ public class AdviceAnnotationVisitor extends EmptyVisitor {
 
 	private String aspectClassName;
 
-	public AdviceAnnotationVisitor(IDOMNode node, String aspectName, String aspectClassName) {
+	public AdviceAnnotationVisitor(IDOMNode node, String aspectName,
+			String aspectClassName) {
 		this.node = node;
 		this.aspectName = aspectName;
 		this.aspectClassName = aspectClassName;
 	}
 
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-		if (visitedMethod != null && visible && ANNOTATION_TYPES.containsKey(desc)) {
+		if (visitedMethod != null && visible
+				&& ANNOTATION_TYPES.containsKey(desc)) {
 
 			AnnotationAspectDefinition def = new AnnotationAspectDefinition();
 			aspectDefinitions.add(def);
@@ -111,7 +119,8 @@ public class AdviceAnnotationVisitor extends EmptyVisitor {
 			visitedField = null;
 			return this;
 		}
-		else if (visitedField != null && visible && ANNOTATION_TYPES.containsKey(desc)) {
+		else if (visitedField != null && visible
+				&& ANNOTATION_TYPES.containsKey(desc)) {
 			AnnotationIntroductionDefinition def = new AnnotationIntroductionDefinition();
 			aspectDefinitions.add(def);
 			lastAspectDefinition = def;
@@ -134,10 +143,12 @@ public class AdviceAnnotationVisitor extends EmptyVisitor {
 		if (lastAspectDefinition != null) {
 			if (lastAspectDefinition instanceof AnnotationAspectDefinition) {
 				if ("value".equals(name) || "pointcut".equals(name)) {
-					((AnnotationAspectDefinition) lastAspectDefinition).setPointcutExpression(value.toString());
+					((AnnotationAspectDefinition) lastAspectDefinition)
+							.setPointcutExpression(value.toString());
 				}
 				else if ("argNames".equals(name)) {
-					lastAspectDefinition.setArgNames(StringUtils.commaDelimitedListToStringArray(value.toString()));
+					lastAspectDefinition.setArgNames(StringUtils
+							.commaDelimitedListToStringArray(value.toString()));
 				}
 				else if ("returning".equals(name)) {
 					lastAspectDefinition.setReturning(value.toString());
@@ -148,23 +159,27 @@ public class AdviceAnnotationVisitor extends EmptyVisitor {
 			}
 			else if (lastAspectDefinition instanceof AnnotationIntroductionDefinition) {
 				if ("defaultImpl".equals(name)) {
-					((AnnotationIntroductionDefinition) lastAspectDefinition).setDefaultImplName(value.toString());
+					((AnnotationIntroductionDefinition) lastAspectDefinition)
+							.setDefaultImplName(value.toString());
 				}
 				else if ("value".equals(name)) {
-					((AnnotationIntroductionDefinition) lastAspectDefinition).setTypePattern(value.toString());
+					((AnnotationIntroductionDefinition) lastAspectDefinition)
+							.setTypePattern(value.toString());
 				}
 			}
 		}
 	}
 
-	public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
+	public FieldVisitor visitField(int access, String name, String desc,
+			String signature, Object value) {
 		visitedField = name;
 		visitedFieldType = Type.getType(desc).getClassName();
 		visitedMethod = null;
 		return this;
 	}
 
-	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+	public MethodVisitor visitMethod(int access, String name, String desc,
+			String signature, String[] exceptions) {
 		Type[] types = Type.getArgumentTypes(desc);
 		StringBuffer buf = new StringBuffer(name);
 		if (types != null && types.length > 0) {

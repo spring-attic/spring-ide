@@ -29,7 +29,8 @@ import org.eclipse.wst.xml.core.internal.modelhandler.XMLModelLoader;
  * Provides model handling for Spring beans config files.
  */
 @SuppressWarnings("restriction")
-public class BeansModelHandler extends AbstractModelHandler implements IModelHandler {
+public class BeansModelHandler extends AbstractModelHandler implements
+		IModelHandler {
 	/**
 	 * Needs to match what's in plugin registry. In fact, can be overwritten at
 	 * run time with what's in registry! (so should never be 'final')
@@ -40,7 +41,8 @@ public class BeansModelHandler extends AbstractModelHandler implements IModelHan
 	 * Needs to match what's in plugin registry. In fact, can be overwritten at
 	 * run time with what's in registry! (so should never be 'final')
 	 */
-	private static String associatedContentTypeID = Activator.PLUGIN_ID + ".beansConfig";
+	private static String associatedContentTypeID = Activator.PLUGIN_ID
+			+ ".beansConfig";
 
 	public BeansModelHandler() {
 		setId(modelHandlerID);

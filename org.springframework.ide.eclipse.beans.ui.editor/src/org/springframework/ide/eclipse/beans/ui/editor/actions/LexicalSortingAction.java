@@ -50,10 +50,12 @@ public class LexicalSortingAction extends Action {
 		if (spring) {
 			viewer.setSorter(value ? new OutlineSorter() : null);
 		}
-		setToolTipText(value ? Activator.getResourceString(PREFIX + "tooltip.checked") : Activator
-				.getResourceString(PREFIX + "tooltip.unchecked"));
-		setDescription(value ? Activator.getResourceString(PREFIX + "description.checked") : Activator
-				.getResourceString(PREFIX + "description.unchecked"));
+		setToolTipText(value ? Activator.getResourceString(PREFIX
+				+ "tooltip.checked") : Activator.getResourceString(PREFIX
+				+ "tooltip.unchecked"));
+		setDescription(value ? Activator.getResourceString(PREFIX
+				+ "description.checked") : Activator.getResourceString(PREFIX
+				+ "description.unchecked"));
 		if (doStore) {
 			prefs.setValue(IPreferencesConstants.OUTLINE_SORT, value);
 			Activator.getDefault().savePluginPreferences();

@@ -38,11 +38,11 @@ public class PublicMethodSearchRequestor extends MethodSearchRequestor {
 	public void acceptSearchMatch(IMethod method) throws CoreException {
 		if (Flags.isPublic(method.getFlags()) && !Flags.isInterface(method.getFlags()) && method.exists()
 				&& ((IType) method.getParent()).isClass() && !method.isConstructor()) {
-			createMethodProposal(method);
+			createMethodProposal(method, MethodSearchRequestor.METHOD_RELEVANCE);
 		}
 	}
 
-	protected void createMethodProposal(IMethod method) {
+	protected void createMethodProposal(IMethod method, int relevance) {
 		try {
 			String[] parameterNames = method.getParameterNames();
 			String[] parameterTypes = getParameterTypes(method);
@@ -86,7 +86,7 @@ public class PublicMethodSearchRequestor extends MethodSearchRequestor {
 
 				BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(replaceText, request
 						.getReplacementBeginPosition(), request.getReplacementLength(), replaceText.length(), image,
-						displayText, null, javadoc, MethodSearchRequestor.METHOD_RELEVANCE);
+						displayText, null, javadoc, relevance);
 
 				request.addProposal(proposal);
 				methods.add(method.getSignature());

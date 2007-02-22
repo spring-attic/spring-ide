@@ -119,8 +119,10 @@ public class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 				}
 			}
 		}
-		else if ("before".equals(shortNodeName) || "after".equals(shortNodeName)
-				|| "after-returning".equals(shortNodeName) || "after-throwing".equals(shortNodeName)
+		else if ("before".equals(shortNodeName)
+				|| "after".equals(shortNodeName)
+				|| "after-returning".equals(shortNodeName)
+				|| "after-throwing".equals(shortNodeName)
 				|| "around".equals(shortNodeName)) {
 			text = nodeName + " ";
 			if (BeansContentOutlineConfiguration.isShowAttributes()) {

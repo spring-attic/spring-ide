@@ -24,7 +24,8 @@ import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 
 /**
  */
-public class AopReferenceModelNavigatorLabelProvider extends BeansModelLabelProvider implements ICommonLabelProvider {
+public class AopReferenceModelNavigatorLabelProvider extends
+		BeansModelLabelProvider implements ICommonLabelProvider {
 
 	public String getDescription(Object element) {
 		// TODO add descrption here

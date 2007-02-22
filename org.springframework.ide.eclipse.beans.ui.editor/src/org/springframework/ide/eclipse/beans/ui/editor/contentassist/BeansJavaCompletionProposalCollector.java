@@ -20,7 +20,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 
-public class BeansJavaCompletionProposalCollector extends CompletionProposalCollector {
+public class BeansJavaCompletionProposalCollector extends
+		CompletionProposalCollector {
 
 	private boolean interfaceRequired = false;
 
@@ -33,7 +34,8 @@ public class BeansJavaCompletionProposalCollector extends CompletionProposalColl
 	 * 
 	 * @param cu the compilation unit that the result collector will operate on
 	 */
-	public BeansJavaCompletionProposalCollector(ICompilationUnit cu, boolean interfaceRequired) {
+	public BeansJavaCompletionProposalCollector(ICompilationUnit cu,
+			boolean interfaceRequired) {
 		super(cu);
 		this.interfaceRequired = interfaceRequired;
 	}
@@ -72,7 +74,8 @@ public class BeansJavaCompletionProposalCollector extends CompletionProposalColl
 	public void accept(CompletionProposal proposal) {
 		if (CompletionProposal.TYPE_REF == proposal.getKind()) {
 			if ((!interfaceRequired && !Flags.isInterface(proposal.getFlags()))
-					|| (interfaceRequired && Flags.isInterface(proposal.getFlags()))) {
+					|| (interfaceRequired && Flags.isInterface(proposal
+							.getFlags()))) {
 				super.accept(proposal);
 			}
 		}

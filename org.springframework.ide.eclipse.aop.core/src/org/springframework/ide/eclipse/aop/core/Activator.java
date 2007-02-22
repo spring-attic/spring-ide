@@ -73,7 +73,8 @@ public class Activator extends AbstractUIPlugin {
 	}
 
 	public static void log(Throwable exception) {
-		getDefault().getLog().log(createErrorStatus("Internal Error", exception));
+		getDefault().getLog().log(
+				createErrorStatus("Internal Error", exception));
 	}
 
 	/**

@@ -24,7 +24,8 @@ public interface INamespaceAwareEditorContribution {
 
 	String getNamespaceUri();
 
-	LabelProvider getLabelProvider(BeansContentOutlineConfiguration configuration);
+	LabelProvider getLabelProvider(
+			BeansContentOutlineConfiguration configuration);
 
 	INamespaceContentAssistProcessor getContentAssistProcessor();
 

@@ -36,8 +36,8 @@ public class AopReference implements IAopReference {
 
 	private IBean bean;
 
-	public AopReference(ADVICE_TYPES type, IMember source, IMember target, IAspectDefinition def, IResource file,
-			IBean bean) {
+	public AopReference(ADVICE_TYPES type, IMember source, IMember target,
+			IAspectDefinition def, IResource file, IBean bean) {
 		this.type = type;
 		this.source = source;
 		this.target = target;
@@ -71,8 +71,10 @@ public class AopReference implements IAopReference {
 			AopReference other = (AopReference) obj;
 			return getTarget().equals(other.getTarget())
 					&& ((getSource() == null && other.getSource() == null) || (getSource() != null && getSource()
-							.equals(other.getSource()))) && getResource().equals(other.getResource())
-					&& getDefinition().getAspectLineNumber() == other.getDefinition().getAspectLineNumber();
+							.equals(other.getSource())))
+					&& getResource().equals(other.getResource())
+					&& getDefinition().getAspectLineNumber() == other
+							.getDefinition().getAspectLineNumber();
 		}
 		return false;
 	}
@@ -81,7 +83,8 @@ public class AopReference implements IAopReference {
 		int hashCode = ObjectUtils.nullSafeHashCode(source);
 		hashCode = 21 + ObjectUtils.nullSafeHashCode(target);
 		hashCode = 24 + ObjectUtils.nullSafeHashCode(file);
-		hashCode = 12 + ObjectUtils.nullSafeHashCode(definition.getAspectLineNumber());
+		hashCode = 12 + ObjectUtils.nullSafeHashCode(definition
+				.getAspectLineNumber());
 		return hashCode;
 	}
 

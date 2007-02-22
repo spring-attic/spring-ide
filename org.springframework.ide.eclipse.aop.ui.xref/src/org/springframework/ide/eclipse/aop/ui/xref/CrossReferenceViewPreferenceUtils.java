@@ -24,9 +24,11 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 public class CrossReferenceViewPreferenceUtils {
 
-	public static final String XREF_CHECKED_FILTERS = Activator.PLUGIN_ID + ".checked.filters"; //$NON-NLS-1$
+	public static final String XREF_CHECKED_FILTERS = Activator.PLUGIN_ID
+			+ ".checked.filters"; //$NON-NLS-1$
 
-	public static final String XREF_CHECKED_FILTERS_INPLACE = Activator.PLUGIN_ID + ".checked.filters.inplace";
+	public static final String XREF_CHECKED_FILTERS_INPLACE = Activator.PLUGIN_ID
+			+ ".checked.filters.inplace";
 
 	@SuppressWarnings("unchecked")
 	public static void setCheckedInplaceFilters(List l) {
@@ -39,13 +41,16 @@ public class CrossReferenceViewPreferenceUtils {
 				sb.append(","); //$NON-NLS-1$
 			}
 		}
-		IPreferenceStore pstoreInplace = Activator.getDefault().getPreferenceStore();
+		IPreferenceStore pstoreInplace = Activator.getDefault()
+				.getPreferenceStore();
 		pstoreInplace.setValue(XREF_CHECKED_FILTERS_INPLACE, sb.toString());
 	}
 
 	public static List<Object> getFilterCheckedInplaceList() {
-		IPreferenceStore pstoreInplace = Activator.getDefault().getPreferenceStore();
-		String xRefCheckedFilters = pstoreInplace.getString(XREF_CHECKED_FILTERS_INPLACE);
+		IPreferenceStore pstoreInplace = Activator.getDefault()
+				.getPreferenceStore();
+		String xRefCheckedFilters = pstoreInplace
+				.getString(XREF_CHECKED_FILTERS_INPLACE);
 		if (!xRefCheckedFilters.startsWith("set: ")) { //$NON-NLS-1$
 			return null;
 		}

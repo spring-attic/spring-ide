@@ -53,8 +53,10 @@ public class AopReferenceModel implements IAopReferenceModel {
 	}
 
 	private void createModel(IJavaProject project) {
-		Set<IFile> resourcesToBuild = AopReferenceModelUtils.getFilesToBuildFromBeansProject(project.getProject());
-		AopReferenceModelBuilder.buildAopModel(project.getProject(), resourcesToBuild);
+		Set<IFile> resourcesToBuild = AopReferenceModelUtils
+				.getFilesToBuildFromBeansProject(project.getProject());
+		AopReferenceModelBuilder.buildAopModel(project.getProject(),
+				resourcesToBuild);
 	}
 
 	public IAopProject getProjectWithInitialization(IJavaProject project) {
@@ -96,11 +98,13 @@ public class AopReferenceModel implements IAopReferenceModel {
 		return getAdviceDefinition(je).size() > 0;
 	}
 
-	public void registerAopModelChangedListener(IAopModelChangedListener listener) {
+	public void registerAopModelChangedListener(
+			IAopModelChangedListener listener) {
 		this.listeners.add(listener);
 	}
 
-	public void unregisterAopModelChangedListener(IAopModelChangedListener listener) {
+	public void unregisterAopModelChangedListener(
+			IAopModelChangedListener listener) {
 		this.listeners.remove(listener);
 	}
 
@@ -110,7 +114,8 @@ public class AopReferenceModel implements IAopReferenceModel {
 
 		List<IAopReference> references = getAllReferences(project);
 		for (IAopReference reference : references) {
-			if (reference.getSource() != null && reference.getSource().equals(je)) {
+			if (reference.getSource() != null
+					&& reference.getSource().equals(je)) {
 				advices.add(reference);
 			}
 		}

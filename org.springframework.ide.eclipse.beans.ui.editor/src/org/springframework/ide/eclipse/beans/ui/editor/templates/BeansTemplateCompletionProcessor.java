@@ -36,16 +36,19 @@ import org.springframework.ide.eclipse.beans.ui.editor.Activator;
  * assist proposals, the <code>BeansContentAssistProcessor</code> has already
  * set the context type for templates.
  */
-public class BeansTemplateCompletionProcessor extends TemplateCompletionProcessor {
+public class BeansTemplateCompletionProcessor extends
+		TemplateCompletionProcessor {
 
 	private String contextTypeId = null;
 
-	protected ICompletionProposal createProposal(Template template, TemplateContext context, IRegion region,
-			int relevance) {
-		return new BeansCustomTemplateProposal(template, context, region, getImage(template), relevance);
+	protected ICompletionProposal createProposal(Template template,
+			TemplateContext context, IRegion region, int relevance) {
+		return new BeansCustomTemplateProposal(template, context, region,
+				getImage(template), relevance);
 	}
 
-	protected TemplateContextType getContextType(ITextViewer viewer, IRegion region) {
+	protected TemplateContextType getContextType(ITextViewer viewer,
+			IRegion region) {
 		ContextTypeRegistry registry = getTemplateContextRegistry();
 		if (registry != null) {
 			return registry.getContextType(contextTypeId);

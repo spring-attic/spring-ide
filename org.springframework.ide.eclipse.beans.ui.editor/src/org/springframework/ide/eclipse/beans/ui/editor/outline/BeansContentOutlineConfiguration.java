@@ -26,7 +26,8 @@ import org.springframework.ide.eclipse.beans.ui.editor.Activator;
 import org.springframework.ide.eclipse.beans.ui.editor.actions.LexicalSortingAction;
 import org.springframework.ide.eclipse.beans.ui.editor.actions.OutlineStyleAction;
 
-public class BeansContentOutlineConfiguration extends XMLContentOutlineConfiguration {
+public class BeansContentOutlineConfiguration extends
+		XMLContentOutlineConfiguration {
 
 	static boolean showAttributes;
 
@@ -41,7 +42,8 @@ public class BeansContentOutlineConfiguration extends XMLContentOutlineConfigura
 	 * Adds the outline style toggle to the context menu.
 	 */
 	protected IContributionItem[] createMenuContributions(TreeViewer viewer) {
-		IContributionItem styleItem = new ActionContributionItem(new OutlineStyleAction(viewer));
+		IContributionItem styleItem = new ActionContributionItem(
+				new OutlineStyleAction(viewer));
 		IContributionItem[] items = super.createMenuContributions(viewer);
 		if (items == null) {
 			items = new IContributionItem[] { styleItem };
@@ -59,7 +61,8 @@ public class BeansContentOutlineConfiguration extends XMLContentOutlineConfigura
 	 * Adds the sort toggle to the toolbar.
 	 */
 	protected IContributionItem[] createToolbarContributions(TreeViewer viewer) {
-		IContributionItem sortItem = new ActionContributionItem(new LexicalSortingAction(viewer));
+		IContributionItem sortItem = new ActionContributionItem(
+				new LexicalSortingAction(viewer));
 		IContributionItem[] items = super.createToolbarContributions(viewer);
 		if (items == null) {
 			items = new IContributionItem[] { sortItem };
@@ -73,7 +76,8 @@ public class BeansContentOutlineConfiguration extends XMLContentOutlineConfigura
 		return items;
 	}
 
-	protected void enableShowAttributes(boolean showAttributes, TreeViewer treeViewer) {
+	protected void enableShowAttributes(boolean showAttributes,
+			TreeViewer treeViewer) {
 		BeansContentOutlineConfiguration.showAttributes = showAttributes;
 	}
 

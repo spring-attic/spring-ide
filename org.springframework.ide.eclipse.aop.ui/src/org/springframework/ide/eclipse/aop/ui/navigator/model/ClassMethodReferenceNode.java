@@ -27,8 +27,8 @@ import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 
-public class ClassMethodReferenceNode extends AbstractJavaElementReferenceNode implements IReferenceNode,
-		IRevealableReferenceNode {
+public class ClassMethodReferenceNode extends AbstractJavaElementReferenceNode
+		implements IReferenceNode, IRevealableReferenceNode {
 
 	private List<IReferenceNode> children;
 
@@ -64,7 +64,8 @@ public class ClassMethodReferenceNode extends AbstractJavaElementReferenceNode i
 		}
 
 		if (getDeclaredOnReferences().size() > 0) {
-			nodes.add(new AdvisedDeclareParentAopReferenceNode(getDeclaredOnReferences()));
+			nodes.add(new AdvisedDeclareParentAopReferenceNode(
+					getDeclaredOnReferences()));
 		}
 		if (beans.size() > 0) {
 			nodes.add(new ClassBeanReferenceNode(beans));
@@ -74,16 +75,20 @@ public class ClassMethodReferenceNode extends AbstractJavaElementReferenceNode i
 
 	public String getText() {
 		if (element instanceof IType) {
-			return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element) + " - "
+			return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER
+					.getText(element)
+					+ " - "
 					+ AopReferenceModelUtils.getPackageLinkName(element);
 		}
 		else {
-			return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element);
+			return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER
+					.getText(element);
 		}
 	}
 
 	public boolean hasChildren() {
-		return (children != null && children.size() > 0) || declareParentReferences.size() > 0
+		return (children != null && children.size() > 0)
+				|| declareParentReferences.size() > 0
 				|| declaredOnReferences.size() > 0 || this.beans.size() > 0;
 	}
 

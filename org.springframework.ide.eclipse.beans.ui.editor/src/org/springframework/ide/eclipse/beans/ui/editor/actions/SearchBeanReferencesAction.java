@@ -36,10 +36,12 @@ import org.w3c.dom.Element;
 public class SearchBeanReferencesAction extends AbstractBeansConfigEditorAction {
 	public void run(IAction action) {
 		if (getTextEditor() != null) {
-			ISelection selection = getTextEditor().getSelectionProvider().getSelection();
+			ISelection selection = getTextEditor().getSelectionProvider()
+					.getSelection();
 			String beanId = extractBeanId(selection);
 			if (beanId != null) {
-				ISearchQuery query = new BeanReferenceQuery(BeansSearchScope.newSearchScope(), beanId, true, true);
+				ISearchQuery query = new BeanReferenceQuery(BeansSearchScope
+						.newSearchScope(), beanId, true, true);
 				NewSearchUI.activateSearchResultView();
 				NewSearchUI.runQueryInBackground(query);
 			}
@@ -74,7 +76,8 @@ public class SearchBeanReferencesAction extends AbstractBeansConfigEditorAction 
 					// reg exp
 					attribute = elem.getAttributeNode("name");
 					if (attribute != null && attribute.getValue() != null) {
-						String[] tokens = StringUtils.tokenizeToStringArray(attribute.getValue(), ",; ");
+						String[] tokens = StringUtils.tokenizeToStringArray(
+								attribute.getValue(), ",; ");
 						for (int i = 0; i < tokens.length; i++) {
 							if (beanId != null) {
 								beanId += "|" + tokens[i];

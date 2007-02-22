@@ -34,7 +34,8 @@ public class OutlineStyleAction extends Action {
 		super(Activator.getResourceString(PREFIX + "label"), AS_CHECK_BOX);
 		this.viewer = viewer;
 		Preferences prefs = Activator.getDefault().getPluginPreferences();
-		boolean checked = prefs.getBoolean(IPreferencesConstants.OUTLINE_SPRING);
+		boolean checked = prefs
+				.getBoolean(IPreferencesConstants.OUTLINE_SPRING);
 		update(checked, false);
 		setImageDescriptor(BeansUIImages.DESC_OBJS_SPRING);
 	}
@@ -50,10 +51,12 @@ public class OutlineStyleAction extends Action {
 		if (sort) {
 			viewer.setSorter(value ? new OutlineSorter() : null);
 		}
-		setToolTipText(value ? Activator.getResourceString(PREFIX + "tooltip.checked") : Activator
-				.getResourceString(PREFIX + "tooltip.unchecked"));
-		setDescription(value ? Activator.getResourceString(PREFIX + "description.checked") : Activator
-				.getResourceString(PREFIX + "description.unchecked"));
+		setToolTipText(value ? Activator.getResourceString(PREFIX
+				+ "tooltip.checked") : Activator.getResourceString(PREFIX
+				+ "tooltip.unchecked"));
+		setDescription(value ? Activator.getResourceString(PREFIX
+				+ "description.checked") : Activator.getResourceString(PREFIX
+				+ "description.unchecked"));
 		if (doStore) {
 			prefs.setValue(IPreferencesConstants.OUTLINE_SPRING, value);
 			Activator.getDefault().savePluginPreferences();

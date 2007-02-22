@@ -40,7 +40,8 @@ import org.springframework.ide.eclipse.aop.ui.Activator;
 /**
  * Displays and configures debug tracing for AJDT
  */
-public class EventTraceView extends ViewPart implements EventTrace.EventListener {
+public class EventTraceView extends ViewPart implements
+		EventTrace.EventListener {
 
 	StyledText text;
 
@@ -64,7 +65,8 @@ public class EventTraceView extends ViewPart implements EventTrace.EventListener
 	 * @see IWorkbenchPart#createPartControl(Composite)
 	 */
 	public void createPartControl(Composite parent) {
-		text = new StyledText(parent, SWT.MULTI | SWT.READ_ONLY | SWT.VERTICAL | SWT.HORIZONTAL);
+		text = new StyledText(parent, SWT.MULTI | SWT.READ_ONLY | SWT.VERTICAL
+				| SWT.HORIZONTAL);
 		startup();
 		EventTrace.addListener(this);
 
@@ -74,14 +76,16 @@ public class EventTraceView extends ViewPart implements EventTrace.EventListener
 		// Add an empty ISelectionProvider so that this view works with dynamic
 		// help (bug 104331)
 		getSite().setSelectionProvider(new ISelectionProvider() {
-			public void addSelectionChangedListener(ISelectionChangedListener listener) {
+			public void addSelectionChangedListener(
+					ISelectionChangedListener listener) {
 			}
 
 			public ISelection getSelection() {
 				return null;
 			}
 
-			public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+			public void removeSelectionChangedListener(
+					ISelectionChangedListener listener) {
 			}
 
 			public void setSelection(ISelection selection) {
@@ -105,12 +109,14 @@ public class EventTraceView extends ViewPart implements EventTrace.EventListener
 	}
 
 	public void aopEvent(String msg, final int category, Date time) {
-		final String txt = DateFormat.getTimeInstance().format(time) + " " + msg + "\n";
-		Activator.getDefault().getWorkbench().getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				appendEventText(txt, category);
-			}
-		});
+		final String txt = DateFormat.getTimeInstance().format(time) + " "
+				+ msg + "\n";
+		Activator.getDefault().getWorkbench().getDisplay().asyncExec(
+				new Runnable() {
+					public void run() {
+						appendEventText(txt, category);
+					}
+				});
 	}
 
 	private void appendEventText(String msg, int category) {
@@ -137,9 +143,11 @@ public class EventTraceView extends ViewPart implements EventTrace.EventListener
 		else if (category == AopLog.BUILDER_CLASSPATH) {
 			styleRange.foreground = display.getSystemColor(SWT.COLOR_DARK_RED);
 		}
-		else if ((category == AopLog.BUILDER) || (category == AopLog.BUILDER_PROGRESS)
+		else if ((category == AopLog.BUILDER)
+				|| (category == AopLog.BUILDER_PROGRESS)
 				|| (category == AopLog.BUILDER_MESSAGES)) {
-			styleRange.foreground = display.getSystemColor(SWT.COLOR_DARK_GREEN);
+			styleRange.foreground = display
+					.getSystemColor(SWT.COLOR_DARK_GREEN);
 		}
 		else {
 			styleRange.foreground = display.getSystemColor(SWT.COLOR_BLACK);

@@ -31,7 +31,8 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
-public class BeanReferenceNode implements IReferenceNode, IRevealableReferenceNode {
+public class BeanReferenceNode implements IReferenceNode,
+		IRevealableReferenceNode {
 
 	private IBean bean;
 
@@ -52,8 +53,10 @@ public class BeanReferenceNode implements IReferenceNode, IRevealableReferenceNo
 		this.showChildren = showChildren;
 
 		List<IAopReference> references = Activator.getModel().getAllReferences(
-				BeansModelUtils.getJavaType(this.bean.getElementResource().getProject(),
-						BeansModelUtils.getBeanClass(this.bean, this.bean.getElementParent())).getJavaProject());
+				BeansModelUtils.getJavaType(
+						this.bean.getElementResource().getProject(),
+						BeansModelUtils.getBeanClass(this.bean, this.bean
+								.getElementParent())).getJavaProject());
 
 		Set<IBean> innerBeans = bean.getInnerBeans();
 
@@ -87,16 +90,21 @@ public class BeanReferenceNode implements IReferenceNode, IRevealableReferenceNo
 
 	public void openAndReveal() {
 		IResource resource = this.bean.getElementResource();
-		SpringUIUtils.openInEditor((IFile) resource, this.bean.getElementStartLine());
+		SpringUIUtils.openInEditor((IFile) resource, this.bean
+				.getElementStartLine());
 	}
 
 	public IReferenceNode[] getChildren() {
-		if (BeansModelUtils.getBeanClass(bean, bean.getElementParent()) != null && this.showChildren) {
+		if (BeansModelUtils.getBeanClass(bean, bean.getElementParent()) != null
+				&& this.showChildren) {
 
 			List<IReferenceNode> children = new ArrayList<IReferenceNode>();
-			children.add(new BeanClassReferenceNode(new BeanClassTargetReferenceNode(BeansModelUtils.getJavaType(
-					this.bean.getElementResource().getProject(), BeansModelUtils.getBeanClass(bean, bean
-							.getElementParent())), this)));
+			children.add(new BeanClassReferenceNode(
+					new BeanClassTargetReferenceNode(BeansModelUtils
+							.getJavaType(this.bean.getElementResource()
+									.getProject(),
+									BeansModelUtils.getBeanClass(bean, bean
+											.getElementParent())), this)));
 			if (this.innerBeanNodes.size() > 0) {
 				children.add(new InnerBeansReferenceNode(this.innerBeanNodes));
 			}
@@ -108,11 +116,14 @@ public class BeanReferenceNode implements IReferenceNode, IRevealableReferenceNo
 	}
 
 	public Image getImage() {
-		return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getImage(this.bean);
+		return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER
+				.getImage(this.bean);
 	}
 
 	public String getText() {
-		return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getText(this.bean) + " - "
+		return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER
+				.getText(this.bean)
+				+ " - "
 				+ this.bean.getElementResource().getFullPath().toString();
 	}
 

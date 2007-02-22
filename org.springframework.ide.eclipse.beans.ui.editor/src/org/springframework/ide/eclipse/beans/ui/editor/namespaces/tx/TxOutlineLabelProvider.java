@@ -41,15 +41,19 @@ public class TxOutlineLabelProvider extends JFaceNodeLabelProvider {
 		String shortNodeName = node.getLocalName();
 
 		String text = null;
-		if ("advice".equals(shortNodeName) || "annotation-driven".equals(shortNodeName)) {
+		if ("advice".equals(shortNodeName)
+				|| "annotation-driven".equals(shortNodeName)) {
 			text = nodeName;
 			String id = BeansEditorUtils.getAttribute(node, "id");
 			if (StringUtils.hasText(id)) {
 				text += " " + id;
 			}
 			if (BeansContentOutlineConfiguration.isShowAttributes()
-					&& BeansEditorUtils.hasAttribute(node, "transaction-manager")) {
-				text += " <" + BeansEditorUtils.getAttribute(node, "transaction-manager") + ">";
+					&& BeansEditorUtils.hasAttribute(node,
+							"transaction-manager")) {
+				text += " <"
+						+ BeansEditorUtils.getAttribute(node,
+								"transaction-manager") + ">";
 			}
 		}
 		return text;

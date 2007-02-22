@@ -28,7 +28,8 @@ public class TxClassNameProvider implements IClassNameProvider {
 
 	static {
 		elementToClassNameMapping = new HashMap<String, String>();
-		elementToClassNameMapping.put("advice", TransactionInterceptor.class.getName());
+		elementToClassNameMapping.put("advice", TransactionInterceptor.class
+				.getName());
 	}
 
 	public String getClassNameForElement(Element elem) {

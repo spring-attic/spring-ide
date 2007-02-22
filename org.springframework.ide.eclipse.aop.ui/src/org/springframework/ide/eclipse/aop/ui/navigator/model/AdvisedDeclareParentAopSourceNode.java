@@ -27,7 +27,8 @@ import org.springframework.ide.eclipse.aop.core.model.IIntroductionDefinition;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
-public class AdvisedDeclareParentAopSourceNode implements IReferenceNode, IRevealableReferenceNode {
+public class AdvisedDeclareParentAopSourceNode implements IReferenceNode,
+		IRevealableReferenceNode {
 
 	private List<IAopReference> references;
 
@@ -37,7 +38,8 @@ public class AdvisedDeclareParentAopSourceNode implements IReferenceNode, IRevea
 
 	public IReferenceNode[] getChildren() {
 		if (references.get(0).getDefinition() instanceof IAnnotationAopDefinition) {
-			return new IReferenceNode[] { new AdvisedDeclareParentAopSourceFieldNode(references.get(0)) };
+			return new IReferenceNode[] { new AdvisedDeclareParentAopSourceFieldNode(
+					references.get(0)) };
 		}
 		else {
 			return new IReferenceNode[0];
@@ -51,11 +53,14 @@ public class AdvisedDeclareParentAopSourceNode implements IReferenceNode, IRevea
 	public String getText() {
 		String text = "";
 		text += "declare parents:";
-		text += " implements " + ((IIntroductionDefinition) references.get(0).getDefinition()).getImplInterfaceName();
+		text += " implements "
+				+ ((IIntroductionDefinition) references.get(0).getDefinition())
+						.getImplInterfaceName();
 		text += " <";
 		text += references.get(0).getDefinition().getAspectName();
 		text += "> - ";
-		text += references.get(0).getDefinition().getResource().getFullPath().toString();
+		text += references.get(0).getDefinition().getResource().getFullPath()
+				.toString();
 		return text;
 	}
 
@@ -65,7 +70,8 @@ public class AdvisedDeclareParentAopSourceNode implements IReferenceNode, IRevea
 
 	public void openAndReveal() {
 		IResource resource = references.get(0).getDefinition().getResource();
-		SpringUIUtils.openInEditor((IFile) resource, references.get(0).getDefinition().getAspectLineNumber());
+		SpringUIUtils.openInEditor((IFile) resource, references.get(0)
+				.getDefinition().getAspectLineNumber());
 	}
 
 	public IAopReference getReference() {

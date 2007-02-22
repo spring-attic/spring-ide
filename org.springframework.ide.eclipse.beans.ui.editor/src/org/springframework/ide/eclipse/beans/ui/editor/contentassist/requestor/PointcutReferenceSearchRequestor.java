@@ -45,7 +45,8 @@ public class PointcutReferenceSearchRequestor {
 	public void acceptSearchMatch(Node pointcutNode, IFile file, String prefix) {
 		NamedNodeMap attributes = pointcutNode.getAttributes();
 		Node idAttribute = attributes.getNamedItem("id");
-		if (idAttribute != null && idAttribute.getNodeValue() != null && idAttribute.getNodeValue().startsWith(prefix)) {
+		if (idAttribute != null && idAttribute.getNodeValue() != null
+				&& idAttribute.getNodeValue().startsWith(prefix)) {
 			String pointcutName = idAttribute.getNodeValue();
 			String replaceText = pointcutName;
 			String fileName = file.getProjectRelativePath().toString();
@@ -61,11 +62,15 @@ public class PointcutReferenceSearchRequestor {
 				}
 
 				String displayText = buf.toString();
-				Image image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_POINTCUT);
+				Image image = BeansUIImages
+						.getImage(BeansUIImages.IMG_OBJS_POINTCUT);
 
-				BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(replaceText, request
-						.getReplacementBeginPosition(), request.getReplacementLength(), replaceText.length(), image,
-						displayText, null, BeansEditorUtils.createAdditionalProposalInfo(pointcutNode, file),
+				BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
+						replaceText, request.getReplacementBeginPosition(),
+						request.getReplacementLength(), replaceText.length(),
+						image, displayText, null, BeansEditorUtils
+								.createAdditionalProposalInfo(pointcutNode,
+										file),
 						PointcutReferenceSearchRequestor.LOCAL_BEAN_RELEVANCE);
 
 				request.addProposal(proposal);

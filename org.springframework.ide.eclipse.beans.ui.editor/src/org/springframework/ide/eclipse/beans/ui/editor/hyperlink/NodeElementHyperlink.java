@@ -33,7 +33,8 @@ public class NodeElementHyperlink implements IHyperlink {
 
 	private final ITextViewer viewer;
 
-	public NodeElementHyperlink(IRegion region, IRegion targetRegion, ITextViewer viewer) {
+	public NodeElementHyperlink(IRegion region, IRegion targetRegion,
+			ITextViewer viewer) {
 		this.region = region;
 		this.targetRegion = targetRegion;
 		this.viewer = viewer;

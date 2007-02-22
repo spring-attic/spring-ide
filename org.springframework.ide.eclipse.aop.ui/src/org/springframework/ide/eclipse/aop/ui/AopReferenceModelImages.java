@@ -59,7 +59,8 @@ public class AopReferenceModelImages {
 
 	static {
 		try {
-			ICON_BASE_URL = new URL(Activator.getDefault().getBundle().getEntry("/"), ICON_PATH_PREFIX);
+			ICON_BASE_URL = new URL(Activator.getDefault().getBundle()
+					.getEntry("/"), ICON_PATH_PREFIX);
 		}
 		catch (MalformedURLException e) {
 			Activator.log(e);
@@ -81,51 +82,70 @@ public class AopReferenceModelImages {
 
 	public static final String IMG_OBJS_ADVICE = NAME_PREFIX + "advice.gif";
 
-	public static final String IMG_OBJS_AROUND_ADVICE = NAME_PREFIX + "around_advice.gif";
+	public static final String IMG_OBJS_AROUND_ADVICE = NAME_PREFIX
+			+ "around_advice.gif";
 
-	public static final String IMG_OBJS_BEFORE_ADVICE = NAME_PREFIX + "before_advice.gif";
+	public static final String IMG_OBJS_BEFORE_ADVICE = NAME_PREFIX
+			+ "before_advice.gif";
 
-	public static final String IMG_OBJS_AFTER_ADVICE = NAME_PREFIX + "after_advice.gif";
+	public static final String IMG_OBJS_AFTER_ADVICE = NAME_PREFIX
+			+ "after_advice.gif";
 
 	public static final String IMG_OBJS_INTRODUCTION = NAME_PREFIX + "itd.gif";
 
 	public static final String IMG_OBJS_CONFIG = NAME_PREFIX + "ajcu_obj.gif";
 
-	public static final String IMG_OBJS_POINTCUT = NAME_PREFIX + "pointcut_def.gif";
+	public static final String IMG_OBJS_POINTCUT = NAME_PREFIX
+			+ "pointcut_def.gif";
 
-	public static final String IMG_OVR_ADVICE = NAME_PREFIX + "advice_overlay.gif";
+	public static final String IMG_OVR_ADVICE = NAME_PREFIX
+			+ "advice_overlay.gif";
 
-	public static final String IMG_OVR_SPRING = NAME_PREFIX + "spring_overlay.gif";
+	public static final String IMG_OVR_SPRING = NAME_PREFIX
+			+ "spring_overlay.gif";
 
-	public static final String IMG_OVR_ANNOTATION = NAME_PREFIX + "annotation_overlay.gif";
+	public static final String IMG_OVR_ANNOTATION = NAME_PREFIX
+			+ "annotation_overlay.gif";
 
 	private final static String STRUCTURE = "structure/"; // basic colors -
 
 	// size 16x16
 
-	public static final ImageDescriptor DESC_OBJS_ASPECT = createManaged(STRUCTURE, IMG_OBJS_ASPECT);
+	public static final ImageDescriptor DESC_OBJS_ASPECT = createManaged(
+			STRUCTURE, IMG_OBJS_ASPECT);
 
-	public static final ImageDescriptor DESC_OBJS_FILE = createManaged(STRUCTURE, IMG_OBJS_FILE);
+	public static final ImageDescriptor DESC_OBJS_FILE = createManaged(
+			STRUCTURE, IMG_OBJS_FILE);
 
-	public static final ImageDescriptor DESC_OBJS_ADVICE = createManaged(STRUCTURE, IMG_OBJS_ADVICE);
+	public static final ImageDescriptor DESC_OBJS_ADVICE = createManaged(
+			STRUCTURE, IMG_OBJS_ADVICE);
 
-	public static final ImageDescriptor DESC_OBJS_AROUND_ADVICE = createManaged(STRUCTURE, IMG_OBJS_AROUND_ADVICE);
+	public static final ImageDescriptor DESC_OBJS_AROUND_ADVICE = createManaged(
+			STRUCTURE, IMG_OBJS_AROUND_ADVICE);
 
-	public static final ImageDescriptor DESC_OBJS_BEFORE_ADVICE = createManaged(STRUCTURE, IMG_OBJS_BEFORE_ADVICE);
+	public static final ImageDescriptor DESC_OBJS_BEFORE_ADVICE = createManaged(
+			STRUCTURE, IMG_OBJS_BEFORE_ADVICE);
 
-	public static final ImageDescriptor DESC_OBJS_AFTER_ADVICE = createManaged(STRUCTURE, IMG_OBJS_AFTER_ADVICE);
+	public static final ImageDescriptor DESC_OBJS_AFTER_ADVICE = createManaged(
+			STRUCTURE, IMG_OBJS_AFTER_ADVICE);
 
-	public static final ImageDescriptor DESC_OBJS_INTRODUCTION = createManaged(STRUCTURE, IMG_OBJS_INTRODUCTION);
+	public static final ImageDescriptor DESC_OBJS_INTRODUCTION = createManaged(
+			STRUCTURE, IMG_OBJS_INTRODUCTION);
 
-	public static final ImageDescriptor DESC_OBJS_CONFIG = createManaged(STRUCTURE, IMG_OBJS_CONFIG);
+	public static final ImageDescriptor DESC_OBJS_CONFIG = createManaged(
+			STRUCTURE, IMG_OBJS_CONFIG);
 
-	public static final ImageDescriptor DESC_OBJS_POINTCUT = createManaged(STRUCTURE, IMG_OBJS_POINTCUT);
+	public static final ImageDescriptor DESC_OBJS_POINTCUT = createManaged(
+			STRUCTURE, IMG_OBJS_POINTCUT);
 
-	public static final ImageDescriptor DESC_OVR_ADVICE = createManaged(STRUCTURE, IMG_OVR_ADVICE);
+	public static final ImageDescriptor DESC_OVR_ADVICE = createManaged(
+			STRUCTURE, IMG_OVR_ADVICE);
 
-	public static final ImageDescriptor DESC_OVR_SPRING = createManaged(STRUCTURE, IMG_OVR_SPRING);
+	public static final ImageDescriptor DESC_OVR_SPRING = createManaged(
+			STRUCTURE, IMG_OVR_SPRING);
 
-	public static final ImageDescriptor DESC_OVR_ANNOTATION = createManaged(STRUCTURE, IMG_OVR_ANNOTATION);
+	public static final ImageDescriptor DESC_OVR_ANNOTATION = createManaged(
+			STRUCTURE, IMG_OVR_ANNOTATION);
 
 	/**
 	 * Returns the <code>Image<code> identified by the given key,
@@ -157,9 +177,11 @@ public class AopReferenceModelImages {
 	/* package */static ImageRegistry getImageRegistry() {
 		if (imageRegistry == null) {
 			imageRegistry = new ImageRegistry();
-			for (Iterator<String> iter = imageDescriptors.keySet().iterator(); iter.hasNext();) {
+			for (Iterator<String> iter = imageDescriptors.keySet().iterator(); iter
+					.hasNext();) {
 				String key = (String) iter.next();
-				imageRegistry.put(key, (ImageDescriptor) imageDescriptors.get(key));
+				imageRegistry.put(key, (ImageDescriptor) imageDescriptors
+						.get(key));
 			}
 			imageDescriptors = null;
 		}
@@ -169,9 +191,11 @@ public class AopReferenceModelImages {
 	// ---- Helper methods to access icons on the file system
 	// -------------------
 
-	private static void setImageDescriptors(IAction action, String type, String relPath) {
+	private static void setImageDescriptors(IAction action, String type,
+			String relPath) {
 		try {
-			ImageDescriptor id = ImageDescriptor.createFromURL(makeIconFileURL("d" + type, relPath));
+			ImageDescriptor id = ImageDescriptor.createFromURL(makeIconFileURL(
+					"d" + type, relPath));
 			if (id != null) {
 				action.setDisabledImageDescriptor(id);
 			}
@@ -190,8 +214,9 @@ public class AopReferenceModelImages {
 
 	private static ImageDescriptor createManaged(String prefix, String name) {
 		try {
-			ImageDescriptor result = ImageDescriptor.createFromURL(makeIconFileURL(prefix, name
-					.substring(NAME_PREFIX_LENGTH)));
+			ImageDescriptor result = ImageDescriptor
+					.createFromURL(makeIconFileURL(prefix, name
+							.substring(NAME_PREFIX_LENGTH)));
 			if (imageDescriptors == null) {
 				imageDescriptors = new HashMap<String, ImageDescriptor>();
 			}
@@ -217,7 +242,8 @@ public class AopReferenceModelImages {
 		}
 	}
 
-	private static URL makeIconFileURL(String prefix, String name) throws MalformedURLException {
+	private static URL makeIconFileURL(String prefix, String name)
+			throws MalformedURLException {
 		if (ICON_BASE_URL == null) {
 			throw new MalformedURLException();
 		}

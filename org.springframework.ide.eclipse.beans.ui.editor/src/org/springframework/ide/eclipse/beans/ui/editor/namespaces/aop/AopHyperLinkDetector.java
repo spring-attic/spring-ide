@@ -47,20 +47,24 @@ import org.w3c.dom.NodeList;
  * 
  * @author Christian Dupuis
  */
-public class AopHyperLinkDetector extends AbstractHyperLinkDetector implements IHyperlinkDetector {
+public class AopHyperLinkDetector extends AbstractHyperLinkDetector implements
+		IHyperlinkDetector {
 
 	/**
 	 * Returns <code>true</code> if given attribute is openable.
 	 */
 	protected boolean isLinkableAttr(Attr attr) {
 		String attrName = attr.getName();
-		return ("method".equals(attrName) || "ref".equals(attrName) || "pointcut-ref".equals(attrName)
-				|| "advice-ref".equals(attrName) || "implement-interface".equals(attrName) || "default-impl"
+		return ("method".equals(attrName) || "ref".equals(attrName)
+				|| "pointcut-ref".equals(attrName)
+				|| "advice-ref".equals(attrName)
+				|| "implement-interface".equals(attrName) || "default-impl"
 				.equals(attrName));
 	}
 
-	protected IHyperlink createHyperlink(String name, String target, Node parentNode, IRegion hyperlinkRegion,
-			IDocument document, Node node, ITextViewer textViewer, IRegion cursor) {
+	protected IHyperlink createHyperlink(String name, String target,
+			Node parentNode, IRegion hyperlinkRegion, IDocument document,
+			Node node, ITextViewer textViewer, IRegion cursor) {
 		if (name == null) {
 			return null;
 		}
@@ -81,12 +85,16 @@ public class AopHyperLinkDetector extends AbstractHyperLinkDetector implements I
 
 				if (ref != null) {
 					IFile file = BeansEditorUtils.getFile(document);
-					String className = BeansEditorUtils.getClassNameForBean(file, node.getOwnerDocument(), ref);
-					IType type = BeansModelUtils.getJavaType(file.getProject(), className);
+					String className = BeansEditorUtils.getClassNameForBean(
+							file, node.getOwnerDocument(), ref);
+					IType type = BeansModelUtils.getJavaType(file.getProject(),
+							className);
 					try {
-						IMethod method = Introspector.findMethod(type, target, -1, true, Statics.DONT_CARE);
+						IMethod method = Introspector.findMethod(type, target,
+								-1, true, Statics.DONT_CARE);
 						if (method != null) {
-							return new JavaElementHyperlink(hyperlinkRegion, method);
+							return new JavaElementHyperlink(hyperlinkRegion,
+									method);
 						}
 					}
 					catch (JavaModelException e) {
@@ -95,26 +103,32 @@ public class AopHyperLinkDetector extends AbstractHyperLinkDetector implements I
 			}
 		}
 		else if ("pointcut-ref".equals(name) && parentNode != null) {
-			IHyperlink hyperlink = searchPointcutElements(target, parentNode, textViewer, hyperlinkRegion);
+			IHyperlink hyperlink = searchPointcutElements(target, parentNode,
+					textViewer, hyperlinkRegion);
 			if (hyperlink == null && parentNode.getParentNode() != null) {
-				hyperlink = searchPointcutElements(target, parentNode.getParentNode(), textViewer, hyperlinkRegion);
+				hyperlink = searchPointcutElements(target, parentNode
+						.getParentNode(), textViewer, hyperlinkRegion);
 			}
 			return hyperlink;
 		}
 		else if ("advice-ref".equals(name)) {
-			Node bean = BeansEditorUtils.getFirstReferenceableNodeById(node.getOwnerDocument(), target);
+			Node bean = BeansEditorUtils.getFirstReferenceableNodeById(node
+					.getOwnerDocument(), target);
 			if (bean != null) {
 				IRegion region = getHyperlinkRegion(bean);
-				return new NodeElementHyperlink(hyperlinkRegion, region, textViewer);
+				return new NodeElementHyperlink(hyperlinkRegion, region,
+						textViewer);
 			}
 			else {
 				IFile file = BeansEditorUtils.getFile(document);
 				// assume this is an external reference
-				Iterator<?> beans = BeansEditorUtils.getBeansFromConfigSets(file).iterator();
+				Iterator<?> beans = BeansEditorUtils.getBeansFromConfigSets(
+						file).iterator();
 				while (beans.hasNext()) {
 					IBean modelBean = (IBean) beans.next();
 					if (modelBean.getElementName().equals(target)) {
-						return new ExternalBeanHyperlink(modelBean, hyperlinkRegion);
+						return new ExternalBeanHyperlink(modelBean,
+								hyperlinkRegion);
 					}
 				}
 			}
@@ -122,14 +136,16 @@ public class AopHyperLinkDetector extends AbstractHyperLinkDetector implements I
 		return null;
 	}
 
-	private IHyperlink searchPointcutElements(String name, Node node, ITextViewer textViewer, IRegion hyperlinkRegion) {
+	private IHyperlink searchPointcutElements(String name, Node node,
+			ITextViewer textViewer, IRegion hyperlinkRegion) {
 		NodeList beanNodes = node.getChildNodes();
 		for (int i = 0; i < beanNodes.getLength(); i++) {
 			Node beanNode = beanNodes.item(i);
 			if ("pointcut".equals(beanNode.getLocalName())) {
 				if (name.equals(BeansEditorUtils.getAttribute(beanNode, "id"))) {
 					IRegion region = getHyperlinkRegion(beanNode);
-					return new NodeElementHyperlink(hyperlinkRegion, region, textViewer);
+					return new NodeElementHyperlink(hyperlinkRegion, region,
+							textViewer);
 				}
 			}
 		}

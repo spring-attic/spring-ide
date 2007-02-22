@@ -61,7 +61,9 @@ public class JavaElementHyperlink implements IHyperlink {
 			if (elements[0] instanceof IJavaElement) {
 				IJavaElement element = (IJavaElement) elements[0];
 				try {
-					JavaUI.revealInEditor(JavaUI.openInEditor(element), element);
+					JavaUI
+							.revealInEditor(JavaUI.openInEditor(element),
+									element);
 				}
 				catch (PartInitException e) {
 				}

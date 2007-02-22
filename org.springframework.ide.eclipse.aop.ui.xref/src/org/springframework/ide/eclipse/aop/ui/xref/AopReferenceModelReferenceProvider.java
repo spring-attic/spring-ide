@@ -69,7 +69,8 @@ public class AopReferenceModelReferenceProvider implements IXReferenceProvider {
 
 	@SuppressWarnings("unchecked")
 	public List getFilterCheckedInplaceList() {
-		List checked = CrossReferenceViewPreferenceUtils.getFilterCheckedInplaceList();
+		List checked = CrossReferenceViewPreferenceUtils
+				.getFilterCheckedInplaceList();
 		if (checked != null) {
 			return checked;
 		}
@@ -120,79 +121,90 @@ public class AopReferenceModelReferenceProvider implements IXReferenceProvider {
 		IJavaElement je = (IJavaElement) o;
 		List<XRef> xrefs = new ArrayList<XRef>();
 
-		IAopReferenceModel model = org.springframework.ide.eclipse.aop.core.Activator.getModel();
-		List<IAopReference> references = model.getAllReferences(je.getJavaProject());
+		IAopReferenceModel model = org.springframework.ide.eclipse.aop.core.Activator
+				.getModel();
+		List<IAopReference> references = model.getAllReferences(je
+				.getJavaProject());
 		Map<IMember, XRef> refsAdvised = new HashMap<IMember, XRef>();
 		Map<IMember, XRef> refsAdvises = new HashMap<IMember, XRef>();
 		Map<IMember, XRef> refsDeclaredOn = new HashMap<IMember, XRef>();
 		Map<IMember, XRef> refsAspectDeclarations = new HashMap<IMember, XRef>();
 		for (IAopReference reference : references) {
 			if (reference.getAdviceType() != ADVICE_TYPES.DECLARE_PARENTS) {
-				if (checkFilter(checkedRelNames, "advises") && reference.getSource() != null
+				if (checkFilter(checkedRelNames, "advises")
+						&& reference.getSource() != null
 						&& reference.getSource().equals(je)) {
 					XRef ref = null;
 					if (refsDeclaredOn.containsKey(reference.getSource())) {
 						ref = refsDeclaredOn.get(reference.getSource());
 					}
 					else {
-						ref = new XRef("advises", new HashSet<AopReferenceModelNode>());
+						ref = new XRef("advises",
+								new HashSet<AopReferenceModelNode>());
 						refsDeclaredOn.put(reference.getSource(), ref);
 						xrefs.add(ref);
 					}
-					AopReferenceModelNode associate = new AopReferenceModelNode(AopReferenceModelNode.TYPE.TARGET,
-							reference);
+					AopReferenceModelNode associate = new AopReferenceModelNode(
+							AopReferenceModelNode.TYPE.TARGET, reference);
 					if (!ref.getAssociatesList().contains(associate)) {
 						ref.getAssociatesList().add(associate);
 					}
 				}
-				else if (checkFilter(checkedRelNames, "advised by") && reference.getTarget().equals(je)) {
+				else if (checkFilter(checkedRelNames, "advised by")
+						&& reference.getTarget().equals(je)) {
 					XRef ref = null;
-					if (refsAspectDeclarations.containsKey(reference.getTarget())) {
+					if (refsAspectDeclarations.containsKey(reference
+							.getTarget())) {
 						ref = refsAspectDeclarations.get(reference.getTarget());
 					}
 					else {
-						ref = new XRef("advised by", new HashSet<AopReferenceModelNode>());
+						ref = new XRef("advised by",
+								new HashSet<AopReferenceModelNode>());
 						refsAspectDeclarations.put(reference.getTarget(), ref);
 						xrefs.add(ref);
 					}
-					AopReferenceModelNode associate = new AopReferenceModelNode(AopReferenceModelNode.TYPE.SOURCE,
-							reference);
+					AopReferenceModelNode associate = new AopReferenceModelNode(
+							AopReferenceModelNode.TYPE.SOURCE, reference);
 					if (!ref.getAssociatesList().contains(associate)) {
 						ref.getAssociatesList().add(associate);
 					}
 				}
 			}
 			else {
-				if (checkFilter(checkedRelNames, "declared on") && reference.getSource() != null
+				if (checkFilter(checkedRelNames, "declared on")
+						&& reference.getSource() != null
 						&& reference.getSource().equals(je)) {
 					XRef ref = null;
 					if (refsAdvises.containsKey(reference.getSource())) {
 						ref = refsAdvises.get(reference.getSource());
 					}
 					else {
-						ref = new XRef("declared on", new HashSet<AopReferenceModelNode>());
+						ref = new XRef("declared on",
+								new HashSet<AopReferenceModelNode>());
 						refsAdvises.put(reference.getSource(), ref);
 						xrefs.add(ref);
 					}
-					AopReferenceModelNode associate = new AopReferenceModelNode(AopReferenceModelNode.TYPE.TARGET,
-							reference);
+					AopReferenceModelNode associate = new AopReferenceModelNode(
+							AopReferenceModelNode.TYPE.TARGET, reference);
 					if (!ref.getAssociatesList().contains(associate)) {
 						ref.getAssociatesList().add(associate);
 					}
 				}
-				else if (checkFilter(checkedRelNames, "aspect declarations") && reference.getTarget().equals(je)
+				else if (checkFilter(checkedRelNames, "aspect declarations")
+						&& reference.getTarget().equals(je)
 						&& reference.getSource() != null) {
 					XRef ref = null;
 					if (refsAdvised.containsKey(reference.getTarget())) {
 						ref = refsAdvised.get(reference.getTarget());
 					}
 					else {
-						ref = new XRef("aspect declarations", new HashSet<AopReferenceModelNode>());
+						ref = new XRef("aspect declarations",
+								new HashSet<AopReferenceModelNode>());
 						refsAdvised.put(reference.getTarget(), ref);
 						xrefs.add(ref);
 					}
-					AopReferenceModelNode associate = new AopReferenceModelNode(AopReferenceModelNode.TYPE.SOURCE,
-							reference);
+					AopReferenceModelNode associate = new AopReferenceModelNode(
+							AopReferenceModelNode.TYPE.SOURCE, reference);
 					if (!ref.getAssociatesList().contains(associate)) {
 						ref.getAssociatesList().add(associate);
 					}
@@ -204,7 +216,9 @@ public class AopReferenceModelReferenceProvider implements IXReferenceProvider {
 
 	@SuppressWarnings("unchecked")
 	private boolean checkFilter(List checkedRelNames, String relName) {
-		return checkedRelNames == null || (checkedRelNames != null && !checkedRelNames.contains(relName));
+		return checkedRelNames == null
+				|| (checkedRelNames != null && !checkedRelNames
+						.contains(relName));
 	}
 
 	private static class XRef implements IXReference {

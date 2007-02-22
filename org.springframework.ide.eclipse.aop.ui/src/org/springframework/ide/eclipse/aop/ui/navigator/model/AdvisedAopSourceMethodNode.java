@@ -20,7 +20,8 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 
-public class AdvisedAopSourceMethodNode extends AbstractJavaElementReferenceNode implements IReferenceNode,
+public class AdvisedAopSourceMethodNode extends
+		AbstractJavaElementReferenceNode implements IReferenceNode,
 		IRevealableReferenceNode {
 
 	private IAopReference reference;
@@ -37,13 +38,21 @@ public class AdvisedAopSourceMethodNode extends AbstractJavaElementReferenceNode
 	public String getText() {
 		if (reference.getSource() != null) {
 			if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
-				return AopReferenceModelUtils.getJavaElementLinkName(reference.getSource()) + " - "
-						+ AopReferenceModelUtils.getPackageLinkName(reference.getSource());
+				return AopReferenceModelUtils.getJavaElementLinkName(reference
+						.getSource())
+						+ " - "
+						+ AopReferenceModelUtils.getPackageLinkName(reference
+								.getSource());
 			}
 			else {
-				return AopReferenceModelUtils.getJavaElementLinkName(reference.getSource().getParent()) + "."
-						+ AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER.getText(reference.getSource()) + " - "
-						+ AopReferenceModelUtils.getPackageLinkName(reference.getSource());
+				return AopReferenceModelUtils.getJavaElementLinkName(reference
+						.getSource().getParent())
+						+ "."
+						+ AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER
+								.getText(reference.getSource())
+						+ " - "
+						+ AopReferenceModelUtils.getPackageLinkName(reference
+								.getSource());
 			}
 		}
 		else {

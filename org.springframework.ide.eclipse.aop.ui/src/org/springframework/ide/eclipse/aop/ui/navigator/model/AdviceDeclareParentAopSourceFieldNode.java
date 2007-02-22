@@ -20,7 +20,8 @@ import java.util.List;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 
-public class AdviceDeclareParentAopSourceFieldNode extends AbstractJavaElementReferenceNode implements IReferenceNode,
+public class AdviceDeclareParentAopSourceFieldNode extends
+		AbstractJavaElementReferenceNode implements IReferenceNode,
 		IRevealableReferenceNode {
 
 	private List<IAopReference> references;
@@ -31,10 +32,12 @@ public class AdviceDeclareParentAopSourceFieldNode extends AbstractJavaElementRe
 	}
 
 	public IReferenceNode[] getChildren() {
-		return new IReferenceNode[] { new AdviceDeclareParentAopReferenceNode(references) };
+		return new IReferenceNode[] { new AdviceDeclareParentAopReferenceNode(
+				references) };
 	}
 
 	public String getText() {
-		return AopReferenceModelUtils.getJavaElementLinkName(references.get(0).getSource());
+		return AopReferenceModelUtils.getJavaElementLinkName(references.get(0)
+				.getSource());
 	}
 }

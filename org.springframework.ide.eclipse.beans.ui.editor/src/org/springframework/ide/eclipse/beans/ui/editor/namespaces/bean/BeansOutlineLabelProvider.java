@@ -68,7 +68,8 @@ public class BeansOutlineLabelProvider extends JFaceNodeLabelProvider {
 		}
 
 		// Misc elements
-		if ("list".equals(nodeName) || "set".equals(nodeName) || "map".equals(nodeName) || "props".equals(nodeName)) {
+		if ("list".equals(nodeName) || "set".equals(nodeName)
+				|| "map".equals(nodeName) || "props".equals(nodeName)) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_COLLECTION);
 		}
 		if ("ref".equals(nodeName)) {

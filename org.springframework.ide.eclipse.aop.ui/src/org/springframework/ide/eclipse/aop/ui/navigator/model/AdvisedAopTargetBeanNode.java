@@ -24,7 +24,8 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
-public class AdvisedAopTargetBeanNode implements IReferenceNode, IRevealableReferenceNode {
+public class AdvisedAopTargetBeanNode implements IReferenceNode,
+		IRevealableReferenceNode {
 
 	private List<IAopReference> references;
 
@@ -37,12 +38,16 @@ public class AdvisedAopTargetBeanNode implements IReferenceNode, IRevealableRefe
 	}
 
 	public Image getImage() {
-		return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getImage(this.references.get(0).getTargetBean());
+		return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER
+				.getImage(this.references.get(0).getTargetBean());
 	}
 
 	public String getText() {
-		return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getText(this.references.get(0).getTargetBean())
-				+ " - " + this.references.get(0).getTargetBean().getElementResource().getFullPath().toString();
+		return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER
+				.getText(this.references.get(0).getTargetBean())
+				+ " - "
+				+ this.references.get(0).getTargetBean().getElementResource()
+						.getFullPath().toString();
 	}
 
 	public boolean hasChildren() {
@@ -50,8 +55,10 @@ public class AdvisedAopTargetBeanNode implements IReferenceNode, IRevealableRefe
 	}
 
 	public void openAndReveal() {
-		IResource resource = references.get(0).getTargetBean().getElementResource();
-		SpringUIUtils.openInEditor((IFile) resource, references.get(0).getTargetBean().getElementStartLine());
+		IResource resource = references.get(0).getTargetBean()
+				.getElementResource();
+		SpringUIUtils.openInEditor((IFile) resource, references.get(0)
+				.getTargetBean().getElementStartLine());
 	}
 
 	public IAopReference getReference() {

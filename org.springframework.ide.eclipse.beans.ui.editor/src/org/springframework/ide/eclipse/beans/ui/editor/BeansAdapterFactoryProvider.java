@@ -39,7 +39,8 @@ public class BeansAdapterFactoryProvider extends AdapterFactoryProviderForXML {
 	protected void addContentBasedFactories(IStructuredModel structuredModel) {
 		FactoryRegistry factoryRegistry = structuredModel.getFactoryRegistry();
 		Assert.isNotNull(factoryRegistry, "No factory registered");
-		INodeAdapterFactory factory = factoryRegistry.getFactoryFor(IJFaceNodeAdapter.class);
+		INodeAdapterFactory factory = factoryRegistry
+				.getFactoryFor(IJFaceNodeAdapter.class);
 		if (factory == null) {
 			factory = new BeansJFaceNodeAdapterFactory();
 			factoryRegistry.addFactory(factory);
@@ -47,17 +48,25 @@ public class BeansAdapterFactoryProvider extends AdapterFactoryProviderForXML {
 
 		// Stuff from super method (inferred grammar support)
 		if (structuredModel != null) {
-			ModelQuery modelQuery = ModelQueryUtil.getModelQuery(structuredModel);
+			ModelQuery modelQuery = ModelQueryUtil
+					.getModelQuery(structuredModel);
 			if (modelQuery != null) {
-				CMDocumentManager documentManager = modelQuery.getCMDocumentManager();
+				CMDocumentManager documentManager = modelQuery
+						.getCMDocumentManager();
 				if (documentManager != null) {
-					IPreferenceStore store = XMLUIPlugin.getDefault().getPreferenceStore();
+					IPreferenceStore store = XMLUIPlugin.getDefault()
+							.getPreferenceStore();
 					boolean useInferredGrammar = (store != null) ? store
-							.getBoolean(XMLUIPreferenceNames.USE_INFERRED_GRAMMAR) : true;
+							.getBoolean(XMLUIPreferenceNames.USE_INFERRED_GRAMMAR)
+							: true;
 
-					documentManager.setPropertyEnabled(CMDocumentManager.PROPERTY_ASYNC_LOAD, true);
-					documentManager.setPropertyEnabled(CMDocumentManager.PROPERTY_AUTO_LOAD, false);
-					documentManager.setPropertyEnabled(CMDocumentManager.PROPERTY_USE_CACHED_RESOLVED_URI, true);
+					documentManager.setPropertyEnabled(
+							CMDocumentManager.PROPERTY_ASYNC_LOAD, true);
+					documentManager.setPropertyEnabled(
+							CMDocumentManager.PROPERTY_AUTO_LOAD, false);
+					documentManager.setPropertyEnabled(
+							CMDocumentManager.PROPERTY_USE_CACHED_RESOLVED_URI,
+							true);
 					DOMObserver domObserver = new DOMObserver(structuredModel);
 					domObserver.setGrammarInferenceEnabled(useInferredGrammar);
 					domObserver.init();

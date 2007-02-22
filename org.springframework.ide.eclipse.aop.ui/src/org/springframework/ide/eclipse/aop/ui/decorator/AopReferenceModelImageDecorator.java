@@ -42,7 +42,8 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 @SuppressWarnings("restriction")
-public class AopReferenceModelImageDecorator extends LabelProvider implements ILightweightLabelDecorator {
+public class AopReferenceModelImageDecorator extends LabelProvider implements
+		ILightweightLabelDecorator {
 
 	public static final String DECORATOR_ID = org.springframework.ide.eclipse.aop.ui.Activator.PLUGIN_ID
 			+ ".decorator.adviceimagedecorator";
@@ -65,48 +66,69 @@ public class AopReferenceModelImageDecorator extends LabelProvider implements IL
 			IJavaElement je = (IJavaElement) element;
 			IJavaProject jp = je.getJavaProject();
 			// only query the model if the element is in an Spring project
-			if ((jp != null) && SpringCoreUtils.isSpringProject(jp.getProject())) {
+			if ((jp != null)
+					&& SpringCoreUtils.isSpringProject(jp.getProject())) {
 				if (je instanceof IMethod && Activator.getModel().isAdvised(je)) {
-					decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE, IDecoration.TOP_LEFT);
+					decoration.addOverlay(
+							AopReferenceModelImages.DESC_OVR_ADVICE,
+							IDecoration.TOP_LEFT);
 				}
 			}
 		}
 		else if (element instanceof BeanMethodReferenceNode
-				&& Activator.getModel().isAdvised(((BeanMethodReferenceNode) element).getJavaElement())) {
-			decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE, IDecoration.TOP_LEFT);
+				&& Activator.getModel().isAdvised(
+						((BeanMethodReferenceNode) element).getJavaElement())) {
+			decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE,
+					IDecoration.TOP_LEFT);
 		}
 		else if (element instanceof AdviceAopTargetMethodNode) {
-			decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE, IDecoration.TOP_LEFT);
+			decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE,
+					IDecoration.TOP_LEFT);
 		}
 		else if (element instanceof AdvisedAopSourceMethodNode) {
-			if (Activator.getModel().isAdvised(((AdvisedAopSourceMethodNode) element).getReference().getSource()))
-				decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE, IDecoration.TOP_LEFT);
+			if (Activator.getModel().isAdvised(
+					((AdvisedAopSourceMethodNode) element).getReference()
+							.getSource()))
+				decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE,
+						IDecoration.TOP_LEFT);
 		}
 		else if (element instanceof AdviceRootAopReferenceNode) {
-			List<IAopReference> references = ((AdviceRootAopReferenceNode) element).getReference();
+			List<IAopReference> references = ((AdviceRootAopReferenceNode) element)
+					.getReference();
 			for (IAopReference reference : references) {
 				if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
-					decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ANNOTATION, IDecoration.BOTTOM_LEFT);
+					decoration.addOverlay(
+							AopReferenceModelImages.DESC_OVR_ANNOTATION,
+							IDecoration.BOTTOM_LEFT);
 					break;
 				}
 			}
 		}
 		else if (element instanceof AdvisedAopSourceNode) {
-			IAopReference reference = ((AdvisedAopSourceNode) element).getReference();
+			IAopReference reference = ((AdvisedAopSourceNode) element)
+					.getReference();
 			if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
-				decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ANNOTATION, IDecoration.BOTTOM_LEFT);
+				decoration.addOverlay(
+						AopReferenceModelImages.DESC_OVR_ANNOTATION,
+						IDecoration.BOTTOM_LEFT);
 			}
 		}
 		else if (element instanceof AdviceDeclareParentAopSourceNode) {
-			IAopReference reference = ((AdviceDeclareParentAopSourceNode) element).getReference();
+			IAopReference reference = ((AdviceDeclareParentAopSourceNode) element)
+					.getReference();
 			if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
-				decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ANNOTATION, IDecoration.BOTTOM_LEFT);
+				decoration.addOverlay(
+						AopReferenceModelImages.DESC_OVR_ANNOTATION,
+						IDecoration.BOTTOM_LEFT);
 			}
 		}
 		else if (element instanceof AdvisedDeclareParentAopSourceNode) {
-			IAopReference reference = ((AdvisedDeclareParentAopSourceNode) element).getReference();
+			IAopReference reference = ((AdvisedDeclareParentAopSourceNode) element)
+					.getReference();
 			if (reference.getDefinition() instanceof IAnnotationAopDefinition) {
-				decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ANNOTATION, IDecoration.BOTTOM_LEFT);
+				decoration.addOverlay(
+						AopReferenceModelImages.DESC_OVR_ANNOTATION,
+						IDecoration.BOTTOM_LEFT);
 			}
 		}
 	}

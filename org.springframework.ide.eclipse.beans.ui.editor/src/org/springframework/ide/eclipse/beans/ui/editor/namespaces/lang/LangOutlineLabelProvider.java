@@ -29,8 +29,8 @@ public class LangOutlineLabelProvider extends JFaceNodeLabelProvider {
 	public Image getImage(Object object) {
 		Node node = (Node) object;
 		String nodeName = node.getLocalName();
-		if ("groovy".equals(nodeName) || "bsh".equals(nodeName) || "jruby".equals(nodeName)
-				|| "inline-script".equals(nodeName)) {
+		if ("groovy".equals(nodeName) || "bsh".equals(nodeName)
+				|| "jruby".equals(nodeName) || "inline-script".equals(nodeName)) {
 			return LangUIImages.getImage(LangUIImages.IMG_OBJS_LANG);
 		}
 		return null;
@@ -42,14 +42,16 @@ public class LangOutlineLabelProvider extends JFaceNodeLabelProvider {
 		String shortNodeName = node.getLocalName();
 
 		String text = null;
-		if ("groovy".equals(shortNodeName) || "bsh".equals(shortNodeName) || "jruby".equals(shortNodeName)) {
+		if ("groovy".equals(shortNodeName) || "bsh".equals(shortNodeName)
+				|| "jruby".equals(shortNodeName)) {
 			text = nodeName;
 			String id = BeansEditorUtils.getAttribute(node, "id");
 			if (StringUtils.hasText(id)) {
 				text += " " + id;
 			}
 			if (BeansContentOutlineConfiguration.isShowAttributes()) {
-				String ss = BeansEditorUtils.getAttribute(node, "script-source");
+				String ss = BeansEditorUtils
+						.getAttribute(node, "script-source");
 				if (StringUtils.hasText(ss)) {
 					text += " [" + ss + "]";
 				}

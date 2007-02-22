@@ -35,7 +35,8 @@ public class AopProject implements IAopProject {
 	}
 
 	public void addAopReference(IAopReference reference) {
-		AopLog.log(AopLog.BUILDER_MESSAGES, "Created AOP reference [" + reference + "]");
+		AopLog.log(AopLog.BUILDER_MESSAGES, "Created AOP reference ["
+				+ reference + "]");
 		this.references.add(reference);
 	}
 
@@ -60,7 +61,8 @@ public class AopProject implements IAopProject {
 	public List<IAopReference> getReferencesForResource(IResource resource) {
 		List<IAopReference> list = new ArrayList<IAopReference>();
 		for (IAopReference reference : this.references) {
-			if (reference.getResource().equals(resource) || reference.getDefinition().getResource().equals(resource)) {
+			if (reference.getResource().equals(resource)
+					|| reference.getDefinition().getResource().equals(resource)) {
 				list.add(reference);
 			}
 		}

@@ -49,7 +49,8 @@ public class DebugTracing {
 
 	public static String startupInfo() {
 		Bundle bundle = Activator.getDefault().getBundle();
-		String version = (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION);
+		String version = (String) bundle.getHeaders().get(
+				Constants.BUNDLE_VERSION);
 		StringBuffer eventData = new StringBuffer();
 		eventData.append("Spring IDE version ");
 		eventData.append(version);

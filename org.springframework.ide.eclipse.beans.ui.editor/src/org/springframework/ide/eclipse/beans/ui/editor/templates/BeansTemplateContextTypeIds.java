@@ -20,7 +20,8 @@ import org.springframework.ide.eclipse.beans.ui.editor.Activator;
 
 public interface BeansTemplateContextTypeIds {
 
-	public static final String PREFIX = Activator.PLUGIN_ID + ".templates.contextType.";
+	public static final String PREFIX = Activator.PLUGIN_ID
+			+ ".templates.contextType.";
 
 	public static final String ALL = PREFIX + "all";
 

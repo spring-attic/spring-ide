@@ -46,7 +46,8 @@ public class AdvisedDeclareParentAopReferenceNode implements IReferenceNode {
 				dRefs.put(r.getDefinition(), ref);
 			}
 		}
-		for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : dRefs.entrySet()) {
+		for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : dRefs
+				.entrySet()) {
 			nodes.add(new AdvisedDeclareParentAopSourceNode(entry.getValue()));
 		}
 		return nodes.toArray(new IReferenceNode[nodes.size()]);

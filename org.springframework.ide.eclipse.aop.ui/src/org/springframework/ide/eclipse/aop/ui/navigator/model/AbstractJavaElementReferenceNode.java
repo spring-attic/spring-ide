@@ -33,11 +33,14 @@ public class AbstractJavaElementReferenceNode {
 	}
 
 	public Image getImage() {
-		return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER.getImage(this.element);
+		return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER
+				.getImage(this.element);
 	}
 
 	public String getText() {
-		return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER.getText(this.element) + " - "
+		return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER
+				.getText(this.element)
+				+ " - "
 				+ AopReferenceModelUtils.getPackageLinkName(this.element);
 	}
 

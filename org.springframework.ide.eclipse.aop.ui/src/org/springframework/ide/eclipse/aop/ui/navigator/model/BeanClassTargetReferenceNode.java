@@ -27,7 +27,8 @@ import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 
-public class BeanClassTargetReferenceNode extends AbstractJavaElementReferenceNode implements IReferenceNode,
+public class BeanClassTargetReferenceNode extends
+		AbstractJavaElementReferenceNode implements IReferenceNode,
 		IRevealableReferenceNode {
 
 	protected BeanReferenceNode parent;
@@ -63,8 +64,8 @@ public class BeanClassTargetReferenceNode extends AbstractJavaElementReferenceNo
 			}
 		}
 		for (Map.Entry<IMember, MethodReference> entry : refs.entrySet()) {
-			nodes.add(new BeanMethodReferenceNode(entry.getKey(), entry.getValue().getAspects(), entry.getValue()
-					.getAdvices()));
+			nodes.add(new BeanMethodReferenceNode(entry.getKey(), entry
+					.getValue().getAspects(), entry.getValue().getAdvices()));
 		}
 		Map<IAspectDefinition, List<IAopReference>> dRefs = new HashMap<IAspectDefinition, List<IAopReference>>();
 		for (IAopReference r : parent.getDeclareParentReferences()) {
@@ -77,11 +78,13 @@ public class BeanClassTargetReferenceNode extends AbstractJavaElementReferenceNo
 				dRefs.put(r.getDefinition(), ref);
 			}
 		}
-		for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : dRefs.entrySet()) {
+		for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : dRefs
+				.entrySet()) {
 			nodes.add(new AdviceDeclareParentAopSourceNode(entry.getValue()));
 		}
 		if (parent.getDeclaredOnReferences().size() > 0) {
-			nodes.add(new AdvisedDeclareParentAopReferenceNode(parent.getDeclaredOnReferences()));
+			nodes.add(new AdvisedDeclareParentAopReferenceNode(parent
+					.getDeclaredOnReferences()));
 		}
 
 		return nodes.toArray(new IReferenceNode[nodes.size()]);
@@ -89,16 +92,20 @@ public class BeanClassTargetReferenceNode extends AbstractJavaElementReferenceNo
 
 	public String getText() {
 		if (element instanceof IType) {
-			return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element) + " - "
+			return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER
+					.getText(element)
+					+ " - "
 					+ AopReferenceModelUtils.getPackageLinkName(element);
 		}
 		else {
-			return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element);
+			return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER
+					.getText(element);
 		}
 	}
 
 	public boolean hasChildren() {
-		return parent.getAdviseReferences().size() > 0 || parent.getAspectReferences().size() > 0;
+		return parent.getAdviseReferences().size() > 0
+				|| parent.getAspectReferences().size() > 0;
 	}
 
 }

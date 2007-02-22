@@ -36,8 +36,9 @@ import org.eclipse.wst.sse.ui.internal.contentassist.IRelevanceConstants;
  * creation.
  */
 @SuppressWarnings("restriction")
-public class BeansJavaCompletionProposal implements ICompletionProposal, ICompletionProposalExtension,
-		ICompletionProposalExtension2, ICompletionProposalExtension4, IRelevanceCompletionProposal {
+public class BeansJavaCompletionProposal implements ICompletionProposal,
+		ICompletionProposalExtension, ICompletionProposalExtension2,
+		ICompletionProposalExtension4, IRelevanceCompletionProposal {
 
 	private String fAdditionalProposalInfo;
 
@@ -79,9 +80,12 @@ public class BeansJavaCompletionProposal implements ICompletionProposal, IComple
 	 * <tag |name="attr"> - the replacment length remains 4
 	 * 
 	 */
-	public BeansJavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength,
-			int cursorPosition, Image image, String displayString, IContextInformation contextInformation,
-			String additionalProposalInfo, int relevance, boolean updateReplacementLengthOnValidate) {
+	public BeansJavaCompletionProposal(String replacementString,
+			int replacementOffset, int replacementLength, int cursorPosition,
+			Image image, String displayString,
+			IContextInformation contextInformation,
+			String additionalProposalInfo, int relevance,
+			boolean updateReplacementLengthOnValidate) {
 
 		fReplacementString = "\"" + replacementString;
 		fReplacementOffset = replacementOffset;
@@ -96,11 +100,14 @@ public class BeansJavaCompletionProposal implements ICompletionProposal, IComple
 		fOriginalReplacementLength = fReplacementLength;
 	}
 
-	public BeansJavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength,
-			int cursorPosition, Image image, String displayString, IContextInformation contextInformation,
+	public BeansJavaCompletionProposal(String replacementString,
+			int replacementOffset, int replacementLength, int cursorPosition,
+			Image image, String displayString,
+			IContextInformation contextInformation,
 			String additionalProposalInfo, int relevance) {
-		this(replacementString, replacementOffset, replacementLength, cursorPosition, image, displayString,
-				contextInformation, additionalProposalInfo, relevance, true);
+		this(replacementString, replacementOffset, replacementLength,
+				cursorPosition, image, displayString, contextInformation,
+				additionalProposalInfo, relevance, true);
 	}
 
 	public void apply(IDocument document) {
@@ -114,16 +121,20 @@ public class BeansJavaCompletionProposal implements ICompletionProposal, IComple
 		}
 
 		if ("\"".equals(charBeforeCursor)) {
-			CompletionProposal proposal = new CompletionProposal(getReplacementString(), getReplacementOffset() - 1,
-					getReplacementLength(), getCursorPosition() + 1, getImage(), getDisplayString(),
-					getContextInformation(), getAdditionalProposalInfo());
+			CompletionProposal proposal = new CompletionProposal(
+					getReplacementString(), getReplacementOffset() - 1,
+					getReplacementLength(), getCursorPosition() + 1,
+					getImage(), getDisplayString(), getContextInformation(),
+					getAdditionalProposalInfo());
 			proposal.apply(document);
 
 		}
 		else {
-			CompletionProposal proposal = new CompletionProposal(getReplacementString() + "\"", getReplacementOffset(),
-					getReplacementLength(), getCursorPosition() + 1, getImage(), getDisplayString(),
-					getContextInformation(), getAdditionalProposalInfo());
+			CompletionProposal proposal = new CompletionProposal(
+					getReplacementString() + "\"", getReplacementOffset(),
+					getReplacementLength(), getCursorPosition() + 1,
+					getImage(), getDisplayString(), getContextInformation(),
+					getAdditionalProposalInfo());
 			proposal.apply(document);
 
 		}
@@ -143,14 +154,17 @@ public class BeansJavaCompletionProposal implements ICompletionProposal, IComple
 		}
 		catch (BadLocationException e) {
 		}
-		CompletionProposal proposal = new CompletionProposal(getReplacementString() + "\"", getReplacementOffset(),
-				getReplacementLength(), getCursorPosition() + 1, getImage(), getDisplayString(),
-				getContextInformation(), getAdditionalProposalInfo());
+		CompletionProposal proposal = new CompletionProposal(
+				getReplacementString() + "\"", getReplacementOffset(),
+				getReplacementLength(), getCursorPosition() + 1, getImage(),
+				getDisplayString(), getContextInformation(),
+				getAdditionalProposalInfo());
 		proposal.apply(document);
 		// we want to ContextInformationPresenter.updatePresentation() here
 	}
 
-	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
+	public void apply(ITextViewer viewer, char trigger, int stateMask,
+			int offset) {
 		IDocument document = viewer.getDocument();
 		// CMVC 252634 to compensate for "invisible" initial region
 		int caretOffset = viewer.getTextWidget().getCaretOffset();
@@ -159,7 +173,8 @@ public class BeansJavaCompletionProposal implements ICompletionProposal, IComple
 			caretOffset = extension.widgetOffset2ModelOffset(caretOffset);
 		}
 		else {
-			caretOffset = viewer.getTextWidget().getCaretOffset() + viewer.getVisibleRegion().getOffset();
+			caretOffset = viewer.getTextWidget().getCaretOffset()
+					+ viewer.getVisibleRegion().getOffset();
 		}
 
 		if (caretOffset == getReplacementOffset()) {
@@ -169,12 +184,15 @@ public class BeansJavaCompletionProposal implements ICompletionProposal, IComple
 			// replace the text without affecting the caret Position as this
 			// causes the cursor to move on its own
 			try {
-				int endOffsetOfChanges = getReplacementString().length() + getReplacementOffset();
+				int endOffsetOfChanges = getReplacementString().length()
+						+ getReplacementOffset();
 				// Insert the portion of the new text that comes after the
 				// current caret position
 				if (endOffsetOfChanges >= caretOffset) {
-					int postCaretReplacementLength = getReplacementOffset() + getReplacementLength() - caretOffset;
-					int preCaretReplacementLength = getReplacementString().length()
+					int postCaretReplacementLength = getReplacementOffset()
+							+ getReplacementLength() - caretOffset;
+					int preCaretReplacementLength = getReplacementString()
+							.length()
 							- (endOffsetOfChanges - caretOffset);
 					if (postCaretReplacementLength < 0) {
 						if (Debug.displayWarnings) {
@@ -190,15 +208,20 @@ public class BeansJavaCompletionProposal implements ICompletionProposal, IComple
 
 					String charAfterCursor = document.get(caretOffset, 1);
 					if ("\"".equals(charAfterCursor)) {
-						document.replace(caretOffset,
-								((postCaretReplacementLength - 1) < 0 ? postCaretReplacementLength
-										: postCaretReplacementLength - 1), getReplacementString().substring(
-										preCaretReplacementLength));
+						document
+								.replace(
+										caretOffset,
+										((postCaretReplacementLength - 1) < 0 ? postCaretReplacementLength
+												: postCaretReplacementLength - 1),
+										getReplacementString().substring(
+												preCaretReplacementLength));
 					}
 					else {
-						document.replace(caretOffset, postCaretReplacementLength, getReplacementString().substring(
-								preCaretReplacementLength)
-								+ "\"");
+						document.replace(caretOffset,
+								postCaretReplacementLength,
+								getReplacementString().substring(
+										preCaretReplacementLength)
+										+ "\"");
 					}
 
 				}
@@ -208,9 +231,11 @@ public class BeansJavaCompletionProposal implements ICompletionProposal, IComple
 				// otherwise
 				// Outright insertions are handled here
 				if (caretOffset > getReplacementOffset()) {
-					int preCaretTextLength = caretOffset - getReplacementOffset();
-					document.replace(getReplacementOffset(), preCaretTextLength, getReplacementString().substring(0,
-							preCaretTextLength));
+					int preCaretTextLength = caretOffset
+							- getReplacementOffset();
+					document.replace(getReplacementOffset(),
+							preCaretTextLength, getReplacementString()
+									.substring(0, preCaretTextLength));
 				}
 			}
 			catch (BadLocationException x) {
@@ -281,8 +306,10 @@ public class BeansJavaCompletionProposal implements ICompletionProposal, IComple
 
 	public Point getSelection(IDocument document) {
 		// return fProposal.getSelection(document);
-		CompletionProposal proposal = new CompletionProposal(getReplacementString(), getReplacementOffset(),
-				getReplacementLength(), getCursorPosition(), getImage(), getDisplayString(), getContextInformation(),
+		CompletionProposal proposal = new CompletionProposal(
+				getReplacementString(), getReplacementOffset(),
+				getReplacementLength(), getCursorPosition(), getImage(),
+				getDisplayString(), getContextInformation(),
 				getAdditionalProposalInfo());
 		return proposal.getSelection(document);
 	}
@@ -327,7 +354,8 @@ public class BeansJavaCompletionProposal implements ICompletionProposal, IComple
 			String start = document.get(fReplacementOffset, length);
 			// Remove " for comparison
 			start = start.replaceAll("\"", "");
-			String wordTemp = word.replaceAll("\"", "").substring(0, start.length());
+			String wordTemp = word.replaceAll("\"", "").substring(0,
+					start.length());
 			return wordTemp.equalsIgnoreCase(start);
 		}
 		catch (BadLocationException x) {

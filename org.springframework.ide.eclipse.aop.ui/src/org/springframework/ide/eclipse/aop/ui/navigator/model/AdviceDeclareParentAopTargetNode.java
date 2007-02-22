@@ -22,7 +22,8 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
-public class AdviceDeclareParentAopTargetNode implements IReferenceNode, IRevealableReferenceNode {
+public class AdviceDeclareParentAopTargetNode implements IReferenceNode,
+		IRevealableReferenceNode {
 
 	private IAopReference reference;
 
@@ -31,16 +32,21 @@ public class AdviceDeclareParentAopTargetNode implements IReferenceNode, IReveal
 	}
 
 	public IReferenceNode[] getChildren() {
-		return new IReferenceNode[] { new AdviceDeclareParentAopTargetMethodNode(reference) };
+		return new IReferenceNode[] { new AdviceDeclareParentAopTargetMethodNode(
+				reference) };
 	}
 
 	public Image getImage() {
-		return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getImage(this.reference.getTargetBean());
+		return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER
+				.getImage(this.reference.getTargetBean());
 	}
 
 	public String getText() {
-		return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER.getText(this.reference.getTargetBean()) + " - "
-				+ this.reference.getTargetBean().getElementResource().getFullPath().toString();
+		return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER
+				.getText(this.reference.getTargetBean())
+				+ " - "
+				+ this.reference.getTargetBean().getElementResource()
+						.getFullPath().toString();
 	}
 
 	public boolean hasChildren() {
@@ -48,12 +54,15 @@ public class AdviceDeclareParentAopTargetNode implements IReferenceNode, IReveal
 	}
 
 	public void openAndReveal() {
-		IResource resource = this.reference.getTargetBean().getElementResource();
-		SpringUIUtils.openInEditor((IFile) resource, this.reference.getTargetBean().getElementStartLine());
+		IResource resource = this.reference.getTargetBean()
+				.getElementResource();
+		SpringUIUtils.openInEditor((IFile) resource, this.reference
+				.getTargetBean().getElementStartLine());
 	}
 
 	public int getLineNumber() {
-		return AopReferenceModelNavigatorUtils.getLineNumber(reference.getTarget());
+		return AopReferenceModelNavigatorUtils.getLineNumber(reference
+				.getTarget());
 	}
 
 	public IResource getResource() {

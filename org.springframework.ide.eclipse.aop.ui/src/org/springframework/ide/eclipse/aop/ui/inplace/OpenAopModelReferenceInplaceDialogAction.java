@@ -23,7 +23,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 @SuppressWarnings("restriction")
-public class OpenAopModelReferenceInplaceDialogAction implements IWorkbenchWindowActionDelegate {
+public class OpenAopModelReferenceInplaceDialogAction implements
+		IWorkbenchWindowActionDelegate {
 
 	private AopReferenceModelInplaceDialog xrefDialog;
 
@@ -51,7 +52,8 @@ public class OpenAopModelReferenceInplaceDialogAction implements IWorkbenchWindo
 		xrefDialog = new AopReferenceModelInplaceDialog(parent);
 
 		xrefDialog.setLastSelection(getCurrentSelection());
-		xrefDialog.setWorkbenchPart(JavaPlugin.getActiveWorkbenchWindow().getActivePage().getActivePart());
+		xrefDialog.setWorkbenchPart(JavaPlugin.getActiveWorkbenchWindow()
+				.getActivePage().getActivePart());
 		xrefDialog.open();
 	}
 

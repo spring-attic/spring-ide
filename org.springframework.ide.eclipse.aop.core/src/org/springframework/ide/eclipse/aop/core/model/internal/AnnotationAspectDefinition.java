@@ -17,6 +17,7 @@ package org.springframework.ide.eclipse.aop.core.model.internal;
 
 import org.springframework.ide.eclipse.aop.core.model.IAnnotationAopDefinition;
 
-public class AnnotationAspectDefinition extends JavaAspectDefinition implements IAnnotationAopDefinition {
+public class AnnotationAspectDefinition extends JavaAspectDefinition implements
+		IAnnotationAopDefinition {
 
 }

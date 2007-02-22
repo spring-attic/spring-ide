@@ -24,7 +24,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class DefaultReferenceableElementsLocator implements IReferenceableElementsLocator {
+public class DefaultReferenceableElementsLocator implements
+		IReferenceableElementsLocator {
 
 	public Map<String, Node> getReferenceableElements(Document document) {
 		Map<String, Node> nodes = new HashMap<String, Node>();

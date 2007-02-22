@@ -33,30 +33,39 @@ public class NamespaceUtils {
 
 	public static final String DEFAULT_NAMESPACE_URI = "http://www.springframework.org/schema/beans";
 
-	public static final String EXTENSION_POINT = Activator.PLUGIN_ID + ".namespaces";
+	public static final String EXTENSION_POINT = Activator.PLUGIN_ID
+			+ ".namespaces";
 
 	public static IClassNameProvider getClassNameProvider(String namespaceUri) {
-		return getExecutableExtension(namespaceUri, "classNameProvider", IClassNameProvider.class);
+		return getExecutableExtension(namespaceUri, "classNameProvider",
+				IClassNameProvider.class);
 	}
 
-	public static INamespaceContentAssistProcessor getContentAssistProcessor(String namespaceUri) {
-		return getExecutableExtension(namespaceUri, "contentAssistProcessor", INamespaceContentAssistProcessor.class);
+	public static INamespaceContentAssistProcessor getContentAssistProcessor(
+			String namespaceUri) {
+		return getExecutableExtension(namespaceUri, "contentAssistProcessor",
+				INamespaceContentAssistProcessor.class);
 	}
 
-	public static IReferenceableElementsLocator getElementsLocator(String namespaceUri) {
-		return getExecutableExtension(namespaceUri, "elementLocator", IReferenceableElementsLocator.class);
+	public static IReferenceableElementsLocator getElementsLocator(
+			String namespaceUri) {
+		return getExecutableExtension(namespaceUri, "elementLocator",
+				IReferenceableElementsLocator.class);
 	}
 
 	public static List<IReferenceableElementsLocator> getAllElementsLocators() {
 		List<IReferenceableElementsLocator> locators = new ArrayList<IReferenceableElementsLocator>();
-		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(EXTENSION_POINT);
+		IExtensionPoint point = Platform.getExtensionRegistry()
+				.getExtensionPoint(EXTENSION_POINT);
 		if (point != null) {
 			for (IExtension extension : point.getExtensions()) {
-				for (IConfigurationElement config : extension.getConfigurationElements()) {
+				for (IConfigurationElement config : extension
+						.getConfigurationElements()) {
 					try {
 						if (config.getAttribute("elementLocator") != null) {
-							locators.add(((IReferenceableElementsLocator) config
-									.createExecutableExtension("elementLocator")));
+							locators
+									.add(((IReferenceableElementsLocator) config
+											.createExecutableExtension("elementLocator")));
 						}
 					}
 					catch (Exception e) {
@@ -69,16 +78,20 @@ public class NamespaceUtils {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T> T getExecutableExtension(String namespaceUri, String attributeName, Class<T> requiredType) {
+	private static <T> T getExecutableExtension(String namespaceUri,
+			String attributeName, Class<T> requiredType) {
 		namespaceUri = checkNameSpaceUri(namespaceUri);
-		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(EXTENSION_POINT);
+		IExtensionPoint point = Platform.getExtensionRegistry()
+				.getExtensionPoint(EXTENSION_POINT);
 		if (point != null) {
 			for (IExtension extension : point.getExtensions()) {
-				for (IConfigurationElement config : extension.getConfigurationElements()) {
+				for (IConfigurationElement config : extension
+						.getConfigurationElements()) {
 					if (namespaceUri.equals(config.getAttribute("uri"))) {
 						try {
 							if (config.getAttribute(attributeName) != null) {
-								return (T) config.createExecutableExtension(attributeName);
+								return (T) config
+										.createExecutableExtension(attributeName);
 							}
 						}
 						catch (Exception e) {
@@ -93,11 +106,13 @@ public class NamespaceUtils {
 	}
 
 	public static IHyperlinkDetector getHyperlinkDetector(String namespaceUri) {
-		return getExecutableExtension(namespaceUri, "hyperLinkDetector", IHyperlinkDetector.class);
+		return getExecutableExtension(namespaceUri, "hyperLinkDetector",
+				IHyperlinkDetector.class);
 	}
 
 	public static ILabelProvider getLabelProvider(String namespaceUri) {
-		return getExecutableExtension(namespaceUri, "labelProvider", ILabelProvider.class);
+		return getExecutableExtension(namespaceUri, "labelProvider",
+				ILabelProvider.class);
 	}
 
 	public static String getNameSpaceUri(Element element) {

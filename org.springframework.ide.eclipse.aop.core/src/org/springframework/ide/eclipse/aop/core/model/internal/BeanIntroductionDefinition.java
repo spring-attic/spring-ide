@@ -21,7 +21,8 @@ import org.springframework.aop.support.ClassFilters;
 import org.springframework.ide.eclipse.aop.core.model.IIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 
-public class BeanIntroductionDefinition extends BeanAspectDefinition implements IIntroductionDefinition {
+public class BeanIntroductionDefinition extends BeanAspectDefinition implements
+		IIntroductionDefinition {
 
 	private String introducedInterfaceName;
 
@@ -37,15 +38,17 @@ public class BeanIntroductionDefinition extends BeanAspectDefinition implements 
 
 	public ClassFilter getTypeMatcher() {
 		if (this.typePatternClassFilter == null) {
-			ClassFilter typePatternFilter = new TypePatternClassFilter(typePattern);
+			ClassFilter typePatternFilter = new TypePatternClassFilter(
+					typePattern);
 
 			// Excludes methods implemented.
 			ClassFilter exclusion = new ClassFilter() {
 				@SuppressWarnings("unchecked")
 				public boolean matches(Class clazz) {
 					try {
-						Class<?> implInterfaceClass = Thread.currentThread().getContextClassLoader().loadClass(
-								introducedInterfaceName);
+						Class<?> implInterfaceClass = Thread.currentThread()
+								.getContextClassLoader().loadClass(
+										introducedInterfaceName);
 						return !(implInterfaceClass.isAssignableFrom(clazz));
 					}
 					catch (ClassNotFoundException e) {
@@ -53,7 +56,8 @@ public class BeanIntroductionDefinition extends BeanAspectDefinition implements 
 					}
 				}
 			};
-			this.typePatternClassFilter = ClassFilters.intersection(typePatternFilter, exclusion);
+			this.typePatternClassFilter = ClassFilters.intersection(
+					typePatternFilter, exclusion);
 		}
 		return this.typePatternClassFilter;
 	}

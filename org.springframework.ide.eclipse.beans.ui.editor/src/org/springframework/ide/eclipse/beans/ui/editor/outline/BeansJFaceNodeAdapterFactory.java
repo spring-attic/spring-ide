@@ -33,7 +33,8 @@ public class BeansJFaceNodeAdapterFactory extends JFaceNodeAdapterFactory {
 		this(IJFaceNodeAdapter.class, true);
 	}
 
-	public BeansJFaceNodeAdapterFactory(Object adapterKey, boolean registerAdapters) {
+	public BeansJFaceNodeAdapterFactory(Object adapterKey,
+			boolean registerAdapters) {
 		super(adapterKey, registerAdapters);
 	}
 

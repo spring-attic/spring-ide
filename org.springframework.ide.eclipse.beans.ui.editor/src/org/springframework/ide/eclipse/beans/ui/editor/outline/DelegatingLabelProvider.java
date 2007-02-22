@@ -43,7 +43,8 @@ public class DelegatingLabelProvider extends JFaceNodeLabelProvider {
 		Node node = (Node) object;
 		String namespace = node.getNamespaceURI();
 
-		ILabelProvider labelProvider = NamespaceUtils.getLabelProvider(namespace);
+		ILabelProvider labelProvider = NamespaceUtils
+				.getLabelProvider(namespace);
 		if (labelProvider != null) {
 			Image image = labelProvider.getImage(object);
 			if (image != null) {
@@ -61,10 +62,11 @@ public class DelegatingLabelProvider extends JFaceNodeLabelProvider {
 		Node node = (Node) object;
 		String namespace = node.getNamespaceURI();
 
-		ILabelProvider labelProvider = NamespaceUtils.getLabelProvider(namespace);
+		ILabelProvider labelProvider = NamespaceUtils
+				.getLabelProvider(namespace);
 		if (labelProvider != null) {
 			String text = labelProvider.getText(object);
-			if (text != null) {
+			if (text != null && !"".equals(text.trim())) {
 				return text;
 			}
 		}

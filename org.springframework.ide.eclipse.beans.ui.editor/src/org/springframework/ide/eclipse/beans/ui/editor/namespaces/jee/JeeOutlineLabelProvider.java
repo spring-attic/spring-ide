@@ -28,7 +28,8 @@ public class JeeOutlineLabelProvider extends JFaceNodeLabelProvider {
 	public Image getImage(Object object) {
 		Node node = (Node) object;
 		String nodeName = node.getLocalName();
-		if ("jndi-lookup".equals(nodeName) || "local-slsb".equals(nodeName) || "remote-slsb".equals(nodeName)
+		if ("jndi-lookup".equals(nodeName) || "local-slsb".equals(nodeName)
+				|| "remote-slsb".equals(nodeName)
 				|| "entity-manager-factory".equals(nodeName)) {
 			return JeeUIImages.getImage(JeeUIImages.IMG_OBJS_JEE);
 		}
@@ -41,15 +42,18 @@ public class JeeOutlineLabelProvider extends JFaceNodeLabelProvider {
 		String shortNodeName = node.getLocalName();
 
 		String text = null;
-		if ("jndi-lookup".equals(shortNodeName) || "local-slsb".equals(shortNodeName)
+		if ("jndi-lookup".equals(shortNodeName)
+				|| "local-slsb".equals(shortNodeName)
 				|| "remote-slsb".equals(shortNodeName)) {
 			text = nodeName;
 			String id = BeansEditorUtils.getAttribute(node, "id");
 			if (StringUtils.hasText(id)) {
 				text += " " + id;
 			}
-			if (BeansContentOutlineConfiguration.isShowAttributes() && BeansEditorUtils.hasAttribute(node, "jndi-name")) {
-				text += " [" + BeansEditorUtils.getAttribute(node, "jndi-name") + "]";
+			if (BeansContentOutlineConfiguration.isShowAttributes()
+					&& BeansEditorUtils.hasAttribute(node, "jndi-name")) {
+				text += " [" + BeansEditorUtils.getAttribute(node, "jndi-name")
+						+ "]";
 			}
 		}
 		else if ("entity-manager-factory".equals(shortNodeName)) {
@@ -59,8 +63,11 @@ public class JeeOutlineLabelProvider extends JFaceNodeLabelProvider {
 				text += " " + id;
 			}
 			if (BeansContentOutlineConfiguration.isShowAttributes()
-					&& BeansEditorUtils.hasAttribute(node, "persistence-unit-name")) {
-				text += " [" + BeansEditorUtils.getAttribute(node, "persistence-unit-name") + "]";
+					&& BeansEditorUtils.hasAttribute(node,
+							"persistence-unit-name")) {
+				text += " ["
+						+ BeansEditorUtils.getAttribute(node,
+								"persistence-unit-name") + "]";
 			}
 		}
 		return text;

@@ -51,17 +51,21 @@ public class BeanReferenceSearchRequestor {
 		this(request, new ArrayList<String>());
 	}
 
-	public BeanReferenceSearchRequestor(ContentAssistRequest request, List<String> requiredTypes) {
+	public BeanReferenceSearchRequestor(ContentAssistRequest request,
+			List<String> requiredTypes) {
 		this.request = request;
 		this.beans = new HashSet<String>();
 		this.requiredTypes = requiredTypes;
 	}
 
 	public void acceptSearchMatch(IBean bean, IFile file, String prefix) {
-		if (bean.getElementName() != null && bean.getElementName().toLowerCase().startsWith(prefix.toLowerCase())) {
+		if (bean.getElementName() != null
+				&& bean.getElementName().toLowerCase().startsWith(
+						prefix.toLowerCase())) {
 			String beanName = bean.getElementName();
 			String replaceText = beanName;
-			String fileName = bean.getElementResource().getProjectRelativePath().toString();
+			String fileName = bean.getElementResource()
+					.getProjectRelativePath().toString();
 			String key = beanName + fileName;
 			if (!beans.contains(key)) {
 				StringBuffer buf = new StringBuffer();
@@ -81,18 +85,32 @@ public class BeanReferenceSearchRequestor {
 				buf.append(fileName);
 				String displayText = buf.toString();
 
-				Image image = BeansModelImages.getImage(bean, BeansCorePlugin.getModel().getConfig(file));
+				Image image = BeansModelImages.getImage(bean, BeansCorePlugin
+						.getModel().getConfig(file));
 				BeansJavaCompletionProposal proposal = null;
 				if (this.requiredTypes.contains(bean.getClassName())) {
-					proposal = new BeansJavaCompletionProposal(replaceText, request.getReplacementBeginPosition(),
-							request.getReplacementLength(), replaceText.length(), image, displayText, null,
+					proposal = new BeansJavaCompletionProposal(
+							replaceText,
+							request.getReplacementBeginPosition(),
+							request.getReplacementLength(),
+							replaceText.length(),
+							image,
+							displayText,
+							null,
 							BeansEditorUtils.createAdditionalProposalInfo(bean),
 							BeanReferenceSearchRequestor.TYPE_MATCHING_RELEVANCE);
 				}
 				else {
-					proposal = new BeansJavaCompletionProposal(replaceText, request.getReplacementBeginPosition(),
-							request.getReplacementLength(), replaceText.length(), image, displayText, null,
-							BeansEditorUtils.createAdditionalProposalInfo(bean), BeanReferenceSearchRequestor.RELEVANCE);
+					proposal = new BeansJavaCompletionProposal(
+							replaceText,
+							request.getReplacementBeginPosition(),
+							request.getReplacementLength(),
+							replaceText.length(),
+							image,
+							displayText,
+							null,
+							BeansEditorUtils.createAdditionalProposalInfo(bean),
+							BeanReferenceSearchRequestor.RELEVANCE);
 				}
 
 				request.addProposal(proposal);
@@ -101,10 +119,12 @@ public class BeanReferenceSearchRequestor {
 		}
 	}
 
-	public void acceptSearchMatch(String beanId, Node beanNode, IFile file, String prefix) {
+	public void acceptSearchMatch(String beanId, Node beanNode, IFile file,
+			String prefix) {
 		NamedNodeMap attributes = beanNode.getAttributes();
 		if (beanId.toLowerCase().startsWith(prefix.toLowerCase())) {
-			if (beanNode.getParentNode() != null && "beans".equals(beanNode.getParentNode().getNodeName())) {
+			if (beanNode.getParentNode() != null
+					&& "beans".equals(beanNode.getParentNode().getNodeName())) {
 				String beanName = beanId;
 				String replaceText = beanName;
 				String fileName = file.getProjectRelativePath().toString();
@@ -113,13 +133,15 @@ public class BeanReferenceSearchRequestor {
 					StringBuffer buf = new StringBuffer();
 					buf.append(beanName);
 					if (attributes.getNamedItem("class") != null) {
-						String className = attributes.getNamedItem("class").getNodeValue();
+						String className = attributes.getNamedItem("class")
+								.getNodeValue();
 						buf.append(" [");
 						buf.append(Signature.getSimpleName(className));
 						buf.append("]");
 					}
 					if (attributes.getNamedItem("parent") != null) {
-						String parentName = attributes.getNamedItem("parent").getNodeValue();
+						String parentName = attributes.getNamedItem("parent")
+								.getNodeValue();
 						buf.append(" <");
 						buf.append(parentName);
 						buf.append(">");
@@ -127,20 +149,29 @@ public class BeanReferenceSearchRequestor {
 					buf.append(" - ");
 					buf.append(fileName);
 					String displayText = buf.toString();
-					Image image = new DelegatingLabelProvider().getImage(beanNode);
+					Image image = new DelegatingLabelProvider()
+							.getImage(beanNode);
 
 					BeansJavaCompletionProposal proposal = null;
 
-					String className = BeansEditorUtils.getClassNameForBean(beanNode);
+					String className = BeansEditorUtils
+							.getClassNameForBean(beanNode);
 					if (this.requiredTypes.contains(className)) {
-						proposal = new BeansJavaCompletionProposal(replaceText, request.getReplacementBeginPosition(),
-								request.getReplacementLength(), replaceText.length(), image, displayText, null,
-								BeansEditorUtils.createAdditionalProposalInfo(beanNode, file), TYPE_MATCHING_RELEVANCE);
+						proposal = new BeansJavaCompletionProposal(replaceText,
+								request.getReplacementBeginPosition(), request
+										.getReplacementLength(), replaceText
+										.length(), image, displayText, null,
+								BeansEditorUtils.createAdditionalProposalInfo(
+										beanNode, file),
+								TYPE_MATCHING_RELEVANCE);
 					}
 					else {
-						proposal = new BeansJavaCompletionProposal(replaceText, request.getReplacementBeginPosition(),
-								request.getReplacementLength(), replaceText.length(), image, displayText, null,
-								BeansEditorUtils.createAdditionalProposalInfo(beanNode, file), RELEVANCE);
+						proposal = new BeansJavaCompletionProposal(replaceText,
+								request.getReplacementBeginPosition(), request
+										.getReplacementLength(), replaceText
+										.length(), image, displayText, null,
+								BeansEditorUtils.createAdditionalProposalInfo(
+										beanNode, file), RELEVANCE);
 					}
 
 					request.addProposal(proposal);

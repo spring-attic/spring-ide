@@ -47,8 +47,10 @@ public class AopReferenceModelNode implements IAdaptable, IXReferenceNode {
 	private void computeLabel() {
 		if (getJavaElement() != null) {
 			if (getJavaElement() instanceof IMethod) {
-				this.label = getJavaElement().getParent().getElementName() + '.'
-						+ AopReferenceModelUtils.readableName((IMethod) getJavaElement());
+				this.label = getJavaElement().getParent().getElementName()
+						+ '.'
+						+ AopReferenceModelUtils
+								.readableName((IMethod) getJavaElement());
 			}
 			else {
 				this.label = getJavaElement().getElementName();

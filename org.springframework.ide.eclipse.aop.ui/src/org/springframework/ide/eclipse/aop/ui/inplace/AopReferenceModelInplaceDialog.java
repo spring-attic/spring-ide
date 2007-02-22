@@ -239,8 +239,8 @@ public class AopReferenceModelInplaceDialog {
 		// XReferenceProviderManager.getManager().setIsInplace(true);
 
 		if (invokingCommandId != null) {
-			ICommandService commandService = (ICommandService) PlatformUI.getWorkbench().getAdapter(
-					ICommandService.class);
+			ICommandService commandService = (ICommandService) PlatformUI
+					.getWorkbench().getAdapter(ICommandService.class);
 			invokingCommand = commandService.getCommand(invokingCommandId);
 			if (invokingCommand != null && !invokingCommand.isDefined())
 				invokingCommand = null;
@@ -265,7 +265,8 @@ public class AopReferenceModelInplaceDialog {
 		addListenersToTree(viewer);
 		// set the tab order
 		viewMenuButtonComposite.setTabList(new Control[] { filterText });
-		composite.setTabList(new Control[] { viewMenuButtonComposite, viewer.getTree() });
+		composite.setTabList(new Control[] { viewMenuButtonComposite,
+				viewer.getTree() });
 
 		setInfoSystemColor();
 		installFilter();
@@ -308,7 +309,8 @@ public class AopReferenceModelInplaceDialog {
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
 		viewMenuButtonComposite.setLayout(layout);
-		viewMenuButtonComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		viewMenuButtonComposite.setLayoutData(new GridData(
+				GridData.FILL_HORIZONTAL));
 	}
 
 	private TreeViewer createTreeViewer(Composite parent, int style) {
@@ -332,7 +334,8 @@ public class AopReferenceModelInplaceDialog {
 	}
 
 	private void createHorizontalSeparator(Composite parent) {
-		Label separator = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL | SWT.LINE_DOT);
+		Label separator = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL
+				| SWT.LINE_DOT);
 		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	}
 
@@ -340,20 +343,34 @@ public class AopReferenceModelInplaceDialog {
 		Display display = dialogShell.getDisplay();
 
 		// set the foreground colour
-		viewer.getTree().setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-		filterText.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-		composite.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-		viewMenuButtonComposite.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-		toolBar.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-		statusField.setForeground(display.getSystemColor(SWT.COLOR_WIDGET_DARK_SHADOW));
+		viewer.getTree().setForeground(
+				display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+		filterText.setForeground(display
+				.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+		composite.setForeground(display
+				.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+		viewMenuButtonComposite.setForeground(display
+				.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+		toolBar
+				.setForeground(display
+						.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+		statusField.setForeground(display
+				.getSystemColor(SWT.COLOR_WIDGET_DARK_SHADOW));
 
 		// set the background colour
-		viewer.getTree().setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
-		filterText.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
-		composite.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
-		viewMenuButtonComposite.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
-		toolBar.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
-		statusField.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+		viewer.getTree().setBackground(
+				display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+		filterText.setBackground(display
+				.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+		composite.setBackground(display
+				.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+		viewMenuButtonComposite.setBackground(display
+				.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+		toolBar
+				.setBackground(display
+						.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+		statusField.setBackground(display
+				.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 	}
 
 	// --------------------- adding listeners ---------------------------
@@ -401,7 +418,8 @@ public class AopReferenceModelInplaceDialog {
 								tree.setSelection(new TreeItem[] { fLastItem });
 							}
 						}
-						else if (e.y > tree.getBounds().height - tree.getItemHeight() / 4) {
+						else if (e.y > tree.getBounds().height
+								- tree.getItemHeight() / 4) {
 							// Scroll down
 							Point p = tree.toDisplay(e.x, e.y);
 							Item item = viewer.scrollDown(p.x, p.y);
@@ -434,7 +452,8 @@ public class AopReferenceModelInplaceDialog {
 			}
 		});
 
-		doubleClickAction = new OpenRevealableReferenceNodeAction(dialogShell, treeViewer);
+		doubleClickAction = new OpenRevealableReferenceNodeAction(dialogShell,
+				treeViewer);
 
 		treeViewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
@@ -482,7 +501,8 @@ public class AopReferenceModelInplaceDialog {
 			 * @see org.eclipse.swt.events.ShellAdapter#shellActivated(org.eclipse.swt.events.ShellEvent)
 			 */
 			public void shellActivated(ShellEvent e) {
-				if (e.widget == dialogShell && dialogShell.getShells().length == 0)
+				if (e.widget == dialogShell
+						&& dialogShell.getShells().length == 0)
 					isDeactivateListenerActive = true;
 			}
 		});
@@ -527,8 +547,10 @@ public class AopReferenceModelInplaceDialog {
 		data.verticalAlignment = GridData.BEGINNING;
 		toolBar.setLayoutData(data);
 
-		viewMenuButton.setImage(JavaPluginImages.get(JavaPluginImages.IMG_ELCL_VIEW_MENU));
-		viewMenuButton.setDisabledImage(JavaPluginImages.get(JavaPluginImages.IMG_DLCL_VIEW_MENU));
+		viewMenuButton.setImage(JavaPluginImages
+				.get(JavaPluginImages.IMG_ELCL_VIEW_MENU));
+		viewMenuButton.setDisabledImage(JavaPluginImages
+				.get(JavaPluginImages.IMG_DLCL_VIEW_MENU));
 		viewMenuButton.setToolTipText("Menu");
 
 		// Used to enable the menu to be accessed from the keyboard
@@ -539,7 +561,8 @@ public class AopReferenceModelInplaceDialog {
 
 		// Remember current scope and then set window context.
 		fKeyBindingScopes = fKeyBindingService.getScopes();
-		fKeyBindingService.setScopes(new String[] { IContextService.CONTEXT_ID_WINDOW });
+		fKeyBindingService
+				.setScopes(new String[] { IContextService.CONTEXT_ID_WINDOW });
 
 		// Create show view menu action
 		fShowViewMenuAction = new Action("showViewMenu") { //$NON-NLS-1$
@@ -551,11 +574,14 @@ public class AopReferenceModelInplaceDialog {
 			}
 		};
 		fShowViewMenuAction.setEnabled(true);
-		fShowViewMenuAction.setActionDefinitionId("org.eclipse.ui.window.showViewMenu"); //$NON-NLS-1$
+		fShowViewMenuAction
+				.setActionDefinitionId("org.eclipse.ui.window.showViewMenu"); //$NON-NLS-1$
 
 		// Register action with handler service
-		IHandlerService handlerService = (IHandlerService) PlatformUI.getWorkbench().getAdapter(IHandlerService.class);
-		handlerActivation = handlerService.activateHandler(fShowViewMenuAction.getActionDefinitionId(),
+		IHandlerService handlerService = (IHandlerService) PlatformUI
+				.getWorkbench().getAdapter(IHandlerService.class);
+		handlerActivation = handlerService.activateHandler(fShowViewMenuAction
+				.getActionDefinitionId(),
 				new ActionHandler(fShowViewMenuAction));
 
 		viewMenuButton.addSelectionListener(new SelectionAdapter() {
@@ -629,13 +655,19 @@ public class AopReferenceModelInplaceDialog {
 		String keySequence = sequences[0].format();
 
 		if (isShowingParentCrosscutting)
-			return NLS.bind("Press \'\'{0}\'\' to hide cross references for entire file", keySequence); //$NON-NLS-1$
-		return NLS.bind("Press \'\'{0}\'\' to show cross references for entire file", keySequence); //$NON-NLS-1$
+			return NLS
+					.bind(
+							"Press \'\'{0}\'\' to hide cross references for entire file", keySequence); //$NON-NLS-1$
+		return NLS
+				.bind(
+						"Press \'\'{0}\'\' to show cross references for entire file", keySequence); //$NON-NLS-1$
 	}
 
 	private TriggerSequence[] getInvokingCommandKeySequences() {
-		IBindingService bindingService = (IBindingService) PlatformUI.getWorkbench().getAdapter(IBindingService.class);
-		TriggerSequence[] bindings = bindingService.getActiveBindingsFor(invokingCommandId);
+		IBindingService bindingService = (IBindingService) PlatformUI
+				.getWorkbench().getAdapter(IBindingService.class);
+		TriggerSequence[] bindings = bindingService
+				.getActiveBindingsFor(invokingCommandId);
 		if (bindings.length > 0) {
 			invokingCommandTriggerSequences = bindings;
 		}
@@ -646,9 +678,11 @@ public class AopReferenceModelInplaceDialog {
 		if (keyAdapter == null) {
 			keyAdapter = new KeyAdapter() {
 				public void keyPressed(KeyEvent e) {
-					int accelerator = SWTKeySupport.convertEventToUnmodifiedAccelerator(e);
-					KeySequence keySequence = KeySequence.getInstance(SWTKeySupport
-							.convertAcceleratorToKeyStroke(accelerator));
+					int accelerator = SWTKeySupport
+							.convertEventToUnmodifiedAccelerator(e);
+					KeySequence keySequence = KeySequence
+							.getInstance(SWTKeySupport
+									.convertAcceleratorToKeyStroke(accelerator));
 					TriggerSequence[] sequences = getInvokingCommandKeySequences();
 					if (sequences == null)
 						return;
@@ -669,20 +703,25 @@ public class AopReferenceModelInplaceDialog {
 		if (lastSelection != null && workbenchPart != null) {
 			Object element = null;
 			if (!isShowingParentCrosscutting) {
-				element = AopReferenceModelNavigator.calculateRootElement(AopReferenceModelNavigatorUtils
-						.getSelectedElement(workbenchPart, lastSelection), true);
+				element = AopReferenceModelNavigator.calculateRootElement(
+						AopReferenceModelNavigatorUtils.getSelectedElement(
+								workbenchPart, lastSelection), true);
 			}
 			else {
-				element = AopReferenceModelNavigator.calculateRootElement(AopReferenceModelNavigatorUtils
-						.getSelectedElement(workbenchPart, lastSelection), false);
+				element = AopReferenceModelNavigator.calculateRootElement(
+						AopReferenceModelNavigatorUtils.getSelectedElement(
+								workbenchPart, lastSelection), false);
 			}
 			if (element != null) {
 				viewer.getControl().setRedraw(false);
 				viewer.setInput(element);
 				viewer.expandToLevel(AbstractTreeViewer.ALL_LEVELS);
-				AopReferenceModelNavigator.expandTree(viewer.getTree().getItems(), false);
-				AopReferenceModelNavigator.revealSelection(viewer, AopReferenceModelNavigatorUtils.getSelectedElement(
-						workbenchPart, lastSelection), !isShowingParentCrosscutting);
+				AopReferenceModelNavigator.expandTree(viewer.getTree()
+						.getItems(), false);
+				AopReferenceModelNavigator.revealSelection(viewer,
+						AopReferenceModelNavigatorUtils.getSelectedElement(
+								workbenchPart, lastSelection),
+						!isShowingParentCrosscutting);
 				viewer.getControl().setRedraw(true);
 			}
 		}
@@ -692,20 +731,25 @@ public class AopReferenceModelInplaceDialog {
 		if (lastSelection != null && workbenchPart != null) {
 			Object element = null;
 			if (!isShowingParentCrosscutting) {
-				element = AopReferenceModelNavigator.calculateRootElement(AopReferenceModelNavigatorUtils
-						.getSelectedElement(workbenchPart, lastSelection), true);
+				element = AopReferenceModelNavigator.calculateRootElement(
+						AopReferenceModelNavigatorUtils.getSelectedElement(
+								workbenchPart, lastSelection), true);
 			}
 			else {
-				element = AopReferenceModelNavigator.calculateRootElement(AopReferenceModelNavigatorUtils
-						.getSelectedElement(workbenchPart, lastSelection), false);
+				element = AopReferenceModelNavigator.calculateRootElement(
+						AopReferenceModelNavigatorUtils.getSelectedElement(
+								workbenchPart, lastSelection), false);
 			}
 			if (element != null) {
 				viewer.getControl().setRedraw(false);
 				viewer.setInput(element);
 				viewer.expandToLevel(AbstractTreeViewer.ALL_LEVELS);
-				AopReferenceModelNavigator.expandTree(viewer.getTree().getItems(), false);
-				AopReferenceModelNavigator.revealSelection(viewer, AopReferenceModelNavigatorUtils.getSelectedElement(
-						workbenchPart, lastSelection), !isShowingParentCrosscutting);
+				AopReferenceModelNavigator.expandTree(viewer.getTree()
+						.getItems(), false);
+				AopReferenceModelNavigator.revealSelection(viewer,
+						AopReferenceModelNavigatorUtils.getSelectedElement(
+								workbenchPart, lastSelection),
+						!isShowingParentCrosscutting);
 				viewer.getControl().setRedraw(true);
 			}
 		}
@@ -762,14 +806,18 @@ public class AopReferenceModelInplaceDialog {
 			centerPoint = Geometry.centerPoint(monitorBounds);
 		}
 
-		return new Point(centerPoint.x - (initialSize.x / 2), Math.max(monitorBounds.y, Math.min(centerPoint.y
-				- (initialSize.y * 2 / 3), monitorBounds.y + monitorBounds.height - initialSize.y)));
+		return new Point(centerPoint.x - (initialSize.x / 2), Math.max(
+				monitorBounds.y, Math.min(centerPoint.y
+						- (initialSize.y * 2 / 3), monitorBounds.y
+						+ monitorBounds.height - initialSize.y)));
 	}
 
 	private IDialogSettings getDialogSettings() {
-		IDialogSettings settings = Activator.getDefault().getDialogSettings().getSection(sectionName);
+		IDialogSettings settings = Activator.getDefault().getDialogSettings()
+				.getSection(sectionName);
 		if (settings == null)
-			settings = Activator.getDefault().getDialogSettings().addNewSection(sectionName);
+			settings = Activator.getDefault().getDialogSettings()
+					.addNewSection(sectionName);
 
 		return settings;
 	}
@@ -777,8 +825,10 @@ public class AopReferenceModelInplaceDialog {
 	private void storeBounds() {
 		IDialogSettings dialogSettings = getDialogSettings();
 
-		boolean controlRestoresSize = !dialogSettings.getBoolean(STORE_DISABLE_RESTORE_SIZE);
-		boolean controlRestoresLocation = !dialogSettings.getBoolean(STORE_DISABLE_RESTORE_LOCATION);
+		boolean controlRestoresSize = !dialogSettings
+				.getBoolean(STORE_DISABLE_RESTORE_SIZE);
+		boolean controlRestoresLocation = !dialogSettings
+				.getBoolean(STORE_DISABLE_RESTORE_LOCATION);
 
 		if (bounds == null)
 			return;
@@ -797,8 +847,10 @@ public class AopReferenceModelInplaceDialog {
 
 		IDialogSettings dialogSettings = getDialogSettings();
 
-		boolean controlRestoresSize = !dialogSettings.getBoolean(STORE_DISABLE_RESTORE_SIZE);
-		boolean controlRestoresLocation = !dialogSettings.getBoolean(STORE_DISABLE_RESTORE_LOCATION);
+		boolean controlRestoresSize = !dialogSettings
+				.getBoolean(STORE_DISABLE_RESTORE_SIZE);
+		boolean controlRestoresLocation = !dialogSettings
+				.getBoolean(STORE_DISABLE_RESTORE_LOCATION);
 
 		Rectangle bounds = new Rectangle(-1, -1, -1, -1);
 
@@ -825,7 +877,8 @@ public class AopReferenceModelInplaceDialog {
 		}
 
 		// sanity check
-		if (bounds.x == -1 && bounds.y == -1 && bounds.width == -1 && bounds.height == -1) {
+		if (bounds.x == -1 && bounds.y == -1 && bounds.width == -1
+				&& bounds.height == -1) {
 			return null;
 		}
 
@@ -946,7 +999,8 @@ public class AopReferenceModelInplaceDialog {
 		viewer.getControl().setRedraw(false);
 		viewer.refresh();
 		viewer.expandToLevel(AbstractTreeViewer.ALL_LEVELS);
-		AopReferenceModelNavigator.expandTree(viewer.getTree().getItems(), false);
+		AopReferenceModelNavigator.expandTree(viewer.getTree().getItems(),
+				false);
 		selectFirstMatch();
 		viewer.getControl().setRedraw(true);
 	}
@@ -968,7 +1022,8 @@ public class AopReferenceModelInplaceDialog {
 
 	@SuppressWarnings("restriction")
 	private Object findElement(TreeItem[] items) {
-		ILabelProvider labelProvider = (ILabelProvider) viewer.getLabelProvider();
+		ILabelProvider labelProvider = (ILabelProvider) viewer
+				.getLabelProvider();
 		for (int i = 0; i < items.length; i++) {
 			Object o = items[i].getData();
 			Object element = null;
@@ -998,13 +1053,15 @@ public class AopReferenceModelInplaceDialog {
 		/*
 		 * (non-Javadoc) Method declared on ViewerFilter.
 		 */
-		public boolean select(Viewer viewer, Object parentElement, Object element) {
+		public boolean select(Viewer viewer, Object parentElement,
+				Object element) {
 			StringMatcher matcher = getMatcher();
 			if (matcher == null || !(viewer instanceof TreeViewer))
 				return true;
 			TreeViewer treeViewer = (TreeViewer) viewer;
 
-			String matchName = ((ILabelProvider) treeViewer.getLabelProvider()).getText(element);
+			String matchName = ((ILabelProvider) treeViewer.getLabelProvider())
+					.getText(element);
 			if (matchName != null && matcher.match(matchName)) {
 				if (element instanceof IReferenceNode) {
 					filteredElements.add(element);
@@ -1016,7 +1073,8 @@ public class AopReferenceModelInplaceDialog {
 
 		private boolean hasUnfilteredChild(TreeViewer viewer, Object element) {
 			if (element instanceof IReferenceNode) {
-				Object[] children = ((ITreeContentProvider) viewer.getContentProvider()).getChildren(element);
+				Object[] children = ((ITreeContentProvider) viewer
+						.getContentProvider()).getChildren(element);
 				for (int i = 0; i < children.length; i++) {
 					if (select(viewer, element, children[i])) {
 						return true;
@@ -1086,14 +1144,16 @@ public class AopReferenceModelInplaceDialog {
 		 * @see org.eclipse.swt.widgets.Layout#computeSize(org.eclipse.swt.widgets.Composite,
 		 * int, int, boolean)
 		 */
-		protected Point computeSize(Composite composite, int wHint, int hHint, boolean flushCache) {
+		protected Point computeSize(Composite composite, int wHint, int hHint,
+				boolean flushCache) {
 
 			Control[] children = composite.getChildren();
 			Point minSize = new Point(0, 0);
 
 			if (children != null) {
 				for (int i = 0; i < children.length; i++) {
-					Point size = children[i].computeSize(wHint, hHint, flushCache);
+					Point size = children[i].computeSize(wHint, hHint,
+							flushCache);
 					minSize.x = Math.max(minSize.x, size.x);
 					minSize.y = Math.max(minSize.y, size.y);
 				}
@@ -1112,12 +1172,14 @@ public class AopReferenceModelInplaceDialog {
 		protected void layout(Composite composite, boolean flushCache) {
 
 			Control[] children = composite.getChildren();
-			Point minSize = new Point(composite.getClientArea().width, composite.getClientArea().height);
+			Point minSize = new Point(composite.getClientArea().width,
+					composite.getClientArea().height);
 
 			if (children != null) {
 				for (int i = 0; i < children.length; i++) {
 					Control child = children[i];
-					child.setSize(minSize.x - fBorderSize * 2, minSize.y - fBorderSize * 2);
+					child.setSize(minSize.x - fBorderSize * 2, minSize.y
+							- fBorderSize * 2);
 					child.setLocation(fBorderSize, fBorderSize);
 				}
 			}
@@ -1148,7 +1210,8 @@ public class AopReferenceModelInplaceDialog {
 			composite = null;
 			dialog = null;
 		}
-		IHandlerService handlerService = (IHandlerService) PlatformUI.getWorkbench().getAdapter(IHandlerService.class);
+		IHandlerService handlerService = (IHandlerService) PlatformUI
+				.getWorkbench().getAdapter(IHandlerService.class);
 		handlerService.deactivateHandler(handlerActivation);
 
 		// Restore editor's key binding scope
@@ -1190,7 +1253,8 @@ public class AopReferenceModelInplaceDialog {
 
 		RememberBoundsAction() {
 			super("Remember Size and &Location", IAction.AS_CHECK_BOX);
-			setChecked(!getDialogSettings().getBoolean(STORE_DISABLE_RESTORE_LOCATION));
+			setChecked(!getDialogSettings().getBoolean(
+					STORE_DISABLE_RESTORE_LOCATION));
 		}
 
 		/*
@@ -1250,7 +1314,8 @@ public class AopReferenceModelInplaceDialog {
 
 	private void createContents() {
 		if (lastSelection != null && workbenchPart != null) {
-			Object element = AopReferenceModelNavigatorUtils.getSelectedElement(workbenchPart, lastSelection);
+			Object element = AopReferenceModelNavigatorUtils
+					.getSelectedElement(workbenchPart, lastSelection);
 
 			viewer.setInput(element);
 		}

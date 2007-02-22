@@ -32,20 +32,23 @@ import org.w3c.dom.Node;
  * Main entry point for the Spring beans xml editor's content assist.
  */
 @SuppressWarnings("restriction")
-public abstract class AbstractContentAssistProcessor implements INamespaceContentAssistProcessor {
+public abstract class AbstractContentAssistProcessor implements
+		INamespaceContentAssistProcessor {
 
 	protected IContentAssistProcessor delegatingContextAssistProcessor;
 
 	private BeansTemplateCompletionProcessor templateProcessor = null;
 
-	public void addAttributeNameProposals(IContentAssistProcessor delegatingContextAssistProcessor,
+	public void addAttributeNameProposals(
+			IContentAssistProcessor delegatingContextAssistProcessor,
 			ContentAssistRequest request) {
 		this.delegatingContextAssistProcessor = delegatingContextAssistProcessor;
 		IDOMNode node = (IDOMNode) request.getNode();
 
 		// Find the attribute region and name for which this position should
 		// have a value proposed
-		IStructuredDocumentRegion open = node.getFirstStructuredDocumentRegion();
+		IStructuredDocumentRegion open = node
+				.getFirstStructuredDocumentRegion();
 		ITextRegionList openRegions = open.getRegions();
 		int i = openRegions.indexOf(request.getRegion());
 		if (i < 0) {
@@ -63,7 +66,8 @@ public abstract class AbstractContentAssistProcessor implements INamespaceConten
 		if (matchString == null) {
 			matchString = "";
 		}
-		if (matchString.length() > 0 && (matchString.startsWith("\"") || matchString.startsWith("'"))) {
+		if (matchString.length() > 0
+				&& (matchString.startsWith("\"") || matchString.startsWith("'"))) {
 			matchString = matchString.substring(1);
 		}
 
@@ -75,22 +79,26 @@ public abstract class AbstractContentAssistProcessor implements INamespaceConten
 				String prefix = attribute.getPrefix();
 				String namespace = attribute.getNamespaceURI();
 				if (prefix != null) {
-					attributeName = attributeName.substring(prefix.length() + 1);
+					attributeName = attributeName
+							.substring(prefix.length() + 1);
 				}
-				computeAttributeNameProposals(request, attributeName, namespace, prefix, node);
+				computeAttributeNameProposals(request, attributeName,
+						namespace, prefix, node);
 			}
 		}
 		// super.addAttributeNameProposals(request);
 	}
 
-	public void addAttributeValueProposals(IContentAssistProcessor delegatingContextAssistProcessor,
+	public void addAttributeValueProposals(
+			IContentAssistProcessor delegatingContextAssistProcessor,
 			ContentAssistRequest request) {
 		this.delegatingContextAssistProcessor = delegatingContextAssistProcessor;
 		IDOMNode node = (IDOMNode) request.getNode();
 
 		// Find the attribute region and name for which this position should
 		// have a value proposed
-		IStructuredDocumentRegion open = node.getFirstStructuredDocumentRegion();
+		IStructuredDocumentRegion open = node
+				.getFirstStructuredDocumentRegion();
 		ITextRegionList openRegions = open.getRegions();
 		int i = openRegions.indexOf(request.getRegion());
 		if (i < 0) {
@@ -108,25 +116,30 @@ public abstract class AbstractContentAssistProcessor implements INamespaceConten
 		if (matchString == null) {
 			matchString = "";
 		}
-		if (matchString.length() > 0 && (matchString.startsWith("\"") || matchString.startsWith("'"))) {
+		if (matchString.length() > 0
+				&& (matchString.startsWith("\"") || matchString.startsWith("'"))) {
 			matchString = matchString.substring(1);
 		}
 
 		// the name region is REQUIRED to do anything useful
 		if (nameRegion != null) {
 			String attributeName = open.getText(nameRegion);
-			computeAttributeValueProposals(request, node, matchString, attributeName);
+			computeAttributeValueProposals(request, node, matchString,
+					attributeName);
 		}
 	}
 
-	public void addTagCloseProposals(IContentAssistProcessor delegatingContextAssistProcessor,
+	public void addTagCloseProposals(
+			IContentAssistProcessor delegatingContextAssistProcessor,
 			ContentAssistRequest request) {
 		this.delegatingContextAssistProcessor = delegatingContextAssistProcessor;
 		// add content assist proposals for incomplete tags
-		this.addAttributeValueProposals(delegatingContextAssistProcessor, request);
+		this.addAttributeValueProposals(delegatingContextAssistProcessor,
+				request);
 	}
 
-	public void addTagInsertionProposals(IContentAssistProcessor delegatingContextAssistProcessor,
+	public void addTagInsertionProposals(
+			IContentAssistProcessor delegatingContextAssistProcessor,
 			ContentAssistRequest request, int childPosition) {
 		this.delegatingContextAssistProcessor = delegatingContextAssistProcessor;
 		IDOMNode node = (IDOMNode) request.getNode();
@@ -139,7 +152,8 @@ public abstract class AbstractContentAssistProcessor implements INamespaceConten
 	 * @param contentAssistRequest
 	 * @param context
 	 */
-	protected void addTemplates(ContentAssistRequest contentAssistRequest, String context) {
+	protected void addTemplates(ContentAssistRequest contentAssistRequest,
+			String context) {
 		if (contentAssistRequest == null)
 			return;
 
@@ -151,9 +165,11 @@ public abstract class AbstractContentAssistProcessor implements INamespaceConten
 
 		if (getTemplateCompletionProcessor() != null) {
 			getTemplateCompletionProcessor().setContextType(context);
-			ICompletionProposal[] proposals = getTemplateCompletionProcessor().computeCompletionProposals(
-					((DelegatingContentAssistProcessor) this.delegatingContextAssistProcessor).getTextViewer(),
-					contentAssistRequest.getReplacementBeginPosition());
+			ICompletionProposal[] proposals = getTemplateCompletionProcessor()
+					.computeCompletionProposals(
+							((DelegatingContentAssistProcessor) this.delegatingContextAssistProcessor)
+									.getTextViewer(),
+							contentAssistRequest.getReplacementBeginPosition());
 			for (int i = 0; i < proposals.length; ++i) {
 				if (useProposalList)
 					contentAssistRequest.addProposal(proposals[i]);
@@ -163,13 +179,16 @@ public abstract class AbstractContentAssistProcessor implements INamespaceConten
 		}
 	}
 
-	protected abstract void computeAttributeNameProposals(ContentAssistRequest request, String prefix,
-			String namespace, String namespacePrefix, Node attributeNode);
+	protected abstract void computeAttributeNameProposals(
+			ContentAssistRequest request, String prefix, String namespace,
+			String namespacePrefix, Node attributeNode);
 
-	protected abstract void computeAttributeValueProposals(ContentAssistRequest request, IDOMNode node,
-			String matchString, String attributeName);
+	protected abstract void computeAttributeValueProposals(
+			ContentAssistRequest request, IDOMNode node, String matchString,
+			String attributeName);
 
-	protected abstract void computeTagInsertionProposals(ContentAssistRequest request, IDOMNode node);
+	protected abstract void computeTagInsertionProposals(
+			ContentAssistRequest request, IDOMNode node);
 
 	/**
 	 * Returns project request is in

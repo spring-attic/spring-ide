@@ -37,12 +37,14 @@ public class OpenConfigFileAction extends Action {
 	}
 
 	public boolean isEnabled() {
-		ISelection selection = site.getViewSite().getSelectionProvider().getSelection();
+		ISelection selection = site.getViewSite().getSelectionProvider()
+				.getSelection();
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection sSelection = (IStructuredSelection) selection;
 			if (sSelection.size() == 1) {
 				if (sSelection.getFirstElement() instanceof IRevealableReferenceNode) {
-					element = (IRevealableReferenceNode) sSelection.getFirstElement();
+					element = (IRevealableReferenceNode) sSelection
+							.getFirstElement();
 					return true;
 				}
 			}

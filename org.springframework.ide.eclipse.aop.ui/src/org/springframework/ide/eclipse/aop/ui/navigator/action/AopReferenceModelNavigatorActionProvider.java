@@ -24,7 +24,8 @@ import org.eclipse.ui.navigator.ICommonMenuConstants;
 
 /**
  */
-public class AopReferenceModelNavigatorActionProvider extends CommonActionProvider {
+public class AopReferenceModelNavigatorActionProvider extends
+		CommonActionProvider {
 
 	private OpenConfigFileAction openConfigAction;
 
@@ -40,6 +41,7 @@ public class AopReferenceModelNavigatorActionProvider extends CommonActionProvid
 	}
 
 	public void fillActionBars(IActionBars actionBars) {
-		actionBars.setGlobalActionHandler(ICommonActionConstants.OPEN, openConfigAction);
+		actionBars.setGlobalActionHandler(ICommonActionConstants.OPEN,
+				openConfigAction);
 	}
 }

@@ -28,7 +28,8 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
-public class AdviceRootAopReferenceNode implements IReferenceNode, IRevealableReferenceNode {
+public class AdviceRootAopReferenceNode implements IReferenceNode,
+		IRevealableReferenceNode {
 
 	private List<IAopReference> reference;
 
@@ -36,7 +37,8 @@ public class AdviceRootAopReferenceNode implements IReferenceNode, IRevealableRe
 		this(reference, false);
 	}
 
-	public AdviceRootAopReferenceNode(List<IAopReference> reference, boolean isBeanConfig) {
+	public AdviceRootAopReferenceNode(List<IAopReference> reference,
+			boolean isBeanConfig) {
 		this.reference = reference;
 	}
 
@@ -50,7 +52,8 @@ public class AdviceRootAopReferenceNode implements IReferenceNode, IRevealableRe
 
 	public Image getImage() {
 		ADVICE_TYPES type = reference.get(0).getAdviceType();
-		if (type == ADVICE_TYPES.AFTER || type == ADVICE_TYPES.AFTER_RETURNING || type == ADVICE_TYPES.AFTER_THROWING) {
+		if (type == ADVICE_TYPES.AFTER || type == ADVICE_TYPES.AFTER_RETURNING
+				|| type == ADVICE_TYPES.AFTER_THROWING) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_AFTER_ADVICE);
 		}
 		else if (type == ADVICE_TYPES.BEFORE) {
@@ -85,12 +88,14 @@ public class AdviceRootAopReferenceNode implements IReferenceNode, IRevealableRe
 		}
 		else if (type == ADVICE_TYPES.DECLARE_PARENTS) {
 			text += "declare parents: implements "
-					+ ((IIntroductionDefinition) reference.get(0).getDefinition()).getImplInterfaceName();
+					+ ((IIntroductionDefinition) reference.get(0)
+							.getDefinition()).getImplInterfaceName();
 		}
 		text += " <";
 		text += reference.get(0).getDefinition().getAspectName();
 		text += "> - ";
-		text += reference.get(0).getDefinition().getResource().getFullPath().toString();
+		text += reference.get(0).getDefinition().getResource().getFullPath()
+				.toString();
 		return text;
 	}
 
@@ -104,7 +109,8 @@ public class AdviceRootAopReferenceNode implements IReferenceNode, IRevealableRe
 
 	public void openAndReveal() {
 		IResource resource = reference.get(0).getDefinition().getResource();
-		SpringUIUtils.openInEditor((IFile) resource, reference.get(0).getDefinition().getAspectLineNumber());
+		SpringUIUtils.openInEditor((IFile) resource, reference.get(0)
+				.getDefinition().getAspectLineNumber());
 	}
 
 	public int getLineNumber() {

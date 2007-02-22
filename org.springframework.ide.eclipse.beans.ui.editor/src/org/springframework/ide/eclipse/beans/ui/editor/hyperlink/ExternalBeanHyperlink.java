@@ -48,7 +48,8 @@ public class ExternalBeanHyperlink implements IHyperlink {
 	}
 
 	public void open() {
-		SpringUIUtils.openInEditor((IFile) modelElement.getElementResource(), modelElement.getElementStartLine());
+		SpringUIUtils.openInEditor((IFile) modelElement.getElementResource(),
+				modelElement.getElementStartLine());
 	}
 
 }

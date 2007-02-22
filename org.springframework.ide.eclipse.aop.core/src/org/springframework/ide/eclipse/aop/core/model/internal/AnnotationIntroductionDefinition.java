@@ -18,7 +18,8 @@ package org.springframework.ide.eclipse.aop.core.model.internal;
 import org.springframework.ide.eclipse.aop.core.model.IAnnotationAopDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IIntroductionDefinition;
 
-public class AnnotationIntroductionDefinition extends BeanIntroductionDefinition implements IIntroductionDefinition,
+public class AnnotationIntroductionDefinition extends
+		BeanIntroductionDefinition implements IIntroductionDefinition,
 		IAnnotationAopDefinition {
 
 	private String definingField;

@@ -24,18 +24,20 @@ import org.w3c.dom.Node;
 @SuppressWarnings("restriction")
 public class JeeContentAssistProcessor extends AbstractContentAssistProcessor {
 
-	private void addInterfaceAttributeValueProposals(ContentAssistRequest request, String prefix) {
+	private void addInterfaceAttributeValueProposals(
+			ContentAssistRequest request, String prefix) {
 		BeansJavaCompletionUtils.addClassValueProposals(request, prefix, true);
 	}
 
 	@Override
-	protected void computeAttributeNameProposals(ContentAssistRequest request, String prefix, String namespace,
-			String namespacePrefix, Node attributeNode) {
+	protected void computeAttributeNameProposals(ContentAssistRequest request,
+			String prefix, String namespace, String namespacePrefix,
+			Node attributeNode) {
 	}
 
 	@Override
-	protected void computeAttributeValueProposals(ContentAssistRequest request, IDOMNode node, String matchString,
-			String attributeName) {
+	protected void computeAttributeValueProposals(ContentAssistRequest request,
+			IDOMNode node, String matchString, String attributeName) {
 		String nodeName = node.getNodeName();
 		String prefix = node.getPrefix();
 		if (prefix != null) {
@@ -50,7 +52,8 @@ public class JeeContentAssistProcessor extends AbstractContentAssistProcessor {
 				addInterfaceAttributeValueProposals(request, matchString);
 			}
 		}
-		else if ("remote-slsb".equals(nodeName) || "local-slsb".equals(nodeName)) {
+		else if ("remote-slsb".equals(nodeName)
+				|| "local-slsb".equals(nodeName)) {
 			if ("business-interface".equals(attributeName)) {
 				addInterfaceAttributeValueProposals(request, matchString);
 			}
@@ -61,6 +64,7 @@ public class JeeContentAssistProcessor extends AbstractContentAssistProcessor {
 	}
 
 	@Override
-	protected void computeTagInsertionProposals(ContentAssistRequest request, IDOMNode node) {
+	protected void computeTagInsertionProposals(ContentAssistRequest request,
+			IDOMNode node) {
 	}
 }

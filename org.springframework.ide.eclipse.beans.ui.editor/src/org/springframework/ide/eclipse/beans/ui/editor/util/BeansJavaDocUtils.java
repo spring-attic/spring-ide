@@ -35,7 +35,8 @@ public class BeansJavaDocUtils {
 
 		try {
 			StringBuffer buf = new StringBuffer();
-			Reader reader = JavadocContentAccess.getHTMLContentReader(element, false, false);
+			Reader reader = JavadocContentAccess.getHTMLContentReader(element,
+					false, false);
 			if (reader != null) {
 				int charValue = 0;
 				while ((charValue = reader.read()) != -1) {

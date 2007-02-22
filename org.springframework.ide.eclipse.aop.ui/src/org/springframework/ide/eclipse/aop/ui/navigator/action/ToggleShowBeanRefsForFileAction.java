@@ -31,7 +31,8 @@ public class ToggleShowBeanRefsForFileAction extends Action {
 	/**
 	 * Constructs a new action.
 	 */
-	public ToggleShowBeanRefsForFileAction(AopReferenceModelNavigator aopNavigator) {
+	public ToggleShowBeanRefsForFileAction(
+			AopReferenceModelNavigator aopNavigator) {
 		super("&Show the Beans Cross References for the entire file");
 		setDescription("Show the Beans Cross References for the entire file");
 		setToolTipText("Show the Beans Cross References for the entire file");

@@ -31,11 +31,13 @@ public class AspectAnnotationVisitor extends EmptyVisitor {
 
 	private ClassInfo classInfo = new ClassInfo();
 
-	private static final String ASPECT_ANNOTATION_DESC = "L" + Aspect.class.getName().replace('.', '/') + ";";
+	private static final String ASPECT_ANNOTATION_DESC = "L"
+			+ Aspect.class.getName().replace('.', '/') + ";";
 
 	private static final String OBJECT_CLASS = "java/lang/Object";
 
-	public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+	public void visit(int version, int access, String name, String signature,
+			String superName, String[] interfaces) {
 		classInfo.setModifier(access);
 		if (!OBJECT_CLASS.equals(superName)) {
 			classInfo.setSuperType(superName);
@@ -56,7 +58,8 @@ public class AspectAnnotationVisitor extends EmptyVisitor {
 		}
 	}
 
-	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+	public MethodVisitor visitMethod(int access, String name, String desc,
+			String signature, String[] exceptions) {
 		classInfo.getMethodNames().add(name);
 		return new EmptyVisitor();
 	}

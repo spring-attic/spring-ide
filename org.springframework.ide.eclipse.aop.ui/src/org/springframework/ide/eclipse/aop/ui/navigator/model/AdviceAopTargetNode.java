@@ -30,7 +30,8 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
-public class AdviceAopTargetNode implements IReferenceNode, IRevealableReferenceNode {
+public class AdviceAopTargetNode implements IReferenceNode,
+		IRevealableReferenceNode {
 
 	private List<IAopReference> references;
 
@@ -51,7 +52,8 @@ public class AdviceAopTargetNode implements IReferenceNode, IRevealableReference
 				refs.put(r.getDefinition(), ref);
 			}
 		}
-		for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : refs.entrySet()) {
+		for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : refs
+				.entrySet()) {
 			nodes.add(new AdviceAopReferenceNode(entry.getValue()));
 		}
 		return nodes.toArray(new IReferenceNode[nodes.size()]);
@@ -60,7 +62,8 @@ public class AdviceAopTargetNode implements IReferenceNode, IRevealableReference
 
 	public Image getImage() {
 		ADVICE_TYPES type = references.get(0).getAdviceType();
-		if (type == ADVICE_TYPES.AFTER || type == ADVICE_TYPES.AFTER_RETURNING || type == ADVICE_TYPES.AFTER_THROWING) {
+		if (type == ADVICE_TYPES.AFTER || type == ADVICE_TYPES.AFTER_RETURNING
+				|| type == ADVICE_TYPES.AFTER_THROWING) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_AFTER_ADVICE);
 		}
 		else if (type == ADVICE_TYPES.BEFORE) {
@@ -96,7 +99,8 @@ public class AdviceAopTargetNode implements IReferenceNode, IRevealableReference
 		text += " <";
 		text += references.get(0).getDefinition().getAspectName();
 		text += "> -";
-		text += references.get(0).getDefinition().getResource().getFullPath().toString();
+		text += references.get(0).getDefinition().getResource().getFullPath()
+				.toString();
 		return text;
 	}
 
@@ -106,7 +110,8 @@ public class AdviceAopTargetNode implements IReferenceNode, IRevealableReference
 
 	public void openAndReveal() {
 		IResource resource = references.get(0).getDefinition().getResource();
-		SpringUIUtils.openInEditor((IFile) resource, references.get(0).getDefinition().getAspectLineNumber());
+		SpringUIUtils.openInEditor((IFile) resource, references.get(0)
+				.getDefinition().getAspectLineNumber());
 	}
 
 	public IAopReference getReference() {

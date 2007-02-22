@@ -48,7 +48,8 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 			Node node = (Node) object;
 
 			List<Node> children = new ArrayList<Node>();
-			for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling()) {
+			for (Node child = node.getFirstChild(); child != null; child = child
+					.getNextSibling()) {
 				Node n = child;
 				if (n.getNodeType() != Node.TEXT_NODE) {
 					if (n.getNodeType() == Node.COMMENT_NODE) {
@@ -81,7 +82,8 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 	public boolean hasChildren(Object object) {
 		if (BeansEditorUtils.isSpringStyleOutline()) {
 			Node node = (Node) object;
-			for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling()) {
+			for (Node child = node.getFirstChild(); child != null; child = child
+					.getNextSibling()) {
 				if (child.getNodeType() != Node.TEXT_NODE)
 					return true;
 			}

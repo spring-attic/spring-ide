@@ -63,7 +63,8 @@ public class AopReferenceModelUtils {
 			return je.getElementName();
 		}
 		else if (je instanceof IField) {
-			return je.getElementName() + " - " + ((IType) je.getParent()).getFullyQualifiedName();
+			return je.getElementName() + " - "
+					+ ((IType) je.getParent()).getFullyQualifiedName();
 		}
 		else if (je.getParent() != null) {
 			return je.getParent().getElementName() + '.' + je.getElementName();
@@ -73,7 +74,8 @@ public class AopReferenceModelUtils {
 
 	public static String getPackageLinkName(IJavaElement je) {
 		if (je instanceof IMethod) {
-			return ((IMethod) je).getDeclaringType().getPackageFragment().getElementName();
+			return ((IMethod) je).getDeclaringType().getPackageFragment()
+					.getElementName();
 		}
 		else if (je instanceof IType) {
 			return ((IType) je).getPackageFragment().getElementName();
@@ -103,7 +105,8 @@ public class AopReferenceModelUtils {
 		StringBuffer buf = new StringBuffer(": <");
 		buf.append(reference.getDefinition().getAspectName());
 		buf.append("> [");
-		buf.append(reference.getDefinition().getResource().getProjectRelativePath().toString());
+		buf.append(reference.getDefinition().getResource()
+				.getProjectRelativePath().toString());
 		buf.append("]");
 		return buf.toString();
 	}
@@ -116,7 +119,8 @@ public class AopReferenceModelUtils {
 			methodName = methodName.substring(0, i);
 		}
 		try {
-			return Introspector.findMethod(type, methodName, argCount, true, Statics.DONT_CARE);
+			return Introspector.findMethod(type, methodName, argCount, true,
+					Statics.DONT_CARE);
 		}
 		catch (JavaModelException e) {
 		}
@@ -125,7 +129,8 @@ public class AopReferenceModelUtils {
 
 	public static Set<IFile> getFilesToBuildFromBeansProject(IProject file) {
 		Set<IFile> resourcesToBuild = new HashSet<IFile>();
-		IBeansProject bp = BeansCorePlugin.getModel().getProject(file.getProject());
+		IBeansProject bp = BeansCorePlugin.getModel().getProject(
+				file.getProject());
 		if (bp != null && bp.getConfigs() != null && bp.getConfigs().size() > 0) {
 			for (IBeansConfig config : bp.getConfigs()) {
 				resourcesToBuild.add((IFile) config.getElementResource());
@@ -137,7 +142,8 @@ public class AopReferenceModelUtils {
 	public static Set<IFile> getFilesToBuild(IFile file) {
 		Set<IFile> resourcesToBuild = new HashSet<IFile>();
 		if (file.getName().endsWith(".java")) {
-			Set<IBeansProject> projects = BeansCorePlugin.getModel().getProjects();
+			Set<IBeansProject> projects = BeansCorePlugin.getModel()
+					.getProjects();
 			if (projects != null) {
 				for (IBeansProject project : projects) {
 					if (project != null) {
@@ -145,16 +151,19 @@ public class AopReferenceModelUtils {
 						IJavaElement element = JavaCore.create(file);
 						if (element instanceof ICompilationUnit) {
 							try {
-								IType[] types = ((ICompilationUnit) element).getAllTypes();
+								IType[] types = ((ICompilationUnit) element)
+										.getAllTypes();
 								List<String> typeNames = new ArrayList<String>();
 								for (IType type : types) {
 									typeNames.add(type.getFullyQualifiedName());
 								}
 								for (IBeansConfig config : configs) {
-									Set<String> allBeanClasses = config.getBeanClasses();
+									Set<String> allBeanClasses = config
+											.getBeanClasses();
 									for (String className : allBeanClasses) {
 										if (typeNames.contains(className)) {
-											resourcesToBuild.add((IFile) config.getElementResource());
+											resourcesToBuild.add((IFile) config
+													.getElementResource());
 										}
 									}
 								}
@@ -174,7 +183,8 @@ public class AopReferenceModelUtils {
 
 	public static IJavaProject getJavaProject(IBeansConfig config) {
 		if (config != null) {
-			IJavaProject project = JavaCore.create(config.getElementResource().getProject());
+			IJavaProject project = JavaCore.create(config.getElementResource()
+					.getProject());
 			return project;
 		}
 		else {
@@ -199,12 +209,16 @@ public class AopReferenceModelUtils {
 				IMethod method = (IMethod) element;
 				int lines = 0;
 				String targetsource;
-				if (method.getDeclaringType() != null && method.getDeclaringType().getCompilationUnit() != null) {
-					targetsource = method.getDeclaringType().getCompilationUnit().getSource();
-					String sourceuptomethod = targetsource.substring(0, method.getNameRange().getOffset());
+				if (method.getDeclaringType() != null
+						&& method.getDeclaringType().getCompilationUnit() != null) {
+					targetsource = method.getDeclaringType()
+							.getCompilationUnit().getSource();
+					String sourceuptomethod = targetsource.substring(0, method
+							.getNameRange().getOffset());
 
 					char[] chars = new char[sourceuptomethod.length()];
-					sourceuptomethod.getChars(0, sourceuptomethod.length(), chars, 0);
+					sourceuptomethod.getChars(0, sourceuptomethod.length(),
+							chars, 0);
 					for (int j = 0; j < chars.length; j++) {
 						if (chars[j] == '\n') {
 							lines++;
@@ -222,10 +236,12 @@ public class AopReferenceModelUtils {
 				int lines = 0;
 				String targetsource;
 				targetsource = type.getCompilationUnit().getSource();
-				String sourceuptomethod = targetsource.substring(0, type.getNameRange().getOffset());
+				String sourceuptomethod = targetsource.substring(0, type
+						.getNameRange().getOffset());
 
 				char[] chars = new char[sourceuptomethod.length()];
-				sourceuptomethod.getChars(0, sourceuptomethod.length(), chars, 0);
+				sourceuptomethod.getChars(0, sourceuptomethod.length(), chars,
+						0);
 				for (int j = 0; j < chars.length; j++) {
 					if (chars[j] == '\n') {
 						lines++;
@@ -242,10 +258,12 @@ public class AopReferenceModelUtils {
 				int lines = 0;
 				String targetsource;
 				targetsource = type.getCompilationUnit().getSource();
-				String sourceuptomethod = targetsource.substring(0, type.getNameRange().getOffset());
+				String sourceuptomethod = targetsource.substring(0, type
+						.getNameRange().getOffset());
 
 				char[] chars = new char[sourceuptomethod.length()];
-				sourceuptomethod.getChars(0, sourceuptomethod.length(), chars, 0);
+				sourceuptomethod.getChars(0, sourceuptomethod.length(), chars,
+						0);
 				for (int j = 0; j < chars.length; j++) {
 					if (chars[j] == '\n') {
 						lines++;
@@ -259,22 +277,28 @@ public class AopReferenceModelUtils {
 		return new Integer(-1);
 	}
 
-	public static List<IMethod> getMatches(Class<?> clazz, Object aspectJExpressionPointcut, IProject project)
+	public static List<IMethod> getMatches(Class<?> clazz,
+			Object aspectJExpressionPointcut, IProject project)
 			throws Throwable {
 
-		Method getMethodMatcherMethod = aspectJExpressionPointcut.getClass().getMethod("getMethodMatcher",
-				(Class[]) null);
-		Object methodMatcher = getMethodMatcherMethod.invoke(aspectJExpressionPointcut, (Object[]) null);
-		Method matchesMethod = methodMatcher.getClass().getMethod("matches", Method.class, Class.class);
+		Method getMethodMatcherMethod = aspectJExpressionPointcut.getClass()
+				.getMethod("getMethodMatcher", (Class[]) null);
+		Object methodMatcher = getMethodMatcherMethod.invoke(
+				aspectJExpressionPointcut, (Object[]) null);
+		Method matchesMethod = methodMatcher.getClass().getMethod("matches",
+				Method.class, Class.class);
 
-		IType jdtTargetClass = BeansModelUtils.getJavaType(project, clazz.getName());
+		IType jdtTargetClass = BeansModelUtils.getJavaType(project, clazz
+				.getName());
 		Method[] methods = clazz.getDeclaredMethods();
 		List<IMethod> matchingMethod = new ArrayList<IMethod>();
 		for (Method method : methods) {
 			if (Modifier.isPublic(method.getModifiers())
-					&& (Boolean) matchesMethod.invoke(methodMatcher, method, clazz)) {
-				IMethod jdtMethod = AopReferenceModelUtils.getMethod(jdtTargetClass, method.getName(), method
-						.getParameterTypes().length);
+					&& (Boolean) matchesMethod.invoke(methodMatcher, method,
+							clazz)) {
+				IMethod jdtMethod = AopReferenceModelUtils.getMethod(
+						jdtTargetClass, method.getName(), method
+								.getParameterTypes().length);
 				if (jdtMethod != null) {
 					matchingMethod.add(jdtMethod);
 				}

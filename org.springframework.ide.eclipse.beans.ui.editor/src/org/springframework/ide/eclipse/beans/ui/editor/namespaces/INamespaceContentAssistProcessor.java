@@ -22,14 +22,19 @@ import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 @SuppressWarnings("restriction")
 public interface INamespaceContentAssistProcessor {
 
-	void addAttributeValueProposals(IContentAssistProcessor delegatingContentAssistProcessor,
+	void addAttributeValueProposals(
+			IContentAssistProcessor delegatingContentAssistProcessor,
 			ContentAssistRequest request);
 
-	void addAttributeNameProposals(IContentAssistProcessor delegatingContentAssistProcessor,
+	void addAttributeNameProposals(
+			IContentAssistProcessor delegatingContentAssistProcessor,
 			ContentAssistRequest request);
 
-	void addTagCloseProposals(IContentAssistProcessor delegatingContentAssistProcessor, ContentAssistRequest request);
+	void addTagCloseProposals(
+			IContentAssistProcessor delegatingContentAssistProcessor,
+			ContentAssistRequest request);
 
-	void addTagInsertionProposals(IContentAssistProcessor delegatingContentAssistProcessor,
+	void addTagInsertionProposals(
+			IContentAssistProcessor delegatingContentAssistProcessor,
 			ContentAssistRequest request, int childPosition);
 }

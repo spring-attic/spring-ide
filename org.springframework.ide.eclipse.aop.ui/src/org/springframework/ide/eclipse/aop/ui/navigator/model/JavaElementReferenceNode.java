@@ -53,7 +53,8 @@ public class JavaElementReferenceNode implements IRevealableReferenceNode {
 
 	public int getLineNumber() {
 		if (method instanceof IMember) {
-			return AopReferenceModelNavigatorUtils.getLineNumber((IMember) method);
+			return AopReferenceModelNavigatorUtils
+					.getLineNumber((IMember) method);
 		}
 		else {
 			return -1;

@@ -29,10 +29,11 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
  * fit for an HTML viewer (by escaping characters)
  */
 @SuppressWarnings("restriction")
-public class BeansCustomTemplateProposal extends TemplateProposal implements IRelevanceCompletionProposal {
+public class BeansCustomTemplateProposal extends TemplateProposal implements
+		IRelevanceCompletionProposal {
 
-	public BeansCustomTemplateProposal(Template template, TemplateContext context, IRegion region, Image image,
-			int relevance) {
+	public BeansCustomTemplateProposal(Template template,
+			TemplateContext context, IRegion region, Image image, int relevance) {
 		super(template, context, region, image, relevance);
 	}
 

@@ -147,7 +147,8 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public TemplateStore getTemplateStore() {
 		if (templateStore == null) {
-			templateStore = new ContributionTemplateStore(getTemplateContextRegistry(), getPreferenceStore(),
+			templateStore = new ContributionTemplateStore(
+					getTemplateContextRegistry(), getPreferenceStore(),
 					TEMPLATES_KEY);
 			try {
 				templateStore.load();
@@ -235,7 +236,9 @@ public class Activator extends AbstractUIPlugin {
 	}
 
 	public static void log(Throwable exception) {
-		getDefault().getLog().log(createErrorStatus(getResourceString("Plugin.internal_error"), exception));
+		getDefault().getLog().log(
+				createErrorStatus(getResourceString("Plugin.internal_error"),
+						exception));
 	}
 
 	/**

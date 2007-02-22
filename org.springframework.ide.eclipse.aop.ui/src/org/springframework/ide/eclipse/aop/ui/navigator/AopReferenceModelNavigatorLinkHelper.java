@@ -26,7 +26,8 @@ import org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferen
  */
 public class AopReferenceModelNavigatorLinkHelper implements ILinkHelper {
 
-	public void activateEditor(IWorkbenchPage page, IStructuredSelection selection) {
+	public void activateEditor(IWorkbenchPage page,
+			IStructuredSelection selection) {
 		if (selection != null && !selection.isEmpty()) {
 			if (selection.getFirstElement() instanceof IRevealableReferenceNode) {
 				// TODO fix selection hen & egg problem with ISelectionListener

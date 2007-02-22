@@ -28,14 +28,15 @@ import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 
-public class MethodBeanReferenceNode extends AbstractJavaElementReferenceNode implements IReferenceNode,
-		IRevealableReferenceNode {
+public class MethodBeanReferenceNode extends AbstractJavaElementReferenceNode
+		implements IReferenceNode, IRevealableReferenceNode {
 
 	private List<IAopReference> aspectReferences = new ArrayList<IAopReference>();
 
 	private List<IAopReference> adviseReferences = new ArrayList<IAopReference>();
 
-	public MethodBeanReferenceNode(IMember member, List<IAopReference> aspectReferences,
+	public MethodBeanReferenceNode(IMember member,
+			List<IAopReference> aspectReferences,
 			List<IAopReference> adviseReferences) {
 		super(member);
 		this.aspectReferences = aspectReferences;
@@ -56,7 +57,8 @@ public class MethodBeanReferenceNode extends AbstractJavaElementReferenceNode im
 					refs.put(r.getDefinition(), ref);
 				}
 			}
-			for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : refs.entrySet()) {
+			for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : refs
+					.entrySet()) {
 				nodes.add(new AdviceAopTargetNode(entry.getValue()));
 			}
 		}
@@ -81,15 +83,19 @@ public class MethodBeanReferenceNode extends AbstractJavaElementReferenceNode im
 
 	public String getText() {
 		if (element instanceof IType) {
-			return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element) + " - "
+			return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER
+					.getText(element)
+					+ " - "
 					+ AopReferenceModelUtils.getPackageLinkName(element);
 		}
 		else {
-			return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER.getText(element);
+			return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER
+					.getText(element);
 		}
 	}
 
 	public boolean hasChildren() {
-		return this.aspectReferences.size() > 0 || this.adviseReferences.size() > 0;
+		return this.aspectReferences.size() > 0
+				|| this.adviseReferences.size() > 0;
 	}
 }

@@ -25,7 +25,8 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
-public class AdvisedAopSourceNode implements IReferenceNode, IRevealableReferenceNode {
+public class AdvisedAopSourceNode implements IReferenceNode,
+		IRevealableReferenceNode {
 
 	private IAopReference references;
 
@@ -39,7 +40,8 @@ public class AdvisedAopSourceNode implements IReferenceNode, IRevealableReferenc
 
 	public Image getImage() {
 		ADVICE_TYPES type = references.getAdviceType();
-		if (type == ADVICE_TYPES.AFTER || type == ADVICE_TYPES.AFTER_RETURNING || type == ADVICE_TYPES.AFTER_THROWING) {
+		if (type == ADVICE_TYPES.AFTER || type == ADVICE_TYPES.AFTER_RETURNING
+				|| type == ADVICE_TYPES.AFTER_THROWING) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_AFTER_ADVICE);
 		}
 		else if (type == ADVICE_TYPES.BEFORE) {
@@ -74,12 +76,14 @@ public class AdvisedAopSourceNode implements IReferenceNode, IRevealableReferenc
 		}
 		else if (type == ADVICE_TYPES.DECLARE_PARENTS) {
 			text += "declare parents: implements "
-					+ ((IIntroductionDefinition) references.getDefinition()).getImplInterfaceName();
+					+ ((IIntroductionDefinition) references.getDefinition())
+							.getImplInterfaceName();
 		}
 		text += " <";
 		text += references.getDefinition().getAspectName();
 		text += "> - ";
-		text += references.getDefinition().getResource().getFullPath().toString();
+		text += references.getDefinition().getResource().getFullPath()
+				.toString();
 		return text;
 	}
 
@@ -89,7 +93,8 @@ public class AdvisedAopSourceNode implements IReferenceNode, IRevealableReferenc
 
 	public void openAndReveal() {
 		IResource resource = references.getDefinition().getResource();
-		SpringUIUtils.openInEditor((IFile) resource, references.getDefinition().getAspectLineNumber());
+		SpringUIUtils.openInEditor((IFile) resource, references.getDefinition()
+				.getAspectLineNumber());
 	}
 
 	public IAopReference getReference() {

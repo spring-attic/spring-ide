@@ -48,21 +48,24 @@ import org.w3c.dom.NodeList;
  * Main entry point for the Spring beans xml editor's content assist.
  */
 @SuppressWarnings("restriction")
-public class AopContentAssistProcessor extends AbstractContentAssistProcessor implements
-		INamespaceContentAssistProcessor {
+public class AopContentAssistProcessor extends AbstractContentAssistProcessor
+		implements INamespaceContentAssistProcessor {
 
-	private void addBeanReferenceProposals(ContentAssistRequest request, String prefix, Document document,
-			boolean showExternal) {
+	private void addBeanReferenceProposals(ContentAssistRequest request,
+			String prefix, Document document, boolean showExternal) {
 		if (prefix == null) {
 			prefix = "";
 		}
 		IFile file = BeansEditorUtils.getResource(request);
 		if (document != null) {
-			BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(request);
-			Map<String, Node> beanNodes = BeansEditorUtils.getReferenceableNodes(document);
+			BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(
+					request);
+			Map<String, Node> beanNodes = BeansEditorUtils
+					.getReferenceableNodes(document);
 			for (Map.Entry<String, Node> node : beanNodes.entrySet()) {
 				Node beanNode = node.getValue();
-				requestor.acceptSearchMatch(node.getKey(), beanNode, file, prefix);
+				requestor.acceptSearchMatch(node.getKey(), beanNode, file,
+						prefix);
 			}
 			if (showExternal) {
 				List<?> beans = BeansEditorUtils.getBeansFromConfigSets(file);
@@ -74,8 +77,8 @@ public class AopContentAssistProcessor extends AbstractContentAssistProcessor im
 		}
 	}
 
-	protected void computeAttributeValueProposals(ContentAssistRequest request, IDOMNode node, String matchString,
-			String attributeName) {
+	protected void computeAttributeValueProposals(ContentAssistRequest request,
+			IDOMNode node, String matchString, String attributeName) {
 
 		String nodeName = node.getNodeName();
 		String prefix = node.getPrefix();
@@ -85,21 +88,26 @@ public class AopContentAssistProcessor extends AbstractContentAssistProcessor im
 
 		if ("aspect".equals(nodeName)) {
 			if ("ref".equals(attributeName)) {
-				addBeanReferenceProposals(request, matchString, node.getOwnerDocument(), true);
+				addBeanReferenceProposals(request, matchString, node
+						.getOwnerDocument(), true);
 			}
 		}
 		else if ("advisor".equals(nodeName)) {
 			if ("advice-ref".equals(attributeName)) {
-				addBeanReferenceProposals(request, matchString, node.getOwnerDocument(), true);
+				addBeanReferenceProposals(request, matchString, node
+						.getOwnerDocument(), true);
 			}
 		}
 		if ("pointcut-ref".equals(attributeName)) {
-			addPointcutReferenceProposals(request, matchString, node, node.getOwnerDocument());
+			addPointcutReferenceProposals(request, matchString, node, node
+					.getOwnerDocument());
 		}
 		if ("default-impl".equals(attributeName)) {
-			String implementInterface = BeansEditorUtils.getAttribute(node, "implement-interface");
+			String implementInterface = BeansEditorUtils.getAttribute(node,
+					"implement-interface");
 			if (StringUtils.hasText(implementInterface)) {
-				addCollectionTypesAttributeValueProposals(request, matchString, implementInterface);
+				addCollectionTypesAttributeValueProposals(request, matchString,
+						implementInterface);
 			}
 			else {
 				addClassAttributeValueProposals(request, matchString, false);
@@ -108,35 +116,43 @@ public class AopContentAssistProcessor extends AbstractContentAssistProcessor im
 		if ("implement-interface".equals(attributeName)) {
 			addClassAttributeValueProposals(request, matchString, true);
 		}
-		if ("method".equals(attributeName) && "aspect".equals(node.getParentNode().getLocalName())
+		if ("method".equals(attributeName)
+				&& "aspect".equals(node.getParentNode().getLocalName())
 				&& BeansEditorUtils.hasAttribute(node.getParentNode(), "ref")) {
 			addMethodAttributeValueProposals(request, matchString, node);
 		}
 	}
 
-	private void addClassAttributeValueProposals(ContentAssistRequest request, String prefix, boolean interfaceRequired) {
-		BeansJavaCompletionUtils.addClassValueProposals(request, prefix, interfaceRequired);
+	private void addClassAttributeValueProposals(ContentAssistRequest request,
+			String prefix, boolean interfaceRequired) {
+		BeansJavaCompletionUtils.addClassValueProposals(request, prefix,
+				interfaceRequired);
 	}
 
-	private void addCollectionTypesAttributeValueProposals(ContentAssistRequest request, final String prefix,
-			String typeName) {
-		BeansJavaCompletionUtils.addTypeHierachyAttributeValueProposals(request, prefix, typeName);
+	private void addCollectionTypesAttributeValueProposals(
+			ContentAssistRequest request, final String prefix, String typeName) {
+		BeansJavaCompletionUtils.addTypeHierachyAttributeValueProposals(
+				request, prefix, typeName);
 	}
 
-	private void addPointcutReferenceProposals(ContentAssistRequest request, String prefix, IDOMNode node,
-			Document document) {
+	private void addPointcutReferenceProposals(ContentAssistRequest request,
+			String prefix, IDOMNode node, Document document) {
 		if (prefix == null) {
 			prefix = "";
 		}
 		IFile file = BeansEditorUtils.getResource(request);
 		if (document != null) {
-			PointcutReferenceSearchRequestor requestor = new PointcutReferenceSearchRequestor(request);
-			searchPointcutElements(prefix, node.getParentNode(), requestor, file);
-			searchPointcutElements(prefix, node.getParentNode().getParentNode(), requestor, file);
+			PointcutReferenceSearchRequestor requestor = new PointcutReferenceSearchRequestor(
+					request);
+			searchPointcutElements(prefix, node.getParentNode(), requestor,
+					file);
+			searchPointcutElements(prefix,
+					node.getParentNode().getParentNode(), requestor, file);
 		}
 	}
 
-	private void searchPointcutElements(String prefix, Node node, PointcutReferenceSearchRequestor requestor, IFile file) {
+	private void searchPointcutElements(String prefix, Node node,
+			PointcutReferenceSearchRequestor requestor, IFile file) {
 		NodeList beanNodes = node.getChildNodes();
 		for (int i = 0; i < beanNodes.getLength(); i++) {
 			Node beanNode = beanNodes.item(i);
@@ -146,23 +162,29 @@ public class AopContentAssistProcessor extends AbstractContentAssistProcessor im
 		}
 	}
 
-	private void addMethodAttributeValueProposals(ContentAssistRequest request, String prefix, IDOMNode node) {
+	private void addMethodAttributeValueProposals(ContentAssistRequest request,
+			String prefix, IDOMNode node) {
 
 		Node parentNode = node.getParentNode();
 		String ref = BeansEditorUtils.getAttribute(parentNode, "ref");
 
 		if (ref != null) {
 			IFile file = (IFile) BeansEditorUtils.getResource(request);
-			String className = BeansEditorUtils.getClassNameForBean(file, node.getOwnerDocument(), ref);
-			IType type = BeansModelUtils.getJavaType(file.getProject(), className);
+			String className = BeansEditorUtils.getClassNameForBean(file, node
+					.getOwnerDocument(), ref);
+			IType type = BeansModelUtils.getJavaType(file.getProject(),
+					className);
 			if (type != null) {
 				try {
-					Collection<?> methods = Introspector.findAllMethods(type, prefix, -1, true, Statics.DONT_CARE);
+					Collection<?> methods = Introspector.findAllMethods(type,
+							prefix, -1, true, Statics.DONT_CARE);
 					if (methods != null && methods.size() > 0) {
-						PublicMethodSearchRequestor requestor = new PublicMethodSearchRequestor(request);
+						PublicMethodSearchRequestor requestor = new PublicMethodSearchRequestor(
+								request);
 						Iterator<?> iterator = methods.iterator();
 						while (iterator.hasNext()) {
-							requestor.acceptSearchMatch((IMethod) iterator.next());
+							requestor.acceptSearchMatch((IMethod) iterator
+									.next());
 						}
 					}
 				}
@@ -176,13 +198,15 @@ public class AopContentAssistProcessor extends AbstractContentAssistProcessor im
 		}
 	}
 
-	protected void computeAttributeNameProposals(ContentAssistRequest request, String prefix, String namespace,
-			String namespacePrefix, Node attributeNode) {
+	protected void computeAttributeNameProposals(ContentAssistRequest request,
+			String prefix, String namespace, String namespacePrefix,
+			Node attributeNode) {
 
 	}
 
 	@Override
-	protected void computeTagInsertionProposals(ContentAssistRequest request, IDOMNode node) {
+	protected void computeTagInsertionProposals(ContentAssistRequest request,
+			IDOMNode node) {
 
 	}
 }

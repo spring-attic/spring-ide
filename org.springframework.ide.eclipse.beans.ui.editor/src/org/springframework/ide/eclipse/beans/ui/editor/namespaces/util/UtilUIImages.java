@@ -63,7 +63,8 @@ public class UtilUIImages {
 
 	static {
 		try {
-			ICON_BASE_URL = new URL(Activator.getDefault().getBundle().getEntry("/"), ICON_PATH_PREFIX);
+			ICON_BASE_URL = new URL(Activator.getDefault().getBundle()
+					.getEntry("/"), ICON_PATH_PREFIX);
 		}
 		catch (MalformedURLException e) {
 			Activator.log(e);
@@ -79,7 +80,8 @@ public class UtilUIImages {
 	/*
 	 * Available cached Images in the Java plugin image registry.
 	 */
-	public static final String IMG_OBJS_PROPERTIES = NAME_PREFIX + "properties_obj.gif";
+	public static final String IMG_OBJS_PROPERTIES = NAME_PREFIX
+			+ "properties_obj.gif";
 
 	public static final String IMG_OBJS_SET = NAME_PREFIX + "column_obj.gif";
 
@@ -87,17 +89,23 @@ public class UtilUIImages {
 
 	public static final String IMG_OBJS_MAP = NAME_PREFIX + "table_obj.gif";
 
-	public static final String IMG_OBJS_CONSTANT = NAME_PREFIX + "field_public_obj.gif";
+	public static final String IMG_OBJS_CONSTANT = NAME_PREFIX
+			+ "field_public_obj.gif";
 
-	public static final ImageDescriptor DESC_OBJS_PROPERTIES = createManaged(STRUCTURE, IMG_OBJS_PROPERTIES);
+	public static final ImageDescriptor DESC_OBJS_PROPERTIES = createManaged(
+			STRUCTURE, IMG_OBJS_PROPERTIES);
 
-	public static final ImageDescriptor DESC_OBJS_SET = createManaged(STRUCTURE, IMG_OBJS_SET);
+	public static final ImageDescriptor DESC_OBJS_SET = createManaged(
+			STRUCTURE, IMG_OBJS_SET);
 
-	public static final ImageDescriptor DESC_OBJS_LIST = createManaged(STRUCTURE, IMG_OBJS_LIST);
+	public static final ImageDescriptor DESC_OBJS_LIST = createManaged(
+			STRUCTURE, IMG_OBJS_LIST);
 
-	public static final ImageDescriptor DESC_OBJS_MAP = createManaged(STRUCTURE, IMG_OBJS_MAP);
+	public static final ImageDescriptor DESC_OBJS_MAP = createManaged(
+			STRUCTURE, IMG_OBJS_MAP);
 
-	public static final ImageDescriptor DESC_OBJS_CONSTANT = createManaged(STRUCTURE, IMG_OBJS_CONSTANT);
+	public static final ImageDescriptor DESC_OBJS_CONSTANT = createManaged(
+			STRUCTURE, IMG_OBJS_CONSTANT);
 
 	/**
 	 * Returns the <code>Image<code> identified by the given key,
@@ -129,9 +137,11 @@ public class UtilUIImages {
 	/* package */static ImageRegistry getImageRegistry() {
 		if (imageRegistry == null) {
 			imageRegistry = new ImageRegistry();
-			for (Iterator<String> iter = imageDescriptors.keySet().iterator(); iter.hasNext();) {
+			for (Iterator<String> iter = imageDescriptors.keySet().iterator(); iter
+					.hasNext();) {
 				String key = (String) iter.next();
-				imageRegistry.put(key, (ImageDescriptor) imageDescriptors.get(key));
+				imageRegistry.put(key, (ImageDescriptor) imageDescriptors
+						.get(key));
 			}
 			imageDescriptors = null;
 		}
@@ -141,9 +151,11 @@ public class UtilUIImages {
 	// ---- Helper methods to access icons on the file system
 	// -------------------
 
-	private static void setImageDescriptors(IAction action, String type, String relPath) {
+	private static void setImageDescriptors(IAction action, String type,
+			String relPath) {
 		try {
-			ImageDescriptor id = ImageDescriptor.createFromURL(makeIconFileURL("d" + type, relPath));
+			ImageDescriptor id = ImageDescriptor.createFromURL(makeIconFileURL(
+					"d" + type, relPath));
 			if (id != null) {
 				action.setDisabledImageDescriptor(id);
 			}
@@ -162,8 +174,9 @@ public class UtilUIImages {
 
 	private static ImageDescriptor createManaged(String prefix, String name) {
 		try {
-			ImageDescriptor result = ImageDescriptor.createFromURL(makeIconFileURL(prefix, name
-					.substring(NAME_PREFIX_LENGTH)));
+			ImageDescriptor result = ImageDescriptor
+					.createFromURL(makeIconFileURL(prefix, name
+							.substring(NAME_PREFIX_LENGTH)));
 			if (imageDescriptors == null) {
 				imageDescriptors = new HashMap<String, ImageDescriptor>();
 			}
@@ -189,7 +202,8 @@ public class UtilUIImages {
 		}
 	}
 
-	private static URL makeIconFileURL(String prefix, String name) throws MalformedURLException {
+	private static URL makeIconFileURL(String prefix, String name)
+			throws MalformedURLException {
 		if (ICON_BASE_URL == null) {
 			throw new MalformedURLException();
 		}
