@@ -52,7 +52,7 @@ public class BeansUILabels {
 			StringBuffer buf) {
 		String nodeName = ModelUtils.getNodeName(element);
 		if (nodeName != null) {
-			buf.append('<').append(nodeName).append("/>");
+			buf.append(nodeName);
 			return true;
 		}
 		return false;
