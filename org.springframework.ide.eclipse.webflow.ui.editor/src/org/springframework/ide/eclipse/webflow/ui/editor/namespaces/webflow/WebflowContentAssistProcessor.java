@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.B
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionUtils;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 @SuppressWarnings("restriction")
 public class WebflowContentAssistProcessor extends
@@ -52,6 +53,24 @@ public class WebflowContentAssistProcessor extends
 		}
 	}
 
+	private void addStateReferenceProposals(ContentAssistRequest request,
+			String prefix, Node node) {
+		if (prefix == null) {
+			prefix = "";
+		}
+
+		Node flowNode = WebflowNamespaceUtils.locateFlowRootNode(node);
+		NodeList nodes = flowNode.getChildNodes();
+		if (nodes.getLength() > 0) {
+			StateReferenceSearchRequestor requestor = new StateReferenceSearchRequestor(
+					request);
+			IFile file = BeansEditorUtils.getResource(request);
+			for (int i = 0; i < nodes.getLength(); i++) {
+				requestor.acceptSearchMatch(nodes.item(i), file, prefix);
+			}
+		}
+	}
+
 	private void addClassAttributeValueProposals(ContentAssistRequest request,
 			String prefix) {
 		BeansJavaCompletionUtils.addClassValueProposals(request, prefix);
@@ -62,10 +81,28 @@ public class WebflowContentAssistProcessor extends
 		try {
 			IMethod[] methods = type.getMethods();
 			if (methods != null) {
-				ActionMethodSearchRequestor requestor = new ActionMethodSearchRequestor(
+				BeanActionMethodSearchRequestor requestor = new BeanActionMethodSearchRequestor(
 						request);
 				for (IMethod method : methods) {
-					requestor.acceptSearchMatch(method);
+					requestor.acceptSearchMatch(method, prefix);
+				}
+			}
+		}
+		catch (JavaModelException e) {
+		}
+		catch (CoreException e) {
+		}
+	}
+
+	private void addMethodAttributeValueProposals(ContentAssistRequest request,
+			String prefix, IType type) {
+		try {
+			IMethod[] methods = type.getMethods();
+			if (methods != null) {
+				BeanMethodSearchRequestor requestor = new BeanMethodSearchRequestor(
+						request);
+				for (IMethod method : methods) {
+					requestor.acceptSearchMatch(method, prefix);
 				}
 			}
 		}
@@ -111,11 +148,24 @@ public class WebflowContentAssistProcessor extends
 				addBeanReferenceProposals(request, matchString);
 			}
 			// method
+			else if ("method".equals(attributeName)
+					&& BeansEditorUtils.hasAttribute(node, "bean")) {
+				String className = BeansEditorUtils.getClassNameForBean(
+						BeansEditorUtils.getResource(request), node
+								.getOwnerDocument(), BeansEditorUtils
+								.getAttribute(node, "bean"));
+				IType type = BeansModelUtils.getJavaType(BeansEditorUtils
+						.getResource(request).getProject(), className);
+				if (type != null) {
+					addMethodAttributeValueProposals(request,
+							matchString, type);
+				}
+			}
 		}
 		else if ("transition".equals(nodeName)) {
 			// to
 			if ("to".equals(attributeName)) {
-				
+				addStateReferenceProposals(request, matchString, node);
 			}
 			// on-exception
 			else if ("on-exception".equals(attributeName)) {
@@ -131,11 +181,19 @@ public class WebflowContentAssistProcessor extends
 		}
 		else if ("mapping".equals(nodeName)) {
 			// to
-
+			if ("to".equals(attributeName)) {
+				addClassAttributeValueProposals(request, matchString);
+			}
 			// from
+			else if ("from".equals(attributeName)) {
+				addClassAttributeValueProposals(request, matchString);
+			}
 		}
 		else if ("start-state".equals(nodeName)) {
 			// idref
+			if ("idref".equals(attributeName)) {
+				addBeanReferenceProposals(request, matchString);
+			}
 		}
 		else if ("var".equals(nodeName)) {
 			// bean
@@ -149,8 +207,13 @@ public class WebflowContentAssistProcessor extends
 		}
 		else if ("if".equals(nodeName)) {
 			// then
-
+			if ("then".equals(attributeName)) {
+				addBeanReferenceProposals(request, matchString);
+			}
 			// else
+			else if ("else".equals(attributeName)) {
+				addBeanReferenceProposals(request, matchString);
+			}
 		}
 		else if ("exception-handler".equals(nodeName)) {
 			// bean

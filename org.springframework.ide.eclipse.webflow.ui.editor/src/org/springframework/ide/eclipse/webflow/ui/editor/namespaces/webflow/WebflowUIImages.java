@@ -87,25 +87,62 @@ public class WebflowUIImages {
 	public static final String IMG_OBJS_ACTION_STATE = NAME_PREFIX
 			+ "action_state_obj.gif";
 
+	public static final String IMG_OBJS_ACTIONS = NAME_PREFIX
+			+ "actions_obj.gif";
+
+	public static final String IMG_OBJS_ARGUMENT = NAME_PREFIX
+			+ "argument_obj.gif";
+
+	public static final String IMG_OBJS_ATTRIBUTE_MAPPER = NAME_PREFIX
+			+ "attribute_mapper_obj.gif";
+
+	public static final String IMG_OBJS_BEAN_ACTION = NAME_PREFIX
+			+ "bean_action_obj.gif";
+
 	public static final String IMG_OBJS_DECISION_STATE = NAME_PREFIX
 			+ "decision_state_obj.gif";
 
 	public static final String IMG_OBJS_END_STATE = NAME_PREFIX
 			+ "end_state_obj.gif";
 
+	public static final String IMG_OBJS_EXCEPTION_HANDLER = NAME_PREFIX
+			+ "exception_handler_obj.gif";
+
+	public static final String IMG_OBJS_EXPRESSION = NAME_PREFIX
+			+ "expression_obj.gif";
+
+	public static final String IMG_OBJS_GLOBAL_TRANSITION = NAME_PREFIX
+			+ "global_transition_obj.gif";
+
+	public static final String IMG_OBJS_IF = NAME_PREFIX + "if_obj.gif";
+
+	public static final String IMG_OBJS_IMPORT = NAME_PREFIX + "import_obj.gif";
+
+	public static final String IMG_OBJS_METHOD = NAME_PREFIX + "method_obj.gif";
+
+	public static final String IMG_OBJS_INPUT = NAME_PREFIX + "input_obj.gif";
+
+	public static final String IMG_OBJS_OUTPUT = NAME_PREFIX + "output_obj.gif";
+
+	public static final String IMG_OBJS_PROPERTIES = NAME_PREFIX
+			+ "properties_obj.gif";
+
+	public static final String IMG_OBJS_START_ACTION = NAME_PREFIX
+			+ "start_action_obj.gif";
+
+	public static final String IMG_OBJS_START_STATE = NAME_PREFIX
+			+ "start_state_obj.gif";
+
 	public static final String IMG_OBJS_SUBFLOW_STATE = NAME_PREFIX
 			+ "subflow_state_obj.gif";
+
+	public static final String IMG_OBJS_TRANSITION = NAME_PREFIX
+			+ "transition_obj.gif";
 
 	public static final String IMG_OBJS_VIEW_STATE = NAME_PREFIX
 			+ "view_state_obj.gif";
 
-	public static final String IMG_OBJS_ATTRIBUTE_MAPPER = NAME_PREFIX
-			+ "attribute_mapper_obj.gif";
-
-	public static final String IMG_OBJS_TRANSITION = NAME_PREFIX
-			+ "connection_obj.gif";
-
-	public static final String IMG_OBJS_IF = NAME_PREFIX + "if_obj.gif";
+	public static final String IMG_OBJS_VAR = NAME_PREFIX + "var_obj.gif";
 
 	public static final ImageDescriptor DESC_OBJS_WEBFLOW = createManaged(
 			STRUCTURE, IMG_OBJS_WEBFLOW);
@@ -116,26 +153,68 @@ public class WebflowUIImages {
 	public static final ImageDescriptor DESC_OBJS_ACTION_STATE = createManaged(
 			STRUCTURE, IMG_OBJS_ACTION_STATE);
 
+	public static final ImageDescriptor DESC_OBJS_ACTIONS = createManaged(
+			STRUCTURE, IMG_OBJS_ACTIONS);
+
+	public static final ImageDescriptor DESC_OBJS_ARGUMENT = createManaged(
+			STRUCTURE, IMG_OBJS_ARGUMENT);
+
+	public static final ImageDescriptor DESC_OBJS_ATTRIBUTE_MAPPER = createManaged(
+			STRUCTURE, IMG_OBJS_ATTRIBUTE_MAPPER);
+
+	public static final ImageDescriptor DESC_OBJS_BEAN_ACTION = createManaged(
+			STRUCTURE, IMG_OBJS_BEAN_ACTION);
+
 	public static final ImageDescriptor DESC_OBJS_DECISION_STATE = createManaged(
 			STRUCTURE, IMG_OBJS_DECISION_STATE);
 
 	public static final ImageDescriptor DESC_OBJS_END_STATE = createManaged(
 			STRUCTURE, IMG_OBJS_END_STATE);
 
+	public static final ImageDescriptor DESC_OBJS_EXCEPTION_HANDLER = createManaged(
+			STRUCTURE, IMG_OBJS_EXCEPTION_HANDLER);
+
+	public static final ImageDescriptor DESC_OBJS_EXPRESSION = createManaged(
+			STRUCTURE, IMG_OBJS_EXPRESSION);
+
+	public static final ImageDescriptor DESC_OBJS_GLOBAL_TRANSITION = createManaged(
+			STRUCTURE, IMG_OBJS_GLOBAL_TRANSITION);
+
+	public static final ImageDescriptor DESC_OBJS_IF = createManaged(STRUCTURE,
+			IMG_OBJS_IF);
+
+	public static final ImageDescriptor DESC_OBJS_IMPORT = createManaged(
+			STRUCTURE, IMG_OBJS_IMPORT);
+
+	public static final ImageDescriptor DESC_OBJS_INPUT = createManaged(
+			STRUCTURE, IMG_OBJS_INPUT);
+
+	public static final ImageDescriptor DESC_OBJS_METHOD = createManaged(
+			STRUCTURE, IMG_OBJS_METHOD);
+
+	public static final ImageDescriptor DESC_OBJS_OUTPUT = createManaged(
+			STRUCTURE, IMG_OBJS_OUTPUT);
+
+	public static final ImageDescriptor DESC_OBJS_PROPERTIES = createManaged(
+			STRUCTURE, IMG_OBJS_PROPERTIES);
+
+	public static final ImageDescriptor DESC_OBJS_START_ACTION = createManaged(
+			STRUCTURE, IMG_OBJS_START_ACTION);
+
+	public static final ImageDescriptor DESC_OBJS_START_STATE = createManaged(
+			STRUCTURE, IMG_OBJS_START_STATE);
+
 	public static final ImageDescriptor DESC_OBJS_SUBFLOW_STATE = createManaged(
 			STRUCTURE, IMG_OBJS_SUBFLOW_STATE);
 
-	public static final ImageDescriptor DESC_OBJS_VIEW_STATE = createManaged(
-			STRUCTURE, IMG_OBJS_VIEW_STATE);
-
-	public static final ImageDescriptor DESC_OBJS_ATTRIBUTE_MAPPER = createManaged(
-			STRUCTURE, IMG_OBJS_ATTRIBUTE_MAPPER);
-
-	public static final ImageDescriptor DESC_TRANSITION_OBJS = createManaged(
+	public static final ImageDescriptor DESC_OBJS_TRANSITION = createManaged(
 			STRUCTURE, IMG_OBJS_TRANSITION);
 
-	public static final ImageDescriptor DESC_OBJS_IF = createManaged(
-			STRUCTURE, IMG_OBJS_IF);
+	public static final ImageDescriptor DESC_OBJS_VAR = createManaged(
+			STRUCTURE, IMG_OBJS_VAR);
+
+	public static final ImageDescriptor DESC_OBJS_VIEW_STATE = createManaged(
+			STRUCTURE, IMG_OBJS_VIEW_STATE);
 
 	/**
 	 * Returns the <code>Image<code> identified by the given key,

@@ -29,21 +29,74 @@ public class WebflowOutlineLabelProvider extends JFaceNodeLabelProvider {
 
 	static {
 		IMAGES = new HashMap<String, Image>();
+		IMAGES.put("flow", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW));
+		IMAGES.put("start-state", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_START_STATE));
+		IMAGES.put("input-mapper", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_INPUT));
+		IMAGES.put("mapping", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_ATTRIBUTE_MAPPER));
+		IMAGES.put("input-attribute", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_INPUT));
+		IMAGES.put("attribute", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_PROPERTIES));
+		//IMAGES.put("value", WebflowUIImages
+		//		.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW));
+		IMAGES.put("var", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_VAR));
+		IMAGES.put("start-actions", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_ACTIONS));
 		IMAGES.put("action-state", WebflowUIImages
 				.getImage(WebflowUIImages.IMG_OBJS_ACTION_STATE));
 		IMAGES.put("action", WebflowUIImages
 				.getImage(WebflowUIImages.IMG_OBJS_ACTION));
-		IMAGES.put("view-state", WebflowUIImages
-				.getImage(WebflowUIImages.IMG_OBJS_VIEW_STATE));
-		IMAGES.put("end-state", WebflowUIImages
-				.getImage(WebflowUIImages.IMG_OBJS_END_STATE));
-		IMAGES.put("decision-state", WebflowUIImages
-				.getImage(WebflowUIImages.IMG_OBJS_DECISION_STATE));
-		IMAGES.put("if", WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_IF));
+		IMAGES.put("bean-action", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_BEAN_ACTION));
+		IMAGES.put("method-arguments", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_ARGUMENT));
+		IMAGES.put("argument", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_ARGUMENT));
+		IMAGES.put("method-result", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_ARGUMENT));
+		IMAGES.put("evaluate-action", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_ACTION));
+		IMAGES.put("evaluate-result", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_ACTION));
+		IMAGES.put("set", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_ARGUMENT));
 		IMAGES.put("transition", WebflowUIImages
 				.getImage(WebflowUIImages.IMG_OBJS_TRANSITION));
+		IMAGES.put("view-state", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_VIEW_STATE));
+		IMAGES.put("entry-actions", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_ACTIONS));
+		IMAGES.put("render-actions", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_ACTIONS));
+		IMAGES.put("exit-actions", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_ACTIONS));
+		IMAGES.put("decision-state", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_DECISION_STATE));
+		IMAGES.put("if", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_IF));
+		IMAGES.put("subflow-state", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_SUBFLOW_STATE));
 		IMAGES.put("attribute-mapper", WebflowUIImages
 				.getImage(WebflowUIImages.IMG_OBJS_ATTRIBUTE_MAPPER));
+		IMAGES.put("end-state", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_END_STATE));
+		IMAGES.put("global-transitions", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_GLOBAL_TRANSITION));
+		IMAGES.put("output-mapper", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_OUTPUT));
+		IMAGES.put("output-attribute", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_OUTPUT));
+		IMAGES.put("exception-handler", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_EXCEPTION_HANDLER));
+		IMAGES.put("import", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_IMPORT));
+		IMAGES.put("inline-flow", WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW));
 	}
 
 	public Image getImage(Object object) {
