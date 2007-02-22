@@ -38,7 +38,7 @@ public class WebflowAdapterFactoryProvider extends AdapterFactoryProviderForXML 
 	@SuppressWarnings("deprecation")
 	protected void addContentBasedFactories(IStructuredModel structuredModel) {
 		FactoryRegistry factoryRegistry = structuredModel.getFactoryRegistry();
-		Assert.isNull(factoryRegistry, "No factory registered");
+		Assert.notNull(factoryRegistry, "No factory registered");
 		INodeAdapterFactory factory = factoryRegistry.getFactoryFor(IJFaceNodeAdapter.class);
 		if (factory == null) {
 			factory = new BeansJFaceNodeAdapterFactory();

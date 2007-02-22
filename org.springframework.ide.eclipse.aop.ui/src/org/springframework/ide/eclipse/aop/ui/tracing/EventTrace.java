@@ -31,7 +31,7 @@ public class EventTrace {
 	public static void postEvent(String msg, int category) {
 		Date time = new Date();
 		if (!listeners.isEmpty()) {
-			for (Iterator it = listeners.iterator(); it.hasNext();) {
+			for (Iterator<?> it = listeners.iterator(); it.hasNext();) {
 				((EventListener) it.next()).aopEvent(msg, category, time);
 			}
 		}
