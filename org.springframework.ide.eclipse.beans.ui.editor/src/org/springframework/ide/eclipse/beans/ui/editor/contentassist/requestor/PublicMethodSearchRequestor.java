@@ -36,8 +36,10 @@ public class PublicMethodSearchRequestor extends MethodSearchRequestor {
 	}
 
 	public void acceptSearchMatch(IMethod method) throws CoreException {
-		if (Flags.isPublic(method.getFlags()) && !Flags.isInterface(method.getFlags()) && method.exists()
-				&& ((IType) method.getParent()).isClass() && !method.isConstructor()) {
+		if (Flags.isPublic(method.getFlags())
+				&& !Flags.isInterface(method.getFlags()) && method.exists()
+				&& ((IType) method.getParent()).isClass()
+				&& !method.isConstructor()) {
 			createMethodProposal(method, MethodSearchRequestor.METHOD_RELEVANCE);
 		}
 	}
@@ -79,14 +81,16 @@ public class PublicMethodSearchRequestor extends MethodSearchRequestor {
 				buf.append(method.getParent().getElementName());
 
 				String displayText = buf.toString();
-				Image image = imageProvider.getImageLabel(method, method.getFlags()
+				Image image = imageProvider.getImageLabel(method, method
+						.getFlags()
 						| JavaElementImageProvider.SMALL_ICONS);
 				BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
 				String javadoc = utils.getJavaDoc();
 
-				BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(replaceText, request
-						.getReplacementBeginPosition(), request.getReplacementLength(), replaceText.length(), image,
-						displayText, null, javadoc, relevance);
+				BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
+						replaceText, request.getReplacementBeginPosition(),
+						request.getReplacementLength(), replaceText.length(),
+						image, displayText, null, javadoc, relevance);
 
 				request.addProposal(proposal);
 				methods.add(method.getSignature());

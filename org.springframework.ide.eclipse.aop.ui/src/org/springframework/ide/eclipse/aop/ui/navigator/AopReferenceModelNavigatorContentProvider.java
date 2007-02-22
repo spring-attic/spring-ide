@@ -76,7 +76,8 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 /**
  */
 @SuppressWarnings("restriction")
-public class AopReferenceModelNavigatorContentProvider implements ICommonContentProvider, IModelChangeListener {
+public class AopReferenceModelNavigatorContentProvider implements
+		ICommonContentProvider, IModelChangeListener {
 
 	@SuppressWarnings("unused")
 	private INavigatorContentExtension contentExtension;
@@ -116,7 +117,8 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 			return getChildren(inputElement);
 		}
 		else if (inputElement instanceof JavaElementReferenceNode) {
-			return getChildren(((JavaElementReferenceNode) inputElement).getJavaElement());
+			return getChildren(((JavaElementReferenceNode) inputElement)
+					.getJavaElement());
 		}
 		else if (inputElement instanceof ElementImpl) {
 			return getChildren(inputElement);
@@ -131,7 +133,8 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 		}
 		else if (parentElement instanceof JavaElementReferenceNode
 				&& ((JavaElementReferenceNode) parentElement).isRoot()) {
-			return getChildren(((JavaElementReferenceNode) parentElement).getJavaElement());
+			return getChildren(((JavaElementReferenceNode) parentElement)
+					.getJavaElement());
 		}
 		else if (parentElement instanceof IType) {
 			IType type = (IType) parentElement;
@@ -139,16 +142,19 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 			try {
 				IMethod[] methods = type.getMethods();
 				for (IMethod method : methods) {
-					if (Activator.getModel().isAdvice(method) || Activator.getModel().isAdvised(method)) {
+					if (Activator.getModel().isAdvice(method)
+							|| Activator.getModel().isAdvised(method)) {
 						me.addAll(Arrays.asList(getChildren(method)));
 					}
 				}
 			}
 			catch (JavaModelException e) {
 			}
-			ClassMethodReferenceNode node = new ClassMethodReferenceNode(type, me);
+			ClassMethodReferenceNode node = new ClassMethodReferenceNode(type,
+					me);
 
-			List<IAopReference> references = Activator.getModel().getAllReferences(type.getJavaProject());
+			List<IAopReference> references = Activator.getModel()
+					.getAllReferences(type.getJavaProject());
 
 			// fields
 			try {
@@ -156,7 +162,8 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 					Object[] obj = getChildren(field);
 					if (obj != null && obj.length > 0) {
 						for (Object o : obj) {
-							node.getDeclareParentReferences().add((IReferenceNode) o);
+							node.getDeclareParentReferences().add(
+									(IReferenceNode) o);
 						}
 					}
 				}
@@ -172,12 +179,14 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 				}
 			}
 			// add bean references
-			Set<IBeansConfig> projects = BeansCorePlugin.getModel().getConfigs(type.getFullyQualifiedName());
+			Set<IBeansConfig> projects = BeansCorePlugin.getModel().getConfigs(
+					type.getFullyQualifiedName());
 			Set<IBean> beans = new HashSet<IBean>();
 			for (IBeansConfig project : projects) {
 				Set<IBean> pBeans = project.getBeans();
 				for (IBean b : pBeans) {
-					if (type.getFullyQualifiedName().equals(BeansModelUtils.getBeanClass(b, project))) {
+					if (type.getFullyQualifiedName().equals(
+							BeansModelUtils.getBeanClass(b, project))) {
 						beans.add(b);
 					}
 				}
@@ -185,16 +194,19 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 			node.setBeans(beans);
 			return new Object[] { node };
 		}
-		else if (parentElement instanceof IMethod && parentElement instanceof SourceMethod) {
+		else if (parentElement instanceof IMethod
+				&& parentElement instanceof SourceMethod) {
 			IMethod method = (IMethod) parentElement;
-			List<IAopReference> references = Activator.getModel().getAllReferences(method.getJavaProject());
+			List<IAopReference> references = Activator.getModel()
+					.getAllReferences(method.getJavaProject());
 			List<IAopReference> foundSourceReferences = new ArrayList<IAopReference>();
 			List<IAopReference> foundTargetReferences = new ArrayList<IAopReference>();
 			for (IAopReference reference : references) {
 				if (reference.getTarget().equals(method)) {
 					foundTargetReferences.add(reference);
 				}
-				if (reference.getSource() != null && reference.getSource().equals(method)) {
+				if (reference.getSource() != null
+						&& reference.getSource().equals(method)) {
 					foundSourceReferences.add(reference);
 				}
 			}
@@ -223,17 +235,22 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 				}
 			}
 			for (Map.Entry<IMember, MethodReference> entry : refs.entrySet()) {
-				nodes.add(new MethodBeanReferenceNode(entry.getKey(), entry.getValue().getAspects(), entry.getValue()
-						.getAdvices()));
+				nodes
+						.add(new MethodBeanReferenceNode(entry.getKey(), entry
+								.getValue().getAspects(), entry.getValue()
+								.getAdvices()));
 			}
 			return nodes.toArray();
 		}
-		else if (parentElement instanceof IField && parentElement instanceof SourceField) {
+		else if (parentElement instanceof IField
+				&& parentElement instanceof SourceField) {
 			IField method = (IField) parentElement;
-			List<IAopReference> references = Activator.getModel().getAllReferences(method.getJavaProject());
+			List<IAopReference> references = Activator.getModel()
+					.getAllReferences(method.getJavaProject());
 			List<IAopReference> foundSourceReferences = new ArrayList<IAopReference>();
 			for (IAopReference reference : references) {
-				if (reference.getSource() != null && reference.getSource().equals(method)) {
+				if (reference.getSource() != null
+						&& reference.getSource().equals(method)) {
 					foundSourceReferences.add(reference);
 				}
 			}
@@ -249,8 +266,11 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 					refs.put(reference.getSource(), f);
 				}
 			}
-			for (Map.Entry<IMember, List<IAopReference>> entry : refs.entrySet()) {
-				nodes.add(new AdviceDeclareParentAopSourceNode(entry.getValue()));
+			for (Map.Entry<IMember, List<IAopReference>> entry : refs
+					.entrySet()) {
+				nodes
+						.add(new AdviceDeclareParentAopSourceNode(entry
+								.getValue()));
 			}
 			return nodes.toArray();
 		}
@@ -264,18 +284,20 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 			if (!BeansCoreUtils.isBeansConfig(resource)) {
 				return nodes.toArray();
 			}
-			IBeansConfig beansConfig = BeansCorePlugin.getModel().getProject(resource.getProject()).getConfig(
-					(IFile) resource);
+			IBeansConfig beansConfig = BeansCorePlugin.getModel().getProject(
+					resource.getProject()).getConfig((IFile) resource);
 
 			int startLine = document.getLineOfOffset(element.getStartOffset()) + 1;
 			int endLine = document.getLineOfOffset(element.getEndOffset()) + 1;
 			String id = BeansEditorUtils.getAttribute(element, "id");
 
-			nodes.addAll(getChildrenFromXmlLocation(resource, startLine, endLine, id, beansConfig.getBeans()));
+			nodes.addAll(getChildrenFromXmlLocation(resource, startLine,
+					endLine, id, beansConfig.getBeans()));
 
 			// add inner beans
 			if (nodes.size() == 0) {
-				nodes.addAll(getChildrenFromXmlLocation(resource, startLine, endLine, id, beansConfig.getInnerBeans()));
+				nodes.addAll(getChildrenFromXmlLocation(resource, startLine,
+						endLine, id, beansConfig.getInnerBeans()));
 			}
 
 			return nodes.toArray();
@@ -283,10 +305,11 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 		return IModelElement.NO_CHILDREN;
 	}
 
-	private List<IReferenceNode> getChildrenFromXmlLocation(IResource resource, int startLine, int endLine, String id,
-			Set<IBean> beans) {
+	private List<IReferenceNode> getChildrenFromXmlLocation(IResource resource,
+			int startLine, int endLine, String id, Set<IBean> beans) {
 		List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
-		IAopProject project = Activator.getModel().getProject(AopReferenceModelUtils.getJavaProject(resource));
+		IAopProject project = Activator.getModel().getProject(
+				AopReferenceModelUtils.getJavaProject(resource));
 		List<IAopReference> references = new ArrayList<IAopReference>();
 		if (project != null) {
 			references = project.getReferencesForResource(resource);
@@ -300,52 +323,64 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 		for (IAopReference reference : references) {
 			if (reference.getDefinition().getAspectName().equals(id)
 					|| (reference.getDefinition().getAspectLineNumber() >= startLine
-							&& reference.getDefinition().getAspectLineNumber() <= endLine && resource.equals(reference
-							.getDefinition().getResource()))) {
+							&& reference.getDefinition().getAspectLineNumber() <= endLine && resource
+							.equals(reference.getDefinition().getResource()))) {
 				if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
-					if (foundIntroductionSourceReferences.containsKey(reference.getDefinition())) {
-						foundIntroductionSourceReferences.get(reference.getDefinition()).add(reference);
+					if (foundIntroductionSourceReferences.containsKey(reference
+							.getDefinition())) {
+						foundIntroductionSourceReferences.get(
+								reference.getDefinition()).add(reference);
 					}
 					else {
 						List<IAopReference> tmp = new ArrayList<IAopReference>();
 						tmp.add(reference);
-						foundIntroductionSourceReferences.put(reference.getDefinition(), tmp);
+						foundIntroductionSourceReferences.put(reference
+								.getDefinition(), tmp);
 					}
 
 				}
 				else {
-					if (foundSourceReferences.containsKey(reference.getDefinition())) {
-						foundSourceReferences.get(reference.getDefinition()).add(reference);
+					if (foundSourceReferences.containsKey(reference
+							.getDefinition())) {
+						foundSourceReferences.get(reference.getDefinition())
+								.add(reference);
 					}
 					else {
 						List<IAopReference> tmp = new ArrayList<IAopReference>();
 						tmp.add(reference);
-						foundSourceReferences.put(reference.getDefinition(), tmp);
+						foundSourceReferences.put(reference.getDefinition(),
+								tmp);
 					}
 				}
 			}
 			if (reference.getDefinition().getAspectName().equals(id)
 					|| (reference.getTargetBean().getElementStartLine() >= startLine
-							&& reference.getTargetBean().getElementEndLine() <= endLine && resource.equals(reference
-							.getResource()))) {
+							&& reference.getTargetBean().getElementEndLine() <= endLine && resource
+							.equals(reference.getResource()))) {
 				if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
-					if (foundIntroductionTargetReferences.containsKey(reference.getTargetBean())) {
-						foundIntroductionTargetReferences.get(reference.getTargetBean()).add(reference);
+					if (foundIntroductionTargetReferences.containsKey(reference
+							.getTargetBean())) {
+						foundIntroductionTargetReferences.get(
+								reference.getTargetBean()).add(reference);
 					}
 					else {
 						List<IAopReference> tmp = new ArrayList<IAopReference>();
 						tmp.add(reference);
-						foundIntroductionTargetReferences.put(reference.getTargetBean(), tmp);
+						foundIntroductionTargetReferences.put(reference
+								.getTargetBean(), tmp);
 					}
 				}
 				else {
-					if (foundTargetReferences.containsKey(reference.getTargetBean())) {
-						foundTargetReferences.get(reference.getTargetBean()).add(reference);
+					if (foundTargetReferences.containsKey(reference
+							.getTargetBean())) {
+						foundTargetReferences.get(reference.getTargetBean())
+								.add(reference);
 					}
 					else {
 						List<IAopReference> tmp = new ArrayList<IAopReference>();
 						tmp.add(reference);
-						foundTargetReferences.put(reference.getTargetBean(), tmp);
+						foundTargetReferences.put(reference.getTargetBean(),
+								tmp);
 					}
 				}
 			}
@@ -354,7 +389,8 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 		// add normal beans
 		Map<IBean, BeanReferenceNode> beansRefs = new HashMap<IBean, BeanReferenceNode>();
 		for (IBean bean : beans) {
-			if (bean.getElementStartLine() >= startLine && bean.getElementEndLine() <= endLine) {
+			if (bean.getElementStartLine() >= startLine
+					&& bean.getElementEndLine() <= endLine) {
 				BeanReferenceNode rn = new BeanReferenceNode(bean);
 				nodes.add(rn);
 				beansRefs.put(bean, rn);
@@ -362,35 +398,49 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 		}
 		// add found references
 		if (foundTargetReferences.size() > 0) {
-			for (Map.Entry<IBean, List<IAopReference>> entry : foundTargetReferences.entrySet()) {
+			for (Map.Entry<IBean, List<IAopReference>> entry : foundTargetReferences
+					.entrySet()) {
 				if (beansRefs.containsKey(entry.getKey())) {
-					beansRefs.get(entry.getKey()).getAdviseReferences().addAll(entry.getValue());
+					beansRefs.get(entry.getKey()).getAdviseReferences().addAll(
+							entry.getValue());
 				}
 			}
 		}
 		if (foundIntroductionTargetReferences.size() > 0) {
-			for (Map.Entry<IBean, List<IAopReference>> entry : foundIntroductionTargetReferences.entrySet()) {
+			for (Map.Entry<IBean, List<IAopReference>> entry : foundIntroductionTargetReferences
+					.entrySet()) {
 				if (beansRefs.containsKey(entry.getKey())) {
-					beansRefs.get(entry.getKey()).getDeclaredOnReferences().addAll(entry.getValue());
+					beansRefs.get(entry.getKey()).getDeclaredOnReferences()
+							.addAll(entry.getValue());
 				}
 			}
 		}
 		if (foundSourceReferences.size() > 0) {
-			for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : foundSourceReferences.entrySet()) {
-				for (Map.Entry<IBean, BeanReferenceNode> n : beansRefs.entrySet()) {
-					if (n.getKey().getElementStartLine() == entry.getKey().getAspectLineNumber()
-							|| entry.getKey().getAspectName().equals(n.getKey().getElementName())) {
-						beansRefs.get(n.getKey()).getAspectReferences().addAll(entry.getValue());
+			for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : foundSourceReferences
+					.entrySet()) {
+				for (Map.Entry<IBean, BeanReferenceNode> n : beansRefs
+						.entrySet()) {
+					if (n.getKey().getElementStartLine() == entry.getKey()
+							.getAspectLineNumber()
+							|| entry.getKey().getAspectName().equals(
+									n.getKey().getElementName())) {
+						beansRefs.get(n.getKey()).getAspectReferences().addAll(
+								entry.getValue());
 					}
 				}
 			}
 		}
 		if (foundIntroductionSourceReferences.size() > 0) {
-			for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : foundIntroductionSourceReferences.entrySet()) {
-				for (Map.Entry<IBean, BeanReferenceNode> n : beansRefs.entrySet()) {
-					if (n.getKey().getElementStartLine() == entry.getKey().getAspectLineNumber()
-							|| entry.getKey().getAspectName().equals(n.getKey().getElementName())) {
-						beansRefs.get(n.getKey()).getDeclareParentReferences().addAll(entry.getValue());
+			for (Map.Entry<IAspectDefinition, List<IAopReference>> entry : foundIntroductionSourceReferences
+					.entrySet()) {
+				for (Map.Entry<IBean, BeanReferenceNode> n : beansRefs
+						.entrySet()) {
+					if (n.getKey().getElementStartLine() == entry.getKey()
+							.getAspectLineNumber()
+							|| entry.getKey().getAspectName().equals(
+									n.getKey().getElementName())) {
+						beansRefs.get(n.getKey()).getDeclareParentReferences()
+								.addAll(entry.getValue());
 					}
 				}
 			}
@@ -399,7 +449,8 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 	}
 
 	private IResource getResource(IStructuredDocument document) {
-		IStructuredModel model = StructuredModelManager.getModelManager().getModelForRead(document);
+		IStructuredModel model = StructuredModelManager.getModelManager()
+				.getModelForRead(document);
 		IResource resource = null;
 		try {
 			String baselocation = model.getBaseLocation();
@@ -425,10 +476,13 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 			return ((IModelElement) element).getElementParent();
 		}
 		else if (element instanceof IFile) {
-			return BeansCorePlugin.getModel().getConfig((IFile) element).getElementParent();
+			return BeansCorePlugin.getModel().getConfig((IFile) element)
+					.getElementParent();
 		}
 		if (element instanceof ZipEntryStorage) {
-			return BeansCorePlugin.getModel().getConfig(((ZipEntryStorage) element).getFullName()).getElementParent();
+			return BeansCorePlugin.getModel().getConfig(
+					((ZipEntryStorage) element).getFullName())
+					.getElementParent();
 		}
 		return null;
 	}
@@ -443,7 +497,8 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 			try {
 				IMethod[] methods = type.getMethods();
 				for (IMethod method : methods) {
-					if (Activator.getModel().isAdvised(method) || Activator.getModel().isAdvice(method)) {
+					if (Activator.getModel().isAdvised(method)
+							|| Activator.getModel().isAdvice(method)) {
 						return true;
 					}
 				}
@@ -453,7 +508,8 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 		}
 		else if (element instanceof IMethod) {
 			IMethod method = (IMethod) element;
-			List<IAopReference> references = Activator.getModel().getAllReferences(method.getJavaProject());
+			List<IAopReference> references = Activator.getModel()
+					.getAllReferences(method.getJavaProject());
 			for (IAopReference reference : references) {
 				if (reference.getTarget().equals(method)) {
 					return true;
@@ -472,7 +528,8 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 			IBeansConfig config = (IBeansConfig) element;
 			Set<String> classes = config.getBeanClasses();
 			for (String clz : classes) {
-				IType type = BeansModelUtils.getJavaType(config.getElementResource().getProject(), clz);
+				IType type = BeansModelUtils.getJavaType(config
+						.getElementResource().getProject(), clz);
 				if (type != null && type instanceof SourceType) {
 					// refreshViewer(type);
 				}
@@ -486,8 +543,9 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 
 			// Are we in the UI thread?
 			if (ctrl.getDisplay().getThread() == Thread.currentThread()) {
-				AopReferenceModelNavigator.refreshViewer((TreeViewer) viewer, AopReferenceModelNavigator
-						.calculateRootElement(element), element);
+				AopReferenceModelNavigator.refreshViewer((TreeViewer) viewer,
+						AopReferenceModelNavigator
+								.calculateRootElement(element), element);
 			}
 			else {
 				ctrl.getDisplay().asyncExec(new Runnable() {
@@ -498,8 +556,11 @@ public class AopReferenceModelNavigatorContentProvider implements ICommonContent
 						if (ctrl == null || ctrl.isDisposed()) {
 							return;
 						}
-						AopReferenceModelNavigator.refreshViewer((TreeViewer) viewer, AopReferenceModelNavigator
-								.calculateRootElement(element), element);
+						AopReferenceModelNavigator
+								.refreshViewer((TreeViewer) viewer,
+										AopReferenceModelNavigator
+												.calculateRootElement(element),
+										element);
 					}
 				});
 			}

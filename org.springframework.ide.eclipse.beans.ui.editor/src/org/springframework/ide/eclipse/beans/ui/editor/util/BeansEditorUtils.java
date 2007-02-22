@@ -492,7 +492,8 @@ public class BeansEditorUtils {
 				.getParameterTypes().length);
 		String[] parameterTypeNames = method.getParameterTypes();
 		for (String parameterTypeName : parameterTypeNames) {
-			parameterTypes.add(getTypeFromSignature(parameterTypeName, contextType));
+			parameterTypes.add(getTypeFromSignature(parameterTypeName,
+					contextType));
 		}
 		return parameterTypes;
 	}

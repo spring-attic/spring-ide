@@ -62,13 +62,17 @@ import org.w3c.dom.Text;
 @SuppressWarnings("restriction")
 public class AopReferenceModelNavigatorUtils {
 
-	public static ILabelProvider JAVA_LABEL_PROVIDER = new DecoratingLabelProvider(new JavaElementLabelProvider(
-			JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_SMALL_ICONS), Activator.getDefault()
-			.getWorkbench().getDecoratorManager().getLabelDecorator());
+	public static ILabelProvider JAVA_LABEL_PROVIDER = new DecoratingLabelProvider(
+			new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT
+					| JavaElementLabelProvider.SHOW_SMALL_ICONS), Activator
+					.getDefault().getWorkbench().getDecoratorManager()
+					.getLabelDecorator());
 
-	public static BeansModelLabelProvider BEAN_LABEL_PROVIDER = new BeansModelLabelProvider(true);
+	public static BeansModelLabelProvider BEAN_LABEL_PROVIDER = new BeansModelLabelProvider(
+			true);
 
-	public static Object getSelectedElement(IWorkbenchPart part, ISelection selection) {
+	public static Object getSelectedElement(IWorkbenchPart part,
+			ISelection selection) {
 		Object selectedElement = getSelectedJavaElement(part, selection);
 
 		if (selectedElement == null) {
@@ -88,19 +92,27 @@ public class AopReferenceModelNavigatorUtils {
 				Element elem = (Element) obj;
 				selectedElement = obj;
 
-				if ("http://www.springframework.org/schema/aop".equals(elem.getNamespaceURI())) {
+				if ("http://www.springframework.org/schema/aop".equals(elem
+						.getNamespaceURI())) {
 					if ("aspect".equals(elem.getLocalName())) {
-						selectedElement = locateAspectReference(elem, BeansEditorUtils.getAttribute(elem, "ref"));
+						selectedElement = locateAspectReference(elem,
+								BeansEditorUtils.getAttribute(elem, "ref"));
 					}
 					else if ("advisor".equals(elem.getLocalName())) {
-						selectedElement = locateAspectReference(elem, BeansEditorUtils.getAttribute(elem, "advice-ref"));
+						selectedElement = locateAspectReference(elem,
+								BeansEditorUtils.getAttribute(elem,
+										"advice-ref"));
 					}
-					else if (elem.getParentNode() != null && "aspect".equals(elem.getParentNode().getLocalName())) {
-						selectedElement = locateAspectReference(elem.getParentNode(), BeansEditorUtils.getAttribute(
-								elem.getParentNode(), "ref"));
+					else if (elem.getParentNode() != null
+							&& "aspect".equals(elem.getParentNode()
+									.getLocalName())) {
+						selectedElement = locateAspectReference(elem
+								.getParentNode(), BeansEditorUtils
+								.getAttribute(elem.getParentNode(), "ref"));
 					}
 					else if (!"config".equals(elem.getLocalName())) {
-						selectedElement = locateAspectReference(elem, BeansEditorUtils.getAttribute(elem, "ref"));
+						selectedElement = locateAspectReference(elem,
+								BeansEditorUtils.getAttribute(elem, "ref"));
 					}
 				}
 				else {
@@ -123,7 +135,8 @@ public class AopReferenceModelNavigatorUtils {
 	}
 
 	private static Node getBeanElement(Node elem, String nodeName) {
-		if (!nodeName.equals(elem.getLocalName()) && !elem.getOwnerDocument().equals(elem.getParentNode())) {
+		if (!nodeName.equals(elem.getLocalName())
+				&& !elem.getOwnerDocument().equals(elem.getParentNode())) {
 			return getBeanElement(elem.getParentNode(), nodeName);
 		}
 		else {
@@ -134,7 +147,8 @@ public class AopReferenceModelNavigatorUtils {
 	private static Object locateAspectReference(Node elem, String ref) {
 		Object selectedElement = null;
 		if (StringUtils.hasText(ref)) {
-			NodeList beans = elem.getOwnerDocument().getElementsByTagName("bean");
+			NodeList beans = elem.getOwnerDocument().getElementsByTagName(
+					"bean");
 			if (beans != null && beans.getLength() > 0) {
 				for (int i = 0; i < beans.getLength(); i++) {
 					Node node = beans.item(i);
@@ -152,7 +166,8 @@ public class AopReferenceModelNavigatorUtils {
 		return selectedElement;
 	}
 
-	public static IJavaElement getSelectedJavaElement(IWorkbenchPart part, ISelection selection) {
+	public static IJavaElement getSelectedJavaElement(IWorkbenchPart part,
+			ISelection selection) {
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection = (IStructuredSelection) selection;
 			Object first = structuredSelection.getFirstElement();
@@ -162,7 +177,8 @@ public class AopReferenceModelNavigatorUtils {
 				}
 			}
 		}
-		else if (part instanceof IEditorPart && selection instanceof ITextSelection) {
+		else if (part instanceof IEditorPart
+				&& selection instanceof ITextSelection) {
 			if (part instanceof JavaEditor) {
 				JavaEditor je = (JavaEditor) part;
 				ISourceReference sourceRef = computeHighlightRangeSourceReference(je);
@@ -181,7 +197,8 @@ public class AopReferenceModelNavigatorUtils {
 	 * 
 	 * @return the computed source reference
 	 */
-	public static ISourceReference computeHighlightRangeSourceReference(JavaEditor editor) {
+	public static ISourceReference computeHighlightRangeSourceReference(
+			JavaEditor editor) {
 		ISourceViewer sourceViewer = editor.getViewer();
 		if (sourceViewer == null)
 			return null;
@@ -193,7 +210,8 @@ public class AopReferenceModelNavigatorUtils {
 		int caret = 0;
 		if (sourceViewer instanceof ITextViewerExtension5) {
 			ITextViewerExtension5 extension = (ITextViewerExtension5) sourceViewer;
-			caret = extension.widgetOffset2ModelOffset(styledText.getCaretOffset());
+			caret = extension.widgetOffset2ModelOffset(styledText
+					.getCaretOffset());
 		}
 		else {
 			int offset = sourceViewer.getVisibleRegion().getOffset();
@@ -208,7 +226,8 @@ public class AopReferenceModelNavigatorUtils {
 		if (element.getElementType() == IJavaElement.IMPORT_DECLARATION) {
 
 			IImportDeclaration declaration = (IImportDeclaration) element;
-			IImportContainer container = (IImportContainer) declaration.getParent();
+			IImportContainer container = (IImportContainer) declaration
+					.getParent();
 			ISourceRange srcRange = null;
 			try {
 				srcRange = container.getSourceRange();
@@ -234,10 +253,12 @@ public class AopReferenceModelNavigatorUtils {
 	 * This is taken from the getElementAt(int offset, boolean reconcile) method
 	 * in the CompilationUnitEditor class.
 	 */
-	private static IJavaElement getElementAt(JavaEditor editor, int offset, boolean reconcile) {
+	private static IJavaElement getElementAt(JavaEditor editor, int offset,
+			boolean reconcile) {
 		IWorkingCopyManager manager;
 		if (workingCopyManagersForEditors.get(editor) instanceof IWorkingCopyManager) {
-			manager = (IWorkingCopyManager) workingCopyManagersForEditors.get(editor);
+			manager = (IWorkingCopyManager) workingCopyManagersForEditors
+					.get(editor);
 		}
 		else {
 			manager = JavaPlugin.getDefault().getWorkingCopyManager();
@@ -248,7 +269,8 @@ public class AopReferenceModelNavigatorUtils {
 			try {
 				if (reconcile) {
 					synchronized (unit) {
-						unit.reconcile(ICompilationUnit.NO_AST, false, null, null);
+						unit.reconcile(ICompilationUnit.NO_AST, false, null,
+								null);
 					}
 					IJavaElement elementAt = unit.getElementAt(offset);
 					if (elementAt != null) {
@@ -281,8 +303,10 @@ public class AopReferenceModelNavigatorUtils {
 					if (res instanceof IFile) {
 						IFile file = (IFile) res;
 						IProject containingProject = file.getProject();
-						IMarker[] javaModelMarkers = containingProject.findMarkers(
-								IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE);
+						IMarker[] javaModelMarkers = containingProject
+								.findMarkers(
+										IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER,
+										false, IResource.DEPTH_INFINITE);
 						for (int i = 0; i < javaModelMarkers.length; i++) {
 							IMarker marker = javaModelMarkers[i];
 							if (marker.getResource().equals(file)) {
@@ -318,7 +342,8 @@ public class AopReferenceModelNavigatorUtils {
 		try {
 			ICompilationUnit compUnit = member.getCompilationUnit();
 			Document document = new Document(compUnit.getBuffer().getContents());
-			return document.getLineOfOffset(member.getSourceRange().getOffset());
+			return document
+					.getLineOfOffset(member.getSourceRange().getOffset());
 		}
 		catch (JavaModelException e) {
 		}

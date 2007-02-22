@@ -45,7 +45,8 @@ import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNa
 import org.w3c.dom.Element;
 
 @SuppressWarnings("restriction")
-public class AopReferenceModelNavigator extends CommonNavigator implements ISelectionListener {
+public class AopReferenceModelNavigator extends CommonNavigator implements
+		ISelectionListener {
 
 	public static final String ID = "org.springframework.ide.eclipse.aop.ui.navigator.AopReferenceModelNavigator";
 
@@ -68,13 +69,15 @@ public class AopReferenceModelNavigator extends CommonNavigator implements ISele
 		return calculateRootElement(element, showBeansRefsForFileEnabled);
 	}
 
-	public static Object calculateRootElement(Object element, boolean showBeansRefsForFile) {
+	public static Object calculateRootElement(Object element,
+			boolean showBeansRefsForFile) {
 		if (showBeansRefsForFile && element != null) {
 			if (element instanceof IMethod) {
 				element = ((IMethod) element).getDeclaringType();
 			}
 			else if (element instanceof Element) {
-				element = ((Element) element).getOwnerDocument().getDocumentElement();
+				element = ((Element) element).getOwnerDocument()
+						.getDocumentElement();
 			}
 			else if (element instanceof IField) {
 				element = ((IField) element).getDeclaringType();
@@ -83,7 +86,8 @@ public class AopReferenceModelNavigator extends CommonNavigator implements ISele
 		return element;
 	}
 
-	public static void refreshViewer(TreeViewer viewer, final Object rootElement, Object element) {
+	public static void refreshViewer(TreeViewer viewer,
+			final Object rootElement, Object element) {
 		viewer.getTree().setRedraw(false);
 		viewer.setInput(rootElement);
 		// viewer.refresh();
@@ -97,7 +101,8 @@ public class AopReferenceModelNavigator extends CommonNavigator implements ISele
 		if (items != null) {
 			for (TreeItem item : items) {
 				Object obj = item.getData();
-				if (obj instanceof AdviceAopReferenceNode || obj instanceof AdvisedAopReferenceNode
+				if (obj instanceof AdviceAopReferenceNode
+						|| obj instanceof AdvisedAopReferenceNode
 						|| obj instanceof AdviceDeclareParentAopReferenceNode
 						|| obj instanceof AdvisedDeclareParentAopReferenceNode) {
 					expandTree(item.getItems(), true);
@@ -112,11 +117,13 @@ public class AopReferenceModelNavigator extends CommonNavigator implements ISele
 		}
 	}
 
-	public static void revealSelection(TreeViewer viewer, final Object javaElement) {
+	public static void revealSelection(TreeViewer viewer,
+			final Object javaElement) {
 		revealSelection(viewer, javaElement, showBeansRefsForFileEnabled);
 	}
 
-	public static void revealSelection(TreeViewer viewer, final Object javaElement, boolean showBeansRefsForFile) {
+	public static void revealSelection(TreeViewer viewer,
+			final Object javaElement, boolean showBeansRefsForFile) {
 		TreeItem[] items = viewer.getTree().getItems();
 		Object wr = null;
 
@@ -127,7 +134,8 @@ public class AopReferenceModelNavigator extends CommonNavigator implements ISele
 				for (int i = 0; i < aspectChildren.length; i++) {
 					Object obj = aspectChildren[i].getData();
 					if (obj instanceof AbstractJavaElementReferenceNode
-							&& ((AbstractJavaElementReferenceNode) obj).getElement().equals(javaElement)) {
+							&& ((AbstractJavaElementReferenceNode) obj)
+									.getElement().equals(javaElement)) {
 						wr = obj;
 						break;
 					}
@@ -148,7 +156,8 @@ public class AopReferenceModelNavigator extends CommonNavigator implements ISele
 			else {
 				ElementImpl element = (ElementImpl) javaElement;
 				IStructuredDocument document = element.getStructuredDocument();
-				int startLine = document.getLineOfOffset(element.getStartOffset()) + 1;
+				int startLine = document.getLineOfOffset(element
+						.getStartOffset()) + 1;
 				int endLine = document.getLineOfOffset(element.getEndOffset()) + 1;
 				for (int i = 0; i < items.length; i++) {
 					Object obj = items[i].getData();
@@ -177,13 +186,15 @@ public class AopReferenceModelNavigator extends CommonNavigator implements ISele
 
 	public void createPartControl(Composite aParent) {
 		super.createPartControl(aParent);
-		getSite().getWorkbenchWindow().getSelectionService().addPostSelectionListener(this);
+		getSite().getWorkbenchWindow().getSelectionService()
+				.addPostSelectionListener(this);
 
 		makeActions();
 	}
 
 	private void makeActions() {
-		this.toggleShowBeanRefsForFileAction = new ToggleShowBeanRefsForFileAction(this);
+		this.toggleShowBeanRefsForFileAction = new ToggleShowBeanRefsForFileAction(
+				this);
 		IActionBars bars = getViewSite().getActionBars();
 		bars.getToolBarManager().add(toggleShowBeanRefsForFileAction);
 		bars.getMenuManager().add(toggleShowBeanRefsForFileAction);
@@ -191,7 +202,8 @@ public class AopReferenceModelNavigator extends CommonNavigator implements ISele
 
 	public void dispose() {
 		super.dispose();
-		getSite().getWorkbenchWindow().getSelectionService().removeSelectionListener(this);
+		getSite().getWorkbenchWindow().getSelectionService()
+				.removeSelectionListener(this);
 	}
 
 	public boolean isShowBeansRefsForFileEnabled() {
@@ -202,7 +214,8 @@ public class AopReferenceModelNavigator extends CommonNavigator implements ISele
 		updateTreeViewer(part, selection, true);
 	}
 
-	public void setShowBeansRefsForFileEnabled(boolean showBeansRefsForFileEnabled) {
+	public void setShowBeansRefsForFileEnabled(
+			boolean showBeansRefsForFileEnabled) {
 		AopReferenceModelNavigator.showBeansRefsForFileEnabled = showBeansRefsForFileEnabled;
 
 		IPreferenceStore pstore = Activator.getDefault().getPreferenceStore();
@@ -212,15 +225,20 @@ public class AopReferenceModelNavigator extends CommonNavigator implements ISele
 		updateTreeViewer(lastWorkbenchPart, lastSelection, false);
 	}
 
-	private void updateTreeViewer(IWorkbenchPart part, ISelection selection, boolean ignoreSameSelection) {
-		final Object element = AopReferenceModelNavigatorUtils.getSelectedElement(part, selection);
-		if (element == null || (element.equals(lastElement) && ignoreSameSelection)) {
+	private void updateTreeViewer(IWorkbenchPart part, ISelection selection,
+			boolean ignoreSameSelection) {
+		final Object element = AopReferenceModelNavigatorUtils
+				.getSelectedElement(part, selection);
+		if (element == null
+				|| (element.equals(lastElement) && ignoreSameSelection)) {
 			return;
 		}
-		if ((element instanceof IType || element instanceof IMethod || element instanceof IField || element instanceof Element)
+		if ((element instanceof IType || element instanceof IMethod
+				|| element instanceof IField || element instanceof Element)
 				&& isLinkingEnabled()) {
 
-			final Object rootElement = calculateRootElement(element, showBeansRefsForFileEnabled);
+			final Object rootElement = calculateRootElement(element,
+					showBeansRefsForFileEnabled);
 
 			// Abort if this happens after disposes
 			Control ctrl = getCommonViewer().getControl();
