@@ -192,7 +192,7 @@ public class WebflowContentAssistProcessor extends
 		else if ("start-state".equals(nodeName)) {
 			// idref
 			if ("idref".equals(attributeName)) {
-				addBeanReferenceProposals(request, matchString);
+				addStateReferenceProposals(request, matchString, node);
 			}
 		}
 		else if ("var".equals(nodeName)) {
