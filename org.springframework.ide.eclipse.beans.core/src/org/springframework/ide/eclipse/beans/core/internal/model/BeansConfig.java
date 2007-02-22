@@ -832,14 +832,10 @@ public class BeansConfig extends AbstractResourceModelElement implements
 				return inputSource;
 			}
 
-			inputSource = resolveEntitViaXmlCatalog(publicId, systemId);
-			if (inputSource != null) {
-				return inputSource;
-			}
-			return null;
+			return resolveEntityViaXmlCatalog(publicId, systemId);
 		}
 
-		public InputSource resolveEntitViaXmlCatalog(String publicId,
+		public InputSource resolveEntityViaXmlCatalog(String publicId,
 				String systemId) {
 			ICatalog catalog = XMLCorePlugin.getDefault()
 					.getDefaultXMLCatalog();
