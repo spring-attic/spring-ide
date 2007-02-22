@@ -183,7 +183,9 @@ public class AopReferenceModelNavigatorContentProvider implements
 					type.getFullyQualifiedName());
 			Set<IBean> beans = new HashSet<IBean>();
 			for (IBeansConfig project : projects) {
-				Set<IBean> pBeans = project.getBeans();
+				List<IBean> pBeans = new ArrayList<IBean>();
+				pBeans.addAll(project.getBeans());
+				pBeans.addAll(project.getInnerBeans());				
 				for (IBean b : pBeans) {
 					if (type.getFullyQualifiedName().equals(
 							BeansModelUtils.getBeanClass(b, project))) {
