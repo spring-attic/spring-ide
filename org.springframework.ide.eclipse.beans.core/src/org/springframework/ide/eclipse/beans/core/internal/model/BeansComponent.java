@@ -20,12 +20,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
-import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
@@ -41,53 +36,18 @@ public class BeansComponent extends AbstractBeansModelElement implements
 		IBeansComponent {
 
 	/** List of all beans which are defined within this component */
-	private Set<IBean> beans;
+	private Set<IBean> beans = new LinkedHashSet<IBean>();
 
 	/** List of all inner components which are defined within this component */
-	private Set<IBeansComponent> components;
+	private Set<IBeansComponent> components =
+			new LinkedHashSet<IBeansComponent>();
 
-	private LinkedHashSet<IBean> innerBeans;
+	/** List of all inner beans which are defined within this component */
+	private LinkedHashSet<IBean> innerBeans = new LinkedHashSet<IBean>();
 
 	public BeansComponent(IModelElement parent,
 			ComponentDefinition definition) {
 		super(parent, definition.getName(), definition);
-		beans = new LinkedHashSet<IBean>();
-		for (BeanDefinition beanDef : definition.getBeanDefinitions()) {
-			if (beanDef instanceof AbstractBeanDefinition && beanDef
-					.getRole() != BeanDefinition.ROLE_INFRASTRUCTURE) {
-				String beanName = BeanDefinitionReaderUtils.generateBeanName(
-						(AbstractBeanDefinition) beanDef, null, true);
-				IBean bean = new Bean(this, beanName, null, beanDef);
-				beans.add(bean);
-			}
-		}
-
-		components = new LinkedHashSet<IBeansComponent>();
-		if (definition instanceof CompositeComponentDefinition) {
-			for (ComponentDefinition compDef : ((CompositeComponentDefinition)
-					definition).getNestedComponents()) {
-				if (compDef instanceof BeanComponentDefinition) {
-					if (compDef.getBeanDefinitions()[0].getRole()
-							!= BeanDefinition.ROLE_INFRASTRUCTURE) {
-						IBean bean = new Bean(this,
-								(BeanComponentDefinition) compDef);
-						beans.add(bean);
-					}
-				} else {
-					IBeansComponent component = new BeansComponent(this,
-							(ComponentDefinition) compDef);
-					components.add(component);
-				}
-			}
-		}
-
-		innerBeans = new LinkedHashSet<IBean>();
-		for (IBean bean : beans) {
-			innerBeans.addAll(bean.getInnerBeans());
-		}
-		for (IBeansComponent comp : components) {
-			innerBeans.addAll(comp.getInnerBeans());
-		}
 	}
 
 	public int getElementType() {
@@ -100,12 +60,24 @@ public class BeansComponent extends AbstractBeansModelElement implements
 		return children.toArray(new IModelElement[children.size()]);
 	}
 
+	public void addBean(IBean bean) {
+		beans.add(bean);
+	}
+
 	public Set<IBean> getBeans() {
 		return Collections.unmodifiableSet(beans);
 	}
 
+	public void addComponent(IBeansComponent component) {
+		components.add(component);
+	}
+
 	public Set<IBeansComponent> getComponents() {
 		return Collections.unmodifiableSet(components);
+	}
+
+	public void addInnerBeans(Set<IBean> innerBeans) {
+		this.innerBeans.addAll(innerBeans);
 	}
 
 	public Set<IBean> getInnerBeans() {
@@ -124,6 +96,8 @@ public class BeansComponent extends AbstractBeansModelElement implements
 			return false;
 		if (!ObjectUtils.nullSafeEquals(this.components, that.components))
 			return false;
+		if (!ObjectUtils.nullSafeEquals(this.innerBeans, that.innerBeans))
+			return false;
 		return super.equals(other);
 	}
 
@@ -131,6 +105,8 @@ public class BeansComponent extends AbstractBeansModelElement implements
 		int hashCode = ObjectUtils.nullSafeHashCode(beans);
 		hashCode = getElementType() * hashCode
 				+ ObjectUtils.nullSafeHashCode(components);
+		hashCode = getElementType() * hashCode
+				+ ObjectUtils.nullSafeHashCode(innerBeans);
 		return getElementType() * hashCode + super.hashCode();
 	}
 

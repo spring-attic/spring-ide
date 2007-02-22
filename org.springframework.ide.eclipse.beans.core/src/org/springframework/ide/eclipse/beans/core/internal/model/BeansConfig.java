@@ -42,7 +42,6 @@ import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.AliasDefinition;
-import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.parsing.DefaultsDefinition;
@@ -54,6 +53,7 @@ import org.springframework.beans.factory.xml.DefaultNamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.DelegatingEntityResolver;
 import org.springframework.beans.factory.xml.DocumentDefaultsDefinition;
 import org.springframework.beans.factory.xml.NamespaceHandler;
+import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -70,6 +70,9 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.namespaces.DefaultModelElementProvider;
+import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
+import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.io.FileResource;
 import org.springframework.ide.eclipse.core.io.StorageResource;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
@@ -95,10 +98,14 @@ import org.xml.sax.SAXParseException;
  * This class defines a Spring beans configuration.
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 @SuppressWarnings("restriction")
 public class BeansConfig extends AbstractResourceModelElement implements
 		IBeansConfig {
+
+	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER =
+			new DefaultModelElementProvider();
 
 	/** This bean's config file */
 	private IFile file;
@@ -570,20 +577,22 @@ public class BeansConfig extends AbstractResourceModelElement implements
 				resource = new FileResource(file);
 			}
 
-			DefaultBeanDefinitionRegistry registry = new DefaultBeanDefinitionRegistry();
+			DefaultBeanDefinitionRegistry registry =
+					new DefaultBeanDefinitionRegistry();
+			EntityResolver resolver = new XmlCatalogDelegatingEntityResolver(
+					new BeansDtdResolver(), new PluggableSchemaResolver(
+							PluggableSchemaResolver.class.getClassLoader()));
 			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
 					registry);
 			reader.setDocumentLoader(new XercesDocumentLoader());
-			EntityResolver resolver = new CatalogDelegatingEntityResolver(
-					new BeansDtdResolver(), new PluggableSchemaResolver(
-							PluggableSchemaResolver.class.getClassLoader()));
 			reader.setEntityResolver(resolver);
 			reader.setSourceExtractor(new XmlSourceExtractor());
 			reader.setEventListener(new BeansConfigReaderEventListener(this));
 			reader.setProblemReporter(new BeansConfigProblemReporter(this));
 			reader.setErrorHandler(new BeansConfigErrorHandler(this));
-			reader.setNamespaceHandlerResolver(new NamespaceHandlerResolver(
-					PluggableSchemaResolver.class.getClassLoader()));
+			reader.setNamespaceHandlerResolver(
+					new DelegatingNamespaceHandlerResolver(
+							NamespaceHandlerResolver.class.getClassLoader()));
 			try {
 				reader.loadBeanDefinitions(resource);
 			}
@@ -660,18 +669,22 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	 * instance of {@link IBeansConfig} with data from the XML bean definition
 	 * reader events.
 	 */
-	private final class BeansConfigReaderEventListener implements
-			ReaderEventListener {
+	private final class BeansConfigReaderEventListener
+			implements ReaderEventListener {
 
 		private IBeansConfig config;
 
+		private Map<String, IModelElementProvider> elementProviders;
+
 		public BeansConfigReaderEventListener(IBeansConfig config) {
 			this.config = config;
+			this.elementProviders = NamespaceUtils.getElementProviders();
 		}
 
 		public void defaultsRegistered(DefaultsDefinition defaultsDefinition) {
 			if (!isImported(defaultsDefinition)
-					&& defaultsDefinition instanceof DocumentDefaultsDefinition) {
+					&& defaultsDefinition instanceof
+							DocumentDefaultsDefinition) {
 				defaults = (DocumentDefaultsDefinition) defaultsDefinition;
 			}
 		}
@@ -690,21 +703,32 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			}
 		}
 
-		public void componentRegistered(ComponentDefinition componentDefinition) {
+		/**
+		 * Converts the given {@link ComponentDefinition} into a corresponding
+		 * {@link ISourceModelElement} via a namespace-specific
+		 * {@link IModelElementProvider}. These providers are registered via
+		 * the extension point
+		 * <code>org.springframework.ide.eclipse.beans.core.namespaces</code>.
+		 */
+		public void componentRegistered(
+				ComponentDefinition componentDefinition) {
 			if (!isImported(componentDefinition)) {
-				if (componentDefinition instanceof BeanComponentDefinition) {
-					if (componentDefinition.getBeanDefinitions()[0].getRole() != BeanDefinition.ROLE_INFRASTRUCTURE) {
-						IBean bean = new Bean(config,
-								(BeanComponentDefinition) componentDefinition);
-						beans.put(bean.getElementName(), bean);
-						innerBeans.addAll(bean.getInnerBeans());
-					}
+				String uri = NamespaceUtils
+						.getNameSpaceURI(componentDefinition);
+				IModelElementProvider provider = elementProviders.get(uri);
+				if (provider == null) {
+					provider = DEFAULT_ELEMENT_PROVIDER;
 				}
-				else {
-					IBeansComponent comp = new BeansComponent(config,
-							componentDefinition);
-					components.add(comp);
-					innerBeans.addAll(comp.getInnerBeans());
+				ISourceModelElement element = provider.getElement(config,
+						componentDefinition);
+				if (element instanceof IBean) {
+					beans.put(element.getElementName(), (IBean) element);
+					innerBeans.addAll(((IBean) element).getInnerBeans());
+				}
+				else if (element instanceof IBeansComponent) {
+					components.add((IBeansComponent) element);
+					innerBeans.addAll(((IBeansComponent) element)
+							.getInnerBeans());
 				}
 			}
 		}
@@ -724,59 +748,79 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		}
 	}
 
-	static class NamespaceHandlerResolver extends
-			DefaultNamespaceHandlerResolver {
+	/**
+	 * This {@link NamespaceHandlerResolver}Êprovides a
+	 * {@link NamespaceHandler} for a given namespace URI. Depending on this
+	 * namespace URI the returned namespace handler is one of the following (in
+	 * the provided order):
+	 * 
+	 * <ol>
+	 * <li>a namespace handler provided by the Spring framework</li>
+	 * <li>a namespace handler contributed via the extension point
+	 * <code>org.springframework.ide.eclipse.beans.core.namespaces</code></li>
+	 * <li>a no-op {@link NoOpNamespaceHandler namespace handler}</li>
+	 * </ol>
+	 */
+	private static final class DelegatingNamespaceHandlerResolver
+			extends DefaultNamespaceHandlerResolver {
 
-		public NamespaceHandlerResolver(ClassLoader classLoader) {
+		private static final NamespaceHandler NO_OP_NAMESPACE_HANDLER =
+				new NoOpNamespaceHandler();
+
+		private Map<String, NamespaceHandler> namespaceHandlers;
+
+		public DelegatingNamespaceHandlerResolver(ClassLoader classLoader) {
 			super(classLoader);
+			namespaceHandlers = NamespaceUtils.getNamespaceHandlers();
 		}
 
-		/**
-		 * Locate the {@link NamespaceHandler} for the supplied namespace URI
-		 * from the configured mappings.
-		 * @param namespaceUri the relevant namespace URI
-		 * @return the located {@link NamespaceHandler}, or <code>null</code>
-		 * if none found
-		 */
 		public NamespaceHandler resolve(String namespaceUri) {
+
+			// First check for a namespace handler provided by Spring  
 			NamespaceHandler namespaceHandler = super.resolve(namespaceUri);
 			if (namespaceHandler != null) {
 				return namespaceHandler;
 			}
-			return new NamespaceHandler() {
 
-				public BeanDefinitionHolder decorate(Node source,
-						BeanDefinitionHolder definition,
-						ParserContext parserContext) {
-					parserContext.getReaderContext().warning("blbla", source);
-					return null;
-				}
+			// Then check for a namespace handler provided by an extension  
+			namespaceHandler = namespaceHandlers.get(namespaceUri);
+			if (namespaceHandler != null) {
+				return namespaceHandler;
+			}
 
-				public void init() {
-
-				}
-
-				public BeanDefinition parse(Element element,
-						ParserContext parserContext) {
-					parserContext.getReaderContext().warning("blbla", element);
-					return null;
-				}
-			};
+			// Finally use a no-op namespace handler
+			return NO_OP_NAMESPACE_HANDLER;
 		}
 	}
 
-	static class CatalogDelegatingEntityResolver extends
-			DelegatingEntityResolver {
+	private static final class NoOpNamespaceHandler
+			implements NamespaceHandler {
 
-		/**
-		 * Create a new DelegatingEntityResolver that delegates to the given
-		 * {@link EntityResolver EntityResolvers}.
-		 * @param dtdResolver the EntityResolver to resolve DTDs with
-		 * @param schemaResolver the EntityResolver to resolve XML schemas with
-		 * @throws IllegalArgumentException if either of the supplied resolvers
-		 * is <code>null</code>
-		 */
-		public CatalogDelegatingEntityResolver(EntityResolver dtdResolver,
+		public void init() {
+			// do nothing
+		}
+
+		public BeanDefinitionHolder decorate(Node source,
+				BeanDefinitionHolder definition,
+				ParserContext parserContext) {
+			// do nothing
+			return null;
+		}
+
+		public BeanDefinition parse(Element element,
+				ParserContext parserContext) {
+			// do nothing
+			return null;
+		}
+	}
+
+	/**
+	 * This {@link EntityResolver}  
+	 */
+	private static class XmlCatalogDelegatingEntityResolver
+			extends DelegatingEntityResolver {
+
+		public XmlCatalogDelegatingEntityResolver(EntityResolver dtdResolver,
 				EntityResolver schemaResolver) {
 			super(dtdResolver, schemaResolver);
 		}
@@ -787,53 +831,56 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			if (inputSource != null) {
 				return inputSource;
 			}
-			else {
-				String resolved = resolve(publicId, systemId);
-				if (resolved != null) {
-					return new InputSource(resolved);
-				}
-				return null;
+
+			inputSource = resolveEntitViaXmlCatalog(publicId, systemId);
+			if (inputSource != null) {
+				return inputSource;
 			}
+			return null;
 		}
 
-		public String resolve(String publicId, String systemId) {
+		public InputSource resolveEntitViaXmlCatalog(String publicId,
+				String systemId) {
 			ICatalog catalog = XMLCorePlugin.getDefault()
 					.getDefaultXMLCatalog();
-			String resolved = null;
 			if (systemId != null) {
 				try {
-					resolved = catalog.resolveSystem(systemId);
-					if (resolved == null) {
-						resolved = catalog.resolveURI(systemId);
+					String resolvedSystemId = catalog.resolveSystem(systemId);
+					if (resolvedSystemId == null) {
+						resolvedSystemId = catalog.resolveURI(systemId);
+					}
+					if (resolvedSystemId != null) {
+						return new InputSource(resolvedSystemId);
 					}
 				}
 				catch (MalformedURLException me) {
-					resolved = null;
+					// ignore
 				}
 				catch (IOException ie) {
-					resolved = null;
+					// ignore
 				}
 			}
-			if (resolved == null) {
-				if (publicId != null) {
-					if (!(systemId != null && systemId.endsWith(".xsd"))) {
-						try {
-							resolved = catalog
-									.resolvePublic(publicId, systemId);
-							if (resolved == null) {
-								resolved = catalog.resolveURI(publicId);
-							}
+			if (publicId != null) {
+				if (!(systemId != null && systemId.endsWith(XSD_SUFFIX))) {
+					try {
+						String resolvedSystemId = catalog.resolvePublic(
+								publicId, systemId);
+						if (resolvedSystemId == null) {
+							resolvedSystemId = catalog.resolveURI(publicId);
 						}
-						catch (MalformedURLException me) {
-							resolved = null;
+						if (resolvedSystemId != null) {
+							return new InputSource(resolvedSystemId);
 						}
-						catch (IOException ie) {
-							resolved = null;
-						}
+					}
+					catch (MalformedURLException me) {
+						// ignore
+					}
+					catch (IOException ie) {
+						// ignore
 					}
 				}
 			}
-			return resolved;
+			return null;
 		}
 	}
 }

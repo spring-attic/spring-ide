@@ -2,6 +2,10 @@
 <?eclipse version="3.0"?>
 <plugin>
 
+   <extension-point id="namespaces"
+         name="%extensionNamespaces.name"
+         schema="schema/namespaces.exsd"/>
+
    <extension
          id="problemmarker"
          name="%beansProblemMarker"

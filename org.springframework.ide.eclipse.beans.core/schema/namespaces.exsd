@@ -1,0 +1,155 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Schema file written by PDE -->
+<schema targetNamespace="org.springframework.ide.eclipse.beans.core">
+<annotation>
+      <appInfo>
+         <meta.schema plugin="org.springframework.ide.eclipse.beans.core" id="namespaces" name="Namespaces"/>
+      </appInfo>
+      <documentation>
+         &lt;p&gt;
+This extension point is used to add namespace handlers and model element providers for Spring 2.0 namespaces.
+      </documentation>
+   </annotation>
+
+   <element name="extension">
+      <complexType>
+         <sequence>
+            <element ref="namespace" minOccurs="0" maxOccurs="unbounded"/>
+         </sequence>
+         <attribute name="point" type="string" use="required">
+            <annotation>
+               <documentation>
+                  a fully-qualified name of the target extension point
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="id" type="string">
+            <annotation>
+               <documentation>
+                  an optional id
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string">
+            <annotation>
+               <documentation>
+                  an optional name
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="namespace">
+      <annotation>
+         <appInfo>
+            <meta.element labelAttribute="uri"/>
+         </appInfo>
+      </annotation>
+      <complexType>
+         <attribute name="name" type="string">
+            <annotation>
+               <documentation>
+                  an optional name
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="uri" type="string" use="required">
+            <annotation>
+               <documentation>
+                  the URI of the namespace, e.g. &quot;http://www.springframework.org/schema/beans&quot;
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="namespaceHandler" type="string" use="required">
+            <annotation>
+               <documentation>
+                  an instance of &lt;samp&gt;org.springframework.beans.factory.xml.NamespaceHandler&lt;/samp&gt;
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn="org.springframework.beans.factory.xml.NamespaceHandler"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="elementProvider" type="string" use="required">
+            <annotation>
+               <documentation>
+                  an instance of &lt;samp&gt;org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider&lt;/samp&gt;
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="since"/>
+      </appInfo>
+      <documentation>
+         2.0
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="examples"/>
+      </appInfo>
+      <documentation>
+         &lt;pre&gt;
+&lt;extension point=&quot;org.springframework.ide.eclipse.beans.core.namespaces&quot;&gt;
+   &lt;namespace name=&quot;Spring AOP&quot;
+      uri=&quot;http://www.springframework.org/schema/aop&quot;
+      namespaceHandler=&quot;org.springframework.ide.eclipse.core.namespaces.aop.AopNamespaceHandler&quot;/&gt;
+      elementProvider=&quot;org.springframework.ide.eclipse.core.namespaces.aop.AopNamespaceModelElementProvider&quot;/&gt;
+&lt;/extension&gt;
+&lt;/pre&gt;
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="apiInfo"/>
+      </appInfo>
+      <documentation>
+         &lt;p&gt;
+Each namespace handler must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.springframework.beans.factory.xml.NamespaceHandler&lt;/samp&gt;.
+
+Each provider must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.springframework.ide.eclipse.core.namespaces.IModelElementProvider&lt;/samp&gt;.
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="implementation"/>
+      </appInfo>
+      <documentation>
+         &lt;p&gt;
+This plugin itself comes with a set of predefined namespace contributions.
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="copyright"/>
+      </appInfo>
+      <documentation>
+         Copyright 2002-2007 the original author or authors.
+&lt;br&gt;
+Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+&lt;br&gt;
+&lt;a href=&quot;http://www.apache.org/licenses/LICENSE-2.0&quot;&gt;http://www.apache.org/licenses/LICENSE-2.0&lt;/a&gt;
+&lt;br&gt;
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+      </documentation>
+   </annotation>
+
+</schema>
