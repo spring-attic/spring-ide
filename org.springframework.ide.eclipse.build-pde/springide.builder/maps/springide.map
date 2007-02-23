@@ -12,6 +12,7 @@ plugin@org.springframework.ide.eclipse.beans.ui.editor=SVN,trunk,svn://localhost
 plugin@org.springframework.ide.eclipse.beans.ui.graph=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.beans.ui.graph
 plugin@org.springframework.ide.eclipse.beans.ui.navigator=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.beans.ui.navigator
 plugin@org.springframework.ide.eclipse.beans.ui.search=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.beans.ui.search
+plugin@org.springframework.ide.eclipse.beans.ui.refactoring=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.beans.ui.refactoring
 plugin@org.springframework.ide.eclipse.core=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.core
 plugin@org.springframework.ide.eclipse.ui=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.ui
 plugin@org.springframework.ide.eclipse.aop.core=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.aop.core
