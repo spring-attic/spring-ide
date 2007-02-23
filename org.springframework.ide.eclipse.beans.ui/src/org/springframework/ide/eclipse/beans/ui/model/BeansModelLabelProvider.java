@@ -19,7 +19,6 @@ package org.springframework.ide.eclipse.beans.ui.model;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreePathLabelProvider;
@@ -29,10 +28,13 @@ import org.eclipse.jface.viewers.ViewerLabel;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeanClassReferences;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
@@ -102,60 +104,49 @@ public class BeansModelLabelProvider extends LabelProvider implements
 	}
 
 	protected Image getDecoratedImage(Object element, Image image) {
-		IResource resource = null;
-		int startLine = -1;
-		int endLine = -1;
-		if (element instanceof IResourceModelElement) {
-			resource = ((IResourceModelElement) element).getElementResource();
-			if (element instanceof ISourceModelElement) {
-				startLine = ((ISourceModelElement) element)
-						.getElementStartLine();
-				endLine = ((ISourceModelElement) element).getElementEndLine();
-			}
-		} else if (element instanceof IResource) {
-			resource = (IResource) element;
-		} else if (element instanceof ZipEntryStorage) {
-			resource = ((ZipEntryStorage) element).getFile();
+		int severity = 0;
+		if (element instanceof ISourceModelElement) {
+			ISourceModelElement source = (ISourceModelElement) element;
+			severity = MarkerUtils.getHighestSeverityFromMarkersInRange(source
+					.getElementResource(), source.getElementStartLine(), source
+					.getElementEndLine());
 		}
-		if (resource != null) {
-			try {
-				int severity = -1;
-				IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true,
-						IResource.DEPTH_INFINITE);
-				for (IMarker marker : markers) {
-					if (startLine == -1
-							|| isMarkerInRange(marker, startLine, endLine)) {
-						int sev = marker.getAttribute(IMarker.SEVERITY, -1);
-						if (sev == IMarker.SEVERITY_WARNING) {
-							severity = sev;
-						} else if (sev == IMarker.SEVERITY_ERROR) {
-							severity = sev;
-							break;
-						}
+		else if (element instanceof IResourceModelElement) {
+			if (element instanceof IBeansConfigSet) {
+				for (IBeansConfig config : ((IBeansConfigSet) element)
+						.getConfigs()) {
+					severity = MarkerUtils
+							.getHighestSeverityFromMarkersInRange(config
+									.getElementResource(), -1, -1);
+					if (severity == IMarker.SEVERITY_ERROR) {
+						break;
 					}
 				}
-				if (severity == IMarker.SEVERITY_WARNING) {
-					return BeansModelImages.getDecoratedImage(image,
-							BeansModelImages.FLAG_WARNING);
-				} else if (severity == IMarker.SEVERITY_ERROR) {
-					return BeansModelImages.getDecoratedImage(image,
-							BeansModelImages.FLAG_ERROR);
-				}
-			} catch (CoreException e) {
-				BeansUIPlugin.log(e);
+			}
+			else {
+				severity = MarkerUtils.getHighestSeverityFromMarkersInRange(
+						((IResourceModelElement) element).getElementResource(),
+						-1, -1);
 			}
 		}
-		return image;
-	}
-
-	private boolean isMarkerInRange(IMarker marker, int startLine, int endLine)
-			throws CoreException {
-		if (startLine >= 0 && endLine >= startLine
-				&& marker.isSubtypeOf(IMarker.TEXT)) {
-			int line = marker.getAttribute(IMarker.LINE_NUMBER, -1);
-			return (line >= startLine && line <= endLine);
+		else if (element instanceof IResource) {
+			severity = MarkerUtils.getHighestSeverityFromMarkersInRange(
+					(IResource) element, -1, -1);
 		}
-		return false;
+		else if (element instanceof ZipEntryStorage) {
+			IResource resource = ((ZipEntryStorage) element).getFile();
+			severity = MarkerUtils.getHighestSeverityFromMarkersInRange(
+					resource, -1, -1);
+		}
+		if (severity == IMarker.SEVERITY_WARNING) {
+			return BeansModelImages.getDecoratedImage(image,
+					BeansModelImages.FLAG_WARNING);
+		}
+		else if (severity == IMarker.SEVERITY_ERROR) {
+			return BeansModelImages.getDecoratedImage(image,
+					BeansModelImages.FLAG_ERROR);
+		}
+		return image;
 	}
 
 	public String getText(Object element) {
