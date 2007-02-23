@@ -24,14 +24,21 @@ import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 
 /**
+ * A {@link IProjectBuilder} implementation that triggers creation of Spring
+ * IDE's internal AOP reference model
+ * 
  * @author Christian Dupuis
+ * @since 2.0
  */
 @SuppressWarnings("restriction")
 public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 
+	/**
+	 * @see IProjectBuilder#build(IFile, IProgressMonitor)
+	 */
 	public void build(IFile file, IProgressMonitor monitor) {
 		Set<IFile> filesToBuild = AopReferenceModelUtils.getFilesToBuild(file);
-		monitor.beginTask("Parsing Spring AOP", filesToBuild.size());
+		monitor.beginTask("Building Spring AOP reference model", filesToBuild.size());
 		AopReferenceModelBuilder.buildAopModel(file.getProject(), filesToBuild);
 		monitor.done();
 	}

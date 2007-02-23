@@ -17,7 +17,6 @@ package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
 import java.util.List;
 
-import org.eclipse.jdt.core.IMember;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 
 public class AdviceAopSourceMethodNode extends AbstractJavaElementReferenceNode
@@ -32,9 +31,5 @@ public class AdviceAopSourceMethodNode extends AbstractJavaElementReferenceNode
 
 	public IReferenceNode[] getChildren() {
 		return new IReferenceNode[] { new AdviceAopReferenceNode(this.reference) };
-	}
-
-	public IMember getAdviceSourceMethod() {
-		return reference.get(0).getSource();
 	}
 }

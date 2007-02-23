@@ -48,19 +48,17 @@ import org.w3c.dom.Element;
 public class AopReferenceModelNavigator extends CommonNavigator implements
 		ISelectionListener {
 
-	public static final String ID = 
-		"org.springframework.ide.eclipse.aop.ui.navigator.AopReferenceModelNavigator";
+	public static final String ID = AopReferenceModelNavigator.class.getName();
 
 	public static final String BEAN_REFS_FOR_FILE_ID = ID + ".beanRefsForFile";
-
-	private static boolean showBeansRefsForFileEnabled;
-
-	private ToggleShowBeanRefsForFileAction toggleShowBeanRefsForFileAction;
-
+	
 	static {
 		IPreferenceStore pstore = Activator.getDefault().getPreferenceStore();
 		showBeansRefsForFileEnabled = pstore.getBoolean(BEAN_REFS_FOR_FILE_ID);
 	}
+
+
+	private static boolean showBeansRefsForFileEnabled;
 
 	public static int calculateExpandToLevel(Object element) {
 		return AbstractTreeViewer.ALL_LEVELS;
@@ -87,17 +85,6 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 		return element;
 	}
 
-	public static void refreshViewer(TreeViewer viewer,
-			final Object rootElement, Object element) {
-		viewer.getTree().setRedraw(false);
-		viewer.setInput(rootElement);
-		// viewer.refresh();
-		viewer.expandToLevel(calculateExpandToLevel(rootElement));
-		expandTree(viewer.getTree().getItems(), false);
-		revealSelection(viewer, element);
-		viewer.getTree().setRedraw(true);
-	}
-
 	public static void expandTree(TreeItem[] items, boolean b) {
 		if (items != null) {
 			for (TreeItem item : items) {
@@ -116,6 +103,17 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 				}
 			}
 		}
+	}
+
+	public static void refreshViewer(TreeViewer viewer,
+			final Object rootElement, Object element) {
+		viewer.getTree().setRedraw(false);
+		viewer.setInput(rootElement);
+		// viewer.refresh();
+		viewer.expandToLevel(calculateExpandToLevel(rootElement));
+		expandTree(viewer.getTree().getItems(), false);
+		revealSelection(viewer, element);
+		viewer.getTree().setRedraw(true);
 	}
 
 	public static void revealSelection(TreeViewer viewer,
@@ -185,20 +183,14 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 
 	private IWorkbenchPart lastWorkbenchPart;
 
+	private ToggleShowBeanRefsForFileAction toggleShowBeanRefsForFileAction;
+
 	public void createPartControl(Composite aParent) {
 		super.createPartControl(aParent);
 		getSite().getWorkbenchWindow().getSelectionService()
 				.addPostSelectionListener(this);
 
 		makeActions();
-	}
-
-	private void makeActions() {
-		this.toggleShowBeanRefsForFileAction = new ToggleShowBeanRefsForFileAction(
-				this);
-		IActionBars bars = getViewSite().getActionBars();
-		bars.getToolBarManager().add(toggleShowBeanRefsForFileAction);
-		bars.getMenuManager().add(toggleShowBeanRefsForFileAction);
 	}
 
 	public void dispose() {
@@ -209,6 +201,14 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 
 	public boolean isShowBeansRefsForFileEnabled() {
 		return showBeansRefsForFileEnabled;
+	}
+
+	private void makeActions() {
+		this.toggleShowBeanRefsForFileAction = new ToggleShowBeanRefsForFileAction(
+				this);
+		IActionBars bars = getViewSite().getActionBars();
+		bars.getToolBarManager().add(toggleShowBeanRefsForFileAction);
+		bars.getMenuManager().add(toggleShowBeanRefsForFileAction);
 	}
 
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.ide.eclipse.aop.core.model.builder;
 
 import java.io.IOException;
@@ -33,9 +32,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.ILock;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
@@ -137,9 +134,7 @@ public class AopReferenceModelBuilder {
 		IBeansProject project = BeansCorePlugin.getModel().getProject(
 				currentFile.getProject());
 
-		// change to Job.getJobManager as soon as we only use Eclipse 3.3
-		IJobManager jobMan = Platform.getJobManager();
-		ILock lock = jobMan.newLock();
+		ILock lock = Job.getJobManager().newLock();
 		lock.acquire();
 
 		if (project != null) {
@@ -455,21 +450,19 @@ public class AopReferenceModelBuilder {
 				if (monitor.isCanceled()) {
 					return Status.CANCEL_STATUS;
 				}
-				Job[] buildJobs = Platform.getJobManager().find(
+				Job[] buildJobs = Job.getJobManager().find(
 						ResourcesPlugin.FAMILY_MANUAL_BUILD);
-				for (int i = 0; i < buildJobs.length; i++) {
-					Job curr = buildJobs[i];
+				for (Job curr : buildJobs) {
 					if (curr != this && curr instanceof BuildJob) {
 						BuildJob job = (BuildJob) curr;
 						if (job.isCoveredBy(this)) {
-							curr.cancel(); // cancel all other build jobs of
-							// our kind
+							curr.cancel(); // cancel all other build jobs of our kind
 						}
 					}
 				}
 			}
 			try {
-				monitor.beginTask("Builder Spring AOP reference model",
+				monitor.beginTask("Building Spring AOP reference model",
 						filesToBuild.size());
 				buildAopModel(monitor, filesToBuild);
 			}
