@@ -23,6 +23,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -42,6 +44,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
@@ -104,7 +107,7 @@ public class ValidationTests extends AbstractSpringIdeTest {
 		IFile xmlFile = createXmlFile("sample.xml", beansProject);
 
 		IMarker[] markers = getFailureMarkers();
-		assertEquals("Wrong number of validation errors (problem markers)", 7,
+		assertEquals("Wrong number of validation errors (problem markers)", 5,
 				markers.length);
 
 		// test that we get an error for a bean class
@@ -202,7 +205,7 @@ public class ValidationTests extends AbstractSpringIdeTest {
 		IFile xmlFileA = createXmlFile("a.xml", beansProject);
 		IFile xmlFileB = createXmlFile("b.xml", beansProject);
 
-		ArrayList configNames = new ArrayList();
+		Set<String> configNames = new HashSet<String>();
 		configNames.add("xml/a.xml");
 		configNames.add("xml/b.xml");
 		BeansConfigSet b = new BeansConfigSet(beansProject, "configSet",
@@ -211,7 +214,7 @@ public class ValidationTests extends AbstractSpringIdeTest {
 		// TODO: really should run this test twice, with this flag set and unset
 
 		Collection c = beansProject.getConfigSets();
-		ArrayList l = new ArrayList(c);
+		Set<IBeansConfigSet> l = new HashSet<IBeansConfigSet>();
 		l.add(b);
 		beansProject.setConfigSets(l);
 		beansProject.saveDescription();
@@ -227,8 +230,9 @@ public class ValidationTests extends AbstractSpringIdeTest {
 		IMarker marker = markers[0];
 		assertEquals(marker.getType(), IBeansProjectMarker.PROBLEM_MARKER);
 		assertEquals(6, marker.getAttribute(IMarker.LINE_NUMBER, 0));
-		assertEquals("Overrides another bean in config set 'configSet'", marker
-				.getAttribute(IMarker.MESSAGE, ""));
+		assertEquals(
+				"Overrides another bean named 'simple' in config set 'configSet'",
+				marker.getAttribute(IMarker.MESSAGE, ""));
 
 	}
 
@@ -254,7 +258,7 @@ public class ValidationTests extends AbstractSpringIdeTest {
 		assertTrue(xmlFile.getLocation().toFile().exists());
 
 		// BeansProject beansProject = createBeansProject();
-		beansProject.addConfig(xmlFile, false);
+		beansProject.addConfig(xmlFile);
 		project.waitForAutoBuild();
 
 		IBeansConfig beansConfig = beansProject.getConfig(xmlFile);
@@ -273,10 +277,8 @@ public class ValidationTests extends AbstractSpringIdeTest {
 	/**
 	 * create an empty file with the indicated name in the indicated folder
 	 * 
-	 * @param destFolder
-	 *            the folder in which to create the file
-	 * @param name
-	 *            the name of the file to be created
+	 * @param destFolder the folder in which to create the file
+	 * @param name the name of the file to be created
 	 * @return an eclipse handle on the newly created file
 	 * @throws CoreException
 	 */
@@ -326,7 +328,8 @@ public class ValidationTests extends AbstractSpringIdeTest {
 					"org.springframework.ide.eclipse.test").getEntry("/");
 			return new File(Platform.asLocalURL(platformURL).getFile())
 					.getAbsolutePath();
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -334,7 +337,7 @@ public class ValidationTests extends AbstractSpringIdeTest {
 
 	/**
 	 * @return the path to the data to be tested (text files which will be
-	 *         copied into the test area)
+	 * copied into the test area)
 	 */
 	public String getSourceDataPath() {
 		return getPluginDirectoryPath() + java.io.File.separator + "data";
