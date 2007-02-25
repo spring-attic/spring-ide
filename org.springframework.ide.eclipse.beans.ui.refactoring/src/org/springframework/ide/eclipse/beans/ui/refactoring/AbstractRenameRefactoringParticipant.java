@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.refactoring;
 
@@ -73,8 +73,8 @@ public abstract class AbstractRenameRefactoringParticipant extends
 		return (result.getChildren().length == 0) ? null : result;
 	}
 
-	protected abstract void addChange(CompositeChange result, IResource resource,
-			IProgressMonitor pm) throws CoreException;
+	protected abstract void addChange(CompositeChange result,
+			IResource resource, IProgressMonitor pm) throws CoreException;
 
 	protected IJavaElement[] getAffectedElements() {
 		Set<Object> objects = elements.keySet();
@@ -84,12 +84,12 @@ public abstract class AbstractRenameRefactoringParticipant extends
 
 	protected String[] getNewNames() {
 		String[] result = new String[elements.size()];
-		Iterator iter = elements.values().iterator();
+		Iterator<Object> iter = elements.values().iterator();
 		for (int i = 0; i < elements.size(); i++)
 			result[i] = iter.next().toString();
 		return result;
 	}
-	
+
 	public String getName() {
 		return "Rename classes referenced in Spring Bean definitions";
 	}

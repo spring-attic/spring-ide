@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.refactoring.method;
 
@@ -73,7 +73,7 @@ public class BeansMethodRenameRefactoringParticipant extends
 		}
 		return result;
 	}
-	
+
 	public String getName() {
 		return "Rename properties referenced in Spring Bean definitions";
 	}

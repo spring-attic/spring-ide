@@ -39,7 +39,7 @@
 			</enablement>
 		</renameParticipant>
 	</extension>
-	
+
 	<extension
 		point="org.eclipse.ltk.core.refactoring.moveParticipants">
 		<moveParticipant
@@ -54,4 +54,93 @@
 			</enablement>
 		</moveParticipant>
 	</extension>
+
+	<extension point="org.eclipse.ui.editorActions">
+		<editorContribution
+			id="org.springframework.ide.eclipse.beans.ui.refactoring.actions"
+			targetID="org.eclipse.wst.xml.ui.internal.tabletree.XMLMultiPageEditorPart">
+			<menu label="%refactorMenu.label" path="additions"
+				id="org.springframework.ide.eclipse.beans.ui.refactoring.menu">
+				<groupMarker name="sourceGroup"></groupMarker>
+			</menu>
+			<action
+				id="org.springframework.ide.eclipse.beans.ui.refactoring.refactorBeanClassAction"
+				label="%renameJavaElement.label"
+				definitionId="org.springframework.ide.eclipse.beans.ui.refactoring.commands.refactorBeanClassAction"
+				menubarPath="org.springframework.ide.eclipse.beans.ui.refactoring.menu/sourceGroup"
+				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.RenameJavaElementAction">
+			</action>
+			<action
+				id="org.springframework.ide.eclipse.beans.ui.refactoring.moveBeanClassAction"
+				label="%moveJavaElement.label"
+				definitionId="org.springframework.ide.eclipse.beans.ui.refactoring.commands.moveBeanClassAction"
+				menubarPath="org.springframework.ide.eclipse.beans.ui.refactoring.menu/sourceGroup"
+				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.MoveJavaElementAction">
+			</action>
+		</editorContribution>
+	</extension>
+
+	<extension point="org.eclipse.ui.popupMenus">
+		<viewerContribution
+			targetID="org.springframework.ide.eclipse.beans.ui.editor.beansConfig.source.EditorContext"
+			id="org.springframework.ide.eclipse.beans.ui.editor.actions.context">
+			<menu label="%refactorMenu.label" path="additions"
+				id="org.springframework.ide.eclipse.beans.ui.editor.actions.rector.menu">
+			</menu>
+			<action
+				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.RenameJavaElementAction"
+				id="org.springframework.ide.eclipse.beans.ui.refactoring.context.refactorBeanClassAction"
+				label="%renameJavaElement.label"
+				menubarPath="org.springframework.ide.eclipse.beans.ui.editor.actions.rector.menu/group1">
+			</action>
+			<action
+				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.MoveJavaElementAction"
+				id="org.springframework.ide.eclipse.beans.ui.refactoring.context.moveBeanClassAction"
+				label="%moveJavaElement.label"
+				menubarPath="org.springframework.ide.eclipse.beans.ui.editor.actions.rector.menu/group1">
+			</action>
+		</viewerContribution>
+	</extension>
+
+	<extension point="org.eclipse.ui.commands">
+		<command
+			id="org.springframework.ide.eclipse.beans.ui.refactoring.commands.refactorBeanClassAction"
+			name="Rename Bean Java Elements"
+			categoryId="org.eclipse.jdt.ui.category.refactoring" />
+		<command
+			id="org.springframework.ide.eclipse.beans.ui.refactoring.commands.moveBeanClassAction"
+			name="Move Bean Class"
+			categoryId="org.eclipse.jdt.ui.category.refactoring" />
+	</extension>
+
+	<extension point="org.eclipse.ui.bindings">
+		<key sequence="M2+M3+R"
+			commandId="org.springframework.ide.eclipse.beans.ui.refactoring.commands.refactorBeanClassAction"
+			contextId="org.eclipse.wst.sse.ui.structuredTextEditorScope"
+			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" />
+		<key platform="carbon" sequence="M2+M3+R" commandId=""
+			contextId="org.eclipse.wst.sse.ui.structuredTextEditorScope"
+			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" />
+		<key platform="carbon" sequence="COMMAND+ALT+R"
+			commandId="org.springframework.ide.eclipse.beans.ui.refactoring.commands.refactorBeanClassAction"
+			contextId="org.eclipse.wst.sse.ui.structuredTextEditorScope"
+			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" />
+
+		<key sequence="M2+M3+V"
+			commandId="org.springframework.ide.eclipse.beans.ui.refactoring.commands.moveBeanClassAction"
+			contextId="org.eclipse.wst.sse.ui.structuredTextEditorScope"
+			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" />
+		<key platform="carbon" sequence="M2+M3+V" commandId=""
+			contextId="org.eclipse.wst.sse.ui.structuredTextEditorScope"
+			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" />
+		<key platform="carbon" sequence="COMMAND+ALT+V"
+			commandId="org.springframework.ide.eclipse.beans.ui.refactoring.commands.moveBeanClassAction"
+			contextId="org.eclipse.wst.sse.ui.structuredTextEditorScope"
+			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" />
+
+	</extension>
+
+
+
+
 </plugin>

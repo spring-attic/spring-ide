@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.refactoring.folder;
 
@@ -26,7 +26,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.ide.eclipse.beans.ui.refactoring.type.BeansTypeRenameRefactoringParticipant;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
-public class BeansPackageRenameRefactoringParticipant extends BeansTypeRenameRefactoringParticipant {
+public class BeansPackageRenameRefactoringParticipant extends
+		BeansTypeRenameRefactoringParticipant {
 
 	protected boolean initialize(Object element) {
 		try {
@@ -48,10 +49,10 @@ public class BeansPackageRenameRefactoringParticipant extends BeansTypeRenameRef
 		}
 		return false;
 	}
-	
+
 	protected String[] getNewNames() {
 		String[] result = new String[elements.size()];
-		Iterator iter = elements.values().iterator();
+		Iterator<Object> iter = elements.values().iterator();
 		for (int i = 0; i < elements.size(); i++)
 			result[i] = iter.next().toString();
 		return result;

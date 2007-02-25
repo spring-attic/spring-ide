@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.ui.refactoring.type;
 
@@ -49,12 +49,12 @@ public class BeansTypeRenameRefactoringParticipant extends
 		}
 		return false;
 	}
-	
+
 	protected void addChange(CompositeChange result, IResource resource,
 			IProgressMonitor pm) throws CoreException {
 		if (resource.exists()) {
-			Change change = BeansRefactoringChangeUtils.createRenameChange((IFile) resource,
-					getAffectedElements(), getNewNames(), pm);
+			Change change = BeansRefactoringChangeUtils.createRenameChange(
+					(IFile) resource, getAffectedElements(), getNewNames(), pm);
 			if (change != null)
 				result.add(change);
 		}
@@ -62,7 +62,7 @@ public class BeansTypeRenameRefactoringParticipant extends
 
 	protected String[] getOldNames() {
 		String[] result = new String[elements.size()];
-		Iterator iter = elements.keySet().iterator();
+		Iterator<Object> iter = elements.keySet().iterator();
 		for (int i = 0; i < elements.size(); i++)
 			result[i] = ((IType) iter.next()).getFullyQualifiedName('$');
 		return result;
@@ -70,7 +70,7 @@ public class BeansTypeRenameRefactoringParticipant extends
 
 	protected String[] getNewNames() {
 		String[] result = new String[elements.size()];
-		Iterator iter = elements.keySet().iterator();
+		Iterator<Object> iter = elements.keySet().iterator();
 		for (int i = 0; i < elements.size(); i++) {
 			IType type = (IType) iter.next();
 			String oldName = type.getFullyQualifiedName('$');
