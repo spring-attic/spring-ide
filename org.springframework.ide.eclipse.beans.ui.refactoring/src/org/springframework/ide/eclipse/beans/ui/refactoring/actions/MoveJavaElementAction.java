@@ -24,10 +24,18 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
-import org.eclipse.jdt.internal.ui.actions.ActionUtil;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
+import org.eclipse.jdt.internal.corext.refactoring.structure.JavaMoveRefactoring;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.CreateTargetQueries;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMoveWizard;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgQueries;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.swt.widgets.Shell;
 
 /**
@@ -39,16 +47,11 @@ import org.eclipse.swt.widgets.Shell;
 @SuppressWarnings("restriction")
 public class MoveJavaElementAction extends AbstractRefactorJavaElementAction {
 
-	protected void run(JavaEditor fEditor, IJavaElement element,
-			boolean lightweight) throws CoreException {
+	protected void run(JavaEditor fEditor, IJavaElement element)
+			throws CoreException {
 		Shell shell = fEditor.getSite().getShell();
 
 		if (!(element instanceof IType)) {
-			return;
-		}
-
-		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
-		if (!ActionUtil.isEditable(fEditor, shell, element)) {
 			return;
 		}
 
@@ -56,10 +59,33 @@ public class MoveJavaElementAction extends AbstractRefactorJavaElementAction {
 		elements.add(element);
 		IResource[] resources = ReorgUtils.getResources(elements);
 		IJavaElement[] javaElements = ReorgUtils.getJavaElements(elements);
+		startRefactoring(resources, javaElements, shell);
+	}
+
+	protected void startRefactoring(IResource[] resources,
+			IJavaElement[] javaElements, Shell shell) throws CoreException {
 		if (RefactoringAvailabilityTester.isMoveAvailable(resources,
 				javaElements)) {
-			RefactoringExecutionStarter.startMoveRefactoring(resources,
-					javaElements, shell);
+			IMovePolicy policy = ReorgPolicyFactory.createMovePolicy(resources,
+					javaElements);
+			if (policy.canEnable()) {
+				final JavaMoveProcessor processor = new JavaMoveProcessor(
+						policy);
+				final JavaMoveRefactoring refactoring = new JavaMoveRefactoring(
+						processor);
+				final RefactoringWizard wizard = new ReorgMoveWizard(
+						refactoring);
+				processor
+						.setCreateTargetQueries(new CreateTargetQueries(wizard));
+				processor.setReorgQueries(new ReorgQueries(wizard));
+				new RefactoringStarter()
+						.activate(
+								refactoring,
+								wizard,
+								shell,
+								RefactoringMessages.OpenRefactoringWizardAction_refactoring,
+								true);
+			}
 		}
 	}
 }

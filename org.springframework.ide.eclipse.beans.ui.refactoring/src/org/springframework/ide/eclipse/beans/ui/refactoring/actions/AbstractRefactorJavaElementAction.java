@@ -6,17 +6,19 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.ui.actions.AbstractBeansConfigEditorAction;
@@ -28,7 +30,8 @@ import org.w3c.dom.Node;
 
 /**
  * 
- * @author cd
+ * @author Christian Dupuis
+ * @since 2.0
  * 
  */
 @SuppressWarnings( { "unchecked", "restriction" })
@@ -74,17 +77,18 @@ public abstract class AbstractRefactorJavaElementAction extends
 					// bring up the Java Editor
 					IEditorPart javaEditorPart = SpringUIUtils.openInEditor(je);
 					SpringUIUtils.openInEditor(getConfigFile(), textSelection
-							.getStartLine());
+							.getStartLine() + 1);
 					try {
 						if (javaEditorPart != null && je != null) {
 							JavaEditor editor = (JavaEditor) javaEditorPart;
-							IPreferenceStore store = JavaPlugin.getDefault()
-									.getPreferenceStore();
-							run(
-									editor,
-									je,
-									store
-											.getBoolean(PreferenceConstants.REFACTOR_LIGHTWEIGHT));
+							// Work around for
+							// http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
+							if (!isEditable(editor,
+									editor.getSite().getShell(), je)) {
+								return;
+							}
+
+							run(editor, je);
 						}
 					}
 					catch (CoreException e) {
@@ -94,8 +98,8 @@ public abstract class AbstractRefactorJavaElementAction extends
 		}
 	}
 
-	protected abstract void run(JavaEditor fEditor, IJavaElement element,
-			boolean lightweight) throws CoreException;
+	protected abstract void run(JavaEditor fEditor, IJavaElement element)
+			throws CoreException;
 
 	public void run(IAction action) {
 		IDocument document = getTextEditor().getDocumentProvider().getDocument(
@@ -117,6 +121,67 @@ public abstract class AbstractRefactorJavaElementAction extends
 				return (ITextSelection) selection;
 		}
 		return TextSelection.emptySelection();
+	}
+	
+	// *********** remove the methods below after upgrading to 3.3 ***********
+	public static boolean isProcessable(JavaEditor editor) {
+		if (editor == null)
+			return true;
+		Shell shell = editor.getSite().getShell();
+		IJavaElement input = SelectionConverter.getInput(editor);
+		// if a Java editor doesn't have an input of type Java element
+		// then it is for sure not on the build path
+		if (input == null) {
+			MessageDialog.openInformation(shell,
+					ActionMessages.ActionUtil_notOnBuildPath_title,
+					ActionMessages.ActionUtil_notOnBuildPath_message);
+			return false;
+		}
+		return ActionUtil.isProcessable(shell, input);
+	}
+
+	/**
+	 * Check whether <code>editor</code> and <code>element</code> are
+	 * processable and editable. If the editor edits the element, the validation
+	 * is only performed once. If necessary, ask the user whether the file(s)
+	 * should be edited.
+	 * 
+	 * @param editor an editor, or <code>null</code> iff the action was not
+	 * executed from an editor
+	 * @param shell a shell to serve as parent for a dialog
+	 * @param element the element to check, cannot be <code>null</code>
+	 * @return <code>true</code> if the element can be edited,
+	 * <code>false</code> otherwise
+	 */
+	public static boolean isEditable(JavaEditor editor, Shell shell,
+			IJavaElement element) {
+		if (editor != null) {
+			IJavaElement input = SelectionConverter.getInput(editor);
+			if (input != null
+					&& input.equals(element
+							.getAncestor(IJavaElement.COMPILATION_UNIT))) {
+				return isEditable(editor);
+			}
+			else {
+				return isEditable(editor) && isEditable(shell, element);
+			}
+		}
+		return isEditable(shell, element);
+	}
+
+	public static boolean isEditable(JavaEditor editor) {
+		if (!isProcessable(editor)) {
+			return false;
+		}
+
+		return editor.validateEditorInputState();
+	}
+
+	public static boolean isEditable(Shell shell, IJavaElement element) {
+		if (!ActionUtil.isProcessable(shell, element)) {
+			return false;
+		}
+		return true;
 	}
 
 }

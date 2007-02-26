@@ -31,9 +31,7 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameLinkedMode;
 import org.eclipse.swt.widgets.Shell;
 
 /**
@@ -45,31 +43,18 @@ import org.eclipse.swt.widgets.Shell;
 @SuppressWarnings("restriction")
 public class RenameJavaElementAction extends AbstractRefactorJavaElementAction {
 
-	protected void run(JavaEditor fEditor, IJavaElement element,
-			boolean lightweight) throws CoreException {
+	protected void run(JavaEditor fEditor, IJavaElement element) throws CoreException {
 		Shell shell = fEditor.getSite().getShell();
 
 		if (!isRenameAvailable(element)) {
 			return;
 		}
 
-		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
-		if (!ActionUtil.isEditable(fEditor, shell, element)) {
-			return;
-		}
 		// XXX workaround bug 31998
 		if (ActionUtil.mustDisableJavaModelAction(shell, element)) {
 			return;
 		}
-
-		if (lightweight && fEditor instanceof CompilationUnitEditor
-				&& !(element instanceof IPackageFragment)) {
-			new RenameLinkedMode(element, (CompilationUnitEditor) fEditor)
-					.start();
-		}
-		else {
-			RefactoringExecutionStarter.startRenameRefactoring(element, shell);
-		}
+		RefactoringExecutionStarter.startRenameRefactoring(element, shell);
 	}
 
 	private boolean isRenameAvailable(IJavaElement element)
