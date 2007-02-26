@@ -52,4 +52,13 @@
 			description="%command.openBeansSearchPage.description"
 			categoryId="org.eclipse.ui.category.views"/>
    </extension>
+   
+   <extension
+         point="org.eclipse.jdt.ui.queryParticipants">
+      <queryParticipant
+            class="org.springframework.ide.eclipse.beans.ui.search.jdt.BeansJavaSearchParticipant"
+            id="org.springframework.ide.eclipse.beans.ui.search.queryParticipant"
+            name="Query"
+            nature="org.springframework.ide.eclipse.core.springnature"/>
+   </extension>
 </plugin>
