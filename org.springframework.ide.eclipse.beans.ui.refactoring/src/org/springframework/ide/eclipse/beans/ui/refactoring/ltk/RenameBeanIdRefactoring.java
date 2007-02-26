@@ -271,7 +271,8 @@ public class RenameBeanIdRefactoring extends Refactoring {
 			status.merge(RefactoringStatus
 					.createFatalErrorStatus("Bean id cannot be empty"));
 		}
-		else if (this.node.getOwnerDocument().getElementById(beanId) != null) {
+		else if (this.node != null
+				&& this.node.getOwnerDocument().getElementById(beanId) != null) {
 			status.merge(RefactoringStatus
 					.createInfoStatus("Bean id already used in current file"));
 		}

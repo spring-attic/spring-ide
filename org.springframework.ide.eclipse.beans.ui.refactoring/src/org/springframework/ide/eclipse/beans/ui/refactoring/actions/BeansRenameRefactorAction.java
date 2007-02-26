@@ -115,10 +115,10 @@ public class BeansRenameRefactorAction extends AbstractBeansRefactorAction {
 				if ("bean".equals(node.getLocalName())
 						&& "id".equals(attributeName)) {
 					RenameBeanIdRefactoring refactoring = new RenameBeanIdRefactoring();
+					refactoring.setNode((IDOMNode) node);
 					refactoring.setBeanId(BeansEditorUtils.getAttribute(node,
 							"id"));
 					refactoring.setFile(getConfigFile());
-					refactoring.setNode((IDOMNode) node);
 					refactoring.setOffset(textSelection.getOffset());
 					RenameBeanIdRefactoringWizard wizard = new RenameBeanIdRefactoringWizard(
 							refactoring, "Rename Bean id");
