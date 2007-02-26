@@ -31,6 +31,7 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.xml.core.internal.document.AttrImpl;
@@ -69,6 +70,10 @@ public class BeansRefactoringChangeUtils {
 			if (multiEdit.hasChildren()) {
 				TextFileChange change = new TextFileChange("", file);
 				change.setEdit(multiEdit);
+				for (TextEdit e : multiEdit.getChildren()) {
+					change.addTextEditGroup(new TextEditGroup(
+							"Rename Bean property name", e));
+				}
 				return change;
 			}
 		}
@@ -118,6 +123,168 @@ public class BeansRefactoringChangeUtils {
 		return null;
 	}
 
+	public static Change createRenameBeanIdChange(IFile file, String beanId,
+			String newBeanId, boolean updateReferences, IProgressMonitor monitor)
+			throws CoreException {
+		IStructuredModel model = null;
+		try {
+			model = StructuredModelManager.getModelManager().getModelForRead(
+					file);
+
+			if (model == null) {
+				return null;
+			}
+			IDOMDocument document = ((DOMModelImpl) model).getDocument();
+			MultiTextEdit multiEdit = new MultiTextEdit();
+			NodeList nodes = document.getElementsByTagName("bean");
+			for (int i = 0; i < nodes.getLength(); i++) {
+				TextEdit edit = createRenameBeanIdTextEdit(nodes.item(i),
+						beanId, newBeanId);
+				if (edit != null)
+					multiEdit.addChild(edit);
+			}
+
+			if (model != null) {
+				model.releaseFromRead();
+				model = null;
+			}
+
+			TextFileChange refChanges = null;
+			if (updateReferences) {
+				refChanges = createRenameBeanRefsChange(file, beanId,
+						newBeanId, monitor);
+			}
+
+			if (multiEdit.hasChildren()) {
+				TextFileChange change = new TextFileChange("", file);
+				change.setEdit(multiEdit);
+				for (TextEdit e : multiEdit.getChildren()) {
+					change.addTextEditGroup(new TextEditGroup("Rename Bean id",
+							e));
+				}
+				if (refChanges != null) {
+					MultiTextEdit edit = (MultiTextEdit) refChanges.getEdit();
+					if (edit.hasChildren()) {
+						for (TextEdit e : edit.getChildren()) {
+							edit.removeChild(e);
+							multiEdit.addChild(e);
+							change.addTextEditGroup(new TextEditGroup(
+									"Rename Bean reference", e));
+						}
+					}
+				}
+				return change;
+			}
+		}
+		catch (IOException e) {
+		}
+		finally {
+			if (model != null) {
+				model.releaseFromRead();
+			}
+		}
+		return null;
+	}
+
+	private static TextEdit createRenameBeanIdTextEdit(Node node,
+			String beanId, String newBeanId) {
+		if (node == null)
+			return null;
+
+		String id = BeansEditorUtils.getAttribute(node, "id");
+		if (beanId.equals(id)) {
+			AttrImpl attr = (AttrImpl) node.getAttributes().getNamedItem("id");
+			int offset = attr.getValueRegionStartOffset() + 1;
+			if (offset >= 0)
+				return new ReplaceEdit(offset, beanId.length(), newBeanId);
+		}
+		return null;
+	}
+
+	public static TextFileChange createRenameBeanRefsChange(IFile file,
+			String beanId, String newBeanId, IProgressMonitor monitor)
+			throws CoreException {
+		IStructuredModel model = null;
+		try {
+			model = StructuredModelManager.getModelManager().getModelForRead(
+					file);
+
+			if (model == null) {
+				return null;
+			}
+			IDOMDocument document = ((DOMModelImpl) model).getDocument();
+			MultiTextEdit multiEdit = new MultiTextEdit();
+			NodeList nodes = document.getDocumentElement().getChildNodes();
+			for (int i = 0; i < nodes.getLength(); i++) {
+				createRenameBeanRefsTextEdit(nodes.item(i), beanId, newBeanId,
+						multiEdit);
+			}
+			if (multiEdit.hasChildren()) {
+				TextFileChange change = new TextFileChange("", file);
+				change.setEdit(multiEdit);
+				for (TextEdit e : multiEdit.getChildren()) {
+					change.addTextEditGroup(new TextEditGroup(
+							"Rename Bean reference", e));
+				}
+				return change;
+			}
+		}
+		catch (IOException e) {
+		}
+		finally {
+			if (model != null) {
+				model.releaseFromRead();
+			}
+		}
+		return null;
+	}
+
+	private static void createRenameBeanRefsTextEdit(Node node, String beanId,
+			String newBeanId, MultiTextEdit multiEdit) {
+		if (node == null) {
+			return;
+		}
+		createRenameBeanRefTextEditForAttribute("depends-on", node, beanId,
+				newBeanId, multiEdit);
+		createRenameBeanRefTextEditForAttribute("bean", node, beanId,
+				newBeanId, multiEdit);
+		createRenameBeanRefTextEditForAttribute("local", node, beanId,
+				newBeanId, multiEdit);
+		createRenameBeanRefTextEditForAttribute("parent", node, beanId,
+				newBeanId, multiEdit);
+		createRenameBeanRefTextEditForAttribute("ref", node, beanId, newBeanId,
+				multiEdit);
+		createRenameBeanRefTextEditForAttribute("key-ref", node, beanId,
+				newBeanId, multiEdit);
+		createRenameBeanRefTextEditForAttribute("value-ref", node, beanId,
+				newBeanId, multiEdit);
+
+		NodeList nodes = node.getChildNodes();
+		if (nodes != null && nodes.getLength() > 0) {
+			for (int i = 0; i < nodes.getLength(); i++) {
+				createRenameBeanRefsTextEdit(nodes.item(i), beanId, newBeanId,
+						multiEdit);
+			}
+		}
+
+	}
+
+	private static void createRenameBeanRefTextEditForAttribute(
+			String attributeName, Node node, String beanId, String newBeanId,
+			MultiTextEdit multiEdit) {
+		if (BeansEditorUtils.hasAttribute(node, attributeName)) {
+			String beanRef = BeansEditorUtils.getAttribute(node, attributeName);
+			if (beanRef != null && beanRef.equals(beanId)) {
+				AttrImpl attr = (AttrImpl) node.getAttributes().getNamedItem(
+						attributeName);
+				int offset = attr.getValueRegionStartOffset() + 1;
+				if (offset >= 0)
+					multiEdit.addChild(new ReplaceEdit(offset,
+							beanRef.length(), newBeanId));
+			}
+		}
+	}
+
 	public static Change createRenameChange(IFile file,
 			IJavaElement[] affectedElements, String[] newNames,
 			IProgressMonitor monitor) throws CoreException {
@@ -143,6 +310,10 @@ public class BeansRefactoringChangeUtils {
 			if (multiEdit.hasChildren()) {
 				TextFileChange change = new TextFileChange("", file);
 				change.setEdit(multiEdit);
+				for (TextEdit e : multiEdit.getChildren()) {
+					change.addTextEditGroup(new TextEditGroup(
+							"Rename Bean class", e));
+				}
 				return change;
 			}
 		}

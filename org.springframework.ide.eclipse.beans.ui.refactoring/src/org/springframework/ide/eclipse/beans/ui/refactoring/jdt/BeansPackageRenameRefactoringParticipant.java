@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.ide.eclipse.beans.ui.refactoring.folder;
+package org.springframework.ide.eclipse.beans.ui.refactoring.jdt;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
-import org.springframework.ide.eclipse.beans.ui.refactoring.type.BeansTypeRenameRefactoringParticipant;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
 public class BeansPackageRenameRefactoringParticipant extends

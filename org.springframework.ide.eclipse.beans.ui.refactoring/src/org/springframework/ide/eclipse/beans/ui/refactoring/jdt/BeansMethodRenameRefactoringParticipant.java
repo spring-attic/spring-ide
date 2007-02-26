@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.ide.eclipse.beans.ui.refactoring.type;
+package org.springframework.ide.eclipse.beans.ui.refactoring.jdt;
 
 import java.util.HashMap;
-import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -25,25 +24,26 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.springframework.ide.eclipse.beans.ui.refactoring.AbstractRenameRefactoringParticipant;
 import org.springframework.ide.eclipse.beans.ui.refactoring.util.BeansRefactoringChangeUtils;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.util.StringUtils;
 
-public class BeansTypeRenameRefactoringParticipant extends
+public class BeansMethodRenameRefactoringParticipant extends
 		AbstractRenameRefactoringParticipant {
 
 	protected boolean initialize(Object element) {
-		if (element instanceof IType) {
-			IType type = (IType) element;
-			IJavaProject javaProject = (IJavaProject) type
+		if (element instanceof IMethod) {
+			IMethod method = (IMethod) element;
+			IJavaProject javaProject = (IJavaProject) method
 					.getAncestor(IJavaElement.JAVA_PROJECT);
 			project = javaProject.getProject();
-			if (SpringCoreUtils.isSpringProject(project)) {
+			if (SpringCoreUtils.isSpringProject(project)
+					&& method.getElementName().startsWith("set")) {
 				elements = new HashMap<Object, Object>();
-				elements.put(type, getArguments().getNewName());
+				elements.put(method, getArguments().getNewName());
 				return true;
 			}
 		}
@@ -53,32 +53,27 @@ public class BeansTypeRenameRefactoringParticipant extends
 	protected void addChange(CompositeChange result, IResource resource,
 			IProgressMonitor pm) throws CoreException {
 		if (resource.exists()) {
-			Change change = BeansRefactoringChangeUtils.createRenameChange(
-					(IFile) resource, getAffectedElements(), getNewNames(), pm);
+			Change change = BeansRefactoringChangeUtils
+					.createMethodRenameChange((IFile) resource,
+							getAffectedElements(), getNewNames(), pm);
 			if (change != null)
 				result.add(change);
 		}
 	}
 
-	protected String[] getOldNames() {
+	protected String[] getNewNames() {
 		String[] result = new String[elements.size()];
-		Iterator<Object> iter = elements.keySet().iterator();
-		for (int i = 0; i < elements.size(); i++)
-			result[i] = ((IType) iter.next()).getFullyQualifiedName('$');
+		for (int i = 0; i < elements.size(); i++) {
+			String newName = getArguments().getNewName();
+			if (newName.startsWith("set")) {
+				newName = StringUtils.uncapitalize(newName.substring(3));
+			}
+			result[i] = newName;
+		}
 		return result;
 	}
 
-	protected String[] getNewNames() {
-		String[] result = new String[elements.size()];
-		Iterator<Object> iter = elements.keySet().iterator();
-		for (int i = 0; i < elements.size(); i++) {
-			IType type = (IType) iter.next();
-			String oldName = type.getFullyQualifiedName('$');
-			int index = oldName.lastIndexOf(type.getElementName());
-			StringBuffer buffer = new StringBuffer(oldName.substring(0, index));
-			buffer.append(elements.get(type));
-			result[i] = buffer.toString();
-		}
-		return result;
+	public String getName() {
+		return "Rename properties referenced in Spring Bean definitions";
 	}
 }

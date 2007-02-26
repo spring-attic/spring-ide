@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.ide.eclipse.beans.ui.refactoring;
+package org.springframework.ide.eclipse.beans.ui.refactoring.jdt;
 
-import java.util.List;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
@@ -24,28 +25,29 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.ISharableParticipant;
-import org.eclipse.ltk.core.refactoring.participants.MoveParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
+import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 
 /**
- * Abstract class for implementing {@link MoveParticipant}
+ * Abstract super class for implemeting {@link RenameParticipant}
  * 
  * @author Christian Dupuis
  */
-public abstract class AbstractMoveRefactoringParticipant extends
-		MoveParticipant implements ISharableParticipant {
+public abstract class AbstractRenameRefactoringParticipant extends
+		RenameParticipant {
 
 	protected IProject project;
 
-	protected List<Object> elements;
+	protected Map<Object, Object> elements;
 
 	public RefactoringStatus checkConditions(IProgressMonitor pm,
 			CheckConditionsContext context) throws OperationCanceledException {
@@ -53,7 +55,7 @@ public abstract class AbstractMoveRefactoringParticipant extends
 	}
 
 	public void addElement(Object element, RefactoringArguments arguments) {
-		elements.add(element);
+		elements.put(element, ((RenameArguments) arguments).getNewName());
 	}
 
 	public Change createChange(IProgressMonitor pm) throws CoreException,
@@ -73,4 +75,22 @@ public abstract class AbstractMoveRefactoringParticipant extends
 
 	protected abstract void addChange(CompositeChange result,
 			IResource resource, IProgressMonitor pm) throws CoreException;
+
+	protected IJavaElement[] getAffectedElements() {
+		Set<Object> objects = elements.keySet();
+		return (IJavaElement[]) objects
+				.toArray(new IJavaElement[objects.size()]);
+	}
+
+	protected String[] getNewNames() {
+		String[] result = new String[elements.size()];
+		Iterator<Object> iter = elements.values().iterator();
+		for (int i = 0; i < elements.size(); i++)
+			result[i] = iter.next().toString();
+		return result;
+	}
+
+	public String getName() {
+		return "Rename classes referenced in Spring Bean definitions";
+	}
 }

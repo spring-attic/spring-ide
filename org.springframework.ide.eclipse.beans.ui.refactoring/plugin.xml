@@ -3,9 +3,16 @@
 <plugin>
 
 	<extension
+         point="org.eclipse.ltk.core.refactoring.refactoringContributions">
+      <contribution
+            class="org.springframework.ide.eclipse.beans.ui.refactoring.ltk.RenameBeanIdRefactoringContribution"
+            id="org.springframework.ide.eclipse.beans.ui.refactoring.ltk.renameBeanIdRefactoring"/>
+   </extension>
+
+	<extension
 		point="org.eclipse.ltk.core.refactoring.renameParticipants">
 		<renameParticipant
-			class="org.springframework.ide.eclipse.beans.ui.refactoring.type.BeansTypeRenameRefactoringParticipant"
+			class="org.springframework.ide.eclipse.beans.ui.refactoring.jdt.BeansTypeRenameRefactoringParticipant"
 			id="org.springframework.ide.eclipse.beans.ui.refactoring.beanTypeRenameParticipant"
 			name="%beanTypeRenameParticipant.name">
 			<enablement>
@@ -16,7 +23,7 @@
 			</enablement>
 		</renameParticipant>
 		<renameParticipant
-			class="org.springframework.ide.eclipse.beans.ui.refactoring.method.BeansMethodRenameRefactoringParticipant"
+			class="org.springframework.ide.eclipse.beans.ui.refactoring.jdt.BeansMethodRenameRefactoringParticipant"
 			id="org.springframework.ide.eclipse.beans.ui.refactoring.beanMethodRenameParticipant"
 			name="%beanMethodRenameParticipant.name">
 			<enablement>
@@ -27,7 +34,7 @@
 			</enablement>
 		</renameParticipant>
 		<renameParticipant
-			class="org.springframework.ide.eclipse.beans.ui.refactoring.folder.BeansPackageRenameRefactoringParticipant"
+			class="org.springframework.ide.eclipse.beans.ui.refactoring.jdt.BeansPackageRenameRefactoringParticipant"
 			id="org.springframework.ide.eclipse.beans.ui.refactoring.beanPackageRenameParticipant"
 			name="%beanPackageRenameParticipant.name">
 			<enablement>
@@ -43,7 +50,7 @@
 	<extension
 		point="org.eclipse.ltk.core.refactoring.moveParticipants">
 		<moveParticipant
-			class="org.springframework.ide.eclipse.beans.ui.refactoring.type.BeansTypeMoveRefactoringParticipant"
+			class="org.springframework.ide.eclipse.beans.ui.refactoring.jdt.BeansTypeMoveRefactoringParticipant"
 			id="org.springframework.ide.eclipse.beans.ui.refactoring.beanTypeMoveParticipant"
 			name="%beanTypeMoveParticipant.name">
 			<enablement>
@@ -68,14 +75,14 @@
 				label="%renameJavaElement.label"
 				definitionId="org.springframework.ide.eclipse.beans.ui.refactoring.commands.refactorBeanClassAction"
 				menubarPath="org.springframework.ide.eclipse.beans.ui.refactoring.menu/sourceGroup"
-				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.RenameJavaElementAction">
+				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.BeansRenameRefactorAction">
 			</action>
 			<action
 				id="org.springframework.ide.eclipse.beans.ui.refactoring.moveBeanClassAction"
 				label="%moveJavaElement.label"
 				definitionId="org.springframework.ide.eclipse.beans.ui.refactoring.commands.moveBeanClassAction"
 				menubarPath="org.springframework.ide.eclipse.beans.ui.refactoring.menu/sourceGroup"
-				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.MoveJavaElementAction">
+				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.BeansMoveRefactorAction">
 			</action>
 		</editorContribution>
 	</extension>
@@ -88,13 +95,13 @@
 				id="org.springframework.ide.eclipse.beans.ui.editor.actions.rector.menu">
 			</menu>
 			<action
-				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.RenameJavaElementAction"
+				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.BeansRenameRefactorAction"
 				id="org.springframework.ide.eclipse.beans.ui.refactoring.context.refactorBeanClassAction"
 				label="%renameJavaElement.label"
 				menubarPath="org.springframework.ide.eclipse.beans.ui.editor.actions.rector.menu/group1">
 			</action>
 			<action
-				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.MoveJavaElementAction"
+				class="org.springframework.ide.eclipse.beans.ui.refactoring.actions.BeansMoveRefactorAction"
 				id="org.springframework.ide.eclipse.beans.ui.refactoring.context.moveBeanClassAction"
 				label="%moveJavaElement.label"
 				menubarPath="org.springframework.ide.eclipse.beans.ui.editor.actions.rector.menu/group1">

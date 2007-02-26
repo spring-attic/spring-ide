@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.ide.eclipse.beans.ui.refactoring.type;
+package org.springframework.ide.eclipse.beans.ui.refactoring.jdt;
 
 import java.util.ArrayList;
 
@@ -28,7 +28,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.springframework.ide.eclipse.beans.ui.refactoring.AbstractMoveRefactoringParticipant;
 import org.springframework.ide.eclipse.beans.ui.refactoring.util.BeansRefactoringChangeUtils;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
