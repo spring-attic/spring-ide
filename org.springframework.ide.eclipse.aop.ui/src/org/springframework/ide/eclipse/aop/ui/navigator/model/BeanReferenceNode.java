@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
@@ -52,27 +53,30 @@ public class BeanReferenceNode implements IReferenceNode,
 		this.bean = bean;
 		this.showChildren = showChildren;
 
-		List<IAopReference> references = Activator.getModel().getAllReferences(
-				BeansModelUtils.getJavaType(
-						this.bean.getElementResource().getProject(),
-						BeansModelUtils.getBeanClass(this.bean, this.bean
-								.getElementParent())).getJavaProject());
+		IType type = BeansModelUtils.getJavaType(this.bean.getElementResource()
+				.getProject(), BeansModelUtils.getBeanClass(this.bean,
+				this.bean.getElementParent()));
+		if (type != null) {
+			List<IAopReference> references = Activator.getModel()
+					.getAllReferences(type.getJavaProject());
 
-		Set<IBean> innerBeans = bean.getInnerBeans();
+			Set<IBean> innerBeans = bean.getInnerBeans();
 
-		Map<IBean, BeanReferenceNode> refs = new HashMap<IBean, BeanReferenceNode>();
-		for (IBean innerBean : innerBeans) {
-			BeanReferenceNode n = new BeanReferenceNode(innerBean, true);
-			refs.put(innerBean, n);
+			Map<IBean, BeanReferenceNode> refs = new HashMap<IBean, BeanReferenceNode>();
+			for (IBean innerBean : innerBeans) {
+				BeanReferenceNode n = new BeanReferenceNode(innerBean, true);
+				refs.put(innerBean, n);
 
-			for (IAopReference r : references) {
-				if (innerBean.equals(r.getTargetBean())) {
-					refs.get(r.getTargetBean()).getAdviseReferences().add(r);
+				for (IAopReference r : references) {
+					if (innerBean.equals(r.getTargetBean())) {
+						refs.get(r.getTargetBean()).getAdviseReferences()
+								.add(r);
+					}
 				}
 			}
-		}
-		for (Map.Entry<IBean, BeanReferenceNode> e : refs.entrySet()) {
-			innerBeanNodes.add(e.getValue());
+			for (Map.Entry<IBean, BeanReferenceNode> e : refs.entrySet()) {
+				innerBeanNodes.add(e.getValue());
+			}
 		}
 	}
 
