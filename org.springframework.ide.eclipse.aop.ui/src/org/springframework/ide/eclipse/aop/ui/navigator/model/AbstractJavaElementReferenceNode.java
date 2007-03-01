@@ -23,6 +23,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorPart;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
+import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 
 public class AbstractJavaElementReferenceNode {
 
@@ -33,8 +34,13 @@ public class AbstractJavaElementReferenceNode {
 	}
 
 	public Image getImage() {
-		return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER
+		if (element != null) {
+			return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER
 				.getImage(this.element);
+		}
+		else {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ERROR);
+		}
 	}
 
 	public String getText() {

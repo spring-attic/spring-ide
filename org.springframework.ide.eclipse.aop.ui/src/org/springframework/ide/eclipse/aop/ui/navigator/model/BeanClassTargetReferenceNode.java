@@ -98,8 +98,7 @@ public class BeanClassTargetReferenceNode extends
 					+ AopReferenceModelUtils.getPackageLinkName(element);
 		}
 		else {
-			return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER
-					.getText(element);
+			return "<source type not found>";
 		}
 	}
 
