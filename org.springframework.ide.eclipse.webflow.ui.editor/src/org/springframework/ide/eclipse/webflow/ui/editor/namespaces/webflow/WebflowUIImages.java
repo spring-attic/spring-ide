@@ -133,6 +133,9 @@ public class WebflowUIImages {
 	public static final String IMG_OBJS_START_STATE = NAME_PREFIX
 			+ "start_state_obj.gif";
 
+	public static final String IMG_OVR_START_STATE = NAME_PREFIX
+			+ "start_state_ovr.gif";
+
 	public static final String IMG_OBJS_SUBFLOW_STATE = NAME_PREFIX
 			+ "subflow_state_obj.gif";
 
@@ -203,6 +206,9 @@ public class WebflowUIImages {
 
 	public static final ImageDescriptor DESC_OBJS_START_STATE = createManaged(
 			STRUCTURE, IMG_OBJS_START_STATE);
+
+	public static final ImageDescriptor DESC_OVR_START_STATE = createManaged(
+			STRUCTURE, IMG_OVR_START_STATE);
 
 	public static final ImageDescriptor DESC_OBJS_SUBFLOW_STATE = createManaged(
 			STRUCTURE, IMG_OBJS_SUBFLOW_STATE);
