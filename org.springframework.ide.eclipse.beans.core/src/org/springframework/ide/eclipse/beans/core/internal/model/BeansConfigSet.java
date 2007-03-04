@@ -319,7 +319,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 			beanClassesMap = new LinkedHashMap<String, Set<IBean>>();
 			for (IBean bean : getBeansMap().values()) {
 				addBeanClassToMap(bean);
-				for (IBean innerBean : bean.getInnerBeans()) {
+				for (IBean innerBean : BeansModelUtils.getInnerBeans(bean)) {
 					addBeanClassToMap(innerBean);
 				}
 			}

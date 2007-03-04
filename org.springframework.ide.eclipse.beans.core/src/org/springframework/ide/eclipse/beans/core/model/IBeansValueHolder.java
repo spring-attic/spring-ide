@@ -16,15 +16,14 @@
 
 package org.springframework.ide.eclipse.beans.core.model;
 
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
+
 /**
- * This interface provides information for an {@link IBean}'s constructor
- * argument.
+ * Defines a holder of a value.
  * 
  * @author Torsten Juergeleit
  */
-public interface IBeanConstructorArgument extends IBeansValueHolder {
+public interface IBeansValueHolder extends ISourceModelElement {
 
-	int getIndex();
-
-	String getType();
+	Object getValue();
 }

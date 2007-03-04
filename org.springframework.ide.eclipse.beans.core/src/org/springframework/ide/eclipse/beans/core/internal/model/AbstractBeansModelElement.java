@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.ide.eclipse.beans.core.internal.model;
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 
 /**
@@ -34,5 +35,10 @@ public abstract class AbstractBeansModelElement extends
 	protected AbstractBeansModelElement(IModelElement parent, String name,
 			BeanMetadataElement metadata) {
 		super(parent, name, ModelUtils.getSourceLocation(metadata));
+	}
+
+	protected AbstractBeansModelElement(IModelElement parent, String name,
+			IModelSourceLocation location) {
+		super(parent, name, location);
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,11 @@
 
 package org.springframework.ide.eclipse.beans.core.model;
 
-import org.springframework.ide.eclipse.core.model.ISourceModelElement;
-
 /**
- * Holds on {@link IBean}'s property.
+ * This interface provides information for an {@link IBean}'s property.
  * 
  * @author Torsten Juergeleit
  */
-public interface IBeanProperty extends ISourceModelElement {
+public interface IBeanProperty extends IBeansValueHolder {
 
-	Object getValue();
 }

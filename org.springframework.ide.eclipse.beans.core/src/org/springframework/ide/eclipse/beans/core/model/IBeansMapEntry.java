@@ -16,15 +16,14 @@
 
 package org.springframework.ide.eclipse.beans.core.model;
 
+import java.util.Map;
+
 /**
- * This interface provides information for an {@link IBean}'s constructor
- * argument.
+ * Defines a holder of a {@link Map.Entry}.
  * 
  * @author Torsten Juergeleit
  */
-public interface IBeanConstructorArgument extends IBeansValueHolder {
+public interface IBeansMapEntry extends IBeansValueHolder {
 
-	int getIndex();
-
-	String getType();
+	Object getKey();
 }

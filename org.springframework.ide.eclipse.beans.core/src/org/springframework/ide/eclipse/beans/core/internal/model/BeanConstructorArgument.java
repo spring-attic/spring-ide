@@ -23,17 +23,15 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.util.ObjectUtils;
 
 /**
- * This class defines a constructor argument within a Spring beans
- * configuration.
+ * Holds the data of an {@link IBean}'s constructor argument.
  * 
  * @author Torsten Juergeleit
  */
-public class BeanConstructorArgument extends AbstractBeansModelElement
+public class BeanConstructorArgument extends AbstractBeansValueHolder
 		implements IBeanConstructorArgument {
 
 	private int index;
 	private String type;
-	private Object value;
 	
 	public BeanConstructorArgument(IBean bean, ValueHolder vHolder) {
 		this(bean, -1, vHolder);
@@ -41,10 +39,50 @@ public class BeanConstructorArgument extends AbstractBeansModelElement
 
 	public BeanConstructorArgument(IBean bean, int index,
 			ValueHolder vHolder) {
-		super(bean, createName(index, vHolder), vHolder);
+		super(bean, createName(index, vHolder), vHolder.getValue(), vHolder);
 		this.index = index;
 		this.type = vHolder.getType();
-		this.value = vHolder.getValue();
+	}
+
+	public int getElementType() {
+		return IBeansModelElementTypes.CONSTRUCTOR_ARGUMENT_TYPE;
+	}
+
+	public int getIndex() {
+		return index;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof BeanConstructorArgument)) {
+			return false;
+		}
+		BeanConstructorArgument that = (BeanConstructorArgument) other;
+		if (!ObjectUtils.nullSafeEquals(this.index, that.index)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.type, that.type)) return false;
+		return super.equals(other);
+	}
+
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(index);
+		hashCode = getElementType() * hashCode
+				+ ObjectUtils.nullSafeHashCode(type);
+		return getElementType() * hashCode + super.hashCode();
+	}
+
+	public String toString() {
+		StringBuffer text = new StringBuffer(super.toString());
+		text.append(", index=");
+		text.append(index);
+		text.append(", type=");
+		text.append(type);
+		return text.toString();
 	}
 
 	protected static final String createName(int index, ValueHolder vHolder) {
@@ -62,55 +100,5 @@ public class BeanConstructorArgument extends AbstractBeansModelElement
 			buf.append(BeansModelUtils.getValueName(vHolder.getValue()));
 		}
 		return buf.toString();
-	}
-
-	public int getElementType() {
-		return IBeansModelElementTypes.CONSTRUCTOR_ARGUMENT_TYPE;
-	}
-
-	public int getIndex() {
-		return index;
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public Object getValue() {
-		return value;
-	}
-
-	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof BeanConstructorArgument)) {
-			return false;
-		}
-		BeanConstructorArgument that = (BeanConstructorArgument) other;
-		if (!ObjectUtils.nullSafeEquals(this.index, that.index)) return false;
-		if (!ObjectUtils.nullSafeEquals(this.type, that.type)) return false;
-		if (!ObjectUtils.nullSafeEquals(this.value, that.value)) return false;
-		return super.equals(other);
-	}
-
-	public int hashCode() {
-		int hashCode = ObjectUtils.nullSafeHashCode(index);
-		hashCode = getElementType() * hashCode
-				+ ObjectUtils.nullSafeHashCode(type);
-		hashCode = getElementType() * hashCode
-				+ ObjectUtils.nullSafeHashCode(value);
-		return getElementType() * hashCode + super.hashCode();
-	}
-
-	public String toString() {
-		StringBuffer text = new StringBuffer(super.toString());
-		text.append(": index=");
-		text.append(index);
-		text.append(", type=");
-		text.append(type);
-		text.append(", value=");
-		text.append(value);
-		return text.toString();
 	}
 }

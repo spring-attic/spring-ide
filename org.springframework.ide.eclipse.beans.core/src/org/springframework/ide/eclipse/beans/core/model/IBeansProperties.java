@@ -16,15 +16,14 @@
 
 package org.springframework.ide.eclipse.beans.core.model;
 
+import java.util.Properties;
+
 /**
- * This interface provides information for an {@link IBean}'s constructor
- * argument.
+ * Defines a holder of a managed {@link Properties}.
  * 
  * @author Torsten Juergeleit
  */
-public interface IBeanConstructorArgument extends IBeansValueHolder {
+public interface IBeansProperties extends IBeansMap {
 
-	int getIndex();
-
-	String getType();
+	Properties getProperties();
 }

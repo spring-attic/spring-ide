@@ -58,6 +58,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker.ErrorCode;
@@ -74,6 +75,7 @@ import org.springframework.ide.eclipse.beans.core.namespaces.DefaultModelElement
 import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.io.FileResource;
+import org.springframework.ide.eclipse.core.io.FileResourceLoader;
 import org.springframework.ide.eclipse.core.io.StorageResource;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.io.xml.XercesDocumentLoader;
@@ -128,9 +130,6 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	/** List of bean names mapped beans (in registration order) */
 	private Map<String, IBean> beans;
 
-	/** List of inner beans (in registration order) */
-	private Set<IBean> innerBeans;
-
 	/**
 	 * List of bean class names mapped to list of beans implementing the
 	 * corresponding class
@@ -147,11 +146,9 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	}
 
 	public IModelElement[] getElementChildren() {
-		if (!isInitialized()) {
 
-			// Lazily initialization of this config
-			readConfig();
-		}
+		// Lazily initialization of this config
+		readConfig();
 		List<ISourceModelElement> children = new ArrayList<ISourceModelElement>(
 				getImports());
 		children.addAll(getAliases());
@@ -205,7 +202,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 				}
 			}
 
-			// Now ask this config's aliases
+			// Now ask this config's components
 			for (IBeansComponent component : getComponents()) {
 				component.accept(visitor, monitor);
 				if (monitor.isCanceled()) {
@@ -233,7 +230,6 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		imports = null;
 		aliases = null;
 		beans = null;
-		innerBeans = null;
 		beanClassesMap = null;
 
 		// Reset all config sets which contain this config
@@ -246,60 +242,47 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	}
 
 	public String getDefaultLazyInit() {
-		if (!isInitialized()) {
 
-			// Lazily initialization of this config
-			readConfig();
-		}
+		// Lazily initialization of this config
+		readConfig();
 		return (defaults != null ? defaults.getLazyInit() : DEFAULT_LAZY_INIT);
 	}
 
 	public String getDefaultAutowire() {
-		if (!isInitialized()) {
 
-			// Lazily initialization of this config
-			readConfig();
-		}
+		// Lazily initialization of this config
+		readConfig();
 		return (defaults != null ? defaults.getAutowire() : DEFAULT_AUTO_WIRE);
 	}
 
 	public String getDefaultDependencyCheck() {
-		if (!isInitialized()) {
 
-			// Lazily initialization of this config
-			readConfig();
-		}
+		// Lazily initialization of this config
+		readConfig();
 		return (defaults != null ? defaults.getDependencyCheck()
 				: DEFAULT_DEPENDENCY_CHECK);
 	}
 
 	public String getDefaultInitMethod() {
-		if (!isInitialized()) {
 
-			// Lazily initialization of this config
-			readConfig();
-		}
-		return (defaults != null && defaults.getInitMethod() != null ? defaults
-				.getInitMethod() : DEFAULT_INIT_METHOD);
+		// Lazily initialization of this config
+		readConfig();
+		return (defaults != null && defaults.getInitMethod() != null
+				? defaults.getInitMethod() : DEFAULT_INIT_METHOD);
 	}
 
 	public String getDefaultDestroyMethod() {
-		if (!isInitialized()) {
 
-			// Lazily initialization of this config
-			readConfig();
-		}
-		return (defaults != null && defaults.getDestroyMethod() != null ? defaults
-				.getDestroyMethod()
-				: DEFAULT_DESTROY_METHOD);
+		// Lazily initialization of this config
+		readConfig();
+		return (defaults != null && defaults.getDestroyMethod() != null
+				? defaults.getDestroyMethod() : DEFAULT_DESTROY_METHOD);
 	}
 
 	public String getDefaultMerge() {
-		if (!isInitialized()) {
 
-			// Lazily initialization of this config
-			readConfig();
-		}
+		// Lazily initialization of this config
+		readConfig();
 
 		// This default value was introduced with Spring 2.0 -> so we have
 		// to check for an empty string here as well
@@ -309,20 +292,16 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	}
 
 	public Set<IBeansImport> getImports() {
-		if (!isInitialized()) {
 
-			// Lazily initialization of this config
-			readConfig();
-		}
+		// Lazily initialization of this config
+		readConfig();
 		return Collections.unmodifiableSet(imports);
 	}
 
 	public Set<IBeanAlias> getAliases() {
-		if (!isInitialized()) {
 
-			// Lazily initialization of this config
-			readConfig();
-		}
+		// Lazily initialization of this config
+		readConfig();
 		return Collections.unmodifiableSet(new LinkedHashSet<IBeanAlias>(
 				aliases.values()));
 	}
@@ -335,31 +314,25 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	}
 
 	public Set<IBeansComponent> getComponents() {
-		if (!isInitialized()) {
 
-			// Lazily initialization of this config
-			readConfig();
-		}
+		// Lazily initialization of this config
+		readConfig();
 		return Collections.unmodifiableSet(components);
 	}
 
 	public Set<IBean> getBeans() {
-		if (!isInitialized()) {
 
-			// Lazily initialization of this config
-			readConfig();
-		}
+		// Lazily initialization of this config
+		readConfig();
 		return Collections.unmodifiableSet(new LinkedHashSet<IBean>(beans
 				.values()));
 	}
 
 	public IBean getBean(String name) {
 		if (name != null) {
-			if (!isInitialized()) {
 
-				// Lazily initialization of this config
-				readConfig();
-			}
+			// Lazily initialization of this config
+			readConfig();
 			return beans.get(name);
 		}
 		return null;
@@ -367,23 +340,12 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 	public boolean hasBean(String name) {
 		if (name != null) {
-			if (!isInitialized()) {
-
-				// Lazily initialization of this config
-				readConfig();
-			}
-			return beans.containsKey(name);
-		}
-		return false;
-	}
-
-	public Set<IBean> getInnerBeans() {
-		if (!isInitialized()) {
 
 			// Lazily initialization of this config
 			readConfig();
+			return beans.containsKey(name);
 		}
-		return Collections.unmodifiableSet(innerBeans);
+		return false;
 	}
 
 	public boolean isBeanClass(String className) {
@@ -533,9 +495,10 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		}
 	}
 
-	private void addBeanClasses(IBean bean, Map<String, Set<IBean>> beanClasses) {
+	private void addBeanClasses(IBean bean, Map<String,
+			Set<IBean>> beanClasses) {
 		addBeanClass(bean, beanClasses);
-		for (IBean innerBean : bean.getInnerBeans()) {
+		for (IBean innerBean : BeansModelUtils.getInnerBeans(bean)) {
 			addBeanClass(innerBean, beanClasses);
 		}
 	}
@@ -561,52 +524,74 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		}
 	}
 
-	private void readConfig() {
-		imports = new LinkedHashSet<IBeansImport>();
-		aliases = new LinkedHashMap<String, IBeanAlias>();
-		components = new LinkedHashSet<IBeansComponent>();
-		beans = new LinkedHashMap<String, IBean>();
-		innerBeans = new LinkedHashSet<IBean>();
-		if (file != null && file.isAccessible()) {
-			Resource resource;
-			if (isArchived) {
-				resource = new StorageResource(new ZipEntryStorage(file
-						.getProject(), getElementName()));
-			}
-			else {
-				resource = new FileResource(file);
-			}
+	private synchronized void readConfig() {
+		if (imports == null) {
+			imports = new LinkedHashSet<IBeansImport>();
+			aliases = new LinkedHashMap<String, IBeanAlias>();
+			components = new LinkedHashSet<IBeansComponent>();
+			beans = new LinkedHashMap<String, IBean>();
+			if (file != null && file.isAccessible()) {
+				Resource resource;
+				if (isArchived) {
+					resource = new StorageResource(new ZipEntryStorage(file
+							.getProject(), getElementName()));
+				}
+				else {
+					resource = new FileResource(file);
+				}
 
-			DefaultBeanDefinitionRegistry registry =
-					new DefaultBeanDefinitionRegistry();
-			EntityResolver resolver = new XmlCatalogDelegatingEntityResolver(
-					new BeansDtdResolver(), new PluggableSchemaResolver(
-							PluggableSchemaResolver.class.getClassLoader()));
-			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
-					registry);
-			reader.setDocumentLoader(new XercesDocumentLoader());
-			reader.setEntityResolver(resolver);
-			reader.setSourceExtractor(new XmlSourceExtractor());
-			reader.setEventListener(new BeansConfigReaderEventListener(this));
-			reader.setProblemReporter(new BeansConfigProblemReporter(this));
-			reader.setErrorHandler(new BeansConfigErrorHandler(this));
-			reader.setNamespaceHandlerResolver(
-					new DelegatingNamespaceHandlerResolver(
-							NamespaceHandlerResolver.class.getClassLoader()));
-			try {
-				reader.loadBeanDefinitions(resource);
-			}
-			catch (Throwable e) { // handle ALL exceptions
+				DefaultBeanDefinitionRegistry registry =
+						new DefaultBeanDefinitionRegistry();
+				EntityResolver resolver =
+						new XmlCatalogDelegatingEntityResolver(
+								new BeansDtdResolver(),
+								new PluggableSchemaResolver(
+										PluggableSchemaResolver.class
+												.getClassLoader()));
+				XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
+						registry);
+				reader.setDocumentLoader(new XercesDocumentLoader());
+				reader.setResourceLoader(new NoOpResourcePatternResolver());
+				reader.setEntityResolver(resolver);
+				reader.setSourceExtractor(new XmlSourceExtractor());
+				reader.setEventListener(new BeansConfigReaderEventListener(
+						this));
+				reader.setProblemReporter(new BeansConfigProblemReporter(this));
+				reader.setErrorHandler(new BeansConfigErrorHandler(this));
+				reader.setNamespaceHandlerResolver(
+						new DelegatingNamespaceHandlerResolver(
+								NamespaceHandlerResolver.class
+										.getClassLoader()));
+				try {
+					reader.loadBeanDefinitions(resource);
+				}
+				catch (Throwable e) { // handle ALL exceptions
 
-				// Skip SAXParseExceptions because they're already handled by
-				// the SAX ErrorHandler
-				if (!(e.getCause() instanceof SAXParseException)) {
-					BeansModelUtils.createProblemMarker(this, e.getMessage(),
-							IMarker.SEVERITY_ERROR, -1,
-							ErrorCode.PARSING_FAILED);
-					BeansCorePlugin.log(e);
+					// Skip SAXParseExceptions because they're already handled
+					// by the SAX ErrorHandler
+					if (!(e.getCause() instanceof SAXParseException)) {
+						BeansModelUtils.createProblemMarker(this, e
+								.getMessage(), IMarker.SEVERITY_ERROR, -1,
+								ErrorCode.PARSING_FAILED);
+						BeansCorePlugin.log(e);
+					}
 				}
 			}
+		}
+	}
+
+	private final class NoOpResourcePatternResolver extends FileResourceLoader
+			implements ResourcePatternResolver {
+
+		public Resource[] getResources(String locationPattern)
+				throws IOException {
+
+			// Ignore any resource using an URI or Ant-style regular expressions
+			if (locationPattern.indexOf(':') != -1
+					|| locationPattern.indexOf('*') != -1) {
+				return new Resource[0];
+			}
+			return new Resource[] { getResource(locationPattern) };
 		}
 	}
 
@@ -646,21 +631,35 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		}
 
 		public void fatal(Problem problem) {
-			BeansModelUtils.createProblemMarker(config, problem.getMessage(),
+			BeansModelUtils.createProblemMarker(config, getMessage(problem),
 					IMarker.SEVERITY_ERROR, problem, ErrorCode.PARSING_FAILED);
 			throw new BeanDefinitionParsingException(problem);
 		}
 
 		public void error(Problem problem) {
-			BeansModelUtils.createProblemMarker(config, problem.getMessage(),
+			BeansModelUtils.createProblemMarker(config, getMessage(problem),
 					IMarker.SEVERITY_ERROR, problem, ErrorCode.PARSING_FAILED);
 		}
 
 		public void warning(Problem problem) {
-			BeansModelUtils
-					.createProblemMarker(config, problem.getMessage(),
-							IMarker.SEVERITY_WARNING, problem,
-							ErrorCode.PARSING_FAILED);
+			BeansModelUtils.createProblemMarker(config, getMessage(problem),
+					IMarker.SEVERITY_WARNING, problem,
+					ErrorCode.PARSING_FAILED);
+		}
+
+		private String getMessage(Problem problem) {
+			StringBuffer message = new StringBuffer(problem.getMessage());
+			Throwable rootCause = problem.getRootCause();
+			if (rootCause != null) {
+
+				// Retrieve nested exception
+				while (rootCause.getCause() != null) {
+					rootCause = rootCause.getCause();
+				}
+				message.append(": ");
+				message.append(rootCause.getMessage());
+			}
+			return message.toString();
 		}
 	}
 
@@ -723,12 +722,9 @@ public class BeansConfig extends AbstractResourceModelElement implements
 						componentDefinition);
 				if (element instanceof IBean) {
 					beans.put(element.getElementName(), (IBean) element);
-					innerBeans.addAll(((IBean) element).getInnerBeans());
 				}
 				else if (element instanceof IBeansComponent) {
 					components.add((IBeansComponent) element);
-					innerBeans.addAll(((IBeansComponent) element)
-							.getInnerBeans());
 				}
 			}
 		}

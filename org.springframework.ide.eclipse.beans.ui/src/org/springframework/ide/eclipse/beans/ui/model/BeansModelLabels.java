@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,22 @@ package org.springframework.ide.eclipse.beans.ui.model;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Path;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.core.model.IBeanReference;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansList;
+import org.springframework.ide.eclipse.beans.core.model.IBeansMap;
+import org.springframework.ide.eclipse.beans.core.model.IBeansMapEntry;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProperties;
+import org.springframework.ide.eclipse.beans.core.model.IBeansSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansTypedString;
 import org.springframework.ide.eclipse.beans.ui.BeansUILabels;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.util.StringUtils;
 
 /**
@@ -51,10 +58,8 @@ public final class BeansModelLabels extends BeansUILabels {
 		}
 		if (element instanceof IBeansConfig) {
 			appendBeansConfigLabel((IBeansConfig) element, flags, buf);
-		} else if (element instanceof IBean) {
-			appendBeanLabel((IBean) element, buf);
-		} else if (element instanceof IBeanProperty) {
-			appendBeanPropertyLabel((IBeanProperty) element, buf);
+		} else if (element instanceof ISourceModelElement) {
+			appendElementLabel((ISourceModelElement) element, buf);
 		} else {
 			buf.append(element.getElementName());
 		}
@@ -139,24 +144,49 @@ public final class BeansModelLabels extends BeansUILabels {
 	}
 
 	public static void appendBeanLabel(IBean bean, StringBuffer buf) {
-		buf.append(bean.getElementName());
+		if (!bean.isInnerBean()) {
+			buf.append(bean.getElementName()).append(' ');
+		}
 		if (bean.getAliases() != null && bean.getAliases().length > 0) {
-			buf.append(" '");
+			buf.append('\'');
 			buf.append(StringUtils.arrayToDelimitedString(bean.getAliases(),
 					LIST_DELIMITER_STRING));
 			buf.append('\'');
 		}
 		if (bean.getClassName() != null) {
-			buf.append(" [").append(bean.getClassName()).append(']');
+			buf.append('[').append(bean.getClassName()).append(']');
 		} else if (bean.getParentName() != null) {
-			buf.append(" <").append(bean.getParentName()).append('>');
+			buf.append('<').append(bean.getParentName()).append('>');
 		}
 	}
 
-	public static void appendBeanPropertyLabel(IBeanProperty property,
+	public static void appendElementLabel(ISourceModelElement element,
 			StringBuffer buf) {
-		buf.append(property.getElementName());
-		Object value = ((IBeanProperty) property).getValue();
-		buf.append(": ").append(BeansModelUtils.getValueName(value));
+		if (element instanceof IBeansList) {
+			buf.append("list");
+		}
+		else if (element instanceof IBeansSet) {
+			buf.append("set");
+		}
+		else if (element instanceof IBeansMap) {
+			buf.append("map");
+		}
+		else if (element instanceof IBeansMapEntry) {
+			buf.append("entry");
+		}
+		else if (element instanceof IBeansProperties) {
+			buf.append("props");
+		}
+		else if (element instanceof IBeanReference) {
+			buf.append('<');
+			buf.append(((IBeanReference) element).getBeanName());
+			buf.append('>');
+		}
+		else if (element instanceof IBeansTypedString) {
+			buf.append(((IBeansTypedString) element).getString());
+		}
+		else {
+			buf.append(element.getElementName());
+		}
 	}
 }

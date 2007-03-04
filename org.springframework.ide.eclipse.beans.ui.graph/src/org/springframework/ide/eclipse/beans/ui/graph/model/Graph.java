@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@ import org.eclipse.draw2d.graph.EdgeList;
 import org.eclipse.draw2d.graph.Node;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Font;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConnection;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference.BeanType;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConnection.BeanType;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput;
@@ -83,7 +83,7 @@ public class Graph implements IAdaptable {
 			Iterator beanRefs = BeansModelUtils.getBeanReferences(
 						 bean.getBean(), input.getContext(), false).iterator();
 			while (beanRefs.hasNext()) {
-				BeanReference beanRef = (BeanReference) beanRefs.next();
+				BeansConnection beanRef = (BeansConnection) beanRefs.next();
 				Bean targetBean = getBean(beanRef.getTarget().getElementName());
 				if (targetBean != null && targetBean != bean &&
 										beanRef.getSource() instanceof IBean) {
@@ -101,7 +101,7 @@ public class Graph implements IAdaptable {
 										 carg.getBeanConstructorArgument(),
 										 input.getContext(), false).iterator();
 				while (cargRefs.hasNext()) {
-					BeanReference beanRef = (BeanReference) cargRefs.next();
+					BeansConnection beanRef = (BeansConnection) cargRefs.next();
 					Bean targetBean = getBean(
 										 beanRef.getTarget().getElementName());
 					if (targetBean != null && targetBean != bean) {
@@ -119,7 +119,7 @@ public class Graph implements IAdaptable {
 										 property.getBeanProperty(),
 										 input.getContext(), false).iterator();
 				while (propRefs.hasNext()) {
-					BeanReference beanRef = (BeanReference) propRefs.next();
+					BeansConnection beanRef = (BeansConnection) propRefs.next();
 					Bean targetBean = getBean(
 										 beanRef.getTarget().getElementName());
 					if (targetBean != null && targetBean != bean) {

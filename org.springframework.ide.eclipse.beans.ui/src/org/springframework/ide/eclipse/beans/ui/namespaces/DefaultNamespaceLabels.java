@@ -17,14 +17,13 @@
 package org.springframework.ide.eclipse.beans.ui.namespaces;
 
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.BeansUILabels;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabels;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * This class provides labels for the beans core model's
@@ -50,8 +49,8 @@ public final class DefaultNamespaceLabels extends BeansUILabels {
 			appendBeansComponentLabel((IBeansComponent) element, buf);
 		} else if (element instanceof IBean) {
 			appendBeanLabel((IBean) element, buf);
-		} else if (element instanceof IBeanProperty) {
-			BeansModelLabels.appendBeanPropertyLabel((IBeanProperty) element,
+		} else if (element instanceof ISourceModelElement) {
+			BeansModelLabels.appendElementLabel((ISourceModelElement) element,
 					buf);
 		} else {
 			buf.append(element.getElementName());
@@ -77,11 +76,12 @@ public final class DefaultNamespaceLabels extends BeansUILabels {
 	}
 
 	public static void appendBeanLabel(IBean bean, StringBuffer buf) {
-		IModelElement parent = bean.getElementParent();
-		if (parent instanceof IBeansConfig
-				|| parent instanceof IBeansComponent) {
+		if (!bean.isInnerBean()) {
 			if (appendNodeName(bean, buf)) {
 				buf.append(' ');
+			}
+			if (StringUtils.hasText(bean.getElementName())) {
+				buf.append(bean.getElementName()).append(' ');
 			}
 		}
 		if (bean.isRootBean()) {

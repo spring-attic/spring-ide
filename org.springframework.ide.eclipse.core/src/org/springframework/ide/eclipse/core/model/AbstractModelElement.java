@@ -131,7 +131,11 @@ public abstract class AbstractModelElement implements IModelElement {
 	}
 
 	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
-		visitor.visit(this, monitor);
+
+		// Visit only this element
+		if (!monitor.isCanceled()) {
+			visitor.visit(this, monitor);
+		}
 	}
 
 	public boolean equals(Object other) {

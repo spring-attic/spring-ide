@@ -358,7 +358,7 @@ public class AopReferenceModelBuilder {
 		}
 
 		// Make sure that inner beans are handled as well
-		Set<IBean> innerBeans = bean.getInnerBeans();
+		Set<IBean> innerBeans = BeansModelUtils.getInnerBeans(bean);
 		if (innerBeans != null && innerBeans.size() > 0) {
 			for (IBean innerBean : innerBeans) {
 				buildAopReferencesForBean(innerBean, context, info, file,

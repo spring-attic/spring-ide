@@ -373,8 +373,10 @@ public class BeansConfigValidator {
 		}
 
 		// Validate this bean's inner beans recursively
-		for (IBean innerBean : bean.getInnerBeans()) {
-			validateBean(innerBean, configSet, registry);
+		if (!bean.isInnerBean()) {
+			for (IBean innerBean : BeansModelUtils.getInnerBeans(bean)) {
+				validateBean(innerBean, configSet, registry);
+			}
 		}
 	}
 
@@ -569,7 +571,7 @@ public class BeansConfigValidator {
 			validateBeanReferences(bean, registry);
 			
 			// Validate references of all inner beans
-			for (IBean innerBean : bean.getInnerBeans()) {
+			for (IBean innerBean : BeansModelUtils.getInnerBeans(bean)) {
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
 				}

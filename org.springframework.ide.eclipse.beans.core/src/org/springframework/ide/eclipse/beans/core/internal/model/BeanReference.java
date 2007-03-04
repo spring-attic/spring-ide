@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,53 +17,33 @@
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.beans.core.model.IBeanReference;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Holder for information about a reference from a model element to to a Spring
- * bean within a certain context (<code>IBeansConfig</code> or
- * <code>IBeansConfigSet</code>).
+ * Holds a reference to an {@link IBean}'s by it's name.
  * 
  * @author Torsten Juergeleit
  */
-public class BeanReference {
+public class BeanReference extends AbstractBeansModelElement implements
+		IBeanReference {
 
-	public enum BeanType {
-		STANDARD, PARENT, FACTORY, DEPENDS_ON, METHOD_OVERRIDE, INTERCEPTOR,
-		INNER
-	}
-	private BeanType type;
-	private IModelElement source;
-	private IBean target;
-	private IModelElement context;
+	private String beanName;
 
-	public BeanReference(BeanType type, IModelElement source, IBean target) {
-		this(BeanType.STANDARD, source, target, target.getElementParent());
+	public BeanReference(ISourceModelElement parent,
+			org.springframework.beans.factory.config.BeanReference beanRef) {
+		super(parent, "(bean reference)", beanRef);
+		beanName = beanRef.getBeanName();
 	}
 
-	public BeanReference(BeanType type, IModelElement source, IBean target,
-			IModelElement context) {
-		this.type = type;
-		this.source = source;
-		this.target = target;
-		this.context = context;
+	public int getElementType() {
+		return IBeansModelElementTypes.BEAN_REFERENCE_TYPE;
 	}
 
-	public final BeanType getType() {
-		return type;
-	}
-
-	public final IModelElement getSource() {
-		return source;
-	}
-
-	public final IBean getTarget() {
-		return target;
-	}
-
-	public IModelElement getContext() {
-		return context;
+	public String getBeanName() {
+		return beanName;
 	}
 
 	public boolean equals(Object other) {
@@ -74,26 +54,19 @@ public class BeanReference {
 			return false;
 		}
 		BeanReference that = (BeanReference) other;
-		if (!ObjectUtils.nullSafeEquals(this.type, that.type))
-			return false;
-		if (!ObjectUtils.nullSafeEquals(this.source, that.source))
-			return false;
-		if (!ObjectUtils.nullSafeEquals(this.target, that.target))
-			return false;
-		return ObjectUtils.nullSafeEquals(this.context, that.context);
+		if (!ObjectUtils.nullSafeEquals(this.beanName, that.beanName)) return false;
+		return super.equals(other);
 	}
 
 	public int hashCode() {
-		int hashCode = ObjectUtils.nullSafeHashCode(type);
-		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(source);
-		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(target);
-		return 29 * hashCode + ObjectUtils.nullSafeHashCode(context);
+		int hashCode = ObjectUtils.nullSafeHashCode(beanName);
+		return getElementType() * hashCode + super.hashCode();
 	}
 
 	public String toString() {
-		StringBuffer text = new StringBuffer(type.toString());
-		text.append(": ").append(source).append(" -> ").append(target);
-		text.append(" @ ").append(context);
+		StringBuffer text = new StringBuffer(super.toString());
+		text.append(": name=");
+		text.append(beanName);
 		return text.toString();
 	}
 }

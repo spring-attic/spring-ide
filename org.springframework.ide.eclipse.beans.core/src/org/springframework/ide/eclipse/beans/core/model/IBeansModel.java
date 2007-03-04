@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,16 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.core.model.IModel;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
- * The {@link IBeansModel} manages instances of
- * {@link IBeansProject}s. {@link IBeansModelChangedListener}s
- * register with the {@link IBeansModel} and receive
- * {@link BeansModelChangedEvent}s for all changes.
+ * The {@link IBeansModel} manages instances of {@link IModelElement}s
+ * (e.g. {@link IBeansProject}). {@link IBeansModelChangedListener}s register
+ * with the {@link IBeansModel} and receive {@link BeansModelChangedEvent}s for
+ * all changes.
  * <p>
- * The single instance of {@link IBeansModel} is available from the
- * static method {@link BeansCorePlugin#getModel()}.
+ * The single instance of {@link IBeansModel} is available from the static
+ * method {@link BeansCorePlugin#getModel()}.
  * 
  * @author Torsten Juergeleit
  */

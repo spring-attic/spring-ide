@@ -60,6 +60,4 @@ public interface IBean extends ISourceModelElement {
 	IBeanProperty getProperty(String name);
 
 	Set<IBeanProperty> getProperties();
-
-	Set<IBean> getInnerBeans();
 }

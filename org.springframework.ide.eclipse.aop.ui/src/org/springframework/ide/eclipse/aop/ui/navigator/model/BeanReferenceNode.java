@@ -60,7 +60,7 @@ public class BeanReferenceNode implements IReferenceNode,
 			List<IAopReference> references = Activator.getModel()
 					.getAllReferences(type.getJavaProject());
 
-			Set<IBean> innerBeans = bean.getInnerBeans();
+			Set<IBean> innerBeans = BeansModelUtils.getInnerBeans(bean);
 
 			Map<IBean, BeanReferenceNode> refs = new HashMap<IBean, BeanReferenceNode>();
 			for (IBean innerBean : innerBeans) {

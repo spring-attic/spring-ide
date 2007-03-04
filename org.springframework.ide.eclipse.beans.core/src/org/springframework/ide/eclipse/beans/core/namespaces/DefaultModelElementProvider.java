@@ -32,7 +32,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
  * This class is an {@link IModelElementProvider} which converts a given
- * {@link CompositeComponentDefinition} into a single {@link IBean} or an
+ * {@link ComponentDefinition} into a single {@link IBean} or an
  * {@link IBeansComponent} containing {@link IBean}(s) or
  * {@link IBeansComponent}(s).
  * 
@@ -79,14 +79,6 @@ public class DefaultModelElementProvider implements IModelElementProvider {
 					}
 				}
 			}
-		}
-
-		// Handle inner beans
-		for (IBean bean : component.getBeans()) {
-			component.addInnerBeans(bean.getInnerBeans());
-		}
-		for (IBeansComponent comp : component.getComponents()) {
-			component.addInnerBeans(comp.getInnerBeans());
 		}
 		return component;
 	}

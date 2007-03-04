@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.ide.eclipse.beans.ui.graph.model;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.draw2d.graph.Edge;
 import org.eclipse.draw2d.graph.Node;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference.BeanType;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConnection.BeanType;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**

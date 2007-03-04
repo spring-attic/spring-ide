@@ -25,10 +25,17 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.core.model.IBeanReference;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
+import org.springframework.ide.eclipse.beans.core.model.IBeansList;
+import org.springframework.ide.eclipse.beans.core.model.IBeansMap;
+import org.springframework.ide.eclipse.beans.core.model.IBeansMapEntry;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProperties;
+import org.springframework.ide.eclipse.beans.core.model.IBeansSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansTypedString;
 import org.springframework.ide.eclipse.beans.ui.AbstractCompositeImageDescriptor;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
@@ -76,6 +83,21 @@ public final class BeansModelImages {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONSTRUCTOR);
 		} else if (element instanceof IBeanProperty) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_PROPERTY);
+		} else if (element instanceof IBeansList || element instanceof IBeansSet
+				|| element instanceof IBeansMap
+				|| element instanceof IBeansMapEntry
+				|| element instanceof IBeansProperties) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_COLLECTION);
+		} else if (element instanceof IBeanReference) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_REFERENCE);
+		} else if (element instanceof IBeansTypedString) {
+			if (element.getElementParent() instanceof IBeansMapEntry
+					&& element.equals(((IBeansMapEntry) element
+							.getElementParent()).getKey())) {
+				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_KEY);
+			} else {
+				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_VALUE);
+			}
 		}
 		return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_SPRING);
 	}

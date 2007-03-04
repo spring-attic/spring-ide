@@ -16,15 +16,16 @@
 
 package org.springframework.ide.eclipse.beans.core.model;
 
+import java.util.Set;
+
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
+
 /**
- * This interface provides information for an {@link IBean}'s constructor
- * argument.
+ * Defines a holder of a managed {@link Set}.
  * 
  * @author Torsten Juergeleit
  */
-public interface IBeanConstructorArgument extends IBeansValueHolder {
+public interface IBeansSet extends ISourceModelElement {
 
-	int getIndex();
-
-	String getType();
+	Set getSet();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConnection;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference.BeanType;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConnection.BeanType;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
@@ -43,19 +43,16 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.util.ObjectUtils;
 
 /**
- * This editor input is used to specify the list of <code>IBean</code>s which
- * should be displayed in the beans graph editor.
- * Therefore a source model model element (<code>IBean</code>,
- * <code>IBeanConfig</code> or <code>IBeanConfigSet</code>) has to be
- * specified.
- * For a given bean it's parent bean (for child beans only), constructor
- * argument values and property values are checked.
- * <code>IBean</code> look-up is done from the specified context
- * (<code>IBeanConfig</code> or <code>IBeanConfigSet</code>).
- * This list of beans is accessible via <code<>getBeans()</code>.
- * This context used for bean look-up is accessible via
- * <code<>getContext()</code>.
- *
+ * This editor input is used to specify the list of {@link IBean}s which should
+ * be displayed in the beans graph editor. Therefore a source model model
+ * element ({@link IBean}>, {@link IBeanConfig} or {@link IBeanConfigSet})
+ * has to be specified. For a given bean it's parent bean (for child beans
+ * only), constructor argument values and property values are checked.
+ * {@link IBean} look-up is done from the specified context ({@link IBeanConfig}
+ * or {@link IBeanConfigSet}). This list of beans is accessible via
+ * {@link #getBeans()}. This context used for bean look-up is accessible via
+ * {@link #getContext()}.
+ * 
  * @author Torsten Juergeleit
  */
 public class GraphEditorInput implements IEditorInput, IPersistableElement {
@@ -180,7 +177,7 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 
 	/**
 	 * Creates a list with all beans belonging to the specified config / config
-	 * set or being referenced from the specified bean.
+	 * set or being connected with the specified bean.
 	 */
 	protected void createBeansMap() {
 		Set<IBean> list = new LinkedHashSet<IBean>();
@@ -190,7 +187,7 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 			list.addAll(((IBeansConfigSet) element).getBeans());
 		} else if (element instanceof IBean) {
 			list.add((IBean) element);
-			for (BeanReference beanRef : BeansModelUtils
+			for (BeansConnection beanRef : BeansModelUtils
 					.getBeanReferences(element, context, true)) {
 				if (beanRef.getType() != BeanType.INNER) {
 					list.add(beanRef.getTarget());

@@ -61,6 +61,4 @@ public interface IBeansConfig extends IResourceModelElement, IBeanClassAware {
 	IBean getBean(String name);
 
 	boolean hasBean(String name);
-
-	Set<IBean> getInnerBeans();
 }

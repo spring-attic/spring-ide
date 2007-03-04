@@ -110,6 +110,7 @@ public class BeansUIImages {
     public static final String IMG_OBJS_TX = NAME_PREFIX + "tx_obj.gif";
     public static final String IMG_OBJS_EJB = NAME_PREFIX + "ejb_obj.gif";
     public static final String IMG_OBJS_PROPERTIES = NAME_PREFIX + "properties_obj.gif";
+    public static final String IMG_OBJS_KEY = NAME_PREFIX + "key_obj.gif";
 
 	public static final String IMG_WIZ_PROJECT = NAME_PREFIX + "project_wiz.png";
 	public static final String IMG_WIZ_CONFIG = NAME_PREFIX + "config_wiz.png";
@@ -148,6 +149,7 @@ public class BeansUIImages {
 	public static final ImageDescriptor DESC_OBJS_TX = createManaged(OBJECT, IMG_OBJS_TX);
 	public static final ImageDescriptor DESC_OBJS_EJB = createManaged(OBJECT, IMG_OBJS_EJB);
 	public static final ImageDescriptor DESC_OBJS_PROPERTIES = createManaged(OBJECT, IMG_OBJS_PROPERTIES);
+	public static final ImageDescriptor DESC_OBJS_KEY = createManaged(OBJECT, IMG_OBJS_KEY);
 
 	public static final ImageDescriptor DESC_OVR_SPRING = create(OVR, "spring_ovr.gif");
 	public static final ImageDescriptor DESC_OVR_ERROR = create(OVR, "error_ovr.gif");

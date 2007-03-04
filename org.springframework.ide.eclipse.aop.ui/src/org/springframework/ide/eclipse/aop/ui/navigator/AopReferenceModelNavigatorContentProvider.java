@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.ui.navigator;
 
 import java.util.ArrayList;
@@ -74,6 +75,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 
 /**
+ * @author Christian Dupuis
  */
 @SuppressWarnings("restriction")
 public class AopReferenceModelNavigatorContentProvider implements
@@ -179,16 +181,16 @@ public class AopReferenceModelNavigatorContentProvider implements
 				}
 			}
 			// add bean references
-			Set<IBeansConfig> projects = BeansCorePlugin.getModel().getConfigs(
+			Set<IBeansConfig> configs = BeansCorePlugin.getModel().getConfigs(
 					type.getFullyQualifiedName());
 			Set<IBean> beans = new HashSet<IBean>();
-			for (IBeansConfig project : projects) {
+			for (IBeansConfig config : configs) {
 				List<IBean> pBeans = new ArrayList<IBean>();
-				pBeans.addAll(project.getBeans());
-				pBeans.addAll(project.getInnerBeans());				
+				pBeans.addAll(config.getBeans());
+				pBeans.addAll(BeansModelUtils.getInnerBeans(config));				
 				for (IBean b : pBeans) {
 					if (type.getFullyQualifiedName().equals(
-							BeansModelUtils.getBeanClass(b, project))) {
+							BeansModelUtils.getBeanClass(b, config))) {
 						beans.add(b);
 					}
 				}
@@ -299,7 +301,8 @@ public class AopReferenceModelNavigatorContentProvider implements
 			// add inner beans
 			if (nodes.size() == 0) {
 				nodes.addAll(getChildrenFromXmlLocation(resource, startLine,
-						endLine, id, beansConfig.getInnerBeans()));
+						endLine, id, BeansModelUtils
+								.getInnerBeans(beansConfig)));
 			}
 
 			return nodes.toArray();

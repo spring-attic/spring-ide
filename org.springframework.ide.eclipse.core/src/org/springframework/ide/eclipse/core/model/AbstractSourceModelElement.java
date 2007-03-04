@@ -70,6 +70,11 @@ public abstract class AbstractSourceModelElement extends
 		return false;
 	}
 
+	protected final void setElementSourceLocation(
+			IModelSourceLocation location) {
+		this.location = location;
+	}
+
 	public final IModelSourceLocation getElementSourceLocation() {
 		if (location != null) {
 			return location;

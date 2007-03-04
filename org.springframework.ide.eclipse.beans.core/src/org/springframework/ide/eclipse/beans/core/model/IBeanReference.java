@@ -16,15 +16,18 @@
 
 package org.springframework.ide.eclipse.beans.core.model;
 
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
+
 /**
- * This interface provides information for an {@link IBean}'s constructor
- * argument.
+ * Interface that exposes a reference to a bean by it's bean name.
  * 
  * @author Torsten Juergeleit
  */
-public interface IBeanConstructorArgument extends IBeansValueHolder {
+public interface IBeanReference extends ISourceModelElement {
 
-	int getIndex();
-
-	String getType();
+	/**
+	 * Returns the target bean name that this reference points to (never
+	 * <code>null</code>).
+	 */
+	String getBeanName();
 }

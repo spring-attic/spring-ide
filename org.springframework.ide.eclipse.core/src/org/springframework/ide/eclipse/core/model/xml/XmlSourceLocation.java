@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Node;
 
 /**
- * Storage for an <code>IModelElement</code>'s XML source location retrieved
+ * Storage for an {@link IModelElement}'s XML source location retrieved
  * via {@link XmlSourceExtractor}.
  * 
  * @author Torsten Juergeleit
@@ -49,6 +49,19 @@ public class XmlSourceLocation implements IModelSourceLocation {
 			namespaceURI = node.getNamespaceURI();
 		}
 	}
+	
+	public XmlSourceLocation(XmlSourceLocation location) {
+		resource = location.getResource();
+		localName = location.getLocalName();
+		prefix = location.getPrefix();
+		namespaceURI = location.getNamespaceURI();
+		startLine = location.getStartLine();
+		endLine = location.getEndLine();
+	}
+
+	public void setResource(Resource resource) {
+		this.resource = resource;
+	}
 
 	public Resource getResource() {
 		return resource;
@@ -58,20 +71,40 @@ public class XmlSourceLocation implements IModelSourceLocation {
 		return (prefix == null ? localName : prefix + ':' + localName);
 	}
 
+	public void setPrefix(String prefix) {
+		this.prefix = prefix;
+	}
+
 	public String getPrefix() {
 		return prefix;
+	}
+
+	public void setLocalName(String localName) {
+		this.localName = localName;
 	}
 
 	public String getLocalName() {
 		return localName;
 	}
 
+	public void setNamespaceURI(String namespaceURI) {
+		this.namespaceURI = namespaceURI;
+	}
+
 	public String getNamespaceURI() {
 		return namespaceURI;
 	}
 
+	public void setStartLine(int startLine) {
+		this.startLine = startLine;
+	}
+
 	public int getStartLine() {
 		return startLine;
+	}
+
+	public void setEndLine(int endLine) {
+		this.endLine = endLine;
 	}
 
 	public int getEndLine() {

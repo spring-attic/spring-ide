@@ -16,15 +16,18 @@
 
 package org.springframework.ide.eclipse.beans.core.model;
 
+import org.springframework.beans.factory.config.TypedStringValue;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
+
 /**
- * This interface provides information for an {@link IBean}'s constructor
- * argument.
+ * Defines a holder of a literal (string value wrapped in
+ * {@link TypedStringValue}).
  * 
  * @author Torsten Juergeleit
  */
-public interface IBeanConstructorArgument extends IBeansValueHolder {
+public interface IBeansTypedString extends ISourceModelElement {
 
-	int getIndex();
+	String getString();
 
-	String getType();
+	String getTargetTypeName();
 }

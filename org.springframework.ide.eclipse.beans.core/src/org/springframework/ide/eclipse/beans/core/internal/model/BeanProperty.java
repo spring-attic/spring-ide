@@ -20,29 +20,21 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
-import org.springframework.util.ObjectUtils;
 
 /**
- * This class defines a property within a Spring beans configuration.
+ * Holds the data of an {@link IBean}'s property.
  * 
  * @author Torsten Juergeleit
  */
-public class BeanProperty extends AbstractBeansModelElement implements
+public class BeanProperty extends AbstractBeansValueHolder implements
 		IBeanProperty {
 
-	private Object value;
-
 	public BeanProperty(IBean bean, PropertyValue propValue) {
-		super(bean, propValue.getName(), propValue);
-		value = propValue.getValue();
+		super(bean, propValue.getName(), propValue.getValue(), propValue);
 	}
 
 	public int getElementType() {
 		return IBeansModelElementTypes.PROPERTY_TYPE;
-	}
-	
-	public Object getValue() {
-		return value;
 	}
 
 	public boolean equals(Object other) {
@@ -52,20 +44,10 @@ public class BeanProperty extends AbstractBeansModelElement implements
 		if (!(other instanceof BeanProperty)) {
 			return false;
 		}
-		BeanProperty that = (BeanProperty) other;
-		if (!ObjectUtils.nullSafeEquals(this.value, that.value)) return false;
 		return super.equals(other);
 	}
 
 	public int hashCode() {
-		int hashCode = ObjectUtils.nullSafeHashCode(value);
-		return getElementType() * hashCode + super.hashCode();
-	}
-
-	public String toString() {
-		StringBuffer text = new StringBuffer(super.toString());
-		text.append(": value=");
-		text.append(value);
-		return text.toString();
+		return getElementType() + super.hashCode();
 	}
 }

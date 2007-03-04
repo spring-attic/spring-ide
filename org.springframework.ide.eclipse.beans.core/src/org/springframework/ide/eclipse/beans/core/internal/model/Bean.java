@@ -30,15 +30,13 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
-import org.springframework.beans.factory.support.ManagedList;
-import org.springframework.beans.factory.support.ManagedMap;
-import org.springframework.beans.factory.support.ManagedProperties;
-import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
@@ -55,7 +53,6 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 	private String[] aliases;
 	private Set<IBeanConstructorArgument> constructorArguments;
 	private Map<String, IBeanProperty> properties;
-	private Set<IBean> innerBeans;
 
 	public Bean(IModelElement parent, BeanDefinitionHolder bdHolder) {
 		this(parent, bdHolder.getBeanName(), bdHolder.getAliases(), bdHolder
@@ -93,17 +90,9 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 				}
 			}
 
-			// Then ask this beans's properties
+			// Finally ask this beans's properties
 			for (IBeanProperty property : getProperties()) {
 				property.accept(visitor, monitor);
-				if (monitor.isCanceled()) {
-					return;
-				}
-			}
-
-			// Finally ask this bean's inner beans
-			for (IBean bean : getInnerBeans()) {
-				bean.accept(visitor, monitor);
 				if (monitor.isCanceled()) {
 					return;
 				}
@@ -143,13 +132,6 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		return new LinkedHashSet<IBeanProperty>(properties.values());
 	}
 
-	public Set<IBean> getInnerBeans() {
-		if (innerBeans == null) {
-			initBean();
-		}
-		return innerBeans;
-	}
-
 	public String getClassName() {
 		if (definition instanceof AbstractBeanDefinition) {
 			return ((AbstractBeanDefinition) definition).getBeanClassName();
@@ -173,8 +155,9 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 	}
 
 	public boolean isInnerBean() {
-		return ((getElementParent() instanceof IBeanConstructorArgument)
-				|| (getElementParent() instanceof IBeanProperty));
+		IModelElement parent = getElementParent();
+		return !(parent instanceof IBeansConfig
+				|| parent instanceof IBeansComponent);
 	}
 
 	public boolean isSingleton() {
@@ -251,90 +234,36 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		}
 		return text.toString();
 	}
-
+	
 	/**
 	 * Lazily initialize this bean's data (constructor arguments, properties
 	 * and inner beans).
 	 */
 	private void initBean() {
 
-		// First retrieve this bean's constructor arguments and properties
-		constructorArguments = retrieveConstructorArguments(definition);
-		properties = retrieveProperties(definition);
-
-		// AFTER retrieving this bean's constructor arguments and properties
-		// retrieve now the inner beans from the bean's constructor arguments
-		// and properties
-		innerBeans = retrieveInnerBeans();
-	}
-
-	private Set<IBeanConstructorArgument> retrieveConstructorArguments(
-			BeanDefinition beanDefinition) {
-		Set<IBeanConstructorArgument> cargs = new LinkedHashSet
-				<IBeanConstructorArgument>();
-		ConstructorArgumentValues cargValues = beanDefinition
+		// Retrieve this bean's constructor arguments
+		constructorArguments = new LinkedHashSet<IBeanConstructorArgument>();
+		ConstructorArgumentValues cargValues = definition
 				.getConstructorArgumentValues();
 		for (Object cargValue : cargValues.getGenericArgumentValues()) {
 			IBeanConstructorArgument carg = new BeanConstructorArgument(this,
 					(ValueHolder) cargValue);
-			cargs.add(carg);
+			constructorArguments.add(carg);
 		}
 		Map indexedCargValues = cargValues.getIndexedArgumentValues();
 		for (Object key : indexedCargValues.keySet()) {
 			ValueHolder vHolder = (ValueHolder) indexedCargValues.get(key);
 			IBeanConstructorArgument carg = new BeanConstructorArgument(this,
 					((Integer) key).intValue(), vHolder);
-			cargs.add(carg);
+			constructorArguments.add(carg);
 		}
-		return cargs;
-	}
 
-	private Map<String, IBeanProperty> retrieveProperties(
-			BeanDefinition definition) {
-		Map<String, IBeanProperty> properties = new LinkedHashMap
-				<String, IBeanProperty>();
+		// Retrieve this bean's properties
+		properties = new LinkedHashMap<String, IBeanProperty>();
 		for (PropertyValue propValue : definition.getPropertyValues()
 				.getPropertyValues()) {
 			IBeanProperty property = new BeanProperty(this, propValue);
 			properties.put(property.getElementName(), property);
-		}
-		return properties;
-	}
-
-	private Set<IBean> retrieveInnerBeans() {
-		Set<IBean> innerBeans = new LinkedHashSet<IBean>();
-		for (IBeanConstructorArgument carg : getConstructorArguments()) {
-			addInnerBeans(carg, carg.getValue(), innerBeans);
-		}
-		for (IBeanProperty prop : getProperties()) {
-			addInnerBeans(prop, prop.getValue(), innerBeans);
-		}
-		return innerBeans;
-	}
-
-	private void addInnerBeans(IModelElement parent, Object value,
-			Set<IBean> innerBeans) {
-		if (value instanceof BeanDefinitionHolder) {
-			IBean bean = new Bean(parent, (BeanDefinitionHolder) value);
-			innerBeans.add(bean);
-		} else if (value instanceof ManagedList) {
-			for (Object element : (ManagedList) value) {
-				addInnerBeans(parent, element, innerBeans);
-			}
-		} else if (value instanceof ManagedSet) {
-			for (Object element : (ManagedSet) value) {
-				addInnerBeans(parent, element, innerBeans);
-			}
-		} else if (value instanceof ManagedMap) {
-			ManagedMap map = (ManagedMap) value;
-			for (Object key : map.keySet()) {
-				addInnerBeans(parent, map.get(key), innerBeans);
-			}
-		} else if (value instanceof ManagedProperties) {
-			ManagedProperties props = (ManagedProperties) value;
-			for (Object key : props.keySet()) {
-				addInnerBeans(parent, props.get(key), innerBeans);
-			}
 		}
 	}
 }

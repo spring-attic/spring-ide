@@ -28,7 +28,8 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.util.ObjectUtils;
 
 /**
- * This class defines a Spring beans component defined via an XML namespace.
+ * This class holds the data of a Spring {@link ComponentDefinition} defined via
+ * an XML namespace.
  * 
  * @author Torsten Juergeleit
  */
@@ -41,9 +42,6 @@ public class BeansComponent extends AbstractBeansModelElement implements
 	/** List of all inner components which are defined within this component */
 	private Set<IBeansComponent> components =
 			new LinkedHashSet<IBeansComponent>();
-
-	/** List of all inner beans which are defined within this component */
-	private LinkedHashSet<IBean> innerBeans = new LinkedHashSet<IBean>();
 
 	public BeansComponent(IModelElement parent,
 			ComponentDefinition definition) {
@@ -76,14 +74,6 @@ public class BeansComponent extends AbstractBeansModelElement implements
 		return Collections.unmodifiableSet(components);
 	}
 
-	public void addInnerBeans(Set<IBean> innerBeans) {
-		this.innerBeans.addAll(innerBeans);
-	}
-
-	public Set<IBean> getInnerBeans() {
-		return Collections.unmodifiableSet(innerBeans);
-	}
-
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -96,8 +86,6 @@ public class BeansComponent extends AbstractBeansModelElement implements
 			return false;
 		if (!ObjectUtils.nullSafeEquals(this.components, that.components))
 			return false;
-		if (!ObjectUtils.nullSafeEquals(this.innerBeans, that.innerBeans))
-			return false;
 		return super.equals(other);
 	}
 
@@ -105,8 +93,6 @@ public class BeansComponent extends AbstractBeansModelElement implements
 		int hashCode = ObjectUtils.nullSafeHashCode(beans);
 		hashCode = getElementType() * hashCode
 				+ ObjectUtils.nullSafeHashCode(components);
-		hashCode = getElementType() * hashCode
-				+ ObjectUtils.nullSafeHashCode(innerBeans);
 		return getElementType() * hashCode + super.hashCode();
 	}
 

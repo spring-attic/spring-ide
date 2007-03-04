@@ -17,7 +17,6 @@
 package org.springframework.ide.eclipse.beans.ui.namespaces.beans;
 
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.ui.BeansUILabels;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabels;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
@@ -47,8 +46,8 @@ public final class BeansNamespaceLabels extends BeansUILabels {
 		}
 		if (element instanceof IBean) {
 			appendBeanLabel((IBean) element, buf);
-		} else if (element instanceof IBeanProperty) {
-			BeansModelLabels.appendBeanPropertyLabel((IBeanProperty) element,
+		} else if (element instanceof ISourceModelElement) {
+			BeansModelLabels.appendElementLabel((ISourceModelElement) element,
 					buf);
 		} else {
 			buf.append(element.getElementName());
@@ -60,17 +59,19 @@ public final class BeansNamespaceLabels extends BeansUILabels {
 	}
 
 	public static void appendBeanLabel(IBean bean, StringBuffer buf) {
-		buf.append(bean.getElementName());
-		if (bean.getAliases() != null && bean.getAliases().length > 0) {
-			buf.append(" '");
-			buf.append(StringUtils.arrayToDelimitedString(bean.getAliases(),
-					LIST_DELIMITER_STRING));
-			buf.append('\'');
+		if (!bean.isInnerBean()) {
+			buf.append(bean.getElementName()).append(' ');
+			if (bean.getAliases() != null && bean.getAliases().length > 0) {
+				buf.append('\'');
+				buf.append(StringUtils.arrayToDelimitedString(bean.getAliases(),
+						LIST_DELIMITER_STRING));
+				buf.append("' ");
+			}
 		}
 		if (bean.getClassName() != null) {
-			buf.append(" [").append(bean.getClassName()).append(']');
+			buf.append('[').append(bean.getClassName()).append(']');
 		} else if (bean.getParentName() != null) {
-			buf.append(" <").append(bean.getParentName()).append('>');
+			buf.append('<').append(bean.getParentName()).append('>');
 		}
 	}
 }
