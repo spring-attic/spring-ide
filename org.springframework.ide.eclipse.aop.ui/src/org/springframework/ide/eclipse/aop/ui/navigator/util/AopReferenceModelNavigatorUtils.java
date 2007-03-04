@@ -62,11 +62,11 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 /**
- * Helper methods for {@link AopReferenceModelNavigator}. 
- *
+ * Helper methods for {@link AopReferenceModelNavigator}.
+ * 
  * @author Christian Dupuis
  * @since 2.0
- *
+ * 
  */
 @SuppressWarnings("restriction")
 public class AopReferenceModelNavigatorUtils {
@@ -124,7 +124,9 @@ public class AopReferenceModelNavigatorUtils {
 								BeansEditorUtils.getAttribute(elem, "ref"));
 					}
 				}
-				else {
+				else if ("".equals(elem.getNamespaceURI())
+						|| "http://www.springframework.org/schema/beans"
+								.equals(elem.getNamespaceURI())) {
 					// go up until a bean is reached
 					Object parentBean = getBeanElement(elem, "bean");
 					if (parentBean != null) {
