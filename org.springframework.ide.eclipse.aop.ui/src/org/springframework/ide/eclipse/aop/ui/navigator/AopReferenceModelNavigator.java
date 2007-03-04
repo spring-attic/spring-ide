@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.ui.navigator;
 
 import org.eclipse.jdt.core.IField;
@@ -44,6 +45,14 @@ import org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferen
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 import org.w3c.dom.Element;
 
+/**
+ * Customized extension of the {@link CommonNavigator} that links to the current
+ * selected element in the Java Editor or Spring IDE's XML Editor.
+ *
+ * @author Christian Dupuis
+ * @since 2.0
+ *
+ */
 @SuppressWarnings("restriction")
 public class AopReferenceModelNavigator extends CommonNavigator implements
 		ISelectionListener {

@@ -13,16 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.ide.eclipse.aop.ui.navigator;
+
+package org.springframework.ide.eclipse.aop.ui.navigator.util;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.navigator.CommonNavigator;
 import org.eclipse.ui.navigator.ILinkHelper;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferenceNode;
 
 /**
+ * {@link ILinkHelper} implementation that links the current selected element in
+ * the workbench to elements of the {@link CommonNavigator}.
+ * 
+ * This class is currently not used.
+ *
+ * @author Christian Dupuis
+ * @since 2.0
+ *
  */
 public class AopReferenceModelNavigatorLinkHelper implements ILinkHelper {
 

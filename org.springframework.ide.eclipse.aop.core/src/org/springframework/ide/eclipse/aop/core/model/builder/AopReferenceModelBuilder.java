@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.core.model.builder;
 
 import java.io.IOException;
@@ -69,6 +70,13 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.util.StringUtils;
 
+/**
+ * Handles creation and modification of the {@link AopReferenceModel}.
+ *
+ * @author Christian Dupuis
+ * @since 2.0
+ *
+ */
 @SuppressWarnings("restriction")
 public class AopReferenceModelBuilder {
 

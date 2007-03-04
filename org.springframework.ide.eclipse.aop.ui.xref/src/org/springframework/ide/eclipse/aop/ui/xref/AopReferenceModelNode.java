@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.springframework.ide.eclipse.aop.ui.xref;
 
 import org.eclipse.contribution.xref.core.IXReferenceNode;
@@ -26,6 +27,10 @@ import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.util.ObjectUtils;
 
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 public class AopReferenceModelNode implements IAdaptable, IXReferenceNode {
 
 	public enum TYPE {

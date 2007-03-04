@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.ui.decorator;
 
 import java.util.List;
@@ -30,7 +31,6 @@ import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAnnotationAopDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.ui.AopReferenceModelImages;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceAopTargetMethodNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceDeclareParentAopSourceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceRootAopReferenceNode;
@@ -38,9 +38,17 @@ import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedAopSourceMe
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedAopSourceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedDeclareParentAopSourceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.BeanMethodReferenceNode;
+import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelImages;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
+/**
+ * {@link ILightweightLabelDecorator} that decorates advised Java elements. 
+ *
+ * @author Christian Dupuis
+ * @since 2.0
+ *
+ */
 @SuppressWarnings("restriction")
 public class AopReferenceModelImageDecorator extends LabelProvider implements
 		ILightweightLabelDecorator {

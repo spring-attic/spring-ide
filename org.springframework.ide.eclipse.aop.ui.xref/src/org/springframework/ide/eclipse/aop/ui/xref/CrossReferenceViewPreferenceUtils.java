@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.ui.xref;
 
 import java.util.ArrayList;
@@ -22,6 +23,10 @@ import java.util.StringTokenizer;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 public class CrossReferenceViewPreferenceUtils {
 
 	public static final String XREF_CHECKED_FILTERS = Activator.PLUGIN_ID

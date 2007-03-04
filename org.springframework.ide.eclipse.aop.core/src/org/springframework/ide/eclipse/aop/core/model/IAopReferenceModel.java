@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.core.model;
 
 import java.util.List;
@@ -22,24 +23,24 @@ import org.eclipse.jdt.core.IJavaProject;
 
 public interface IAopReferenceModel {
 
+	void addProject(IJavaProject project, IAopProject aopProject);
+
+	void fireModelChanged();
+
+	List<IAopReference> getAdviceDefinition(IJavaElement je);
+
+	public List<IAopReference> getAllReferences(IJavaProject project);
+
 	IAopProject getProject(IJavaProject project);
 
 	List<IAopProject> getProjects();
 
-	void addProject(IJavaProject project, IAopProject aopProject);
-
-	boolean isAdvised(IJavaElement je);
-
 	boolean isAdvice(IJavaElement je);
 
-	List<IAopReference> getAdviceDefinition(IJavaElement je);
+	boolean isAdvised(IJavaElement je);
 
 	void registerAopModelChangedListener(IAopModelChangedListener listener);
 
 	void unregisterAopModelChangedListener(IAopModelChangedListener listener);
-
-	void fireModelChanged();
-
-	public List<IAopReference> getAllReferences(IJavaProject project);
 
 }

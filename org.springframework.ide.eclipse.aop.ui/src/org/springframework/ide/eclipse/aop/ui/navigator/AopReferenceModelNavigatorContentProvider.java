@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.SourceField;
 import org.eclipse.jdt.internal.core.SourceMethod;
-import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -45,7 +44,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonContentProvider;
-import org.eclipse.ui.navigator.INavigatorContentExtension;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
@@ -55,6 +53,8 @@ import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.core.model.builder.AopReferenceModelBuilder;
+import org.springframework.ide.eclipse.aop.core.model.internal.AopReferenceModel;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceDeclareParentAopSourceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.BeanReferenceNode;
@@ -70,32 +70,25 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
-import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 
 /**
+ * {@link ICommonContentProvider} that contributes elements from the
+ * {@link AopReferenceModel} created by {@link AopReferenceModelBuilder}. 
+ *
  * @author Christian Dupuis
+ * @since 2.0
+ *
  */
 @SuppressWarnings("restriction")
 public class AopReferenceModelNavigatorContentProvider implements
-		ICommonContentProvider, IModelChangeListener {
-
-	@SuppressWarnings("unused")
-	private INavigatorContentExtension contentExtension;
+		ICommonContentProvider {
 
 	private StructuredViewer viewer;
 
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		if (viewer instanceof StructuredViewer) {
 			this.viewer = (StructuredViewer) viewer;
-
-			if (oldInput == null && newInput != null) {
-				BeansCorePlugin.getModel().addChangeListener(this);
-			}
-			else if (oldInput != null && newInput == null) {
-				BeansCorePlugin.getModel().removeChangeListener(this);
-			}
 		}
 		else {
 			this.viewer = null;
@@ -104,7 +97,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 
 	public void dispose() {
 		if (viewer != null && viewer.getInput() != null) {
-			BeansCorePlugin.getModel().removeChangeListener(this);
+			this.viewer = null;
 		}
 	}
 
@@ -527,21 +520,6 @@ public class AopReferenceModelNavigatorContentProvider implements
 		return false;
 	}
 
-	public void elementChanged(ModelChangeEvent event) {
-		IModelElement element = event.getElement();
-		if (element instanceof IBeansConfig) {
-			IBeansConfig config = (IBeansConfig) element;
-			Set<String> classes = config.getBeanClasses();
-			for (String clz : classes) {
-				IType type = BeansModelUtils.getJavaType(config
-						.getElementResource().getProject(), clz);
-				if (type != null && type instanceof SourceType) {
-					// refreshViewer(type);
-				}
-			}
-		}
-	}
-
 	protected void refreshViewer(final Object element) {
 		if (viewer instanceof TreeViewer) {
 			Control ctrl = viewer.getControl();
@@ -573,7 +551,6 @@ public class AopReferenceModelNavigatorContentProvider implements
 	}
 
 	public void init(ICommonContentExtensionSite config) {
-		contentExtension = config.getExtension();
 	}
 
 	public void saveState(IMemento aMemento) {

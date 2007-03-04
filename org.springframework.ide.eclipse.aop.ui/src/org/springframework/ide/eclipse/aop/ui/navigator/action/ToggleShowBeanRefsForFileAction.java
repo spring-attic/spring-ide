@@ -13,16 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.ui.navigator.action;
 
 import org.eclipse.jface.action.Action;
-import org.springframework.ide.eclipse.aop.ui.AopReferenceModelImages;
 import org.springframework.ide.eclipse.aop.ui.navigator.AopReferenceModelNavigator;
+import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelImages;
 
 /**
  * This action toggles whether the cross reference view displays the cross
  * references for the current selection in the active editor, or for the file
  * which is shown in the active editor.
+ * 
+ * @author Christian Dupuis
+ * @since 2.0
  */
 public class ToggleShowBeanRefsForFileAction extends Action {
 
@@ -33,6 +37,8 @@ public class ToggleShowBeanRefsForFileAction extends Action {
 	 */
 	public ToggleShowBeanRefsForFileAction(
 			AopReferenceModelNavigator aopNavigator) {
+		
+		// TODO externalize strings
 		super("&Show the Beans Cross References for the entire file");
 		setDescription("Show the Beans Cross References for the entire file");
 		setToolTipText("Show the Beans Cross References for the entire file");

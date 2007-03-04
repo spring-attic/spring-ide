@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.ui.inplace;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -22,6 +23,13 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
+/**
+ * {@link IWorkbenchWindowActionDelegate} implementation that opens the
+ * {@link AopReferenceModelInplaceDialog}.
+ * 
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 @SuppressWarnings("restriction")
 public class OpenAopModelReferenceInplaceDialogAction implements
 		IWorkbenchWindowActionDelegate {

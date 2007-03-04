@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.ui.navigator;
 
 import org.eclipse.swt.graphics.Image;
@@ -23,6 +24,14 @@ import org.springframework.ide.eclipse.aop.ui.navigator.model.IReferenceNode;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 
 /**
+ * {@link ICommonLabelProvider} that just delegates to
+ * {@link IReferenceNode#getText()} and {@link IReferenceNode#getImage()} of
+ * instances of {@link IReferenceNode}. Otherwise calls
+ * {@link BeansModelLabelProvider}.
+ * 
+ * @author Christian Dupuis
+ * @since 2.0
+ * 
  */
 public class AopReferenceModelNavigatorLabelProvider extends
 		BeansModelLabelProvider implements ICommonLabelProvider {

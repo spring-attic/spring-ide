@@ -13,21 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.core.model;
 
 import org.springframework.aop.ClassFilter;
 
 public interface IIntroductionDefinition extends IAspectDefinition {
 
-	// Class<?> getImplInterfaceClass() throws ClassNotFoundException;
+	String getDefaultImplName();
 
 	String getImplInterfaceName();
 
 	ClassFilter getTypeMatcher();
 
 	String getTypePattern();
-
-	String getDefaultImplName();
-
-	// Class<?> getDefaultImplClass() throws ClassNotFoundException;
 }

@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.springframework.ide.eclipse.aop.ui.navigator.util;
 
 import java.util.HashMap;
@@ -51,6 +52,7 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.springframework.ide.eclipse.aop.ui.Activator;
+import org.springframework.ide.eclipse.aop.ui.navigator.AopReferenceModelNavigator;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.util.StringUtils;
@@ -59,6 +61,13 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
+/**
+ * Helper methods for {@link AopReferenceModelNavigator}. 
+ *
+ * @author Christian Dupuis
+ * @since 2.0
+ *
+ */
 @SuppressWarnings("restriction")
 public class AopReferenceModelNavigatorUtils {
 

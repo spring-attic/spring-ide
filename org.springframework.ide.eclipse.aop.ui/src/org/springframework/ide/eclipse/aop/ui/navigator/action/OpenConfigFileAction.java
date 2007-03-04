@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.ui.navigator.action;
 
 import org.eclipse.jface.action.Action;
@@ -22,8 +23,13 @@ import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferenceNode;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 
+
 /**
  * Opens the file for currently selected {@link IBeansConfig}.
+ * 
+ * @author Christian Dupuis
+ * @since 2.0
+ * 
  */
 public class OpenConfigFileAction extends Action {
 

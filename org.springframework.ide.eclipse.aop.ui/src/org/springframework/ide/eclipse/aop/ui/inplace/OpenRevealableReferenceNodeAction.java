@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.ui.inplace;
 
 import org.eclipse.jface.action.Action;
@@ -22,6 +23,13 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferenceNode;
 
+/**
+ * {@link Action} implementations that opens the selected element.
+ *
+ * @author Christian Dupuis
+ * @since 2.0
+ *
+ */
 public class OpenRevealableReferenceNodeAction extends Action {
 
 	private TreeViewer viewer;

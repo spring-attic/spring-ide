@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.core.model.builder;
 
 import java.util.ArrayList;
@@ -39,8 +40,11 @@ import org.springframework.ide.eclipse.aop.core.model.internal.AnnotationIntrodu
 import org.springframework.util.StringUtils;
 
 /**
- * ASM-based Visitor that collects all
- * @AspectJ-style annotations
+ * ASM-based Visitor that collects all @AspectJ-style annotations
+ * 
+ * @author Christian Dupuis
+ * @since 2.0
+ *  
  */
 @SuppressWarnings("restriction")
 public class AdviceAnnotationVisitor extends EmptyVisitor {

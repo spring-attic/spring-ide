@@ -138,7 +138,7 @@
 	<extension point="org.eclipse.ui.navigator.linkHelper">
 		<linkHelper
 			id="org.springframework.ide.eclipse.aop.ui.navigator.linkHelper"
-			class="org.springframework.ide.eclipse.aop.ui.navigator.AopReferenceModelNavigatorLinkHelper">
+			class="org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorLinkHelper">
 			<selectionEnablement>
 				<instanceof
 					value="org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferenceNode" />

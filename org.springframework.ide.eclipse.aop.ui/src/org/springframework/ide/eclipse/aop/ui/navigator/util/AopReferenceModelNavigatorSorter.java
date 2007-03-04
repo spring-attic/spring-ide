@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.ui.navigator.util;
 
 import org.eclipse.jface.viewers.Viewer;
@@ -21,6 +22,13 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferenceNode;
 
 /**
+ * {@link ViewerSorter} that sorts the tree elements depending on element's
+ * resources and their line location in the resource.
+ * 
+ * @author Christian Dupuis
+ * @since 2.0
+ * @see IRevealableReferenceNode
+ * 
  */
 public class AopReferenceModelNavigatorSorter extends ViewerSorter {
 

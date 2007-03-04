@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.ui.xref.action;
 
 import org.eclipse.contribution.xref.internal.ui.providers.TreeObject;
@@ -27,6 +28,10 @@ import org.eclipse.ui.IViewPart;
 import org.springframework.ide.eclipse.aop.ui.xref.AopReferenceModelNode;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 @SuppressWarnings("restriction")
 public class OpenBeansAopConfigAction extends Action implements
 		IViewActionDelegate {

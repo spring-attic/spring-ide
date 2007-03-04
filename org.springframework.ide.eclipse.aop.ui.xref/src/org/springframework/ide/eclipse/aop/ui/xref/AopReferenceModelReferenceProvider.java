@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.ui.xref;
 
 import java.util.ArrayList;
@@ -33,6 +34,10 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReferenceModel;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 public class AopReferenceModelReferenceProvider implements IXReferenceProvider {
 
 	@SuppressWarnings("unchecked")

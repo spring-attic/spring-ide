@@ -13,11 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.springframework.ide.eclipse.aop.ui.xref;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 class AopReferenceModelNodeAdapter implements IWorkbenchAdapter {
 
 	protected AopReferenceModelNodeAdapter() {

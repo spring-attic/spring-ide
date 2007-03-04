@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.ui.inplace;
 
 import java.util.ArrayList;
@@ -110,6 +111,12 @@ import org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferen
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorSorter;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 
+/**
+ * Inplace variant of the Beans Cross References View.
+ * 
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 @SuppressWarnings( { "deprecation", "restriction" })
 public class AopReferenceModelInplaceDialog {
 

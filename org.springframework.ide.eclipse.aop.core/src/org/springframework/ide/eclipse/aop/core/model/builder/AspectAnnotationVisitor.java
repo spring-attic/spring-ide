@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.core.model.builder;
 
 import java.util.ArrayList;
@@ -26,6 +27,10 @@ import org.objectweb.asm.commons.EmptyVisitor;
 /**
  * ASM-based visitor that checks if a certain class has the
  * @Aspect annotation
+ * 
+ * @author Christian Dupuis
+ * @since 2.0
+ * 
  */
 public class AspectAnnotationVisitor extends EmptyVisitor {
 

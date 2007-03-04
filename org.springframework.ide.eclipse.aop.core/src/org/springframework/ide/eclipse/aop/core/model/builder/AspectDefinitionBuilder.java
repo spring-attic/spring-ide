@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.core.model.builder;
 
 import java.lang.reflect.Method;
@@ -44,6 +45,14 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+/**
+ * Builder implementation that creates {@link IAspectDefinition} from Spring xml
+ * definition files. Understands aop:config tags and @AspectJ-style aspects.
+ * 
+ * @author Christian Dupuis
+ * @since 2.0
+ * 
+ */
 @SuppressWarnings("restriction")
 public class AspectDefinitionBuilder {
 

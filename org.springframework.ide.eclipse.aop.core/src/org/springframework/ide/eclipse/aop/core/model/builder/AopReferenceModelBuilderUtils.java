@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.core.model.builder;
 
 import java.io.InputStream;
@@ -40,6 +41,14 @@ import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.util.StringUtils;
 
+/**
+ * Helper class for {@link AopReferenceModelBuilder} and
+ * {@link AspectDefinitionBuilder}.
+ * 
+ * @author Christian Dupuis
+ * @since 2.0
+ * 
+ */
 @SuppressWarnings("restriction")
 public class AopReferenceModelBuilderUtils {
 

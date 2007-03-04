@@ -13,16 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.ui.navigator.action;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.navigator.CommonActionProvider;
+import org.eclipse.ui.navigator.CommonNavigator;
 import org.eclipse.ui.navigator.ICommonActionConstants;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.eclipse.ui.navigator.ICommonMenuConstants;
 
 /**
+ * {@link CommonNavigator} actions that delegates to
+ * {@link OpenConfigFileAction}.
+ * 
+ * @author Christian Dupuis
+ * @since 2.0
+ * 
  */
 public class AopReferenceModelNavigatorActionProvider extends
 		CommonActionProvider {

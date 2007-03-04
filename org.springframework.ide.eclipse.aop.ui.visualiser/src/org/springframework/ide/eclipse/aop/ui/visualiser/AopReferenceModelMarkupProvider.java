@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.ui.visualiser;
 
 import java.util.ArrayList;
@@ -39,10 +40,16 @@ import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.aop.core.model.internal.AopReferenceModel;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
 
 /**
- * The Beans AOP Markup Provider
+ * Implementation of AJDT's {@link SimpleMarkupProvider} that contributes
+ * elements from the {@link AopReferenceModel}.
+ * 
+ * @author Christian Dupuis
+ * @since 2.0
+ * 
  */
 public class AopReferenceModelMarkupProvider extends SimpleMarkupProvider
 		implements IAopModelChangedListener {

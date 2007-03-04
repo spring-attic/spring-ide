@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.ide.eclipse.aop.ui;
+
+package org.springframework.ide.eclipse.aop.ui.navigator.util;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -25,6 +26,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
+import org.springframework.ide.eclipse.aop.ui.Activator;
 
 /**
  * The images provided by the Spring UI plugin. Initialize the image registry by
