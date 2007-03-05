@@ -61,7 +61,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
-import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
@@ -118,27 +117,22 @@ public final class BeansModelUtils {
 	}
 
 	/**
-	 * Returns the {@link IBeanConfig} the given model element
-	 * ({@link IBean}, {@link IBeanAlias}, {@link IBeansComponent},
-	 * {@link IBeanConstructorArgument} or {@link IBeanProperty}) belongs to.
+	 * Returns the {@link IBeanConfig} the given {@link IModelElement} belongs
+	 * to.
 	 * 
-	 * @param element  the model element to get the beans config for
-	 * @throws IllegalArgumentException  if unsupported model element specified
+	 * @param element the model element to get the beans config for
+	 * @throws IllegalArgumentException if unsupported model element specified
 	 */
 	public static IBeansConfig getConfig(IModelElement element) {
-		IModelElement parent;
-		if (element instanceof IBean || element instanceof IBeanAlias
-				|| element instanceof IBeansComponent) {
-			parent = element.getElementParent();
-		} else if (element instanceof IBeanConstructorArgument
-				|| element instanceof IBeanProperty) {
-			parent = element.getElementParent().getElementParent();
-		} else {
-			throw new IllegalArgumentException("Unsupported model element "
-					+ element);
+		if (element instanceof ISourceModelElement) {
+			IResource resource = ((ISourceModelElement) element)
+					.getElementResource();
+			if (resource instanceof IFile) {
+				return BeansCorePlugin.getModel().getConfig((IFile) resource);
+			}
 		}
-		return (parent instanceof IBeansConfig ? (IBeansConfig) parent
-				: getConfig((IModelElement) parent));
+		throw new IllegalArgumentException("Unsupported model element "
+				+ element);
 	}
 
 	/**
