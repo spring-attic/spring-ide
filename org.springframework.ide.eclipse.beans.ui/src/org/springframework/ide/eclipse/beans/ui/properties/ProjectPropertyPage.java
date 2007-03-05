@@ -16,6 +16,8 @@
 
 package org.springframework.ide.eclipse.beans.ui.properties;
 
+import java.util.Set;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
@@ -26,6 +28,9 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModel;
@@ -103,17 +108,30 @@ public class ProjectPropertyPage extends PropertyPage {
 	}
 
 	public boolean performOk() {
+		IProject project = (IProject) getElement();
+		IBeansProject currentProject = BeansCorePlugin.getModel().getProject(
+				project);
+		PropertiesProject newProject = (PropertiesProject) model
+				.getProject(project);
 
-		// Save modified project description
-		if (configFilesTab.hasUserMadeChanges()
-				|| configSetsTab.hasUserMadeChanges()) {
-			PropertiesProject project = (PropertiesProject) model
-					.getProject((IProject) getElement());
-			project.saveDescription();
+		// At first delete all problem markers from the removed config files
+		if (configFilesTab.hasUserMadeChanges()) {
+			Set<IBeansConfig> currentConfigs = currentProject.getConfigs();
+			for (IBeansConfig currentConfig : currentConfigs) {
+				if (!newProject.hasConfig(currentConfig.getElementName())) {
+					BeansModelUtils.deleteProblemMarkers(currentConfig);
+				}
+			}
 		}
 
-		// After saving the modified project description refresh the label
-		// decoration of all Spring config files
+		// Now save modified project description
+		if (configFilesTab.hasUserMadeChanges()
+				|| configSetsTab.hasUserMadeChanges()) {
+			newProject.saveDescription();
+		}
+
+		// Finally (after saving the modified project description!!!) refresh
+		// the label decoration of all config files
 		if (configFilesTab.hasUserMadeChanges()) {
 			BeansModelLabelDecorator.update();
 		}
