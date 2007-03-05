@@ -26,6 +26,7 @@ import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditor;
@@ -64,6 +65,7 @@ public class ShowBeansGraphAction extends Action {
 				if (tElement instanceof IResourceModelElement) {
 					if (tElement instanceof IBeansConfig
 							|| tElement instanceof IBeansConfigSet
+							|| tElement instanceof IBeansComponent
 							|| tElement instanceof IBean) {
 						rElement = (IResourceModelElement) tElement;
 					}

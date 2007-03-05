@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -61,10 +60,17 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.core.model.IBeanReference;
+import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansList;
+import org.springframework.ide.eclipse.beans.core.model.IBeansMap;
+import org.springframework.ide.eclipse.beans.core.model.IBeansMapEntry;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.IBeansSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansTypedString;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.io.xml.LineNumberPreservingDOMParser;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -230,74 +236,6 @@ public final class BeansModelUtils {
 	}
 
 	/**
-	 * Returns a list of all {@link BeansConnection}s which have a target bean
-	 * with given ID. The connections are looked-up within a certain context
-	 * ({@link IBeanConfig} or {@link IBeanConfigSet}).
-	 * @param beanID the ID of the bean which is referenced
-	 * @param context the context ({@link IBeanConfig} or
-	 * {@link IBeanConfigSet}) the referencing beans are looked-up
-	 * @throws IllegalArgumentException if unsupported context specified
-	 */
-	public static Set<BeansConnection> getBeanReferences(String beanID,
-			IModelElement context) {
-		Set<BeansConnection> references = new LinkedHashSet<BeansConnection>();
-		if (context instanceof IBeansConfig) {
-			IBeansConfig config = (IBeansConfig) context;
-			Set<IBeansConfigSet> configSets = getConfigSets(config);
-			if (configSets.isEmpty()) {
-				addBeanReferences(config.getBeans(), beanID, context,
-						references);
-			} else {
-				for (IBeansConfigSet configSet : configSets) {
-					addBeanReferences(config.getBeans(), beanID, configSet,
-							references);
-				}
-			}
-		} else if (context instanceof IBeansConfigSet) {
-			addBeanReferences(((IBeansConfigSet) context).getBeans(), beanID,
-					context, references);
-		} else {
-			throw new IllegalArgumentException("Unsupported context "
-					+ context);
-		}
-		return references;
-	}
-
-	/**
-	 * Check given beans for a reference to a bean with given ID and add these
-	 * references to the specified list.
-	 */
-	private static void addBeanReferences(Set<IBean> beans, String beanID,
-			IModelElement context, Set<BeansConnection> references) {
-		for (IBean bean : beans) {
-			for (BeansConnection reference : getBeanReferences(bean, context,
-					false)) {
-				IModelElement target = reference.getTarget();
-				if (target instanceof IBean
-						&& target.getElementName().equals(beanID)) {
-					if (!references.contains(reference)) {
-						references.add(reference);
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Returns a list of config sets a given config belongs to.
-	 */
-	public static Set<IBeansConfigSet> getConfigSets(IBeansConfig config) {
-		Set<IBeansConfigSet> configSets = new LinkedHashSet<IBeansConfigSet>();
-		for (IBeansConfigSet configSet : ((IBeansProject) config
-				.getElementParent()).getConfigSets()) {
-			if (configSet.hasConfig(config.getElementName())) {
-				configSets.add(configSet);
-			}
-		}
-		return configSets;
-	}
-
-	/**
 	 * Returns a collection of {@link BeansConnection}s holding all
 	 * {@link IBean<}s which are referenced from given model element. For a
 	 * bean it's parent bean (for child beans only), constructor argument values
@@ -323,10 +261,13 @@ public final class BeansModelUtils {
 	}
 
 	private static Set<BeansConnection> getBeanReferences(
-			IModelElement element, IModelElement context,
-			boolean recursive, Set<BeansConnection> references,
-			Set<IBean> referencedBeans) {
-		if (element instanceof Bean) {
+			IModelElement element, IModelElement context, boolean recursive,
+			Set<BeansConnection> references, Set<IBean> referencedBeans) {
+		if (element instanceof IBeansComponent) {
+			addBeanReferencesForBeansComponent((IBeansComponent) element,
+					context, recursive, references, referencedBeans);
+		}
+		else if (element instanceof Bean) {
 
 			// Add referenced beans from bean element
 			Bean bean = (Bean) element;
@@ -465,9 +406,8 @@ public final class BeansModelUtils {
 	 * <code>false</code>.
 	 */
 	private static boolean addBeanReference(BeanType type,
-			IModelElement source, IBean target,
-			IModelElement context, Set<BeansConnection> references,
-			Set<IBean> referencedBeans) {
+			IModelElement source, IBean target, IModelElement context,
+			Set<BeansConnection> references, Set<IBean> referencedBeans) {
 		if (target != null && target != source) {
 			BeansConnection ref = new BeansConnection(type, source,
 					target, context);
@@ -481,6 +421,29 @@ public final class BeansModelUtils {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Adds the all beans which are referenced by the specified
+	 * {@link IBeansComponent} to the given list as an instance of
+	 * {@link BeansConnection}.
+	 * 
+	 * @param context the context (<code>IBeanConfig</code> or
+	 * <code>IBeanConfigSet</code>) the referenced beans are looked-up
+	 * @param referencedBeans used to break from cycles
+	 */
+	private static void addBeanReferencesForBeansComponent(
+			IBeansComponent component, IModelElement context,
+			boolean recursive, Set<BeansConnection> references,
+			Set<IBean> referencedBeans) {
+		for (IBean bean : component.getBeans()) {
+			addBeanReferencesForBean(bean, context, recursive, references,
+					referencedBeans);
+		}
+		for (IBeansComponent innerComponent : component.getComponents()) {
+			addBeanReferencesForBeansComponent(innerComponent, context,
+					recursive, references, referencedBeans);
+		}
 	}
 
 	/**
@@ -511,26 +474,26 @@ public final class BeansModelUtils {
 	/**
 	 * Given a bean property's or constructor argument's value, adds any beans
 	 * referenced by this value. This value could be:
-	 * <li>A RuntimeBeanReference, which bean will be added.
-	 * <li>A BeanDefinitionHolder. This is an inner bean that may contain
-	 * RuntimeBeanReferences which will be added.
-	 * <li>A List. This is a collection that may contain RuntimeBeanReferences
-	 * which will be added.
-	 * <li>A Set. May also contain RuntimeBeanReferences that will be added.
-	 * <li>A Map. In this case the value may be a RuntimeBeanReference that
-	 * will be added.
+	 * <li>An {@link IBeanReference}, which bean will be added.
+	 * <li>An inner {@link IBean}. This is an inner {@link IBean} that may
+	 * contain {@link IBeanReference}s which will be added too.
+	 * <li>An {@link IBeansList}. This is a collection that may contain
+	 * {@link IBeanReference}s which will be added.
+	 * <li>An {@link IBeansSet}. May also contain {@link IBeanReference}s
+	 * that will be added.
+	 * <li>An {@link IBeansMap}. In this case the value may be a
+	 * {@link IBeanReference} that will be added.
 	 * <li>An ordinary object or null, in which case it's ignored.
 	 * 
-	 * @param context  the context (<code>IBeanConfig</code> or
-	 *            <code>IBeanConfigSet</code>) the referenced beans are
-	 *            looked-up
+	 * @param context the context (<code>IBeanConfig</code> or
+	 * <code>IBeanConfigSet</code>) the referenced beans are looked-up
 	 */
 	private static void addBeanReferencesForValue(IModelElement element,
 			Object value, IModelElement context,
 			Set<BeansConnection> references, Set<IBean> referencedBeans,
 			boolean recursive) {
-		if (value instanceof RuntimeBeanReference) {
-			String beanName = ((RuntimeBeanReference) value).getBeanName();
+		if (value instanceof IBeanReference) {
+			String beanName = ((IBeanReference) value).getBeanName();
 			IBean bean = getBean(beanName, context);
 			if (addBeanReference(BeanType.STANDARD, element,
 					bean, context, references, referencedBeans)
@@ -538,7 +501,7 @@ public final class BeansModelUtils {
 				addBeanReferencesForBean(bean, context, recursive, references,
 						referencedBeans);
 			}
-		} else if (value instanceof List) {
+		} else if (value instanceof IBeansList) {
 
 			// Add bean property's interceptors
 			if (element instanceof IBeanProperty
@@ -548,9 +511,11 @@ public final class BeansModelUtils {
 				if (type != null) {
 					if (type.getFullyQualifiedName().equals(
 							"org.springframework.aop.framework.ProxyFactoryBean")) {
-						for (Object obj : (List) value) {
-							if (obj instanceof String) {
-								IBean interceptor = getBean((String) obj,
+						for (IModelElement child : ((IBeansList) value)
+								.getElementChildren()) {
+							if (child instanceof IBeansTypedString) {
+								IBean interceptor = getBean(
+										((IBeansTypedString) child).getString(),
 										context);
 								if (addBeanReference(BeanType.INTERCEPTOR,
 										element, interceptor, context,
@@ -565,21 +530,30 @@ public final class BeansModelUtils {
 					}
 				}
 			} else {
-				for (Object obj : (List) value) {
-					addBeanReferencesForValue(element, obj, context,
+				for (IModelElement child : ((IBeansList) value)
+						.getElementChildren()) {
+					addBeanReferencesForValue(element, child, context,
 							references, referencedBeans, recursive);
 				}
 			}
-		} else if (value instanceof Set) {
-			for (Object obj : (Set) value) {
-				addBeanReferencesForValue(element, obj, context,
+		} else if (value instanceof IBeansSet) {
+			for (IModelElement child : ((IBeansSet) value)
+					.getElementChildren()) {
+				addBeanReferencesForValue(element, child, context,
 						references, referencedBeans, recursive);
 			}
-		} else if (value instanceof Map) {
-			Map map = (Map) value;
-			for (Object key : map.keySet()) {
-				addBeanReferencesForValue(element, map.get(key), context,
-						references, referencedBeans, recursive);
+		}
+		else if (value instanceof IBeansMap) {
+			for (IModelElement child : ((IBeansMap) value)
+					.getElementChildren()) {
+				if (child instanceof IBeansMapEntry) {
+					addBeanReferencesForValue(element, ((IBeansMapEntry) child)
+							.getKey(), context, references, referencedBeans,
+							recursive);
+					addBeanReferencesForValue(element, ((IBeansMapEntry) child)
+							.getValue(), context, references, referencedBeans,
+							recursive);
+				}
 			}
 		}
 	}

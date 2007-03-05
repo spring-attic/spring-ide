@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansConnection
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphImages;
@@ -148,11 +149,17 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 			toolTip = BeansGraphPlugin
 					.getResourceString("ShowGraphAction.name.configSet")
 					+ parent.getElementName() + '/' + element.getElementName();
-		} else if (element instanceof IBean) {
+		} else if (element instanceof IBeansComponent
+				|| element instanceof IBean) {
 			name = element.getElementName();
 			StringBuffer buffer = new StringBuffer();
-			buffer.append(BeansGraphPlugin
-					.getResourceString("ShowGraphAction.name.bean"));
+			if (element instanceof IBeansComponent) {
+				buffer.append(BeansGraphPlugin
+						.getResourceString("ShowGraphAction.name.component"));
+			} else {
+				buffer.append(BeansGraphPlugin
+						.getResourceString("ShowGraphAction.name.bean"));
+			}
 			if (context instanceof IBeansConfig) {
 				buffer.append(BeansGraphPlugin
 						.getResourceString("ShowGraphAction.name.config"));
