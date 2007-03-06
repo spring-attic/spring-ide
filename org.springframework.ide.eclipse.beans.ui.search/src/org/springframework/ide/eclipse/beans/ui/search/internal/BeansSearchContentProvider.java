@@ -21,28 +21,18 @@ package org.springframework.ide.eclipse.beans.ui.search.internal;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.Viewer;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelContentProvider;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * @author Torsten Juergeleit
  */
-public class BeansSearchContentProvider implements ITreeContentProvider,
-		IStructuredContentProvider {
+public class BeansSearchContentProvider extends BeansModelContentProvider {
 
-	private Viewer viewer;
 	private BeansSearchResult result;
-
-	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		this.viewer = viewer;
-	}
-
-	public void dispose() {
-	}
 
 	public Object[] getElements(Object inputElement) {
 		if (inputElement instanceof BeansSearchResult) {
@@ -72,30 +62,29 @@ public class BeansSearchContentProvider implements ITreeContentProvider,
 			return IModelElement.NO_CHILDREN;
 		}
 
-		// Create list of matched element's child elements which belong to
-		// given parent element
+		// Create list of matched element's children which belong to given
+		// parent element
 		Object[] matches = result.getElements();
-		List<IModelElement> childs = new ArrayList<IModelElement>();
+		List<IModelElement> children = new ArrayList<IModelElement>();
 		for (int i = 0; i < matches.length; i++) {
 			IModelElement element = (IModelElement) matches[i];
 			IModelElement child = BeansModelUtils.getChildForElement(
 					(IModelElement) parentElement, element);
-			if (child != null && !childs.contains(child)) {
-				childs.add(child);
+			if (child != null) {
+				if (child instanceof IBeansConfig) {
+					
+				}
+				if (!children.contains(child)) {
+					children.add(child);
+				}
 			}
 		}
-		return childs.toArray(new IModelElement[childs.size()]);
+		return children.toArray(new IModelElement[children.size()]);
 	}
 
-	public Object getParent(Object element) {
-		return ((IModelElement) element).getElementParent();
-	}
-
-	public boolean hasChildren(Object parent) {
-		return ((IModelElement) parent).getElementChildren().length > 0;
-	}
-
-	public void elementsChanged(Object[] objects) {
-		viewer.refresh();
+	public void elementsChanged(Object[] elements) {
+		for (Object element : elements) {
+			refreshViewerForElement(element);
+		}
 	}
 }

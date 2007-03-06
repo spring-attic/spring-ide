@@ -17,14 +17,10 @@
 package org.springframework.ide.eclipse.beans.ui.search.internal.queries;
 
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.search.ui.ISearchQuery;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MethodOverride;
@@ -34,6 +30,12 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.core.model.IBeanReference;
+import org.springframework.ide.eclipse.beans.core.model.IBeansList;
+import org.springframework.ide.eclipse.beans.core.model.IBeansMap;
+import org.springframework.ide.eclipse.beans.core.model.IBeansMapEntry;
+import org.springframework.ide.eclipse.beans.core.model.IBeansSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansTypedString;
 import org.springframework.ide.eclipse.beans.core.model.IBeansValueHolder;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchMessages;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchScope;
@@ -41,8 +43,8 @@ import org.springframework.ide.eclipse.core.MessageUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
- * This implementation of {@link ISearchQuery} looks for all
- * {@link IBeanAlias}es or {@link IBean}s which are referencing a given bean.
+ * This {@link ISearchQuery} looks for all {@link IBeanAlias}es or
+ * {@link IBean}s which are referencing a given bean.
  * 
  * @author Torsten Juergeleit
  */
@@ -133,15 +135,13 @@ public class BeanReferenceQuery extends AbstractBeansQuery {
 
 	private boolean doesValueMatch(IModelElement element, Object value,
 			Pattern pattern) {
-// TODO update for extended BeansCoreModel (instances of IModelElement
-// for bean references and collection types)
-		if (value instanceof RuntimeBeanReference) {
-			String name = ((RuntimeBeanReference) value).getBeanName();
+		if (value instanceof IBeanReference) {
+			String name = ((IBeanReference) value).getBeanName();
 			if (pattern.matcher(name).matches()) {
 				return true;
 			}
 		}
-		else if (value instanceof List) {
+		else if (value instanceof IBeansList) {
 
 			// Compare reference with bean property's interceptors
 			if (element instanceof IBeanProperty
@@ -149,11 +149,11 @@ public class BeanReferenceQuery extends AbstractBeansQuery {
 				String beanClass = BeansModelUtils.getBeanClass((IBean) element
 						.getElementParent(), null);
 				if (PROXY_FACTORY_CLASS_NAME.equals(beanClass)) {
-					for (Iterator names = ((List) value).iterator(); names
-							.hasNext();) {
-						Object name = (Object) names.next();
-						if (name instanceof String) {
-							if (pattern.matcher((String) name).matches()) {
+					for (IModelElement child : ((IBeansList) value)
+							.getElementChildren()) {
+						if (child instanceof IBeansTypedString) {
+							if (pattern.matcher(((IBeansTypedString) child)
+									.getString()).matches()) {
 								return true;
 							}
 						}
@@ -161,33 +161,32 @@ public class BeanReferenceQuery extends AbstractBeansQuery {
 				}
 			}
 			else {
-				List list = (List) value;
-				for (int i = 0; i < list.size(); i++) {
-					boolean doesMatch = doesValueMatch(element, list.get(i),
-							pattern);
-					if (doesMatch) {
+				for (IModelElement child : ((IBeansList) value)
+						.getElementChildren()) {
+					if (doesValueMatch(element, child, pattern)) {
 						return true;
 					}
 				}
 			}
 		}
-		else if (value instanceof Set) {
-			Set set = (Set) value;
-			for (Iterator iter = set.iterator(); iter.hasNext();) {
-				boolean doesMatch = doesValueMatch(element, iter.next(),
-						pattern);
-				if (doesMatch) {
+		else if (value instanceof IBeansSet) {
+			for (IModelElement child : ((IBeansSet) value)
+					.getElementChildren()) {
+				if (doesValueMatch(element, child, pattern)) {
 					return true;
 				}
 			}
 		}
-		else if (value instanceof Map) {
-			Map map = (Map) value;
-			for (Iterator iter = map.keySet().iterator(); iter.hasNext();) {
-				boolean doesMatch = doesValueMatch(element, map
-						.get(iter.next()), pattern);
-				if (doesMatch) {
-					return true;
+		else if (value instanceof IBeansMap) {
+			for (IModelElement child : ((IBeansMap) value)
+					.getElementChildren()) {
+				if (child instanceof IBeansMapEntry) {
+					if (doesValueMatch(element, ((IBeansMapEntry) child)
+							.getKey(), pattern)
+							|| doesValueMatch(element, ((IBeansMapEntry) child)
+									.getValue(), pattern)) {
+						return true;
+					}
 				}
 			}
 		}

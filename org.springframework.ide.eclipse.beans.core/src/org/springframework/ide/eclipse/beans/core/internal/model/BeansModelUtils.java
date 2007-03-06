@@ -899,7 +899,8 @@ public final class BeansModelUtils {
 	public static IModelElement getChildForElement(
 			IModelElement parent, IModelElement element) {
 		while (element != null) {
-			IModelElement elementParent = (IModelElement) element.getElementParent();
+			IModelElement elementParent = (IModelElement) element
+					.getElementParent();
 			if (parent.equals(elementParent)) {
 				return element;
 			}

@@ -43,8 +43,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 
 /**
- * This class provides images for the beans core model's
- * {@link IModelElement}s.
+ * This class provides images for the beans core model's {@link IModelElement}s.
  * 
  * @author Torsten Juergeleit
  */

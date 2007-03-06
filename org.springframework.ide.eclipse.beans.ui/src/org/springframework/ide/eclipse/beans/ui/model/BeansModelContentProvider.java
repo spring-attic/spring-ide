@@ -188,7 +188,7 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 		return IModelElement.NO_CHILDREN;
 	}
 
-	private Object[] getProjectChildren(IBeansProject project,
+	protected Object[] getProjectChildren(IBeansProject project,
 			boolean onlyConfigSets) {
 		Set<Object> children = new LinkedHashSet<Object>();
 		if (!onlyConfigSets) {
@@ -204,7 +204,7 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 		return children.toArray();
 	}
 
-	private Object[] getConfigSetChildren(IBeansConfigSet configSet) {
+	protected Object[] getConfigSetChildren(IBeansConfigSet configSet) {
 		Set<ISourceModelElement> children =
 				new LinkedHashSet<ISourceModelElement>();
 		for (IBeansConfig config : configSet.getConfigs()) {
@@ -219,7 +219,7 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 		return children.toArray();
 	}
 
-	private Object[] getJavaTypeChildren(IType type) {
+	protected Object[] getJavaTypeChildren(IType type) {
 		IBeansProject project = BeansCorePlugin.getModel().getProject(
 				type.getJavaProject().getProject());
 		if (project != null) {
