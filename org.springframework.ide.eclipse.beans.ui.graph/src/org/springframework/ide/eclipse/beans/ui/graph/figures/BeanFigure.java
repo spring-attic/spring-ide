@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,14 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.graphics.Color;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphImages;
+import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
 import org.springframework.ide.eclipse.beans.ui.graph.model.ConstructorArgument;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Property;
 
+/**
+ * @author Torsten Juergeleit
+ */
 public class BeanFigure extends Figure {
 
 	public static final Color COLOR = new Color(null, 255, 255, 206);
@@ -59,19 +62,22 @@ public class BeanFigure extends Figure {
 		Label label = new Label();
 		label.setText(bean.getName());
 		if (bean.isRootBean()) {
-			label.setIcon(BeansGraphImages.getImage(
-										  BeansGraphImages.IMG_OBJS_ROOT_BEAN));
+			label.setIcon(BeansUIPlugin.getLabelProvider().getImage(
+					bean.getBean()));
 			if (bean.getClassName() != null) {
 				label.setToolTip(new Label("Class: " + bean.getClassName()));
-			} else {
+			}
+			else {
 				// TODO set tooltip for abstract beans, bean factories, ...
 				label.setToolTip(new Label("Class: <no class specified>"));
 			}
-		} else if (bean.isChildBean()){
-			label.setIcon(BeansGraphImages.getImage(
-										 BeansGraphImages.IMG_OBJS_CHILD_BEAN));
+		}
+		else if (bean.isChildBean()) {
+			label.setIcon(BeansUIPlugin.getLabelProvider().getImage(
+					bean.getBean()));
 			label.setToolTip(new Label("Parent: " + bean.getParentName()));
-		} else {
+		}
+		else {
 			// FIXME Handle factory beans
 //			label.setIcon(BeansGraphImages.getImage(
 //										 BeansGraphImages.IMG_OBJS_CHILD_BEAN));
@@ -97,8 +103,8 @@ public class BeanFigure extends Figure {
 				Object value = carg.getBeanConstructorArgument().getValue();
 				label.setToolTip(new Label(createToolTipForValue(value)));
 			}
-			label.setIcon(BeansGraphImages
-					.getImage(BeansGraphImages.IMG_OBJS_CONSTRUCTOR));
+			label.setIcon(BeansUIPlugin.getLabelProvider().getImage(
+					carg.getBeanConstructorArgument()));
 			figure.add(label);
 		}
 		return figure;
@@ -110,8 +116,8 @@ public class BeanFigure extends Figure {
 		for (int i = 0; i < props.length; i++) {
 			Property prop = props[i];
 			Label label = new Label(prop.getName());
-			label.setIcon(BeansGraphImages.getImage(
-										   BeansGraphImages.IMG_OBJS_PROPERTY));
+			label.setIcon(BeansUIPlugin.getLabelProvider().getImage(
+					prop.getBeanProperty()));
 			Object value = prop.getBeanProperty().getValue();
 			label.setToolTip(new Label(createToolTipForValue(value)));
 			properties.add(label);

@@ -36,7 +36,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
-import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphImages;
+import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
@@ -241,7 +241,7 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 	}
 
 	public ImageDescriptor getImageDescriptor() {
-		return BeansGraphImages.DESC_OBJS_SPRING;
+		return BeansUIImages.DESC_OBJS_SPRING;
 	}
 
 	public IPersistableElement getPersistable() {
