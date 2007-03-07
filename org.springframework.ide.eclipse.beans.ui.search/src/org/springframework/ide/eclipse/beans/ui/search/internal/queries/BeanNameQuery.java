@@ -27,8 +27,8 @@ import org.springframework.ide.eclipse.core.MessageUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
- * This implementation of {@link ISearchQuery} looks for all {@link IBean}s
- * which ID or alias names match a given name.
+ * This {@link ISearchQuery} looks for all {@link IBean}s which ID or alias
+ * names match a given name.
  * 
  * @author Torsten Juergeleit
  */

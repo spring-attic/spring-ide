@@ -27,9 +27,9 @@ import org.springframework.ide.eclipse.core.MessageUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
- * This implementation of {@link ISearchQuery} looks for all
- * {@link IBean}s which have a property of given name.
- *
+ * This {@link ISearchQuery} looks for all {@link IBean}s which have a property
+ * of given name.
+ * 
  * @author Torsten Juergeleit
  */
 public class BeanPropertyQuery extends AbstractBeansQuery {
@@ -43,7 +43,7 @@ public class BeanPropertyQuery extends AbstractBeansQuery {
 		Object[] args = new Object[] { getPattern(),
 				getScope().getDescription() };
 		return MessageUtils.format(
-				BeansSearchMessages.SearchQuery_searchFor_class, args);
+				BeansSearchMessages.SearchQuery_searchFor_property, args);
 	}
 
 	protected boolean doesMatch(IModelElement element, Pattern pattern,

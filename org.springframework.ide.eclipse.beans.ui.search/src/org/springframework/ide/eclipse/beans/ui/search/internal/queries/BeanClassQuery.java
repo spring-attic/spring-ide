@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,30 +26,27 @@ import org.springframework.ide.eclipse.core.MessageUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
- * This implementation of <code>ISearchQuery</code> looks for all
- * <code>IBean</code>s which class name matches the given class name.
- *
- * @see org.eclipse.search.ui.ISearchQuery
- * @see org.springframework.ide.eclipse.beans.core.model.IBean
- *
+ * This {@link ISearchQuery} looks for all {@link IBean}s which class name
+ * matches the given class name.
+ * 
  * @author Torsten Juergeleit
  */
 public class BeanClassQuery extends AbstractBeansQuery {
 
 	public BeanClassQuery(BeansSearchScope scope, String pattern,
-						  boolean isCaseSensitive, boolean isRegexSearch) {
+			boolean isCaseSensitive, boolean isRegexSearch) {
 		super(scope, pattern, isCaseSensitive, isRegexSearch);
 	}
 
 	public String getLabel() {
 		Object[] args = new Object[] { getPattern(),
-									   getScope().getDescription() };
+				getScope().getDescription() };
 		return MessageUtils.format(
-						BeansSearchMessages.SearchQuery_searchFor_child, args);
+				BeansSearchMessages.SearchQuery_searchFor_class, args);
 	}
 
 	protected boolean doesMatch(IModelElement element, Pattern pattern,
-								IProgressMonitor monitor) {
+			IProgressMonitor monitor) {
 		if (element instanceof IBean) {
 			String className = ((IBean) element).getClassName();
 			if (className != null) {

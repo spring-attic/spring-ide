@@ -43,8 +43,8 @@ import org.springframework.ide.eclipse.core.MessageUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
- * This {@link ISearchQuery} looks for all {@link IBeanAlias}es or
- * {@link IBean}s which are referencing a given bean.
+ * This {@link ISearchQuery} looks for all {@link IBean}s which are referencing
+ * a given bean.
  * 
  * @author Torsten Juergeleit
  */
@@ -107,8 +107,8 @@ public class BeanReferenceQuery extends AbstractBeansQuery {
 				Iterator methodsOverrides = bd.getMethodOverrides()
 						.getOverrides().iterator();
 				while (methodsOverrides.hasNext()) {
-					MethodOverride methodOverride =
-							(MethodOverride) methodsOverrides.next();
+					MethodOverride methodOverride = (MethodOverride)
+							methodsOverrides.next();
 					if (methodOverride instanceof LookupOverride) {
 						String name = ((LookupOverride) methodOverride)
 								.getBeanName();
