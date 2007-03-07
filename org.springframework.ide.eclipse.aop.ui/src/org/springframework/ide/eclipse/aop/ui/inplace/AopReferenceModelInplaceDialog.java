@@ -208,10 +208,6 @@ public class AopReferenceModelInplaceDialog {
 
 	private TreeViewer viewer;
 
-	private AopReferenceModelNavigatorContentProvider contentProvider;
-
-	private AopReferenceModelNavigatorLabelProvider labelProvider;
-
 	private IKeyBindingService fKeyBindingService;
 
 	private String[] fKeyBindingScopes;
@@ -322,10 +318,8 @@ public class AopReferenceModelInplaceDialog {
 		viewer = new TreeViewer(parent, SWT.SINGLE | (style & ~SWT.MULTI));
 		viewer.getTree().setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		contentProvider = new AopReferenceModelNavigatorContentProvider();
-		viewer.setContentProvider(contentProvider);
-		labelProvider = new AopReferenceModelNavigatorLabelProvider();
-		viewer.setLabelProvider(labelProvider);
+		viewer.setContentProvider(new AopReferenceModelNavigatorContentProvider());
+		viewer.setLabelProvider(new AopReferenceModelNavigatorLabelProvider());
 		viewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
 		viewer.setSorter(new AopReferenceModelNavigatorSorter());
 
@@ -1150,8 +1144,6 @@ public class AopReferenceModelInplaceDialog {
 		storeBounds();
 		toolBar = null;
 		viewMenuManager = null;
-		labelProvider.dispose();
-		contentProvider.dispose();
 	}
 
 	public void dispose() {

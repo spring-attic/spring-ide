@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
 import java.util.List;
@@ -21,9 +22,13 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
+import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 public class AdvisedAopTargetBeanNode implements IReferenceNode,
 		IRevealableReferenceNode {
 
@@ -38,13 +43,13 @@ public class AdvisedAopTargetBeanNode implements IReferenceNode,
 	}
 
 	public Image getImage() {
-		return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER
-				.getImage(this.references.get(0).getTargetBean());
+		return BeansUIPlugin.getLabelProvider().getImage(
+				this.references.get(0).getTargetBean());
 	}
 
 	public String getText() {
-		return AopReferenceModelNavigatorUtils.BEAN_LABEL_PROVIDER
-				.getText(this.references.get(0).getTargetBean())
+		return BeansUIPlugin.getLabelProvider().getText(
+				this.references.get(0).getTargetBean())
 				+ " - "
 				+ this.references.get(0).getTargetBean().getElementResource()
 						.getFullPath().toString();

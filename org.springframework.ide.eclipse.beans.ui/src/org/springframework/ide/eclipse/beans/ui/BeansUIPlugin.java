@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,13 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.ui.ImageDescriptorRegistry;
 
 /**
@@ -55,8 +57,8 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	private static BeansUIPlugin plugin;
 
 	private ResourceBundle resourceBundle;
-
 	private ImageDescriptorRegistry imageDescriptorRegistry;
+	private ILabelProvider labelProvider;
 
 	/**
 	 * Creates the Spring Beans UI plug-in.
@@ -78,13 +80,14 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 		BeansUIImages.initializeImageRegistry(registry);
 	}
 
-	public void start(BundleContext context) throws Exception {
-		super.start(context);
-	}
-
 	public void stop(BundleContext context) throws Exception {
+		if (labelProvider != null) {
+			labelProvider.dispose();
+			labelProvider = null;
+		}
 		if (imageDescriptorRegistry != null) {
 			imageDescriptorRegistry.dispose();
+			imageDescriptorRegistry = null;
 		}
 		super.stop(context);
 	}
@@ -93,7 +96,8 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 		return getDefault().internalGetImageDescriptorRegistry();
 	}
 
-	private synchronized ImageDescriptorRegistry internalGetImageDescriptorRegistry() {
+	private synchronized ImageDescriptorRegistry
+			internalGetImageDescriptorRegistry() {
 		if (imageDescriptorRegistry == null) {
 			imageDescriptorRegistry = new ImageDescriptorRegistry();
 		}
@@ -101,9 +105,27 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Returns an image descriptor for the image file at the given
-	 * plug-in relative path
-	 *
+	 * Returns then singleton instance of
+	 * <code>BeansModelLabelProvider(true)</code>.
+	 * <p>
+	 * <b>For this instance the dispose method must never becalled!! This is
+	 * done by <code>Plugin.stop()</code> instead.</b>
+	 */
+	public static ILabelProvider getLabelProvider() {
+		return getDefault().internalGetLabelProvider();
+	}
+
+	private synchronized ILabelProvider internalGetLabelProvider() {
+		if (labelProvider == null) {
+			labelProvider = new BeansModelLabelProvider(true);
+		}
+		return labelProvider;
+	}
+
+	/**
+	 * Returns an image descriptor for the image file at the given plug-in
+	 * relative path
+	 * 
 	 * @param path the path
 	 * @return the image descriptor
 	 */
@@ -183,17 +205,18 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	}
 	
 	public static void log(Throwable exception) {
-		getDefault().getLog().log(createErrorStatus(
-						getResourceString("Plugin.internal_error"), exception));
+		getDefault().getLog().log(createErrorStatus(getResourceString(
+				"Plugin.internal_error"), exception));
 	}
+
 	/**
 	 * Returns a new <code>IStatus</code> for this plug-in
 	 */
 	public static IStatus createErrorStatus(String message,
-											Throwable exception) {
+			Throwable exception) {
 		if (message == null) {
-			message= ""; 
-		}		
+			message = "";
+		}
 		return new Status(Status.ERROR, PLUGIN_ID, 0, message, exception);
 	}
 }

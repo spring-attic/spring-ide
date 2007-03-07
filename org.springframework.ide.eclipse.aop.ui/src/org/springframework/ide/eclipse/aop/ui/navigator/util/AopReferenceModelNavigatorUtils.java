@@ -54,7 +54,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.springframework.ide.eclipse.aop.ui.Activator;
 import org.springframework.ide.eclipse.aop.ui.navigator.AopReferenceModelNavigator;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -66,7 +65,6 @@ import org.w3c.dom.Text;
  * 
  * @author Christian Dupuis
  * @since 2.0
- * 
  */
 @SuppressWarnings("restriction")
 public class AopReferenceModelNavigatorUtils {
@@ -77,9 +75,6 @@ public class AopReferenceModelNavigatorUtils {
 					.getDefault().getWorkbench().getDecoratorManager()
 					.getLabelDecorator());
 
-	public static BeansModelLabelProvider BEAN_LABEL_PROVIDER = new BeansModelLabelProvider(
-			true);
-
 	public static Object getSelectedElement(IWorkbenchPart part,
 			ISelection selection) {
 		Object selectedElement = getSelectedJavaElement(part, selection);
@@ -88,7 +83,6 @@ public class AopReferenceModelNavigatorUtils {
 			selectedElement = getSelectedXmlElement(selection);
 
 		}
-
 		return selectedElement;
 	}
 

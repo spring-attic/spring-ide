@@ -30,7 +30,6 @@ import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.text.Match;
 import org.eclipse.ui.PartInitException;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchResult;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchScope;
 import org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanClassQuery;
@@ -44,20 +43,15 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
  * question
  * 
  * @author Christian Dupuis
+ * @author Torsten Juergeleit
  * @since 2.0
  */
 public class BeansJavaSearchParticipant implements IQueryParticipant,
 		IMatchPresentation {
 
-	private static final ILabelProvider LABEL_PROVIDER = new BeansModelLabelProvider(
-			true);
-
 	private static final int S_LIMIT_REF = 2;
-
 	private static final int S_LIMIT_ALL = 3;
-
 	private static final int S_FOR_TYPES = 0;
-
 	private static final int S_FOR_FIELDS = 1;
 
 	private int searchFor = -1;
@@ -80,7 +74,8 @@ public class BeansJavaSearchParticipant implements IQueryParticipant,
 
 		String search = null;
 		if (querySpecification instanceof ElementQuerySpecification) {
-			ElementQuerySpecification elementQuerySpecification = (ElementQuerySpecification) querySpecification;
+			ElementQuerySpecification elementQuerySpecification =
+					(ElementQuerySpecification) querySpecification;
 			if (elementQuerySpecification.getElement() instanceof IType) {
 				search = ((IType) elementQuerySpecification.getElement())
 						.getFullyQualifiedName();
@@ -120,8 +115,8 @@ public class BeansJavaSearchParticipant implements IQueryParticipant,
 			for (Object obj : searchResult.getElements()) {
 				Match[] matches = searchResult.getMatches(obj);
 				if (matches != null && matches.length > 0) {
-					for (Match m : matches) {
-						requestor.reportMatch(m);
+					for (Match match : matches) {
+						requestor.reportMatch(match);
 					}
 				}
 			}
@@ -129,7 +124,9 @@ public class BeansJavaSearchParticipant implements IQueryParticipant,
 	}
 
 	public ILabelProvider createLabelProvider() {
-		return LABEL_PROVIDER;
+		
+		// This label provider will be disposed by the search page
+		return new BeansJavaSearchLabelProvider(true);
 	}
 
 	public void showMatch(Match match, int currentOffset, int currentLength,

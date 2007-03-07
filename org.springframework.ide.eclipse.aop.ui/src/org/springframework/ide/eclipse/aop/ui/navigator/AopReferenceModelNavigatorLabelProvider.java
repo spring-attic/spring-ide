@@ -31,13 +31,12 @@ import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
  * 
  * @author Christian Dupuis
  * @since 2.0
- * 
  */
 public class AopReferenceModelNavigatorLabelProvider extends
 		BeansModelLabelProvider implements ICommonLabelProvider {
 
 	public String getDescription(Object element) {
-		// TODO add descrption here
+		// TODO add description here
 		return null;
 	}
 

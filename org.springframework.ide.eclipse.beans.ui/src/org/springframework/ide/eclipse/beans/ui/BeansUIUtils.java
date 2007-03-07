@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.eclipse.ui.views.properties.FilePropertySource;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.ResourcePropertySource;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeanClassReferences;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -66,8 +67,8 @@ import org.w3c.dom.Element;
 public final class BeansUIUtils {
 
 	/**
-	 * Returns edited file for given <code>IWorkbenchPart</code>
-	 * if it's an editor editing a Spring bean config file.
+	 * Returns edited file for given <code>IWorkbenchPart</code> if it's an
+	 * editor editing a Spring bean config file.
 	 */
 	public static IFile getConfigFile(IWorkbenchPart part) {
 		if (part instanceof IEditorPart) {
@@ -75,7 +76,7 @@ public final class BeansUIUtils {
 			if (input instanceof IFileEditorInput) {
 				IFile file = ((IFileEditorInput) input).getFile();
 				IBeansProject project = BeansCorePlugin.getModel().getProject(
-															 file.getProject());
+						file.getProject());
 				if (project != null && project.hasConfig(file)) {
 					return file;
 				}
@@ -95,8 +96,8 @@ public final class BeansUIUtils {
 				IFile file = ((IFileEditorInput) input).getFile();
 				return BeansCorePlugin.getModel().getConfig(file);
 			} else if (input instanceof ZipEntryEditorInput) {
-				ZipEntryStorage storage = (ZipEntryStorage)
-						((ZipEntryEditorInput) input).getStorage();
+				ZipEntryStorage storage = (ZipEntryStorage) ((ZipEntryEditorInput) input)
+						.getStorage();
 				IBeansProject project = BeansCorePlugin.getModel().getProject(
 						storage.getFile().getProject());
 				if (project != null) {
@@ -140,7 +141,7 @@ public final class BeansUIUtils {
 			} else if (bean.isChildBean()){
 				return new ChildBeanProperties(bean);
 			} else {
-				// FIXME add support for factory beans
+// FIXME add support for factory beans
 //				return new FactoryBeanProperties(bean);
 			}
 		} else if (element instanceof IBeanConstructorArgument) {
@@ -148,6 +149,8 @@ public final class BeansUIUtils {
 											(IBeanConstructorArgument) element);
 		} else if (element instanceof IBeanProperty) {
 			return new PropertyProperties((IBeanProperty) element);
+		} else if (element instanceof BeanClassReferences) {
+// TODO implement IPropertySource for BeanClassReferences
 		}
 		return null;
 	}
