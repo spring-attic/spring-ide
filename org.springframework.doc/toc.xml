@@ -89,7 +89,10 @@
                   <topic label="Strongly-typed collection (Java5+ only)" href="beans.html#beans-collection-elements-strongly-typed"/>
                </topic>
                <topic label="Nulls" href="beans.html#beans-null-element"/>
-               <topic label="XML-based configuration metadata shortcuts" href="beans.html#beans-value-ref-shortcuts"/>
+               <topic label="Shortcuts and other convenience options for XML-based configuration metadata" href="beans.html#xml-config-shortcuts">
+                  <topic label="XML-based configuration metadata shortcuts" href="beans.html#beans-value-ref-shortcuts"/>
+                  <topic label="The p-namespace and how to use it to configure properties" href="beans.html#beans-p-namespace"/>
+               </topic>
                <topic label="Compound property names" href="beans.html#beans-compound-property-names"/>
             </topic>
             <topic label="Using depends-on" href="beans.html#beans-factory-dependson"/>
@@ -111,7 +114,9 @@
                <topic label="The request scope" href="beans.html#beans-factory-scopes-request"/>
                <topic label="The session scope" href="beans.html#beans-factory-scopes-session"/>
                <topic label="The global session scope" href="beans.html#beans-factory-scopes-global-session"/>
-               <topic label="Scoped beans as dependencies" href="beans.html#beans-factory-scopes-other-injection"/>
+               <topic label="Scoped beans as dependencies" href="beans.html#beans-factory-scopes-other-injection">
+                  <topic label="Choosing the type of proxy created" href="beans.html#beans-factory-scopes-other-injection-proxies"/>
+               </topic>
             </topic>
             <topic label="Custom scopes" href="beans.html#beans-factory-scopes-custom">
                <topic label="Creating your own custom scope" href="beans.html#beans-factory-scopes-custom-creating"/>
@@ -324,11 +329,15 @@
          <topic label="Unit testing" href="testing.html#unit-testing"/>
          <topic label="Integration testing" href="testing.html#integration-testing">
             <topic label="Context management and caching" href="testing.html#testing-ctx-management"/>
-            <topic label="Dependency Injection of test fixtures" href="testing.html#testing-fixture-di"/>
+            <topic label="Dependency Injection of test fixtures" href="testing.html#testing-fixture-di">
+               <topic label="Field level injection" href="testing.html#testing-fixture-di-field"/>
+            </topic>
             <topic label="Transaction management" href="testing.html#testing-tx"/>
             <topic label="Convenience variables" href="testing.html#testing-superclasses"/>
-            <topic label="Example" href="testing.html#testing-example"/>
-            <topic label="Running integration tests" href="testing.html#testing-integration"/>
+            <topic label="Java5+ specific support" href="testing.html#testing-java5-support">
+               <topic label="Annotations" href="testing.html#testing-java5-support-annotations"/>
+            </topic>
+            <topic label="PetClinic example" href="testing.html#testing-examples-petclinic"/>
          </topic>
          <topic label="Further Resources" href="testing.html#testing-resources"/>
       </topic>
@@ -344,7 +353,7 @@
             <topic label="TransactionAwareDataSourceProxy" href="transaction.html#tx-resource-synchronization-tadsp"/>
          </topic>
          <topic label="Declarative transaction management" href="transaction.html#transaction-declarative">
-            <topic label="Understanding Spring's declarative transaction implementation" href="transaction.html#tx-decl-explained"/>
+            <topic label="Understanding the Spring Framework's declarative transaction implementation" href="transaction.html#tx-decl-explained"/>
             <topic label="A first example" href="transaction.html#transaction-declarative-first-example"/>
             <topic label="Rolling back" href="transaction.html#transaction-declarative-rolling-back"/>
             <topic label="Configuring different transactional semantics for different beans" href="transaction.html#transaction-declarative-diff-tx"/>
@@ -379,7 +388,14 @@
             <topic label="The package hierarchy" href="jdbc.html#jdbc-packages"/>
          </topic>
          <topic label="Using the JDBC Core classes to control basic JDBC processing and error handling" href="jdbc.html#jdbc-core">
-            <topic label="JdbcTemplate" href="jdbc.html#jdbc-JdbcTemplate"/>
+            <topic label="JdbcTemplate" href="jdbc.html#jdbc-JdbcTemplate">
+               <topic label="Examples" href="jdbc.html#jdbc-JdbcTemplate-examples">
+                  <topic label="Querying (SELECT)" href="jdbc.html#jdbc-JdbcTemplate-examples-query"/>
+                  <topic label="Updating (INSERT/UPDATE/DELETE)" href="jdbc.html#jdbc-JdbcTemplate-examples-update"/>
+                  <topic label="Other operations (DDL)" href="jdbc.html#jdbc-JdbcTemplate-examples-other"/>
+               </topic>
+               <topic label="JdbcTemplate idioms (best practices)" href="jdbc.html#jdbc-JdbcTemplate-idioms"/>
+            </topic>
             <topic label="NamedParameterJdbcTemplate" href="jdbc.html#jdbc-NamedParameterJdbcTemplate"/>
             <topic label="SimpleJdbcTemplate" href="jdbc.html#jdbc-SimpleJdbcTemplate"/>
             <topic label="DataSource" href="jdbc.html#jdbc-datasource"/>
@@ -824,6 +840,7 @@
          <topic label="Scenarios" href="dynamic-language.html#dynamic-language-scenarios">
             <topic label="Scripted Spring MVC Controllers" href="dynamic-language.html#dynamic-language-scenarios-controllers"/>
             <topic label="Scripted Validators" href="dynamic-language.html#dynamic-language-scenarios-validators"/>
+            <topic label="AOP - advising scripted beans" href="dynamic-language.html#dynamic-language-scenarios-aop"/>
          </topic>
          <topic label="Further Resources" href="dynamic-language.html#dynamic-language-resources"/>
       </topic>

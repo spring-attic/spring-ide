@@ -15,12 +15,12 @@
 
 	<target name="usage">
 		<echo message=""/>
-		<echo message="${name} build file"/>
+		<echo message="spring-docs build file"/>
 		<echo message="------------------------------------------------------"/>
 		<echo message=""/>
 		<echo message="Available targets:"/>
 		<echo message=""/>
-		<echo message="docbuild --> build HTML documentation"/>
+		<echo message="dochtml --> build HTML documentation"/>
 		<echo message="docclean --> delete HTML documentation"/>
 		<echo message=""/>
 	</target>
