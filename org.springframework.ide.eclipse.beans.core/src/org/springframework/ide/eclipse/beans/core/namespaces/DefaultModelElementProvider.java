@@ -22,9 +22,9 @@ import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansComponent;
+import org.springframework.ide.eclipse.beans.core.internal.model.UniqueBeanNameGenerator;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -57,9 +57,8 @@ public class DefaultModelElementProvider implements IModelElementProvider {
 		for (BeanDefinition beanDef : definition.getBeanDefinitions()) {
 			if (beanDef instanceof AbstractBeanDefinition && beanDef
 					.getRole() != BeanDefinition.ROLE_INFRASTRUCTURE) {
-				String beanName = BeanDefinitionReaderUtils
-						.generateBeanName((AbstractBeanDefinition) beanDef,
-								null, true);
+				String beanName = UniqueBeanNameGenerator.generateBeanName(
+						(AbstractBeanDefinition) beanDef, config);
 				IBean bean = new Bean(component, beanName, null, beanDef);
 				component.addBean(bean);
 			}

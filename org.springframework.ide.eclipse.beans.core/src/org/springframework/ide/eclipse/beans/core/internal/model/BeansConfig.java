@@ -562,6 +562,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 						new DelegatingNamespaceHandlerResolver(
 								NamespaceHandlerResolver.class
 										.getClassLoader()));
+				reader.setBeanNameGenerator(new UniqueBeanNameGenerator(this));
 				try {
 					reader.loadBeanDefinitions(resource);
 				}
