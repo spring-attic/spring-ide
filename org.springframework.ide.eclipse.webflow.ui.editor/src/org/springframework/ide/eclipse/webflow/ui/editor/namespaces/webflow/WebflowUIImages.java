@@ -32,20 +32,15 @@ import org.springframework.ide.eclipse.webflow.ui.editor.Activator;
  * The images provided by the Spring UI plugin. Initialize the image registry by
  * declaring all of the required graphics. This involves creating JFace image
  * descriptors describing how to create/find the image should it be needed. The
- * image is not actually allocated until requested.
- * 
- * Prefix conventions Wizard Banners WIZBAN_ Preference Banners PREF_BAN_
- * Property Page Banners PROPBAN_ Color toolbar CTOOL_ Enable toolbar ETOOL_
- * Disable toolbar DTOOL_ Local enabled toolbar ELCL_ Local Disable toolbar
- * DLCL_ Object large OBJL_ Object small OBJS_ View VIEW_ Product images PROD_
- * Misc images MISC_
- * 
- * Where are the images? The images (typically gifs) are found in the same
- * location as this plugin class. This may mean the same package directory as
- * the package holding this class. The images are declared using
- * <code>this.getClass()</code> to ensure they are looked up via this plugin
- * class.
- * 
+ * image is not actually allocated until requested. Prefix conventions Wizard
+ * Banners WIZBAN_ Preference Banners PREF_BAN_ Property Page Banners PROPBAN_
+ * Color toolbar CTOOL_ Enable toolbar ETOOL_ Disable toolbar DTOOL_ Local
+ * enabled toolbar ELCL_ Local Disable toolbar DLCL_ Object large OBJL_ Object
+ * small OBJS_ View VIEW_ Product images PROD_ Misc images MISC_ Where are the
+ * images? The images (typically gifs) are found in the same location as this
+ * plugin class. This may mean the same package directory as the package holding
+ * this class. The images are declared using <code>this.getClass()</code> to
+ * ensure they are looked up via this plugin class.
  * @see org.eclipse.jface.resource.ImageRegistry
  */
 public class WebflowUIImages {
@@ -105,6 +100,9 @@ public class WebflowUIImages {
 	public static final String IMG_OBJS_END_STATE = NAME_PREFIX
 			+ "end_state_obj.gif";
 
+	public static final String IMG_OBJS_EVALUATION_ACTION = NAME_PREFIX
+			+ "evaluation_action_obj.gif";
+
 	public static final String IMG_OBJS_EXCEPTION_HANDLER = NAME_PREFIX
 			+ "exception_handler_obj.gif";
 
@@ -122,13 +120,23 @@ public class WebflowUIImages {
 
 	public static final String IMG_OBJS_INPUT = NAME_PREFIX + "input_obj.gif";
 
+	public static final String IMG_OVR_INPUT = NAME_PREFIX + "input_ovr.gif";
+
 	public static final String IMG_OBJS_OUTPUT = NAME_PREFIX + "output_obj.gif";
+
+	public static final String IMG_OVR_OUTPUT = NAME_PREFIX + "output_ovr.gif";
 
 	public static final String IMG_OBJS_PROPERTIES = NAME_PREFIX
 			+ "properties_obj.gif";
 
+	public static final String IMG_OVR_RENDER = NAME_PREFIX
+			+ "render_ovr.gif";
+
 	public static final String IMG_OBJS_START_ACTION = NAME_PREFIX
 			+ "start_action_obj.gif";
+
+	public static final String IMG_OBJS_SET_ACTION = NAME_PREFIX
+			+ "set_action_obj.gif";
 
 	public static final String IMG_OBJS_START_STATE = NAME_PREFIX
 			+ "start_state_obj.gif";
@@ -171,6 +179,9 @@ public class WebflowUIImages {
 	public static final ImageDescriptor DESC_OBJS_DECISION_STATE = createManaged(
 			STRUCTURE, IMG_OBJS_DECISION_STATE);
 
+	public static final ImageDescriptor DESC_OBJS_EVALUATION_ACTION = createManaged(
+			STRUCTURE, IMG_OBJS_EVALUATION_ACTION);
+
 	public static final ImageDescriptor DESC_OBJS_END_STATE = createManaged(
 			STRUCTURE, IMG_OBJS_END_STATE);
 
@@ -192,14 +203,26 @@ public class WebflowUIImages {
 	public static final ImageDescriptor DESC_OBJS_INPUT = createManaged(
 			STRUCTURE, IMG_OBJS_INPUT);
 
+	public static final ImageDescriptor DESC_OVR_INPUT = createManaged(
+			STRUCTURE, IMG_OVR_INPUT);
+
 	public static final ImageDescriptor DESC_OBJS_METHOD = createManaged(
 			STRUCTURE, IMG_OBJS_METHOD);
 
 	public static final ImageDescriptor DESC_OBJS_OUTPUT = createManaged(
 			STRUCTURE, IMG_OBJS_OUTPUT);
 
+	public static final ImageDescriptor DESC_OVR_OUTPUT = createManaged(
+			STRUCTURE, IMG_OVR_OUTPUT);
+
 	public static final ImageDescriptor DESC_OBJS_PROPERTIES = createManaged(
 			STRUCTURE, IMG_OBJS_PROPERTIES);
+
+	public static final ImageDescriptor DESC_OVR_RENDER = createManaged(
+			STRUCTURE, IMG_OVR_RENDER);
+
+	public static final ImageDescriptor DESC_OBJS_SET_ACTION = createManaged(
+			STRUCTURE, IMG_OBJS_SET_ACTION);
 
 	public static final ImageDescriptor DESC_OBJS_START_ACTION = createManaged(
 			STRUCTURE, IMG_OBJS_START_ACTION);

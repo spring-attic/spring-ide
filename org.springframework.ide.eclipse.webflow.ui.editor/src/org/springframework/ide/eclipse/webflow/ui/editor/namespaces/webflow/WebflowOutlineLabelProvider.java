@@ -60,11 +60,11 @@ public class WebflowOutlineLabelProvider extends JFaceNodeLabelProvider {
 		IMAGES.put("method-result", WebflowUIImages
 				.getImage(WebflowUIImages.IMG_OBJS_ARGUMENT));
 		IMAGES.put("evaluate-action", WebflowUIImages
-				.getImage(WebflowUIImages.IMG_OBJS_ACTION));
+				.getImage(WebflowUIImages.IMG_OBJS_EVALUATION_ACTION));
 		IMAGES.put("evaluate-result", WebflowUIImages
 				.getImage(WebflowUIImages.IMG_OBJS_ACTION));
 		IMAGES.put("set", WebflowUIImages
-				.getImage(WebflowUIImages.IMG_OBJS_ARGUMENT));
+				.getImage(WebflowUIImages.IMG_OBJS_SET_ACTION));
 		IMAGES.put("transition", WebflowUIImages
 				.getImage(WebflowUIImages.IMG_OBJS_TRANSITION));
 		IMAGES.put("view-state", WebflowUIImages
