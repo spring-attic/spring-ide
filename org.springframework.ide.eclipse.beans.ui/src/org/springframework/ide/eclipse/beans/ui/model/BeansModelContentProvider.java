@@ -86,7 +86,7 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 	}
 
 	public final void dispose() {
-		if (viewer != null && viewer.getInput() != null && refresh) {
+		if (refresh) {
 			BeansCorePlugin.getModel().removeChangeListener(this);
 		}
 	}
@@ -247,12 +247,17 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 			}
 			return ((IModelElement) element).getElementParent();
 		} else if (element instanceof IFile) {
-			return BeansCorePlugin.getModel().getConfig((IFile) element)
-					.getElementParent();
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
+					(IFile) element);
+			if (config != null) {
+				return config.getElementParent();
+			}
 		} else if (element instanceof ZipEntryStorage) {
-			return BeansCorePlugin.getModel().getConfig(
-					((ZipEntryStorage) element).getFullName())
-					.getElementParent();
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
+					((ZipEntryStorage) element).getFullName());
+			if (config != null) {
+				return config.getElementParent();
+			}
 		} else if (element instanceof BeanClassReferences) {
 			return ((BeanClassReferences) element).getBeanClass();
 		}

@@ -48,29 +48,24 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.refactoring.util.BeansRefactoringChangeUtils;
 import org.springframework.util.StringUtils;
 
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 @SuppressWarnings("restriction")
 public class RenameBeanIdRefactoring extends Refactoring {
 
 	protected static final String FILE = "file";
-
 	private static final String NAME = "name";
-
 	private static final String OFFSET = "offset";
-
 	protected static final String OLDNAME = "oldName";
-
 	private static final String REFERENCES = "references";
 
 	private String beanId;
-
 	private IFile file;
-
 	private IDOMNode node;
-
 	private int offset;
-
 	private String oldBeanId;
-
 	private boolean updateReferences = true;
 
 	@Override
@@ -91,25 +86,20 @@ public class RenameBeanIdRefactoring extends Refactoring {
 						.createFatalErrorStatus("Config file not given"));
 			}
 			else if (!file.exists()) {
-				status
-						.merge(RefactoringStatus
-								.createFatalErrorStatus(MessageFormat
-										.format(
-												"File ''{0}'' is not a Spring IDE Beans Config.",
-												new Object[] { file
-														.getFullPath()
-														.toString() })));
+				status.merge(RefactoringStatus.createFatalErrorStatus(
+						MessageFormat.format("File ''{0}'' is not a " +
+								"Spring IDE Beans Config.",
+										new Object[] { file.getFullPath()
+												.toString() })));
 			}
 			if (node == null) {
 				status.merge(RefactoringStatus
 						.createFatalErrorStatus("Selection not given"));
 			}
 			else if (!BeansEditorUtils.hasAttribute(node, "id")) {
-				status
-						.merge(RefactoringStatus
-								.createFatalErrorStatus("Selected XML element has no id"));
+				status.merge(RefactoringStatus.createFatalErrorStatus(
+						"Selected XML element has no id"));
 			}
-
 		}
 		finally {
 			monitor.done();
@@ -133,7 +123,8 @@ public class RenameBeanIdRefactoring extends Refactoring {
 					String comment = MessageFormat.format(
 							"Rename Spring Bean from ''{0}'' to ''{1}''",
 							new Object[] { oldBeanId, beanId });
-					Map<String, String> arguments = new HashMap<String, String>();
+					Map<String, String> arguments = new HashMap<String,
+							String>();
 					arguments.put(OLDNAME, oldBeanId);
 					arguments.put(NAME, beanId);
 					arguments.put(FILE, file.getFullPath().toString());
@@ -153,34 +144,42 @@ public class RenameBeanIdRefactoring extends Refactoring {
 				compositeChange.add(change);
 			}
 			if (updateReferences) {
-				Set<IBeansProject> beansProjects = BeansCorePlugin.getModel()
-						.getProjects();
-				IBeansConfig beansConfig = BeansCorePlugin.getModel()
-						.getConfig(file);
+				addChangesForUpdatedReferences(compositeChange, pm);
+			}
+			return compositeChange;
+		}
+		finally {
+			pm.done();
+		}
+	}
 
-				Set<IBeansConfig> resources = new HashSet<IBeansConfig>();
-				resources.add(beansConfig);
+	private void addChangesForUpdatedReferences(
+			CompositeChange compositeChange, IProgressMonitor pm)
+			throws CoreException {
+		IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
+		if (config != null) {
+			Set<IBeansConfig> resources = new HashSet<IBeansConfig>();
+			resources.add(config);
 
-				for (IBeansProject beansProject : beansProjects) {
-					Set<IBeansConfigSet> beansConfigSets = beansProject
-							.getConfigSets();
-					for (IBeansConfigSet beansConfigSet : beansConfigSets) {
-						if (beansConfigSet.getConfigs().contains(beansConfig)) {
-							for (IBeansConfig bc : beansConfigSet.getConfigs()) {
-								if (!resources.contains(bc)
-										&& !bc.isElementArchived()) {
-									IResource res = bc.getElementResource();
-									if (res.isAccessible()
-											&& res instanceof IFile) {
-										resources.add(bc);
-										Change refsChange = BeansRefactoringChangeUtils
-												.createRenameBeanRefsChange(
-														(IFile) bc
-																.getElementResource(),
-														oldBeanId, beanId, pm);
-										if (refsChange != null) {
-											compositeChange.add(refsChange);
-										}
+			for (IBeansProject project : BeansCorePlugin.getModel()
+					.getProjects()) {
+				for (IBeansConfigSet configSet : project.getConfigSets()) {
+					if (configSet.getConfigs().contains(config)) {
+						for (IBeansConfig bc : configSet.getConfigs()) {
+							if (!resources.contains(bc)
+									&& !bc.isElementArchived()) {
+								IResource res = bc.getElementResource();
+								if (res.isAccessible()
+										&& res instanceof IFile) {
+									resources.add(bc);
+									Change refsChange =
+										BeansRefactoringChangeUtils
+											.createRenameBeanRefsChange(
+													(IFile) bc
+														.getElementResource(),
+													oldBeanId, beanId, pm);
+									if (refsChange != null) {
+										compositeChange.add(refsChange);
 									}
 								}
 							}
@@ -188,10 +187,6 @@ public class RenameBeanIdRefactoring extends Refactoring {
 					}
 				}
 			}
-			return compositeChange;
-		}
-		finally {
-			pm.done();
 		}
 	}
 
@@ -272,7 +267,8 @@ public class RenameBeanIdRefactoring extends Refactoring {
 					.createFatalErrorStatus("Bean id cannot be empty"));
 		}
 		else if (this.node != null
-				&& this.node.getOwnerDocument().getElementById(beanId) != null) {
+				&& this.node.getOwnerDocument()
+						.getElementById(beanId) != null) {
 			status.merge(RefactoringStatus
 					.createInfoStatus("Bean id already used in current file"));
 		}

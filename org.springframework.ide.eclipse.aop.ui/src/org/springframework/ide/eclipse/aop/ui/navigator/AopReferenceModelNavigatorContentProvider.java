@@ -78,7 +78,6 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  *
  * @author Christian Dupuis
  * @since 2.0
- *
  */
 @SuppressWarnings("restriction")
 public class AopReferenceModelNavigatorContentProvider implements
@@ -474,13 +473,18 @@ public class AopReferenceModelNavigatorContentProvider implements
 			return ((IModelElement) element).getElementParent();
 		}
 		else if (element instanceof IFile) {
-			return BeansCorePlugin.getModel().getConfig((IFile) element)
-					.getElementParent();
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
+					(IFile) element);
+			if (config != null) {
+				return config.getElementParent();
+			}
 		}
-		if (element instanceof ZipEntryStorage) {
-			return BeansCorePlugin.getModel().getConfig(
-					((ZipEntryStorage) element).getFullName())
-					.getElementParent();
+		else if (element instanceof ZipEntryStorage) {
+			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
+					((ZipEntryStorage) element).getFullName());
+			if (config != null) {
+				return config.getElementParent();
+			}
 		}
 		return null;
 	}
