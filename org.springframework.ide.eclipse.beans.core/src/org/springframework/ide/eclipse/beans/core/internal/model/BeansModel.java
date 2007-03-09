@@ -336,14 +336,12 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		}
 
 		public void projectDeleted(IProject project, int eventType) {
-			if (eventType == IResourceChangeEvent.POST_BUILD) {
-				if (DEBUG) {
-					System.out.println("Project '" + project.getName()
-							+ "' deleted");
-				}
-				IBeansProject proj = (IBeansProject) projects.remove(project);
-				notifyListeners(proj, Type.REMOVED);
+			if (DEBUG) {
+				System.out.println("Project '" + project.getName()
+						+ "' deleted");
 			}
+			IBeansProject proj = (IBeansProject) projects.remove(project);
+			notifyListeners(proj, Type.REMOVED);
 		}
 
 		public void projectDescriptionChanged(IFile file, int eventType) {
