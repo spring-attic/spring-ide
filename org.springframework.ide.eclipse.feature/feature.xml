@@ -42,6 +42,13 @@
          unpack="false"/>
 
    <plugin
+         id="org.springframework.ide.eclipse.doc"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="true"/>
+
+   <plugin
          id="org.springframework.ide.eclipse.ui"
          download-size="0"
          install-size="0"
@@ -141,6 +148,13 @@
 
    <plugin
          id="org.springframework.webflow"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="true"/>
+
+   <plugin
+         id="org.springframework.webflow.doc"
          download-size="0"
          install-size="0"
          version="0.0.0"
