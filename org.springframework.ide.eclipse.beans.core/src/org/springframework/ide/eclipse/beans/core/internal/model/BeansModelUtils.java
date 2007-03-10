@@ -943,11 +943,15 @@ public final class BeansModelUtils {
 	}
 
 	/**
-	 * Returns the {@link IResource} for a given {@link IModelElement}.
+	 * Returns the {@link IFile} for a given {@link IModelElement}.
 	 */
-	public static IResource getResourc(IModelElement element) {
+	public static IFile getFile(IModelElement element) {
 		if (element instanceof IResourceModelElement) {
-			return ((IResourceModelElement) element).getElementResource();
+			IResource resource = ((IResourceModelElement) element)
+					.getElementResource();
+			if (resource instanceof IFile) {
+				return (IFile) resource;
+			}
 		}
 		return null;
 	}

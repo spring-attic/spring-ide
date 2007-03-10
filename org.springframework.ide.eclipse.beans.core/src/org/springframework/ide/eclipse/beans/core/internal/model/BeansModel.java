@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.BeansResourceChangeListener;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.IBeansResourceChangeEvents;
+import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectValidator;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
@@ -43,7 +44,6 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.AbstractModel;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
-import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 import org.springframework.util.ObjectUtils;
 
@@ -110,7 +110,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 
 		// Add a ResourceChangeListener to the Eclipse Workspace
 		workspaceListener = new BeansResourceChangeListener(
-				new ResourceChangeEventHandler(this));
+				new ResourceChangeEventHandler());
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.addResourceChangeListener(workspaceListener,
 				BeansResourceChangeListener.LISTENER_FLAGS);
@@ -269,12 +269,6 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	private class ResourceChangeEventHandler implements
 			IBeansResourceChangeEvents {
 
-		private IBeansModel model;
-
-		public ResourceChangeEventHandler(IBeansModel model) {
-			this.model = model;
-		}
-
 		public boolean isSpringProject(IProject project, int eventType) {
 			return getProject(project) != null;
 		}
@@ -285,7 +279,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 					System.out.println("Spring beans nature added to "
 							+ "project '" + project.getName() + "'");
 				}
-				BeansProject proj = new BeansProject(model, project);
+				BeansProject proj = new BeansProject(BeansModel.this, project);
 				projects.put(project, proj);
 				notifyListeners(proj, Type.ADDED);
 			}
@@ -308,7 +302,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 					System.out.println("Project '" + project.getName()
 							+ "' added");
 				}
-				BeansProject proj = new BeansProject(model, project);
+				BeansProject proj = new BeansProject(BeansModel.this, project);
 				projects.put(project, proj);
 				notifyListeners(proj, Type.ADDED);
 			}
@@ -320,7 +314,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 					System.out.println("Project '" + project.getName()
 							+ "' opened");
 				}
-				BeansProject proj = new BeansProject(model, project);
+				BeansProject proj = new BeansProject(BeansModel.this, project);
 				projects.put(project, proj);
 				notifyListeners(proj, Type.ADDED);
 			}
@@ -386,7 +380,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			} else {
 				// Reset corresponding BeansConfig BEFORE the project builder
 				// starts validating this BeansConfig
-				config.reset();
+				config.reload();
 			}
 		}
 
@@ -425,12 +419,12 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 					System.out.println("Bean class '" + className
 							+ "' changed");
 				}
-				BeansConfigValidator validator = new BeansConfigValidator();
+				IProgressMonitor monitor = new NullProgressMonitor();
 				for (IBeansConfig config : configs) {
-
-					// Delete all problem markers created by Spring IDE
-					ModelUtils.deleteProblemMarkers(config);
-					validator.validate(config, new NullProgressMonitor());
+					IFile file = BeansModelUtils.getFile(config);
+					if (file != null) {
+						BeansProjectValidator.validate(file, monitor);
+					}
 				}
 			}
 		}

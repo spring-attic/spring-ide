@@ -21,7 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.IMethod;
@@ -60,11 +62,11 @@ import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Validates a beans config file.
+ * Validates a given {@link IBeansConfig} file.
  * 
  * @author Torsten Juergeleit
  */
-public class BeansConfigValidator {
+public class BeansConfigValidator implements IWorkspaceRunnable {
 
 	private static final String PLACEHOLDER_PREFIX = "${";
 	private static final String PLACEHOLDER_SUFFIX = "}";
@@ -80,10 +82,33 @@ public class BeansConfigValidator {
 			+ "/model/validator/debug";
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
 
+	private IFile file;
 	private IProgressMonitor monitor;
 
-	public void validate(IBeansConfig config, IProgressMonitor monitor) {
+	public BeansConfigValidator(IFile file) {
+		this.file = file;
+	}
+
+	public void run(IProgressMonitor monitor) {
 		this.monitor = monitor;
+		if (file == null) {
+			return;
+		}
+		monitor.beginTask(BeansCorePlugin.getFormattedMessage(
+				"BeansProjectValidator.validateFile", file.getFullPath()
+						.toString()), IProgressMonitor.UNKNOWN);
+
+		IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
+		if (config == null) {
+			return;
+		}
+	
+		// At first delete all problem markers
+		BeansModelUtils.deleteProblemMarkers(config);
+		monitor.worked(1);
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
 
 		// Validate the given config within all config sets which contain the
 		// given config

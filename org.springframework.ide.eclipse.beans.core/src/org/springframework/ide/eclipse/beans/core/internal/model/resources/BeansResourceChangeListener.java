@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,12 +39,12 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
 /**
- * Implementation of <code>IResourceChangeListener</code> which detects
- * modifications to Spring projects (add/remove Spring beans nature, open/close
- * and delete) and Spring beans configurations (change and delete).
+ * Implementation of {@link IResourceChangeListener} which detects modifications
+ * to Spring projects (add/remove Spring beans nature, open/close and delete)
+ * and Spring beans configurations (change and delete).
  * <p>
- * An implementation of {@link IBeansResourceChangeEvents} has to be
- * provided. Here are callbacks defined for the different events.
+ * An implementation of {@link IBeansResourceChangeEvents} has to be provided.
+ * Here are callbacks defined for the different events.
  * 
  * @author Torsten Juergeleit
  */

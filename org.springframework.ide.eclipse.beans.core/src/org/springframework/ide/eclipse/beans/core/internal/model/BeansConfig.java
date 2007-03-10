@@ -112,6 +112,9 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	/** This bean's config file */
 	private IFile file;
 
+	/** This bean config file's timestamp of last modification */
+	private long modificationTimestamp;
+
 	/** Indicator for a beans configuration embedded in a ZIP file */
 	private boolean isArchived;
 
@@ -221,22 +224,26 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	}
 
 	/**
-	 * Sets internal list of <code>IBean</code>s to <code>null</code>. Any
-	 * further access to the data of this instance of <code>IBeansConfig</code>
-	 * leads to reloading of this beans config file.
+	 * Sets internal list of {@link IBean}s to <code>null</code>. Any
+	 * further access to the data of this instance of {@link IBeansConfig} leads
+	 * to reloading of the corresponding beans config file.
 	 */
-	public void reset() {
-		defaults = null;
-		imports = null;
-		aliases = null;
-		beans = null;
-		beanClassesMap = null;
+	public void reload() {
+		if (file != null && file.isAccessible()
+				&& modificationTimestamp < file.getModificationStamp()) {
+			modificationTimestamp = IResource.NULL_STAMP;
+			defaults = null;
+			imports = null;
+			aliases = null;
+			beans = null;
+			beanClassesMap = null;
 
-		// Reset all config sets which contain this config
-		for (IBeansConfigSet configSet : ((IBeansProject) getElementParent())
-				.getConfigSets()) {
-			if (configSet.hasConfig(getElementName())) {
-				((BeansConfigSet) configSet).reset();
+			// Reset all config sets which contain this config
+			for (IBeansConfigSet configSet
+					: ((IBeansProject) getElementParent()) .getConfigSets()) {
+				if (configSet.hasConfig(getElementName())) {
+					((BeansConfigSet) configSet).reset();
+				}
 			}
 		}
 	}
@@ -463,9 +470,12 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		}
 		file = (IFile) container.findMember(name);
 		if (file == null || !file.isAccessible()) {
+			modificationTimestamp = IResource.NULL_STAMP;
 			String msg = "Beans config file '" + fullPath + "' not accessible";
 			BeansModelUtils.createProblemMarker(this, msg,
 					IMarker.SEVERITY_ERROR, -1, ErrorCode.PARSING_FAILED);
+		} else {
+			modificationTimestamp = file.getModificationStamp();
 		}
 	}
 
@@ -531,6 +541,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			components = new LinkedHashSet<IBeansComponent>();
 			beans = new LinkedHashMap<String, IBean>();
 			if (file != null && file.isAccessible()) {
+				modificationTimestamp = file.getModificationStamp();
 				Resource resource;
 				if (isArchived) {
 					resource = new StorageResource(new ZipEntryStorage(file

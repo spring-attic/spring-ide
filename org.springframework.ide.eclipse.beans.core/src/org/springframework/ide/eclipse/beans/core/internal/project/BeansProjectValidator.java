@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,15 @@
 package org.springframework.ide.eclipse.beans.core.internal.project;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigValidator;
-import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.core.MarkerUtils;
-import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 
 /**
@@ -35,24 +35,19 @@ public class BeansProjectValidator implements IProjectBuilder {
 
 	public void build(IFile file, IProgressMonitor monitor) {
 		if (BeansCoreUtils.isBeansConfig(file)) {
-			monitor.beginTask(BeansCorePlugin.getFormattedMessage(
-					"BeansProjectValidator.validateFile", file.getFullPath()
-							.toString()), IProgressMonitor.UNKNOWN);
-			// Delete all problem markers created by Spring IDE
-			MarkerUtils.deleteMarkers(file, SpringCore.MARKER_ID);
-			monitor.worked(1);
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
+			validate(file, monitor);
+		}
+	}
 
-			// Validate the modified config file
-			IBeansProject project = BeansCorePlugin.getModel().getProject(
-					file.getProject());
-			BeansConfig config = (BeansConfig) project.getConfig(file);
-
-			BeansConfigValidator validator = new BeansConfigValidator();
-			validator.validate(config, monitor);
-			monitor.done();
+	public static void validate(IFile file, IProgressMonitor monitor) {
+		IWorkspaceRunnable validator = new BeansConfigValidator(file);
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		ISchedulingRule rule = workspace.getRuleFactory().markerRule(file);
+		try {
+			workspace.run(validator, rule, IWorkspace.AVOID_UPDATE, monitor);
+		}
+		catch (CoreException e) {
+			BeansCorePlugin.log("Error while running the validator", e);
 		}
 	}
 }
