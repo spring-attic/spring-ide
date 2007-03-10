@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <plugin
-   id="org.springframework.doc"
+   id="org.springframework.ide.eclipse.doc"
    name="%pluginName"
-   version="2.0.2"
+   version="2.0.0.qualifier"
    provider-name="%providerName">
 
    <runtime>
@@ -13,7 +13,7 @@
          point="org.eclipse.help.toc">
       <toc
             file="toc.xml"
-            primary="false">
+            primary="true">
       </toc>
    </extension>
 

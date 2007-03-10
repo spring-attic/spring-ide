@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<toc label="Spring Framework Documentation">
+	<topic label="The Spring Framework - Reference Documentation"
+		href="../org.springframework.doc/index.html">
+		<link toc="../org.springframework.doc/toc.xml" />
+	</topic>
+	<topic label="Spring Web Flow - Reference Documentation"
+		href="../org.springframework.webflow.doc/index.html">
+		<link toc="../org.springframework.webflow.doc/toc.xml" />
+	</topic>
+	<!-- insert link to Spring IDE Wiki -->
+	<topic label="Spring IDE - Documentation"
+		href="http://springide.org">
+	</topic>
+</toc>
