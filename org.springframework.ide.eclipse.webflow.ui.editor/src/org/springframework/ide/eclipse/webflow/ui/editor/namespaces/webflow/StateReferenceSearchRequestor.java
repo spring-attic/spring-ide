@@ -28,17 +28,35 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCo
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.w3c.dom.Node;
 
+/**
+ * 
+ */
 @SuppressWarnings("restriction")
 public class StateReferenceSearchRequestor {
 
+	/**
+	 * 
+	 */
 	public static final int RELEVANCE = 10;
 
+	/**
+	 * 
+	 */
 	protected Set<String> beans;
 
+	/**
+	 * 
+	 */
 	protected ContentAssistRequest request;
 	
+	/**
+	 * 
+	 */
 	private static final Set<String> VALID_NODE_NAMES;
 	
+	/**
+	 * 
+	 */
 	private static final ILabelProvider labelProvider = new WebflowOutlineLabelProvider();
 	
 	static {
@@ -51,11 +69,23 @@ public class StateReferenceSearchRequestor {
 		VALID_NODE_NAMES.add("inline-flow");
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param request 
+	 */
 	public StateReferenceSearchRequestor(ContentAssistRequest request) {
 		this.request = request;
 		this.beans = new HashSet<String>();
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param file 
+	 * @param node 
+	 * @param prefix 
+	 */
 	public void acceptSearchMatch(Node node, IFile file, String prefix) {
 		String id = BeansEditorUtils.getAttribute(node, "id");
 		if (!beans.contains(id) && node != null && id != null && id.toLowerCase().startsWith(prefix.toLowerCase()) && VALID_NODE_NAMES.contains(node.getLocalName())) {

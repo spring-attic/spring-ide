@@ -1,6 +1,7 @@
 /*
  * Copyright 2004 DekaBank Deutsche Girozentrale. All rights reserved.
  */
+
 package org.springframework.ide.eclipse.aop.ui.navigator.model;
 
 import java.util.ArrayList;

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces.webflow;
 
 import java.util.Iterator;
@@ -45,6 +46,10 @@ public class WebflowConfigHyperLinkDetector extends AbstractHyperLinkDetector im
 
 	/**
 	 * Returns <code>true</code> if given attribute is openable.
+	 * 
+	 * @param attr 
+	 * 
+	 * @return 
 	 */
 	@Override
 	protected boolean isLinkableAttr(Attr attr) {
@@ -53,6 +58,9 @@ public class WebflowConfigHyperLinkDetector extends AbstractHyperLinkDetector im
 				|| "ref".equals(attrName) || "type".equals(attrName));
 	}
 
+	/* (non-Javadoc)
+	 * @see org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperLinkDetector#createHyperlink(java.lang.String, java.lang.String, org.w3c.dom.Node, org.eclipse.jface.text.IRegion, org.eclipse.jface.text.IDocument, org.w3c.dom.Node, org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
+	 */
 	@Override
 	protected IHyperlink createHyperlink(String name, String target, Node parentNode, IRegion hyperlinkRegion,
 			IDocument document, Node node, ITextViewer textViewer, IRegion cursor) {

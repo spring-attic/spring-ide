@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow;
 
 import java.util.List;
@@ -33,10 +34,19 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionU
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+/**
+ * 
+ */
 @SuppressWarnings("restriction")
 public class WebflowContentAssistProcessor extends
 		AbstractContentAssistProcessor {
 
+	/**
+	 * 
+	 * 
+	 * @param prefix 
+	 * @param request 
+	 */
 	private void addBeanReferenceProposals(ContentAssistRequest request,
 			String prefix) {
 		if (prefix == null) {
@@ -53,6 +63,13 @@ public class WebflowContentAssistProcessor extends
 		}
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param node 
+	 * @param prefix 
+	 * @param request 
+	 */
 	private void addStateReferenceProposals(ContentAssistRequest request,
 			String prefix, Node node) {
 		if (prefix == null) {
@@ -71,11 +88,24 @@ public class WebflowContentAssistProcessor extends
 		}
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param prefix 
+	 * @param request 
+	 */
 	private void addClassAttributeValueProposals(ContentAssistRequest request,
 			String prefix) {
 		BeansJavaCompletionUtils.addClassValueProposals(request, prefix);
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param type 
+	 * @param prefix 
+	 * @param request 
+	 */
 	private void addActionMethodAttributeValueProposals(
 			ContentAssistRequest request, String prefix, IType type) {
 		try {
@@ -94,6 +124,13 @@ public class WebflowContentAssistProcessor extends
 		}
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param type 
+	 * @param prefix 
+	 * @param request 
+	 */
 	private void addMethodAttributeValueProposals(ContentAssistRequest request,
 			String prefix, IType type) {
 		try {
@@ -112,12 +149,26 @@ public class WebflowContentAssistProcessor extends
 		}
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param prefix 
+	 * @param request 
+	 */
 	private void addExceptionTypesAttributeValueProposals(
 			ContentAssistRequest request, final String prefix) {
 		BeansJavaCompletionUtils.addTypeHierachyAttributeValueProposals(
 				request, prefix, Throwable.class.getName());
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param attributeName 
+	 * @param node 
+	 * @param request 
+	 * @param matchString 
+	 */
 	@Override
 	protected void computeAttributeValueProposals(ContentAssistRequest request,
 			IDOMNode node, String matchString, String attributeName) {
@@ -229,11 +280,26 @@ public class WebflowContentAssistProcessor extends
 		}
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param node 
+	 * @param request 
+	 */
 	@Override
 	protected void computeTagInsertionProposals(ContentAssistRequest request,
 			IDOMNode node) {
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param namespace 
+	 * @param attributeNode 
+	 * @param prefix 
+	 * @param namespacePrefix 
+	 * @param request 
+	 */
 	@Override
 	protected void computeAttributeNameProposals(ContentAssistRequest request,
 			String prefix, String namespace, String namespacePrefix,

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow;
 
 import java.util.HashMap;
@@ -22,9 +23,15 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider;
 import org.w3c.dom.Node;
 
+/**
+ * 
+ */
 @SuppressWarnings("restriction")
 public class WebflowOutlineLabelProvider extends JFaceNodeLabelProvider {
 
+	/**
+	 * 
+	 */
 	private static final Map<String, Image> IMAGES;
 
 	static {
@@ -99,6 +106,13 @@ public class WebflowOutlineLabelProvider extends JFaceNodeLabelProvider {
 				.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW));
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param object 
+	 * 
+	 * @return 
+	 */
 	@Override
 	public Image getImage(Object object) {
 		Node node = (Node) object;
@@ -112,6 +126,13 @@ public class WebflowOutlineLabelProvider extends JFaceNodeLabelProvider {
 		}
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param o 
+	 * 
+	 * @return 
+	 */
 	@Override
 	public String getText(Object o) {
 		// Node node = (Node) o;

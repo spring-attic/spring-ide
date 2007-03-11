@@ -72,20 +72,80 @@ import org.springframework.util.StringUtils;
 
 /**
  * Handles creation and modification of the {@link AopReferenceModel}.
- *
+ * 
  * @author Christian Dupuis
  * @since 2.0
- *
+ * 
  */
 @SuppressWarnings("restriction")
 public class AopReferenceModelBuilder {
+	
+	/**
+	 * Internal {@link Job} extension that triggers the AOP building process
+	 */
+	private static final class BuildJob extends Job {
 
-	public static void buildAopModel(IProject project, Set<IFile> filesToBuild) {
-		if (filesToBuild.size() > 0) {
-			getBuildJob(project, filesToBuild).schedule();
+		private final IProject project;
+
+		private final Set<IFile> filesToBuild;
+
+		private BuildJob(String name, IProject project, Set<IFile> filesToBuild) {
+			super(name);
+			this.project = project;
+			this.filesToBuild = filesToBuild;
+		}
+		
+		@Override
+		public boolean belongsTo(Object family) {
+			return ResourcesPlugin.FAMILY_MANUAL_BUILD == family;
+		}
+
+		public boolean isCoveredBy(BuildJob other) {
+			if (other.project == null) {
+				return true;
+			}
+			return project != null && project.equals(other.project);
+		}
+
+		@Override
+		@SuppressWarnings("deprecation")
+		protected IStatus run(IProgressMonitor monitor) {
+			synchronized (getClass()) {
+				if (monitor.isCanceled()) {
+					return Status.CANCEL_STATUS;
+				}
+				Job[] buildJobs = Job.getJobManager().find(
+						ResourcesPlugin.FAMILY_MANUAL_BUILD);
+				for (Job curr : buildJobs) {
+					if (curr != this && curr instanceof BuildJob) {
+						BuildJob job = (BuildJob) curr;
+						if (job.isCoveredBy(this)) {
+							curr.cancel(); // cancel all other build jobs of
+											// our kind
+						}
+					}
+				}
+			}
+			try {
+				monitor.beginTask("Building Spring AOP reference model",
+						filesToBuild.size());
+				buildAopModel(monitor, filesToBuild);
+			}
+			catch (OperationCanceledException e) {
+				return Status.CANCEL_STATUS;
+			}
+			finally {
+				monitor.done();
+			}
+			return Status.OK_STATUS;
 		}
 	}
-
+	
+	/**
+	 * Handles the creation of the AOP reference model
+	 * @param monitor the progressMonitor
+	 * @param filesToBuild the files to build the model from
+	 */
 	protected static void buildAopModel(IProgressMonitor monitor,
 			Set<IFile> filesToBuild) {
 		AopLog.logStart("Processing took");
@@ -135,111 +195,22 @@ public class AopReferenceModelBuilder {
 		// update images and text decoractions
 		Activator.getModel().fireModelChanged();
 	}
-
-	@SuppressWarnings("deprecation")
-	private static IAopProject buildAopReferencesFromFile(IFile currentFile) {
-		IAopProject aopProject = null;
-		IBeansProject project = BeansCorePlugin.getModel().getProject(
-				currentFile.getProject());
-
-		ILock lock = Job.getJobManager().newLock();
-		lock.acquire();
-
-		if (project != null) {
-			BeansConfig config = (BeansConfig) project.getConfig(currentFile);
-			IJavaProject javaProject = AopReferenceModelUtils
-					.getJavaProject(config);
-
-			if (javaProject != null) {
-				aopProject = ((AopReferenceModel) Activator.getModel())
-						.getProjectWithInitialization(AopReferenceModelUtils
-								.getJavaProject(config.getElementResource()
-										.getProject()));
-
-				aopProject.clearReferencesForResource(currentFile);
-
-				ClassLoader classLoader = Thread.currentThread()
-						.getContextClassLoader();
-				ClassLoader weavingClassLoader = SpringCoreUtils
-						.getClassLoader(javaProject, false);
-				Thread.currentThread()
-						.setContextClassLoader(weavingClassLoader);
-				AopLog.log(AopLog.BUILDER_CLASSPATH, "AOP builder classpath: "
-						+ StringUtils
-								.arrayToDelimitedString(
-										((URLClassLoader) weavingClassLoader)
-												.getURLs(), ";"));
-
-				IStructuredModel model = null;
-				List<IAspectDefinition> aspectInfos = null;
-				try {
-					try {
-						model = StructuredModelManager.getModelManager()
-								.getModelForRead(currentFile);
-						IDOMDocument document = ((DOMModelImpl) model)
-								.getDocument();
-
-						aspectInfos = AspectDefinitionBuilder
-								.buildAspectDefinitions(document, currentFile);
-					}
-					finally {
-						if (model != null) {
-							model.releaseFromRead();
-						}
-					}
-
-					for (IAspectDefinition info : aspectInfos) {
-
-						// build model for config
-						buildAopReferencesFromAspectDefinition(config, info);
-
-						// check config sets as well
-						Set<IBeansConfigSet> configSets = project
-								.getConfigSets();
-						for (IBeansConfigSet configSet : configSets) {
-							if (configSet.getConfigs().contains(config)) {
-								Set<IBeansConfig> configs = configSet
-										.getConfigs();
-								for (IBeansConfig configSetConfig : configs) {
-									if (!config.equals(configSetConfig)) {
-										buildAopReferencesFromAspectDefinition(
-												configSetConfig, info);
-									}
-								}
-							}
-						}
-					}
-				}
-				catch (IOException e) {
-					Activator.log(e);
-				}
-				catch (CoreException e) {
-					Activator.log(e);
-				}
-				finally {
-					Thread.currentThread().setContextClassLoader(classLoader);
-					lock.release();
-				}
-			}
-		}
-		return aopProject;
-	}
-
-	private static void buildAopReferencesFromAspectDefinition(
-			IBeansConfig config, IAspectDefinition info) {
-
-		IResource file = config.getElementResource();
-		IAopProject aopProject = ((AopReferenceModel) Activator.getModel())
-				.getProjectWithInitialization(AopReferenceModelUtils
-						.getJavaProject(config.getElementResource()
-								.getProject()));
-
-		Set<IBean> beans = config.getBeans();
-		for (IBean bean : beans) {
-			buildAopReferencesForBean(bean, config, info, file, aopProject);
+	
+	/**
+	 * Starts the AOP reference model creation by scheduling {@link BuildJob}.
+	 * @param project the project to build for
+	 * @param filesToBuild the files to build the reference model from
+	 */
+	public static void buildAopModel(IProject project, Set<IFile> filesToBuild) {
+		if (filesToBuild.size() > 0) {
+			getBuildJob(project, filesToBuild).schedule();
 		}
 	}
 
+	/**
+	 * Builds AOP refererences for given {@link IBean} instances. Matches the given
+	 * Aspect definition against the {@link IBean}.
+	 */
 	private static void buildAopReferencesForBean(IBean bean,
 			IModelElement context, IAspectDefinition info, IResource file,
 			IAopProject aopProject) {
@@ -376,6 +347,125 @@ public class AopReferenceModelBuilder {
 
 	}
 
+	private static void buildAopReferencesFromAspectDefinition(
+			IBeansConfig config, IAspectDefinition info) {
+
+		IResource file = config.getElementResource();
+		IAopProject aopProject = ((AopReferenceModel) Activator.getModel())
+				.getProjectWithInitialization(AopReferenceModelUtils
+						.getJavaProject(config.getElementResource()
+								.getProject()));
+
+		Set<IBean> beans = config.getBeans();
+		for (IBean bean : beans) {
+			buildAopReferencesForBean(bean, config, info, file, aopProject);
+		}
+	}
+
+	private static void buildAopReferencesFromBeansConfigSets(
+			IBeansProject project, BeansConfig config, IAspectDefinition info) {
+		// check config sets as well
+		Set<IBeansConfigSet> configSets = project.getConfigSets();
+		for (IBeansConfigSet configSet : configSets) {
+			if (configSet.getConfigs().contains(config)) {
+				Set<IBeansConfig> configs = configSet.getConfigs();
+				for (IBeansConfig configSetConfig : configs) {
+					if (!config.equals(configSetConfig)) {
+						buildAopReferencesFromAspectDefinition(configSetConfig,
+								info);
+					}
+				}
+			}
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	private static IAopProject buildAopReferencesFromFile(IFile currentFile) {
+		IAopProject aopProject = null;
+		IBeansProject project = BeansCorePlugin.getModel().getProject(
+				currentFile.getProject());
+
+		ILock lock = Job.getJobManager().newLock();
+		lock.acquire();
+
+		if (project != null) {
+			BeansConfig config = (BeansConfig) project.getConfig(currentFile);
+			IJavaProject javaProject = AopReferenceModelUtils
+					.getJavaProject(config);
+
+			if (javaProject != null) {
+				aopProject = ((AopReferenceModel) Activator.getModel())
+						.getProjectWithInitialization(AopReferenceModelUtils
+								.getJavaProject(config.getElementResource()
+										.getProject()));
+
+				aopProject.clearReferencesForResource(currentFile);
+
+				ClassLoader classLoader = Thread.currentThread()
+						.getContextClassLoader();
+				ClassLoader weavingClassLoader = SpringCoreUtils
+						.getClassLoader(javaProject, false);
+				Thread.currentThread()
+						.setContextClassLoader(weavingClassLoader);
+				AopLog.log(AopLog.BUILDER_CLASSPATH, "AOP builder classpath: "
+						+ StringUtils
+								.arrayToDelimitedString(
+										((URLClassLoader) weavingClassLoader)
+												.getURLs(), ";"));
+
+				IStructuredModel model = null;
+				List<IAspectDefinition> aspectInfos = null;
+				try {
+					try {
+						model = StructuredModelManager.getModelManager()
+								.getModelForRead(currentFile);
+						IDOMDocument document = ((DOMModelImpl) model)
+								.getDocument();
+
+						aspectInfos = AspectDefinitionBuilder
+								.buildAspectDefinitions(document, currentFile);
+					}
+					finally {
+						if (model != null) {
+							model.releaseFromRead();
+						}
+					}
+
+					for (IAspectDefinition info : aspectInfos) {
+
+						// build model for config
+						buildAopReferencesFromAspectDefinition(config, info);
+
+						// build model for config sets
+						buildAopReferencesFromBeansConfigSets(project, config,
+								info);
+					}
+				}
+				catch (IOException e) {
+					Activator.log(e);
+				}
+				catch (CoreException e) {
+					Activator.log(e);
+				}
+				finally {
+					Thread.currentThread().setContextClassLoader(classLoader);
+					lock.release();
+				}
+			}
+		}
+		return aopProject;
+	}
+
+	public static Job getBuildJob(final IProject project,
+			final Set<IFile> filesToBuild) {
+		Job buildJob = new BuildJob("Building Spring AOP reference model",
+				project, filesToBuild);
+		buildJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory()
+				.buildRule());
+		buildJob.setUser(false);
+		return buildJob;
+	}
+
 	private static void handleException(Throwable t, IAspectDefinition info,
 			IBean bean, IResource file) {
 		if (t instanceof NoClassDefFoundError
@@ -420,73 +510,6 @@ public class AopReferenceModelBuilder {
 					.getMessage(), IMarker.SEVERITY_WARNING, info
 					.getAspectLineNumber(),
 					AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
-		}
-	}
-
-	public static Job getBuildJob(final IProject project,
-			final Set<IFile> filesToBuild) {
-		Job buildJob = new BuildJob("Building Spring AOP reference model",
-				project, filesToBuild);
-		buildJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory()
-				.buildRule());
-		buildJob.setUser(false);
-		return buildJob;
-	}
-
-	private static final class BuildJob extends Job {
-
-		private final IProject project;
-
-		private final Set<IFile> filesToBuild;
-
-		private BuildJob(String name, IProject project, Set<IFile> filesToBuild) {
-			super(name);
-			this.project = project;
-			this.filesToBuild = filesToBuild;
-		}
-
-		public boolean isCoveredBy(BuildJob other) {
-			if (other.project == null) {
-				return true;
-			}
-			return project != null && project.equals(other.project);
-		}
-
-		@Override
-		@SuppressWarnings("deprecation")
-		protected IStatus run(IProgressMonitor monitor) {
-			synchronized (getClass()) {
-				if (monitor.isCanceled()) {
-					return Status.CANCEL_STATUS;
-				}
-				Job[] buildJobs = Job.getJobManager().find(
-						ResourcesPlugin.FAMILY_MANUAL_BUILD);
-				for (Job curr : buildJobs) {
-					if (curr != this && curr instanceof BuildJob) {
-						BuildJob job = (BuildJob) curr;
-						if (job.isCoveredBy(this)) {
-							curr.cancel(); // cancel all other build jobs of our kind
-						}
-					}
-				}
-			}
-			try {
-				monitor.beginTask("Building Spring AOP reference model",
-						filesToBuild.size());
-				buildAopModel(monitor, filesToBuild);
-			}
-			catch (OperationCanceledException e) {
-				return Status.CANCEL_STATUS;
-			}
-			finally {
-				monitor.done();
-			}
-			return Status.OK_STATUS;
-		}
-
-		@Override
-		public boolean belongsTo(Object family) {
-			return ResourcesPlugin.FAMILY_MANUAL_BUILD == family;
 		}
 	}
 }

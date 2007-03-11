@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow;
 
 import java.util.Set;
@@ -26,18 +27,34 @@ import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.MethodSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PublicMethodSearchRequestor;
 
+/**
+ * 
+ */
 @SuppressWarnings("restriction")
 public class BeanMethodSearchRequestor extends PublicMethodSearchRequestor {
 
+	/**
+	 * 
+	 */
 	public static final int PROPERTY_RELEVANCE = 5;
 
+	/**
+	 * 
+	 * 
+	 * @param request 
+	 */
 	public BeanMethodSearchRequestor(ContentAssistRequest request) {
 		super(request);
 	}
 
 	/**
 	 * Check methods for the following signatur public Event
-	 * execute(RequestContext context) throws Exception;
+	 * execute(RequestContext context) throws Exception;.
+	 * 
+	 * @param prefix 
+	 * @param method 
+	 * 
+	 * @throws CoreException 
 	 */
 	public void acceptSearchMatch(IMethod method, String prefix)
 			throws CoreException {

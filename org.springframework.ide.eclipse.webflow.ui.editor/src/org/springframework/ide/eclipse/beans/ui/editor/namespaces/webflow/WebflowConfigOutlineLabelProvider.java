@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces.webflow;
 
 import org.eclipse.swt.graphics.Image;
@@ -22,9 +23,19 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
 
+/**
+ * 
+ */
 @SuppressWarnings("restriction")
 public class WebflowConfigOutlineLabelProvider extends JFaceNodeLabelProvider {
 
+	/**
+	 * 
+	 * 
+	 * @param object 
+	 * 
+	 * @return 
+	 */
 	@Override
 	public Image getImage(Object object) {
 		Node node = (Node) object;
@@ -35,6 +46,13 @@ public class WebflowConfigOutlineLabelProvider extends JFaceNodeLabelProvider {
 		return null;
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param o 
+	 * 
+	 * @return 
+	 */
 	@Override
 	public String getText(Object o) {
 

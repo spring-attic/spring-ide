@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces.webflow;
 
 import java.util.List;
@@ -28,9 +29,20 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionUtils;
 import org.w3c.dom.Node;
 
+/**
+ * 
+ */
 @SuppressWarnings("restriction")
 public class WebflowConfigContentAssistProcessor extends AbstractContentAssistProcessor {
 
+	/**
+	 * 
+	 * 
+	 * @param node 
+	 * @param prefix 
+	 * @param showExternal 
+	 * @param request 
+	 */
 	private void addBeanReferenceProposals(ContentAssistRequest request, String prefix, Node node, boolean showExternal) {
 		if (prefix == null) {
 			prefix = "";
@@ -55,15 +67,38 @@ public class WebflowConfigContentAssistProcessor extends AbstractContentAssistPr
 		}
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param prefix 
+	 * @param request 
+	 */
 	private void addClassAttributeValueProposals(ContentAssistRequest request, String prefix) {
 		BeansJavaCompletionUtils.addClassValueProposals(request, prefix);
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param namespace 
+	 * @param attributeNode 
+	 * @param prefix 
+	 * @param namespacePrefix 
+	 * @param request 
+	 */
 	@Override
 	protected void computeAttributeNameProposals(ContentAssistRequest request, String prefix, String namespace,
 			String namespacePrefix, Node attributeNode) {
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param attributeName 
+	 * @param node 
+	 * @param request 
+	 * @param matchString 
+	 */
 	@Override
 	protected void computeAttributeValueProposals(ContentAssistRequest request, IDOMNode node, String matchString,
 			String attributeName) {
@@ -95,6 +130,12 @@ public class WebflowConfigContentAssistProcessor extends AbstractContentAssistPr
 		}
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param node 
+	 * @param request 
+	 */
 	@Override
 	protected void computeTagInsertionProposals(ContentAssistRequest request, IDOMNode node) {
 	}
