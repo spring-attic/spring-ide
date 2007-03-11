@@ -25,6 +25,7 @@ import org.eclipse.ui.navigator.IDescriptionProvider;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
+import org.springframework.ide.eclipse.beans.ui.BeansUILabels;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
@@ -39,6 +40,7 @@ import org.springframework.ide.eclipse.core.model.ModelUtils;
 public class DefaultNamespaceLabelProvider extends LabelProvider implements
 		ITreePathLabelProvider, IDescriptionProvider {
 
+	@Override
 	public Image getImage(Object element) {
 		if (element instanceof ISourceModelElement) {
 			return getImage((ISourceModelElement) element, null);
@@ -46,6 +48,7 @@ public class DefaultNamespaceLabelProvider extends LabelProvider implements
 		return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_SPRING);
 	}
 
+	@Override
 	public String getText(Object element) {
 		if (element instanceof ISourceModelElement) {
 			return getElementLabel((ISourceModelElement) element, 0);
@@ -70,8 +73,8 @@ public class DefaultNamespaceLabelProvider extends LabelProvider implements
 	public String getDescription(Object element) {
 		if (element instanceof ISourceModelElement) {
 			return getElementLabel((ISourceModelElement) element,
-					DefaultNamespaceLabels.APPEND_PATH
-							| DefaultNamespaceLabels.DESCRIPTION);
+					BeansUILabels.APPEND_PATH
+							| BeansUILabels.DESCRIPTION);
 		}
 		return null;
 	}

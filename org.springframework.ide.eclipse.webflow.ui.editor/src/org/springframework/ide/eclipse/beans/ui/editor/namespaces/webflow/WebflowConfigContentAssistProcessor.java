@@ -36,7 +36,7 @@ public class WebflowConfigContentAssistProcessor extends AbstractContentAssistPr
 			prefix = "";
 		}
 
-		IFile file = (IFile) BeansEditorUtils.getResource(request);
+		IFile file = BeansEditorUtils.getResource(request);
 		if (node.getOwnerDocument() != null) {
 			BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(request, BeansJavaCompletionUtils
 					.getPropertyTypes(node, file.getProject()));

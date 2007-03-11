@@ -39,6 +39,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionListener;
@@ -208,7 +209,7 @@ public final class SpringUIUtils {
 				dialog.create();
 				dialog.setMessage(targetNode.getLabelText());
 				dialog.getShell().setText(title);
-				result[0] = (dialog.open() == PreferenceDialog.OK);
+				result[0] = (dialog.open() == Window.OK);
 			}
 		});
 		return result[0];		

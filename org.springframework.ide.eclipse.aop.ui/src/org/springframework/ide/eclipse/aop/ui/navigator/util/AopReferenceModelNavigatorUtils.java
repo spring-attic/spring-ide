@@ -284,9 +284,9 @@ public class AopReferenceModelNavigatorUtils {
 					// this is if the selection in the editor
 					// is outside the {} of the class or aspect
 					IJavaElement[] children = unit.getChildren();
-					for (int i = 0; i < children.length; i++) {
-						if (children[i] instanceof SourceType) {
-							return children[i];
+					for (IJavaElement element : children) {
+						if (element instanceof SourceType) {
+							return element;
 						}
 					}
 				}
@@ -312,8 +312,7 @@ public class AopReferenceModelNavigatorUtils {
 								.findMarkers(
 										IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER,
 										false, IResource.DEPTH_INFINITE);
-						for (int i = 0; i < javaModelMarkers.length; i++) {
-							IMarker marker = javaModelMarkers[i];
+						for (IMarker marker : javaModelMarkers) {
 							if (marker.getResource().equals(file)) {
 								// there is an error in the file, therefore
 								// we don't want to return any xrefs

@@ -40,6 +40,7 @@ public class AopReferenceModelNavigatorLabelProvider extends
 		return null;
 	}
 
+	@Override
 	public Image getImage(Object element) {
 		if (element instanceof IReferenceNode) {
 			return ((IReferenceNode) element).getImage();
@@ -47,6 +48,7 @@ public class AopReferenceModelNavigatorLabelProvider extends
 		return super.getImage(element);
 	}
 
+	@Override
 	public String getText(Object element) {
 		if (element instanceof IReferenceNode) {
 			return ((IReferenceNode) element).getText();

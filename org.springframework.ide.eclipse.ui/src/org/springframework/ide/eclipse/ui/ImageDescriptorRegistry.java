@@ -68,7 +68,7 @@ public class ImageDescriptorRegistry {
 		if (descriptor == null) {
 			descriptor = ImageDescriptor.getMissingImageDescriptor();
 		}
-		Image result = (Image) registry.get(descriptor);
+		Image result = registry.get(descriptor);
 		if (result != null) {
 			return result;
 		}

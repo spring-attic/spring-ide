@@ -35,6 +35,7 @@ public class FactoryMethodSearchRequestor extends PublicMethodSearchRequestor {
 		super(request);
 	}
 
+	@Override
 	public void acceptSearchMatch(IMethod method) throws CoreException {
 		if (Flags.isPublic(method.getFlags())
 				&& !Flags.isInterface(method.getFlags()) && method.exists()

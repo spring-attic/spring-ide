@@ -34,6 +34,7 @@ import org.springframework.util.StringUtils;
 public class BeansMethodRenameRefactoringParticipant extends
 		AbstractRenameRefactoringParticipant {
 
+	@Override
 	protected boolean initialize(Object element) {
 		if (element instanceof IMethod) {
 			IMethod method = (IMethod) element;
@@ -50,6 +51,7 @@ public class BeansMethodRenameRefactoringParticipant extends
 		return false;
 	}
 
+	@Override
 	protected void addChange(CompositeChange result, IResource resource,
 			IProgressMonitor pm) throws CoreException {
 		if (resource.exists()) {
@@ -61,6 +63,7 @@ public class BeansMethodRenameRefactoringParticipant extends
 		}
 	}
 
+	@Override
 	protected String[] getNewNames() {
 		String[] result = new String[elements.size()];
 		for (int i = 0; i < elements.size(); i++) {
@@ -73,6 +76,7 @@ public class BeansMethodRenameRefactoringParticipant extends
 		return result;
 	}
 
+	@Override
 	public String getName() {
 		return "Rename properties referenced in Spring Bean definitions";
 	}

@@ -195,6 +195,7 @@ public class ZipEntryStorage implements IStorage, IAdaptable {
 		return null;
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -208,11 +209,13 @@ public class ZipEntryStorage implements IStorage, IAdaptable {
 		return ObjectUtils.nullSafeEquals(this.file, that.file);
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(fullName);
 		return 29 * hashCode + ObjectUtils.nullSafeHashCode(file);
 	}
 
+	@Override
 	public String toString() {
 		return "ZipEntryStorage[" + file.toString() + " - " + entryPath
 				+ "]";

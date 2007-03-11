@@ -47,7 +47,7 @@ public class LangContentAssistProcessor extends AbstractContentAssistProcessor {
 			prefix = "";
 		}
 
-		IFile file = (IFile) BeansEditorUtils.getResource(request);
+		IFile file = BeansEditorUtils.getResource(request);
 		if (node.getOwnerDocument() != null) {
 			BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(
 					request, BeansJavaCompletionUtils.getPropertyTypes(node,
@@ -74,6 +74,7 @@ public class LangContentAssistProcessor extends AbstractContentAssistProcessor {
 			Node attributeNode) {
 	}
 
+	@Override
 	protected void computeAttributeValueProposals(ContentAssistRequest request,
 			IDOMNode node, String matchString, String attributeName) {
 

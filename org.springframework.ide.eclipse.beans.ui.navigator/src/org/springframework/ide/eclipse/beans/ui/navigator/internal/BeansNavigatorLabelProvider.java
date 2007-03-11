@@ -24,6 +24,7 @@ import org.eclipse.ui.navigator.ICommonLabelProvider;
 import org.eclipse.ui.navigator.IDescriptionProvider;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.ui.BeansUILabels;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabels;
 import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
@@ -60,24 +61,24 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 		} else if (adaptedElement instanceof IModelElement) {
 			return BeansModelLabels
 					.getElementLabel((IModelElement) adaptedElement,
-							BeansModelLabels.APPEND_PATH
-									| BeansModelLabels.DESCRIPTION);
+							BeansUILabels.APPEND_PATH
+									| BeansUILabels.DESCRIPTION);
 		}
 		if (element instanceof IFile) {
 			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
 					(IFile) element);
 			if (config != null) {
 				return BeansModelLabels.getElementLabel(config,
-						BeansModelLabels.APPEND_PATH
-								| BeansModelLabels.DESCRIPTION);
+						BeansUILabels.APPEND_PATH
+								| BeansUILabels.DESCRIPTION);
 			}
 		} else if (element instanceof ZipEntryStorage) {
 			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
 					((ZipEntryStorage) element).getAbsoluteName());
 			if (config != null) {
 				return BeansModelLabels.getElementLabel(config,
-						BeansModelLabels.APPEND_PATH
-								| BeansModelLabels.DESCRIPTION);
+						BeansUILabels.APPEND_PATH
+								| BeansUILabels.DESCRIPTION);
 			}
 		}
 		return null;

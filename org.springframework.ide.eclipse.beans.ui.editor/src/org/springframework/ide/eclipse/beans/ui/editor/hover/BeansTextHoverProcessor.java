@@ -62,6 +62,7 @@ import org.w3c.dom.Node;
 public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 		ITextHover {
 
+	@Override
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 		String displayText = null;
 		int documentOffset = hoverRegion.getOffset();
@@ -79,6 +80,7 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 	 * if there is nothing to display.
 	 * 
 	 */
+	@Override
 	protected String computeHoverHelp(ITextViewer textViewer,
 			int documentPosition) {
 		String result = null;
@@ -255,8 +257,7 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 			if (type != null) {
 				try {
 					IMethod[] methods = type.getMethods();
-					for (int i = 0; i < methods.length; i++) {
-						IMethod method = methods[i];
+					for (IMethod method : methods) {
 						if (method.getElementName().equals(factoryMethod)
 								&& Flags.isStatic(method.getFlags())) {
 							BeansJavaDocUtils utils = new BeansJavaDocUtils(

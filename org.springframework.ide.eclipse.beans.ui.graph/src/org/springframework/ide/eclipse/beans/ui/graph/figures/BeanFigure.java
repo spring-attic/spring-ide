@@ -89,8 +89,7 @@ public class BeanFigure extends Figure {
 	protected ConstructorArgumentFigure createConstructorArguments(Bean bean) {
 		ConstructorArgument[] cargs = bean.getConstructorArguments();
 		ConstructorArgumentFigure figure = new ConstructorArgumentFigure();
-		for (int i = 0; i < cargs.length; i++) {
-			ConstructorArgument carg = cargs[i];
+		for (ConstructorArgument carg : cargs) {
 			String name = carg.getName();
 			Label label = new Label();
 
@@ -113,8 +112,7 @@ public class BeanFigure extends Figure {
 	protected PropertiesFigure createProperties(Bean bean) {
 		Property[] props = bean.getProperties();
 		PropertiesFigure properties = new PropertiesFigure();
-		for (int i = 0; i < props.length; i++) {
-			Property prop = props[i];
+		for (Property prop : props) {
 			Label label = new Label(prop.getName());
 			label.setIcon(BeansUIPlugin.getLabelProvider().getImage(
 					prop.getBeanProperty()));
@@ -143,12 +141,14 @@ public class BeanFigure extends Figure {
 		return toolTip.toString();
 	}
 
+	@Override
 	protected void paintFigure(Graphics graphics) {
 		if (isOpaque()) {
 			graphics.fillRectangle(getClientArea());
 		}
 	}
 
+	@Override
 	public String toString() {
 		Rectangle rect = getBounds();
 		return "BeanFigure '" + bean.getName() + "': x=" + rect.x + ", y=" +

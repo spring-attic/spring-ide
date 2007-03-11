@@ -50,6 +50,7 @@ public class BeansList extends AbstractBeansModelElement implements IBeansList {
 		return IBeansModelElementTypes.LIST_TYPE;
 	}
 
+	@Override
 	public IModelElement[] getElementChildren() {
 		List<IModelElement> children = new ArrayList<IModelElement>();
 		for (Object value : list) {
@@ -60,6 +61,7 @@ public class BeansList extends AbstractBeansModelElement implements IBeansList {
 		return children.toArray(new IModelElement[children.size()]);
 	}
 
+	@Override
 	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 
 		// First visit this bean
@@ -77,10 +79,11 @@ public class BeansList extends AbstractBeansModelElement implements IBeansList {
 		}
 	}
 
-	public List getList() {
+	public List<Object> getList() {
 		return list;
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -93,11 +96,13 @@ public class BeansList extends AbstractBeansModelElement implements IBeansList {
 		return super.equals(other);
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(list);
 		return getElementType() * hashCode + super.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer text = new StringBuffer(super.toString());
 		text.append(": list=");

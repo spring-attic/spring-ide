@@ -31,6 +31,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -97,6 +98,7 @@ public class ConfigFilesTab {
 	private Button addButton, removeButton;
 
 	private SelectionListener buttonListener = new SelectionAdapter() {
+		@Override
 		public void widgetSelected(SelectionEvent e) {
 			handleButtonPressed((Button) e.widget);
 		}
@@ -161,6 +163,7 @@ public class ConfigFilesTab {
 		data.widthHint = TABLE_WIDTH;
 		configsTable.setLayoutData(data);
 		configsTable.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleTableSelectionChanged();
 			}
@@ -313,7 +316,7 @@ public class ConfigFilesTab {
 		}
 		dialog.setTitle(BeansUIPlugin.getResourceString(DIALOG_TITLE));
 		dialog.setMessage(BeansUIPlugin.getResourceString(DIALOG_MESSAGE));
-		if (dialog.open() == ElementTreeSelectionDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			Object[] selection = dialog.getResult();
 			if (selection != null && selection.length > 0) {
 				for (Object element : selection) {
@@ -378,6 +381,7 @@ public class ConfigFilesTab {
 			SUB_DIR, ROOT_DIR, OTHER
 		};
 
+		@Override
 		public int category(Object element) {
 			if (element instanceof IBeansConfig) {
 				if (((IBeansConfig) element).getElementName()

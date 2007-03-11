@@ -33,6 +33,7 @@ public class AdvisedDeclareParentAopSourceFieldNode extends
 		return new IReferenceNode[0];
 	}
 
+	@Override
 	public String getText() {
 		return AopReferenceModelUtils.getJavaElementLinkName(references
 				.getSource())
@@ -41,6 +42,7 @@ public class AdvisedDeclareParentAopSourceFieldNode extends
 						.getSource());
 	}
 
+	@Override
 	public boolean hasChildren() {
 		return false;
 	}

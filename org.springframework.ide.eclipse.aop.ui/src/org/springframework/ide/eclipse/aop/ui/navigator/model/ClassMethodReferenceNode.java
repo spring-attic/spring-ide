@@ -73,6 +73,7 @@ public class ClassMethodReferenceNode extends AbstractJavaElementReferenceNode
 		return nodes.toArray(new IReferenceNode[nodes.size()]);
 	}
 
+	@Override
 	public String getText() {
 		if (element instanceof IType) {
 			return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER
@@ -86,6 +87,7 @@ public class ClassMethodReferenceNode extends AbstractJavaElementReferenceNode
 		}
 	}
 
+	@Override
 	public boolean hasChildren() {
 		return (children != null && children.size() > 0)
 				|| declareParentReferences.size() > 0

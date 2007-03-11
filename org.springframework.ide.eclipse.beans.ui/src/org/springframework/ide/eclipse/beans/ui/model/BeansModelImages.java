@@ -156,6 +156,7 @@ public final class BeansModelImages {
 			super(baseImage, flags);
 		}
 
+		@Override
 		protected void drawOverlays() {
 			int flags = getFlags();
 			if ((flags & BeansModelImages.FLAG_WARNING) != 0) {

@@ -36,12 +36,14 @@ public class BeansNavigatorActionProvider extends CommonActionProvider {
 	public BeansNavigatorActionProvider() {
 	}
 
+	@Override
 	public void init(ICommonActionExtensionSite site) {
 		openConfigAction = new OpenConfigFileAction(site);
 		openPropertiesAction = new OpenPropertiesAction(site);
 		showBeansGraphAction = new ShowBeansGraphAction(site);
 	}
 
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		if (openConfigAction.isEnabled()) {
 			menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN,
@@ -57,6 +59,7 @@ public class BeansNavigatorActionProvider extends CommonActionProvider {
 		}
 	}
 
+	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		if (openConfigAction.isEnabled()) {
 			actionBars.setGlobalActionHandler(ICommonActionConstants.OPEN,

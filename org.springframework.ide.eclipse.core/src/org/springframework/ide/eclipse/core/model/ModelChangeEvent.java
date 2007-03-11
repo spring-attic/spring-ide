@@ -64,6 +64,7 @@ public class ModelChangeEvent extends EventObject {
 		return type;
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer text = new StringBuffer("Model element '");
 		text.append(getElement().getElementName()).append("' (");

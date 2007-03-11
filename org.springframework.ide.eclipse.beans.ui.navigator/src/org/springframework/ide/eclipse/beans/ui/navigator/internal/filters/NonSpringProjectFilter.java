@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
  */
 public class NonSpringProjectFilter extends ViewerFilter {
 
+	@Override
 	public boolean select(Viewer viewer, Object parent, Object element) {
 		if (element instanceof IAdaptable) {
 			IProject project = (IProject) ((IAdaptable) element)

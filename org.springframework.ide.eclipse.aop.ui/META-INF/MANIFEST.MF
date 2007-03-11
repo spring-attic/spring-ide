@@ -34,3 +34,4 @@ Export-Package: org.springframework.ide.eclipse.aop.ui,
  org.springframework.ide.eclipse.aop.ui.navigator.model,
  org.springframework.ide.eclipse.aop.ui.navigator.util
 Bundle-Vendor: %providerName
+Bundle-RequiredExecutionEnvironment: J2SE-1.5

@@ -47,6 +47,7 @@ public class WebflowModelHandler extends AbstractModelHandler implements IModelH
 		setAssociatedContentTypeId(associatedContentTypeID);
 	}
 
+	@Override
 	public IDocumentCharsetDetector getEncodingDetector() {
 		return new XMLDocumentCharsetDetector();
 	}

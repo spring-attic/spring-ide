@@ -128,10 +128,10 @@ public class BeansSearchScope {
 
 	private static IModelElement[] convertToElements(IWorkingSet[] workingSets) {
 		List<IModelElement> elements = new ArrayList<IModelElement>();
-		for (int i = 0; i < workingSets.length; i++) {
-			IAdaptable[] wsElements = workingSets[i].getElements();
-			for (int j = 0; j < wsElements.length; j++) {
-				addToList(wsElements[j], elements, true);
+		for (IWorkingSet element : workingSets) {
+			IAdaptable[] wsElements = element.getElements();
+			for (IAdaptable element0 : wsElements) {
+				addToList(element0, elements, true);
 			}
 		}
 		return elements.toArray(new IModelElement[elements.size()]);
@@ -144,7 +144,7 @@ public class BeansSearchScope {
 			IStructuredSelection structuredSelection = (IStructuredSelection) selection;
 			Iterator selectedElements = structuredSelection.iterator();
 			while (selectedElements.hasNext()) {
-				Object selectedElement = (Object) selectedElements.next();
+				Object selectedElement = selectedElements.next();
 				if (selectedElement instanceof IAdaptable) {
 					addToList((IAdaptable) selectedElement, elements,
 							isProjectsSelection);
@@ -177,6 +177,7 @@ public class BeansSearchScope {
 		}
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer text = new StringBuffer(description);
 		text.append(" [");

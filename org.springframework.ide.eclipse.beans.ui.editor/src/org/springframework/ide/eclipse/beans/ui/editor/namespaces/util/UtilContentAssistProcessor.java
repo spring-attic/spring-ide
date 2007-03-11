@@ -46,6 +46,7 @@ public class UtilContentAssistProcessor extends AbstractContentAssistProcessor {
 			Node attributeNode) {
 	}
 
+	@Override
 	protected void computeAttributeValueProposals(ContentAssistRequest request,
 			IDOMNode node, String matchString, String attributeName) {
 

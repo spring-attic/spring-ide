@@ -39,6 +39,7 @@ public class LexicalSortingAction extends Action {
 		update(checked, false);
 	}
 
+	@Override
 	public void run() {
 		update(isChecked(), true);
 	}

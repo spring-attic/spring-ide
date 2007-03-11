@@ -47,6 +47,7 @@ public class BeanClassReferences {
 		return beans;
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -60,11 +61,13 @@ public class BeanClassReferences {
 		return ObjectUtils.nullSafeEquals(this.beans, that.beans);
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(beanClass);
 		return 29 * hashCode + ObjectUtils.nullSafeHashCode(beans);
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer text = new StringBuffer(": ");
 		text.append(beanClass).append(" <- ").append(beans);

@@ -75,7 +75,7 @@ public class BeansJavaCompletionUtils {
 		}
 
 		try {
-			IFile file = (IFile) BeansEditorUtils.getResource(request);
+			IFile file = BeansEditorUtils.getResource(request);
 			IJavaProject project = JavaCore.create(file.getProject());
 			IPackageFragment root = project.getPackageFragments()[0];
 			ICompilationUnit unit = root.getCompilationUnit("_xxx.java")
@@ -98,8 +98,7 @@ public class BeansJavaCompletionUtils {
 
 			ICompletionProposal[] proposals = order(props);
 
-			for (int i = 0; i < proposals.length; i++) {
-				ICompletionProposal comProposal = proposals[i];
+			for (ICompletionProposal comProposal : proposals) {
 				processJavaCompletionProposal(request, comProposal);
 			}
 		}

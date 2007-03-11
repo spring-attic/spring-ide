@@ -38,6 +38,7 @@ public class OpenRevealableReferenceNodeAction extends Action {
 		this.viewer = viewer;
 	}
 
+	@Override
 	public void run() {
 		ISelection selection = viewer.getSelection();
 		if (selection instanceof IStructuredSelection) {

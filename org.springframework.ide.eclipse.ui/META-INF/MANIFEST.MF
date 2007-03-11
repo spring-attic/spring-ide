@@ -25,3 +25,4 @@ Export-Package: org.springframework.ide.eclipse.ui,
  org.springframework.ide.eclipse.ui.editors,
  org.springframework.ide.eclipse.ui.viewers
 Eclipse-LazyStart: true
+Bundle-RequiredExecutionEnvironment: J2SE-1.5

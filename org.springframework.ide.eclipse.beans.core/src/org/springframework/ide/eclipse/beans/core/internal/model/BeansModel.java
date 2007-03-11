@@ -77,11 +77,13 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				.synchronizedMap(new LinkedHashMap<IProject, IBeansProject>());
 	}
 
+	@Override
 	public IModelElement[] getElementChildren() {
 		return getProjects().toArray(
 				new IModelElement[getProjects().size()]);
 	}
 
+	@Override
 	public void accept(IModelElementVisitor visitor,
 			IProgressMonitor monitor) {
 		// Ask this model's projects
@@ -201,6 +203,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		return configs;
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -214,11 +217,13 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		return super.equals(other);
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(projects);
 		return getElementType() * hashCode + super.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer text = new StringBuffer("Beans model:\n");
 		synchronized (projects) {
@@ -291,7 +296,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 					System.out.println("Spring beans nature removed from "
 							+ "project '" + project.getName() + "'");
 				}
-				IBeansProject proj = (IBeansProject) projects.remove(project);
+				IBeansProject proj = projects.remove(project);
 				notifyListeners(proj, Type.REMOVED);
 			}
 		}
@@ -325,7 +330,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				System.out.println("Project '" + project.getName()
 						+ "' closed");
 			}
-			IBeansProject proj = (IBeansProject) projects.remove(project);
+			IBeansProject proj = projects.remove(project);
 			notifyListeners(proj, Type.REMOVED);
 		}
 
@@ -334,7 +339,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				System.out.println("Project '" + project.getName()
 						+ "' deleted");
 			}
-			IBeansProject proj = (IBeansProject) projects.remove(project);
+			IBeansProject proj = projects.remove(project);
 			notifyListeners(proj, Type.REMOVED);
 		}
 
@@ -368,7 +373,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		}
 
 		public void configChanged(IFile file, int eventType) {
-			IBeansProject project = (IBeansProject) projects.get(file
+			IBeansProject project = projects.get(file
 					.getProject());
 			BeansConfig config = (BeansConfig) project.getConfig(file);
 			if (eventType == IResourceChangeEvent.POST_BUILD) {

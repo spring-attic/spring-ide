@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 
 /**
  * This is a representation of a Spring bean.
+ * 
  * @author Torsten Juergeleit
  */
 public class Bean extends Node implements IAdaptable {
@@ -76,15 +77,14 @@ public class Bean extends Node implements IAdaptable {
 	}
 
 	public ConstructorArgument[] getConstructorArguments() {
-		ArrayList list = new ArrayList();
+		ArrayList<ConstructorArgument> list = new ArrayList<ConstructorArgument>();
 		Iterator cargs = bean.getConstructorArguments().iterator();
 		while (cargs.hasNext()) {
-			IBeanConstructorArgument carg = (IBeanConstructorArgument)
-																   cargs.next();
+			IBeanConstructorArgument carg = (IBeanConstructorArgument) cargs
+					.next();
 			list.add(new ConstructorArgument(this, carg));
 		}
-		return (ConstructorArgument[])
-								list.toArray(new ConstructorArgument[list.size()]);
+		return list.toArray(new ConstructorArgument[list.size()]);
 	}
 
 	public boolean hasProperties() {
@@ -92,13 +92,13 @@ public class Bean extends Node implements IAdaptable {
 	}
 
 	public Property[] getProperties() {
-		ArrayList list = new ArrayList();
+		ArrayList<Property> list = new ArrayList<Property>();
 		Iterator props = bean.getProperties().iterator();
 		while (props.hasNext()) {
 			IBeanProperty prop = (IBeanProperty) props.next();
 			list.add(new Property(this, prop));
 		}
-		return (Property[]) list.toArray(new Property[list.size()]);
+		return list.toArray(new Property[list.size()]);
 	}
 
 	public boolean isRootBean() {
@@ -116,6 +116,7 @@ public class Bean extends Node implements IAdaptable {
 		return null;
 	}
 
+	@Override
 	public String toString() {
 		return "Bean '" + getName() + "': x=" + x + ", y=" + y + ", width=" +
 			   width + ", height=" + height;

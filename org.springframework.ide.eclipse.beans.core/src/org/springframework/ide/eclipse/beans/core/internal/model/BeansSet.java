@@ -51,6 +51,7 @@ public class BeansSet extends AbstractBeansModelElement implements IBeansSet {
 		return IBeansModelElementTypes.SET_TYPE;
 	}
 
+	@Override
 	public IModelElement[] getElementChildren() {
 		List<IModelElement> children = new ArrayList<IModelElement>();
 		for (Object value : set) {
@@ -61,6 +62,7 @@ public class BeansSet extends AbstractBeansModelElement implements IBeansSet {
 		return children.toArray(new IModelElement[children.size()]);
 	}
 
+	@Override
 	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 
 		// First visit this bean
@@ -78,7 +80,7 @@ public class BeansSet extends AbstractBeansModelElement implements IBeansSet {
 		}
 	}
 
-	public Set getSet() {
+	public Set<Object> getSet() {
 		return set;
 	}
 }

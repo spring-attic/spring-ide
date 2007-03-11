@@ -138,6 +138,7 @@ public abstract class AbstractModelElement implements IModelElement {
 		}
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -149,6 +150,7 @@ public abstract class AbstractModelElement implements IModelElement {
 		return ObjectUtils.nullSafeEquals(this.name, that.name); // ignore parent
 	}
 
+	@Override
 	public int hashCode() {
 		return ObjectUtils.nullSafeHashCode(name); // ignore parent
 	}

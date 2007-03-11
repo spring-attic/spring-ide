@@ -109,6 +109,7 @@ public class ConfigSetDialog extends Dialog {
 		}
 	}
 
+	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		if (title != null) {
@@ -116,6 +117,7 @@ public class ConfigSetDialog extends Dialog {
 		}
 	}
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 
 		// Create group composite for options
@@ -179,6 +181,7 @@ public class ConfigSetDialog extends Dialog {
 		return composite;
 	}
 
+	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 
 		// Create OK and Cancel buttons by default
@@ -198,6 +201,7 @@ public class ConfigSetDialog extends Dialog {
 		}
 	}
 
+	@Override
 	protected void buttonPressed(int buttonId) {
 		if (buttonId == IDialogConstants.OK_ID) {
 
@@ -337,6 +341,7 @@ public class ConfigSetDialog extends Dialog {
 			SUB_DIR, ROOT_DIR, OTHER
 		};
 
+		@Override
 		public int category(Object element) {
 			if (element instanceof IBeansConfig) {
 				if (((IBeansConfig) element).getElementName()

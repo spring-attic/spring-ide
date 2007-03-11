@@ -45,7 +45,7 @@ public final class AopNamespaceImages {
 			IModelElement context) {
 		if (element instanceof IBeansComponent) {
 			String localName = ModelUtils
-					.getLocalName((IBeansComponent) element);
+					.getLocalName(element);
 			if ("config".equals(localName)) {
 				return BeansUIImages
 						.getImage(BeansUIImages.IMG_OBJS_AOP_CONFIG);
@@ -64,7 +64,7 @@ public final class AopNamespaceImages {
 					element, context);
 		} else if (element instanceof IBean
 				&& context instanceof IBeansComponent) {
-			String localName = ModelUtils.getLocalName((IBean) element);
+			String localName = ModelUtils.getLocalName(element);
 			String contextLocalName = ModelUtils
 					.getLocalName((IBeansComponent) context);
 			if (localName.equals(contextLocalName)) {

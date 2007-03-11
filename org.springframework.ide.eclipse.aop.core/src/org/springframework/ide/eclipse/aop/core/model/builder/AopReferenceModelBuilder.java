@@ -452,6 +452,7 @@ public class AopReferenceModelBuilder {
 			return project != null && project.equals(other.project);
 		}
 
+		@Override
 		@SuppressWarnings("deprecation")
 		protected IStatus run(IProgressMonitor monitor) {
 			synchronized (getClass()) {
@@ -483,6 +484,7 @@ public class AopReferenceModelBuilder {
 			return Status.OK_STATUS;
 		}
 
+		@Override
 		public boolean belongsTo(Object family) {
 			return ResourcesPlugin.FAMILY_MANUAL_BUILD == family;
 		}

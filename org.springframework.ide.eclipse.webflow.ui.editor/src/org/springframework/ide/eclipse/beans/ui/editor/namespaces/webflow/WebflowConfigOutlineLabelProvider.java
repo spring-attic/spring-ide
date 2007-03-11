@@ -25,6 +25,7 @@ import org.w3c.dom.Node;
 @SuppressWarnings("restriction")
 public class WebflowConfigOutlineLabelProvider extends JFaceNodeLabelProvider {
 
+	@Override
 	public Image getImage(Object object) {
 		Node node = (Node) object;
 		String ns = node.getNamespaceURI();
@@ -34,6 +35,7 @@ public class WebflowConfigOutlineLabelProvider extends JFaceNodeLabelProvider {
 		return null;
 	}
 
+	@Override
 	public String getText(Object o) {
 
 		// Create Spring beans label text

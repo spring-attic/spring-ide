@@ -35,6 +35,7 @@ public class AdvisedAopSourceMethodNode extends
 		return new IReferenceNode[0];
 	}
 
+	@Override
 	public String getText() {
 		if (reference.getSource() != null) {
 			if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
@@ -60,6 +61,7 @@ public class AdvisedAopSourceMethodNode extends
 		}
 	}
 
+	@Override
 	public boolean hasChildren() {
 		return false;
 	}

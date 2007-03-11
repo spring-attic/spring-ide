@@ -26,6 +26,7 @@ import org.w3c.dom.Node;
 @SuppressWarnings("restriction")
 public class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 
+	@Override
 	public Image getImage(Object object) {
 		Node node = (Node) object;
 		String nodeName = node.getLocalName();
@@ -70,6 +71,7 @@ public class AopOutlineLabelProvider extends JFaceNodeLabelProvider {
 		return null;
 	}
 
+	@Override
 	public String getText(Object o) {
 		// Create Spring beans label text
 		Node node = (Node) o;

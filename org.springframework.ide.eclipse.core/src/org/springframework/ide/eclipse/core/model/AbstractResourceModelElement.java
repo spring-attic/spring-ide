@@ -31,6 +31,7 @@ public abstract class AbstractResourceModelElement extends AbstractModelElement
 		super(parent, name);
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -45,6 +46,7 @@ public abstract class AbstractResourceModelElement extends AbstractModelElement
 		return super.equals(other);
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(getElementResource());
 		return getElementType() * hashCode + super.hashCode();

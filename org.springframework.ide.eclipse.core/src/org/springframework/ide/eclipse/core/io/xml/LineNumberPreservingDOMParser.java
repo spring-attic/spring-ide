@@ -68,6 +68,7 @@ public class LineNumberPreservingDOMParser extends DOMParser {
 		return -1;
 	}
 
+	@Override
 	public void startDocument(XMLLocator locator, String encoding,
 			NamespaceContext namespaceContext, Augmentations augs)
 			throws XNIException {
@@ -76,17 +77,20 @@ public class LineNumberPreservingDOMParser extends DOMParser {
 		addLineNumberToCurrentNode(START_LINE);
 	}
 
+	@Override
 	public void endDocument(Augmentations augs) throws XNIException {
 		addLineNumberToCurrentNode(END_LINE);
 		super.endDocument(augs);
 	}
 
+	@Override
 	public void startElement(QName element, XMLAttributes attributes,
 			Augmentations augs) throws XNIException {
 		super.startElement(element, attributes, augs);
 		addLineNumberToCurrentNode(START_LINE);
 	}
 
+	@Override
 	public void endElement(QName element, Augmentations augs)
 			throws XNIException {
 		addLineNumberToCurrentNode(END_LINE);

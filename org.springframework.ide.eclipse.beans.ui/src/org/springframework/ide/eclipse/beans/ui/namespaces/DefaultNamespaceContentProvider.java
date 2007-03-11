@@ -19,6 +19,7 @@ package org.springframework.ide.eclipse.beans.ui.namespaces;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
@@ -45,7 +46,7 @@ public class DefaultNamespaceContentProvider implements ITreeContentProvider {
 		if (parentElement instanceof ISourceModelElement) {
 			return ((ISourceModelElement) parentElement).getElementChildren();
 		}
-		return ISourceModelElement.NO_CHILDREN;
+		return IModelElement.NO_CHILDREN;
 	}
 
 	public Object getParent(Object element) {

@@ -41,7 +41,7 @@ public class BeansConnection {
 
 	public BeansConnection(BeanType type, IModelElement source,
 			IBean target) {
-		this(BeanType.STANDARD, source, target, (IModelElement) target
+		this(BeanType.STANDARD, source, target, target
 				.getElementParent());
 	}
 
@@ -69,6 +69,7 @@ public class BeansConnection {
 		return context;
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -86,6 +87,7 @@ public class BeansConnection {
 		return ObjectUtils.nullSafeEquals(this.context, that.context);
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(type);
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(source);
@@ -93,6 +95,7 @@ public class BeansConnection {
 		return 29 * hashCode + ObjectUtils.nullSafeHashCode(context);
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer text = new StringBuffer(type.toString());
 		text.append(": ").append(source).append(" -> ").append(target);

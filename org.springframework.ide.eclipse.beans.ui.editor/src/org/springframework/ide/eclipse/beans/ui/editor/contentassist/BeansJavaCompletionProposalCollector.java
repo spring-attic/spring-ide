@@ -71,6 +71,7 @@ public class BeansJavaCompletionProposalCollector extends
 	 * instead.
 	 * </p>
 	 */
+	@Override
 	public void accept(CompletionProposal proposal) {
 		if (CompletionProposal.TYPE_REF == proposal.getKind()) {
 			if ((!interfaceRequired && !Flags.isInterface(proposal.getFlags()))

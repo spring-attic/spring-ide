@@ -45,6 +45,7 @@ public class BeanChildQuery extends AbstractBeansQuery {
 				BeansSearchMessages.SearchQuery_searchFor_child, args);
 	}
 
+	@Override
 	protected boolean doesMatch(IModelElement element, Pattern pattern,
 			IProgressMonitor monitor) {
 		if (element instanceof IBean) {

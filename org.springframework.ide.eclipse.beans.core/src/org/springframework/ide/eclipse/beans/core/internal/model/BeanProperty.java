@@ -37,6 +37,7 @@ public class BeanProperty extends AbstractBeansValueHolder implements
 		return IBeansModelElementTypes.PROPERTY_TYPE;
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -47,6 +48,7 @@ public class BeanProperty extends AbstractBeansValueHolder implements
 		return super.equals(other);
 	}
 
+	@Override
 	public int hashCode() {
 		return getElementType() + super.hashCode();
 	}

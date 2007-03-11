@@ -36,6 +36,7 @@ public class AdviceDeclareParentAopSourceFieldNode extends
 				references) };
 	}
 
+	@Override
 	public String getText() {
 		return AopReferenceModelUtils.getJavaElementLinkName(references.get(0)
 				.getSource());

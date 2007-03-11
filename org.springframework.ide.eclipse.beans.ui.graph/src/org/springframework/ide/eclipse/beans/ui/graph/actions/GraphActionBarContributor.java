@@ -26,15 +26,18 @@ import org.eclipse.ui.actions.ActionFactory;
 
 public class GraphActionBarContributor extends ActionBarContributor {
 
+	@Override
 	protected void buildActions() {
 		addRetargetAction(new ZoomInRetargetAction());
 		addRetargetAction(new ZoomOutRetargetAction());
 	}
 
+	@Override
 	protected void declareGlobalActionKeys() {
 		addGlobalActionKey(ActionFactory.PRINT.getId());
 	}
 
+	@Override
 	public void contributeToToolBar(IToolBarManager manager) {
 		String[] zoomStrings = new String[] { ZoomManager.FIT_ALL,
 								ZoomManager.FIT_HEIGHT, ZoomManager.FIT_WIDTH };

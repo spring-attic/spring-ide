@@ -59,7 +59,7 @@ public class JavaElementHyperlink implements IHyperlink {
 		// TODO display selection dialog if element.length > 1
 		if (elements != null && elements.length > 0) {
 			if (elements[0] instanceof IJavaElement) {
-				IJavaElement element = (IJavaElement) elements[0];
+				IJavaElement element = elements[0];
 				try {
 					JavaUI
 							.revealInEditor(JavaUI.openInEditor(element),

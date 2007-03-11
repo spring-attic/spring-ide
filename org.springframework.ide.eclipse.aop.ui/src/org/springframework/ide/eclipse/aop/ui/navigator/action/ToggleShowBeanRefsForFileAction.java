@@ -50,6 +50,7 @@ public class ToggleShowBeanRefsForFileAction extends Action {
 	/**
 	 * Runs the action.
 	 */
+	@Override
 	public void run() {
 		aopNavigator.setShowBeansRefsForFileEnabled(isChecked());
 	}

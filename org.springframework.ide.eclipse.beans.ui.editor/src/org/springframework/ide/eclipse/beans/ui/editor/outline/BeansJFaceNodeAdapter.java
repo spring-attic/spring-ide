@@ -40,6 +40,7 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 		super(adapterFactory);
 	}
 
+	@Override
 	public Object[] getChildren(Object object) {
 		if (BeansEditorUtils.isSpringStyleOutline()) {
 			Preferences prefs = Activator.getDefault().getPluginPreferences();
@@ -69,6 +70,7 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 		}
 	}
 
+	@Override
 	public Object getParent(Object object) {
 		if (BeansEditorUtils.isSpringStyleOutline()) {
 			Node node = (Node) object;
@@ -79,6 +81,7 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 		}
 	}
 
+	@Override
 	public boolean hasChildren(Object object) {
 		if (BeansEditorUtils.isSpringStyleOutline()) {
 			Node node = (Node) object;
@@ -98,10 +101,12 @@ public class BeansJFaceNodeAdapter extends JFaceNodeAdapter {
 	 * Allowing the INodeAdapter to compare itself against the type allows it to
 	 * return true in more than one case.
 	 */
+	@Override
 	public boolean isAdapterForType(Object type) {
 		return type.equals(ADAPTER_KEY);
 	}
 
+	@Override
 	public Object[] getElements(Object node) {
 		if (BeansEditorUtils.isSpringStyleOutline()) {
 			return getChildren(node);

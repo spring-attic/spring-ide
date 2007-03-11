@@ -43,11 +43,13 @@ public class BeanTemplatePreferencePage extends TemplatePreferencePage {
 	// return c;
 	// }
 
+	@Override
 	protected boolean isShowFormatterSetting() {
 		// template formatting has not been implemented
 		return false;
 	}
 
+	@Override
 	public boolean performOk() {
 		boolean ok = super.performOk();
 		Activator.getDefault().savePluginPreferences();

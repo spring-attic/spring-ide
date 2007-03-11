@@ -139,8 +139,8 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 			if (showBeansRefsForFile && javaElement instanceof IMethod) {
 				// we have one root element
 				TreeItem[] aspectChildren = items[0].getItems();
-				for (int i = 0; i < aspectChildren.length; i++) {
-					Object obj = aspectChildren[i].getData();
+				for (TreeItem element : aspectChildren) {
+					Object obj = element.getData();
 					if (obj instanceof AbstractJavaElementReferenceNode
 							&& ((AbstractJavaElementReferenceNode) obj)
 									.getElement().equals(javaElement)) {
@@ -167,8 +167,8 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 				int startLine = document.getLineOfOffset(element
 						.getStartOffset()) + 1;
 				int endLine = document.getLineOfOffset(element.getEndOffset()) + 1;
-				for (int i = 0; i < items.length; i++) {
-					Object obj = items[i].getData();
+				for (TreeItem element0 : items) {
+					Object obj = element0.getData();
 					if (obj instanceof IRevealableReferenceNode
 							&& ((IRevealableReferenceNode) obj).getLineNumber() >= startLine
 							&& ((IRevealableReferenceNode) obj).getLineNumber() <= endLine) {
@@ -194,6 +194,7 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 
 	private ToggleShowBeanRefsForFileAction toggleShowBeanRefsForFileAction;
 
+	@Override
 	public void createPartControl(Composite aParent) {
 		super.createPartControl(aParent);
 		getSite().getWorkbenchWindow().getSelectionService()
@@ -202,6 +203,7 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 		makeActions();
 	}
 
+	@Override
 	public void dispose() {
 		super.dispose();
 		getSite().getWorkbenchWindow().getSelectionService()

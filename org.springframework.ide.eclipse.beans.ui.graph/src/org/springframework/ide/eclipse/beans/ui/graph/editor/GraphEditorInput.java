@@ -260,6 +260,7 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 		GraphEditorInputFactory.saveState(memento, this);
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -273,6 +274,7 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 		return ObjectUtils.nullSafeEquals(this.context, that.context);
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(element);
 		return 29 * hashCode + ObjectUtils.nullSafeHashCode(context);

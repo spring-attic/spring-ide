@@ -41,3 +41,4 @@ Export-Package: org.springframework.ide.eclipse.beans.ui.editor,
  org.springframework.ide.eclipse.beans.ui.editor.outline,
  org.springframework.ide.eclipse.beans.ui.editor.templates,
  org.springframework.ide.eclipse.beans.ui.editor.util
+Bundle-RequiredExecutionEnvironment: J2SE-1.5

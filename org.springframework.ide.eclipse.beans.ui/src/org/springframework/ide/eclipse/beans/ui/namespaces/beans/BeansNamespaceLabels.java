@@ -47,7 +47,7 @@ public final class BeansNamespaceLabels extends BeansUILabels {
 		if (element instanceof IBean) {
 			appendBeanLabel((IBean) element, buf);
 		} else if (element instanceof ISourceModelElement) {
-			BeansModelLabels.appendElementLabel((ISourceModelElement) element,
+			BeansModelLabels.appendElementLabel(element,
 					buf);
 		} else {
 			buf.append(element.getElementName());

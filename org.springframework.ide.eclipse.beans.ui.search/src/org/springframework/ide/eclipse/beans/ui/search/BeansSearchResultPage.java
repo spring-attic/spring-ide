@@ -66,11 +66,13 @@ public class BeansSearchResultPage extends AbstractTextSearchViewPage {
 		};
 	}
 
+	@Override
 	protected void configureTableViewer(TableViewer viewer) {
 		throw new UnsupportedOperationException(
 				"Why do you want a table viewer?");
 	}
 
+	@Override
 	protected void configureTreeViewer(TreeViewer viewer) {
 		viewer.setUseHashlookup(true);
 		viewer.setLabelProvider(new BeansModelLabelProvider(true));
@@ -79,23 +81,27 @@ public class BeansSearchResultPage extends AbstractTextSearchViewPage {
 		this.provider = provider;
 	}
 
+	@Override
 	protected TableViewer createTableViewer(Composite parent) {
 		TableViewer viewer = super.createTableViewer(parent);
 		viewer.addDoubleClickListener(doubleClickListener);
 		return viewer;
 	}
 
+	@Override
 	protected TreeViewer createTreeViewer(Composite parent) {
 		TreeViewer viewer = super.createTreeViewer(parent);
 		viewer.addDoubleClickListener(doubleClickListener);
 		return viewer;
 	}
 
+	@Override
 	public String getLabel() {
 		// TODO read from resource
 		return "Bean Search Result";
 	}
 
+	@Override
 	protected void elementsChanged(Object[] objects) {
 		if (provider != null) {
 			provider.elementsChanged(objects);
@@ -115,6 +121,7 @@ public class BeansSearchResultPage extends AbstractTextSearchViewPage {
 		// viewer.refresh();
 	}
 
+	@Override
 	public void setInput(ISearchResult search, Object viewState) {
 		super.setInput(search, viewState);
 		if (search != null) {
@@ -122,6 +129,7 @@ public class BeansSearchResultPage extends AbstractTextSearchViewPage {
 		}
 	}
 
+	@Override
 	protected void clear() {
 		// FIXME
 		// provider.elementsChanged(new Object[] {});

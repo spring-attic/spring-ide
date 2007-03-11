@@ -81,6 +81,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 		return IBeansModelElementTypes.CONFIG_SET_TYPE;
 	}
 
+	@Override
 	public IModelElement[] getElementChildren() {
 		Set<IBeansConfig> children = getConfigs();
 		return children.toArray(new IModelElement[children.size()]);
@@ -171,7 +172,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 	}
 
 	public IBeanAlias getAlias(String name) {
-		return (IBeanAlias) getAliasesMap().get(name);
+		return getAliasesMap().get(name);
 	}
 
 	public Set<IBeanAlias> getAliases() {
@@ -209,6 +210,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 		return new HashSet<IBean>();
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -230,6 +232,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 		return super.equals(other);
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(configNames);
 		hashCode = getElementType() * hashCode
@@ -241,6 +244,7 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 		return getElementType() * hashCode + super.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return getElementName() + ": " + configNames.toString();
 	}

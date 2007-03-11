@@ -34,6 +34,7 @@ import org.w3c.dom.Element;
  * @author Christian Dupuis
  */
 public class SearchBeanReferencesAction extends AbstractBeansConfigEditorAction {
+	@Override
 	public void run(IAction action) {
 		if (getTextEditor() != null) {
 			ISelection selection = getTextEditor().getSelectionProvider()
@@ -78,12 +79,12 @@ public class SearchBeanReferencesAction extends AbstractBeansConfigEditorAction 
 					if (attribute != null && attribute.getValue() != null) {
 						String[] tokens = StringUtils.tokenizeToStringArray(
 								attribute.getValue(), ",; ");
-						for (int i = 0; i < tokens.length; i++) {
+						for (String element : tokens) {
 							if (beanId != null) {
-								beanId += "|" + tokens[i];
+								beanId += "|" + element;
 							}
 							else {
-								beanId = tokens[i];
+								beanId = element;
 							}
 						}
 					}

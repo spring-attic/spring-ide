@@ -19,7 +19,6 @@ package org.springframework.ide.eclipse.beans.ui.editor.namespaces.jee;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.jface.action.IAction;
@@ -115,12 +114,11 @@ public class JeeUIImages {
 	/* package */static ImageRegistry getImageRegistry() {
 		if (imageRegistry == null) {
 			imageRegistry = new ImageRegistry();
-			for (Iterator<String> iter = imageDescriptors.keySet().iterator(); iter
-					.hasNext();) {
-				String key = (String) iter.next();
-				imageRegistry.put(key, (ImageDescriptor) imageDescriptors
-						.get(key));
-			}
+			for (String string : imageDescriptors.keySet()) {
+String key = string;
+imageRegistry.put(key, imageDescriptors
+				.get(key));
+}
 			imageDescriptors = null;
 		}
 		return imageRegistry;

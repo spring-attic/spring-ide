@@ -22,10 +22,12 @@ import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.Webf
 
 public class WebflowLabelProvider extends LabelProvider {
 
+	@Override
 	public Image getImage(Object element) {
 		return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW);
 	}
 
+	@Override
 	public String getText(Object element) {
 		return BeansModelLabelProvider.DEFAULT_NAMESPACE_LABEL_PROVIDER
 				.getText(element);

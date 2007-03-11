@@ -50,6 +50,7 @@ public class ReferencePart extends AbstractConnectionEditPart {
 		return (Reference) getModel();
 	}
 
+	@Override
 	protected IFigure createFigure() {
 		PolylineConnection conn = createConnection(getReference());
 		Label label = new Label();
@@ -83,6 +84,7 @@ public class ReferencePart extends AbstractConnectionEditPart {
 		return conn;
 	}
 
+	@Override
 	protected void createEditPolicies() {
 	}
 
@@ -110,7 +112,7 @@ public class ReferencePart extends AbstractConnectionEditPart {
 				Node node = nodes.getNode(i);
 
 				// Check if edge was inverted (due to broken cycle)
-				if (edge.isFeedback) {
+				if (edge.isFeedback()) {
 					bends.add(new AbsoluteBendpoint(node.x
 							+ GraphPart.MARGIN_SIZE, node.y
 							+ GraphPart.MARGIN_SIZE + node.height));
@@ -132,6 +134,7 @@ public class ReferencePart extends AbstractConnectionEditPart {
 		return conn;
 	}
 
+	@Override
 	public void setSelected(int value) {
 		super.setSelected(value);
 		if (value != EditPart.SELECTED_NONE) {
@@ -144,6 +147,7 @@ public class ReferencePart extends AbstractConnectionEditPart {
 	/**
 	 * Opens this property's config file on double click.
 	 */
+	@Override
 	public void performRequest(Request req) {
 		if (req.getType() == RequestConstants.REQ_OPEN) {
 			BeansUIUtils.openInEditor(getReference().getResourceElement());

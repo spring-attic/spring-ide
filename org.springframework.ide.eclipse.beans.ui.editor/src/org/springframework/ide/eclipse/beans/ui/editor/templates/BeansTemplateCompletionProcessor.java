@@ -41,12 +41,14 @@ public class BeansTemplateCompletionProcessor extends
 
 	private String contextTypeId = null;
 
+	@Override
 	protected ICompletionProposal createProposal(Template template,
 			TemplateContext context, IRegion region, int relevance) {
 		return new BeansCustomTemplateProposal(template, context, region,
 				getImage(template), relevance);
 	}
 
+	@Override
 	protected TemplateContextType getContextType(ITextViewer viewer,
 			IRegion region) {
 		ContextTypeRegistry registry = getTemplateContextRegistry();
@@ -56,6 +58,7 @@ public class BeansTemplateCompletionProcessor extends
 		return null;
 	}
 
+	@Override
 	protected Image getImage(Template template) {
 		// just return the same image for now
 		return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_SPRING);
@@ -65,6 +68,7 @@ public class BeansTemplateCompletionProcessor extends
 		return Activator.getDefault().getTemplateContextRegistry();
 	}
 
+	@Override
 	protected Template[] getTemplates(String contextTypeId) {
 		TemplateStore store = getTemplateStore();
 		if (store != null) {

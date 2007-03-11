@@ -57,6 +57,7 @@ public class EventTraceView extends ViewPart implements
 		super();
 	}
 
+	@Override
 	public void dispose() {
 		EventTrace.removeListener(this);
 		DebugTracing.DEBUG = false;
@@ -65,6 +66,7 @@ public class EventTraceView extends ViewPart implements
 	/**
 	 * @see IWorkbenchPart#createPartControl(Composite)
 	 */
+	@Override
 	public void createPartControl(Composite parent) {
 		text = new StyledText(parent, SWT.MULTI | SWT.READ_ONLY | SWT.VERTICAL
 				| SWT.HORIZONTAL);
@@ -105,6 +107,7 @@ public class EventTraceView extends ViewPart implements
 	/**
 	 * @see IWorkbenchPart#setFocus()
 	 */
+	@Override
 	public void setFocus() {
 		text.setFocus();
 	}

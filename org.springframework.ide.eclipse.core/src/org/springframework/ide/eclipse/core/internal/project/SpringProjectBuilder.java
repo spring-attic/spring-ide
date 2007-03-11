@@ -57,6 +57,7 @@ public class SpringProjectBuilder extends IncrementalProjectBuilder {
 
 	private List<IProjectBuilder> builders;
 
+	@Override
 	public void setInitializationData(IConfigurationElement cfig,
 			String propertyName, Object data) throws CoreException {
 		super.setInitializationData(cfig, propertyName, data);
@@ -79,6 +80,7 @@ public class SpringProjectBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
+	@Override
 	protected final IProject[] build(int kind, Map args,
 			IProgressMonitor monitor) throws CoreException {
 		IProject project = getProject();

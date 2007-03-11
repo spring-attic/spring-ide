@@ -219,8 +219,8 @@ public class AopReferenceModelUtils {
 					char[] chars = new char[sourceuptomethod.length()];
 					sourceuptomethod.getChars(0, sourceuptomethod.length(),
 							chars, 0);
-					for (int j = 0; j < chars.length; j++) {
-						if (chars[j] == '\n') {
+					for (char element0 : chars) {
+						if (element0 == '\n') {
 							lines++;
 						}
 					}
@@ -242,8 +242,8 @@ public class AopReferenceModelUtils {
 				char[] chars = new char[sourceuptomethod.length()];
 				sourceuptomethod.getChars(0, sourceuptomethod.length(), chars,
 						0);
-				for (int j = 0; j < chars.length; j++) {
-					if (chars[j] == '\n') {
+				for (char element0 : chars) {
+					if (element0 == '\n') {
 						lines++;
 					}
 				}
@@ -264,8 +264,8 @@ public class AopReferenceModelUtils {
 				char[] chars = new char[sourceuptomethod.length()];
 				sourceuptomethod.getChars(0, sourceuptomethod.length(), chars,
 						0);
-				for (int j = 0; j < chars.length; j++) {
-					if (chars[j] == '\n') {
+				for (char element0 : chars) {
+					if (element0 == '\n') {
 						lines++;
 					}
 				}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,9 @@ import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextTypeIds;
 
 /**
- * The main plugin class
+ * The main plugin class.
+ * 
+ * @author Christian Dupuis
  */
 @SuppressWarnings("restriction")
 public class Activator extends AbstractUIPlugin {
@@ -89,6 +91,7 @@ public class Activator extends AbstractUIPlugin {
 	/**
 	 * This method is called upon plug-in activation
 	 */
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		this.context = context;
@@ -97,6 +100,7 @@ public class Activator extends AbstractUIPlugin {
 	/**
 	 * This method is called when the plug-in is stopped
 	 */
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		super.stop(context);
 		plugin = null;
@@ -248,6 +252,6 @@ public class Activator extends AbstractUIPlugin {
 		if (message == null) {
 			message = "";
 		}
-		return new Status(Status.ERROR, PLUGIN_ID, 0, message, exception);
+		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
 	}
 }

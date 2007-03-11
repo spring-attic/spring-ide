@@ -19,6 +19,7 @@ package org.springframework.ide.eclipse.beans.ui.properties;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -27,6 +28,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -78,6 +80,7 @@ public class ConfigSetsTab {
 	private Button newButton, editButton, removeButton, upButton, downButton;
 
 	private SelectionListener buttonListener = new SelectionAdapter() {
+		@Override
 		public void widgetSelected(SelectionEvent e) {
 			handleButtonPressed((Button) e.widget);
 		}
@@ -131,6 +134,7 @@ public class ConfigSetsTab {
 		data.widthHint = TABLE_WIDTH;
 		configSetsTree.setLayoutData(data);
 		configSetsTree.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleTreeSelectionChanged();
 			}
@@ -233,7 +237,7 @@ public class ConfigSetsTab {
 	private void handleNewButtonPressed() {
 		ConfigSetDialog dialog = new ConfigSetDialog(SpringUIUtils
 				.getStandardDisplay().getActiveShell(), project, null);
-		if (dialog.open() == ConfigSetDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			configSetsViewer.refresh(false);
 			hasUserMadeChanges = true;
 		}
@@ -248,7 +252,7 @@ public class ConfigSetsTab {
 				// Expand or collapse selected project
 				if (configSetsViewer.getExpandedState(elem)) {
 					configSetsViewer.collapseToLevel(elem,
-							TreeViewer.ALL_LEVELS);
+							AbstractTreeViewer.ALL_LEVELS);
 				} else {
 					configSetsViewer.expandToLevel(elem, 1);
 				}
@@ -270,7 +274,7 @@ public class ConfigSetsTab {
 			ConfigSetDialog dialog = new ConfigSetDialog(SpringUIUtils
 					.getStandardDisplay().getActiveShell(), project,
 					selectedElement.getElementName());
-			if (dialog.open() == ConfigSetDialog.OK) {
+			if (dialog.open() == Window.OK) {
 				configSetsViewer.refresh(false);
 				hasUserMadeChanges = true;
 			}
@@ -368,6 +372,7 @@ public class ConfigSetsTab {
 	}
 
 	private static class ConfigSetsSorter extends ViewerSorter {
+		@Override
 		public void sort(Viewer viewer, Object[] elements) {
 
 			// Do NOT sort configs within a config set

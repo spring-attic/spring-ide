@@ -67,6 +67,7 @@ public class AopReference implements IAopReference {
 		return file;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof AopReference) {
 			AopReference other = (AopReference) obj;
@@ -80,6 +81,7 @@ public class AopReference implements IAopReference {
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(source);
 		hashCode = 21 + ObjectUtils.nullSafeHashCode(target);
@@ -93,6 +95,7 @@ public class AopReference implements IAopReference {
 		return bean;
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer buf = new StringBuffer();
 		buf.append("Bean definition [");

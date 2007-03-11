@@ -63,7 +63,7 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 			prefix = "";
 		}
 
-		IFile file = (IFile) BeansEditorUtils.getResource(request);
+		IFile file = BeansEditorUtils.getResource(request);
 		if (node.getOwnerDocument() != null) {
 			BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(
 					request, BeansJavaCompletionUtils.getPropertyTypes(node,
@@ -93,7 +93,7 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 			ContentAssistRequest request, String prefix,
 			String factoryClassName, boolean isStatic) {
 		if (BeansEditorUtils.getResource(request) instanceof IFile) {
-			IFile file = (IFile) BeansEditorUtils.getResource(request);
+			IFile file = BeansEditorUtils.getResource(request);
 			IType type = BeansModelUtils.getJavaType(file.getProject(),
 					factoryClassName);
 			if (type != null) {
@@ -124,7 +124,7 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 	private void addInitDestroyAttributeValueProposals(
 			ContentAssistRequest request, String prefix, String className) {
 		if (BeansEditorUtils.getResource(request) instanceof IFile) {
-			IFile file = (IFile) BeansEditorUtils.getResource(request);
+			IFile file = BeansEditorUtils.getResource(request);
 			IType type = BeansModelUtils.getJavaType(file.getProject(),
 					className);
 			if (type != null) {
@@ -168,7 +168,7 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 				lastPrefix = lastPrefix.substring(1);
 			}
 			for (int i = 0; i < classNames.size(); i++) {
-				IType type = (IType) classNames.get(i);
+				IType type = classNames.get(i);
 				try {
 					Collection<?> methods = Introspector
 							.findReadableProperties(type, firstPrefix, true);
@@ -200,7 +200,7 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 		}
 		else {
 			for (int i = 0; i < classNames.size(); i++) {
-				IType type = (IType) classNames.get(i);
+				IType type = classNames.get(i);
 				try {
 					Collection<?> methods = Introspector
 							.findWritableProperties(type, prefix, true);
@@ -223,6 +223,7 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 		}
 	}
 
+	@Override
 	protected void computeAttributeValueProposals(ContentAssistRequest request,
 			IDOMNode node, String matchString, String attributeName) {
 
@@ -247,7 +248,7 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 				if (factoryBean != null) {
 					// instance factory method
 					factoryClassName = BeansEditorUtils.getClassNameForBean(
-							(IFile) BeansEditorUtils.getResource(request), node
+							BeansEditorUtils.getResource(request), node
 									.getOwnerDocument(), factoryBean
 									.getNodeValue());
 					isStatic = false;
@@ -255,7 +256,7 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 				else {
 					// static factory method
 					List<?> list = BeansEditorUtils
-							.getClassNamesOfBean((IFile) BeansEditorUtils
+							.getClassNamesOfBean(BeansEditorUtils
 									.getResource(request), node);
 					factoryClassName = (list.size() != 0 ? ((IType) list.get(0))
 							.getFullyQualifiedName()
@@ -280,7 +281,7 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 
 			if ("name".equals(attributeName) && parentAttributes != null) {
 				List classNames = BeansEditorUtils.getClassNamesOfBean(
-						(IFile) BeansEditorUtils.getResource(request),
+						BeansEditorUtils.getResource(request),
 						parentNode);
 				addPropertyNameAttributeValueProposals(request, matchString,
 						"", parentNode, classNames);

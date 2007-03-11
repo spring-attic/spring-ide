@@ -49,6 +49,7 @@ public class BeansModelHandler extends AbstractModelHandler implements
 		setAssociatedContentTypeId(associatedContentTypeID);
 	}
 
+	@Override
 	public IDocumentCharsetDetector getEncodingDetector() {
 		return new XMLDocumentCharsetDetector();
 	}

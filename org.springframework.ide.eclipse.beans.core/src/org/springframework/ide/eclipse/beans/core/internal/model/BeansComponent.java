@@ -52,6 +52,7 @@ public class BeansComponent extends AbstractBeansModelElement implements
 		return IBeansModelElementTypes.COMPONENT_TYPE;
 	}
 
+	@Override
 	public IModelElement[] getElementChildren() {
 		Set<IModelElement> children = new LinkedHashSet<IModelElement>(beans);
 		children.addAll(components);
@@ -74,6 +75,7 @@ public class BeansComponent extends AbstractBeansModelElement implements
 		return Collections.unmodifiableSet(components);
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -89,6 +91,7 @@ public class BeansComponent extends AbstractBeansModelElement implements
 		return super.equals(other);
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(beans);
 		hashCode = getElementType() * hashCode
@@ -96,6 +99,7 @@ public class BeansComponent extends AbstractBeansModelElement implements
 		return getElementType() * hashCode + super.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer text = new StringBuffer(super.toString());
 		text.append(": beans=");

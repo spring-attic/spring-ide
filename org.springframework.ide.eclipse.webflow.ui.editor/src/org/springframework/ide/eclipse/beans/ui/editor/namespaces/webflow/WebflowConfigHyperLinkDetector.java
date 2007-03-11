@@ -46,12 +46,14 @@ public class WebflowConfigHyperLinkDetector extends AbstractHyperLinkDetector im
 	/**
 	 * Returns <code>true</code> if given attribute is openable.
 	 */
+	@Override
 	protected boolean isLinkableAttr(Attr attr) {
 		String attrName = attr.getName();
 		return ("registry-ref".equals(attrName) || "conversation-manager-ref".equals(attrName)
 				|| "ref".equals(attrName) || "type".equals(attrName));
 	}
 
+	@Override
 	protected IHyperlink createHyperlink(String name, String target, Node parentNode, IRegion hyperlinkRegion,
 			IDocument document, Node node, ITextViewer textViewer, IRegion cursor) {
 		if (name == null) {

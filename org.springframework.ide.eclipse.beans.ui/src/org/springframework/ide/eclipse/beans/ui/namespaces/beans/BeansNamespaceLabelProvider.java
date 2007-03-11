@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  */
 public class BeansNamespaceLabelProvider extends DefaultNamespaceLabelProvider {
 
+	@Override
 	protected String getElementLabel(ISourceModelElement element, int flags) {
 		return BeansNamespaceLabels.getElementLabel(element, flags);
 	}

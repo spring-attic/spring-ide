@@ -67,6 +67,7 @@ public class FileResource extends AbstractResource implements IAdaptable {
 		}
 	}
 
+	@Override
 	public boolean exists() {
 		return (file != null && file.exists());
 	}
@@ -78,6 +79,7 @@ public class FileResource extends AbstractResource implements IAdaptable {
 		return new FileInputStream(getFile());
 	}
 
+	@Override
 	public URL getURL() throws IOException {
 		if (file == null) {
 			throw new FileNotFoundException("File not found");
@@ -86,6 +88,7 @@ public class FileResource extends AbstractResource implements IAdaptable {
 				+ file.getRawLocation());
 	}
 
+	@Override
 	public File getFile() throws IOException {
 		if (file == null) {
 			throw new FileNotFoundException("File not found");
@@ -93,6 +96,7 @@ public class FileResource extends AbstractResource implements IAdaptable {
 		return file.getLocation().toFile();
 	}
 
+	@Override
 	public Resource createRelative(String relativePath) throws IOException {
 		if (file == null) {
 			throw new IllegalStateException("File not found");
@@ -106,6 +110,7 @@ public class FileResource extends AbstractResource implements IAdaptable {
 				+ relativePath + "' for " + getDescription());
 	}
 
+	@Override
 	public String getFilename() {
 		if (file == null) {
 			throw new IllegalStateException("File not found");
@@ -113,6 +118,7 @@ public class FileResource extends AbstractResource implements IAdaptable {
 		return file.getName();
 	}
 
+	@Override
 	public String getDescription() {
 		return "file [" + (file != null ? file.getRawLocation() : "") + "]";
 	}
@@ -127,6 +133,7 @@ public class FileResource extends AbstractResource implements IAdaptable {
 		return null;
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -138,6 +145,7 @@ public class FileResource extends AbstractResource implements IAdaptable {
 		return ObjectUtils.nullSafeEquals(this.file, that.file);
 	}
 
+	@Override
 	public int hashCode() {
 		return ObjectUtils.nullSafeHashCode(file);
 	}

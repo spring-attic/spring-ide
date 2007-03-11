@@ -46,6 +46,7 @@ public class CompilationUnitHelper {
 
 		if (fWorkingCopyOwner == null) {
 			fWorkingCopyOwner = new WorkingCopyOwner() {
+				@Override
 				public String toString() {
 					return "Spring Beans IDE Working copy owner"; //$NON-NLS-1$
 				}

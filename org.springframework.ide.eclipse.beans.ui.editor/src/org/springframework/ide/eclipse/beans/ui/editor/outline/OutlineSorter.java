@@ -22,6 +22,7 @@ import org.w3c.dom.Node;
 
 public class OutlineSorter extends ViewerSorter {
 
+	@Override
 	public int category(Object element) {
 		return BeansTags.getTag((Node) element).ordinal();
 	}

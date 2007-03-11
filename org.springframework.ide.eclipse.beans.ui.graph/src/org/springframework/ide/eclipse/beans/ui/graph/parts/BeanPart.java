@@ -43,18 +43,21 @@ public class BeanPart extends AbstractGraphicalEditPart implements NodeEditPart 
 		return (Bean) getModel();
 	}
 
+	@Override
 	protected IFigure createFigure() {
 		Bean bean = getBean();
 		BeanFigure figure = new BeanFigure(bean);
 		return figure;
 	}
 
+	@Override
 	protected void createEditPolicies() {
 	}
 
 	/**
 	 * Sets constraint for XYLayout (rectangle with figure bounds from bean). 
 	 */
+	@Override
 	protected void refreshVisuals() {
 		Dimension dim = getFigure().getPreferredSize();
 		Rectangle rect = new Rectangle(getBean().x, getBean().y, dim.width,
@@ -63,10 +66,12 @@ public class BeanPart extends AbstractGraphicalEditPart implements NodeEditPart 
 															  rect);
 	}
 
+	@Override
 	protected List getModelSourceConnections() {
 		return getBean().outgoing;
 	}
 
+	@Override
 	protected List getModelTargetConnections() {
 		return getBean().incoming;
 	}
@@ -87,6 +92,7 @@ public class BeanPart extends AbstractGraphicalEditPart implements NodeEditPart 
 		return new TopOrBottomAnchor(getFigure());
 	}
 
+	@Override
 	public void setSelected(int value) {
 		super.setSelected(value);
 		Border border = getFigure().getBorder();
@@ -103,6 +109,7 @@ public class BeanPart extends AbstractGraphicalEditPart implements NodeEditPart 
 	/**
 	 * Opens this bean's config file on double click.
 	 */
+	@Override
 	public void performRequest(Request req) {
 		if (req.getType() == RequestConstants.REQ_OPEN) {
 			BeansUIUtils.openInEditor(getBean().getBean());
@@ -116,6 +123,7 @@ public class BeanPart extends AbstractGraphicalEditPart implements NodeEditPart 
 			super(owner);
 		}
 
+		@Override
 		public Point getLocation(Point reference) {
 			Point p = getOwner().getBounds().getCenter();
 			getOwner().translateToAbsolute(p);

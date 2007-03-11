@@ -170,11 +170,11 @@ public abstract class AbstractContentAssistProcessor implements
 							((DelegatingContentAssistProcessor) this.delegatingContextAssistProcessor)
 									.getTextViewer(),
 							contentAssistRequest.getReplacementBeginPosition());
-			for (int i = 0; i < proposals.length; ++i) {
+			for (ICompletionProposal element : proposals) {
 				if (useProposalList)
-					contentAssistRequest.addProposal(proposals[i]);
+					contentAssistRequest.addProposal(element);
 				else
-					contentAssistRequest.addMacro(proposals[i]);
+					contentAssistRequest.addMacro(element);
 			}
 		}
 	}

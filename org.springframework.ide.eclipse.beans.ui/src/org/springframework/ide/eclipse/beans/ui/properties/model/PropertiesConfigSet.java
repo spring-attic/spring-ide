@@ -51,37 +51,44 @@ public class PropertiesConfigSet extends BeansConfigSet {
 		super.setIncomplete(configSet.isIncomplete());
 	}
 
+	@Override
 	public void setElementName(String name) {
 		super.setElementName(name);
 		notifyListeners();
 	}
 
+	@Override
 	public void setAllowBeanDefinitionOverriding(
 			boolean allowBeanDefinitionOverriding) {
 		super.setAllowBeanDefinitionOverriding(allowBeanDefinitionOverriding);
 		notifyListeners();
 	}
 
+	@Override
 	public void setIncomplete(boolean isIncomplete) {
 		super.setIncomplete(isIncomplete);
 		notifyListeners();
 	}
 
+	@Override
 	public void addConfig(String configName) {
 		super.addConfig(configName);
 		notifyListeners();
 	}
 
+	@Override
 	public void removeConfig(String configName) {
 		super.removeConfig(configName);
 		notifyListeners();
 	}
 
+	@Override
 	public void removeAllConfigs() {
 		super.removeAllConfigs();
 		notifyListeners();
 	}
 
+	@Override
 	public Set<IBeansConfig> getConfigs() {
 		Set<IBeansConfig> configs = new LinkedHashSet<IBeansConfig>();
 		for (String configName : configNames) {

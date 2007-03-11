@@ -61,7 +61,7 @@ public class AopLog {
 	}
 
 	public static void logEnd(int category, String event, String optional_msg) {
-		Long then = (Long) timers.get(event);
+		Long then = timers.get(event);
 		if (then != null) {
 			long now = System.currentTimeMillis();
 			long elapsed = now - then.longValue();

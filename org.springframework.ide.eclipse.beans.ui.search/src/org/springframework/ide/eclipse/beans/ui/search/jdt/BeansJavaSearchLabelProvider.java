@@ -17,6 +17,7 @@
 package org.springframework.ide.eclipse.beans.ui.search.jdt;
 
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.springframework.ide.eclipse.beans.ui.BeansUILabels;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabels;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -34,12 +35,13 @@ public class BeansJavaSearchLabelProvider extends BeansModelLabelProvider {
 		super(isDecorating);
 	}	
 
+	@Override
 	public String getText(Object element) {
 		if (element instanceof IModelElement) {
 			StringBuffer buffer = new StringBuffer(super.getText(element));
-			buffer.append(BeansModelLabels.CONCAT_STRING);
+			buffer.append(BeansUILabels.CONCAT_STRING);
 			BeansModelLabels.appendElementPathLabel((IModelElement) element,
-					BeansModelLabels.DESCRIPTION, buffer);
+					BeansUILabels.DESCRIPTION, buffer);
 			return buffer.toString();
 		}
 		return super.getText(element);

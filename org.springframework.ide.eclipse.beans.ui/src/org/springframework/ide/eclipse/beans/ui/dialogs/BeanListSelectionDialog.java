@@ -54,6 +54,7 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
  * 
  * @author Christian Dupuis
  */
+@SuppressWarnings("restriction")
 public class BeanListSelectionDialog extends ElementListSelectionDialog {
 
 	private class BeanFilterMatcher implements FilterMatcher {
@@ -133,11 +134,13 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 		}
 	}
 
+	@Override
 	public boolean close() {
 		writeSettings();
 		return super.close();
 	}
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		readSettings();
 		Composite contents = (Composite) super.createDialogArea(parent);
@@ -160,6 +163,7 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 	 *            the parent composite.
 	 * @return returns the filtered list widget.
 	 */
+	@Override
 	protected FilteredList createFilteredList(Composite parent) {
 		int flags = SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL
 				| (false ? SWT.MULTI : SWT.SINGLE);
@@ -193,6 +197,7 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 		return list;
 	}
 
+	@Override
 	protected Point getInitialLocation(Point initialSize) {
 		Point result = super.getInitialLocation(initialSize);
 		if (fLocation != null) {
@@ -211,6 +216,7 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 		return result;
 	}
 
+	@Override
 	protected Point getInitialSize() {
 		Point result = super.getInitialSize();
 		if (fSize != null) {
@@ -227,6 +233,7 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 	 * Handles a selection changed event. By default, the current selection is
 	 * validated.
 	 */
+	@Override
 	protected void handleSelectionChanged() {
 		validateCurrentSelection();
 		if (getSelectedElements().length == 1) {
@@ -256,6 +263,7 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 		}
 	}
 
+	@Override
 	public int open() {
 		final Set<IBean> beanList = new LinkedHashSet<IBean>();
 

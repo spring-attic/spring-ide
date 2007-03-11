@@ -42,6 +42,7 @@ public class OpenConfigFileAction extends Action {
 		setText("Op&en"); // TODO externalize text
 	}
 
+	@Override
 	public boolean isEnabled() {
 		ISelection selection = site.getViewSite().getSelectionProvider()
 				.getSelection();
@@ -58,6 +59,7 @@ public class OpenConfigFileAction extends Action {
 		return false;
 	}
 
+	@Override
 	public void run() {
 		if (isEnabled()) {
 			element.openAndReveal();

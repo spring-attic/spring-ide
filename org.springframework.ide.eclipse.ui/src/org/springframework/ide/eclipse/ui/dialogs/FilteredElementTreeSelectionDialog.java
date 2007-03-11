@@ -35,6 +35,7 @@ import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
 import org.eclipse.ui.internal.WorkbenchMessages;
 
+@SuppressWarnings("restriction")
 public class FilteredElementTreeSelectionDialog extends SelectionStatusDialog {
 
 	private TreeViewer fViewer;
@@ -186,7 +187,8 @@ public class FilteredElementTreeSelectionDialog extends SelectionStatusDialog {
         updateStatus(fCurrStatus);
     }
 
-    public int open() {
+    @Override
+	public int open() {
         fIsEmpty = evaluateIfTreeEmpty(fInput);
         super.open();
         return getReturnCode();
@@ -199,7 +201,8 @@ public class FilteredElementTreeSelectionDialog extends SelectionStatusDialog {
     /**
      * Handles cancel button pressed event.
      */
-    protected void cancelPressed() {
+    @Override
+	protected void cancelPressed() {
         setResult(null);
         super.cancelPressed();
     }
@@ -207,11 +210,13 @@ public class FilteredElementTreeSelectionDialog extends SelectionStatusDialog {
     /*
      * @see SelectionStatusDialog#computeResult()
      */
-    protected void computeResult() {
+    @Override
+	protected void computeResult() {
         setResult(((IStructuredSelection) fViewer.getSelection()).toList());
     }
 
-    public void create() {
+    @Override
+	public void create() {
         BusyIndicator.showWhile(null, new Runnable() {
             public void run() {
                 access$superCreate();
@@ -222,7 +227,8 @@ public class FilteredElementTreeSelectionDialog extends SelectionStatusDialog {
         });
     }
 
-    protected Control createDialogArea(Composite parent) {
+    @Override
+	protected Control createDialogArea(Composite parent) {
         Composite composite = (Composite) super.createDialogArea(parent);
 
         Label messageLabel = createMessageArea(composite);
@@ -277,14 +283,15 @@ public class FilteredElementTreeSelectionDialog extends SelectionStatusDialog {
         fViewer.setSorter(fSorter);
         if (fFilters != null) {
             for (int i = 0; i != fFilters.size(); i++) {
-				fViewer.addFilter((ViewerFilter) fFilters.get(i));
+				fViewer.addFilter(fFilters.get(i));
 			}
         }
 
         if (fDoubleClickSelects) {
             Tree tree = fViewer.getTree();
             tree.addSelectionListener(new SelectionAdapter() {
-                public void widgetDefaultSelected(SelectionEvent e) {
+                @Override
+				public void widgetDefaultSelected(SelectionEvent e) {
                     updateOKStatus();
                     if (fCurrStatus.isOK()) {
 						access$superButtonPressed(IDialogConstants.OK_ID);
@@ -323,7 +330,7 @@ public class FilteredElementTreeSelectionDialog extends SelectionStatusDialog {
         if (elements.length > 0) {
             if (fFilters != null) {
                 for (int i = 0; i < fFilters.size(); i++) {
-                    ViewerFilter curr = (ViewerFilter) fFilters.get(i);
+                    ViewerFilter curr = fFilters.get(i);
                     elements = curr.filter(fViewer, input, elements);
                 }
             }
@@ -354,7 +361,8 @@ public class FilteredElementTreeSelectionDialog extends SelectionStatusDialog {
     /**
      * @see org.eclipse.jface.window.Window#handleShellCloseEvent()
      */
-    protected void handleShellCloseEvent() {
+    @Override
+	protected void handleShellCloseEvent() {
         super.handleShellCloseEvent();
 
         //Handle the closing of the shell by selecting the close icon

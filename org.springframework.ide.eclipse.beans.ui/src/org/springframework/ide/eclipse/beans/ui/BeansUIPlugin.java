@@ -76,10 +76,12 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 		}
 	}
 
+	@Override
 	protected void initializeImageRegistry(ImageRegistry registry) {
 		BeansUIImages.initializeImageRegistry(registry);
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		if (labelProvider != null) {
 			labelProvider.dispose();
@@ -217,6 +219,6 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 		if (message == null) {
 			message = "";
 		}
-		return new Status(Status.ERROR, PLUGIN_ID, 0, message, exception);
+		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
 	}
 }

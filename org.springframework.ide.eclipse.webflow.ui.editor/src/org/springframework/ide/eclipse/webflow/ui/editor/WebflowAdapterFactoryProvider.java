@@ -35,6 +35,7 @@ import org.springframework.util.Assert;
 @SuppressWarnings("restriction")
 public class WebflowAdapterFactoryProvider extends AdapterFactoryProviderForXML {
 
+	@Override
 	@SuppressWarnings("deprecation")
 	protected void addContentBasedFactories(IStructuredModel structuredModel) {
 		FactoryRegistry factoryRegistry = structuredModel.getFactoryRegistry();
@@ -66,6 +67,7 @@ public class WebflowAdapterFactoryProvider extends AdapterFactoryProviderForXML 
 		}
 	}
 
+	@Override
 	public boolean isFor(IDocumentTypeHandler contentTypeDescription) {
 		return (contentTypeDescription instanceof WebflowModelHandler);
 	}

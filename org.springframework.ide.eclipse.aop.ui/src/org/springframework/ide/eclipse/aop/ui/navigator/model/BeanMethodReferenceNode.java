@@ -68,6 +68,7 @@ public class BeanMethodReferenceNode extends AbstractJavaElementReferenceNode
 		return nodes.toArray(new IReferenceNode[nodes.size()]);
 	}
 
+	@Override
 	public String getText() {
 		if (element instanceof IType) {
 			return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER
@@ -81,6 +82,7 @@ public class BeanMethodReferenceNode extends AbstractJavaElementReferenceNode
 		}
 	}
 
+	@Override
 	public boolean hasChildren() {
 		return this.aspectReferences.size() > 0
 				|| this.adviseReferences.size() > 0;

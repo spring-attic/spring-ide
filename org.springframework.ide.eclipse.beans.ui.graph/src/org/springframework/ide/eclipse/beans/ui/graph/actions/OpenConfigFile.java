@@ -34,16 +34,19 @@ public class OpenConfigFile extends EditorPartAction {
 		super(editor);
 	}
 
+	@Override
 	protected void init() {
 		setId(GraphActionConstants.OPEN_FILE);
 		setText(BeansGraphPlugin.getResourceString(
 												  "ContextMenu.OpenFile.text"));
 	}
 
+	@Override
 	protected boolean calculateEnabled() {
 		return true;
 	}
 
+	@Override
 	public boolean isEnabled() {
 		EditPart part = getFirstSelectedEditPart();
 		if (part instanceof BeanPart) {
@@ -52,6 +55,7 @@ public class OpenConfigFile extends EditorPartAction {
 		return false;
 	}
 
+	@Override
 	public void run() {
 		Bean bean = ((BeanPart) getFirstSelectedEditPart()).getBean();
 		BeansUIUtils.openInEditor(bean.getBean());

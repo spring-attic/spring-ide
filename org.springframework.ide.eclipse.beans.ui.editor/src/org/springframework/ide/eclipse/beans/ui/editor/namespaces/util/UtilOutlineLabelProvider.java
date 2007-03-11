@@ -24,6 +24,7 @@ import org.w3c.dom.Node;
 @SuppressWarnings("restriction")
 public class UtilOutlineLabelProvider extends JFaceNodeLabelProvider {
 
+	@Override
 	public Image getImage(Object object) {
 		Node node = (Node) object;
 		String nodeName = node.getLocalName();
@@ -49,6 +50,7 @@ public class UtilOutlineLabelProvider extends JFaceNodeLabelProvider {
 		return null;
 	}
 
+	@Override
 	public String getText(Object o) {
 		Node node = (Node) o;
 		NamedNodeMap attrs = node.getAttributes();

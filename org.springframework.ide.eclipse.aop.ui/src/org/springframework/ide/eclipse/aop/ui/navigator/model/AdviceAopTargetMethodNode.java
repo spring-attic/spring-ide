@@ -33,6 +33,7 @@ public class AdviceAopTargetMethodNode extends AbstractJavaElementReferenceNode
 		return new IReferenceNode[0];
 	}
 
+	@Override
 	public String getText() {
 		if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
 			return AopReferenceModelUtils.getJavaElementLinkName(reference
@@ -53,6 +54,7 @@ public class AdviceAopTargetMethodNode extends AbstractJavaElementReferenceNode
 		}
 	}
 
+	@Override
 	public boolean hasChildren() {
 		return false;
 	}

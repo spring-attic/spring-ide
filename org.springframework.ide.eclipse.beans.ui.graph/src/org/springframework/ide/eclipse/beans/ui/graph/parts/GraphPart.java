@@ -31,6 +31,7 @@ public class GraphPart extends AbstractGraphicalEditPart {
 
 	public static final int MARGIN_SIZE = 10;
 
+	@Override
 	protected IFigure createFigure() {
 		Figure panel = new ScalableFreeformLayeredPane();
 		panel.setBackgroundColor(ColorConstants.listBackground);
@@ -39,9 +40,11 @@ public class GraphPart extends AbstractGraphicalEditPart {
 		return panel;
 	}
 
+	@Override
 	protected void createEditPolicies() {
 	}
 
+	@Override
 	protected List getModelChildren() {
 		return ((Graph) super.getModel()).getNodes();
 	}

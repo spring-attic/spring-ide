@@ -32,6 +32,7 @@ public class PatternFilteredTree extends FilteredTree {
 		super(parent, treeStyle, new PatternFilter());
 	}
 
+	@Override
 	public TreeViewer getViewer() {
 		return super.getViewer();
 	}

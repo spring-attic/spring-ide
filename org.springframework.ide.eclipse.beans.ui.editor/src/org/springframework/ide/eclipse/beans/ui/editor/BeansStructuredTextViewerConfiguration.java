@@ -40,6 +40,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.DelegatingHyper
 public class BeansStructuredTextViewerConfiguration extends
 		StructuredTextViewerConfigurationXML {
 
+	@Override
 	public IContentAssistProcessor[] getContentAssistProcessors(
 			ISourceViewer sourceViewer, String partitionType) {
 
@@ -68,6 +69,7 @@ public class BeansStructuredTextViewerConfiguration extends
 		return processors;
 	}
 
+	@Override
 	public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
 		if (sourceViewer == null
 				|| !fPreferenceStore
@@ -78,16 +80,16 @@ public class BeansStructuredTextViewerConfiguration extends
 		allDetectors.add(new DelegatingHyperLinkDetector());
 		IHyperlinkDetector[] superDetectors = super
 				.getHyperlinkDetectors(sourceViewer);
-		for (int m = 0; m < superDetectors.length; m++) {
-			IHyperlinkDetector detector = superDetectors[m];
+		for (IHyperlinkDetector detector : superDetectors) {
 			if (!allDetectors.contains(detector)) {
 				allDetectors.add(detector);
 			}
 		}
-		return (IHyperlinkDetector[]) allDetectors
+		return allDetectors
 				.toArray(new IHyperlinkDetector[0]);
 	}
 
+	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer,
 			String contentType, int stateMask) {
 		if ((contentType == IStructuredPartitions.DEFAULT_PARTITION)

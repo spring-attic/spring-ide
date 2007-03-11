@@ -37,6 +37,7 @@ public class BeansCustomTemplateProposal extends TemplateProposal implements
 		super(template, context, region, image, relevance);
 	}
 
+	@Override
 	public String getAdditionalProposalInfo() {
 		String additionalInfo = super.getAdditionalProposalInfo();
 		return BeansEditorUtils.convertToHTMLContent(additionalInfo);

@@ -62,11 +62,13 @@ public class ShadowedLineBorder extends LineBorder {
 	 * @param figure The figure this border belongs to
 	 * @return This border's insets
 	 */
+	@Override
 	public Insets getInsets(IFigure figure) {
 		return new Insets(getWidth(), getWidth(), getWidth() + getShadowWidth(),
 						  getWidth() + getShadowWidth());
 	}
 
+	@Override
 	public void paint(IFigure figure, Graphics graphics, Insets insets) {
 
 		// Paint line border [copied from super.paint()]

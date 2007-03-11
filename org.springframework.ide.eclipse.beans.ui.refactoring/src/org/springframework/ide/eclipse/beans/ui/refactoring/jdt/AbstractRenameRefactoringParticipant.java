@@ -49,6 +49,7 @@ public abstract class AbstractRenameRefactoringParticipant extends
 
 	protected Map<Object, Object> elements;
 
+	@Override
 	public RefactoringStatus checkConditions(IProgressMonitor pm,
 			CheckConditionsContext context) throws OperationCanceledException {
 		return new RefactoringStatus();
@@ -58,6 +59,7 @@ public abstract class AbstractRenameRefactoringParticipant extends
 		elements.put(element, ((RenameArguments) arguments).getNewName());
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException,
 			OperationCanceledException {
 		if (!getArguments().getUpdateReferences())
@@ -78,7 +80,7 @@ public abstract class AbstractRenameRefactoringParticipant extends
 
 	protected IJavaElement[] getAffectedElements() {
 		Set<Object> objects = elements.keySet();
-		return (IJavaElement[]) objects
+		return objects
 				.toArray(new IJavaElement[objects.size()]);
 	}
 
@@ -90,6 +92,7 @@ public abstract class AbstractRenameRefactoringParticipant extends
 		return result;
 	}
 
+	@Override
 	public String getName() {
 		return "Rename classes referenced in Spring Bean definitions";
 	}

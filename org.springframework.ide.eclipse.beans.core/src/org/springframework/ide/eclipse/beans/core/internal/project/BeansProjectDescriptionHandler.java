@@ -62,6 +62,7 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 		return problems;
 	}
 
+	@Override
 	public void startElement(String uri, String elementName, String qname,
 			Attributes attributes) throws SAXException {
 		// clear the character buffer at the start of every element
@@ -110,6 +111,7 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 		}
 	}
 
+	@Override
 	public void endElement(String uri, String elementName, String qname)
 			throws SAXException {
 		if (state == State.PROJECT_DESC) {
@@ -201,20 +203,24 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 		charBuffer.setLength(0);
 	}
 
+	@Override
 	public void characters(char[] chars, int offset, int length)
 			throws SAXException {
 		// accumulate characters and process them when endElement is reached
 		charBuffer.append(chars, offset, length);
 	}
 
+	@Override
 	public void setDocumentLocator(Locator locator) {
 		this.locator = locator;
 	}
 
+	@Override
 	public void error(SAXParseException error) throws SAXException {
 		log(IStatus.WARNING, error);
 	}
 
+	@Override
 	public void warning(SAXParseException error) throws SAXException {
 		log(IStatus.WARNING, error);
 	}

@@ -112,8 +112,8 @@ public class WebflowConfigUIImages {
 		if (imageRegistry == null) {
 			imageRegistry = new ImageRegistry();
 			for (Iterator<String> iter = imageDescriptors.keySet().iterator(); iter.hasNext();) {
-				String key = (String) iter.next();
-				imageRegistry.put(key, (ImageDescriptor) imageDescriptors.get(key));
+				String key = iter.next();
+				imageRegistry.put(key, imageDescriptors.get(key));
 			}
 			imageDescriptors = null;
 		}

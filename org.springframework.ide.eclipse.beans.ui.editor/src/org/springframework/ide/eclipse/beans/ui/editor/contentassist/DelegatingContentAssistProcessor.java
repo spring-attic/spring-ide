@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.namespaces.NamespaceUtils
 @SuppressWarnings("restriction")
 public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor {
 
+	@Override
 	protected void addAttributeValueProposals(ContentAssistRequest request) {
 		IDOMNode node = (IDOMNode) request.getNode();
 		String namespace = node.getNamespaceURI();
@@ -37,6 +38,7 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 		super.addAttributeValueProposals(request);
 	}
 
+	@Override
 	protected void addAttributeNameProposals(ContentAssistRequest request) {
 		IDOMNode node = (IDOMNode) request.getNode();
 		String namespace = node.getNamespaceURI();
@@ -48,6 +50,7 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 		super.addAttributeNameProposals(request);
 	}
 
+	@Override
 	protected void addTagCloseProposals(ContentAssistRequest request) {
 		IDOMNode node = (IDOMNode) request.getNode();
 		String namespace = node.getNamespaceURI();
@@ -59,6 +62,7 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 		super.addTagCloseProposals(request);
 	}
 
+	@Override
 	protected void addTagInsertionProposals(ContentAssistRequest request,
 			int childPosition) {
 		IDOMNode node = (IDOMNode) request.getNode();
@@ -75,6 +79,7 @@ public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor 
 		return fTextViewer;
 	}
 
+	@Override
 	public char[] getCompletionProposalAutoActivationCharacters() {
 		return new char[] { '.', '=', '\"', '<' };
 	}

@@ -105,6 +105,7 @@ public class AdviceAnnotationVisitor extends EmptyVisitor {
 		this.aspectClassName = aspectClassName;
 	}
 
+	@Override
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
 		if (visitedMethod != null && visible
 				&& ANNOTATION_TYPES.containsKey(desc)) {
@@ -143,6 +144,7 @@ public class AdviceAnnotationVisitor extends EmptyVisitor {
 		return new EmptyVisitor();
 	}
 
+	@Override
 	public void visit(String name, Object value) {
 		if (lastAspectDefinition != null) {
 			if (lastAspectDefinition instanceof AnnotationAspectDefinition) {
@@ -174,6 +176,7 @@ public class AdviceAnnotationVisitor extends EmptyVisitor {
 		}
 	}
 
+	@Override
 	public FieldVisitor visitField(int access, String name, String desc,
 			String signature, Object value) {
 		visitedField = name;
@@ -182,6 +185,7 @@ public class AdviceAnnotationVisitor extends EmptyVisitor {
 		return this;
 	}
 
+	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc,
 			String signature, String[] exceptions) {
 		Type[] types = Type.getArgumentTypes(desc);

@@ -84,6 +84,7 @@ public class NewSpringProjectWizard extends Wizard
 		setNeedsProgressMonitor(true);
 	}
 
+	@Override
 	public void addPages() {
 		mainPage = new NewSpringProjectCreationPage("springNewProjectPage");
 		mainPage.setTitle(BeansWizardsMessages.NewProject_title);
@@ -99,6 +100,7 @@ public class NewSpringProjectWizard extends Wizard
             String propertyName, Object data) {
     }
 
+	@Override
 	public boolean performFinish() {
 
 		// get the data from the UI widgets
@@ -136,6 +138,7 @@ public class NewSpringProjectWizard extends Wizard
 
 		// create the new Spring project operation
 		WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
+			@Override
 			protected void execute(IProgressMonitor monitor)
 					throws CoreException {
 				monitor.beginTask(

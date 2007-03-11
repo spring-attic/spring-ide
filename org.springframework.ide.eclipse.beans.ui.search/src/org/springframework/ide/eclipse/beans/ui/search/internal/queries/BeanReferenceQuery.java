@@ -65,6 +65,7 @@ public class BeanReferenceQuery extends AbstractBeansQuery {
 				BeansSearchMessages.SearchQuery_searchFor_reference, args);
 	}
 
+	@Override
 	protected boolean doesMatch(IModelElement element, Pattern pattern,
 			IProgressMonitor monitor) {
 		if (element instanceof IBeanAlias) {
@@ -94,8 +95,7 @@ public class BeanReferenceQuery extends AbstractBeansQuery {
 			// Compare reference with depends-on beans
 			String dependsOnBeanNames[] = bd.getDependsOn();
 			if (dependsOnBeanNames != null) {
-				for (int i = 0; i < dependsOnBeanNames.length; i++) {
-					String name = dependsOnBeanNames[i];
+				for (String name : dependsOnBeanNames) {
 					if (pattern.matcher(name).matches()) {
 						return true;
 					}

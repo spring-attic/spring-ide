@@ -90,6 +90,7 @@ public class BeanClassTargetReferenceNode extends
 		return nodes.toArray(new IReferenceNode[nodes.size()]);
 	}
 
+	@Override
 	public String getText() {
 		if (element instanceof IType) {
 			return AopReferenceModelNavigatorUtils.JAVA_LABEL_PROVIDER
@@ -102,6 +103,7 @@ public class BeanClassTargetReferenceNode extends
 		}
 	}
 
+	@Override
 	public boolean hasChildren() {
 		return parent.getAdviseReferences().size() > 0
 				|| parent.getAspectReferences().size() > 0;

@@ -71,11 +71,13 @@ public class BeansCorePlugin extends Plugin {
 		}
 	}
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		model.startup();
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		model.shutdown();
 		super.stop(context);
@@ -161,7 +163,7 @@ public class BeansCorePlugin extends Plugin {
 		if (message == null) {
 			message = ""; 
 		}		
-		return new Status(Status.ERROR, PLUGIN_ID, 0, message, exception);
+		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
 	}
 
 	public static String getFormattedMessage(String key, String arg) {

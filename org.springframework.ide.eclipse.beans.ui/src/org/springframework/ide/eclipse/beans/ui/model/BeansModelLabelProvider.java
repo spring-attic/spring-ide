@@ -67,11 +67,13 @@ public class BeansModelLabelProvider extends LabelProvider implements
 		this.wbLabelProvider = new WorkbenchLabelProvider();
 	}
 
+	@Override
 	public void dispose() {
 		wbLabelProvider.dispose();
 		super.dispose();
 	}
 
+	@Override
 	public Image getImage(Object element) {
 		Image image = getBaseImage(element);
 		if (isDecorating) {
@@ -149,6 +151,7 @@ public class BeansModelLabelProvider extends LabelProvider implements
 		return image;
 	}
 
+	@Override
 	public String getText(Object element) {
 		String text = getBaseText(element);
 		if (isDecorating) {

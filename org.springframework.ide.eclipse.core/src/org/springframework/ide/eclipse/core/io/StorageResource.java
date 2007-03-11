@@ -40,6 +40,7 @@ public class StorageResource extends AbstractResource implements IAdaptable {
 		this.storage = storage;
 	}
 
+	@Override
 	public boolean exists() {
 		return (storage != null);
 	}
@@ -55,6 +56,7 @@ public class StorageResource extends AbstractResource implements IAdaptable {
 		}
 	}
 
+	@Override
 	public String getDescription() {
 		return "storage [" + (storage != null ? storage.getName() : "") + "]";
 	}
@@ -69,6 +71,7 @@ public class StorageResource extends AbstractResource implements IAdaptable {
 		return storage.getAdapter(adapter);
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -80,6 +83,7 @@ public class StorageResource extends AbstractResource implements IAdaptable {
 		return ObjectUtils.nullSafeEquals(this.storage, that.storage);
 	}
 
+	@Override
 	public int hashCode() {
 		return ObjectUtils.nullSafeHashCode(storage);
 	}

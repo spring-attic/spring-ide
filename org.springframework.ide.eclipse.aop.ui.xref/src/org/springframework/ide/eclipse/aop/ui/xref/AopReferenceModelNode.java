@@ -104,6 +104,7 @@ public class AopReferenceModelNode implements IAdaptable, IXReferenceNode {
 		return this.reference.getResource();
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof AopReferenceModelNode) {
 			AopReferenceModelNode other = (AopReferenceModelNode) obj;
@@ -112,6 +113,7 @@ public class AopReferenceModelNode implements IAdaptable, IXReferenceNode {
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(getLabel());
 		return hashCode;

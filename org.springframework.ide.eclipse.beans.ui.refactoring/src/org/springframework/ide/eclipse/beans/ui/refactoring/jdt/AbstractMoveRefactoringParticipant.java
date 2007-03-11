@@ -47,6 +47,7 @@ public abstract class AbstractMoveRefactoringParticipant extends
 
 	protected List<Object> elements;
 
+	@Override
 	public RefactoringStatus checkConditions(IProgressMonitor pm,
 			CheckConditionsContext context) throws OperationCanceledException {
 		return new RefactoringStatus();
@@ -56,6 +57,7 @@ public abstract class AbstractMoveRefactoringParticipant extends
 		elements.add(element);
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException,
 			OperationCanceledException {
 		if (!getArguments().getUpdateReferences())

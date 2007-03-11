@@ -84,6 +84,7 @@ public class BeanDefinitionException extends NestedRuntimeException {
 		return lineNumber;	
 	}
 
+	@Override
 	public String getMessage() {
 		return (getCause() != null ? getCause().getMessage() : super.getMessage());
 	}

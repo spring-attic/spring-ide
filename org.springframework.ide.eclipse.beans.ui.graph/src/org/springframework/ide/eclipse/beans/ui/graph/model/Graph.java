@@ -41,9 +41,8 @@ import org.springframework.ide.eclipse.beans.ui.graph.figures.BeanFigure;
 
 /**
  * This class builds the graphical representation of the model data (given as
- * editor input) via GEF's <code>DirectedGraphLayout</code>.
- * @see org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput
- * @see org.eclipse.draw2d.graph.DirectedGraphLayout
+ * {@link GraphEditorInput}) via GEF's {@link DirectedGraphLayout}.
+ * 
  * @author Torsten Juergeleit
  */
 public class Graph implements IAdaptable {
@@ -95,8 +94,7 @@ public class Graph implements IAdaptable {
 			// Add all bean references in bean's constructor arguments to list
 			// of graph edges
 			ConstructorArgument[] cargs = bean.getConstructorArguments();
-			for (int i = 0; i < cargs.length; i++) {
-				ConstructorArgument carg = cargs[i];
+			for (ConstructorArgument carg : cargs) {
 				Iterator cargRefs = BeansModelUtils.getBeanReferences(
 										 carg.getBeanConstructorArgument(),
 										 input.getContext(), false).iterator();
@@ -113,8 +111,7 @@ public class Graph implements IAdaptable {
 
 			// Add all bean references in properties to list of graph edges
 			Property[] properties = bean.getProperties();
-			for (int i = 0; i < properties.length; i++) {
-				Property property = properties[i];
+			for (Property property : properties) {
 				Iterator propRefs = BeansModelUtils.getBeanReferences(
 										 property.getBeanProperty(),
 										 input.getContext(), false).iterator();
@@ -169,7 +166,7 @@ public class Graph implements IAdaptable {
 		graph.nodes.add(root);
 
 		EdgeList rootEdges = new EdgeList();
-		List orphanBeans = new ArrayList();
+		List<Bean> orphanBeans = new ArrayList<Bean>();
 		beans = getBeans().iterator();
 		while (beans.hasNext()) {
 			Bean bean = (Bean) beans.next();
@@ -192,14 +189,14 @@ public class Graph implements IAdaptable {
 			// Re-invert edges inverted while breaking cycles
 			for (int i = 0; i < graph.edges.size(); i++) {
 				Edge e = graph.edges.getEdge(i);
-				if (e.isFeedback) {
+				if (e.isFeedback()) {
 					e.invert();
 				}
 			}
 	
 			// Remove temporary root and root edges
 			for (int i = 0; i < rootEdges.size(); i++) {
-				Edge e = (Edge) rootEdges.getEdge(i);
+				Edge e = rootEdges.getEdge(i);
 				e.source.outgoing.remove(e);
 				e.target.incoming.remove(e);
 				graph.edges.remove(e);

@@ -47,6 +47,7 @@ public class GraphOutlinePage extends Page implements IContentOutlinePage {
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		overview = new Canvas(parent, SWT.NONE);
 		overview.setBackground(ColorConstants.listBackground);
@@ -58,6 +59,7 @@ public class GraphOutlinePage extends Page implements IContentOutlinePage {
 		lws.setContents(thumbnail);
 	}
 
+	@Override
 	public Control getControl() {
 		return overview;
 	}
@@ -69,6 +71,7 @@ public class GraphOutlinePage extends Page implements IContentOutlinePage {
 	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
 	}
 
+	@Override
 	public void setFocus() {
 		if (getControl() != null) {
 			getControl().setFocus();
@@ -78,6 +81,7 @@ public class GraphOutlinePage extends Page implements IContentOutlinePage {
 	public void setSelection(ISelection selection) {
 	}
 
+	@Override
 	public void dispose() {
 		if (null != thumbnail) {
 			thumbnail.deactivate();

@@ -97,7 +97,7 @@ public class BeansEditorUtils {
 
 	protected static final String DOUBLE_QUOTE = "\""; //$NON-NLS-1$
 
-	protected static final char DOUBLE_QUOTE_CHAR = '\"'; //$NON-NLS-1$
+	protected static final char DOUBLE_QUOTE_CHAR = '\"'; 
 
 	protected static final String DOUBLE_QUOTE_ENTITY = "&quot;"; //$NON-NLS-1$
 
@@ -129,7 +129,7 @@ public class BeansEditorUtils {
 
 	protected static final String SINGLE_QUOTE = "'"; //$NON-NLS-1$
 
-	protected static final char SINGLE_QUOTE_CHAR = '\''; //$NON-NLS-1$
+	protected static final char SINGLE_QUOTE_CHAR = '\''; 
 
 	protected static final String SINGLE_QUOTE_ENTITY = "&#039;"; //$NON-NLS-1$
 
@@ -206,8 +206,8 @@ public class BeansEditorUtils {
 
 		Iterator paths = configsMap.keySet().iterator();
 		while (paths.hasNext()) {
-			IBeansConfig beansConfig = (IBeansConfig) configsMap
-					.get((String) paths.next());
+			IBeansConfig beansConfig = configsMap
+					.get(paths.next());
 			beans.addAll(beansConfig.getBeans());
 			Set<IBeansComponent> components = beansConfig.getComponents();
 			for (IBeansComponent component : components) {
@@ -536,7 +536,7 @@ public class BeansEditorUtils {
 					propertyPaths.add(tok.nextToken());
 				}
 
-				int regionLength = ((String) propertyPaths
+				int regionLength = (propertyPaths
 						.get(segmentCount - 1)).length();
 
 				return new Region(regionOffset, regionLength);
@@ -761,8 +761,7 @@ public class BeansEditorUtils {
 
 		int currPos = 0;
 		boolean upperCaseNext = false;
-		for (int i = 0; i < chars.length; i++) {
-			char c = chars[i];
+		for (char c : chars) {
 			if (c == '-') {
 				upperCaseNext = true;
 				continue;
@@ -782,8 +781,7 @@ public class BeansEditorUtils {
 		char[] chars = propertyName.toCharArray();
 		StringBuffer buf = new StringBuffer();
 
-		for (int i = 0; i < chars.length; i++) {
-			char c = chars[i];
+		for (char c : chars) {
 			if (Character.isUpperCase(c)) {
 				c = Character.toLowerCase(c);
 				buf.append('-');

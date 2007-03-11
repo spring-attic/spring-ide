@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 public class BeansPackageRenameRefactoringParticipant extends
 		BeansTypeRenameRefactoringParticipant {
 
+	@Override
 	protected boolean initialize(Object element) {
 		try {
 			if (element instanceof IPackageFragment) {
@@ -49,6 +50,7 @@ public class BeansPackageRenameRefactoringParticipant extends
 		return false;
 	}
 
+	@Override
 	protected String[] getNewNames() {
 		String[] result = new String[elements.size()];
 		Iterator<Object> iter = elements.values().iterator();

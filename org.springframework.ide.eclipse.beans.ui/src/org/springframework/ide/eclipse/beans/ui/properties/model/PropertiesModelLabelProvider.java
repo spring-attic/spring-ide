@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
  */
 public class PropertiesModelLabelProvider extends BeansModelLabelProvider {
 
+	@Override
 	public String getText(Object element) {
 		if (element instanceof IBeansConfig) {
 			return ((IBeansConfig) element).getElementName();

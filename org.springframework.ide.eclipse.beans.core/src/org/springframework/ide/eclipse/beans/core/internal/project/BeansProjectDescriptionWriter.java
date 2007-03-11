@@ -19,7 +19,7 @@ package org.springframework.ide.eclipse.beans.core.internal.project;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Collection;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -75,8 +75,7 @@ public class BeansProjectDescriptionWriter implements
 		}
 	}
 
-	protected static void write(BeansProject project, XMLWriter writer)
-			throws IOException {
+	protected static void write(BeansProject project, XMLWriter writer) {
 		writer.startTag(PROJECT_DESCRIPTION, null);
 		write(CONFIG_EXTENSIONS, CONFIG_EXTENSION, project
 				.getConfigExtensions(), writer);
@@ -85,8 +84,7 @@ public class BeansProjectDescriptionWriter implements
 		writer.endTag(PROJECT_DESCRIPTION);
 	}
 
-	protected static void write(IBeansConfigSet configSet, XMLWriter writer)
-			throws IOException {
+	protected static void write(IBeansConfigSet configSet, XMLWriter writer) {
 		writer.startTag(CONFIG_SET, null);
 		writer.printSimpleTag(NAME, configSet.getElementName());
 		writer.printSimpleTag(OVERRIDING, new Boolean(configSet
@@ -97,8 +95,8 @@ public class BeansProjectDescriptionWriter implements
 		writer.endTag(CONFIG_SET);
 	}
 
-	protected static void write(String name, Collection elements,
-			XMLWriter writer) throws IOException {
+	protected static void write(String name, Set<?> elements,
+			XMLWriter writer) {
 		writer.startTag(name, null);
 		for (Object element : elements) {
 			if (element instanceof IBeansConfigSet) {
@@ -109,7 +107,7 @@ public class BeansProjectDescriptionWriter implements
 	}
 
 	protected static void write(String name, String elementTagName,
-			String[] values, XMLWriter writer) throws IOException {
+			String[] values, XMLWriter writer) {
 		writer.startTag(name, null);
 		for (String value : values) {
 			writer.printSimpleTag(elementTagName, value);
@@ -118,7 +116,7 @@ public class BeansProjectDescriptionWriter implements
 	}
 
 	protected static void write(String name, String elementTagName,
-			Collection values, XMLWriter writer) throws IOException {
+			Set<?> values, XMLWriter writer) {
 		writer.startTag(name, null);
 		for (Object value : values) {
 			writer.printSimpleTag(elementTagName, value);

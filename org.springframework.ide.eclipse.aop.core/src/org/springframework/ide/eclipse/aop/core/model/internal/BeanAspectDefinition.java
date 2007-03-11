@@ -57,6 +57,7 @@ public class BeanAspectDefinition implements IAspectDefinition {
 
 	protected IAopReference.ADVICE_TYPES type;
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof BeanAspectDefinition) {
 			BeanAspectDefinition other = (BeanAspectDefinition) obj;
@@ -129,6 +130,7 @@ public class BeanAspectDefinition implements IAspectDefinition {
 		return type;
 	}
 
+	@Override
 	public int hashCode() {
 		int hc = node.hashCode();
 		hc = 23 * hc + type.hashCode();
@@ -216,6 +218,7 @@ public class BeanAspectDefinition implements IAspectDefinition {
 		this.adivceMethodParameterTypes = params;
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer buf = new StringBuffer();
 		buf.append("Aspect definition");

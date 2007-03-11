@@ -111,6 +111,7 @@ public class XmlSourceLocation implements IModelSourceLocation {
 		return endLine;
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -132,6 +133,7 @@ public class XmlSourceLocation implements IModelSourceLocation {
 		return ObjectUtils.nullSafeEquals(this.endLine, that.endLine);
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = 29 * ObjectUtils.nullSafeHashCode(resource);
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(localName);
@@ -141,6 +143,7 @@ public class XmlSourceLocation implements IModelSourceLocation {
 		return 29 * hashCode + ObjectUtils.nullSafeHashCode(endLine);
 	}
 
+	@Override
 	public String toString() {
 		return "XmlSource: resource=" + resource + ", nodeName="
 				+ getNodeName() + ", startLine=" + startLine + ", endLine="

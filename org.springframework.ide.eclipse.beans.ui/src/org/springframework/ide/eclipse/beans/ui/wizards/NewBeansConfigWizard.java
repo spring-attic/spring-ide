@@ -57,6 +57,7 @@ public class NewBeansConfigWizard extends Wizard implements INewWizard {
 		setDefaultPageImageDescriptor(BeansUIImages.DESC_WIZ_CONFIG);
 	}
 
+	@Override
 	public void addPages() {
 		super.addPages();
 		mainPage = new WizardNewFileCreationPage("springNewConfigPage", selection);
@@ -65,6 +66,7 @@ public class NewBeansConfigWizard extends Wizard implements INewWizard {
 		addPage(mainPage);
 	}
 
+	@Override
 	public boolean performFinish() {
 		createNewConfig();
 		if (newConfig == null) {

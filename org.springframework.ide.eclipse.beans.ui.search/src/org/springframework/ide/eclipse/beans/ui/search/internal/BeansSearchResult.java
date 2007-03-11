@@ -46,6 +46,7 @@ public class BeansSearchResult extends AbstractTextSearchResult implements
 		this.query = query;
 	}
 
+	@Override
 	public IEditorMatchAdapter getEditorMatchAdapter() {
 		return this;
 	}
@@ -69,6 +70,7 @@ public class BeansSearchResult extends AbstractTextSearchResult implements
 		return false;
 	}
 
+	@Override
 	public IFileMatchAdapter getFileMatchAdapter() {
 		return this;
 	}
@@ -105,6 +107,7 @@ public class BeansSearchResult extends AbstractTextSearchResult implements
 		return getLabel();
 	}
 
+	@Override
 	public String toString() {
 		return "Results for " + getQuery().getLabel() + " # = " +
 			   getMatchCount();

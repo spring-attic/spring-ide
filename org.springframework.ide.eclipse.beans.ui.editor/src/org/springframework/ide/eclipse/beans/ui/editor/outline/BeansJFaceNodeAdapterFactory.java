@@ -41,6 +41,7 @@ public class BeansJFaceNodeAdapterFactory extends JFaceNodeAdapterFactory {
 	/**
 	 * Create a new JFace adapter for the DOM node passed in.
 	 */
+	@Override
 	protected INodeAdapter createAdapter(INodeNotifier node) {
 		if (singletonAdapter == null) {
 			singletonAdapter = new BeansJFaceNodeAdapter(this);
@@ -49,6 +50,7 @@ public class BeansJFaceNodeAdapterFactory extends JFaceNodeAdapterFactory {
 		return singletonAdapter;
 	}
 
+	@Override
 	public INodeAdapterFactory copy() {
 		return new BeansJFaceNodeAdapterFactory();
 	}

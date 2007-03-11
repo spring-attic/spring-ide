@@ -35,6 +35,7 @@ public class FileSelectionValidator extends AbstractSelectionValidator {
 		super(multiSelect);
 	}
 
+	@Override
 	public boolean isValid(Object selection) {
 		return (selection instanceof IFile);
 	}

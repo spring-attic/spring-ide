@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,11 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 
+/**
+ * This is a representation of a Spring bean's constructor argument.
+ * 
+ * @author Torsten Juergeleit
+ */
 public class ConstructorArgument extends Node implements IAdaptable {
 
 	private Bean bean;
@@ -53,11 +58,11 @@ public class ConstructorArgument extends Node implements IAdaptable {
 	}
 
 	/**
-	 * Returns a list of all references to other beans
-	 * (RuntimeBeanReferences) of this ConstructorArgumentValue.
+	 * Returns a list of all references to other beans of this
+	 * ConstructorArgumentValue.
 	 */
-	public List getBeanReferences() {
-		List references = new ArrayList();
+	public List<RuntimeBeanReference> getBeanReferences() {
+		List<RuntimeBeanReference> references = new ArrayList<RuntimeBeanReference>();
 		addReferencesForValue(carg.getValue(), references);
 		return references;
 	}
@@ -73,22 +78,26 @@ public class ConstructorArgument extends Node implements IAdaptable {
 	 * added.
 	 * <li>An ordinary object or null, in which case it's ignored.
 	 */
-	private void addReferencesForValue(Object value, List references) {
+	private void addReferencesForValue(Object value,
+			List<RuntimeBeanReference> references) {
 		if (value instanceof RuntimeBeanReference) {
-			references.add(value);
-		} else if (value instanceof List) {
+			references.add((RuntimeBeanReference) value);
+		}
+		else if (value instanceof List) {
 			List list = (List) value;
 			for (int i = 0; i < list.size(); i++) {
 				addReferencesForValue(list.get(i), references);
 			}
-		} else if (value instanceof Set) {
+		}
+		else if (value instanceof Set) {
 			Set set = (Set) value;
-			for (Iterator iter = set.iterator(); iter.hasNext(); ) {
+			for (Iterator iter = set.iterator(); iter.hasNext();) {
 				addReferencesForValue(iter.next(), references);
 			}
-		} else if (value instanceof Map) {
+		}
+		else if (value instanceof Map) {
 			Map map = (Map) value;
-			for (Iterator iter = map.keySet().iterator(); iter.hasNext(); ) {
+			for (Iterator iter = map.keySet().iterator(); iter.hasNext();) {
 				addReferencesForValue(map.get(iter.next()), references);
 			}
 		}

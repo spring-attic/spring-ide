@@ -76,6 +76,7 @@ public class NewSpringProjectCreationPage extends WizardNewProjectCreationPage {
 		return StringUtils.commaDelimitedListToSet(extensionsText.getText());
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		Composite control = (Composite)getControl();
@@ -117,6 +118,7 @@ public class NewSpringProjectCreationPage extends WizardNewProjectCreationPage {
 		isJavaButton.setText(BeansWizardsMessages.NewProjectPage_java);
 		isJavaButton.setSelection(true);
 		isJavaButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				boolean enabled = isJavaButton.getSelection();
 				sourceDirLabel.setEnabled(enabled);
@@ -173,6 +175,7 @@ public class NewSpringProjectCreationPage extends WizardNewProjectCreationPage {
 		return text;
 	}
 
+	@Override
 	protected boolean validatePage() {
 		if (!super.validatePage()) {
 			return false;

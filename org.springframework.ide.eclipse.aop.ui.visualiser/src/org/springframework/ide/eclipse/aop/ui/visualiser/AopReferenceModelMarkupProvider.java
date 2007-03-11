@@ -64,6 +64,7 @@ public class AopReferenceModelMarkupProvider extends SimpleMarkupProvider
 	/**
 	 * Get a List of Stripes for the given member, which are its markups.
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public List<Stripe> getMemberMarkups(IMember member) {
 
@@ -87,7 +88,7 @@ public class AopReferenceModelMarkupProvider extends SimpleMarkupProvider
 							advisedType = (IType) reference.getTarget();
 						}
 						else {
-							advisedType = (IType) reference.getTarget()
+							advisedType = reference.getTarget()
 									.getDeclaringType();
 						}
 						ICompilationUnit advisedCu = advisedType
@@ -120,6 +121,7 @@ public class AopReferenceModelMarkupProvider extends SimpleMarkupProvider
 	 * 
 	 * @return a Set of Strings
 	 */
+	@Override
 	public SortedSet<SimpleMarkupKind> getAllMarkupKinds() {
 		SortedSet<SimpleMarkupKind> kinds = new TreeSet<SimpleMarkupKind>();
 		List<String> advices = new ArrayList<String>();
@@ -153,6 +155,7 @@ public class AopReferenceModelMarkupProvider extends SimpleMarkupProvider
 	 * @see org.eclipse.contribution.visualiser.interfaces.IMarkupProvider#processMouseclick(org.eclipse.contribution.visualiser.interfaces.IMember,
 	 * org.eclipse.contribution.visualiser.core.Stripe, int)
 	 */
+	@Override
 	public boolean processMouseclick(IMember member, Stripe stripe,
 			int buttonClicked) {
 		if (buttonClicked == 1) {
@@ -208,6 +211,7 @@ public class AopReferenceModelMarkupProvider extends SimpleMarkupProvider
 	/**
 	 * Activate the provider
 	 */
+	@Override
 	public void activate() {
 		Activator.getModel().registerAopModelChangedListener(this);
 	}
@@ -215,6 +219,7 @@ public class AopReferenceModelMarkupProvider extends SimpleMarkupProvider
 	/**
 	 * Deactivate the provider
 	 */
+	@Override
 	public void deactivate() {
 		super.deactivate();
 		Activator.getModel().unregisterAopModelChangedListener(this);

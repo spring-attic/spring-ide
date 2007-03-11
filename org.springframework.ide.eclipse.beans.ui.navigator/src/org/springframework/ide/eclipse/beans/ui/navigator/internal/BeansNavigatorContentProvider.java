@@ -48,7 +48,8 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 
 	private String providerID;
 
-    public void elementChanged(ModelChangeEvent event) {
+    @Override
+	public void elementChanged(ModelChangeEvent event) {
 		IModelElement element = event.getElement();
 
 		if (element instanceof IBeansProject) {
@@ -96,6 +97,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 	public void restoreState(IMemento aMemento) {
 	}
 
+	@Override
 	public String toString() {
 		return String.valueOf(providerID);
 	}

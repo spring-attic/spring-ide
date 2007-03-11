@@ -99,6 +99,7 @@ public class WebflowOutlineLabelProvider extends JFaceNodeLabelProvider {
 				.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW));
 	}
 
+	@Override
 	public Image getImage(Object object) {
 		Node node = (Node) object;
 		String nodeName = node.getLocalName();
@@ -111,6 +112,7 @@ public class WebflowOutlineLabelProvider extends JFaceNodeLabelProvider {
 		}
 	}
 
+	@Override
 	public String getText(Object o) {
 		// Node node = (Node) o;
 		// String nodeName = node.getNodeName();

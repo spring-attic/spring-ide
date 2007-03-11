@@ -34,6 +34,7 @@ public class BeansContentOutlineConfiguration extends
 	/**
 	 * Returns the bean editor plugin's preference store.
 	 */
+	@Override
 	protected IPreferenceStore getPreferenceStore() {
 		return Activator.getDefault().getPreferenceStore();
 	}
@@ -41,6 +42,7 @@ public class BeansContentOutlineConfiguration extends
 	/**
 	 * Adds the outline style toggle to the context menu.
 	 */
+	@Override
 	protected IContributionItem[] createMenuContributions(TreeViewer viewer) {
 		IContributionItem styleItem = new ActionContributionItem(
 				new OutlineStyleAction(viewer));
@@ -60,6 +62,7 @@ public class BeansContentOutlineConfiguration extends
 	/**
 	 * Adds the sort toggle to the toolbar.
 	 */
+	@Override
 	protected IContributionItem[] createToolbarContributions(TreeViewer viewer) {
 		IContributionItem sortItem = new ActionContributionItem(
 				new LexicalSortingAction(viewer));
@@ -76,6 +79,7 @@ public class BeansContentOutlineConfiguration extends
 		return items;
 	}
 
+	@Override
 	protected void enableShowAttributes(boolean showAttributes,
 			TreeViewer treeViewer) {
 		BeansContentOutlineConfiguration.showAttributes = showAttributes;
@@ -89,6 +93,7 @@ public class BeansContentOutlineConfiguration extends
 	 * 
 	 * @see BeansOutlineLabelProvider
 	 */
+	@Override
 	public ILabelProvider getLabelProvider(TreeViewer viewer) {
 		return new DelegatingLabelProvider(super.getLabelProvider(viewer));
 	}

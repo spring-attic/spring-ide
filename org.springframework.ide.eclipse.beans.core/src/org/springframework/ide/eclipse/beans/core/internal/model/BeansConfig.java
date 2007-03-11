@@ -148,6 +148,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		return IBeansModelElementTypes.CONFIG_TYPE;
 	}
 
+	@Override
 	public IModelElement[] getElementChildren() {
 
 		// Lazily initialization of this config
@@ -184,6 +185,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		return beans != null;
 	}
 
+	@Override
 	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 
 		// First visit this config
@@ -375,6 +377,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		return new HashSet<IBean>();
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -409,6 +412,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		return super.equals(other);
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = 1;
 		if (defaults != null) {
@@ -432,6 +436,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		return getElementType() * hashCode + super.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return getElementName() + ": " + getBeans();
 	}
@@ -747,9 +752,11 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			if (location != null) {
 				Resource resource = location.getResource();
 				if (resource instanceof IAdaptable) {
-					IFile file = (IFile) ((IAdaptable) resource)
-							.getAdapter(IFile.class);
-					return !config.getElementResource().equals(file);
+
+					// Adapt given resource to a file and compare it with this
+					// config's resource
+					return !config.getElementResource().equals(
+							((IAdaptable) resource).getAdapter(IFile.class));
 				}
 			}
 			return false;
@@ -782,6 +789,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			namespaceHandlers = NamespaceUtils.getNamespaceHandlers();
 		}
 
+		@Override
 		public NamespaceHandler resolve(String namespaceUri) {
 
 			// First check for a namespace handler provided by Spring  
@@ -833,6 +841,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			super(dtdResolver, schemaResolver);
 		}
 
+		@Override
 		public InputSource resolveEntity(String publicId, String systemId)
 				throws SAXException, IOException {
 			InputSource inputSource = super.resolveEntity(publicId, systemId);

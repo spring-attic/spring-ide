@@ -37,6 +37,7 @@ public class ZipEntryEditorInput implements IStorageEditorInput {
 		this.storage = storage;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
@@ -48,6 +49,7 @@ public class ZipEntryEditorInput implements IStorageEditorInput {
 		return storage.equals(other.storage);
 	}
 
+	@Override
 	public int hashCode() {
 		return storage.hashCode();
 	}

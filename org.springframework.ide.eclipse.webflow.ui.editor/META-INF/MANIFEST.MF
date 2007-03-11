@@ -33,4 +33,5 @@ Export-Package:
  org.springframework.ide.eclipse.beans.ui.namespaces,
  org.springframework.ide.eclipse.webflow.ui.editor,
  org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
 

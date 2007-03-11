@@ -277,8 +277,8 @@ public class WebflowUIImages {
 			imageRegistry = new ImageRegistry();
 			for (Iterator<String> iter = imageDescriptors.keySet().iterator(); iter
 					.hasNext();) {
-				String key = (String) iter.next();
-				imageRegistry.put(key, (ImageDescriptor) imageDescriptors
+				String key = iter.next();
+				imageRegistry.put(key, imageDescriptors
 						.get(key));
 			}
 			imageDescriptors = null;

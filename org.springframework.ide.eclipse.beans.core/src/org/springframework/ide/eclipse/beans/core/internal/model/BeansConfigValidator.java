@@ -614,7 +614,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 
 			// Validate referenced beans in indexed constructor argument values
 			for (Object entry : cargs.getIndexedArgumentValues().entrySet()) {
-				Map.Entry cargValue = (Map.Entry) entry;
+				Map.Entry<?, ?> cargValue = (Map.Entry) entry;
 				int index = ((Integer) cargValue.getKey()).intValue();
 
 				// Lookup corresponding model element (constructor argument)
@@ -719,7 +719,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
                     BeansModelUtils.createProblemMarker(element,
                     		"Referenced bean '" + beanName + "' not found",
                     		IMarker.SEVERITY_WARNING,
-                    		((ISourceModelElement) element)
+                    		(element)
                     				.getElementStartLine(),
                     		ErrorCode.UNDEFINED_REFERENCED_BEAN,
                     		element.getElementName(), beanName);
@@ -746,7 +746,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 											+ "' does not implement the "
 											+ "interface 'FactoryBean'",
 											IMarker.SEVERITY_ERROR,
-											((ISourceModelElement) element)
+											(element)
 													.getElementStartLine(),
 											ErrorCode.INVALID_FACTORY_BEAN,
 											element.getElementName(),
@@ -758,7 +758,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 										+ tempBeanName
 										+ "' implementation class not found",
 										IMarker.SEVERITY_WARNING,
-										((ISourceModelElement) element)
+										(element)
 												.getElementStartLine(),
 										ErrorCode.INVALID_REFERENCED_BEAN,
 										element.getElementName(), beanName);
@@ -769,7 +769,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 								"Referenced factory bean '" + tempBeanName
 										+ "' not found",
 								IMarker.SEVERITY_WARNING,
-								((ISourceModelElement) element)
+								(element)
 										.getElementStartLine(),
 								ErrorCode.UNDEFINED_FACTORY_BEAN,
 								element.getElementName(), beanName);
@@ -778,7 +778,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 					BeansModelUtils.createProblemMarker(element,
 							"Referenced bean '" + beanName + "' not found",
 							IMarker.SEVERITY_WARNING,
-							((ISourceModelElement) element)
+							(element)
 									.getElementStartLine(),
 							ErrorCode.UNDEFINED_REFERENCED_BEAN, element
 									.getElementName(), beanName);

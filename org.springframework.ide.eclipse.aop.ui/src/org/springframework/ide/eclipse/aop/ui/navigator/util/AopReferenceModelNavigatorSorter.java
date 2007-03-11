@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferen
  */
 public class AopReferenceModelNavigatorSorter extends ViewerSorter {
 
+	@Override
 	public int category(Object element) {
 		if (element instanceof IAopReference) {
 			return 1;
@@ -39,6 +40,7 @@ public class AopReferenceModelNavigatorSorter extends ViewerSorter {
 		return 0;
 	}
 
+	@Override
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		if (e1 instanceof IRevealableReferenceNode
 				&& e2 instanceof IRevealableReferenceNode) {

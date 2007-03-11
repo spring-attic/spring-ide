@@ -67,6 +67,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 		return IBeansModelElementTypes.PROJECT_TYPE;
 	}
 
+	@Override
 	public IModelElement[] getElementChildren() {
 		Set<IModelElement> children = new LinkedHashSet<IModelElement>(
 				getConfigs());
@@ -82,6 +83,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 		return false;
 	}
 
+	@Override
 	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 
 		// First visit this project
@@ -265,12 +267,11 @@ public class BeansProject extends AbstractResourceModelElement implements
 	public IBeansConfig getConfig(String configName) {
 		if (configName != null && configName.charAt(0) == '/') {
 			return BeansCorePlugin.getModel().getConfig(configName);
-		} else {
-			if (configs == null) {
-				populateModel();
-			}
-			return configs.get(configName);
 		}
+		if (configs == null) {
+			populateModel();
+		}
+		return configs.get(configName);
 	}
 
 	public Set<String> getConfigNames() {
@@ -386,6 +387,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 		configSets = null;
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -399,11 +401,13 @@ public class BeansProject extends AbstractResourceModelElement implements
 		return super.equals(other);
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(project);
 		return getElementType() * hashCode + super.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return "Project=" + getElementName() + ", ConfigExtensions="
 				+ configExtensions + ", Configs=" + configs.values()

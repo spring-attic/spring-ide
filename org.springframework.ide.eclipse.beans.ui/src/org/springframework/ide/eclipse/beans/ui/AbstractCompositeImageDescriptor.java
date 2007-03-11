@@ -35,6 +35,7 @@ public abstract class AbstractCompositeImageDescriptor extends
 		this.flags = flags;
 	}
 
+	@Override
 	public boolean equals(Object object) {
 		if (!(object instanceof AbstractCompositeImageDescriptor)) {
 			return false;
@@ -44,6 +45,7 @@ public abstract class AbstractCompositeImageDescriptor extends
 		return (baseImage.equals(other.baseImage) && flags == other.flags);
 	}
 
+	@Override
 	public int hashCode() {
 		return baseImage.hashCode() | flags;
 	}
@@ -52,6 +54,7 @@ public abstract class AbstractCompositeImageDescriptor extends
 		return flags;
 	}
 
+	@Override
 	protected final Point getSize() {
 		if (size == null) {
 			ImageData data = baseImage.getImageData();
@@ -60,6 +63,7 @@ public abstract class AbstractCompositeImageDescriptor extends
 		return size;
 	}
 
+	@Override
 	protected final void drawCompositeImage(int width, int height) {
 		ImageData background = baseImage.getImageData();
 		if (background == null) {

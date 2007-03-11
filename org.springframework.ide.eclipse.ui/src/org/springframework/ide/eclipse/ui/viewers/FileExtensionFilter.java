@@ -57,6 +57,7 @@ public class FileExtensionFilter extends ViewerFilter {
 		allowedFileExtensions = null;
 	}
 
+	@Override
 	public boolean select(Viewer viewer, Object parent, Object element) {
 		if (element instanceof IFile) {
 			return hasAllowedFileExtension(((IFile) element).getFullPath());

@@ -191,13 +191,12 @@ public final class Introspector {
 		if (name != null) {
 			if (type.isBinary()) {
 				return type.getJavaProject().findType(name);
-			} else {
-				String[][] resolvedNames = type.resolveType(name);
-				if (resolvedNames != null && resolvedNames.length > 0) {
-					String resolvedName = StringUtils.concatenate(
-							resolvedNames[0][0], resolvedNames[0][1], ".");
-					return type.getJavaProject().findType(resolvedName);
-				}
+			}
+			String[][] resolvedNames = type.resolveType(name);
+			if (resolvedNames != null && resolvedNames.length > 0) {
+				String resolvedName = StringUtils.concatenate(
+						resolvedNames[0][0], resolvedNames[0][1], ".");
+				return type.getJavaProject().findType(resolvedName);
 			}
 		}
 		return null;
@@ -206,13 +205,13 @@ public final class Introspector {
 	/**
 	 * Returns <code>true</code> if the given type has a public constructor
 	 * with the specified number of arguments. If a constructor with no
-	 * arguments is requested then the absence of a constructor (the JVM adds
-	 * an implicit constructor here) results in <code>true</code>.
+	 * arguments is requested then the absence of a constructor (the JVM adds an
+	 * implicit constructor here) results in <code>true</code>.
 	 * 
-	 * @param type  the Java type object on which to retrieve the method
-	 * @param argCount  the number of arguments for the constructor
-	 * @param isNonPublicAllowed  <code>true</code> if non-public constructurs
-	 * 								are recognized too
+	 * @param type the Java type object on which to retrieve the method
+	 * @param argCount the number of arguments for the constructor
+	 * @param isNonPublicAllowed <code>true</code> if non-public constructurs
+	 * are recognized too
 	 */
 	public static boolean hasConstructor(IType type, int argCount,
 			boolean isNonPublicAllowed) throws JavaModelException {

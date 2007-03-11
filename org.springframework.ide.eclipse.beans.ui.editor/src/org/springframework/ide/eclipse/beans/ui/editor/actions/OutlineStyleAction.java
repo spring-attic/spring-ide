@@ -40,6 +40,7 @@ public class OutlineStyleAction extends Action {
 		setImageDescriptor(BeansUIImages.DESC_OBJS_SPRING);
 	}
 
+	@Override
 	public void run() {
 		update(isChecked(), true);
 	}

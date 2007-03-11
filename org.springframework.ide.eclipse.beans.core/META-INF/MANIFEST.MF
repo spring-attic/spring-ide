@@ -23,3 +23,4 @@ Export-Package: org.springframework.ide.eclipse.beans.core,
  org.springframework.ide.eclipse.beans.core.model,
  org.springframework.ide.eclipse.beans.core.namespaces
 DynamicImport-Package: *
+Bundle-RequiredExecutionEnvironment: J2SE-1.5

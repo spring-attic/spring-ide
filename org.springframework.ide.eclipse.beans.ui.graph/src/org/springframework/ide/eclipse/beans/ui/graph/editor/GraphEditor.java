@@ -106,6 +106,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 		setEditDomain(new DefaultEditDomain(this));
 	}
 
+	@Override
 	public void setInput(IEditorInput input) {
 		super.setInput(input);
 		if (input instanceof GraphEditorInput) {
@@ -161,6 +162,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 		getSite().registerContextMenu(CONTEXT_MENU_ID, provider, viewer);
 	}
 
+	@Override
 	public Object getAdapter(Class type) {
 		if (type == IPropertySheetPage.class) {
 			return getPropertySheetPage();
@@ -254,6 +256,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	 * to {@link #dispose()}.
 	 * @param parent the parent composite
 	 */
+	@Override
 	public void createPartControl(Composite parent) {
 		createGraphicalViewer(parent);
 	}
@@ -261,6 +264,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	/**
 	 * @see org.eclipse.ui.IWorkbenchPart#dispose()
 	 */
+	@Override
 	public void dispose() {
 		getSite().getWorkbenchWindow().getSelectionService().removeSelectionListener(this);
 		getEditDomain().setActiveTool(null);
@@ -271,6 +275,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	/**
 	 * @see org.eclipse.ui.part.WorkbenchPart#firePropertyChange(int)
 	 */
+	@Override
 	protected void firePropertyChange(int property) {
 		super.firePropertyChange(property);
 		updateActions(propertyActions);
@@ -360,6 +365,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	 * actions.
 	 * @see org.eclipse.ui.IEditorPart#init(IEditorSite, IEditorInput)
 	 */
+	@Override
 	public void init(IEditorSite site, IEditorInput input)
 													  throws PartInitException {
 		setSite(site);
@@ -409,6 +415,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	/**
 	 * @see org.eclipse.ui.IWorkbenchPart#setFocus()
 	 */
+	@Override
 	public void setFocus() {
 		getGraphicalViewer().getControl().setFocus();
 	}
@@ -434,16 +441,18 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 		ActionRegistry registry = getActionRegistry();
 		Iterator iter = actionIds.iterator();
 		while (iter.hasNext()) {
-			IAction action = registry.getAction((String) iter.next());
+			IAction action = registry.getAction(iter.next());
 			if (action instanceof UpdateAction) {
 				((UpdateAction) action).update();
 			}
 		}
 	}
 
+	@Override
 	public void doSave(IProgressMonitor monitor) {
 	}
 
+	@Override
 	public void doSaveAs() {
 		SaveAsDialog dialog = new SaveAsDialog(getSite().getShell());
 		dialog.setOriginalName("graph.jpg");
@@ -483,6 +492,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	 */
 	public void saveImage(final IFile file, final int format) {
 		WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
+			@Override
 			public void execute(final IProgressMonitor monitor)
 													  throws CoreException {
 				try {
@@ -560,10 +570,12 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	public void gotoMarker(IMarker marker) {
 	}
 
+	@Override
 	public boolean isDirty() {
 		return false;
 	}
 
+	@Override
 	public boolean isSaveAsAllowed() {
 		return true;
 	}

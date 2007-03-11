@@ -70,10 +70,12 @@ public class WebflowHyperLinkDetector extends AbstractHyperLinkDetector
 	/**
 	 * Returns <code>true</code> if given attribute is openable.
 	 */
+	@Override
 	protected boolean isLinkableAttr(Attr attr) {
 		return VALID_ATTRIBUTES.contains(attr.getLocalName());
 	}
 
+	@Override
 	protected IHyperlink createHyperlink(String name, String target,
 			Node parentNode, IRegion hyperlinkRegion, IDocument document,
 			Node node, ITextViewer textViewer, IRegion cursor) {

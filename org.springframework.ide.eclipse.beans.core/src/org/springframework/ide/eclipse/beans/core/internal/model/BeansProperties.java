@@ -49,7 +49,7 @@ public class BeansProperties extends AbstractBeansModelElement implements
 		this.properties = new Properties();
 		this.entries = new LinkedList<IBeansMapEntry>();
 		for (Object entry : properties.entrySet()) {
-			Map.Entry mEntry = (Map.Entry) entry;
+			Map.Entry<?, ?> mEntry = (Map.Entry) entry;
 			this.properties.put(mEntry.getKey(), mEntry.getValue());
 
 			BeansMapEntry bmEntry = new BeansMapEntry(this, mEntry);
@@ -65,6 +65,7 @@ public class BeansProperties extends AbstractBeansModelElement implements
 		return IBeansModelElementTypes.PROPERTIES_TYPE;
 	}
 
+	@Override
 	public IModelElement[] getElementChildren() {
 		List<IBeansMapEntry> children = new ArrayList<IBeansMapEntry>();
 		for (IBeansMapEntry entry : entries) {
@@ -73,6 +74,7 @@ public class BeansProperties extends AbstractBeansModelElement implements
 		return children.toArray(new IModelElement[children.size()]);
 	}
 
+	@Override
 	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 
 		// First visit this bean
@@ -90,7 +92,7 @@ public class BeansProperties extends AbstractBeansModelElement implements
 		}
 	}
 
-	public Map getMap() {
+	public Map<?, ?> getMap() {
 		return properties;
 	}
 
@@ -98,6 +100,7 @@ public class BeansProperties extends AbstractBeansModelElement implements
 		return properties;
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -111,11 +114,13 @@ public class BeansProperties extends AbstractBeansModelElement implements
 		return super.equals(other);
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(properties);
 		return getElementType() * hashCode + super.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer text = new StringBuffer(super.toString());
 		text.append(": properties=");

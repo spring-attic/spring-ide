@@ -42,16 +42,19 @@ public class OpenJavaType extends EditorPartAction {
 		super(editor);
 	}
 
+	@Override
 	protected void init() {
 		setId(GraphActionConstants.OPEN_TYPE);
 		setText(BeansGraphPlugin.getResourceString(
 				"ContextMenu.OpenType.text"));
 	}
 
+	@Override
 	protected boolean calculateEnabled() {
 		return true;
 	}
 
+	@Override
 	public boolean isEnabled() {
 		EditPart part = getFirstSelectedEditPart();
 		if (part instanceof BeanPart) {
@@ -63,6 +66,7 @@ public class OpenJavaType extends EditorPartAction {
 		return false;
 	}
 
+	@Override
 	public void run() {
 		IBean bean = ((BeanPart) getFirstSelectedEditPart()).getBean()
 				.getBean();

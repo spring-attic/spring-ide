@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,18 +26,19 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
- * Opens the Java <code>IType</code> at current selection in
- * <code>ITextEditor</code>.
+ * Opens the Java {@link IType} at current selection in {@link ITextEditor}.
+ * 
  * @author Torsten Juergeleit
  */
 public class OpenJavaTypeAction extends AbstractBeansConfigEditorAction {
 
+	@Override
 	public void run(IAction action) {
 		if (getTextEditor() != null && getConfigFile() != null) {
 			String className = guessType(getTextEditor());
 			if (className != null && className.length() > 0) {
-				IType type = BeansModelUtils.getJavaType(
-									 getConfigFile().getProject(), className);
+				IType type = BeansModelUtils.getJavaType(getConfigFile()
+						.getProject(), className);
 				if (type != null) {
 					SpringUIUtils.openInEditor(type);
 				}
@@ -52,14 +53,15 @@ public class OpenJavaTypeAction extends AbstractBeansConfigEditorAction {
 			// try to search around caret
 			int caretPosition = SpringUIUtils.getCaretOffset(editor);
 			IDocument doc = editor.getDocumentProvider().getDocument(
-													  editor.getEditorInput());
+					editor.getEditorInput());
 			try {
-				IRegion line = doc.getLineInformation(doc.getLineOfOffset(
-																caretPosition));
+				IRegion line = doc.getLineInformation(doc
+						.getLineOfOffset(caretPosition));
 				String lineText = doc.get(line.getOffset(), line.getLength());
-				selectedText = findJavaType(lineText,
-											caretPosition - line.getOffset());
-			} catch (BadLocationException e) {
+				selectedText = findJavaType(lineText, caretPosition
+						- line.getOffset());
+			}
+			catch (BadLocationException e) {
 				selectedText = null;
 			}
 		}
@@ -106,7 +108,8 @@ public class OpenJavaTypeAction extends AbstractBeansConfigEditorAction {
 
 		if (length == max) {
 			return line;
-		} else if (length > 0) {
+		}
+		else if (length > 0) {
 			return line.substring(start, start + length);
 		}
 		return null;

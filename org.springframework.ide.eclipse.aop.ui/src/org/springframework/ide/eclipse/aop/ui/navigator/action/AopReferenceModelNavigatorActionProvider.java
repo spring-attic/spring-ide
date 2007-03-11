@@ -40,14 +40,17 @@ public class AopReferenceModelNavigatorActionProvider extends
 	public AopReferenceModelNavigatorActionProvider() {
 	}
 
+	@Override
 	public void init(ICommonActionExtensionSite site) {
 		openConfigAction = new OpenConfigFileAction(site);
 	}
 
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN, openConfigAction);
 	}
 
+	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		actionBars.setGlobalActionHandler(ICommonActionConstants.OPEN,
 				openConfigAction);

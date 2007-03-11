@@ -41,8 +41,8 @@ public class ClearEventTraceAction extends Action {
 	 * @since 3.1
 	 */
 	private ClearEventTraceAction() {
-		super(ConsoleMessages.ClearOutputAction_title); //$NON-NLS-1$
-		setToolTipText(ConsoleMessages.ClearOutputAction_toolTipText); //$NON-NLS-1$
+		super(ConsoleMessages.ClearOutputAction_title); 
+		setToolTipText(ConsoleMessages.ClearOutputAction_toolTipText); 
 		setHoverImageDescriptor(ConsolePluginImages
 				.getImageDescriptor(IConsoleConstants.IMG_LCL_CLEAR));
 		setDisabledImageDescriptor(ConsolePluginImages
@@ -66,6 +66,7 @@ public class ClearEventTraceAction extends Action {
 	 * 
 	 * @see org.eclipse.jface.action.IAction#run()
 	 */
+	@Override
 	public void run() {
 		BusyIndicator.showWhile(ConsolePlugin.getStandardDisplay(),
 				new Runnable() {

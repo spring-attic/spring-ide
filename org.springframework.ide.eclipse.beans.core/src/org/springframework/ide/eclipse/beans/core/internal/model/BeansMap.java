@@ -48,7 +48,7 @@ public class BeansMap extends AbstractBeansModelElement implements IBeansMap {
 		this.map = new LinkedHashMap<Object, Object>();
 		this.entries = new LinkedList<IBeansMapEntry>();
 		for (Object entry : map.entrySet()) {
-			Map.Entry mEntry = (Map.Entry) entry;
+			Map.Entry<?, ?> mEntry = (Map.Entry) entry;
 			this.map.put(mEntry.getKey(), mEntry.getValue());
 
 			BeansMapEntry bmEntry = new BeansMapEntry(this, mEntry);
@@ -64,6 +64,7 @@ public class BeansMap extends AbstractBeansModelElement implements IBeansMap {
 		return IBeansModelElementTypes.MAP_TYPE;
 	}
 
+	@Override
 	public IModelElement[] getElementChildren() {
 		List<IBeansMapEntry> children = new ArrayList<IBeansMapEntry>();
 		for (IBeansMapEntry entry : entries) {
@@ -72,6 +73,7 @@ public class BeansMap extends AbstractBeansModelElement implements IBeansMap {
 		return children.toArray(new IModelElement[children.size()]);
 	}
 
+	@Override
 	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 
 		// First visit this bean
@@ -89,10 +91,11 @@ public class BeansMap extends AbstractBeansModelElement implements IBeansMap {
 		}
 	}
 
-	public Map getMap() {
+	public Map<Object, Object> getMap() {
 		return map;
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -105,11 +108,13 @@ public class BeansMap extends AbstractBeansModelElement implements IBeansMap {
 		return super.equals(other);
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(map);
 		return getElementType() * hashCode + super.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer text = new StringBuffer(super.toString());
 		text.append(": map=");

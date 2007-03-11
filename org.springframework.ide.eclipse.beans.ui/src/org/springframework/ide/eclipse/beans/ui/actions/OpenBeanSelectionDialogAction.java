@@ -17,8 +17,8 @@
 package org.springframework.ide.eclipse.beans.ui.actions;
 
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -31,14 +31,15 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
  * 
  * @author Christian Dupuis
  */
-public class OpenBeanSelectionDialogAction implements IWorkbenchWindowActionDelegate {
+public class OpenBeanSelectionDialogAction implements
+		IWorkbenchWindowActionDelegate {
 
 	private IWorkbenchWindow workbenchWindow;
 
 	public void run(IAction action) {
-		BeanListSelectionDialog dialog = new BeanListSelectionDialog(workbenchWindow.getShell(),
-				new BeansModelLabelProvider());
-		if (Dialog.OK == dialog.open()) {
+		BeanListSelectionDialog dialog = new BeanListSelectionDialog(
+				workbenchWindow.getShell(), new BeansModelLabelProvider());
+		if (Window.OK == dialog.open()) {
 			IBean bean = (IBean) dialog.getFirstResult();
 			SpringUIUtils.openInEditor(bean);
 		}

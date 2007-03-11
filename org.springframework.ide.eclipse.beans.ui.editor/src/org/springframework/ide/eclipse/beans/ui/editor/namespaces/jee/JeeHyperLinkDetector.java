@@ -43,6 +43,7 @@ public class JeeHyperLinkDetector extends AbstractHyperLinkDetector implements
 	/**
 	 * Returns <code>true</code> if given attribute is openable.
 	 */
+	@Override
 	protected boolean isLinkableAttr(Attr attr) {
 		String attrName = attr.getName();
 		return ("expected-type".equals(attrName)
@@ -51,6 +52,7 @@ public class JeeHyperLinkDetector extends AbstractHyperLinkDetector implements
 				.equals(attrName));
 	}
 
+	@Override
 	protected IHyperlink createHyperlink(String name, String target,
 			Node parentNode, IRegion hyperlinkRegion, IDocument document,
 			Node node, ITextViewer textViewer, IRegion cursor) {

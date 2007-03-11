@@ -56,10 +56,12 @@ public class PropertiesProject extends BeansProject {
 		}
 	}
 
+	@Override
 	public void setConfigExtensions(Set<String> extensions) {
 		super.setConfigExtensions(extensions);
 	}
 
+	@Override
 	public boolean addConfigExtension(String extension) {
 		if (super.addConfigExtension(extension)) {
 			notifyListeners();
@@ -68,11 +70,13 @@ public class PropertiesProject extends BeansProject {
 		return false;
 	}
 
+	@Override
 	public void setConfigs(Set<String> configNames) {
 		super.setConfigs(configNames);
 		notifyListeners();
 	}
 		
+	@Override
 	public boolean addConfig(String configName) {
 		if (super.addConfig(configName)) {
 			notifyListeners();
@@ -81,6 +85,7 @@ public class PropertiesProject extends BeansProject {
 		return false;
 	}
 
+	@Override
 	public boolean removeConfig(String configName) {
 		if (super.removeConfig(configName)) {
 			notifyListeners();
@@ -89,11 +94,13 @@ public class PropertiesProject extends BeansProject {
 		return false;
 	}
 
+	@Override
 	public void setConfigSets(Set<IBeansConfigSet> configSets) {
 		super.setConfigSets(configSets);
 		notifyListeners();
 	}
 
+	@Override
 	public boolean addConfigSet(IBeansConfigSet configSet) {
 		if (super.addConfigSet(configSet)) {
 			notifyListeners();
@@ -102,6 +109,7 @@ public class PropertiesProject extends BeansProject {
 		return false;
 	}
 
+	@Override
 	public void removeConfigSet(String configSetName) {
 		super.removeConfigSet(configSetName);
 		notifyListeners();

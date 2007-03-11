@@ -42,6 +42,7 @@ public class GraphContextMenuProvider extends ContextMenuProvider {
 		return actionRegistry;
 	}
 
+	@Override
 	public void buildContextMenu(IMenuManager menu) {
 		GEFActionConstants.addStandardActionGroups(menu);
 		IAction action;

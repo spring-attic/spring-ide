@@ -285,6 +285,7 @@ public class AopReferenceModelInplaceDialog {
 
 		// To handle "ESC" case
 		dialogShell.addShellListener(new ShellAdapter() {
+			@Override
 			public void shellClosed(ShellEvent event) {
 				event.doit = false; // don't close now
 				dispose();
@@ -422,6 +423,7 @@ public class AopReferenceModelInplaceDialog {
 		});
 
 		tree.addMouseListener(new MouseAdapter() {
+			@Override
 			public void mouseUp(MouseEvent e) {
 
 				if (tree.getSelectionCount() < 1)
@@ -487,6 +489,7 @@ public class AopReferenceModelInplaceDialog {
 			/*
 			 * @see org.eclipse.swt.events.ShellAdapter#shellActivated(org.eclipse.swt.events.ShellEvent)
 			 */
+			@Override
 			public void shellActivated(ShellEvent e) {
 				if (e.widget == dialogShell && dialogShell.getShells().length == 0)
 					isDeactivateListenerActive = true;
@@ -497,6 +500,7 @@ public class AopReferenceModelInplaceDialog {
 			/**
 			 * {@inheritDoc}
 			 */
+			@Override
 			public void controlMoved(ControlEvent e) {
 				bounds = dialogShell.getBounds();
 				if (trim != null) {
@@ -510,6 +514,7 @@ public class AopReferenceModelInplaceDialog {
 			/**
 			 * {@inheritDoc}
 			 */
+			@Override
 			public void controlResized(ControlEvent e) {
 				bounds = dialogShell.getBounds();
 				if (trim != null) {
@@ -552,6 +557,7 @@ public class AopReferenceModelInplaceDialog {
 			/*
 			 * @see org.eclipse.jface.action.Action#run()
 			 */
+			@Override
 			public void run() {
 				showViewMenu();
 			}
@@ -566,6 +572,7 @@ public class AopReferenceModelInplaceDialog {
 				.getActionDefinitionId(), new ActionHandler(fShowViewMenuAction));
 
 		viewMenuButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				showViewMenu();
 			}
@@ -622,8 +629,8 @@ public class AopReferenceModelInplaceDialog {
 		Font font = statusField.getFont();
 		Display display = parent.getDisplay();
 		FontData[] fontDatas = font.getFontData();
-		for (int i = 0; i < fontDatas.length; i++)
-			fontDatas[i].setHeight(fontDatas[i].getHeight() * 9 / 10);
+		for (FontData element : fontDatas)
+			element.setHeight(element.getHeight() * 9 / 10);
 		Font statusTextFont = new Font(display, fontDatas);
 		statusField.setFont(statusTextFont);
 	}
@@ -654,6 +661,7 @@ public class AopReferenceModelInplaceDialog {
 	private KeyAdapter getKeyAdapter() {
 		if (keyAdapter == null) {
 			keyAdapter = new KeyAdapter() {
+				@Override
 				public void keyPressed(KeyEvent e) {
 					int accelerator = SWTKeySupport.convertEventToUnmodifiedAccelerator(e);
 					KeySequence keySequence = KeySequence.getInstance(SWTKeySupport
@@ -661,8 +669,8 @@ public class AopReferenceModelInplaceDialog {
 					TriggerSequence[] sequences = getInvokingCommandKeySequences();
 					if (sequences == null)
 						return;
-					for (int i = 0; i < sequences.length; i++) {
-						if (sequences[i].equals(keySequence)) {
+					for (TriggerSequence element : sequences) {
+						if (element.equals(keySequence)) {
 							e.doit = false;
 							toggleShowParentCrosscutting();
 							return;
@@ -935,8 +943,8 @@ public class AopReferenceModelInplaceDialog {
 			public void modifyText(ModifyEvent e) {
 				String text = ((Text) e.widget).getText();
 				int length = text.length();
-				if (length > 0 && text.charAt(length - 1) != '*') {//$NON-NLS-1$
-					text = text + '*';//$NON-NLS-1$
+				if (length > 0 && text.charAt(length - 1) != '*') {
+					text = text + '*';
 				}
 				setMatcherString(text);
 			}
@@ -981,8 +989,8 @@ public class AopReferenceModelInplaceDialog {
 	@SuppressWarnings("restriction")
 	private Object findElement(TreeItem[] items) {
 		ILabelProvider labelProvider = (ILabelProvider) viewer.getLabelProvider();
-		for (int i = 0; i < items.length; i++) {
-			Object o = items[i].getData();
+		for (TreeItem element0 : items) {
+			Object o = element0.getData();
 			Object element = null;
 			if (o instanceof IReferenceNode) {
 				element = o;
@@ -995,7 +1003,7 @@ public class AopReferenceModelInplaceDialog {
 				if (stringMatcher.match(label))
 					return o;
 			}
-			o = findElement(items[i].getItems());
+			o = findElement(element0.getItems());
 			if (o != null)
 				return o;
 		}
@@ -1010,6 +1018,7 @@ public class AopReferenceModelInplaceDialog {
 		/*
 		 * (non-Javadoc) Method declared on ViewerFilter.
 		 */
+		@Override
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			StringMatcher matcher = getMatcher();
 			if (matcher == null || !(viewer instanceof TreeViewer))
@@ -1030,8 +1039,8 @@ public class AopReferenceModelInplaceDialog {
 			if (element instanceof IReferenceNode) {
 				Object[] children = ((ITreeContentProvider) viewer.getContentProvider())
 						.getChildren(element);
-				for (int i = 0; i < children.length; i++) {
-					if (select(viewer, element, children[i])) {
+				for (Object element0 : children) {
+					if (select(viewer, element, element0)) {
 						return true;
 					}
 				}
@@ -1042,6 +1051,7 @@ public class AopReferenceModelInplaceDialog {
 		/*
 		 * (non-Javadoc) Method declared on ViewerFilter.
 		 */
+		@Override
 		public Object[] filter(Viewer viewer, Object parent, Object[] elements) {
 			int size = elements.length;
 			List<Object> out = new ArrayList<Object>(size);
@@ -1097,14 +1107,15 @@ public class AopReferenceModelInplaceDialog {
 		 * @see org.eclipse.swt.widgets.Layout#computeSize(org.eclipse.swt.widgets.Composite, int,
 		 *      int, boolean)
 		 */
+		@Override
 		protected Point computeSize(Composite composite, int wHint, int hHint, boolean flushCache) {
 
 			Control[] children = composite.getChildren();
 			Point minSize = new Point(0, 0);
 
 			if (children != null) {
-				for (int i = 0; i < children.length; i++) {
-					Point size = children[i].computeSize(wHint, hHint, flushCache);
+				for (Control element : children) {
+					Point size = element.computeSize(wHint, hHint, flushCache);
 					minSize.x = Math.max(minSize.x, size.x);
 					minSize.y = Math.max(minSize.y, size.y);
 				}
@@ -1119,6 +1130,7 @@ public class AopReferenceModelInplaceDialog {
 		/*
 		 * @see org.eclipse.swt.widgets.Layout#layout(org.eclipse.swt.widgets.Composite, boolean)
 		 */
+		@Override
 		protected void layout(Composite composite, boolean flushCache) {
 
 			Control[] children = composite.getChildren();
@@ -1126,8 +1138,7 @@ public class AopReferenceModelInplaceDialog {
 					composite.getClientArea().height);
 
 			if (children != null) {
-				for (int i = 0; i < children.length; i++) {
-					Control child = children[i];
+				for (Control child : children) {
 					child.setSize(minSize.x - fBorderSize * 2, minSize.y - fBorderSize * 2);
 					child.setLocation(fBorderSize, fBorderSize);
 				}
@@ -1186,6 +1197,7 @@ public class AopReferenceModelInplaceDialog {
 		 * 
 		 * @see org.eclipse.jface.action.IAction#run()
 		 */
+		@Override
 		public void run() {
 			performTrackerAction(SWT.NONE);
 			isDeactivateListenerActive = true;
@@ -1208,6 +1220,7 @@ public class AopReferenceModelInplaceDialog {
 		 * 
 		 * @see org.eclipse.jface.action.IAction#run()
 		 */
+		@Override
 		public void run() {
 			IDialogSettings settings = getDialogSettings();
 
@@ -1232,6 +1245,7 @@ public class AopReferenceModelInplaceDialog {
 		/*
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
+		@Override
 		public void run() {
 			performTrackerAction(SWT.RESIZE);
 			isDeactivateListenerActive = true;

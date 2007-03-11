@@ -27,5 +27,5 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  */
 public interface IBeansMap extends ISourceModelElement {
 
-	Map getMap();
+	Map<?, ?> getMap();
 }

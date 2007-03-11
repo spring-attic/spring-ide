@@ -118,7 +118,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		int patternCount = previousSearchPatterns.size();
 		String[] patterns = new String[patternCount];
 		for (int i = 0; i < patternCount; i++) {
-			patterns[i] = ((SearchData) previousSearchPatterns.get(i))
+			patterns[i] = (previousSearchPatterns.get(i))
 					.getPattern();
 		}
 		return patterns;
@@ -168,6 +168,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		searchContainer = container;
 	}
 
+	@Override
 	public void setVisible(boolean visible) {
 		if (visible && expressionCombo != null) {
 			if (firstTime) {
@@ -292,7 +293,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		s.put(STORE_HISTORY_SIZE, historySize);
 		for (int i = 0; i < historySize; i++) {
 			IDialogSettings histSettings = s.addNewSection(STORE_HISTORY + i);
-			SearchData data = ((SearchData) previousSearchPatterns.get(i));
+			SearchData data = (previousSearchPatterns.get(i));
 			data.store(histSettings);
 		}
 	}
@@ -344,6 +345,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		// Expression combo
 		expressionCombo = new Combo(group, SWT.SINGLE | SWT.BORDER);
 		expressionCombo.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handlePatternSelected();
 				updateOKStatus();
@@ -365,6 +367,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		caseSensitiveCheckbox
 				.setText(BeansSearchMessages.SearchPage_caseSensitive);
 		caseSensitiveCheckbox.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				isCaseSensitive = caseSensitiveCheckbox.getSelection();
 			}
@@ -384,6 +387,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		regExCheckbox.setText(BeansSearchMessages.SearchPage_regularExpression);
 		regExCheckbox.setSelection(isRegExSearch);
 		regExCheckbox.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				isRegExSearch = regExCheckbox.getSelection();
 				updateOKStatus();
@@ -409,6 +413,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		return true;
 	}
 
+	@Override
 	public void dispose() {
 		writeConfiguration();
 		super.dispose();
@@ -424,7 +429,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 				|| selectionIndex >= previousSearchPatterns.size()) {
 			return;
 		}
-		SearchData data = (SearchData) previousSearchPatterns
+		SearchData data = previousSearchPatterns
 				.get(selectionIndex);
 		setSearchFor(data.getSearchFor());
 
@@ -451,6 +456,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 		group.setLayout(new GridLayout(2, true));
 
 		SelectionAdapter selectionListener = new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				doPatternModified();
 			}
@@ -525,7 +531,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 
 	private SearchData getDefaultInitValues() {
 		if (!previousSearchPatterns.isEmpty()) {
-			return (SearchData) previousSearchPatterns.get(0);
+			return previousSearchPatterns.get(0);
 		}
 		return new SearchData(SEARCH_FOR_BEAN_NAME, "", isCaseSensitive, false);
 	}

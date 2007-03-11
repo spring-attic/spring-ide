@@ -23,4 +23,5 @@ Import-Package: org.apache.xerces.dom,
  org.apache.xerces.parsers,
  org.apache.xerces.xni
 Eclipse-LazyStart: true
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
 

@@ -47,6 +47,7 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 @SuppressWarnings("restriction")
 public class BeansMoveRefactorAction extends AbstractBeansRefactorAction {
 
+	@Override
 	protected void run(IJavaElement element) throws CoreException {
 		if (!(element instanceof IType)) {
 			return;

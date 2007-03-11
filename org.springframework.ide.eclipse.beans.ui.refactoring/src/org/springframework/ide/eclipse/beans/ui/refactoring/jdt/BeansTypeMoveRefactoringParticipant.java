@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 public class BeansTypeMoveRefactoringParticipant extends
 		AbstractMoveRefactoringParticipant {
 
+	@Override
 	protected boolean initialize(Object element) {
 		if (element instanceof IType) {
 			IType type = (IType) element;
@@ -49,10 +50,12 @@ public class BeansTypeMoveRefactoringParticipant extends
 		return false;
 	}
 
+	@Override
 	public String getName() {
 		return "Rename classes referenced in Spring Bean definitions";
 	}
 
+	@Override
 	protected void addChange(CompositeChange result, IResource resource,
 			IProgressMonitor pm) throws CoreException {
 		if (resource.exists()) {
@@ -64,7 +67,7 @@ public class BeansTypeMoveRefactoringParticipant extends
 	}
 
 	protected IJavaElement[] getAffectedElements() {
-		return (IJavaElement[]) elements.toArray(new IJavaElement[elements
+		return elements.toArray(new IJavaElement[elements
 				.size()]);
 	}
 

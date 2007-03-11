@@ -34,6 +34,7 @@ public class AdviceDeclareParentAopTargetMethodNode extends
 		return new IReferenceNode[0];
 	}
 
+	@Override
 	public String getText() {
 		if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
 			return AopReferenceModelUtils.getJavaElementLinkName(reference
@@ -54,6 +55,7 @@ public class AdviceDeclareParentAopTargetMethodNode extends
 		}
 	}
 
+	@Override
 	public boolean hasChildren() {
 		return false;
 	}

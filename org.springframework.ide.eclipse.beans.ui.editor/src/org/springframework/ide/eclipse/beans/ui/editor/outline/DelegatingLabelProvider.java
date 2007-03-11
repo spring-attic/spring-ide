@@ -35,6 +35,7 @@ public class DelegatingLabelProvider extends LabelProvider {
 	public DelegatingLabelProvider() {
 	}
 
+	@Override
 	public Image getImage(Object object) {
 		if (!BeansEditorUtils.isSpringStyleOutline()) {
 			return xmlProvider.getImage(object);
@@ -54,6 +55,7 @@ public class DelegatingLabelProvider extends LabelProvider {
 		return xmlProvider.getImage(object);
 	}
 
+	@Override
 	public String getText(Object object) {
 		if (!BeansEditorUtils.isSpringStyleOutline()) {
 			return xmlProvider.getText(object);

@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 public class BeansTypeRenameRefactoringParticipant extends
 		AbstractRenameRefactoringParticipant {
 
+	@Override
 	protected boolean initialize(Object element) {
 		if (element instanceof IType) {
 			IType type = (IType) element;
@@ -49,6 +50,7 @@ public class BeansTypeRenameRefactoringParticipant extends
 		return false;
 	}
 
+	@Override
 	protected void addChange(CompositeChange result, IResource resource,
 			IProgressMonitor pm) throws CoreException {
 		
@@ -69,6 +71,7 @@ public class BeansTypeRenameRefactoringParticipant extends
 		return result;
 	}
 
+	@Override
 	protected String[] getNewNames() {
 		String[] result = new String[elements.size()];
 		Iterator<Object> iter = elements.keySet().iterator();

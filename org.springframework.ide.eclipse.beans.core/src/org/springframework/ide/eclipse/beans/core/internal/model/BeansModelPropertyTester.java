@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
  */
 public class BeansModelPropertyTester extends PropertyTester {
 
+	@Override
 	public boolean test(Object receiver, String property, Object[] args,
 			Object expectedValue) {
 		if (receiver instanceof IFile && "isBeansConfig".equals(property)) {

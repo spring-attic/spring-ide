@@ -54,6 +54,7 @@ public class ShowBeansGraphAction extends Action {
 		setText("Show &Graph");	// TODO externalize text
     }
 
+	@Override
 	public boolean isEnabled() {
 		ISelection selection = site.getViewSite().getSelectionProvider()
 				.getSelection();
@@ -80,7 +81,7 @@ public class ShowBeansGraphAction extends Action {
 							.getConfig((ZipEntryStorage) tElement);
 				}
 				if (rElement != null) {
-					element = (IResourceModelElement) rElement;
+					element = rElement;
 					path = tSelection.getPaths()[0];
 					return true;
 				}
@@ -89,6 +90,7 @@ public class ShowBeansGraphAction extends Action {
 		return false;
 	}
 
+	@Override
 	public void run() {
 		IEditorInput input;
 		if (element instanceof IBeansConfig

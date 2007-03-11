@@ -70,6 +70,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		return IBeansModelElementTypes.BEAN_TYPE;
 	}
 
+	@Override
 	public IModelElement[] getElementChildren() {
 		Set<IModelElement> children = new LinkedHashSet<IModelElement>(
 				getConstructorArguments());
@@ -77,6 +78,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		return children.toArray(new IModelElement[children.size()]);
 	}
 
+	@Override
 	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 
 		// First visit this bean
@@ -199,6 +201,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		return false;
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -214,6 +217,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		return super.equals(other);
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(definition);
 		hashCode = getElementType() * hashCode
@@ -221,6 +225,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		return getElementType() * hashCode + super.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer text = new StringBuffer(super.toString());
 		if (getClassName() != null) {
@@ -250,7 +255,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 					(ValueHolder) cargValue);
 			constructorArguments.add(carg);
 		}
-		Map indexedCargValues = cargValues.getIndexedArgumentValues();
+		Map<?, ?> indexedCargValues = cargValues.getIndexedArgumentValues();
 		for (Object key : indexedCargValues.keySet()) {
 			ValueHolder vHolder = (ValueHolder) indexedCargValues.get(key);
 			IBeanConstructorArgument carg = new BeanConstructorArgument(this,

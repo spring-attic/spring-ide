@@ -41,6 +41,7 @@ public class AspectAnnotationVisitor extends EmptyVisitor {
 
 	private static final String OBJECT_CLASS = "java/lang/Object";
 
+	@Override
 	public void visit(int version, int access, String name, String signature,
 			String superName, String[] interfaces) {
 		classInfo.setModifier(access);
@@ -49,6 +50,7 @@ public class AspectAnnotationVisitor extends EmptyVisitor {
 		}
 	}
 
+	@Override
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
 		if (visible && ASPECT_ANNOTATION_DESC.equals(desc)) {
 			classInfo.setAspectAnnotation(new AspectAnnotation());
@@ -57,12 +59,14 @@ public class AspectAnnotationVisitor extends EmptyVisitor {
 		return new EmptyVisitor();
 	}
 
+	@Override
 	public void visit(String name, Object value) {
 		if ("value".equals(name) && classInfo.hasAspectAnnotation()) {
 			classInfo.getAspectAnnotation().setValue((String) value);
 		}
 	}
 
+	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc,
 			String signature, String[] exceptions) {
 		classInfo.getMethodNames().add(name);

@@ -57,6 +57,7 @@ public class TreePathBuilder {
 		return segments.getFirst();
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();
 		for (Object segment : segments) {

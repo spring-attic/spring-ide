@@ -27,5 +27,5 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  */
 public interface IBeansList extends ISourceModelElement {
 
-	List getList();
+	List<?> getList();
 }

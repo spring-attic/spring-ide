@@ -41,7 +41,7 @@ public class BeansMapEntry extends AbstractBeansValueHolder implements
 
 	private Object key;
 
-	public BeansMapEntry(IBeansMap map, Map.Entry entry) {
+	public BeansMapEntry(IBeansMap map, Map.Entry<?, ?> entry) {
 		super(map, "(map entry)", null, null);
 		setLocation(entry);
 	}
@@ -50,6 +50,7 @@ public class BeansMapEntry extends AbstractBeansValueHolder implements
 		return IBeansModelElementTypes.MAP_ENTRY_TYPE;
 	}
 
+	@Override
 	public IModelElement[] getElementChildren() {
 		List<IModelElement> children = new ArrayList<IModelElement>();
 		if (!(getElementParent() instanceof IBeansProperties)
@@ -60,10 +61,11 @@ public class BeansMapEntry extends AbstractBeansValueHolder implements
 		if (value instanceof IModelElement) {
 			children.add((IModelElement) value);
 		}
-		return (IModelElement[]) children.toArray(new IModelElement[children.
+		return children.toArray(new IModelElement[children.
 		                                                            size()]);
 	}
 
+	@Override
 	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 
 		// First visit this bean
@@ -90,6 +92,7 @@ public class BeansMapEntry extends AbstractBeansValueHolder implements
 		return key;
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -102,11 +105,13 @@ public class BeansMapEntry extends AbstractBeansValueHolder implements
 		return super.equals(other);
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(key);
 		return getElementType() * hashCode + super.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer text = new StringBuffer(super.toString());
 		text.append(", key=");
@@ -114,7 +119,7 @@ public class BeansMapEntry extends AbstractBeansValueHolder implements
 		return text.toString();
 	}
 
-	private void setLocation(Map.Entry entry) {
+	private void setLocation(Map.Entry<?, ?> entry) {
 		XmlSourceLocation location = null;
 		Object key = entry.getKey();
 		if (key instanceof BeanMetadataElement) {

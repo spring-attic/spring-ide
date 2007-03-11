@@ -34,6 +34,7 @@ public class BeansSearchContentProvider extends BeansModelContentProvider {
 
 	private BeansSearchResult result;
 
+	@Override
 	public Object[] getElements(Object inputElement) {
 		if (inputElement instanceof BeansSearchResult) {
 			result = (BeansSearchResult) inputElement;
@@ -46,8 +47,8 @@ public class BeansSearchContentProvider extends BeansModelContentProvider {
 		// Create list of projects the matched beans belong to
 		Object[] matches = result.getElements();
 		List<IModelElement> projects = new ArrayList<IModelElement>();
-		for (int i = 0; i < matches.length; i++) {
-			IModelElement element = (IModelElement) matches[i];
+		for (Object element0 : matches) {
+			IModelElement element = (IModelElement) element0;
 			IModelElement project = BeansModelUtils.getChildForElement(
 					BeansCorePlugin.getModel(), element);
 			if (!projects.contains(project)) {
@@ -57,6 +58,7 @@ public class BeansSearchContentProvider extends BeansModelContentProvider {
 		return projects.toArray(new IModelElement[projects.size()]);
 	}
 
+	@Override
 	public Object[] getChildren(Object parentElement) {
 		if (result == null) {
 			return IModelElement.NO_CHILDREN;
@@ -66,8 +68,8 @@ public class BeansSearchContentProvider extends BeansModelContentProvider {
 		// parent element
 		Object[] matches = result.getElements();
 		List<IModelElement> children = new ArrayList<IModelElement>();
-		for (int i = 0; i < matches.length; i++) {
-			IModelElement element = (IModelElement) matches[i];
+		for (Object element0 : matches) {
+			IModelElement element = (IModelElement) element0;
 			IModelElement child = BeansModelUtils.getChildForElement(
 					(IModelElement) parentElement, element);
 			if (child != null) {

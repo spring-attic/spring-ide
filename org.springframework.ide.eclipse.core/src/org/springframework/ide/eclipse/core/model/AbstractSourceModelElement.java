@@ -110,6 +110,7 @@ public abstract class AbstractSourceModelElement extends
 	/**
 	 * Returns an adapter for <code>IMarker.class</code>.
 	 */
+	@Override
 	public Object getAdapter(Class adapter) {
 		if (adapter == IMarker.class) {
 			return ModelUtils.createMarker(this);
@@ -117,6 +118,7 @@ public abstract class AbstractSourceModelElement extends
 		return super.getAdapter(adapter);
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -130,11 +132,13 @@ public abstract class AbstractSourceModelElement extends
 		return super.equals(other);
 	}
 
+	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(location);
 		return getElementType() * hashCode + super.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer text = new StringBuffer(getElementName());
 		text.append(" (");
@@ -152,6 +156,7 @@ public abstract class AbstractSourceModelElement extends
 	 * 
 	 * @see #getElementID()
 	 */
+	@Override
 	protected String getUniqueElementName() {
 		return (location != null ? getElementName() : getElementName()
 				+ ID_SEPARATOR + location.getStartLine());

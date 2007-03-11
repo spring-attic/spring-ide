@@ -30,6 +30,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  */
 public class BeansNavigatorSorter extends ViewerSorter {
 
+	@Override
 	public int category(Object element) {
 
 		// Keep the config sets separate
@@ -39,6 +40,7 @@ public class BeansNavigatorSorter extends ViewerSorter {
 		return 0;
 	}
 
+	@Override
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		if (e1 instanceof ISourceModelElement
 				|| e2 instanceof ISourceModelElement) {

@@ -308,7 +308,7 @@ public final class BeansModelUtils {
 				bd = (AbstractBeanDefinition) getMergedBeanDefinition(bean,
 						context);
 			} else {
-				bd = (AbstractBeanDefinition) ((Bean) bean).getBeanDefinition();
+				bd = (AbstractBeanDefinition) (bean).getBeanDefinition();
 			}
 
 			// Add bean's factoy bean
@@ -743,40 +743,39 @@ public final class BeansModelUtils {
 		Assert.notNull(bean);
 		if (bean.isRootBean()) {
 			return bean.getClassName();
-		} else {
-			if (context == null) {
-				context = bean.getElementParent();
-			}
-			Set<String> beanNames = new HashSet<String>();
-			do {
-				beanNames.add(bean.getElementName());
-				String parentName = bean.getParentName();
-				if (parentName != null) {
-					if (beanNames.contains(parentName)) {
-						// Break cyclic references
-						break;
-					}
-					bean = getBean(parentName, context);
-					if (bean != null && bean.isRootBean()) {
-						return bean.getClassName();
-					}
-				}
-			} while (bean != null);
 		}
+		if (context == null) {
+			context = bean.getElementParent();
+		}
+		Set<String> beanNames = new HashSet<String>();
+		do {
+			beanNames.add(bean.getElementName());
+			String parentName = bean.getParentName();
+			if (parentName != null) {
+				if (beanNames.contains(parentName)) {
+					// Break cyclic references
+					break;
+				}
+				bean = getBean(parentName, context);
+				if (bean != null && bean.isRootBean()) {
+					return bean.getClassName();
+				}
+			}
+		} while (bean != null);
 		return null;
 	}
 
 	/**
 	 * Returns the corresponding Java type for given bean's class.
 	 * 
-	 * @param bean  the bean to lookup the bean class' Java type
-	 * @param context  the context (<code>IBeanConfig</code> or
-	 *            <code>IBeanConfigSet</code>) the beans are looked-up
-	 * @param context  the context (<code>IBeanConfig</code> or
-	 *            <code>IBeanConfigSet</code>) the beans are looked-up; if
-	 *            <code>null</code> then the bean's config is used
+	 * @param bean the bean to lookup the bean class' Java type
+	 * @param context the context (<code>IBeanConfig</code> or
+	 * <code>IBeanConfigSet</code>) the beans are looked-up
+	 * @param context the context (<code>IBeanConfig</code> or
+	 * <code>IBeanConfigSet</code>) the beans are looked-up; if
+	 * <code>null</code> then the bean's config is used
 	 * @return the Java type of given bean's class or <code>null</code> if no
-	 *         bean class defined or type not found
+	 * bean class defined or type not found
 	 */
 	public static IType getBeanType(IBean bean, IModelElement context) {
 		Assert.notNull(bean);
@@ -899,7 +898,7 @@ public final class BeansModelUtils {
 	public static IModelElement getChildForElement(
 			IModelElement parent, IModelElement element) {
 		while (element != null) {
-			IModelElement elementParent = (IModelElement) element
+			IModelElement elementParent = element
 					.getElementParent();
 			if (parent.equals(elementParent)) {
 				return element;

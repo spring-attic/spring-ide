@@ -38,6 +38,7 @@ public class RoundedLineBorder extends LineBorder {
 		this.corner = corner;
 	}
 
+	@Override
 	public void paint(IFigure figure, Graphics graphics, Insets insets) {
 
 		// Calculations from super.paint()

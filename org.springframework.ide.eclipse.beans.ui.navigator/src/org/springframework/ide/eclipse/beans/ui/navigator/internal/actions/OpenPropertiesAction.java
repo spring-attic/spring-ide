@@ -48,6 +48,7 @@ public class OpenPropertiesAction extends Action {
 		setText("&Properties");	// TODO externalize text
     }
 
+	@Override
 	public boolean isEnabled() {
 		ISelection selection = site.getViewSite().getSelectionProvider()
 				.getSelection();
@@ -79,6 +80,7 @@ public class OpenPropertiesAction extends Action {
 		return false;
 	}
 
+	@Override
 	public void run() {
 		BeansUIUtils.showProjectPropertyPage(project, block);
 	}

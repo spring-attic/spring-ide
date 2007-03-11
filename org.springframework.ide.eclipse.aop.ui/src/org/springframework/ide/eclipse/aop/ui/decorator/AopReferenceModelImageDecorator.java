@@ -141,6 +141,7 @@ public class AopReferenceModelImageDecorator extends LabelProvider implements
 		}
 	}
 
+	@Override
 	public void dispose() {
 		if (listener != null) {
 			Activator.getModel().unregisterAopModelChangedListener(listener);
@@ -148,6 +149,7 @@ public class AopReferenceModelImageDecorator extends LabelProvider implements
 		}
 	}
 
+	@Override
 	public boolean isLabelProperty(Object element, String property) {
 		return false;
 	}

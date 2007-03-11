@@ -44,10 +44,12 @@ public class BeansExplorer extends CommonNavigator implements IShowInTarget {
 	public static final String BEANS_EXPLORER_ID = Activator.PLUGIN_ID
 			+ ".BeansExplorer";
 
+	@Override
 	protected IAdaptable getInitialInput() {
 		return BeansCorePlugin.getModel();
 	}
 
+	@Override
 	public boolean show(ShowInContext context) {
 
 		// First check the context's input object for a resource model element

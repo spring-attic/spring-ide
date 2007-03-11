@@ -165,6 +165,7 @@ public class RefactorPropertyElementAction extends
 		elem.normalize();
 	}
 
+	@Override
 	public void run(IAction action) {
 		IDocument document = getTextEditor().getDocumentProvider().getDocument(
 				getTextEditor().getEditorInput());
@@ -199,6 +200,7 @@ public class RefactorPropertyElementAction extends
 	 * <code>IActionDelegate</code> method does nothing. Subclasses may
 	 * reimplement.
 	 */
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		boolean enabled = false;
 		if (selection != null) {

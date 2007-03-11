@@ -67,10 +67,12 @@ public class BeanIntroductionDefinition extends BeanAspectDefinition implements
 		return this.typePattern;
 	}
 
+	@Override
 	public String getAdviceMethodName() {
 		throw new IllegalArgumentException();
 	}
 
+	@Override
 	public ADVICE_TYPES getType() {
 		return ADVICE_TYPES.DECLARE_PARENTS;
 	}

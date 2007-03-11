@@ -55,6 +55,7 @@ public class JavaFileExtensionFilter extends FileExtensionFilter {
 		super();
 	}
 
+	@Override
 	public boolean select(Viewer viewer, Object parent, Object element) {
 		if (element instanceof IPackageFragmentRoot) {
 			IPackageFragmentRoot root = (IPackageFragmentRoot) element;

@@ -18,7 +18,6 @@ package org.springframework.ide.eclipse.aop.ui.tracing;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 public class EventTrace {
@@ -32,8 +31,8 @@ public class EventTrace {
 	public static void postEvent(String msg, int category) {
 		Date time = new Date();
 		if (!listeners.isEmpty()) {
-			for (Iterator<?> it = listeners.iterator(); it.hasNext();) {
-				((EventListener) it.next()).aopEvent(msg, category, time);
+			for (Object name : listeners) {
+				((EventListener) name).aopEvent(msg, category, time);
 			}
 		}
 	}

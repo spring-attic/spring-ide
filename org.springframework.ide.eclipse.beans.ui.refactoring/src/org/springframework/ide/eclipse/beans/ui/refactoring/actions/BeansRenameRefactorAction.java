@@ -97,6 +97,7 @@ public class BeansRenameRefactorAction extends AbstractBeansRefactorAction {
 		return false;
 	}
 
+	@Override
 	public void run(IAction action) {
 		IDocument document = getTextEditor().getDocumentProvider().getDocument(
 				getTextEditor().getEditorInput());
@@ -132,6 +133,7 @@ public class BeansRenameRefactorAction extends AbstractBeansRefactorAction {
 		}
 	}
 
+	@Override
 	protected void run(IJavaElement element) throws CoreException {
 		if (!isRenameAvailable(element)
 				|| !ActionUtil.isProcessable(BeansUIPlugin

@@ -123,6 +123,7 @@ public abstract class AbstractBeansRefactorAction extends
 
 	protected abstract void run(IJavaElement element) throws CoreException;
 
+	@Override
 	public void run(IAction action) {
 		IDocument document = getTextEditor().getDocumentProvider().getDocument(
 				getTextEditor().getEditorInput());

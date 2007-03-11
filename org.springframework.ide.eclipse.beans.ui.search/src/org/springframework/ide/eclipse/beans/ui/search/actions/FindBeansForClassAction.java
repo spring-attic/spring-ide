@@ -49,6 +49,7 @@ public class FindBeansForClassAction extends Action
 		run();
 	}
 
+	@Override
 	public void run() {
 		String className = getSelectedClassName();
 		if (className != null) {

@@ -26,6 +26,7 @@ import org.w3c.dom.Node;
 @SuppressWarnings("restriction")
 public class LangOutlineLabelProvider extends JFaceNodeLabelProvider {
 
+	@Override
 	public Image getImage(Object object) {
 		Node node = (Node) object;
 		String nodeName = node.getLocalName();
@@ -36,6 +37,7 @@ public class LangOutlineLabelProvider extends JFaceNodeLabelProvider {
 		return null;
 	}
 
+	@Override
 	public String getText(Object o) {
 		Node node = (Node) o;
 		String nodeName = node.getNodeName();

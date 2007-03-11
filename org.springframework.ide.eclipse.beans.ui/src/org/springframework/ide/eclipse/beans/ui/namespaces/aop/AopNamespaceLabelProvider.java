@@ -30,6 +30,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  */
 public class AopNamespaceLabelProvider extends DefaultNamespaceLabelProvider {
 
+	@Override
 	protected Image getImage(ISourceModelElement element,
 			IModelElement context) {
 		return AopNamespaceImages.getImage(element, context);

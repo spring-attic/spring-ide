@@ -30,6 +30,7 @@ import org.w3c.dom.Node;
 @SuppressWarnings("restriction")
 public class BeansOutlineLabelProvider extends JFaceNodeLabelProvider {
 
+	@Override
 	public Image getImage(Object object) {
 		// Create Spring beans label image
 		Node node = (Node) object;
@@ -81,6 +82,7 @@ public class BeansOutlineLabelProvider extends JFaceNodeLabelProvider {
 		return null;
 	}
 
+	@Override
 	public String getText(Object o) {
 		// Create Spring beans label text
 		Node node = (Node) o;

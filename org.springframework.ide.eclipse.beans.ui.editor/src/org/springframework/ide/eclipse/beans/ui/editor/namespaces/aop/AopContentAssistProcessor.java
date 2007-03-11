@@ -77,6 +77,7 @@ public class AopContentAssistProcessor extends AbstractContentAssistProcessor
 		}
 	}
 
+	@Override
 	protected void computeAttributeValueProposals(ContentAssistRequest request,
 			IDOMNode node, String matchString, String attributeName) {
 
@@ -169,7 +170,7 @@ public class AopContentAssistProcessor extends AbstractContentAssistProcessor
 		String ref = BeansEditorUtils.getAttribute(parentNode, "ref");
 
 		if (ref != null) {
-			IFile file = (IFile) BeansEditorUtils.getResource(request);
+			IFile file = BeansEditorUtils.getResource(request);
 			String className = BeansEditorUtils.getClassNameForBean(file, node
 					.getOwnerDocument(), ref);
 			IType type = BeansModelUtils.getJavaType(file.getProject(),
@@ -198,6 +199,7 @@ public class AopContentAssistProcessor extends AbstractContentAssistProcessor
 		}
 	}
 
+	@Override
 	protected void computeAttributeNameProposals(ContentAssistRequest request,
 			String prefix, String namespace, String namespacePrefix,
 			Node attributeNode) {

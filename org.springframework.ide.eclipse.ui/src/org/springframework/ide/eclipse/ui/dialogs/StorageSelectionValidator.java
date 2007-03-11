@@ -35,6 +35,7 @@ public class StorageSelectionValidator extends AbstractSelectionValidator {
 		super(multiSelect);
 	}
 
+	@Override
 	public boolean isValid(Object selection) {
 		return (selection instanceof IStorage);
 	}

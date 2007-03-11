@@ -150,6 +150,6 @@ public class BeansSearchPlugin extends AbstractUIPlugin {
 		if (message == null) {
 			message= ""; 
 		}		
-		return new Status(Status.ERROR, PLUGIN_ID, 0, message, exception);
+		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
 	}
 }

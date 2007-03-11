@@ -76,6 +76,7 @@ public class ProjectPropertyPage extends PropertyPage {
 		this.selectedTab = selectedTab;
 	}
 
+	@Override
 	protected Control createContents(Composite parent) {
 
 		// Build temporary beans core model with a cloned "real" Spring project
@@ -107,6 +108,7 @@ public class ProjectPropertyPage extends PropertyPage {
 		return folder;
 	}
 
+	@Override
 	public boolean performOk() {
 		IProject project = (IProject) getElement();
 		IBeansProject currentProject = BeansCorePlugin.getModel().getProject(
@@ -138,6 +140,7 @@ public class ProjectPropertyPage extends PropertyPage {
 		return super.performOk();
 	}
 
+	@Override
 	public void dispose() {
 		if (configFilesTab != null) {
 			configFilesTab.dispose();
