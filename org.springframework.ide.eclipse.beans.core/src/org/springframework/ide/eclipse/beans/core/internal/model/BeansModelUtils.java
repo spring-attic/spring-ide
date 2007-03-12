@@ -130,12 +130,14 @@ public final class BeansModelUtils {
 	 * @throws IllegalArgumentException if unsupported model element specified
 	 */
 	public static IBeansConfig getConfig(IModelElement element) {
-		if (element instanceof ISourceModelElement) {
-			IResource resource = ((ISourceModelElement) element)
-					.getElementResource();
-			if (resource instanceof IFile) {
-				return BeansCorePlugin.getModel().getConfig((IFile) resource);
-			}
+		if (element instanceof IBeansConfig) {
+			return (IBeansConfig) element;
+		}
+		else if (element instanceof ISourceModelElement) {
+			do {
+				element = element.getElementParent();
+			} while (!(element instanceof IBeansConfig));
+			return (IBeansConfig) element;
 		}
 		throw new IllegalArgumentException("Unsupported model element "
 				+ element);
@@ -744,8 +746,10 @@ public final class BeansModelUtils {
 		if (bean.isRootBean()) {
 			return bean.getClassName();
 		}
+
+		// If no context given then use this bean's config instead
 		if (context == null) {
-			context = bean.getElementParent();
+			context = getConfig(bean);
 		}
 		Set<String> beanNames = new HashSet<String>();
 		do {
