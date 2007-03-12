@@ -16,63 +16,37 @@
 
 package org.springframework.ide.eclipse.beans.ui.search;
 
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.search.ui.ISearchResult;
-import org.eclipse.search.ui.ISearchResultListener;
-import org.eclipse.search.ui.SearchResultEvent;
+import org.eclipse.search.ui.ISearchResultPage;
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
-import org.eclipse.search.ui.text.MatchEvent;
-import org.eclipse.search.ui.text.RemoveAllEvent;
-import org.eclipse.swt.widgets.Composite;
+import org.eclipse.search.ui.text.Match;
+import org.eclipse.ui.PartInitException;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchContentProvider;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
- * {@link ISearchResultPage} which provides the UI for displaying the results
- * from searching the BeansCoreModel.
+ * {@link ISearchResultPage} which displays the results from searching the
+ * {@link IBeansModel}.
  * 
- * @author David Watkins
  * @author Torsten Juergeleit
  */
 public class BeansSearchResultPage extends AbstractTextSearchViewPage {
 
-	private ISearchResultListener resultListener;
-	private IDoubleClickListener doubleClickListener;
 	private BeansSearchContentProvider provider;
 
 	public BeansSearchResultPage() {
 		super(AbstractTextSearchViewPage.FLAG_LAYOUT_TREE);
 		setID(BeansSearchResultPage.class.getName());
-		resultListener = new ISearchResultListener() {
-			public void searchResultChanged(SearchResultEvent e) {
-				handleSearchResultsChanged(e);
-			}
-		};
-		doubleClickListener = new IDoubleClickListener() {
-			public void doubleClick(DoubleClickEvent event) {
-				IStructuredSelection selection = (IStructuredSelection) event
-						.getSelection();
-				Object obj = selection.getFirstElement();
-				if (obj instanceof ISourceModelElement) {
-					SpringUIUtils.openInEditor((ISourceModelElement) obj);
-				}
-			}
-		};
 	}
 
-	@Override
 	protected void configureTableViewer(TableViewer viewer) {
-		throw new UnsupportedOperationException(
-				"Why do you want a table viewer?");
+		throw new IllegalStateException("Doesn't support flat mode.");
 	}
 
-	@Override
 	protected void configureTreeViewer(TreeViewer viewer) {
 		viewer.setUseHashlookup(true);
 		viewer.setLabelProvider(new BeansModelLabelProvider(true));
@@ -81,57 +55,22 @@ public class BeansSearchResultPage extends AbstractTextSearchViewPage {
 		this.provider = provider;
 	}
 
-	@Override
-	protected TableViewer createTableViewer(Composite parent) {
-		TableViewer viewer = super.createTableViewer(parent);
-		viewer.addDoubleClickListener(doubleClickListener);
-		return viewer;
-	}
-
-	@Override
-	protected TreeViewer createTreeViewer(Composite parent) {
-		TreeViewer viewer = super.createTreeViewer(parent);
-		viewer.addDoubleClickListener(doubleClickListener);
-		return viewer;
-	}
-
-	@Override
-	public String getLabel() {
-		// TODO read from resource
-		return "Bean Search Result";
-	}
-
-	@Override
 	protected void elementsChanged(Object[] objects) {
 		if (provider != null) {
 			provider.elementsChanged(objects);
 		}
 	}
 
-	private synchronized void handleSearchResultsChanged(
-			final SearchResultEvent e) {
-		if (e instanceof MatchEvent) {
-			// FIXME
-//			MatchEvent me = (MatchEvent) e;
-//			postUpdate(me.getMatches());
-		} else if (e instanceof RemoveAllEvent) {
-			clear();
-		}
-		// FIXME
-		// viewer.refresh();
-	}
-
-	@Override
-	public void setInput(ISearchResult search, Object viewState) {
-		super.setInput(search, viewState);
-		if (search != null) {
-			search.addListener(resultListener);
-		}
-	}
-
-	@Override
 	protected void clear() {
-		// FIXME
-		// provider.elementsChanged(new Object[] {});
+		provider.clear();
+	}
+
+	@Override
+	protected void showMatch(Match match, int currentOffset, int currentLength,
+			boolean activate) throws PartInitException {
+		Object element = match.getElement();
+		if (element instanceof ISourceModelElement) {
+			SpringUIUtils.openInEditor((ISourceModelElement) element, activate);
+		}
 	}
 }

@@ -62,6 +62,7 @@ public class BeansSearchPage extends DialogPage implements ISearchPage {
 
 	public static final String EXTENSION_POINT_ID = "org.springframework."
 			+ "ide.eclipse.beans.ui.search.searchPage";
+
 	public static final int SEARCH_FOR_BEAN_NAME = 0;
 	public static final int SEARCH_FOR_BEAN_REFERENCE = 1; 
 	public static final int SEARCH_FOR_BEAN_CLASS = 2;

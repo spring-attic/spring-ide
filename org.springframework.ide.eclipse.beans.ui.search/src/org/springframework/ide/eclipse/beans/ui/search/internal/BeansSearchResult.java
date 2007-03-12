@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,8 +12,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Created on 22-Aug-2004
  */
 
 package org.springframework.ide.eclipse.beans.ui.search.internal;
@@ -37,8 +35,9 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  * @author Torsten Juergeleit
  */
 public class BeansSearchResult extends AbstractTextSearchResult implements
-									   IEditorMatchAdapter, IFileMatchAdapter {
-	private static final Match[] NO_MATCH = new Match[0];
+		IEditorMatchAdapter, IFileMatchAdapter {
+
+	public static final Match[] NO_MATCH = new Match[0];
 
 	private ISearchQuery query;
 
@@ -46,44 +45,42 @@ public class BeansSearchResult extends AbstractTextSearchResult implements
 		this.query = query;
 	}
 
-	@Override
 	public IEditorMatchAdapter getEditorMatchAdapter() {
 		return this;
 	}
-	
+
 	public Match[] computeContainedMatches(AbstractTextSearchResult result,
-										   IEditorPart editor) {
-		IEditorInput ei = editor.getEditorInput();
-		if (ei instanceof IFileEditorInput) {
-			IFileEditorInput fi = (IFileEditorInput) ei;
-			return getMatches(fi.getFile());
+			IEditorPart editor) {
+		IEditorInput editorInput = editor.getEditorInput();
+		if (editorInput instanceof IFileEditorInput) {
+			IFileEditorInput fileEditorInput = (IFileEditorInput) editorInput;
+			return getMatches(fileEditorInput.getFile());
 		}
 		return NO_MATCH;
 	}
 
 	public boolean isShownInEditor(Match match, IEditorPart editor) {
-		IEditorInput ei = editor.getEditorInput();
-		if (ei instanceof IFileEditorInput) {
-			IFileEditorInput fi = (IFileEditorInput) ei;
-			return match.getElement().equals(fi.getFile());
+		IEditorInput editorInput = editor.getEditorInput();
+		if (editorInput instanceof IFileEditorInput) {
+			IFileEditorInput fileEditorInput = (IFileEditorInput) editorInput;
+			return match.getElement().equals(fileEditorInput.getFile());
 		}
 		return false;
 	}
 
-	@Override
 	public IFileMatchAdapter getFileMatchAdapter() {
 		return this;
 	}
 
 	public Match[] computeContainedMatches(AbstractTextSearchResult result,
-										   IFile file) {
-		return NO_MATCH;
+			IFile file) {
+		return getMatches(file);
 	}
 
 	public IFile getFile(Object element) {
 		if (element instanceof ISourceModelElement) {
-			IResource resource = ((ISourceModelElement)
-												 element).getElementResource();
+			IResource resource = ((ISourceModelElement) element)
+					.getElementResource();
 			if (resource instanceof IFile) {
 				return (IFile) resource;
 			}
@@ -109,7 +106,7 @@ public class BeansSearchResult extends AbstractTextSearchResult implements
 
 	@Override
 	public String toString() {
-		return "Results for " + getQuery().getLabel() + " # = " +
-			   getMatchCount();
+		return "Results for " + getQuery().getLabel() + " # = "
+				+ getMatchCount();
 	}
 }

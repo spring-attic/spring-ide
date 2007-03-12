@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,8 +12,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Created on 22-Aug-2004
  */
 
 package org.springframework.ide.eclipse.beans.ui.search.internal;
@@ -38,21 +36,21 @@ public class BeansSearchContentProvider extends BeansModelContentProvider {
 	public Object[] getElements(Object inputElement) {
 		if (inputElement instanceof BeansSearchResult) {
 			result = (BeansSearchResult) inputElement;
-		}
-
-		if (result == null) {
-			return null;
+		} else {
+			result = null;
+			return IModelElement.NO_CHILDREN;
 		}
 
 		// Create list of projects the matched beans belong to
-		Object[] matches = result.getElements();
+		Object[] elements = result.getElements();
 		List<IModelElement> projects = new ArrayList<IModelElement>();
-		for (Object element0 : matches) {
-			IModelElement element = (IModelElement) element0;
-			IModelElement project = BeansModelUtils.getChildForElement(
-					BeansCorePlugin.getModel(), element);
-			if (!projects.contains(project)) {
-				projects.add(project);
+		for (Object element : elements) {
+			if (element instanceof IModelElement) {
+				IModelElement project = BeansModelUtils.getChildForElement(
+						BeansCorePlugin.getModel(), (IModelElement) element);
+				if (!projects.contains(project)) {
+					projects.add(project);
+				}
 			}
 		}
 		return projects.toArray(new IModelElement[projects.size()]);
@@ -85,8 +83,10 @@ public class BeansSearchContentProvider extends BeansModelContentProvider {
 	}
 
 	public void elementsChanged(Object[] elements) {
-		for (Object element : elements) {
-			refreshViewerForElement(element);
-		}
+		getViewer().refresh();
+	}
+
+	public void clear() {
+		getViewer().refresh();
 	}
 }
