@@ -83,7 +83,7 @@ public abstract class AbstractBeansValueHolder extends
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof BeanConstructorArgument)) {
+		if (!(other instanceof AbstractBeansValueHolder)) {
 			return false;
 		}
 		AbstractBeansValueHolder that = (AbstractBeansValueHolder) other;
