@@ -19,7 +19,6 @@ package org.springframework.ide.eclipse.webflow.ui.navigator;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
-import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 
 /**
  * {@link ViewerSorter} that sorts the tree elements depending on element's

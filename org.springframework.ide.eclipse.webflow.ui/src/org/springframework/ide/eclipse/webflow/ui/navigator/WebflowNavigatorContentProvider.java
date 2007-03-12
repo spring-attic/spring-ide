@@ -19,6 +19,7 @@ package org.springframework.ide.eclipse.webflow.ui.navigator;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -48,10 +49,19 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 		IWebflowModelListener {
 
+	public static final String PROJECT_EXPLORER_CONTENT_PROVIDER_ID = org.springframework.ide.eclipse.webflow.ui.Activator.PLUGIN_ID
+			+ ".navigator.projectExplorerContent";
+
+	public static final String BEANS_EXPLORER_CONTENT_PROVIDER_ID = org.springframework.ide.eclipse.webflow.ui.Activator.PLUGIN_ID
+			+ ".navigator.beansExplorerContent";
+
+	private String providerID;
+
 	private StructuredViewer viewer;
 
 	public void init(ICommonContentExtensionSite config) {
 		Activator.getModel().registerModelChangeListener(this);
+		providerID = config.getExtension().getId();
 	}
 
 	public void saveState(IMemento aMemento) {
@@ -75,6 +85,12 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 			}
 			return files.toArray();
 		}
+		else if (parentElement instanceof IFile
+				&& providerID.equals(PROJECT_EXPLORER_CONTENT_PROVIDER_ID)) {
+			IFile file = (IFile) parentElement;
+			return new Object[] { Activator.getModel().getProject(
+					file.getProject()).getConfig(file) };
+		}
 
 		return null;
 	}
@@ -93,6 +109,12 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 					&& config.getBeansConfigs().size() > 0) {
 				return true;
 			}
+		}
+		else if (element instanceof IFile
+				&& providerID.equals(PROJECT_EXPLORER_CONTENT_PROVIDER_ID)) {
+			IFile file = (IFile) element;
+			return Activator.getModel().getProject(file.getProject())
+					.getConfig(file) != null;
 		}
 		return false;
 	}
@@ -125,7 +147,7 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 			this.viewer = null;
 		}
 	}
-	
+
 	protected final void refreshViewerForElement(final Object element) {
 		if (viewer instanceof StructuredViewer && element != null) {
 
@@ -138,7 +160,8 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 			// Are we in the UI thread?
 			if (ctrl.getDisplay().getThread() == Thread.currentThread()) {
 				viewer.refresh(element);
-			} else {
+			}
+			else {
 				ctrl.getDisplay().asyncExec(new Runnable() {
 					public void run() {
 
