@@ -16,7 +16,7 @@
 
 package org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow;
 
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -31,11 +31,14 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperLinkDetector;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.ExternalBeanHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.JavaElementHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.NodeElementHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
+import org.springframework.ide.eclipse.webflow.core.Activator;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -44,7 +47,6 @@ import org.w3c.dom.NodeList;
  * Detects hyperlinks in XML tags. Includes detection of bean classes and bean
  * properties in attribute values. Resolves bean references (including
  * references to parent beans or factory beans).
- * 
  * @author Christian Dupuis
  */
 public class WebflowHyperLinkDetector extends AbstractHyperLinkDetector
@@ -72,18 +74,20 @@ public class WebflowHyperLinkDetector extends AbstractHyperLinkDetector
 
 	/**
 	 * Returns <code>true</code> if given attribute is openable.
-	 * 
-	 * @param attr 
-	 * 
-	 * @return 
+	 * @param attr
+	 * @return
 	 */
 	@Override
 	protected boolean isLinkableAttr(Attr attr) {
 		return VALID_ATTRIBUTES.contains(attr.getLocalName());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperLinkDetector#createHyperlink(java.lang.String, java.lang.String, org.w3c.dom.Node, org.eclipse.jface.text.IRegion, org.eclipse.jface.text.IDocument, org.w3c.dom.Node, org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperLinkDetector#createHyperlink(java.lang.String,
+	 * java.lang.String, org.w3c.dom.Node, org.eclipse.jface.text.IRegion,
+	 * org.eclipse.jface.text.IDocument, org.w3c.dom.Node,
+	 * org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
 	 */
 	@Override
 	protected IHyperlink createHyperlink(String name, String target,
@@ -94,13 +98,20 @@ public class WebflowHyperLinkDetector extends AbstractHyperLinkDetector
 		}
 		if ("bean".equals(name)) {
 			IFile file = BeansEditorUtils.getFile(document);
-			// assume this is an external reference
-			Iterator<?> beans = BeansEditorUtils.getBeansFromConfigSets(file)
-					.iterator();
-			while (beans.hasNext()) {
-				IBean modelBean = (IBean) beans.next();
-				if (modelBean.getElementName().equals(target)) {
-					return new ExternalBeanHyperlink(modelBean, hyperlinkRegion);
+			IWebflowConfig config = Activator.getModel().getProject(
+					file.getProject()).getConfig(file);
+			if (config != null) {
+				Set<IBeansConfig> beansConfigs = config.getBeansConfigs();
+				Set<IBean> beans = new HashSet<IBean>();
+				if (beansConfigs != null) {
+					for (IBeansConfig bc : beansConfigs) {
+						beans.addAll(bc.getBeans());
+					}
+				}
+				for (IBean bean : beans) {
+					if (bean.getElementName().equals(target)) {
+						return new ExternalBeanHyperlink(bean, hyperlinkRegion);
+					}
 				}
 			}
 		}
@@ -137,30 +148,39 @@ public class WebflowHyperLinkDetector extends AbstractHyperLinkDetector
 				&& BeansEditorUtils.hasAttribute(node, "bean")) {
 			String bean = BeansEditorUtils.getAttribute(node, "bean");
 			IFile file = BeansEditorUtils.getFile(document);
-			Iterator<?> beans = BeansEditorUtils.getBeansFromConfigSets(file)
-					.iterator();
-			while (beans.hasNext()) {
-				IBean modelBean = (IBean) beans.next();
-				String className = BeansModelUtils.getBeanClass(modelBean,
-						modelBean.getElementParent());
-				if (modelBean.getElementName().equals(bean)) {
-					IType type = BeansModelUtils.getJavaType(file.getProject(),
-							className);
-					if (type != null) {
-						IMethod[] methods;
-						try {
-							methods = type.getMethods();
-							if (methods != null) {
-								for (IMethod method : methods) {
-									if (method.getElementName().equals(target)) {
-										return new JavaElementHyperlink(
-												hyperlinkRegion, method);
-									}
+			String className = null;
+			IWebflowConfig config = Activator.getModel().getProject(
+					file.getProject()).getConfig(file);
+			if (config != null) {
+				Set<IBeansConfig> beansConfigs = config.getBeansConfigs();
+				Set<IBean> beans = new HashSet<IBean>();
+				if (beansConfigs != null) {
+					for (IBeansConfig bc : beansConfigs) {
+						beans.addAll(bc.getBeans());
+					}
+				}
+				for (IBean modelBean : beans) {
+					if (modelBean.getElementName().equals(bean)) {
+						className = BeansModelUtils.getBeanClass(modelBean,
+								null);
+					}
+				}
+				IType type = BeansModelUtils.getJavaType(file.getProject(),
+						className);
+				if (type != null) {
+					IMethod[] methods;
+					try {
+						methods = type.getMethods();
+						if (methods != null) {
+							for (IMethod method : methods) {
+								if (method.getElementName().equals(target)) {
+									return new JavaElementHyperlink(
+											hyperlinkRegion, method);
 								}
 							}
 						}
-						catch (JavaModelException e) {
-						}
+					}
+					catch (JavaModelException e) {
 					}
 				}
 			}

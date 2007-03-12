@@ -31,7 +31,8 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
  * 
  */
 @SuppressWarnings("restriction")
-public class BeanActionMethodSearchRequestor extends PublicMethodSearchRequestor {
+public class BeanActionMethodSearchRequestor extends
+		PublicMethodSearchRequestor {
 
 	/**
 	 * 
@@ -44,9 +45,7 @@ public class BeanActionMethodSearchRequestor extends PublicMethodSearchRequestor
 	private final String REQUEST_CONTEXT_CLASS = "org.springframework.webflow.execution.RequestContext";
 
 	/**
-	 * 
-	 * 
-	 * @param request 
+	 * @param request
 	 */
 	public BeanActionMethodSearchRequestor(ContentAssistRequest request) {
 		super(request);
@@ -55,11 +54,9 @@ public class BeanActionMethodSearchRequestor extends PublicMethodSearchRequestor
 	/**
 	 * Check methods for the following signatur public Event
 	 * execute(RequestContext context) throws Exception;.
-	 * 
-	 * @param prefix 
-	 * @param method 
-	 * 
-	 * @throws CoreException 
+	 * @param prefix
+	 * @param method
+	 * @throws CoreException
 	 */
 	public void acceptSearchMatch(IMethod method, String prefix)
 			throws CoreException {
@@ -83,7 +80,8 @@ public class BeanActionMethodSearchRequestor extends PublicMethodSearchRequestor
 				if (EVENT_CLASS.equals(returnType.getFullyQualifiedName())
 						&& REQUEST_CONTEXT_CLASS.equals(parameterTypes.get(0)
 								.getFullyQualifiedName())) {
-					createMethodProposal(method, MethodSearchRequestor.METHOD_RELEVANCE);
+					createMethodProposal(method,
+							MethodSearchRequestor.METHOD_RELEVANCE);
 				}
 			}
 		}
