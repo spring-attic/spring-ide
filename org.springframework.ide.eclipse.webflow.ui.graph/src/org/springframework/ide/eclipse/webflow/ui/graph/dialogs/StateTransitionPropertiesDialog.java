@@ -22,13 +22,23 @@ import java.util.List;
 import ognl.Ognl;
 import ognl.OgnlException;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -40,16 +50,23 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.ui.graph.WebflowImages;
+import org.springframework.ide.eclipse.webflow.ui.graph.WebflowUtils;
 
 /**
+ * Properties {@link Dialog} implemantation that enables the edition of
+ * {@link IStateTransition} elements.
  * 
+ * @author Christian Dupuis
+ * @since 2.0
  */
+@SuppressWarnings("restriction")
 public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 		IDialogValidator {
 
@@ -96,6 +113,16 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 */
+	private SelectionListener buttonListener = new SelectionAdapter() {
+
+		public void widgetSelected(SelectionEvent e) {
+			handleButtonPressed((Button) e.widget);
+		}
+	};
+
+	/**
+	 * 
+	 */
 	private IWebflowModelElement parent;
 
 	/**
@@ -121,10 +148,11 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 * 
-	 * @param parentShell 
-	 * @param state 
-	 * @param parent 
+	 * @param parentShell
+	 * @param state
+	 * @param parent
 	 */
+	@SuppressWarnings("unchecked")
 	public StateTransitionPropertiesDialog(Shell parentShell,
 			IWebflowModelElement parent, IStateTransition state) {
 		super(parentShell);
@@ -132,21 +160,49 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 		this.parent = parent;
 		this.transitionClone = ((ICloneableModelElement<IStateTransition>) this.transition)
 				.cloneModelElement();
-		
+
 		actions = new ArrayList<IActionElement>();
 		if (this.transitionClone.getActions() != null) {
 			actions.addAll(this.transitionClone.getActions());
 		}
-		
+
 	}
 
-	/* (non-Javadoc)
+	protected void handleButtonPressed(Button widget) {
+		try {
+			IType throwable = BeansModelUtils.getJavaType(WebflowUtils
+					.getActiveWebflowConfig().getProject().getProject(),
+					"java.lang.Throwable");
+			IJavaSearchScope searchScope = SearchEngine
+					.createJavaSearchScope(throwable.newTypeHierarchy(
+							new NullProgressMonitor())
+							.getAllSubtypes(throwable));
+			TypeSelectionDialog2 dialog = new TypeSelectionDialog2(getShell(),
+					false, new ProgressMonitorDialog(getShell()), searchScope,
+					IJavaSearchConstants.CLASS);
+			dialog.setBlockOnOpen(true);
+			dialog.setTitle("Type Selection");
+			// dialog.setFilter("*");
+			if (Dialog.OK == dialog.open()) {
+				IType obj = (IType) dialog.getFirstResult();
+				this.onExceptionText.setText(obj.getFullyQualifiedName());
+			}
+		}
+		catch (JavaModelException e) {
+		}
+
+		this.validateInput();
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
 	 */
+	@SuppressWarnings("unchecked")
 	protected void buttonPressed(int buttonId) {
 		if (buttonId == IDialogConstants.OK_ID) {
 			this.transitionClone.setOn(trimString(getOn()));
-			
+
 			if (this.actions != null && this.actions.size() > 0) {
 				transitionClone.removeAll();
 				for (IActionElement a : this.actions) {
@@ -156,14 +212,15 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 			else {
 				transitionClone.removeAll();
 			}
-			
+
 			((ICloneableModelElement<IStateTransition>) this.transition)
 					.applyCloneValues(this.transitionClone);
 		}
 		super.buttonPressed(buttonId);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.jface.window.Window#configureShell(org.eclipse.swt.widgets.Shell)
 	 */
 	protected void configureShell(Shell shell) {
@@ -171,7 +228,8 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 		shell.setText(getShellTitle());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
 	 */
 	protected void createButtonsForButtonBar(Composite parent) {
@@ -191,7 +249,8 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createContents(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createContents(Composite parent) {
@@ -201,7 +260,8 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 		return contents;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createDialogArea(Composite parent) {
@@ -225,7 +285,7 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 		Composite nameGroup = new Composite(folder, SWT.NULL);
 		nameGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		GridLayout layout1 = new GridLayout();
-		layout1.numColumns = 3;
+		layout1.numColumns = 2;
 		layout1.marginWidth = 0;
 		layout1.marginHeight = 0;
 		nameGroup.setLayout(layout1);
@@ -233,11 +293,11 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 		Group groupActionType = new Group(nameGroup, SWT.NULL);
 		groupActionType.setLayoutData(new GridData(GridData.FILL_BOTH));
 		GridLayout layoutAttMap = new GridLayout();
-		layoutAttMap.numColumns = 2;
+		layoutAttMap.numColumns = 3;
 		layoutAttMap.marginWidth = 5;
 		groupActionType.setLayout(layoutAttMap);
 		groupActionType.setText(" Transition ");
-		
+
 		Label onLabel = new Label(groupActionType, SWT.NONE);
 		onLabel.setText("On");
 		onText = new Text(groupActionType, SWT.SINGLE | SWT.BORDER);
@@ -277,7 +337,13 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 				validateInput();
 			}
 		});
-		
+
+		browseExceptionButton = new Button(groupActionType, SWT.PUSH);
+		browseExceptionButton.setText("...");
+		browseExceptionButton.setLayoutData(new GridData(
+				GridData.HORIZONTAL_ALIGN_END));
+		browseExceptionButton.addSelectionListener(buttonListener);
+
 		item1.setControl(nameGroup);
 
 		actionProperties = new ActionComposite(this, item2, getShell(),
@@ -297,9 +363,9 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * Cut the expression from given criteria string and return it.
 	 * 
-	 * @param encodedCriteria 
+	 * @param encodedCriteria
 	 * 
-	 * @return 
+	 * @return
 	 */
 	private String cutExpression(String encodedCriteria) {
 		return encodedCriteria.substring(EXPRESSION_PREFIX.length(),
@@ -309,7 +375,7 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	protected String getMessage() {
 		return "Enter the details for the state transition";
@@ -318,7 +384,7 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public IWebflowModelElement getModelElementParent() {
 		return this.parent;
@@ -327,7 +393,7 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public String getOn() {
 		return this.onText.getText();
@@ -336,7 +402,7 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	protected String getShellTitle() {
 		return "Transition";
@@ -345,7 +411,7 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	protected String getTitle() {
 		return "Transition properties";
@@ -361,7 +427,7 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 * 
-	 * @param error 
+	 * @param error
 	 */
 	protected void showError(String error) {
 		super.setErrorMessage(error);
@@ -370,9 +436,9 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 * 
-	 * @param string 
+	 * @param string
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public String trimString(String string) {
 		if (string != null && string == "") {
@@ -381,7 +447,8 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 		return string;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.ui.graph.dialogs.IDialogValidator#validateInput()
 	 */
 	public void validateInput() {
