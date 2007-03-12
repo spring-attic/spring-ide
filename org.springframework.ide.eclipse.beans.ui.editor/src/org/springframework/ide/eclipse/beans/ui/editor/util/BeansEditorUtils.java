@@ -369,7 +369,7 @@ public class BeansEditorUtils {
 
 					if (parentId.equals(bean.getElementName())) {
 						getClassNamesOfBeans(file, document, bean
-								.getElementName(), bean.getClassName(), bean
+								.getElementName(), BeansModelUtils.getBeanClass(bean, null), bean
 								.getParentName(), classNames, beans);
 						break;
 					}
@@ -406,7 +406,7 @@ public class BeansEditorUtils {
 			for (int i = 0; i < beansList.size(); i++) {
 				IBean bean = (IBean) beansList.get(i);
 				if (id.equals(bean.getElementName())) {
-					return BeansModelUtils.getBeanClass(bean, bean.getElementParent());
+					return BeansModelUtils.getBeanClass(bean, null);
 				}
 			}
 		}
