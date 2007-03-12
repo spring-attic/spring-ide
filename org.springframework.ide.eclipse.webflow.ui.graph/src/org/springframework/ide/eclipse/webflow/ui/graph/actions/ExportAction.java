@@ -42,15 +42,20 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.SaveAsDialog;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.ui.graph.Activator;
 import org.springframework.ide.eclipse.webflow.ui.graph.WebflowEditor;
+import org.springframework.ide.eclipse.webflow.ui.graph.WebflowEditorInput;
 import org.springframework.ide.eclipse.webflow.ui.graph.WebflowImages;
 
 /**
+ * {@link WorkbenchPartAction} that exports the current {@link IWebflowConfig} 
+ * to an image file.
  * 
+ * @author Christian Dupuis
+ * @since 2.0
  */
 public class ExportAction extends WorkbenchPartAction {
 
@@ -67,7 +72,7 @@ public class ExportAction extends WorkbenchPartAction {
 	/**
 	 * 
 	 * 
-	 * @param part 
+	 * @param part
 	 */
 	public ExportAction(WebflowEditor part) {
 		super(part);
@@ -79,21 +84,22 @@ public class ExportAction extends WorkbenchPartAction {
 		setDisabledImageDescriptor(WebflowImages.DESC_OBJS_EXPORT_DISABLED);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	public void run() {
 		SaveAsDialog dialog = new SaveAsDialog(getWorkbenchPart().getSite()
 				.getShell());
-		IFile editorFile = ((IFileEditorInput) this.editor.getEditorInput())
+		IFile editorFile = ((WebflowEditorInput) this.editor.getEditorInput())
 				.getFile();
 		String fileName = editorFile.getName();
 		fileName = fileName.substring(0, fileName.lastIndexOf("."));
-		dialog.setOriginalName(fileName + ".jpg");
+		dialog.setTitle("Export to image");
+		dialog.setOriginalFile(editorFile);
 		dialog.create();
 		dialog
-				.setMessage("Specify a name and location for the image. Either enter .bmp or .jpg extension.");
-		dialog.setOriginalName(fileName + ".jpg");
+				.setMessage("Specify a name and location for the image. Either enter .png, .jpg or .bmp extension.");
 		dialog.open();
 		IPath path = dialog.getResult();
 		if (path != null) {
@@ -102,18 +108,26 @@ public class ExportAction extends WorkbenchPartAction {
 			String ext = file.getFileExtension();
 			if (ext == null
 					|| ext.length() == 0
-					|| !(ext.equalsIgnoreCase("jpg") || ext
-							.equalsIgnoreCase("bmp"))) {
-				ErrorDialog
-						.openError(
-								getWorkbenchPart().getSite().getShell(),
-								"Error",
-								"Error during processing of export",
-								Activator.createErrorStatus("error", null));
+					|| !(ext.equalsIgnoreCase("jpg")
+							|| ext.equalsIgnoreCase("jpeg")
+							|| ext.equalsIgnoreCase("bmp") || ext
+							.equalsIgnoreCase("png"))) {
+				ErrorDialog.openError(getWorkbenchPart().getSite().getShell(),
+						"Error", "Error during processing of export", Activator
+								.createErrorStatus("error", null));
 			}
 			else {
-				saveImage(file, (ext.equalsIgnoreCase("jpg") ? SWT.IMAGE_JPEG
-						: SWT.IMAGE_BMP));
+
+				if ("PNG".equalsIgnoreCase(ext)) {
+					saveImage(file, SWT.IMAGE_PNG);
+				}
+				else if ("JPG".equalsIgnoreCase(ext)
+						|| "JPEG".equalsIgnoreCase(ext)) {
+					saveImage(file, SWT.IMAGE_JPEG);
+				}
+				else if ("BMP".equalsIgnoreCase(ext)) {
+					saveImage(file, SWT.IMAGE_BMP);
+				}
 			}
 		}
 	}
@@ -121,7 +135,7 @@ public class ExportAction extends WorkbenchPartAction {
 	/**
 	 * Saves an encoded image from this viewer.
 	 * 
-	 * @param file 
+	 * @param file
 	 * @param format one of SWT.IMAGE_BMP, SWT.IMAGE_BMP_RLE, SWT.IMAGE_GIF
 	 * SWT.IMAGE_ICO, SWT.IMAGE_JPEG or SWT.IMAGE_PNG
 	 * 
@@ -167,7 +181,8 @@ public class ExportAction extends WorkbenchPartAction {
 	 * 
 	 * @see org.eclipse.gef.ui.actions.WorkbenchPartAction#calculateEnabled()
 	 */
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.ui.actions.WorkbenchPartAction#calculateEnabled()
 	 */
 	protected boolean calculateEnabled() {
