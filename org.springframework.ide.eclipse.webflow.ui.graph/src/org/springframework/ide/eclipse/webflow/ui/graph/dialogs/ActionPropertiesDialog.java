@@ -16,9 +16,7 @@
 
 package org.springframework.ide.eclipse.webflow.ui.graph.dialogs;
 
-import java.util.Set;
-
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -41,10 +39,7 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.webflow.core.internal.model.Action;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
@@ -124,6 +119,11 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 */
+	private Button browseMethodButton;
+
+	/**
+	 * 
+	 */
 	private SelectionListener buttonListener = new SelectionAdapter() {
 
 		public void widgetSelected(SelectionEvent e) {
@@ -132,11 +132,9 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 	};
 
 	/**
-	 * 
-	 * 
-	 * @param parentShell 
-	 * @param state 
-	 * @param parent 
+	 * @param parentShell
+	 * @param state
+	 * @param parent
 	 */
 	public ActionPropertiesDialog(Shell parentShell,
 			IWebflowModelElement parent, Action state) {
@@ -147,11 +145,8 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 	}
 
 	/**
-	 * 
-	 * 
-	 * @param string 
-	 * 
-	 * @return 
+	 * @param string
+	 * @return
 	 */
 	private String trimString(String string) {
 		if (string != null && string == "") {
@@ -160,7 +155,8 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 		return string;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
 	 */
 	protected void buttonPressed(int buttonId) {
@@ -173,7 +169,8 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 		super.buttonPressed(buttonId);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.jface.window.Window#configureShell(org.eclipse.swt.widgets.Shell)
 	 */
 	protected void configureShell(Shell shell) {
@@ -182,7 +179,8 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 		shell.setImage(getImage());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
 	 */
 	protected void createButtonsForButtonBar(Composite parent) {
@@ -204,7 +202,8 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 		this.validateInput();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createContents(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createContents(Composite parent) {
@@ -214,7 +213,8 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 		return contents;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createDialogArea(Composite parent) {
@@ -304,7 +304,11 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 			}
 		});
 
-		new Label(nameGroup, SWT.NONE);
+		browseMethodButton = new Button(nameGroup, SWT.PUSH);
+		browseMethodButton.setText("...");
+		browseMethodButton.setLayoutData(new GridData(
+				GridData.HORIZONTAL_ALIGN_END));
+		browseMethodButton.addSelectionListener(buttonListener);
 
 		item1.setControl(groupActionType);
 
@@ -318,60 +322,49 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 	}
 
 	/**
-	 * 
-	 * 
-	 * @return 
+	 * @return
 	 */
 	protected Image getImage() {
 		return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_ACTION);
 	}
 
 	/**
-	 * 
-	 * 
-	 * @return 
+	 * @return
 	 */
 	protected String getMessage() {
 		return "Enter the details for the action";
 	}
 
 	/**
-	 * 
-	 * 
-	 * @return 
+	 * @return
 	 */
 	public String getName() {
 		return this.nameText.getText();
 	}
 
 	/**
-	 * 
-	 * 
-	 * @return 
+	 * @return
 	 */
 	protected String getShellTitle() {
 		return "Action";
 	}
 
 	/**
-	 * 
-	 * 
-	 * @return 
+	 * @return
 	 */
 	protected String getTitle() {
 		return "Action properties";
 	}
 
 	/**
-	 * 
-	 * 
-	 * @param error 
+	 * @param error
 	 */
 	protected void showError(String error) {
 		super.setErrorMessage(error);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.ui.graph.dialogs.IDialogValidator#validateInput()
 	 */
 	public void validateInput() {
@@ -388,27 +381,23 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 	}
 
 	/**
-	 * 
-	 * 
-	 * @param button 
+	 * @param button
 	 */
 	private void handleButtonPressed(Button button) {
 
 		if (button.equals(browseBeanButton)) {
-			ElementListSelectionDialog dialog = new ElementListSelectionDialog(
-					getParentShell(), new BeansModelLabelProvider(true));
-			dialog.setBlockOnOpen(true);
-			Set<IBean> beans = BeansModelUtils.getBeans(BeansCorePlugin
-					.getModel(), new NullProgressMonitor());
-			dialog.setSize(100, 20);
-			dialog.setFilter("*" + this.beanText.getText() + "*");
-			dialog.setElements(beans.toArray());
-			dialog.setEmptySelectionMessage("Select a bean reference");
-			dialog.setTitle("Bean reference");
-			dialog.setMessage("Please select a bean reference");
-			dialog.setMultipleSelection(false);
+			ElementListSelectionDialog dialog = DialogUtils
+					.openBeanReferenceDialog(this.beanText.getText(), false);
 			if (Dialog.OK == dialog.open()) {
 				this.beanText.setText(((IBean) dialog.getFirstResult())
+						.getElementName());
+			}
+		}
+		else if (button.equals(browseMethodButton)) {
+			ElementListSelectionDialog dialog = DialogUtils
+					.openActionMethodReferenceDialog(this.actionClone.getNode());
+			if (Dialog.OK == dialog.open()) {
+				this.methodText.setText(((IMethod) dialog.getFirstResult())
 						.getElementName());
 			}
 		}

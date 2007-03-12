@@ -21,14 +21,11 @@ import java.util.Set;
 
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalViewer;
-import org.eclipse.gef.ui.actions.EditorPartAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IEditorPart;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditor;
-import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.webflow.core.internal.model.Action;
 import org.springframework.ide.eclipse.webflow.core.internal.model.AttributeMapper;
 import org.springframework.ide.eclipse.webflow.core.internal.model.BeanAction;
@@ -40,24 +37,24 @@ import org.springframework.ide.eclipse.webflow.ui.graph.WebflowUtils;
 /**
  * 
  */
-public class OpenBeansGraphAction extends EditorPartAction {
+public class OpenBeansConfigAction extends OpenBeansGraphAction {
 
 	/**
 	 * 
 	 */
-	public static final String OPEN_FILE_REQUEST = "Open_beans_graph";
+	public static final String OPEN_FILE_REQUEST = "Open_beans_config";
 
 	/**
 	 * 
 	 */
-	public static final String OPEN_FILE = "Open_beans_graph";
+	public static final String OPEN_FILE = "Open_beans_config";
 
 	/**
 	 * 
 	 * 
 	 * @param editor
 	 */
-	public OpenBeansGraphAction(IEditorPart editor) {
+	public OpenBeansConfigAction(IEditorPart editor) {
 		super(editor);
 	}
 
@@ -66,48 +63,9 @@ public class OpenBeansGraphAction extends EditorPartAction {
 	 * @see org.eclipse.gef.ui.actions.WorkbenchPartAction#init()
 	 */
 	protected void init() {
-		setId(OpenBeansGraphAction.OPEN_FILE);
-		setText("Open Beans Graph");
-		setToolTipText("Open element in beans graph");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.gef.ui.actions.WorkbenchPartAction#calculateEnabled()
-	 */
-	protected boolean calculateEnabled() {
-		return true;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.gef.ui.actions.WorkbenchPartAction#isEnabled()
-	 */
-	public boolean isEnabled() {
-		if (getFirstSelectedEditPart() != null) {
-			Object flowModelElement = getFirstSelectedEditPart().getModel();
-			IWebflowConfig config = WebflowUtils.getActiveWebflowConfig();
-			if (config != null && config.getBeansConfigs() != null
-					&& config.getBeansConfigs().size() > 0) {
-				if (flowModelElement instanceof Action) {
-					Action action = (Action) flowModelElement;
-					return action.getBean() != null;
-				}
-				else if (flowModelElement instanceof BeanAction) {
-					BeanAction action = (BeanAction) flowModelElement;
-					return action.getBean() != null;
-				}
-				else if (flowModelElement instanceof ExceptionHandler) {
-					ExceptionHandler action = (ExceptionHandler) flowModelElement;
-					return action.getBean() != null;
-				}
-				else if (flowModelElement instanceof AttributeMapper) {
-					AttributeMapper action = (AttributeMapper) flowModelElement;
-					return action.getBean() != null;
-				}
-			}
-		}
-		return false;
+		setId(OpenBeansConfigAction.OPEN_FILE);
+		setText("Open Beans Config");
+		setToolTipText("Open element in beans config");
 	}
 
 	/*
@@ -149,9 +107,7 @@ public class OpenBeansGraphAction extends EditorPartAction {
 			}
 		}
 		if (bean != null) {
-			GraphEditorInput graphEditorInput = new GraphEditorInput(bean,
-					beansConfig);
-			SpringUIUtils.openInEditor(graphEditorInput, GraphEditor.EDITOR_ID);
+			BeansUIUtils.openInEditor(bean);
 		}
 		else {
 			MessageDialog.openError(getWorkbenchPart().getSite().getShell(),

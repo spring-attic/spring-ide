@@ -38,7 +38,6 @@ import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.ui.graph.actions.EditPropertiesAction;
 import org.springframework.ide.eclipse.webflow.ui.graph.commands.EditPropertiesCommand;
-import org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart;
 
 /**
  * 

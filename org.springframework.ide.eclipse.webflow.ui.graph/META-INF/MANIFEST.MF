@@ -27,7 +27,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jdt,
  org.eclipse.ui.views.properties.tabbed,
  org.springframework.ide.eclipse,
- org.springframework.ide.eclipse.beans.ui.graph
+ org.springframework.ide.eclipse.beans.ui.graph,
+ org.springframework.ide.eclipse.beans.ui.editor,
+ org.eclipse.wst.xml.ui
 Eclipse-LazyStart: true
 Export-Package: org.springframework.ide.eclipse.webflow.ui.graph,
  org.springframework.ide.eclipse.webflow.ui.graph.actions,

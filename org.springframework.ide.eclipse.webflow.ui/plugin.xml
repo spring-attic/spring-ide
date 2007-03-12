@@ -36,11 +36,13 @@
    <extension
          point="org.eclipse.ui.navigator.navigatorContent">
       <navigatorContent
-            id="org.springframework.ide.eclipse.webflow.ui.navigator.projectExplorerContent"
-            name="%navigatorContentName"
+            activeByDefault="true"
             contentProvider="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorContentProvider"
+            icon="icons/full/obj16/spring_webflow_obj.gif"
+            id="org.springframework.ide.eclipse.webflow.ui.navigator.projectExplorerContent"
             labelProvider="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorLabelProvider"
-            activeByDefault="true">
+            name="%navigatorContentName"
+            providesSaveables="false">
 		 <triggerPoints>
 			<or>
 				<instanceof value="org.eclipse.core.resources.IFile"/>
@@ -55,6 +57,9 @@
 				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
 			</or>
          </possibleChildren>
+         <commonSorter
+				id="org.springframework.ide.eclipse.webflow.ui.navigator.projectExplorerContent"
+				class="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowModelNavigatorSorter" />
       </navigatorContent>
 
       <actionProvider

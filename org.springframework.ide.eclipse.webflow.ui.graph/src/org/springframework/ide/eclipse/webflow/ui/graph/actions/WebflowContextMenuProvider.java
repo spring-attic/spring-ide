@@ -74,6 +74,10 @@ public class WebflowContextMenuProvider extends ContextMenuProvider {
         action = getActionRegistry().getAction(OpenBeansGraphAction.OPEN_FILE);
         if (action.isEnabled())
             menu.appendToGroup(GEFActionConstants.GROUP_UNDO, action);
+
+        action = getActionRegistry().getAction(OpenBeansConfigAction.OPEN_FILE);
+        if (action.isEnabled())
+        	menu.appendToGroup(GEFActionConstants.GROUP_UNDO, action);
         
         action = getActionRegistry().getAction(ActionFactory.DELETE.getId());
         if (action.isEnabled())

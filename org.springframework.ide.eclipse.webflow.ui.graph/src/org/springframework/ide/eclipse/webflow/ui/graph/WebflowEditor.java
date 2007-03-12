@@ -83,7 +83,6 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.SaveAsDialog;
-import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
@@ -97,11 +96,14 @@ import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.core.internal.provisional.format.FormatProcessorXML;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowState;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.springframework.ide.eclipse.webflow.ui.editor.Activator;
 import org.springframework.ide.eclipse.webflow.ui.graph.actions.EditPropertiesAction;
 import org.springframework.ide.eclipse.webflow.ui.graph.actions.ExportAction;
+import org.springframework.ide.eclipse.webflow.ui.graph.actions.OpenBeansConfigAction;
 import org.springframework.ide.eclipse.webflow.ui.graph.actions.OpenBeansGraphAction;
 import org.springframework.ide.eclipse.webflow.ui.graph.actions.OpenConfigFileAction;
 import org.springframework.ide.eclipse.webflow.ui.graph.actions.SetAsStartStateAction;
@@ -163,8 +165,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 		private Thumbnail thumbnail;
 
 		/**
-		 * 
-		 * 
 		 * @param viewer
 		 */
 		public OutlinePage(EditPartViewer viewer) {
@@ -210,8 +210,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 		}
 
 		/**
-		 * 
-		 * 
 		 * @param parent
 		 */
 		public void createControl(Composite parent) {
@@ -238,10 +236,7 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 		}
 
 		/**
-		 * 
-		 * 
 		 * @param type
-		 * 
 		 * @return
 		 */
 		public Object getAdapter(Class type) {
@@ -252,8 +247,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 		}
 
 		/**
-		 * 
-		 * 
 		 * @return
 		 */
 		public Control getControl() {
@@ -268,8 +261,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 		}
 
 		/**
-		 * 
-		 * 
 		 * @param pageSite
 		 */
 		public void init(IPageSite pageSite) {
@@ -321,8 +312,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 		}
 
 		/**
-		 * 
-		 * 
 		 * @param contents
 		 */
 		public void setContents(Object contents) {
@@ -330,8 +319,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 		}
 
 		/**
-		 * 
-		 * 
 		 * @param id
 		 */
 		protected void showPage(int id) {
@@ -370,8 +357,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 			IResourceDeltaVisitor {
 
 		/**
-		 * 
-		 * 
 		 * @param event
 		 */
 		public void resourceChanged(IResourceChangeEvent event) {
@@ -386,10 +371,7 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 		}
 
 		/**
-		 * 
-		 * 
 		 * @param delta
-		 * 
 		 * @return
 		 */
 		public boolean visit(IResourceDelta delta) {
@@ -416,20 +398,28 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 					display.asyncExec(new Runnable() {
 
 						public void run() {
-							superSetInput(new FileEditorInput(newFile));
+							IWebflowConfig config = ((WebflowEditorInput) getEditorInput())
+									.getConfig();
+							config.setResource(newFile);
+							List<IWebflowConfig> configs = config.getProject()
+									.getConfigs();
+							config.getProject().setConfigs(configs);
+							superSetInput(new WebflowEditorInput(config));
 						}
 					});
 				}
 			}
 			else if (delta.getKind() == IResourceDelta.CHANGED) {
 				if (!isDirty() || isCurrentlySaving) {
-					final IFile newFile = ResourcesPlugin.getWorkspace()
-							.getRoot().getFile(delta.getFullPath());
+					//final IFile newFile = ResourcesPlugin.getWorkspace()
+					//		.getRoot().getFile(delta.getFullPath());
 					Display display = getSite().getShell().getDisplay();
 					display.asyncExec(new Runnable() {
 
 						public void run() {
-							setInput(new FileEditorInput(newFile));
+							IWebflowConfig config = ((WebflowEditorInput) getEditorInput())
+									.getConfig();
+							setInput(new WebflowEditorInput(config));
 							getCommandStack().flush();
 							initializeGraphicalViewer();
 							outlinePage.initializeOutlineViewer();
@@ -444,13 +434,15 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 												.getShell(),
 										"File Changed",
 										"The file has been changed on the file system. Do you want to load the changes?")) {
-					final IFile newFile = ResourcesPlugin.getWorkspace()
-							.getRoot().getFile(delta.getFullPath());
+					//final IFile newFile = ResourcesPlugin.getWorkspace()
+					//		.getRoot().getFile(delta.getFullPath());
 					Display display = getSite().getShell().getDisplay();
 					display.asyncExec(new Runnable() {
 
 						public void run() {
-							setInput(new FileEditorInput(newFile));
+							IWebflowConfig config = ((WebflowEditorInput) getEditorInput())
+									.getConfig();
+							setInput(new WebflowEditorInput(config));
 							getCommandStack().flush();
 							initializeGraphicalViewer();
 							outlinePage.initializeOutlineViewer();
@@ -561,8 +553,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @param save
 	 */
 	protected void closeEditor(boolean save) {
@@ -570,10 +560,7 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @param event
-	 * 
 	 * @see org.eclipse.gef.commands.CommandStackListener#commandStackChanged(java.util.EventObject)
 	 */
 	public void commandStackChanged(EventObject event) {
@@ -591,8 +578,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @see org.eclipse.gef.ui.parts.GraphicalEditor#configureGraphicalViewer()
 	 */
 	protected void configureGraphicalViewer() {
@@ -630,8 +615,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @see org.eclipse.gef.ui.parts.GraphicalEditor#createActions()
 	 */
 	@SuppressWarnings("unchecked")
@@ -664,6 +647,10 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 		registry.registerAction(action);
 		getSelectionActions().add(action.getId());
 
+		action = new OpenBeansConfigAction(this);
+		registry.registerAction(action);
+		getSelectionActions().add(action.getId());
+
 	}
 
 	/**
@@ -688,10 +675,7 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @param monitor
-	 * 
 	 * @see org.eclipse.ui.ISaveablePart#doSave(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public void doSave(IProgressMonitor monitor) {
@@ -721,8 +705,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @param monitor
 	 */
 	private void formatElement(IProgressMonitor monitor) {
@@ -737,10 +719,7 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @param type
-	 * 
 	 * @return
 	 */
 	public Object getAdapter(Class type) {
@@ -760,8 +739,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @return
 	 */
 	protected KeyHandler getCommonKeyHandler() {
@@ -781,8 +758,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @return
 	 */
 	protected FigureCanvas getEditor() {
@@ -790,8 +765,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @return
 	 */
 	public GraphicalViewer getGraphViewer() {
@@ -799,10 +772,7 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @return
-	 * 
 	 * @see org.eclipse.gef.ui.parts.GraphicalEditorWithPalette#getPaletteRoot()
 	 */
 	protected PaletteRoot getPaletteRoot() {
@@ -812,8 +782,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @param marker
 	 */
 	public void gotoMarker(IMarker marker) {
@@ -821,8 +789,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @see org.eclipse.gef.ui.parts.GraphicalEditor#initializeGraphicalViewer()
 	 */
 	protected void initializeGraphicalViewer() {
@@ -830,8 +796,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @see org.eclipse.gef.ui.parts.GraphicalEditorWithPalette#initializePaletteViewer()
 	 */
 	/*
@@ -842,10 +806,7 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	 */
 
 	/**
-	 * 
-	 * 
 	 * @return
-	 * 
 	 * @see org.eclipse.ui.ISaveablePart#isDirty()
 	 */
 	public boolean isDirty() {
@@ -853,10 +814,7 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @return
-	 * 
 	 * @see org.eclipse.ui.ISaveablePart#isSaveAsAllowed()
 	 */
 	public boolean isSaveAsAllowed() {
@@ -864,10 +822,7 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @return
-	 * 
 	 * @see org.eclipse.ui.ISaveablePart#isSaveOnCloseNeeded()
 	 */
 	public boolean isSaveOnCloseNeeded() {
@@ -875,10 +830,7 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @return
-	 * 
 	 * @see org.eclipse.ui.ISaveablePart#doSaveAs()
 	 */
 	public boolean performSaveAs() {
@@ -925,17 +877,36 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 			}
 		};
 
+		IWebflowConfig config = ((WebflowEditorInput) getEditorInput())
+				.getConfig();
+		IWebflowConfig newConfig = org.springframework.ide.eclipse.webflow.core.Activator
+				.getModel().getProject(file.getProject()).getConfig(file);
+
+		if (newConfig == null) {
+			newConfig = new WebflowConfig(config.getProject());
+			newConfig.setBeansConfigs(config.getBeansConfigs());
+			newConfig.setResource(file);
+			List<IWebflowConfig> configs = config.getProject().getConfigs();
+			configs.add(newConfig);
+			config.getProject().setConfigs(configs);
+		}
+		else {
+			newConfig.setBeansConfigs(config.getBeansConfigs());
+			List<IWebflowConfig> configs = config.getProject().getConfigs();
+			config.getProject().setConfigs(configs);
+		}
+
 		try {
 			new ProgressMonitorDialog(getSite().getWorkbenchWindow().getShell())
 					.run(false, true, op);
-			setInput(new FileEditorInput((IFile) file));
+			setInput(new WebflowEditorInput(newConfig));
 			getCommandStack().markSaveLocation();
 		}
 		catch (Exception e) {
 		}
 
 		try {
-			superSetInput(new FileEditorInput((IFile) file));
+			superSetInput(new WebflowEditorInput(newConfig));
 			getCommandStack().markSaveLocation();
 		}
 		catch (Exception e) {
@@ -945,8 +916,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @return
 	 */
 	private boolean savePreviouslyNeeded() {
@@ -954,10 +923,7 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @param input
-	 * 
 	 * @see org.eclipse.ui.part.EditorPart#setInput(org.eclipse.ui.IEditorInput)
 	 */
 	protected void setInput(IEditorInput input) {
@@ -986,8 +952,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @param value
 	 */
 	private void setSavePreviouslyNeeded(boolean value) {
@@ -995,8 +959,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @param site
 	 */
 	protected void setSite(IWorkbenchPartSite site) {
@@ -1006,8 +968,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @param input
 	 */
 	protected void superSetInput(IEditorInput input) {
@@ -1026,8 +986,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @return
 	 */
 	public String getContributorId() {

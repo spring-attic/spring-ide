@@ -68,4 +68,6 @@ public interface IWebflowConfig {
 	 */
 	void addBeansConfigElementId(String id);
 	
+	IWebflowProject getProject();
+	
 }

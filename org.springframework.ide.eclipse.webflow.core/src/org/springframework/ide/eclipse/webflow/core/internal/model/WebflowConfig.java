@@ -50,6 +50,10 @@ public class WebflowConfig implements IWebflowConfig {
 	@SuppressWarnings("unused")
 	private IWebflowProject project;
 	
+	public IWebflowProject getProject() {
+		return project;
+	}
+
 	/**
 	 * 
 	 * 

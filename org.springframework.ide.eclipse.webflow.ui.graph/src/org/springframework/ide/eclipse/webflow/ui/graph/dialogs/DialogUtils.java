@@ -16,8 +16,12 @@
 
 package org.springframework.ide.eclipse.webflow.ui.graph.dialogs;
 
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.webflow.core.internal.model.Action;
 import org.springframework.ide.eclipse.webflow.core.internal.model.BeanAction;
 import org.springframework.ide.eclipse.webflow.core.internal.model.EvaluateAction;
@@ -38,27 +42,25 @@ import org.springframework.ide.eclipse.webflow.core.model.IViewState;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.springframework.ide.eclipse.webflow.ui.graph.Activator;
+import org.springframework.ide.eclipse.webflow.ui.graph.WebflowUtils;
 
 /**
  * 
  */
+@SuppressWarnings("restriction")
 public class DialogUtils {
 
 	/**
-	 * 
-	 * 
-	 * @param element 
-	 * @param newMode 
-	 * @param parent 
-	 * 
-	 * @return 
+	 * @param element
+	 * @param newMode
+	 * @param parent
+	 * @return
 	 */
 	public static int openPropertiesDialog(IWebflowModelElement parent,
 			IWebflowModelElement element, boolean newMode) {
 		int result = Dialog.OK;
 		Dialog dialog = null;
-		Shell shell = Activator.getDefault().getWorkbench()
-				.getActiveWorkbenchWindow().getShell();
+		Shell shell = getShell();
 		if (element instanceof IEndState) {
 			dialog = new EndStatePropertiesDialog(shell, parent,
 					(IEndState) element);
@@ -125,5 +127,43 @@ public class DialogUtils {
 			result = dialog.open();
 		}
 		return result;
+	}
+
+	private static Shell getShell() {
+		Shell shell = Activator.getDefault().getWorkbench()
+				.getActiveWorkbenchWindow().getShell();
+		return shell;
+	}
+
+	public static ElementListSelectionDialog openBeanReferenceDialog(
+			String beanId, boolean filter) {
+		ElementListSelectionDialog dialog = new ElementListSelectionDialog(
+				getShell(), new BeansModelLabelProvider(true));
+		dialog.setBlockOnOpen(true);
+
+		dialog.setSize(100, 20);
+		if (filter) {
+			dialog.setFilter("*" + beanId + "*");
+		}
+		dialog.setElements(WebflowUtils.getBeansFromEditorInput().toArray());
+		dialog.setEmptySelectionMessage("Select a bean reference");
+		dialog.setTitle("Bean reference");
+		dialog.setMessage("Please select a bean reference");
+		dialog.setMultipleSelection(false);
+		return dialog;
+	}
+
+	public static ElementListSelectionDialog openActionMethodReferenceDialog(
+			IDOMNode node) {
+		ElementListSelectionDialog dialog = new ElementListSelectionDialog(
+				getShell(), new JavaElementLabelProvider());
+		dialog.setBlockOnOpen(true);
+		dialog.setSize(100, 20);
+		dialog.setElements(WebflowUtils.getActionMethods(node).toArray());
+		dialog.setEmptySelectionMessage("Select a action method");
+		dialog.setTitle("Action method reference");
+		dialog.setMessage("Please select a action method");
+		dialog.setMultipleSelection(false);
+		return dialog;
 	}
 }

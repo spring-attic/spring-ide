@@ -109,4 +109,8 @@ public class WebflowEditorInput implements IEditorInput, IPersistableElement {
 	public Object getAdapter(Class adapter) {
 		return this.config.getResource().getAdapter(adapter);
 	}
+
+	public IWebflowConfig getConfig() {
+		return config;
+	}
 }

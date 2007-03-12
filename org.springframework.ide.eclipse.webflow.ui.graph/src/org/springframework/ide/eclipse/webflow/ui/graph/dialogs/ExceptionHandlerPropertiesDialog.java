@@ -16,9 +16,6 @@
 
 package org.springframework.ide.eclipse.webflow.ui.graph.dialogs;
 
-import java.util.Set;
-
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -38,10 +35,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.webflow.core.internal.model.ExceptionHandler;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
@@ -303,18 +297,8 @@ public class ExceptionHandlerPropertiesDialog extends TitleAreaDialog implements
 	private void handleButtonPressed(Button button) {
 
 		if (button.equals(browseBeanButton)) {
-			ElementListSelectionDialog dialog = new ElementListSelectionDialog(
-					getParentShell(), new BeansModelLabelProvider(true));
-			dialog.setBlockOnOpen(true);
-			Set<IBean> beans = BeansModelUtils.getBeans(BeansCorePlugin
-					.getModel(), new NullProgressMonitor());
-			dialog.setSize(100, 20);
-			dialog.setFilter("*" + this.beanText.getText() + "*");
-			dialog.setElements(beans.toArray());
-			dialog.setEmptySelectionMessage("Select a bean reference");
-			dialog.setTitle("Bean reference");
-			dialog.setMessage("Please select a bean reference");
-			dialog.setMultipleSelection(false);
+			ElementListSelectionDialog dialog = DialogUtils.openBeanReferenceDialog(this.beanText
+					.getText(), false);
 			if (Dialog.OK == dialog.open()) {
 				this.beanText.setText(((IBean) dialog.getFirstResult())
 						.getElementName());

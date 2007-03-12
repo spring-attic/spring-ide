@@ -279,8 +279,6 @@ public abstract class WebflowModelElement implements IWebflowModelElement,
 	}
 
 	public int getElementStartLine() {
-		return ((IDOMDocument) this.node.getOwnerDocument())
-				.getStructuredDocument().getLineOfOffset(
-						this.node.getStartOffset()) + 1;
+		return this.node.getStructuredDocument().getLineOfOffset(this.node.getStartOffset()) + 1;
 	}
 }

@@ -16,14 +16,32 @@
 
 package org.springframework.ide.eclipse.webflow.ui.graph;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 import org.springframework.ide.eclipse.webflow.ui.editor.Activator;
+import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.BeanActionMethodSearchRequestor;
+import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.BeanMethodSearchRequestor;
 
 /**
  * 
  */
+@SuppressWarnings("restriction")
 public abstract class WebflowUtils {
 
 	public static WebflowEditor getActiveFlowEditor() {
@@ -45,7 +63,7 @@ public abstract class WebflowUtils {
 		return null;
 	}
 
-	public static IWebflowConfig getActoveWebflowConfig() {
+	public static IWebflowConfig getActiveWebflowConfig() {
 		WebflowEditorInput editorInput = getActiveFlowEditorInput();
 		if (editorInput != null && editorInput.getFile() != null) {
 			IWebflowProject project = org.springframework.ide.eclipse.webflow.core.Activator
@@ -57,4 +75,103 @@ public abstract class WebflowUtils {
 		return null;
 	}
 
+	public static Set<IBean> getBeansFromEditorInput() {
+		IWebflowConfig config = getActiveWebflowConfig();
+		Set<IBeansConfig> beansConfigs = config.getBeansConfigs();
+		Set<IBean> beans = new HashSet<IBean>();
+
+		if (beansConfigs != null) {
+			for (IBeansConfig bc : beansConfigs) {
+				beans.addAll(bc.getBeans());
+			}
+		}
+
+		return beans;
+	}
+
+	public static List<IMethod> getActionMethods(IDOMNode node) {
+		Set<IBean> beans = getBeansFromEditorInput();
+		String className = null;
+		for (IBean bean : beans) {
+			if (bean.getElementName().equals(
+					BeansEditorUtils.getAttribute(node, "bean"))) {
+				className = BeansModelUtils.getBeanClass(bean, null);
+			}
+		}
+
+		IType type = BeansModelUtils.getJavaType(getActiveFlowEditorInput()
+				.getFile().getProject(), className);
+		if (type != null) {
+			if ("bean-action".equals(node.getLocalName())) {
+				MethodSearchRequestor requestor = new MethodSearchRequestor(
+						null);
+				try {
+					IMethod[] methods = type.getMethods();
+					if (methods != null) {
+						for (IMethod method : methods) {
+							requestor.acceptSearchMatch(method, "");
+						}
+					}
+				}
+				catch (JavaModelException e) {
+				}
+				catch (CoreException e) {
+				}
+				return requestor.getMethods();
+			}
+			else {
+				ActionMethodSearchRequestor requestor = new ActionMethodSearchRequestor(null);
+				try {
+					IMethod[] methods = type.getMethods();
+					if (methods != null) {
+						for (IMethod method : methods) {
+							requestor.acceptSearchMatch(method, "");
+						}
+					}
+				}
+				catch (JavaModelException e) {
+				}
+				catch (CoreException e) {
+				}
+				return requestor.getMethods();
+			}
+		}
+		return null;
+	}
+
+	private static class ActionMethodSearchRequestor extends
+			BeanActionMethodSearchRequestor {
+
+		private List<IMethod> methods = new ArrayList<IMethod>();
+
+		public ActionMethodSearchRequestor(ContentAssistRequest request) {
+			super(request);
+		}
+
+		protected void createMethodProposal(IMethod method, int relevance) {
+			methods.add(method);
+		}
+
+		public List<IMethod> getMethods() {
+			return methods;
+		}
+	}
+
+	private static class MethodSearchRequestor extends
+			BeanMethodSearchRequestor {
+
+		private List<IMethod> methods = new ArrayList<IMethod>();
+
+		public MethodSearchRequestor(ContentAssistRequest request) {
+			super(request);
+		}
+
+		protected void createMethodProposal(IMethod method, int relevance) {
+			methods.add(method);
+		}
+
+		public List<IMethod> getMethods() {
+			return methods;
+		}
+	}
 }
