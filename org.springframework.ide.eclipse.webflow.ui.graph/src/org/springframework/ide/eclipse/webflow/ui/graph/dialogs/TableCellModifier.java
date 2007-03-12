@@ -1,0 +1,68 @@
+/*
+ * Copyright 2002-2007 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.ide.eclipse.webflow.ui.graph.dialogs;
+
+import org.eclipse.jface.viewers.ICellModifier;
+import org.eclipse.swt.widgets.TableItem;
+import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
+
+/**
+ * 
+ */
+public class TableCellModifier implements ICellModifier {
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.viewers.ICellModifier#canModify(java.lang.Object, java.lang.String)
+     */
+    public boolean canModify(Object element, String property) {
+        return true;
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.viewers.ICellModifier#getValue(java.lang.Object, java.lang.String)
+     */
+    public Object getValue(Object element, String property) {
+        if (element instanceof IAttribute) {
+            if (property.equals("Name")) {
+                return ((IAttribute) element).getName();
+            }
+            else if (property.equals("Value")) {
+                return ((IAttribute) element).getValue();
+            }
+        }
+        return new String("");
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.viewers.ICellModifier#modify(java.lang.Object, java.lang.String, java.lang.Object)
+     */
+    public void modify(Object element, String property, Object value) {
+        if (element instanceof TableItem
+                && ((TableItem) element).getData() instanceof IAttribute) {
+            if (property.equals("Name")) {
+                ((IAttribute) ((TableItem) element).getData())
+                        .setName((String) value);
+                ((TableItem) element).setText(0, (String) value);
+            }
+            else if (property.equals("Value")) {
+                ((IAttribute) ((TableItem) element).getData())
+                        .setValue((String) value);
+                ((TableItem) element).setText(1, (String) value);
+            }
+        }
+    }
+}

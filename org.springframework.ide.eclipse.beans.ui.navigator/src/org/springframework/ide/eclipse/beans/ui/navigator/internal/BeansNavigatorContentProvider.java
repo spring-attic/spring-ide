@@ -33,7 +33,7 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 
 /**
  * This class is a content provider for the {@link CommonNavigator} which knows
- * about the beans core model's {@link IModelElement elements}.
+ * about the beans core model's {@link IModelElement} elements.
  * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis

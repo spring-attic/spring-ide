@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+   
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.springframework.ide.eclipse.webflow.ui.graph.WebflowEditor"
+            contributorClass="org.springframework.ide.eclipse.webflow.ui.graph.actions.WebflowActionBarContributor"
+            default="false"
+            icon="icons/full/obj16/spring_webflow_obj.gif"
+            id="org.springframework.ide.eclipse.webflow.ui.graph.WebflowEditor"
+            name="%flowgraph.name">
+      </editor>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.elementFactories">
+      <factory
+            class="org.springframework.ide.eclipse.webflow.ui.graph.WebflowEditorInputFactory"
+            id="org.springframework.ide.eclipse.webflow.ui.graph.webFlowEditorInputFactory"/>
+   </extension>
+   
+    <extension point="org.eclipse.ui.views.properties.tabbed.propertyContributor">
+      <propertyContributor
+            contributorId="org.springframework.ide.eclipse.webflow.ui.graph.WebflowEditor"
+            labelProvider="org.springframework.ide.eclipse.webflow.ui.graph.properties.PropertiesModelLabelProvider">
+         <propertyCategory category="webflow"/>
+      </propertyContributor>
+   </extension>
+   
+   <extension point="org.eclipse.ui.views.properties.tabbed.propertyTabs">
+      <propertyTabs contributorId="org.springframework.ide.eclipse.webflow.ui.graph.WebflowEditor">
+         <propertyTab
+            category="webflow"
+               id="org.springframework.ide.eclipse.webflow.ui.graph.GeneralTab"
+            label="General"/>
+         <propertyTab
+         	afterTab="org.springframework.ide.eclipse.webflow.ui.graph.GeneralTab"
+            category="webflow"
+               id="org.springframework.ide.eclipse.webflow.ui.graph.AttributesTab"
+            label="Attributes"/>
+         <propertyTab
+         	afterTab="org.springframework.ide.eclipse.webflow.ui.graph.AttributesTab"
+            category="webflow"
+            id="org.springframework.ide.eclipse.webflow.ui.graph.AdvancedTab"
+            label="Advanced"/>
+      </propertyTabs>
+   </extension>
+   
+   <extension point="org.eclipse.ui.views.properties.tabbed.propertySections">
+      <propertySections contributorId="org.springframework.ide.eclipse.webflow.ui.graph.WebflowEditor">
+         <propertySection
+               class="org.springframework.ide.eclipse.webflow.ui.graph.properties.StateIdSection"
+               id="org.springframework.ide.eclipse.webflow.ui.graph.StateIdSection"
+               filter="org.springframework.ide.eclipse.webflow.ui.graph.properties.StateIdSectionFilter"
+               tab="org.springframework.ide.eclipse.webflow.ui.graph.GeneralTab">
+            <input type="org.springframework.ide.eclipse.webflow.ui.graph.parts.ChildrenStatePart"/>
+         </propertySection>
+         <propertySection
+               class="org.springframework.ide.eclipse.webflow.ui.graph.properties.StateTransitionSection"
+               id="org.springframework.ide.eclipse.webflow.ui.graph.StateTransitionSection"
+               tab="org.springframework.ide.eclipse.webflow.ui.graph.GeneralTab">
+            <input type="org.springframework.ide.eclipse.webflow.ui.graph.parts.StateTransitionPart"/>
+         </propertySection>
+         <propertySection
+               afterSection="org.springframework.ide.eclipse.webflow.ui.graph.StateIdSection"
+               class="org.springframework.ide.eclipse.webflow.ui.graph.properties.ViewSection"
+               filter="org.springframework.ide.eclipse.webflow.ui.graph.properties.ViewSectionFilter"
+               id="org.springframework.ide.eclipse.webflow.ui.graph.ViewSection"
+               tab="org.springframework.ide.eclipse.webflow.ui.graph.GeneralTab">
+            <input type="org.springframework.ide.eclipse.webflow.ui.graph.parts.ChildrenStatePart"/>
+         </propertySection>
+         <propertySection
+         	   afterSection="org.springframework.ide.eclipse.webflow.ui.graph.properties.ViewSection"
+               class="org.springframework.ide.eclipse.webflow.ui.graph.properties.AdvancedEditSection"
+               filter="org.springframework.ide.eclipse.webflow.ui.graph.properties.AdvancedEditSectionFilter"
+               id="org.springframework.ide.eclipse.webflow.ui.graph.AdvancedEditSection"
+               tab="org.springframework.ide.eclipse.webflow.ui.graph.GeneralTab">
+         </propertySection>
+         <propertySection
+	           afterSection="org.springframework.ide.eclipse.webflow.ui.graph.StateIdSection"
+               class="org.springframework.ide.eclipse.webflow.ui.graph.properties.AttributeSection"
+               id="org.springframework.ide.eclipse.webflow.ui.graph.AttributeSection"
+               tab="org.springframework.ide.eclipse.webflow.ui.graph.AttributesTab">
+            <input type="org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart"/>
+         </propertySection>
+         <propertySection
+	           afterSection="org.springframework.ide.eclipse.webflow.ui.graph.AttributeSection"
+               class="org.eclipse.ui.views.properties.tabbed.AdvancedPropertySection"
+               id="org.springframework.ide.eclipse.webflow.ui.graph.AdvancedSection"
+               tab="org.springframework.ide.eclipse.webflow.ui.graph.AdvancedTab">
+           <input type="org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart"/>
+         </propertySection>
+      </propertySections>
+   </extension>
+   
+</plugin>
