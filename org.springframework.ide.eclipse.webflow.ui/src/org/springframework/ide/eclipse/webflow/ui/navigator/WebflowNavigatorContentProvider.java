@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,10 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 
 /**
  * This class is a content provider for the {@link CommonNavigator} which knows
- * about the beans core model's {@link IModelElement elements}.
+ * about the web flow core model's {@link IWebflowConfig}.
  * 
  * @author Christian Dupuis
+ * @since 2.0
  */
 public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 		IWebflowModelListener {

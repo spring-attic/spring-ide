@@ -38,7 +38,8 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 import org.springframework.ide.eclipse.webflow.ui.Activator;
 
 /**
- * 
+ * @author Christian Dupuis
+ * @since 2.0
  */
 public class ConfigurationPropertyPage extends PropertyPage {
 

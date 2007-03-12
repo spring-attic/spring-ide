@@ -25,7 +25,13 @@ import org.eclipse.ui.IMemento;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ *
+ */
 public class WebflowEditorInputFactory implements IElementFactory {
+
 	/**
 	 * Factory id. The workbench plug-in registers a factory by this name with
 	 * the "org.eclipse.ui.elementFactories" extension point.

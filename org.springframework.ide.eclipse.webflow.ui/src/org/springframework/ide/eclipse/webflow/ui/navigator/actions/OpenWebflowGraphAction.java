@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
-import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
@@ -29,18 +28,18 @@ import org.springframework.ide.eclipse.webflow.ui.graph.WebflowEditor;
 import org.springframework.ide.eclipse.webflow.ui.graph.WebflowEditorInput;
 
 /**
- * Shows the BeansGraph for the currently selected {@link IModelElement} in the
- * Project Explorer.
+ * Shows the WebflowEditor for the currently selected {@link IWebflowConfig}
  * 
- * @author Torsten Juergeleit
+ * @author Christian Dupuis
+ * @since 2.0
  */
-public class ShowBeansGraphAction extends Action {
+public class OpenWebflowGraphAction extends Action {
 
 	private ICommonActionExtensionSite site;
 
 	private IWebflowConfig element;
 
-	public ShowBeansGraphAction(ICommonActionExtensionSite site) {
+	public OpenWebflowGraphAction(ICommonActionExtensionSite site) {
 		this.site = site;
 		setText("Open &Graphical Editor"); // TODO externalize text
 		setImageDescriptor(WebflowUIImages.DESC_OBJS_WEBFLOW)

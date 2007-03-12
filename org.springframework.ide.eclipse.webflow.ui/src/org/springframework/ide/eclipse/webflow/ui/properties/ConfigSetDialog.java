@@ -40,7 +40,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 
 /**
- * 
+ * @author Christian Dupuis
+ * @since 2.0
  */
 public class ConfigSetDialog extends Dialog {
 

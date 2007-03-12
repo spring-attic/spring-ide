@@ -30,7 +30,7 @@ import org.eclipse.ui.navigator.ICommonMenuConstants;
 public class WebflowNavigatorActionProvider extends CommonActionProvider {
 
 	private OpenConfigFileAction openConfigAction;
-	private ShowBeansGraphAction showBeansGraphAction;
+	private OpenWebflowGraphAction showBeansGraphAction;
 
 	public WebflowNavigatorActionProvider() {
 	}
@@ -38,7 +38,7 @@ public class WebflowNavigatorActionProvider extends CommonActionProvider {
 	@Override
 	public void init(ICommonActionExtensionSite site) {
 		openConfigAction = new OpenConfigFileAction(site);
-		showBeansGraphAction = new ShowBeansGraphAction(site);
+		showBeansGraphAction = new OpenWebflowGraphAction(site);
 	}
 
 	@Override

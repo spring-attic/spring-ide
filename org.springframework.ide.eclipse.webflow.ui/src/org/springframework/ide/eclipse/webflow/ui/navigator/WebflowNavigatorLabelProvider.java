@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.ide.eclipse.webflow.ui.navigator;
 
 import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
@@ -25,6 +26,13 @@ import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
 
+/**
+ * {@link LabelProvider} implementation for {@link IWebflowConfig} elements.
+ *
+ * @author Christian Dupuis
+ * @since 2.0
+ *
+ */
 public class WebflowNavigatorLabelProvider extends BeansModelLabelProvider
 		implements ICommonLabelProvider {
 
