@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansSet;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Holds a managed {@link Set}.
@@ -82,5 +83,32 @@ public class BeansSet extends AbstractBeansModelElement implements IBeansSet {
 
 	public Set<Object> getSet() {
 		return set;
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof BeansSet)) {
+			return false;
+		}
+		BeansSet that = (BeansSet) other;
+		if (!ObjectUtils.nullSafeEquals(this.set, that.set)) return false;
+		return super.equals(other);
+	}
+
+	@Override
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(set);
+		return getElementType() * hashCode + super.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		StringBuffer text = new StringBuffer(super.toString());
+		text.append(": set=");
+		text.append(set);
+		return text.toString();
 	}
 }
