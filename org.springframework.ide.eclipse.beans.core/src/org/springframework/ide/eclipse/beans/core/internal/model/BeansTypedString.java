@@ -64,7 +64,7 @@ public class BeansTypedString extends AbstractBeansModelElement implements
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof BeanReference)) {
+		if (!(other instanceof BeansTypedString)) {
 			return false;
 		}
 		BeansTypedString that = (BeansTypedString) other;
