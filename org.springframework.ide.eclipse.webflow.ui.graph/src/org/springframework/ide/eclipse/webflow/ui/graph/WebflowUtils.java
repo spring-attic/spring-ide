@@ -39,7 +39,10 @@ import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.Bean
 import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.BeanMethodSearchRequestor;
 
 /**
+ * Some helper methods for {@link WebflowEditor}
  * 
+ * @author Christian Dupuis
+ * @since 2.0
  */
 @SuppressWarnings("restriction")
 public abstract class WebflowUtils {

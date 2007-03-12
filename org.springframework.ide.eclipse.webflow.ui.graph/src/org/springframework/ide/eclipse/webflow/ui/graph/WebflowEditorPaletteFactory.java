@@ -55,7 +55,10 @@ import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.Webf
 import org.springframework.ide.eclipse.webflow.ui.graph.model.WebflowModelLabelDecorator;
 
 /**
+ * Utility class that bzilds the {@link WebflowEditor} toolbar
  * 
+ * @author Christian Dupuis
+ * @since 2.0
  */
 public class WebflowEditorPaletteFactory {
 
@@ -67,7 +70,7 @@ public class WebflowEditorPaletteFactory {
 	 * @return 
 	 */
 	private static List createCategories(PaletteRoot root) {
-		List categories = new ArrayList();
+		List<PaletteContainer> categories = new ArrayList<PaletteContainer>();
 		categories.add(createControlGroup(root));
 		categories.add(createComponentsDrawer());
 		categories.add(createActionDrawer());
@@ -86,7 +89,7 @@ public class WebflowEditorPaletteFactory {
 
 		PaletteDrawer drawer = new PaletteDrawer("Web Flow States", null);
 
-		List entries = new ArrayList();
+		List<ToolEntry> entries = new ArrayList<ToolEntry>();
 
 		CombinedTemplateCreationEntry combined = new CombinedTemplateCreationEntry(
 				"Action State", "Create a new Action State", ActionState.class,
@@ -135,7 +138,7 @@ public class WebflowEditorPaletteFactory {
 	private static PaletteContainer createControlGroup(PaletteRoot root) {
 		PaletteGroup controlGroup = new PaletteGroup("Control Group");
 
-		List entries = new ArrayList();
+		List<PaletteEntry> entries = new ArrayList<PaletteEntry>();
 
 		ToolEntry tool = new SelectionToolEntry();
 		entries.add(tool);
@@ -183,7 +186,7 @@ public class WebflowEditorPaletteFactory {
 	 * @return 
 	 */
 	private static PaletteContainer createActionDrawer() {
-		List entries = new ArrayList();
+		List<ToolEntry> entries = new ArrayList<ToolEntry>();
 
 		PaletteDrawer drawer = new PaletteDrawer("Actions", null);
 		drawer.setInitialState(PaletteDrawer.INITIAL_STATE_OPEN);
@@ -224,7 +227,7 @@ public class WebflowEditorPaletteFactory {
 	 * @return 
 	 */
 	private static PaletteContainer createRenderActionsDrawer() {
-		List entries = new ArrayList();
+		List<ToolEntry> entries = new ArrayList<ToolEntry>();
 		
 		IRenderActions exit = new RenderActions();
 		IAction action = new Action();
@@ -298,7 +301,7 @@ public class WebflowEditorPaletteFactory {
 	 * @return 
 	 */
 	private static PaletteContainer createEntryActionDrawer() {
-		List entries = new ArrayList();
+		List<ToolEntry> entries = new ArrayList<ToolEntry>();
 
 		IEntryActions exit = new EntryActions();
 		IAction action = new Action();
@@ -368,7 +371,7 @@ public class WebflowEditorPaletteFactory {
 	 * @return 
 	 */
 	private static PaletteContainer createExitActionDrawer() {
-		List entries = new ArrayList();
+		List<ToolEntry> entries = new ArrayList<ToolEntry>();
 
 		IExitActions exit = new ExitActions();
 		IAction action = new Action();

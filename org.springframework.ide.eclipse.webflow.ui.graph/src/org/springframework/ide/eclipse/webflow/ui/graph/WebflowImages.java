@@ -286,7 +286,8 @@ public class WebflowImages {
      * 
      * @return 
      */
-    private static ImageDescriptor createManaged(String prefix, String name) {
+    @SuppressWarnings("unchecked")
+	private static ImageDescriptor createManaged(String prefix, String name) {
         try {
             ImageDescriptor result = ImageDescriptor
                     .createFromURL(makeIconFileURL(prefix, name

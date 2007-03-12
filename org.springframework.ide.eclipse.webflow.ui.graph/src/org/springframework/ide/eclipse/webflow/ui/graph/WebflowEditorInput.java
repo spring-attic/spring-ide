@@ -24,87 +24,40 @@ import org.eclipse.ui.IPersistableElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 
 /**
+ * {@link IEditorInput} implementation that takes care of locating the
+ * {@link IWebflowConfig} for a given {@link IFile}.
+ * 
  * @author Christian Dupuis
  * @since 2.0
  */
 public class WebflowEditorInput implements IEditorInput, IPersistableElement {
 
-    private IWebflowConfig config;
+	private IWebflowConfig config;
 
-    private boolean isValid = true;
-    
-    private String name;
-    
-    private String tooltip;
+	private boolean isValid = true;
 
-    public WebflowEditorInput(IWebflowConfig config) {
-    	this.config = config;
-    	this.tooltip = config.getResource().getFullPath().makeRelative().toString();
-        this.name = config.getResource().getFullPath().makeRelative().toString();
-    }
+	private String name;
 
-    public boolean equals(Object obj) {
-        if (obj instanceof WebflowEditorInput) {
-            return ((WebflowEditorInput) obj).getFile().equals(this.getFile());
-        }
-        return false;
-    }
+	private String tooltip;
 
-    public boolean exists() {
-        return false;
-    }
+	public WebflowEditorInput(IWebflowConfig config) {
+		this.config = config;
+		this.tooltip = config.getResource().getFullPath().makeRelative()
+				.toString();
+		this.name = config.getResource().getFullPath().makeRelative()
+				.toString();
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.ui.IPersistableElement#getFactoryId()
-     */
-    public String getFactoryId() {
-        return WebflowEditorInputFactory.getFactoryId();
-    }
+	public boolean equals(Object obj) {
+		if (obj instanceof WebflowEditorInput) {
+			return ((WebflowEditorInput) obj).getFile().equals(this.getFile());
+		}
+		return false;
+	}
 
-    public IFile getFile() {
-        return this.config.getResource();
-    }
-
-    public ImageDescriptor getImageDescriptor() {
-        return null;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public IPersistableElement getPersistable() {
-        return this;
-    }
-
-    public String getToolTipText() {
-        return tooltip;
-    }
-
-    public int hashCode() {
-        return this.getFile().hashCode();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.ui.IPersistableElement#saveState(org.eclipse.ui.IMemento)
-     */
-    public void saveState(IMemento memento) {
-        if (this.isValid) {
-            WebflowEditorInputFactory.saveState(memento, this);
-        }
-    }
-    
-    public boolean isValid() {
-        return isValid;
-    }
-
-    public void setValid(boolean isValid) {
-        this.isValid = isValid;
-    }
+	public boolean exists() {
+		return false;
+	}
 
 	public Object getAdapter(Class adapter) {
 		return this.config.getResource().getAdapter(adapter);
@@ -112,5 +65,57 @@ public class WebflowEditorInput implements IEditorInput, IPersistableElement {
 
 	public IWebflowConfig getConfig() {
 		return config;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.IPersistableElement#getFactoryId()
+	 */
+	public String getFactoryId() {
+		return WebflowEditorInputFactory.getFactoryId();
+	}
+
+	public IFile getFile() {
+		return this.config.getResource();
+	}
+
+	public ImageDescriptor getImageDescriptor() {
+		return null;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public IPersistableElement getPersistable() {
+		return this;
+	}
+
+	public String getToolTipText() {
+		return tooltip;
+	}
+
+	public int hashCode() {
+		return this.getFile().hashCode();
+	}
+
+	public boolean isValid() {
+		return isValid;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.IPersistableElement#saveState(org.eclipse.ui.IMemento)
+	 */
+	public void saveState(IMemento memento) {
+		if (this.isValid) {
+			WebflowEditorInputFactory.saveState(memento, this);
+		}
+	}
+
+	public void setValid(boolean isValid) {
+		this.isValid = isValid;
 	}
 }
