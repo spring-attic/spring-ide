@@ -398,4 +398,12 @@ public class StateTransition extends Transition implements IStateTransition,
 		}
 		this.actions = new ArrayList<IActionElement>();
 	}
+
+	public String getOnException() {
+		return getAttribute("on-exception");
+	}
+
+	public void setOnException(String exception) {
+		setAttribute("on-exception", exception);
+	}
 }

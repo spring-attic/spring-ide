@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IDecisionState;
 import org.springframework.ide.eclipse.webflow.core.model.IEndState;
 import org.springframework.ide.eclipse.webflow.core.model.IIf;
 import org.springframework.ide.eclipse.webflow.core.model.IIfTransition;
+import org.springframework.ide.eclipse.webflow.core.model.IInlineFlowState;
 import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.webflow.core.model.ITransitionableFrom;
@@ -54,8 +55,15 @@ public class StateNodeEditPolicy extends GraphicalNodeEditPolicy {
             if (getHost().getModel() instanceof ITransitionableTo) {
                 StateTransitionCreateCommand cmd = (StateTransitionCreateCommand) request
                         .getStartCommand();
-                cmd.setTarget((ITransitionableTo) getState());
-                return cmd;
+                IState source = cmd.getSource();
+                ITransitionableTo target = (ITransitionableTo) getState();
+                if (!(target instanceof IInlineFlowState) && source.getElementParent().equals(target.getElementParent())) {
+                	cmd.setTarget((ITransitionableTo) getState());
+                	return cmd;
+                }
+                else {
+                	return null;
+                }
             }
         }
         else if (request.getNewObject() instanceof IIfTransition) {
@@ -78,7 +86,8 @@ public class StateNodeEditPolicy extends GraphicalNodeEditPolicy {
                     || getHost().getModel() instanceof IActionElement
                     || getHost().getModel() instanceof IAttributeMapper
                     || getHost().getModel() instanceof IDecisionState
-                    || getHost().getModel() instanceof IIf)
+                    || getHost().getModel() instanceof IIf
+            		|| getHost().getModel() instanceof IInlineFlowState)
                 return null;
             StateTransitionCreateCommand cmd = new StateTransitionCreateCommand();
             cmd.setSource((ITransitionableFrom) getHost().getModel());

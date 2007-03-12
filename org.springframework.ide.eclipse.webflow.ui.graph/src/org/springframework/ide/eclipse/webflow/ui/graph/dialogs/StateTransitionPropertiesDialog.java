@@ -86,6 +86,16 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 */
+	private Text onExceptionText;
+
+	/**
+	 * 
+	 */
+	private Button browseExceptionButton;
+
+	/**
+	 * 
+	 */
 	private IWebflowModelElement parent;
 
 	/**
@@ -215,7 +225,7 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 		Composite nameGroup = new Composite(folder, SWT.NULL);
 		nameGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		GridLayout layout1 = new GridLayout();
-		layout1.numColumns = 2;
+		layout1.numColumns = 3;
 		layout1.marginWidth = 0;
 		layout1.marginHeight = 0;
 		nameGroup.setLayout(layout1);
@@ -243,6 +253,7 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 		});
 
 		new Label(groupActionType, SWT.NONE);
+		new Label(groupActionType, SWT.NONE);
 		ognlButton = new Button(groupActionType, SWT.CHECK);
 		ognlButton.setText("Parse OGNL transition criteria");
 		ognlButton.addSelectionListener(new SelectionAdapter() {
@@ -251,7 +262,22 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 				validateInput();
 			}
 		});
+		new Label(groupActionType, SWT.NONE);
 
+		Label onExceptionLabel = new Label(groupActionType, SWT.NONE);
+		onExceptionLabel.setText("On Exception");
+		onExceptionText = new Text(groupActionType, SWT.SINGLE | SWT.BORDER);
+		if (this.transition != null && this.transition.getOnException() != null) {
+			this.onExceptionText.setText(this.transition.getOnException());
+		}
+		onExceptionText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		onExceptionText.addModifyListener(new ModifyListener() {
+
+			public void modifyText(ModifyEvent e) {
+				validateInput();
+			}
+		});
+		
 		item1.setControl(nameGroup);
 
 		actionProperties = new ActionComposite(this, item2, getShell(),

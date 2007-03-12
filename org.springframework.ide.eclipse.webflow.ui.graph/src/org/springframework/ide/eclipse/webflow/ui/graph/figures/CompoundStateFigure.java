@@ -26,7 +26,7 @@ import org.eclipse.swt.SWT;
  * 
  */
 public class CompoundStateFigure extends SubgraphFigure {
-
+	
     /**
      * 
      */

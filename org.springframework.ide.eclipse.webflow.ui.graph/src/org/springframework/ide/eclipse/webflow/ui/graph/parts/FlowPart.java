@@ -25,7 +25,6 @@ import java.util.Map;
 import org.eclipse.draw2d.ConnectionLayer;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.ShortestPathConnectionRouter;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.draw2d.graph.CompoundDirectedGraph;
 import org.eclipse.gef.EditPolicy;
@@ -187,6 +186,7 @@ public class FlowPart extends ChildrenStatePart implements
             fanRouter.setSeparation(20);
             router = new ShortestPathConnectionRouter(getFigure());
         }
+        
         fanRouter.setNextRouter(router);
         cLayer.setConnectionRouter(fanRouter);
     }

@@ -20,20 +20,28 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.draw2d.ConnectionAnchor;
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Label;
+import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.graph.CompoundDirectedGraph;
 import org.eclipse.draw2d.graph.Edge;
 import org.eclipse.draw2d.graph.Node;
+import org.eclipse.gef.ConnectionEditPart;
+import org.eclipse.gef.Request;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IInlineFlowState;
 import org.springframework.ide.eclipse.webflow.ui.graph.figures.CompoundStateFigure;
+import org.springframework.ide.eclipse.webflow.ui.graph.figures.InlineFlowStateFigure;
 
 /**
  * 
  */
 public class InlineFlowStatePart extends ChildrenStatePart {
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#activate()
 	 */
 	public void activate() {
@@ -41,8 +49,22 @@ public class InlineFlowStatePart extends ChildrenStatePart {
 		((IInlineFlowState) getModel()).getWebFlowState()
 				.addPropertyChangeListener(this);
 	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 */
+	protected IFigure createFigure() {
+		InlineFlowStateFigure figure = new InlineFlowStateFigure();
+		((Label) figure.getHeader())
+				.setIcon(labelProvider.getImage(getModel()));
+		((Label) figure.getHeader()).setIconTextGap(5);
+		((Label) figure.getHeader()).setIconAlignment(PositionConstants.TOP);
+		return figure;
+	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#deactivate()
 	 */
 	public void deactivate() {
@@ -51,8 +73,44 @@ public class InlineFlowStatePart extends ChildrenStatePart {
 				.removePropertyChangeListener(this);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.ChildrenStatePart#applyChildrenResults(org.eclipse.draw2d.graph.CompoundDirectedGraph, java.util.Map)
+	/**
+	 * @param connection
+	 * @return
+	 */
+	public ConnectionAnchor getSourceConnectionAnchor(
+			ConnectionEditPart connection) {
+		return null;
+	}
+
+	/**
+	 * @param request
+	 * @return
+	 */
+	public ConnectionAnchor getSourceConnectionAnchor(Request request) {
+		return null;
+	}
+
+	/**
+	 * @param connection
+	 * @return
+	 */
+	public ConnectionAnchor getTargetConnectionAnchor(
+			ConnectionEditPart connection) {
+		return null;
+	}
+
+	/**
+	 * @param request
+	 * @return
+	 */
+	public ConnectionAnchor getTargetConnectionAnchor(Request request) {
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.ChildrenStatePart#applyChildrenResults(org.eclipse.draw2d.graph.CompoundDirectedGraph,
+	 * java.util.Map)
 	 */
 	protected void applyChildrenResults(CompoundDirectedGraph graph, Map map) {
 		CompoundStateFigure figure = (CompoundStateFigure) getFigure();
@@ -73,8 +131,10 @@ public class InlineFlowStatePart extends ChildrenStatePart {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#contributeEdgesToGraph(org.eclipse.draw2d.graph.CompoundDirectedGraph, java.util.Map)
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#contributeEdgesToGraph(org.eclipse.draw2d.graph.CompoundDirectedGraph,
+	 * java.util.Map)
 	 */
 	public void contributeEdgesToGraph(CompoundDirectedGraph graph, Map map) {
 		List outgoing = getSourceConnections();
@@ -102,7 +162,8 @@ public class InlineFlowStatePart extends ChildrenStatePart {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#getModelChildren()
 	 */
 	protected List getModelChildren() {
