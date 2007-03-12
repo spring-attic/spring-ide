@@ -406,12 +406,12 @@ public class BeansEditorUtils {
 			for (int i = 0; i < beansList.size(); i++) {
 				IBean bean = (IBean) beansList.get(i);
 				if (id.equals(bean.getElementName())) {
-					return bean.getClassName();
+					return BeansModelUtils.getBeanClass(bean, bean.getElementParent());
 				}
 			}
 		}
 
-		// fi we reach this point we haven't found a class name. so try to
+		// if we reach this point we haven't found a class name. so try to
 		// locate the xml element
 		// and calculate the class from there
 		Element node = document.getElementById(id);
