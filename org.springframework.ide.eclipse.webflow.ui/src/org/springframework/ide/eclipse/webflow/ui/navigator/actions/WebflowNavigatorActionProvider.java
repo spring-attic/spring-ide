@@ -18,6 +18,7 @@ package org.springframework.ide.eclipse.webflow.ui.navigator.actions;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.navigator.CommonActionProvider;
 import org.eclipse.ui.navigator.ICommonActionConstants;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
@@ -30,6 +31,7 @@ import org.eclipse.ui.navigator.ICommonMenuConstants;
 public class WebflowNavigatorActionProvider extends CommonActionProvider {
 
 	private OpenConfigFileAction openConfigAction;
+	private OpenPropertiesAction openPropertiesAction;
 	private OpenWebflowGraphAction showBeansGraphAction;
 
 	public WebflowNavigatorActionProvider() {
@@ -38,6 +40,7 @@ public class WebflowNavigatorActionProvider extends CommonActionProvider {
 	@Override
 	public void init(ICommonActionExtensionSite site) {
 		openConfigAction = new OpenConfigFileAction(site);
+		openPropertiesAction = new OpenPropertiesAction(site);
 		showBeansGraphAction = new OpenWebflowGraphAction(site);
 	}
 
@@ -51,6 +54,10 @@ public class WebflowNavigatorActionProvider extends CommonActionProvider {
 			menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN,
 					showBeansGraphAction);
 		}
+		if (openPropertiesAction.isEnabled()) {
+			menu.appendToGroup(ICommonMenuConstants.GROUP_PROPERTIES,
+					openPropertiesAction);
+		}
 	}
 
 	@Override
@@ -58,6 +65,10 @@ public class WebflowNavigatorActionProvider extends CommonActionProvider {
 		if (openConfigAction.isEnabled()) {
 			actionBars.setGlobalActionHandler(ICommonActionConstants.OPEN,
 					openConfigAction);
+		}
+		if (openPropertiesAction.isEnabled()) {
+			actionBars.setGlobalActionHandler(ActionFactory.PROPERTIES.getId(),
+					openPropertiesAction);
 		}
 	}
 }
