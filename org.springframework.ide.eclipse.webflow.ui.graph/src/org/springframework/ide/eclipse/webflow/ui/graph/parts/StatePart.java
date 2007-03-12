@@ -69,7 +69,7 @@ public class StatePart extends AbstractStatePart {
 				|| getModel() instanceof IAttributeMapper
 				|| getModel() instanceof IIf
 				|| getModel() instanceof IExceptionHandler)
-			n.setPadding(new Insets(0, 5, 4, 0));
+			n.setPadding(new Insets(0, 5, 5, 0));
 		else
 			n.setPadding(new Insets(0, 50, 50, 50));
 		map.put(this, n);

@@ -44,7 +44,7 @@ public class DecisionStatePart extends ChildrenStatePart {
 	 */
 	protected void applyChildrenResults(CompoundDirectedGraph graph, Map map) {
 		CompoundStateFigure figure = (CompoundStateFigure) getFigure();
-		int headerY = figure.getHeader().getBounds().getBottom().y + 7;
+		int headerY = figure.getHeader().getBounds().getBottom().y + 9;
 		int y = 0;
 		int x = -1;
 		for (int i = 0; i < getChildren().size(); i++) {
@@ -70,7 +70,7 @@ public class DecisionStatePart extends ChildrenStatePart {
 				Node n = (Node) map.get(part);
 				Dimension dim = part.getFigure().getPreferredSize();
 				part.getFigure().setBounds(
-						new Rectangle(n.x, n.y, n.width, dim.height));
+						new Rectangle(n.x, n.y + 5, n.width, dim.height));
 			}
 		}
 

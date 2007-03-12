@@ -184,6 +184,7 @@ public class FlowPart extends ChildrenStatePart implements
         cLayer.setAntialias(SWT.ON);
         if (fanRouter == null && router == null) {
             fanRouter = new AnimatedFanConnectionRouter();
+            fanRouter.setSeparation(20);
             router = new ShortestPathConnectionRouter(getFigure());
         }
         fanRouter.setNextRouter(router);

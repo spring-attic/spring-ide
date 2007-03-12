@@ -71,7 +71,7 @@ public class IfPart extends AbstractStatePart {
         n.incomingOffset = 9;
         n.width = getFigure().getPreferredSize().width + 5;
         n.height = getFigure().getPreferredSize().height;
-        n.setPadding(new Insets(1, 5, 5, 9));
+        n.setPadding(new Insets(0, 5, 5, 9));
         map.put(this, n);
         graph.nodes.add(n);
 

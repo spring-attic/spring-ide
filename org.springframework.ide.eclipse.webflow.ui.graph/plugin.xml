@@ -72,6 +72,27 @@
             <input type="org.springframework.ide.eclipse.webflow.ui.graph.parts.ChildrenStatePart"/>
          </propertySection>
          <propertySection
+               afterSection="org.springframework.ide.eclipse.webflow.ui.graph.StateIdSection"
+               class="org.springframework.ide.eclipse.webflow.ui.graph.properties.ActionNameSection"
+               filter="org.springframework.ide.eclipse.webflow.ui.graph.properties.ActionNameSectionFilter"
+               id="org.springframework.ide.eclipse.webflow.ui.graph.ActionNameSection"
+               tab="org.springframework.ide.eclipse.webflow.ui.graph.GeneralTab">
+         </propertySection>
+         <propertySection
+               afterSection="org.springframework.ide.eclipse.webflow.ui.graph.ActionNameSection"
+               class="org.springframework.ide.eclipse.webflow.ui.graph.properties.ActionBeanSection"
+               filter="org.springframework.ide.eclipse.webflow.ui.graph.properties.BeanActionSectionFilter"
+               id="org.springframework.ide.eclipse.webflow.ui.graph.ActionBeanSection"
+               tab="org.springframework.ide.eclipse.webflow.ui.graph.GeneralTab">
+         </propertySection>
+         <propertySection
+               afterSection="org.springframework.ide.eclipse.webflow.ui.graph.properties.ActionBeanSection"
+               class="org.springframework.ide.eclipse.webflow.ui.graph.properties.ActionMethodSection"
+               filter="org.springframework.ide.eclipse.webflow.ui.graph.properties.BeanActionSectionFilter"
+               id="org.springframework.ide.eclipse.webflow.ui.graph.ActionMethodSection"
+               tab="org.springframework.ide.eclipse.webflow.ui.graph.GeneralTab">
+         </propertySection>
+         <propertySection
          	   afterSection="org.springframework.ide.eclipse.webflow.ui.graph.properties.ViewSection"
                class="org.springframework.ide.eclipse.webflow.ui.graph.properties.AdvancedEditSection"
                filter="org.springframework.ide.eclipse.webflow.ui.graph.properties.AdvancedEditSectionFilter"
@@ -81,16 +102,16 @@
          <propertySection
 	           afterSection="org.springframework.ide.eclipse.webflow.ui.graph.StateIdSection"
                class="org.springframework.ide.eclipse.webflow.ui.graph.properties.AttributeSection"
+               filter="org.springframework.ide.eclipse.webflow.ui.graph.properties.AdvancedEditSectionFilter"
                id="org.springframework.ide.eclipse.webflow.ui.graph.AttributeSection"
                tab="org.springframework.ide.eclipse.webflow.ui.graph.AttributesTab">
-            <input type="org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart"/>
          </propertySection>
          <propertySection
 	           afterSection="org.springframework.ide.eclipse.webflow.ui.graph.AttributeSection"
                class="org.eclipse.ui.views.properties.tabbed.AdvancedPropertySection"
+               filter="org.springframework.ide.eclipse.webflow.ui.graph.properties.AdvancedEditSectionFilter"
                id="org.springframework.ide.eclipse.webflow.ui.graph.AdvancedSection"
                tab="org.springframework.ide.eclipse.webflow.ui.graph.AdvancedTab">
-           <input type="org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart"/>
          </propertySection>
       </propertySections>
    </extension>

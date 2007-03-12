@@ -76,10 +76,8 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 	private static final Insets PADDING = new Insets(0, 50, 50, 9);
 
 	/**
-	 * 
-	 * 
-	 * @param graph 
-	 * @param map 
+	 * @param graph
+	 * @param map
 	 */
 	protected void applyChildrenResults(CompoundDirectedGraph graph, Map map) {
 
@@ -118,10 +116,8 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 	}
 
 	/**
-	 * 
-	 * 
-	 * @param graph 
-	 * @param map 
+	 * @param graph
+	 * @param map
 	 */
 	protected void applyChildrenResultsToOwn(CompoundDirectedGraph graph,
 			Map map) {
@@ -136,13 +132,15 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 		}
 		if (bottom > -1) {
 			int top = getFigure().getBounds().getTop().y;
-			int height = bottom - top + 5 + 7;
+			int height = bottom - top + 7 + 7;
 			getFigure().setBounds(new Rectangle(n.x, n.y, n.width, height));
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#applyGraphResults(org.eclipse.draw2d.graph.CompoundDirectedGraph, java.util.Map)
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#applyGraphResults(org.eclipse.draw2d.graph.CompoundDirectedGraph,
+	 * java.util.Map)
 	 */
 	protected void applyGraphResults(CompoundDirectedGraph graph, Map map) {
 		applyOwnResults(graph, map);
@@ -151,10 +149,8 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 	}
 
 	/**
-	 * 
-	 * 
-	 * @param graph 
-	 * @param map 
+	 * @param graph
+	 * @param map
 	 */
 	protected void applyOwnResults(CompoundDirectedGraph graph, Map map) {
 		Node n = (Node) map.get(this);
@@ -180,8 +176,10 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#contributeNodesToGraph(org.eclipse.draw2d.graph.CompoundDirectedGraph, org.eclipse.draw2d.graph.Subgraph, java.util.Map)
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#contributeNodesToGraph(org.eclipse.draw2d.graph.CompoundDirectedGraph,
+	 * org.eclipse.draw2d.graph.Subgraph, java.util.Map)
 	 */
 	public void contributeNodesToGraph(CompoundDirectedGraph graph, Subgraph s,
 			Map map) {
@@ -198,10 +196,10 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 					.getPreferredSize().height + 5;
 			me.insets.left = 5;
 			me.insets.right = 5;
-			me.insets.bottom = 9;
+			me.insets.bottom = 15;
 		}
-		me.innerPadding = INNER_PADDING;
-		me.setPadding(PADDING);
+		me.innerPadding = new Insets(0, 0, 0, 4);
+		// me.setPadding(PADDING);
 		map.put(this, me);
 		graph.nodes.add(me);
 		for (int i = 0; i < getChildren().size(); i++) {
@@ -211,7 +209,8 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#createEditPolicies()
 	 */
 	protected void createEditPolicies() {
@@ -224,11 +223,11 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 				new StateContainerEditPolicy());
 		installEditPolicy(EditPolicy.LAYOUT_ROLE,
 				new FlowStateLayoutEditPolicy());
-		installEditPolicy(EditPolicy.DIRECT_EDIT_ROLE,
-				null);
+		installEditPolicy(EditPolicy.DIRECT_EDIT_ROLE, null);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
 	 */
 	protected IFigure createFigure() {
@@ -241,11 +240,8 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 	}
 
 	/**
-	 * 
-	 * 
-	 * @param requestLoc 
-	 * 
-	 * @return 
+	 * @param requestLoc
+	 * @return
 	 */
 	private boolean directEditHitTest(Point requestLoc) {
 		/*
@@ -256,7 +252,8 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 		return false;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#getContentPane()
 	 */
 	public IFigure getContentPane() {
@@ -265,7 +262,8 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 		return getFigure();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#performDirectEdit()
 	 */
 	protected void performDirectEdit() {
@@ -277,7 +275,8 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 		 */
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#performRequest(org.eclipse.gef.Request)
 	 */
 	public void performRequest(Request request) {
@@ -302,7 +301,8 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editparts.AbstractEditPart#refreshVisuals()
 	 */
 	protected void refreshVisuals() {
@@ -310,10 +310,12 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 				.setText(labelProvider.getText(getModel()));
 		((Label) ((SubgraphFigure) getFigure()).getHeader())
 				.setIcon(labelProvider.getImage(getModel()));
+		((Label) ((SubgraphFigure) getFigure()).getHeader()).setIconTextGap(5);
 		getFigure().repaint();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editparts.AbstractEditPart#setSelected(int)
 	 */
 	public void setSelected(int value) {

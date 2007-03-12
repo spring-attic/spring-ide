@@ -42,7 +42,7 @@ public class ActionStatePart extends ChildrenStatePart {
 	 */
 	protected void applyChildrenResults(CompoundDirectedGraph graph, Map map) {
 		CompoundStateFigure figure = (CompoundStateFigure) getFigure();
-		int headerY = figure.getHeader().getBounds().getBottom().y + 6;
+		int headerY = figure.getHeader().getBounds().getBottom().y + 8;
 		for (int i = 0; i < getChildren().size(); i++) {
 			AbstractStatePart part = (AbstractStatePart) getChildren().get(i);
 			part.applyGraphResults(graph, map);
