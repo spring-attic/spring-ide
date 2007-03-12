@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditor;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput;
 import org.springframework.ide.eclipse.beans.ui.navigator.BeansExplorer;
@@ -52,6 +53,7 @@ public class ShowBeansGraphAction extends Action {
 	public ShowBeansGraphAction(ICommonActionExtensionSite site) {
 		this.site = site;
 		setText("Show &Graph");	// TODO externalize text
+		setImageDescriptor(BeansUIImages.DESC_OBJS_SPRING);
     }
 
 	@Override

@@ -29,6 +29,7 @@
       <viewerContentBinding viewerId="org.springframework.ide.eclipse.beans.ui.navigator.BeansExplorer">
          <includes>
             <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.beansExplorerContent"/>
+            <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.filters.hideBeansConfigSets"/>
             <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.linkHelper"/>
          </includes>
       </viewerContentBinding>
