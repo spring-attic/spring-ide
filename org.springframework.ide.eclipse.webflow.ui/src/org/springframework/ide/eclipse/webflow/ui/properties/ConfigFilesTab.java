@@ -357,7 +357,7 @@ public class ConfigFilesTab {
 		if (!selection.isEmpty()) {
 			Iterator elements = selection.iterator();
 			while (elements.hasNext()) {
-				configFiles.remove((IFile) elements.next());
+				configFiles.remove((IWebflowConfig) elements.next());
 			}
 			configsViewer.refresh();
 			hasUserMadeChanges = true;
