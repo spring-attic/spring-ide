@@ -44,6 +44,7 @@ import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.SaveAsDialog;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.ui.graph.Activator;
 import org.springframework.ide.eclipse.webflow.ui.graph.WebflowEditor;
@@ -51,7 +52,7 @@ import org.springframework.ide.eclipse.webflow.ui.graph.WebflowEditorInput;
 import org.springframework.ide.eclipse.webflow.ui.graph.WebflowImages;
 
 /**
- * {@link WorkbenchPartAction} that exports the current {@link IWebflowConfig} 
+ * {@link WorkbenchPartAction} that exports the current {@link IWebflowConfig}
  * to an image file.
  * 
  * @author Christian Dupuis
@@ -112,9 +113,21 @@ public class ExportAction extends WorkbenchPartAction {
 							|| ext.equalsIgnoreCase("jpeg")
 							|| ext.equalsIgnoreCase("bmp") || ext
 							.equalsIgnoreCase("png"))) {
-				ErrorDialog.openError(getWorkbenchPart().getSite().getShell(),
-						"Error", "Error during processing of export", Activator
-								.createErrorStatus("error", null));
+				ErrorDialog
+						.openError(
+								getWorkbenchPart().getSite().getShell(),
+								"Problem",
+								"Please specify one extension from the following options .png, .jpg or .bmp",
+								Activator.createErrorStatus("error", null));
+			}
+			else if (ext.equalsIgnoreCase("PNG")
+					&& !SpringCoreUtils.isEclipseSameOrNewer(3, 3)) {
+				ErrorDialog
+						.openError(
+								getWorkbenchPart().getSite().getShell(),
+								"Problem",
+								"Exporting to PNG format is only supported on Eclipse 3.3 or newer",
+								Activator.createErrorStatus("error", null));
 			}
 			else {
 
