@@ -57,8 +57,8 @@ import org.springframework.ide.eclipse.webflow.ui.graph.policies.StateNodeEditPo
 /**
  * 
  */
-public abstract class AbstractStatePart extends AbstractGraphicalEditPart
-		implements PropertyChangeListener, NodeEditPart {
+public abstract class AbstractStatePart extends AbstractGraphicalEditPart implements PropertyChangeListener,
+		NodeEditPart {
 
 	/**
 	 * 
@@ -83,8 +83,8 @@ public abstract class AbstractStatePart extends AbstractGraphicalEditPart
 		/**
 		 * 
 		 * 
-		 * @param source 
-		 * @param offset 
+		 * @param source
+		 * @param offset
 		 */
 		TopOrBottomAnchor(IFigure source, int offset) {
 			super(source);
@@ -94,9 +94,9 @@ public abstract class AbstractStatePart extends AbstractGraphicalEditPart
 		/**
 		 * 
 		 * 
-		 * @param reference 
+		 * @param reference
 		 * 
-		 * @return 
+		 * @return
 		 */
 		public Point getLocation(Point reference) {
 			Rectangle r = getOwner().getBounds().getCopy();
@@ -132,18 +132,16 @@ public abstract class AbstractStatePart extends AbstractGraphicalEditPart
 	/**
 	 * 
 	 * 
-	 * @param graph 
-	 * @param map 
+	 * @param graph
+	 * @param map
 	 */
 	protected void applyGraphResults(CompoundDirectedGraph graph, Map map) {
 		Node n = (Node) map.get(this);
 		getFigure().setBounds(
-				new Rectangle(n.x, n.y, getFigure().getPreferredSize().width,
-						getFigure().getPreferredSize().height));
+				new Rectangle(n.x, n.y, getFigure().getPreferredSize().width, getFigure().getPreferredSize().height));
 
 		for (int i = 0; i < getSourceConnections().size(); i++) {
-			StateTransitionPart trans = (StateTransitionPart) getSourceConnections()
-					.get(i);
+			StateTransitionPart trans = (StateTransitionPart) getSourceConnections().get(i);
 			trans.applyGraphResults(graph, map);
 		}
 	}
@@ -151,14 +149,13 @@ public abstract class AbstractStatePart extends AbstractGraphicalEditPart
 	/**
 	 * 
 	 * 
-	 * @param graph 
-	 * @param map 
+	 * @param graph
+	 * @param map
 	 */
 	public void contributeEdgesToGraph(CompoundDirectedGraph graph, Map map) {
 		List outgoing = getSourceConnections();
 		for (int i = 0; i < outgoing.size(); i++) {
-			StateTransitionPart part = (StateTransitionPart) getSourceConnections()
-					.get(i);
+			StateTransitionPart part = (StateTransitionPart) getSourceConnections().get(i);
 			part.contributeToGraph(graph, map);
 		}
 		for (int i = 0; i < getChildren().size(); i++) {
@@ -170,23 +167,20 @@ public abstract class AbstractStatePart extends AbstractGraphicalEditPart
 	/**
 	 * 
 	 * 
-	 * @param graph 
-	 * @param map 
-	 * @param s 
+	 * @param graph
+	 * @param map
+	 * @param s
 	 */
-	public abstract void contributeNodesToGraph(CompoundDirectedGraph graph,
-			Subgraph s, Map map);
+	public abstract void contributeNodesToGraph(CompoundDirectedGraph graph, Subgraph s, Map map);
 
 	/**
 	 * 
 	 */
 	protected void createEditPolicies() {
-		installEditPolicy(EditPolicy.GRAPHICAL_NODE_ROLE,
-				new StateNodeEditPolicy());
+		installEditPolicy(EditPolicy.GRAPHICAL_NODE_ROLE, new StateNodeEditPolicy());
 		installEditPolicy(EditPolicy.CONTAINER_ROLE, null);
 		installEditPolicy(EditPolicy.COMPONENT_ROLE, new StateEditPolicy());
-		installEditPolicy(EditPolicy.DIRECT_EDIT_ROLE,
-				null);
+		installEditPolicy(EditPolicy.DIRECT_EDIT_ROLE, null);
 	}
 
 	/**
@@ -200,9 +194,9 @@ public abstract class AbstractStatePart extends AbstractGraphicalEditPart
 	/**
 	 * 
 	 * 
-	 * @param key 
+	 * @param key
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public Object getAdapter(Class key) {
 		if (IPropertySource.class == key) {
@@ -216,7 +210,7 @@ public abstract class AbstractStatePart extends AbstractGraphicalEditPart
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	protected List getModelSourceConnections() {
 		if (getModel() instanceof ITransitionableFrom) {
@@ -226,6 +220,10 @@ public abstract class AbstractStatePart extends AbstractGraphicalEditPart
 				if (transition.getToState() != null) {
 					transitions.add(transition);
 				}
+				/*else {
+					System.out.println(((IState) transition.getElementParent()).getId() + " -> "
+							+ transition.getToStateId());
+				}*/
 			}
 			return transitions;
 		}
@@ -237,7 +235,7 @@ public abstract class AbstractStatePart extends AbstractGraphicalEditPart
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	protected List getModelTargetConnections() {
 		if (getModel() instanceof ITransitionableTo)
@@ -250,12 +248,11 @@ public abstract class AbstractStatePart extends AbstractGraphicalEditPart
 	/**
 	 * 
 	 * 
-	 * @param connection 
+	 * @param connection
 	 * 
-	 * @return 
+	 * @return
 	 */
-	public ConnectionAnchor getSourceConnectionAnchor(
-			ConnectionEditPart connection) {
+	public ConnectionAnchor getSourceConnectionAnchor(ConnectionEditPart connection) {
 		if (connectionAnchor == null)
 			connectionAnchor = new TopOrBottomAnchor(getFigure(), 0);
 		return connectionAnchor;
@@ -264,9 +261,9 @@ public abstract class AbstractStatePart extends AbstractGraphicalEditPart
 	/**
 	 * 
 	 * 
-	 * @param request 
+	 * @param request
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public ConnectionAnchor getSourceConnectionAnchor(Request request) {
 		if (connectionAnchor == null)
@@ -277,7 +274,7 @@ public abstract class AbstractStatePart extends AbstractGraphicalEditPart
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public IState getState() {
 		return (IState) getModel();
@@ -286,12 +283,11 @@ public abstract class AbstractStatePart extends AbstractGraphicalEditPart
 	/**
 	 * 
 	 * 
-	 * @param connection 
+	 * @param connection
 	 * 
-	 * @return 
+	 * @return
 	 */
-	public ConnectionAnchor getTargetConnectionAnchor(
-			ConnectionEditPart connection) {
+	public ConnectionAnchor getTargetConnectionAnchor(ConnectionEditPart connection) {
 		if (connectionAnchor == null)
 			connectionAnchor = new TopOrBottomAnchor(getFigure(), 0);
 		return connectionAnchor;
@@ -300,9 +296,9 @@ public abstract class AbstractStatePart extends AbstractGraphicalEditPart
 	/**
 	 * 
 	 * 
-	 * @param request 
+	 * @param request
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public ConnectionAnchor getTargetConnectionAnchor(Request request) {
 		if (connectionAnchor == null)
@@ -319,20 +315,16 @@ public abstract class AbstractStatePart extends AbstractGraphicalEditPart
 	/**
 	 * 
 	 * 
-	 * @param request 
+	 * @param request
 	 */
 	public void performRequest(Request request) {
 		if (request.getType() == RequestConstants.REQ_DIRECT_EDIT) {
 			performDirectEdit();
 		}
 		else if (request.getType().equals(RequestConstants.REQ_OPEN)) {
-			IEditorPart editor = PlatformUI.getWorkbench()
-					.getActiveWorkbenchWindow().getActivePage()
-					.getActiveEditor();
-			ActionRegistry actionRegistry = (ActionRegistry) editor
-					.getAdapter(ActionRegistry.class);
-			IAction action = actionRegistry
-					.getAction(EditPropertiesAction.EDITPROPERTIES);
+			IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+			ActionRegistry actionRegistry = (ActionRegistry) editor.getAdapter(ActionRegistry.class);
+			IAction action = actionRegistry.getAction(EditPropertiesAction.EDITPROPERTIES);
 			if (action != null && action.isEnabled()) {
 				action.run();
 			}
@@ -342,12 +334,11 @@ public abstract class AbstractStatePart extends AbstractGraphicalEditPart
 	/**
 	 * 
 	 * 
-	 * @param evt 
+	 * @param evt
 	 */
 	public void propertyChange(PropertyChangeEvent evt) {
 		String prop = evt.getPropertyName();
-		if (IWebflowModelElement.ADD_CHILDREN.equals(prop)
-				|| IWebflowModelElement.REMOVE_CHILDREN.equals(prop)) {
+		if (IWebflowModelElement.ADD_CHILDREN.equals(prop) || IWebflowModelElement.REMOVE_CHILDREN.equals(prop)) {
 			refreshChildren();
 		}
 		else if (IWebflowModelElement.MOVE_CHILDREN.equals(prop)) {
@@ -363,14 +354,13 @@ public abstract class AbstractStatePart extends AbstractGraphicalEditPart
 			refreshVisuals();
 		}
 		// Causes Graph to re-layout
-		((GraphicalEditPart) (getViewer().getContents())).getFigure()
-				.revalidate();
+		((GraphicalEditPart) (getViewer().getContents())).getFigure().revalidate();
 	}
 
 	/**
 	 * 
 	 * 
-	 * @param figure 
+	 * @param figure
 	 */
 	protected void setFigure(IFigure figure) {
 		figure.getBounds().setSize(0, 0);
@@ -380,22 +370,20 @@ public abstract class AbstractStatePart extends AbstractGraphicalEditPart
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	@SuppressWarnings("unchecked")
 	protected List getModelChildren() {
 		List children = new ArrayList();
 		if (getModel() instanceof IState) {
 			if (((IState) getState()).getEntryActions() != null) {
-				children.addAll(((IState) getState()).getEntryActions()
-						.getEntryActions());
+				children.addAll(((IState) getState()).getEntryActions().getEntryActions());
 			}
 
 			onGetModelChildren(children);
 
 			if (((IState) getState()).getExitActions() != null) {
-				children.addAll(((IState) getState()).getExitActions()
-						.getExitActions());
+				children.addAll(((IState) getState()).getExitActions().getExitActions());
 			}
 			if (((IState) getState()).getExceptionHandlers() != null) {
 				children.addAll(((IState) getState()).getExceptionHandlers());
@@ -407,7 +395,7 @@ public abstract class AbstractStatePart extends AbstractGraphicalEditPart
 	/**
 	 * 
 	 * 
-	 * @param children 
+	 * @param children
 	 */
 	protected void onGetModelChildren(List children) {
 
