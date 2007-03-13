@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
@@ -112,15 +111,16 @@ public class ConfigurationPropertyPage extends PropertyPage {
 		// Save config files from model in project
 		if (configFilesBlock.hasUserMadeChanges()) {
 
-			Set<IFile> files = configFilesBlock.getConfigFiles();
-			Map<IFile, Set<IBeansConfig>> filesToConfig = configFilesBlock
+			Set<IWebflowConfig> files = configFilesBlock.getConfigFiles();
+			Map<IWebflowConfig, Set<IBeansConfig>> filesToConfig = configFilesBlock
 					.getConfigFilesToBeansConfigs();
-
+			Map<IWebflowConfig, String> names = configFilesBlock.getConfigFilesToNames();
 			List<IWebflowConfig> webflowConfigs = new ArrayList<IWebflowConfig>();
-			for (IFile file : files) {
+			for (IWebflowConfig file : files) {
 				WebflowConfig webflowConfig = new WebflowConfig(project);
 				webflowConfig.setBeansConfigs(filesToConfig.get(file));
-				webflowConfig.setResource(file);
+				webflowConfig.setResource(file.getResource());
+				webflowConfig.setName(names.get(file));
 				webflowConfigs.add(webflowConfig);
 			}
 

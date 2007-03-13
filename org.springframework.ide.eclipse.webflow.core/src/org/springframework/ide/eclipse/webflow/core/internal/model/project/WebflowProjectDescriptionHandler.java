@@ -69,6 +69,11 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 	/**
 	 * 
 	 */
+	protected static final int S_NAME = 6;
+
+	/**
+	 * 
+	 */
 	protected IWebflowProject project;
 	
 	/**
@@ -174,6 +179,9 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 			else if (elementName.equals(BEANS_CONFIG)) {
 				state = S_BEAN_CONFIG;
 			}
+			else if (elementName.equals(NAME)) {
+				state = S_NAME;
+			}
 			else {
 				state = S_CONFIG;
 			}
@@ -194,6 +202,19 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 		case S_CONFIGS:
 			if (elementName.equals(CONFIGS)) {
 				state = S_PROJECT_DESC;
+			}
+			break;
+			
+		case S_NAME:
+			if (elementName.equals(NAME)) {
+				String config = charBuffer.toString().trim();
+				if (webflowConfig != null) {
+					webflowConfig.setName(config);
+					state = S_FILE;
+				}
+				else {
+					state = S_FILE;
+				}
 			}
 			break;
 			

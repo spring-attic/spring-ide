@@ -70,4 +70,8 @@ public interface IWebflowConfig {
 	
 	IWebflowProject getProject();
 	
+	void setName(String name);
+	
+	String getName();
+	
 }

@@ -44,6 +44,8 @@ public class WebflowConfig implements IWebflowConfig {
 	 */
 	private IFile resource;
 	
+	private String name;
+	
 	/**
 	 * 
 	 */
@@ -120,6 +122,14 @@ public class WebflowConfig implements IWebflowConfig {
 	 */
 	public void addBeansConfigElementId(String id) {
 		this.beansConfigs.add(id);
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }

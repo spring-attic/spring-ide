@@ -78,14 +78,24 @@ public class WebflowNavigatorLabelProvider extends BeansModelLabelProvider
 
 	public String getText(Object element) {
 		if (element instanceof IWebflowConfig) {
-			if (providerID
-					.equals(WebflowNavigatorContentProvider.BEANS_EXPLORER_CONTENT_PROVIDER_ID)) {
-				return ((IWebflowConfig) element).getResource()
-						.getProjectRelativePath().toString();
+			IWebflowConfig config = (IWebflowConfig) element;
+			if (WebflowNavigatorContentProvider.BEANS_EXPLORER_CONTENT_PROVIDER_ID
+					.equals(providerID)) {
+				StringBuffer buf = new StringBuffer();
+				if (config.getName() != null) {
+					buf.append(config.getName());
+					buf.append(" - ");
+				}
+				buf.append(config.getResource().getProjectRelativePath()
+						.toString());
+				return buf.toString();
 			}
-			else if (providerID
-					.equals(WebflowNavigatorContentProvider.PROJECT_EXPLORER_CONTENT_PROVIDER_ID)) {
-				return "flow";
+			else if (WebflowNavigatorContentProvider.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
+					.equals(providerID)) {
+				return config.getName();
+			}
+			else {
+				return config.getResource().getProjectRelativePath().toString();
 			}
 		}
 		return super.getText(element);

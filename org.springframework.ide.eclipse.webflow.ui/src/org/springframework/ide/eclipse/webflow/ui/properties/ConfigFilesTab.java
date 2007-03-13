@@ -16,9 +16,11 @@
 
 package org.springframework.ide.eclipse.webflow.ui.properties;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -47,9 +49,11 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceSorter;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 import org.springframework.ide.eclipse.webflow.ui.Activator;
+import org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorLabelProvider;
 
 /**
  * @author Christian Dupuis
@@ -135,12 +139,14 @@ public class ConfigFilesTab {
 	/**
 	 * 
 	 */
-	private Set<IFile> configFiles;
+	private Set<IWebflowConfig> configFiles;
 
 	/**
 	 * 
 	 */
-	private Map<IFile, Set<IBeansConfig>> configFilesToBeansConfigs;
+	private Map<IWebflowConfig, Set<IBeansConfig>> configFilesToBeansConfigs;
+
+	private Map<IWebflowConfig, String> configFilesToNames;
 
 	/**
 	 * 
@@ -150,20 +156,22 @@ public class ConfigFilesTab {
 	/**
 	 * 
 	 * 
-	 * @param element 
-	 * @param project 
+	 * @param element
+	 * @param project
 	 */
 	public ConfigFilesTab(IWebflowProject project, IAdaptable element) {
 		this.project = project;
 		this.element = element;
-		this.configFiles = new HashSet<IFile>();
-		this.configFilesToBeansConfigs = new HashMap<IFile, Set<IBeansConfig>>();
+		this.configFiles = new HashSet<IWebflowConfig>();
+		this.configFilesToBeansConfigs = new HashMap<IWebflowConfig, Set<IBeansConfig>>();
+		this.configFilesToNames = new HashMap<IWebflowConfig, String>();
 
 		if (project.getConfigs() != null) {
 			for (IWebflowConfig config : project.getConfigs()) {
-				this.configFiles.add(config.getResource());
-				this.configFilesToBeansConfigs.put(config.getResource(), config
+				this.configFiles.add(config);
+				this.configFilesToBeansConfigs.put(config, config
 						.getBeansConfigs());
+				this.configFilesToNames.put(config, config.getName());
 			}
 		}
 
@@ -172,7 +180,7 @@ public class ConfigFilesTab {
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public boolean hasUserMadeChanges() {
 		return hasUserMadeChanges;
@@ -181,9 +189,9 @@ public class ConfigFilesTab {
 	/**
 	 * 
 	 * 
-	 * @param parent 
+	 * @param parent
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public Control createControl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
@@ -219,7 +227,7 @@ public class ConfigFilesTab {
 		configsViewer = new TableViewer(configsTable);
 		configsViewer.setContentProvider(new ConfigFilesContentProvider(
 				this.configFiles));
-		configsViewer.setLabelProvider(new WorkbenchLabelProvider());
+		configsViewer.setLabelProvider(new WebflowNavigatorLabelProvider());
 		configsViewer.setInput(this.configFiles); // activate content provider
 		configsViewer.setSorter(new ConfigFilesSorter());
 
@@ -259,7 +267,7 @@ public class ConfigFilesTab {
 	/**
 	 * One of the buttons has been pressed, act accordingly.
 	 * 
-	 * @param button 
+	 * @param button
 	 */
 	private void handleButtonPressed(Button button) {
 		if (button == addButton) {
@@ -282,20 +290,22 @@ public class ConfigFilesTab {
 		IStructuredSelection selection = (IStructuredSelection) configsViewer
 				.getSelection();
 		if (!selection.isEmpty()) {
-			IFile file = (IFile) selection.getFirstElement();
+			IWebflowConfig file = (IWebflowConfig) selection.getFirstElement();
 			Set<IBeansConfig> configs = new HashSet<IBeansConfig>();
+			String name = file.getName();
+			List<String> names = new ArrayList<String>();
+			names.add(name);
 			if (this.configFilesToBeansConfigs.containsKey(file)) {
 				Set<IBeansConfig> oldConfigs = this.configFilesToBeansConfigs
 						.get(file);
 				configs.addAll(oldConfigs);
 			}
-			else {
-			}
-			Dialog dialog = new ConfigSetDialog(SpringUIUtils
+			ConfigSetDialog dialog = new ConfigSetDialog(SpringUIUtils
 					.getStandardDisplay().getActiveShell(), project
-					.getProject(), configs);
+					.getProject(), configs, names, file.getResource());
 			if (dialog.open() == Dialog.OK) {
 				this.configFilesToBeansConfigs.put(file, configs);
+				this.configFilesToNames.put(file, names.get(0));
 				hasUserMadeChanges = true;
 			}
 		}
@@ -320,7 +330,16 @@ public class ConfigFilesTab {
 			if (selection != null && selection.length > 0) {
 				for (int i = 0; i < selection.length; i++) {
 					IFile file = (IFile) selection[i];
-					configFiles.add(file);
+					IWebflowConfig config = new WebflowConfig(project);
+					config.setResource(file);
+					int j = file.getName().lastIndexOf('.');
+					if (j > 0) {
+						config.setName(file.getName().substring(0, j));
+					}
+					else {
+						config.setName(file.getName());
+					}
+					configFiles.add(config);
 				}
 				hasUserMadeChanges = true;
 				configsViewer.refresh();
@@ -354,31 +373,35 @@ public class ConfigFilesTab {
 		/**
 		 * 
 		 */
-		private Set<IFile> files;
+		private Set<IWebflowConfig> files;
 
 		/**
 		 * 
 		 * 
-		 * @param files 
+		 * @param files
 		 */
-		public ConfigFilesContentProvider(Set<IFile> files) {
+		public ConfigFilesContentProvider(Set<IWebflowConfig> files) {
 			this.files = files;
 		}
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
 		 */
 		public Object[] getElements(Object obj) {
 			return files.toArray();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
+		/*
+		 * (non-Javadoc)
+		 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer,
+		 * java.lang.Object, java.lang.Object)
 		 */
 		public void inputChanged(Viewer arg0, Object arg1, Object arg2) {
 		}
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
 		 */
 		public void dispose() {
@@ -401,39 +424,44 @@ public class ConfigFilesTab {
 		 */
 		public static final int ROOT_DIR = 1;
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.ViewerComparator#category(java.lang.Object)
 		 */
 		public int category(Object element) {
-			return (((IFile) element).getName().indexOf('/') == -1 ? ROOT_DIR
-					: SUB_DIR);
+			return (((IWebflowConfig) element).getResource().getName().indexOf(
+					'/') == -1 ? ROOT_DIR : SUB_DIR);
 		}
 	}
 
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
-	public Map<IFile, Set<IBeansConfig>> getConfigFilesToBeansConfigs() {
+	public Map<IWebflowConfig, Set<IBeansConfig>> getConfigFilesToBeansConfigs() {
 		return configFilesToBeansConfigs;
 	}
 
 	/**
 	 * 
 	 * 
-	 * @param configFiles 
+	 * @param configFiles
 	 */
-	public void setConfigFiles(Set<IFile> configFiles) {
+	public void setConfigFiles(Set<IWebflowConfig> configFiles) {
 		this.configFiles = configFiles;
 	}
 
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
-	public Set<IFile> getConfigFiles() {
+	public Set<IWebflowConfig> getConfigFiles() {
 		return configFiles;
+	}
+
+	public Map<IWebflowConfig, String> getConfigFilesToNames() {
+		return this.configFilesToNames;
 	}
 }
