@@ -22,8 +22,6 @@ import org.springframework.ide.eclipse.webflow.core.model.ITransitionableTo;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 
 /**
- * 
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -48,7 +46,6 @@ public abstract class Transition extends AbstractModelElement implements
 
 	/**
 	 * The Constructor.
-	 * 
 	 * @param webflowState the webflow state
 	 */
 	public Transition(IWebflowState webflowState) {
@@ -61,7 +58,6 @@ public abstract class Transition extends AbstractModelElement implements
 	 */
 	/**
 	 * Gets the to state.
-	 * 
 	 * @return the to state
 	 */
 	public ITransitionableTo getToState() {
@@ -78,12 +74,14 @@ public abstract class Transition extends AbstractModelElement implements
 	 */
 	/**
 	 * Sets the to state.
-	 * 
 	 * @param state the to state
 	 */
 	public void setToState(ITransitionableTo state) {
-		ITransitionableTo newTargetState = (ITransitionableTo) WebflowModelUtils
-				.getStateById(webflowState, state.getId());
+		ITransitionableTo newTargetState = null;
+		if (state != null) {
+			newTargetState = (ITransitionableTo) WebflowModelUtils
+					.getStateById(webflowState, state.getId());
+		}
 		if (newTargetState != null && !newTargetState.equals(targetState)) {
 			if (targetState != null) {
 				targetState.removeInputTransition(this);
@@ -96,14 +94,18 @@ public abstract class Transition extends AbstractModelElement implements
 			}
 		}
 		else {
-			setAttribute("to", state.getId());
+			if (state != null) {
+				setAttribute("to", state.getId());
+			}
+			else {
+				targetState = newTargetState;
+			}
 			super.fireStructureChange(OUTPUTS, state);
 		}
 	}
 
 	/**
 	 * Gets the to state id.
-	 * 
 	 * @return the to state id
 	 */
 	public String getToStateId() {

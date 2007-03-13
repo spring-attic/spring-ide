@@ -39,8 +39,10 @@ import org.springframework.ide.eclipse.webflow.ui.graph.figures.CompoundStateFig
  */
 public class DecisionStatePart extends ChildrenStatePart {
 
-	/* (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.ChildrenStatePart#applyChildrenResults(org.eclipse.draw2d.graph.CompoundDirectedGraph, java.util.Map)
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.ChildrenStatePart#applyChildrenResults(org.eclipse.draw2d.graph.CompoundDirectedGraph,
+	 * java.util.Map)
 	 */
 	protected void applyChildrenResults(CompoundDirectedGraph graph, Map map) {
 		CompoundStateFigure figure = (CompoundStateFigure) getFigure();
@@ -77,8 +79,10 @@ public class DecisionStatePart extends ChildrenStatePart {
 		applyMaxWidths();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#contributeEdgesToGraph(org.eclipse.draw2d.graph.CompoundDirectedGraph, java.util.Map)
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#contributeEdgesToGraph(org.eclipse.draw2d.graph.CompoundDirectedGraph,
+	 * java.util.Map)
 	 */
 	@SuppressWarnings("unchecked")
 	public void contributeEdgesToGraph(CompoundDirectedGraph graph, Map map) {
@@ -93,7 +97,8 @@ public class DecisionStatePart extends ChildrenStatePart {
 		int j = 0;
 		while (iter.hasNext()) {
 			IIf theIf = (IIf) iter.next();
-			if (theIf.getThenTransition() != null) {
+			if (theIf.getThenTransition() != null
+					&& theIf.getThenTransition().getToState() != null) {
 				// insert dummy edges for layouting
 				Edge e1 = new Edge((Node) map.get(this), getNode(theIf
 						.getThenTransition().getToState(), map));
@@ -102,7 +107,8 @@ public class DecisionStatePart extends ChildrenStatePart {
 				graph.edges.add(e1);
 				map.put(this.toString() + (j++), e1);
 			}
-			if (theIf.getElseTransition() != null) {
+			if (theIf.getElseTransition() != null
+					&& theIf.getElseTransition().getToState() != null) {
 				Edge e2 = new Edge((Node) map.get(this), getNode(theIf
 						.getElseTransition().getToState(), map));
 				// e2.weight = 5;
@@ -132,7 +138,8 @@ public class DecisionStatePart extends ChildrenStatePart {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#onGetModelChildren(java.util.List)
 	 */
 	@SuppressWarnings("unchecked")
@@ -143,12 +150,9 @@ public class DecisionStatePart extends ChildrenStatePart {
 	}
 
 	/**
-	 * 
-	 * 
-	 * @param map 
-	 * @param model 
-	 * 
-	 * @return 
+	 * @param map
+	 * @param model
+	 * @return
 	 */
 	private Node getNode(Object model, Map map) {
 		Node node = null;
@@ -167,7 +171,8 @@ public class DecisionStatePart extends ChildrenStatePart {
 		return node;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#getModelChildren()
 	 */
 	@SuppressWarnings("unchecked")

@@ -99,4 +99,6 @@ public interface IStateTransition extends ITransition {
 	String getOnException();
 	
 	void setOnException(String exception);
+	
+	String getToStateId();
 }

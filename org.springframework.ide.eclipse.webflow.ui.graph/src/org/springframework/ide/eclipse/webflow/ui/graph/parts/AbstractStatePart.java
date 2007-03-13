@@ -46,6 +46,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.springframework.ide.eclipse.webflow.core.model.IState;
+import org.springframework.ide.eclipse.webflow.core.model.ITransition;
 import org.springframework.ide.eclipse.webflow.core.model.ITransitionableFrom;
 import org.springframework.ide.eclipse.webflow.core.model.ITransitionableTo;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
@@ -218,8 +219,16 @@ public abstract class AbstractStatePart extends AbstractGraphicalEditPart
 	 * @return 
 	 */
 	protected List getModelSourceConnections() {
-		if (getModel() instanceof ITransitionableFrom)
-			return ((ITransitionableFrom) getModel()).getOutputTransitions();
+		if (getModel() instanceof ITransitionableFrom) {
+			List<ITransition> modelTransitions = ((ITransitionableFrom) getModel()).getOutputTransitions();
+			List<ITransition> transitions = new ArrayList<ITransition>();
+			for (ITransition transition : modelTransitions) {
+				if (transition.getToState() != null) {
+					transitions.add(transition);
+				}
+			}
+			return transitions;
+		}
 		else {
 			return Collections.EMPTY_LIST;
 		}

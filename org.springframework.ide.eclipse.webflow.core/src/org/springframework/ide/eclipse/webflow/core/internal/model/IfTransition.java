@@ -23,8 +23,6 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.w3c.dom.Node;
 
 /**
- * 
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -38,7 +36,6 @@ public class IfTransition extends Transition implements IIfTransition {
 
 	/**
 	 * The Constructor.
-	 * 
 	 * @param webflowState the webflow state
 	 * @param isThen the is then
 	 */
@@ -49,7 +46,6 @@ public class IfTransition extends Transition implements IIfTransition {
 
 	/**
 	 * Checks if is then.
-	 * 
 	 * @return true, if is then
 	 */
 	public boolean isThen() {
@@ -58,7 +54,6 @@ public class IfTransition extends Transition implements IIfTransition {
 
 	/**
 	 * Sets the then.
-	 * 
 	 * @param isThen then
 	 */
 	public void setThen(boolean isThen) {
@@ -74,7 +69,6 @@ public class IfTransition extends Transition implements IIfTransition {
 	 */
 	/**
 	 * Gets the from if.
-	 * 
 	 * @return the from if
 	 */
 	public IIf getFromIf() {
@@ -87,7 +81,6 @@ public class IfTransition extends Transition implements IIfTransition {
 	 */
 	/**
 	 * Sets the from if.
-	 * 
 	 * @param fromIf the from if
 	 */
 	public void setFromIf(IIf fromIf) {
@@ -101,7 +94,6 @@ public class IfTransition extends Transition implements IIfTransition {
 
 	/**
 	 * Gets the to state id.
-	 * 
 	 * @return the to state id
 	 */
 	@Override
@@ -116,14 +108,16 @@ public class IfTransition extends Transition implements IIfTransition {
 
 	/**
 	 * Sets the to state.
-	 * 
 	 * @param state the to state
 	 */
 	@Override
 	public void setToState(ITransitionableTo state) {
-		ITransitionableTo newTargetState = (ITransitionableTo) WebflowModelUtils
-				.getStateById(webflowState, state.getId());
-		if (targetState != null && !targetState.equals(newTargetState)) {
+		ITransitionableTo newTargetState = null;
+		if (state != null) {
+			newTargetState = (ITransitionableTo) WebflowModelUtils
+					.getStateById(webflowState, state.getId());
+		}
+		if (newTargetState != null && !newTargetState.equals(newTargetState)) {
 			if (targetState != null) {
 				targetState.removeInputTransition(this);
 			}
@@ -140,11 +134,16 @@ public class IfTransition extends Transition implements IIfTransition {
 			}
 		}
 		else {
-			if (isThen) {
-				setAttribute(this.parent.getNode(), "then", state.getId());
+			if (state != null) {
+				if (isThen) {
+					setAttribute(this.parent.getNode(), "then", state.getId());
+				}
+				else {
+					setAttribute(this.parent.getNode(), "else", state.getId());
+				}
 			}
 			else {
-				setAttribute(this.parent.getNode(), "else", state.getId());
+				targetState = newTargetState;
 			}
 			super.fireStructureChange(OUTPUTS, state);
 		}

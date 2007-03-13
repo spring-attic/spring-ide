@@ -61,11 +61,6 @@ public class StateTransition extends Transition implements IStateTransition,
 		super(webflowState);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.internal.model.AbstractModelElement#init(org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode,
-	 * org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement)
-	 */
 	/**
 	 * 
 	 * 
@@ -109,14 +104,6 @@ public class StateTransition extends Transition implements IStateTransition,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.IActionState#addAction(org.springframework.ide.eclipse.web.core.model.IAction)
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IStateTransition#addAction(org.springframework.ide.eclipse.webflow.core.model.IActionElement)
-	 */
 	/**
 	 * 
 	 * 
@@ -131,16 +118,6 @@ public class StateTransition extends Transition implements IStateTransition,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.IActionState#addAction(org.springframework.ide.eclipse.web.flow.core.model.IAction,
-	 * int)
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IStateTransition#addAction(org.springframework.ide.eclipse.webflow.core.model.IActionElement,
-	 * int)
-	 */
 	/**
 	 * 
 	 * 
@@ -155,14 +132,6 @@ public class StateTransition extends Transition implements IStateTransition,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.IActionState#getActions()
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IStateTransition#getActions()
-	 */
 	/**
 	 * 
 	 * 
@@ -172,10 +141,6 @@ public class StateTransition extends Transition implements IStateTransition,
 		return this.actions;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IStateTransition#getOn()
-	 */
 	/**
 	 * 
 	 * 
@@ -185,14 +150,6 @@ public class StateTransition extends Transition implements IStateTransition,
 		return getAttribute("on");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.IActionState#removeAction(org.springframework.ide.eclipse.web.core.model.IAction)
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IStateTransition#removeAction(org.springframework.ide.eclipse.webflow.core.model.IActionElement)
-	 */
 	/**
 	 * 
 	 * 
@@ -206,10 +163,6 @@ public class StateTransition extends Transition implements IStateTransition,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IStateTransition#setOn(java.lang.String)
-	 */
 	/**
 	 * 
 	 * 
@@ -219,14 +172,6 @@ public class StateTransition extends Transition implements IStateTransition,
 		setAttribute("on", on);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.ITransition#getFromState()
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IStateTransition#getFromState()
-	 */
 	/**
 	 * 
 	 * 
@@ -236,14 +181,6 @@ public class StateTransition extends Transition implements IStateTransition,
 		return (ITransitionableFrom) this.parent;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.ITransition#setFromState(org.springframework.ide.eclipse.web.flow.core.model.ITransitionableFrom)
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IStateTransition#setFromState(org.springframework.ide.eclipse.webflow.core.model.ITransitionableFrom)
-	 */
 	/**
 	 * 
 	 * 
@@ -258,10 +195,6 @@ public class StateTransition extends Transition implements IStateTransition,
 		this.parent = fromState;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelElement#getElementParent()
-	 */
 	/**
 	 * 
 	 * 
@@ -272,11 +205,6 @@ public class StateTransition extends Transition implements IStateTransition,
 		return this.parent;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IStateTransition#createNew(org.springframework.ide.eclipse.webflow.core.model.IState,
-	 * org.springframework.ide.eclipse.webflow.core.model.IWebflowState)
-	 */
 	/**
 	 * 
 	 * 
@@ -290,10 +218,6 @@ public class StateTransition extends Transition implements IStateTransition,
 		init(node, parent);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement#cloneModelElement()
-	 */
 	/**
 	 * 
 	 * 
@@ -305,10 +229,6 @@ public class StateTransition extends Transition implements IStateTransition,
 		return state;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement#applyCloneValues(org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement)
-	 */
 	/**
 	 * 
 	 * 
@@ -385,10 +305,6 @@ public class StateTransition extends Transition implements IStateTransition,
 		node = newNode;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IStateTransition#removeAll()
-	 */
 	/**
 	 * 
 	 */
