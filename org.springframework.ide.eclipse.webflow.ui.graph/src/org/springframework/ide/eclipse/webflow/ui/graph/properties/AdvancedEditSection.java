@@ -90,6 +90,8 @@ public class AdvancedEditSection extends AbstractPropertySection {
 						.getAdapter(ActionRegistry.class);
 				EditPropertiesAction action = (EditPropertiesAction) actionRegistry
 						.getAction(EditPropertiesAction.EDITPROPERTIES);
+				action.setOpenDialog(true);
+				
 				EditPropertiesCommand command = new EditPropertiesCommand();
 
 				IWebflowModelElement clone = null;
@@ -101,8 +103,7 @@ public class AdvancedEditSection extends AbstractPropertySection {
 
 				command.setChild(
 						(ICloneableModelElement<IWebflowModelElement>) state,
-						clone, true);
-
+						clone);
 				if (action != null) {
 					action.runWithCommand(command);
 				}

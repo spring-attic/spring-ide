@@ -140,7 +140,8 @@ public class ActionNameSection extends AbstractPropertySection implements Proper
 		if (oldAction != null) {
 			oldAction.removePropertyChangeListener(this);
 		}
-		if (input instanceof IAction) {
+		if (input instanceof AbstractStatePart
+				&& ((AbstractStatePart) input).getModel() instanceof IAction) {
 			action = (IAction) ((AbstractStatePart) input).getModel();
 			action.addPropertyChangeListener(this);
 			oldAction = action;

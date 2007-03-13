@@ -17,65 +17,62 @@
 package org.springframework.ide.eclipse.webflow.ui.graph.commands;
 
 import org.eclipse.gef.commands.Command;
-import org.eclipse.jface.dialogs.Dialog;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.webflow.core.model.ITransitionableTo;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
-import org.springframework.ide.eclipse.webflow.ui.graph.dialogs.DialogUtils;
 
 /**
  * 
  */
 public class EditPropertiesCommand extends Command {
 
-	/**
-	 * 
-	 */
-	IWebflowModelElement child = null;
+	private IWebflowModelElement child = null;
 
-	/**
-	 * 
-	 */
-	ICloneableModelElement<IWebflowModelElement> oldChild = null;
+	private ITransitionableTo newTarget = null;
 
-	/**
-	 * 
-	 */
-	IWebflowModelElement undoChild = null;
+	private ICloneableModelElement<IWebflowModelElement> oldChild = null;
 
-	/**
-	 * 
-	 */
-	ITransitionableTo newTarget = null;
+	private ITransitionableTo oldTarget = null;
 
-	/**
-	 * 
-	 */
-	ITransitionableTo oldTarget = null;
+	private boolean onlyReconnect = false;
 
-	/**
-	 * 
-	 */
-	boolean openDialog = true;
+	private IWebflowModelElement undoChild = null;
 
-	/**
-	 * 
-	 */
-	boolean onlyReconnect = false;
-
-	/**
-	 * 
-	 */
 	public EditPropertiesCommand() {
 		super("Properties");
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param oldChild 
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.gef.commands.Command#execute()
 	 */
+	public void execute() {
+		if (!onlyReconnect) {
+			oldChild.applyCloneValues(child);
+		}
+		if (oldChild instanceof IStateTransition && newTarget != null) {
+			oldTarget = ((IStateTransition) oldChild).getToState();
+			((IStateTransition) oldChild).setToState(newTarget);
+		}
+	}
+
+	public IWebflowModelElement getChild() {
+		return child;
+	}
+
+	public IWebflowModelElement getChildClone() {
+		return this.child;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.gef.commands.Command#redo()
+	 */
+	public void redo() {
+		execute();
+	}
+
 	public void setChild(ICloneableModelElement<IWebflowModelElement> oldChild) {
 		this.oldChild = oldChild;
 		// don't work on orginal domain model object
@@ -83,67 +80,24 @@ public class EditPropertiesCommand extends Command {
 		this.undoChild = oldChild.cloneModelElement();
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param oldChild 
-	 * @param newChild 
-	 */
 	public void setChild(ICloneableModelElement<IWebflowModelElement> oldChild,
 			IWebflowModelElement newChild) {
-		setChild(oldChild, newChild, false);
-	}
-
-	/**
-	 * 
-	 * 
-	 * @param openDialog 
-	 * @param oldChild 
-	 * @param newChild 
-	 */
-	public void setChild(ICloneableModelElement<IWebflowModelElement> oldChild,
-			IWebflowModelElement newChild, boolean openDialog) {
 		this.oldChild = oldChild;
 		// don't work on orginal domain model object
 		this.child = newChild;
 		this.undoChild = oldChild.cloneModelElement();
-		this.openDialog = openDialog;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.gef.commands.Command#execute()
-	 */
-	public void execute() {
-		int result = -1;
-		if (!onlyReconnect) {
-			if (openDialog) {
-				if (((IWebflowModelElement) oldChild).getElementParent() instanceof IWebflowModelElement) {
-					result = DialogUtils.openPropertiesDialog(
-							((IWebflowModelElement) oldChild)
-									.getElementParent(),
-							(IWebflowModelElement) child, false);
-				}
-				else {
-					result = DialogUtils.openPropertiesDialog(null,
-							(IWebflowModelElement) child, false);
-				}
-				if (result == Dialog.OK) {
-					oldChild.applyCloneValues(child);
-				}
-			}
-			else {
-				oldChild.applyCloneValues(child);
-			}
-		}
-
-		if (oldChild instanceof IStateTransition && newTarget != null) {
-			oldTarget = ((IStateTransition) oldChild).getToState();
-			((IStateTransition) oldChild).setToState(newTarget);
-		}
-
+	public void setNewTarget(ITransitionableTo newTarget) {
+		this.newTarget = newTarget;
+	}
+	
+	public void setOnlyReconnect(boolean onlyReconnect) {
+		this.onlyReconnect = onlyReconnect;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.commands.Command#undo()
 	 */
 	public void undo() {
@@ -154,30 +108,5 @@ public class EditPropertiesCommand extends Command {
 				&& oldTarget != null) {
 			((IStateTransition) oldChild).setToState(oldTarget);
 		}
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.gef.commands.Command#redo()
-	 */
-	public void redo() {
-		oldChild.applyCloneValues(child);
-	}
-
-	/**
-	 * 
-	 * 
-	 * @param newTarget 
-	 */
-	public void setNewTarget(ITransitionableTo newTarget) {
-		this.newTarget = newTarget;
-	}
-
-	/**
-	 * 
-	 * 
-	 * @param onlyReconnect 
-	 */
-	public void setOnlyReconnect(boolean onlyReconnect) {
-		this.onlyReconnect = onlyReconnect;
 	}
 }

@@ -22,108 +22,135 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
+import org.eclipse.gef.ui.actions.SelectionAction;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.ui.IWorkbenchPart;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IIf;
 import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.IStateTransition;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
+import org.springframework.ide.eclipse.webflow.ui.graph.commands.EditPropertiesCommand;
+import org.springframework.ide.eclipse.webflow.ui.graph.dialogs.DialogUtils;
 
 /**
+ * {@link SelectionAction} that opens the Properties Dialog of the selected
+ * {@link IWebflowModelElement} and in case the {@link Dialog} is closed with
+ * {@link Dialog.OK} the values will be applied to the original element.
  * 
+ * @author Christian Dupuis
+ * @since 2.0
  */
-public class EditPropertiesAction extends
-        org.eclipse.gef.ui.actions.SelectionAction {
+public class EditPropertiesAction extends SelectionAction {
 
-    /**
-     * 
-     */
-    public static final String EDITPROPERTIES_REQUEST = "Edit_propeties";
+	public static final String EDITPROPERTIES_REQUEST = "Edit_propeties";
 
-    /**
-     * 
-     */
-    public static final String EDITPROPERTIES = "Edit_propeties";
+	public static final String EDITPROPERTIES = "Edit_propeties";
 
-    /**
-     * 
-     */
-    Request request;
+	private Request request;
 
-    /**
-     * 
-     * 
-     * @param part 
-     */
-    public EditPropertiesAction(IWorkbenchPart part) {
-        super(part);
-        request = new Request(EDITPROPERTIES_REQUEST);
-        setText("Properties");
-        setId(EDITPROPERTIES);
-        setToolTipText("Edit properties of selected state");
-        setImageDescriptor(WebflowUIImages.DESC_OBJS_PROPERTIES);
-        setHoverImageDescriptor(getImageDescriptor());
-    }
+	boolean openDialog = true;
 
-    /* (non-Javadoc)
-     * @see org.eclipse.gef.ui.actions.WorkbenchPartAction#calculateEnabled()
-     */
-    protected boolean calculateEnabled() {
-        return canPerformAction();
-    }
+	public void setOpenDialog(boolean openDialog) {
+		this.openDialog = openDialog;
+	}
 
-    /**
-     * 
-     * 
-     * @return 
-     */
-    private boolean canPerformAction() {
-        if (getSelectedObjects().isEmpty())
-            return false;
-        List parts = getSelectedObjects();
-        for (int i = 0; i < parts.size(); i++) {
-            Object o = parts.get(i);
-            if (!(o instanceof EditPart))
-                return false;
-            EditPart part = (EditPart) o;
-            if (!(part.getModel() instanceof IState
-                    || part.getModel() instanceof IActionElement
-                    || part.getModel() instanceof IStateTransition || part
-                    .getModel() instanceof IIf))
-                return false;
-        }
-        return true;
-    }
+	public EditPropertiesAction(IWorkbenchPart part) {
+		super(part);
+		request = new Request(EDITPROPERTIES_REQUEST);
+		setText("Properties");
+		setId(EDITPROPERTIES);
+		setToolTipText("Edit properties of selected state");
+		setImageDescriptor(WebflowUIImages.DESC_OBJS_PROPERTIES);
+		setHoverImageDescriptor(getImageDescriptor());
+	}
 
-    /**
-     * 
-     * 
-     * @return 
-     */
-    private Command getCommand() {
-        List editparts = getSelectedObjects();
-        CompoundCommand cc = new CompoundCommand();
-        for (int i = 0; i < editparts.size(); i++) {
-            EditPart part = (EditPart) editparts.get(i);
-            cc.add(part.getCommand(request));
-        }
-        return cc;
-    }
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.gef.ui.actions.WorkbenchPartAction#calculateEnabled()
+	 */
+	protected boolean calculateEnabled() {
+		return canPerformAction();
+	}
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.action.Action#run()
-     */
-    public void run() {
-        execute(getCommand());
-    }
-    
-    /**
-     * 
-     * 
-     * @param command 
-     */
-    public void runWithCommand(Command command) {
-    	execute(command);
-    }
+	/**
+	 * @return
+	 */
+	private boolean canPerformAction() {
+		if (getSelectedObjects().isEmpty())
+			return false;
+		List parts = getSelectedObjects();
+		for (int i = 0; i < parts.size(); i++) {
+			Object o = parts.get(i);
+			if (!(o instanceof EditPart))
+				return false;
+			EditPart part = (EditPart) o;
+			if (!(part.getModel() instanceof IState
+					|| part.getModel() instanceof IActionElement
+					|| part.getModel() instanceof IStateTransition || part
+					.getModel() instanceof IIf)) {
+				return false;
+			}
+		}
+		return true;
+	}
 
+	/**
+	 * @return
+	 */
+	private CompoundCommand getCommand() {
+		List editparts = getSelectedObjects();
+		CompoundCommand cc = new CompoundCommand();
+		for (int i = 0; i < editparts.size(); i++) {
+			EditPart part = (EditPart) editparts.get(i);
+			cc.add(part.getCommand(request));
+		}
+		return cc;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jface.action.Action#run()
+	 */
+	public void run() {
+		int result = -1;
+
+		CompoundCommand cc = getCommand();
+
+		for (int i = 0; i < cc.getCommands().size(); i++) {
+			if (cc.getCommands().get(i) instanceof EditPropertiesCommand) {
+				EditPropertiesCommand command = (EditPropertiesCommand) cc
+						.getCommands().get(i);
+				IWebflowModelElement child = command.getChild();
+				IWebflowModelElement newChild = command.getChildClone();
+
+				if (openDialog) {
+					if (((IWebflowModelElement) child).getElementParent() instanceof IWebflowModelElement) {
+						result = DialogUtils.openPropertiesDialog(
+								((IWebflowModelElement) child)
+										.getElementParent(),
+								(IWebflowModelElement) newChild, false);
+					}
+					else {
+						result = DialogUtils.openPropertiesDialog(null,
+								(IWebflowModelElement) newChild, false);
+					}
+					if (result == Dialog.OK) {
+						execute(command);
+					}
+				}
+				else {
+					execute(command);
+				}
+			}
+		}
+	}
+
+	/**
+	 * @param command
+	 */
+	public void runWithCommand(Command command) {
+		execute(command);
+	}
 }

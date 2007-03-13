@@ -24,11 +24,11 @@ import java.util.List;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.wst.sse.core.internal.provisional.INodeNotifier;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.properties.XMLPropertySource;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -167,6 +167,11 @@ public abstract class WebflowModelElement implements IWebflowModelElement,
 	 */
 	protected void setAttribute(IDOMNode node, String attributeName,
 			String value) {
+		
+		if (!StringUtils.hasText(value)) {
+			value = null;
+		}
+		
 		// String oldValue = BeansEditorUtils.getAttribute(node, attributeName);
 		node.getModel().aboutToChangeModel();
 		if (value != null) {
