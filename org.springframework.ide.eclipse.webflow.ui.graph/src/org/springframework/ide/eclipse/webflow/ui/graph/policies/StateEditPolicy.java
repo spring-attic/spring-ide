@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IDecisionState;
 import org.springframework.ide.eclipse.webflow.core.model.IIf;
+import org.springframework.ide.eclipse.webflow.core.model.IInlineFlowState;
 import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.ISubflowState;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
@@ -46,7 +47,8 @@ import org.springframework.ide.eclipse.webflow.ui.graph.commands.EditPropertiesC
  */
 public class StateEditPolicy extends ComponentEditPolicy {
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editpolicies.ComponentEditPolicy#createDeleteCommand(org.eclipse.gef.requests.GroupRequest)
 	 */
 	protected Command createDeleteCommand(GroupRequest deleteRequest) {
@@ -76,8 +78,9 @@ public class StateEditPolicy extends ComponentEditPolicy {
 			// deleteCmd.setChild(getHost().getModel());
 			// return deleteCmd;
 		}
-		else if (getHost().getParent().getModel() instanceof IWebflowState) {
-			IWebflowState parent = (IWebflowState) (getHost().getParent()
+		else if (getHost().getParent().getModel() instanceof IWebflowState
+				|| getHost().getParent().getModel() instanceof IInlineFlowState) {
+			IWebflowModelElement parent = (IWebflowModelElement) (getHost().getParent()
 					.getModel());
 			DeleteCommand deleteCmd = new DeleteCommand();
 			deleteCmd.setParent(parent);
@@ -100,7 +103,8 @@ public class StateEditPolicy extends ComponentEditPolicy {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editpolicies.ComponentEditPolicy#getCommand(org.eclipse.gef.Request)
 	 */
 	public Command getCommand(Request request) {
@@ -114,9 +118,7 @@ public class StateEditPolicy extends ComponentEditPolicy {
 	}
 
 	/**
-	 * 
-	 * 
-	 * @return 
+	 * @return
 	 */
 	protected Command getSetAsStartStateCommand() {
 		SetAsStartStateCommand command = new SetAsStartStateCommand();
@@ -125,9 +127,7 @@ public class StateEditPolicy extends ComponentEditPolicy {
 	}
 
 	/**
-	 * 
-	 * 
-	 * @return 
+	 * @return
 	 */
 	@SuppressWarnings("unchecked")
 	protected Command getEditPropertiesCommand() {
@@ -167,15 +167,14 @@ public class StateEditPolicy extends ComponentEditPolicy {
 		}
 
 		/**
-		 * 
-		 * 
-		 * @param child 
+		 * @param child
 		 */
 		public void setChild(IState child) {
 			this.child = child;
 		}
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
 		 * @see org.eclipse.gef.commands.Command#execute()
 		 */
 		public void execute() {
@@ -187,7 +186,8 @@ public class StateEditPolicy extends ComponentEditPolicy {
 			}
 		}
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
 		 * @see org.eclipse.gef.commands.Command#undo()
 		 */
 		public void undo() {
@@ -198,7 +198,8 @@ public class StateEditPolicy extends ComponentEditPolicy {
 			}
 		}
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
 		 * @see org.eclipse.gef.commands.Command#redo()
 		 */
 		public void redo() {

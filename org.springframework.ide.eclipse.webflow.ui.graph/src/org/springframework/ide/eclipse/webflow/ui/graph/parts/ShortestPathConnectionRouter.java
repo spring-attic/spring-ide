@@ -21,6 +21,7 @@ import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.draw2d.graph.Path;
 import org.eclipse.draw2d.graph.ShortestPathRouter;
+import org.springframework.ide.eclipse.webflow.core.model.IInlineFlowState;
 import org.springframework.ide.eclipse.webflow.ui.graph.figures.CompoundStateFigure;
 import org.springframework.ide.eclipse.webflow.ui.graph.figures.InlineFlowStateFigure;
 
@@ -256,13 +257,26 @@ public final class ShortestPathConnectionRouter extends AbstractRouter {
 	void removeChild(IFigure child) {
 		if (connectionToPaths == null)
 			return;
-		Rectangle bounds = child.getBounds().getCopy();
-		boolean change = algorithm.removeObstacle(bounds);
-		figuresToBounds.remove(child);
-		child.removeFigureListener(figureListener);
-		if (change) {
-			isDirty = true;
-			queueSomeRouting();
+
+		if (child instanceof InlineFlowStateFigure) {
+			// TODO recheck if this is not needed
+			/*InlineFlowStateFigure inlineFigure = (InlineFlowStateFigure) child;
+			for (int j = 0; j < ((IFigure) inlineFigure.getChildren().get(0))
+					.getChildren().size(); j++) {
+				
+				removeChild((IFigure) ((IFigure) inlineFigure.getChildren()
+						.get(0)).getChildren().get(j));
+			}*/
+		}
+		else {
+			Rectangle bounds = child.getBounds().getCopy();
+			boolean change = algorithm.removeObstacle(bounds);
+			figuresToBounds.remove(child);
+			child.removeFigureListener(figureListener);
+			if (change) {
+				isDirty = true;
+				queueSomeRouting();
+			}
 		}
 	}
 

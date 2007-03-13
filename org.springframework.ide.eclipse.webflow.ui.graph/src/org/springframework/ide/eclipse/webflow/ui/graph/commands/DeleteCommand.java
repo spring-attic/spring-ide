@@ -24,11 +24,13 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.springframework.ide.eclipse.webflow.core.internal.model.IfTransition;
 import org.springframework.ide.eclipse.webflow.core.model.IDecisionState;
 import org.springframework.ide.eclipse.webflow.core.model.IIfTransition;
+import org.springframework.ide.eclipse.webflow.core.model.IInlineFlowState;
 import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.webflow.core.model.ITransition;
 import org.springframework.ide.eclipse.webflow.core.model.ITransitionableFrom;
 import org.springframework.ide.eclipse.webflow.core.model.ITransitionableTo;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.springframework.ide.eclipse.webflow.ui.graph.Activator;
 
@@ -162,7 +164,6 @@ public class DeleteCommand extends Command {
 	 * 
 	 */
 	protected void primExecute() {
-
 		deleteConnections(child);
 		index = parent.getStates().indexOf(child);
 		parent.removeState(child);
@@ -220,8 +221,13 @@ public class DeleteCommand extends Command {
 	 * 
 	 * @param sa 
 	 */
-	public void setParent(IWebflowState sa) {
-		parent = sa;
+	public void setParent(IWebflowModelElement sa) {
+		if (sa instanceof IWebflowState) {
+			parent = (IWebflowState) sa;
+		}
+		else if (sa instanceof IInlineFlowState) {
+			parent = ((IInlineFlowState) sa).getWebFlowState();
+		}
 	}
 
 	/* (non-Javadoc)

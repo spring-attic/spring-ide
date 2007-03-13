@@ -81,6 +81,8 @@ public class BeanActionPropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 */
+	//private DecoratedField namefield;
+
 	private Text nameText;
 
 	/**
@@ -356,6 +358,18 @@ public class BeanActionPropertiesDialog extends TitleAreaDialog implements
 		nameGroup.setLayout(layout1);
 		nameLabel = new Label(nameGroup, SWT.NONE);
 		nameLabel.setText("Name");
+		/*
+		// Create a decorated field with a required field decoration.
+		DecoratedField nameField = new DecoratedField(nameGroup, SWT.SINGLE
+				| SWT.BORDER, new TextControlCreator());
+		FieldDecoration requiredFieldIndicator = FieldDecorationRegistry
+				.getDefault().getFieldDecoration(
+						FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
+		nameField.addFieldDecoration(requiredFieldIndicator, SWT.BOTTOM
+				| SWT.LEFT, true);
+		nameText = (Text) nameField.getControl();
+		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		nameField.getLayoutControl().setLayoutData(data); */
 		nameText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
 		if (this.action != null && this.action.getName() != null) {
 			this.nameText.setText(this.action.getName());
@@ -367,6 +381,21 @@ public class BeanActionPropertiesDialog extends TitleAreaDialog implements
 				validateInput();
 			}
 		});
+		
+		/*
+		try {
+			char[] autoActivationCharacters = new char[] { '.' };
+			KeyStroke keyStroke;
+			keyStroke = KeyStroke.getInstance("Ctrl+Space");
+			// assume that myTextControl has already been created in some way
+			ContentProposalAdapter adapter = new ContentProposalAdapter(
+					nameText, new TextContentAdapter(),
+					new SimpleContentProposalProvider(new String[] {
+							"ProposalOne", "ProposalTwo", "ProposalThree" }),
+					keyStroke, autoActivationCharacters);
+		}
+		catch (ParseException e1) {
+		}*/
 
 		new Label(nameGroup, SWT.NONE);
 
@@ -376,8 +405,6 @@ public class BeanActionPropertiesDialog extends TitleAreaDialog implements
 		GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gridData.widthHint = LABEL_WIDTH;
 		beanLabel.setLayoutData(gridData);
-
-		// Add the text box for action classname.
 		beanText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
 		if (this.action != null && this.action.getBean() != null) {
 			beanText.setText(this.action.getBean());
@@ -391,6 +418,7 @@ public class BeanActionPropertiesDialog extends TitleAreaDialog implements
 				}
 			}
 		});
+
 		browseBeanButton = new Button(nameGroup, SWT.PUSH);
 		browseBeanButton.setText("...");
 		browseBeanButton.setLayoutData(new GridData(
@@ -660,8 +688,8 @@ public class BeanActionPropertiesDialog extends TitleAreaDialog implements
 	private void handleButtonPressed(Button button) {
 
 		if (button.equals(browseBeanButton)) {
-			ElementListSelectionDialog dialog = DialogUtils.openBeanReferenceDialog(this.beanText
-					.getText(), false);
+			ElementListSelectionDialog dialog = DialogUtils
+					.openBeanReferenceDialog(this.beanText.getText(), false);
 			if (Dialog.OK == dialog.open()) {
 				this.beanText.setText(((IBean) dialog.getFirstResult())
 						.getElementName());
