@@ -5,11 +5,12 @@
  	<extension
          point="org.eclipse.ui.propertyPages">
       <page
-            adaptable="true"
-            objectClass="org.eclipse.core.resources.IProject"
+            id="org.springframework.ide.eclipse.web.flow.ui.properties.ConfigurationPropertyPage"
             class="org.springframework.ide.eclipse.webflow.ui.properties.WebflowPropertyPage"
             name="%configurationPropertyPage"
-            id="org.springframework.ide.eclipse.web.flow.ui.properties.ConfigurationPropertyPage">
+            objectClass="org.eclipse.core.resources.IProject"
+            adaptable="true"
+            category="org.springframework.ide.eclipse.ui.projectPropertyPage">
          <filter
                name="nature"
                value="org.springframework.ide.eclipse.core.springnature">

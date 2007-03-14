@@ -29,11 +29,12 @@
    <extension
          point="org.eclipse.ui.propertyPages">
       <page
-            objectClass="org.eclipse.core.resources.IProject"
-            adaptable="true"
-            name="%projectPropertyPage"
+            id="org.springframework.ide.eclipse.beans.ui.properties.ProjectPropertyPage"
+            name="%configurationPropertyPage"
             class="org.springframework.ide.eclipse.beans.ui.properties.ProjectPropertyPage"
-            id="org.springframework.ide.eclipse.beans.ui.properties.ProjectPropertyPage">
+            adaptable="true"
+            objectClass="org.eclipse.core.resources.IProject"
+            category="org.springframework.ide.eclipse.ui.projectPropertyPage">
          <filter
                name="nature"
                value="org.springframework.ide.eclipse.core.springnature">

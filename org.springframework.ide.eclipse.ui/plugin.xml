@@ -58,18 +58,28 @@
                   value="org.springframework.ide.eclipse.core.springnature">
             </objectState>
          </visibility>
-<!--
-         <filter
-               name="nature"
-               value="org.springframework.ide.eclipse.core.springnature">
-         </filter>
--->         <action
+         <action
                label="%popupMenus.removeNature.label"
                class="org.springframework.ide.eclipse.ui.internal.actions.AddRemoveNature"
                enablesFor="+"
                id="org.springframework.ide.eclipse.ui.actions.removeNature">
          </action>
       </objectContribution>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            id="org.springframework.ide.eclipse.ui.projectPropertyPage"
+            name="%projectPropertyPage"
+            class="org.springframework.ide.eclipse.ui.dialogs.EmptyPropertyPage"
+            adaptable="true"
+            objectClass="org.eclipse.core.resources.IProject">
+         <filter
+               name="nature"
+               value="org.springframework.ide.eclipse.core.springnature">
+         </filter>
+      </page>
    </extension>
 
 </plugin>
