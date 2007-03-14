@@ -139,7 +139,7 @@ public abstract class WebflowUtils {
 				return requestor.getMethods();
 			}
 		}
-		return null;
+		return new ArrayList<IMethod>();
 	}
 
 	private static class ActionMethodSearchRequestor extends
