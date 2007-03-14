@@ -40,6 +40,8 @@ import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.webflow.core.model.IExceptionHandler;
+import org.springframework.ide.eclipse.webflow.core.model.IInlineFlowState;
+import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.ISubflowState;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.springframework.ide.eclipse.webflow.ui.graph.actions.EditPropertiesAction;
@@ -185,6 +187,24 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 			Map map) {
 		GraphAnimation.recordInitialState(getContentPane());
 		Subgraph me = new Subgraph(this, s);
+		IState state = (IState) getModel();
+
+		if (!(state instanceof IWebflowState)) {
+			int index = -1;
+			int stateCount = ((IWebflowState) state.getElementParent())
+					.getStates().size();
+			if (state instanceof IInlineFlowState) {
+				index = ((IWebflowState) state.getElementParent())
+						.getInlineFlowStates().indexOf(state)
+						+ stateCount;
+			}
+			else {
+				index = ((IWebflowState) state.getElementParent()).getStates()
+						.indexOf(state);
+			}
+			me.setRowConstraint(index);
+		}
+
 		me.outgoingOffset = 5;
 		me.incomingOffset = 5;
 		IFigure fig = getFigure();
@@ -199,7 +219,7 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 			me.insets.bottom = 15;
 		}
 		me.innerPadding = new Insets(0, 0, 0, 4);
-		// me.setPadding(PADDING);
+		// me.setPadding(new Insets(10, 50, 50, 0));
 		map.put(this, me);
 		graph.nodes.add(me);
 		for (int i = 0; i < getChildren().size(); i++) {

@@ -85,6 +85,9 @@ public abstract class AbstractTransitionableFrom extends
 	 */
 	public void addOutputTransition(ITransition transitions) {
 		this.outputTransitions.add(transitions);
+		if (getNode() != null) {
+			getNode().appendChild(transitions.getNode());
+		}
 		super.fireStructureChange(OUTPUTS, transitions);
 	}
 

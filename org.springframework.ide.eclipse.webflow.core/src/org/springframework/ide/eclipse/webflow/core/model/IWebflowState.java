@@ -194,5 +194,38 @@ public interface IWebflowState extends ITransitionableFrom {
 	 * @param outputMapper the output mapper
 	 */
 	void setOutputMapper(IOutputMapper outputMapper);
+	
+	List<IInlineFlowState> getInlineFlowStates();
+	
+	/**
+	 * Adds the state.
+	 * 
+	 * @param state the state
+	 */
+	void addInlineFlowState(IInlineFlowState state);
+
+	/**
+	 * Adds the state.
+	 * 
+	 * @param i the i
+	 * @param state the state
+	 */
+	void addInlineFlowState(IInlineFlowState state, int i);
+
+	/**
+	 * Move state.
+	 * 
+	 * @param i the i
+	 * @param state the state
+	 */
+	void moveInlineFlowState(IInlineFlowState state, int i);
+
+	/**
+	 * Removes the state.
+	 * 
+	 * @param state the state
+	 */
+	void removeInlineFlowState(IInlineFlowState state);
+
 
 }

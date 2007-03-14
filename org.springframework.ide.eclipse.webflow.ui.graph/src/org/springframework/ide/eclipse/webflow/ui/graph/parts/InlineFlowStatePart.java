@@ -16,6 +16,7 @@
 
 package org.springframework.ide.eclipse.webflow.ui.graph.parts;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,8 @@ import org.eclipse.gef.ConnectionEditPart;
 import org.eclipse.gef.Request;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IInlineFlowState;
+import org.springframework.ide.eclipse.webflow.core.model.IState;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.springframework.ide.eclipse.webflow.ui.graph.figures.CompoundStateFigure;
 import org.springframework.ide.eclipse.webflow.ui.graph.figures.InlineFlowStateFigure;
 
@@ -168,9 +171,12 @@ public class InlineFlowStatePart extends ChildrenStatePart {
 	 */
 	protected List getModelChildren() {
 		if (getModel() instanceof IInlineFlowState) {
-			List child = ((IInlineFlowState) getModel()).getWebFlowState()
-					.getStates();
-			return child;
+			List<IState> states = new ArrayList<IState>();
+            states.addAll(((IInlineFlowState) getModel()).getWebFlowState()
+					.getStates());
+            states.addAll(((IInlineFlowState) getModel()).getWebFlowState()
+					.getInlineFlowStates());
+			return states;
 		}
 		else {
 			return Collections.EMPTY_LIST;

@@ -17,6 +17,7 @@
 package org.springframework.ide.eclipse.webflow.ui.graph.parts;
 
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EventObject;
 import java.util.List;
@@ -30,6 +31,7 @@ import org.eclipse.draw2d.graph.CompoundDirectedGraph;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.commands.CommandStackListener;
 import org.eclipse.swt.SWT;
+import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.springframework.ide.eclipse.webflow.ui.graph.policies.FlowEditPolicy;
 import org.springframework.ide.eclipse.webflow.ui.graph.policies.FlowStateLayoutEditPolicy;
@@ -154,7 +156,10 @@ public class FlowPart extends ChildrenStatePart implements
      */
     protected List getModelChildren() {
         if (((IWebflowState) getState()).getStates() != null) {
-            return ((IWebflowState) getState()).getStates();
+            List<IState> states = new ArrayList<IState>();
+            states.addAll(((IWebflowState) getState()).getStates());
+            states.addAll(((IWebflowState) getState()).getInlineFlowStates());
+            return states;
         }
         else {
             return Collections.EMPTY_LIST;

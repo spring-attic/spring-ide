@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.eclipse.draw2d.AbstractLayout;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.draw2d.graph.CompoundDirectedGraph;
@@ -71,6 +72,7 @@ class GraphLayoutManager extends AbstractLayout {
             return;
 
         CompoundDirectedGraph graph = new CompoundDirectedGraph();
+        graph.setDirection(PositionConstants.SOUTH);
         Map partsToNodes = new HashMap();
         diagram.contributeNodesToGraph(graph, null, partsToNodes);
         diagram.contributeEdgesToGraph(graph, partsToNodes);

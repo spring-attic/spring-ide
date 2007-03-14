@@ -120,7 +120,7 @@ public class StateTreeEditPart extends
 		}
 		else if (getModel() instanceof IInlineFlowState) {
 			children.addAll(((IInlineFlowState) getModel()).getWebFlowState()
-					.getStates());
+					.getInlineFlowStates());
 		}
 		else if (getModel() instanceof IWebflowState) {
 			if (((IWebflowState) getState()).getStates() != null)

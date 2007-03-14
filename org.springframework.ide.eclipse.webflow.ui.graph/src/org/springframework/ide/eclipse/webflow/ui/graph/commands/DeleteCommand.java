@@ -57,12 +57,12 @@ public class DeleteCommand extends Command {
 	/**
 	 * 
 	 */
-	private List sourceConnections = new ArrayList();
+	private List<ITransition> sourceConnections = new ArrayList<ITransition>();
 
 	/**
 	 * 
 	 */
-	private List targetConnections = new ArrayList();
+	private List<ITransition> targetConnections = new ArrayList<ITransition>();
 
 	/**
 	 * 
@@ -92,8 +92,8 @@ public class DeleteCommand extends Command {
 					.getOutputTransitions());
 			for (int i = 0; i < sourceConnections.size(); i++) {
 				ITransition t = (ITransition) sourceConnections.get(i);
-				t.getToState().removeInputTransition(t);
 				((ITransitionableFrom) a).removeOutputTransition(t);
+				t.getToState().removeInputTransition(t);
 			}
 		}
 		if (a instanceof ITransitionableTo)
@@ -165,8 +165,14 @@ public class DeleteCommand extends Command {
 	 */
 	protected void primExecute() {
 		deleteConnections(child);
-		index = parent.getStates().indexOf(child);
-		parent.removeState(child);
+		if (child instanceof IInlineFlowState) {
+			index = parent.getInlineFlowStates().indexOf(child);
+			parent.removeInlineFlowState((IInlineFlowState) child);
+		}
+		else {
+			index = parent.getStates().indexOf(child);
+			parent.removeState(child);
+		}
 	}
 
 	/* (non-Javadoc)
@@ -190,18 +196,18 @@ public class DeleteCommand extends Command {
 			if (targetConnections.get(i) instanceof IStateTransition) {
 				IStateTransition t = (IStateTransition) targetConnections
 						.get(i);
-				t.getFromState().addOutputTransition(t);
 				t.getToState().addInputTransition(t);
+				t.getFromState().addOutputTransition(t);
 			}
 			else if (targetConnections.get(i) instanceof IIfTransition) {
 				IIfTransition t = (IIfTransition) targetConnections.get(i);
+				t.getToState().addInputTransition(t);
 				if (t.isThen()) {
 					t.getFromIf().setThenTransition(t);
 				}
 				else {
 					t.getFromIf().setElseTransition(t);
 				}
-				t.getToState().addInputTransition(t);
 			}
 		}
 		targetConnections.clear();
@@ -234,7 +240,12 @@ public class DeleteCommand extends Command {
 	 * @see org.eclipse.gef.commands.Command#undo()
 	 */
 	public void undo() {
-		parent.addState(child, index);
+		if (child instanceof IInlineFlowState) {
+			parent.addInlineFlowState((IInlineFlowState) child, index);
+		}
+		else {
+			parent.addState(child, index);
+		}
 		restoreConnections();
 	}
 }
