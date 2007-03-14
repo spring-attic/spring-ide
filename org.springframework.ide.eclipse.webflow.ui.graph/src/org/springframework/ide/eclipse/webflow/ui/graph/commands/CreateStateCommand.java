@@ -21,17 +21,13 @@ import java.util.List;
 
 import org.eclipse.gef.commands.Command;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.springframework.ide.eclipse.webflow.core.internal.model.IfTransition;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IIfTransition;
 import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.webflow.core.model.ITransition;
-import org.springframework.ide.eclipse.webflow.core.model.ITransitionableFrom;
 import org.springframework.ide.eclipse.webflow.core.model.ITransitionableTo;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
-import org.springframework.ide.eclipse.webflow.ui.graph.Activator;
 import org.springframework.ide.eclipse.webflow.ui.graph.dialogs.DialogUtils;
 
 /**
@@ -57,12 +53,7 @@ public class CreateStateCommand extends Command {
 	/**
 	 * 
 	 */
-	private List sourceConnections = new ArrayList();
-
-	/**
-	 * 
-	 */
-	private List targetConnections = new ArrayList();
+	private List<ITransition> targetConnections = new ArrayList<ITransition>();
 
 	/**
 	 * 

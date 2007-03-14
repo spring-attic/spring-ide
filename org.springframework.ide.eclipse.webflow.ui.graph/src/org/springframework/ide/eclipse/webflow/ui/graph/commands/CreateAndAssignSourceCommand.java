@@ -17,7 +17,6 @@
 package org.springframework.ide.eclipse.webflow.ui.graph.commands;
 
 import org.eclipse.gef.commands.Command;
-import org.springframework.ide.eclipse.webflow.core.internal.model.StateTransition;
 import org.springframework.ide.eclipse.webflow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.webflow.core.model.ITransitionableFrom;
 import org.springframework.ide.eclipse.webflow.core.model.ITransitionableTo;

@@ -596,7 +596,6 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 		getActionRegistry().registerAction(zoomOut);
 
 		getActionRegistry().registerAction(new ExportAction(this));
-
 		getSite().getKeyBindingService().registerAction(zoomIn);
 		getSite().getKeyBindingService().registerAction(zoomOut);
 		getGraphicalViewer().setRootEditPart(root);

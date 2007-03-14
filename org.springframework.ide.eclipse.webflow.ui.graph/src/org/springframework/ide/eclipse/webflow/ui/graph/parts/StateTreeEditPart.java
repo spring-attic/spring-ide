@@ -44,8 +44,7 @@ import org.springframework.ide.eclipse.webflow.ui.graph.policies.StateTreeEditPo
 /**
  * 
  */
-public class StateTreeEditPart extends
-		AbstractTreeEditPart implements
+public class StateTreeEditPart extends AbstractTreeEditPart implements
 		PropertyChangeListener {
 
 	/**
@@ -59,7 +58,8 @@ public class StateTreeEditPart extends
 	 */
 	protected static WebflowModelLabelProvider tLabelProvider = new WebflowModelLabelProvider();
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editparts.AbstractEditPart#activate()
 	 */
 	public void activate() {
@@ -67,7 +67,8 @@ public class StateTreeEditPart extends
 		((IWebflowModelElement) getModel()).addPropertyChangeListener(this);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editparts.AbstractTreeEditPart#createEditPolicies()
 	 */
 	protected void createEditPolicies() {
@@ -78,7 +79,8 @@ public class StateTreeEditPart extends
 				new StateTreeEditPolicy());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editparts.AbstractEditPart#deactivate()
 	 */
 	public void deactivate() {
@@ -86,11 +88,12 @@ public class StateTreeEditPart extends
 		super.deactivate();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editparts.AbstractEditPart#getModelChildren()
 	 */
 	protected List getModelChildren() {
-		List children = new ArrayList();
+		List<IWebflowModelElement> children = new ArrayList<IWebflowModelElement>();
 		if (getModel() instanceof IAttributeEnabled) {
 			IAttributeEnabled properties = (IAttributeEnabled) getModel();
 			if (properties.getAttributes() != null) {
@@ -120,11 +123,13 @@ public class StateTreeEditPart extends
 		}
 		else if (getModel() instanceof IInlineFlowState) {
 			children.addAll(((IInlineFlowState) getModel()).getWebFlowState()
+					.getStates());
+			children.addAll(((IInlineFlowState) getModel()).getWebFlowState()
 					.getInlineFlowStates());
 		}
 		else if (getModel() instanceof IWebflowState) {
-			if (((IWebflowState) getState()).getStates() != null)
-				children.addAll(((IWebflowState) getState()).getStates());
+			children.addAll(((IWebflowState) getState()).getStates());
+			children.addAll(((IWebflowState) getState()).getInlineFlowStates());
 		}
 		else if (getModel() instanceof IDecisionState) {
 			if (((IDecisionState) getModel()).getIfs() != null) {
@@ -145,15 +150,14 @@ public class StateTreeEditPart extends
 	}
 
 	/**
-	 * 
-	 * 
-	 * @return 
+	 * @return
 	 */
 	protected IState getState() {
 		return (IState) getModel();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent change) {
@@ -176,7 +180,8 @@ public class StateTreeEditPart extends
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editparts.AbstractTreeEditPart#refreshVisuals()
 	 */
 	protected void refreshVisuals() {

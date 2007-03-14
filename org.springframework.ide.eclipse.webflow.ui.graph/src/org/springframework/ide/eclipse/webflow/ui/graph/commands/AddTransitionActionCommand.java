@@ -23,7 +23,6 @@ import org.springframework.ide.eclipse.webflow.core.internal.model.BeanAction;
 import org.springframework.ide.eclipse.webflow.core.internal.model.EvaluateAction;
 import org.springframework.ide.eclipse.webflow.core.internal.model.Set;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
-import org.springframework.ide.eclipse.webflow.core.model.IActionState;
 import org.springframework.ide.eclipse.webflow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.webflow.ui.graph.dialogs.DialogUtils;
 

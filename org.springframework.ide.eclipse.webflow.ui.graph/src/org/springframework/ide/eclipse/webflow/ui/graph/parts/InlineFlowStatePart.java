@@ -34,7 +34,6 @@ import org.eclipse.gef.Request;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IInlineFlowState;
 import org.springframework.ide.eclipse.webflow.core.model.IState;
-import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.springframework.ide.eclipse.webflow.ui.graph.figures.CompoundStateFigure;
 import org.springframework.ide.eclipse.webflow.ui.graph.figures.InlineFlowStateFigure;
 
@@ -139,6 +138,7 @@ public class InlineFlowStatePart extends ChildrenStatePart {
 	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#contributeEdgesToGraph(org.eclipse.draw2d.graph.CompoundDirectedGraph,
 	 * java.util.Map)
 	 */
+	@SuppressWarnings("unchecked")
 	public void contributeEdgesToGraph(CompoundDirectedGraph graph, Map map) {
 		List outgoing = getSourceConnections();
 		for (int i = 0; i < outgoing.size(); i++) {

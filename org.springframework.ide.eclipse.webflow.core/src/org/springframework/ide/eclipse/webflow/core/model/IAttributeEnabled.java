@@ -53,5 +53,5 @@ public interface IAttributeEnabled extends IWebflowModelElement {
 	 * 
 	 * @return the attributes
 	 */
-	List getAttributes();
+	List<IAttribute> getAttributes();
 }

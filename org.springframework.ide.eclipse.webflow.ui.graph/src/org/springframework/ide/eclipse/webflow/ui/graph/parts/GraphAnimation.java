@@ -213,7 +213,8 @@ public class GraphAnimation {
      * 
      * @param conn 
      */
-    static void recordFinalState(Connection conn) {
+    @SuppressWarnings("unchecked")
+	static void recordFinalState(Connection conn) {
         //$TODO
         PointList points1 = (PointList) initialStates.get(conn);
         PointList points2 = conn.getPoints().getCopy();
@@ -289,7 +290,8 @@ public class GraphAnimation {
      * 
      * @param child 
      */
-    static void recordFinalState(IFigure child) {
+    @SuppressWarnings("unchecked")
+	static void recordFinalState(IFigure child) {
         if (child instanceof Connection) {
             recordFinalState((Connection) child);
             return;
@@ -309,7 +311,8 @@ public class GraphAnimation {
      * 
      * @param connection 
      */
-    static void recordInitialState(Connection connection) {
+    @SuppressWarnings("unchecked")
+	static void recordInitialState(Connection connection) {
         if (!RECORDING)
             return;
         PointList points = connection.getPoints().getCopy();
@@ -327,7 +330,8 @@ public class GraphAnimation {
      * 
      * @param container 
      */
-    static void recordInitialState(IFigure container) {
+    @SuppressWarnings("unchecked")
+	static void recordInitialState(IFigure container) {
         if (!RECORDING)
             return;
 

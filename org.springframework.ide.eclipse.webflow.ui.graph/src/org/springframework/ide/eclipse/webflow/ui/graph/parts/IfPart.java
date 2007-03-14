@@ -31,6 +31,7 @@ import org.eclipse.draw2d.graph.Node;
 import org.eclipse.draw2d.graph.Subgraph;
 import org.eclipse.swt.graphics.Color;
 import org.springframework.ide.eclipse.webflow.core.model.IIf;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.ui.graph.figures.StateLabel;
 import org.springframework.ide.eclipse.webflow.ui.graph.model.WebflowModelLabelProvider;
 
@@ -68,6 +69,7 @@ public class IfPart extends AbstractStatePart {
 	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#contributeNodesToGraph(org.eclipse.draw2d.graph.CompoundDirectedGraph,
 	 * org.eclipse.draw2d.graph.Subgraph, java.util.Map)
 	 */
+	@SuppressWarnings("unchecked")
 	public void contributeNodesToGraph(CompoundDirectedGraph graph, Subgraph s,
 			Map map) {
 		Node n = new Node(this, s);
@@ -100,7 +102,7 @@ public class IfPart extends AbstractStatePart {
 	 */
 	protected List getModelSourceConnections() {
 		if (getModel() instanceof IIf) {
-			List sourceConnections = new ArrayList();
+			List<IWebflowModelElement> sourceConnections = new ArrayList<IWebflowModelElement>();
 			IIf theIf = (IIf) getModel();
 			if (theIf.getThenTransition() != null
 					&& theIf.getThenTransition().getToState() != null) {

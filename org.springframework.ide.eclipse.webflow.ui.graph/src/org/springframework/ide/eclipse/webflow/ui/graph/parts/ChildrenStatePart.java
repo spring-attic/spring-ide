@@ -64,18 +64,8 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 	/**
 	 * 
 	 */
-	private static final Insets INNER_PADDING = new Insets(4, 4, 10, 4);
-
-	/**
-	 * 
-	 */
 	protected static ILabelProvider labelProvider = new DecoratingLabelProvider(
 			new WebflowModelLabelProvider(), new WebflowModelLabelDecorator());
-
-	/**
-	 * 
-	 */
-	private static final Insets PADDING = new Insets(0, 50, 50, 9);
 
 	/**
 	 * @param graph
@@ -183,6 +173,7 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#contributeNodesToGraph(org.eclipse.draw2d.graph.CompoundDirectedGraph,
 	 * org.eclipse.draw2d.graph.Subgraph, java.util.Map)
 	 */
+	@SuppressWarnings("unchecked")
 	public void contributeNodesToGraph(CompoundDirectedGraph graph, Subgraph s,
 			Map map) {
 		GraphAnimation.recordInitialState(getContentPane());
@@ -222,6 +213,7 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 		// me.setPadding(new Insets(10, 50, 50, 0));
 		map.put(this, me);
 		graph.nodes.add(me);
+		
 		for (int i = 0; i < getChildren().size(); i++) {
 			AbstractStatePart activity = (AbstractStatePart) getChildren().get(
 					i);

@@ -21,7 +21,6 @@ import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.editpolicies.ComponentEditPolicy;
 import org.eclipse.gef.requests.GroupRequest;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
-import org.springframework.ide.eclipse.webflow.core.model.IActionState;
 import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeMapper;
@@ -70,8 +69,8 @@ public class StateEditPolicy extends ComponentEditPolicy {
 			return deleteCmd;
 		}
 		else if (getHost().getParent().getModel() instanceof IAttributeMapper) {
-			IAttributeMapper parent = (IAttributeMapper) (getHost().getParent()
-					.getModel());
+			//IAttributeMapper parent = (IAttributeMapper) (getHost().getParent()
+			//		.getModel());
 			// DeleteInputOutputCommand deleteCmd = new
 			// DeleteInputOutputCommand();
 			// deleteCmd.setParent(parent);

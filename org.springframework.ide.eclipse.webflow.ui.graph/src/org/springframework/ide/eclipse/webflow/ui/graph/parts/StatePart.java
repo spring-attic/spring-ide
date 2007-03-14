@@ -56,6 +56,7 @@ public class StatePart extends AbstractStatePart {
 	/* (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#contributeNodesToGraph(org.eclipse.draw2d.graph.CompoundDirectedGraph, org.eclipse.draw2d.graph.Subgraph, java.util.Map)
 	 */
+	@SuppressWarnings("unchecked")
 	public void contributeNodesToGraph(CompoundDirectedGraph graph, Subgraph s,
 			Map map) {
 		Node n = new Node(this, s);
@@ -90,17 +91,6 @@ public class StatePart extends AbstractStatePart {
 		l.setIconAlignment(PositionConstants.TOP);
 		l.setBorder(new LineBorder());
 		return l;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#performDirectEdit()
-	 */
-	protected void performDirectEdit() {
-		/*
-		 * if (manager == null) { Label l = (Label) getFigure(); manager = new
-		 * StateDirectEditManager(this, TextCellEditor.class, new
-		 * StateCellEditorLocator(l), l); } manager.show();
-		 */
 	}
 
 	/* (non-Javadoc)

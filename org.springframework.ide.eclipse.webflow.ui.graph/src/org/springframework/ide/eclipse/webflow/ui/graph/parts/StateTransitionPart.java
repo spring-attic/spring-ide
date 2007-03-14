@@ -96,6 +96,7 @@ public class StateTransitionPart extends AbstractConnectionEditPart implements
 	 * @param graph 
 	 * @param map 
 	 */
+	@SuppressWarnings("unchecked")
 	public void contributeToGraph(CompoundDirectedGraph graph, Map map) {
 		GraphAnimation.recordInitialState(getConnectionFigure());
 		Node source = (Node) map.get(getSource());
@@ -140,7 +141,6 @@ public class StateTransitionPart extends AbstractConnectionEditPart implements
 		else {
 			// e.weight = 3;
 		}
-
 		graph.edges.add(e);
 		map.put(this, e);
 	}

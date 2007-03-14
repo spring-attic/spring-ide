@@ -21,8 +21,6 @@ import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.draw2d.graph.Path;
 import org.eclipse.draw2d.graph.ShortestPathRouter;
-import org.springframework.ide.eclipse.webflow.core.model.IInlineFlowState;
-import org.springframework.ide.eclipse.webflow.ui.graph.figures.CompoundStateFigure;
 import org.springframework.ide.eclipse.webflow.ui.graph.figures.InlineFlowStateFigure;
 
 /**
@@ -31,6 +29,7 @@ import org.springframework.ide.eclipse.webflow.ui.graph.figures.InlineFlowStateF
  * @author Randy Hudson
  * @since 3.1
  */
+@SuppressWarnings("unchecked")
 public final class ShortestPathConnectionRouter extends AbstractRouter {
 
 	private class LayoutTracker extends LayoutListener.Stub {

@@ -82,7 +82,6 @@ public class IfTransitionPart extends AbstractConnectionEditPart implements
 	 * @param map 
 	 */
 	protected void applyGraphResults(CompoundDirectedGraph graph, Map map) {
-		Edge e = (Edge) map.get(this);
 		conn = (PolylineConnection) getConnectionFigure();
 		conn.setTargetDecoration(new PolygonDecoration());
 
@@ -94,6 +93,7 @@ public class IfTransitionPart extends AbstractConnectionEditPart implements
 	 * @param graph 
 	 * @param map 
 	 */
+	@SuppressWarnings("unchecked")
 	public void contributeToGraph(CompoundDirectedGraph graph, Map map) {
 		GraphAnimation.recordInitialState(getConnectionFigure());
 		Node source = (Node) map.get(getSource());
@@ -187,18 +187,10 @@ public class IfTransitionPart extends AbstractConnectionEditPart implements
 		return (IIfTransition) getModel();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
-	 */
 	/* (non-Javadoc)
 	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent evt) {
-		String prop = evt.getPropertyName();
-		// if (IWebFlowModelElement.PROPS.equals(prop))
-
 	}
 
 	/* (non-Javadoc)
