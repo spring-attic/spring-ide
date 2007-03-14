@@ -46,6 +46,8 @@ import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.Bean
  */
 @SuppressWarnings("restriction")
 public abstract class WebflowUtils {
+	
+	private static final List<IMethod> NO_METHOD_MATCHES = new ArrayList<IMethod>();
 
 	public static WebflowEditor getActiveFlowEditor() {
 
@@ -139,7 +141,7 @@ public abstract class WebflowUtils {
 				return requestor.getMethods();
 			}
 		}
-		return new ArrayList<IMethod>();
+		return NO_METHOD_MATCHES;
 	}
 
 	private static class ActionMethodSearchRequestor extends
