@@ -65,7 +65,7 @@ public class WebflowProjectDescriptionWriter implements
             }
             else {
                 file.setContents(new ByteArrayInputStream(os.toByteArray()),
-                        IResource.NONE, null);
+                        IResource.FORCE, null);
             }
         }
         catch (IOException e) {

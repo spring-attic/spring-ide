@@ -40,7 +40,7 @@ import org.springframework.ide.eclipse.webflow.ui.Activator;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class ConfigurationPropertyPage extends PropertyPage {
+public class WebflowPropertyPage extends PropertyPage {
 
 	/**
 	 * 
@@ -61,12 +61,12 @@ public class ConfigurationPropertyPage extends PropertyPage {
 	/**
 	 * 
 	 */
-	private ConfigFilesTab configFilesBlock;
+	private WebflowConfigTab configFilesBlock;
 
 	/**
 	 * 
 	 */
-	public ConfigurationPropertyPage() {
+	public WebflowPropertyPage() {
 		this(null);
 	}
 
@@ -75,7 +75,7 @@ public class ConfigurationPropertyPage extends PropertyPage {
 	 * 
 	 * @param project 
 	 */
-	public ConfigurationPropertyPage(IProject project) {
+	public WebflowPropertyPage(IProject project) {
 		setElement(project);
 		setTitle(Activator.getResourceString(TITLE));
 		noDefaultAndApplyButton();
@@ -92,7 +92,7 @@ public class ConfigurationPropertyPage extends PropertyPage {
 		TabFolder folder = new TabFolder(parent, SWT.NONE);
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		configFilesBlock = new ConfigFilesTab(project, getElement());
+		configFilesBlock = new WebflowConfigTab(project, getElement());
 		TabItem item = new TabItem(folder, SWT.NONE);
 		item.setText(Activator.getResourceString(CONFIG_FILES_LABEL));
 		item.setControl(configFilesBlock.createControl(folder));

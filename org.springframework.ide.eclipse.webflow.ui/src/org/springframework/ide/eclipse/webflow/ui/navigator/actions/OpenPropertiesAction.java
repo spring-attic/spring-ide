@@ -24,7 +24,7 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
-import org.springframework.ide.eclipse.webflow.ui.properties.ConfigurationPropertyPage;
+import org.springframework.ide.eclipse.webflow.ui.properties.WebflowPropertyPage;
 
 /**
  * Opens the project's property page for currently selected
@@ -72,8 +72,8 @@ public class OpenPropertiesAction extends Action {
 	private static void showProjectPropertyPage(IProject project) {
 		if (project != null) {
 			String title = "";
-			IPreferencePage page = new ConfigurationPropertyPage(project);
-			SpringUIUtils.showPreferencePage(ConfigurationPropertyPage.ID,
+			IPreferencePage page = new WebflowPropertyPage(project);
+			SpringUIUtils.showPreferencePage(WebflowPropertyPage.ID,
 					page, title);
 		}
 	}

@@ -7,7 +7,7 @@
       <page
             adaptable="true"
             objectClass="org.eclipse.core.resources.IProject"
-            class="org.springframework.ide.eclipse.webflow.ui.properties.ConfigurationPropertyPage"
+            class="org.springframework.ide.eclipse.webflow.ui.properties.WebflowPropertyPage"
             name="%configurationPropertyPage"
             id="org.springframework.ide.eclipse.web.flow.ui.properties.ConfigurationPropertyPage">
          <filter
@@ -122,6 +122,23 @@
 				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig"/>
          </enablement>
       </actionProvider>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <wizard
+            id="org.springframework.ide.eclipse.webflow.ui.wizard.newWebflowConfigWizard"
+            name="%wizards.newConfig.name"
+            class="org.springframework.ide.eclipse.webflow.ui.wizards.NewWebflowConfigWizard"
+            category="org.springframework.ide.eclipse.beans.ui.wizards.category"
+            icon="icons/full/obj16/spring_webflow_obj.gif">
+         <description>
+            %wizards.newConfig.description
+         </description>
+         <selection
+               class="org.eclipse.core.resources.IResource">
+         </selection>
+      </wizard>
    </extension>
    
 </plugin>

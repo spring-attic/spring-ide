@@ -60,7 +60,7 @@ import org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorLabe
  * @since 2.0
  */
 @SuppressWarnings("deprecation")
-public class ConfigFilesTab {
+public class WebflowConfigTab {
 
 	/**
 	 * 
@@ -159,7 +159,7 @@ public class ConfigFilesTab {
 	 * @param element
 	 * @param project
 	 */
-	public ConfigFilesTab(IWebflowProject project, IAdaptable element) {
+	public WebflowConfigTab(IWebflowProject project, IAdaptable element) {
 		this.project = project;
 		this.element = element;
 		this.configFiles = new HashSet<IWebflowConfig>();
@@ -300,7 +300,7 @@ public class ConfigFilesTab {
 						.get(file);
 				configs.addAll(oldConfigs);
 			}
-			ConfigSetDialog dialog = new ConfigSetDialog(SpringUIUtils
+			WebflowConfigDialog dialog = new WebflowConfigDialog(SpringUIUtils
 					.getStandardDisplay().getActiveShell(), project
 					.getProject(), configs, names, file.getResource());
 			if (dialog.open() == Dialog.OK) {

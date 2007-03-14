@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
@@ -98,7 +99,9 @@ public class WebflowConfig implements IWebflowConfig {
 		this.beansConfigs = new HashSet<String>();
 		if (beansConfigs != null) {
 			for (IBeansConfig config : beansConfigs) {
-				this.beansConfigs.add(config.getElementID());
+				if (BeansModelUtils.getProject(config).equals(project.getProject())) {
+					this.beansConfigs.add(config.getElementID());
+				}
 			}
 		}
 	}
@@ -108,7 +111,17 @@ public class WebflowConfig implements IWebflowConfig {
 	 */
 	public void setResource(IFile file) {
 		this.resource = file;
-	}
+		
+		if (this.name == null && this.resource != null) {
+			int i = this.resource.getName().lastIndexOf('.');
+			if (i > 0) {
+				this.name = this.resource.getName().substring(0, i);
+			}
+			else {
+				this.name = this.resource.getName();
+			}
+		}
+	} 
 
 	/* (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig#setBeansConfigsElementIds(java.util.List)

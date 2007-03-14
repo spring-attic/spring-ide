@@ -26,8 +26,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.JFaceColors;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -42,7 +40,6 @@ import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
@@ -51,7 +48,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class ConfigSetDialog extends Dialog {
+public class WebflowConfigDialog extends Dialog {
 
 	private static final int BEANS_CONFIG_LIST_VIEWER_HEIGHT = 150;
 
@@ -82,7 +79,7 @@ public class ConfigSetDialog extends Dialog {
 	 * @param beansConfig
 	 * @param parent
 	 */
-	public ConfigSetDialog(Shell parent, IProject project,
+	public WebflowConfigDialog(Shell parent, IProject project,
 			Set<IBeansConfig> beansConfig, List<String> config, IFile file) {
 		super(parent);
 		this.project = project;
@@ -143,9 +140,9 @@ public class ConfigSetDialog extends Dialog {
 		gd.widthHint = LIST_VIEWER_WIDTH;
 		gd.heightHint = BEANS_CONFIG_LIST_VIEWER_HEIGHT;
 		beansConfigSetViewer.getTable().setLayoutData(gd);
-		beansConfigSetViewer.setContentProvider(new ConfigFilesContentProvider(
+		beansConfigSetViewer.setContentProvider(new BeansConfigContentProvider(
 				createBeansConfigList()));
-		beansConfigSetViewer.setLabelProvider(new BeansLabelProvider());
+		beansConfigSetViewer.setLabelProvider(new BeansConfigLabelProvider());
 		beansConfigSetViewer.setInput(this); // activate content provider
 		if (this.beansConfig != null) {
 			beansConfigSetViewer.setCheckedElements(this.beansConfig.toArray());
@@ -227,83 +224,6 @@ public class ConfigSetDialog extends Dialog {
 				project);
 		// Create new list with config files from this config set
 		return beansProject.getConfigs();
-	}
-
-	/**
-	 * 
-	 */
-	private static class ConfigFilesContentProvider implements
-			IStructuredContentProvider {
-
-		/**
-		 * 
-		 */
-		private Set<IBeansConfig> configs;
-
-		/**
-		 * 
-		 * 
-		 * @param configs
-		 */
-		public ConfigFilesContentProvider(Set<IBeansConfig> configs) {
-			this.configs = configs;
-		}
-
-		/**
-		 * 
-		 * 
-		 * @param obj
-		 * 
-		 * @return
-		 */
-		public Object[] getElements(Object obj) {
-			return configs.toArray();
-		}
-
-		/**
-		 * 
-		 * 
-		 * @param newInput
-		 * @param viewer
-		 * @param oldInput
-		 */
-		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		}
-
-		/**
-		 * 
-		 */
-		public void dispose() {
-		}
-	}
-
-	/**
-	 * 
-	 */
-	private static class BeansLabelProvider extends BeansModelLabelProvider {
-
-		/**
-		 * 
-		 */
-		public BeansLabelProvider() {
-			super(true);
-		}
-
-		/**
-		 * 
-		 * 
-		 * @param obj
-		 * 
-		 * @return
-		 */
-		public String getText(Object obj) {
-			if (obj instanceof IBeansConfig) {
-				return super.getText(((IBeansConfig) obj).getElementResource());
-			}
-			else {
-				return super.getText(obj);
-			}
-		}
 	}
 
 	private void validateName() {
