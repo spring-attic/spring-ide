@@ -88,8 +88,12 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 		else if (parentElement instanceof IFile
 				&& providerID.equals(PROJECT_EXPLORER_CONTENT_PROVIDER_ID)) {
 			IFile file = (IFile) parentElement;
-			return new Object[] { Activator.getModel().getProject(
-					file.getProject()).getConfig(file) };
+			IWebflowConfig config = Activator.getModel().getProject(
+					file.getProject()).getConfig(file);
+			if (config != null) {
+				return new Object[] { config };
+			}
+			return IModelElement.NO_CHILDREN;
 		}
 
 		return null;
