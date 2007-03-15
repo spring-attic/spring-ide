@@ -105,8 +105,8 @@ public class WebflowProjectDescriptionWriter implements
         if (configs != null) {
         	for (IWebflowConfig config : configs) {
         		writer.startTag(CONFIG, null);
-        		writer.printSimpleTag(NAME, config.getName());
         		writer.printSimpleTag(FILE, config.getResource().getProjectRelativePath().toString());
+        		writer.printSimpleTag(NAME, config.getName());
         		Set<IBeansConfig> beansConfigs = config.getBeansConfigs();
         		if (beansConfigs != null) {
         			for (IBeansConfig bc : beansConfigs) {

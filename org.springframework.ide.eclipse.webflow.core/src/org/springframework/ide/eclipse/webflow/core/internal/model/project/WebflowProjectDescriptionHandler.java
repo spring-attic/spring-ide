@@ -210,10 +210,10 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 				String config = charBuffer.toString().trim();
 				if (webflowConfig != null) {
 					webflowConfig.setName(config);
-					state = S_FILE;
+					state = S_BEAN_CONFIG;
 				}
 				else {
-					state = S_FILE;
+					state = S_BEAN_CONFIG;
 				}
 			}
 			break;
@@ -224,7 +224,7 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 				IFile file = project.getProject().getFile(config);
 				if (file.exists()) {
 					webflowConfig = description.addConfig(file);
-					state = S_BEAN_CONFIG;
+					state = S_NAME;
 				}
 				else {
 					state = S_CONFIG;
