@@ -16,9 +16,22 @@
 
 package org.springframework.ide.eclipse.webflow.ui.graph.dialogs;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jface.bindings.keys.KeyStroke;
+import org.eclipse.jface.bindings.keys.ParseException;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.fieldassist.ContentProposalAdapter;
+import org.eclipse.jface.fieldassist.IContentProposal;
+import org.eclipse.jface.fieldassist.IContentProposalProvider;
+import org.eclipse.jface.fieldassist.TextContentAdapter;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
@@ -41,6 +54,7 @@ import org.springframework.ide.eclipse.webflow.core.model.ISubflowState;
 import org.springframework.ide.eclipse.webflow.core.model.IViewState;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
+import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
 import org.springframework.ide.eclipse.webflow.ui.graph.Activator;
 import org.springframework.ide.eclipse.webflow.ui.graph.WebflowUtils;
 
@@ -165,5 +179,101 @@ public class DialogUtils {
 		dialog.setMessage("Please select a action method");
 		dialog.setMultipleSelection(false);
 		return dialog;
+	}
+
+	public static ElementListSelectionDialog openFlowReferenceDialog() {
+		ElementListSelectionDialog dialog = new ElementListSelectionDialog(
+				getShell(), new LabelProvider() {
+					public Image getImage(Object obj) {
+						return WebflowUIImages
+								.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW);
+					}
+				});
+		dialog.setBlockOnOpen(true);
+		dialog.setSize(100, 20);
+		dialog.setElements(WebflowUtils.getWebflowConfigNames());
+		dialog.setEmptySelectionMessage("Select a flow reference");
+		dialog.setTitle("Flow reference");
+		dialog.setMessage("Please select a flow");
+		dialog.setMultipleSelection(false);
+		return dialog;
+	}
+
+	public static void attachContentAssist(Text text, String[] elements) {
+		try {
+			char[] autoActivationCharacters = new char[0];
+			KeyStroke keyStroke = KeyStroke.getInstance("Ctrl+Space");
+			new ContentProposalAdapter(text, new TextContentAdapter(),
+					new SimpleContentProposalProvider(elements), keyStroke,
+					autoActivationCharacters);
+		}
+		catch (ParseException e1) {
+		}
+	}
+
+	private static class SimpleContentProposalProvider implements
+			IContentProposalProvider {
+
+		/*
+		 * The proposals provided.
+		 */
+		private String[] proposals;
+
+		/**
+		 * Construct a SimpleContentProposalProvider whose content proposals are
+		 * always the specified array of Objects.
+		 * @param proposals the array of Strings to be returned whenever
+		 * proposals are requested.
+		 */
+		public SimpleContentProposalProvider(String[] proposals) {
+			Arrays.sort(proposals);
+			this.proposals = proposals;
+		}
+
+		/**
+		 * Return an array of Objects representing the valid content proposals
+		 * for a field. Ignore the current contents of the field.
+		 * @param contents the current contents of the field (ignored)
+		 * @param position the current cursor position within the field
+		 * (ignored)
+		 * @return the array of Objects that represent valid proposals for the
+		 * field given its current content.
+		 */
+		public IContentProposal[] getProposals(String contents,
+				final int position) {
+			List<IContentProposal> contentProposals = new ArrayList<IContentProposal>();
+			for (int i = 0; i < proposals.length; i++) {
+				final String proposal = proposals[i];
+				if (proposal.startsWith(contents)) {
+					contentProposals.add(new IContentProposal() {
+						public String getContent() {
+							return proposal.substring(position);
+						}
+
+						public String getDescription() {
+							return proposal;
+						}
+
+						public String getLabel() {
+							return proposal;
+						}
+
+						public int getCursorPosition() {
+							return proposal.length();
+						}
+					});
+				}
+			}
+			return contentProposals
+					.toArray(new IContentProposal[contentProposals.size()]);
+		}
+
+		/**
+		 * Set the Strings to be used as content proposals.
+		 * @param items the array of Strings to be used as proposals.
+		 */
+		public void setProposals(String[] items) {
+			this.proposals = items;
+		}
 	}
 }

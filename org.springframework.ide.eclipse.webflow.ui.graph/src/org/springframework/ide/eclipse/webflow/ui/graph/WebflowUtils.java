@@ -179,4 +179,13 @@ public abstract class WebflowUtils {
 			return methods;
 		}
 	}
+	
+	public static String[] getWebflowConfigNames() {
+		IWebflowProject project = getActiveWebflowConfig().getProject();
+		Set<String> flowNames = new HashSet<String>();
+		for (IWebflowConfig config : project.getConfigs()) {
+			flowNames.add(config.getName());
+		}
+		return flowNames.toArray(new String[flowNames.size()]);
+ 	}
 }

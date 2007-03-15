@@ -38,7 +38,6 @@ import org.springframework.ide.eclipse.webflow.ui.graph.dialogs.DialogUtils;
  * {@link SelectionAction} that opens the Properties Dialog of the selected
  * {@link IWebflowModelElement} and in case the {@link Dialog} is closed with
  * {@link Dialog.OK} the values will be applied to the original element.
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -114,35 +113,13 @@ public class EditPropertiesAction extends SelectionAction {
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	public void run() {
-		int result = -1;
-
 		CompoundCommand cc = getCommand();
 
 		for (int i = 0; i < cc.getCommands().size(); i++) {
 			if (cc.getCommands().get(i) instanceof EditPropertiesCommand) {
 				EditPropertiesCommand command = (EditPropertiesCommand) cc
 						.getCommands().get(i);
-				IWebflowModelElement child = command.getChild();
-				IWebflowModelElement newChild = command.getChildClone();
-
-				if (openDialog) {
-					if (((IWebflowModelElement) child).getElementParent() instanceof IWebflowModelElement) {
-						result = DialogUtils.openPropertiesDialog(
-								((IWebflowModelElement) child)
-										.getElementParent(),
-								(IWebflowModelElement) newChild, false);
-					}
-					else {
-						result = DialogUtils.openPropertiesDialog(null,
-								(IWebflowModelElement) newChild, false);
-					}
-					if (result == Dialog.OK) {
-						execute(command);
-					}
-				}
-				else {
-					execute(command);
-				}
+				runWithCommand(command);
 			}
 		}
 	}
@@ -150,7 +127,28 @@ public class EditPropertiesAction extends SelectionAction {
 	/**
 	 * @param command
 	 */
-	public void runWithCommand(Command command) {
-		execute(command);
+	public void runWithCommand(Command cc) {
+		int result = -1;
+		EditPropertiesCommand command = (EditPropertiesCommand) cc;
+		IWebflowModelElement child = command.getChild();
+		IWebflowModelElement newChild = command.getChildClone();
+
+		if (openDialog) {
+			if (((IWebflowModelElement) child).getElementParent() instanceof IWebflowModelElement) {
+				result = DialogUtils.openPropertiesDialog(
+						((IWebflowModelElement) child).getElementParent(),
+						(IWebflowModelElement) newChild, false);
+			}
+			else {
+				result = DialogUtils.openPropertiesDialog(null,
+						(IWebflowModelElement) newChild, false);
+			}
+			if (result == Dialog.OK) {
+				execute(command);
+			}
+		}
+		else {
+			execute(command);
+		}
 	}
 }

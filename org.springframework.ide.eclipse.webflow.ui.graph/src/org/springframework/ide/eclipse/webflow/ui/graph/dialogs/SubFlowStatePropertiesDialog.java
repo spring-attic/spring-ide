@@ -22,6 +22,10 @@ import java.util.List;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.fieldassist.DecoratedField;
+import org.eclipse.jface.fieldassist.FieldDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.fieldassist.TextControlCreator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -58,6 +62,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IOutputAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.ISubflowState;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
+import org.springframework.ide.eclipse.webflow.ui.graph.WebflowUtils;
 
 /**
  * 
@@ -114,6 +119,11 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
 	 * 
 	 */
 	private Button browseBeanButton;
+
+	/**
+	 * 
+	 */
+	private Button browseFlowButton;
 
 	/**
 	 * 
@@ -502,7 +512,7 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
 		Composite nameGroup = new Composite(groupActionType, SWT.NULL);
 		nameGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		GridLayout layout1 = new GridLayout();
-		layout1.numColumns = 2;
+		layout1.numColumns = 3;
 		layout1.marginWidth = 5;
 		nameGroup.setLayout(layout1);
 		nameLabel = new Label(nameGroup, SWT.NONE);
@@ -511,7 +521,6 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
 		if (this.state != null && this.state.getId() != null) {
 			this.nameText.setText(this.state.getId());
 		}
-		nameText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		nameText.addModifyListener(new ModifyListener() {
 
 			public void modifyText(ModifyEvent e) {
@@ -519,19 +528,46 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
 			}
 		});
 
+		new Label(nameGroup, SWT.NONE);
+
 		flowLabel = new Label(nameGroup, SWT.NONE);
 		flowLabel.setText("Flow");
-		flowText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
+
+		// Create a decorated field with a required field decoration.
+		DecoratedField flowField = new DecoratedField(nameGroup, SWT.SINGLE
+				| SWT.BORDER, new TextControlCreator());
+		FieldDecoration requiredFieldIndicator = FieldDecorationRegistry
+				.getDefault().getFieldDecoration(
+						FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
+		flowField.addFieldDecoration(requiredFieldIndicator,
+				SWT.TOP | SWT.LEFT, true);
+		flowText = (Text) flowField.getControl();
+		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		flowField.getLayoutControl().setLayoutData(data);
 		if (this.state != null && this.state.getFlow() != null) {
 			this.flowText.setText(this.state.getFlow());
 		}
-		flowText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		flowText.addModifyListener(new ModifyListener() {
 
 			public void modifyText(ModifyEvent e) {
 				validateInput();
 			}
 		});
+		
+		// add the indent after getting the decorated field
+		data = new GridData(GridData.FILL_HORIZONTAL);
+		data.horizontalIndent = FieldDecorationRegistry.getDefault()
+				.getMaximumDecorationWidth();
+		nameText.setLayoutData(data);
+
+		DialogUtils.attachContentAssist(flowText, WebflowUtils
+				.getWebflowConfigNames());
+
+		browseFlowButton = new Button(nameGroup, SWT.PUSH);
+		browseFlowButton.setText("...");
+		browseFlowButton.setLayoutData(new GridData(
+				GridData.HORIZONTAL_ALIGN_END));
+		browseFlowButton.addSelectionListener(buttonListener);
 
 		item1.setControl(groupActionType);
 
@@ -734,6 +770,13 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
 			if (Dialog.OK == dialog.open()) {
 				this.attributeMapperBeanText.setText(((IBean) dialog
 						.getFirstResult()).getElementName());
+			}
+		}
+		else if (button.equals(browseFlowButton)) {
+			ElementListSelectionDialog dialog = DialogUtils
+					.openFlowReferenceDialog();
+			if (Dialog.OK == dialog.open()) {
+				this.flowText.setText((String) dialog.getFirstResult());
 			}
 		}
 	}

@@ -94,13 +94,20 @@
          </propertySection>
          <propertySection
          	   afterSection="org.springframework.ide.eclipse.webflow.ui.graph.properties.ViewSection"
+               class="org.springframework.ide.eclipse.webflow.ui.graph.properties.FlowSection"
+               filter="org.springframework.ide.eclipse.webflow.ui.graph.properties.FlowSectionFilter"
+               id="org.springframework.ide.eclipse.webflow.ui.graph.properties.FlowSection"
+               tab="org.springframework.ide.eclipse.webflow.ui.graph.GeneralTab">
+         </propertySection>
+         <propertySection
+         	   afterSection="org.springframework.ide.eclipse.webflow.ui.graph.properties.FlowSection"
                class="org.springframework.ide.eclipse.webflow.ui.graph.properties.AdvancedEditSection"
                filter="org.springframework.ide.eclipse.webflow.ui.graph.properties.AdvancedEditSectionFilter"
                id="org.springframework.ide.eclipse.webflow.ui.graph.AdvancedEditSection"
                tab="org.springframework.ide.eclipse.webflow.ui.graph.GeneralTab">
          </propertySection>
          <propertySection
-	           afterSection="org.springframework.ide.eclipse.webflow.ui.graph.StateIdSection"
+	           afterSection="org.springframework.ide.eclipse.webflow.ui.graph.AdvancedEditSection"
                class="org.springframework.ide.eclipse.webflow.ui.graph.properties.AttributeSection"
                filter="org.springframework.ide.eclipse.webflow.ui.graph.properties.AdvancedEditSectionFilter"
                id="org.springframework.ide.eclipse.webflow.ui.graph.AttributeSection"
