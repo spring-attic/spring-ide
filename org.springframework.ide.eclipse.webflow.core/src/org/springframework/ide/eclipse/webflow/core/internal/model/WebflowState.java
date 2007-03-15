@@ -491,7 +491,17 @@ public class WebflowState extends AbstractTransitionableFrom implements
 	 * @param state
 	 */
 	public void moveState(IState state, int i) {
-		// TODO Auto-generated method stub
+		if (!getStates().contains(state)) {
+			int refIndex = i;
+			if (i >= this.states.size()) {
+				refIndex = this.states.size() - 1;
+			}
+			IState refState = getStates().get(refIndex);
+			removeState(state);
+			this.states.add(i, state);
+			WebflowModelUtils.insertBefore(state.getNode(), refState.getNode());
+			super.firePropertyChange(MOVE_CHILDREN, new Integer(i), state);
+		}
 	}
 
 	/**
@@ -539,10 +549,18 @@ public class WebflowState extends AbstractTransitionableFrom implements
 	 * @param state
 	 */
 	public void setStartState(IState state) {
+		IState oldState = getStartState();
+		
 		List<IDOMNode> nodes = getChildrenNodeByTagName("start-state");
 		IDOMNode node = nodes.get(0);
 		setAttribute(node, "idref", state.getId());
+		
+		removeState(state);
+		addState(state, 0);
+		
+		oldState.fireStructureChange(PROPS, oldState);
 		super.fireStructureChange(MOVE_CHILDREN, state);
+		state.fireStructureChange(PROPS, state);
 	}
 
 	/**

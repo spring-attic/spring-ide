@@ -58,8 +58,8 @@ public class ReorderStateCommand extends Command {
         super("Reorder state");
         this.child = child;
         this.parent = parent;
-        this.oldIndex = oldIndex;
-        this.newIndex = newIndex;
+        this.oldIndex = oldIndex - 1;
+        this.newIndex = newIndex - 1;
     }
 
     /* (non-Javadoc)
