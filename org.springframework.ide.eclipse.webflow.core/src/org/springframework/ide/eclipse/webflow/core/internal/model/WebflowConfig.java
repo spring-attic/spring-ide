@@ -28,90 +28,93 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 
 /**
- * 
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
 public class WebflowConfig implements IWebflowConfig {
-	
+
 	/**
 	 * 
 	 */
 	private Set<String> beansConfigs = new HashSet<String>();
-	
+
 	/**
 	 * 
 	 */
 	private IFile resource;
-	
+
 	private String name;
-	
+
 	/**
 	 * 
 	 */
 	@SuppressWarnings("unused")
 	private IWebflowProject project;
-	
+
 	public IWebflowProject getProject() {
 		return project;
 	}
 
 	/**
-	 * 
-	 * 
-	 * @param project 
+	 * @param project
 	 */
 	public WebflowConfig(IWebflowProject project) {
 		this.project = project;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig#getBeansConfigs()
 	 */
 	public java.util.Set<IBeansConfig> getBeansConfigs() {
 		IBeansModel model = BeansCorePlugin.getModel();
-		
+
 		java.util.Set<IBeansConfig> configs = new HashSet<IBeansConfig>();
 		if (beansConfigs != null) {
 			for (String configName : this.beansConfigs) {
-				IBeansConfig config = (IBeansConfig) model.getElement(configName);
+				IBeansConfig config = (IBeansConfig) model
+						.getElement(configName);
 				if (config != null) {
 					configs.add(config);
 				}
 			}
-			
+
 		}
 		return configs;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig#getResource()
 	 */
 	public IFile getResource() {
 		return this.resource;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig#setBeansConfigs(java.util.List)
 	 */
 	public void setBeansConfigs(java.util.Set<IBeansConfig> beansConfigs) {
 		this.beansConfigs = new HashSet<String>();
 		if (beansConfigs != null) {
 			for (IBeansConfig config : beansConfigs) {
-				if (BeansModelUtils.getProject(config).equals(project.getProject())) {
+				if (BeansModelUtils.getProject(config) != null
+						&& BeansModelUtils.getProject(config).getProject()
+								.equals(project.getProject())) {
 					this.beansConfigs.add(config.getElementID());
 				}
 			}
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig#setResource(org.eclipse.core.resources.IFile)
 	 */
 	public void setResource(IFile file) {
 		this.resource = file;
-		
+
 		if (this.name == null && this.resource != null) {
 			int i = this.resource.getName().lastIndexOf('.');
 			if (i > 0) {
@@ -121,16 +124,18 @@ public class WebflowConfig implements IWebflowConfig {
 				this.name = this.resource.getName();
 			}
 		}
-	} 
+	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig#setBeansConfigsElementIds(java.util.List)
 	 */
 	public void setBeansConfigsElementIds(java.util.Set<String> beansConfigs) {
 		this.beansConfigs = beansConfigs;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig#addBeansConfigElementId(java.lang.String)
 	 */
 	public void addBeansConfigElementId(String id) {

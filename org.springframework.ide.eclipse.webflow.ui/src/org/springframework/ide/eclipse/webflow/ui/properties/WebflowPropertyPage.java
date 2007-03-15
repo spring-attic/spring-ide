@@ -120,7 +120,9 @@ public class WebflowPropertyPage extends PropertyPage {
 				WebflowConfig webflowConfig = new WebflowConfig(project);
 				webflowConfig.setBeansConfigs(filesToConfig.get(file));
 				webflowConfig.setResource(file.getResource());
-				webflowConfig.setName(names.get(file));
+				if (names.get(file) != null) {
+					webflowConfig.setName(names.get(file));
+				}
 				webflowConfigs.add(webflowConfig);
 			}
 
