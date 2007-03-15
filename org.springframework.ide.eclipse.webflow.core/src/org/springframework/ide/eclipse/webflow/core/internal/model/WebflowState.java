@@ -499,7 +499,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 			IState refState = getStates().get(refIndex);
 			removeState(state);
 			this.states.add(i, state);
-			WebflowModelUtils.insertBefore(state.getNode(), refState.getNode());
+			WebflowModelXmlUtils.insertBefore(state.getNode(), refState.getNode());
 			super.firePropertyChange(MOVE_CHILDREN, new Integer(i), state);
 		}
 	}
