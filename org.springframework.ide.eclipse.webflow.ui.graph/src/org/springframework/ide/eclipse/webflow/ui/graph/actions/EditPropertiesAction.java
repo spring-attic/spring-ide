@@ -25,10 +25,6 @@ import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.ui.actions.SelectionAction;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.ui.IWorkbenchPart;
-import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
-import org.springframework.ide.eclipse.webflow.core.model.IIf;
-import org.springframework.ide.eclipse.webflow.core.model.IState;
-import org.springframework.ide.eclipse.webflow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
 import org.springframework.ide.eclipse.webflow.ui.graph.commands.EditPropertiesCommand;
@@ -85,12 +81,7 @@ public class EditPropertiesAction extends SelectionAction {
 			if (!(o instanceof EditPart))
 				return false;
 			EditPart part = (EditPart) o;
-			if (!(part.getModel() instanceof IState
-					|| part.getModel() instanceof IActionElement
-					|| part.getModel() instanceof IStateTransition || part
-					.getModel() instanceof IIf)) {
-				return false;
-			}
+			return part.getModel() instanceof IWebflowModelElement;
 		}
 		return true;
 	}

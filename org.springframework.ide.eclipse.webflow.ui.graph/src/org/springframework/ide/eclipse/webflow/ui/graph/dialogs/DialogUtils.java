@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.bindings.keys.ParseException;
@@ -30,11 +31,13 @@ import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.webflow.core.internal.model.Action;
 import org.springframework.ide.eclipse.webflow.core.internal.model.BeanAction;
 import org.springframework.ide.eclipse.webflow.core.internal.model.EvaluateAction;
@@ -70,77 +73,86 @@ public class DialogUtils {
 	 * @param parent
 	 * @return
 	 */
-	public static int openPropertiesDialog(IWebflowModelElement parent,
-			IWebflowModelElement element, boolean newMode) {
-		int result = Dialog.OK;
-		Dialog dialog = null;
-		Shell shell = getShell();
-		if (element instanceof IEndState) {
-			dialog = new EndStatePropertiesDialog(shell, parent,
-					(IEndState) element);
-		}
-		else if (element instanceof IViewState) {
-			dialog = new ViewStatePropertiesDialog(shell, parent,
-					(IViewState) element);
-		}
-		else if (element instanceof ISubflowState) {
-			dialog = new SubFlowStatePropertiesDialog(shell, parent,
-					(ISubflowState) element);
-		}
-		else if (element instanceof IActionState) {
-			dialog = new ActionStatePropertiesDialog(shell, parent,
-					(IActionState) element);
-		}
-		else if (element instanceof Action) {
-			dialog = new ActionPropertiesDialog(shell, parent, (Action) element);
-		}
-		else if (element instanceof BeanAction) {
-			dialog = new BeanActionPropertiesDialog(shell, parent,
-					(BeanAction) element);
-		}
-		else if (element instanceof EvaluateAction) {
-			dialog = new EvaluateActionPropertiesDialog(shell, parent,
-					(EvaluateAction) element);
-		}
-		else if (element instanceof Set) {
-			dialog = new SetActionPropertiesDialog(shell, parent, (Set) element);
-		}
-		else if (element instanceof OutputAttribute) {
-			dialog = new InputAttributeEditorDialog(shell,
-					(IOutputAttribute) element);
-		}
-		else if (element instanceof InputAttribute) {
-			dialog = new InputAttributeEditorDialog(shell,
-					(IInputAttribute) element);
-		}
-		else if (element instanceof IMapping) {
-			dialog = new MappingEditorDialog(shell, (IMapping) element);
-		}
-		else if (element instanceof ExceptionHandler) {
-			dialog = new ExceptionHandlerPropertiesDialog(shell, parent,
-					(ExceptionHandler) element);
-		}
-		else if (element instanceof IStateTransition) {
-			dialog = new StateTransitionPropertiesDialog(shell, parent,
-					(IStateTransition) element);
-		}
-		else if (element instanceof IDecisionState) {
-			dialog = new DecisionStatePropertiesDialog(shell, parent,
-					(IDecisionState) element);
-		}
-		else if (element instanceof IIf) {
-			dialog = new IfPropertiesDialog(shell, (IDecisionState) parent,
-					(IIf) element, newMode);
-		}
-		else if (element instanceof IWebflowState) {
-			dialog = new WebflowStatePropertiesDialog(shell,
-					(IWebflowState) element);
-		}
-		if (dialog != null) {
-			dialog.setBlockOnOpen(true);
-			result = dialog.open();
-		}
-		return result;
+	public static int openPropertiesDialog(final IWebflowModelElement parent,
+			final IWebflowModelElement element, final boolean newMode) {
+		final Integer[] result = new Integer[1];		
+		final Shell shell = getShell();
+		
+		Display.getDefault().syncExec(new Runnable() {
+            public void run() {
+            	Dialog dialog = null;
+            	if (element instanceof IEndState) {
+            		dialog = new EndStatePropertiesDialog(shell, parent,
+            				(IEndState) element);
+            	}
+            	else if (element instanceof IViewState) {
+            		dialog = new ViewStatePropertiesDialog(shell, parent,
+            				(IViewState) element);
+            	}
+            	else if (element instanceof ISubflowState) {
+            		dialog = new SubFlowStatePropertiesDialog(shell,
+            				parent, (ISubflowState) element);
+            	}
+            	else if (element instanceof IActionState) {
+            		dialog = new ActionStatePropertiesDialog(shell, parent,
+            				(IActionState) element);
+            	}
+            	else if (element instanceof Action) {
+            		dialog = new ActionPropertiesDialog(shell, parent,
+            				(Action) element);
+            	}
+            	else if (element instanceof BeanAction) {
+            		dialog = new BeanActionPropertiesDialog(shell, parent,
+            				(BeanAction) element);
+            	}
+            	else if (element instanceof EvaluateAction) {
+            		dialog = new EvaluateActionPropertiesDialog(shell,
+            				parent, (EvaluateAction) element);
+            	}
+            	else if (element instanceof Set) {
+            		dialog = new SetActionPropertiesDialog(shell, parent,
+            				(Set) element);
+            	}
+            	else if (element instanceof OutputAttribute) {
+            		dialog = new InputAttributeEditorDialog(shell,
+            				(IOutputAttribute) element);
+            	}
+            	else if (element instanceof InputAttribute) {
+            		dialog = new InputAttributeEditorDialog(shell,
+            				(IInputAttribute) element);
+            	}
+            	else if (element instanceof IMapping) {
+            		dialog = new MappingEditorDialog(shell,
+            				(IMapping) element);
+            	}
+            	else if (element instanceof ExceptionHandler) {
+            		dialog = new ExceptionHandlerPropertiesDialog(shell,
+            				parent, (ExceptionHandler) element);
+            	}
+            	else if (element instanceof IStateTransition) {
+            		dialog = new StateTransitionPropertiesDialog(shell,
+            				parent, (IStateTransition) element);
+            	}
+            	else if (element instanceof IDecisionState) {
+            		dialog = new DecisionStatePropertiesDialog(shell,
+            				parent, (IDecisionState) element);
+            	}
+            	else if (element instanceof IIf) {
+            		dialog = new IfPropertiesDialog(shell,
+            				(IDecisionState) parent, (IIf) element, newMode);
+            	}
+            	else if (element instanceof IWebflowState) {
+            		dialog = new WebflowStatePropertiesDialog(shell,
+            				(IWebflowState) element);
+            	}
+            	
+            	if (dialog != null) {
+            		dialog.setBlockOnOpen(true);
+            		result[0] = dialog.open();
+            	}
+            }
+		});
+		return result[0];
 	}
 
 	private static Shell getShell() {
@@ -199,7 +211,7 @@ public class DialogUtils {
 		return dialog;
 	}
 
-	public static void attachContentAssist(Text text, String[] elements) {
+	public static void attachContentAssist(Text text, Object[] elements) {
 		try {
 			char[] autoActivationCharacters = new char[0];
 			KeyStroke keyStroke = KeyStroke.getInstance("Ctrl+Space");
@@ -231,6 +243,32 @@ public class DialogUtils {
 		}
 
 		/**
+		 * Construct a SimpleContentProposalProvider whose content proposals are
+		 * always the specified array of Objects.
+		 * @param proposals the array of Strings to be returned whenever
+		 * proposals are requested.
+		 */
+		public SimpleContentProposalProvider(Object[] proposals) {
+
+			if (proposals != null && proposals.length > 0) {
+				List<String> strings = new ArrayList<String>();
+				for (Object obj : proposals) {
+					if (obj instanceof IModelElement) {
+						strings.add(((IModelElement) obj).getElementName());
+					}
+					else if (obj instanceof IMethod) {
+						strings.add(((IMethod) obj).getElementName());
+					}
+				}
+				this.proposals = strings.toArray(new String[strings.size()]);
+				Arrays.sort(this.proposals);
+			}
+			else {
+				this.proposals = new String[0];
+			}
+		}
+
+		/**
 		 * Return an array of Objects representing the valid content proposals
 		 * for a field. Ignore the current contents of the field.
 		 * @param contents the current contents of the field (ignored)
@@ -251,7 +289,7 @@ public class DialogUtils {
 						}
 
 						public String getDescription() {
-							return proposal;
+							return null;
 						}
 
 						public String getLabel() {

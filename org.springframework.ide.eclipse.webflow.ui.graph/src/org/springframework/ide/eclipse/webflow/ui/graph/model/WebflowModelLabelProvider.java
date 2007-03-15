@@ -217,8 +217,10 @@ public class WebflowModelLabelProvider extends LabelProvider {
 		else if (element instanceof IAttributeMapper) {
 			IAttributeMapper attributeMapper = (IAttributeMapper) element;
 			if (attributeMapper.getBean() != null) {
-				buf.append("Bean: ");
 				buf.append(attributeMapper.getBean());
+			}
+			else {
+				buf.append("attribute-mapper");
 			}
 		}
 		else if (element instanceof IAttribute) {

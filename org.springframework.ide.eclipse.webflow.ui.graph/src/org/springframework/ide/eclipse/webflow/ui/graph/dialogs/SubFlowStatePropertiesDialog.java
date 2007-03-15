@@ -604,22 +604,33 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
 
 		attributeMapperBeanLabel = new Label(attributeMapperTypeGroup, SWT.NONE);
 		attributeMapperBeanLabel.setText("Bean");
-		attributeMapperBeanText = new Text(attributeMapperTypeGroup, SWT.SINGLE
-				| SWT.BORDER);
+		
+		// Create a decorated field with a required field decoration.
+		DecoratedField beanField = new DecoratedField(attributeMapperTypeGroup, SWT.SINGLE
+				| SWT.BORDER, new TextControlCreator());
+		FieldDecoration requiredFieldIndicator3 = FieldDecorationRegistry
+				.getDefault().getFieldDecoration(
+						FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
+		beanField.addFieldDecoration(requiredFieldIndicator3,
+				SWT.TOP | SWT.LEFT, true);
+		attributeMapperBeanText = (Text) beanField.getControl();
+		data = new GridData(GridData.FILL_HORIZONTAL);
+		beanField.getLayoutControl().setLayoutData(data);
 		if (this.state != null && this.state.getAttributeMapper() != null
 				&& this.state.getAttributeMapper().getBean() != null) {
 			this.attributeMapperBeanText.setText(this.state
 					.getAttributeMapper().getBean());
 		}
-		attributeMapperBeanText.setLayoutData(new GridData(
-				GridData.FILL_HORIZONTAL));
 		attributeMapperBeanText.addModifyListener(new ModifyListener() {
 
 			public void modifyText(ModifyEvent e) {
 				validateInput();
 			}
 		});
-
+		
+		DialogUtils.attachContentAssist(attributeMapperBeanText, WebflowUtils
+				.getBeansFromEditorInput().toArray());
+		
 		browseBeanButton = new Button(attributeMapperTypeGroup, SWT.PUSH);
 		browseBeanButton.setText("...");
 		browseBeanButton.setLayoutData(new GridData(

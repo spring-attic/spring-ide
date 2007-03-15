@@ -20,6 +20,10 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.fieldassist.DecoratedField;
+import org.eclipse.jface.fieldassist.FieldDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.fieldassist.TextControlCreator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -44,6 +48,7 @@ import org.springframework.ide.eclipse.webflow.core.internal.model.Action;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
+import org.springframework.ide.eclipse.webflow.ui.graph.WebflowUtils;
 
 /**
  * 
@@ -270,12 +275,21 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 		gridData.widthHint = LABEL_WIDTH;
 		beanLabel.setLayoutData(gridData);
 
-		// Add the text box for action classname.
-		beanText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
+		// Create a decorated field with a required field decoration.
+		DecoratedField beanField = new DecoratedField(nameGroup, SWT.SINGLE
+				| SWT.BORDER, new TextControlCreator());
+		FieldDecoration requiredFieldIndicator = FieldDecorationRegistry
+				.getDefault().getFieldDecoration(
+						FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
+		beanField.addFieldDecoration(requiredFieldIndicator,
+				SWT.TOP | SWT.LEFT, true);
+		beanText = (Text) beanField.getControl();
+		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		beanField.getLayoutControl().setLayoutData(data);
+
 		if (this.action != null && this.action.getBean() != null) {
 			beanText.setText(this.action.getBean());
 		}
-		beanText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		beanText.addModifyListener(new ModifyListener() {
 
 			public void modifyText(ModifyEvent e) {
@@ -284,6 +298,10 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 				}
 			}
 		});
+
+		DialogUtils.attachContentAssist(beanText, WebflowUtils
+				.getBeansFromEditorInput().toArray());
+
 		browseBeanButton = new Button(nameGroup, SWT.PUSH);
 		browseBeanButton.setText("...");
 		browseBeanButton.setLayoutData(new GridData(
@@ -292,11 +310,22 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 
 		methodLabel = new Label(nameGroup, SWT.NONE);
 		methodLabel.setText("Method");
-		methodText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
+
+		// Create a decorated field with a required field decoration.
+		DecoratedField methodField = new DecoratedField(nameGroup, SWT.SINGLE
+				| SWT.BORDER, new TextControlCreator());
+		FieldDecoration requiredFieldIndicator1 = FieldDecorationRegistry
+				.getDefault().getFieldDecoration(
+						FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
+		methodField.addFieldDecoration(requiredFieldIndicator1, SWT.TOP
+				| SWT.LEFT, true);
+		methodText = (Text) methodField.getControl();
+		data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		methodField.getLayoutControl().setLayoutData(data);
+
 		if (this.action != null && this.action.getMethod() != null) {
 			this.methodText.setText(this.action.getMethod());
 		}
-		methodText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		methodText.addModifyListener(new ModifyListener() {
 
 			public void modifyText(ModifyEvent e) {
@@ -304,11 +333,20 @@ public class ActionPropertiesDialog extends TitleAreaDialog implements
 			}
 		});
 
+		DialogUtils.attachContentAssist(methodText, WebflowUtils
+				.getActionMethods(this.actionClone.getNode()).toArray());
+
 		browseMethodButton = new Button(nameGroup, SWT.PUSH);
 		browseMethodButton.setText("...");
 		browseMethodButton.setLayoutData(new GridData(
 				GridData.HORIZONTAL_ALIGN_END));
 		browseMethodButton.addSelectionListener(buttonListener);
+
+		// add the indent after getting the decorated field
+		data = new GridData(GridData.FILL_HORIZONTAL);
+		data.horizontalIndent = FieldDecorationRegistry.getDefault()
+				.getMaximumDecorationWidth();
+		nameText.setLayoutData(data);
 
 		item1.setControl(groupActionType);
 

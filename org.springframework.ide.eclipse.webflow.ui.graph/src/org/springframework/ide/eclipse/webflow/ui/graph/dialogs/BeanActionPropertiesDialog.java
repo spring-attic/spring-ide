@@ -23,6 +23,10 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.fieldassist.DecoratedField;
+import org.eclipse.jface.fieldassist.FieldDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.fieldassist.TextControlCreator;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -56,6 +60,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IArgument;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
+import org.springframework.ide.eclipse.webflow.ui.graph.WebflowUtils;
 
 /**
  * 
@@ -346,7 +351,7 @@ public class BeanActionPropertiesDialog extends TitleAreaDialog implements
 		layoutAttMap.marginWidth = 3;
 		layoutAttMap.marginHeight = 3;
 		groupActionType.setLayout(layoutAttMap);
-		groupActionType.setText(" Bean Action ");
+		groupActionType.setText(" Action ");
 		GridData grid = new GridData();
 		groupActionType.setLayoutData(grid);
 
@@ -358,18 +363,6 @@ public class BeanActionPropertiesDialog extends TitleAreaDialog implements
 		nameGroup.setLayout(layout1);
 		nameLabel = new Label(nameGroup, SWT.NONE);
 		nameLabel.setText("Name");
-		/*
-		// Create a decorated field with a required field decoration.
-		DecoratedField nameField = new DecoratedField(nameGroup, SWT.SINGLE
-				| SWT.BORDER, new TextControlCreator());
-		FieldDecoration requiredFieldIndicator = FieldDecorationRegistry
-				.getDefault().getFieldDecoration(
-						FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
-		nameField.addFieldDecoration(requiredFieldIndicator, SWT.BOTTOM
-				| SWT.LEFT, true);
-		nameText = (Text) nameField.getControl();
-		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		nameField.getLayoutControl().setLayoutData(data); */
 		nameText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
 		if (this.action != null && this.action.getName() != null) {
 			this.nameText.setText(this.action.getName());
@@ -381,21 +374,6 @@ public class BeanActionPropertiesDialog extends TitleAreaDialog implements
 				validateInput();
 			}
 		});
-		
-		/*
-		try {
-			char[] autoActivationCharacters = new char[] { '.' };
-			KeyStroke keyStroke;
-			keyStroke = KeyStroke.getInstance("Ctrl+Space");
-			// assume that myTextControl has already been created in some way
-			ContentProposalAdapter adapter = new ContentProposalAdapter(
-					nameText, new TextContentAdapter(),
-					new SimpleContentProposalProvider(new String[] {
-							"ProposalOne", "ProposalTwo", "ProposalThree" }),
-					keyStroke, autoActivationCharacters);
-		}
-		catch (ParseException e1) {
-		}*/
 
 		new Label(nameGroup, SWT.NONE);
 
@@ -405,11 +383,22 @@ public class BeanActionPropertiesDialog extends TitleAreaDialog implements
 		GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gridData.widthHint = LABEL_WIDTH;
 		beanLabel.setLayoutData(gridData);
-		beanText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
+
+		// Create a decorated field with a required field decoration.
+		DecoratedField beanField = new DecoratedField(nameGroup, SWT.SINGLE
+				| SWT.BORDER, new TextControlCreator());
+		FieldDecoration requiredFieldIndicator = FieldDecorationRegistry
+				.getDefault().getFieldDecoration(
+						FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
+		beanField.addFieldDecoration(requiredFieldIndicator,
+				SWT.TOP | SWT.LEFT, true);
+		beanText = (Text) beanField.getControl();
+		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		beanField.getLayoutControl().setLayoutData(data);
+
 		if (this.action != null && this.action.getBean() != null) {
 			beanText.setText(this.action.getBean());
 		}
-		beanText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		beanText.addModifyListener(new ModifyListener() {
 
 			public void modifyText(ModifyEvent e) {
@@ -419,6 +408,9 @@ public class BeanActionPropertiesDialog extends TitleAreaDialog implements
 			}
 		});
 
+		DialogUtils.attachContentAssist(beanText, WebflowUtils
+				.getBeansFromEditorInput().toArray());
+
 		browseBeanButton = new Button(nameGroup, SWT.PUSH);
 		browseBeanButton.setText("...");
 		browseBeanButton.setLayoutData(new GridData(
@@ -427,11 +419,22 @@ public class BeanActionPropertiesDialog extends TitleAreaDialog implements
 
 		methodLabel = new Label(nameGroup, SWT.NONE);
 		methodLabel.setText("Method");
-		methodText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
+
+		// Create a decorated field with a required field decoration.
+		DecoratedField methodField = new DecoratedField(nameGroup, SWT.SINGLE
+				| SWT.BORDER, new TextControlCreator());
+		FieldDecoration requiredFieldIndicator1 = FieldDecorationRegistry
+				.getDefault().getFieldDecoration(
+						FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
+		methodField.addFieldDecoration(requiredFieldIndicator1, SWT.TOP
+				| SWT.LEFT, true);
+		methodText = (Text) methodField.getControl();
+		data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		methodField.getLayoutControl().setLayoutData(data);
+
 		if (this.action != null && this.action.getMethod() != null) {
 			this.methodText.setText(this.action.getMethod());
 		}
-		methodText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		methodText.addModifyListener(new ModifyListener() {
 
 			public void modifyText(ModifyEvent e) {
@@ -439,11 +442,20 @@ public class BeanActionPropertiesDialog extends TitleAreaDialog implements
 			}
 		});
 
+		DialogUtils.attachContentAssist(methodText, WebflowUtils
+				.getActionMethods(this.actionClone.getNode()).toArray());
+
 		browseMethodButton = new Button(nameGroup, SWT.PUSH);
 		browseMethodButton.setText("...");
 		browseMethodButton.setLayoutData(new GridData(
 				GridData.HORIZONTAL_ALIGN_END));
 		browseMethodButton.addSelectionListener(buttonListener);
+
+		// add the indent after getting the decorated field
+		data = new GridData(GridData.FILL_HORIZONTAL);
+		data.horizontalIndent = FieldDecorationRegistry.getDefault()
+				.getMaximumDecorationWidth();
+		nameText.setLayoutData(data);
 
 		Group groupPropertyType = new Group(groupActionType, SWT.NULL);
 		GridLayout layoutPropMap = new GridLayout();
@@ -463,7 +475,7 @@ public class BeanActionPropertiesDialog extends TitleAreaDialog implements
 
 		Table configsTable = new Table(tableAndButtons, SWT.MULTI
 				| SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
-		GridData data = new GridData(GridData.FILL_BOTH);
+		data = new GridData(GridData.FILL_BOTH);
 		// data.widthHint = 250;
 		data.heightHint = 70;
 		configsTable.setLayoutData(data);

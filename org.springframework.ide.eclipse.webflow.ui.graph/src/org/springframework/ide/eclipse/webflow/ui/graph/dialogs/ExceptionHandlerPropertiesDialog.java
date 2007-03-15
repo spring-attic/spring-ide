@@ -19,6 +19,10 @@ package org.springframework.ide.eclipse.webflow.ui.graph.dialogs;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.fieldassist.DecoratedField;
+import org.eclipse.jface.fieldassist.FieldDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.fieldassist.TextControlCreator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -40,6 +44,7 @@ import org.springframework.ide.eclipse.webflow.core.internal.model.ExceptionHand
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
+import org.springframework.ide.eclipse.webflow.ui.graph.WebflowUtils;
 
 /**
  * 
@@ -203,13 +208,21 @@ public class ExceptionHandlerPropertiesDialog extends TitleAreaDialog implements
 		GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gridData.widthHint = LABEL_WIDTH;
 		beanLabel.setLayoutData(gridData);
-
-		// Add the text box for action classname.
-		beanText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
+		
+		// Create a decorated field with a required field decoration.
+		DecoratedField beanField = new DecoratedField(nameGroup, SWT.SINGLE
+				| SWT.BORDER, new TextControlCreator());
+		FieldDecoration requiredFieldIndicator = FieldDecorationRegistry
+				.getDefault().getFieldDecoration(
+						FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
+		beanField.addFieldDecoration(requiredFieldIndicator,
+				SWT.TOP | SWT.LEFT, true);
+		beanText = (Text) beanField.getControl();
+		GridData data = new GridData(GridData.FILL_HORIZONTAL);
+		beanField.getLayoutControl().setLayoutData(data);
 		if (this.action != null && this.action.getBean() != null) {
 			beanText.setText(this.action.getBean());
 		}
-		beanText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		beanText.addModifyListener(new ModifyListener() {
 
 			public void modifyText(ModifyEvent e) {
@@ -218,6 +231,10 @@ public class ExceptionHandlerPropertiesDialog extends TitleAreaDialog implements
 				}
 			}
 		});
+		
+		DialogUtils.attachContentAssist(beanText, WebflowUtils
+				.getBeansFromEditorInput().toArray());
+		
 		browseBeanButton = new Button(nameGroup, SWT.PUSH);
 		browseBeanButton.setText("...");
 		browseBeanButton.setLayoutData(new GridData(
