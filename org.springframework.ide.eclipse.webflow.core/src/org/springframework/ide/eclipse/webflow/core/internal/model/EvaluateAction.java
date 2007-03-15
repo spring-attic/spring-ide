@@ -113,7 +113,7 @@ public class EvaluateAction extends AbstractActionElement implements
 		}
 		this.evaluationResult = evaluationResult;
 		if (evaluationResult != null) {
-			WebflowModelUtils.insertNode(evaluationResult.getNode(), getNode());
+			WebflowModelXmlUtils.insertNode(evaluationResult.getNode(), getNode());
 		}
 		super.fireStructureChange(MOVE_CHILDREN, new Integer(1));
 	}

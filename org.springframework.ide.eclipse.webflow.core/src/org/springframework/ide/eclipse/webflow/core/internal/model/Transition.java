@@ -62,7 +62,7 @@ public abstract class Transition extends AbstractModelElement implements
 	 */
 	public ITransitionableTo getToState() {
 		if (this.targetState == null) {
-			this.targetState = (ITransitionableTo) WebflowModelUtils
+			this.targetState = (ITransitionableTo) WebflowModelXmlUtils
 					.getStateById(webflowState, getToStateId());
 		}
 		return targetState;
@@ -79,7 +79,7 @@ public abstract class Transition extends AbstractModelElement implements
 	public void setToState(ITransitionableTo state) {
 		ITransitionableTo newTargetState = null;
 		if (state != null) {
-			newTargetState = (ITransitionableTo) WebflowModelUtils
+			newTargetState = (ITransitionableTo) WebflowModelXmlUtils
 					.getStateById(webflowState, state.getId());
 		}
 		if (newTargetState != null && !newTargetState.equals(targetState)) {

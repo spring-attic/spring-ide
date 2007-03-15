@@ -103,7 +103,7 @@ public class SubflowState extends AbstractTransitionableFrom implements
 		}
 		this.attributeMapper = attributeMapper;
 		if (attributeMapper != null) {
-			WebflowModelUtils.insertNode(attributeMapper.getNode(), getNode());
+			WebflowModelXmlUtils.insertNode(attributeMapper.getNode(), getNode());
 		}
 		super.firePropertyChange(ADD_CHILDREN, new Integer(0), oldValue);
 	}

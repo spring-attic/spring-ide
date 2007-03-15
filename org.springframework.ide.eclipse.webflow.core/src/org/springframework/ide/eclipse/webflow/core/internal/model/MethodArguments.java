@@ -72,7 +72,7 @@ public class MethodArguments extends AbstractModelElement implements
 	public void addArgument(IArgument arg) {
 		if (!this.arguments.contains(arg)) {
 			this.arguments.add(arg);
-			WebflowModelUtils.insertNode(arg.getNode(), getNode());
+			WebflowModelXmlUtils.insertNode(arg.getNode(), getNode());
 			super.firePropertyChange(ADD_CHILDREN, new Integer(this.arguments
 					.indexOf(arg)), arg);
 		}

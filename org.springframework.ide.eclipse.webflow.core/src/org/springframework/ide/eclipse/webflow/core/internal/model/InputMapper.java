@@ -100,7 +100,7 @@ public class InputMapper extends AbstractModelElement implements IInputMapper {
 	 */
 	public void addInputAttribute(IInputAttribute action) {
 		if (!this.inputAttributes.contains(action)) {
-			WebflowModelUtils.insertNode(action.getNode(), node);
+			WebflowModelXmlUtils.insertNode(action.getNode(), node);
 			this.inputAttributes.add(action);
 			super.firePropertyChange(ADD_CHILDREN, new Integer(
 					this.inputAttributes.indexOf(action)), action);
@@ -115,7 +115,7 @@ public class InputMapper extends AbstractModelElement implements IInputMapper {
 	 */
 	public void addInputAttribute(IInputAttribute action, int i) {
 		if (!this.inputAttributes.contains(action)) {
-			WebflowModelUtils.insertNode(action.getNode(), node);
+			WebflowModelXmlUtils.insertNode(action.getNode(), node);
 			this.inputAttributes.add(i, action);
 			super.firePropertyChange(ADD_CHILDREN, new Integer(
 					this.inputAttributes.indexOf(action)), action);
@@ -152,7 +152,7 @@ public class InputMapper extends AbstractModelElement implements IInputMapper {
 	 */
 	public void addMapping(IMapping action) {
 		if (!this.mappings.contains(action)) {
-			WebflowModelUtils.insertNode(action.getNode(), node);
+			WebflowModelXmlUtils.insertNode(action.getNode(), node);
 			this.mappings.add(action);
 			super.firePropertyChange(ADD_CHILDREN, new Integer(this.mappings
 					.indexOf(action)), action);
@@ -167,7 +167,7 @@ public class InputMapper extends AbstractModelElement implements IInputMapper {
 	 */
 	public void addMapping(IMapping action, int i) {
 		if (!this.mappings.contains(action)) {
-			WebflowModelUtils.insertNode(action.getNode(), node);
+			WebflowModelXmlUtils.insertNode(action.getNode(), node);
 			this.mappings.add(i, action);
 			super.firePropertyChange(ADD_CHILDREN, new Integer(this.mappings
 					.indexOf(action)), action);

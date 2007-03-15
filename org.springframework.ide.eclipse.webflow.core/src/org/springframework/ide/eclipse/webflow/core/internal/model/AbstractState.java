@@ -136,7 +136,7 @@ public abstract class AbstractState extends AbstractModelElement implements
 		}
 		this.entryActions = entryActions;
 		if (entryActions != null) {
-			WebflowModelUtils.insertNode(entryActions.getNode(), getNode());
+			WebflowModelXmlUtils.insertNode(entryActions.getNode(), getNode());
 		}
 		super.fireStructureChange(MOVE_CHILDREN, new Integer(1));
 	}
@@ -152,7 +152,7 @@ public abstract class AbstractState extends AbstractModelElement implements
 		}
 		this.exitActions = exitActions;
 		if (exitActions != null) {
-			WebflowModelUtils.insertNode(exitActions.getNode(), getNode());
+			WebflowModelXmlUtils.insertNode(exitActions.getNode(), getNode());
 		}
 		super.fireStructureChange(MOVE_CHILDREN, new Integer(1));
 	}
@@ -184,7 +184,7 @@ public abstract class AbstractState extends AbstractModelElement implements
 	public void addExceptionHandler(IExceptionHandler action) {
 		if (!this.exceptionHandler.contains(action)) {
 			this.exceptionHandler.add(action);
-			WebflowModelUtils.insertNode(action.getNode(), getNode());
+			WebflowModelXmlUtils.insertNode(action.getNode(), getNode());
 			super.firePropertyChange(ADD_CHILDREN, new Integer(
 					this.exceptionHandler.indexOf(action)), action);
 		}
@@ -199,7 +199,7 @@ public abstract class AbstractState extends AbstractModelElement implements
 	public void addExceptionHandler(IExceptionHandler action, int i) {
 		if (!this.exceptionHandler.contains(action)) {
 			this.exceptionHandler.add(i, action);
-			WebflowModelUtils.insertNode(action.getNode(), getNode());
+			WebflowModelXmlUtils.insertNode(action.getNode(), getNode());
 			super.firePropertyChange(ADD_CHILDREN, new Integer(
 					this.exceptionHandler.indexOf(action)), action);
 		}

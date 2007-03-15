@@ -99,7 +99,7 @@ public class BeanAction extends AbstractAction implements IBeanAction,
 		}
 		this.methodArguments = methodArguments;
 		if (methodArguments != null) {
-			WebflowModelUtils.insertNode(methodArguments.getNode(), getNode());
+			WebflowModelXmlUtils.insertNode(methodArguments.getNode(), getNode());
 		}
 		super.fireStructureChange(MOVE_CHILDREN, new Integer(1));
 	}
@@ -115,7 +115,7 @@ public class BeanAction extends AbstractAction implements IBeanAction,
 		}
 		this.methodResult = methodResult;
 		if (methodResult != null) {
-			WebflowModelUtils.insertNode(methodResult.getNode(), getNode());
+			WebflowModelXmlUtils.insertNode(methodResult.getNode(), getNode());
 		}
 		super.fireStructureChange(MOVE_CHILDREN, new Integer(1));
 	}

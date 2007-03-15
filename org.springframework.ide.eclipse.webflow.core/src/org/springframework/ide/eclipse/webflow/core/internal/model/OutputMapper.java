@@ -101,7 +101,7 @@ public class OutputMapper extends AbstractModelElement implements IOutputMapper 
 	 */
 	public void addOutputAttribute(IOutputAttribute action) {
 		if (!this.outputAttributes.contains(action)) {
-			WebflowModelUtils.insertNode(action.getNode(), node);
+			WebflowModelXmlUtils.insertNode(action.getNode(), node);
 			this.outputAttributes.add(action);
 			super.firePropertyChange(ADD_CHILDREN, new Integer(
 					this.outputAttributes.indexOf(action)), action);
@@ -116,7 +116,7 @@ public class OutputMapper extends AbstractModelElement implements IOutputMapper 
 	 */
 	public void addOutputAttribute(IOutputAttribute action, int i) {
 		if (!this.outputAttributes.contains(action)) {
-			WebflowModelUtils.insertNode(action.getNode(), node);
+			WebflowModelXmlUtils.insertNode(action.getNode(), node);
 			this.outputAttributes.add(i, action);
 			super.firePropertyChange(ADD_CHILDREN, new Integer(
 					this.outputAttributes.indexOf(action)), action);
@@ -164,7 +164,7 @@ public class OutputMapper extends AbstractModelElement implements IOutputMapper 
 	 */
 	public void addMapping(IMapping action) {
 		if (!this.mappings.contains(action)) {
-			WebflowModelUtils.insertNode(action.getNode(), node);
+			WebflowModelXmlUtils.insertNode(action.getNode(), node);
 			this.mappings.add(action);
 			super.firePropertyChange(ADD_CHILDREN, new Integer(this.mappings
 					.indexOf(action)), action);
@@ -179,7 +179,7 @@ public class OutputMapper extends AbstractModelElement implements IOutputMapper 
 	 */
 	public void addMapping(IMapping action, int i) {
 		if (!this.mappings.contains(action)) {
-			WebflowModelUtils.insertNode(action.getNode(), node);
+			WebflowModelXmlUtils.insertNode(action.getNode(), node);
 			this.mappings.add(i, action);
 			super.firePropertyChange(ADD_CHILDREN, new Integer(this.mappings
 					.indexOf(action)), action);

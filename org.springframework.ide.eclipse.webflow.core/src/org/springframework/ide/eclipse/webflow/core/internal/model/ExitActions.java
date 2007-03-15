@@ -95,7 +95,7 @@ public class ExitActions extends WebflowModelElement implements IExitActions {
 	public void addExitAction(IActionElement action) {
 		if (!this.exitActions.contains(action)) {
 			this.exitActions.add(action);
-			WebflowModelUtils.insertNode(action.getNode(), node);
+			WebflowModelXmlUtils.insertNode(action.getNode(), node);
 			super.firePropertyChange(ADD_CHILDREN, new Integer(this.exitActions
 					.indexOf(action)), action);
 			parent.fireStructureChange(MOVE_CHILDREN, this);
@@ -117,10 +117,10 @@ public class ExitActions extends WebflowModelElement implements IExitActions {
 		if (!this.exitActions.contains(action)) {
 			if (this.exitActions.size() > i) {
 				IActionElement ref = this.exitActions.get(i);
-				WebflowModelUtils.insertBefore(action.getNode(), ref.getNode());
+				WebflowModelXmlUtils.insertBefore(action.getNode(), ref.getNode());
 			}
 			else {
-				WebflowModelUtils.insertNode(action.getNode(), node);
+				WebflowModelXmlUtils.insertNode(action.getNode(), node);
 			}
 			this.exitActions.add(i, action);
 			super.firePropertyChange(ADD_CHILDREN, new Integer(i), action);

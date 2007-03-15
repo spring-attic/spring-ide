@@ -95,7 +95,7 @@ public class EntryActions extends WebflowModelElement implements IEntryActions {
 	 */
 	public void addEntryAction(IActionElement action) {
 		if (!this.entryActions.contains(action)) {
-			WebflowModelUtils.insertNode(action.getNode(), node);
+			WebflowModelXmlUtils.insertNode(action.getNode(), node);
 			this.entryActions.add(action);
 			super.firePropertyChange(ADD_CHILDREN, new Integer(
 					this.entryActions.indexOf(action)), action);
@@ -136,10 +136,10 @@ public class EntryActions extends WebflowModelElement implements IEntryActions {
 		if (!this.entryActions.contains(action)) {
 			if (this.entryActions.size() > i) {
 				IActionElement ref = this.entryActions.get(i);
-				WebflowModelUtils.insertBefore(action.getNode(), ref.getNode());
+				WebflowModelXmlUtils.insertBefore(action.getNode(), ref.getNode());
 			}
 			else {
-				WebflowModelUtils.insertNode(action.getNode(), node);
+				WebflowModelXmlUtils.insertNode(action.getNode(), node);
 			}
 			this.entryActions.add(i, action);
 			super.firePropertyChange(ADD_CHILDREN, new Integer(i), action);

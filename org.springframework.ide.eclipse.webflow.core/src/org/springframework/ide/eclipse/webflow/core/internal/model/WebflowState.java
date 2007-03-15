@@ -249,7 +249,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 	public void addState(IState state) {
 		if (!getStates().contains(state)) {
 			// attach to xml after last state
-			WebflowModelUtils.insertNode(state.getNode(), node);
+			WebflowModelXmlUtils.insertNode(state.getNode(), node);
 			this.states.add(state);
 			super.firePropertyChange(ADD_CHILDREN, new Integer(this.states
 					.indexOf(state)), state);
@@ -340,7 +340,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 			}
 			IState refState = getStates().get(refIndex);
 			this.states.add(i, state);
-			WebflowModelUtils.insertBefore(state.getNode(), refState.getNode());
+			WebflowModelXmlUtils.insertBefore(state.getNode(), refState.getNode());
 			super.firePropertyChange(ADD_CHILDREN, new Integer(i), state);
 		}
 
@@ -434,7 +434,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 		if (hasStartState()) {
 			List<IDOMNode> nodes = getChildrenNodeByTagName("start-state");
 			IDOMNode node = nodes.get(0);
-			return WebflowModelUtils.getStateById(this, getAttribute(node,
+			return WebflowModelXmlUtils.getStateById(this, getAttribute(node,
 					"idref"));
 		}
 		return null;
@@ -585,7 +585,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 		}
 		this.outputMapper = outputMapper;
 		if (outputMapper != null) {
-			WebflowModelUtils.insertNode(outputMapper.getNode(), getNode());
+			WebflowModelXmlUtils.insertNode(outputMapper.getNode(), getNode());
 		}
 		super.fireStructureChange(ADD_CHILDREN, outputMapper);
 	}
@@ -599,7 +599,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 		}
 		this.inputMapper = inputMapper;
 		if (inputMapper != null) {
-			WebflowModelUtils.insertNode(inputMapper.getNode(), getNode());
+			WebflowModelXmlUtils.insertNode(inputMapper.getNode(), getNode());
 		}
 		super.fireStructureChange(ADD_CHILDREN, inputMapper);
 	}
@@ -618,7 +618,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 	public void addInlineFlowState(IInlineFlowState state) {
 		if (!this.inlineFlows.contains(state)) {
 			// attach to xml after last state
-			WebflowModelUtils.insertNode(state.getNode(), node);
+			WebflowModelXmlUtils.insertNode(state.getNode(), node);
 			this.inlineFlows.add(state);
 			super.firePropertyChange(ADD_CHILDREN, new Integer(this.inlineFlows
 					.indexOf(state)), state);
@@ -637,7 +637,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 			}
 			IState refState = getStates().get(refIndex);
 			this.inlineFlows.add(i, state);
-			WebflowModelUtils.insertBefore(state.getNode(), refState.getNode());
+			WebflowModelXmlUtils.insertBefore(state.getNode(), refState.getNode());
 			super.firePropertyChange(ADD_CHILDREN, new Integer(i), state);
 		}
 

@@ -112,7 +112,7 @@ public class StateTransition extends Transition implements IStateTransition,
 	public void addAction(IActionElement action) {
 		if (!this.actions.contains(action)) {
 			this.actions.add(action);
-			WebflowModelUtils.insertNode(action.getNode(), getNode());
+			WebflowModelXmlUtils.insertNode(action.getNode(), getNode());
 			super.firePropertyChange(ADD_CHILDREN, new Integer(this.actions
 					.indexOf(action)), action);
 		}
@@ -127,7 +127,7 @@ public class StateTransition extends Transition implements IStateTransition,
 	public void addAction(IActionElement action, int i) {
 		if (!this.actions.contains(action)) {
 			this.actions.add(i, action);
-			WebflowModelUtils.insertNode(action.getNode(), getNode());
+			WebflowModelXmlUtils.insertNode(action.getNode(), getNode());
 			super.firePropertyChange(ADD_CHILDREN, new Integer(i), action);
 		}
 	}
@@ -191,7 +191,7 @@ public class StateTransition extends Transition implements IStateTransition,
 		if (parent != null) {
 			parent.removeChild(this.node);
 		}
-		WebflowModelUtils.insertNode(getNode(), fromState.getNode());
+		WebflowModelXmlUtils.insertNode(getNode(), fromState.getNode());
 		this.parent = fromState;
 	}
 
@@ -242,7 +242,7 @@ public class StateTransition extends Transition implements IStateTransition,
 			}
 			setOn(element.getOn());
 			init(element.getNode(), parent);
-			WebflowModelUtils.removeTextChildren(getNode());
+			WebflowModelXmlUtils.removeTextChildren(getNode());
 			super.fireStructureChange(MOVE_CHILDREN, new Integer(0));
 		}
 	}
@@ -301,7 +301,7 @@ public class StateTransition extends Transition implements IStateTransition,
 		if (getNode().getParentNode() != null) {
 			parent.getNode().replaceChild(newNode, getNode());
 		}
-		WebflowModelUtils.removeTextChildren(newNode);
+		WebflowModelXmlUtils.removeTextChildren(newNode);
 		node = newNode;
 	}
 

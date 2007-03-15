@@ -95,7 +95,7 @@ public class RenderActions extends WebflowModelElement implements
 	public void addRenderAction(IActionElement action) {
 		if (!this.renderActions.contains(action)) {
 			this.renderActions.add(action);
-			WebflowModelUtils.insertNode(action.getNode(), node);
+			WebflowModelXmlUtils.insertNode(action.getNode(), node);
 			super.firePropertyChange(ADD_CHILDREN, new Integer(
 					this.renderActions.indexOf(action)), action);
 			parent.fireStructureChange(MOVE_CHILDREN, this);
@@ -117,10 +117,10 @@ public class RenderActions extends WebflowModelElement implements
 		if (!this.renderActions.contains(action)) {
 			if (this.renderActions.size() > i) {
 				IActionElement ref = this.renderActions.get(i);
-				WebflowModelUtils.insertBefore(action.getNode(), ref.getNode());
+				WebflowModelXmlUtils.insertBefore(action.getNode(), ref.getNode());
 			}
 			else {
-				WebflowModelUtils.insertNode(action.getNode(), node);
+				WebflowModelXmlUtils.insertNode(action.getNode(), node);
 			}
 			this.renderActions.add(i, action);
 			super.firePropertyChange(ADD_CHILDREN, new Integer(i), action);

@@ -124,7 +124,7 @@ public class ActionState extends AbstractTransitionableFrom implements
 	public void addAction(IActionElement action) {
 		if (!this.actions.contains(action)) {
 			this.actions.add(action);
-			WebflowModelUtils.insertNode(action.getNode(), getNode());
+			WebflowModelXmlUtils.insertNode(action.getNode(), getNode());
 			super.firePropertyChange(ADD_CHILDREN, new Integer(this.actions
 					.indexOf(action)), action);
 		}
@@ -171,10 +171,10 @@ public class ActionState extends AbstractTransitionableFrom implements
 		if (!this.actions.contains(action)) {
 			if (this.actions.size() > i) {
 				IActionElement ref = this.actions.get(i);
-				WebflowModelUtils.insertBefore(action.getNode(), ref.getNode());
+				WebflowModelXmlUtils.insertBefore(action.getNode(), ref.getNode());
 			}
 			else {
-				WebflowModelUtils.insertNode(action.getNode(), node);
+				WebflowModelXmlUtils.insertNode(action.getNode(), node);
 			}			this.actions.add(i, action);
 			super.firePropertyChange(ADD_CHILDREN, new Integer(i), action);
 		}

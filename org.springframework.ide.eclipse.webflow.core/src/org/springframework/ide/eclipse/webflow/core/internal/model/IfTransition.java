@@ -114,7 +114,7 @@ public class IfTransition extends Transition implements IIfTransition {
 	public void setToState(ITransitionableTo state) {
 		ITransitionableTo newTargetState = null;
 		if (state != null) {
-			newTargetState = (ITransitionableTo) WebflowModelUtils
+			newTargetState = (ITransitionableTo) WebflowModelXmlUtils
 					.getStateById(webflowState, state.getId());
 		}
 		if (newTargetState != null && !newTargetState.equals(newTargetState)) {

@@ -73,7 +73,7 @@ public abstract class AbstractModelElement extends WebflowModelElement
 	 */
 	public void addAttribute(IAttribute property) {
 		if (!this.attributes.contains(property)) {
-			WebflowModelUtils.insertNode(property.getNode(), getNode());
+			WebflowModelXmlUtils.insertNode(property.getNode(), getNode());
 			this.attributes.add(property);
 			super.firePropertyChange(ADD_CHILDREN, new Integer(this.attributes
 					.indexOf(property)), property);
@@ -89,7 +89,7 @@ public abstract class AbstractModelElement extends WebflowModelElement
 	public void addAttribute(IAttribute property, int index) {
 		if (!this.attributes.contains(property)) {
 			this.attributes.add(index, property);
-			WebflowModelUtils.determineNodeToInsert(property.getNode(),
+			WebflowModelXmlUtils.determineNodeToInsert(property.getNode(),
 					getNode());
 			super
 					.firePropertyChange(ADD_CHILDREN, new Integer(index),

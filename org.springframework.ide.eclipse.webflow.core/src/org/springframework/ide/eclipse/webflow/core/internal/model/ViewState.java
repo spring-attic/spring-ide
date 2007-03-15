@@ -145,7 +145,7 @@ public class ViewState extends AbstractTransitionableFrom implements
 		}
 		this.renderActions = renderActions;
 		if (renderActions != null) {
-			WebflowModelUtils.insertNode(renderActions.getNode(), getNode());
+			WebflowModelXmlUtils.insertNode(renderActions.getNode(), getNode());
 		}
 		super.fireStructureChange(MOVE_CHILDREN, new Integer(1));
 	}

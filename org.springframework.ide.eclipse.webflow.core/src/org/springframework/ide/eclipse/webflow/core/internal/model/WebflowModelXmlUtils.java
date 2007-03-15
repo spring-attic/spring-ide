@@ -37,7 +37,7 @@ import org.w3c.dom.Text;
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public class WebflowModelUtils {
+public class WebflowModelXmlUtils {
 
 	/**
 	 * The Constant PRIORITIES.

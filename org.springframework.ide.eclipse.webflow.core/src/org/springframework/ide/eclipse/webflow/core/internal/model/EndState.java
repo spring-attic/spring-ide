@@ -173,7 +173,7 @@ public class EndState extends AbstractTransitionableTo implements IEndState,
 		}
 		this.outputMapper = outputMapper;
 		if (outputMapper != null) {
-			WebflowModelUtils.insertNode(outputMapper.getNode(), getNode());
+			WebflowModelXmlUtils.insertNode(outputMapper.getNode(), getNode());
 		}
 		super.fireStructureChange(ADD_CHILDREN, outputMapper);
 	}

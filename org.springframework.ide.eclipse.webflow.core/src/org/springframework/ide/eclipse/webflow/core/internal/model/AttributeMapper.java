@@ -142,7 +142,7 @@ public class AttributeMapper extends AbstractModelElement implements
 		}
 		this.outputMapper = outputMapper;
 		if (outputMapper != null) {
-			WebflowModelUtils.insertNode(outputMapper.getNode(), getNode());
+			WebflowModelXmlUtils.insertNode(outputMapper.getNode(), getNode());
 		}
 		super.fireStructureChange(ADD_CHILDREN, outputMapper);
 	}
@@ -162,7 +162,7 @@ public class AttributeMapper extends AbstractModelElement implements
 		}
 		this.inputMapper = inputMapper;
 		if (inputMapper != null) {
-			WebflowModelUtils.insertNode(inputMapper.getNode(), getNode());
+			WebflowModelXmlUtils.insertNode(inputMapper.getNode(), getNode());
 		}
 		super.fireStructureChange(ADD_CHILDREN, inputMapper);
 	}
