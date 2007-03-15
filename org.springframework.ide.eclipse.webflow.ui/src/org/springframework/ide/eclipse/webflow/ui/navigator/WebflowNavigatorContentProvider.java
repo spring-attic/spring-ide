@@ -93,10 +93,8 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 			if (config != null) {
 				return new Object[] { config };
 			}
-			return IModelElement.NO_CHILDREN;
 		}
-
-		return null;
+		return IModelElement.NO_CHILDREN;
 	}
 
 	public Object getParent(Object element) {
