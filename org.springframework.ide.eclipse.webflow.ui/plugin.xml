@@ -81,7 +81,17 @@
             id="org.springframework.ide.eclipse.webflow.ui.navigator.beansExplorerContent.actions"
             class="org.springframework.ide.eclipse.webflow.ui.navigator.actions.WebflowNavigatorActionProvider">
          <enablement>
-					<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig"/>
+			<or>
+				<adapt type="org.eclipse.core.resources.IProject">
+					<test property="org.eclipse.core.resources.projectNature"
+						value="org.springframework.ide.eclipse.core.springnature"/>
+				</adapt>
+				<and>
+					<instanceof value="org.eclipse.core.resources.IFile"/>
+					<test property="org.springframework.ide.eclipse.webflow.core.model.isWebflowConfig"/>
+				</and>
+            	<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig"/>
+            </or>
          </enablement>
       </actionProvider>
 
@@ -123,6 +133,7 @@
 				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig"/>
          </enablement>
       </actionProvider>
+      
    </extension>
    
    <extension
@@ -140,6 +151,28 @@
                class="org.eclipse.core.resources.IResource">
          </selection>
       </wizard>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.decorators">
+      <decorator
+            lightweight="true"
+            adaptable="false"
+            location="TOP_RIGHT"
+            label="%decorator.label"
+            state="true"
+            class="org.springframework.ide.eclipse.webflow.ui.model.WebflowModelLabelDecorator"
+            id="org.springframework.ide.eclipse.webflow.ui.model.webflowModelLabelDecorator">
+         <description>
+            %decorator.description
+         </description>
+         <enablement>
+            <or>
+               <objectClass name="org.eclipse.core.resources.IFolder"/>
+               <objectClass name="org.eclipse.core.resources.IFile"/>
+            </or>
+         </enablement>
+      </decorator>
    </extension>
    
 </plugin>

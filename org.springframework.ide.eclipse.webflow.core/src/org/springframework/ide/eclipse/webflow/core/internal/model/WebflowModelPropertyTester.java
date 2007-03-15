@@ -18,10 +18,8 @@ package org.springframework.ide.eclipse.webflow.core.internal.model;
 
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IFile;
-import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModel;
-import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 
 /**
  * This <code>PropertyTester</code> is used to check properties of the
@@ -42,8 +40,7 @@ public class WebflowModelPropertyTester extends PropertyTester {
 			Object expectedValue) {
 		if (receiver instanceof IFile && "isWebflowConfig".equals(property)) {
 			IFile file = (IFile) receiver;
-			IWebflowProject project = Activator.getModel().getProject(file.getProject());
-			boolean isWebflowConfig = project.getConfig(file) != null;
+			boolean isWebflowConfig = WebflowModelUtils.isWebflowConfig(file);
 			return expectedValue == null ? isWebflowConfig
 					: isWebflowConfig == ((Boolean) expectedValue).booleanValue();
 		}

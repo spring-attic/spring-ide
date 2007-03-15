@@ -39,7 +39,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelXmlUtils;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IDecisionState;
 import org.springframework.ide.eclipse.webflow.core.model.IIf;
@@ -414,7 +414,7 @@ public class IfPropertiesDialog extends TitleAreaDialog {
 							new WebflowModelLabelProvider(),
 							new WebflowModelLabelDecorator()));
 			dialog.setBlockOnOpen(true);
-			dialog.setElements(WebflowModelUtils.getStates(parent, false)
+			dialog.setElements(WebflowModelXmlUtils.getStates(parent, false)
 					.toArray());
 			dialog.setEmptySelectionMessage("Enter a valid state id");
 			dialog.setTitle("State reference");
@@ -432,7 +432,7 @@ public class IfPropertiesDialog extends TitleAreaDialog {
 							new WebflowModelLabelProvider(),
 							new WebflowModelLabelDecorator()));
 			dialog.setBlockOnOpen(true);
-			dialog.setElements(WebflowModelUtils.getStates(parent, false)
+			dialog.setElements(WebflowModelXmlUtils.getStates(parent, false)
 					.toArray());
 			dialog.setEmptySelectionMessage("Enter a valid state id");
 			dialog.setTitle("State reference");

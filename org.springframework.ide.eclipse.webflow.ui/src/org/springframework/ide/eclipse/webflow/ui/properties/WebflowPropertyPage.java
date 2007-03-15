@@ -35,6 +35,7 @@ import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowConfig
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 import org.springframework.ide.eclipse.webflow.ui.Activator;
+import org.springframework.ide.eclipse.webflow.ui.model.WebflowModelLabelDecorator;
 
 /**
  * @author Christian Dupuis
@@ -129,7 +130,7 @@ public class WebflowPropertyPage extends PropertyPage {
 			project.setConfigs(webflowConfigs);
 
 			// Refresh label decoration of Spring project and config files
-			// BeansUILabelDecorator.update();
+			WebflowModelLabelDecorator.update();
 		}
 		return super.performOk();
 	}

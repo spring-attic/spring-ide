@@ -29,10 +29,8 @@ import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.Webf
 
 /**
  * {@link LabelProvider} implementation for {@link IWebflowConfig} elements.
- * 
  * @author Christian Dupuis
  * @since 2.0
- * 
  */
 public class WebflowNavigatorLabelProvider extends BeansModelLabelProvider
 		implements ICommonLabelProvider {
@@ -79,22 +77,15 @@ public class WebflowNavigatorLabelProvider extends BeansModelLabelProvider
 	public String getText(Object element) {
 		if (element instanceof IWebflowConfig) {
 			IWebflowConfig config = (IWebflowConfig) element;
-			if (WebflowNavigatorContentProvider.BEANS_EXPLORER_CONTENT_PROVIDER_ID
-					.equals(providerID)) {
-				StringBuffer buf = new StringBuffer();
-				if (config.getName() != null) {
-					buf.append(config.getName());
-					buf.append(" - ");
-				}
-				buf.append(config.getResource().getProjectRelativePath()
-						.toString());
-				return buf.toString();
-			}
-			else if (WebflowNavigatorContentProvider.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
-					.equals(providerID)) {
+			if (config.getName() != null
+					&& WebflowNavigatorContentProvider.BEANS_EXPLORER_CONTENT_PROVIDER_ID
+							.equals(providerID)
+					|| WebflowNavigatorContentProvider.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
+							.equals(providerID)) {
 				return config.getName();
 			}
 			else {
+
 				return config.getResource().getProjectRelativePath().toString();
 			}
 		}

@@ -30,10 +30,12 @@ import org.eclipse.ui.navigator.CommonNavigator;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonContentProvider;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.webflow.core.Activator;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelListener;
@@ -42,7 +44,6 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 /**
  * This class is a content provider for the {@link CommonNavigator} which knows
  * about the web flow core model's {@link IWebflowConfig}.
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -55,6 +56,7 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 	public static final String BEANS_EXPLORER_CONTENT_PROVIDER_ID = org.springframework.ide.eclipse.webflow.ui.Activator.PLUGIN_ID
 			+ ".navigator.beansExplorerContent";
 
+	@SuppressWarnings("unused")
 	private String providerID;
 
 	private StructuredViewer viewer;
@@ -73,9 +75,8 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof IBeansProject) {
 			IProject project = ((IBeansProject) parentElement).getProject();
-			IWebflowProject webflowProject = Activator.getModel().getProject(
-					project);
-			return webflowProject.getConfigs().toArray();
+			List<IFile> files = WebflowModelUtils.getFiles(project);
+			return files.toArray();
 		}
 		else if (parentElement instanceof IWebflowConfig) {
 			List<IResource> files = new ArrayList<IResource>();
@@ -85,13 +86,10 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 			}
 			return files.toArray();
 		}
-		else if (parentElement instanceof IFile
-				&& providerID.equals(PROJECT_EXPLORER_CONTENT_PROVIDER_ID)) {
+		else if (parentElement instanceof IFile) {
 			IFile file = (IFile) parentElement;
-			IWebflowConfig config = Activator.getModel().getProject(
-					file.getProject()).getConfig(file);
-			if (config != null) {
-				return new Object[] { config };
+			if (WebflowModelUtils.isWebflowConfig(file)) {
+				return new Object[] { WebflowModelUtils.getWebflowConfig(file) };
 			}
 		}
 		return IModelElement.NO_CHILDREN;
@@ -112,11 +110,10 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 				return true;
 			}
 		}
-		else if (element instanceof IFile
-				&& providerID.equals(PROJECT_EXPLORER_CONTENT_PROVIDER_ID)) {
+		else if (element instanceof IFile) {
 			IFile file = (IFile) element;
-			return Activator.getModel().getProject(file.getProject())
-					.getConfig(file) != null;
+			return WebflowModelUtils.isWebflowConfig(file)
+					|| BeansCoreUtils.isBeansConfig(file);
 		}
 		return false;
 	}

@@ -44,7 +44,7 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.views.properties.tabbed.AbstractPropertySection;
 import org.eclipse.ui.views.properties.tabbed.ITabbedPropertyConstants;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
-import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelXmlUtils;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.IStateTransition;
@@ -144,7 +144,7 @@ public class StateTransitionSection extends AbstractPropertySection implements
 					.getAction(EditPropertiesAction.EDITPROPERTIES);
 			EditPropertiesCommand command = new EditPropertiesCommand();
 
-			IState state = WebflowModelUtils.getStateById(
+			IState state = WebflowModelXmlUtils.getStateById(
 					(IWebflowState) stateTransition.getElementParent()
 							.getElementParent(), toText.getText());
 			command.setNewTarget((ITransitionableTo) state);
@@ -233,7 +233,7 @@ public class StateTransitionSection extends AbstractPropertySection implements
 						new WebflowModelLabelProvider(),
 						new WebflowModelLabelDecorator()));
 		dialog.setBlockOnOpen(true);
-		dialog.setElements(WebflowModelUtils.getStates(
+		dialog.setElements(WebflowModelXmlUtils.getStates(
 				this.stateTransition.getElementParent(), false).toArray());
 		dialog.setEmptySelectionMessage("Enter a valid state id");
 		dialog.setTitle("State reference");

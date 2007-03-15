@@ -16,12 +16,14 @@
 
 package org.springframework.ide.eclipse.webflow.ui.navigator.actions;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
 import org.springframework.ide.eclipse.webflow.ui.graph.WebflowEditor;
@@ -56,6 +58,13 @@ public class OpenWebflowGraphAction extends Action {
 				if (tElement instanceof IWebflowConfig) {
 					element = (IWebflowConfig) tElement;
 					return true;
+				}
+				else if (tElement instanceof IFile) {
+					if (WebflowModelUtils.isWebflowConfig((IFile) tElement)) {
+						element = WebflowModelUtils
+								.getWebflowConfig((IFile) tElement);
+						return true;
+					}
 				}
 			}
 		}
