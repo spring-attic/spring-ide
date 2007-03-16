@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
-import org.apache.xerces.dom.ElementImpl;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
@@ -47,6 +46,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.osgi.framework.Bundle;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -380,11 +380,11 @@ public final class SpringCoreUtils {
 				: project.getLocation());
 	}
 
-	public static String getXercesLocation() {
-		Class elementClass = ElementImpl.class;
-		String resourceName = ClassUtils.getClassFileName(elementClass);
+	public static String getClassLocation(Class clazz) {
+		Assert.notNull(clazz);
+		String resourceName = ClassUtils.getClassFileName(clazz);
 		try {
-			URL url = elementClass.getResource(resourceName);
+			URL url = clazz.getResource(resourceName);
 			if (url != null) {
 				URL nativeUrl = FileLocator.resolve(url);
 				if (nativeUrl != null) {

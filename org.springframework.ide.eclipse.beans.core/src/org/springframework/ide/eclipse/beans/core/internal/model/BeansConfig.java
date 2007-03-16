@@ -74,7 +74,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.namespaces.DefaultModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.io.FileResource;
 import org.springframework.ide.eclipse.core.io.FileResourceLoader;
 import org.springframework.ide.eclipse.core.io.StorageResource;
@@ -587,10 +586,6 @@ public class BeansConfig extends AbstractResourceModelElement implements
 								.getMessage(), IMarker.SEVERITY_ERROR, -1,
 								ErrorCode.PARSING_FAILED);
 						BeansCorePlugin.log(e);
-					}
-					if (e.getCause() instanceof LinkageError) {
-						BeansCorePlugin.log("Xerces loaded from: "
-								+ SpringCoreUtils.getXercesLocation(), null);
 					}
 				}
 			}

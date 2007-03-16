@@ -12,12 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.core.io.xml;
 
 import org.springframework.beans.factory.xml.DocumentLoader;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
@@ -32,16 +34,11 @@ import org.xml.sax.SAXNotSupportedException;
  */
 public class XercesDocumentLoader implements DocumentLoader {
 
-	private static final String WRONG_XERCES_MESSAGE = "Are you using a JRE "
-			+ "with an outdated version of the Xerces XML parser? "
-			+ "Please check the 'endorsed' folder of your JRE.";
-
 	public Document loadDocument(InputSource inputSource,
-				EntityResolver entityResolver, ErrorHandler errorHandler,
-				int validationMode, boolean namespaceAware) throws Exception {
+			EntityResolver entityResolver, ErrorHandler errorHandler,
+			int validationMode, boolean namespaceAware) throws Exception {
 		try {
-			LineNumberPreservingDOMParser parser =
-					new LineNumberPreservingDOMParser();
+			LineNumberPreservingDOMParser parser = new LineNumberPreservingDOMParser();
 			parser.setEntityResolver(entityResolver);
 			parser.setErrorHandler(errorHandler);
 			if (validationMode != XmlBeanDefinitionReader.VALIDATION_NONE) {
@@ -58,14 +55,18 @@ public class XercesDocumentLoader implements DocumentLoader {
 			}
 			parser.parse(inputSource);
 			return parser.getDocument();
-		} catch (NoClassDefFoundError e) {
-			throw new SAXException(WRONG_XERCES_MESSAGE);
-		} catch (NoSuchMethodError e) {
-			throw new SAXException(WRONG_XERCES_MESSAGE);
-		} catch (ClassCastException e) {
-			throw new SAXException(WRONG_XERCES_MESSAGE);
-		} catch (SAXNotSupportedException e) {
-			throw new SAXException(WRONG_XERCES_MESSAGE);
+		}
+		catch (LinkageError e) {
+			// log the Xerces location to the Error log in order to debug the location
+			SpringCore.log(SpringCore.getFormattedMessage(
+					"Plugin.xerces_location", SpringCoreUtils
+							.getClassLocation(org.apache.xerces.dom.ElementImpl.class)), e);
+			throw new SAXException(SpringCore
+					.getResourceString("Plugin.wrong_xerces_message"));
+		}
+		catch (SAXNotSupportedException e) {
+			throw new SAXException(SpringCore
+					.getResourceString("Plugin.wrong_xerces_message"));
 		}
 	}
 }
