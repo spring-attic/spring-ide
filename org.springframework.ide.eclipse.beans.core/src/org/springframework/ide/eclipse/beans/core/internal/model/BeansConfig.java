@@ -74,6 +74,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.namespaces.DefaultModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.io.FileResource;
 import org.springframework.ide.eclipse.core.io.FileResourceLoader;
 import org.springframework.ide.eclipse.core.io.StorageResource;
@@ -98,7 +99,6 @@ import org.xml.sax.SAXParseException;
 
 /**
  * This class defines a Spring beans configuration.
- * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
@@ -106,8 +106,7 @@ import org.xml.sax.SAXParseException;
 public class BeansConfig extends AbstractResourceModelElement implements
 		IBeansConfig {
 
-	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER =
-			new DefaultModelElementProvider();
+	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = new DefaultModelElementProvider();
 
 	/** This bean's config file */
 	private IFile file;
@@ -241,8 +240,8 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			beanClassesMap = null;
 
 			// Reset all config sets which contain this config
-			for (IBeansConfigSet configSet
-					: ((IBeansProject) getElementParent()) .getConfigSets()) {
+			for (IBeansConfigSet configSet : ((IBeansProject) getElementParent())
+					.getConfigSets()) {
 				if (configSet.hasConfig(getElementName())) {
 					((BeansConfigSet) configSet).reset();
 				}
@@ -276,16 +275,17 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 		// Lazily initialization of this config
 		readConfig();
-		return (defaults != null && defaults.getInitMethod() != null
-				? defaults.getInitMethod() : DEFAULT_INIT_METHOD);
+		return (defaults != null && defaults.getInitMethod() != null ? defaults
+				.getInitMethod() : DEFAULT_INIT_METHOD);
 	}
 
 	public String getDefaultDestroyMethod() {
 
 		// Lazily initialization of this config
 		readConfig();
-		return (defaults != null && defaults.getDestroyMethod() != null
-				? defaults.getDestroyMethod() : DEFAULT_DESTROY_METHOD);
+		return (defaults != null && defaults.getDestroyMethod() != null ? defaults
+				.getDestroyMethod()
+				: DEFAULT_DESTROY_METHOD);
 	}
 
 	public String getDefaultMerge() {
@@ -479,7 +479,8 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			String msg = "Beans config file '" + fullPath + "' not accessible";
 			BeansModelUtils.createProblemMarker(this, msg,
 					IMarker.SEVERITY_ERROR, -1, ErrorCode.PARSING_FAILED);
-		} else {
+		}
+		else {
 			modificationTimestamp = file.getModificationStamp();
 		}
 	}
@@ -510,8 +511,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		}
 	}
 
-	private void addBeanClasses(IBean bean, Map<String,
-			Set<IBean>> beanClasses) {
+	private void addBeanClasses(IBean bean, Map<String, Set<IBean>> beanClasses) {
 		addBeanClass(bean, beanClasses);
 		for (IBean innerBean : BeansModelUtils.getInnerBeans(bean)) {
 			addBeanClass(innerBean, beanClasses);
@@ -556,28 +556,24 @@ public class BeansConfig extends AbstractResourceModelElement implements
 					resource = new FileResource(file);
 				}
 
-				DefaultBeanDefinitionRegistry registry =
-						new DefaultBeanDefinitionRegistry();
-				EntityResolver resolver =
-						new XmlCatalogDelegatingEntityResolver(
-								new BeansDtdResolver(),
-								new PluggableSchemaResolver(
-										PluggableSchemaResolver.class
-												.getClassLoader()));
+				DefaultBeanDefinitionRegistry registry = new DefaultBeanDefinitionRegistry();
+				EntityResolver resolver = new XmlCatalogDelegatingEntityResolver(
+						new BeansDtdResolver(), new PluggableSchemaResolver(
+								PluggableSchemaResolver.class.getClassLoader()));
 				XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
 						registry);
 				reader.setDocumentLoader(new XercesDocumentLoader());
 				reader.setResourceLoader(new NoOpResourcePatternResolver());
 				reader.setEntityResolver(resolver);
 				reader.setSourceExtractor(new XmlSourceExtractor());
-				reader.setEventListener(new BeansConfigReaderEventListener(
-						this));
+				reader
+						.setEventListener(new BeansConfigReaderEventListener(
+								this));
 				reader.setProblemReporter(new BeansConfigProblemReporter(this));
 				reader.setErrorHandler(new BeansConfigErrorHandler(this));
-				reader.setNamespaceHandlerResolver(
-						new DelegatingNamespaceHandlerResolver(
-								NamespaceHandlerResolver.class
-										.getClassLoader()));
+				reader
+						.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(
+								NamespaceHandlerResolver.class.getClassLoader()));
 				reader.setBeanNameGenerator(new UniqueBeanNameGenerator(this));
 				try {
 					reader.loadBeanDefinitions(resource);
@@ -591,6 +587,10 @@ public class BeansConfig extends AbstractResourceModelElement implements
 								.getMessage(), IMarker.SEVERITY_ERROR, -1,
 								ErrorCode.PARSING_FAILED);
 						BeansCorePlugin.log(e);
+					}
+					if (e.getCause() instanceof LinkageError) {
+						BeansCorePlugin.log("Xerces loaded from: "
+								+ SpringCoreUtils.getXercesLocation(), null);
 					}
 				}
 			}
@@ -659,9 +659,10 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		}
 
 		public void warning(Problem problem) {
-			BeansModelUtils.createProblemMarker(config, getMessage(problem),
-					IMarker.SEVERITY_WARNING, problem,
-					ErrorCode.PARSING_FAILED);
+			BeansModelUtils
+					.createProblemMarker(config, getMessage(problem),
+							IMarker.SEVERITY_WARNING, problem,
+							ErrorCode.PARSING_FAILED);
 		}
 
 		private String getMessage(Problem problem) {
@@ -685,8 +686,8 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	 * instance of {@link IBeansConfig} with data from the XML bean definition
 	 * reader events.
 	 */
-	private final class BeansConfigReaderEventListener
-			implements ReaderEventListener {
+	private final class BeansConfigReaderEventListener implements
+			ReaderEventListener {
 
 		private IBeansConfig config;
 
@@ -699,8 +700,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 		public void defaultsRegistered(DefaultsDefinition defaultsDefinition) {
 			if (!isImported(defaultsDefinition)
-					&& defaultsDefinition instanceof
-							DocumentDefaultsDefinition) {
+					&& defaultsDefinition instanceof DocumentDefaultsDefinition) {
 				defaults = (DocumentDefaultsDefinition) defaultsDefinition;
 			}
 		}
@@ -726,8 +726,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		 * the extension point
 		 * <code>org.springframework.ide.eclipse.beans.core.namespaces</code>.
 		 */
-		public void componentRegistered(
-				ComponentDefinition componentDefinition) {
+		public void componentRegistered(ComponentDefinition componentDefinition) {
 			if (!isImported(componentDefinition)) {
 				String uri = NamespaceUtils
 						.getNameSpaceURI(componentDefinition);
@@ -768,7 +767,6 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	 * {@link NamespaceHandler} for a given namespace URI. Depending on this
 	 * namespace URI the returned namespace handler is one of the following (in
 	 * the provided order):
-	 * 
 	 * <ol>
 	 * <li>a namespace handler provided by the Spring framework</li>
 	 * <li>a namespace handler contributed via the extension point
@@ -776,11 +774,10 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	 * <li>a no-op {@link NoOpNamespaceHandler namespace handler}</li>
 	 * </ol>
 	 */
-	private static final class DelegatingNamespaceHandlerResolver
-			extends DefaultNamespaceHandlerResolver {
+	private static final class DelegatingNamespaceHandlerResolver extends
+			DefaultNamespaceHandlerResolver {
 
-		private static final NamespaceHandler NO_OP_NAMESPACE_HANDLER =
-				new NoOpNamespaceHandler();
+		private static final NamespaceHandler NO_OP_NAMESPACE_HANDLER = new NoOpNamespaceHandler();
 
 		private Map<String, NamespaceHandler> namespaceHandlers;
 
@@ -792,13 +789,13 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		@Override
 		public NamespaceHandler resolve(String namespaceUri) {
 
-			// First check for a namespace handler provided by Spring  
+			// First check for a namespace handler provided by Spring
 			NamespaceHandler namespaceHandler = super.resolve(namespaceUri);
 			if (namespaceHandler != null) {
 				return namespaceHandler;
 			}
 
-			// Then check for a namespace handler provided by an extension  
+			// Then check for a namespace handler provided by an extension
 			namespaceHandler = namespaceHandlers.get(namespaceUri);
 			if (namespaceHandler != null) {
 				return namespaceHandler;
@@ -809,32 +806,29 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		}
 	}
 
-	private static final class NoOpNamespaceHandler
-			implements NamespaceHandler {
+	private static final class NoOpNamespaceHandler implements NamespaceHandler {
 
 		public void init() {
 			// do nothing
 		}
 
 		public BeanDefinitionHolder decorate(Node source,
-				BeanDefinitionHolder definition,
-				ParserContext parserContext) {
+				BeanDefinitionHolder definition, ParserContext parserContext) {
 			// do nothing
 			return null;
 		}
 
-		public BeanDefinition parse(Element element,
-				ParserContext parserContext) {
+		public BeanDefinition parse(Element element, ParserContext parserContext) {
 			// do nothing
 			return null;
 		}
 	}
 
 	/**
-	 * This {@link EntityResolver}  
+	 * This {@link EntityResolver}
 	 */
-	private static class XmlCatalogDelegatingEntityResolver
-			extends DelegatingEntityResolver {
+	private static class XmlCatalogDelegatingEntityResolver extends
+			DelegatingEntityResolver {
 
 		public XmlCatalogDelegatingEntityResolver(EntityResolver dtdResolver,
 				EntityResolver schemaResolver) {
