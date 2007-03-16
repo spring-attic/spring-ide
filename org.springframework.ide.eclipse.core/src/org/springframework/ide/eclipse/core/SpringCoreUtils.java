@@ -379,21 +379,48 @@ public final class SpringCoreUtils {
 		return (project.getRawLocation() != null ? project.getRawLocation()
 				: project.getLocation());
 	}
+	
+	public static String getClassLoaderHierachy(Class clazz) {
+		ClassLoader cls = clazz.getClassLoader();
+		StringBuffer buf = new StringBuffer(cls.getClass().getName());
+		while (cls.getParent() != null) {
+			cls = cls.getParent();
+			buf.append(" -> ");
+			buf.append(cls.getClass().getName());
+		}
+		return buf.toString();
+	}
+	
+	public static String getClassVersion(Class clazz) {
+		String version = "unkown";
+		if (clazz.getPackage().getImplementationVersion() != null) {
+			version = clazz.getPackage().getImplementationVersion();
+		}
+		return version;
+	}
 
 	public static String getClassLocation(Class clazz) {
 		Assert.notNull(clazz);
 		String resourceName = ClassUtils.getClassFileName(clazz);
+		String location = null;
 		try {
 			URL url = clazz.getResource(resourceName);
 			if (url != null) {
 				URL nativeUrl = FileLocator.resolve(url);
 				if (nativeUrl != null) {
-					return nativeUrl.getFile();
+					location = nativeUrl.getFile();
 				}
 			}
 		}
 		catch (IOException e) {
 		}
-		return null;
+
+		if (location != null) {
+			// remove path behind jar file
+			int ix = location.lastIndexOf('!');
+			location = location.substring(0, ix);
+		}
+
+		return location;
 	}
 }

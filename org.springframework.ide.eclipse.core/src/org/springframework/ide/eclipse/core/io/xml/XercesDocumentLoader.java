@@ -60,7 +60,9 @@ public class XercesDocumentLoader implements DocumentLoader {
 			// log the Xerces location to the Error log in order to debug the location
 			SpringCore.log(SpringCore.getFormattedMessage(
 					"Plugin.xerces_location", SpringCoreUtils
-							.getClassLocation(org.apache.xerces.dom.ElementImpl.class)), e);
+					.getClassVersion(org.apache.xerces.impl.Version.class), SpringCoreUtils
+					.getClassLocation(org.apache.xerces.impl.Version.class), SpringCoreUtils
+					.getClassLoaderHierachy(org.apache.xerces.impl.Version.class)), null);
 			throw new SAXException(SpringCore
 					.getResourceString("Plugin.wrong_xerces_message"));
 		}

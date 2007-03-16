@@ -164,11 +164,7 @@ public class SpringCore extends Plugin {
 		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
 	}
 
-	public static String getFormattedMessage(String key, String arg) {
-		return getFormattedMessage(key, new String[] { arg });
-	}
-
-	public static String getFormattedMessage(String key, Object[] args) {
+	public static String getFormattedMessage(String key, Object... args) {
 		return MessageFormat.format(getResourceString(key), args);
 	}
 }
