@@ -614,7 +614,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 
 			// Validate referenced beans in indexed constructor argument values
 			for (Object entry : cargs.getIndexedArgumentValues().entrySet()) {
-				Map.Entry<?, ?> cargValue = (Map.Entry) entry;
+				Map.Entry<?, ?> cargValue = (Map.Entry<?, ?>) entry;
 				int index = ((Integer) cargValue.getKey()).intValue();
 
 				// Lookup corresponding model element (constructor argument)
@@ -785,15 +785,15 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 				}
 			}
 		} else if (value instanceof List) {
-			for (Object entry : (List) value) {
+			for (Object entry : (List<?>) value) {
 				validateBeanReferencesInValue(bean, element, entry, registry);
 			}
 		} else if (value instanceof Set) {
-			for (Object entry : (Set) value) {
+			for (Object entry : (Set<?>) value) {
 				validateBeanReferencesInValue(bean, element, entry, registry);
 			}
 		} else if (value instanceof Map) {
-			for (Object entry : ((Map) value).values()) {
+			for (Object entry : ((Map<?, ?>) value).values()) {
 				validateBeanReferencesInValue(bean, element, entry, registry);
 			}
 		}

@@ -48,7 +48,7 @@ public class BeansMap extends AbstractBeansModelElement implements IBeansMap {
 		this.map = new LinkedHashMap<Object, Object>();
 		this.entries = new LinkedList<IBeansMapEntry>();
 		for (Object entry : map.entrySet()) {
-			Map.Entry<?, ?> mEntry = (Map.Entry) entry;
+			Map.Entry<?, ?> mEntry = (Map.Entry<?, ?>) entry;
 			this.map.put(mEntry.getKey(), mEntry.getValue());
 
 			BeansMapEntry bmEntry = new BeansMapEntry(this, mEntry);

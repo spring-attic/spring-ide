@@ -49,7 +49,7 @@ public class BeansProperties extends AbstractBeansModelElement implements
 		this.properties = new Properties();
 		this.entries = new LinkedList<IBeansMapEntry>();
 		for (Object entry : properties.entrySet()) {
-			Map.Entry<?, ?> mEntry = (Map.Entry) entry;
+			Map.Entry<?, ?> mEntry = (Map.Entry<?, ?>) entry;
 			this.properties.put(mEntry.getKey(), mEntry.getValue());
 
 			BeansMapEntry bmEntry = new BeansMapEntry(this, mEntry);
