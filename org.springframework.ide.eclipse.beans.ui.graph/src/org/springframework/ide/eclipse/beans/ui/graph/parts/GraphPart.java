@@ -19,24 +19,32 @@ package org.springframework.ide.eclipse.beans.ui.graph.parts;
 import java.util.List;
 
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.ConnectionLayer;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.draw2d.ScalableFreeformLayeredPane;
 import org.eclipse.draw2d.XYLayout;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
+import org.eclipse.swt.SWT;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Graph;
 
 public class GraphPart extends AbstractGraphicalEditPart {
 
+	private static final String CONNECTION_LAYER = "Connection Layer";
+	
 	public static final int MARGIN_SIZE = 10;
-
+	
 	@Override
 	protected IFigure createFigure() {
 		Figure panel = new ScalableFreeformLayeredPane();
 		panel.setBackgroundColor(ColorConstants.listBackground);
 		panel.setLayoutManager(new XYLayout());
 		panel.setBorder(new MarginBorder(MARGIN_SIZE));
+		 
+		ConnectionLayer cLayer = (ConnectionLayer) getLayer(CONNECTION_LAYER);
+        cLayer.setAntialias(SWT.ON);
+		
 		return panel;
 	}
 
