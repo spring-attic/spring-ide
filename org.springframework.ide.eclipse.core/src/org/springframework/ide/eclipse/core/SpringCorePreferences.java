@@ -78,4 +78,8 @@ public class SpringCorePreferences {
 		return this.preferences.getBoolean(propertyNamespace + key, defaultValue);
 	}
 	
+	public IEclipsePreferences getProjectPreferences() {
+		return this.preferences;
+	}
+	
 }

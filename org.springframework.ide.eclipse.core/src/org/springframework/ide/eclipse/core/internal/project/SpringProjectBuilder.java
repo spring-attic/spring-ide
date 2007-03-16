@@ -33,7 +33,7 @@ import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinition;
-import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinitionUtils;
+import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinitionFactory;
 
 /**
  * Incremental project builder which implements the Strategy GOF pattern. For
@@ -116,7 +116,7 @@ public class SpringProjectBuilder extends IncrementalProjectBuilder {
 	}
 
 	private void runBuilders(final IFile file, final IProgressMonitor monitor) {
-		for (final ProjectBuilderDefinition builderHolder : ProjectBuilderDefinitionUtils
+		for (final ProjectBuilderDefinition builderHolder : ProjectBuilderDefinitionFactory
 				.getProjectBuilderDefinitions()) {
 			ISafeRunnable code = new ISafeRunnable() {
 				public void run() throws Exception {

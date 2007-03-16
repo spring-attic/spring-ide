@@ -30,7 +30,7 @@ import org.springframework.ide.eclipse.core.SpringCore;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class ProjectBuilderDefinitionUtils {
+public class ProjectBuilderDefinitionFactory {
 
 	public static final String BUILDERS_EXTENSION_POINT = SpringCore.PLUGIN_ID
 			+ ".builders";

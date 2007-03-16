@@ -46,7 +46,7 @@ import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinition;
-import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinitionUtils;
+import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinitionFactory;
 import org.springframework.ide.eclipse.ui.SpringUIMessages;
 
 /**
@@ -96,7 +96,7 @@ public class ProjectBuilderPropertyPage extends PropertyPage {
 	private Text descriptionText;
 
 	public ProjectBuilderPropertyPage() {
-		this.projectBuilderDefinitions = ProjectBuilderDefinitionUtils
+		this.projectBuilderDefinitions = ProjectBuilderDefinitionFactory
 				.getProjectBuilderDefinitions();
 		noDefaultAndApplyButton();
 	}
@@ -121,6 +121,7 @@ public class ProjectBuilderPropertyPage extends PropertyPage {
 		// config set list viewer
 		builderViewer = CheckboxTableViewer.newCheckList(composite, SWT.BORDER);
 		GridData gd = new GridData(GridData.FILL_BOTH);
+		gd.heightHint = 150;
 		builderViewer.getTable().setLayoutData(gd);
 		builderViewer
 				.setContentProvider(new ProjectBuilderDefinitionContentProvider(
