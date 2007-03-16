@@ -12,11 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.springframework.ide.eclipse.beans.core.internal.project;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -26,6 +27,7 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigValidator;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 
 /**
@@ -49,5 +51,10 @@ public class BeansProjectValidator implements IProjectBuilder {
 		catch (CoreException e) {
 			BeansCorePlugin.log("Error while running the validator", e);
 		}
+	}
+
+	public void cleanup(IResource resource, IProgressMonitor monitor) {
+		BeansModelUtils.deleteProblemMarkers(BeansModelUtils
+				.getResourceModelElement(resource));
 	}
 }

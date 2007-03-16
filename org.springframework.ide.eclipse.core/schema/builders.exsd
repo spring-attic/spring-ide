@@ -13,8 +13,8 @@ This extension-point is used to add one or more builders to the list of Spring p
 
    <element name="extension">
       <complexType>
-         <sequence>
-            <element ref="run" minOccurs="0" maxOccurs="unbounded"/>
+         <sequence minOccurs="0" maxOccurs="unbounded">
+            <element ref="builder"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -40,7 +40,7 @@ This extension-point is used to add one or more builders to the list of Spring p
       </complexType>
    </element>
 
-   <element name="run">
+   <element name="builder">
       <complexType>
          <attribute name="class" type="string" use="required">
             <annotation>
@@ -51,6 +51,34 @@ This extension-point is used to add one or more builders to the list of Spring p
                <appInfo>
                   <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.core.project.IProjectBuilder"/>
                </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="id" type="string" use="required">
+            <annotation>
+               <documentation>
+                  an id
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string" use="required">
+            <annotation>
+               <documentation>
+                  an name
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="enabledByDefault" type="boolean">
+            <annotation>
+               <documentation>
+                  specifies if the builder is enabled by default
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="description" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
             </annotation>
          </attribute>
       </complexType>

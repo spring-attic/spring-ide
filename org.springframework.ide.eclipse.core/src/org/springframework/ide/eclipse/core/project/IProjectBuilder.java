@@ -17,6 +17,7 @@
 package org.springframework.ide.eclipse.core.project;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
@@ -40,4 +41,12 @@ public interface IProjectBuilder {
 	 * reporting and cancellation are not desired
 	 */
 	void build(IFile file, IProgressMonitor monitor);
+	
+	/**
+	 * Clean up the created UI contributions
+	 * @param resource the resource
+	 * @param monitor a progress monitor, or <code>null</code> if progress
+	 * reporting and cancellation are not desired
+	 */
+	void cleanup(IResource resource, IProgressMonitor monitor);
 }

@@ -2,11 +2,15 @@
 <?eclipse version="3.0"?>
 <plugin>
 
-	<extension id="aopvalidator" name="%aopValidator.name"
+	<extension 
 		point="org.springframework.ide.eclipse.core.builders">
-		<run
+		<builder
+			id="aopreferencemodelbuilder" 
+			name="%aopBuilder.name"
+			enabledByDefault="true"
+			description="%aopBuilder.description"
 			class="org.springframework.ide.eclipse.aop.core.builder.AopReferenceModelProjectBuilder">
-		</run>
+		</builder>
 	</extension>
 
 	<extension id="aopmarker" name="%aopMarker.name"
@@ -14,7 +18,7 @@
 		<persistent value="false" />
 		<super type="org.eclipse.core.resources.textmarker" />
 	</extension>
-	
+	 
 	<extension id="aopproblemmarker" name="%aopProblemMarker.name"
 		point="org.eclipse.core.resources.markers">
 		<persistent value="false" />

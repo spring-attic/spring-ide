@@ -72,7 +72,7 @@
       <page
             id="org.springframework.ide.eclipse.ui.projectPropertyPage"
             name="%projectPropertyPage"
-            class="org.springframework.ide.eclipse.ui.dialogs.EmptyPropertyPage"
+            class="org.springframework.ide.eclipse.ui.dialogs.ProjectBuilderPropertyPage"
             adaptable="true"
             objectClass="org.eclipse.core.resources.IProject">
          <filter

@@ -203,7 +203,8 @@ public class AopReferenceModelMarkerUtils {
 				for (IMarker marker : markers) {
 					String sourceResourceName = marker.getAttribute(
 							SOURCE_RESOURCE, "");
-					if (resourceName.equals(sourceResourceName)) {
+					if (sourceResourceName != null && 
+							sourceResourceName.startsWith(resourceName)) {
 						marker.delete();
 					}
 				}

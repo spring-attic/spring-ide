@@ -40,6 +40,11 @@ public final class SpringUIMessages extends NLS {
 
 	public static String ImageDescriptorRegistry_wrongDisplay;
 
+	public static String ProjectBuilderPropertyPage_title;
+	public static String ProjectBuilderPropertyPage_description;
+	public static String ProjectBuilderPropertyPage_noBuilderDescription;
+	public static String ProjectBuilderPropertyPage_builderDescription;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, SpringUIMessages.class);
 	}

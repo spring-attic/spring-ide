@@ -19,8 +19,10 @@ package org.springframework.ide.eclipse.aop.core.builder;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.aop.core.model.builder.AopReferenceModelBuilder;
+import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelMarkerUtils;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 
@@ -41,6 +43,12 @@ public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 		Set<IFile> filesToBuild = AopReferenceModelUtils.getFilesToBuild(file);
 		monitor.beginTask("Building Spring AOP reference model", filesToBuild.size());
 		AopReferenceModelBuilder.buildAopModel(file.getProject(), filesToBuild);
+		monitor.done();
+	}
+
+	public void cleanup(IResource resource, IProgressMonitor monitor) {
+		monitor.beginTask("Deleting Spring AOP reference model marker", 100);
+		AopReferenceModelMarkerUtils.deleteProblemMarkers(resource);
 		monitor.done();
 	}
 }

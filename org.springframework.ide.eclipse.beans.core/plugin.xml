@@ -2,37 +2,36 @@
 <?eclipse version="3.0"?>
 <plugin>
 
-   <extension-point id="namespaces"
-         name="%extensionNamespaces.name"
-         schema="schema/namespaces.exsd"/>
+	<extension-point id="namespaces" name="%extensionNamespaces.name"
+		schema="schema/namespaces.exsd" />
 
-   <extension
-         id="problemmarker"
-         name="%beansProblemMarker"
-         point="org.eclipse.core.resources.markers">
-      <super type="org.springframework.ide.eclipse.core.problemmarker"/>
-      <persistent value="true"/>
-      <attribute name="errorCode"/>
-      <attribute name="beanID"/>
-      <attribute name="errorData"/>
-   </extension>
+	<extension id="problemmarker" name="%beansProblemMarker"
+		point="org.eclipse.core.resources.markers">
+		<super
+			type="org.springframework.ide.eclipse.core.problemmarker" />
+		<persistent value="true" />
+		<attribute name="errorCode" />
+		<attribute name="beanID" />
+		<attribute name="errorData" />
+	</extension>
 
-   <extension
-         id="beansvalidator"
-         name="%beansValidator"
-         point="org.springframework.ide.eclipse.core.builders">
-      <run
-            class="org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectValidator">
-      </run>
-   </extension>
-   <extension
-         point="org.eclipse.core.expressions.propertyTesters">
-      <propertyTester
-            class="org.springframework.ide.eclipse.beans.core.internal.model.BeansModelPropertyTester"
-            id="org.springframework.ide.eclipse.beans.core.beansModelTester"
-            namespace="org.springframework.ide.eclipse.beans.core.model"
-            properties="isBeansConfig"
-            type="org.eclipse.core.resources.IFile"/>
-   </extension>
+	<extension point="org.springframework.ide.eclipse.core.builders">
+		<builder 
+			id="beansvalidator" 
+			name="%beansValidator.name"
+			enabledByDefault="true"
+			description="%beansValidator.description"
+			class="org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectValidator">
+		</builder>
+	</extension>
+
+	<extension point="org.eclipse.core.expressions.propertyTesters">
+		<propertyTester
+			class="org.springframework.ide.eclipse.beans.core.internal.model.BeansModelPropertyTester"
+			id="org.springframework.ide.eclipse.beans.core.beansModelTester"
+			namespace="org.springframework.ide.eclipse.beans.core.model"
+			properties="isBeansConfig" 
+			type="org.eclipse.core.resources.IFile" />
+	</extension>
 
 </plugin>
