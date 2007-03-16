@@ -735,9 +735,10 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 
 	protected void setInput(IEditorInput input) {
 		superSetInput(input);
-		this.file = ((WebflowEditorInput) input).getFile();
+		WebflowEditorInput webflowEditorInput = ((WebflowEditorInput) input);
+		this.file = webflowEditorInput.getFile();
 		setPartName(this.file.getName());
-
+		
 		try {
 			model = null;
 			model = StructuredModelManager.getModelManager()
@@ -750,8 +751,10 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 			if (model != null) {
 				IDOMDocument document = ((DOMModelImpl) model).getDocument();
 				this.diagram = new WebflowState();
-				this.diagram.init((IDOMNode) document.getDocumentElement()
-						.cloneNode(true), null);
+				IDOMNode root = (IDOMNode) document.getDocumentElement();
+				IDOMNode rootClone = (IDOMNode) root.cloneNode(true);
+				webflowEditorInput.initLineNumbers(root, rootClone);
+				this.diagram.init(rootClone, null);
 			}
 		}
 		catch (Exception e) {

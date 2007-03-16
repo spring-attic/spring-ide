@@ -48,8 +48,6 @@ public class OpenConfigFileAction extends EditorPartAction {
 	public static final String OPEN_FILE = "Open_config";
 
 	/**
-	 * 
-	 * 
 	 * @param editor
 	 */
 	public OpenConfigFileAction(IEditorPart editor) {
@@ -98,15 +96,13 @@ public class OpenConfigFileAction extends EditorPartAction {
 			WebflowEditorInput input = WebflowUtils.getActiveFlowEditorInput();
 			IResource file = input.getFile();
 			if (file != null && file.exists()) {
-				SpringUIUtils.openInEditor((IFile) file, element
-						.getElementStartLine());
+				SpringUIUtils.openInEditor((IFile) file, input
+						.getElementStartLine(element.getNode()));
 			}
 		}
 	}
 
 	/**
-	 * 
-	 * 
 	 * @return
 	 */
 	protected EditPart getFirstSelectedEditPart() {

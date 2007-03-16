@@ -16,20 +16,24 @@
 
 package org.springframework.ide.eclipse.webflow.ui.graph;
 
+import java.util.Map;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelXmlUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 
 /**
  * {@link IEditorInput} implementation that takes care of locating the
  * {@link IWebflowConfig} for a given {@link IFile}.
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
+@SuppressWarnings("restriction")
 public class WebflowEditorInput implements IEditorInput, IPersistableElement {
 
 	private IWebflowConfig config;
@@ -39,6 +43,8 @@ public class WebflowEditorInput implements IEditorInput, IPersistableElement {
 	private String name;
 
 	private String tooltip;
+
+	private Map<IDOMNode, Integer> nodesToLineNumbers;
 
 	public WebflowEditorInput(IWebflowConfig config) {
 		this.config = config;
@@ -69,7 +75,6 @@ public class WebflowEditorInput implements IEditorInput, IPersistableElement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
 	 * @see org.eclipse.ui.IPersistableElement#getFactoryId()
 	 */
 	public String getFactoryId() {
@@ -106,7 +111,6 @@ public class WebflowEditorInput implements IEditorInput, IPersistableElement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
 	 * @see org.eclipse.ui.IPersistableElement#saveState(org.eclipse.ui.IMemento)
 	 */
 	public void saveState(IMemento memento) {
@@ -117,5 +121,19 @@ public class WebflowEditorInput implements IEditorInput, IPersistableElement {
 
 	public void setValid(boolean isValid) {
 		this.isValid = isValid;
+	}
+
+	public int getElementStartLine(IDOMNode node) {
+		if (this.nodesToLineNumbers.containsKey(node)) {
+			return this.nodesToLineNumbers.get(node);
+		}
+		else {
+			return 1;
+		}
+	}
+
+	public void initLineNumbers(IDOMNode root, IDOMNode clone) {
+		this.nodesToLineNumbers = WebflowModelXmlUtils.getNodeLineNumbers(root,
+				clone);
 	}
 }

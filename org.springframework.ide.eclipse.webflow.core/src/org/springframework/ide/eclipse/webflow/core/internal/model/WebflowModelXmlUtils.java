@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.eclipse.wst.xml.core.internal.document.ElementImpl;
 import org.eclipse.wst.xml.core.internal.document.TextImpl;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
@@ -31,8 +32,6 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 /**
- * 
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -137,10 +136,8 @@ public class WebflowModelXmlUtils {
 
 	/**
 	 * Gets the state by id.
-	 * 
 	 * @param webflowState the webflow state
 	 * @param id the id
-	 * 
 	 * @return the state by id
 	 */
 	public static IState getStateById(IWebflowState webflowState, String id) {
@@ -157,7 +154,6 @@ public class WebflowModelXmlUtils {
 
 	/**
 	 * Insert node.
-	 * 
 	 * @param parentNode the parent node
 	 * @param nodeToInsert the node to insert
 	 */
@@ -180,10 +176,8 @@ public class WebflowModelXmlUtils {
 	}
 
 	/**
-	 * 
-	 * 
-	 * @param refNode 
-	 * @param nodeToInsert 
+	 * @param refNode
+	 * @param nodeToInsert
 	 */
 	public static void insertBefore(Node nodeToInsert, Node refNode) {
 		Node parentNode = refNode.getParentNode();
@@ -201,7 +195,6 @@ public class WebflowModelXmlUtils {
 
 	/**
 	 * Removes the text children.
-	 * 
 	 * @param elem the elem
 	 */
 	public static void removeTextChildren(Node elem) {
@@ -226,10 +219,8 @@ public class WebflowModelXmlUtils {
 
 	/**
 	 * Determine node to insert.
-	 * 
 	 * @param node the node
 	 * @param nodeToInsert the node to insert
-	 * 
 	 * @return the node
 	 */
 	public static Node determineNodeToInsert(Node nodeToInsert, Node node) {
@@ -238,10 +229,8 @@ public class WebflowModelXmlUtils {
 
 	/**
 	 * Determine node to insert.
-	 * 
 	 * @param elementName the element name
 	 * @param node the node
-	 * 
 	 * @return the node
 	 */
 	public static Node determineNodeToInsert(String elementName, Node node) {
@@ -293,13 +282,12 @@ public class WebflowModelXmlUtils {
 
 	/**
 	 * Gets the states.
-	 * 
 	 * @param includeSelf the include self
 	 * @param state the state
-	 * 
 	 * @return the states
 	 */
-	public static List<IState> getStates(IWebflowModelElement state, boolean includeSelf) {
+	public static List<IState> getStates(IWebflowModelElement state,
+			boolean includeSelf) {
 		List<IState> states = new ArrayList<IState>();
 		if (state instanceof IWebflowState) {
 			states.addAll(((IWebflowState) state).getStates());
@@ -318,5 +306,27 @@ public class WebflowModelXmlUtils {
 			}
 		}
 		return states;
+	}
+
+	public static Map<IDOMNode, Integer> getNodeLineNumbers(IDOMNode root,
+			IDOMNode clone) {
+		Map<IDOMNode, Integer> nodesToLineNumbers = new HashMap<IDOMNode, Integer>();
+		calculateNodeLineNumbers(root, clone, nodesToLineNumbers);
+		return nodesToLineNumbers;
+	}
+
+	private static void calculateNodeLineNumbers(IDOMNode root, IDOMNode clone,
+			Map<IDOMNode, Integer> nodesToLineNumbers) {
+		if (root.getNodeType() == Node.ELEMENT_NODE) {
+			int line = root.getStructuredDocument().getLineOfOffset(
+					root.getStartOffset()) + 1;
+			nodesToLineNumbers.put(clone, line);
+		}
+		NodeList rootChilds = root.getChildNodes();
+		NodeList cloneChilds = clone.getChildNodes();
+		for (int i = 0; i < rootChilds.getLength(); i++) {
+			calculateNodeLineNumbers((IDOMNode) rootChilds.item(i),
+					(IDOMNode) cloneChilds.item(i), nodesToLineNumbers);
+		}
 	}
 }
