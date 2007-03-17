@@ -11,5 +11,16 @@
             properties="isWebflowConfig"
             type="org.eclipse.core.resources.IFile"/>
    </extension>
+   
+   	<extension 
+		point="org.springframework.ide.eclipse.core.builders">
+		<builder
+			id="webflowvalidator" 
+			name="%webflowvalidator.name"
+			enabledByDefault="true"
+			description="%webflowvalidator.description"
+			class="org.springframework.ide.eclipse.webflow.core.internal.model.project.WebflowProjectValidator">
+		</builder>
+	</extension>
 
 </plugin>
