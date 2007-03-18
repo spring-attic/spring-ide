@@ -22,6 +22,13 @@ import java.util.List;
 import org.springframework.ide.eclipse.core.MessageUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 
+/**
+ * Helper class to report errors and warnings.
+ * 
+ * @author Christian Dupuis
+ * @since 2.0
+ * @see WebflowValidationVisitor
+ */
 public class WebflowValidationProblemReporter {
 
 	private List<WebflowValidationProblem> errors = 

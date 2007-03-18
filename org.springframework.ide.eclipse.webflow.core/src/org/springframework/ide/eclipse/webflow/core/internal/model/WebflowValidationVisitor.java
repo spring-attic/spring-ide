@@ -34,6 +34,13 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+/**
+ * {@link IWebflowModelElementVisitor} implementation that collects and 
+ * stores {@link WebflowValidationProblem} in an internal list.
+ * 
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 @SuppressWarnings("restriction")
 public class WebflowValidationVisitor implements IWebflowModelElementVisitor {
 

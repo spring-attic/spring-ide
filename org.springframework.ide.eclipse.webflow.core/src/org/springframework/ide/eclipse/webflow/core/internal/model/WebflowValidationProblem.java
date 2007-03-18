@@ -18,6 +18,12 @@ package org.springframework.ide.eclipse.webflow.core.internal.model;
 
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 
+/**
+ * Describes a single validation problem.
+ * 
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 public class WebflowValidationProblem {
 	
 	private String message;

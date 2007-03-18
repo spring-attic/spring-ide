@@ -20,8 +20,16 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 
+/**
+ * {@link IWorkspaceRunnable} that triggers validation of a single
+ * {@link IWebflowConfig}.
+ *
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 @SuppressWarnings("restriction")
 public class WebflowValidator implements IWorkspaceRunnable {
 
