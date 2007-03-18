@@ -90,15 +90,15 @@ public abstract class AbstractTransitionableTo extends AbstractState implements
 		String oldId = getId();
 		IState oldStartState = ((WebflowState) parent).getStartState();
 		setAttribute("id", id);
-		if (this.inputTransitions != null && this.inputTransitions.size() > 0) {
-			for (ITransition trans : this.inputTransitions) {
-				trans.setToState(this);
-			}
-		}
-		if (!getId().equals(oldId) && parent instanceof WebflowState) {
+		if (!id.equals(oldId) && parent instanceof WebflowState) {
 			// we are the startstate and rename the id
 			if (this.equals(oldStartState)) {
 				((WebflowState) parent).setStartState(this);
+			}
+		}
+		if (this.inputTransitions != null && this.inputTransitions.size() > 0) {
+			for (ITransition trans : this.inputTransitions) {
+				trans.setToState(this);
 			}
 		}
 	}

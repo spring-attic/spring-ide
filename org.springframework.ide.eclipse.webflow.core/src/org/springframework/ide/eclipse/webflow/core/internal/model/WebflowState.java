@@ -456,7 +456,9 @@ public class WebflowState extends AbstractTransitionableFrom implements
 	public void removeState(IState state) {
 		if (getStates().contains(state)) {
 			this.states.remove(state);
-			getNode().removeChild(state.getNode());
+			if (state.getNode().getParentNode() != null) {
+				getNode().removeChild(state.getNode());
+			}
 			super.fireStructureChange(REMOVE_CHILDREN, state);
 		}
 	}
@@ -482,11 +484,11 @@ public class WebflowState extends AbstractTransitionableFrom implements
 		IDOMNode node = nodes.get(0);
 		setAttribute(node, "idref", state.getId());
 
-		removeState(state);
-		addState(state, 0);
-
-		oldState.fireStructureChange(PROPS, oldState);
-		super.fireStructureChange(MOVE_CHILDREN, state);
+		//removeState(state);
+		//addState(state, 0);
+		if (oldState != null) {
+			oldState.fireStructureChange(PROPS, oldState);
+		}
 		state.fireStructureChange(PROPS, state);
 	}
 
