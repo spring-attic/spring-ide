@@ -58,11 +58,11 @@ public class OpenActionWrapperAction extends Action {
 			ITreeSelection tSelection = (ITreeSelection) selection;
 			if (tSelection.size() == 1) {
 				Object tElement = tSelection.getFirstElement();
-				if (tElement instanceof IWebflowConfig) {
+				if (tElement instanceof IWebflowConfig && openWebflowGraphAction.isEnabled()) {
 					this.action = openWebflowGraphAction;
 					return true;
 				}
-				else if (tElement instanceof IFile) {
+				else if (tElement instanceof IFile && openConfigFileAction.isEnabled()) {
 					if (WebflowModelUtils.isWebflowConfig((IFile) tElement)) {
 						this.action = openConfigFileAction;
 						return true;
