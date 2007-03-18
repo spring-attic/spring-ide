@@ -85,6 +85,7 @@ public class ExceptionHandler extends AbstractModelElement implements
 						.replaceChild(element.getNode(), this.node);
 			}
 			init(element.getNode(), parent);
+			super.firePropertyChange(PROPS);
 		}
 	}
 

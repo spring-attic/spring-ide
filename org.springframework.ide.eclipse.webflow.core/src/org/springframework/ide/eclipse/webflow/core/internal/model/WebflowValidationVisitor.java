@@ -35,8 +35,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 /**
- * {@link IWebflowModelElementVisitor} implementation that collects and 
- * stores {@link WebflowValidationProblem} in an internal list.
+ * {@link IWebflowModelElementVisitor} implementation that collects and stores
+ * {@link WebflowValidationProblem} in an internal list.
  * 
  * @author Christian Dupuis
  * @since 2.0
@@ -186,8 +186,8 @@ public class WebflowValidationVisitor implements IWebflowModelElementVisitor {
 		else if (!WebflowModelUtils.getWebflowConfigNames(
 				webflowConfig.getProject()).contains(state.getFlow())
 				&& !WebflowModelUtils.getWebflowConfigNames(
-						WebflowModelUtils.getWebflowState(state, true)).contains(
-						state.getFlow())) {
+						WebflowModelUtils.getWebflowState(state, true))
+						.contains(state.getFlow())) {
 			getProblemReporter().error(
 					"Referenced flow \"{0}\" cannot be found", element,
 					state.getFlow());
@@ -247,6 +247,11 @@ public class WebflowValidationVisitor implements IWebflowModelElementVisitor {
 			getProblemReporter().error(
 					"Specified state id \"{0}\" is not unique", element,
 					state.getId());
+		}
+		if (state.getActions().size() == 0) {
+			getProblemReporter().error(
+					"Element 'action-state' requires action sub elements",
+					element);
 		}
 	}
 
