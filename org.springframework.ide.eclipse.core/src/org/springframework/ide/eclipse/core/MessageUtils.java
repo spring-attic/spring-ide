@@ -28,7 +28,7 @@ public final class MessageUtils {
 		return MessageFormat.format(message, new Object[] { object});
 	}
 
-	public static String format(String message, Object[] objects) {
+	public static String format(String message, Object... objects) {
 		return MessageFormat.format(message, objects);
 	}
 }

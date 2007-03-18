@@ -51,5 +51,5 @@ public interface IModelElementVisitor {
 	 * @return <code>true</code> if the elements's members should
 	 *		be visited; <code>false</code> if they should be skipped
 	 */
-	public boolean visit(IModelElement element, IProgressMonitor monitor);
+	boolean visit(IModelElement element, IProgressMonitor monitor);
 }
