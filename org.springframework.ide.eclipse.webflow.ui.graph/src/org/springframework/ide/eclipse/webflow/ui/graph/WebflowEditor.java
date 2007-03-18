@@ -197,7 +197,7 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 				thumbnail = null;
 			}
 			super.dispose();
-			WebflowEditor.this.outlinePage = null;
+			//WebflowEditor.this.outlinePage = null;
 		}
 
 		public Object getAdapter(Class type) {

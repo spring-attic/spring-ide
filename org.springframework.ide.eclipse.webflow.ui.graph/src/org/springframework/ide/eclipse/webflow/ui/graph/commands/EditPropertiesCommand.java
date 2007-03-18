@@ -49,7 +49,9 @@ public class EditPropertiesCommand extends Command {
 	 */
 	public void execute() {
 		if (!onlyReconnect) {
-			oldChild.applyCloneValues(child);
+			IWebflowModelElement tempChild = ((ICloneableModelElement<IWebflowModelElement>) child)
+					.cloneModelElement();
+			oldChild.applyCloneValues(tempChild);
 		}
 		if (oldChild instanceof IStateTransition && newTarget != null) {
 			oldTarget = ((IStateTransition) oldChild).getToState();
@@ -91,7 +93,7 @@ public class EditPropertiesCommand extends Command {
 	public void setNewTarget(ITransitionableTo newTarget) {
 		this.newTarget = newTarget;
 	}
-	
+
 	public void setOnlyReconnect(boolean onlyReconnect) {
 		this.onlyReconnect = onlyReconnect;
 	}
@@ -102,7 +104,9 @@ public class EditPropertiesCommand extends Command {
 	 */
 	public void undo() {
 		if (!onlyReconnect) {
-			oldChild.applyCloneValues(undoChild);
+			IWebflowModelElement tempChild = ((ICloneableModelElement<IWebflowModelElement>) undoChild)
+					.cloneModelElement();
+			oldChild.applyCloneValues(tempChild);
 		}
 		if (oldChild instanceof IStateTransition && newTarget != null
 				&& oldTarget != null) {
