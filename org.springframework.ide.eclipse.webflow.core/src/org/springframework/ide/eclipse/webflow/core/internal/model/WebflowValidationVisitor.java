@@ -154,6 +154,15 @@ public class WebflowValidationVisitor implements IWebflowModelElementVisitor {
 			validateAttributeMapper(element);
 			return true;
 		}
+		else if (element instanceof RenderActions) {
+			return true;
+		}
+		else if (element instanceof ExitActions) {
+			return true;
+		}
+		else if (element instanceof EntryActions) {
+			return true;
+		}
 		return false;
 	}
 
