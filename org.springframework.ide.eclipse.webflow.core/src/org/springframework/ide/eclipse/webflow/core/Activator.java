@@ -40,11 +40,11 @@ public class Activator extends AbstractUIPlugin {
 	 * The plugin.
 	 */
 	private static Activator plugin;
-	
-	 /**
- 	 * The singleton beans model.
- 	 */
-    private final static WebflowModel WEBFLOW_MODEL = new WebflowModel();
+
+	/**
+	 * The singleton beans model.
+	 */
+	private final static WebflowModel WEBFLOW_MODEL = new WebflowModel();
 
 	/**
 	 * The Constructor.
@@ -53,7 +53,8 @@ public class Activator extends AbstractUIPlugin {
 		plugin = this;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -62,7 +63,8 @@ public class Activator extends AbstractUIPlugin {
 		WEBFLOW_MODEL.startup();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -71,11 +73,11 @@ public class Activator extends AbstractUIPlugin {
 		super.stop(context);
 		WEBFLOW_MODEL.shutdown();
 	}
-	
+
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public static IWebflowModel getModel() {
 		return WEBFLOW_MODEL;
@@ -89,11 +91,11 @@ public class Activator extends AbstractUIPlugin {
 	public static Activator getDefault() {
 		return plugin;
 	}
-	
+
 	/**
 	 * 
 	 * 
-	 * @param status 
+	 * @param status
 	 */
 	public static void log(IStatus status) {
 		getDefault().getLog().log(status);
@@ -102,7 +104,7 @@ public class Activator extends AbstractUIPlugin {
 	/**
 	 * Writes the message to the plug-in's log.
 	 * 
-	 * @param exception 
+	 * @param exception
 	 * @param message the text to write to the log
 	 */
 	public static void log(String message, Throwable exception) {
@@ -113,20 +115,20 @@ public class Activator extends AbstractUIPlugin {
 	/**
 	 * 
 	 * 
-	 * @param exception 
+	 * @param exception
 	 */
 	public static void log(Throwable exception) {
 		getDefault().getLog().log(
 				createErrorStatus("Internal Error", exception));
 	}
-	
+
 	/**
 	 * Returns a new <code>IStatus</code> for this plug-in.
 	 * 
-	 * @param exception 
-	 * @param message 
+	 * @param exception
+	 * @param message
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public static IStatus createErrorStatus(String message, Throwable exception) {
 		if (message == null) {

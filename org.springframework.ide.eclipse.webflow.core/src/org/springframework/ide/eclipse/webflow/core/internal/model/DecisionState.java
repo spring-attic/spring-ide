@@ -19,11 +19,16 @@ package org.springframework.ide.eclipse.webflow.core.internal.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IDecisionState;
+import org.springframework.ide.eclipse.webflow.core.model.IExceptionHandler;
 import org.springframework.ide.eclipse.webflow.core.model.IIf;
+import org.springframework.ide.eclipse.webflow.core.model.ITransition;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.w3c.dom.NodeList;
 
@@ -42,16 +47,11 @@ public class DecisionState extends AbstractTransitionableFrom implements
 	 */
 	private List<IIf> ifs = null;
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.internal.model.AbstractTransitionableFrom#init(org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode,
-	 * org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param node 
-	 * @param parent 
+	 * @param node
+	 * @param parent
 	 */
 	@Override
 	public void init(IDOMNode node, IWebflowModelElement parent) {
@@ -94,35 +94,19 @@ public class DecisionState extends AbstractTransitionableFrom implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.IDecisionState#getIfs()
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IDecisionState#getIfs()
-	 */
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public List<IIf> getIfs() {
 		return this.ifs;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.IDecisionState#addIf(org.springframework.ide.eclipse.web.flow.core.model.IIf)
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IDecisionState#addIf(org.springframework.ide.eclipse.webflow.core.model.IIf)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param theIf 
+	 * @param theIf
 	 */
 	public void addIf(IIf theIf) {
 		if (!this.ifs.contains(theIf)) {
@@ -132,21 +116,11 @@ public class DecisionState extends AbstractTransitionableFrom implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.IDecisionState#addIf(org.springframework.ide.eclipse.web.flow.core.model.IIf,
-	 * int)
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IDecisionState#addIf(org.springframework.ide.eclipse.webflow.core.model.IIf,
-	 * int)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param i 
-	 * @param theIf 
+	 * @param i
+	 * @param theIf
 	 */
 	public void addIf(IIf theIf, int i) {
 		if (!this.ifs.contains(theIf)) {
@@ -155,18 +129,10 @@ public class DecisionState extends AbstractTransitionableFrom implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.IDecisionState#removeIf(org.springframework.ide.eclipse.web.flow.core.model.IIf)
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IDecisionState#removeIf(org.springframework.ide.eclipse.webflow.core.model.IIf)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param theIf 
+	 * @param theIf
 	 */
 	public void removeIf(IIf theIf) {
 		if (this.ifs.contains(theIf)) {
@@ -176,14 +142,10 @@ public class DecisionState extends AbstractTransitionableFrom implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IState#createNew(org.springframework.ide.eclipse.webflow.core.model.IWebflowState)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param parent 
+	 * @param parent
 	 */
 	public void createNew(IWebflowState parent) {
 		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
@@ -191,14 +153,10 @@ public class DecisionState extends AbstractTransitionableFrom implements
 		init(node, parent);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement#cloneModelElement()
-	 */
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public IDecisionState cloneModelElement() {
 		DecisionState state = new DecisionState();
@@ -206,14 +164,10 @@ public class DecisionState extends AbstractTransitionableFrom implements
 		return state;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement#applyCloneValues(org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param element 
+	 * @param element
 	 */
 	public void applyCloneValues(IDecisionState element) {
 		if (element != null) {
@@ -234,6 +188,49 @@ public class DecisionState extends AbstractTransitionableFrom implements
 			// }
 
 			super.fireStructureChange(MOVE_CHILDREN, new Integer(1));
+		}
+	}
+
+	public void accept(IWebflowModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
+
+			for (IAttribute state : getAttributes()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+			if (getEntryActions() != null) {
+				getEntryActions().accept(visitor, monitor);
+			}
+			if (monitor.isCanceled()) {
+				return;
+			}
+			for (IIf state : getIfs()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+			if (monitor.isCanceled()) {
+				return;
+			}
+			if (getExitActions() != null) {
+				getExitActions().accept(visitor, monitor);
+			}
+			for (IExceptionHandler state : getExceptionHandlers()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+			for (ITransition state : getOutputTransitions()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
 		}
 	}
 }

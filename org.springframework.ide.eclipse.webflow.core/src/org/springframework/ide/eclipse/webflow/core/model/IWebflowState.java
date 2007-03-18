@@ -194,9 +194,9 @@ public interface IWebflowState extends ITransitionableFrom {
 	 * @param outputMapper the output mapper
 	 */
 	void setOutputMapper(IOutputMapper outputMapper);
-	
+
 	List<IInlineFlowState> getInlineFlowStates();
-	
+
 	/**
 	 * Adds the state.
 	 * 
@@ -226,6 +226,5 @@ public interface IWebflowState extends ITransitionableFrom {
 	 * @param state the state
 	 */
 	void removeInlineFlowState(IInlineFlowState state);
-
 
 }

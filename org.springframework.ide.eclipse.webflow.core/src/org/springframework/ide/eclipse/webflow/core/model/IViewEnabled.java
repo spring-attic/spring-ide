@@ -20,7 +20,7 @@ package org.springframework.ide.eclipse.webflow.core.model;
  * 
  */
 public interface IViewEnabled extends IWebflowModelElement {
-	
+
 	/**
 	 * Gets the view.
 	 * 

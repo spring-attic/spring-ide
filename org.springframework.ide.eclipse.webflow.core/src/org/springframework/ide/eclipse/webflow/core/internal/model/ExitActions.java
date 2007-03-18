@@ -19,10 +19,12 @@ package org.springframework.ide.eclipse.webflow.core.internal.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IExitActions;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.w3c.dom.NodeList;
 
@@ -83,10 +85,6 @@ public class ExitActions extends WebflowModelElement implements IExitActions {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.IActionState#addAction(org.springframework.ide.eclipse.web.core.model.IAction)
-	 */
 	/**
 	 * Adds the exit action.
 	 * 
@@ -102,11 +100,6 @@ public class ExitActions extends WebflowModelElement implements IExitActions {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.IActionState#addAction(org.springframework.ide.eclipse.web.flow.core.model.IAction,
-	 * int)
-	 */
 	/**
 	 * Adds the exit action.
 	 * 
@@ -117,7 +110,8 @@ public class ExitActions extends WebflowModelElement implements IExitActions {
 		if (!this.exitActions.contains(action)) {
 			if (this.exitActions.size() > i) {
 				IActionElement ref = this.exitActions.get(i);
-				WebflowModelXmlUtils.insertBefore(action.getNode(), ref.getNode());
+				WebflowModelXmlUtils.insertBefore(action.getNode(), ref
+						.getNode());
 			}
 			else {
 				WebflowModelXmlUtils.insertNode(action.getNode(), node);
@@ -128,10 +122,6 @@ public class ExitActions extends WebflowModelElement implements IExitActions {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.IActionState#getActions()
-	 */
 	/**
 	 * Gets the exit actions.
 	 * 
@@ -141,10 +131,6 @@ public class ExitActions extends WebflowModelElement implements IExitActions {
 		return this.exitActions;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.IActionState#removeAction(org.springframework.ide.eclipse.web.core.model.IAction)
-	 */
 	/**
 	 * Removes the exit action.
 	 * 
@@ -185,5 +171,17 @@ public class ExitActions extends WebflowModelElement implements IExitActions {
 			getNode().removeChild(action.getNode());
 		}
 		this.exitActions = new ArrayList<IActionElement>();
+	}
+
+	public void accept(IWebflowModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
+			for (IActionElement state : getExitActions()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+		}
 	}
 }

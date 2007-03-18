@@ -25,40 +25,40 @@ import org.eclipse.core.resources.IProject;
  * 
  */
 public interface IWebflowProject {
-	
+
 	/**
 	 * 
 	 */
 	String DESCRIPTION_FILE = ".springWebflow";
-	
+
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	List<IWebflowConfig> getConfigs();
-	
+
 	/**
 	 * 
 	 * 
-	 * @param configs 
+	 * @param configs
 	 */
 	void setConfigs(List<IWebflowConfig> configs);
-	
+
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	IProject getProject();
-	
+
 	/**
 	 * 
 	 * 
-	 * @param file 
+	 * @param file
 	 * 
-	 * @return 
+	 * @return
 	 */
 	IWebflowConfig getConfig(IFile file);
-	
+
 }

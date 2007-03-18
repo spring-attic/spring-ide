@@ -16,11 +16,16 @@
 
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IExceptionHandler;
 import org.springframework.ide.eclipse.webflow.core.model.IRenderActions;
+import org.springframework.ide.eclipse.webflow.core.model.ITransition;
 import org.springframework.ide.eclipse.webflow.core.model.IViewState;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.w3c.dom.NodeList;
 
@@ -148,5 +153,45 @@ public class ViewState extends AbstractTransitionableFrom implements
 			WebflowModelXmlUtils.insertNode(renderActions.getNode(), getNode());
 		}
 		super.fireStructureChange(MOVE_CHILDREN, new Integer(1));
+	}
+
+	public void accept(IWebflowModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
+
+			for (IAttribute state : getAttributes()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+			if (getEntryActions() != null) {
+				getEntryActions().accept(visitor, monitor);
+			}
+			if (monitor.isCanceled()) {
+				return;
+			}
+			if (getRenderActions() != null) {
+				getRenderActions().accept(visitor, monitor);
+			}
+			if (monitor.isCanceled()) {
+				return;
+			}
+			if (getExitActions() != null) {
+				getExitActions().accept(visitor, monitor);
+			}
+			for (IExceptionHandler state : getExceptionHandlers()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+			for (ITransition state : getOutputTransitions()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+		}
 	}
 }

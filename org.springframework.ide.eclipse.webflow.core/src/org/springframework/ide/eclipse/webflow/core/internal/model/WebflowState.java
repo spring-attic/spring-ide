@@ -19,9 +19,12 @@ package org.springframework.ide.eclipse.webflow.core.internal.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IDecisionState;
+import org.springframework.ide.eclipse.webflow.core.model.IExceptionHandler;
 import org.springframework.ide.eclipse.webflow.core.model.IIf;
 import org.springframework.ide.eclipse.webflow.core.model.IIfTransition;
 import org.springframework.ide.eclipse.webflow.core.model.IImport;
@@ -35,6 +38,7 @@ import org.springframework.ide.eclipse.webflow.core.model.ITransitionableFrom;
 import org.springframework.ide.eclipse.webflow.core.model.ITransitionableTo;
 import org.springframework.ide.eclipse.webflow.core.model.IVar;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.w3c.dom.NodeList;
 
@@ -45,7 +49,7 @@ import org.w3c.dom.NodeList;
 @SuppressWarnings("restriction")
 public class WebflowState extends AbstractTransitionableFrom implements
 		IWebflowState, ICloneableModelElement<IWebflowState> {
-
+	
 	/**
 	 * The imports.
 	 */
@@ -76,11 +80,6 @@ public class WebflowState extends AbstractTransitionableFrom implements
 	 */
 	private List<IVar> vars;
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.internal.model.AbstractTransitionableFrom#init(org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode,
-	 * org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement)
-	 */
 	/**
 	 * @param node
 	 * @param parent
@@ -194,14 +193,6 @@ public class WebflowState extends AbstractTransitionableFrom implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.ISubFlowState#addChildState(org.springframework.ide.eclipse.web.core.model.IState)
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowState#addImport(org.springframework.ide.eclipse.webflow.core.model.IImport)
-	 */
 	/**
 	 * @param ip
 	 */
@@ -213,16 +204,6 @@ public class WebflowState extends AbstractTransitionableFrom implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.ISubFlowState#addChildState(org.springframework.ide.eclipse.web.core.model.IState,
-	 * int)
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowState#addImport(org.springframework.ide.eclipse.webflow.core.model.IImport,
-	 * int)
-	 */
 	/**
 	 * @param i
 	 * @param pm
@@ -235,14 +216,6 @@ public class WebflowState extends AbstractTransitionableFrom implements
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.ISubFlowState#addChildState(org.springframework.ide.eclipse.web.core.model.IState)
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowState#addState(org.springframework.ide.eclipse.webflow.core.model.IState)
-	 */
 	/**
 	 * @param state
 	 */
@@ -318,16 +291,6 @@ public class WebflowState extends AbstractTransitionableFrom implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.ISubFlowState#addChildState(org.springframework.ide.eclipse.web.core.model.IState,
-	 * int)
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowState#addState(org.springframework.ide.eclipse.webflow.core.model.IState,
-	 * int)
-	 */
 	/**
 	 * @param i
 	 * @param state
@@ -340,20 +303,13 @@ public class WebflowState extends AbstractTransitionableFrom implements
 			}
 			IState refState = getStates().get(refIndex);
 			this.states.add(i, state);
-			WebflowModelXmlUtils.insertBefore(state.getNode(), refState.getNode());
+			WebflowModelXmlUtils.insertBefore(state.getNode(), refState
+					.getNode());
 			super.firePropertyChange(ADD_CHILDREN, new Integer(i), state);
 		}
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.ISubFlowState#addChildState(org.springframework.ide.eclipse.web.core.model.IState)
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowState#addVar(org.springframework.ide.eclipse.webflow.core.model.IVar)
-	 */
 	/**
 	 * @param state
 	 */
@@ -365,16 +321,6 @@ public class WebflowState extends AbstractTransitionableFrom implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.ISubFlowState#addChildState(org.springframework.ide.eclipse.web.core.model.IState,
-	 * int)
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowState#addVar(org.springframework.ide.eclipse.webflow.core.model.IVar,
-	 * int)
-	 */
 	/**
 	 * @param i
 	 * @param state
@@ -386,14 +332,6 @@ public class WebflowState extends AbstractTransitionableFrom implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState#getStates()
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowState#getImports()
-	 */
 	/**
 	 * @return
 	 */
@@ -401,10 +339,6 @@ public class WebflowState extends AbstractTransitionableFrom implements
 		return this.imports;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowState#getInputMapper()
-	 */
 	/**
 	 * @return
 	 */
@@ -412,10 +346,6 @@ public class WebflowState extends AbstractTransitionableFrom implements
 		return inputMapper;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowState#getOutputMapper()
-	 */
 	/**
 	 * @return
 	 */
@@ -423,10 +353,6 @@ public class WebflowState extends AbstractTransitionableFrom implements
 		return outputMapper;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowState#getStartState()
-	 */
 	/**
 	 * @return
 	 */
@@ -499,7 +425,8 @@ public class WebflowState extends AbstractTransitionableFrom implements
 			IState refState = getStates().get(refIndex);
 			removeState(state);
 			this.states.add(i, state);
-			WebflowModelXmlUtils.insertBefore(state.getNode(), refState.getNode());
+			WebflowModelXmlUtils.insertBefore(state.getNode(), refState
+					.getNode());
 			super.firePropertyChange(MOVE_CHILDREN, new Integer(i), state);
 		}
 	}
@@ -550,14 +477,14 @@ public class WebflowState extends AbstractTransitionableFrom implements
 	 */
 	public void setStartState(IState state) {
 		IState oldState = getStartState();
-		
+
 		List<IDOMNode> nodes = getChildrenNodeByTagName("start-state");
 		IDOMNode node = nodes.get(0);
 		setAttribute(node, "idref", state.getId());
-		
+
 		removeState(state);
 		addState(state, 0);
-		
+
 		oldState.fireStructureChange(PROPS, oldState);
 		super.fireStructureChange(MOVE_CHILDREN, state);
 		state.fireStructureChange(PROPS, state);
@@ -622,14 +549,6 @@ public class WebflowState extends AbstractTransitionableFrom implements
 		super.fireStructureChange(ADD_CHILDREN, inputMapper);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.ISubFlowState#addChildState(org.springframework.ide.eclipse.web.core.model.IState)
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowState#addState(org.springframework.ide.eclipse.webflow.core.model.IState)
-	 */
 	/**
 	 * @param state
 	 */
@@ -655,7 +574,8 @@ public class WebflowState extends AbstractTransitionableFrom implements
 			}
 			IState refState = getStates().get(refIndex);
 			this.inlineFlows.add(i, state);
-			WebflowModelXmlUtils.insertBefore(state.getNode(), refState.getNode());
+			WebflowModelXmlUtils.insertBefore(state.getNode(), refState
+					.getNode());
 			super.firePropertyChange(ADD_CHILDREN, new Integer(i), state);
 		}
 
@@ -676,6 +596,58 @@ public class WebflowState extends AbstractTransitionableFrom implements
 			this.inlineFlows.remove(state);
 			getNode().removeChild(state.getNode());
 			super.fireStructureChange(REMOVE_CHILDREN, state);
+		}
+	}
+
+	public void accept(IWebflowModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
+
+			for (IState state : getStates()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+			for (IImport state : getImports()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+			for (IInlineFlowState state : getInlineFlowStates()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+			for (IAttribute state : getAttributes()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+			for (IVar state : getVars()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+			for (IExceptionHandler state : getExceptionHandlers()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+			if (monitor.isCanceled()) {
+				return;
+			}
+			if (getInputMapper() != null) {
+				getInputMapper().accept(visitor, monitor);
+			}
+			if (getOutputMapper() != null) {
+				getOutputMapper().accept(visitor, monitor);
+			}
 		}
 	}
 }

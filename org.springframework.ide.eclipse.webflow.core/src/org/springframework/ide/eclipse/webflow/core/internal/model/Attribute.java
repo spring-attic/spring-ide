@@ -16,9 +16,11 @@
 
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 
 /**
  * 
@@ -29,96 +31,73 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 @SuppressWarnings("restriction")
 public class Attribute extends WebflowModelElement implements IAttribute {
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IAttribute#getName()
-	 */
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public String getName() {
 		return getAttribute("name");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IAttribute#getType()
-	 */
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public String getType() {
 		return getAttribute("type");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IAttribute#getValue()
-	 */
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public String getValue() {
 		return getAttribute("value");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IAttribute#setName(java.lang.String)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param name 
+	 * @param name
 	 */
 	public void setName(String name) {
 		setAttribute("name", name);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IAttribute#setType(java.lang.String)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param type 
+	 * @param type
 	 */
 	public void setType(String type) {
 		setAttribute("type", type);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IAttribute#setValue(java.lang.String)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param value 
+	 * @param value
 	 */
 	public void setValue(String value) {
 		setAttribute("value", value);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IAttribute#createNew(org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param parent 
+	 * @param parent
 	 */
 	public void createNew(IWebflowModelElement parent) {
 		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
 				.createElement("attribute");
 		init(node, parent);
+	}
+
+	public void accept(IWebflowModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+		visitor.visit(this, monitor);
 	}
 }

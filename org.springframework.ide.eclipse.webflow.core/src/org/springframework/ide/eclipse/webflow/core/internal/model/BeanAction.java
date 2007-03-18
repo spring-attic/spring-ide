@@ -16,12 +16,15 @@
 
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.IBeanAction;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IMethodArguments;
 import org.springframework.ide.eclipse.webflow.core.model.IMethodResult;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.w3c.dom.NodeList;
 
 /**
@@ -99,7 +102,8 @@ public class BeanAction extends AbstractAction implements IBeanAction,
 		}
 		this.methodArguments = methodArguments;
 		if (methodArguments != null) {
-			WebflowModelXmlUtils.insertNode(methodArguments.getNode(), getNode());
+			WebflowModelXmlUtils.insertNode(methodArguments.getNode(),
+					getNode());
 		}
 		super.fireStructureChange(MOVE_CHILDREN, new Integer(1));
 	}
@@ -159,5 +163,30 @@ public class BeanAction extends AbstractAction implements IBeanAction,
 		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
 				.createElement("bean-action");
 		init(node, parent);
+	}
+
+	public void accept(IWebflowModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
+
+			for (IAttribute state : getAttributes()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+			if (monitor.isCanceled()) {
+				return;
+			}
+			if (getMethodArguments() != null) {
+				getMethodArguments().accept(visitor, monitor);
+			}
+			if (monitor.isCanceled()) {
+				return;
+			}
+			if (getMethodResult() != null) {
+				getMethodResult().accept(visitor, monitor);
+			}
+		}
 	}
 }

@@ -16,11 +16,15 @@
 
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IEndState;
+import org.springframework.ide.eclipse.webflow.core.model.IExceptionHandler;
 import org.springframework.ide.eclipse.webflow.core.model.IOutputMapper;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.w3c.dom.NodeList;
 
@@ -39,16 +43,11 @@ public class EndState extends AbstractTransitionableTo implements IEndState,
 	 */
 	private IOutputMapper outputMapper;
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.internal.model.AbstractTransitionableTo#init(org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode,
-	 * org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param node 
-	 * @param parent 
+	 * @param node
+	 * @param parent
 	 */
 	@Override
 	public void init(IDOMNode node, IWebflowModelElement parent) {
@@ -68,40 +67,28 @@ public class EndState extends AbstractTransitionableTo implements IEndState,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IEndState#getView()
-	 */
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public String getView() {
 		return getAttribute("view");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IEndState#setView(java.lang.String)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param view 
+	 * @param view
 	 */
 	public void setView(String view) {
 		setAttribute("view", view);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IState#createNew(org.springframework.ide.eclipse.webflow.core.model.IWebflowState)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param parent 
+	 * @param parent
 	 */
 	public void createNew(IWebflowState parent) {
 		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
@@ -109,14 +96,10 @@ public class EndState extends AbstractTransitionableTo implements IEndState,
 		init(node, parent);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement#cloneModelElement()
-	 */
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public IEndState cloneModelElement() {
 		EndState state = new EndState();
@@ -124,14 +107,10 @@ public class EndState extends AbstractTransitionableTo implements IEndState,
 		return state;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement#applyCloneValues(org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param element 
+	 * @param element
 	 */
 	public void applyCloneValues(IEndState element) {
 		if (element != null) {
@@ -145,27 +124,19 @@ public class EndState extends AbstractTransitionableTo implements IEndState,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IEndState#getOutputMapper()
-	 */
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public IOutputMapper getOutputMapper() {
 		return this.outputMapper;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IEndState#setOutputMapper(org.springframework.ide.eclipse.webflow.core.model.IOutputMapper)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param outputMapper 
+	 * @param outputMapper
 	 */
 	public void setOutputMapper(IOutputMapper outputMapper) {
 		if (this.outputMapper != null) {
@@ -176,5 +147,30 @@ public class EndState extends AbstractTransitionableTo implements IEndState,
 			WebflowModelXmlUtils.insertNode(outputMapper.getNode(), getNode());
 		}
 		super.fireStructureChange(ADD_CHILDREN, outputMapper);
+	}
+
+	public void accept(IWebflowModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
+
+			for (IAttribute state : getAttributes()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+			if (getEntryActions() != null) {
+				getEntryActions().accept(visitor, monitor);
+			}
+			if (monitor.isCanceled()) {
+				return;
+			}
+			for (IExceptionHandler state : getExceptionHandlers()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+		}
 	}
 }

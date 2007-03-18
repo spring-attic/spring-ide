@@ -16,9 +16,11 @@
 
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.webflow.core.model.IIf;
 import org.springframework.ide.eclipse.webflow.core.model.IIfTransition;
 import org.springframework.ide.eclipse.webflow.core.model.ITransitionableTo;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.w3c.dom.Node;
 
@@ -63,10 +65,6 @@ public class IfTransition extends Transition implements IIfTransition {
 				isThen));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.IIfTransition#getFromState()
-	 */
 	/**
 	 * Gets the from if.
 	 * @return the from if
@@ -75,10 +73,6 @@ public class IfTransition extends Transition implements IIfTransition {
 		return (IIf) this.parent;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.IIfTransition#setFromIf(org.springframework.ide.eclipse.web.flow.core.model.IIf)
-	 */
 	/**
 	 * Sets the from if.
 	 * @param fromIf the from if
@@ -147,5 +141,10 @@ public class IfTransition extends Transition implements IIfTransition {
 			}
 			super.fireStructureChange(OUTPUTS, state);
 		}
+	}
+
+	public void accept(IWebflowModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+		visitor.visit(this, monitor);
 	}
 }

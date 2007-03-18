@@ -29,81 +29,81 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
  */
 public class WebflowProjectDescription {
 
-    /**
-     * 
-     */
-    private IWebflowProject project;
-    
-    /**
-     * 
-     */
-    private List<IWebflowConfig> configs;
+	/**
+	 * 
+	 */
+	private IWebflowProject project;
 
-    /**
-     * 
-     * 
-     * @param project 
-     */
-    public WebflowProjectDescription(IWebflowProject project) {
-        this.project = project;
-        this.configs = new ArrayList<IWebflowConfig>();
-    }
+	/**
+	 * 
+	 */
+	private List<IWebflowConfig> configs;
 
-    /**
-     * 
-     * 
-     * @param file 
-     * 
-     * @return 
-     */
-    public IWebflowConfig addConfig(IFile file) {
-    	IWebflowConfig config = new WebflowConfig(project);
-    	config.setResource(file);
-    	configs.add(config);
-    	return config;
-    }
-    
-    /**
-     * 
-     * 
-     * @param file 
-     */
-    public void add(IWebflowConfig file) {
-    	configs.add(file);
-    }
+	/**
+	 * 
+	 * 
+	 * @param project
+	 */
+	public WebflowProjectDescription(IWebflowProject project) {
+		this.project = project;
+		this.configs = new ArrayList<IWebflowConfig>();
+	}
 
-    /**
-     * 
-     * 
-     * @return 
-     */
-    public List<IWebflowConfig> getConfigs() {
-        return configs;
-    }
+	/**
+	 * 
+	 * 
+	 * @param file
+	 * 
+	 * @return
+	 */
+	public IWebflowConfig addConfig(IFile file) {
+		IWebflowConfig config = new WebflowConfig(project);
+		config.setResource(file);
+		configs.add(config);
+		return config;
+	}
 
-    /**
-     * 
-     * 
-     * @param file 
-     */
-    public void removeConfig(IFile file) {
-    	IWebflowConfig config = null;
-    	for (IWebflowConfig c : configs) {
-    		if (c.getResource().equals(file)) {
-    			config = c;
-    		}
-    	}
-    	if (config != null) {
-    		configs.remove(config);
-    	}
-    }
-    
-    /**
-     * 
-     * 
-     * @param configs 
-     */
-    public void setConfigs(List<IWebflowConfig> configs) {
-    	this.configs = configs;
-    }
+	/**
+	 * 
+	 * 
+	 * @param file
+	 */
+	public void add(IWebflowConfig file) {
+		configs.add(file);
+	}
+
+	/**
+	 * 
+	 * 
+	 * @return
+	 */
+	public List<IWebflowConfig> getConfigs() {
+		return configs;
+	}
+
+	/**
+	 * 
+	 * 
+	 * @param file
+	 */
+	public void removeConfig(IFile file) {
+		IWebflowConfig config = null;
+		for (IWebflowConfig c : configs) {
+			if (c.getResource().equals(file)) {
+				config = c;
+			}
+		}
+		if (config != null) {
+			configs.remove(config);
+		}
+	}
+
+	/**
+	 * 
+	 * 
+	 * @param configs
+	 */
+	public void setConfigs(List<IWebflowConfig> configs) {
+		this.configs = configs;
+	}
 }

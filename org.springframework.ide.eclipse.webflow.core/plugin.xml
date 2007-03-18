@@ -23,4 +23,11 @@
 		</builder>
 	</extension>
 
+	<extension id="problemmarker" name="%webflowProblemMarker"
+		point="org.eclipse.core.resources.markers">
+		<super
+			type="org.springframework.ide.eclipse.core.problemmarker" />
+		<persistent value="true" />
+	</extension>
+
 </plugin>

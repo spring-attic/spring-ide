@@ -16,7 +16,9 @@
 
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.webflow.core.model.IVar;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 
 /**
  * 
@@ -97,5 +99,10 @@ public class Variable extends AbstractModelElement implements IVar {
 	 */
 	public void setScope(String scope) {
 		setAttribute("scope", scope);
+	}
+
+	public void accept(IWebflowModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+		visitor.visit(this, monitor);
 	}
 }

@@ -16,11 +16,14 @@
 
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IEvaluateAction;
 import org.springframework.ide.eclipse.webflow.core.model.IEvaluationResult;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.w3c.dom.NodeList;
 
 /**
@@ -37,25 +40,25 @@ public class EvaluateAction extends AbstractActionElement implements
 	 * 
 	 */
 	private ACTION_TYPE type;
-	
+
 	/**
 	 * 
 	 * 
-	 * @param type 
+	 * @param type
 	 */
 	public void setType(ACTION_TYPE type) {
 		this.type = type;
 	}
-	
+
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public ACTION_TYPE getType() {
 		return this.type;
 	}
-	
+
 	/**
 	 * The evaluation result.
 	 */
@@ -113,7 +116,8 @@ public class EvaluateAction extends AbstractActionElement implements
 		}
 		this.evaluationResult = evaluationResult;
 		if (evaluationResult != null) {
-			WebflowModelXmlUtils.insertNode(evaluationResult.getNode(), getNode());
+			WebflowModelXmlUtils.insertNode(evaluationResult.getNode(),
+					getNode());
 		}
 		super.fireStructureChange(MOVE_CHILDREN, new Integer(1));
 	}
@@ -202,5 +206,21 @@ public class EvaluateAction extends AbstractActionElement implements
 		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
 				.createElement("evaluate-action");
 		init(node, parent);
+	}
+
+	public void accept(IWebflowModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
+
+			for (IAttribute state : getAttributes()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+			if (getEvaluationResult() != null) {
+				getEvaluationResult().accept(visitor, monitor);
+			}
+		}
 	}
 }

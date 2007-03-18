@@ -37,6 +37,6 @@ public interface ITransition extends IWebflowModelElement {
 	 * @param toState the to state
 	 */
 	void setToState(ITransitionableTo toState);
-	
+
 	String getToStateId();
 }

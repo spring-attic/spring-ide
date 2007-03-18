@@ -16,12 +16,14 @@
 
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IInputMapper;
 import org.springframework.ide.eclipse.webflow.core.model.IOutputMapper;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.w3c.dom.NodeList;
 
 /**
@@ -44,16 +46,11 @@ public class AttributeMapper extends AbstractModelElement implements
 	 */
 	private IOutputMapper outputMapper;
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.internal.model.AbstractModelElement#init(org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode,
-	 * org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param node 
-	 * @param parent 
+	 * @param node
+	 * @param parent
 	 */
 	@Override
 	public void init(IDOMNode node, IWebflowModelElement parent) {
@@ -75,66 +72,46 @@ public class AttributeMapper extends AbstractModelElement implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IAttributeMapper#getBean()
-	 */
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public String getBean() {
 		return getAttribute("bean");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IAttributeMapper#getInputMapper()
-	 */
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public IInputMapper getInputMapper() {
 		return this.inputMapper;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IAttributeMapper#setBean(java.lang.String)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param bean 
+	 * @param bean
 	 */
 	public void setBean(String bean) {
 		setAttribute("bean", bean);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IAttributeMapper#getOutputMapper()
-	 */
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public IOutputMapper getOutputMapper() {
 		return this.outputMapper;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IAttributeMapper#setOutputMapper(org.springframework.ide.eclipse.webflow.core.model.IOutputMapper)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param outputMapper 
+	 * @param outputMapper
 	 */
 	public void setOutputMapper(IOutputMapper outputMapper) {
 		if (this.outputMapper != null) {
@@ -147,14 +124,10 @@ public class AttributeMapper extends AbstractModelElement implements
 		super.fireStructureChange(ADD_CHILDREN, outputMapper);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IAttributeMapper#setInputMapper(org.springframework.ide.eclipse.webflow.core.model.IInputMapper)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param inputMapper 
+	 * @param inputMapper
 	 */
 	public void setInputMapper(IInputMapper inputMapper) {
 		if (this.inputMapper != null) {
@@ -167,14 +140,10 @@ public class AttributeMapper extends AbstractModelElement implements
 		super.fireStructureChange(ADD_CHILDREN, inputMapper);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement#cloneModelElement()
-	 */
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public IAttributeMapper cloneModelElement() {
 		AttributeMapper state = new AttributeMapper();
@@ -182,14 +151,10 @@ public class AttributeMapper extends AbstractModelElement implements
 		return state;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement#applyCloneValues(org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param element 
+	 * @param element
 	 */
 	public void applyCloneValues(IAttributeMapper element) {
 		if (element != null) {
@@ -202,18 +167,30 @@ public class AttributeMapper extends AbstractModelElement implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IAttributeMapper#createNew(org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param parent 
+	 * @param parent
 	 */
 	public void createNew(IWebflowModelElement parent) {
 		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
 				.createElement("attribute-mapper");
 		init(node, parent);
+	}
+
+	public void accept(IWebflowModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
+
+			if (getInputMapper() != null) {
+				getInputMapper().accept(visitor, monitor);
+			}
+			if (monitor.isCanceled()) {
+				return;
+			}
+			if (getOutputMapper() != null) {
+				getOutputMapper().accept(visitor, monitor);
+			}
+		}
 	}
 }

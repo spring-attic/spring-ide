@@ -16,9 +16,11 @@
 
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.webflow.core.model.IInputAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 
 /**
  * 
@@ -27,7 +29,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public class InputAttribute extends AbstractModelElement implements
+public class InputAttribute extends WebflowModelElement implements
 		IInputAttribute {
 
 	/**
@@ -98,5 +100,10 @@ public class InputAttribute extends AbstractModelElement implements
 		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
 				.createElement("input-attribute");
 		init(node, parent);
+	}
+
+	public void accept(IWebflowModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+		visitor.visit(this, monitor);
 	}
 }

@@ -36,86 +36,87 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
  * 
  */
 public class WebflowProjectDescriptionWriter implements
-        IWebflowProjectDescriptionConstants {
+		IWebflowProjectDescriptionConstants {
 
-    /**
-     * 
-     * 
-     * @param description 
-     * @param project 
-     */
-    public static void write(IProject project,
-            WebflowProjectDescription description) {
-        IFile file = project
-                .getFile(new Path(IWebflowProject.DESCRIPTION_FILE));
-        try {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            try {
-                XMLWriter writer = new XMLWriter(os);
-                write(description, writer);
-                writer.flush();
-                writer.close();
-            }
-            finally {
-                os.close();
-            }
-            if (!file.exists()) {
-                file.create(new ByteArrayInputStream(os.toByteArray()),
-                        IResource.NONE, null);
-            }
-            else {
-                file.setContents(new ByteArrayInputStream(os.toByteArray()),
-                        IResource.FORCE, null);
-            }
-        }
-        catch (IOException e) {
-        }
-        catch (CoreException e) {
-        }
-    }
+	/**
+	 * 
+	 * 
+	 * @param description
+	 * @param project
+	 */
+	public static void write(IProject project,
+			WebflowProjectDescription description) {
+		IFile file = project
+				.getFile(new Path(IWebflowProject.DESCRIPTION_FILE));
+		try {
+			ByteArrayOutputStream os = new ByteArrayOutputStream();
+			try {
+				XMLWriter writer = new XMLWriter(os);
+				write(description, writer);
+				writer.flush();
+				writer.close();
+			}
+			finally {
+				os.close();
+			}
+			if (!file.exists()) {
+				file.create(new ByteArrayInputStream(os.toByteArray()),
+						IResource.NONE, null);
+			}
+			else {
+				file.setContents(new ByteArrayInputStream(os.toByteArray()),
+						IResource.FORCE, null);
+			}
+		}
+		catch (IOException e) {
+		}
+		catch (CoreException e) {
+		}
+	}
 
-    /**
-     * 
-     * 
-     * @param description 
-     * @param writer 
-     * 
-     * @throws IOException 
-     */
-    protected static void write(WebflowProjectDescription description,
-    		XMLWriter writer) throws IOException {
-        writer.startTag(PROJECT_DESCRIPTION, null);
-        write(CONFIGS, CONFIG, description.getConfigs(), writer);
-        writer.endTag(PROJECT_DESCRIPTION);
-    }
+	/**
+	 * 
+	 * 
+	 * @param description
+	 * @param writer
+	 * 
+	 * @throws IOException
+	 */
+	protected static void write(WebflowProjectDescription description,
+			XMLWriter writer) throws IOException {
+		writer.startTag(PROJECT_DESCRIPTION, null);
+		write(CONFIGS, CONFIG, description.getConfigs(), writer);
+		writer.endTag(PROJECT_DESCRIPTION);
+	}
 
-    /**
-     * 
-     * 
-     * @param elementTagName 
-     * @param writer 
-     * @param name 
-     * @param configs 
-     * 
-     * @throws IOException 
-     */
-    protected static void write(String name, String elementTagName,
-            List<IWebflowConfig> configs, XMLWriter writer) throws IOException {
-        writer.startTag(name, null);
-        if (configs != null) {
-        	for (IWebflowConfig config : configs) {
-        		writer.startTag(CONFIG, null);
-        		writer.printSimpleTag(FILE, config.getResource().getProjectRelativePath().toString());
-        		writer.printSimpleTag(NAME, config.getName());
-        		Set<IBeansConfig> beansConfigs = config.getBeansConfigs();
-        		if (beansConfigs != null) {
-        			for (IBeansConfig bc : beansConfigs) {
-        				writer.printSimpleTag(BEANS_CONFIG, bc.getElementID());
-        			}
-        		}
-        		writer.endTag(CONFIG);
-        	}
-        }
-        writer.endTag(name);
-    }
+	/**
+	 * 
+	 * 
+	 * @param elementTagName
+	 * @param writer
+	 * @param name
+	 * @param configs
+	 * 
+	 * @throws IOException
+	 */
+	protected static void write(String name, String elementTagName,
+			List<IWebflowConfig> configs, XMLWriter writer) throws IOException {
+		writer.startTag(name, null);
+		if (configs != null) {
+			for (IWebflowConfig config : configs) {
+				writer.startTag(CONFIG, null);
+				writer.printSimpleTag(FILE, config.getResource()
+						.getProjectRelativePath().toString());
+				writer.printSimpleTag(NAME, config.getName());
+				Set<IBeansConfig> beansConfigs = config.getBeansConfigs();
+				if (beansConfigs != null) {
+					for (IBeansConfig bc : beansConfigs) {
+						writer.printSimpleTag(BEANS_CONFIG, bc.getElementID());
+					}
+				}
+				writer.endTag(CONFIG);
+			}
+		}
+		writer.endTag(name);
+	}
 }

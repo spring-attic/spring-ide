@@ -19,17 +19,20 @@ package org.springframework.ide.eclipse.webflow.core.internal.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IActionState;
+import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IExceptionHandler;
+import org.springframework.ide.eclipse.webflow.core.model.ITransition;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.w3c.dom.NodeList;
 
 /**
- * 
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -42,16 +45,11 @@ public class ActionState extends AbstractTransitionableFrom implements
 	 */
 	private List<IActionElement> actions = null;
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.internal.model.AbstractTransitionableFrom#init(org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode,
-	 * org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param node 
-	 * @param parent 
+	 * @param node
+	 * @param parent
 	 */
 	@Override
 	public void init(IDOMNode node, IWebflowModelElement parent) {
@@ -91,35 +89,19 @@ public class ActionState extends AbstractTransitionableFrom implements
 		super.fireStructureChange(MOVE_CHILDREN, new Integer(1));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.IActionState#getActions()
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IActionState#getActions()
-	 */
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public List<IActionElement> getActions() {
 		return this.actions;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.IActionState#addAction(org.springframework.ide.eclipse.web.core.model.IAction)
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IActionState#addAction(org.springframework.ide.eclipse.webflow.core.model.IActionElement)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param action 
+	 * @param action
 	 */
 	public void addAction(IActionElement action) {
 		if (!this.actions.contains(action)) {
@@ -130,18 +112,10 @@ public class ActionState extends AbstractTransitionableFrom implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.IActionState#removeAction(org.springframework.ide.eclipse.web.core.model.IAction)
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IActionState#removeAction(org.springframework.ide.eclipse.webflow.core.model.IActionElement)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param action 
+	 * @param action
 	 */
 	public void removeAction(IActionElement action) {
 		if (this.actions.contains(action)) {
@@ -151,43 +125,31 @@ public class ActionState extends AbstractTransitionableFrom implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.IActionState#addAction(org.springframework.ide.eclipse.web.flow.core.model.IAction,
-	 * int)
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IActionState#addAction(org.springframework.ide.eclipse.webflow.core.model.IActionElement,
-	 * int)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param i 
-	 * @param action 
+	 * @param i
+	 * @param action
 	 */
 	public void addAction(IActionElement action, int i) {
 		if (!this.actions.contains(action)) {
 			if (this.actions.size() > i) {
 				IActionElement ref = this.actions.get(i);
-				WebflowModelXmlUtils.insertBefore(action.getNode(), ref.getNode());
+				WebflowModelXmlUtils.insertBefore(action.getNode(), ref
+						.getNode());
 			}
 			else {
 				WebflowModelXmlUtils.insertNode(action.getNode(), node);
-			}			this.actions.add(i, action);
+			}
+			this.actions.add(i, action);
 			super.firePropertyChange(ADD_CHILDREN, new Integer(i), action);
 		}
 	}
 
-	/*  
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IState#createNew(org.springframework.ide.eclipse.webflow.core.model.IWebflowState)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param parent 
+	 * @param parent
 	 */
 	public void createNew(IWebflowState parent) {
 		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
@@ -195,14 +157,10 @@ public class ActionState extends AbstractTransitionableFrom implements
 		init(node, parent);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement#cloneModelElement()
-	 */
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public IActionState cloneModelElement() {
 		ActionState state = new ActionState();
@@ -210,14 +168,10 @@ public class ActionState extends AbstractTransitionableFrom implements
 		return state;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement#applyCloneValues(org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param element 
+	 * @param element
 	 */
 	public void applyCloneValues(IActionState element) {
 		if (element != null) {
@@ -230,10 +184,6 @@ public class ActionState extends AbstractTransitionableFrom implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IActionState#removeAll()
-	 */
 	/**
 	 * 
 	 */
@@ -242,5 +192,48 @@ public class ActionState extends AbstractTransitionableFrom implements
 			getNode().removeChild(action.getNode());
 		}
 		this.actions = new ArrayList<IActionElement>();
+	}
+
+	public void accept(IWebflowModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
+
+			for (IAttribute state : getAttributes()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+			if (getEntryActions() != null) {
+				getEntryActions().accept(visitor, monitor);
+			}
+			if (monitor.isCanceled()) {
+				return;
+			}
+			for (IActionElement state : getActions()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+			if (monitor.isCanceled()) {
+				return;
+			}
+			if (getExitActions() != null) {
+				getExitActions().accept(visitor, monitor);
+			}
+			for (IExceptionHandler state : getExceptionHandlers()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+			for (ITransition state : getOutputTransitions()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+		}
 	}
 }

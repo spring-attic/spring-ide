@@ -16,9 +16,11 @@
 
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.webflow.core.model.IOutputAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 
 /**
  * 
@@ -39,5 +41,10 @@ public class OutputAttribute extends InputAttribute implements IOutputAttribute 
 		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
 				.createElement("output-attribute");
 		init(node, parent);
+	}
+
+	public void accept(IWebflowModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+		visitor.visit(this, monitor);
 	}
 }

@@ -78,7 +78,7 @@ public class WebflowModel implements IWebflowModel, IResourceChangeListener {
 		if (hasProject(project)) {
 			return (IWebflowProject) projects.get(project);
 		}
-		return null;
+		return new WebflowProject(project, this);
 	}
 
 	/**
@@ -195,7 +195,7 @@ public class WebflowModel implements IWebflowModel, IResourceChangeListener {
 	}
 
 	private class WebflowProjectVisitor implements IResourceDeltaVisitor {
-		
+
 		public boolean visit(IResourceDelta delta) throws CoreException {
 			IResource resource = delta.getResource();
 			switch (delta.getKind()) {

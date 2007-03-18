@@ -33,25 +33,25 @@ public abstract class AbstractAction extends AbstractActionElement implements
 	 * 
 	 */
 	private ACTION_TYPE type;
-	
+
 	/**
 	 * 
 	 * 
-	 * @param type 
+	 * @param type
 	 */
 	public void setType(ACTION_TYPE type) {
 		this.type = type;
 	}
-	
+
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public ACTION_TYPE getType() {
 		return this.type;
 	}
-	
+
 	/**
 	 * Gets the name.
 	 * 

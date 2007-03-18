@@ -75,7 +75,7 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 	 * 
 	 */
 	protected IWebflowProject project;
-	
+
 	/**
 	 * 
 	 */
@@ -109,7 +109,7 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 	/**
 	 * 
 	 * 
-	 * @param project 
+	 * @param project
 	 */
 	public WebflowProjectDescriptionHandler(IWebflowProject project) {
 		this.project = project;
@@ -123,7 +123,7 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public IStatus getStatus() {
 		return problems;
@@ -132,14 +132,16 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public WebflowProjectDescription getDescription() {
 		return description;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.xml.sax.helpers.DefaultHandler#startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
+	/*
+	 * (non-Javadoc)
+	 * @see org.xml.sax.helpers.DefaultHandler#startElement(java.lang.String,
+	 * java.lang.String, java.lang.String, org.xml.sax.Attributes)
 	 */
 	public void startElement(String uri, String elementName, String qname,
 			Attributes attributes) throws SAXException {
@@ -189,8 +191,10 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String, java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String,
+	 * java.lang.String, java.lang.String)
 	 */
 	public void endElement(String uri, String elementName, String qname)
 			throws SAXException {
@@ -204,7 +208,7 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 				state = S_PROJECT_DESC;
 			}
 			break;
-			
+
 		case S_NAME:
 			if (elementName.equals(NAME)) {
 				String config = charBuffer.toString().trim();
@@ -217,7 +221,7 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 				}
 			}
 			break;
-			
+
 		case S_FILE:
 			if (elementName.equals(FILE)) {
 				String config = charBuffer.toString().trim();
@@ -234,7 +238,7 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 				state = S_CONFIG;
 			}
 			break;
-		
+
 		case S_CONFIG:
 			if (elementName.equals(CONFIG)) {
 				state = S_CONFIG;
@@ -243,7 +247,7 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 				state = S_PROJECT_DESC;
 			}
 			break;
-			
+
 		case S_BEAN_CONFIG:
 			if (elementName.equals(BEANS_CONFIG)) {
 				String config = charBuffer.toString().trim();
@@ -259,7 +263,8 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 		charBuffer.setLength(0);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.xml.sax.helpers.DefaultHandler#characters(char[], int, int)
 	 */
 	public void characters(char[] chars, int offset, int length)
@@ -268,14 +273,16 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 		charBuffer.append(chars, offset, length);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.xml.sax.helpers.DefaultHandler#setDocumentLocator(org.xml.sax.Locator)
 	 */
 	public void setDocumentLocator(Locator locator) {
 		this.locator = locator;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.xml.sax.helpers.DefaultHandler#fatalError(org.xml.sax.SAXParseException)
 	 */
 	public void fatalError(SAXParseException error) throws SAXException {
@@ -283,14 +290,16 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 		throw error;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.xml.sax.helpers.DefaultHandler#error(org.xml.sax.SAXParseException)
 	 */
 	public void error(SAXParseException error) throws SAXException {
 		log(IStatus.WARNING, error);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.xml.sax.helpers.DefaultHandler#warning(org.xml.sax.SAXParseException)
 	 */
 	public void warning(SAXParseException error) throws SAXException {
@@ -300,8 +309,8 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 	/**
 	 * 
 	 * 
-	 * @param code 
-	 * @param error 
+	 * @param code
+	 * @param error
 	 */
 	public void log(int code, Throwable error) {
 		log(code, error.getMessage(), error);
@@ -310,9 +319,9 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 	/**
 	 * 
 	 * 
-	 * @param code 
-	 * @param errorMessage 
-	 * @param error 
+	 * @param code
+	 * @param errorMessage
+	 * @param error
 	 */
 	public void log(int code, String errorMessage, Throwable error) {
 		problems.add(new Status(code, Activator.PLUGIN_ID,

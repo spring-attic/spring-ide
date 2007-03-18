@@ -95,10 +95,10 @@ public interface IStateTransition extends ITransition {
 	 * @param parent the parent
 	 */
 	void createNew(IState parent, IWebflowState webflowState);
-	
+
 	String getOnException();
-	
+
 	void setOnException(String exception);
-	
+
 	String getToStateId();
 }

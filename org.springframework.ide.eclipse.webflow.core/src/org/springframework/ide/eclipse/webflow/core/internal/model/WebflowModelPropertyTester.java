@@ -42,7 +42,8 @@ public class WebflowModelPropertyTester extends PropertyTester {
 			IFile file = (IFile) receiver;
 			boolean isWebflowConfig = WebflowModelUtils.isWebflowConfig(file);
 			return expectedValue == null ? isWebflowConfig
-					: isWebflowConfig == ((Boolean) expectedValue).booleanValue();
+					: isWebflowConfig == ((Boolean) expectedValue)
+							.booleanValue();
 		}
 		return false;
 	}

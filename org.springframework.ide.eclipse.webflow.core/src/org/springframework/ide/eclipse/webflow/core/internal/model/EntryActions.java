@@ -19,10 +19,12 @@ package org.springframework.ide.eclipse.webflow.core.internal.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IEntryActions;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.w3c.dom.NodeList;
 
@@ -84,10 +86,6 @@ public class EntryActions extends WebflowModelElement implements IEntryActions {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.IActionState#addAction(org.springframework.ide.eclipse.web.core.model.IAction)
-	 */
 	/**
 	 * Adds the entry action.
 	 * 
@@ -103,10 +101,6 @@ public class EntryActions extends WebflowModelElement implements IEntryActions {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.IActionState#removeAction(org.springframework.ide.eclipse.web.core.model.IAction)
-	 */
 	/**
 	 * Removes the entry action.
 	 * 
@@ -121,11 +115,6 @@ public class EntryActions extends WebflowModelElement implements IEntryActions {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.IActionState#addAction(org.springframework.ide.eclipse.web.flow.core.model.IAction,
-	 * int)
-	 */
 	/**
 	 * Adds the entry action.
 	 * 
@@ -136,7 +125,8 @@ public class EntryActions extends WebflowModelElement implements IEntryActions {
 		if (!this.entryActions.contains(action)) {
 			if (this.entryActions.size() > i) {
 				IActionElement ref = this.entryActions.get(i);
-				WebflowModelXmlUtils.insertBefore(action.getNode(), ref.getNode());
+				WebflowModelXmlUtils.insertBefore(action.getNode(), ref
+						.getNode());
 			}
 			else {
 				WebflowModelXmlUtils.insertNode(action.getNode(), node);
@@ -184,4 +174,16 @@ public class EntryActions extends WebflowModelElement implements IEntryActions {
 		this.entryActions = new ArrayList<IActionElement>();
 	}
 
+	public void accept(IWebflowModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
+
+			for (IActionElement state : getEntryActions()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+		}
+	}
 }

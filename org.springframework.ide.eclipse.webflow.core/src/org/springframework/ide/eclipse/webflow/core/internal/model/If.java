@@ -16,11 +16,13 @@
 
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IIf;
 import org.springframework.ide.eclipse.webflow.core.model.IIfTransition;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 
 /**
@@ -80,10 +82,6 @@ public class If extends WebflowModelElement implements IIf,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.IIf#getTest()
-	 */
 	/**
 	 * Gets the test.
 	 * 
@@ -93,10 +91,6 @@ public class If extends WebflowModelElement implements IIf,
 		return getAttribute("test");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.IIf#setElse(org.springframework.ide.eclipse.web.flow.core.model.ITransitionableTo)
-	 */
 	/**
 	 * Sets the else transition.
 	 * 
@@ -109,10 +103,6 @@ public class If extends WebflowModelElement implements IIf,
 		super.firePropertyChange(OUTPUTS, oldValue, theElse);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.IIf#setTest(java.lang.String)
-	 */
 	/**
 	 * Sets the test.
 	 * 
@@ -122,10 +112,6 @@ public class If extends WebflowModelElement implements IIf,
 		setAttribute("test", test);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.IIf#setThen(org.springframework.ide.eclipse.web.flow.core.model.ITransitionableTo)
-	 */
 	/**
 	 * Sets the then transition.
 	 * 
@@ -138,10 +124,6 @@ public class If extends WebflowModelElement implements IIf,
 		super.firePropertyChange(OUTPUTS, oldValue, then);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.IIf#getElseTransition()
-	 */
 	/**
 	 * Gets the else transition.
 	 * 
@@ -151,10 +133,6 @@ public class If extends WebflowModelElement implements IIf,
 		return this.elseTransition;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.IIf#getThenTransition()
-	 */
 	/**
 	 * Gets the then transition.
 	 * 
@@ -164,10 +142,6 @@ public class If extends WebflowModelElement implements IIf,
 		return this.thenTransition;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.IIf#removeElseTransition()
-	 */
 	/**
 	 * Removes the else transition.
 	 */
@@ -211,6 +185,18 @@ public class If extends WebflowModelElement implements IIf,
 			init(element.getNode(), parent);
 			setTest(element.getTest());
 			super.fireStructureChange(MOVE_CHILDREN, new Integer(1));
+		}
+	}
+
+	public void accept(IWebflowModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
+			if (getThenTransition() != null) {
+				getThenTransition().accept(visitor, monitor);
+			}
+			if (getElseTransition() != null) {
+				getElseTransition().accept(visitor, monitor);
+			}
 		}
 	}
 }

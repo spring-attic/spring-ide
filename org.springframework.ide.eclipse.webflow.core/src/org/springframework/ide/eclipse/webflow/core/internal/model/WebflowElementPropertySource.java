@@ -40,7 +40,7 @@ public class WebflowElementPropertySource implements IPropertySource {
 	/**
 	 * 
 	 * 
-	 * @param propertySource 
+	 * @param propertySource
 	 */
 	public WebflowElementPropertySource(IPropertySource propertySource) {
 		this.propertySource = propertySource;
@@ -49,7 +49,7 @@ public class WebflowElementPropertySource implements IPropertySource {
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public Object getEditableValue() {
 		return propertySource.getEditableValue();
@@ -58,7 +58,7 @@ public class WebflowElementPropertySource implements IPropertySource {
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public IPropertyDescriptor[] getPropertyDescriptors() {
 		List<IPropertyDescriptor> descriptors = new ArrayList<IPropertyDescriptor>();
@@ -79,9 +79,9 @@ public class WebflowElementPropertySource implements IPropertySource {
 	/**
 	 * 
 	 * 
-	 * @param id 
+	 * @param id
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public Object getPropertyValue(Object id) {
 		return propertySource.getPropertyValue(id);
@@ -90,9 +90,9 @@ public class WebflowElementPropertySource implements IPropertySource {
 	/**
 	 * 
 	 * 
-	 * @param id 
+	 * @param id
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public boolean isPropertySet(Object id) {
 		return propertySource.isPropertySet(id);
@@ -101,7 +101,7 @@ public class WebflowElementPropertySource implements IPropertySource {
 	/**
 	 * 
 	 * 
-	 * @param id 
+	 * @param id
 	 */
 	public void resetPropertyValue(Object id) {
 		propertySource.resetPropertyValue(id);
@@ -110,8 +110,8 @@ public class WebflowElementPropertySource implements IPropertySource {
 	/**
 	 * 
 	 * 
-	 * @param value 
-	 * @param id 
+	 * @param value
+	 * @param id
 	 */
 	public void setPropertyValue(Object id, Object value) {
 		// do nothing

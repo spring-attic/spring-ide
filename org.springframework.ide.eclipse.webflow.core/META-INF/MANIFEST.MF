@@ -18,10 +18,12 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.wst.sse.ui,
  org.springframework.ide.eclipse.beans.core,
  org.springframework.ide.eclipse.core,
- org.eclipse.core.expressions
+ org.eclipse.core.expressions,
+ org.eclipse.jdt.core
 Eclipse-LazyStart: true
 Export-Package: org.springframework.ide.eclipse.webflow.core,
  org.springframework.ide.eclipse.webflow.core.internal.model,
  org.springframework.ide.eclipse.webflow.core.internal.model.project,
- org.springframework.ide.eclipse.webflow.core.model
+ org.springframework.ide.eclipse.webflow.core.model,
+ org.springframework.ide.eclipse.webflow.core.util
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

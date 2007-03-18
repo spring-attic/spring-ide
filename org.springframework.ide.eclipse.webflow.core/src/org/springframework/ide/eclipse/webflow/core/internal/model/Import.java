@@ -16,7 +16,9 @@
 
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.webflow.core.model.IImport;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 
 /**
  * 
@@ -43,5 +45,10 @@ public class Import extends AbstractModelElement implements IImport {
 	 */
 	public void setResource(String resource) {
 		setAttribute("resource", resource);
+	}
+
+	public void accept(IWebflowModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+		visitor.visit(this, monitor);
 	}
 }

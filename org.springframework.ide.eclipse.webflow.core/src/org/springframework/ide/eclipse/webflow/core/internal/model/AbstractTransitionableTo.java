@@ -43,8 +43,8 @@ public abstract class AbstractTransitionableTo extends AbstractState implements
 	/**
 	 * 
 	 * 
-	 * @param node 
-	 * @param parent 
+	 * @param node
+	 * @param parent
 	 */
 	@Override
 	public void init(IDOMNode node, IWebflowModelElement parent) {
@@ -54,7 +54,7 @@ public abstract class AbstractTransitionableTo extends AbstractState implements
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public List<ITransition> getInputTransitions() {
 		return inputTransitions;
@@ -63,7 +63,7 @@ public abstract class AbstractTransitionableTo extends AbstractState implements
 	/**
 	 * 
 	 * 
-	 * @param transitions 
+	 * @param transitions
 	 */
 	public void addInputTransition(ITransition transitions) {
 		this.inputTransitions.add(transitions);
@@ -73,7 +73,7 @@ public abstract class AbstractTransitionableTo extends AbstractState implements
 	/**
 	 * 
 	 * 
-	 * @param transitions 
+	 * @param transitions
 	 */
 	public void removeInputTransition(ITransition transitions) {
 		this.inputTransitions.remove(transitions);
@@ -83,10 +83,11 @@ public abstract class AbstractTransitionableTo extends AbstractState implements
 	/**
 	 * 
 	 * 
-	 * @param id 
+	 * @param id
 	 */
 	@Override
 	public void setId(String id) {
+		String oldId = getId();
 		IState oldStartState = ((WebflowState) parent).getStartState();
 		setAttribute("id", id);
 		if (this.inputTransitions != null && this.inputTransitions.size() > 0) {
@@ -94,7 +95,7 @@ public abstract class AbstractTransitionableTo extends AbstractState implements
 				trans.setToState(this);
 			}
 		}
-		if (parent instanceof WebflowState) {
+		if (!getId().equals(oldId) && parent instanceof WebflowState) {
 			// we are the startstate and rename the id
 			if (this.equals(oldStartState)) {
 				((WebflowState) parent).setStartState(this);

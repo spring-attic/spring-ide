@@ -167,11 +167,11 @@ public abstract class WebflowModelElement implements IWebflowModelElement,
 	 */
 	protected void setAttribute(IDOMNode node, String attributeName,
 			String value) {
-		
+
 		if (!StringUtils.hasText(value)) {
 			value = null;
 		}
-		
+
 		// String oldValue = BeansEditorUtils.getAttribute(node, attributeName);
 		node.getModel().aboutToChangeModel();
 		if (value != null) {
@@ -284,6 +284,7 @@ public abstract class WebflowModelElement implements IWebflowModelElement,
 	}
 
 	public int getElementStartLine() {
-		return this.node.getStructuredDocument().getLineOfOffset(this.node.getStartOffset()) + 1;
+		return this.node.getStructuredDocument().getLineOfOffset(
+				this.node.getStartOffset()) + 1;
 	}
 }

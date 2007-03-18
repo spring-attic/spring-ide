@@ -33,7 +33,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class WebflowProject extends WebflowModelElement implements IWebflowProject {
+public class WebflowProject implements IWebflowProject {
 
 	/**
 	 * 
@@ -46,25 +46,27 @@ public class WebflowProject extends WebflowModelElement implements IWebflowProje
 	 * 
 	 */
 	private WebflowProjectDescription description;
-	
+
 	/**
 	 * 
 	 * 
-	 * @param project 
+	 * @param project
 	 */
 	public WebflowProject(IProject project, IWebflowModel model) {
 		this.project = project;
 		this.model = model;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowProject#getConfigs()
 	 */
 	public List<IWebflowConfig> getConfigs() {
 		return getDescription().getConfigs();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowProject#getProject()
 	 */
 	public IProject getProject() {
@@ -75,7 +77,7 @@ public class WebflowProject extends WebflowModelElement implements IWebflowProje
 	 * Returns lazily loaded project description. <b>This nature's project has
 	 * to be set first!!! </b>
 	 * 
-	 * @return 
+	 * @return
 	 */
 	private WebflowProjectDescription getDescription() {
 		if (description == null) {
@@ -84,23 +86,25 @@ public class WebflowProject extends WebflowModelElement implements IWebflowProje
 		return description;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowProject#setConfigs(java.util.List)
 	 */
 	public void setConfigs(List<IWebflowConfig> configs) {
 		WebflowProjectDescription description = getDescription();
 		description.setConfigs(configs);
 		WebflowProjectDescriptionWriter.write(project, description);
-		
+
 		model.fireModelChangedEvent(this);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowProject#getConfig(org.eclipse.core.resources.IFile)
 	 */
 	public IWebflowConfig getConfig(IFile file) {
 		List<IWebflowConfig> configs = getDescription().getConfigs();
-		if(configs != null) {
+		if (configs != null) {
 			for (IWebflowConfig config : configs) {
 				if (config.getResource().equals(file)) {
 					return config;

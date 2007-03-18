@@ -16,21 +16,27 @@
 
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
+import java.beans.PropertyChangeListener;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 
 /**
  * @author Christian Dupuis
  * @since 2.0
  */
+@SuppressWarnings("restriction")
 public class WebflowConfig implements IWebflowConfig {
 
 	/**
@@ -150,4 +156,41 @@ public class WebflowConfig implements IWebflowConfig {
 		this.name = name;
 	}
 
+	/** */
+	public void accept(IWebflowModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+
+	}
+
+	public void addPropertyChangeListener(PropertyChangeListener l) {
+	}
+
+
+	public void fireStructureChange(String prop, Object child) {
+	}
+
+	
+	public IWebflowModelElement getElementParent() {
+		return null;
+	}
+
+
+	public int getElementStartLine() {
+		return 0;
+	}
+
+	public IDOMNode getNode() {
+		return null;
+	}
+	
+
+	public void init(IDOMNode node, IWebflowModelElement parent) {
+	}
+
+	public void removePropertyChangeListener(PropertyChangeListener l) {
+	}
+
+
+	public void setElementParent(IWebflowModelElement parent) {
+	}
 }

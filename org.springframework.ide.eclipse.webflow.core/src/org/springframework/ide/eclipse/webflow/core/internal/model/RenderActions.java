@@ -19,10 +19,12 @@ package org.springframework.ide.eclipse.webflow.core.internal.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IRenderActions;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.w3c.dom.NodeList;
 
 /**
@@ -117,7 +119,8 @@ public class RenderActions extends WebflowModelElement implements
 		if (!this.renderActions.contains(action)) {
 			if (this.renderActions.size() > i) {
 				IActionElement ref = this.renderActions.get(i);
-				WebflowModelXmlUtils.insertBefore(action.getNode(), ref.getNode());
+				WebflowModelXmlUtils.insertBefore(action.getNode(), ref
+						.getNode());
 			}
 			else {
 				WebflowModelXmlUtils.insertNode(action.getNode(), node);
@@ -178,5 +181,18 @@ public class RenderActions extends WebflowModelElement implements
 			getNode().removeChild(action.getNode());
 		}
 		this.renderActions = new ArrayList<IActionElement>();
+	}
+
+	public void accept(IWebflowModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
+
+			for (IActionElement state : getRenderActions()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+		}
 	}
 }

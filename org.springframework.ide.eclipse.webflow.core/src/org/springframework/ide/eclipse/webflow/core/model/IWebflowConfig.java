@@ -24,54 +24,54 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 /**
  * 
  */
-public interface IWebflowConfig {
-	
+public interface IWebflowConfig extends IWebflowModelElement {
+
 	/**
 	 * 
 	 * 
-	 * @param file 
+	 * @param file
 	 */
 	void setResource(IFile file);
-	
+
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	IFile getResource();
-	
+
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	Set<IBeansConfig> getBeansConfigs();
-	
+
 	/**
 	 * 
 	 * 
-	 * @param beansConfigs 
+	 * @param beansConfigs
 	 */
 	void setBeansConfigs(Set<IBeansConfig> beansConfigs);
 
 	/**
 	 * 
 	 * 
-	 * @param beansConfigs 
+	 * @param beansConfigs
 	 */
 	void setBeansConfigsElementIds(Set<String> beansConfigs);
-	
+
 	/**
 	 * 
 	 * 
-	 * @param id 
+	 * @param id
 	 */
 	void addBeansConfigElementId(String id);
-	
+
 	IWebflowProject getProject();
-	
+
 	void setName(String name);
-	
+
 	String getName();
-	
+
 }

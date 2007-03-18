@@ -19,13 +19,16 @@ package org.springframework.ide.eclipse.webflow.core.internal.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
+import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.webflow.core.model.ITransitionableFrom;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -64,8 +67,8 @@ public class StateTransition extends Transition implements IStateTransition,
 	/**
 	 * 
 	 * 
-	 * @param node 
-	 * @param parent 
+	 * @param node
+	 * @param parent
 	 */
 	@Override
 	public void init(IDOMNode node, IWebflowModelElement parent) {
@@ -107,7 +110,7 @@ public class StateTransition extends Transition implements IStateTransition,
 	/**
 	 * 
 	 * 
-	 * @param action 
+	 * @param action
 	 */
 	public void addAction(IActionElement action) {
 		if (!this.actions.contains(action)) {
@@ -121,8 +124,8 @@ public class StateTransition extends Transition implements IStateTransition,
 	/**
 	 * 
 	 * 
-	 * @param i 
-	 * @param action 
+	 * @param i
+	 * @param action
 	 */
 	public void addAction(IActionElement action, int i) {
 		if (!this.actions.contains(action)) {
@@ -135,7 +138,7 @@ public class StateTransition extends Transition implements IStateTransition,
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public List<IActionElement> getActions() {
 		return this.actions;
@@ -144,7 +147,7 @@ public class StateTransition extends Transition implements IStateTransition,
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public String getOn() {
 		return getAttribute("on");
@@ -153,7 +156,7 @@ public class StateTransition extends Transition implements IStateTransition,
 	/**
 	 * 
 	 * 
-	 * @param action 
+	 * @param action
 	 */
 	public void removeAction(IActionElement action) {
 		if (this.actions.contains(action)) {
@@ -166,7 +169,7 @@ public class StateTransition extends Transition implements IStateTransition,
 	/**
 	 * 
 	 * 
-	 * @param on 
+	 * @param on
 	 */
 	public void setOn(String on) {
 		setAttribute("on", on);
@@ -175,7 +178,7 @@ public class StateTransition extends Transition implements IStateTransition,
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public ITransitionableFrom getFromState() {
 		return (ITransitionableFrom) this.parent;
@@ -184,7 +187,7 @@ public class StateTransition extends Transition implements IStateTransition,
 	/**
 	 * 
 	 * 
-	 * @param fromState 
+	 * @param fromState
 	 */
 	public void setFromState(ITransitionableFrom fromState) {
 		Node parent = this.node.getParentNode();
@@ -198,7 +201,7 @@ public class StateTransition extends Transition implements IStateTransition,
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	@Override
 	public IWebflowModelElement getElementParent() {
@@ -208,8 +211,8 @@ public class StateTransition extends Transition implements IStateTransition,
 	/**
 	 * 
 	 * 
-	 * @param webflowState 
-	 * @param parent 
+	 * @param webflowState
+	 * @param parent
 	 */
 	public void createNew(IState parent, IWebflowState webflowState) {
 		this.webflowState = webflowState;
@@ -221,7 +224,7 @@ public class StateTransition extends Transition implements IStateTransition,
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public IStateTransition cloneModelElement() {
 		StateTransition state = new StateTransition(this.webflowState);
@@ -232,7 +235,7 @@ public class StateTransition extends Transition implements IStateTransition,
 	/**
 	 * 
 	 * 
-	 * @param element 
+	 * @param element
 	 */
 	public void applyCloneValues(IStateTransition element) {
 		if (element != null) {
@@ -321,5 +324,25 @@ public class StateTransition extends Transition implements IStateTransition,
 
 	public void setOnException(String exception) {
 		setAttribute("on-exception", exception);
+	}
+
+	public void accept(IWebflowModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
+
+			for (IAttribute state : getAttributes()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+			
+			for (IActionElement action : getActions()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				action.accept(visitor, monitor);
+			}
+		}
 	}
 }

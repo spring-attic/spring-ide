@@ -37,66 +37,67 @@ import org.xml.sax.SAXException;
  */
 public class WebflowProjectDescriptionReader {
 
-    /**
-     * Reads project description for given project.
-     * 
-     * @param project 
-     * 
-     * @return 
-     */
-    public static WebflowProjectDescription read(IWebflowProject project) {
-        IFile file = project.getProject().getFile(new Path(IWebflowProject.DESCRIPTION_FILE));
-        if (file.isAccessible()) {
-            BufferedInputStream is = null;
-            try {
-                is = new BufferedInputStream(file.getContents());
-                WebflowProjectDescriptionHandler handler = new WebflowProjectDescriptionHandler(
-                        project);
-                try {
-                    SAXParserFactory factory = SAXParserFactory.newInstance();
-                    factory.setNamespaceAware(true);
-                    SAXParser parser = factory.newSAXParser();
-                    parser.parse(new InputSource(is), handler);
-                }
-                catch (ParserConfigurationException e) {
-                    handler.log(IStatus.ERROR, e);
-                }
-                catch (SAXException e) {
-                    handler.log(IStatus.WARNING, e);
-                }
-                catch (IOException e) {
-                    handler.log(IStatus.WARNING, e);
-                }
-                IStatus status = handler.getStatus();
-                switch (status.getSeverity()) {
-                    case IStatus.ERROR:
-                        Activator.log(status);
-                        return null;
+	/**
+	 * Reads project description for given project.
+	 * 
+	 * @param project
+	 * 
+	 * @return
+	 */
+	public static WebflowProjectDescription read(IWebflowProject project) {
+		IFile file = project.getProject().getFile(
+				new Path(IWebflowProject.DESCRIPTION_FILE));
+		if (file.isAccessible()) {
+			BufferedInputStream is = null;
+			try {
+				is = new BufferedInputStream(file.getContents());
+				WebflowProjectDescriptionHandler handler = new WebflowProjectDescriptionHandler(
+						project);
+				try {
+					SAXParserFactory factory = SAXParserFactory.newInstance();
+					factory.setNamespaceAware(true);
+					SAXParser parser = factory.newSAXParser();
+					parser.parse(new InputSource(is), handler);
+				}
+				catch (ParserConfigurationException e) {
+					handler.log(IStatus.ERROR, e);
+				}
+				catch (SAXException e) {
+					handler.log(IStatus.WARNING, e);
+				}
+				catch (IOException e) {
+					handler.log(IStatus.WARNING, e);
+				}
+				IStatus status = handler.getStatus();
+				switch (status.getSeverity()) {
+				case IStatus.ERROR:
+					Activator.log(status);
+					return null;
 
-                    case IStatus.WARNING:
-                    case IStatus.INFO:
-                    	Activator.log(status);
+				case IStatus.WARNING:
+				case IStatus.INFO:
+					Activator.log(status);
 
-                    case IStatus.OK:
-                    default:
-                        return handler.getDescription();
-                }
-            }
-            catch (CoreException e) {
-            	Activator.log(e.getStatus());
-            }
-            finally {
-                if (is != null) {
-                    try {
-                        is.close();
-                    }
-                    catch (IOException e) {
-                    }
-                }
-            }
-        }
+				case IStatus.OK:
+				default:
+					return handler.getDescription();
+				}
+			}
+			catch (CoreException e) {
+				Activator.log(e.getStatus());
+			}
+			finally {
+				if (is != null) {
+					try {
+						is.close();
+					}
+					catch (IOException e) {
+					}
+				}
+			}
+		}
 
-        // Return empty project description
-        return new WebflowProjectDescription(project);
-    }
+		// Return empty project description
+		return new WebflowProjectDescription(project);
+	}
 }

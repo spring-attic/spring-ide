@@ -16,9 +16,11 @@
 
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.webflow.core.model.IEvaluationResult;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 
 /**
  * 
@@ -37,7 +39,7 @@ public class EvaluationResult extends AbstractModelElement implements
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public String getName() {
 		return getAttribute("name");
@@ -50,7 +52,7 @@ public class EvaluationResult extends AbstractModelElement implements
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public String getScope() {
 		return getAttribute("scope");
@@ -63,7 +65,7 @@ public class EvaluationResult extends AbstractModelElement implements
 	/**
 	 * 
 	 * 
-	 * @param name 
+	 * @param name
 	 */
 	public void setName(String name) {
 		setAttribute("name", name);
@@ -76,7 +78,7 @@ public class EvaluationResult extends AbstractModelElement implements
 	/**
 	 * 
 	 * 
-	 * @param scope 
+	 * @param scope
 	 */
 	public void setScope(String scope) {
 		setAttribute("scope", scope);
@@ -89,11 +91,16 @@ public class EvaluationResult extends AbstractModelElement implements
 	/**
 	 * 
 	 * 
-	 * @param parent 
+	 * @param parent
 	 */
 	public void createNew(IWebflowModelElement parent) {
 		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
 				.createElement("evaluation-result");
 		init(node, parent);
+	}
+
+	public void accept(IWebflowModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+		visitor.visit(this, monitor);
 	}
 }

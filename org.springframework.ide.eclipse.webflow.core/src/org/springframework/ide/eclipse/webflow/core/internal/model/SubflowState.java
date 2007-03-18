@@ -16,11 +16,16 @@
 
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IExceptionHandler;
 import org.springframework.ide.eclipse.webflow.core.model.ISubflowState;
+import org.springframework.ide.eclipse.webflow.core.model.ITransition;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.w3c.dom.NodeList;
 
@@ -39,16 +44,11 @@ public class SubflowState extends AbstractTransitionableFrom implements
 	 */
 	private IAttributeMapper attributeMapper;
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.internal.model.AbstractTransitionableFrom#init(org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode,
-	 * org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param node 
-	 * @param parent 
+	 * @param node
+	 * @param parent
 	 */
 	@Override
 	public void init(IDOMNode node, IWebflowModelElement parent) {
@@ -66,35 +66,19 @@ public class SubflowState extends AbstractTransitionableFrom implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.ISubFlowState#getAttributeMapper()
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.ISubFlowState#getAttributeMapper()
-	 */
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public IAttributeMapper getAttributeMapper() {
 		return this.attributeMapper;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.ISubFlowState#setAttributeMapper(java.lang.String)
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.ISubFlowState#setAttributeMapper(org.springframework.ide.eclipse.webflow.core.model.IAttributeMapper)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param attributeMapper 
+	 * @param attributeMapper
 	 */
 	public void setAttributeMapper(IAttributeMapper attributeMapper) {
 		IAttributeMapper oldValue = this.attributeMapper;
@@ -103,15 +87,12 @@ public class SubflowState extends AbstractTransitionableFrom implements
 		}
 		this.attributeMapper = attributeMapper;
 		if (attributeMapper != null) {
-			WebflowModelXmlUtils.insertNode(attributeMapper.getNode(), getNode());
+			WebflowModelXmlUtils.insertNode(attributeMapper.getNode(),
+					getNode());
 		}
 		super.firePropertyChange(ADD_CHILDREN, new Integer(0), oldValue);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.ISubFlowState#removeAttributeMapper()
-	 */
 	/**
 	 * 
 	 */
@@ -124,48 +105,28 @@ public class SubflowState extends AbstractTransitionableFrom implements
 		super.firePropertyChange(REMOVE_CHILDREN, attributeMapper, oldValue);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState#setFlow(java.lang.String)
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.ISubFlowState#setFlow(java.lang.String)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param flow 
+	 * @param flow
 	 */
 	public void setFlow(String flow) {
 		setAttribute("flow", flow);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.ISubFlowState#getFlow()
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.ISubFlowState#getFlow()
-	 */
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public String getFlow() {
 		return getAttribute("flow");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IState#createNew(org.springframework.ide.eclipse.webflow.core.model.IWebflowState)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param parent 
+	 * @param parent
 	 */
 	public void createNew(IWebflowState parent) {
 		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
@@ -173,14 +134,10 @@ public class SubflowState extends AbstractTransitionableFrom implements
 		init(node, parent);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement#cloneModelElement()
-	 */
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public ISubflowState cloneModelElement() {
 		SubflowState state = new SubflowState();
@@ -188,14 +145,10 @@ public class SubflowState extends AbstractTransitionableFrom implements
 		return state;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement#applyCloneValues(org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement)
-	 */
 	/**
 	 * 
 	 * 
-	 * @param element 
+	 * @param element
 	 */
 	public void applyCloneValues(ISubflowState element) {
 		if (element != null) {
@@ -207,6 +160,42 @@ public class SubflowState extends AbstractTransitionableFrom implements
 			setFlow(element.getFlow());
 			init(element.getNode(), parent);
 			super.fireStructureChange(MOVE_CHILDREN, new Integer(1));
+		}
+	}
+
+	public void accept(IWebflowModelElementVisitor visitor,
+			IProgressMonitor monitor) {
+		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
+			for (IAttribute state : getAttributes()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+			if (getEntryActions() != null) {
+				getEntryActions().accept(visitor, monitor);
+			}
+			if (monitor.isCanceled()) {
+				return;
+			}
+			if (getAttributeMapper() != null) {
+				getAttributeMapper().accept(visitor, monitor);
+			}
+			if (getExitActions() != null) {
+				getExitActions().accept(visitor, monitor);
+			}
+			for (IExceptionHandler state : getExceptionHandlers()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
+			for (ITransition state : getOutputTransitions()) {
+				if (monitor.isCanceled()) {
+					return;
+				}
+				state.accept(visitor, monitor);
+			}
 		}
 	}
 }

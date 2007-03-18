@@ -33,34 +33,34 @@ public interface IActionElement extends IWebflowModelElement {
 		 * The RENDE r_ ACTION.
 		 */
 		RENDER_ACTION,
-		
+
 		/**
 		 * The ENTR y_ ACTION.
 		 */
 		ENTRY_ACTION,
-		
+
 		/**
 		 * The EXI t_ ACTION.
 		 */
 		EXIT_ACTION,
-		
+
 		/**
 		 * The ACTION.
 		 */
 		ACTION
 	};
-	
+
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	ACTION_TYPE getType();
-	
+
 	/**
 	 * 
 	 * 
-	 * @param type 
+	 * @param type
 	 */
 	void setType(ACTION_TYPE type);
 
