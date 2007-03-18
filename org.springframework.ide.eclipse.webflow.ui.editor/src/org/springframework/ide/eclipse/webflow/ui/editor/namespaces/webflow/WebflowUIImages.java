@@ -168,6 +168,12 @@ public class WebflowUIImages {
 	/**
 	 * 
 	 */
+	public static final String IMG_OVR_ERROR = NAME_PREFIX
+		+ "error_ovr.gif";
+
+	/**
+	 * 
+	 */
 	public static final String IMG_OBJS_GLOBAL_TRANSITION = NAME_PREFIX
 			+ "global_transition_obj.gif";
 
@@ -336,6 +342,12 @@ public class WebflowUIImages {
 	 */
 	public static final ImageDescriptor DESC_OBJS_EXPRESSION = createManaged(
 			STRUCTURE, IMG_OBJS_EXPRESSION);
+
+	/**
+	 * 
+	 */
+	public static final ImageDescriptor DESC_OVR_ERROR = createManaged(
+			STRUCTURE, IMG_OVR_ERROR);
 
 	/**
 	 * 

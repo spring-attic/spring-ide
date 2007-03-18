@@ -16,6 +16,7 @@
 
 package org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow;
 
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -35,6 +36,8 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionUtils;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
+import org.springframework.ide.eclipse.webflow.core.util.BeanActionMethodSearchRequestor;
+import org.springframework.ide.eclipse.webflow.core.util.BeanMethodSearchRequestor;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
