@@ -86,8 +86,7 @@ public class BeanActionPropertiesDialog extends TitleAreaDialog implements
 	/**
 	 * 
 	 */
-	//private DecoratedField namefield;
-
+	// private DecoratedField namefield;
 	private Text nameText;
 
 	/**
@@ -611,7 +610,8 @@ public class BeanActionPropertiesDialog extends TitleAreaDialog implements
 				| SWT.READ_ONLY);
 		scopeText.setItems(new String[] { "", "request", "flash", "flow",
 				"conversation", "default" });
-		if (this.action != null && this.action.getMethodResult() != null) {
+		if (this.action != null && this.action.getMethodResult() != null
+				&& this.action.getMethodResult().getScope() != null) {
 			scopeText.setText(this.action.getMethodResult().getScope());
 		}
 		scopeText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
