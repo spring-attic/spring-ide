@@ -81,6 +81,7 @@ public class StateIdSection extends AbstractPropertySection implements PropertyC
 					.getAdapter(ActionRegistry.class);
 			EditPropertiesAction action = (EditPropertiesAction) actionRegistry
 					.getAction(EditPropertiesAction.EDITPROPERTIES);
+			action.setOpenDialog(false);
 			EditPropertiesCommand command = new EditPropertiesCommand();
 
 			IState clone = null;

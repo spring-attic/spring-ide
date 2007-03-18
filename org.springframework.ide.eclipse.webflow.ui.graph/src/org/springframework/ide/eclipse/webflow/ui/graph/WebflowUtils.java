@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -32,11 +33,17 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowValidationProblem;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowValidationProblemReporter;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowValidationVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
+import org.springframework.ide.eclipse.webflow.core.util.BeanActionMethodSearchRequestor;
+import org.springframework.ide.eclipse.webflow.core.util.BeanMethodSearchRequestor;
 import org.springframework.ide.eclipse.webflow.ui.editor.Activator;
-import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.BeanActionMethodSearchRequestor;
-import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.BeanMethodSearchRequestor;
 
 /**
  * Some helper methods for {@link WebflowEditor}
@@ -46,7 +53,7 @@ import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.Bean
  */
 @SuppressWarnings("restriction")
 public abstract class WebflowUtils {
-	
+
 	private static final List<IMethod> NO_METHOD_MATCHES = new ArrayList<IMethod>();
 
 	public static WebflowEditor getActiveFlowEditor() {
@@ -125,7 +132,8 @@ public abstract class WebflowUtils {
 				return requestor.getMethods();
 			}
 			else {
-				ActionMethodSearchRequestor requestor = new ActionMethodSearchRequestor(null);
+				ActionMethodSearchRequestor requestor = new ActionMethodSearchRequestor(
+						null);
 				try {
 					IMethod[] methods = type.getMethods();
 					if (methods != null) {
@@ -179,13 +187,46 @@ public abstract class WebflowUtils {
 			return methods;
 		}
 	}
-	
+
 	public static String[] getWebflowConfigNames() {
 		IWebflowProject project = getActiveWebflowConfig().getProject();
-		Set<String> flowNames = new HashSet<String>();
-		for (IWebflowConfig config : project.getConfigs()) {
-			flowNames.add(config.getName());
+		return WebflowModelUtils.getWebflowConfigNames(project).toArray(
+				new String[0]);
+	}
+
+	public static boolean isValid(
+			IWebflowModelElement element) {
+		WebflowValidationProblemReporter problemReporter = validate(element);
+		return problemReporter == null || problemReporter.getErrors().size() == 0;
+	}
+
+	public static WebflowValidationProblemReporter validate(
+			IWebflowModelElement element) {
+		IWebflowState webflowState = WebflowModelUtils.getWebflowState(element,
+				true);
+		if (webflowState != null) {
+			IWebflowConfig config = (IWebflowConfig) webflowState
+					.getElementParent();
+			WebflowValidationVisitor visitor = new WebflowValidationVisitor(
+					config);
+			element.accept(visitor, new NullProgressMonitor());
+			return visitor.getProblemReporter();
 		}
-		return flowNames.toArray(new String[flowNames.size()]);
- 	}
+		return null;
+	}
+
+	public static String getErrorTooltip(
+			IWebflowModelElement element) {
+		StringBuffer buf = new StringBuffer();
+		WebflowValidationProblemReporter problemReporter = validate(element);
+		if (problemReporter != null && problemReporter.getErrors().size() > 0) {
+			buf.append("\n\nProblems:");
+			for (WebflowValidationProblem problem : problemReporter.getErrors()) {
+				buf.append("\n");
+				buf.append(problem.getMessage());
+			}
+		}
+		
+		return buf.toString();
+	}
 }

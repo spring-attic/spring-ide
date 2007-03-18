@@ -18,14 +18,20 @@ package org.springframework.ide.eclipse.webflow.ui.graph.model;
 
 import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.window.Window.IExceptionHandler;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
+import org.springframework.ide.eclipse.webflow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.webflow.core.model.IEntryActions;
 import org.springframework.ide.eclipse.webflow.core.model.IExitActions;
+import org.springframework.ide.eclipse.webflow.core.model.IIf;
+import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
+import org.springframework.ide.eclipse.webflow.ui.graph.WebflowUtils;
 
 /**
  * An image descriptor consisting of a main icon and several adornments. The
@@ -52,7 +58,7 @@ public class WebflowModelImageDescriptor extends CompositeImageDescriptor {
 	 * Create a new BeansUIImageDescriptor.
 	 * 
 	 * @param baseImage an image descriptor used as the base image
-	 * @param state 
+	 * @param state
 	 */
 	public WebflowModelImageDescriptor(ImageDescriptor baseImage,
 			IWebflowModelElement state) {
@@ -60,7 +66,8 @@ public class WebflowModelImageDescriptor extends CompositeImageDescriptor {
 		this.state = state;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.jface.resource.CompositeImageDescriptor#getSize()
 	 */
 	protected Point getSize() {
@@ -71,8 +78,10 @@ public class WebflowModelImageDescriptor extends CompositeImageDescriptor {
 		return size;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.resource.CompositeImageDescriptor#drawCompositeImage(int, int)
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jface.resource.CompositeImageDescriptor#drawCompositeImage(int,
+	 * int)
 	 */
 	protected void drawCompositeImage(int width, int height) {
 		ImageData background = baseImage.getImageData();
@@ -97,7 +106,7 @@ public class WebflowModelImageDescriptor extends CompositeImageDescriptor {
 			data = WebflowUIImages.DESC_OVR_START_STATE.getImageData();
 			drawImage(data, x, y);
 		}
-		else if (this.state != null && this.state instanceof IActionElement) {
+		if (this.state != null && this.state instanceof IActionElement) {
 			IWebflowModelElement parent = this.state.getElementParent();
 
 			if (parent instanceof IEntryActions) {
@@ -108,17 +117,30 @@ public class WebflowModelImageDescriptor extends CompositeImageDescriptor {
 				data = WebflowUIImages.DESC_OVR_OUTPUT.getImageData();
 				drawImage(data, x, y);
 			}
-			/*else if (parent instanceof IRenderActions) {
-				data = WebflowUIImages.DESC_OVR_RENDER.getImageData();
-				drawImage(data, x, y);
-			}*/
+			/*
+			 * else if (parent instanceof IRenderActions) { data =
+			 * WebflowUIImages.DESC_OVR_RENDER.getImageData(); drawImage(data,
+			 * x, y); }
+			 */
 		}
+		if (this.state instanceof IState && !WebflowUtils.isValid(this.state)) {
+			data = WebflowUIImages.DESC_OVR_ERROR.getImageData();
+			drawImage(data, x, 8);
+		}
+		else if ((this.state instanceof IActionElement
+				|| this.state instanceof IExceptionHandler
+				|| this.state instanceof IIf || this.state instanceof IAttributeMapper)
+				&& !WebflowUtils.isValid(this.state)) {
+			data = WebflowUIImages.DESC_OVR_ERROR.getImageData();
+			drawImage(data, x, 8);
+		}
+
 	}
 
 	/**
 	 * 
 	 * 
-	 * @param size 
+	 * @param size
 	 */
 	protected void setSize(Point size) {
 		this.size = size;

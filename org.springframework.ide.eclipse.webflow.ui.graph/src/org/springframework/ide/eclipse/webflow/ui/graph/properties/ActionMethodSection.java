@@ -94,6 +94,7 @@ public class ActionMethodSection extends AbstractPropertySection implements
 					.getAdapter(ActionRegistry.class);
 			EditPropertiesAction editAction = (EditPropertiesAction) actionRegistry
 					.getAction(EditPropertiesAction.EDITPROPERTIES);
+			editAction.setOpenDialog(false);
 			EditPropertiesCommand command = new EditPropertiesCommand();
 
 			AbstractAction clone = null;

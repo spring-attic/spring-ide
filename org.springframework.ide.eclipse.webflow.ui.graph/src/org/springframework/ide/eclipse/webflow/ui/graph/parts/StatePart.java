@@ -50,11 +50,15 @@ public class StatePart extends AbstractStatePart {
 	/**
 	 * 
 	 */
-	private static ILabelProvider labelProvider = new DecoratingLabelProvider(
+	protected static ILabelProvider labelProvider = new DecoratingLabelProvider(
 			new WebflowModelLabelProvider(), new WebflowModelLabelDecorator());
 
-	/* (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#contributeNodesToGraph(org.eclipse.draw2d.graph.CompoundDirectedGraph, org.eclipse.draw2d.graph.Subgraph, java.util.Map)
+	protected WebflowModelLabelProvider eLabelProvider = new WebflowModelLabelProvider();
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#contributeNodesToGraph(org.eclipse.draw2d.graph.CompoundDirectedGraph,
+	 * org.eclipse.draw2d.graph.Subgraph, java.util.Map)
 	 */
 	@SuppressWarnings("unchecked")
 	public void contributeNodesToGraph(CompoundDirectedGraph graph, Subgraph s,
@@ -78,7 +82,8 @@ public class StatePart extends AbstractStatePart {
 
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
 	 */
 	protected IFigure createFigure() {
@@ -93,14 +98,19 @@ public class StatePart extends AbstractStatePart {
 		return l;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editparts.AbstractEditPart#refreshVisuals()
 	 */
 	protected void refreshVisuals() {
 		((Label) getFigure()).setText(labelProvider.getText(getModel()) + " ");
-		// ((Label) getFigure()).setToolTip(new
-		// Label(labelProvider.getLongText(getModel())));
 		((Label) getFigure()).setIcon(labelProvider.getImage(getModel()));
+		((Label) getFigure()).setToolTip(new Label(eLabelProvider.getText(getModel(), true, true, true)));
+
+		// refresh parent icon to indicate if error exists
+		if (getParent() instanceof ChildrenStatePart) {
+			((ChildrenStatePart) getParent()).refreshVisuals();
+		}
 	}
 
 }

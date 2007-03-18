@@ -110,6 +110,7 @@ public class EditPropertiesAction extends SelectionAction {
 			if (cc.getCommands().get(i) instanceof EditPropertiesCommand) {
 				EditPropertiesCommand command = (EditPropertiesCommand) cc
 						.getCommands().get(i);
+				this.openDialog = true;
 				runWithCommand(command);
 			}
 		}

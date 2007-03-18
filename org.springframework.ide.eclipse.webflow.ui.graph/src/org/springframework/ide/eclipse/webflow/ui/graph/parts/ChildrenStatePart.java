@@ -67,6 +67,8 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 	protected static ILabelProvider labelProvider = new DecoratingLabelProvider(
 			new WebflowModelLabelProvider(), new WebflowModelLabelDecorator());
 
+	protected WebflowModelLabelProvider eLabelProvider = new WebflowModelLabelProvider();
+
 	/**
 	 * @param graph
 	 * @param map
@@ -213,7 +215,7 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 		// me.setPadding(new Insets(10, 50, 50, 0));
 		map.put(this, me);
 		graph.nodes.add(me);
-		
+
 		for (int i = 0; i < getChildren().size(); i++) {
 			AbstractStatePart activity = (AbstractStatePart) getChildren().get(
 					i);
@@ -323,7 +325,10 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 		((Label) ((SubgraphFigure) getFigure()).getHeader())
 				.setIcon(labelProvider.getImage(getModel()));
 		((Label) ((SubgraphFigure) getFigure()).getHeader()).setIconTextGap(5);
+		((Label) ((SubgraphFigure) getFigure()).getHeader())
+				.setToolTip(new Label(eLabelProvider.getText(getModel(), true, true, true)));
 		getFigure().repaint();
+
 	}
 
 	/*

@@ -48,6 +48,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
 import org.springframework.ide.eclipse.webflow.ui.graph.actions.EditPropertiesAction;
+import org.springframework.ide.eclipse.webflow.ui.graph.model.WebflowModelLabelProvider;
 import org.springframework.ide.eclipse.webflow.ui.graph.policies.TransitionEditPolicy;
 
 /**
@@ -61,6 +62,8 @@ public class StateTransitionPart extends AbstractConnectionEditPart implements
 	 */
 	private static final Color COLOR = new Color(null, 255, 255, 206);
 
+	protected WebflowModelLabelProvider eLabelProvider = new WebflowModelLabelProvider();
+
 	/**
 	 * 
 	 */
@@ -71,7 +74,8 @@ public class StateTransitionPart extends AbstractConnectionEditPart implements
 	 */
 	private Label label;
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#activate()
 	 */
 	public void activate() {
@@ -82,8 +86,8 @@ public class StateTransitionPart extends AbstractConnectionEditPart implements
 	/**
 	 * 
 	 * 
-	 * @param graph 
-	 * @param map 
+	 * @param graph
+	 * @param map
 	 */
 	protected void applyGraphResults(CompoundDirectedGraph graph, Map map) {
 		conn = (PolylineConnection) getConnectionFigure();
@@ -93,8 +97,8 @@ public class StateTransitionPart extends AbstractConnectionEditPart implements
 	/**
 	 * 
 	 * 
-	 * @param graph 
-	 * @param map 
+	 * @param graph
+	 * @param map
 	 */
 	@SuppressWarnings("unchecked")
 	public void contributeToGraph(CompoundDirectedGraph graph, Map map) {
@@ -145,7 +149,8 @@ public class StateTransitionPart extends AbstractConnectionEditPart implements
 		map.put(this, e);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editparts.AbstractEditPart#createEditPolicies()
 	 */
 	protected void createEditPolicies() {
@@ -155,7 +160,8 @@ public class StateTransitionPart extends AbstractConnectionEditPart implements
 				new TransitionEditPolicy());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editparts.AbstractConnectionEditPart#createFigure()
 	 */
 	protected IFigure createFigure() {
@@ -170,11 +176,15 @@ public class StateTransitionPart extends AbstractConnectionEditPart implements
 			conn.add(label, new ConnectionLocator(conn));
 		}
 
+		conn.setToolTip(new Label(eLabelProvider.getText(getModel(), false,
+				true, true)));
+
 		conn.setTargetDecoration(new PolygonDecoration());
 		return conn;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#deactivate()
 	 */
 	public void deactivate() {
@@ -185,13 +195,33 @@ public class StateTransitionPart extends AbstractConnectionEditPart implements
 	/**
 	 * 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public IStateTransition getTransitionModel() {
 		return (IStateTransition) getModel();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.gef.editparts.AbstractEditPart#performRequest(org.eclipse.gef.Request)
+	 */
+	public void performRequest(Request request) {
+		if (request.getType().equals(RequestConstants.REQ_OPEN)) {
+			IEditorPart editor = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow().getActivePage()
+					.getActiveEditor();
+			ActionRegistry actionRegistry = (ActionRegistry) editor
+					.getAdapter(ActionRegistry.class);
+			IAction action = actionRegistry
+					.getAction(EditPropertiesAction.EDITPROPERTIES);
+			if (action != null && action.isEnabled()) {
+				action.run();
+			}
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent evt) {
@@ -232,30 +262,17 @@ public class StateTransitionPart extends AbstractConnectionEditPart implements
 				label = null;
 			}
 		}
-		// TODO revalidate the viewer
+		getFigure()
+				.setToolTip(
+						new Label(eLabelProvider.getText(getModel(), false,
+								true, true)));
+
 		((GraphicalEditPart) (getViewer().getContents())).getFigure()
 				.revalidate();
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.gef.editparts.AbstractEditPart#performRequest(org.eclipse.gef.Request)
-	 */
-	public void performRequest(Request request) {
-		if (request.getType().equals(RequestConstants.REQ_OPEN)) {
-			IEditorPart editor = PlatformUI.getWorkbench()
-					.getActiveWorkbenchWindow().getActivePage()
-					.getActiveEditor();
-			ActionRegistry actionRegistry = (ActionRegistry) editor
-					.getAdapter(ActionRegistry.class);
-			IAction action = actionRegistry
-					.getAction(EditPropertiesAction.EDITPROPERTIES);
-			if (action != null && action.isEnabled()) {
-				action.run();
-			}
-		}
-	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editparts.AbstractEditPart#setSelected(int)
 	 */
 	public void setSelected(int value) {

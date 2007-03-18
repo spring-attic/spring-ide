@@ -104,6 +104,7 @@ public class StateTransitionSection extends AbstractPropertySection implements
 					.getAdapter(ActionRegistry.class);
 			EditPropertiesAction action = (EditPropertiesAction) actionRegistry
 					.getAction(EditPropertiesAction.EDITPROPERTIES);
+			action.setOpenDialog(false);
 			EditPropertiesCommand command = new EditPropertiesCommand();
 
 			IStateTransition clone = null;
@@ -142,6 +143,8 @@ public class StateTransitionSection extends AbstractPropertySection implements
 					.getAdapter(ActionRegistry.class);
 			EditPropertiesAction action = (EditPropertiesAction) actionRegistry
 					.getAction(EditPropertiesAction.EDITPROPERTIES);
+			action.setOpenDialog(false);
+			
 			EditPropertiesCommand command = new EditPropertiesCommand();
 
 			IState state = WebflowModelXmlUtils.getStateById(

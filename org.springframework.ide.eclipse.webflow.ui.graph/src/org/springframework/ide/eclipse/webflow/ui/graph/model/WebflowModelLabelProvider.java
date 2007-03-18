@@ -23,7 +23,6 @@ import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.webflow.core.internal.model.Action;
 import org.springframework.ide.eclipse.webflow.core.internal.model.BeanAction;
 import org.springframework.ide.eclipse.webflow.core.model.IAction;
-import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IActionState;
 import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeMapper;
@@ -42,8 +41,10 @@ import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.webflow.core.model.ISubflowState;
 import org.springframework.ide.eclipse.webflow.core.model.IViewState;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
+import org.springframework.ide.eclipse.webflow.ui.graph.WebflowUtils;
 
 /**
  * 
@@ -56,7 +57,8 @@ public class WebflowModelLabelProvider extends LabelProvider {
 	private final BeansModelLabelProvider BEANS_LABEL_PROVIDER = new BeansModelLabelProvider(
 			true);
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.LabelProvider#getImage(java.lang.Object)
 	 */
 	public Image getImage(Object obj) {
@@ -131,25 +133,26 @@ public class WebflowModelLabelProvider extends LabelProvider {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
 	 */
 	public String getText(Object element) {
-		return this.getText(element, false, true, true);
+		return this.getText(element, false, true, false);
 	}
 
 	/**
 	 * 
 	 * 
-	 * @param element 
-	 * @param showBean 
-	 * @param showAdditionalInfo 
-	 * @param showElementType 
+	 * @param element
+	 * @param showBean
+	 * @param showAdditionalInfo
+	 * @param showElementType
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public String getText(Object element, boolean showElementType,
-			boolean showBean, boolean showAdditionalInfo) {
+			boolean showAdditionalInfo, boolean showError) {
 		StringBuffer buf = new StringBuffer();
 		if (element instanceof IState) {
 			buf.append(((IState) element).getId());
@@ -246,6 +249,15 @@ public class WebflowModelLabelProvider extends LabelProvider {
 				buf.append(']');
 			}
 		}
+		else if (element instanceof IStateTransition) {
+			IStateTransition state = (IStateTransition) element;
+			if (state.getToStateId() != null) {
+				buf.append("To: " + state.getToStateId());
+			}
+			if (state.getToStateId() != null) {
+				buf.append("\nOn: " + state.getOn());
+			}
+		}
 		else {
 			buf.append(super.getText(element));
 		}
@@ -268,22 +280,10 @@ public class WebflowModelLabelProvider extends LabelProvider {
 					buf.append("\nView: " + state.getView());
 				}
 			}
-		}
-
-		if (showBean
-				&& (element instanceof IBeanReference && !(element instanceof IActionElement))) {
-			IBeanReference action = (IBeanReference) element;
-			if (action.getBean() != null) {
-				buf.append("\n");
-
-				if (action.getBean() != null) {
-					buf.append("Bean: ");
-					buf.append(action.getBean());
-				}
-				if (action.getMethod() != null) {
-					buf.append(".");
-					buf.append(action.getMethod());
-					buf.append("()");
+			if (element instanceof IStateTransition) {
+				IStateTransition state = (IStateTransition) element;
+				if (state.getOnException() != null) {
+					buf.append("\nOn-exception: " + state.getOnException());
 				}
 			}
 		}
@@ -338,7 +338,15 @@ public class WebflowModelLabelProvider extends LabelProvider {
 			else if (element instanceof IExceptionHandler) {
 				buf.append("Exception Handler");
 			}
+			else if (element instanceof IStateTransition) {
+				buf.append("Transition");
+			}
 			buf.append("]");
+		}
+		
+		if (showError) {
+			buf.append(WebflowUtils
+					.getErrorTooltip((IWebflowModelElement) element));
 		}
 
 		return buf.toString();
@@ -347,9 +355,9 @@ public class WebflowModelLabelProvider extends LabelProvider {
 	/**
 	 * 
 	 * 
-	 * @param element 
+	 * @param element
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public String getLongText(Object element) {
 		StringBuffer buf = new StringBuffer();

@@ -81,6 +81,8 @@ public class ActionNameSection extends AbstractPropertySection implements Proper
 					.getAdapter(ActionRegistry.class);
 			EditPropertiesAction editAction = (EditPropertiesAction) actionRegistry
 					.getAction(EditPropertiesAction.EDITPROPERTIES);
+			editAction.setOpenDialog(false);
+			
 			EditPropertiesCommand command = new EditPropertiesCommand();
 
 			IAction clone = null;
