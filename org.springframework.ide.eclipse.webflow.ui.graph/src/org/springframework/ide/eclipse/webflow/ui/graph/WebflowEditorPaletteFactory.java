@@ -85,7 +85,7 @@ public class WebflowEditorPaletteFactory {
 
 		PaletteDrawer drawer = new PaletteDrawer("Web Flow Elements", null);
 
-		List<ToolEntry> entries = new ArrayList<ToolEntry>();
+		List<PaletteEntry> entries = new ArrayList<PaletteEntry>();
 
 		CombinedTemplateCreationEntry combined = new CombinedTemplateCreationEntry(
 				"Action State", "Create a new Action State", ActionState.class,
@@ -120,6 +120,12 @@ public class WebflowEditorPaletteFactory {
 				WebflowUIImages.DESC_OBJS_END_STATE);
 		entries.add(combined);
 
+		PaletteSeparator sep = new PaletteSeparator(Activator.PLUGIN_ID
+				+ ".palette.sep3");
+		sep
+				.setUserModificationPermission(PaletteEntry.PERMISSION_NO_MODIFICATION);
+		entries.add(sep);
+		
 		combined = new CombinedTemplateCreationEntry("Exception Handler",
 				"Create an Exception Handler", ExceptionHandler.class,
 				new SimpleFactory(ExceptionHandler.class),

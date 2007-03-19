@@ -141,9 +141,16 @@ public class StateEditPolicy extends ComponentEditPolicy {
 	@SuppressWarnings("unchecked")
 	protected Command getEditPropertiesCommand() {
 		EditPropertiesCommand command = new EditPropertiesCommand();
-		command
-				.setChild((ICloneableModelElement<IWebflowModelElement>) getHost()
-						.getModel());
+		if (getHost().getModel() instanceof IAttributeMapper) {
+			command
+					.setChild((ICloneableModelElement<IWebflowModelElement>) ((IAttributeMapper) getHost()
+							.getModel()).getElementParent());
+		}
+		else {
+			command
+					.setChild((ICloneableModelElement<IWebflowModelElement>) getHost()
+							.getModel());
+		}
 		return command;
 	}
 

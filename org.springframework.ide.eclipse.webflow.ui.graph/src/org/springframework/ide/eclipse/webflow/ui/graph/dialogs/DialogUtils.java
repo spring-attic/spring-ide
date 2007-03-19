@@ -71,7 +71,7 @@ public class DialogUtils {
 			final IWebflowModelElement element, final boolean newMode) {
 		return openPropertiesDialog(parent, element, newMode, 0);
 	}
-			
+
 	/**
 	 * @param element
 	 * @param newMode
@@ -79,83 +79,83 @@ public class DialogUtils {
 	 * @return
 	 */
 	public static int openPropertiesDialog(final IWebflowModelElement parent,
-			final IWebflowModelElement element, final boolean newMode, final int index) {
-		final Integer[] result = new Integer[1];		
+			final IWebflowModelElement element, final boolean newMode,
+			final int index) {
+		final Integer[] result = new Integer[1];
 		final Shell shell = getShell();
-		
+
 		Display.getDefault().syncExec(new Runnable() {
-            public void run() {
-            	Dialog dialog = null;
-            	if (element instanceof IEndState) {
-            		dialog = new EndStatePropertiesDialog(shell, parent,
-            				(IEndState) element);
-            	}
-            	else if (element instanceof IViewState) {
-            		dialog = new ViewStatePropertiesDialog(shell, parent,
-            				(IViewState) element);
-            	}
-            	else if (element instanceof ISubflowState) {
-            		dialog = new SubFlowStatePropertiesDialog(shell,
-            				parent, (ISubflowState) element, index);
-            	}
-            	else if (element instanceof IActionState) {
-            		dialog = new ActionStatePropertiesDialog(shell, parent,
-            				(IActionState) element);
-            	}
-            	else if (element instanceof Action) {
-            		dialog = new ActionPropertiesDialog(shell, parent,
-            				(Action) element);
-            	}
-            	else if (element instanceof BeanAction) {
-            		dialog = new BeanActionPropertiesDialog(shell, parent,
-            				(BeanAction) element);
-            	}
-            	else if (element instanceof EvaluateAction) {
-            		dialog = new EvaluateActionPropertiesDialog(shell,
-            				parent, (EvaluateAction) element);
-            	}
-            	else if (element instanceof Set) {
-            		dialog = new SetActionPropertiesDialog(shell, parent,
-            				(Set) element);
-            	}
-            	else if (element instanceof OutputAttribute) {
-            		dialog = new InputAttributeEditorDialog(shell,
-            				(IOutputAttribute) element);
-            	}
-            	else if (element instanceof InputAttribute) {
-            		dialog = new InputAttributeEditorDialog(shell,
-            				(IInputAttribute) element);
-            	}
-            	else if (element instanceof IMapping) {
-            		dialog = new MappingEditorDialog(shell,
-            				(IMapping) element);
-            	}
-            	else if (element instanceof ExceptionHandler) {
-            		dialog = new ExceptionHandlerPropertiesDialog(shell,
-            				parent, (ExceptionHandler) element);
-            	}
-            	else if (element instanceof IStateTransition) {
-            		dialog = new StateTransitionPropertiesDialog(shell,
-            				parent, (IStateTransition) element);
-            	}
-            	else if (element instanceof IDecisionState) {
-            		dialog = new DecisionStatePropertiesDialog(shell,
-            				parent, (IDecisionState) element);
-            	}
-            	else if (element instanceof IIf) {
-            		dialog = new IfPropertiesDialog(shell,
-            				(IDecisionState) parent, (IIf) element, newMode);
-            	}
-            	else if (element instanceof IWebflowState) {
-            		dialog = new WebflowStatePropertiesDialog(shell,
-            				(IWebflowState) element);
-            	}
-            	
-            	if (dialog != null) {
-            		dialog.setBlockOnOpen(true);
-            		result[0] = dialog.open();
-            	}
-            }
+			public void run() {
+				Dialog dialog = null;
+				if (element instanceof IEndState) {
+					dialog = new EndStatePropertiesDialog(shell, parent,
+							(IEndState) element);
+				}
+				else if (element instanceof IViewState) {
+					dialog = new ViewStatePropertiesDialog(shell, parent,
+							(IViewState) element);
+				}
+				else if (element instanceof ISubflowState) {
+					dialog = new SubFlowStatePropertiesDialog(shell, parent,
+							(ISubflowState) element, index);
+				}
+				else if (element instanceof IActionState) {
+					dialog = new ActionStatePropertiesDialog(shell, parent,
+							(IActionState) element);
+				}
+				else if (element instanceof Action) {
+					dialog = new ActionPropertiesDialog(shell, parent,
+							(Action) element);
+				}
+				else if (element instanceof BeanAction) {
+					dialog = new BeanActionPropertiesDialog(shell, parent,
+							(BeanAction) element);
+				}
+				else if (element instanceof EvaluateAction) {
+					dialog = new EvaluateActionPropertiesDialog(shell, parent,
+							(EvaluateAction) element);
+				}
+				else if (element instanceof Set) {
+					dialog = new SetActionPropertiesDialog(shell, parent,
+							(Set) element);
+				}
+				else if (element instanceof OutputAttribute) {
+					dialog = new InputAttributeEditorDialog(shell,
+							(IOutputAttribute) element);
+				}
+				else if (element instanceof InputAttribute) {
+					dialog = new InputAttributeEditorDialog(shell,
+							(IInputAttribute) element);
+				}
+				else if (element instanceof IMapping) {
+					dialog = new MappingEditorDialog(shell, (IMapping) element);
+				}
+				else if (element instanceof ExceptionHandler) {
+					dialog = new ExceptionHandlerPropertiesDialog(shell,
+							parent, (ExceptionHandler) element);
+				}
+				else if (element instanceof IStateTransition) {
+					dialog = new StateTransitionPropertiesDialog(shell, parent,
+							(IStateTransition) element);
+				}
+				else if (element instanceof IDecisionState) {
+					dialog = new DecisionStatePropertiesDialog(shell, parent,
+							(IDecisionState) element);
+				}
+				else if (element instanceof IIf) {
+					dialog = new IfPropertiesDialog(shell,
+							(IDecisionState) parent, (IIf) element, newMode);
+				}
+				else if (element instanceof IWebflowState) {
+					dialog = new WebflowStatePropertiesDialog(shell,
+							(IWebflowState) element);
+				}
+
+				if (dialog != null) {
+					dialog.setBlockOnOpen(true);
+					result[0] = dialog.open();
+				}
+			}
 		});
 		return result[0];
 	}
