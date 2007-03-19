@@ -16,29 +16,19 @@
 
 package org.springframework.ide.eclipse.webflow.core.model;
 
-/**
- * 
- * 
- * @author Christian Dupuis
- * @since 2.0
- */
-public interface ITransition extends IWebflowModelElement {
+import java.util.List;
 
-	/**
-	 * Gets the to state.
-	 * 
-	 * @return the to state
-	 */
-	ITransitionableTo getToState();
+public interface IGlobalTransitions extends IWebflowModelElement {
+	
+	List<IStateTransition> getGlobalTransitions();
 
-	/**
-	 * Sets the to state.
-	 * 
-	 * @param toState the to state
-	 */
-	void setToState(ITransitionableTo toState);
+	void addGlobalTransition(IStateTransition action);
 
-	void setToStateId(String id);
+	void addGlobalTransition(IStateTransition action, int i);
 
-	String getToStateId();
+	void removeGlobalTransition(IStateTransition action);
+
+	void removeAll();
+
+	void createNew(IWebflowModelElement parent);
 }

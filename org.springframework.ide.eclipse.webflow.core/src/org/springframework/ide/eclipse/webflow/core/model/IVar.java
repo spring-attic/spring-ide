@@ -36,7 +36,7 @@ public interface IVar extends IWebflowModelElement {
 	 * 
 	 * @param clazz the class
 	 */
-	void setClass(String clazz);
+	void setClazz(String clazz);
 
 	/**
 	 * Sets the bean.
@@ -79,5 +79,7 @@ public interface IVar extends IWebflowModelElement {
 	 * @return the scope
 	 */
 	String getScope();
+	
+	void createNew(IWebflowModelElement parent); 
 
 }

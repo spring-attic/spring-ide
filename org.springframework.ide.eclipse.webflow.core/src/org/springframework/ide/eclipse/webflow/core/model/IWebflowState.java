@@ -27,41 +27,11 @@ import java.util.List;
 public interface IWebflowState extends ITransitionableFrom {
 
 	/**
-	 * Gets the states.
-	 * 
-	 * @return the states
-	 */
-	List<IState> getStates();
-
-	/**
 	 * Adds the state.
 	 * 
 	 * @param state the state
 	 */
 	void addState(IState state);
-
-	/**
-	 * Adds the state.
-	 * 
-	 * @param i the i
-	 * @param state the state
-	 */
-	void addState(IState state, int i);
-
-	/**
-	 * Move state.
-	 * 
-	 * @param i the i
-	 * @param state the state
-	 */
-	void moveState(IState state, int i);
-
-	/**
-	 * Removes the state.
-	 * 
-	 * @param state the state
-	 */
-	void removeState(IState state);
 
 	/**
 	 * Gets the vars.
@@ -226,5 +196,39 @@ public interface IWebflowState extends ITransitionableFrom {
 	 * @param state the state
 	 */
 	void removeInlineFlowState(IInlineFlowState state);
+
+	/**
+	 * Adds the state.
+	 * 
+	 * @param i the i
+	 * @param state the state
+	 */
+	void addState(IState state, int i);
+
+	/**
+	 * Gets the states.
+	 * 
+	 * @return the states
+	 */
+	List<IState> getStates();
+
+	/**
+	 * Move state.
+	 * 
+	 * @param i the i
+	 * @param state the state
+	 */
+	void moveState(IState state, int i);
+
+	/**
+	 * Removes the state.
+	 * 
+	 * @param state the state
+	 */
+	void removeState(IState state);
+
+	IGlobalTransitions getGlobalTransitions();
+
+	void setGlobalTransitions(IGlobalTransitions inputMapper);
 
 }

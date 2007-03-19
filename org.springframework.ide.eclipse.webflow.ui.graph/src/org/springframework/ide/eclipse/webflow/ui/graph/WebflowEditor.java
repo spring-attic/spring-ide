@@ -346,7 +346,9 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 							setInput(new WebflowEditorInput(config));
 							getCommandStack().flush();
 							initializeGraphicalViewer();
-							outlinePage.initializeOutlineViewer();
+							if (outlinePage != null) {
+								outlinePage.initializeOutlineViewer();
+							}
 						}
 					});
 				}
@@ -367,7 +369,9 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 							setInput(new WebflowEditorInput(config));
 							getCommandStack().flush();
 							initializeGraphicalViewer();
-							outlinePage.initializeOutlineViewer();
+							if (outlinePage != null) {
+								outlinePage.initializeOutlineViewer();
+							}
 						}
 					});
 				}

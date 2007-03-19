@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IDecisionState;
 import org.springframework.ide.eclipse.webflow.core.model.IExceptionHandler;
+import org.springframework.ide.eclipse.webflow.core.model.IGlobalTransitions;
 import org.springframework.ide.eclipse.webflow.core.model.IIf;
 import org.springframework.ide.eclipse.webflow.core.model.IIfTransition;
 import org.springframework.ide.eclipse.webflow.core.model.IImport;
@@ -79,6 +80,8 @@ public class WebflowState extends AbstractTransitionableFrom implements
 	 * The vars.
 	 */
 	private List<IVar> vars;
+	
+	private IGlobalTransitions globalTransition;
 
 	/**
 	 * @param node
@@ -152,6 +155,14 @@ public class WebflowState extends AbstractTransitionableFrom implements
 					this.outputMapper = new OutputMapper();
 					this.outputMapper.init(child, this);
 				}
+				else if ("output-mapper".equals(child.getLocalName())) {
+					this.outputMapper = new OutputMapper();
+					this.outputMapper.init(child, this);
+				}
+				else if ("global-transitions".equals(child.getLocalName())) {
+					this.globalTransition = new GlobalTransitions();
+					this.globalTransition.init(child, this);
+				}
 			}
 		}
 
@@ -199,6 +210,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 	public void addImport(IImport ip) {
 		if (!getImports().contains(ip)) {
 			this.getImports().add(ip);
+			WebflowModelXmlUtils.insertNode(ip.getNode(), node);
 			super.firePropertyChange(ADD_CHILDREN, new Integer(this.getStates()
 					.indexOf(ip)), ip);
 		}
@@ -210,7 +222,14 @@ public class WebflowState extends AbstractTransitionableFrom implements
 	 */
 	public void addImport(IImport pm, int i) {
 		if (!getImports().contains(pm)) {
+			int refIndex = i;
+			if (i >= this.vars.size()) {
+				refIndex = this.vars.size() - 1;
+			}
+			IVar refState = this.vars.get(refIndex);
 			this.getImports().add(i, pm);
+			WebflowModelXmlUtils.insertBefore(pm.getNode(), refState
+					.getNode());
 			super.firePropertyChange(ADD_CHILDREN, new Integer(i), pm);
 		}
 
@@ -316,6 +335,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 	public void addVar(IVar state) {
 		if (!getVars().contains(state)) {
 			this.getVars().add(state);
+			WebflowModelXmlUtils.insertNode(state.getNode(), node);
 			super.firePropertyChange(ADD_CHILDREN, new Integer(this.getVars()
 					.indexOf(state)), state);
 		}
@@ -327,7 +347,14 @@ public class WebflowState extends AbstractTransitionableFrom implements
 	 */
 	public void addVar(IVar state, int i) {
 		if (!getVars().contains(state)) {
+			int refIndex = i;
+			if (i >= this.vars.size()) {
+				refIndex = this.vars.size() - 1;
+			}
+			IVar refState = this.vars.get(refIndex);
 			this.getVars().add(i, state);
+			WebflowModelXmlUtils.insertBefore(state.getNode(), refState
+					.getNode());
 			super.firePropertyChange(ADD_CHILDREN, new Integer(i), state);
 		}
 	}
@@ -445,6 +472,9 @@ public class WebflowState extends AbstractTransitionableFrom implements
 	public void removeImport(IImport im) {
 		if (getImports().contains(im)) {
 			this.getImports().remove(im);
+			if (im.getNode().getParentNode() != null) {
+				getNode().removeChild(im.getNode());
+			}
 			super.fireStructureChange(REMOVE_CHILDREN, im);
 		}
 
@@ -469,6 +499,9 @@ public class WebflowState extends AbstractTransitionableFrom implements
 	public void removeVar(IVar state) {
 		if (getVars().contains(state)) {
 			this.getVars().remove(state);
+			if (state.getNode().getParentNode() != null) {
+				getNode().removeChild(state.getNode());
+			}
 			super.fireStructureChange(REMOVE_CHILDREN, state);
 		}
 
@@ -651,5 +684,20 @@ public class WebflowState extends AbstractTransitionableFrom implements
 				getOutputMapper().accept(visitor, monitor);
 			}
 		}
+	}
+
+	public IGlobalTransitions getGlobalTransitions() {
+		return this.globalTransition;
+	}
+
+	public void setGlobalTransitions(IGlobalTransitions inputMapper) {
+		if (this.globalTransition != null) {
+			getNode().removeChild(this.globalTransition.getNode());
+		}
+		this.globalTransition = inputMapper;
+		if (inputMapper != null) {
+			WebflowModelXmlUtils.insertNode(inputMapper.getNode(), getNode());
+		}
+		super.fireStructureChange(ADD_CHILDREN, inputMapper);
 	}
 }

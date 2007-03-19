@@ -37,6 +37,7 @@ import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelU
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowValidationProblem;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowValidationProblemReporter;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowValidationVisitor;
+import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
@@ -47,7 +48,6 @@ import org.springframework.ide.eclipse.webflow.ui.editor.Activator;
 
 /**
  * Some helper methods for {@link WebflowEditor}
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -194,10 +194,10 @@ public abstract class WebflowUtils {
 				new String[0]);
 	}
 
-	public static boolean isValid(
-			IWebflowModelElement element) {
+	public static boolean isValid(IWebflowModelElement element) {
 		WebflowValidationProblemReporter problemReporter = validate(element);
-		return problemReporter == null || problemReporter.getErrors().size() == 0;
+		return problemReporter == null
+				|| !problemReporter.hasErrors();
 	}
 
 	public static WebflowValidationProblemReporter validate(
@@ -215,8 +215,7 @@ public abstract class WebflowUtils {
 		return null;
 	}
 
-	public static String getErrorTooltip(
-			IWebflowModelElement element) {
+	public static String getErrorTooltip(IWebflowModelElement element) {
 		StringBuffer buf = new StringBuffer();
 		WebflowValidationProblemReporter problemReporter = validate(element);
 		if (problemReporter != null && problemReporter.getErrors().size() > 0) {
@@ -226,7 +225,20 @@ public abstract class WebflowUtils {
 				buf.append(problem.getMessage());
 			}
 		}
-		
+
 		return buf.toString();
 	}
+
+	public static String[] getStateId(IWebflowModelElement parent) {
+		IWebflowState webflowState = WebflowModelUtils.getWebflowState(parent,
+				false);
+		List<String> stateIds = new ArrayList<String>();
+		if (webflowState != null) {
+			for (IState state : webflowState.getStates()) {
+				stateIds.add(state.getId());
+			}
+		}
+		return stateIds.toArray(new String[stateIds.size()]);
+	}
+
 }

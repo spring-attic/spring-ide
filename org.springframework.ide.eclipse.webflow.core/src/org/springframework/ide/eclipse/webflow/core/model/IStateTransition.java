@@ -94,7 +94,7 @@ public interface IStateTransition extends ITransition {
 	 * @param webflowState the webflow state
 	 * @param parent the parent
 	 */
-	void createNew(IState parent, IWebflowState webflowState);
+	void createNew(IWebflowModelElement parent, IWebflowState webflowState);
 
 	String getOnException();
 

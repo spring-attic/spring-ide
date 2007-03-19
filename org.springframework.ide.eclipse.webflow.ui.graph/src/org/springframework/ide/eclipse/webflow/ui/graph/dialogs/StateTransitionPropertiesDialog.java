@@ -39,9 +39,11 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
@@ -56,13 +58,13 @@ import org.springframework.ide.eclipse.webflow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
-import org.springframework.ide.eclipse.webflow.ui.graph.WebflowImages;
+import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
 import org.springframework.ide.eclipse.webflow.ui.graph.WebflowUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Properties {@link Dialog} implemantation that enables the edition of
  * {@link IStateTransition} elements.
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -145,9 +147,11 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 	 */
 	private PropertiesComposite properties;
 
+	private boolean displayToBlock = false;
+
+	private Combo toStateText;
+
 	/**
-	 * 
-	 * 
 	 * @param parentShell
 	 * @param state
 	 * @param parent
@@ -155,6 +159,13 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 	@SuppressWarnings("unchecked")
 	public StateTransitionPropertiesDialog(Shell parentShell,
 			IWebflowModelElement parent, IStateTransition state) {
+		this(parentShell, parent, state, false);
+	}
+
+	@SuppressWarnings("unchecked")
+	public StateTransitionPropertiesDialog(Shell parentShell,
+			IWebflowModelElement parent, IStateTransition state,
+			boolean displayToBlock) {
 		super(parentShell);
 		this.transition = state;
 		this.parent = parent;
@@ -165,7 +176,7 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 		if (this.transitionClone.getActions() != null) {
 			actions.addAll(this.transitionClone.getActions());
 		}
-
+		this.displayToBlock = displayToBlock;
 	}
 
 	protected void handleButtonPressed(Button widget) {
@@ -201,7 +212,14 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 	@SuppressWarnings("unchecked")
 	protected void buttonPressed(int buttonId) {
 		if (buttonId == IDialogConstants.OK_ID) {
-			this.transitionClone.setOn(trimString(getOn()));
+			this.transitionClone.setOn(trimString(this.onText.getText()));
+			this.transitionClone.setOnException(trimString(this.onExceptionText
+					.getText()));
+
+			if (this.displayToBlock) {
+				this.transitionClone.setToStateId(trimString(this.toStateText
+						.getText()));
+			}
 
 			if (this.actions != null && this.actions.size() > 0) {
 				transitionClone.removeAll();
@@ -226,6 +244,7 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		shell.setText(getShellTitle());
+		shell.setImage(getImage());
 	}
 
 	/*
@@ -241,7 +260,9 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 		// do this here because setting the text will set enablement on the
 		// ok button
 		onText.setFocus();
-		if (this.transition != null && this.transition.getOn() != null) {
+		if (this.transition != null
+				&& (this.transition.getOn() != null || this.transition
+						.getOnException() != null)) {
 			okButton.setEnabled(true);
 		}
 		else {
@@ -277,8 +298,8 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 		folder.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		TabItem item1 = new TabItem(folder, SWT.NULL);
 		item1.setText("General");
-		item1.setImage(WebflowImages
-				.getImage(WebflowImages.IMG_OBJS_CONNECTION));
+		item1.setImage(WebflowUIImages
+				.getImage(WebflowUIImages.IMG_OBJS_TRANSITION));
 		TabItem item2 = new TabItem(folder, SWT.NULL);
 		TabItem item4 = new TabItem(folder, SWT.NULL);
 
@@ -344,6 +365,26 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 				GridData.HORIZONTAL_ALIGN_END));
 		browseExceptionButton.addSelectionListener(buttonListener);
 
+		if (this.displayToBlock) {
+			Label toStateLabel = new Label(groupActionType, SWT.NONE);
+			toStateLabel.setText("To State");
+			toStateText = new Combo(groupActionType, SWT.DROP_DOWN
+					| SWT.READ_ONLY);
+			toStateText.setItems(WebflowUtils.getStateId(this.parent));
+			if (this.transition != null
+					&& this.transition.getToStateId() != null) {
+				this.toStateText.setText(this.transition.getToStateId());
+			}
+			toStateText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			toStateText.addModifyListener(new ModifyListener() {
+
+				public void modifyText(ModifyEvent e) {
+					validateInput();
+				}
+			});
+			new Label(groupActionType, SWT.NONE);
+		}
+
 		item1.setControl(nameGroup);
 
 		actionProperties = new ActionComposite(this, item2, getShell(),
@@ -362,9 +403,7 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 
 	/**
 	 * Cut the expression from given criteria string and return it.
-	 * 
 	 * @param encodedCriteria
-	 * 
 	 * @return
 	 */
 	private String cutExpression(String encodedCriteria) {
@@ -373,8 +412,6 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @return
 	 */
 	protected String getMessage() {
@@ -382,8 +419,6 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @return
 	 */
 	public IWebflowModelElement getModelElementParent() {
@@ -391,17 +426,6 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 	}
 
 	/**
-	 * 
-	 * 
-	 * @return
-	 */
-	public String getOn() {
-		return this.onText.getText();
-	}
-
-	/**
-	 * 
-	 * 
 	 * @return
 	 */
 	protected String getShellTitle() {
@@ -409,12 +433,14 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @return
 	 */
 	protected String getTitle() {
 		return "Transition properties";
+	}
+
+	protected Image getImage() {
+		return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_TRANSITION);
 	}
 
 	/**
@@ -425,8 +451,6 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @param error
 	 */
 	protected void showError(String error) {
@@ -434,10 +458,7 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @param string
-	 * 
 	 * @return
 	 */
 	public String trimString(String string) {
@@ -453,10 +474,12 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 	 */
 	public void validateInput() {
 		String id = this.onText.getText();
+		String onexception = this.onExceptionText.getText();
 		boolean error = false;
 		StringBuffer errorMessage = new StringBuffer();
-		if (id == null || "".equals(id)) {
-			errorMessage.append("A valid id attribute is required. ");
+		if (!StringUtils.hasText(id) && !StringUtils.hasText(onexception)) {
+			errorMessage
+					.append("A valid on or on-exception attribute is required. ");
 			error = true;
 		}
 		if (this.ognlButton.getSelection()) {

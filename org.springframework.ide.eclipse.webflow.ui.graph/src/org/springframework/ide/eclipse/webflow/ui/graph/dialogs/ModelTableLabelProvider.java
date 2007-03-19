@@ -21,8 +21,11 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.webflow.core.model.IArgument;
 import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
+import org.springframework.ide.eclipse.webflow.core.model.IImport;
 import org.springframework.ide.eclipse.webflow.core.model.IInputAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.IMapping;
+import org.springframework.ide.eclipse.webflow.core.model.IStateTransition;
+import org.springframework.ide.eclipse.webflow.core.model.IVar;
 
 /**
  * 
@@ -96,10 +99,64 @@ public class ModelTableLabelProvider implements ITableLabelProvider {
 						.getRequired());
 			}
 		}
+		else if (element instanceof IVar) {
+			if (columnIndex == 0) {
+				if (((IVar) element).getName() != null)
+					return ((IVar) element).getName();
+				else
+					return "";
+			}
+			else if (columnIndex == 1) {
+				if (((IVar) element).getScope() != null)
+					return ((IVar) element).getScope();
+				else
+					return "";
+			}
+			else if (columnIndex == 2) {
+				if (((IVar) element).getClazz() != null)
+					return ((IVar) element).getClazz();
+				else
+					return "";
+			}
+			else if (columnIndex == 3) {
+				if (((IVar) element).getBean()!= null)
+					return ((IVar) element).getBean();
+				else
+					return "";
+			}
+		}
 		else if (element instanceof IMapping) {
 			if (columnIndex == 0) {
 				if (((IMapping) element).getSource() != null)
 					return ((IMapping) element).getSource();
+				else
+					return "";
+			}
+		}
+		else if (element instanceof IImport) {
+			if (columnIndex == 0) {
+				if (((IImport) element).getResource() != null)
+					return ((IImport) element).getResource();
+				else
+					return "";
+			}
+		}
+		else if (element instanceof IStateTransition) {
+			if (columnIndex == 0) {
+				if (((IStateTransition) element).getOn() != null)
+					return ((IStateTransition) element).getOn();
+				else
+					return "";
+			}
+			else if (columnIndex == 1) {
+				if (((IStateTransition) element).getToStateId() != null)
+					return ((IStateTransition) element).getToStateId();
+				else
+					return "";
+			}
+			else if (columnIndex == 2) {
+				if (((IStateTransition) element).getOnException() != null)
+					return ((IStateTransition) element).getOnException();
 				else
 					return "";
 			}

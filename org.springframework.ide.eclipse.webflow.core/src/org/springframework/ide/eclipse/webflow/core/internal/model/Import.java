@@ -17,7 +17,9 @@
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.webflow.core.model.IImport;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 
 /**
@@ -50,5 +52,16 @@ public class Import extends AbstractModelElement implements IImport {
 	public void accept(IWebflowModelElementVisitor visitor,
 			IProgressMonitor monitor) {
 		visitor.visit(this, monitor);
+	}
+	
+	/**
+	 * Creates the new.
+	 * 
+	 * @param parent the parent
+	 */
+	public void createNew(IWebflowModelElement parent) {
+		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
+				.createElement("import");
+		init(node, parent);
 	}
 }

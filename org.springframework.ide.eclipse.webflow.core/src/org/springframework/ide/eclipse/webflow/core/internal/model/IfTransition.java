@@ -147,4 +147,13 @@ public class IfTransition extends Transition implements IIfTransition {
 			IProgressMonitor monitor) {
 		visitor.visit(this, monitor);
 	}
+
+	public void setToStateId(String id) {
+		if (this.isThen) {
+			setAttribute("then", id);
+		}
+		else {
+			setAttribute("else", id);
+		}
+	}
 }

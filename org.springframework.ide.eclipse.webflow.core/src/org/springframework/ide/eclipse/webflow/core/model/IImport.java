@@ -37,5 +37,7 @@ public interface IImport extends IWebflowModelElement {
 	 * @return the resource
 	 */
 	String getResource();
+	
+	void createNew(IWebflowModelElement parent);
 
 }

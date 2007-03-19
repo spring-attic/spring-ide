@@ -17,7 +17,9 @@
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.webflow.core.model.IVar;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 
 /**
@@ -79,7 +81,7 @@ public class Variable extends AbstractModelElement implements IVar {
 	 * 
 	 * @param clazz the class
 	 */
-	public void setClass(String clazz) {
+	public void setClazz(String clazz) {
 		setAttribute("class", clazz);
 	}
 
@@ -99,10 +101,21 @@ public class Variable extends AbstractModelElement implements IVar {
 	 */
 	public void setScope(String scope) {
 		setAttribute("scope", scope);
-	}
+	} 
 
 	public void accept(IWebflowModelElementVisitor visitor,
 			IProgressMonitor monitor) {
 		visitor.visit(this, monitor);
+	}
+	
+	/**
+	 * Creates the new.
+	 * 
+	 * @param parent the parent
+	 */
+	public void createNew(IWebflowModelElement parent) {
+		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
+				.createElement("var");
+		init(node, parent);
 	}
 }

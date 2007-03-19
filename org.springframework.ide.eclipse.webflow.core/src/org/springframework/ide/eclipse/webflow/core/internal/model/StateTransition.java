@@ -24,7 +24,6 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
-import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.webflow.core.model.ITransitionableFrom;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
@@ -214,7 +213,7 @@ public class StateTransition extends Transition implements IStateTransition,
 	 * @param webflowState
 	 * @param parent
 	 */
-	public void createNew(IState parent, IWebflowState webflowState) {
+	public void createNew(IWebflowModelElement parent, IWebflowState webflowState) {
 		this.webflowState = webflowState;
 		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
 				.createElement("transition");
@@ -344,5 +343,10 @@ public class StateTransition extends Transition implements IStateTransition,
 				action.accept(visitor, monitor);
 			}
 		}
+	}
+
+	
+	public void setToStateId(String id) {
+		setAttribute("to", id);
 	}
 }
