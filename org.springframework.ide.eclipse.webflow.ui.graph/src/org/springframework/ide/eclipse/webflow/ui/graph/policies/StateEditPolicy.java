@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IDecisionState;
+import org.springframework.ide.eclipse.webflow.core.model.IExceptionHandler;
 import org.springframework.ide.eclipse.webflow.core.model.IIf;
 import org.springframework.ide.eclipse.webflow.core.model.IInlineFlowState;
 import org.springframework.ide.eclipse.webflow.core.model.IState;
@@ -37,6 +38,7 @@ import org.springframework.ide.eclipse.webflow.ui.graph.actions.SetAsStartStateA
 import org.springframework.ide.eclipse.webflow.ui.graph.commands.DeleteActionCommand;
 import org.springframework.ide.eclipse.webflow.ui.graph.commands.DeleteAttributeMapperCommand;
 import org.springframework.ide.eclipse.webflow.ui.graph.commands.DeleteCommand;
+import org.springframework.ide.eclipse.webflow.ui.graph.commands.DeleteExceptionHandlerCommand;
 import org.springframework.ide.eclipse.webflow.ui.graph.commands.DeleteIfCommand;
 import org.springframework.ide.eclipse.webflow.ui.graph.commands.DeleteStatePropertyCommand;
 import org.springframework.ide.eclipse.webflow.ui.graph.commands.EditPropertiesCommand;
@@ -60,7 +62,8 @@ public class StateEditPolicy extends ComponentEditPolicy {
 			deleteCmd.setChild((IAttribute) (getHost().getModel()));
 			return deleteCmd;
 		}
-		else if (getHost().getParent().getModel() instanceof ISubflowState) {
+		else if (getHost().getModel() instanceof IAttributeMapper
+				&& getHost().getParent().getModel() instanceof ISubflowState) {
 			ISubflowState parent = (ISubflowState) (getHost().getParent()
 					.getModel());
 			DeleteAttributeMapperCommand deleteCmd = new DeleteAttributeMapperCommand();
@@ -69,8 +72,9 @@ public class StateEditPolicy extends ComponentEditPolicy {
 			return deleteCmd;
 		}
 		else if (getHost().getParent().getModel() instanceof IAttributeMapper) {
-			//IAttributeMapper parent = (IAttributeMapper) (getHost().getParent()
-			//		.getModel());
+			// IAttributeMapper parent = (IAttributeMapper)
+			// (getHost().getParent()
+			// .getModel());
 			// DeleteInputOutputCommand deleteCmd = new
 			// DeleteInputOutputCommand();
 			// deleteCmd.setParent(parent);
@@ -79,8 +83,8 @@ public class StateEditPolicy extends ComponentEditPolicy {
 		}
 		else if (getHost().getParent().getModel() instanceof IWebflowState
 				|| getHost().getParent().getModel() instanceof IInlineFlowState) {
-			IWebflowModelElement parent = (IWebflowModelElement) (getHost().getParent()
-					.getModel());
+			IWebflowModelElement parent = (IWebflowModelElement) (getHost()
+					.getParent().getModel());
 			DeleteCommand deleteCmd = new DeleteCommand();
 			deleteCmd.setParent(parent);
 			deleteCmd.setChild((IState) (getHost().getModel()));
@@ -91,7 +95,13 @@ public class StateEditPolicy extends ComponentEditPolicy {
 			deleteCmd.setChild((IActionElement) (getHost().getModel()));
 			return deleteCmd;
 		}
-		else if (getHost().getParent().getModel() instanceof IDecisionState) {
+		else if (getHost().getModel() instanceof IExceptionHandler) {
+			DeleteExceptionHandlerCommand deleteCmd = new DeleteExceptionHandlerCommand();
+			deleteCmd.setChild((IExceptionHandler) (getHost().getModel()));
+			return deleteCmd;
+		}
+		else if (getHost().getParent().getModel() instanceof IDecisionState
+				&& getHost().getModel() instanceof IIf) {
 			IDecisionState parent = (IDecisionState) (getHost().getParent()
 					.getModel());
 			DeleteIfCommand deleteCmd = new DeleteIfCommand();

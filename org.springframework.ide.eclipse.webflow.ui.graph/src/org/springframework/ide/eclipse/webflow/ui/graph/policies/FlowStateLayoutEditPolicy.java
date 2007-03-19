@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IActionState;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.webflow.core.model.IDecisionState;
+import org.springframework.ide.eclipse.webflow.core.model.IExceptionHandler;
 import org.springframework.ide.eclipse.webflow.core.model.IIf;
 import org.springframework.ide.eclipse.webflow.core.model.IInlineFlowState;
 import org.springframework.ide.eclipse.webflow.core.model.IState;
@@ -41,9 +42,11 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.springframework.ide.eclipse.webflow.ui.graph.commands.AddActionCommand;
 import org.springframework.ide.eclipse.webflow.ui.graph.commands.AddAttributeMapperCommand;
+import org.springframework.ide.eclipse.webflow.ui.graph.commands.AddExceptionHandlerCommand;
 import org.springframework.ide.eclipse.webflow.ui.graph.commands.AddIfCommand;
 import org.springframework.ide.eclipse.webflow.ui.graph.commands.CreateActionCommand;
 import org.springframework.ide.eclipse.webflow.ui.graph.commands.CreateAttributeMapperCommand;
+import org.springframework.ide.eclipse.webflow.ui.graph.commands.CreateExceptionHandlerCommand;
 import org.springframework.ide.eclipse.webflow.ui.graph.commands.CreateIfCommand;
 import org.springframework.ide.eclipse.webflow.ui.graph.commands.CreateStateCommand;
 import org.springframework.ide.eclipse.webflow.ui.graph.parts.IfPart;
@@ -55,11 +58,8 @@ import org.springframework.ide.eclipse.webflow.ui.graph.parts.StatePart;
 public class FlowStateLayoutEditPolicy extends LayoutEditPolicy {
 
 	/**
-	 * 
-	 * 
-	 * @param child 
-	 * 
-	 * @return 
+	 * @param child
+	 * @return
 	 */
 	protected Command createAddActionCommand(EditPart child) {
 		IActionElement activity = (IActionElement) child.getModel();
@@ -70,11 +70,8 @@ public class FlowStateLayoutEditPolicy extends LayoutEditPolicy {
 	}
 
 	/**
-	 * 
-	 * 
-	 * @param child 
-	 * 
-	 * @return 
+	 * @param child
+	 * @return
 	 */
 	protected Command createAddAttributeMapperCommand(EditPart child) {
 		IAttributeMapper activity = (IAttributeMapper) child.getModel();
@@ -85,11 +82,8 @@ public class FlowStateLayoutEditPolicy extends LayoutEditPolicy {
 	}
 
 	/**
-	 * 
-	 * 
-	 * @param child 
-	 * 
-	 * @return 
+	 * @param child
+	 * @return
 	 */
 	protected Command createAddIfCommand(EditPart child) {
 		IIf activity = (IIf) child.getModel();
@@ -99,7 +93,8 @@ public class FlowStateLayoutEditPolicy extends LayoutEditPolicy {
 		return add;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editpolicies.LayoutEditPolicy#createChildEditPolicy(org.eclipse.gef.EditPart)
 	 */
 	protected EditPolicy createChildEditPolicy(EditPart child) {
@@ -109,18 +104,16 @@ public class FlowStateLayoutEditPolicy extends LayoutEditPolicy {
 	}
 
 	/**
-	 * 
-	 * 
-	 * @param child 
-	 * @param after 
-	 * 
-	 * @return 
+	 * @param child
+	 * @param after
+	 * @return
 	 */
 	protected Command createMoveChildCommand(EditPart child, EditPart after) {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editpolicies.LayoutEditPolicy#getAddCommand(org.eclipse.gef.Request)
 	 */
 	protected Command getAddCommand(Request req) {
@@ -139,6 +132,12 @@ public class FlowStateLayoutEditPolicy extends LayoutEditPolicy {
 					command.add(createAddActionCommand(child));
 				}
 			}
+			else if (child.getModel() instanceof IExceptionHandler) {
+				IState state = (IState) getHost().getModel();
+				if (!(state instanceof IWebflowState) && !(state instanceof IInlineFlowState)) {
+					command.add(createAddExceptionHandlerCommand(child));
+				}
+			}
 			else if (child.getModel() instanceof IAttributeMapper
 					&& getHost().getModel() instanceof ISubflowState) {
 				command.add(createAddAttributeMapperCommand(child));
@@ -151,7 +150,16 @@ public class FlowStateLayoutEditPolicy extends LayoutEditPolicy {
 		return command.unwrap();
 	}
 
-	/* (non-Javadoc)
+	protected Command createAddExceptionHandlerCommand(EditPart child) {
+		IExceptionHandler activity = (IExceptionHandler) child.getModel();
+		AddExceptionHandlerCommand add = new AddExceptionHandlerCommand();
+		add.setParent((IWebflowModelElement) getHost().getModel());
+		add.setChild(activity);
+		return add;
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editpolicies.LayoutEditPolicy#getCreateCommand(org.eclipse.gef.requests.CreateRequest)
 	 */
 	protected Command getCreateCommand(CreateRequest request) {
@@ -187,6 +195,15 @@ public class FlowStateLayoutEditPolicy extends LayoutEditPolicy {
 				return null;
 			}
 		}
+		else if (getHost().getModel() instanceof IState
+				&& !(getHost().getModel() instanceof IWebflowState)
+				&& !(getHost().getModel() instanceof IInlineFlowState)
+				&& request.getNewObject() instanceof IExceptionHandler) {
+			CreateExceptionHandlerCommand command = new CreateExceptionHandlerCommand();
+			command.setParent((IState) getHost().getModel());
+			command.setChild((IExceptionHandler) request.getNewObject());
+			return command;
+		}
 		else if (getHost().getModel() instanceof ISubflowState
 				&& request.getNewObject() instanceof IAttributeMapper) {
 			if (((ISubflowState) getHost().getModel()).getAttributeMapper() == null) {
@@ -211,14 +228,16 @@ public class FlowStateLayoutEditPolicy extends LayoutEditPolicy {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editpolicies.LayoutEditPolicy#getDeleteDependantCommand(org.eclipse.gef.Request)
 	 */
 	protected Command getDeleteDependantCommand(Request request) {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.editpolicies.LayoutEditPolicy#getMoveChildrenCommand(org.eclipse.gef.Request)
 	 */
 	protected Command getMoveChildrenCommand(Request request) {

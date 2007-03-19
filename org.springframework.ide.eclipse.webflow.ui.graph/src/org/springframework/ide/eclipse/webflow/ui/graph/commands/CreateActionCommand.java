@@ -51,26 +51,31 @@ public class CreateActionCommand extends Command {
 	 */
 	private boolean isMove = false;
 
+	private boolean createNew = true;
+
 	/**
 	 * 
 	 */
 	private IState parent;
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.commands.Command#execute()
 	 */
 	public void execute() {
-		if (child instanceof Action) {
-			((Action) child).createNew(parent);
-		}
-		else if (child instanceof BeanAction) {
-			((BeanAction) child).createNew(parent);
-		}
-		else if (child instanceof EvaluateAction) {
-			((EvaluateAction) child).createNew(parent);
-		}
-		else if (child instanceof Set) {
-			((Set) child).createNew(parent);
+		if (createNew) {
+			if (child instanceof Action) {
+				((Action) child).createNew(parent);
+			}
+			else if (child instanceof BeanAction) {
+				((BeanAction) child).createNew(parent);
+			}
+			else if (child instanceof EvaluateAction) {
+				((EvaluateAction) child).createNew(parent);
+			}
+			else if (child instanceof Set) {
+				((Set) child).createNew(parent);
+			}
 		}
 		if (!isMove) {
 			if (DialogUtils.openPropertiesDialog(null, child, true) != Dialog.OK) {
@@ -133,42 +138,35 @@ public class CreateActionCommand extends Command {
 	}
 
 	/**
-	 * 
-	 * 
-	 * @param action 
+	 * @param action
 	 */
 	public void setChild(IActionElement action) {
 		child = action;
 	}
 
 	/**
-	 * 
-	 * 
-	 * @param i 
+	 * @param i
 	 */
 	public void setIndex(int i) {
 		index = i;
 	}
 
 	/**
-	 * 
-	 * 
-	 * @param isMove 
+	 * @param isMove
 	 */
 	public void setMove(boolean isMove) {
 		this.isMove = isMove;
 	}
 
 	/**
-	 * 
-	 * 
-	 * @param sa 
+	 * @param sa
 	 */
 	public void setParent(IState sa) {
 		parent = sa;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see org.eclipse.gef.commands.Command#undo()
 	 */
 	public void undo() {
@@ -194,5 +192,15 @@ public class CreateActionCommand extends Command {
 				parent.setExitActions(null);
 			}
 		}
+	}
+
+	public void redo() {
+		boolean tempMove = this.isMove;
+		boolean tempCreateNew = this.createNew;
+		this.isMove = true;
+		this.createNew = false;
+		execute();
+		this.isMove = tempMove;
+		this.createNew = tempCreateNew;
 	}
 }

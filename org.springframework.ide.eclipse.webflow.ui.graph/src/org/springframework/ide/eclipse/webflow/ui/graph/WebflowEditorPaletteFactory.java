@@ -38,6 +38,7 @@ import org.springframework.ide.eclipse.webflow.core.internal.model.DecisionState
 import org.springframework.ide.eclipse.webflow.core.internal.model.EndState;
 import org.springframework.ide.eclipse.webflow.core.internal.model.EntryActions;
 import org.springframework.ide.eclipse.webflow.core.internal.model.EvaluateAction;
+import org.springframework.ide.eclipse.webflow.core.internal.model.ExceptionHandler;
 import org.springframework.ide.eclipse.webflow.core.internal.model.ExitActions;
 import org.springframework.ide.eclipse.webflow.core.internal.model.IfTransition;
 import org.springframework.ide.eclipse.webflow.core.internal.model.RenderActions;
@@ -56,18 +57,14 @@ import org.springframework.ide.eclipse.webflow.ui.graph.model.WebflowModelLabelD
 
 /**
  * Utility class that bzilds the {@link WebflowEditor} toolbar
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
 public class WebflowEditorPaletteFactory {
 
 	/**
-	 * 
-	 * 
-	 * @param root 
-	 * 
-	 * @return 
+	 * @param root
+	 * @return
 	 */
 	private static List createCategories(PaletteRoot root) {
 		List<PaletteContainer> categories = new ArrayList<PaletteContainer>();
@@ -81,13 +78,11 @@ public class WebflowEditorPaletteFactory {
 	}
 
 	/**
-	 * 
-	 * 
-	 * @return 
+	 * @return
 	 */
 	private static PaletteContainer createComponentsDrawer() {
 
-		PaletteDrawer drawer = new PaletteDrawer("Web Flow States", null);
+		PaletteDrawer drawer = new PaletteDrawer("Web Flow Elements", null);
 
 		List<ToolEntry> entries = new ArrayList<ToolEntry>();
 
@@ -124,16 +119,20 @@ public class WebflowEditorPaletteFactory {
 				WebflowUIImages.DESC_OBJS_END_STATE);
 		entries.add(combined);
 
+		combined = new CombinedTemplateCreationEntry("Exception Handler",
+				"Create an ExceptionHandler", ExceptionHandler.class,
+				new SimpleFactory(ExceptionHandler.class),
+				WebflowUIImages.DESC_OBJS_EXCEPTION_HANDLER,
+				WebflowUIImages.DESC_OBJS_EXCEPTION_HANDLER);
+		entries.add(combined);
+
 		drawer.addAll(entries);
 		return drawer;
 	}
 
 	/**
-	 * 
-	 * 
-	 * @param root 
-	 * 
-	 * @return 
+	 * @param root
+	 * @return
 	 */
 	private static PaletteContainer createControlGroup(PaletteRoot root) {
 		PaletteGroup controlGroup = new PaletteGroup("Control Group");
@@ -171,7 +170,6 @@ public class WebflowEditorPaletteFactory {
 
 	/**
 	 * Creates the PaletteRoot and adds all Palette elements.
-	 * 
 	 * @return the root
 	 */
 	public static PaletteRoot createPalette() {
@@ -181,9 +179,7 @@ public class WebflowEditorPaletteFactory {
 	}
 
 	/**
-	 * 
-	 * 
-	 * @return 
+	 * @return
 	 */
 	private static PaletteContainer createActionDrawer() {
 		List<ToolEntry> entries = new ArrayList<ToolEntry>();
@@ -192,27 +188,27 @@ public class WebflowEditorPaletteFactory {
 		drawer.setInitialState(PaletteDrawer.INITIAL_STATE_OPEN);
 		CombinedTemplateCreationEntry combined = new CombinedTemplateCreationEntry(
 				"Action", "Create a new Action", Action.class,
-				new WebflowModelElementFactory(Action.class,
+				new ActionModelElementFactory(Action.class,
 						IActionElement.ACTION_TYPE.ACTION),
 				WebflowUIImages.DESC_OBJS_ACTION,
 				WebflowUIImages.DESC_OBJS_ACTION);
 		entries.add(combined);
 		combined = new CombinedTemplateCreationEntry("Bean Action",
 				"Create a new Bean Action", BeanAction.class,
-				new WebflowModelElementFactory(BeanAction.class,
+				new ActionModelElementFactory(BeanAction.class,
 						IActionElement.ACTION_TYPE.ACTION),
 				WebflowUIImages.DESC_OBJS_BEAN_ACTION,
 				WebflowUIImages.DESC_OBJS_BEAN_ACTION);
 		entries.add(combined);
 		combined = new CombinedTemplateCreationEntry("Evaluation Action",
 				"Create a new Evaluation Action", EvaluateAction.class,
-				new WebflowModelElementFactory(EvaluateAction.class,
+				new ActionModelElementFactory(EvaluateAction.class,
 						IActionElement.ACTION_TYPE.ACTION),
 				WebflowUIImages.DESC_OBJS_EVALUATION_ACTION,
 				WebflowUIImages.DESC_OBJS_EVALUATION_ACTION);
 		entries.add(combined);
 		combined = new CombinedTemplateCreationEntry("Set", "Create a new Set",
-				Set.class, new WebflowModelElementFactory(Set.class,
+				Set.class, new ActionModelElementFactory(Set.class,
 						IActionElement.ACTION_TYPE.ACTION),
 				WebflowUIImages.DESC_OBJS_SET_ACTION,
 				WebflowUIImages.DESC_OBJS_SET_ACTION);
@@ -222,83 +218,76 @@ public class WebflowEditorPaletteFactory {
 	}
 
 	/**
-	 * 
-	 * 
-	 * @return 
+	 * @return
 	 */
 	private static PaletteContainer createRenderActionsDrawer() {
 		List<ToolEntry> entries = new ArrayList<ToolEntry>();
-		
+
 		IRenderActions exit = new RenderActions();
 		IAction action = new Action();
 		action.setElementParent(exit);
-		
-		WebflowModelLabelDecorator dec = new WebflowModelLabelDecorator();
 
+		WebflowModelLabelDecorator dec = new WebflowModelLabelDecorator();
 
 		PaletteDrawer drawer = new PaletteDrawer("Render Actions", null);
 		drawer.setInitialState(PaletteDrawer.INITIAL_STATE_OPEN);
 		CombinedTemplateCreationEntry combined = new CombinedTemplateCreationEntry(
 				"Render Action", "Create a new Render Action", Action.class,
-				new WebflowModelElementFactory(Action.class,
-						IActionElement.ACTION_TYPE.RENDER_ACTION),
-						dec
+				new ActionModelElementFactory(Action.class,
+						IActionElement.ACTION_TYPE.RENDER_ACTION), dec
 						.getDecoratedImageDescriptor(WebflowUIImages
 								.getImage(WebflowUIImages.IMG_OBJS_ACTION),
-								action),
-								dec
-								.getDecoratedImageDescriptor(WebflowUIImages
-										.getImage(WebflowUIImages.IMG_OBJS_ACTION),
-										action));
+								action), dec.getDecoratedImageDescriptor(
+						WebflowUIImages
+								.getImage(WebflowUIImages.IMG_OBJS_ACTION),
+						action));
 		entries.add(combined);
-		combined = new CombinedTemplateCreationEntry("Render Bean Action",
-				"Create a new Render Bean Action", BeanAction.class,
-				new WebflowModelElementFactory(BeanAction.class,
+		combined = new CombinedTemplateCreationEntry(
+				"Render Bean Action",
+				"Create a new Render Bean Action",
+				BeanAction.class,
+				new ActionModelElementFactory(BeanAction.class,
 						IActionElement.ACTION_TYPE.RENDER_ACTION),
-						dec
-						.getDecoratedImageDescriptor(WebflowUIImages
-								.getImage(WebflowUIImages.IMG_OBJS_BEAN_ACTION),
-								action),
-								dec
-								.getDecoratedImageDescriptor(WebflowUIImages
+				dec
+						.getDecoratedImageDescriptor(
+								WebflowUIImages
 										.getImage(WebflowUIImages.IMG_OBJS_BEAN_ACTION),
-										action));
+								action),
+				dec
+						.getDecoratedImageDescriptor(
+								WebflowUIImages
+										.getImage(WebflowUIImages.IMG_OBJS_BEAN_ACTION),
+								action));
 		entries.add(combined);
 		combined = new CombinedTemplateCreationEntry(
 				"Render Evaluation Action",
 				"Create a new Render Evaluation Action", EvaluateAction.class,
-				new WebflowModelElementFactory(EvaluateAction.class,
+				new ActionModelElementFactory(EvaluateAction.class,
 						IActionElement.ACTION_TYPE.RENDER_ACTION),
-						dec
-						.getDecoratedImageDescriptor(WebflowUIImages
-								.getImage(WebflowUIImages.IMG_OBJS_EVALUATION_ACTION),
-								action),
-								dec
-								.getDecoratedImageDescriptor(WebflowUIImages
-										.getImage(WebflowUIImages.IMG_OBJS_EVALUATION_ACTION),
-										action));
+				dec.getDecoratedImageDescriptor(WebflowUIImages
+						.getImage(WebflowUIImages.IMG_OBJS_EVALUATION_ACTION),
+						action),
+				dec.getDecoratedImageDescriptor(WebflowUIImages
+						.getImage(WebflowUIImages.IMG_OBJS_EVALUATION_ACTION),
+						action));
 		entries.add(combined);
 		combined = new CombinedTemplateCreationEntry("Render Set",
 				"Create a new Render Set", Set.class,
-				new WebflowModelElementFactory(Set.class,
-						IActionElement.ACTION_TYPE.RENDER_ACTION),
-						dec
+				new ActionModelElementFactory(Set.class,
+						IActionElement.ACTION_TYPE.RENDER_ACTION), dec
 						.getDecoratedImageDescriptor(WebflowUIImages
 								.getImage(WebflowUIImages.IMG_OBJS_SET_ACTION),
-								action),
-								dec
-								.getDecoratedImageDescriptor(WebflowUIImages
-										.getImage(WebflowUIImages.IMG_OBJS_SET_ACTION),
-										action));
+								action), dec.getDecoratedImageDescriptor(
+						WebflowUIImages
+								.getImage(WebflowUIImages.IMG_OBJS_SET_ACTION),
+						action));
 		entries.add(combined);
 		drawer.addAll(entries);
 		return drawer;
 	}
 
 	/**
-	 * 
-	 * 
-	 * @return 
+	 * @return
 	 */
 	private static PaletteContainer createEntryActionDrawer() {
 		List<ToolEntry> entries = new ArrayList<ToolEntry>();
@@ -313,7 +302,7 @@ public class WebflowEditorPaletteFactory {
 		drawer.setInitialState(PaletteDrawer.INITIAL_STATE_CLOSED);
 		CombinedTemplateCreationEntry combined = new CombinedTemplateCreationEntry(
 				"Entry Action", "Create a new Entry Action", Action.class,
-				new WebflowModelElementFactory(Action.class,
+				new ActionModelElementFactory(Action.class,
 						IActionElement.ACTION_TYPE.ENTRY_ACTION), dec
 						.getDecoratedImageDescriptor(WebflowUIImages
 								.getImage(WebflowUIImages.IMG_OBJS_ACTION),
@@ -326,7 +315,7 @@ public class WebflowEditorPaletteFactory {
 				"Entry Bean Action",
 				"Create a new Entry Bean Action",
 				BeanAction.class,
-				new WebflowModelElementFactory(BeanAction.class,
+				new ActionModelElementFactory(BeanAction.class,
 						IActionElement.ACTION_TYPE.ENTRY_ACTION),
 				dec
 						.getDecoratedImageDescriptor(
@@ -341,7 +330,7 @@ public class WebflowEditorPaletteFactory {
 		entries.add(combined);
 		combined = new CombinedTemplateCreationEntry("Entry Evaluation Action",
 				"Create a new Evaluation Action", EvaluateAction.class,
-				new WebflowModelElementFactory(EvaluateAction.class,
+				new ActionModelElementFactory(EvaluateAction.class,
 						IActionElement.ACTION_TYPE.ENTRY_ACTION),
 				dec.getDecoratedImageDescriptor(WebflowUIImages
 						.getImage(WebflowUIImages.IMG_OBJS_EVALUATION_ACTION),
@@ -352,7 +341,7 @@ public class WebflowEditorPaletteFactory {
 		entries.add(combined);
 		combined = new CombinedTemplateCreationEntry("Entry Set",
 				"Create a new Entry Set", Set.class,
-				new WebflowModelElementFactory(Set.class,
+				new ActionModelElementFactory(Set.class,
 						IActionElement.ACTION_TYPE.ENTRY_ACTION), dec
 						.getDecoratedImageDescriptor(WebflowUIImages
 								.getImage(WebflowUIImages.IMG_OBJS_SET_ACTION),
@@ -366,9 +355,7 @@ public class WebflowEditorPaletteFactory {
 	}
 
 	/**
-	 * 
-	 * 
-	 * @return 
+	 * @return
 	 */
 	private static PaletteContainer createExitActionDrawer() {
 		List<ToolEntry> entries = new ArrayList<ToolEntry>();
@@ -383,7 +370,7 @@ public class WebflowEditorPaletteFactory {
 		drawer.setInitialState(PaletteDrawer.INITIAL_STATE_CLOSED);
 		CombinedTemplateCreationEntry combined = new CombinedTemplateCreationEntry(
 				"Exit Action", "Create a new Exit Action", Action.class,
-				new WebflowModelElementFactory(Action.class,
+				new ActionModelElementFactory(Action.class,
 						IActionElement.ACTION_TYPE.EXIT_ACTION), dec
 						.getDecoratedImageDescriptor(WebflowUIImages
 								.getImage(WebflowUIImages.IMG_OBJS_ACTION),
@@ -396,7 +383,7 @@ public class WebflowEditorPaletteFactory {
 				"Exit Bean Action",
 				"Create a new Exit Bean Action",
 				BeanAction.class,
-				new WebflowModelElementFactory(BeanAction.class,
+				new ActionModelElementFactory(BeanAction.class,
 						IActionElement.ACTION_TYPE.EXIT_ACTION),
 				dec
 						.getDecoratedImageDescriptor(
@@ -411,7 +398,7 @@ public class WebflowEditorPaletteFactory {
 		entries.add(combined);
 		combined = new CombinedTemplateCreationEntry("Exit Evaluation Action",
 				"Create a new Exit Evaluation Action", EvaluateAction.class,
-				new WebflowModelElementFactory(EvaluateAction.class,
+				new ActionModelElementFactory(EvaluateAction.class,
 						IActionElement.ACTION_TYPE.EXIT_ACTION),
 				dec.getDecoratedImageDescriptor(WebflowUIImages
 						.getImage(WebflowUIImages.IMG_OBJS_EVALUATION_ACTION),
@@ -422,7 +409,7 @@ public class WebflowEditorPaletteFactory {
 		entries.add(combined);
 		combined = new CombinedTemplateCreationEntry("Exit Set",
 				"Create a new Exit Set", Set.class,
-				new WebflowModelElementFactory(Set.class,
+				new ActionModelElementFactory(Set.class,
 						IActionElement.ACTION_TYPE.EXIT_ACTION), dec
 						.getDecoratedImageDescriptor(WebflowUIImages
 								.getImage(WebflowUIImages.IMG_OBJS_SET_ACTION),
@@ -438,7 +425,7 @@ public class WebflowEditorPaletteFactory {
 	/**
 	 * 
 	 */
-	private static class WebflowModelElementFactory extends SimpleFactory {
+	private static class ActionModelElementFactory extends SimpleFactory {
 
 		/**
 		 * 
@@ -446,18 +433,17 @@ public class WebflowEditorPaletteFactory {
 		private IActionElement.ACTION_TYPE type;
 
 		/**
-		 * 
-		 * 
-		 * @param type 
-		 * @param aClass 
+		 * @param type
+		 * @param aClass
 		 */
-		public WebflowModelElementFactory(Class aClass,
+		public ActionModelElementFactory(Class aClass,
 				IActionElement.ACTION_TYPE type) {
 			super(aClass);
 			this.type = type;
 		}
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
 		 * @see org.eclipse.gef.requests.SimpleFactory#getNewObject()
 		 */
 		public Object getNewObject() {
@@ -466,5 +452,4 @@ public class WebflowEditorPaletteFactory {
 			return action;
 		}
 	}
-
 }

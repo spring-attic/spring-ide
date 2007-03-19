@@ -211,7 +211,7 @@ public abstract class AbstractState extends AbstractModelElement implements
 	 * @param action the action
 	 */
 	public void removeExceptionHandler(IExceptionHandler action) {
-		if (!this.exceptionHandler.contains(action)) {
+		if (this.exceptionHandler.contains(action)) {
 			this.exceptionHandler.remove(action);
 			getNode().removeChild(action.getNode());
 			super.firePropertyChange(ADD_CHILDREN, new Integer(
