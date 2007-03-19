@@ -84,7 +84,6 @@ public class StateTreeContainerEditPolicy extends TreeContainerEditPolicy {
             IAttributeMapper child, int index) {
         CreateAttributeMapperCommand cmd = new CreateAttributeMapperCommand();
         cmd.setParent((ISubflowState) getHost().getModel());
-        cmd.setChild(child);
         return cmd;
     }
 

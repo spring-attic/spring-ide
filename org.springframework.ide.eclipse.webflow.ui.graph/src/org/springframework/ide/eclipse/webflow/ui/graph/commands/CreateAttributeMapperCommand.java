@@ -17,53 +17,79 @@
 package org.springframework.ide.eclipse.webflow.ui.graph.commands;
 
 import org.eclipse.gef.commands.Command;
-import org.springframework.ide.eclipse.webflow.core.model.IAttributeMapper;
+import org.eclipse.jface.dialogs.Dialog;
+import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.ISubflowState;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.ui.graph.dialogs.DialogUtils;
 
 /**
  * 
  */
 public class CreateAttributeMapperCommand extends Command {
 
-    /**
-     * 
-     */
-    private IAttributeMapper child;
+	private boolean isMove = false;
 
-    /**
-     * 
-     */
-    private ISubflowState parent;
+	private ISubflowState parent;
 
-    /* (non-Javadoc)
-     * @see org.eclipse.gef.commands.Command#execute()
-     */
-    public void execute() {
-        parent.setAttributeMapper(child);
-    }
+	private ISubflowState newChild;
 
-    /**
-     * 
-     * 
-     * @param action 
-     */
-    public void setChild(IAttributeMapper action) {
-        child = action;
-    }
+	private ISubflowState undoChild;
 
-    /**
-     * 
-     * 
-     * @param sa 
-     */
-    public void setParent(ISubflowState sa) {
-        parent = sa;
-    }
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.gef.commands.Command#execute()
+	 */
+	public void execute() {
+		int result = 0;
+		if (!isMove) {
+			result = DialogUtils.openPropertiesDialog(
+					((IWebflowModelElement) parent).getElementParent(),
+					newChild, true, 1);
+		}
+		if (result == Dialog.OK) {
+			IWebflowModelElement tempChild = ((ICloneableModelElement<IWebflowModelElement>) newChild)
+					.cloneModelElement();
+			((ICloneableModelElement<IWebflowModelElement>) parent)
+					.applyCloneValues(tempChild);
+		}
+	}
 
-    /* (non-Javadoc)
-     * @see org.eclipse.gef.commands.Command#undo()
-     */
-    public void undo() {
-        parent.removeAttributeMapper();
-    }
+	/**
+	 * @param isMove
+	 */
+	public void setMove(boolean isMove) {
+		this.isMove = isMove;
+	}
+
+	/**
+	 * @param sa
+	 */
+	public void setParent(ISubflowState sa) {
+		this.parent = sa;
+
+		// don't work on orginal domain model object
+		this.newChild = (ISubflowState) ((ICloneableModelElement<IWebflowModelElement>) parent)
+				.cloneModelElement();
+		this.undoChild = (ISubflowState) ((ICloneableModelElement<IWebflowModelElement>) parent)
+				.cloneModelElement();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.gef.commands.Command#undo()
+	 */
+	public void undo() {
+		IWebflowModelElement tempChild = ((ICloneableModelElement<IWebflowModelElement>) undoChild)
+				.cloneModelElement();
+		((ICloneableModelElement<IWebflowModelElement>) parent)
+				.applyCloneValues(tempChild);
+	}
+
+	public void redo() {
+		boolean tempMove = this.isMove;
+		this.isMove = true;
+		execute();
+		this.isMove = tempMove;
+	}
 }

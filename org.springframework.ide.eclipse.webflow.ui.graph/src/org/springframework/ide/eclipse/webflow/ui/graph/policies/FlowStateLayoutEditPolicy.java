@@ -139,7 +139,8 @@ public class FlowStateLayoutEditPolicy extends LayoutEditPolicy {
 				}
 			}
 			else if (child.getModel() instanceof IAttributeMapper
-					&& getHost().getModel() instanceof ISubflowState) {
+					&& getHost().getModel() instanceof ISubflowState
+					&& ((ISubflowState) getHost().getModel()).getAttributeMapper() == null) {
 				command.add(createAddAttributeMapperCommand(child));
 			}
 			else if (child.getModel() instanceof IIf
@@ -209,7 +210,6 @@ public class FlowStateLayoutEditPolicy extends LayoutEditPolicy {
 			if (((ISubflowState) getHost().getModel()).getAttributeMapper() == null) {
 				CreateAttributeMapperCommand command = new CreateAttributeMapperCommand();
 				command.setParent((ISubflowState) getHost().getModel());
-				command.setChild((IAttributeMapper) request.getNewObject());
 				return command;
 			}
 			else {

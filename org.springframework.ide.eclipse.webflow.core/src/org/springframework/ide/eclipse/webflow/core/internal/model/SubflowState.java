@@ -30,8 +30,6 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.w3c.dom.NodeList;
 
 /**
- * 
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -45,15 +43,14 @@ public class SubflowState extends AbstractTransitionableFrom implements
 	private IAttributeMapper attributeMapper;
 
 	/**
-	 * 
-	 * 
 	 * @param node
 	 * @param parent
 	 */
 	@Override
 	public void init(IDOMNode node, IWebflowModelElement parent) {
 		super.init(node, parent);
-
+		this.attributeMapper = null;
+		
 		NodeList children = node.getChildNodes();
 		if (children != null && children.getLength() > 0) {
 			for (int i = 0; i < children.getLength(); i++) {
@@ -67,8 +64,6 @@ public class SubflowState extends AbstractTransitionableFrom implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @return
 	 */
 	public IAttributeMapper getAttributeMapper() {
@@ -76,8 +71,6 @@ public class SubflowState extends AbstractTransitionableFrom implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @param attributeMapper
 	 */
 	public void setAttributeMapper(IAttributeMapper attributeMapper) {
@@ -106,8 +99,6 @@ public class SubflowState extends AbstractTransitionableFrom implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @param flow
 	 */
 	public void setFlow(String flow) {
@@ -115,8 +106,6 @@ public class SubflowState extends AbstractTransitionableFrom implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @return
 	 */
 	public String getFlow() {
@@ -124,8 +113,6 @@ public class SubflowState extends AbstractTransitionableFrom implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @param parent
 	 */
 	public void createNew(IWebflowState parent) {
@@ -135,8 +122,6 @@ public class SubflowState extends AbstractTransitionableFrom implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @return
 	 */
 	public ISubflowState cloneModelElement() {
@@ -146,8 +131,6 @@ public class SubflowState extends AbstractTransitionableFrom implements
 	}
 
 	/**
-	 * 
-	 * 
 	 * @param element
 	 */
 	public void applyCloneValues(ISubflowState element) {

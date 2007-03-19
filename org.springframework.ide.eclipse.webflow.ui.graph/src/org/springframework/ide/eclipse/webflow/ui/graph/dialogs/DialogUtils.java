@@ -67,6 +67,11 @@ import org.springframework.ide.eclipse.webflow.ui.graph.WebflowUtils;
 @SuppressWarnings("restriction")
 public class DialogUtils {
 
+	public static int openPropertiesDialog(final IWebflowModelElement parent,
+			final IWebflowModelElement element, final boolean newMode) {
+		return openPropertiesDialog(parent, element, newMode, 0);
+	}
+			
 	/**
 	 * @param element
 	 * @param newMode
@@ -74,7 +79,7 @@ public class DialogUtils {
 	 * @return
 	 */
 	public static int openPropertiesDialog(final IWebflowModelElement parent,
-			final IWebflowModelElement element, final boolean newMode) {
+			final IWebflowModelElement element, final boolean newMode, final int index) {
 		final Integer[] result = new Integer[1];		
 		final Shell shell = getShell();
 		
@@ -91,7 +96,7 @@ public class DialogUtils {
             	}
             	else if (element instanceof ISubflowState) {
             		dialog = new SubFlowStatePropertiesDialog(shell,
-            				parent, (ISubflowState) element);
+            				parent, (ISubflowState) element, index);
             	}
             	else if (element instanceof IActionState) {
             		dialog = new ActionStatePropertiesDialog(shell, parent,

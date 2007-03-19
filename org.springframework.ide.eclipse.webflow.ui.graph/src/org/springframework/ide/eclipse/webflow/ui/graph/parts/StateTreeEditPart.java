@@ -100,7 +100,7 @@ public class StateTreeEditPart extends AbstractTreeEditPart implements
 				children.addAll(properties.getAttributes());
 			}
 		}
-		if (getModel() instanceof IState) {
+		if (getModel() instanceof IState && !(getModel() instanceof IWebflowState)) {
 			IState state = (IState) getModel();
 			if (state.getEntryActions() != null) {
 				children.addAll((state.getEntryActions().getEntryActions()));
@@ -136,7 +136,7 @@ public class StateTreeEditPart extends AbstractTreeEditPart implements
 				children.addAll(((IDecisionState) getModel()).getIfs());
 			}
 		}
-		if (getModel() instanceof IState) {
+		if (getModel() instanceof IState && !(getModel() instanceof IWebflowState)) {
 			IState state = (IState) getModel();
 			if (state.getExitActions() != null) {
 				children.addAll((state.getExitActions().getExitActions()));

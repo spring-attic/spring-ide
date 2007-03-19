@@ -189,6 +189,8 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
 	 * 
 	 */
 	private List<IMapping> inputMapping;
+	
+	private int index = -1;
 
 	/**
 	 * 
@@ -211,7 +213,7 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
 	 * @param parent
 	 */
 	public SubFlowStatePropertiesDialog(Shell parentShell,
-			IWebflowModelElement parent, ISubflowState state) {
+			IWebflowModelElement parent, ISubflowState state, int tabIndex) {
 		super(parentShell);
 		this.state = state;
 		this.parentElement = parent;
@@ -289,6 +291,8 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
 		if (this.stateClone.getExceptionHandlers() != null) {
 			exceptionHandler.addAll(this.stateClone.getExceptionHandlers());
 		}
+		
+		this.index = tabIndex;
 	}
 
 	/*
@@ -499,7 +503,7 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
 		TabItem item4 = new TabItem(folder, SWT.NULL);
 		TabItem item5 = new TabItem(folder, SWT.NULL);
 		TabItem item6 = new TabItem(folder, SWT.NULL);
-
+		
 		Group groupActionType = new Group(folder, SWT.NULL);
 		GridLayout layoutAttMap = new GridLayout();
 		layoutAttMap.marginWidth = 3;
@@ -674,6 +678,10 @@ public class SubFlowStatePropertiesDialog extends TitleAreaDialog implements
 
 		applyDialogFont(parentComposite);
 
+		if (this.index >= 0) {
+			folder.setSelection(this.index);
+		}
+		
 		return parentComposite;
 	}
 

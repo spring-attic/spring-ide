@@ -33,6 +33,7 @@ import org.eclipse.gef.palette.ToolEntry;
 import org.eclipse.gef.requests.SimpleFactory;
 import org.springframework.ide.eclipse.webflow.core.internal.model.Action;
 import org.springframework.ide.eclipse.webflow.core.internal.model.ActionState;
+import org.springframework.ide.eclipse.webflow.core.internal.model.AttributeMapper;
 import org.springframework.ide.eclipse.webflow.core.internal.model.BeanAction;
 import org.springframework.ide.eclipse.webflow.core.internal.model.DecisionState;
 import org.springframework.ide.eclipse.webflow.core.internal.model.EndState;
@@ -120,10 +121,17 @@ public class WebflowEditorPaletteFactory {
 		entries.add(combined);
 
 		combined = new CombinedTemplateCreationEntry("Exception Handler",
-				"Create an ExceptionHandler", ExceptionHandler.class,
+				"Create an Exception Handler", ExceptionHandler.class,
 				new SimpleFactory(ExceptionHandler.class),
 				WebflowUIImages.DESC_OBJS_EXCEPTION_HANDLER,
 				WebflowUIImages.DESC_OBJS_EXCEPTION_HANDLER);
+		entries.add(combined);
+
+		combined = new CombinedTemplateCreationEntry("Attribute Mapper",
+				"Create an Attribute Mapper", AttributeMapper.class,
+				new SimpleFactory(AttributeMapper.class),
+				WebflowUIImages.DESC_OBJS_ATTRIBUTE_MAPPER,
+				WebflowUIImages.DESC_OBJS_ATTRIBUTE_MAPPER);
 		entries.add(combined);
 
 		drawer.addAll(entries);

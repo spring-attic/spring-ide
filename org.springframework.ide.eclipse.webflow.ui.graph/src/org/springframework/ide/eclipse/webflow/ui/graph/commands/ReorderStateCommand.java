@@ -67,7 +67,7 @@ public class ReorderStateCommand extends Command {
      */
     public void execute() {
         parent.removeState(child);
-        parent.addState(child, newIndex);
+        parent.addState(child, newIndex + 1);
     }
 
     /* (non-Javadoc)
@@ -75,7 +75,7 @@ public class ReorderStateCommand extends Command {
      */
     public void undo() {
         parent.removeState(child);
-        parent.addState(child, oldIndex);
+        parent.addState(child, oldIndex + 1);
     }
 
 }

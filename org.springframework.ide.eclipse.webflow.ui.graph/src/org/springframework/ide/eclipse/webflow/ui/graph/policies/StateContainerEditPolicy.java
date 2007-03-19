@@ -25,6 +25,7 @@ import org.eclipse.gef.editpolicies.ContainerEditPolicy;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.gef.requests.GroupRequest;
+import org.springframework.ide.eclipse.webflow.core.internal.model.SubflowState;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IActionState;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeMapper;
@@ -40,6 +41,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.springframework.ide.eclipse.webflow.ui.graph.commands.ActionCloneCommand;
 import org.springframework.ide.eclipse.webflow.ui.graph.commands.ActionOrphanChildCommand;
+import org.springframework.ide.eclipse.webflow.ui.graph.commands.AttributeMapperCloneCommand;
 import org.springframework.ide.eclipse.webflow.ui.graph.commands.AttributeMapperOrphanChildCommand;
 import org.springframework.ide.eclipse.webflow.ui.graph.commands.ExceptionHandlerCloneCommand;
 import org.springframework.ide.eclipse.webflow.ui.graph.commands.ExceptionHandlerOrphanChildCommand;
@@ -127,6 +129,18 @@ public class StateContainerEditPolicy extends ContainerEditPolicy {
 						&& !(state instanceof IInlineFlowState)) {
 					ExceptionHandlerCloneCommand orphan = new ExceptionHandlerCloneCommand();
 					orphan.setChild((IExceptionHandler) ((EditPart) parts.get(i))
+							.getModel());
+					orphan.setNewState((IWebflowModelElement) getHost()
+							.getModel());
+					result.add(orphan);
+				}
+			}
+			else if (part.getModel() instanceof IAttributeMapper) {
+				IState state = (IState) getHost().getModel();
+				if (state instanceof SubflowState
+						&& ((SubflowState) state).getAttributeMapper() == null) {
+					AttributeMapperCloneCommand orphan = new AttributeMapperCloneCommand();
+					orphan.setChild((IAttributeMapper) ((EditPart) parts.get(i))
 							.getModel());
 					orphan.setNewState((IWebflowModelElement) getHost()
 							.getModel());
