@@ -59,9 +59,9 @@ public class AdviceAopTargetBeanNode implements IReferenceNode,
 	}
 
 	public void openAndReveal() {
-		IResource resource = references.get(0).getDefinition().getResource();
-		SpringUIUtils.openInEditor((IFile) resource, references.get(0)
-				.getTargetBean().getElementEndLine());
+		SpringUIUtils.openInEditor((IFile) references.get(0).getTargetBean()
+				.getElementResource(), references.get(0).getTargetBean()
+				.getElementEndLine());
 	}
 
 	public IAopReference getReference() {
