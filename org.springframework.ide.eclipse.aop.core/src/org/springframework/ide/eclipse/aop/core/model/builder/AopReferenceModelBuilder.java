@@ -66,14 +66,12 @@ import org.springframework.util.StringUtils;
 
 /**
  * Handles creation and modification of the {@link AopReferenceModel}.
- * 
  * @author Christian Dupuis
  * @since 2.0
- * 
  */
 @SuppressWarnings("restriction")
 public class AopReferenceModelBuilder {
-	
+
 	/**
 	 * Internal {@link Job} extension that triggers the AOP building process
 	 */
@@ -88,7 +86,7 @@ public class AopReferenceModelBuilder {
 			this.project = project;
 			this.filesToBuild = filesToBuild;
 		}
-		
+
 		@Override
 		public boolean belongsTo(Object family) {
 			return ResourcesPlugin.FAMILY_MANUAL_BUILD == family;
@@ -115,7 +113,7 @@ public class AopReferenceModelBuilder {
 						BuildJob job = (BuildJob) curr;
 						if (job.isCoveredBy(this)) {
 							curr.cancel(); // cancel all other build jobs of
-											// our kind
+							// our kind
 						}
 					}
 				}
@@ -134,7 +132,7 @@ public class AopReferenceModelBuilder {
 			return Status.OK_STATUS;
 		}
 	}
-	
+
 	/**
 	 * Handles the creation of the AOP reference model
 	 * @param monitor the progressMonitor
@@ -189,7 +187,7 @@ public class AopReferenceModelBuilder {
 		// update images and text decoractions
 		Activator.getModel().fireModelChanged();
 	}
-	
+
 	/**
 	 * Starts the AOP reference model creation by scheduling {@link BuildJob}.
 	 * @param project the project to build for
@@ -202,8 +200,8 @@ public class AopReferenceModelBuilder {
 	}
 
 	/**
-	 * Builds AOP refererences for given {@link IBean} instances. Matches the given
-	 * Aspect definition against the {@link IBean}.
+	 * Builds AOP refererences for given {@link IBean} instances. Matches the
+	 * given Aspect definition against the {@link IBean}.
 	 */
 	private static void buildAopReferencesForBean(IBean bean,
 			IModelElement context, IAspectDefinition info, IResource file,
@@ -238,12 +236,9 @@ public class AopReferenceModelBuilder {
 			if (jdtTargetType == null
 					|| Introspector.doesImplement(jdtTargetType,
 							FactoryBean.class.getName())) {
-				AopLog
-						.log(
-								AopLog.BUILDER_MESSAGES,
-								"Skipping bean definition ["
-										+ bean
-										+ "] because either its a FactoryBean or the IType could not be resolved");
+				AopLog.log(AopLog.BUILDER_MESSAGES,	"Skipping bean definition ["
+					+ bean + "] because either its a FactoryBean or the IType could not be resolved");
+				
 				return;
 			}
 
@@ -381,73 +376,81 @@ public class AopReferenceModelBuilder {
 
 		ILock lock = Job.getJobManager().newLock();
 		lock.acquire();
+		try {
+			if (project != null) {
+				BeansConfig config = (BeansConfig) project
+						.getConfig(currentFile);
+				IJavaProject javaProject = AopReferenceModelUtils
+						.getJavaProject(config);
 
-		if (project != null) {
-			BeansConfig config = (BeansConfig) project.getConfig(currentFile);
-			IJavaProject javaProject = AopReferenceModelUtils
-					.getJavaProject(config);
+				if (javaProject != null) {
+					aopProject = ((AopReferenceModel) Activator.getModel())
+							.getProjectWithInitialization(AopReferenceModelUtils
+									.getJavaProject(config.getElementResource()
+											.getProject()));
 
-			if (javaProject != null) {
-				aopProject = ((AopReferenceModel) Activator.getModel())
-						.getProjectWithInitialization(AopReferenceModelUtils
-								.getJavaProject(config.getElementResource()
-										.getProject()));
+					aopProject.clearReferencesForResource(currentFile);
 
-				aopProject.clearReferencesForResource(currentFile);
+					ClassLoader classLoader = Thread.currentThread()
+							.getContextClassLoader();
+					ClassLoader weavingClassLoader = SpringCoreUtils
+							.getClassLoader(javaProject, false);
+					
+					AopLog.log(AopLog.BUILDER_CLASSPATH, "AOP builder classpath: "
+						+ StringUtils.arrayToDelimitedString(
+								((URLClassLoader) weavingClassLoader).getURLs(), ";"));
 
-				ClassLoader classLoader = Thread.currentThread()
-						.getContextClassLoader();
-				ClassLoader weavingClassLoader = SpringCoreUtils
-						.getClassLoader(javaProject, false);
-				Thread.currentThread()
-						.setContextClassLoader(weavingClassLoader);
-				AopLog.log(AopLog.BUILDER_CLASSPATH, "AOP builder classpath: "
-						+ StringUtils
-								.arrayToDelimitedString(
-										((URLClassLoader) weavingClassLoader)
-												.getURLs(), ";"));
-
-				IStructuredModel model = null;
-				List<IAspectDefinition> aspectInfos = null;
-				try {
 					try {
-						model = StructuredModelManager.getModelManager()
-								.getModelForRead(currentFile);
-						IDOMDocument document = ((DOMModelImpl) model)
-								.getDocument();
+						IStructuredModel model = null;
+						List<IAspectDefinition> aspectInfos = null;
+						try {
+							model = StructuredModelManager.getModelManager()
+									.getModelForRead(currentFile);
+							IDOMDocument document = ((DOMModelImpl) model)
+									.getDocument();
+							
+							// move beyond reading the structured model to avoid
+							// class loading problems
+							Thread.currentThread().setContextClassLoader(
+									weavingClassLoader);
 
-						aspectInfos = AspectDefinitionBuilder
-								.buildAspectDefinitions(document, currentFile);
-					}
-					finally {
-						if (model != null) {
-							model.releaseFromRead();
+							aspectInfos = AspectDefinitionBuilder
+									.buildAspectDefinitions(document,
+											currentFile);
+						}
+						finally {
+							if (model != null) {
+								model.releaseFromRead();
+							}
+						}
+
+						for (IAspectDefinition info : aspectInfos) {
+
+							// build model for config
+							buildAopReferencesFromAspectDefinition(config, info);
+
+							// build model for config sets
+							buildAopReferencesFromBeansConfigSets(project,
+									config, info);
 						}
 					}
-
-					for (IAspectDefinition info : aspectInfos) {
-
-						// build model for config
-						buildAopReferencesFromAspectDefinition(config, info);
-
-						// build model for config sets
-						buildAopReferencesFromBeansConfigSets(project, config,
-								info);
+					catch (IOException e) {
+						Activator.log(e);
+					}
+					catch (CoreException e) {
+						Activator.log(e);
+					}
+					finally {
+						Thread.currentThread().setContextClassLoader(
+								classLoader);
 					}
 				}
-				catch (IOException e) {
-					Activator.log(e);
-				}
-				catch (CoreException e) {
-					Activator.log(e);
-				}
-				finally {
-					Thread.currentThread().setContextClassLoader(classLoader);
-					lock.release();
-				}
 			}
+			return aopProject;
 		}
-		return aopProject;
+		finally {
+			lock.release();
+		}
 	}
 
 	public static Job getBuildJob(final IProject project,
