@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -96,7 +97,9 @@ public class AopReferenceModelBuilder {
 			if (other.project == null) {
 				return true;
 			}
-			return project != null && project.equals(other.project);
+			return this.project != null && this.filesToBuild != null
+					&& this.project.equals(other.project)
+					&& this.filesToBuild.equals(other.filesToBuild);
 		}
 
 		@Override
@@ -106,9 +109,7 @@ public class AopReferenceModelBuilder {
 				if (monitor.isCanceled()) {
 					return Status.CANCEL_STATUS;
 				}
-				Job[] buildJobs = Job.getJobManager().find(
-						ResourcesPlugin.FAMILY_MANUAL_BUILD);
-				for (Job curr : buildJobs) {
+				for (BuildJob curr : getBuildJobs()) {
 					if (curr != this && curr instanceof BuildJob) {
 						BuildJob job = (BuildJob) curr;
 						if (job.isCoveredBy(this)) {
@@ -130,6 +131,29 @@ public class AopReferenceModelBuilder {
 				monitor.done();
 			}
 			return Status.OK_STATUS;
+		}
+
+		protected List<BuildJob> getBuildJobs() {
+			List<BuildJob> buildJobs = new ArrayList<BuildJob>();
+			Job[] jobs = Job.getJobManager().find(
+					ResourcesPlugin.FAMILY_MANUAL_BUILD);
+			for (Job curr : jobs) {
+				if (curr != this && curr instanceof BuildJob) {
+					buildJobs.add((BuildJob) curr);
+				}
+			}
+			return buildJobs;
+		}
+
+		public boolean checkIfBuildJobAlreadyScheduled() {
+			synchronized (getClass()) {
+				for (BuildJob job : getBuildJobs()) {
+					if (isCoveredBy(job)) {
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 	}
 
@@ -195,7 +219,11 @@ public class AopReferenceModelBuilder {
 	 */
 	public static void buildAopModel(IProject project, Set<IFile> filesToBuild) {
 		if (filesToBuild.size() > 0) {
-			getBuildJob(project, filesToBuild).schedule();
+			BuildJob buildJob = getBuildJob(project, filesToBuild);
+			// make sure that only one job for same files will get scheduled
+			if (!buildJob.checkIfBuildJobAlreadyScheduled()) {
+				buildJob.schedule();
+			}
 		}
 	}
 
@@ -238,7 +266,7 @@ public class AopReferenceModelBuilder {
 							FactoryBean.class.getName())) {
 				AopLog.log(AopLog.BUILDER_MESSAGES,	"Skipping bean definition ["
 					+ bean + "] because either its a FactoryBean or the IType could not be resolved");
-				
+
 				return;
 			}
 
@@ -395,7 +423,7 @@ public class AopReferenceModelBuilder {
 							.getContextClassLoader();
 					ClassLoader weavingClassLoader = SpringCoreUtils
 							.getClassLoader(javaProject, false);
-					
+
 					AopLog.log(AopLog.BUILDER_CLASSPATH, "AOP builder classpath: "
 						+ StringUtils.arrayToDelimitedString(
 								((URLClassLoader) weavingClassLoader).getURLs(), ";"));
@@ -408,7 +436,7 @@ public class AopReferenceModelBuilder {
 									.getModelForRead(currentFile);
 							IDOMDocument document = ((DOMModelImpl) model)
 									.getDocument();
-							
+
 							// move beyond reading the structured model to avoid
 							// class loading problems
 							Thread.currentThread().setContextClassLoader(
@@ -453,9 +481,9 @@ public class AopReferenceModelBuilder {
 		}
 	}
 
-	public static Job getBuildJob(final IProject project,
+	public static BuildJob getBuildJob(final IProject project,
 			final Set<IFile> filesToBuild) {
-		Job buildJob = new BuildJob("Building Spring AOP reference model",
+		BuildJob buildJob = new BuildJob("Building Spring AOP reference model",
 				project, filesToBuild);
 		buildJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory()
 				.buildRule());
