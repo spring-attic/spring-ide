@@ -3,7 +3,7 @@ Implementation-Version: 1.1
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: jakarta.commons.collections
 Bundle-Name: commons-collections
-Bundle-Version: 1.1
+Bundle-Version: 3.1
 Bundle-Vendor: Apache Jakarta Commons
 Export-Package: org.apache.commons.collections,
  org.apache.commons.collections.bag,
