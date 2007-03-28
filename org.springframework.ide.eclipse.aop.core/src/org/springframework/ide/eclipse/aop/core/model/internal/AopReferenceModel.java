@@ -38,15 +38,20 @@ public class AopReferenceModel implements IAopReferenceModel {
 	}
 
 	public IAopProject getProject(IJavaProject project) {
-		if (this.projects.containsKey(project)) {
+		
+		// currently disabled automatic creation of AOP reference model
+		return getProjectWithInitialization(project);
+		
+		/*if (this.projects.containsKey(project)) {
 			return this.projects.get(project);
-		}
-		else {
+		} 
+		else { 
 			createModel(project);
 			return this.projects.get(project);
-		}
+		}*/
 	}
 
+	@SuppressWarnings("unused")
 	private void createModel(IJavaProject project) {
 		Set<IFile> resourcesToBuild = AopReferenceModelUtils
 				.getFilesToBuildFromBeansProject(project.getProject());
