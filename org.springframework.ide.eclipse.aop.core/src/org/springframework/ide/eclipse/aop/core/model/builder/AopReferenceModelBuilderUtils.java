@@ -30,9 +30,7 @@ import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
-import org.springframework.ide.eclipse.aop.core.model.internal.JavaAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -52,11 +50,8 @@ public class AopReferenceModelBuilderUtils {
 	private static final String CLASS_FILE_SUFFIX = ".class";
 
 	public static boolean validateAspect(String className) throws Throwable {
-		ClassLoader classLoader = Thread.currentThread()
-				.getContextClassLoader();
-		InputStream is = classLoader
-				.getResourceAsStream(AopReferenceModelBuilderUtils
-						.getClassFileName(className));
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		InputStream is = classLoader.getResourceAsStream(AopReferenceModelBuilderUtils.getClassFileName(className));
 
 		// check if class exists on class path
 		if (is == null) {
@@ -83,24 +78,20 @@ public class AopReferenceModelBuilderUtils {
 			}
 			// validate supported instantiation models
 			if (v.getClassInfo().getAspectAnnotation().getValue() != null) {
-				if (v.getClassInfo().getAspectAnnotation().getValue()
-						.toUpperCase()
-						.equals(PerClauseKind.PERCFLOW.toString())) {
+				if (v.getClassInfo().getAspectAnnotation().getValue().toUpperCase().equals(
+						PerClauseKind.PERCFLOW.toString())) {
 					return false;
 				}
-				if (v.getClassInfo().getAspectAnnotation().getValue()
-						.toUpperCase().toString().equals(
-								PerClauseKind.PERCFLOWBELOW.toString())) {
+				if (v.getClassInfo().getAspectAnnotation().getValue().toUpperCase().toString().equals(
+						PerClauseKind.PERCFLOWBELOW.toString())) {
 					return false;
 				}
 			}
 
 			// check if super class is Aspect as well and abstract
 			if (v.getClassInfo().getSuperType() != null) {
-				reader = new ClassReader(classLoader
-						.getResourceAsStream(AopReferenceModelBuilderUtils
-								.getClassFileName(v.getClassInfo()
-										.getSuperType())));
+				reader = new ClassReader(classLoader.getResourceAsStream(AopReferenceModelBuilderUtils
+						.getClassFileName(v.getClassInfo().getSuperType())));
 				AspectAnnotationVisitor sv = new AspectAnnotationVisitor();
 				reader.accept(sv, false);
 
@@ -117,8 +108,9 @@ public class AopReferenceModelBuilderUtils {
 			throws InstantiationException, IllegalAccessException,
 			InvocationTargetException, ClassNotFoundException,
 			NoSuchMethodException {
-		IType jdtAspectType = BeansModelUtils.getJavaType(info.getResource()
-				.getProject(), info.getAspectClassName());
+		// removed for ticket #558
+		// IType jdtAspectType = BeansModelUtils.getJavaType(info.getResource()
+		//		.getProject(), info.getAspectClassName());
 		Class<?> expressionPointcutClass = loadClass(AspectJExpressionPointcut.class
 				.getName());
 		Object pc = expressionPointcutClass.newInstance();
@@ -126,12 +118,19 @@ public class AopReferenceModelBuilderUtils {
 			if (m.getName().equals("setExpression")) {
 				m.invoke(pc, info.getPointcutExpression());
 			}
-			else if (m.getName().equals("setParameterNames")
+			/* 
+			  removed for ticket #558
+			  else if (m.getName().equals("setParameterNames")
 					&& !(info instanceof JavaAspectDefinition)) {
 				m.invoke(pc, new Object[] { new JdtParameterNameDiscoverer(
 						jdtAspectType)
 						.getParameterNames(info.getAdviceMethod()) });
 			}
+			else if (m.getName().equals("setParameterTypes")
+					&& !(info instanceof JavaAspectDefinition)) {
+				m.invoke(pc, new Object[] { info.getAdviceMethod().getParameterTypes() });
+			}
+			*/
 		}
 		Method setDeclarationScopeMethod = expressionPointcutClass.getMethod(
 				"setPointcutDeclarationScope", Class.class);
@@ -140,72 +139,56 @@ public class AopReferenceModelBuilderUtils {
 		return pc;
 	}
 
-	public static Class<?> loadClass(String className)
-			throws ClassNotFoundException {
+	public static Class<?> loadClass(String className) throws ClassNotFoundException {
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		return loader.loadClass(className);
 	}
 
-	public static Class<?> getAspectJAdviceClass(IAspectDefinition info)
-			throws ClassNotFoundException {
+	public static Class<?> getAspectJAdviceClass(IAspectDefinition info) throws ClassNotFoundException {
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		Class<?> aspectJAdviceClass = null;
 		if (info.getType() == ADVICE_TYPES.AROUND) {
-			aspectJAdviceClass = loader.loadClass(AspectJAroundAdvice.class
-					.getName());
+			aspectJAdviceClass = loader.loadClass(AspectJAroundAdvice.class.getName());
 		}
 		else if (info.getType() == ADVICE_TYPES.AFTER) {
-			aspectJAdviceClass = loader.loadClass(AspectJAfterAdvice.class
-					.getName());
+			aspectJAdviceClass = loader.loadClass(AspectJAfterAdvice.class.getName());
 		}
 		else if (info.getType() == ADVICE_TYPES.AFTER_RETURNING) {
-			aspectJAdviceClass = loader
-					.loadClass(AspectJAfterReturningAdvice.class.getName());
+			aspectJAdviceClass = loader.loadClass(AspectJAfterReturningAdvice.class.getName());
 		}
 		else if (info.getType() == ADVICE_TYPES.AFTER_THROWING) {
-			aspectJAdviceClass = loader
-					.loadClass(AspectJAfterThrowingAdvice.class.getName());
+			aspectJAdviceClass = loader.loadClass(AspectJAfterThrowingAdvice.class.getName());
 		}
 		else if (info.getType() == ADVICE_TYPES.BEFORE) {
-			aspectJAdviceClass = loader
-					.loadClass(AspectJMethodBeforeAdvice.class.getName());
+			aspectJAdviceClass = loader.loadClass(AspectJMethodBeforeAdvice.class.getName());
 		}
 		return aspectJAdviceClass;
 	}
 
-	public static Object createAspectJPointcutExpression(IAspectDefinition info)
-			throws Throwable {
+	public static Object createAspectJPointcutExpression(IAspectDefinition info) throws Throwable {
 		try {
 			Object pc = info.getAspectJPointcutExpression();
 			Class<?> aspectJAdviceClass = getAspectJAdviceClass(info);
 			Constructor<?> ctor = aspectJAdviceClass.getConstructors()[0];
-			Method afterPropertiesSetMethod = aspectJAdviceClass.getMethod(
-					"afterPropertiesSet", (Class[]) null);
-			Object aspectJAdvice = ctor.newInstance(new Object[] {
-					info.getAdviceMethod(), pc, null });
+			Method afterPropertiesSetMethod = aspectJAdviceClass.getMethod("afterPropertiesSet", (Class[]) null);
+			Object aspectJAdvice = ctor.newInstance(new Object[] { info.getAdviceMethod(), pc, null });
 			if (info.getType() == ADVICE_TYPES.AFTER_RETURNING) {
 				if (info.getReturning() != null) {
-					Method setReturningNameMethod = aspectJAdviceClass
-							.getMethod("setReturningName", String.class);
-					setReturningNameMethod.invoke(aspectJAdvice, info
-							.getReturning());
+					Method setReturningNameMethod = aspectJAdviceClass.getMethod("setReturningName", String.class);
+					setReturningNameMethod.invoke(aspectJAdvice, info.getReturning());
 				}
 			}
 			else if (info.getType() == ADVICE_TYPES.AFTER_THROWING) {
 				if (info.getThrowing() != null) {
-					Method setThrowingNameMethod = aspectJAdviceClass
-							.getMethod("setThrowingName", String.class);
-					setThrowingNameMethod.invoke(aspectJAdvice, info
-							.getThrowing());
+					Method setThrowingNameMethod = aspectJAdviceClass.getMethod("setThrowingName", String.class);
+					setThrowingNameMethod.invoke(aspectJAdvice, info.getThrowing());
 				}
 			}
 
 			if (info.getArgNames() != null && info.getArgNames().length > 0) {
-				Method setArgumentNamesFromStringArrayMethod = aspectJAdviceClass
-						.getMethod("setArgumentNamesFromStringArray",
-								String[].class);
-				setArgumentNamesFromStringArrayMethod.invoke(aspectJAdvice,
-						new Object[] { info.getArgNames() });
+				Method setArgumentNamesFromStringArrayMethod = aspectJAdviceClass.getMethod(
+						"setArgumentNamesFromStringArray", String[].class);
+				setArgumentNamesFromStringArrayMethod.invoke(aspectJAdvice, new Object[] { info.getArgNames() });
 			}
 
 			afterPropertiesSetMethod.invoke(aspectJAdvice, (Object[]) null);
@@ -230,8 +213,7 @@ public class AopReferenceModelBuilderUtils {
 				int argCount = method.getParameterTypes().length;
 				IMethod jdtMethod;
 				try {
-					jdtMethod = AopReferenceModelUtils.getMethod(type,
-							methodName, argCount);
+					jdtMethod = AopReferenceModelUtils.getMethod(type, methodName, argCount);
 					if (jdtMethod != null) {
 						return jdtMethod.getParameterNames();
 					}
