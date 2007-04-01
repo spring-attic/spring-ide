@@ -54,7 +54,7 @@ public class BeanReferenceNode implements IReferenceNode,
 
 		IType type = BeansModelUtils.getJavaType(this.bean.getElementResource()
 				.getProject(), BeansModelUtils.getBeanClass(this.bean,
-				this.bean.getElementParent()));
+				null));
 		if (type != null) {
 			List<IAopReference> references = Activator.getModel()
 					.getAllReferences(type.getJavaProject());
@@ -98,7 +98,7 @@ public class BeanReferenceNode implements IReferenceNode,
 	}
 
 	public IReferenceNode[] getChildren() {
-		if (BeansModelUtils.getBeanClass(bean, bean.getElementParent()) != null
+		if (BeansModelUtils.getBeanClass(bean, null) != null
 				&& this.showChildren) {
 
 			List<IReferenceNode> children = new ArrayList<IReferenceNode>();
@@ -106,8 +106,7 @@ public class BeanReferenceNode implements IReferenceNode,
 					new BeanClassTargetReferenceNode(BeansModelUtils
 							.getJavaType(this.bean.getElementResource()
 									.getProject(),
-									BeansModelUtils.getBeanClass(bean, bean
-											.getElementParent())), this)));
+									BeansModelUtils.getBeanClass(bean, null)), this)));
 			if (this.innerBeanNodes.size() > 0) {
 				children.add(new InnerBeansReferenceNode(this.innerBeanNodes));
 			}
