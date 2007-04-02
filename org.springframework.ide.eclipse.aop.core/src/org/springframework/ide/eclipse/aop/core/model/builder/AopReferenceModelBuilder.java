@@ -15,20 +15,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ILock;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
@@ -71,90 +67,12 @@ import org.springframework.util.StringUtils;
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public class AopReferenceModelBuilder {
+public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 
-	/**
-	 * Internal {@link Job} extension that triggers the AOP building process
-	 */
-	private static final class BuildJob extends Job {
+	private Set<IFile> filesToBuild;
 
-		private final IProject project;
-
-		private final Set<IFile> filesToBuild;
-
-		private BuildJob(String name, IProject project, Set<IFile> filesToBuild) {
-			super(name);
-			this.project = project;
-			this.filesToBuild = filesToBuild;
-		}
-
-		@Override
-		public boolean belongsTo(Object family) {
-			return ResourcesPlugin.FAMILY_MANUAL_BUILD == family;
-		}
-
-		public boolean isCoveredBy(BuildJob other) {
-			if (other.project == null) {
-				return true;
-			}
-			return this.project != null && this.filesToBuild != null
-					&& this.project.equals(other.project)
-					&& this.filesToBuild.equals(other.filesToBuild);
-		}
-
-		@Override
-		@SuppressWarnings("deprecation")
-		protected IStatus run(IProgressMonitor monitor) {
-			synchronized (getClass()) {
-				if (monitor.isCanceled()) {
-					return Status.CANCEL_STATUS;
-				}
-				for (BuildJob curr : getBuildJobs()) {
-					if (curr != this && curr instanceof BuildJob) {
-						BuildJob job = (BuildJob) curr;
-						if (job.isCoveredBy(this)) {
-							curr.cancel(); // cancel all other build jobs of
-							// our kind
-						}
-					}
-				}
-			}
-			try {
-				monitor.beginTask("Building Spring AOP reference model",
-						filesToBuild.size());
-				buildAopModel(monitor, filesToBuild);
-			}
-			catch (OperationCanceledException e) {
-				return Status.CANCEL_STATUS;
-			}
-			finally {
-				monitor.done();
-			}
-			return Status.OK_STATUS;
-		}
-
-		protected List<BuildJob> getBuildJobs() {
-			List<BuildJob> buildJobs = new ArrayList<BuildJob>();
-			Job[] jobs = Job.getJobManager().find(
-					ResourcesPlugin.FAMILY_MANUAL_BUILD);
-			for (Job curr : jobs) {
-				if (curr != this && curr instanceof BuildJob) {
-					buildJobs.add((BuildJob) curr);
-				}
-			}
-			return buildJobs;
-		}
-
-		public boolean checkIfBuildJobAlreadyScheduled() {
-			synchronized (getClass()) {
-				for (BuildJob job : getBuildJobs()) {
-					if (isCoveredBy(job)) {
-						return true;
-					}
-				}
-			}
-			return false;
-		}
+	public AopReferenceModelBuilder(Set<IFile> filesToBuild) {
+		this.filesToBuild = filesToBuild;
 	}
 
 	/**
@@ -162,7 +80,7 @@ public class AopReferenceModelBuilder {
 	 * @param monitor the progressMonitor
 	 * @param filesToBuild the files to build the model from
 	 */
-	protected static void buildAopModel(IProgressMonitor monitor,
+	protected void buildAopModel(IProgressMonitor monitor,
 			Set<IFile> filesToBuild) {
 		AopLog.logStart("Processing took");
 		AopLog.log(AopLog.BUILDER,
@@ -213,27 +131,11 @@ public class AopReferenceModelBuilder {
 	}
 
 	/**
-	 * Starts the AOP reference model creation by scheduling {@link BuildJob}.
-	 * @param project the project to build for
-	 * @param filesToBuild the files to build the reference model from
-	 */
-	public static void buildAopModel(IProject project, Set<IFile> filesToBuild) {
-		if (filesToBuild.size() > 0) {
-			BuildJob buildJob = getBuildJob(project, filesToBuild);
-			// make sure that only one job for same files will get scheduled
-			if (!buildJob.checkIfBuildJobAlreadyScheduled()) {
-				buildJob.schedule();
-			}
-		}
-	}
-
-	/**
 	 * Builds AOP refererences for given {@link IBean} instances. Matches the
 	 * given Aspect definition against the {@link IBean}.
 	 */
-	private static void buildAopReferencesForBean(IBean bean,
-			IModelElement context, IAspectDefinition info, IResource file,
-			IAopProject aopProject) {
+	private void buildAopReferencesForBean(IBean bean, IModelElement context,
+			IAspectDefinition info, IResource file, IAopProject aopProject) {
 		try {
 			AopLog.log(AopLog.BUILDER, "Processing bean definition [" + bean
 					+ "] from resource ["
@@ -264,8 +166,12 @@ public class AopReferenceModelBuilder {
 			if (jdtTargetType == null
 					|| Introspector.doesImplement(jdtTargetType,
 							FactoryBean.class.getName())) {
-				AopLog.log(AopLog.BUILDER_MESSAGES,	"Skipping bean definition ["
-					+ bean + "] because either its a FactoryBean or the IType could not be resolved");
+				AopLog
+						.log(
+								AopLog.BUILDER_MESSAGES,
+								"Skipping bean definition ["
+										+ bean
+										+ "] because either its a FactoryBean or the IType could not be resolved");
 
 				return;
 			}
@@ -364,8 +270,8 @@ public class AopReferenceModelBuilder {
 
 	}
 
-	private static void buildAopReferencesFromAspectDefinition(
-			IBeansConfig config, IAspectDefinition info) {
+	private void buildAopReferencesFromAspectDefinition(IBeansConfig config,
+			IAspectDefinition info) {
 
 		IResource file = config.getElementResource();
 		IAopProject aopProject = ((AopReferenceModel) Activator.getModel())
@@ -379,8 +285,8 @@ public class AopReferenceModelBuilder {
 		}
 	}
 
-	private static void buildAopReferencesFromBeansConfigSets(
-			IBeansProject project, BeansConfig config, IAspectDefinition info) {
+	private void buildAopReferencesFromBeansConfigSets(IBeansProject project,
+			BeansConfig config, IAspectDefinition info) {
 		// check config sets as well
 		Set<IBeansConfigSet> configSets = project.getConfigSets();
 		for (IBeansConfigSet configSet : configSets) {
@@ -397,7 +303,7 @@ public class AopReferenceModelBuilder {
 	}
 
 	@SuppressWarnings("deprecation")
-	private static IAopProject buildAopReferencesFromFile(IFile currentFile) {
+	private IAopProject buildAopReferencesFromFile(IFile currentFile) {
 		IAopProject aopProject = null;
 		IBeansProject project = BeansCorePlugin.getModel().getProject(
 				currentFile.getProject());
@@ -424,9 +330,15 @@ public class AopReferenceModelBuilder {
 					ClassLoader weavingClassLoader = SpringCoreUtils
 							.getClassLoader(javaProject, false);
 
-					AopLog.log(AopLog.BUILDER_CLASSPATH, "AOP builder classpath: "
-						+ StringUtils.arrayToDelimitedString(
-								((URLClassLoader) weavingClassLoader).getURLs(), ";"));
+					AopLog
+							.log(
+									AopLog.BUILDER_CLASSPATH,
+									"AOP builder classpath: "
+											+ StringUtils
+													.arrayToDelimitedString(
+															((URLClassLoader) weavingClassLoader)
+																	.getURLs(),
+															";"));
 
 					try {
 						IStructuredModel model = null;
@@ -481,17 +393,7 @@ public class AopReferenceModelBuilder {
 		}
 	}
 
-	public static BuildJob getBuildJob(final IProject project,
-			final Set<IFile> filesToBuild) {
-		BuildJob buildJob = new BuildJob("Building Spring AOP reference model",
-				project, filesToBuild);
-		buildJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory()
-				.buildRule());
-		buildJob.setUser(false);
-		return buildJob;
-	}
-
-	private static void handleException(Throwable t, IAspectDefinition info,
+	private void handleException(Throwable t, IAspectDefinition info,
 			IBean bean, IResource file) {
 		if (t instanceof NoClassDefFoundError
 				|| t instanceof ClassNotFoundException) {
@@ -535,6 +437,12 @@ public class AopReferenceModelBuilder {
 					.getMessage(), IMarker.SEVERITY_WARNING, info
 					.getAspectLineNumber(),
 					AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
+		}
+	}
+
+	public void run(IProgressMonitor monitor) throws CoreException {
+		if (!monitor.isCanceled()) {
+			this.buildAopModel(monitor, this.filesToBuild);
 		}
 	}
 }

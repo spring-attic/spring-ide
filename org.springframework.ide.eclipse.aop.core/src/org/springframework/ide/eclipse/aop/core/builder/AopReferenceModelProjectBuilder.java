@@ -14,7 +14,13 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.builder.AopReferenceModelBuilder;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelMarkerUtils;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
@@ -36,7 +42,15 @@ public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 	public void build(IFile file, IProgressMonitor monitor) {
 		Set<IFile> filesToBuild = AopReferenceModelUtils.getFilesToBuild(file);
 		monitor.beginTask("Building Spring AOP reference model", filesToBuild.size());
-		AopReferenceModelBuilder.buildAopModel(file.getProject(), filesToBuild);
+		IWorkspaceRunnable validator = new AopReferenceModelBuilder(filesToBuild);
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		ISchedulingRule rule = workspace.getRuleFactory().markerRule(workspace.getRoot());
+		try {
+			workspace.run(validator, rule, IWorkspace.AVOID_UPDATE, monitor);
+		}
+		catch (CoreException e) {
+			Activator.log(e);
+		}
 		monitor.done();
 	}
 

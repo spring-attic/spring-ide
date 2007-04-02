@@ -14,18 +14,14 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.springframework.ide.eclipse.aop.core.model.IAopReferenceModel;
 import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
-import org.springframework.ide.eclipse.aop.core.model.builder.AopReferenceModelBuilder;
-import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
+import org.springframework.ide.eclipse.aop.core.model.IAopReferenceModel;
 
 public class AopReferenceModel implements IAopReferenceModel {
 
@@ -50,15 +46,16 @@ public class AopReferenceModel implements IAopReferenceModel {
 			return this.projects.get(project);
 		}*/
 	}
-
-	@SuppressWarnings("unused")
+	
+	/*
 	private void createModel(IJavaProject project) {
 		Set<IFile> resourcesToBuild = AopReferenceModelUtils
 				.getFilesToBuildFromBeansProject(project.getProject());
 		AopReferenceModelBuilder.buildAopModel(project.getProject(),
 				resourcesToBuild);
 	}
-
+	 */
+	
 	public IAopProject getProjectWithInitialization(IJavaProject project) {
 		if (this.projects.containsKey(project)) {
 			return this.projects.get(project);
