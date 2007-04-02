@@ -35,19 +35,19 @@ public class AopReferenceModelNavigatorLabelProvider extends
 	}
 
 	@Override
-	public Image getImage(Object element) {
+	public Image getBaseImage(Object element) {
 		if (element instanceof IReferenceNode) {
 			return ((IReferenceNode) element).getImage();
 		}
-		return super.getImage(element);
+		return super.getBaseImage(element);
 	}
 
 	@Override
-	public String getText(Object element) {
+	public String getBaseText(Object element) {
 		if (element instanceof IReferenceNode) {
 			return ((IReferenceNode) element).getText();
 		}
-		return super.getText(element);
+		return super.getBaseText(element);
 	}
 
 	public void init(ICommonContentExtensionSite config) {

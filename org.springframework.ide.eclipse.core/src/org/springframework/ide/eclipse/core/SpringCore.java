@@ -82,8 +82,6 @@ public class SpringCore extends Plugin {
 
 	/**
 	 * Returns the single instance of the Spring core plug-in runtime class.
-	 * 
-	 * @return the single instance of the Spring core plug-in runtime class
 	 */
 	public static SpringCore getDefault() {
 		return plugin;
@@ -148,7 +146,7 @@ public class SpringCore extends Plugin {
 	}
 
 	/**
-	 * Returns a new <code>IStatus</code> with status "ERROR" for this plug-in.
+	 * Returns a new {@link IStatus} with status "ERROR" for this plug-in.
 	 */
 	public static IStatus createErrorStatus(String message,
 											Throwable exception) {

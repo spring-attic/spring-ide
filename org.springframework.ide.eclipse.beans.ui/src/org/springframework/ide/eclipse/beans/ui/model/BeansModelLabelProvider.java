@@ -16,11 +16,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreePathLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.ViewerLabel;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeanClassReferences;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
@@ -34,6 +32,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
+import org.springframework.ide.eclipse.ui.SpringUILabelProvider;
 
 /**
  * This class is an {@link ILabelProvider} which knows about the beans core
@@ -42,38 +41,17 @@ import org.springframework.ide.eclipse.core.model.ModelUtils;
  * 
  * @author Torsten Juergeleit
  */
-public class BeansModelLabelProvider extends LabelProvider implements
-		ITreePathLabelProvider {
+public class BeansModelLabelProvider extends SpringUILabelProvider {
 
 	public static final DefaultNamespaceLabelProvider
 		DEFAULT_NAMESPACE_LABEL_PROVIDER = new DefaultNamespaceLabelProvider();
 
-	private boolean isDecorating;
-	private WorkbenchLabelProvider wbLabelProvider;
-
-
 	public BeansModelLabelProvider() {
-		this(false);
+		super(false);
 	}
 
 	public BeansModelLabelProvider(boolean isDecorating) {
-		this.isDecorating = isDecorating;
-		this.wbLabelProvider = new WorkbenchLabelProvider();
-	}
-
-	@Override
-	public void dispose() {
-		wbLabelProvider.dispose();
-		super.dispose();
-	}
-
-	@Override
-	public Image getImage(Object element) {
-		Image image = getBaseImage(element);
-		if (isDecorating) {
-			return getDecoratedImage(element, image);
-		}
-		return image;
+		super(isDecorating);
 	}
 
 	protected Image getBaseImage(Object element) {
@@ -91,15 +69,14 @@ public class BeansModelLabelProvider extends LabelProvider implements
 			return BeansModelImages.getImage((IModelElement) adaptedElement);
 		}
 		if (element instanceof ZipEntryStorage) {
-			return wbLabelProvider.getImage(((ZipEntryStorage) element)
-					.getFile());
+			return super.getBaseImage(((ZipEntryStorage) element).getFile());
 		} else if (element instanceof BeanClassReferences) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_REFERENCE);
 		}
-		return wbLabelProvider.getImage(element);
+		return super.getBaseImage(element);
 	}
 
-	protected Image getDecoratedImage(Object element, Image image) {
+	protected int getSeverity(Object element) {
 		int severity = 0;
 		if (element instanceof ISourceModelElement) {
 			ISourceModelElement source = (ISourceModelElement) element;
@@ -134,24 +111,7 @@ public class BeansModelLabelProvider extends LabelProvider implements
 			severity = MarkerUtils.getHighestSeverityFromMarkersInRange(
 					resource, -1, -1);
 		}
-		if (severity == IMarker.SEVERITY_WARNING) {
-			return BeansModelImages.getDecoratedImage(image,
-					BeansModelImages.FLAG_WARNING);
-		}
-		else if (severity == IMarker.SEVERITY_ERROR) {
-			return BeansModelImages.getDecoratedImage(image,
-					BeansModelImages.FLAG_ERROR);
-		}
-		return image;
-	}
-
-	@Override
-	public String getText(Object element) {
-		String text = getBaseText(element);
-		if (isDecorating) {
-			return getDecoratedText(element, text);
-		}
-		return text;
+		return severity;
 	}
 
 	protected String getBaseText(Object element) {
@@ -181,11 +141,7 @@ public class BeansModelLabelProvider extends LabelProvider implements
 			return BeansUIPlugin.getResourceString(
 					"BeanClassReferences.label");
 		}
-		return wbLabelProvider.getText(element);
-	}
-
-	protected String getDecoratedText(Object element, String text) {
-		return text;
+		return super.getBaseText(element);
 	}
 
 	public void updateLabel(ViewerLabel label, TreePath elementPath) {
@@ -202,7 +158,7 @@ public class BeansModelLabelProvider extends LabelProvider implements
 				DEFAULT_NAMESPACE_LABEL_PROVIDER
 						.updateLabel(label, elementPath);
 			}
-			if (isDecorating) {
+			if (isDecorating()) {
 				label.setImage(getDecoratedImage(element, label.getImage()));
 				label.setText(getDecoratedText(element, label.getText()));
 			}

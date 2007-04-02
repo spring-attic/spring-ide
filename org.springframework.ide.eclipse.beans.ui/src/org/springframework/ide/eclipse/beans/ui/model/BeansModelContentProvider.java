@@ -14,8 +14,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -168,16 +166,6 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 			Set<IBean> beans = ((BeanClassReferences) parentElement)
 					.getBeans();
 			return beans.toArray(new IBean[beans.size()]);
-		} else if (parentElement instanceof IAdaptable) {
-			IProject project = (IProject) ((IAdaptable) parentElement)
-					.getAdapter(IProject.class);
-			if (project != null) {
-				IBeansProject beansProject = BeansCorePlugin.getModel()
-						.getProject(project);
-				if (beansProject != null) {
-					return getProjectChildren(beansProject, true);
-				}
-			}
 		}
 		return IModelElement.NO_CHILDREN;
 	}

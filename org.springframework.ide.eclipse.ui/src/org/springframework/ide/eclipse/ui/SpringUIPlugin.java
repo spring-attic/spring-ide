@@ -17,13 +17,18 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.BundleContext;
 
 /**
  * The main plugin class to be used in the desktop.
+ * 
  * @author Torsten Juergeleit
  */
 public class SpringUIPlugin extends AbstractUIPlugin {
@@ -38,6 +43,8 @@ public class SpringUIPlugin extends AbstractUIPlugin {
 	private static SpringUIPlugin plugin;
 
 	private ResourceBundle resourceBundle;
+	private ImageDescriptorRegistry imageDescriptorRegistry;
+	private ILabelProvider labelProvider;
 
 	/**
 	 * Creates the Spring UI plug-in.
@@ -47,6 +54,65 @@ public class SpringUIPlugin extends AbstractUIPlugin {
 	 */
 	public SpringUIPlugin() {
 		plugin = this;
+	}
+
+	@Override
+	protected void initializeImageRegistry(ImageRegistry registry) {
+		SpringUIImages.initializeImageRegistry(registry);
+	}
+
+	@Override
+	public void stop(BundleContext context) throws Exception {
+		if (labelProvider != null) {
+			labelProvider.dispose();
+			labelProvider = null;
+		}
+		if (imageDescriptorRegistry != null) {
+			imageDescriptorRegistry.dispose();
+			imageDescriptorRegistry = null;
+		}
+		super.stop(context);
+	}
+
+	public static ImageDescriptorRegistry getImageDescriptorRegistry() {
+		return getDefault().internalGetImageDescriptorRegistry();
+	}
+
+	private synchronized ImageDescriptorRegistry
+			internalGetImageDescriptorRegistry() {
+		if (imageDescriptorRegistry == null) {
+			imageDescriptorRegistry = new ImageDescriptorRegistry();
+		}
+		return imageDescriptorRegistry;
+	}
+
+	/**
+	 * Returns then singleton instance of
+	 * <code>BeansModelLabelProvider(true)</code>.
+	 * <p>
+	 * <b>For this instance the dispose method must never becalled!! This is
+	 * done by <code>Plugin.stop()</code> instead.</b>
+	 */
+	public static ILabelProvider getLabelProvider() {
+		return getDefault().internalGetLabelProvider();
+	}
+
+	private synchronized ILabelProvider internalGetLabelProvider() {
+		if (labelProvider == null) {
+			labelProvider = new SpringUILabelProvider(true);
+		}
+		return labelProvider;
+	}
+
+	/**
+	 * Returns an image descriptor for the image file at the given plug-in
+	 * relative path
+	 * 
+	 * @param path the path
+	 * @return the image descriptor
+	 */
+	public static ImageDescriptor getImageDescriptor(String path) {
+		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
 
 	/**

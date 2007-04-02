@@ -101,11 +101,10 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Returns then singleton instance of
-	 * <code>BeansModelLabelProvider(true)</code>.
+	 * Returns then singleton instance of {@link BeansModelLabelProvider}.
 	 * <p>
-	 * <b>For this instance the dispose method must never becalled!! This is
-	 * done by <code>Plugin.stop()</code> instead.</b>
+	 * <b>For this instance the dispose method must never be called!! This is
+	 * done by {@link Plugin.stop()} instead.</b>
 	 */
 	public static ILabelProvider getLabelProvider() {
 		return getDefault().internalGetLabelProvider();
@@ -119,10 +118,11 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Returns an image descriptor for the image file at the given plug-in
-	 * relative path
+	 * Returns an {@link ImageDescriptor} for the image file at the given
+	 * plug-in relative path
 	 * 
-	 * @param path the path
+	 * @param path
+	 *            the path
 	 * @return the image descriptor
 	 */
 	public static ImageDescriptor getImageDescriptor(String path) {
@@ -173,14 +173,6 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 		return bundleString;
 	}
 
-	public static String getFormattedMessage(String key, Object arg) {
-		return getFormattedMessage(key, new Object[] { arg });
-	}
-
-	public static String getFormattedMessage(String key, Object[] args) {
-		return MessageFormat.format(getResourceString(key), args);
-	}
-
 	public static boolean isDebug(String option) {
 		String value = Platform.getDebugOption(option);
 		return (value != null && value.equalsIgnoreCase("true") ? true : false);
@@ -206,7 +198,7 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Returns a new <code>IStatus</code> for this plug-in
+	 * Returns a new {@link IStatus} for this plug-in
 	 */
 	public static IStatus createErrorStatus(String message,
 			Throwable exception) {
@@ -214,5 +206,9 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 			message = "";
 		}
 		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
+	}
+
+	public static String getFormattedMessage(String key, Object... args) {
+		return MessageFormat.format(getResourceString(key), args);
 	}
 }

@@ -20,8 +20,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class BeansConfigContentProvider implements
-		IStructuredContentProvider {
+public class BeansConfigContentProvider implements IStructuredContentProvider {
 
 	private Set<IBeansConfig> configs;
 

@@ -23,12 +23,11 @@ public class BeansConfigLabelProvider extends BeansModelLabelProvider {
 		super(true);
 	}
 
-	public String getText(Object obj) {
-		if (obj instanceof IBeansConfig) {
-			return super.getText(((IBeansConfig) obj).getElementResource());
+	@Override
+	protected String getBaseText(Object element) {
+		if (element instanceof IBeansConfig) {
+			return ((IBeansConfig) element).getElementName();
 		}
-		else {
-			return super.getText(obj);
-		}
+		return super.getBaseText(element);
 	}
 }

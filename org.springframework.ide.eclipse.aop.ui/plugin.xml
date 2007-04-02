@@ -152,7 +152,7 @@
 	<extension point="org.eclipse.ui.views">
 		<view name="%beansCrossReferenceView.label"
 			icon="icons/full/obj16/xref_obj.gif"
-			category="org.springframework.ide.eclipse.beans.ui.views"
+			category="org.springframework.ide.eclipse.ui.views"
 			class="org.springframework.ide.eclipse.aop.ui.navigator.AopReferenceModelNavigator"
 			id="org.springframework.ide.eclipse.aop.ui.navigator.aopReferenceModelNavigator">
 		</view>
@@ -241,7 +241,7 @@
 	<extension point="org.eclipse.ui.views">
 		<view name="Spring AOP Event Trace"
 			icon="icons/full/obj16/console_view.gif"
-			category="org.springframework.ide.eclipse.beans.ui.views"
+			category="org.springframework.ide.eclipse.ui.views"
 			class="org.springframework.ide.eclipse.aop.ui.tracing.EventTraceView"
 			id="org.springframework.ide.eclipse.aop.ui.tracing.EventTraceView">
 		</view>

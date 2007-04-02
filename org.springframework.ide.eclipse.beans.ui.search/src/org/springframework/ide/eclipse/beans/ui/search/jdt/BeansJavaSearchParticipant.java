@@ -31,6 +31,7 @@ import org.eclipse.search.ui.text.Match;
 import org.eclipse.ui.PartInitException;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchResult;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchScope;
 import org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanClassQuery;
@@ -43,6 +44,7 @@ import org.springframework.util.StringUtils;
  * {@link IQueryParticipant} implementation that hooks into JDT's Java reference
  * search and displays {@link IBean} that have the class or property name under
  * question
+ * 
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  * @since 2.0
@@ -50,13 +52,11 @@ import org.springframework.util.StringUtils;
 public class BeansJavaSearchParticipant implements IQueryParticipant,
 		IMatchPresentation {
 
-	private static final int S_LIMIT_REF = 2;
+	private static final int SEARCH_FOR_TYPES = 0;
+	private static final int SEARCH_FOR_FIELDS = 1;
 
-	private static final int S_LIMIT_ALL = 3;
-
-	private static final int S_FOR_TYPES = 0;
-
-	private static final int S_FOR_FIELDS = 1;
+	private static final int LIMIT_TO_REF = 2;
+	private static final int LIMIT_TO_ALL = 3;
 
 	private int searchFor = -1;
 
@@ -71,8 +71,8 @@ public class BeansJavaSearchParticipant implements IQueryParticipant,
 	public void search(final ISearchRequestor requestor,
 			QuerySpecification querySpecification, IProgressMonitor monitor) {
 
-		if (querySpecification.getLimitTo() != S_LIMIT_REF
-				&& querySpecification.getLimitTo() != S_LIMIT_ALL) {
+		if (querySpecification.getLimitTo() != LIMIT_TO_REF
+				&& querySpecification.getLimitTo() != LIMIT_TO_ALL) {
 			return;
 		}
 
@@ -108,16 +108,12 @@ public class BeansJavaSearchParticipant implements IQueryParticipant,
 			int type = ((ElementQuerySpecification) querySpecification)
 					.getElement().getElementType();
 			if (type == IJavaElement.TYPE) {
-				searchFor = S_FOR_TYPES;
+				searchFor = SEARCH_FOR_TYPES;
+			} else if (type == IJavaElement.FIELD
+					|| type == IJavaElement.METHOD) {
+				searchFor = SEARCH_FOR_FIELDS;
 			}
-			else if (type == IJavaElement.FIELD) {
-				searchFor = S_FOR_FIELDS;
-			}
-			else if (type == IJavaElement.METHOD) {
-				searchFor = S_FOR_FIELDS;
-			}
-		}
-		else {
+		} else {
 			searchFor = ((PatternQuerySpecification) querySpecification)
 					.getSearchFor();
 			search = ((PatternQuerySpecification) querySpecification)
@@ -126,10 +122,10 @@ public class BeansJavaSearchParticipant implements IQueryParticipant,
 
 		ISearchQuery query = null;
 		BeansSearchScope scope = BeansSearchScope.newSearchScope();
-		if (searchFor == S_FOR_TYPES) {
+		if (searchFor == SEARCH_FOR_TYPES) {
 			query = new BeanClassQuery(scope, search, true, false);
 		}
-		else if (searchFor == S_FOR_FIELDS) {
+		else if (searchFor == SEARCH_FOR_FIELDS) {
 			query = new BeanPropertyQuery(scope, search, true, false);
 		}
 
@@ -143,7 +139,7 @@ public class BeansJavaSearchParticipant implements IQueryParticipant,
 				if (matches != null && matches.length > 0) {
 					for (Match match : matches) {
 
-						if (searchFor == S_FOR_FIELDS) {
+						if (searchFor == SEARCH_FOR_FIELDS) {
 							// check if the match fits to the selected class
 							IBean bean = (IBean) match.getElement();
 							String beanClass = BeansModelUtils.getBeanClass(
@@ -151,8 +147,7 @@ public class BeansJavaSearchParticipant implements IQueryParticipant,
 							if (requiredTypeNames.contains(beanClass)) {
 								requestor.reportMatch(match);
 							}
-						}
-						else {
+						} else {
 							requestor.reportMatch(match);
 						}
 					}
@@ -178,7 +173,7 @@ public class BeansJavaSearchParticipant implements IQueryParticipant,
 	public ILabelProvider createLabelProvider() {
 
 		// This label provider will be disposed by the search page
-		return new BeansJavaSearchLabelProvider(true);
+		return new BeansSearchLabelProvider(true);
 	}
 
 	public void showMatch(Match match, int currentOffset, int currentLength,

@@ -16,11 +16,11 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 
 /**
@@ -33,16 +33,13 @@ public final class ModelUtils {
 	/**
 	 * Trys to adapt given element to <code>IModelElement</code>.
 	 */
-	public static Object adaptToModelElement(Object element) {
-		if (!(element instanceof IModelElement)
-				&& (element instanceof IAdaptable)) {
-			Object modelElement = ((IAdaptable) element)
-					.getAdapter(IModelElement.class);
-			if (modelElement != null) {
-				return modelElement;
-			}
+	public static Object adaptToModelElement(Object object) {
+		IModelElement modelElement = SpringCoreUtils.getAdapter(object,
+				IModelElement.class);
+		if (modelElement != null) {
+			return modelElement;
 		}
-		return element;
+		return object;
 	}
 
 	/**

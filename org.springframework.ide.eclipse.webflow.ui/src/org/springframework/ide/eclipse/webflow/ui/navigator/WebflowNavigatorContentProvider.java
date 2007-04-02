@@ -26,7 +26,6 @@ import org.eclipse.ui.navigator.ICommonContentProvider;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
@@ -38,26 +37,25 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 /**
  * This class is a content provider for the {@link CommonNavigator} which knows
  * about the web flow core model's {@link IWebflowConfig}.
+ * 
  * @author Christian Dupuis
  * @since 2.0
  */
 public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 		IWebflowModelListener {
 
-	public static final String PROJECT_EXPLORER_CONTENT_PROVIDER_ID = org.springframework.ide.eclipse.webflow.ui.Activator.PLUGIN_ID
-			+ ".navigator.projectExplorerContent";
+	public static final String PROJECT_EXPLORER_CONTENT_PROVIDER_ID =
+			org.springframework.ide.eclipse.webflow.ui.Activator.PLUGIN_ID
+					+ ".navigator.projectExplorerContent";
 
-	public static final String BEANS_EXPLORER_CONTENT_PROVIDER_ID = org.springframework.ide.eclipse.webflow.ui.Activator.PLUGIN_ID
-			+ ".navigator.beansExplorerContent";
-
-	@SuppressWarnings("unused")
-	private String providerID;
+	public static final String BEANS_EXPLORER_CONTENT_PROVIDER_ID =
+			org.springframework.ide.eclipse.webflow.ui.Activator.PLUGIN_ID
+					+ ".navigator.springExplorerContent";
 
 	private StructuredViewer viewer;
 
 	public void init(ICommonContentExtensionSite config) {
 		Activator.getModel().registerModelChangeListener(this);
-		providerID = config.getExtension().getId();
 	}
 
 	public void saveState(IMemento aMemento) {
@@ -67,24 +65,24 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 	}
 
 	public Object[] getChildren(Object parentElement) {
-		if (parentElement instanceof IBeansProject) {
-			IProject project = ((IBeansProject) parentElement).getProject();
-			List<IFile> files = WebflowModelUtils.getFiles(project);
-			return files.toArray();
-		}
-		else if (parentElement instanceof IWebflowConfig) {
-			List<IResource> files = new ArrayList<IResource>();
-			for (IBeansConfig bc : ((IWebflowConfig) parentElement)
-					.getBeansConfigs()) {
-				files.add(bc.getElementResource());
-			}
-			return files.toArray();
+		if (parentElement instanceof IProject) {
+			return WebflowModelUtils.getFiles((IProject) parentElement)
+					.toArray();
 		}
 		else if (parentElement instanceof IFile) {
 			IFile file = (IFile) parentElement;
 			if (WebflowModelUtils.isWebflowConfig(file)) {
-				return new Object[] { WebflowModelUtils.getWebflowConfig(file) };
+				return new Object[] {
+						WebflowModelUtils.getWebflowConfig(file) };
 			}
+		}
+		else if (parentElement instanceof IWebflowConfig) {
+			List<IResource> files = new ArrayList<IResource>();
+			for (IBeansConfig config : ((IWebflowConfig) parentElement)
+					.getBeansConfigs()) {
+				files.add(config.getElementResource());
+			}
+			return files.toArray();
 		}
 		return IModelElement.NO_CHILDREN;
 	}
@@ -97,17 +95,20 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 	}
 
 	public boolean hasChildren(Object element) {
-		if (element instanceof IWebflowConfig) {
-			IWebflowConfig config = (IWebflowConfig) element;
-			if (config.getBeansConfigs() != null
-					&& config.getBeansConfigs().size() > 0) {
-				return true;
-			}
+		if (element instanceof IProject) {
+			return (WebflowModelUtils.getFiles((IProject) element).size() > 0);
 		}
 		else if (element instanceof IFile) {
 			IFile file = (IFile) element;
 			return WebflowModelUtils.isWebflowConfig(file)
 					|| BeansCoreUtils.isBeansConfig(file);
+		}
+		else if (element instanceof IWebflowConfig) {
+			IWebflowConfig config = (IWebflowConfig) element;
+			if (config.getBeansConfigs() != null
+					&& config.getBeansConfigs().size() > 0) {
+				return true;
+			}
 		}
 		return false;
 	}

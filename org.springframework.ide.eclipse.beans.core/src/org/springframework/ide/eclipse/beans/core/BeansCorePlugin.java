@@ -85,31 +85,31 @@ public class BeansCorePlugin extends Plugin {
 	}
 
 	/**
-	 * Returns the singleton <code>IBeansModel</code>.
+	 * Returns the singleton {@link IBeansModel}.
 	 */
 	public static final IBeansModel getModel() {
 		return model;
 	}
 
 	/**
-	 * Returns the workspace instance.
+	 * Returns the {@link IWorkspace} instance.
 	 */
 	public static final IWorkspace getWorkspace() {
 		return ResourcesPlugin.getWorkspace();
 	}
 
 	/**
-	 * Returns the string from the plugin's resource bundle,
-	 * or 'key' if not found.
+	 * Returns the string from the plugin's resource bundle, or 'key' if not
+	 * found.
 	 */
 	public static String getResourceString(String key) {
-	    String bundleString;
+		String bundleString;
 		ResourceBundle bundle = getDefault().getResourceBundle();
 		if (bundle != null) {
 			try {
 				bundleString = bundle.getString(key);
 			} catch (MissingResourceException e) {
-			    log(e);
+				log(e);
 				bundleString = "!" + key + "!";
 			}
 		} else {
@@ -150,7 +150,7 @@ public class BeansCorePlugin extends Plugin {
 	}
 
 	/**
-	 * Returns a new <code>IStatus</code> with status "ERROR" for this plug-in.
+	 * Returns a new {@link IStatus} with status "ERROR" for this plug-in.
 	 */
 	public static IStatus createErrorStatus(String message,
 											Throwable exception) {
@@ -160,11 +160,7 @@ public class BeansCorePlugin extends Plugin {
 		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
 	}
 
-	public static String getFormattedMessage(String key, String arg) {
-		return MessageUtils.format(getResourceString(key), arg);
-	}
-
-	public static String getFormattedMessage(String key, String[] args) {
+	public static String getFormattedMessage(String key, Object... args) {
 		return MessageUtils.format(getResourceString(key), args);
 	}
 }

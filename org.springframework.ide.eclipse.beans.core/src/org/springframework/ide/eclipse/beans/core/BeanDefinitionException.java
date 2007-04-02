@@ -16,8 +16,9 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXParseException;
 
 /**
- * This exception is thrown if a error while reading Spring bean definition
- * XML files occurs. Optionally it holds the corresponding line number. 
+ * This exception is thrown if a error while reading Spring bean definition XML
+ * files occurs. Optionally it holds the corresponding line number.
+ * 
  * @author Torsten Juergeleit
  */
 public class BeanDefinitionException extends NestedRuntimeException {
@@ -27,7 +28,7 @@ public class BeanDefinitionException extends NestedRuntimeException {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private int lineNumber;
+	private transient final int lineNumber;
 
 	public BeanDefinitionException(Node node, String message, Throwable cause) {
 		super(message, cause);

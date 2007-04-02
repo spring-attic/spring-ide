@@ -30,27 +30,18 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProperties;
 import org.springframework.ide.eclipse.beans.core.model.IBeansSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansTypedString;
-import org.springframework.ide.eclipse.beans.ui.AbstractCompositeImageDescriptor;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
+import org.springframework.ide.eclipse.ui.AbstractCompositeImageDescriptor;
 
 /**
  * This class provides images for the beans core model's {@link IModelElement}s.
  * 
  * @author Torsten Juergeleit
  */
-public final class BeansModelImages {
-
-    public static final int FLAG_WARNING = 1 << 1;
-    public static final int FLAG_ERROR = 1 << 2;
-    public static final int FLAG_EXTERNAL = 1 << 3;
-    public static final int FLAG_CHILD = 1 << 4;
-    public static final int FLAG_FACTORY = 1 << 5;
-    public static final int FLAG_ABSTRACT = 1 << 6;
-    public static final int FLAG_PROTOTYPE = 1 << 7;
-    public static final int FLAG_LAZY_INIT = 1 << 8;
+public final class BeansModelImages implements BeansModelImageFlags {
 
 	public static Image getImage(IModelElement element) {
 		return getImage(element, null);

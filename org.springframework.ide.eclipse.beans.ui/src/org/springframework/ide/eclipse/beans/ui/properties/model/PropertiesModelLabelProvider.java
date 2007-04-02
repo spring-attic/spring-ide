@@ -20,10 +20,10 @@ import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 public class PropertiesModelLabelProvider extends BeansModelLabelProvider {
 
 	@Override
-	public String getText(Object element) {
+	public String getBaseText(Object element) {
 		if (element instanceof IBeansConfig) {
 			return ((IBeansConfig) element).getElementName();
 		}
-		return super.getText(element);
+		return super.getBaseText(element);
 	}
 }

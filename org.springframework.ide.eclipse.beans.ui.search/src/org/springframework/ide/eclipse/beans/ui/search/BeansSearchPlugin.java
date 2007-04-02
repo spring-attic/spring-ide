@@ -105,14 +105,6 @@ public class BeansSearchPlugin extends AbstractUIPlugin {
 		return bundleString;
 	}
 
-	public static String getFormattedMessage(String key, String arg) {
-		return getFormattedMessage(key, new Object[] { arg });
-	}
-
-	public static String getFormattedMessage(String key, Object[] args) {
-		return MessageFormat.format(getResourceString(key), args);
-	}
-
 	public static boolean isDebug(String option) {
 		String value = Platform.getDebugOption(option);
 		return (value != null && value.equalsIgnoreCase("true") ? true : false);
@@ -136,14 +128,19 @@ public class BeansSearchPlugin extends AbstractUIPlugin {
 		getDefault().getLog().log(createErrorStatus(
 						getResourceString("Plugin.internal_error"), exception));
 	}
+
 	/**
-	 * Returns a new <code>IStatus</code> for this plug-in
+	 * Returns a new {@link IStatus} for this plug-in
 	 */
 	public static IStatus createErrorStatus(String message,
-											Throwable exception) {
+			Throwable exception) {
 		if (message == null) {
-			message= ""; 
-		}		
+			message = "";
+		}
 		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
+	}
+
+	public static String getFormattedMessage(String key, Object... args) {
+		return MessageFormat.format(getResourceString(key), args);
 	}
 }

@@ -16,8 +16,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.ICommand;
@@ -30,6 +32,7 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -46,10 +49,42 @@ import org.springframework.util.StringUtils;
 
 /**
  * Some helper methods.
+ * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
 public final class SpringCoreUtils {
+
+	/**
+	 * Returns the specified adapter for the given object or <code>null</code>
+	 * if adapter is not supported.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T getAdapter(Object object, Class<T> adapter) {
+		if (object != null && adapter != null) {
+			if (adapter.isAssignableFrom(object.getClass())) {
+				return (T) object;
+			}
+			if (object instanceof IAdaptable) {
+				return (T) ((IAdaptable) object).getAdapter(adapter);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns a list of all projects with the Spring project nature.
+	 */
+	public static Set<IProject> getSpringProjects() {
+		Set<IProject> projects = new LinkedHashSet<IProject>();
+		for (IProject project : ResourcesPlugin.getWorkspace().getRoot()
+				.getProjects()) {
+			if (isSpringProject(project)) {
+				projects.add(project);
+			}
+		}
+		return projects;
+	}
 
 	/**
 	 * Creates specified simple project.
