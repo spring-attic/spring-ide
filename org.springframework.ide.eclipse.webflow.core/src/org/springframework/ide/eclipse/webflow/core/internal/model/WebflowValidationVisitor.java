@@ -31,12 +31,15 @@ import org.w3c.dom.NodeList;
 /**
  * {@link IWebflowModelElementVisitor} implementation that collects and stores
  * {@link WebflowValidationProblem} in an internal list.
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
 @SuppressWarnings("restriction")
 public class WebflowValidationVisitor implements IWebflowModelElementVisitor {
+
+	private static final String EXPRESSION_PREFIX = "${";
+
+	private static final String EXPRESSION_SUFFIX = "}";
 
 	private static final List<String> SCOPE_TYPES;
 
@@ -266,7 +269,9 @@ public class WebflowValidationVisitor implements IWebflowModelElementVisitor {
 			getProblemReporter().error(
 					"Element 'transition' requires 'to' attribute", element);
 		}
-		else if (trans.getToState() == null) {
+		else if (trans.getToState() == null
+				&& (!(trans.getToStateId().startsWith(EXPRESSION_PREFIX) && trans
+						.getToStateId().endsWith(EXPRESSION_SUFFIX)))) {
 			getProblemReporter()
 					.error(
 							"Element 'transition' references a non-exiting state \"{0}\"",

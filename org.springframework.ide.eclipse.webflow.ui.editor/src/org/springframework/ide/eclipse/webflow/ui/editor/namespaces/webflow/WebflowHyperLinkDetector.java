@@ -23,6 +23,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
+import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -162,9 +163,8 @@ public class WebflowHyperLinkDetector extends AbstractHyperLinkDetector
 				IType type = BeansModelUtils.getJavaType(file.getProject(),
 						className);
 				if (type != null) {
-					IMethod[] methods;
 					try {
-						methods = type.getMethods();
+						Set<IMethod> methods = Introspector.getAllMethods(type);
 						if (methods != null) {
 							for (IMethod method : methods) {
 								if (method.getElementName().equals(target)) {

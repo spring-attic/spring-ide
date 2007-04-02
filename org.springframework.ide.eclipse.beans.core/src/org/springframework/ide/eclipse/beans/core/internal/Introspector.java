@@ -24,25 +24,26 @@ import org.springframework.ide.eclipse.core.StringUtils;
 
 /**
  * Helper methods for examining a Java {@link IType}.
- * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @author Pierre-Antoine Grégoire
  */
 public final class Introspector {
 
-	public enum Statics { YES, NO, DONT_CARE }
-	
-    /**
-     * Returns a list of all methods from given type with specified features.
-     */
-    public static Set<IMethod> findAllMethods(IType type, String methodPrefix,
+	public enum Statics {
+		YES, NO, DONT_CARE
+	}
+
+	/**
+	 * Returns a list of all methods from given type with specified features.
+	 */
+	public static Set<IMethod> findAllMethods(IType type, String methodPrefix,
 			int argCount, boolean isPublic, Statics statics)
 			throws JavaModelException {
 		return findAllMethods(type, methodPrefix, argCount, isPublic, statics,
 				false);
 	}
-    
+
 	/**
 	 * Returns a list of all methods from given type with specified features.
 	 */
@@ -57,12 +58,10 @@ public final class Introspector {
 				if (!allMethods.containsKey(key)
 						&& Flags.isPublic(flags) == isPublic
 						&& (statics == Statics.DONT_CARE
-								|| (statics == Statics.YES
-										&& Flags.isStatic(flags))
-											|| (statics == Statics.NO
-													&& !Flags.isStatic(flags)))
-						&& (argCount == -1
-								|| method.getNumberOfParameters() == argCount)
+								|| (statics == Statics.YES && Flags
+										.isStatic(flags)) || (statics == Statics.NO && !Flags
+								.isStatic(flags)))
+						&& (argCount == -1 || method.getNumberOfParameters() == argCount)
 						&& ((!ignoreCase && method.getElementName().startsWith(
 								methodPrefix)))
 						|| (ignoreCase && method.getElementName().toLowerCase()
@@ -84,8 +83,7 @@ public final class Introspector {
 		while (type != null) {
 			for (IMethod method : type.getMethods()) {
 				String key = method.getElementName() + method.getSignature();
-				if (!allConstructors.containsKey(key)
-						&& method.isConstructor()) {
+				if (!allConstructors.containsKey(key) && method.isConstructor()) {
 					allConstructors.put(key, method);
 				}
 			}
@@ -109,12 +107,11 @@ public final class Introspector {
 	/**
 	 * Finds a target methodName with specific number of arguments on the type
 	 * hierarchy of given type.
-	 * 
-	 * @param type  the Java type object on which to retrieve the method
-	 * @param methodName  the name of the method
-	 * @param argCount  the number of arguments for the desired method
-	 * @param isPublic  <code>true</code> if public method is requested
-	 * @param statics one of the <code>Statics</code> constants 
+	 * @param type the Java type object on which to retrieve the method
+	 * @param methodName the name of the method
+	 * @param argCount the number of arguments for the desired method
+	 * @param isPublic <code>true</code> if public method is requested
+	 * @param statics one of the <code>Statics</code> constants
 	 */
 	public static IMethod findMethod(IType type, String methodName,
 			int argCount, boolean isPublic, Statics statics)
@@ -124,12 +121,10 @@ public final class Introspector {
 				int flags = method.getFlags();
 				if (Flags.isPublic(flags) == isPublic
 						&& (statics == Statics.DONT_CARE
-								|| (statics == Statics.YES
-										&& Flags.isStatic(flags))
-										|| (statics == Statics.NO
-												&& !Flags.isStatic(flags)))
-						&& (argCount == -1
-								|| method.getNumberOfParameters() == argCount)
+								|| (statics == Statics.YES && Flags
+										.isStatic(flags)) || (statics == Statics.NO && !Flags
+								.isStatic(flags)))
+						&& (argCount == -1 || method.getNumberOfParameters() == argCount)
 						&& methodName.equals(method.getElementName())) {
 					return method;
 				}
@@ -148,7 +143,7 @@ public final class Introspector {
 		return findAllMethods(type, "set" + base, 1, true, Statics.NO);
 	}
 
-    /**
+	/**
 	 * Returns a list of all setters with the given prefix.
 	 */
 	public static Set<IMethod> findWritableProperties(IType type,
@@ -167,7 +162,7 @@ public final class Introspector {
 		return findAllMethods(type, "get" + base, 0, true, Statics.NO);
 	}
 
-    /**
+	/**
 	 * Returns a list of all getters with the given prefix.
 	 */
 	public static Set<IMethod> findReadableProperties(IType type,
@@ -201,7 +196,6 @@ public final class Introspector {
 	 * with the specified number of arguments. If a constructor with no
 	 * arguments is requested then the absence of a constructor (the JVM adds an
 	 * implicit constructor here) results in <code>true</code>.
-	 * 
 	 * @param type the Java type object on which to retrieve the method
 	 * @param argCount the number of arguments for the constructor
 	 * @param isNonPublicAllowed <code>true</code> if non-public constructurs
@@ -230,8 +224,7 @@ public final class Introspector {
 		for (IMethod method : methods) {
 			if (method.isConstructor()) {
 				if (method.getNumberOfParameters() == argCount) {
-					if (isNonPublicAllowed
-							|| Flags.isPublic(method.getFlags())) {
+					if (isNonPublicAllowed || Flags.isPublic(method.getFlags())) {
 						return true;
 					}
 				}
@@ -244,9 +237,8 @@ public final class Introspector {
 	 * Returns true if the given type has a public setter (one-argument method
 	 * named "set" + property name with an uppercase first character) for the
 	 * specified property.
-	 * 
-	 * @param type  the Java type object on which to retrieve the method
-	 * @param propertyName  the name of the property
+	 * @param type the Java type object on which to retrieve the method
+	 * @param propertyName the name of the property
 	 */
 	public static boolean hasWritableProperty(IType type, String propertyName)
 			throws JavaModelException {
@@ -258,9 +250,8 @@ public final class Introspector {
 	 * Returns true if the given type has a public setter (one-argument method
 	 * named "set" + property name with an uppercase first character) for the
 	 * specified property.
-	 * 
-	 * @param type  the Java type object on which to retrieve the method
-	 * @param propertyName  the name of the property
+	 * @param type the Java type object on which to retrieve the method
+	 * @param propertyName the name of the property
 	 */
 	public static IMethod getWritableProperty(IType type, String propertyName)
 			throws JavaModelException {
@@ -281,13 +272,12 @@ public final class Introspector {
 	 * more than one character and both the first and second characters are
 	 * upper case, then an upper case character is valid too.
 	 * <p>
-	 * Thus "fooBah" corresponds to "FooBah" and "x" to "X", but "URL" stays
-	 * the same as "URL".
+	 * Thus "fooBah" corresponds to "FooBah" and "x" to "X", but "URL" stays the
+	 * same as "URL".
 	 * <p>
 	 * This conforms to section "8.8 Capitalization of inferred names" of the
 	 * JavaBeans specs.
-	 * 
-	 * @param name  the name to be checked
+	 * @param name the name to be checked
 	 */
 	public static boolean isValidPropertyName(String name) {
 		if (name == null || name.length() == 0) {
@@ -306,10 +296,9 @@ public final class Introspector {
 	/**
 	 * Returns <code>true</code> if the given Java type implements the
 	 * specified interface.
-	 * 
-	 * @param type  the Java type to be examined
-	 * @param interfaceName  the full qualified name of the interface we are
-	 * 				looking for
+	 * @param type the Java type to be examined
+	 * @param interfaceName the full qualified name of the interface we are
+	 * looking for
 	 */
 	public static boolean doesImplement(IType type, String interfaceName) {
 		if (interfaceName != null && interfaceName.length() > 0) {
@@ -335,7 +324,8 @@ public final class Introspector {
 					}
 					type = getSuperType(type);
 				}
-			} catch (JavaModelException e) {
+			}
+			catch (JavaModelException e) {
 				BeansCorePlugin.log(e);
 			}
 		}
@@ -345,26 +335,47 @@ public final class Introspector {
 	/**
 	 * Returns <code>true</code> if the given Java type extends the specified
 	 * class.
-	 * 
-	 * @param type  the Java type to be examined
-	 * @param className  the full qualified name of the class we are
-	 * 				looking for
+	 * @param type the Java type to be examined
+	 * @param className the full qualified name of the class we are looking for
 	 */
 	public static boolean doesExtend(IType type, String className) {
 		if (className != null && className.length() > 0) {
 			try {
 				while (type != null) {
 					type = getSuperType(type);
-					if (type != null){
+					if (type != null) {
 						if (className.equals(type.getFullyQualifiedName())) {
 							return true;
 						}
 					}
 				}
-			} catch (JavaModelException e) {
+			}
+			catch (JavaModelException e) {
 				BeansCorePlugin.log(e);
 			}
 		}
 		return false;
 	}
+	
+	/**
+	 * Returns <strong>all</strong> methods of the given {@link IType} instance.
+	 * @param type the type
+	 * @return set of {@link IMethod}
+	 * @throws JavaModelException
+	 */
+	public static Set<IMethod> getAllMethods(IType type)
+			throws JavaModelException {
+		Map<String, IMethod> allMethods = new HashMap<String, IMethod>();
+		while (type != null) {
+			for (IMethod method : type.getMethods()) {
+				String key = method.getElementName() + method.getSignature();
+				if (!allMethods.containsKey(key)) {
+					allMethods.put(key, method);
+				}
+			}
+			type = getSuperType(type);
+		}
+		return new HashSet<IMethod>(allMethods.values());
+	}
+
 }

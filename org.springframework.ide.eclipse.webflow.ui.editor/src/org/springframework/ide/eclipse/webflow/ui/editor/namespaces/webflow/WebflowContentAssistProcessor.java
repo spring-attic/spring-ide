@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
+import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -112,7 +113,7 @@ public class WebflowContentAssistProcessor extends
 	private void addActionMethodAttributeValueProposals(
 			ContentAssistRequest request, String prefix, IType type) {
 		try {
-			IMethod[] methods = type.getMethods();
+			Set<IMethod> methods = Introspector.getAllMethods(type);
 			if (methods != null) {
 				BeanActionMethodSearchRequestor requestor = new BeanActionMethodSearchRequestor(
 						request);
@@ -135,7 +136,7 @@ public class WebflowContentAssistProcessor extends
 	private void addMethodAttributeValueProposals(ContentAssistRequest request,
 			String prefix, IType type) {
 		try {
-			IMethod[] methods = type.getMethods();
+			Set<IMethod> methods = Introspector.getAllMethods(type);
 			if (methods != null) {
 				BeanMethodSearchRequestor requestor = new BeanMethodSearchRequestor(
 						request);

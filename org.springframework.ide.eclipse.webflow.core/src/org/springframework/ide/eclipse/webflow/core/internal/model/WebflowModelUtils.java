@@ -31,6 +31,7 @@ import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
+import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -151,7 +152,7 @@ public class WebflowModelUtils {
 	public static void deleteProblemMarkers(IResource resource) {
 		MarkerUtils.deleteMarkers(resource, PROBLEM_MARKER);
 	}
-
+	
 	public static List<IMethod> getActionMethods(IWebflowConfig config,
 			IDOMNode node) {
 		Set<IBean> beans = getBeans(config);
@@ -170,7 +171,7 @@ public class WebflowModelUtils {
 				MethodSearchRequestor requestor = new MethodSearchRequestor(
 						null);
 				try {
-					IMethod[] methods = type.getMethods();
+					Set<IMethod> methods = Introspector.getAllMethods(type);
 					if (methods != null) {
 						for (IMethod method : methods) {
 							requestor.acceptSearchMatch(method, "");
@@ -187,7 +188,7 @@ public class WebflowModelUtils {
 				ActionMethodSearchRequestor requestor = new ActionMethodSearchRequestor(
 						null);
 				try {
-					IMethod[] methods = type.getMethods();
+					Set<IMethod> methods = Introspector.getAllMethods(type);
 					if (methods != null) {
 						for (IMethod method : methods) {
 							requestor.acceptSearchMatch(method, "");
