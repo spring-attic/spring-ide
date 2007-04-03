@@ -41,7 +41,7 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceSorter;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
@@ -138,7 +138,7 @@ public class WebflowConfigTab {
 	/**
 	 * 
 	 */
-	private Map<IWebflowConfig, Set<IBeansConfig>> configFilesToBeansConfigs;
+	private Map<IWebflowConfig, Set<IModelElement>> configFilesToBeansConfigs;
 
 	private Map<IWebflowConfig, String> configFilesToNames;
 
@@ -157,7 +157,7 @@ public class WebflowConfigTab {
 		this.project = project;
 		this.element = element;
 		this.configFiles = new HashSet<IWebflowConfig>();
-		this.configFilesToBeansConfigs = new HashMap<IWebflowConfig, Set<IBeansConfig>>();
+		this.configFilesToBeansConfigs = new HashMap<IWebflowConfig, Set<IModelElement>>();
 		this.configFilesToNames = new HashMap<IWebflowConfig, String>();
 
 		if (project.getConfigs() != null) {
@@ -285,12 +285,12 @@ public class WebflowConfigTab {
 				.getSelection();
 		if (!selection.isEmpty()) {
 			IWebflowConfig file = (IWebflowConfig) selection.getFirstElement();
-			Set<IBeansConfig> configs = new HashSet<IBeansConfig>();
+			Set<IModelElement> configs = new HashSet<IModelElement>();
 			String name = file.getName();
 			List<String> names = new ArrayList<String>();
 			names.add(name);
 			if (this.configFilesToBeansConfigs.containsKey(file)) {
-				Set<IBeansConfig> oldConfigs = this.configFilesToBeansConfigs
+				Set<IModelElement> oldConfigs = this.configFilesToBeansConfigs
 						.get(file);
 				configs.addAll(oldConfigs);
 			}
@@ -433,7 +433,7 @@ public class WebflowConfigTab {
 	 * 
 	 * @return
 	 */
-	public Map<IWebflowConfig, Set<IBeansConfig>> getConfigFilesToBeansConfigs() {
+	public Map<IWebflowConfig, Set<IModelElement>> getConfigFilesToBeansConfigs() {
 		return configFilesToBeansConfigs;
 	}
 

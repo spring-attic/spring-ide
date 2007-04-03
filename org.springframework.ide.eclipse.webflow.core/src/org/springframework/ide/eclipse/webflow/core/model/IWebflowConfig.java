@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.webflow.core.model;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * 
@@ -39,14 +39,14 @@ public interface IWebflowConfig extends IWebflowModelElement {
 	 * 
 	 * @return
 	 */
-	Set<IBeansConfig> getBeansConfigs();
+	Set<IModelElement> getBeansConfigs();
 
 	/**
 	 * 
 	 * 
 	 * @param beansConfigs
 	 */
-	void setBeansConfigs(Set<IBeansConfig> beansConfigs);
+	void setBeansConfigs(Set<IModelElement> beansConfigs);
 
 	/**
 	 * 

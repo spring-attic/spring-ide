@@ -19,8 +19,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
@@ -66,13 +66,13 @@ public class WebflowConfig implements IWebflowConfig {
 	 * (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig#getBeansConfigs()
 	 */
-	public java.util.Set<IBeansConfig> getBeansConfigs() {
+	public java.util.Set<IModelElement> getBeansConfigs() {
 		IBeansModel model = BeansCorePlugin.getModel();
 
-		java.util.Set<IBeansConfig> configs = new HashSet<IBeansConfig>();
+		java.util.Set<IModelElement> configs = new HashSet<IModelElement>();
 		if (beansConfigs != null) {
 			for (String configName : this.beansConfigs) {
-				IBeansConfig config = (IBeansConfig) model
+				IModelElement config = model
 						.getElement(configName);
 				if (config != null) {
 					configs.add(config);
@@ -95,10 +95,10 @@ public class WebflowConfig implements IWebflowConfig {
 	 * (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig#setBeansConfigs(java.util.List)
 	 */
-	public void setBeansConfigs(java.util.Set<IBeansConfig> beansConfigs) {
+	public void setBeansConfigs(java.util.Set<IModelElement> beansConfigs) {
 		this.beansConfigs = new HashSet<String>();
 		if (beansConfigs != null) {
-			for (IBeansConfig config : beansConfigs) {
+			for (IModelElement config : beansConfigs) {
 				if (BeansModelUtils.getProject(config) != null
 						&& BeansModelUtils.getProject(config).getProject()
 								.equals(project.getProject())) {

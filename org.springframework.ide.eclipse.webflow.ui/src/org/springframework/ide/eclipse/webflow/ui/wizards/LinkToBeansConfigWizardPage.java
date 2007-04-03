@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.webflow.ui.properties.BeansConfigLabelProvider;
 import org.springframework.ide.eclipse.webflow.ui.properties.BeansConfigContentProvider;
 
@@ -85,18 +86,19 @@ public class LinkToBeansConfigWizardPage extends WizardPage {
 		beansConfigSetViewer.setInput(this); // activate content provider
 	}
 	
-	private Set<IBeansConfig> createBeansConfigList() {
-		Set<IBeansConfig> configs = new HashSet<IBeansConfig>();
+	private Set<IModelElement> createBeansConfigList() {
+		// Create new list with config files from this config set
+		Set<IModelElement> configs = new HashSet<IModelElement>();
 		Set<IBeansProject> beansProjects = BeansCorePlugin.getModel().getProjects();
 		for (IBeansProject project : beansProjects) {
 			configs.addAll(project.getConfigs());
+			configs.addAll(project.getConfigSets());
 		}
-		// Create new list with config files from this config set
 		return configs;
 	}
-
-	public Set<IBeansConfig> getBeansConfigs() {
-		Set<IBeansConfig> configs = new HashSet<IBeansConfig>();
+ 
+	public Set<IModelElement> getBeansConfigs() {
+		Set<IModelElement> configs = new HashSet<IModelElement>();
 		Object[] checkedElements = beansConfigSetViewer.getCheckedElements();
 		if (checkedElements != null) {
 			for (int i = 0; i < checkedElements.length; i++) {

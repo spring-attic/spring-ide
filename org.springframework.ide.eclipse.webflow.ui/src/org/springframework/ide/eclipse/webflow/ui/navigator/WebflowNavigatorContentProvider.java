@@ -15,7 +15,6 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Control;
@@ -77,12 +76,17 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 			}
 		}
 		else if (parentElement instanceof IWebflowConfig) {
-			List<IResource> files = new ArrayList<IResource>();
-			for (IBeansConfig config : ((IWebflowConfig) parentElement)
+			List<Object> children = new ArrayList<Object>();
+			for (IModelElement config : ((IWebflowConfig) parentElement)
 					.getBeansConfigs()) {
-				files.add(config.getElementResource());
+				if (config instanceof IBeansConfig) {
+					children.add(((IBeansConfig) config).getElementResource());
+				}
+				else {
+					children.add(config);
+				}
 			}
-			return files.toArray();
+			return children.toArray();
 		}
 		return IModelElement.NO_CHILDREN;
 	}

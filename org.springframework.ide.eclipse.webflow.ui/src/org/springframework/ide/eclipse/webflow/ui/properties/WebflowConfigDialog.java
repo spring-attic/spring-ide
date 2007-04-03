@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.webflow.ui.properties;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -32,8 +33,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
@@ -60,7 +61,7 @@ public class WebflowConfigDialog extends Dialog {
 
 	private IProject project;
 
-	private Set<IBeansConfig> beansConfig;
+	private Set<IModelElement> beansConfig;
 
 	private List<String> config;
 	
@@ -74,7 +75,7 @@ public class WebflowConfigDialog extends Dialog {
 	 * @param parent
 	 */
 	public WebflowConfigDialog(Shell parent, IProject project,
-			Set<IBeansConfig> beansConfig, List<String> config, IFile file) {
+			Set<IModelElement> beansConfig, List<String> config, IFile file) {
 		super(parent);
 		this.project = project;
 		this.config = config;
@@ -213,11 +214,14 @@ public class WebflowConfigDialog extends Dialog {
 	 * 
 	 * @return
 	 */
-	private Set<IBeansConfig> createBeansConfigList() {
+	private Set<IModelElement> createBeansConfigList() {
 		IBeansProject beansProject = BeansCorePlugin.getModel().getProject(
 				project);
 		// Create new list with config files from this config set
-		return beansProject.getConfigs();
+		Set<IModelElement> elements = new HashSet<IModelElement>();
+		elements.addAll(beansProject.getConfigs());
+		elements.addAll(beansProject.getConfigSets());
+		return elements;
 	}
 
 	private void validateName() {

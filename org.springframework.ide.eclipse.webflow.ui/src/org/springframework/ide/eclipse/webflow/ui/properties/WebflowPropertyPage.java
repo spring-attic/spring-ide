@@ -24,7 +24,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.dialogs.PropertyPage;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
@@ -107,7 +107,7 @@ public class WebflowPropertyPage extends PropertyPage {
 		if (configFilesBlock.hasUserMadeChanges()) {
 
 			Set<IWebflowConfig> files = configFilesBlock.getConfigFiles();
-			Map<IWebflowConfig, Set<IBeansConfig>> filesToConfig = configFilesBlock
+			Map<IWebflowConfig, Set<IModelElement>> filesToConfig = configFilesBlock
 					.getConfigFilesToBeansConfigs();
 			Map<IWebflowConfig, String> names = configFilesBlock.getConfigFilesToNames();
 			List<IWebflowConfig> webflowConfigs = new ArrayList<IWebflowConfig>();

@@ -18,10 +18,11 @@ import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.ui.actions.EditorPartAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IEditorPart;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditor;
 import org.springframework.ide.eclipse.beans.ui.graph.editor.GraphEditorInput;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.webflow.core.internal.model.Action;
 import org.springframework.ide.eclipse.webflow.core.internal.model.AttributeMapper;
@@ -111,7 +112,7 @@ public class OpenBeansGraphAction extends EditorPartAction {
 	public void run() {
 		Object flowModelElement = getFirstSelectedEditPart().getModel();
 		IBean bean = null;
-		IBeansConfig beansConfig = null;
+		IModelElement beansConfig = null;
 		String beanId = null;
 		IWebflowConfig config = WebflowUtils.getActiveWebflowConfig();
 		if (config != null && config.getBeansConfigs() != null
@@ -134,10 +135,10 @@ public class OpenBeansGraphAction extends EditorPartAction {
 			}
 		}
 		if (beanId != null) {
-			Set<IBeansConfig> configs = config.getBeansConfigs();
-			for (IBeansConfig bc : configs) {
-				if (bc.getBean(beanId) != null) {
-					bean = bc.getBean(beanId);
+			Set<IModelElement> configs = config.getBeansConfigs();
+			for (IModelElement bc : configs) {
+				if (BeansModelUtils.getBean(beanId, bc) != null) {
+					bean = BeansModelUtils.getBean(beanId, bc);
 					beansConfig = bc;
 				}
 			}

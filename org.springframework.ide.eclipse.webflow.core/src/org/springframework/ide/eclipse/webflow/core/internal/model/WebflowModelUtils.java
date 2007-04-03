@@ -34,9 +34,9 @@ import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.MarkerUtils;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.model.IInlineFlowState;
 import org.springframework.ide.eclipse.webflow.core.model.IState;
@@ -206,12 +206,12 @@ public class WebflowModelUtils {
 	}
 
 	public static Set<IBean> getBeans(IWebflowConfig config) {
-		Set<IBeansConfig> beansConfigs = config.getBeansConfigs();
+		Set<IModelElement> beansConfigs = config.getBeansConfigs();
 		Set<IBean> beans = new HashSet<IBean>();
 
 		if (beansConfigs != null) {
-			for (IBeansConfig bc : beansConfigs) {
-				beans.addAll(bc.getBeans());
+			for (IModelElement bc : beansConfigs) {
+				beans.addAll(BeansModelUtils.getBeans(bc, null));
 			}
 		}
 
@@ -269,8 +269,8 @@ public class WebflowModelUtils {
 
 	public static boolean isReferencedBeanFound(IWebflowConfig config,
 			String beanName) {
-		Set<IBeansConfig> beansConfigs = config.getBeansConfigs();
-		for (IBeansConfig beansConfig : beansConfigs) {
+		Set<IModelElement> beansConfigs = config.getBeansConfigs();
+		for (IModelElement beansConfig : beansConfigs) {
 			if (BeansModelUtils.getBean(beanName, beansConfig) != null) {
 				return true;
 			}

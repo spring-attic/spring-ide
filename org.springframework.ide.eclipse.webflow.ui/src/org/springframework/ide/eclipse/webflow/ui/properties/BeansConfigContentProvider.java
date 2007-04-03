@@ -14,7 +14,7 @@ import java.util.Set;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * @author Christian Dupuis
@@ -22,9 +22,9 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
  */
 public class BeansConfigContentProvider implements IStructuredContentProvider {
 
-	private Set<IBeansConfig> configs;
+	private Set<IModelElement> configs;
 
-	public BeansConfigContentProvider(Set<IBeansConfig> configs) {
+	public BeansConfigContentProvider(Set<IModelElement> configs) {
 		this.configs = configs;
 	}
 

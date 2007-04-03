@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow;
 
-
-import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -24,12 +22,12 @@ import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.AbstractContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.BeanReferenceSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionUtils;
 import org.springframework.ide.eclipse.webflow.core.Activator;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.util.BeanActionMethodSearchRequestor;
 import org.springframework.ide.eclipse.webflow.core.util.BeanMethodSearchRequestor;
@@ -60,13 +58,7 @@ public class WebflowContentAssistProcessor extends
 		IWebflowConfig config = Activator.getModel().getProject(
 				file.getProject()).getConfig(file);
 		if (config != null) {
-			Set<IBeansConfig> beansConfigs = config.getBeansConfigs();
-			Set<IBean> beans = new HashSet<IBean>();
-			if (beansConfigs != null) {
-				for (IBeansConfig bc : beansConfigs) {
-					beans.addAll(bc.getBeans());
-				}
-			}
+			Set<IBean> beans = WebflowModelUtils.getBeans(config);
 			for (IBean bean : beans) {
 				requestor.acceptSearchMatch(bean, file, prefix);
 			}
@@ -184,13 +176,7 @@ public class WebflowContentAssistProcessor extends
 						BeansEditorUtils.getResource(request).getProject())
 						.getConfig(BeansEditorUtils.getResource(request));
 				if (config != null) {
-					Set<IBeansConfig> beansConfigs = config.getBeansConfigs();
-					Set<IBean> beans = new HashSet<IBean>();
-					if (beansConfigs != null) {
-						for (IBeansConfig bc : beansConfigs) {
-							beans.addAll(bc.getBeans());
-						}
-					}
+					Set<IBean> beans = WebflowModelUtils.getBeans(config);
 					for (IBean bean : beans) {
 						if (bean.getElementName().equals(
 								BeansEditorUtils.getAttribute(node, "bean"))) {
@@ -220,13 +206,7 @@ public class WebflowContentAssistProcessor extends
 						BeansEditorUtils.getResource(request).getProject())
 						.getConfig(BeansEditorUtils.getResource(request));
 				if (config != null) {
-					Set<IBeansConfig> beansConfigs = config.getBeansConfigs();
-					Set<IBean> beans = new HashSet<IBean>();
-					if (beansConfigs != null) {
-						for (IBeansConfig bc : beansConfigs) {
-							beans.addAll(bc.getBeans());
-						}
-					}
+					Set<IBean> beans = WebflowModelUtils.getBeans(config);
 					for (IBean bean : beans) {
 						if (bean.getElementName().equals(
 								BeansEditorUtils.getAttribute(node, "bean"))) {

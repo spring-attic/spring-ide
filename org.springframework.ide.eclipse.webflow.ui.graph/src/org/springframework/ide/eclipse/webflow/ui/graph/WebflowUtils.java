@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.webflow.ui.graph;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -25,7 +24,6 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowValidationProblem;
@@ -82,17 +80,7 @@ public abstract class WebflowUtils {
 	}
 
 	public static Set<IBean> getBeansFromEditorInput() {
-		IWebflowConfig config = getActiveWebflowConfig();
-		Set<IBeansConfig> beansConfigs = config.getBeansConfigs();
-		Set<IBean> beans = new HashSet<IBean>();
-
-		if (beansConfigs != null) {
-			for (IBeansConfig bc : beansConfigs) {
-				beans.addAll(bc.getBeans());
-			}
-		}
-
-		return beans;
+		return WebflowModelUtils.getBeans(getActiveWebflowConfig());
 	}
 
 	public static List<IMethod> getActionMethods(IDOMNode node) {

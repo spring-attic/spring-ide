@@ -21,8 +21,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.core.io.xml.XMLWriter;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 
@@ -102,9 +102,9 @@ public class WebflowProjectDescriptionWriter implements
 				writer.printSimpleTag(FILE, config.getResource()
 						.getProjectRelativePath().toString());
 				writer.printSimpleTag(NAME, config.getName());
-				Set<IBeansConfig> beansConfigs = config.getBeansConfigs();
+				Set<IModelElement> beansConfigs = config.getBeansConfigs();
 				if (beansConfigs != null) {
-					for (IBeansConfig bc : beansConfigs) {
+					for (IModelElement bc : beansConfigs) {
 						writer.printSimpleTag(BEANS_CONFIG, bc.getElementID());
 					}
 				}
