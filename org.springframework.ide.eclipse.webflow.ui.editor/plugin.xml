@@ -90,4 +90,9 @@
 			uri="http://www.springframework.org/schema/webflow" />
 	</extension>
 
+	<extension point="org.eclipse.ui.editors.templates">
+		<include file="templates/templates.xml"
+			translations="templates/templates.properties" />
+	</extension>
+
 </plugin>

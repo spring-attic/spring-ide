@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+	<!-- Templates for creating beans -->	
+	<template name="%NAME_executor" description="%DESC_executor"
+		id="org.springframework.ide.eclipse.webflow.ui.editor.template.executor"
+		context="org.springframework.ide.eclipse.beans.ui.editor.templates.contextType.all"
+		enabled="true"><![CDATA[<!-- Launches new flow executions and resumes existing executions. -->
+${cursor}<flow:executor id="${flowExecutor}" registry-ref="${flowRegistry}" repository-type="${singlekey}" />]]>
+</template>
+ 
+	<template name="%NAME_registry" description="%DESC_registry"
+		id="org.springframework.ide.eclipse.webflow.ui.editor.template.registry"
+		context="org.springframework.ide.eclipse.beans.ui.editor.templates.contextType.all"
+		enabled="true"><![CDATA[<!-- Creates the registry of flow definitions for this application -->
+${cursor}<flow:registry id="${flowRegistry}">
+	<flow:location path="/WEB-INF/fileupload.xml" />
+</flow:registry>]]>
+</template>
+
+</templates>
