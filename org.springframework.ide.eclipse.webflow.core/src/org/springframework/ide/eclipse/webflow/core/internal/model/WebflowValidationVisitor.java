@@ -20,6 +20,8 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.binding.convert.ConversionService;
+import org.springframework.binding.convert.support.DefaultConversionService;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
@@ -51,7 +53,10 @@ public class WebflowValidationVisitor implements IWebflowModelElementVisitor {
 		SCOPE_TYPES.add("conversation");
 	}
 
-	private WebflowValidationProblemReporter problemReporter = new WebflowValidationProblemReporter();
+	private WebflowValidationProblemReporter problemReporter = 
+		new WebflowValidationProblemReporter();
+	
+	private ConversionService conversionService = null;
 
 	private IWebflowConfig webflowConfig = null;
 
@@ -571,6 +576,21 @@ public class WebflowValidationVisitor implements IWebflowModelElementVisitor {
 	}
 
 	private IType getJavaType(String className) {
-		return BeansModelUtils.getJavaType(file.getProject(), className);
+		IType type = BeansModelUtils.getJavaType(file.getProject(), className);
+		if (type == null) {
+			Class clazz = getConversionService().getClassByAlias(className);
+			if (clazz != null) {
+				type = BeansModelUtils.getJavaType(file.getProject(), clazz
+						.getName());
+			}
+		}
+		return type;
+	}
+	
+	private ConversionService getConversionService() {
+		if (this.conversionService == null) {
+			this.conversionService = new DefaultConversionService();
+		}
+		return this.conversionService;
 	}
 }

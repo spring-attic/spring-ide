@@ -18,4 +18,5 @@ Export-Package:
  org.springframework.binding.format.support,
  org.springframework.binding.mapping,
  org.springframework.binding.method
+Require-Bundle: org.springframework
 
