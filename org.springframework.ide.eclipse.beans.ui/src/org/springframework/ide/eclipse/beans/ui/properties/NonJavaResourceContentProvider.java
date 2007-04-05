@@ -130,7 +130,10 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 	private Object[] getNonJavaResources(IPackageFragmentRoot root)
 			throws JavaModelException {
 		Object[] nonJavaResources = root.getNonJavaResources();
-		if (root.getKind() == IPackageFragmentRoot.K_BINARY) {
+
+		// Replace JAR entries with our own wrapper
+		if (root.getKind() == IPackageFragmentRoot.K_BINARY
+				&& root.getResource() instanceof IFile) {
 			for (int i = 0; i < nonJavaResources.length; i++) {
 				Object resource = nonJavaResources[i];
 				if (resource instanceof IStorage) {
@@ -204,12 +207,13 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 			}
 			boolean isFolderOnClasspath = javaProject.isOnClasspath(container);
 			List<IResource> nonJavaResources = new ArrayList<IResource>();
+
 			// Can be on classpath but as a member of non-java resource folder
 			for (IResource member : members) {
-				// A resource can also be a java element
-				// in the case of exclusion and inclusion filters.
-				// We therefore exclude Java elements from the list
-				// of non-Java resources.
+
+				// A resource can also be a java element in the case of
+				// exclusion and inclusion filters. We therefore exclude Java
+				// elements from the list of non-Java resources.
 				if (isFolderOnClasspath) {
 					if (javaProject.findPackageFragmentRoot(member
 							.getFullPath()) == null) {
@@ -297,6 +301,7 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 		if (element instanceof IResource) {
 			IResource parent = ((IResource) element).getParent();
 			IJavaElement jParent = JavaCore.create(parent);
+
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=31374
 			if (jParent != null && jParent.exists()) {
 				return jParent;
@@ -304,11 +309,12 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 			return parent;
 		} else if (element instanceof IJavaElement) {
 			IJavaElement parent = ((IJavaElement) element).getParent();
-			// for package fragments that are contained in a project package
-			// fragment
-			// we have to skip the package fragment root as the parent.
+
+			// For package fragments that are contained in a project package
+			// fragment we have to skip the package fragment root as the parent.
 			if (element instanceof IPackageFragment) {
-				return skipProjectPackageFragmentRoot((IPackageFragmentRoot) parent);
+				return skipProjectPackageFragmentRoot((IPackageFragmentRoot)
+						parent);
 			}
 			return parent;
 		}
