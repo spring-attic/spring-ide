@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+	<!-- Contribution to the Eclipse WTP XML Catalog -->
+	<extension point="org.eclipse.wst.xml.core.catalogContributions">
+		<catalogContribution>
+			<public publicId="http://www.springframework.org/schema/db"
+				uri="jar:spring-db.jar!/org/springframework/jdbc/datasource/config/spring-db-2.0.xsd"
+				webURL="http://www.springframework.org/schema/db/spring-db-2.0.xsd" />
+		</catalogContribution>
+		<catalogContribution>
+			<system
+				systemId="http://www.springframework.org/schema/db/spring-db-2.0.xsd"
+				uri="jar:spring-db.jar!/org/springframework/jdbc/datasource/config/spring-db-2.0.xsd" />
+		</catalogContribution>
+	</extension>
+
+	<!-- Contribution to the Spring Core namespace handler. Required to load the
+		Spring XML file by Spring IDE. -->
+	<extension
+		point="org.springframework.ide.eclipse.beans.core.namespaces">
+		<namespace
+			namespaceHandler="org.springframework.jdbc.datasource.config.DbNamespaceHandler"
+			uri="http://www.springframework.org/schema/db" />
+	</extension>
+
+	<!-- Contribution to the Spring IDE UI. Drives image and label in Spring Explorer -->
+	<extension
+		point="org.springframework.ide.eclipse.beans.ui.namespaces">
+		<namespace
+			labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.DbLabelProvider"
+			uri="http://www.springframework.org/schema/db" />
+	</extension>
+
+	<!-- Contribution to the Spring IDE XML Editor. Drives content assist, hyperlink -->
+	<extension
+		point="org.springframework.ide.eclipse.beans.ui.editor.namespaces">
+		<namespace
+			contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.namespaces.db.DbContentAssistProcessor"
+			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
+			hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.namespaces.db.DbHyperLinkDetector"
+			labelProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.db.DbOutlineLabelProvider"
+			name="Spring DB Config"
+			uri="http://www.springframework.org/schema/db" />
+	</extension>
+
+</plugin>
