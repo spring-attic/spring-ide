@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -29,14 +28,13 @@ import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector.Statics;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
-import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.AbstractContentAssistProcessor;
-import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.BeanReferenceSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.FactoryMethodSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PropertyNameSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PropertyValueSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.VoidMethodSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextTypeIds;
+import org.springframework.ide.eclipse.beans.ui.editor.util.BeansCompletionUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionUtils;
 import org.w3c.dom.NamedNodeMap;
@@ -44,7 +42,6 @@ import org.w3c.dom.Node;
 
 /**
  * Main entry point for the Spring beans xml editor's content assist.
- * 
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  */
@@ -53,29 +50,8 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 
 	private void addBeanReferenceProposals(ContentAssistRequest request,
 			String prefix, Node node, boolean showExternal) {
-		if (prefix == null) {
-			prefix = "";
-		}
-
-		IFile file = BeansEditorUtils.getResource(request);
-		if (node.getOwnerDocument() != null) {
-			BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(
-					request, BeansJavaCompletionUtils.getPropertyTypes(node,
-							file.getProject()));
-			Map<String, Node> beanNodes = BeansEditorUtils
-					.getReferenceableNodes(node.getOwnerDocument());
-			for (Map.Entry<String, Node> n : beanNodes.entrySet()) {
-				Node beanNode = n.getValue();
-				requestor.acceptSearchMatch(n.getKey(), beanNode, file, prefix);
-			}
-			if (showExternal) {
-				List<?> beans = BeansEditorUtils.getBeansFromConfigSets(file);
-				for (int i = 0; i < beans.size(); i++) {
-					IBean bean = (IBean) beans.get(i);
-					requestor.acceptSearchMatch(bean, file, prefix);
-				}
-			}
-		}
+		BeansCompletionUtils.addBeanReferenceProposals(request, prefix, node
+				.getOwnerDocument(), showExternal);
 	}
 
 	private void addClassAttributeValueProposals(ContentAssistRequest request,
@@ -249,9 +225,8 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 				}
 				else {
 					// static factory method
-					List<?> list = BeansEditorUtils
-							.getClassNamesOfBean(BeansEditorUtils
-									.getResource(request), node);
+					List<?> list = BeansEditorUtils.getClassNamesOfBean(
+							BeansEditorUtils.getResource(request), node);
 					factoryClassName = (list.size() != 0 ? ((IType) list.get(0))
 							.getFullyQualifiedName()
 							: null);
@@ -275,8 +250,7 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 
 			if ("name".equals(attributeName) && parentAttributes != null) {
 				List classNames = BeansEditorUtils.getClassNamesOfBean(
-						BeansEditorUtils.getResource(request),
-						parentNode);
+						BeansEditorUtils.getResource(request), parentNode);
 				addPropertyNameAttributeValueProposals(request, matchString,
 						"", parentNode, classNames);
 			}

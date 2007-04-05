@@ -12,8 +12,6 @@ package org.springframework.ide.eclipse.beans.ui.editor.namespaces.aop;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -25,12 +23,11 @@ import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector.Statics;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
-import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.AbstractContentAssistProcessor;
-import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.BeanReferenceSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PointcutReferenceSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PublicMethodSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceContentAssistProcessor;
+import org.springframework.ide.eclipse.beans.ui.editor.util.BeansCompletionUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionUtils;
 import org.springframework.util.StringUtils;
@@ -47,28 +44,8 @@ public class AopContentAssistProcessor extends AbstractContentAssistProcessor
 
 	private void addBeanReferenceProposals(ContentAssistRequest request,
 			String prefix, Document document, boolean showExternal) {
-		if (prefix == null) {
-			prefix = "";
-		}
-		IFile file = BeansEditorUtils.getResource(request);
-		if (document != null) {
-			BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(
-					request);
-			Map<String, Node> beanNodes = BeansEditorUtils
-					.getReferenceableNodes(document);
-			for (Map.Entry<String, Node> node : beanNodes.entrySet()) {
-				Node beanNode = node.getValue();
-				requestor.acceptSearchMatch(node.getKey(), beanNode, file,
-						prefix);
-			}
-			if (showExternal) {
-				List<?> beans = BeansEditorUtils.getBeansFromConfigSets(file);
-				for (int i = 0; i < beans.size(); i++) {
-					IBean bean = (IBean) beans.get(i);
-					requestor.acceptSearchMatch(bean, file, prefix);
-				}
-			}
-		}
+		BeansCompletionUtils.addBeanReferenceProposals(request, prefix,
+				document.getOwnerDocument(), showExternal);
 	}
 
 	@Override
