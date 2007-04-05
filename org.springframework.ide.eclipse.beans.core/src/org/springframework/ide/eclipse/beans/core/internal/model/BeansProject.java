@@ -57,6 +57,15 @@ public class BeansProject extends AbstractResourceModelElement implements
 		this.project = project;
 	}
 
+	@Override
+	@SuppressWarnings("unchecked")
+	public Object getAdapter(Class adapter) {
+		if (adapter == IProject.class) {
+			return project;
+		}
+		return super.getAdapter(adapter);
+	}
+
 	public int getElementType() {
 		return IBeansModelElementTypes.PROJECT_TYPE;
 	}
@@ -440,7 +449,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 	/**
 	 * Populate the project's model with the information read from project
 	 * description (an XML file defined in
-	 * {@link IBeansProject.DESCRIPTION_FILE}).
+	 * {@link ISpringProject.DESCRIPTION_FILE}).
 	 */
 	private void populateModel() {
 

@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
@@ -47,7 +48,7 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 			org.springframework.ide.eclipse.webflow.ui.Activator.PLUGIN_ID
 					+ ".navigator.projectExplorerContent";
 
-	public static final String BEANS_EXPLORER_CONTENT_PROVIDER_ID =
+	public static final String SPRING_EXPLORER_CONTENT_PROVIDER_ID =
 			org.springframework.ide.eclipse.webflow.ui.Activator.PLUGIN_ID
 					+ ".navigator.springExplorerContent";
 
@@ -64,7 +65,11 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 	}
 
 	public Object[] getChildren(Object parentElement) {
-		if (parentElement instanceof IProject) {
+		if (parentElement instanceof ISpringProject) {
+			return WebflowModelUtils.getFiles(
+					((ISpringProject) parentElement).getProject()).toArray();
+		}
+		else if (parentElement instanceof IProject) {
 			return WebflowModelUtils.getFiles((IProject) parentElement)
 					.toArray();
 		}
@@ -99,7 +104,11 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 	}
 
 	public boolean hasChildren(Object element) {
-		if (element instanceof IProject) {
+		if (element instanceof ISpringProject) {
+			return WebflowModelUtils.getFiles(
+					((ISpringProject) element).getProject()).size() > 0;
+		}
+		else if (element instanceof IProject) {
 			return (WebflowModelUtils.getFiles((IProject) element).size() > 0);
 		}
 		else if (element instanceof IFile) {

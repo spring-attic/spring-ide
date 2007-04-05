@@ -13,29 +13,15 @@ package org.springframework.ide.eclipse.beans.core.internal.model.resources;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.core.internal.model.resources.ISpringResourceChangeEvents;
 
 /**
- * Defines callbacks for the <code>BeansResourceChangeListener</code>.
- * @see BeansResourceChangeListener
+ * Defines callbacks for the {@link BeansResourceChangeListener}.
+ * 
  * @author Torsten Juergeleit
  */
-public interface IBeansResourceChangeEvents {
-
-	boolean isSpringProject(IProject project, int eventType);
-
-	void springNatureAdded(IProject project, int eventType);
-
-	void springNatureRemoved(IProject project, int eventType);
-
-	void projectAdded(IProject project, int eventType);
-
-	void projectOpened(IProject project, int eventType);
-
-	void projectClosed(IProject project, int eventType);
-
-	void projectDeleted(IProject project, int eventType);
+public interface IBeansResourceChangeEvents extends ISpringResourceChangeEvents {
 
 	void projectDescriptionChanged(IFile file, int eventType);
 

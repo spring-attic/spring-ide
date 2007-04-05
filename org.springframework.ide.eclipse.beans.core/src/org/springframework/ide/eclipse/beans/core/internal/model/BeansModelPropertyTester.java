@@ -15,18 +15,20 @@ import org.eclipse.core.resources.IFile;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 
 /**
- * This {@link PropertyTester} is used to check properties of the
- * BeansCoreModel in <code><test property="..."/></code> expressions.
+ * This {@link PropertyTester} is used to check properties of the BeansCoreModel
+ * in <code><test property="..."/></code> expressions.
  * <p>
  * Currently the following properties are supported:
  * <ul>
- * <li><strong>isBeansConfig</strong> checks if a given {@link IFile}
- * is a BeansConfig file</li>
+ * <li><strong>isBeansConfig</strong> checks if a given {@link IFile} is a
+ * BeansConfig file</li>
  * </ul>
+ * 
  * @author Torsten Juergeleit
  */
 public class BeansModelPropertyTester extends PropertyTester {
 
+	@Override
 	public boolean test(Object receiver, String property, Object[] args,
 			Object expectedValue) {
 		if (receiver instanceof IFile && "isBeansConfig".equals(property)) {

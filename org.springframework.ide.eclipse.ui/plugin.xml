@@ -134,7 +134,12 @@
             labelProvider="org.springframework.ide.eclipse.ui.internal.navigator.SpringExplorerLabelProvider"
             icon="icons/full/obj16/project_obj.gif"
             activeByDefault="true">
-		 <triggerPoints/>
+         <triggerPoints>
+			<instanceof value="org.eclipse.core.resources.IWorkspaceRoot"/>
+         </triggerPoints>
+         <possibleChildren>
+			<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+         </possibleChildren>
       </navigatorContent>
       <actionProvider
             id="org.springframework.ide.eclipse.ui.navigator.springExplorerActions"

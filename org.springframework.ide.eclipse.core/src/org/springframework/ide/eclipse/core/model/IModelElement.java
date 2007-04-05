@@ -57,8 +57,7 @@ public interface IModelElement extends IAdaptable {
 	 * This is a handle-only method.
 	 *
 	 * @return the kind of element; e.g. one of the constants declared in
-	 *			<code>IBeansModelElementTypes</code>
-	 * @see IBeansModelElementTypes
+	 *         {@link ISpringModelElementTypes}
 	 */
 	int getElementType();
 

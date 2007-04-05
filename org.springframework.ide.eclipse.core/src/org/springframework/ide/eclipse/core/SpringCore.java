@@ -20,6 +20,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
+import org.osgi.framework.BundleContext;
+import org.springframework.ide.eclipse.core.internal.model.SpringModel;
+import org.springframework.ide.eclipse.core.model.ISpringModel;
 
 /**
  * Central access point for the Spring IDE core plug-in
@@ -62,6 +65,9 @@ public class SpringCore extends Plugin {
 	/** The shared instance */
 	private static SpringCore plugin; 
 
+	/** The singleton Spring model */
+	private static SpringModel model;
+
 	/** Resource bundle */
 	private ResourceBundle resourceBundle;
 
@@ -73,6 +79,7 @@ public class SpringCore extends Plugin {
 	 */
 	public SpringCore() {
 		plugin = this;
+		model = new SpringModel();
 		try {
 			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);
 		} catch (MissingResourceException e) {
@@ -80,11 +87,30 @@ public class SpringCore extends Plugin {
 		}
 	}
 
+	@Override
+	public void start(BundleContext context) throws Exception {
+		super.start(context);
+		model.startup();
+	}
+
+	@Override
+	public void stop(BundleContext context) throws Exception {
+		model.shutdown();
+		super.stop(context);
+	}
+
 	/**
 	 * Returns the single instance of the Spring core plug-in runtime class.
 	 */
 	public static SpringCore getDefault() {
 		return plugin;
+	}
+
+	/**
+	 * Returns the singleton {@link ISpringModel}.
+	 */
+	public static final ISpringModel getModel() {
+		return model;
 	}
 
 	/**

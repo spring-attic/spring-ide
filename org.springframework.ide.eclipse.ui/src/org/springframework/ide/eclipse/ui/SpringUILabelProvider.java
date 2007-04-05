@@ -11,8 +11,6 @@
 package org.springframework.ide.eclipse.ui;
 
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreePathLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -21,7 +19,7 @@ import org.eclipse.jface.viewers.ViewerLabel;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.springframework.ide.eclipse.core.MarkerUtils;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.core.model.ISpringProject;
 
 /**
  * This {@link ILabelProvider} knows about Spring projects.
@@ -64,8 +62,7 @@ public class SpringUILabelProvider extends LabelProvider implements
 	}
 
 	protected Image getBaseImage(Object element) {
-		IProject project = SpringCoreUtils.getAdapter(element, IProject.class);
-		if (project != null && SpringCoreUtils.isSpringProject(project)) {
+		if (element instanceof ISpringProject) {
 			return SpringUIImages.getImage(SpringUIImages.IMG_OBJS_PROJECT);
 		}
 		return wbLabelProvider.getImage(element);
@@ -85,9 +82,9 @@ public class SpringUILabelProvider extends LabelProvider implements
 
 	protected int getSeverity(Object element) {
 		int severity = 0;
-		if (element instanceof IResource) {
+		if (element instanceof ISpringProject) {
 			severity = MarkerUtils.getHighestSeverityFromMarkersInRange(
-					(IResource) element, -1, -1);
+					((ISpringProject) element).getProject(), -1, -1);
 		}
 		return severity;
 	}
@@ -102,6 +99,9 @@ public class SpringUILabelProvider extends LabelProvider implements
 	}
 
 	protected String getBaseText(Object element) {
+		if (element instanceof ISpringProject) {
+			return ((ISpringProject) element).getElementName();
+		}
 		return wbLabelProvider.getText(element);
 	}
 

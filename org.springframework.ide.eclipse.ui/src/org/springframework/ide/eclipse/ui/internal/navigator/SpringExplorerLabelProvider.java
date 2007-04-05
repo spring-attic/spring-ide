@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.ui.internal.navigator;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonLabelProvider;
+import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.ui.SpringUILabelProvider;
 
 /**
@@ -30,8 +30,8 @@ public class SpringExplorerLabelProvider extends SpringUILabelProvider
 	}
 
 	public String getDescription(Object element) {
-		if (element instanceof IProject) {
-			return ((IProject) element).getName();
+		if (element instanceof ISpringProject) {
+			return ((ISpringProject) element).getElementName();
 		}
 		return null;
 	}

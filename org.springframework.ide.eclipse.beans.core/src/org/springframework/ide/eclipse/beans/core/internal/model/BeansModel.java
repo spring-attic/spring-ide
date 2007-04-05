@@ -99,7 +99,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		// Load all projects
 		synchronized (projects) {
 			projects.clear();
-			for (IProject project : getSpringProjects()) {
+			for (IProject project : SpringCoreUtils.getSpringProjects()) {
 				projects.put(project, new BeansProject(this, project));
 			}
 		}
@@ -246,20 +246,6 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			}
 		}
 		return text.toString();
-	}
-
-	/**
-	 * Returns a list of all projects with the Spring project nature.
-	 */
-	private static Set<IProject> getSpringProjects() {
-		Set<IProject> springProjects = new LinkedHashSet<IProject>();
-		for (IProject project : ResourcesPlugin.getWorkspace().getRoot()
-				.getProjects()) {
-			if (SpringCoreUtils.isSpringProject(project)) {
-				springProjects.add(project);
-			}
-		}
-		return springProjects;
 	}
 
 	/**

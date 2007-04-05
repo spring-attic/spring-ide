@@ -50,7 +50,7 @@ public class WebflowNavigatorLabelProvider extends BeansNavigatorLabelProvider {
 			IWebflowConfig config = (IWebflowConfig) element;
 			if (config.getName() != null
 					&& WebflowNavigatorContentProvider
-							.BEANS_EXPLORER_CONTENT_PROVIDER_ID
+							.SPRING_EXPLORER_CONTENT_PROVIDER_ID
 									.equals(getProviderID())
 					|| WebflowNavigatorContentProvider
 							.PROJECT_EXPLORER_CONTENT_PROVIDER_ID

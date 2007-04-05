@@ -162,9 +162,9 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 			}
 		} else {
 			monitor.subTask(BeansCorePlugin.getFormattedMessage(
-					"BeansConfigValidator.validateConfigSet", new String[] {
-							ModelUtils.getResourcePath(config),
-							configSet.getElementName() }));
+					"BeansConfigValidator.validateConfigSet", ModelUtils
+							.getResourcePath(config), configSet
+							.getElementName()));
 			if (DEBUG) {
 				System.out.println("Validating config '"
 						+ ModelUtils.getResourcePath(config) + "' in set '"

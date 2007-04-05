@@ -8,14 +8,19 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.model;
-
-import org.springframework.ide.eclipse.core.model.IModelElement;
+package org.springframework.ide.eclipse.core.model;
 
 /**
- * Marker interface for the elements of the {@link IBeansModel}.
+ * Constants for {@link IModelElement} types defined by the Spring model.
  * 
  * @author Torsten Juergeleit
  */
-public interface IBeansModelElement extends IModelElement {
+public interface ISpringModelElementTypes {
+
+	/**
+	 * Constant representing a Spring project.
+	 * A model element with this type can be safely cast to
+	 * {@link ISpringProject}.
+	 */
+	int PROJECT_TYPE = 2; // starts with 2 because 1 is reserved for the model
 }
