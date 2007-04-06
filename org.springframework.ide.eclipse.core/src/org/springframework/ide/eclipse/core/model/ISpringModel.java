@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.core.model;
 
 import java.util.Set;
 
+import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.core.SpringCore;
 
 /**
@@ -28,6 +29,17 @@ import org.springframework.ide.eclipse.core.SpringCore;
 public interface ISpringModel extends IModel {
 
 	String ELEMENT_NAME = "SpringModel";
+
+	/**
+	 * Returns <code>true</code> if the given project is a Spring project.
+	 */
+	boolean hasProject(IProject project);
+
+	/**
+	 * Returns the {@link ISpringProject} for the given project or
+	 * <code>null</code> if given project is not a Spring project.
+	 */
+	ISpringProject getProject(IProject project);
 
 	/**
 	 * Returns a list of all projects defined in this model.

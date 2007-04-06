@@ -54,7 +54,10 @@ public class BeansModelLabelDecorator extends LabelProvider implements
 	public BeansModelLabelDecorator() {
 		listener = new IModelChangeListener() {
 			public void elementChanged(ModelChangeEvent event) {
-				update();
+				if (event.getElement() instanceof IBeansProject
+						&& event.getType() != ModelChangeEvent.Type.REMOVED) {
+					update();
+				}
 			}
 		};
 		BeansCorePlugin.getModel().addChangeListener(listener);

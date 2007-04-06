@@ -24,6 +24,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelContentProvider;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
@@ -39,9 +40,9 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 		implements ICommonContentProvider {
 
 	public static final String PROJECT_EXPLORER_CONTENT_PROVIDER_ID =
-			BeansUIPlugin.PLUGIN_ID + ".projectExplorerContent";
+			BeansUIPlugin.PLUGIN_ID + ".navigator.projectExplorerContent";
 	public static final String SPRING_EXPLORER_CONTENT_PROVIDER_ID =
-			BeansUIPlugin.PLUGIN_ID + ".springExplorerContent";
+			BeansUIPlugin.PLUGIN_ID + ".navigator.springExplorerContent";
 
 	private String providerID;
 
@@ -57,7 +58,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 	public boolean hasChildren(Object element) {
 		IProject project = SpringCoreUtils.getAdapter(element, IProject.class);
 		if (project != null) {
-			return SpringCoreUtils.isSpringProject((IProject) element);
+			return SpringCoreUtils.isSpringProject(project);
 		}
 		return super.hasChildren(element);
 	}
@@ -82,9 +83,12 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 		IModelElement element = event.getElement();
 
 		if (element instanceof IBeansProject) {
+			IProject project = ((IBeansProject) element).getProject();
 			if (providerID.equals(PROJECT_EXPLORER_CONTENT_PROVIDER_ID)) {
-				refreshViewerForElement(((IBeansProject) element)
-						.getElementResource());
+				refreshViewerForElement(project);
+			} else if (providerID.equals(SPRING_EXPLORER_CONTENT_PROVIDER_ID)) {
+				refreshViewerForElement(SpringCore.getModel().getProject(
+						project));
 			} else {
 				super.elementChanged(event);
 			}

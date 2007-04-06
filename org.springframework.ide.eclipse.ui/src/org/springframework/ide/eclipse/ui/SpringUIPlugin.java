@@ -39,6 +39,13 @@ public class SpringUIPlugin extends AbstractUIPlugin {
 	 */
 	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.ui";
 
+	/**
+	 * Viewer identifier of the Spring Explorer (value
+	 * <code>org.springframework.ide.eclipse.ui.navigator.springExplorer</code>).
+	 */
+	public static final String SPRING_EXPLORER_ID = PLUGIN_ID
+			+ ".navigator.springExplorer";
+
 	/** The shared instance. */
 	private static SpringUIPlugin plugin;
 

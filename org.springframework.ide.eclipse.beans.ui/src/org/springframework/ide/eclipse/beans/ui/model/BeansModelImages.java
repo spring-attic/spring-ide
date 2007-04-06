@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansTypedString;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.ui.AbstractCompositeImageDescriptor;
 
@@ -49,7 +50,8 @@ public final class BeansModelImages implements BeansModelImageFlags {
 
 	public static Image getImage(IModelElement element,
 			IModelElement context) {
-		if (element instanceof IBeansProject) {
+		if (element instanceof ISpringProject
+				|| element instanceof IBeansProject) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_PROJECT);
 		} else if (element instanceof IBeansConfig) {
 			return getDecoratedImage(BeansUIImages

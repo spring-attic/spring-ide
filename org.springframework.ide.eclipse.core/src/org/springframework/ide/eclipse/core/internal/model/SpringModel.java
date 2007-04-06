@@ -95,6 +95,14 @@ public class SpringModel extends AbstractModel implements ISpringModel {
 		projects.clear();
 	}
 
+	public boolean hasProject(IProject project) {
+		return projects.containsKey(project);
+	}
+
+	public ISpringProject getProject(IProject project) {
+		return projects.get(project);
+	}
+
 	public Set<ISpringProject> getProjects() {
 		return Collections.unmodifiableSet(new HashSet<ISpringProject>(projects
 				.values()));

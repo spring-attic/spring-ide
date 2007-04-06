@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceContentProvider;
 import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
@@ -283,7 +284,13 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 						if (ctrl == null || ctrl.isDisposed()) {
 							return;
 						}
-						viewer.refresh(element);
+
+						// If the model changed then refresh the whole viewer 
+						if (element instanceof IBeansModel) {
+							viewer.refresh();
+						} else {
+							viewer.refresh(element);
+						}
 					}
 				});
 			}

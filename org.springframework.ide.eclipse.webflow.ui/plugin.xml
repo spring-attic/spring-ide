@@ -51,12 +51,12 @@
    <extension
          point="org.eclipse.ui.navigator.navigatorContent">
       <navigatorContent
-            activeByDefault="true"
-            contentProvider="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorContentProvider"
-            icon="icons/full/obj16/spring_webflow_obj.gif"
             id="org.springframework.ide.eclipse.webflow.ui.navigator.springExplorerContent"
-            labelProvider="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorLabelProvider"
             name="%navigatorContentName"
+            contentProvider="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorContentProvider"
+            labelProvider="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorLabelProvider"
+            icon="icons/full/obj16/spring_webflow_obj.gif"
+            activeByDefault="true"
             providesSaveables="false">
 		 <triggerPoints>
 			<or>
@@ -71,6 +71,7 @@
 				<instanceof value="org.eclipse.core.resources.IFile"/>
                 <instanceof value="org.eclipse.core.resources.IStorage"/>
 				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement"/>
 			</or>
 		 </triggerPoints>
          <possibleChildren>
@@ -78,6 +79,7 @@
 				<instanceof value="org.eclipse.core.resources.IFile"/>
                 <instanceof value="org.eclipse.core.resources.IStorage"/>
 				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement"/>
 			</or>
          </possibleChildren>
          <commonSorter
@@ -104,18 +106,19 @@
    <extension
          point="org.eclipse.ui.navigator.navigatorContent">
       <navigatorContent
-            activeByDefault="true"
-            contentProvider="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorContentProvider"
-            icon="icons/full/obj16/spring_webflow_obj.gif"
             id="org.springframework.ide.eclipse.webflow.ui.navigator.projectExplorerContent"
-            labelProvider="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorLabelProvider"
             name="%navigatorContentName"
+            contentProvider="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorContentProvider"
+            labelProvider="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorLabelProvider"
+            icon="icons/full/obj16/spring_webflow_obj.gif"
+            activeByDefault="true"
             providesSaveables="false">
 		 <triggerPoints>
 			<or>
 				<instanceof value="org.eclipse.core.resources.IFile"/>
                 <instanceof value="org.eclipse.core.resources.IStorage"/>
 				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement"/>
 			</or>
 		 </triggerPoints>
          <possibleChildren>
@@ -123,6 +126,7 @@
 				<instanceof value="org.eclipse.core.resources.IFile"/>
                 <instanceof value="org.eclipse.core.resources.IStorage"/>
 				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement"/>
 			</or>
          </possibleChildren>
          <commonSorter

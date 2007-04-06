@@ -25,6 +25,7 @@ import org.eclipse.ui.navigator.ICommonContentProvider;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.webflow.core.Activator;
@@ -39,6 +40,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
  * about the web flow core model's {@link IWebflowConfig}.
  * 
  * @author Christian Dupuis
+ * @author Torsten Juergeleit
  * @since 2.0
  */
 public class WebflowNavigatorContentProvider implements ICommonContentProvider,
@@ -47,14 +49,15 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 	public static final String PROJECT_EXPLORER_CONTENT_PROVIDER_ID =
 			org.springframework.ide.eclipse.webflow.ui.Activator.PLUGIN_ID
 					+ ".navigator.projectExplorerContent";
-
 	public static final String SPRING_EXPLORER_CONTENT_PROVIDER_ID =
 			org.springframework.ide.eclipse.webflow.ui.Activator.PLUGIN_ID
 					+ ".navigator.springExplorerContent";
 
+	private String providerID;
 	private StructuredViewer viewer;
 
 	public void init(ICommonContentExtensionSite config) {
+		providerID = config.getExtension().getId();
 		Activator.getModel().registerModelChangeListener(this);
 	}
 
@@ -136,7 +139,12 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 
 	public void modelChanged(IWebflowProject project) {
 		IProject p = project.getProject();
-		refreshViewerForElement(BeansCorePlugin.getModel().getProject(p));
+		if (providerID.equals(PROJECT_EXPLORER_CONTENT_PROVIDER_ID)) {
+			refreshViewerForElement(BeansCorePlugin.getModel().getProject(p));
+		}
+		else if (providerID.equals(SPRING_EXPLORER_CONTENT_PROVIDER_ID)) {
+			refreshViewerForElement(SpringCore.getModel().getProject(p));
+		}
 	}
 
 	public final void inputChanged(Viewer viewer, Object oldInput,
@@ -182,5 +190,10 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 				});
 			}
 		}
+	}
+
+	@Override
+	public String toString() {
+		return String.valueOf(providerID);
 	}
 }
