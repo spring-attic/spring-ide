@@ -333,16 +333,19 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 					try {
 						model = StructuredModelManager.getModelManager()
 								.getModelForRead(currentFile);
-						IDOMDocument document = ((DOMModelImpl) model)
-								.getDocument();
+						if (model != null) {
+							IDOMDocument document = ((DOMModelImpl) model)
+									.getDocument();
 
-						// move beyond reading the structured model to avoid
-						// class loading problems
-						Thread.currentThread().setContextClassLoader(
-								weavingClassLoader);
+							// move beyond reading the structured model to avoid
+							// class loading problems
+							Thread.currentThread().setContextClassLoader(
+									weavingClassLoader);
 
-						aspectInfos = AspectDefinitionBuilder
-								.buildAspectDefinitions(document, currentFile);
+							aspectInfos = AspectDefinitionBuilder
+									.buildAspectDefinitions(document,
+											currentFile);
+						}
 					}
 					finally {
 						if (model != null) {
@@ -350,14 +353,17 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 						}
 					}
 
-					for (IAspectDefinition info : aspectInfos) {
+					if (aspectInfos != null) {
+						for (IAspectDefinition info : aspectInfos) {
 
-						// build model for config
-						buildAopReferencesFromAspectDefinition(config, info);
+							// build model for config
+							buildAopReferencesFromAspectDefinition(config,
+									info);
 
-						// build model for config sets
-						buildAopReferencesFromBeansConfigSets(project, config,
-								info);
+							// build model for config sets
+							buildAopReferencesFromBeansConfigSets(project,
+									config, info);
+						}
 					}
 				}
 				catch (IOException e) {
