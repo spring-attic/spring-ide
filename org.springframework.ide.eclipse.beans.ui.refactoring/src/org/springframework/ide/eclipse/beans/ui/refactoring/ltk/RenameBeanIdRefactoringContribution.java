@@ -15,6 +15,10 @@ import java.util.Map;
 import org.eclipse.ltk.core.refactoring.RefactoringContribution;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 public class RenameBeanIdRefactoringContribution extends
 		RefactoringContribution {
 

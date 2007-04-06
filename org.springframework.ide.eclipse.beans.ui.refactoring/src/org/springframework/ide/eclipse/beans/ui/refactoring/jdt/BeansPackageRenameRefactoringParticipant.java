@@ -19,6 +19,10 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 public class BeansPackageRenameRefactoringParticipant extends
 		BeansTypeRenameRefactoringParticipant {
 

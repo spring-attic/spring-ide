@@ -25,6 +25,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 public class RenameBeanIdRefactoringInputPage extends UserInputWizardPage {
 
 	private Text nameField;

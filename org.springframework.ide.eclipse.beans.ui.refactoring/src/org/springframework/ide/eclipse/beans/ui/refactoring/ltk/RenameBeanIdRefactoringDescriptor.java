@@ -17,10 +17,16 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.springframework.ide.eclipse.beans.ui.refactoring.Activator;
 
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 public class RenameBeanIdRefactoringDescriptor extends RefactoringDescriptor {
 
-	public static final String REFACTORING_ID = "org.springframework.ide.eclipse.beans.ui.refactoring.ltk.renameBeanIdRefactoring";
+	public static final String REFACTORING_ID = Activator.PLUGIN_ID
+			+ ".ltk.renameBeanIdRefactoring";
 
 	private final Map<String, String> arguments;
 

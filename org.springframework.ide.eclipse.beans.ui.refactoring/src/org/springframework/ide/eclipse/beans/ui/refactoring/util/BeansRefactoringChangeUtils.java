@@ -36,6 +36,10 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 @SuppressWarnings("restriction")
 public class BeansRefactoringChangeUtils {
 

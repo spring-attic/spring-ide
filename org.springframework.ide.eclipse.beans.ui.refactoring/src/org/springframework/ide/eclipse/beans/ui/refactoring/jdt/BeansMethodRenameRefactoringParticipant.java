@@ -25,6 +25,10 @@ import org.springframework.ide.eclipse.beans.ui.refactoring.util.BeansRefactorin
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.util.StringUtils;
 
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 public class BeansMethodRenameRefactoringParticipant extends
 		AbstractRenameRefactoringParticipant {
 

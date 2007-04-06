@@ -25,6 +25,10 @@ import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.springframework.ide.eclipse.beans.ui.refactoring.util.BeansRefactoringChangeUtils;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 public class BeansTypeMoveRefactoringParticipant extends
 		AbstractMoveRefactoringParticipant {
 

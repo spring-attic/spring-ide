@@ -12,6 +12,10 @@ package org.springframework.ide.eclipse.beans.ui.refactoring.ltk;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 public class RenameBeanIdRefactoringWizard extends RefactoringWizard {
 
 	public RenameBeanIdRefactoringWizard(RenameBeanIdRefactoring refactoring,
