@@ -33,15 +33,15 @@ import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinitionFact
  * Incremental project builder which implements the Strategy GOF pattern. For
  * every modified file within a Spring project all implementations of the
  * interface
- * <code>org.springframework.ide.eclipse.core.project.IProjectBuilder</code>
- * provided via the extension point
+ * {@link org.springframework.ide.eclipse.core.project.IProjectBuilder} provided
+ * via the extension point
  * <code>org.springframework.ide.eclipse.core.builders</code> are called.
+ * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
 public class SpringProjectBuilder extends IncrementalProjectBuilder {
 
-	@Override
 	protected final IProject[] build(int kind, Map args,
 			IProgressMonitor monitor) throws CoreException {
 		IProject project = getProject();
