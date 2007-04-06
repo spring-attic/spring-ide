@@ -22,8 +22,8 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.CommonNavigator;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonContentProvider;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -140,7 +140,8 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 	public void modelChanged(IWebflowProject project) {
 		IProject p = project.getProject();
 		if (providerID.equals(PROJECT_EXPLORER_CONTENT_PROVIDER_ID)) {
-			refreshViewerForElement(BeansCorePlugin.getModel().getProject(p));
+			refreshViewerForElement(p);
+			refreshViewerForElement(BeansModelUtils.getJavaProject(p));
 		}
 		else if (providerID.equals(SPRING_EXPLORER_CONTENT_PROVIDER_ID)) {
 			refreshViewerForElement(SpringCore.getModel().getProject(p));

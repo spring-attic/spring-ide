@@ -678,6 +678,26 @@ public final class BeansModelUtils {
 		element.accept(visitor, new NullProgressMonitor());
 		return innerBeans;
 	}
+	/**
+	 * Returns the corresponding Java project or <code>null</code> a for given project.
+	 * 
+	 * @param project  the project the Java project is requested for
+	 * @return the requested Java project or <code>null</code> if the Java project is not defined or
+	 * the project is not accessible
+	 */
+	public static IJavaProject getJavaProject(IProject project) {
+		if (project.isAccessible()) {
+			try {
+				if (project.hasNature(JavaCore.NATURE_ID)) {
+					return (IJavaProject) project.getNature(JavaCore.NATURE_ID);
+				}
+			} catch (CoreException e) {
+				BeansCorePlugin.log("Error getting Java project for project '"
+						+ project.getName() + "'", e);
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * Returns the corresponding Java type for given full-qualified class name.
@@ -688,7 +708,8 @@ public final class BeansModelUtils {
 	 * the project is not accessible
 	 */
 	public static IType getJavaType(IProject project, String className) {
-		if (className != null && project.isAccessible()) {
+		IJavaProject javaProject = getJavaProject(project);
+		if (javaProject != null && className != null) {
 
 			// For inner classes replace '$' by '.'
 			int pos = className.lastIndexOf('$');
@@ -697,23 +718,17 @@ public final class BeansModelUtils {
 						+ className.substring(pos + 1);
 			}
 			try {
-				// Find type in this project
-				if (project.hasNature(JavaCore.NATURE_ID)) {
-					IJavaProject javaProject = (IJavaProject) project
-							.getNature(JavaCore.NATURE_ID);
-					IType type = javaProject.findType(className);
-					if (type != null) {
-						return type;
-					}
+				// First look for the type in the Java project
+				IType type = javaProject.findType(className);
+				if (type != null) {
+					return type;
 				}
 
-				// Find type in referenced Java projects
+				// Then look for the type in the referenced Java projects
 				for (IProject refProject : project.getReferencedProjects()) {
-					if (refProject.isAccessible()
-							&& refProject.hasNature(JavaCore.NATURE_ID)) {
-						IJavaProject javaProject = (IJavaProject) refProject
-								.getNature(JavaCore.NATURE_ID);
-						IType type = javaProject.findType(className);
+					IJavaProject refJavaProject = getJavaProject(refProject);
+					if (refJavaProject != null) {
+						type = refJavaProject.findType(className);
 						if (type != null) {
 							return type;
 						}
