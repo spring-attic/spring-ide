@@ -114,9 +114,12 @@ public class SpringProjectBuilder extends IncrementalProjectBuilder {
 				.getProjectBuilderDefinitions()) {
 			ISafeRunnable code = new ISafeRunnable() {
 				public void run() throws Exception {
+					
 					SubProgressMonitor subMonitor = new SubProgressMonitor(
 							monitor, 1);
-					builderHolder.getProjectBuilder().cleanup(file, monitor);
+					builderHolder.getProjectBuilder().cleanup(file, subMonitor);
+
+					subMonitor = new SubProgressMonitor(monitor, 1);
 					if (builderHolder.isEnabled(file.getProject())) {
 						builderHolder.getProjectBuilder().build(file,
 								subMonitor);

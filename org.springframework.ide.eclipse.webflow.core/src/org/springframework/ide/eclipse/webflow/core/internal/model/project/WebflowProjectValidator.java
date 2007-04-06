@@ -37,6 +37,8 @@ public class WebflowProjectValidator implements IProjectBuilder {
 	}
 
 	protected void validate(IFile file, IProgressMonitor monitor) {
+		monitor.subTask("Validating Spring Web Flow file ["
+				+ file.getFullPath().toString() + "]");
 		IWorkspaceRunnable validator = new WebflowValidator(file);
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		ISchedulingRule rule = workspace.getRuleFactory().markerRule(file);
@@ -46,10 +48,19 @@ public class WebflowProjectValidator implements IProjectBuilder {
 		catch (CoreException e) {
 			Activator.log(e);
 		}
+		finally {
+			monitor.done();
+		}
 	}
 
 	public void cleanup(IResource resource, IProgressMonitor monitor) {
-		WebflowModelUtils.deleteProblemMarkers(resource);
+		try {
+			monitor.subTask("Deleting Spring Web Flow problem marker");
+			WebflowModelUtils.deleteProblemMarkers(resource);
+		}
+		finally {
+			monitor.done();
+		}
 	}
 
 }

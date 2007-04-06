@@ -41,22 +41,33 @@ public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 	 */
 	public void build(IFile file, IProgressMonitor monitor) {
 		Set<IFile> filesToBuild = AopReferenceModelUtils.getFilesToBuild(file);
-		monitor.beginTask("Building Spring AOP reference model", filesToBuild.size());
-		IWorkspaceRunnable validator = new AopReferenceModelBuilder(filesToBuild);
-		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		ISchedulingRule rule = workspace.getRuleFactory().markerRule(workspace.getRoot());
-		try {
-			workspace.run(validator, rule, IWorkspace.AVOID_UPDATE, monitor);
+		if (filesToBuild != null && filesToBuild.size() > 0) {
+			monitor.subTask("Building Spring AOP reference model");
+			IWorkspaceRunnable validator = new AopReferenceModelBuilder(
+					filesToBuild);
+			IWorkspace workspace = ResourcesPlugin.getWorkspace();
+			ISchedulingRule rule = workspace.getRuleFactory().markerRule(
+					workspace.getRoot());
+			try {
+				workspace
+						.run(validator, rule, IWorkspace.AVOID_UPDATE, monitor);
+			}
+			catch (CoreException e) {
+				Activator.log(e);
+			}
+			finally {
+				monitor.done();
+			}
 		}
-		catch (CoreException e) {
-			Activator.log(e);
-		}
-		monitor.done();
 	}
 
 	public void cleanup(IResource resource, IProgressMonitor monitor) {
-		monitor.beginTask("Deleting Spring AOP reference model marker", 100);
-		AopReferenceModelMarkerUtils.deleteProblemMarkers(resource);
-		monitor.done();
+		try {
+			monitor.subTask("Deleting Spring AOP reference model marker");
+			AopReferenceModelMarkerUtils.deleteProblemMarkers(resource);
+		}
+		finally {
+			monitor.done();
+		}
 	}
 }
