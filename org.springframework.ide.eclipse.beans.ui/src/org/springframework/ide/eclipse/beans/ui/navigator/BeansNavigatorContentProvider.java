@@ -71,7 +71,12 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 			IBeansProject beansProject = BeansCorePlugin.getModel().getProject(
 					project);
 			if (beansProject != null) {
-				return getProjectChildren(beansProject, false);
+				if (providerID.equals(PROJECT_EXPLORER_CONTENT_PROVIDER_ID)) {
+					return getProjectChildren(beansProject, true);
+				}
+				if (providerID.equals(SPRING_EXPLORER_CONTENT_PROVIDER_ID)) {
+					return getProjectChildren(beansProject, false);
+				}
 			}
 			return IModelElement.NO_CHILDREN;
 		}
