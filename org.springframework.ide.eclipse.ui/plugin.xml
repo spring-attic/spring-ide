@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <plugin>
+   <extension-point id="projectExplorer"
+         name="Project Explorer Filters"
+         schema="schema/projectExplorer.exsd"/>
 
    <extension
          point="org.eclipse.ui.ide.projectNatureImages">
@@ -110,6 +113,16 @@
 
    <extension
          point="org.eclipse.ui.navigator.viewer">
+      <viewer viewerId="org.eclipse.ui.navigator.ProjectExplorer"/>
+      <viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+         <includes>
+            <contentExtension pattern="org.springframework.ide.eclipse.ui.navigator.filters.*"/>
+         </includes>
+      </viewerContentBinding>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.navigator.viewer">
       <viewer viewerId="org.springframework.ide.eclipse.ui.navigator.springExplorer"/>
       <viewerContentBinding viewerId="org.springframework.ide.eclipse.ui.navigator.springExplorer">
          <includes>
@@ -134,9 +147,7 @@
             labelProvider="org.springframework.ide.eclipse.ui.internal.navigator.SpringExplorerLabelProvider"
             icon="icons/full/obj16/project_obj.gif"
             activeByDefault="true">
-         <triggerPoints>
-			<instanceof value="org.eclipse.core.resources.IWorkspaceRoot"/>
-         </triggerPoints>
+         <triggerPoints/>
          <possibleChildren>
 			<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
          </possibleChildren>
@@ -151,6 +162,12 @@
 			</adapt>
          </enablement>
       </actionProvider>
+      <commonFilter
+            id="org.springframework.ide.eclipse.ui.navigator.filters.hideNonSpringArtefacts"
+            name="%navigatorfilterHideNonSpringArtefactsName"
+            description="%navigatorfilterHideNonSpringArtefactsDescription"
+            class="org.springframework.ide.eclipse.ui.navigator.filters.NonSpringArtefactsFilter"
+            activeByDefault="false"/>
    </extension>
 
 </plugin>

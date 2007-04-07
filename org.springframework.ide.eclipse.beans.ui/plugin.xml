@@ -299,4 +299,9 @@
        </linkHelper>
    </extension>
 
+   <extension
+         point="org.springframework.ide.eclipse.ui.projectExplorer">
+      <filter class="org.springframework.ide.eclipse.beans.ui.navigator.filters.NonSpringArtefactsFilter"/>
+   </extension>
+
 </plugin>

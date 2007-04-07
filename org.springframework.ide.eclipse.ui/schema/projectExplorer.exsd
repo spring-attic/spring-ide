@@ -1,0 +1,122 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Schema file written by PDE -->
+<schema targetNamespace="org.springframework.ide.eclipse.ui">
+<annotation>
+      <appInfo>
+         <meta.schema plugin="org.springframework.ide.eclipse.ui" id="projectExplorer" name="Project Explorer Filters"/>
+      </appInfo>
+      <documentation>
+         &lt;p&gt;
+This extension-point is used to specify one or more filters which identify non-Spring artefacts within a Spring project. These filters are added to the list of filters used by the project explorer filter &quot;Non-Spring Artefacts&quot;.
+      </documentation>
+   </annotation>
+
+   <element name="extension">
+      <complexType>
+         <sequence>
+            <element ref="filter" minOccurs="0" maxOccurs="unbounded"/>
+         </sequence>
+         <attribute name="point" type="string" use="required">
+            <annotation>
+               <documentation>
+                  the full-qualified name of the extension point (that is &lt;samp&gt;org.springframework.ide.eclipse.ui.projectExplorer&lt;/samp&gt;)
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="id" type="string">
+            <annotation>
+               <documentation>
+                  an optional id
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string">
+            <annotation>
+               <documentation>
+                  an optional name
+               </documentation>
+               <appInfo>
+                  <meta.attribute translatable="true"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="filter">
+      <complexType>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  the full-qualified name of a class which extends 
+&lt;samp&gt;org.eclipse.jface.viewers.ViewerFilter&lt;/samp&gt;
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn="org.eclipse.jface.viewers.ViewerFilter"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="since"/>
+      </appInfo>
+      <documentation>
+         2.0
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="examples"/>
+      </appInfo>
+      <documentation>
+         &lt;pre&gt;
+&lt;extension point=&quot;org.springframework.ide.eclipse.ui.projectExplorer&quot;&gt;
+      &lt;filter class=&quot;org.springframework.ide.eclipse.beans.ui.navigator.filters.NonSpringArtefactsFilter&quot;/&gt;
+&lt;/extension&gt;
+&lt;/pre&gt;
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="apiInfo"/>
+      </appInfo>
+      <documentation>
+         &lt;p&gt;
+Each builder must supply a public, no-argument constructor and extend from the class &lt;samp&gt;org.eclipse.jface.viewers.ViewerFilter&lt;/samp&gt;.
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="implementation"/>
+      </appInfo>
+      <documentation>
+         &lt;p&gt;
+This plugin itself does not have any predefined filters.
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="copyright"/>
+      </appInfo>
+      <documentation>
+         &lt;pre&gt;
+Copyright (c) 2005, 2007 Spring IDE Developers
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/epl-v10.html
+ 
+Contributors:
+    Spring IDE Developers - initial API and implementation
+&lt;/pre&gt;
+      </documentation>
+   </annotation>
+
+</schema>
