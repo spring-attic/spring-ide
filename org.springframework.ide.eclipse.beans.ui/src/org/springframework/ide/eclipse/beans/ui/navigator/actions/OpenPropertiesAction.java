@@ -12,8 +12,7 @@ package org.springframework.ide.eclipse.beans.ui.navigator.actions;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
@@ -23,6 +22,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.ui.navigator.actions.AbstractNavigatorAction;
 
 /**
  * Opens the project's property page for currently selected
@@ -30,21 +30,18 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  * 
  * @author Torsten Juergeleit
  */
-public class OpenPropertiesAction extends Action {
+public class OpenPropertiesAction extends AbstractNavigatorAction {
 
-	private ICommonActionExtensionSite site;
 	private IProject project;
 	private int block = 0;
 
 	public OpenPropertiesAction(ICommonActionExtensionSite site) {
-		this.site = site;
+		super(site);
 		setText("&Properties");	// TODO externalize text
     }
 
 	@Override
-	public boolean isEnabled() {
-		ISelection selection = site.getViewSite().getSelectionProvider()
-				.getSelection();
+	public boolean isEnabled(IStructuredSelection selection) {
 		if (selection instanceof ITreeSelection) {
 			ITreeSelection tSelection = (ITreeSelection) selection;
 			if (tSelection.size() == 1) {

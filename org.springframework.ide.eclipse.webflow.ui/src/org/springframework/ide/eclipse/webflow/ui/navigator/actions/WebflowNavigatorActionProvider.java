@@ -25,11 +25,8 @@ import org.eclipse.ui.navigator.ICommonMenuConstants;
 public class WebflowNavigatorActionProvider extends CommonActionProvider {
 
 	private OpenConfigFileAction openConfigAction;
-
 	private OpenPropertiesAction openPropertiesAction;
-
 	private OpenWebflowGraphAction openGraphAction;
-
 	private OpenActionWrapperAction openActionWrapperAction;
 
 	public WebflowNavigatorActionProvider() {
@@ -51,9 +48,8 @@ public class WebflowNavigatorActionProvider extends CommonActionProvider {
 					openConfigAction);
 		}
 		if (openGraphAction.isEnabled()) {
-			menu
-					.appendToGroup(ICommonMenuConstants.GROUP_OPEN,
-							openGraphAction);
+			menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN,
+					openGraphAction);
 		}
 		if (openPropertiesAction.isEnabled()) {
 			menu.appendToGroup(ICommonMenuConstants.GROUP_PROPERTIES,

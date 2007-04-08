@@ -18,6 +18,7 @@ import org.eclipse.ui.navigator.ICommonActionConstants;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.eclipse.ui.navigator.ICommonMenuConstants;
 import org.springframework.ide.eclipse.beans.ui.navigator.actions.OpenConfigFileAction;
+import org.springframework.ide.eclipse.beans.ui.navigator.actions.OpenJavaElementAction;
 import org.springframework.ide.eclipse.beans.ui.navigator.actions.OpenPropertiesAction;
 
 /**
@@ -26,6 +27,7 @@ import org.springframework.ide.eclipse.beans.ui.navigator.actions.OpenProperties
 public class BeansNavigatorActionProvider extends CommonActionProvider {
 
 	private OpenConfigFileAction openConfigAction;
+	private OpenJavaElementAction openElementAction;
 	private OpenPropertiesAction openPropertiesAction;
 
 	public BeansNavigatorActionProvider() {
@@ -34,6 +36,7 @@ public class BeansNavigatorActionProvider extends CommonActionProvider {
 	@Override
 	public void init(ICommonActionExtensionSite site) {
 		openConfigAction = new OpenConfigFileAction(site);
+		openElementAction = new OpenJavaElementAction(site);
 		openPropertiesAction = new OpenPropertiesAction(site);
 	}
 
@@ -42,6 +45,10 @@ public class BeansNavigatorActionProvider extends CommonActionProvider {
 		if (openConfigAction.isEnabled()) {
 			menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN,
 					openConfigAction);
+		}
+		if (openElementAction.isEnabled()) {
+			menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN,
+					openElementAction);
 		}
 		if (openPropertiesAction.isEnabled()) {
 			menu.appendToGroup(ICommonMenuConstants.GROUP_PROPERTIES,

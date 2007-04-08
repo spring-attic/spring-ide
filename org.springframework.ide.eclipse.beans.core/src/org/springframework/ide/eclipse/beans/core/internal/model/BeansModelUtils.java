@@ -25,8 +25,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -49,6 +51,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.BeansTags;
 import org.springframework.ide.eclipse.beans.core.BeansTags.Tag;
 import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker.ErrorCode;
+import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConnection.BeanType;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
@@ -678,12 +681,14 @@ public final class BeansModelUtils {
 		element.accept(visitor, new NullProgressMonitor());
 		return innerBeans;
 	}
+
 	/**
-	 * Returns the corresponding Java project or <code>null</code> a for given project.
+	 * Returns the corresponding Java project or <code>null</code> a for given
+	 * project.
 	 * 
 	 * @param project  the project the Java project is requested for
-	 * @return the requested Java project or <code>null</code> if the Java project is not defined or
-	 * the project is not accessible
+	 * @return the requested Java project or <code>null</code> if the Java
+	 *         project is not defined or the project is not accessible
 	 */
 	public static IJavaProject getJavaProject(IProject project) {
 		if (project.isAccessible()) {
@@ -783,18 +788,40 @@ public final class BeansModelUtils {
 	 * 
 	 * @param bean the bean to lookup the bean class' Java type
 	 * @param context the context (<code>IBeanConfig</code> or
-	 * <code>IBeanConfigSet</code>) the beans are looked-up
-	 * @param context the context (<code>IBeanConfig</code> or
-	 * <code>IBeanConfigSet</code>) the beans are looked-up; if
-	 * <code>null</code> then the bean's config is used
+	 * 			<code>IBeanConfigSet</code>) the beans are looked-up; if
+	 *			<code>null</code> then the bean's config is used
 	 * @return the Java type of given bean's class or <code>null</code> if no
-	 * bean class defined or type not found
+	 * 			bean class defined or type not found
 	 */
 	public static IType getBeanType(IBean bean, IModelElement context) {
 		Assert.notNull(bean);
 		String className = getBeanClass(bean, context);
 		if (className != null) {
 			return getJavaType(getProject(bean).getProject(), className);
+		}
+		return null;
+	}
+	/**
+	 * Returns the corresponding Java set method for given bean property.
+	 * 
+	 * @param property the property to lookup the Java method for
+	 * @param context the context (<code>IBeanConfig</code> or
+	 * 			<code>IBeanConfigSet</code>) the beans are looked-up; if
+	 * 			<code>null</code> then the bean's config is used
+	 * @return the Java method of given bean property or <code>null</code> if no
+	 * 			bean class defined or set method not found
+	 */
+	public static IMethod getPropertyMethod(IBeanProperty property,
+			IModelElement context) {
+		Assert.notNull(property);
+		IType type = getBeanType((IBean) property.getElementParent(), context);
+		if (type != null) {
+			try {
+				return Introspector.getWritableProperty(type, property
+						.getElementName());
+			} catch (JavaModelException e) {
+				BeansCorePlugin.log(e);
+			}
 		}
 		return null;
 	}

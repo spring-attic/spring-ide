@@ -139,7 +139,7 @@
       </viewerContentBinding>
       <viewerActionBinding viewerId="org.springframework.ide.eclipse.ui.navigator.springExplorer">
          <includes>
-            <actionExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.actions"/>
+            <actionExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.springExplorerActions"/>
          </includes>
       </viewerActionBinding>
    </extension>
@@ -156,7 +156,7 @@
       </viewerContentBinding>
       <viewerActionBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
          <includes>
-            <actionExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.actions"/>
+            <actionExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.projectExplorerActions"/>
          </includes>
       </viewerActionBinding>
    </extension>
@@ -195,6 +195,20 @@
          <commonSorter
                id="org.springframework.ide.eclipse.beans.ui.navigator.springExplorerSorter"
                class="org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorSorter"/>
+         <actionProvider
+             id="org.springframework.ide.eclipse.beans.ui.navigator.springExplorerActions"
+             class="org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorActionProvider">
+	         <enablement>
+				<or>
+					<and>
+						<instanceof value="org.eclipse.core.resources.IFile"/>
+						<test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
+					</and>
+					<instanceof value="org.springframework.ide.eclipse.core.io.ZipEntryStorage"/>
+	            	<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+	            </or>
+	         </enablement>
+         </actionProvider>
       </navigatorContent>
 
       <navigatorContent
@@ -229,28 +243,20 @@
          <commonSorter
                id="org.springframework.ide.eclipse.beans.ui.navigator.sorter.projectExplorerSorter"
                class="org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorSorter"/>
-		<override
-				policy="InvokeAlwaysRegardlessOfSuppressedExt"
-				suppressedExtensionId="org.eclipse.jdt.java.ui.javaContent"/>			
-		<override
-				policy="InvokeAlwaysRegardlessOfSuppressedExt"
-				suppressedExtensionId="org.eclipse.ui.navigator.navigatorContent"/>			
+         <actionProvider
+             id="org.springframework.ide.eclipse.beans.ui.navigator.projectExplorerActions"
+             class="org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorActionProvider">
+	         <enablement>
+				<or>
+					<and>
+						<instanceof value="org.eclipse.core.resources.IFile"/>
+						<test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
+					</and>
+	            	<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+	            </or>
+	         </enablement>
+         </actionProvider>
       </navigatorContent>
-
-      <actionProvider
-            id="org.springframework.ide.eclipse.beans.ui.navigator.actions"
-            class="org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorActionProvider">
-         <enablement>
-			<or>
-				<and>
-					<instanceof value="org.eclipse.core.resources.IFile"/>
-					<test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
-				</and>
-				<instanceof value="org.springframework.ide.eclipse.core.io.ZipEntryStorage"/>
-            	<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
-            </or>
-         </enablement>
-      </actionProvider>
 
       <commonFilter
             id="org.springframework.ide.eclipse.beans.ui.navigator.filters.hideNonSpringProjects"

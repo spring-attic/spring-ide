@@ -62,6 +62,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
  * This is a collection of UI-related helper methods.
+ * 
  * @author Torsten Juergeleit
  */
 public final class SpringUIUtils {
@@ -321,9 +322,13 @@ public final class SpringUIUtils {
 		return null;
 	}
 
-	public static IEditorPart openInEditor(IJavaElement type) {
+	public static IEditorPart openInEditor(IJavaElement element) {
 		try {
-			return JavaUI.openInEditor(type);
+			IEditorPart editor = JavaUI.openInEditor(element);
+			if (editor != null) {
+				JavaUI.revealInEditor(editor, element);
+			}
+			return editor;
 		} catch (PartInitException e) {
 			openError(SpringUIMessages.OpenInEditor_errorMessage, e
 					.getMessage(), e);

@@ -24,6 +24,7 @@ import org.springframework.ide.eclipse.core.StringUtils;
 
 /**
  * Helper methods for examining a Java {@link IType}.
+ * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @author Pierre-Antoine Grégoire
@@ -246,13 +247,6 @@ public final class Introspector {
 		return (findMethod(type, "set" + base, 1, true, Statics.NO) != null);
 	}
 
-	/**
-	 * Returns true if the given type has a public setter (one-argument method
-	 * named "set" + property name with an uppercase first character) for the
-	 * specified property.
-	 * @param type the Java type object on which to retrieve the method
-	 * @param propertyName the name of the property
-	 */
 	public static IMethod getWritableProperty(IType type, String propertyName)
 			throws JavaModelException {
 		String base = StringUtils.capitalize(propertyName);

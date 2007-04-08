@@ -11,12 +11,11 @@
 package org.springframework.ide.eclipse.webflow.ui.navigator.actions;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ITreeSelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springframework.ide.eclipse.ui.navigator.actions.AbstractNavigatorAction;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
@@ -24,41 +23,34 @@ import org.springframework.ide.eclipse.webflow.ui.graph.WebflowEditor;
 import org.springframework.ide.eclipse.webflow.ui.graph.WebflowEditorInput;
 
 /**
- * Shows the WebflowEditor for the currently selected {@link IWebflowConfig}
+ * Opens the WebflowEditor for the currently selected {@link IWebflowConfig}.
  * 
  * @author Christian Dupuis
+ * @author Torsten Juergeleit
  * @since 2.0
  */
-public class OpenWebflowGraphAction extends Action {
-
-	private ICommonActionExtensionSite site;
+public class OpenWebflowGraphAction extends AbstractNavigatorAction {
 
 	private IWebflowConfig element;
 
 	public OpenWebflowGraphAction(ICommonActionExtensionSite site) {
-		this.site = site;
+		super(site);
 		setText("Open &Graphical Editor"); // TODO externalize text
-		setImageDescriptor(WebflowUIImages.DESC_OBJS_WEBFLOW)
-	;}
+		setImageDescriptor(WebflowUIImages.DESC_OBJS_WEBFLOW);
+	}
 
-	@Override
-	public boolean isEnabled() {
-		ISelection selection = site.getViewSite().getSelectionProvider()
-				.getSelection();
-		if (selection instanceof ITreeSelection) {
-			ITreeSelection tSelection = (ITreeSelection) selection;
-			if (tSelection.size() == 1) {
-				Object tElement = tSelection.getFirstElement();
-				if (tElement instanceof IWebflowConfig) {
-					element = (IWebflowConfig) tElement;
+	public boolean isEnabled(IStructuredSelection selection) {
+		if (selection.size() == 1) {
+			Object sElement = selection.getFirstElement();
+			if (sElement instanceof IWebflowConfig) {
+				element = (IWebflowConfig) sElement;
+				return true;
+			}
+			else if (sElement instanceof IFile) {
+				if (WebflowModelUtils.isWebflowConfig((IFile) sElement)) {
+					element = WebflowModelUtils
+							.getWebflowConfig((IFile) sElement);
 					return true;
-				}
-				else if (tElement instanceof IFile) {
-					if (WebflowModelUtils.isWebflowConfig((IFile) tElement)) {
-						element = WebflowModelUtils
-								.getWebflowConfig((IFile) tElement);
-						return true;
-					}
 				}
 			}
 		}
