@@ -34,14 +34,14 @@ import org.springframework.ide.eclipse.ui.SpringUIPlugin;
  */
 public class NonSpringArtefactsFilter extends ViewerFilter {
 
-	public static final String NAVIGATOR_CONTENT_EXTENSION_POINT =
-			SpringUIPlugin.PLUGIN_ID + ".navigatorContent";
+	public static final String PROJECT_EXPLORER_EXTENSION_POINT =
+			SpringUIPlugin.PLUGIN_ID + ".projectExplorer";
 
 	private List<ViewerFilter> filters = new ArrayList<ViewerFilter>();
 	
 	public NonSpringArtefactsFilter() {
 		IExtensionPoint point = Platform.getExtensionRegistry()
-				.getExtensionPoint(NAVIGATOR_CONTENT_EXTENSION_POINT);
+				.getExtensionPoint(PROJECT_EXPLORER_EXTENSION_POINT);
 		if (point != null) {
 			for (IExtension extension : point.getExtensions()) {
 				for (IConfigurationElement config : extension

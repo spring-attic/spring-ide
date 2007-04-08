@@ -103,8 +103,7 @@
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
-         <showInPart id="org.springframework.ide.eclipse.ui.navigator.springExplorer">
-         </showInPart>
+         <showInPart id="org.springframework.ide.eclipse.ui.navigator.springExplorer"/>
       </perspectiveExtension>
       <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
          <showInPart id="org.springframework.ide.eclipse.ui.navigator.springExplorer"/>
