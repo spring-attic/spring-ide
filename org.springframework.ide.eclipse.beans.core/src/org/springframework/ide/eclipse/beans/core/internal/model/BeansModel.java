@@ -266,7 +266,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				}
 				BeansProject proj = new BeansProject(BeansModel.this, project);
 				projects.put(project, proj);
-				notifyListeners(proj, Type.ADDED);
+				notifyListeners(proj, Type.CHANGED);
 			}
 		}
 
@@ -277,7 +277,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 							+ "project '" + project.getName() + "'");
 				}
 				IBeansProject proj = projects.remove(project);
-				notifyListeners(proj, Type.REMOVED);
+				notifyListeners(proj, Type.CHANGED);
 			}
 		}
 

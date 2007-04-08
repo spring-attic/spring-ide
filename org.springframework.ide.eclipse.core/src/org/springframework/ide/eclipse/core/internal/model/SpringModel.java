@@ -158,14 +158,14 @@ public class SpringModel extends AbstractModel implements ISpringModel {
 				ISpringProject proj = new SpringProject(SpringModel.this,
 						project);
 				projects.put(project, proj);
-				notifyListeners(proj, Type.ADDED);
+				notifyListeners(proj, Type.CHANGED);
 			}
 		}
 
 		public void springNatureRemoved(IProject project, int eventType) {
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				ISpringProject proj = projects.remove(project);
-				notifyListeners(proj, Type.REMOVED);
+				notifyListeners(proj, Type.CHANGED);
 			}
 		}
 
