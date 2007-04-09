@@ -271,8 +271,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 		IResource file = config.getElementResource();
 		IAopProject aopProject = ((AopReferenceModel) Activator.getModel())
 				.getProjectWithInitialization(AopReferenceModelUtils
-						.getJavaProject(config.getElementResource()
-								.getProject()));
+						.getJavaProject(config.getElementResource()	.getProject()));
 
 		Set<IBean> beans = config.getBeans();
 		for (IBean bean : beans) {
@@ -322,10 +321,8 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 						.getClassLoader(javaProject, false);
 
 				AopLog.log(AopLog.BUILDER_CLASSPATH, "AOP builder classpath: "
-						+ StringUtils
-								.arrayToDelimitedString(
-										((URLClassLoader) weavingClassLoader)
-												.getURLs(), ";"));
+						+ StringUtils.arrayToDelimitedString(
+								((URLClassLoader) weavingClassLoader).getURLs(), ";"));
 
 				try {
 					IStructuredModel model = null;
