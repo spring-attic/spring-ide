@@ -17,7 +17,8 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  * 
  * @author Torsten Juergeleit
  */
-public interface IBeansValueHolder extends ISourceModelElement {
+public interface IBeansValueHolder extends IBeansModelElement,
+		ISourceModelElement {
 
 	Object getValue();
 }

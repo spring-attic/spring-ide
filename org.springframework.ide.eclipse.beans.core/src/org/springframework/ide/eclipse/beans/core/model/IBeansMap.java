@@ -19,7 +19,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  * 
  * @author Torsten Juergeleit
  */
-public interface IBeansMap extends ISourceModelElement {
+public interface IBeansMap extends IBeansModelElement, ISourceModelElement {
 
 	Map<?, ?> getMap();
 }

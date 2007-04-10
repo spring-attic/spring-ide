@@ -29,7 +29,7 @@ public abstract class AbstractModel extends AbstractModelElement implements
 	}
 
 	public int getElementType() {
-		return MODEL_TYPE;
+		return IModelElementTypes.MODEL_TYPE;
 	}
 
 	public final void addChangeListener(IModelChangeListener listener) {

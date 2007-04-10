@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.model;
 
-import org.springframework.ide.eclipse.core.model.ISourceModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
- * Holds an {@link IBean}'s alias.
+ * Marker interface for all {@link IModelElement}s defined by the beans model.
  * 
  * @author Torsten Juergeleit
+ * @since 2.0
  */
-public interface IBeanAlias extends IBeansModelElement, ISourceModelElement {
+public interface IBeansModelElement extends IModelElement {
 
-	String getBeanName();
 }

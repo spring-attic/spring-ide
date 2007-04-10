@@ -29,7 +29,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  * 
  * @author Torsten Juergeleit
  */
-public interface IBeansModel extends IModel {
+public interface IBeansModel extends IBeansModelElement, IModel {
 
 	String ELEMENT_NAME = "BeansModel";
 

@@ -19,7 +19,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  * 
  * @author Torsten Juergeleit
  */
-public interface IBeansList extends ISourceModelElement {
+public interface IBeansList extends IBeansModelElement, ISourceModelElement {
 
 	List<?> getList();
 }

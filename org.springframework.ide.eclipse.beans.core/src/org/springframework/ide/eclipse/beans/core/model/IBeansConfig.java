@@ -19,7 +19,8 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
  * 
  * @author Torsten Juergeleit
  */
-public interface IBeansConfig extends IResourceModelElement, IBeanClassAware {
+public interface IBeansConfig extends IBeansModelElement, IResourceModelElement,
+		IBeanClassAware {
 
 	char EXTERNAL_FILE_NAME_PREFIX = '/';
 

@@ -15,14 +15,16 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementTypes;
 
 /**
  * Constants for {@link IModelElement} types defined by the beans model.
  * 
  * @author Torsten Juergeleit
  */
-public interface IBeansModelElementTypes {
+public interface IBeansModelElementTypes extends IModelElementTypes {
 
 	/**
 	 * Constant representing a Spring project.

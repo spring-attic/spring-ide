@@ -17,7 +17,8 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  * 
  * @author Torsten Juergeleit
  */
-public interface IBeanReference extends ISourceModelElement {
+public interface IBeanReference extends IBeansModelElement,
+		ISourceModelElement {
 
 	/**
 	 * Returns the target bean name that this reference points to (never

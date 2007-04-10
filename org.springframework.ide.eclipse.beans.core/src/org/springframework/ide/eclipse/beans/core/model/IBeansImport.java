@@ -18,7 +18,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  * 
  * @author Torsten Juergeleit
  */
-public interface IBeansImport extends ISourceModelElement {
+public interface IBeansImport extends IBeansModelElement, ISourceModelElement {
 
 	IResource getImportedResource();
 }

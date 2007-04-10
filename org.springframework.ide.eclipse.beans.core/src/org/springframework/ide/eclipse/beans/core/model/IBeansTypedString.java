@@ -19,7 +19,8 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  * 
  * @author Torsten Juergeleit
  */
-public interface IBeansTypedString extends ISourceModelElement {
+public interface IBeansTypedString extends IBeansModelElement,
+		ISourceModelElement {
 
 	String getString();
 

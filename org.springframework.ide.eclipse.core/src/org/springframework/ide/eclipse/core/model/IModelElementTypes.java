@@ -8,16 +8,20 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.model;
-
-import org.springframework.ide.eclipse.core.model.ISourceModelElement;
+package org.springframework.ide.eclipse.core.model;
 
 /**
- * Holds an {@link IBean}'s alias.
+ * Constants for {@link IModelElement} types defined by the core model.
  * 
  * @author Torsten Juergeleit
+ * @since 2.0
  */
-public interface IBeanAlias extends IBeansModelElement, ISourceModelElement {
+public interface IModelElementTypes {
 
-	String getBeanName();
+	/**
+	 * Constant representing a model (workspace level object). A
+	 * {@link IModelElement model element} with this type can be safely cast to
+	 * {@link IModel}.
+	 */
+	int MODEL_TYPE = 1;
 }

@@ -21,7 +21,8 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
  * 
  * @author Torsten Juergeleit
  */
-public interface IBeansProject extends IResourceModelElement, IBeanClassAware {
+public interface IBeansProject extends IBeansModelElement,
+		IResourceModelElement, IBeanClassAware {
 
 	/** File name of the Spring Beans project description */
 	public static final String DESCRIPTION_FILE = ".springBeans";

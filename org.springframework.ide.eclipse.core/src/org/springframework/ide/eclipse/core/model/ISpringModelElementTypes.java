@@ -14,12 +14,13 @@ package org.springframework.ide.eclipse.core.model;
  * Constants for {@link IModelElement} types defined by the Spring model.
  * 
  * @author Torsten Juergeleit
+ * @since 2.0
  */
-public interface ISpringModelElementTypes {
+public interface ISpringModelElementTypes extends IModelElementTypes{
 
 	/**
-	 * Constant representing a Spring project.
-	 * A model element with this type can be safely cast to
+	 * Constant representing a {@link ISpringProject Spring project}. A
+	 * {@link IModelElement model element} with this type can be safely cast to
 	 * {@link ISpringProject}.
 	 */
 	int PROJECT_TYPE = 2; // starts with 2 because 1 is reserved for the model

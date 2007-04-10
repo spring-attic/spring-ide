@@ -21,8 +21,8 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
  * 
  * @author Torsten Juergeleit
  */
-public interface IBeansConfigSet extends IResourceModelElement,
-		IBeanClassAware {
+public interface IBeansConfigSet extends IBeansModelElement,
+		IResourceModelElement, IBeanClassAware {
 
 	/** Name prefix of a config which belongs to a different project */
 	char EXTERNAL_CONFIG_NAME_PREFIX = '/';
