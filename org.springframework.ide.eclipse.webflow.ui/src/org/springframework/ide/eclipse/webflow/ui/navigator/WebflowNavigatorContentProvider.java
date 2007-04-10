@@ -22,7 +22,6 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.CommonNavigator;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonContentProvider;
-import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.core.SpringCore;
@@ -31,6 +30,7 @@ import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModel;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelListener;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
@@ -45,13 +45,6 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
  */
 public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 		IWebflowModelListener {
-
-	public static final String PROJECT_EXPLORER_CONTENT_PROVIDER_ID =
-			org.springframework.ide.eclipse.webflow.ui.Activator.PLUGIN_ID
-					+ ".navigator.projectExplorerContent";
-	public static final String SPRING_EXPLORER_CONTENT_PROVIDER_ID =
-			org.springframework.ide.eclipse.webflow.ui.Activator.PLUGIN_ID
-					+ ".navigator.springExplorerContent";
 
 	private String providerID;
 	private StructuredViewer viewer;
@@ -69,12 +62,14 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof ISpringProject) {
-			return WebflowModelUtils.getFiles(
-					((ISpringProject) parentElement).getProject()).toArray();
+			if (hasChildren(parentElement)) {
+				return new Object[] { Activator.getModel().getProject(
+					((ISpringProject) parentElement).getProject()) };
+			}
 		}
-		else if (parentElement instanceof IProject) {
-			return WebflowModelUtils.getFiles((IProject) parentElement)
-					.toArray();
+		else if (parentElement instanceof IWebflowProject) {
+			return WebflowModelUtils.getFiles(
+					((IWebflowProject) parentElement).getProject()).toArray();
 		}
 		else if (parentElement instanceof IFile) {
 			IFile file = (IFile) parentElement;
@@ -108,16 +103,16 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 
 	public boolean hasChildren(Object element) {
 		if (element instanceof ISpringProject) {
-			return WebflowModelUtils.getFiles(
-					((ISpringProject) element).getProject()).size() > 0;
+			return Activator.getModel().getProject(
+					((ISpringProject) element).getProject()).getConfigs()
+					.size() > 0;
 		}
-		else if (element instanceof IProject) {
-			return (WebflowModelUtils.getFiles((IProject) element).size() > 0);
+		else if (element instanceof IWebflowProject) {
+			return ((IWebflowProject) element).getConfigs().size() > 0;
 		}
 		else if (element instanceof IFile) {
 			IFile file = (IFile) element;
-			return WebflowModelUtils.isWebflowConfig(file)
-					|| BeansCoreUtils.isBeansConfig(file);
+			return WebflowModelUtils.isWebflowConfig(file);
 		}
 		else if (element instanceof IWebflowConfig) {
 			IWebflowConfig config = (IWebflowConfig) element;
@@ -139,11 +134,13 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 
 	public void modelChanged(IWebflowProject project) {
 		IProject p = project.getProject();
-		if (providerID.equals(PROJECT_EXPLORER_CONTENT_PROVIDER_ID)) {
+		if (org.springframework.ide.eclipse.webflow.ui.Activator
+				.PROJECT_EXPLORER_CONTENT_PROVIDER_ID.equals(providerID)) {
 			refreshViewerForElement(p);
 			refreshViewerForElement(BeansModelUtils.getJavaProject(p));
 		}
-		else if (providerID.equals(SPRING_EXPLORER_CONTENT_PROVIDER_ID)) {
+		else if (org.springframework.ide.eclipse.webflow.ui.Activator
+				.SPRING_EXPLORER_CONTENT_PROVIDER_ID.equals(providerID)) {
 			refreshViewerForElement(SpringCore.getModel().getProject(p));
 		}
 	}
@@ -186,7 +183,11 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 						if (ctrl == null || ctrl.isDisposed()) {
 							return;
 						}
-						viewer.refresh(element);
+						if (element instanceof IWebflowModel) {
+							viewer.refresh();
+						} else {
+							viewer.refresh(element);
+						}
 					}
 				});
 			}

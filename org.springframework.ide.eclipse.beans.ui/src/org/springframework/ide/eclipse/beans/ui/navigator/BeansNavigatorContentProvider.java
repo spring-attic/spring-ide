@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.beans.ui.model.BeansModelContentProvider;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 
 /**
@@ -39,16 +40,12 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 public class BeansNavigatorContentProvider extends BeansModelContentProvider
 		implements ICommonContentProvider {
 
-	public static final String PROJECT_EXPLORER_CONTENT_PROVIDER_ID =
-			BeansUIPlugin.PLUGIN_ID + ".navigator.projectExplorerContent";
-	public static final String SPRING_EXPLORER_CONTENT_PROVIDER_ID =
-			BeansUIPlugin.PLUGIN_ID + ".navigator.springExplorerContent";
-
 	private String providerID;
 
 	@Override
 	public Object[] getElements(Object inputElement) {
-		if (providerID.equals(PROJECT_EXPLORER_CONTENT_PROVIDER_ID)) {
+		if (BeansUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
+				.equals(providerID)) {
 			return SpringCoreUtils.getSpringProjects().toArray();
 		}
 		return super.getElements(inputElement);
@@ -56,29 +53,18 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 
 	@Override
 	public boolean hasChildren(Object element) {
-		IProject project = SpringCoreUtils.getAdapter(element, IProject.class);
-		if (project != null) {
-			return SpringCoreUtils.isSpringProject(project);
-		}
-		return super.hasChildren(element);
+		return getChildren(element).length > 0;
 	}
 
 	@Override
 	public Object[] getChildren(Object parentElement) {
-		IProject project = SpringCoreUtils.getAdapter(parentElement,
-				IProject.class);
-		if (project != null) {
+		if (parentElement instanceof ISpringProject) {
 			IBeansProject beansProject = BeansCorePlugin.getModel().getProject(
-					project);
-			if (beansProject != null) {
-				if (providerID.equals(PROJECT_EXPLORER_CONTENT_PROVIDER_ID)) {
-					return getProjectChildren(beansProject, true);
-				}
-				if (providerID.equals(SPRING_EXPLORER_CONTENT_PROVIDER_ID)) {
-					return getProjectChildren(beansProject, false);
-				}
-			}
-			return IModelElement.NO_CHILDREN;
+					((ISpringProject) parentElement).getProject());
+			return new Object[] { beansProject };
+		}
+		else if (parentElement instanceof IBeansProject) {
+			return getProjectChildren((IBeansProject) parentElement, false);
 		}
 		return super.getChildren(parentElement);
 	}
@@ -89,11 +75,13 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 
 		if (element instanceof IBeansProject) {
 			IProject project = ((IBeansProject) element).getProject();
-			if (providerID.equals(PROJECT_EXPLORER_CONTENT_PROVIDER_ID)) {
+			if (BeansUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
+					.equals(providerID)) {
 				refreshViewerForElement(project);
 				refreshViewerForElement(BeansModelUtils
 						.getJavaProject(project));
-			} else if (providerID.equals(SPRING_EXPLORER_CONTENT_PROVIDER_ID)) {
+			} else if (BeansUIPlugin.SPRING_EXPLORER_CONTENT_PROVIDER_ID
+						.equals(providerID)) {
 				refreshViewerForElement(SpringCore.getModel().getProject(
 						project));
 			} else {
@@ -105,7 +93,8 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 
 			// For a changed Spring beans config in the Eclipse Project Explorer
 			// refresh all corresponding bean classes
-			if (providerID.equals(PROJECT_EXPLORER_CONTENT_PROVIDER_ID)) {
+			if (BeansUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
+					.equals(providerID)) {
 				refreshBeanClasses(config);
 			}
 		} else {

@@ -13,11 +13,7 @@ package org.springframework.ide.eclipse.beans.ui.model;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ITreePathLabelProvider;
-import org.eclipse.jface.viewers.TreePath;
-import org.eclipse.jface.viewers.ViewerLabel;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeanClassReferences;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -31,17 +27,17 @@ import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
-import org.springframework.ide.eclipse.core.model.ModelUtils;
-import org.springframework.ide.eclipse.ui.SpringUILabelProvider;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springframework.ide.eclipse.ui.viewers.DecoratingWorkbenchTreePathLabelProvider;
 
 /**
- * This class is an {@link ILabelProvider} which knows about the beans core
- * model's {@link IModelElement}s. If the given element is not of type
- * {@link IModelElement} then it tries to adapt it via {@link IAdaptable}.
+ * This {@link ILabelProvider} knows about the beans core model's
+ * {@link IModelElement}s.
  * 
  * @author Torsten Juergeleit
  */
-public class BeansModelLabelProvider extends SpringUILabelProvider {
+public class BeansModelLabelProvider extends
+		DecoratingWorkbenchTreePathLabelProvider {
 
 	public static final DefaultNamespaceLabelProvider
 		DEFAULT_NAMESPACE_LABEL_PROVIDER = new DefaultNamespaceLabelProvider();
@@ -54,29 +50,8 @@ public class BeansModelLabelProvider extends SpringUILabelProvider {
 		super(isDecorating);
 	}
 
-	protected Image getBaseImage(Object element) {
-		Object adaptedElement = ModelUtils.adaptToModelElement(element);
-		if (adaptedElement instanceof ISourceModelElement) {
-			ILabelProvider provider = NamespaceUtils
-					.getLabelProvider((ISourceModelElement) adaptedElement);
-			if (provider != null) {
-				return provider.getImage(adaptedElement);
-			} else {
-				return DEFAULT_NAMESPACE_LABEL_PROVIDER
-						.getImage(adaptedElement);
-			}
-		} else if (adaptedElement instanceof IModelElement) {
-			return BeansModelImages.getImage((IModelElement) adaptedElement);
-		}
-		if (element instanceof ZipEntryStorage) {
-			return super.getBaseImage(((ZipEntryStorage) element).getFile());
-		} else if (element instanceof BeanClassReferences) {
-			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_REFERENCE);
-		}
-		return super.getBaseImage(element);
-	}
-
-	protected int getSeverity(Object element) {
+	@Override
+	protected int getSeverity(Object element, Object parentElement) {
 		int severity = 0;
 		if (element instanceof ISourceModelElement) {
 			ISourceModelElement source = (ISourceModelElement) element;
@@ -114,57 +89,65 @@ public class BeansModelLabelProvider extends SpringUILabelProvider {
 		return severity;
 	}
 
-	protected String getBaseText(Object element) {
-		Object adaptedElement = ModelUtils.adaptToModelElement(element);
-		if (adaptedElement instanceof ISourceModelElement) {
+	@Override
+	protected Image getImage(Object element, Object parentElement,
+			int severity) {
+		Image image = null;
+		if (element instanceof ISourceModelElement) {
 			ILabelProvider provider = NamespaceUtils
-					.getLabelProvider((ISourceModelElement) adaptedElement);
+					.getLabelProvider((ISourceModelElement) element);
 			if (provider != null) {
-				return provider.getText(adaptedElement);
-			} else {
-				return DEFAULT_NAMESPACE_LABEL_PROVIDER
-						.getText(adaptedElement);
+				image = provider.getImage(element);
 			}
-		} else if (adaptedElement instanceof IModelElement) {
-			return BeansModelLabels.getElementLabel(
-					(IModelElement) adaptedElement, 0);
+			else {
+				image = DEFAULT_NAMESPACE_LABEL_PROVIDER.getImage(element);
+			}
+		}
+		else if (element instanceof IModelElement) {
+			image = BeansModelImages.getImage((IModelElement) element);
+		}
+		if (element instanceof ZipEntryStorage) {
+			return super.getImage(((ZipEntryStorage) element).getFile(),
+					parentElement, severity);
+		}
+		else if (element instanceof BeanClassReferences) {
+			image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_REFERENCE);
+		}
+		if (image != null) {
+			return SpringUIUtils.getDecoratedImage(image, severity);
+		}
+		return super.getImage(element, parentElement, severity);
+	}
+
+	@Override
+	protected String getText(Object element, Object parentElement,
+			int severity) {
+		if (element instanceof ISourceModelElement) {
+			ILabelProvider provider = NamespaceUtils
+					.getLabelProvider((ISourceModelElement) element);
+			if (provider != null) {
+				return provider.getText(element);
+			}
+			else {
+				return DEFAULT_NAMESPACE_LABEL_PROVIDER.getText(element);
+			}
+		}
+		else if (element instanceof IModelElement) {
+			return BeansModelLabels.getElementLabel((IModelElement) element, 0);
 		}
 		if (element instanceof IFile) {
 			return ((IFile) element).getProjectRelativePath().toString();
-		} else if (element instanceof ZipEntryStorage) {
+		}
+		else if (element instanceof ZipEntryStorage) {
 			ZipEntryStorage storage = (ZipEntryStorage) element;
 			StringBuffer buf = new StringBuffer(storage.getFile()
 					.getProjectRelativePath().toString());
 			buf.append(" - " + storage.getFullPath().toString());
 			return buf.toString();
-		} else if (element instanceof BeanClassReferences) {
-			return BeansUIPlugin.getResourceString(
-					"BeanClassReferences.label");
 		}
-		return super.getBaseText(element);
-	}
-
-	public void updateLabel(ViewerLabel label, TreePath elementPath) {
-		Object element = ModelUtils.adaptToModelElement(elementPath
-				.getLastSegment());
-		if (element instanceof ISourceModelElement) {
-			ILabelProvider provider = NamespaceUtils
-					.getLabelProvider((ISourceModelElement) element);
-			if (provider != null
-					&& provider instanceof ITreePathLabelProvider) {
-				((ITreePathLabelProvider) provider).updateLabel(label,
-						elementPath);
-			} else {
-				DEFAULT_NAMESPACE_LABEL_PROVIDER
-						.updateLabel(label, elementPath);
-			}
-			if (isDecorating()) {
-				label.setImage(getDecoratedImage(element, label.getImage()));
-				label.setText(getDecoratedText(element, label.getText()));
-			}
-		} else {
-			label.setImage(getImage(element));
-			label.setText(getText(element));
+		else if (element instanceof BeanClassReferences) {
+			return BeansUIPlugin.getResourceString("BeanClassReferences.label");
 		}
+		return super.getText(element, parentElement, severity);
 	}
 }

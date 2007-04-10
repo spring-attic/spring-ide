@@ -12,12 +12,15 @@ package org.springframework.ide.eclipse.beans.ui.navigator;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonLabelProvider;
 import org.eclipse.ui.navigator.IDescriptionProvider;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUILabels;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabels;
@@ -25,11 +28,11 @@ import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
-import org.springframework.ide.eclipse.core.model.ModelUtils;
+import org.springframework.ide.eclipse.core.model.ISpringProject;
 
 /**
- * This class is a label provider for the {@link CommonNavigator} which knows
- * about the beans core model's {@link IModelElement elements}.
+ * {@link ICommonLabelProvider} which knows about the beans core model's
+ * {@link IModelElement elements}.
  * 
  * @author Torsten Juergeleit
  */
@@ -46,25 +49,34 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 		super(isDecorating);
 	}
 
-	protected String getProviderID() {
-		return providerID;
+	public void init(ICommonContentExtensionSite config) {
+		providerID = config.getExtension().getId();
+	}
+
+	public void restoreState(IMemento memento) {
+	}
+
+	public void saveState(IMemento memento) {
 	}
 
 	public String getDescription(Object element) {
-		Object adaptedElement = ModelUtils.adaptToModelElement(element);
-		if (adaptedElement instanceof ISourceModelElement) {
+		if (element instanceof IBeansProject) {
+			return "Beans"	// TODO Externalize string
+					+ " - " + ((IBeansProject) element).getProject().getName();
+		}
+		else if (element instanceof ISourceModelElement) {
 			ILabelProvider provider = NamespaceUtils
-					.getLabelProvider((ISourceModelElement) adaptedElement);
+					.getLabelProvider((ISourceModelElement) element);
 			if (provider != null && provider instanceof IDescriptionProvider) {
 				return ((IDescriptionProvider) provider)
-						.getDescription(adaptedElement);
+						.getDescription(element);
 			} else {
 				return DEFAULT_NAMESPACE_LABEL_PROVIDER
-						.getDescription(adaptedElement);
+						.getDescription(element);
 			}
-		} else if (adaptedElement instanceof IModelElement) {
+		} else if (element instanceof IModelElement) {
 			return BeansModelLabels
-					.getElementLabel((IModelElement) adaptedElement,
+					.getElementLabel((IModelElement) element,
 							BeansUILabels.APPEND_PATH
 									| BeansUILabels.DESCRIPTION);
 		}
@@ -88,13 +100,36 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 		return null;
 	}
 
-	public void init(ICommonContentExtensionSite config) {
-		providerID = config.getExtension().getId();
+	@Override
+	public String toString() {
+		return providerID;
 	}
 
-	public void restoreState(IMemento memento) {
+	protected String getProviderID() {
+		return providerID;
 	}
 
-	public void saveState(IMemento memento) {
+	@Override
+	protected Image getImage(Object element, Object parentElement,
+			int severity) {
+		if (element instanceof IBeansProject) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_BEAN);
+		}
+		return super.getImage(element, parentElement, severity);
+	}
+
+	@Override
+	protected String getText(Object element, Object parentElement,
+			int severity) {
+		if (element instanceof IBeansProject) {
+			return "Beans";	// TODO Externalize string
+		}
+		else if (element instanceof IBeansConfig) {
+			if (parentElement instanceof ISpringProject
+					|| parentElement instanceof IBeansProject) {
+				return ((IBeansConfig) element).getElementName();
+			}
+		}
+		return super.getText(element, parentElement, severity);
 	}
 }

@@ -11,51 +11,37 @@
 package org.springframework.ide.eclipse.aop.ui.navigator;
 
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.IMemento;
-import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonLabelProvider;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.IReferenceNode;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
+import org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorLabelProvider;
 
 /**
  * {@link ICommonLabelProvider} that just delegates to
  * {@link IReferenceNode#getText()} and {@link IReferenceNode#getImage()} of
  * instances of {@link IReferenceNode}. Otherwise calls
- * {@link BeansModelLabelProvider}.
+ * {@link BeansNavigatorLabelProvider}.
  * 
  * @author Christian Dupuis
  * @since 2.0
  */
 public class AopReferenceModelNavigatorLabelProvider extends
-		BeansModelLabelProvider implements ICommonLabelProvider {
-
-	public String getDescription(Object element) {
-		// TODO add description here
-		return null;
-	}
+		BeansNavigatorLabelProvider {
 
 	@Override
-	public Image getBaseImage(Object element) {
+	public Image getImage(Object element, Object parentElement,
+			int severity) {
 		if (element instanceof IReferenceNode) {
 			return ((IReferenceNode) element).getImage();
 		}
-		return super.getBaseImage(element);
+		return super.getImage(element, parentElement, severity);
 	}
 
 	@Override
-	public String getBaseText(Object element) {
+	public String getText(Object element, Object parentElement,
+			int severity) {
 		if (element instanceof IReferenceNode) {
 			return ((IReferenceNode) element).getText();
 		}
-		return super.getBaseText(element);
-	}
-
-	public void init(ICommonContentExtensionSite config) {
-	}
-
-	public void restoreState(IMemento memento) {
-	}
-
-	public void saveState(IMemento memento) {
+		return super.getText(element, parentElement, severity);
 	}
 }

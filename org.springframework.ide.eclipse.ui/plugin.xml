@@ -117,9 +117,15 @@
       <viewer viewerId="org.eclipse.ui.navigator.ProjectExplorer"/>
       <viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
          <includes>
+            <contentExtension pattern="org.springframework.ide.eclipse.ui.navigator.projectExplorerContent"/>
             <contentExtension pattern="org.springframework.ide.eclipse.ui.navigator.filters.*"/>
          </includes>
       </viewerContentBinding>
+      <viewerActionBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+         <includes>
+            <actionExtension pattern="org.springframework.ide.eclipse.ui.navigator.projectExplorerActions"/>
+         </includes>
+      </viewerActionBinding>
    </extension>
 
    <extension
@@ -144,30 +150,58 @@
       <navigatorContent
             id="org.springframework.ide.eclipse.ui.navigator.springExplorerContent"
             name="%navigatorContentName"
-            contentProvider="org.springframework.ide.eclipse.ui.internal.navigator.SpringExplorerContentProvider"
-            labelProvider="org.springframework.ide.eclipse.ui.internal.navigator.SpringExplorerLabelProvider"
+            contentProvider="org.springframework.ide.eclipse.ui.internal.navigator.SpringNavigatorContentProvider"
+            labelProvider="org.springframework.ide.eclipse.ui.internal.navigator.SpringNavigatorLabelProvider"
             icon="icons/full/obj16/project_obj.gif"
             activeByDefault="true">
          <triggerPoints/>
          <possibleChildren>
-			<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+			<instanceof value="org.springframework.ide.eclipse.core.model.ISpringProject"/>
          </possibleChildren>
+         <actionProvider
+				id="org.springframework.ide.eclipse.ui.navigator.springExplorerActions"
+				class="org.springframework.ide.eclipse.ui.internal.navigator.SpringNavigatorActionProvider">
+            <enablement>
+				<adapt type="org.eclipse.core.resources.IProject">
+					<test property="org.eclipse.core.resources.projectNature"
+						value="org.springframework.ide.eclipse.core.springnature"/>
+				</adapt>
+            </enablement>
+         </actionProvider>
       </navigatorContent>
-      <actionProvider
-            id="org.springframework.ide.eclipse.ui.navigator.springExplorerActions"
-            class="org.springframework.ide.eclipse.ui.internal.navigator.SpringExplorerActionProvider">
-         <enablement>
+
+      <navigatorContent
+            id="org.springframework.ide.eclipse.ui.navigator.projectExplorerContent"
+            name="%navigatorContentName"
+            contentProvider="org.springframework.ide.eclipse.ui.internal.navigator.SpringNavigatorContentProvider"
+            labelProvider="org.springframework.ide.eclipse.ui.internal.navigator.SpringNavigatorLabelProvider"
+            icon="icons/full/obj16/project_obj.gif"
+            activeByDefault="true">
+         <triggerPoints>
 			<adapt type="org.eclipse.core.resources.IProject">
+				<test property="org.eclipse.core.resources.open"
+					value="true"/>
 				<test property="org.eclipse.core.resources.projectNature"
 					value="org.springframework.ide.eclipse.core.springnature"/>
 			</adapt>
-         </enablement>
-      </actionProvider>
+         </triggerPoints>
+         <possibleChildren>
+			<instanceof value="org.springframework.ide.eclipse.core.model.ISpringProject"/>
+         </possibleChildren>
+         <actionProvider
+				id="org.springframework.ide.eclipse.ui.navigator.projectExplorerActions"
+				class="org.springframework.ide.eclipse.ui.internal.navigator.SpringNavigatorActionProvider">
+            <enablement>
+				<instanceof value="org.springframework.ide.eclipse.core.model.ISpringProject"/>
+            </enablement>
+         </actionProvider>
+      </navigatorContent>
+
       <commonFilter
             id="org.springframework.ide.eclipse.ui.navigator.filters.hideNonSpringArtefacts"
-            name="%navigatorfilterHideNonSpringArtefactsName"
-            description="%navigatorfilterHideNonSpringArtefactsDescription"
-            class="org.springframework.ide.eclipse.ui.navigator.filters.NonSpringArtefactsFilter"
+            name="%navigatorfilterHideNonSpringElementsName"
+            description="%navigatorfilterHideNonSpringElementsDescription"
+            class="org.springframework.ide.eclipse.ui.navigator.filters.NonSpringElementsFilter"
             activeByDefault="false"/>
    </extension>
 

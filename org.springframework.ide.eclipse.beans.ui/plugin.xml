@@ -172,24 +172,18 @@
             activeByDefault="true">
 		 <triggerPoints>
 			<or>
-				<adapt type="org.eclipse.core.resources.IProject">
-					<and>
-						<test property="org.eclipse.core.resources.open"
-							value="true"/>
-						<test property="org.eclipse.core.resources.projectNature"
-							value="org.springframework.ide.eclipse.core.springnature"/>
-					</and>
-				</adapt>
-				<instanceof value="org.eclipse.core.resources.IFile"/>
-                <instanceof value="org.eclipse.core.resources.IStorage"/>
-				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+				<instanceof value="org.springframework.ide.eclipse.core.model.ISpringProject"/>
+				<and>
+					<instanceof value="org.eclipse.core.resources.IFile"/>
+					<test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
+				</and>
+				<instanceof value="org.springframework.ide.eclipse.core.io.ZipEntryStorage"/>
+				<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
 			</or>
 		 </triggerPoints>
          <possibleChildren>
 			<or>
-				<instanceof value="org.eclipse.core.resources.IFile"/>
-                <instanceof value="org.eclipse.core.resources.IStorage"/>
-				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+				<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
 			</or>
          </possibleChildren>
          <commonSorter
@@ -205,7 +199,7 @@
 						<test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
 					</and>
 					<instanceof value="org.springframework.ide.eclipse.core.io.ZipEntryStorage"/>
-	            	<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+					<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
 	            </or>
 	         </enablement>
          </actionProvider>
@@ -221,24 +215,18 @@
             priority="highest">
 		<triggerPoints>
 			<or>
-				<adapt type="org.eclipse.core.resources.IProject">
-					<and>
-						<test property="org.eclipse.core.resources.open"
-							value="true"/>
-						<test property="org.eclipse.core.resources.projectNature"
-							value="org.springframework.ide.eclipse.core.springnature"/>
-					</and>
-				</adapt>
+				<instanceof value="org.springframework.ide.eclipse.core.model.ISpringProject"/>
 				<and>
 					<instanceof value="org.eclipse.core.resources.IFile"/>
 					<test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
 				</and>
 				<instanceof value="org.eclipse.jdt.core.IType"/>
-				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+				<instanceof value="org.springframework.ide.eclipse.core.io.ZipEntryStorage"/>
+				<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
 			</or>
 		 </triggerPoints>
          <possibleChildren>
-			<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+			<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
          </possibleChildren>
          <commonSorter
                id="org.springframework.ide.eclipse.beans.ui.navigator.sorter.projectExplorerSorter"
@@ -252,7 +240,8 @@
 						<instanceof value="org.eclipse.core.resources.IFile"/>
 						<test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
 					</and>
-	            	<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+				<instanceof value="org.springframework.ide.eclipse.core.io.ZipEntryStorage"/>
+					<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
 	            </or>
 	         </enablement>
          </actionProvider>
@@ -291,12 +280,12 @@
              class="org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorLinkHelper">
           <selectionEnablement>
 			 <or>
-				 <and>
+				<and>
 					<instanceof value="org.eclipse.core.resources.IFile"/>
 					<test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
-				 </and>
-				 <instanceof value="org.springframework.ide.eclipse.core.io.ZipEntryStorage"/>
-	             <instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+				</and>
+				<instanceof value="org.springframework.ide.eclipse.core.io.ZipEntryStorage"/>
+				<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
 	         </or>
           </selectionEnablement>
           <editorInputEnablement>

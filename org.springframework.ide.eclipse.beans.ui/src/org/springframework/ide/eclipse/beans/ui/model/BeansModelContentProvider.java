@@ -183,7 +183,7 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 				}
 			}
 		}
-		children.addAll((project).getConfigSets());
+		children.addAll(project.getConfigSets());
 		return children.toArray();
 	}
 

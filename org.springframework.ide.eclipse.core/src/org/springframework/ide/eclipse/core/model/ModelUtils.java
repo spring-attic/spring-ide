@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.SpringCore;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 
 /**
@@ -29,18 +28,6 @@ import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
  * @author Torsten Juergeleit
  */
 public final class ModelUtils {
-
-	/**
-	 * Trys to adapt given element to <code>IModelElement</code>.
-	 */
-	public static Object adaptToModelElement(Object object) {
-		IModelElement modelElement = SpringCoreUtils.getAdapter(object,
-				IModelElement.class);
-		if (modelElement != null) {
-			return modelElement;
-		}
-		return object;
-	}
 
 	/**
 	 * Returns <code>true</code> if a given {@link IModelElement element} is

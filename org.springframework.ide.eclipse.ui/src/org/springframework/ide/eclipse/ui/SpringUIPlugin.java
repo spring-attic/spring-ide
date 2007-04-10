@@ -46,6 +46,12 @@ public class SpringUIPlugin extends AbstractUIPlugin {
 	public static final String SPRING_EXPLORER_ID = PLUGIN_ID
 			+ ".navigator.springExplorer";
 
+	public static final String PROJECT_EXPLORER_CONTENT_PROVIDER_ID = PLUGIN_ID
+			+ ".navigator.projectExplorerContent";
+
+	public static final String SPRING_EXPLORER_CONTENT_PROVIDER_ID = PLUGIN_ID
+			+ ".navigator.springExplorerContent";
+
 	/** The shared instance. */
 	private static SpringUIPlugin plugin;
 
@@ -95,7 +101,7 @@ public class SpringUIPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Returns then singleton instance of
-	 * <code>BeansModelLabelProvider(true)</code>.
+	 * <code>SpringUILabelProvider(true)</code>.
 	 * <p>
 	 * <b>For this instance the dispose method must never becalled!! This is
 	 * done by <code>Plugin.stop()</code> instead.</b>

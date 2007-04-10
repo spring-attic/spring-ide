@@ -19,6 +19,7 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.ui.navigator.actions.AbstractNavigatorAction;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 import org.springframework.ide.eclipse.webflow.ui.properties.WebflowPropertyPage;
 
 /**
@@ -41,18 +42,21 @@ public class OpenPropertiesAction extends AbstractNavigatorAction {
 	public boolean isEnabled(IStructuredSelection selection) {
 		if (selection.size() == 1) {
 			Object sElement = selection.getFirstElement();
-			IWebflowConfig element = null;
-			if (sElement instanceof IWebflowConfig) {
-				element = (IWebflowConfig) sElement;
+			IProject project = null;
+			if (sElement instanceof IWebflowProject) {
+				project = ((IWebflowProject) sElement).getProject();
+			}
+			else if (sElement instanceof IWebflowConfig) {
+				project = ((IWebflowConfig) sElement).getProject().getProject();
 			}
 			else if (sElement instanceof IFile) {
 				if (WebflowModelUtils.isWebflowConfig((IFile) sElement)) {
-					element = WebflowModelUtils
-							.getWebflowConfig((IFile) sElement);
+					project = WebflowModelUtils.getWebflowConfig(
+							(IFile) sElement).getProject().getProject();
 				}
 			}
-			if (element != null) {
-				project = element.getProject().getProject();
+			if (project != null) {
+				this.project = project;
 				return true;
 			}
 		}

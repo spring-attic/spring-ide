@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.ui.internal.navigator;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Control;
@@ -17,11 +18,14 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonContentProvider;
 import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringModel;
+import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
+import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 
 /**
  * This {@link ICommonContentProvider} knows about the Spring projects.
@@ -29,17 +33,18 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
  * @author Torsten Juergeleit
  * @since 2.0
  */
-public class SpringExplorerContentProvider implements ICommonContentProvider,
+public class SpringNavigatorContentProvider implements ICommonContentProvider,
 		IModelChangeListener {
 
 	private boolean refresh;
 	private StructuredViewer viewer;
+	private String providerID;
 
-	public SpringExplorerContentProvider() {
+	public SpringNavigatorContentProvider() {
 		this(true);
 	}
 
-	public SpringExplorerContentProvider(boolean refresh) {
+	public SpringNavigatorContentProvider(boolean refresh) {
 		this.refresh = refresh;
 	}
 
@@ -73,6 +78,18 @@ public class SpringExplorerContentProvider implements ICommonContentProvider,
 	}
 
 	public Object[] getChildren(Object parentElement) {
+		IProject project = SpringCoreUtils.getAdapter(parentElement,
+				IProject.class);
+		if (project != null) {
+			ISpringProject springProject = SpringCore.getModel().getProject(
+					project);
+			if (springProject != null) {
+				if (SpringUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
+						.equals(providerID)) {
+					return new Object[] { springProject };
+				}
+			}
+		}
 		return IModelElement.NO_CHILDREN;
 	}
 
@@ -81,6 +98,7 @@ public class SpringExplorerContentProvider implements ICommonContentProvider,
 	}
 
 	public void init(ICommonContentExtensionSite config) {
+		providerID = config.getExtension().getId();
 	}
 
 	public void saveState(IMemento aMemento) {
@@ -135,5 +153,10 @@ public class SpringExplorerContentProvider implements ICommonContentProvider,
 				});
 			}
 		}
+	}
+
+	@Override
+	public String toString() {
+		return String.valueOf(providerID);
 	}
 }

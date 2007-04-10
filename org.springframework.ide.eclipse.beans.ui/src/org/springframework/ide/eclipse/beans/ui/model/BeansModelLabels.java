@@ -71,8 +71,10 @@ public final class BeansModelLabels extends BeansUILabels {
 			String path;
 			if (element instanceof IBeansConfig
 					&& isFlagged(flags, DESCRIPTION)) {
-				path = resource.getProject().getName();
-			} else {
+				path = resource.getFullPath().makeRelative()
+						.removeLastSegments(1).toString();
+			}
+			else {
 				path = resource.getFullPath().makeRelative().toString();
 			}
 			buf.append(path);

@@ -24,11 +24,11 @@ import org.springframework.ide.eclipse.ui.SpringUIPlugin;
  * @author Torsten Juergeleit
  * @since 2.0
  */
-public class SpringExplorerActionProvider extends CommonActionProvider {
+public class SpringNavigatorActionProvider extends CommonActionProvider {
 
 	private IWorkbenchAction openPropertiesAction;
 
-	public SpringExplorerActionProvider() {
+	public SpringNavigatorActionProvider() {
 	}
 
 	@Override

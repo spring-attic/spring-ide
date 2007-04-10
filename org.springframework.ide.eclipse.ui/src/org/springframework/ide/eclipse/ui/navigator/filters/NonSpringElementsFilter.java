@@ -13,8 +13,6 @@ package org.springframework.ide.eclipse.ui.navigator.filters;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -27,19 +25,19 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 
 /**
- * Filters non-Spring artefacts.
+ * Filters non-Spring elements.
  * 
  * @author Torsten Juergeleit
  * @since 2.0
  */
-public class NonSpringArtefactsFilter extends ViewerFilter {
+public class NonSpringElementsFilter extends ViewerFilter {
 
 	public static final String PROJECT_EXPLORER_EXTENSION_POINT =
 			SpringUIPlugin.PLUGIN_ID + ".projectExplorer";
 
 	private List<ViewerFilter> filters = new ArrayList<ViewerFilter>();
 	
-	public NonSpringArtefactsFilter() {
+	public NonSpringElementsFilter() {
 		IExtensionPoint point = Platform.getExtensionRegistry()
 				.getExtensionPoint(PROJECT_EXPLORER_EXTENSION_POINT);
 		if (point != null) {
@@ -61,10 +59,11 @@ public class NonSpringArtefactsFilter extends ViewerFilter {
 	}
 
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
-		if ((element instanceof IFolder || element instanceof IFile)
-				&& SpringCoreUtils.isSpringProject((IResource) element)) {
+		IResource resource = SpringCoreUtils.getAdapter(element,
+				IResource.class);
+		if (SpringCoreUtils.isSpringProject(resource)) {
 			for (ViewerFilter filter : filters) {
-				if (filter.select(viewer, parentElement, element)) {
+				if (filter.select(viewer, resource, element)) {
 					return true;
 				}
 			}

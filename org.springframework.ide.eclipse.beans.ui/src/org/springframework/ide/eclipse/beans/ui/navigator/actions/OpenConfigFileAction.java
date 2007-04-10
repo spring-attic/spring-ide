@@ -16,8 +16,8 @@ import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
-import org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorContentProvider;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
@@ -45,8 +45,7 @@ public class OpenConfigFileAction extends AbstractNavigatorAction {
 				rElement = ((IResourceModelElement) selection
 						.getFirstElement());
 			} else if (sElement instanceof IFile) {
-				if (BeansNavigatorContentProvider
-						.SPRING_EXPLORER_CONTENT_PROVIDER_ID
+				if (BeansUIPlugin.SPRING_EXPLORER_CONTENT_PROVIDER_ID
 						.equals(getActionSite().getExtensionId())) {
 					rElement = BeansCorePlugin.getModel().getConfig(
 							(IFile) sElement);

@@ -23,7 +23,6 @@ import org.springframework.ide.eclipse.beans.ui.BeansUILabels;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
-import org.springframework.ide.eclipse.core.model.ModelUtils;
 
 /**
  * This class is a label provider which knows about the beans core model's
@@ -51,8 +50,7 @@ public class DefaultNamespaceLabelProvider extends LabelProvider implements
 	}
 
 	public void updateLabel(ViewerLabel label, TreePath elementPath) {
-		Object element = ModelUtils.adaptToModelElement(elementPath
-				.getLastSegment());
+		Object element = elementPath.getLastSegment();
 		if (element instanceof ISourceModelElement
 				&& elementPath.getSegmentCount() > 1) {
 			Object parent = elementPath.getParentPath().getLastSegment();

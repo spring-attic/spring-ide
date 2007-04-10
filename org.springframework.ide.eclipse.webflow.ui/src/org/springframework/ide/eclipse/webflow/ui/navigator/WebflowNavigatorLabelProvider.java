@@ -14,11 +14,14 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.navigator.ICommonLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorLabelProvider;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
 
 /**
- * {@link ICommonLabelProvider} implementation for {@link IWebflowConfig}
+ * {@link ICommonLabelProvider} which knows about the beans core model's
+ * {@link IModelElement elements} and the {@link IWebflowConfig}
  * elements.
  * 
  * @author Christian Dupuis
@@ -26,41 +29,53 @@ import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.Webf
  */
 public class WebflowNavigatorLabelProvider extends BeansNavigatorLabelProvider {
 
+	@Override
 	public String getDescription(Object element) {
-		if (element instanceof IWebflowConfig) {
-			IFile file = ((IWebflowConfig) element).getResource();
-			return file.getName()
+		if (element instanceof IWebflowProject) {
+			return "Web Flow" // TODO Externalize text
 					+ " - "
-					+ file.getProjectRelativePath().removeLastSegments(1)
-							.toString();
-		} else {
-			return null;
+					+ ((IWebflowProject) element).getProject().getName();
 		}
+		else if (element instanceof IWebflowConfig) {
+			return getFileDescription(((IWebflowConfig) element).getResource());
+		}
+		else if (element instanceof IFile) {
+			return getFileDescription((IFile) element);
+		}
+		return super.getDescription(element);
 	}
 
-	public Image getBaseImage(Object element) {
-		if (element instanceof IWebflowConfig) {
+	protected String getFileDescription(IFile file) {
+		return file.getName() + " - " + file.getFullPath().makeRelative()
+				.removeLastSegments(1).toString();
+	}
+
+	@Override
+	protected Image getImage(Object element, Object parentElement,
+			int severity) {
+		if (element instanceof IWebflowConfig
+				|| element instanceof IWebflowProject) {
 			return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW);
 		}
-		return super.getBaseImage(element);
+		return super.getImage(element, parentElement, severity);
 	}
 
-	public String getBaseText(Object element) {
-		if (element instanceof IWebflowConfig) {
+	@Override
+	protected String getText(Object element, Object parentElement,
+			int severity) {
+		if (element instanceof IWebflowProject) {
+			return "Web Flow"; // TODO Externalize text
+		}
+		else if (element instanceof IWebflowConfig) {
 			IWebflowConfig config = (IWebflowConfig) element;
-			if (config.getName() != null
-					&& WebflowNavigatorContentProvider
-							.SPRING_EXPLORER_CONTENT_PROVIDER_ID
-									.equals(getProviderID())
-					|| WebflowNavigatorContentProvider
-							.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
-									.equals(getProviderID())) {
+			if (config.getName() != null) {
 				return config.getName();
-			} else {
-
-				return config.getResource().getProjectRelativePath().toString();
+			}
+			else {
+				return config.getResource().getFullPath().makeRelative()
+						.toString();
 			}
 		}
-		return super.getBaseText(element);
+		return super.getText(element, parentElement, severity);
 	}
 }

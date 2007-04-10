@@ -57,15 +57,6 @@ public class BeansProject extends AbstractResourceModelElement implements
 		this.project = project;
 	}
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public Object getAdapter(Class adapter) {
-		if (adapter == IProject.class) {
-			return project;
-		}
-		return super.getAdapter(adapter);
-	}
-
 	public int getElementType() {
 		return IBeansModelElementTypes.PROJECT_TYPE;
 	}

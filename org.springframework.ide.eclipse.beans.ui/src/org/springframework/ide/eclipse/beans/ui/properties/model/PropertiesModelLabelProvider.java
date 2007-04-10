@@ -10,20 +10,25 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.properties.model;
 
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 
 /**
+ * This {@link ILabelProvider}Êdelegates to the {@link BeansModelLabelProvider}
+ * and uses the {@link IBeansConfig}'s name.
+ * 
  * @author Torsten Juergeleit
  * @since 2.0
  */
 public class PropertiesModelLabelProvider extends BeansModelLabelProvider {
 
 	@Override
-	public String getBaseText(Object element) {
+	protected String getText(Object element, Object parentElement,
+			int severity) {
 		if (element instanceof IBeansConfig) {
 			return ((IBeansConfig) element).getElementName();
 		}
-		return super.getBaseText(element);
+		return super.getText(element, parentElement, severity);
 	}
 }

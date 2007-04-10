@@ -39,6 +39,7 @@ import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -392,5 +393,17 @@ public final class SpringUIUtils {
 			// extra information to display
 			MessageDialog.openError(shell, title, message);
 		}
+	}
+
+	public static Image getDecoratedImage(Image image, int severity) {
+		if (severity == IMarker.SEVERITY_WARNING) {
+			return SpringUIImages.getDecoratedImage(image,
+					SpringUIImages.FLAG_WARNING);
+		}
+		else if (severity == IMarker.SEVERITY_ERROR) {
+			return SpringUIImages.getDecoratedImage(image,
+					SpringUIImages.FLAG_ERROR);
+		}
+		return image;
 	}
 }

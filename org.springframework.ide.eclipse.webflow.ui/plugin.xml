@@ -60,25 +60,18 @@
             providesSaveables="false">
 		 <triggerPoints>
 			<or>
-				<adapt type="org.eclipse.core.resources.IProject">
-					<and>
-						<test property="org.eclipse.core.resources.open"
-							value="true"/>
-						<test property="org.eclipse.core.resources.projectNature"
-							value="org.springframework.ide.eclipse.core.springnature"/>
-					</and>
-				</adapt>
-				<instanceof value="org.eclipse.core.resources.IFile"/>
-                <instanceof value="org.eclipse.core.resources.IStorage"/>
-				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+				<instanceof value="org.springframework.ide.eclipse.core.model.ISpringProject"/>
+				<and>
+					<instanceof value="org.eclipse.core.resources.IFile"/>
+					<test property="org.springframework.ide.eclipse.webflow.core.model.isWebflowConfig"/>
+				</and>
+				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject"/>
 				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement"/>
 			</or>
 		 </triggerPoints>
          <possibleChildren>
 			<or>
-				<instanceof value="org.eclipse.core.resources.IFile"/>
-                <instanceof value="org.eclipse.core.resources.IStorage"/>
-				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject"/>
 				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement"/>
 			</or>
          </possibleChildren>
@@ -92,15 +85,15 @@
             class="org.springframework.ide.eclipse.webflow.ui.navigator.actions.WebflowNavigatorActionProvider">
          <enablement>
 			<or>
+				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject"/>
 				<and>
 					<instanceof value="org.eclipse.core.resources.IFile"/>
 					<test property="org.springframework.ide.eclipse.webflow.core.model.isWebflowConfig"/>
 				</and>
-            	<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig"/>
+				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement"/>
             </or>
          </enablement>
       </actionProvider>
-
    </extension>
 
    <extension
@@ -115,17 +108,18 @@
             providesSaveables="false">
 		 <triggerPoints>
 			<or>
-				<instanceof value="org.eclipse.core.resources.IFile"/>
-                <instanceof value="org.eclipse.core.resources.IStorage"/>
-				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+				<instanceof value="org.springframework.ide.eclipse.core.model.ISpringProject"/>
+				<and>
+					<instanceof value="org.eclipse.core.resources.IFile"/>
+					<test property="org.springframework.ide.eclipse.webflow.core.model.isWebflowConfig"/>
+				</and>
+				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject"/>
 				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement"/>
 			</or>
 		 </triggerPoints>
          <possibleChildren>
-			<or>
-				<instanceof value="org.eclipse.core.resources.IFile"/>
-                <instanceof value="org.eclipse.core.resources.IStorage"/>
-				<instanceof value="org.springframework.ide.eclipse.core.model.IModelElement"/>
+         	<or>
+				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject"/>
 				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement"/>
 			</or>
          </possibleChildren>
@@ -138,10 +132,16 @@
             id="org.springframework.ide.eclipse.webflow.ui.navigator.projectExplorerActions"
             class="org.springframework.ide.eclipse.webflow.ui.navigator.actions.WebflowNavigatorActionProvider">
 	     <enablement>
-				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig"/>
+	     	<or>
+				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject"/>
+				<and>
+					<instanceof value="org.eclipse.core.resources.IFile"/>
+					<test property="org.springframework.ide.eclipse.webflow.core.model.isWebflowConfig"/>
+				</and>
+				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement"/>
+			</or>
          </enablement>
       </actionProvider>
-      
    </extension>
    
    <extension

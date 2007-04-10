@@ -36,7 +36,8 @@ public class BeansSearchLabelProvider extends BeansModelLabelProvider {
 	}	
 
 	@Override
-	protected String getBaseText(Object element) {
+	protected String getText(Object element, Object parentElement,
+			int severity) {
 		if (element instanceof IModelElement) {
 			StringBuffer buffer = new StringBuffer(super.getText(element));
 			buffer.append(BeansUILabels.CONCAT_STRING);
@@ -44,6 +45,6 @@ public class BeansSearchLabelProvider extends BeansModelLabelProvider {
 					BeansUILabels.DESCRIPTION, buffer);
 			return buffer.toString();
 		}
-		return super.getBaseText(element);
+		return super.getText(element, parentElement, severity);
 	}
 }

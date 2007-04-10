@@ -45,6 +45,12 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	public static final String PLUGIN_ID =
 			"org.springframework.ide.eclipse.beans.ui";
 
+	public static final String PROJECT_EXPLORER_CONTENT_PROVIDER_ID = PLUGIN_ID
+			+ ".navigator.projectExplorerContent";
+
+	public static final String SPRING_EXPLORER_CONTENT_PROVIDER_ID = PLUGIN_ID
+			+ ".navigator.springExplorerContent";
+
 	public static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
 
 	/** The shared instance. */
