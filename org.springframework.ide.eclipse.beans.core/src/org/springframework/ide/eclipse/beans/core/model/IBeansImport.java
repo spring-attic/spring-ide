@@ -10,15 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.model;
 
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IFile;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
  * This interface provides information for a Spring beans import.
  * 
  * @author Torsten Juergeleit
+ * @since 2.0
  */
 public interface IBeansImport extends IBeansModelElement, ISourceModelElement {
 
-	IResource getImportedResource();
+	IFile getImportedFile();
 }

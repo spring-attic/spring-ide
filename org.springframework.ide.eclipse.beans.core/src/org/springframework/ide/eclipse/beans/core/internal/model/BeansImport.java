@@ -10,33 +10,41 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.Path;
 import org.springframework.beans.factory.parsing.ImportDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * This class defines an import within a Spring beans configuration.
  * 
  * @author Torsten Juergeleit
+ * @since 2.0
  */
 public class BeansImport extends AbstractBeansModelElement
 		implements IBeansImport {
 
-	private String resourceName;
+	private String resourcePath;
 
 	public BeansImport(IBeansConfig config, ImportDefinition definition) {
 		super(config, definition.getImportedResource(), definition);
+		resourcePath = StringUtils.cleanPath(definition.getImportedResource());
 	}
 
 	public int getElementType() {
 		return IBeansModelElementTypes.IMPORT_TYPE;
 	}
 
-	public IResource getImportedResource() {
-		// TODO
+	public IFile getImportedFile() {
+		if (resourcePath.indexOf(':') > -1) {
+			IBeansConfig config = (IBeansConfig) getElementParent();
+			return config.getElementResource().getParent().getFile(
+					new Path(resourcePath));
+		}
 		return null;
 	}
 
@@ -49,14 +57,14 @@ public class BeansImport extends AbstractBeansModelElement
 			return false;
 		}
 		BeansImport that = (BeansImport) other;
-		if (!ObjectUtils.nullSafeEquals(this.resourceName, that.resourceName))
+		if (!ObjectUtils.nullSafeEquals(this.resourcePath, that.resourcePath))
 			return false;
 		return super.equals(other);
 	}
 
 	@Override
 	public int hashCode() {
-		int hashCode = ObjectUtils.nullSafeHashCode(resourceName);
+		int hashCode = ObjectUtils.nullSafeHashCode(resourcePath);
 		return getElementType() * hashCode + super.hashCode();
 	}
 
@@ -64,7 +72,7 @@ public class BeansImport extends AbstractBeansModelElement
 	public String toString() {
 		StringBuffer text = new StringBuffer(super.toString());
 		text.append(": resource=");
-		text.append(resourceName);
+		text.append(resourcePath);
 		return text.toString();
 	}
 }
