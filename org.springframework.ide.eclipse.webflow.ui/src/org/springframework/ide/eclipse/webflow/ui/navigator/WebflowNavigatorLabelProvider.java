@@ -76,6 +76,10 @@ public class WebflowNavigatorLabelProvider extends BeansNavigatorLabelProvider {
 						.toString();
 			}
 		}
+		else if (element instanceof IFile
+				&& parentElement instanceof IWebflowProject) {
+			return ((IFile) element).getProjectRelativePath().toString();
+		}
 		return super.getText(element, parentElement, severity);
 	}
 }

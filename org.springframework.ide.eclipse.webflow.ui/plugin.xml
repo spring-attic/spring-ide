@@ -104,8 +104,9 @@
             contentProvider="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorContentProvider"
             labelProvider="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorLabelProvider"
             icon="icons/full/obj16/spring_webflow_obj.gif"
+            providesSaveables="false"
             activeByDefault="true"
-            providesSaveables="false">
+            priority="highest">	<!-- we need to outrule the other navigators here to get the IFiles labeled -->
 		 <triggerPoints>
 			<or>
 				<instanceof value="org.springframework.ide.eclipse.core.model.ISpringProject"/>
@@ -119,6 +120,7 @@
 		 </triggerPoints>
          <possibleChildren>
          	<or>
+				<instanceof value="org.eclipse.core.resources.IFile"/>
 				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject"/>
 				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement"/>
 			</or>

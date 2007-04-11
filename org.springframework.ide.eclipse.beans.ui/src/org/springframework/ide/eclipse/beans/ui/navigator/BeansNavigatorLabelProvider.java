@@ -124,11 +124,14 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 		if (element instanceof IBeansProject) {
 			return "Beans";	// TODO Externalize string
 		}
-		else if (element instanceof IBeansConfig) {
-			if (parentElement instanceof ISpringProject
-					|| parentElement instanceof IBeansProject) {
-				return ((IBeansConfig) element).getElementName();
-			}
+		else if (element instanceof IBeansConfig
+				&& (parentElement instanceof ISpringProject
+						|| parentElement instanceof IBeansProject)) {
+			return ((IBeansConfig) element).getElementName();
+		}
+		else if (element instanceof IFile
+				&& parentElement instanceof IBeansProject) {
+			return ((IFile) element).getProjectRelativePath().toString();
 		}
 		return super.getText(element, parentElement, severity);
 	}

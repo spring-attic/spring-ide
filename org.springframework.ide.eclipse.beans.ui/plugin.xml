@@ -183,6 +183,8 @@
 		 </triggerPoints>
          <possibleChildren>
 			<or>
+				<instanceof value="org.eclipse.core.resources.IFile"/>
+				<instanceof value="org.springframework.ide.eclipse.core.io.ZipEntryStorage"/>
 				<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
 			</or>
          </possibleChildren>
@@ -211,8 +213,8 @@
             contentProvider="org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorContentProvider"
             labelProvider="org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorLabelProvider"
             icon="icons/full/obj16/bean_obj.gif"
-            activeByDefault="true">
-            priority="highest">
+            activeByDefault="true"
+            priority="highest">	<!-- we need to outrule the other navigators here to get the IFiles labeled -->
 		<triggerPoints>
 			<or>
 				<instanceof value="org.springframework.ide.eclipse.core.model.ISpringProject"/>
@@ -226,7 +228,11 @@
 			</or>
 		 </triggerPoints>
          <possibleChildren>
-			<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
+			<or>
+				<instanceof value="org.eclipse.core.resources.IFile"/>
+				<instanceof value="org.springframework.ide.eclipse.core.io.ZipEntryStorage"/>
+				<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
+			</or>
          </possibleChildren>
          <commonSorter
                id="org.springframework.ide.eclipse.beans.ui.navigator.sorter.projectExplorerSorter"
