@@ -10,29 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.ui.graph.actions;
 
-import java.util.List;
-import java.util.Set;
-
-import org.eclipse.gef.EditPart;
-import org.eclipse.gef.GraphicalViewer;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IEditorPart;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
-import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.webflow.core.internal.model.Action;
-import org.springframework.ide.eclipse.webflow.core.internal.model.AttributeMapper;
-import org.springframework.ide.eclipse.webflow.core.internal.model.BeanAction;
-import org.springframework.ide.eclipse.webflow.core.internal.model.ExceptionHandler;
-import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
-import org.springframework.ide.eclipse.webflow.ui.graph.WebflowEditor;
-import org.springframework.ide.eclipse.webflow.ui.graph.WebflowUtils;
 
 /**
  * 
  */
-public class OpenBeansConfigAction extends OpenBeansGraphAction {
+public class OpenBeansConfigAction extends AbstractBeansEditorPartAction {
 
 	/**
 	 * 
@@ -68,63 +53,9 @@ public class OpenBeansConfigAction extends OpenBeansGraphAction {
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	public void run() {
-		Object flowModelElement = getFirstSelectedEditPart().getModel();
-		IBean bean = null;
-		IModelElement beansConfig = null;
-		String beanId = null;
-		IWebflowConfig config = WebflowUtils.getActiveWebflowConfig();
-		if (config != null && config.getBeansConfigs() != null
-				&& config.getBeansConfigs().size() > 0) {
-			if (flowModelElement instanceof Action) {
-				Action action = (Action) flowModelElement;
-				beanId = action.getBean();
-			}
-			else if (flowModelElement instanceof BeanAction) {
-				BeanAction action = (BeanAction) flowModelElement;
-				beanId = action.getBean();
-			}
-			else if (flowModelElement instanceof ExceptionHandler) {
-				ExceptionHandler action = (ExceptionHandler) flowModelElement;
-				beanId = action.getBean();
-			}
-			else if (flowModelElement instanceof AttributeMapper) {
-				AttributeMapper action = (AttributeMapper) flowModelElement;
-				beanId = action.getBean();
-			}
-		}
-		if (beanId != null) {
-			Set<IModelElement> configs = config.getBeansConfigs();
-			for (IModelElement bc : configs) {
-				if (BeansModelUtils.getBean(beanId, bc) != null) {
-					bean = BeansModelUtils.getBean(beanId, bc);
-					beansConfig = bc;
-				}
-			}
-		}
+		IBean bean = getBean();
 		if (bean != null) {
 			BeansUIUtils.openInEditor(bean);
 		}
-		else {
-			MessageDialog.openError(getWorkbenchPart().getSite().getShell(),
-					"Error opening Beans Graph",
-					"The referenced bean cannot be located in Beans ConfigSet '"
-							+ beansConfig.getElementName() + "'");
-		}
-
-	}
-
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
-	protected EditPart getFirstSelectedEditPart() {
-		GraphicalViewer viewer = ((WebflowEditor) getWorkbenchPart())
-				.getGraphViewer();
-		List list = viewer.getSelectedEditParts();
-		if (!list.isEmpty()) {
-			return (EditPart) list.get(0);
-		}
-		return null;
 	}
 }
