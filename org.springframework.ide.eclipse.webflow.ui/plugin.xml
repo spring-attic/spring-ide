@@ -56,15 +56,14 @@
             contentProvider="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorContentProvider"
             labelProvider="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorLabelProvider"
             icon="icons/full/obj16/spring_webflow_obj.gif"
-            activeByDefault="true"
-            providesSaveables="false">
+            activeByDefault="true">
 		 <triggerPoints>
 			<or>
-				<instanceof value="org.springframework.ide.eclipse.core.model.ISpringProject"/>
 				<and>
 					<instanceof value="org.eclipse.core.resources.IFile"/>
 					<test property="org.springframework.ide.eclipse.webflow.core.model.isWebflowConfig"/>
 				</and>
+				<instanceof value="org.springframework.ide.eclipse.core.model.ISpringProject"/>
 				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject"/>
 				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement"/>
 			</or>
@@ -109,18 +108,17 @@
             priority="highest">	<!-- we need to outrule the other navigators here to get the IFiles labeled -->
 		 <triggerPoints>
 			<or>
-				<instanceof value="org.springframework.ide.eclipse.core.model.ISpringProject"/>
 				<and>
 					<instanceof value="org.eclipse.core.resources.IFile"/>
 					<test property="org.springframework.ide.eclipse.webflow.core.model.isWebflowConfig"/>
 				</and>
+				<instanceof value="org.springframework.ide.eclipse.core.model.ISpringProject"/>
 				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject"/>
 				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement"/>
 			</or>
 		 </triggerPoints>
          <possibleChildren>
          	<or>
-				<instanceof value="org.eclipse.core.resources.IFile"/>
 				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject"/>
 				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement"/>
 			</or>

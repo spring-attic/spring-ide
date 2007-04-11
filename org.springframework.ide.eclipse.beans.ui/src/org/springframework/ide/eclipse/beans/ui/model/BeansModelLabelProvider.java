@@ -136,7 +136,7 @@ public class BeansModelLabelProvider extends
 			return BeansModelLabels.getElementLabel((IModelElement) element, 0);
 		}
 		if (element instanceof IFile) {
-			return ((IFile) element).getProjectRelativePath().toString();
+			return ((IFile) element).getName();
 		}
 		else if (element instanceof ZipEntryStorage) {
 			ZipEntryStorage storage = (ZipEntryStorage) element;
