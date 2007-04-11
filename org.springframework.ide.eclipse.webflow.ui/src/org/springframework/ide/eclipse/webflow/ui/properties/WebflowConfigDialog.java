@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorSorter;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
@@ -127,7 +128,7 @@ public class WebflowConfigDialog extends Dialog {
 		});
 
 		Label beansLabel = new Label(composite, SWT.NONE);
-		beansLabel.setText("Link Spring Beans configs to Web Flow flow");
+		beansLabel.setText("Link Spring Bean Config and Config Sets");
 		// config set list viewer
 		beansConfigSetViewer = CheckboxTableViewer.newCheckList(composite,
 				SWT.BORDER);
@@ -142,6 +143,7 @@ public class WebflowConfigDialog extends Dialog {
 		if (this.beansConfig != null) {
 			beansConfigSetViewer.setCheckedElements(this.beansConfig.toArray());
 		}
+		beansConfigSetViewer.setSorter(new BeansNavigatorSorter());
 
 		// Create error label
 		errorLabel = new Label(composite, SWT.NONE);
