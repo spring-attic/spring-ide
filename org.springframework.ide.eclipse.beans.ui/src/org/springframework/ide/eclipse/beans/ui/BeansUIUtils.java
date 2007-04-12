@@ -246,6 +246,10 @@ public final class BeansUIUtils {
 					|| segment instanceof IBeansConfig) {
 				return (IModelElement) segment;
 			}
+			else if (segment instanceof BeanClassReferences) {
+				IBean bean = (IBean) path.getSegment(i + 1);
+				return bean.getElementParent();
+			}
 		}
 		return null;
 	}
