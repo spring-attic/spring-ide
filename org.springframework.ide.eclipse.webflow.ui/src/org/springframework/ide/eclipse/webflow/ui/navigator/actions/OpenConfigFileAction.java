@@ -11,47 +11,44 @@
 package org.springframework.ide.eclipse.webflow.ui.navigator.actions;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springframework.ide.eclipse.ui.navigator.actions.AbstractNavigatorAction;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
+import org.springframework.ide.eclipse.webflow.ui.Activator;
 
 /**
- * Open {@link IWebflowConfig} in the standard Eclipse editor
+ * Opens the {@link IWebflowConfig} in the standard Eclipse editor.
+ * 
  * @author Christian Dupuis
+ * @author Torsten Juergeleit
  * @since 2.0
  */
-public class OpenConfigFileAction extends Action {
-
-	private ICommonActionExtensionSite site;
+public class OpenConfigFileAction extends AbstractNavigatorAction {
 
 	private IWebflowConfig element;
 
 	public OpenConfigFileAction(ICommonActionExtensionSite site) {
-		this.site = site;
+		super(site);
 		setText("Op&en"); // TODO externalize text
 	}
 
-	@Override
-	public boolean isEnabled() {
-		ISelection selection = site.getViewSite().getSelectionProvider()
-				.getSelection();
-		if (selection instanceof IStructuredSelection) {
-			IStructuredSelection sSelection = (IStructuredSelection) selection;
-			if (sSelection.size() == 1) {
-				Object sElement = sSelection.getFirstElement();
-				if (sElement instanceof IWebflowConfig) {
-					element = (IWebflowConfig) sElement;
+	public boolean isEnabled(IStructuredSelection selection) {
+		if (selection.size() == 1) {
+			Object sElement = selection.getFirstElement();
+			if (sElement instanceof IWebflowConfig) {
+				element = (IWebflowConfig) sElement;
+				return true;
+			}
+			else if (sElement instanceof IFile) {
+				if (WebflowModelUtils.isWebflowConfig((IFile) sElement)
+						&& Activator.SPRING_EXPLORER_CONTENT_PROVIDER_ID
+								.equals(getActionSite().getExtensionId())) {
+					element = WebflowModelUtils
+							.getWebflowConfig((IFile) sElement);
 					return true;
-				}
-				else if (sElement instanceof IFile) {
-					if (WebflowModelUtils.isWebflowConfig((IFile) sElement)) {
-						element = WebflowModelUtils.getWebflowConfig((IFile) sElement);
-						return true;
-					}
 				}
 			}
 		}

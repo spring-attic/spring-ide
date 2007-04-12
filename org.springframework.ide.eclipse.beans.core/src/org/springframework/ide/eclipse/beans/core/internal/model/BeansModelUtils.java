@@ -662,6 +662,23 @@ public final class BeansModelUtils {
 		}
 	}
 
+	public static IBean getBeanWithConfigSets(String name,
+			IBeansConfig config) {
+		IBean bean = getBean(name, config);
+		if (bean == null) {
+			IBeansProject project = (IBeansProject) config.getElementParent();
+			for (IBeansConfigSet configSet : project.getConfigSets()) {
+				if (configSet.hasConfig(config.getElementName())) {
+					bean = getBean(name, configSet);
+					if (bean != null) {
+						break;
+					}
+				}
+			}
+		}
+		return bean;
+	}
+
 	/**
 	 * Returns the inner {@link IBean}s of a given {@link IModelElement}.
 	 */

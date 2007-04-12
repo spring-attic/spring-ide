@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.preference.IPreferencePage;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
@@ -231,5 +232,21 @@ public final class BeansUIUtils {
 			element = element.getElementParent();
 		}
 		return path.getPath();
+	}
+
+	/**
+	 * Returns the context ({@link IBeansConfig} or {@link IBeansConfigSet})
+	 * from the given {@link ITreeSelection selection}.
+	 */
+	public static IModelElement getContext(ITreeSelection selection) {
+		TreePath path = selection.getPaths()[0];
+		for (int i = path.getSegmentCount() - 1; i > 0; i--) {
+			Object segment = path.getSegment(i);
+			if (segment instanceof IBeansConfigSet
+					|| segment instanceof IBeansConfig) {
+				return (IModelElement) segment;
+			}
+		}
+		return null;
 	}
 }

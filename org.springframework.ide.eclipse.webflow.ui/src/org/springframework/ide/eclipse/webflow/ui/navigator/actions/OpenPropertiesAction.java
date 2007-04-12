@@ -20,6 +20,7 @@ import org.springframework.ide.eclipse.ui.navigator.actions.AbstractNavigatorAct
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
+import org.springframework.ide.eclipse.webflow.ui.Activator;
 import org.springframework.ide.eclipse.webflow.ui.properties.WebflowPropertyPage;
 
 /**
@@ -50,7 +51,9 @@ public class OpenPropertiesAction extends AbstractNavigatorAction {
 				project = ((IWebflowConfig) sElement).getProject().getProject();
 			}
 			else if (sElement instanceof IFile) {
-				if (WebflowModelUtils.isWebflowConfig((IFile) sElement)) {
+				if (WebflowModelUtils.isWebflowConfig((IFile) sElement)
+						&& Activator.SPRING_EXPLORER_CONTENT_PROVIDER_ID
+								.equals(getActionSite().getExtensionId())) {
 					project = WebflowModelUtils.getWebflowConfig(
 							(IFile) sElement).getProject().getProject();
 				}
