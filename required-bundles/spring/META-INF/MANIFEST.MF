@@ -1,11 +1,11 @@
 Manifest-Version: 1.0
 Implementation-Title: Spring Framework
-Implementation-Version: 2.0.3
-Spring-Version: 2.0.3
+Implementation-Version: 2.0.4
+Spring-Version: 2.0.4
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.springframework
 Bundle-Name: org.springframework
-Bundle-Version: 2.0.3
+Bundle-Version: 2.0.4
 Bundle-Vendor: Spring Framework
 Bundle-ClassPath: spring.jar
 Bundle-Localization: plugin

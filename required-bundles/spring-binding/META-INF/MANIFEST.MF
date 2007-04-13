@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Implementation-Title: Spring Binding
-Implementation-Version: 1.0.1
+Implementation-Version: 1.0.2
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.springframework.binding
 Bundle-Name: org.springframework.binding
-Bundle-Version: 1.0.1
+Bundle-Version: 1.0.2
 Bundle-Vendor: Spring Binding
 Bundle-ClassPath: spring-binding.jar
 Bundle-Localization: plugin

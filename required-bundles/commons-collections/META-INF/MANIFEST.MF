@@ -1,9 +1,9 @@
-Implementation-Title: commons-attributes
-Implementation-Version: 1.1
+Implementation-Title: commons-collections
+Implementation-Version: 3.2
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: jakarta.commons.collections
 Bundle-Name: commons-collections
-Bundle-Version: 3.1
+Bundle-Version: 3.2
 Bundle-Vendor: Apache Jakarta Commons
 Export-Package: org.apache.commons.collections,
  org.apache.commons.collections.bag,

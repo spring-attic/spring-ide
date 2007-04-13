@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Implementation-Title: Spring Web Flow
-Implementation-Version: 1.0.1
+Implementation-Version: 1.0.2
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.springframework.webflow
 Bundle-Name: org.springframework.webflow
-Bundle-Version: 1.0.1
+Bundle-Version: 1.0.2
 Bundle-Vendor: Spring Web Flow
 Bundle-ClassPath: spring-webflow.jar
 Bundle-Localization: plugin
