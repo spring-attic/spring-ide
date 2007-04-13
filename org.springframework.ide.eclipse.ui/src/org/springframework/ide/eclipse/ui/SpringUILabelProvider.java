@@ -42,8 +42,12 @@ public class SpringUILabelProvider extends
 	protected Image getImage(Object element, Object parentElement,
 			int severity) {
 		if (element instanceof ISpringProject) {
-			return SpringUIUtils.getDecoratedImage(SpringUIImages
-					.getImage(SpringUIImages.IMG_OBJS_PROJECT), severity);
+			Image image = SpringUIImages
+					.getImage(SpringUIImages.IMG_OBJS_PROJECT);
+			if (isDecorating()) {
+				image = SpringUIUtils.getDecoratedImage(image, severity);
+			}
+			return image;
 		}
 		return super.getImage(element, parentElement, severity);
 	}

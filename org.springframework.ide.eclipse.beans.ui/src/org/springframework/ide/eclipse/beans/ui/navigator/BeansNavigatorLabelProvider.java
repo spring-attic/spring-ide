@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
  * {@link ICommonLabelProvider} which knows about the beans core model's
@@ -113,7 +114,11 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 	protected Image getImage(Object element, Object parentElement,
 			int severity) {
 		if (element instanceof IBeansProject) {
-			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_BEAN);
+			Image image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_BEAN);
+			if (isDecorating()) {
+				image = SpringUIUtils.getDecoratedImage(image, severity);
+			}
+			return image;
 		}
 		return super.getImage(element, parentElement, severity);
 	}

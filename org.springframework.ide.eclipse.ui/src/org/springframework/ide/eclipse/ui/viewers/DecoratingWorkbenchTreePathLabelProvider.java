@@ -16,6 +16,7 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.ViewerLabel;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
  * This template implementation of the {@link ITreePathLabelProvider} interface
@@ -92,7 +93,11 @@ public class DecoratingWorkbenchTreePathLabelProvider extends LabelProvider
 	 */
 	protected Image getImage(Object element, Object parentElement,
 			int severity) {
-		return wbLabelProvider.getImage(element);
+		Image image = wbLabelProvider.getImage(element);
+		if (isDecorating) {
+			image = SpringUIUtils.getDecoratedImage(image, severity);
+		}
+		return image;
 	}
 
 	/**

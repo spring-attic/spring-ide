@@ -18,6 +18,7 @@ import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeanClassReferences;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceLabelProvider;
@@ -60,7 +61,18 @@ public class BeansModelLabelProvider extends
 					.getElementEndLine());
 		}
 		else if (element instanceof IResourceModelElement) {
-			if (element instanceof IBeansConfigSet) {
+			if (element instanceof IBeansProject) {
+				for (IBeansConfig config : ((IBeansProject) element)
+						.getConfigs()) {
+					severity = MarkerUtils
+							.getHighestSeverityFromMarkersInRange(config
+									.getElementResource(), -1, -1);
+					if (severity == IMarker.SEVERITY_ERROR) {
+						break;
+					}
+				}
+			}
+			else if (element instanceof IBeansConfigSet) {
 				for (IBeansConfig config : ((IBeansConfigSet) element)
 						.getConfigs()) {
 					severity = MarkerUtils
@@ -106,7 +118,7 @@ public class BeansModelLabelProvider extends
 		else if (element instanceof IModelElement) {
 			image = BeansModelImages.getImage((IModelElement) element);
 		}
-		if (element instanceof ZipEntryStorage) {
+		else if (element instanceof ZipEntryStorage) {
 			return super.getImage(((ZipEntryStorage) element).getFile(),
 					parentElement, severity);
 		}
@@ -114,7 +126,10 @@ public class BeansModelLabelProvider extends
 			image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_REFERENCE);
 		}
 		if (image != null) {
-			return SpringUIUtils.getDecoratedImage(image, severity);
+			if (isDecorating()) {
+				image = SpringUIUtils.getDecoratedImage(image, severity);
+			}
+			return image;
 		}
 		return super.getImage(element, parentElement, severity);
 	}
