@@ -15,6 +15,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.navigator.ICommonLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorLabelProvider;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
@@ -55,7 +56,10 @@ public class WebflowNavigatorLabelProvider extends BeansNavigatorLabelProvider {
 			int severity) {
 		if (element instanceof IWebflowConfig
 				|| element instanceof IWebflowProject) {
-			return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW);
+			Image image = WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW);
+			if (image != null) {
+				return SpringUIUtils.getDecoratedImage(image, severity);
+			}
 		}
 		return super.getImage(element, parentElement, severity);
 	}

@@ -57,7 +57,6 @@ public class BeanActionMethodSearchRequestor extends
 			throws CoreException {
 		if (method.getElementName().toLowerCase().startsWith(
 				prefix.toLowerCase())
-				&& Flags.isPublic(method.getFlags())
 				&& !Flags.isInterface(method.getFlags())
 				&& method.exists()
 				&& ((IType) method.getParent()).isClass()

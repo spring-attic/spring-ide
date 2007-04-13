@@ -161,6 +161,7 @@ public class WebflowModelUtils {
 			if (bean.getElementName().equals(
 					BeansEditorUtils.getAttribute(node, "bean"))) {
 				className = BeansModelUtils.getBeanClass(bean, null);
+				break;
 			}
 		}
 
