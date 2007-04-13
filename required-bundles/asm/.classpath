@@ -2,8 +2,8 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry exported="true" kind="lib" path="asm-2.2.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="asm-commons-2.2.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="asm-util-2.2.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="asm.jar"/>
+	<classpathentry exported="true" kind="lib" path="asm-commons.jar"/>
+	<classpathentry exported="true" kind="lib" path="asm-util.jar"/>
 	<classpathentry kind="output" path="target/bin"/>
 </classpath>
