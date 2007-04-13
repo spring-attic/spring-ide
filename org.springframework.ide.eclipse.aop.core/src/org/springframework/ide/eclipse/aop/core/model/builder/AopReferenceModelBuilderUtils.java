@@ -162,8 +162,6 @@ public class AopReferenceModelBuilderUtils {
 			Object pc = info.getAspectJPointcutExpression();
 			Class<?> aspectJAdviceClass = getAspectJAdviceClass(info);
 			Constructor<?> ctor = aspectJAdviceClass.getConstructors()[0];
-			Method calculateArgumentBindingsMethod = aspectJAdviceClass
-					.getMethod("calculateArgumentBindings", (Class[]) null);
 			Object aspectJAdvice = ctor.newInstance(new Object[] {
 					info.getAdviceMethod(), pc, null });
 			if (info.getType() == ADVICE_TYPES.AFTER_RETURNING) {
@@ -190,10 +188,11 @@ public class AopReferenceModelBuilderUtils {
 				setArgumentNamesFromStringArrayMethod.invoke(aspectJAdvice,
 						new Object[] { info.getArgNames() });
 			}
-
-			calculateArgumentBindingsMethod.invoke(aspectJAdvice,
+			
+			Method getPointuctMethod = aspectJAdviceClass
+					.getMethod("getPointcut", (Class[]) null);
+			return getPointuctMethod.invoke(aspectJAdvice,
 					(Object[]) null);
-			return pc;
 		}
 		catch (InvocationTargetException e) {
 			throw e.getCause();
