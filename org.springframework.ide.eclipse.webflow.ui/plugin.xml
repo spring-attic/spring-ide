@@ -77,22 +77,21 @@
          <commonSorter
 				id="org.springframework.ide.eclipse.webflow.ui.navigator.springExplorerSorter"
 				class="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowModelNavigatorSorter" />
+	      <actionProvider
+	            id="org.springframework.ide.eclipse.webflow.ui.navigator.springExplorerActions"
+	            class="org.springframework.ide.eclipse.webflow.ui.navigator.actions.WebflowNavigatorActionProvider">
+	         <enablement>
+				<or>
+					<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject"/>
+					<and>
+						<instanceof value="org.eclipse.core.resources.IFile"/>
+						<test property="org.springframework.ide.eclipse.webflow.core.model.isWebflowConfig"/>
+					</and>
+					<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement"/>
+	            </or>
+	         </enablement>
+	      </actionProvider>
       </navigatorContent>
-
-      <actionProvider
-            id="org.springframework.ide.eclipse.webflow.ui.navigator.springExplorerActions"
-            class="org.springframework.ide.eclipse.webflow.ui.navigator.actions.WebflowNavigatorActionProvider">
-         <enablement>
-			<or>
-				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject"/>
-				<and>
-					<instanceof value="org.eclipse.core.resources.IFile"/>
-					<test property="org.springframework.ide.eclipse.webflow.core.model.isWebflowConfig"/>
-				</and>
-				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement"/>
-            </or>
-         </enablement>
-      </actionProvider>
    </extension>
 
    <extension
@@ -126,22 +125,21 @@
          <commonSorter
 				id="org.springframework.ide.eclipse.webflow.ui.navigator.projectExplorerSorter"
 				class="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowModelNavigatorSorter"/>
+	      <actionProvider
+	            id="org.springframework.ide.eclipse.webflow.ui.navigator.projectExplorerActions"
+	            class="org.springframework.ide.eclipse.webflow.ui.navigator.actions.WebflowNavigatorActionProvider">
+		     <enablement>
+		     	<or>
+					<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject"/>
+					<and>
+						<instanceof value="org.eclipse.core.resources.IFile"/>
+						<test property="org.springframework.ide.eclipse.webflow.core.model.isWebflowConfig"/>
+					</and>
+					<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement"/>
+				</or>
+	         </enablement>
+	      </actionProvider>
       </navigatorContent>
-
-      <actionProvider
-            id="org.springframework.ide.eclipse.webflow.ui.navigator.projectExplorerActions"
-            class="org.springframework.ide.eclipse.webflow.ui.navigator.actions.WebflowNavigatorActionProvider">
-	     <enablement>
-	     	<or>
-				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject"/>
-				<and>
-					<instanceof value="org.eclipse.core.resources.IFile"/>
-					<test property="org.springframework.ide.eclipse.webflow.core.model.isWebflowConfig"/>
-				</and>
-				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement"/>
-			</or>
-         </enablement>
-      </actionProvider>
    </extension>
    
    <extension
