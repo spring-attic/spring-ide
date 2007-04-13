@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.aop.core.model.internal;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.aop.core.Activator;
-import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelMarkerUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeEventsAdapter;
 
@@ -35,7 +34,8 @@ public class AopResourceChangeEvents extends SpringResourceChangeEventsAdapter {
 	private void clearProject(IProject project) {
 		IJavaProject jp = BeansModelUtils.getJavaProject(project);
 		Activator.getModel().removeProject(jp);
-		AopReferenceModelMarkerUtils.deleteProblemMarkers(project);
+		// commented because of workspace locking
+		// AopReferenceModelMarkerUtils.deleteProblemMarkers(project);
 	}
 
 	public void projectDeleted(IProject project, int eventType) {
