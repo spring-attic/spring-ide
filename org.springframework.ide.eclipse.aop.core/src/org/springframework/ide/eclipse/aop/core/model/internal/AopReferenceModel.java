@@ -16,12 +16,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAopReferenceModel;
+import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeListener;
 
 public class AopReferenceModel implements IAopReferenceModel {
 
@@ -29,33 +33,26 @@ public class AopReferenceModel implements IAopReferenceModel {
 
 	private List<IAopModelChangedListener> listeners = new LinkedList<IAopModelChangedListener>();
 
+	private IResourceChangeListener workspaceListener;
+
 	public void addProject(IJavaProject project, IAopProject aopProject) {
 		this.projects.put(project, aopProject);
 	}
 
+	public synchronized void removeProject(IJavaProject project) {
+		for (IJavaProject jp : projects.keySet()) {
+			if (jp.equals(project)) {
+				projects.remove(jp);
+				fireModelChanged();
+			}
+			break;
+		}
+	}
+
 	public IAopProject getProject(IJavaProject project) {
-		
-		// currently disabled automatic creation of AOP reference model
 		return getProjectWithInitialization(project);
-		
-		/*if (this.projects.containsKey(project)) {
-			return this.projects.get(project);
-		} 
-		else { 
-			createModel(project);
-			return this.projects.get(project);
-		}*/
 	}
-	
-	/*
-	private void createModel(IJavaProject project) {
-		Set<IFile> resourcesToBuild = AopReferenceModelUtils
-				.getFilesToBuildFromBeansProject(project.getProject());
-		AopReferenceModelBuilder.buildAopModel(project.getProject(),
-				resourcesToBuild);
-	}
-	 */
-	
+
 	public IAopProject getProjectWithInitialization(IJavaProject project) {
 		if (this.projects.containsKey(project)) {
 			return this.projects.get(project);
@@ -123,5 +120,24 @@ public class AopReferenceModel implements IAopReferenceModel {
 		for (IAopModelChangedListener listener : listeners) {
 			listener.changed();
 		}
+	}
+
+	public void shutdown() {
+		// Remove the ResourceChangeListener from the Eclipse Workspace
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		workspace.removeResourceChangeListener(workspaceListener);
+		workspaceListener = null;
+
+		// Remove all projects
+		projects.clear();
+	}
+
+	public void startup() {
+		// Add a ResourceChangeListener to the Eclipse Workspace
+		workspaceListener = new SpringResourceChangeListener(
+				new AopResourceChangeEvents());
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		workspace.addResourceChangeListener(workspaceListener,
+				SpringResourceChangeListener.LISTENER_FLAGS);
 	}
 }

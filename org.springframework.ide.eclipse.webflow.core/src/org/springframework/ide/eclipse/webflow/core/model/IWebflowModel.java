@@ -13,19 +13,17 @@ package org.springframework.ide.eclipse.webflow.core.model;
 import org.eclipse.core.resources.IProject;
 
 /**
- * 
+ * @author Christian Dupuis
+ * @since 2.0 
  */
 public interface IWebflowModel {
 
-	/**
-	 * 
-	 * 
-	 * @param project
-	 * 
-	 * @return
-	 */
 	IWebflowProject getProject(IProject project);
+	
+	boolean hasProject(IProject project);
 
+	void removeProject(IProject project);
+	
 	void registerModelChangeListener(IWebflowModelListener listener);
 
 	void removeModelChangeListener(IWebflowModelListener listener);

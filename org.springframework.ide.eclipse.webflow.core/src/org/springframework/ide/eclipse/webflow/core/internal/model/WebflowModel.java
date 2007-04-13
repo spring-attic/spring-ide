@@ -28,6 +28,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeListener;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModel;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelListener;
@@ -45,6 +46,8 @@ public class WebflowModel implements IWebflowModel, IResourceChangeListener {
 	 */
 	private Map<IProject, IWebflowProject> projects;
 
+	private IResourceChangeListener workspaceListener;
+
 	/**
 	 * 
 	 */
@@ -58,7 +61,8 @@ public class WebflowModel implements IWebflowModel, IResourceChangeListener {
 	 */
 	public boolean hasProject(IProject project) {
 		if (project != null && project.isAccessible()
-				&& projects.containsKey(project)) {
+				&& projects.containsKey(project)
+				&& SpringCoreUtils.isSpringProject(project)) {
 			return true;
 		}
 		return false;
@@ -116,6 +120,12 @@ public class WebflowModel implements IWebflowModel, IResourceChangeListener {
 		initialize();
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.addResourceChangeListener(this);
+
+		// Add a ResourceChangeListener to the Eclipse Workspace
+		workspaceListener = new SpringResourceChangeListener(
+				new WebflowResourceChangeEvents());
+		workspace.addResourceChangeListener(workspaceListener,
+				SpringResourceChangeListener.LISTENER_FLAGS);
 	}
 
 	/**
@@ -125,6 +135,13 @@ public class WebflowModel implements IWebflowModel, IResourceChangeListener {
 		initialize();
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.removeResourceChangeListener(this);
+
+		// Remove the ResourceChangeListener from the Eclipse Workspace
+		workspace.removeResourceChangeListener(workspaceListener);
+		workspaceListener = null;
+
+		// Remove all projects
+		projects.clear();
 	}
 
 	/**
@@ -212,5 +229,10 @@ public class WebflowModel implements IWebflowModel, IResourceChangeListener {
 			}
 			return true;
 		}
+	}
+
+	public synchronized void removeProject(IProject project) {
+		initialize();
+		fireModelChangedEvent(null);
 	}
 }

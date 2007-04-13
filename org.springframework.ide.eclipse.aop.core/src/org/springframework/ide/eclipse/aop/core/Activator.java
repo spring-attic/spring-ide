@@ -45,6 +45,7 @@ public class Activator extends AbstractUIPlugin {
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+		model.startup();
 	}
 
 	/*
@@ -54,6 +55,7 @@ public class Activator extends AbstractUIPlugin {
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
+		model.shutdown();
 		super.stop(context);
 	}
 

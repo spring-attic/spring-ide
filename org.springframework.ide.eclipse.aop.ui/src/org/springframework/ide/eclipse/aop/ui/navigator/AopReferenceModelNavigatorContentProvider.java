@@ -43,6 +43,7 @@ import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.xml.core.internal.document.ElementImpl;
 import org.springframework.ide.eclipse.aop.core.Activator;
+import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
@@ -62,20 +63,23 @@ import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
+import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
+import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 
 /**
  * {@link ICommonContentProvider} that contributes elements from the
- * {@link AopReferenceModel} created by {@link AopReferenceModelBuilder}. 
- *
+ * {@link AopReferenceModel} created by {@link AopReferenceModelBuilder}.
  * @author Christian Dupuis
  * @since 2.0
  */
 @SuppressWarnings("restriction")
 public class AopReferenceModelNavigatorContentProvider implements
-		ICommonContentProvider {
+		ICommonContentProvider, IAopModelChangedListener, IModelChangeListener {
 
 	private StructuredViewer viewer;
 
@@ -92,6 +96,8 @@ public class AopReferenceModelNavigatorContentProvider implements
 		if (viewer != null && viewer.getInput() != null) {
 			this.viewer = null;
 		}
+		Activator.getModel().unregisterAopModelChangedListener(this);
+		BeansCorePlugin.getModel().removeChangeListener(this);
 	}
 
 	public Object[] getElements(Object inputElement) {
@@ -173,7 +179,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 			for (IBeansConfig config : configs) {
 				List<IBean> pBeans = new ArrayList<IBean>();
 				pBeans.addAll(config.getBeans());
-				pBeans.addAll(BeansModelUtils.getInnerBeans(config));				
+				pBeans.addAll(BeansModelUtils.getInnerBeans(config));
 				for (IBean b : pBeans) {
 					if (type.getFullyQualifiedName().equals(
 							BeansModelUtils.getBeanClass(b, config))) {
@@ -286,9 +292,10 @@ public class AopReferenceModelNavigatorContentProvider implements
 
 			// add inner beans
 			if (nodes.size() == 0) {
-				nodes.addAll(getChildrenFromXmlLocation(resource, startLine,
-						endLine, id, BeansModelUtils
-								.getInnerBeans(beansConfig)));
+				nodes
+						.addAll(getChildrenFromXmlLocation(resource, startLine,
+								endLine, id, BeansModelUtils
+										.getInnerBeans(beansConfig)));
 			}
 
 			return nodes.toArray();
@@ -549,11 +556,25 @@ public class AopReferenceModelNavigatorContentProvider implements
 	}
 
 	public void init(ICommonContentExtensionSite config) {
+		Activator.getModel().registerAopModelChangedListener(this);
+		BeansCorePlugin.getModel().addChangeListener(this);
 	}
 
 	public void saveState(IMemento aMemento) {
 	}
 
 	public void restoreState(IMemento aMemento) {
+	}
+
+	public void changed() {
+		Object obj = viewer.getInput();
+		refreshViewer(obj);
+	}
+
+	public void elementChanged(ModelChangeEvent event) {
+		if (event.getType() == Type.CHANGED
+				&& event.getSource() instanceof IBeansProject) {
+			changed();
+		}
 	}
 }

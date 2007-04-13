@@ -38,7 +38,6 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 /**
  * This class is a content provider for the {@link CommonNavigator} which knows
  * about the web flow core model's {@link IWebflowConfig}.
- * 
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  * @since 2.0
@@ -47,6 +46,7 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 		IWebflowModelListener {
 
 	private String providerID;
+
 	private StructuredViewer viewer;
 
 	public void init(ICommonContentExtensionSite config) {
@@ -64,7 +64,7 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 		if (parentElement instanceof ISpringProject) {
 			if (hasChildren(parentElement)) {
 				return new Object[] { Activator.getModel().getProject(
-					((ISpringProject) parentElement).getProject()) };
+						((ISpringProject) parentElement).getProject()) };
 			}
 		}
 		else if (parentElement instanceof IWebflowProject) {
@@ -74,8 +74,7 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 		else if (parentElement instanceof IFile) {
 			IFile file = (IFile) parentElement;
 			if (WebflowModelUtils.isWebflowConfig(file)) {
-				return new Object[] {
-						WebflowModelUtils.getWebflowConfig(file) };
+				return new Object[] { WebflowModelUtils.getWebflowConfig(file) };
 			}
 		}
 		else if (parentElement instanceof IWebflowConfig) {
@@ -133,15 +132,17 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 	}
 
 	public void modelChanged(IWebflowProject project) {
-		IProject p = project.getProject();
-		if (org.springframework.ide.eclipse.webflow.ui.Activator
-				.PROJECT_EXPLORER_CONTENT_PROVIDER_ID.equals(providerID)) {
-			refreshViewerForElement(p);
-			refreshViewerForElement(BeansModelUtils.getJavaProject(p));
-		}
-		else if (org.springframework.ide.eclipse.webflow.ui.Activator
-				.SPRING_EXPLORER_CONTENT_PROVIDER_ID.equals(providerID)) {
-			refreshViewerForElement(SpringCore.getModel().getProject(p));
+		if (project != null) {
+			IProject p = project.getProject();
+			if (org.springframework.ide.eclipse.webflow.ui.Activator.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
+					.equals(providerID)) {
+				refreshViewerForElement(p);
+				refreshViewerForElement(BeansModelUtils.getJavaProject(p));
+			}
+			else if (org.springframework.ide.eclipse.webflow.ui.Activator.SPRING_EXPLORER_CONTENT_PROVIDER_ID
+					.equals(providerID)) {
+				refreshViewerForElement(SpringCore.getModel().getProject(p));
+			}
 		}
 	}
 
@@ -185,7 +186,8 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 						}
 						if (element instanceof IWebflowModel) {
 							viewer.refresh();
-						} else {
+						}
+						else {
 							viewer.refresh(element);
 						}
 					}

@@ -17,6 +17,12 @@ import org.eclipse.jdt.core.IJavaProject;
 
 public interface IAopReferenceModel {
 
+	void startup();
+
+	void shutdown();
+
+	void removeProject(IJavaProject project);
+
 	void addProject(IJavaProject project, IAopProject aopProject);
 
 	void fireModelChanged();

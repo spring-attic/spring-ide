@@ -63,8 +63,8 @@ public class WebflowModelLabelDecorator extends LabelProvider implements
 	protected void decorateFolder(IFolder folder, IDecoration decoration) {
 		IWebflowModel model = org.springframework.ide.eclipse.webflow.core.Activator
 				.getModel();
-		IWebflowProject project = model.getProject(folder.getProject());
-		if (project != null) {
+		if (model.hasProject(folder.getProject())) {
+			IWebflowProject project = model.getProject(folder.getProject());
 			String path = folder.getProjectRelativePath().toString() + '/';
 			for (IWebflowConfig config : project.getConfigs()) {
 				if (config.getResource().getProjectRelativePath().toString()
@@ -79,8 +79,8 @@ public class WebflowModelLabelDecorator extends LabelProvider implements
 	protected void decorateFile(IFile file, IDecoration decoration) {
 		IWebflowModel model = org.springframework.ide.eclipse.webflow.core.Activator
 				.getModel();
-		IWebflowProject project = model.getProject(file.getProject());
-		if (project != null) {
+		if (model.hasProject(file.getProject())) {
+			IWebflowProject project = model.getProject(file.getProject());
 			for (IWebflowConfig config : project.getConfigs()) {
 				// The following comparison works for archived config files too
 				if (config.getResource().equals(file)) {
