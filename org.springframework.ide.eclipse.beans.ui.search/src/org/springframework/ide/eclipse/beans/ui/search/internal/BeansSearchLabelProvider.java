@@ -39,7 +39,8 @@ public class BeansSearchLabelProvider extends BeansModelLabelProvider {
 	protected String getText(Object element, Object parentElement,
 			int severity) {
 		if (element instanceof IModelElement) {
-			StringBuffer buffer = new StringBuffer(super.getText(element));
+			StringBuffer buffer = new StringBuffer(super.getText(element,
+					parentElement, severity));
 			buffer.append(BeansUILabels.CONCAT_STRING);
 			BeansModelLabels.appendElementPathLabel((IModelElement) element,
 					BeansUILabels.DESCRIPTION, buffer);
