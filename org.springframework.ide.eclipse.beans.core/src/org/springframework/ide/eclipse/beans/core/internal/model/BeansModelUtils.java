@@ -84,8 +84,14 @@ import org.w3c.dom.Node;
  * Helper methods for working with the BeansCoreModel.
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public final class BeansModelUtils {
+	
+	/**
+	 * only allow use of static helper methods
+	 */
+	private BeansModelUtils() { }
 
 	/**
 	 * Returns config for given name from specified context
@@ -138,6 +144,44 @@ public final class BeansModelUtils {
 		}
 		throw new IllegalArgumentException("Unsupported model element "
 				+ element);
+	}
+
+	/**
+	 * Returns all {@link IBeansConfigSet} the given {@link IModelElement} belongs
+	 * to.
+	 * 
+	 * @param element the model element to get the beans config for
+	 * @throws IllegalArgumentException if unsupported model element specified
+	 */
+	public static Set<IBeansConfigSet> getConfigSets(IModelElement element) {
+		Set<IBeansConfigSet> configSets = new HashSet<IBeansConfigSet>();
+		if (element instanceof IBeansConfigSet) {
+			configSets.add((IBeansConfigSet) element);
+		}
+		else if (element instanceof IBeansConfig) {
+			IBeansProject beansProject = getProject(element);
+			Set<IBeansConfigSet> css = beansProject.getConfigSets();
+			for (IBeansConfigSet cs : css) {
+				if (cs.getConfigs().contains(element)) {
+					configSets.add(cs);
+				}
+			}
+		}
+		else if (element instanceof ISourceModelElement) {
+			IBeansConfig bc = getConfig(element);
+			IBeansProject beansProject = getProject(bc);
+			Set<IBeansConfigSet> css = beansProject.getConfigSets();
+			for (IBeansConfigSet cs : css) {
+				if (cs.getConfigs().contains(bc)) {
+					configSets.add(cs);
+				}
+			}
+		}
+		else {
+			throw new IllegalArgumentException("Unsupported model element "
+					+ element);
+		}
+		return configSets;
 	}
 
 	/**
@@ -763,25 +807,66 @@ public final class BeansModelUtils {
 		}
 		return null;
 	}
-
+	
 	/**
 	 * Returns the given bean's class name.
 	 * 
 	 * @param bean  the bean to lookup the bean class name for
 	 * @param context  the context ({@link IBeanConfig} or
 	 *            {@link IBeanConfigSet}) the beans are looked-up; if
-	 *            <code>null</code> then the bean's config is used
+	 *            <code>null</code> then the bean's config will be first used;
+	 *            if the bean class name cannot be resolved in the bean's configs,
+	 *            the algorithm will look in all bean config sets that contain
+	 *            the bean's config
 	 */
 	public static String getBeanClass(IBean bean, IModelElement context) {
 		Assert.notNull(bean);
-		if (bean.isRootBean()) {
+		
+		// TODO add factory-bean and factory-method to this check
+		if (bean.getClassName() != null) {
+			return bean.getClassName();
+		}
+		
+		if (context == null) {
+			// first use config
+			context = getConfig(bean);
+			String className = getBeanClassFromContext(bean, context);
+			if (className != null) {
+				return className;
+			}
+			// second use possibly config sets
+			Set<IBeansConfigSet> configSets = getConfigSets(bean);
+			for (IBeansConfigSet configSet : configSets) {
+				 className = getBeanClassFromContext(bean, configSet);
+				if (className != null) {
+					return className;
+				}	
+			}
+		}
+		else {
+			return getBeanClassFromContext(bean, context);
+		}
+		
+		return null;
+	}
+
+	/**
+	 * Returns the given bean's class name.
+	 * 
+	 * @param bean  the bean to lookup the bean class name for
+	 * @param context  the context ({@link IBeanConfig} or
+	 *            {@link IBeanConfigSet}) the beans are looked-up
+	 * @throws IllegalArgumentException if context of bean is <code>null</code>
+	 */
+	public static String getBeanClassFromContext(IBean bean, IModelElement context) {
+		Assert.notNull(bean);
+		Assert.notNull(context);
+		
+		// TODO add factory-bean and factory-method to this check
+		if (bean.getClassName() != null) {
 			return bean.getClassName();
 		}
 
-		// If no context given then use this bean's config instead
-		if (context == null) {
-			context = getConfig(bean);
-		}
 		Set<String> beanNames = new HashSet<String>();
 		do {
 			beanNames.add(bean.getElementName());
@@ -792,7 +877,8 @@ public final class BeansModelUtils {
 					break;
 				}
 				bean = getBean(parentName, context);
-				if (bean != null && bean.isRootBean()) {
+				// TODO add factory-bean and factory-method to this check
+				if (bean != null && bean.getClassName() != null) {
 					return bean.getClassName();
 				}
 			}
