@@ -6,7 +6,6 @@ Bundle-Version: 2.0.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.webflow.ui.editor.Activator
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Bundle-ClassPath: webflow-editor.jar
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.core.runtime,
@@ -26,7 +25,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.beans.core,
  org.springframework.ide.eclipse.beans.ui,
  org.springframework.ide.eclipse.beans.ui.editor,
- org.springframework.webflow;bundle-version="1.0.1";visibility:=reexport,
+ org.springframework.webflow;bundle-version="1.0.2";visibility:=reexport,
  org.springframework.ide.eclipse.webflow.core
 Eclipse-LazyStart: true
 Export-Package: 

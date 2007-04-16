@@ -26,7 +26,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.beans.ui.search
 Eclipse-LazyStart: true
 Bundle-Vendor: %providerName
-Bundle-ClassPath: beans-editor.jar
 Export-Package: org.springframework.ide.eclipse.beans.ui.editor,
  org.springframework.ide.eclipse.beans.ui.editor.actions,
  org.springframework.ide.eclipse.beans.ui.editor.contentassist,

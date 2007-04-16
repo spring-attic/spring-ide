@@ -6,7 +6,6 @@ Bundle-Version: 2.0.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.aop.ui.xref.Activator
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Bundle-ClassPath: aop-ui-xref.jar
 Require-Bundle: org.eclipse.contribution.xref.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,

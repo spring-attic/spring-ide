@@ -6,7 +6,6 @@ Bundle-Version: 2.0.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.webflow.core.Activator
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Bundle-ClassPath: webflow-core.jar
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,

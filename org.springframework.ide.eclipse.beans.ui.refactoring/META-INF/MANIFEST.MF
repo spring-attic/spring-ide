@@ -6,7 +6,6 @@ Bundle-Version: 2.0.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.beans.ui.refactoring.Activator
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Bundle-ClassPath: beans-refactoring.jar
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.ltk.core.refactoring,

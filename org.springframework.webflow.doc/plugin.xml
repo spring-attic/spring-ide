@@ -3,7 +3,7 @@
 <plugin
    id="org.springframework.webflow.doc"
    name="%pluginName"
-   version="1.0.1"
+   version="1.0.2"
    provider-name="%providerName">
 
    <runtime>

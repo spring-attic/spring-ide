@@ -5,7 +5,6 @@ Bundle-SymbolicName: org.springframework.ide.eclipse.beans.ui.search; singleton:
 Bundle-Version: 2.0.0.qualifier
 Bundle-Localization: plugin
 Bundle-Vendor: %providerName
-Bundle-ClassPath: search.jar
 Bundle-Activator: org.springframework.ide.eclipse.beans.ui.search.BeansSearchPlugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

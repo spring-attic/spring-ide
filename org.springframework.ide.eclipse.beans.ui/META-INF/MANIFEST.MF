@@ -20,7 +20,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.beans.core
 Eclipse-LazyStart: true
 Bundle-Vendor: %providerName
-Bundle-ClassPath: beans-ui.jar
 Export-Package: org.springframework.ide.eclipse.beans.ui,
  org.springframework.ide.eclipse.beans.ui.actions,
  org.springframework.ide.eclipse.beans.ui.dialogs,

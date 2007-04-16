@@ -18,7 +18,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.beans.core,
  org.springframework.ide.eclipse.beans.ui
 Eclipse-LazyStart: true
-Bundle-ClassPath: beans-graph.jar
 Bundle-Vendor: %providerName
 Export-Package: org.springframework.ide.eclipse.beans.ui.graph,
  org.springframework.ide.eclipse.beans.ui.graph.actions,

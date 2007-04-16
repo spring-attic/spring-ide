@@ -22,7 +22,6 @@ Require-Bundle: org.eclipse.ui,
  org.aspectj.aspectjweaver,
  org.objectweb.asm
 Eclipse-LazyStart: true
-Bundle-ClassPath: aop-core.jar
 Export-Package: org.springframework.ide.eclipse.aop.core,
  org.springframework.ide.eclipse.aop.core.logging,
  org.springframework.ide.eclipse.aop.core.model,

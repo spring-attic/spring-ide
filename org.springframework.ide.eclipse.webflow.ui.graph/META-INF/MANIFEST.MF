@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.springframework.ide.eclipse.webflow.ui.graph;singleton:
 Bundle-Version: 2.0.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.webflow.ui.graph.Activator
 Bundle-Vendor: %providerName
-Bundle-ClassPath: webflow-graph.jar, ognl.jar
+Bundle-ClassPath: ., ognl.jar
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
