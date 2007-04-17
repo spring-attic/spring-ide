@@ -127,6 +127,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 							+ currentFile.getFullPath().toString() + "]");
 
 		}
+
 		AopLog.logEnd(AopLog.BUILDER, "Processing took");
 		// update images and text decoractions
 		Activator.getModel().fireModelChanged();
@@ -171,9 +172,8 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 			if (jdtTargetType == null
 					|| Introspector.doesImplement(jdtTargetType,
 							FactoryBean.class.getName())) {
-				AopLog.log(AopLog.BUILDER_MESSAGES,
-					"Skipping bean definition [" + bean 
-					+ "] because either it is a FactoryBean or the IType "
+				AopLog.log(AopLog.BUILDER_MESSAGES, "Skipping bean definition ["
+					+ bean + "] because either it is a FactoryBean or the IType "
 					+ "could not be resolved");
 				return;
 			}
@@ -325,13 +325,13 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 										.getProject()));
 
 				aopProject.clearReferencesForResource(currentFile);
-				
+
 				// prepare class loaders
 				setupClassLoaders(javaProject);
 
 				AopLog.log(AopLog.BUILDER_CLASSPATH, "AOP builder classpath: "
-						+ StringUtils.arrayToDelimitedString(
-							((URLClassLoader) weavingClassLoader).getURLs(), ";"));
+					+ StringUtils.arrayToDelimitedString(
+						((URLClassLoader) weavingClassLoader).getURLs(), ";"));
 
 				try {
 					IStructuredModel model = null;
@@ -344,7 +344,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 									.getDocument();
 							try {
 								// move beyond reading the structured model to
-								// avoid  class loading problems
+								// avoid class loading problems
 								activateWeavingClassLoader();
 								aspectInfos = AspectDefinitionBuilder
 										.buildAspectDefinitions(document,
@@ -445,8 +445,15 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 	}
 
 	public void run(IProgressMonitor monitor) throws CoreException {
-		if (!monitor.isCanceled()) {
-			this.buildAopModel(monitor, this.filesToBuild);
+		try {
+			if (!monitor.isCanceled()) {
+				this.buildAopModel(monitor, this.filesToBuild);
+			}
+		}
+		finally {
+			weavingClassLoader = null;
+			classLoader = null;
+			filesToBuild = null;
 		}
 	}
 }
