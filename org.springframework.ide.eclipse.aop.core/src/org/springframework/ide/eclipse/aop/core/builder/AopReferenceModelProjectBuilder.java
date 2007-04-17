@@ -37,10 +37,10 @@ import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 
 	/**
-	 * @see IProjectBuilder#build(IFile, IProgressMonitor)
+	 * @see IProjectBuilder#build(IFile, int, IProgressMonitor)
 	 */
-	public void build(IFile file, IProgressMonitor monitor) {
-		Set<IFile> filesToBuild = AopReferenceModelUtils.getFilesToBuild(file);
+	public void build(IFile file, int kind, IProgressMonitor monitor) {
+		Set<IFile> filesToBuild = AopReferenceModelUtils.getFilesToBuild(kind, file);
 		if (filesToBuild != null && filesToBuild.size() > 0) {
 			monitor.subTask("Building Spring AOP reference model");
 			IWorkspaceRunnable validator = new AopReferenceModelBuilder(

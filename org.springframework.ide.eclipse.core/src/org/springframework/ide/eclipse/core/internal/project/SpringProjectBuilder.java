@@ -48,35 +48,39 @@ public class SpringProjectBuilder extends IncrementalProjectBuilder {
 		IResourceDelta delta = (kind != FULL_BUILD ? getDelta(project) : null);
 		if (delta == null || kind == FULL_BUILD) {
 			if (SpringCoreUtils.isSpringProject(project)) {
-				project.accept(new Visitor(monitor));
+				project.accept(new Visitor(kind, monitor));
 			}
 		}
 		else {
-			delta.accept(new DeltaVisitor(monitor));
+			delta.accept(new DeltaVisitor(kind, monitor));
 		}
 		return null;
 	}
 
 	private class Visitor implements IResourceVisitor {
-		private IProgressMonitor monitor;
+		private final IProgressMonitor monitor;
+		private final int kind;
 
-		public Visitor(IProgressMonitor monitor) {
+		public Visitor(int kind, IProgressMonitor monitor) {
 			this.monitor = monitor;
+			this.kind = kind;
 		}
 
 		public boolean visit(IResource resource) {
 			if (resource instanceof IFile) {
-				runBuilders((IFile) resource, monitor);
+				runBuilders((IFile) resource, kind, monitor);
 			}
 			return true;
 		}
 	}
 
 	private class DeltaVisitor implements IResourceDeltaVisitor {
-		private IProgressMonitor monitor;
+		private final IProgressMonitor monitor;
+		private final int kind;
 
-		public DeltaVisitor(IProgressMonitor monitor) {
+		public DeltaVisitor(int kind, IProgressMonitor monitor) {
 			this.monitor = monitor;
+			this.kind = kind;
 		}
 
 		public boolean visit(IResourceDelta aDelta) {
@@ -96,7 +100,7 @@ public class SpringProjectBuilder extends IncrementalProjectBuilder {
 				case IResourceDelta.ADDED:
 				case IResourceDelta.CHANGED:
 					if (resource instanceof IFile) {
-						runBuilders((IFile) resource, monitor);
+						runBuilders((IFile) resource, kind, monitor);
 					}
 					visitChildren = true;
 					break;
@@ -109,7 +113,7 @@ public class SpringProjectBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
-	private void runBuilders(final IFile file, final IProgressMonitor monitor) {
+	private void runBuilders(final IFile file, final int kind, final IProgressMonitor monitor) {
 		for (final ProjectBuilderDefinition builderHolder : ProjectBuilderDefinitionFactory
 				.getProjectBuilderDefinitions()) {
 			ISafeRunnable code = new ISafeRunnable() {
@@ -122,7 +126,7 @@ public class SpringProjectBuilder extends IncrementalProjectBuilder {
 					subMonitor = new SubProgressMonitor(monitor, 1);
 					if (builderHolder.isEnabled(file.getProject())) {
 						builderHolder.getProjectBuilder().build(file,
-								subMonitor);
+								kind, subMonitor);
 					}
 				}
 

@@ -20,6 +20,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -42,7 +43,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 
 /**
  * Some helper methods.
- * 
  * @author Christian Dupuis
  */
 public class AopReferenceModelUtils {
@@ -136,9 +136,11 @@ public class AopReferenceModelUtils {
 		return resourcesToBuild;
 	}
 
-	public static Set<IFile> getFilesToBuild(IFile file) {
+	public static Set<IFile> getFilesToBuild(int kind, IFile file) {
 		Set<IFile> resourcesToBuild = new HashSet<IFile>();
-		if (file.getName().endsWith(".java")) {
+		if ((kind == IncrementalProjectBuilder.AUTO_BUILD 
+				|| kind == IncrementalProjectBuilder.INCREMENTAL_BUILD)
+				&& file.getName().endsWith(".java")) {
 			Set<IBeansProject> projects = BeansCorePlugin.getModel()
 					.getProjects();
 			if (projects != null) {
@@ -303,7 +305,7 @@ public class AopReferenceModelUtils {
 		}
 		return matchingMethod;
 	}
-	
+
 	public static IBean getBeanFromElementId(String elementId) {
 		IBeansModel model = BeansCorePlugin.getModel();
 		return (IBean) model.getElement(elementId);

@@ -29,7 +29,7 @@ import org.springframework.ide.eclipse.core.project.IProjectBuilder;
  */
 public class BeansProjectValidator implements IProjectBuilder {
 
-	public void build(IFile file, IProgressMonitor monitor) {
+	public void build(IFile file, int kind, IProgressMonitor monitor) {
 		if (BeansCoreUtils.isBeansConfig(file)) {
 			validate(file, monitor);
 		}
