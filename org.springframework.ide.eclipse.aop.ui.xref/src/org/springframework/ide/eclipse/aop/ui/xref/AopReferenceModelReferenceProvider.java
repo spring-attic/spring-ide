@@ -122,12 +122,12 @@ public class AopReferenceModelReferenceProvider implements IXReferenceProvider {
 
 		IAopReferenceModel model = org.springframework.ide.eclipse.aop.core.Activator
 				.getModel();
-		List<IAopReference> references = model.getAllReferences(je
-				.getJavaProject());
+		List<IAopReference> references = model.getAllReferences();
 		Map<IMember, XRef> refsAdvised = new HashMap<IMember, XRef>();
 		Map<IMember, XRef> refsAdvises = new HashMap<IMember, XRef>();
 		Map<IMember, XRef> refsDeclaredOn = new HashMap<IMember, XRef>();
 		Map<IMember, XRef> refsAspectDeclarations = new HashMap<IMember, XRef>();
+		
 		for (IAopReference reference : references) {
 			if (reference.getAdviceType() != ADVICE_TYPES.DECLARE_PARENTS) {
 				if (checkFilter(checkedRelNames, "advises")

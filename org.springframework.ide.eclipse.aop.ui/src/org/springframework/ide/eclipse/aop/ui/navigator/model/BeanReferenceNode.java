@@ -57,7 +57,7 @@ public class BeanReferenceNode implements IReferenceNode,
 				null));
 		if (type != null) {
 			List<IAopReference> references = Activator.getModel()
-					.getAllReferences(type.getJavaProject());
+					.getAllReferences();
 
 			Set<IBean> innerBeans = BeansModelUtils.getInnerBeans(bean);
 

@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.aop.core.model;
 
 import java.util.List;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 
@@ -29,7 +30,12 @@ public interface IAopReferenceModel {
 
 	List<IAopReference> getAdviceDefinition(IJavaElement je);
 
-	public List<IAopReference> getAllReferences(IJavaProject project);
+	@Deprecated
+	List<IAopReference> getAllReferences(IJavaProject project);
+
+	List<IAopReference> getAllReferences();
+	
+	List<IAopReference> getAllReferencesForResource(IResource resource);
 
 	IAopProject getProject(IJavaProject project);
 

@@ -44,13 +44,11 @@ import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.xml.core.internal.document.ElementImpl;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
-import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.aop.core.model.builder.AopReferenceModelBuilder;
 import org.springframework.ide.eclipse.aop.core.model.internal.AopReferenceModel;
-import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceDeclareParentAopSourceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.BeanReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.ClassMethodReferenceNode;
@@ -148,7 +146,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 					me);
 
 			List<IAopReference> references = Activator.getModel()
-					.getAllReferences(type.getJavaProject());
+					.getAllReferences();
 
 			// fields
 			try {
@@ -194,7 +192,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 				&& parentElement instanceof SourceMethod) {
 			IMethod method = (IMethod) parentElement;
 			List<IAopReference> references = Activator.getModel()
-					.getAllReferences(method.getJavaProject());
+					.getAllReferences();
 			List<IAopReference> foundSourceReferences = new ArrayList<IAopReference>();
 			List<IAopReference> foundTargetReferences = new ArrayList<IAopReference>();
 			for (IAopReference reference : references) {
@@ -242,7 +240,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 				&& parentElement instanceof SourceField) {
 			IField method = (IField) parentElement;
 			List<IAopReference> references = Activator.getModel()
-					.getAllReferences(method.getJavaProject());
+					.getAllReferences();
 			List<IAopReference> foundSourceReferences = new ArrayList<IAopReference>();
 			for (IAopReference reference : references) {
 				if (reference.getSource() != null
@@ -306,13 +304,9 @@ public class AopReferenceModelNavigatorContentProvider implements
 	private List<IReferenceNode> getChildrenFromXmlLocation(IResource resource,
 			int startLine, int endLine, String id, Set<IBean> beans) {
 		List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
-		IAopProject project = Activator.getModel().getProject(
-				AopReferenceModelUtils.getJavaProject(resource));
-		List<IAopReference> references = new ArrayList<IAopReference>();
-		if (project != null) {
-			references = project.getReferencesForResource(resource);
+		List<IAopReference> references = Activator.getModel()
+				.getAllReferencesForResource(resource);
 
-		}
 		Map<IAspectDefinition, List<IAopReference>> foundSourceReferences = new HashMap<IAspectDefinition, List<IAopReference>>();
 		Map<IAspectDefinition, List<IAopReference>> foundIntroductionSourceReferences = new HashMap<IAspectDefinition, List<IAopReference>>();
 		Map<IBean, List<IAopReference>> foundTargetReferences = new HashMap<IBean, List<IAopReference>>();
@@ -512,7 +506,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 		else if (element instanceof IMethod) {
 			IMethod method = (IMethod) element;
 			List<IAopReference> references = Activator.getModel()
-					.getAllReferences(method.getJavaProject());
+					.getAllReferences();
 			for (IAopReference reference : references) {
 				if (reference.getTarget().equals(method)) {
 					return true;

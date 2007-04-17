@@ -27,7 +27,6 @@ import org.eclipse.contribution.visualiser.utils.JDTUtils;
 import org.eclipse.contribution.visualiser.utils.MarkupUtils;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
@@ -40,10 +39,8 @@ import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNa
 /**
  * Implementation of AJDT's {@link SimpleMarkupProvider} that contributes
  * elements from the {@link AopReferenceModel}.
- * 
  * @author Christian Dupuis
  * @since 2.0
- * 
  */
 public class AopReferenceModelMarkupProvider extends SimpleMarkupProvider
 		implements IAopModelChangedListener {
@@ -69,37 +66,28 @@ public class AopReferenceModelMarkupProvider extends SimpleMarkupProvider
 
 		List<Stripe> stripeList = new ArrayList<Stripe>();
 		if (ProviderManager.getContentProvider() instanceof JDTContentProvider) {
-			IJavaProject jp = ((JDTContentProvider) ProviderManager
-					.getContentProvider()).getCurrentProject();
-
-			if (jp != null) {
-				List<IAopReference> references = org.springframework.ide.eclipse.aop.core.Activator
-						.getModel().getAllReferences(jp.getJavaProject());
-				if (references != null && references.size() > 0) {
-					for (IAopReference reference : references) {
-						IType advisedType = null;
-						if (reference.getTarget() instanceof IType) {
-							advisedType = (IType) reference.getTarget();
-						}
-						else {
-							advisedType = reference.getTarget()
-									.getDeclaringType();
-						}
-						ICompilationUnit advisedCu = advisedType
-								.getCompilationUnit();
-						if (member instanceof JDTMember) {
-							IJavaElement je = ((JDTMember) member)
-									.getResource();
-							if (je.equals(advisedCu)) {
-								String label = getText(reference);
-								Stripe stripe = new Stripe(
-										new SimpleMarkupKind(label),
-										AopReferenceModelNavigatorUtils
-												.getLineNumber(reference
-														.getTarget()) + 1);
-								stripeList.add(stripe);
-								addMarkup(member.getFullname(), stripe);
-							}
+			List<IAopReference> references = org.springframework.ide.eclipse.aop.core.Activator
+					.getModel().getAllReferences();
+			if (references != null && references.size() > 0) {
+				for (IAopReference reference : references) {
+					IType advisedType = null;
+					if (reference.getTarget() instanceof IType) {
+						advisedType = (IType) reference.getTarget();
+					}
+					else {
+						advisedType = reference.getTarget().getDeclaringType();
+					}
+					ICompilationUnit advisedCu = advisedType
+							.getCompilationUnit();
+					if (member instanceof JDTMember) {
+						IJavaElement je = ((JDTMember) member).getResource();
+						if (je.equals(advisedCu)) {
+							String label = getText(reference);
+							Stripe stripe = new Stripe(new SimpleMarkupKind(
+									label), AopReferenceModelNavigatorUtils
+									.getLineNumber(reference.getTarget()) + 1);
+							stripeList.add(stripe);
+							addMarkup(member.getFullname(), stripe);
 						}
 					}
 				}
@@ -112,7 +100,6 @@ public class AopReferenceModelMarkupProvider extends SimpleMarkupProvider
 
 	/**
 	 * Get all the markup kinds
-	 * 
 	 * @return a Set of Strings
 	 */
 	@Override
@@ -120,18 +107,14 @@ public class AopReferenceModelMarkupProvider extends SimpleMarkupProvider
 		SortedSet<SimpleMarkupKind> kinds = new TreeSet<SimpleMarkupKind>();
 		List<String> advices = new ArrayList<String>();
 		if (ProviderManager.getContentProvider() instanceof JDTContentProvider) {
-			IJavaProject jp = ((JDTContentProvider) ProviderManager
-					.getContentProvider()).getCurrentProject();
-			if (jp != null) {
-				List<IAopReference> references = Activator.getModel()
-						.getAllReferences(jp);
-				if (references != null && references.size() > 0) {
-					for (IAopReference reference : references) {
-						String label = getText(reference);
-						if (!advices.contains(label)) {
-							kinds.add(new SimpleMarkupKind(label));
-							advices.add(label);
-						}
+			List<IAopReference> references = Activator.getModel()
+					.getAllReferences();
+			if (references != null && references.size() > 0) {
+				for (IAopReference reference : references) {
+					String label = getText(reference);
+					if (!advices.contains(label)) {
+						kinds.add(new SimpleMarkupKind(label));
+						advices.add(label);
 					}
 				}
 			}
@@ -145,7 +128,6 @@ public class AopReferenceModelMarkupProvider extends SimpleMarkupProvider
 	/**
 	 * Process a mouse click on a stripe. This method opens the editor at the
 	 * line of the stripe clicked.
-	 * 
 	 * @see org.eclipse.contribution.visualiser.interfaces.IMarkupProvider#processMouseclick(org.eclipse.contribution.visualiser.interfaces.IMember,
 	 * org.eclipse.contribution.visualiser.core.Stripe, int)
 	 */

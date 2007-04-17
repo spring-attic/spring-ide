@@ -28,6 +28,12 @@ public class AopReferenceModelNavigatorLabelProvider extends
 		BeansNavigatorLabelProvider {
 
 	@Override
+	public String getDescription(Object element) {
+		return super.getDescription(element);
+		//return element.toString();
+	}
+	
+	@Override
 	public Image getImage(Object element, Object parentElement,
 			int severity) {
 		if (element instanceof IReferenceNode) {

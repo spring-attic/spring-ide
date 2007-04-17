@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -68,7 +69,12 @@ public class AopReferenceModel implements IAopReferenceModel {
 		return null;
 	}
 
+	@Deprecated
 	public List<IAopReference> getAllReferences(IJavaProject project) {
+		return getAllReferences();
+	}
+
+	public List<IAopReference> getAllReferences() {
 		List<IAopReference> refs = new ArrayList<IAopReference>();
 		for (Map.Entry<IJavaProject, IAopProject> e : projects.entrySet()) {
 			refs.addAll(e.getValue().getAllReferences());
@@ -77,8 +83,7 @@ public class AopReferenceModel implements IAopReferenceModel {
 	}
 
 	public boolean isAdvised(IJavaElement je) {
-		IJavaProject project = je.getJavaProject();
-		List<IAopReference> references = getAllReferences(project);
+		List<IAopReference> references = getAllReferences();
 
 		for (IAopReference reference : references) {
 			if (reference.getTarget().equals(je)) {
@@ -139,5 +144,23 @@ public class AopReferenceModel implements IAopReferenceModel {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.addResourceChangeListener(workspaceListener,
 				SpringResourceChangeListener.LISTENER_FLAGS);
+	}
+
+	public List<IAopReference> getAllReferencesForResource(IResource resource) {
+		List<IAopReference> references = new ArrayList<IAopReference>();
+		for (IAopReference ref : getAllReferences()) {
+			if ((ref.getResource() != null && ref.getResource()
+					.equals(resource))
+					|| (ref.getTargetBean() != null && resource.equals(ref
+							.getTargetBean().getElementResource()))
+					|| (ref.getSource() != null && resource.equals(ref
+							.getSource().getResource()))
+					|| (ref.getTarget() != null && resource.equals(ref
+							.getTarget().getResource()))
+					|| (ref.getDefinition().getResource().equals(resource))) {
+				references.add(ref);
+			}
+		}
+		return references;
 	}
 }

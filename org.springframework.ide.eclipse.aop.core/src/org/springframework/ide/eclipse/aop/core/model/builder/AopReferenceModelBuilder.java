@@ -281,7 +281,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 		IResource file = config.getElementResource();
 		IAopProject aopProject = ((AopReferenceModel) Activator.getModel())
 				.getProjectWithInitialization(AopReferenceModelUtils
-						.getJavaProject(config.getElementResource()
+						.getJavaProject(info.getResource()
 								.getProject()));
 
 		Set<IBean> beans = config.getBeans();
