@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.aop.ui.navigator;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.navigator.ICommonLabelProvider;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.IReferenceNode;
+import org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferenceNode;
 import org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorLabelProvider;
 
 /**
@@ -20,7 +21,6 @@ import org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorLabelPro
  * {@link IReferenceNode#getText()} and {@link IReferenceNode#getImage()} of
  * instances of {@link IReferenceNode}. Otherwise calls
  * {@link BeansNavigatorLabelProvider}.
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -29,13 +29,16 @@ public class AopReferenceModelNavigatorLabelProvider extends
 
 	@Override
 	public String getDescription(Object element) {
+		if (element instanceof IRevealableReferenceNode) {
+			IRevealableReferenceNode node = (IRevealableReferenceNode) element;
+			return node.getResource().getName() + " - "
+					+ node.getResource().getFullPath().toString().substring(1);
+		}
 		return super.getDescription(element);
-		//return element.toString();
 	}
-	
+
 	@Override
-	public Image getImage(Object element, Object parentElement,
-			int severity) {
+	public Image getImage(Object element, Object parentElement, int severity) {
 		if (element instanceof IReferenceNode) {
 			return ((IReferenceNode) element).getImage();
 		}
@@ -43,8 +46,7 @@ public class AopReferenceModelNavigatorLabelProvider extends
 	}
 
 	@Override
-	public String getText(Object element, Object parentElement,
-			int severity) {
+	public String getText(Object element, Object parentElement, int severity) {
 		if (element instanceof IReferenceNode) {
 			return ((IReferenceNode) element).getText();
 		}
