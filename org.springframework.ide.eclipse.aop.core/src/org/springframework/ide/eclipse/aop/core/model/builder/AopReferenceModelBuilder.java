@@ -69,6 +69,10 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 
 	private Set<IFile> filesToBuild;
 
+	private ClassLoader weavingClassLoader;
+
+	private ClassLoader classLoader;
+
 	public AopReferenceModelBuilder(Set<IFile> filesToBuild) {
 		this.filesToBuild = filesToBuild;
 	}
@@ -155,6 +159,9 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				return;
 			}
 
+			// use the weavingClassLoader to pointcut matching
+			activateWeavingClassLoader();
+
 			IType jdtTargetType = BeansModelUtils.getJavaType(
 					file.getProject(), className);
 			IType jdtAspectType = BeansModelUtils.getJavaType(aopProject
@@ -164,10 +171,10 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 			if (jdtTargetType == null
 					|| Introspector.doesImplement(jdtTargetType,
 							FactoryBean.class.getName())) {
-				AopLog.log(AopLog.BUILDER_MESSAGES,	"Skipping bean definition ["
-					+ bean + "] because either it is a FactoryBean or the IType "
+				AopLog.log(AopLog.BUILDER_MESSAGES,
+					"Skipping bean definition [" + bean 
+					+ "] because either it is a FactoryBean or the IType "
 					+ "could not be resolved");
-
 				return;
 			}
 
@@ -253,6 +260,9 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 		catch (Throwable t) {
 			handleException(t, info, bean, file);
 		}
+		finally {
+			recoverClassLoader();
+		}
 
 		// Make sure that inner beans are handled as well
 		Set<IBean> innerBeans = BeansModelUtils.getInnerBeans(bean);
@@ -271,7 +281,8 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 		IResource file = config.getElementResource();
 		IAopProject aopProject = ((AopReferenceModel) Activator.getModel())
 				.getProjectWithInitialization(AopReferenceModelUtils
-						.getJavaProject(config.getElementResource()	.getProject()));
+						.getJavaProject(config.getElementResource()
+								.getProject()));
 
 		Set<IBean> beans = config.getBeans();
 		for (IBean bean : beans) {
@@ -314,15 +325,13 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 										.getProject()));
 
 				aopProject.clearReferencesForResource(currentFile);
-
-				ClassLoader classLoader = Thread.currentThread()
-						.getContextClassLoader();
-				ClassLoader weavingClassLoader = SpringCoreUtils
-						.getClassLoader(javaProject, false);
+				
+				// prepare class loaders
+				setupClassLoaders(javaProject);
 
 				AopLog.log(AopLog.BUILDER_CLASSPATH, "AOP builder classpath: "
 						+ StringUtils.arrayToDelimitedString(
-								((URLClassLoader) weavingClassLoader).getURLs(), ";"));
+							((URLClassLoader) weavingClassLoader).getURLs(), ";"));
 
 				try {
 					IStructuredModel model = null;
@@ -333,15 +342,17 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 						if (model != null) {
 							IDOMDocument document = ((DOMModelImpl) model)
 									.getDocument();
-
-							// move beyond reading the structured model to avoid
-							// class loading problems
-							Thread.currentThread().setContextClassLoader(
-									weavingClassLoader);
-
-							aspectInfos = AspectDefinitionBuilder
-									.buildAspectDefinitions(document,
-											currentFile);
+							try {
+								// move beyond reading the structured model to
+								// avoid  class loading problems
+								activateWeavingClassLoader();
+								aspectInfos = AspectDefinitionBuilder
+										.buildAspectDefinitions(document,
+												currentFile);
+							}
+							finally {
+								recoverClassLoader();
+							}
 						}
 					}
 					finally {
@@ -354,8 +365,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 						for (IAspectDefinition info : aspectInfos) {
 
 							// build model for config
-							buildAopReferencesFromAspectDefinition(config,
-									info);
+							buildAopReferencesFromAspectDefinition(config, info);
 
 							// build model for config sets
 							buildAopReferencesFromBeansConfigSets(project,
@@ -369,12 +379,22 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				catch (CoreException e) {
 					Activator.log(e);
 				}
-				finally {
-					Thread.currentThread().setContextClassLoader(classLoader);
-				}
 			}
 		}
 		return aopProject;
+	}
+
+	private void recoverClassLoader() {
+		Thread.currentThread().setContextClassLoader(classLoader);
+	}
+
+	private void activateWeavingClassLoader() {
+		Thread.currentThread().setContextClassLoader(weavingClassLoader);
+	}
+
+	private void setupClassLoaders(IJavaProject javaProject) {
+		classLoader = Thread.currentThread().getContextClassLoader();
+		weavingClassLoader = SpringCoreUtils.getClassLoader(javaProject, false);
 	}
 
 	private void handleException(Throwable t, IAspectDefinition info,
