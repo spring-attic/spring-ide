@@ -15,20 +15,19 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.swt.graphics.Image;
-import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 
 public class ClassBeanReferenceNode implements IReferenceNode {
 
-	private Set<IBean> references;
+	private Set<String> references;
 
-	public ClassBeanReferenceNode(Set<IBean> reference) {
+	public ClassBeanReferenceNode(Set<String> reference) {
 		this.references = reference;
 	}
 
 	public IReferenceNode[] getChildren() {
 		List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
-		for (IBean r : references) {
+		for (String r : references) {
 			nodes.add(new BeanReferenceNode(r, false));
 		}
 		return nodes.toArray(new IReferenceNode[nodes.size()]);

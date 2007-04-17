@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAopReferenceModel;
+import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeListener;
 
 public class AopReferenceModel implements IAopReferenceModel {
@@ -151,8 +152,11 @@ public class AopReferenceModel implements IAopReferenceModel {
 		for (IAopReference ref : getAllReferences()) {
 			if ((ref.getResource() != null && ref.getResource()
 					.equals(resource))
-					|| (ref.getTargetBean() != null && resource.equals(ref
-							.getTargetBean().getElementResource()))
+					|| (AopReferenceModelUtils.getBeanFromElementId(ref
+							.getTargetBeanId()) != null && resource
+							.equals(AopReferenceModelUtils
+									.getBeanFromElementId(ref.getTargetBeanId())
+									.getElementResource()))
 					|| (ref.getSource() != null && resource.equals(ref
 							.getSource().getResource()))
 					|| (ref.getTarget() != null && resource.equals(ref

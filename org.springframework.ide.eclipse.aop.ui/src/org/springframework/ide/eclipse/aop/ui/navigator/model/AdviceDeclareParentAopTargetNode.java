@@ -14,7 +14,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
+import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
@@ -37,16 +40,26 @@ public class AdviceDeclareParentAopTargetNode implements IReferenceNode,
 	}
 
 	public Image getImage() {
-		return BeansUIPlugin.getLabelProvider().getImage(
-				this.reference.getTargetBean());
+		IBean bean = AopReferenceModelUtils.getBeanFromElementId(reference
+				.getTargetBeanId());
+		if (bean != null) {
+			return BeansUIPlugin.getLabelProvider().getImage(bean);
+		}
+		else {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ERROR);
+		}
 	}
 
 	public String getText() {
-		return BeansUIPlugin.getLabelProvider().getText(
-				this.reference.getTargetBean())
-				+ " - "
-				+ this.reference.getTargetBean().getElementResource()
-						.getFullPath().toString();
+		IBean bean = AopReferenceModelUtils.getBeanFromElementId(reference
+				.getTargetBeanId());
+		if (bean != null) {
+			return BeansUIPlugin.getLabelProvider().getText(bean) + " - "
+					+ bean.getElementResource().getFullPath().toString();
+		}
+		else {
+			return "<bean cannot be found>";
+		}
 	}
 
 	public boolean hasChildren() {
@@ -54,10 +67,12 @@ public class AdviceDeclareParentAopTargetNode implements IReferenceNode,
 	}
 
 	public void openAndReveal() {
-		IResource resource = this.reference.getTargetBean()
-				.getElementResource();
-		SpringUIUtils.openInEditor((IFile) resource, this.reference
-				.getTargetBean().getElementStartLine());
+		IBean bean = AopReferenceModelUtils.getBeanFromElementId(this.reference
+				.getTargetBeanId());
+		if (bean != null) {
+			SpringUIUtils.openInEditor((IFile) bean.getElementResource(), bean
+					.getElementEndLine());
+		}
 	}
 
 	public int getLineNumber() {

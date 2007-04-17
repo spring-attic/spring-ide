@@ -49,6 +49,7 @@ import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.aop.core.model.builder.AopReferenceModelBuilder;
 import org.springframework.ide.eclipse.aop.core.model.internal.AopReferenceModel;
+import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceDeclareParentAopSourceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.BeanReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.ClassMethodReferenceNode;
@@ -173,7 +174,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 			// add bean references
 			Set<IBeansConfig> configs = BeansCorePlugin.getModel().getConfigs(
 					type.getFullyQualifiedName());
-			Set<IBean> beans = new HashSet<IBean>();
+			Set<String> beans = new HashSet<String>();
 			for (IBeansConfig config : configs) {
 				List<IBean> pBeans = new ArrayList<IBean>();
 				pBeans.addAll(config.getBeans());
@@ -181,7 +182,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 				for (IBean b : pBeans) {
 					if (type.getFullyQualifiedName().equals(
 							BeansModelUtils.getBeanClass(b, config))) {
-						beans.add(b);
+						beans.add(b.getElementID());
 					}
 				}
 			}
@@ -345,34 +346,36 @@ public class AopReferenceModelNavigatorContentProvider implements
 					}
 				}
 			}
-			if (reference.getDefinition().getAspectName().equals(id)
-					|| (reference.getTargetBean().getElementStartLine() >= startLine
-							&& reference.getTargetBean().getElementEndLine() <= endLine && resource
-							.equals(reference.getResource()))) {
-				if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
-					if (foundIntroductionTargetReferences.containsKey(reference
-							.getTargetBean())) {
-						foundIntroductionTargetReferences.get(
-								reference.getTargetBean()).add(reference);
+			IBean targetBean = AopReferenceModelUtils
+					.getBeanFromElementId(reference.getTargetBeanId());
+			if (targetBean != null) {
+				if (reference.getDefinition().getAspectName().equals(id)
+						|| (targetBean.getElementStartLine() >= startLine
+								&& targetBean.getElementEndLine() <= endLine && resource
+								.equals(reference.getResource()))) {
+					if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
+						if (foundIntroductionTargetReferences
+								.containsKey(targetBean)) {
+							foundIntroductionTargetReferences.get(targetBean)
+									.add(reference);
+						}
+						else {
+							List<IAopReference> tmp = new ArrayList<IAopReference>();
+							tmp.add(reference);
+							foundIntroductionTargetReferences.put(targetBean,
+									tmp);
+						}
 					}
 					else {
-						List<IAopReference> tmp = new ArrayList<IAopReference>();
-						tmp.add(reference);
-						foundIntroductionTargetReferences.put(reference
-								.getTargetBean(), tmp);
-					}
-				}
-				else {
-					if (foundTargetReferences.containsKey(reference
-							.getTargetBean())) {
-						foundTargetReferences.get(reference.getTargetBean())
-								.add(reference);
-					}
-					else {
-						List<IAopReference> tmp = new ArrayList<IAopReference>();
-						tmp.add(reference);
-						foundTargetReferences.put(reference.getTargetBean(),
-								tmp);
+						if (foundTargetReferences.containsKey(targetBean)) {
+							foundTargetReferences.get(targetBean)
+									.add(reference);
+						}
+						else {
+							List<IAopReference> tmp = new ArrayList<IAopReference>();
+							tmp.add(reference);
+							foundTargetReferences.put(targetBean, tmp);
+						}
 					}
 				}
 			}
@@ -383,7 +386,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 		for (IBean bean : beans) {
 			if (bean.getElementStartLine() >= startLine
 					&& bean.getElementEndLine() <= endLine) {
-				BeanReferenceNode rn = new BeanReferenceNode(bean);
+				BeanReferenceNode rn = new BeanReferenceNode(bean.getElementID());
 				nodes.add(rn);
 				beansRefs.put(bean, rn);
 			}

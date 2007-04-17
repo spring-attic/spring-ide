@@ -35,7 +35,9 @@ import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector.Statics;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 
 /**
@@ -300,6 +302,11 @@ public class AopReferenceModelUtils {
 			}
 		}
 		return matchingMethod;
+	}
+	
+	public static IBean getBeanFromElementId(String elementId) {
+		IBeansModel model = BeansCorePlugin.getModel();
+		return (IBean) model.getElement(elementId);
 	}
 
 }

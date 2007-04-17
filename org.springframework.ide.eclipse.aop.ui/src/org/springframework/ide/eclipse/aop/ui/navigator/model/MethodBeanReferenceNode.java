@@ -21,7 +21,6 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
-import org.springframework.ide.eclipse.beans.core.model.IBean;
 
 public class MethodBeanReferenceNode extends AbstractJavaElementReferenceNode
 		implements IReferenceNode, IRevealableReferenceNode {
@@ -58,18 +57,18 @@ public class MethodBeanReferenceNode extends AbstractJavaElementReferenceNode
 			}
 		}
 		if (this.adviseReferences.size() > 0) {
-			Map<IBean, List<IAopReference>> refs = new HashMap<IBean, List<IAopReference>>();
+			Map<String, List<IAopReference>> refs = new HashMap<String, List<IAopReference>>();
 			for (IAopReference r : this.adviseReferences) {
-				if (refs.containsKey(r.getTargetBean())) {
-					refs.get(r.getTargetBean()).add(r);
+				if (refs.containsKey(r.getTargetBeanId())) {
+					refs.get(r.getTargetBeanId()).add(r);
 				}
 				else {
 					List<IAopReference> ref = new ArrayList<IAopReference>();
 					ref.add(r);
-					refs.put(r.getTargetBean(), ref);
+					refs.put(r.getTargetBeanId(), ref);
 				}
 			}
-			for (Map.Entry<IBean, List<IAopReference>> entry : refs.entrySet()) {
+			for (Map.Entry<String, List<IAopReference>> entry : refs.entrySet()) {
 				nodes.add(new AdvisedAopTargetBeanNode(entry.getValue()));
 			}
 		}

@@ -16,6 +16,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
+import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
@@ -37,16 +40,26 @@ public class AdvisedAopTargetBeanNode implements IReferenceNode,
 	}
 
 	public Image getImage() {
-		return BeansUIPlugin.getLabelProvider().getImage(
-				this.references.get(0).getTargetBean());
+		IBean bean = AopReferenceModelUtils.getBeanFromElementId(references
+				.get(0).getTargetBeanId());
+		if (bean != null) {
+			return BeansUIPlugin.getLabelProvider().getImage(bean);
+		}
+		else {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ERROR);
+		}
 	}
 
 	public String getText() {
-		return BeansUIPlugin.getLabelProvider().getText(
-				this.references.get(0).getTargetBean())
-				+ " - "
-				+ this.references.get(0).getTargetBean().getElementResource()
-						.getFullPath().toString();
+		IBean bean = AopReferenceModelUtils.getBeanFromElementId(references
+				.get(0).getTargetBeanId());
+		if (bean != null) {
+			return BeansUIPlugin.getLabelProvider().getText(bean) + " - "
+					+ bean.getElementResource().getFullPath().toString();
+		}
+		else {
+			return "<bean cannot be found>";
+		}
 	}
 
 	public boolean hasChildren() {
@@ -54,10 +67,12 @@ public class AdvisedAopTargetBeanNode implements IReferenceNode,
 	}
 
 	public void openAndReveal() {
-		IResource resource = references.get(0).getTargetBean()
-				.getElementResource();
-		SpringUIUtils.openInEditor((IFile) resource, references.get(0)
-				.getTargetBean().getElementStartLine());
+		IBean bean = AopReferenceModelUtils
+				.getBeanFromElementId(this.references.get(0).getTargetBeanId());
+		if (bean != null) {
+			SpringUIUtils.openInEditor((IFile) bean.getElementResource(), bean
+					.getElementEndLine());
+		}
 	}
 
 	public IAopReference getReference() {
@@ -65,10 +80,24 @@ public class AdvisedAopTargetBeanNode implements IReferenceNode,
 	}
 
 	public int getLineNumber() {
-		return references.get(0).getTargetBean().getElementStartLine();
+		IBean bean = AopReferenceModelUtils
+				.getBeanFromElementId(this.references.get(0).getTargetBeanId());
+		if (bean != null) {
+			return bean.getElementStartLine();
+		}
+		else {
+			return -1;
+		}
 	}
 
 	public IResource getResource() {
-		return references.get(0).getTargetBean().getElementResource();
+		IBean bean = AopReferenceModelUtils
+				.getBeanFromElementId(this.references.get(0).getTargetBeanId());
+		if (bean != null) {
+			return bean.getElementResource();
+		}
+		else {
+			return null;
+		}
 	}
 }

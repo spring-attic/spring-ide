@@ -110,12 +110,16 @@ public class AopReferenceModelMarkerUtils {
 							+ reference.getDefinition().getAspectName() + ">",
 					1, AopReferenceModelUtils.getLineNumber(reference
 							.getTarget()), markerId, sourceResource);
-			if (reference.getTargetBean() != null) {
-				createProblemMarker(reference.getTargetBean()
+			if (AopReferenceModelUtils.getBeanFromElementId(reference
+					.getTargetBeanId()) != null) {
+				createProblemMarker(AopReferenceModelUtils
+						.getBeanFromElementId(reference.getTargetBeanId())
 						.getElementResource(), "aspect declarations <"
 						+ reference.getDefinition().getAspectName() + ">", 1,
-						reference.getTargetBean().getElementStartLine(),
-						markerId, sourceResource);
+						AopReferenceModelUtils.getBeanFromElementId(
+								reference.getTargetBeanId())
+								.getElementStartLine(), markerId,
+						sourceResource);
 			}
 		}
 		else {
@@ -128,13 +132,17 @@ public class AopReferenceModelMarkerUtils {
 					1,
 					AopReferenceModelUtils.getLineNumber(reference.getTarget()),
 					markerId, sourceResource);
-			if (reference.getTargetBean() != null) {
-				createProblemMarker(reference.getTargetBean()
+			if (AopReferenceModelUtils.getBeanFromElementId(reference
+					.getTargetBeanId()) != null) {
+				createProblemMarker(AopReferenceModelUtils
+						.getBeanFromElementId(reference.getTargetBeanId())
 						.getElementResource(), "advised by "
 						+ AopReferenceModelUtils
 								.getJavaElementLinkName(reference.getSource()),
-						1, reference.getTargetBean().getElementStartLine(),
-						markerId, sourceResource);
+						1, AopReferenceModelUtils.getBeanFromElementId(
+								reference.getTargetBeanId())
+								.getElementStartLine(), markerId,
+						sourceResource);
 			}
 		}
 	}
@@ -197,8 +205,8 @@ public class AopReferenceModelMarkerUtils {
 				for (IMarker marker : markers) {
 					String sourceResourceName = marker.getAttribute(
 							SOURCE_RESOURCE, "");
-					if (sourceResourceName != null && 
-							sourceResourceName.startsWith(resourceName)) {
+					if (sourceResourceName != null
+							&& sourceResourceName.startsWith(resourceName)) {
 						marker.delete();
 					}
 				}

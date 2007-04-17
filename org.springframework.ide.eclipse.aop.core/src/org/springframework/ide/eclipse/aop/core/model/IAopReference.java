@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.aop.core.model;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IMember;
-import org.springframework.ide.eclipse.beans.core.model.IBean;
 
 public interface IAopReference {
 
@@ -30,6 +29,8 @@ public interface IAopReference {
 
 	IMember getTarget();
 
-	IBean getTargetBean();
+	//IBean getTargetBean();
+	
+	String getTargetBeanId();
 
 }

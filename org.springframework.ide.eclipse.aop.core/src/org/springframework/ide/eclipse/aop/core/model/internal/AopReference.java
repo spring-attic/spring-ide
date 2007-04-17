@@ -29,7 +29,7 @@ public class AopReference implements IAopReference {
 
 	private IResource file;
 
-	private IBean bean;
+	private String bean;
 
 	public AopReference(ADVICE_TYPES type, IMember source, IMember target,
 			IAspectDefinition def, IResource file, IBean bean) {
@@ -38,7 +38,7 @@ public class AopReference implements IAopReference {
 		this.target = target;
 		this.definition = def;
 		this.file = file;
-		this.bean = bean;
+		this.bean = bean.getElementID();
 	}
 
 	public IAspectDefinition getDefinition() {
@@ -85,10 +85,6 @@ public class AopReference implements IAopReference {
 		return hashCode;
 	}
 
-	public IBean getTargetBean() {
-		return bean;
-	}
-
 	@Override
 	public String toString() {
 		StringBuffer buf = new StringBuffer();
@@ -102,5 +98,9 @@ public class AopReference implements IAopReference {
 		buf.append(this.definition);
 		buf.append("]");
 		return buf.toString();
+	}
+
+	public String getTargetBeanId() {
+		return this.bean;
 	}
 }
