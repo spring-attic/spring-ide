@@ -822,11 +822,6 @@ public final class BeansModelUtils {
 	public static String getBeanClass(IBean bean, IModelElement context) {
 		Assert.notNull(bean);
 		
-		// TODO add factory-bean and factory-method to this check
-		if (bean.getClassName() != null) {
-			return bean.getClassName();
-		}
-		
 		if (context == null) {
 			// first use config
 			context = getConfig(bean);
@@ -881,6 +876,9 @@ public final class BeansModelUtils {
 				if (bean != null && bean.getClassName() != null) {
 					return bean.getClassName();
 				}
+			}
+			else {
+				bean = null;
 			}
 		} while (bean != null);
 		return null;
