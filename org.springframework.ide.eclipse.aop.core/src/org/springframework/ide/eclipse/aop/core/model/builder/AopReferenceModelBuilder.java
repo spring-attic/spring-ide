@@ -12,8 +12,6 @@ package org.springframework.ide.eclipse.aop.core.model.builder;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.net.URLClassLoader;
 import java.util.List;
 import java.util.Set;
@@ -172,8 +170,8 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 			if (jdtTargetType == null
 					|| Introspector.doesImplement(jdtTargetType,
 							FactoryBean.class.getName())) {
-				AopLog.log(AopLog.BUILDER_MESSAGES, "Skipping bean definition ["
-					+ bean + "] because either it is a FactoryBean or the IType "
+				AopLog.log(AopLog.BUILDER_MESSAGES,	"Skipping bean definition ["
+					+ bean	+ "] because either it is a FactoryBean or the IType "
 					+ "could not be resolved");
 				return;
 			}
@@ -213,8 +211,8 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 
 					List<IMethod> matchingMethods = AopReferenceModelUtils
 							.getMatches(targetClass, intro
-									.getAspectJPointcutExpression(), aopProject
-									.getProject().getProject());
+									.getAspectJPointcutExpression(), info,
+									aopProject.getProject().getProject());
 					for (IMethod method : matchingMethods) {
 						IAopReference ref = new AopReference(info.getType(),
 								jdtAspectMethod, method, info, file, bean);
@@ -233,26 +231,13 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 								.getAdviceMethod().getParameterTypes().length);
 				if (jdtAspectMethod != null) {
 
-					Object pc = AopReferenceModelBuilderUtils
-							.createAspectJPointcutExpression(info);
-
-					Method matchesMethod = pc.getClass().getMethod("matches",
-							Method.class, Class.class);
-					for (Method m : targetClass.getDeclaredMethods()) {
-						// Spring only allows proxying of public classes
-						if (Modifier.isPublic(m.getModifiers())) {
-							boolean matches = (Boolean) matchesMethod.invoke(
-									pc, m, targetClass);
-							if (matches) {
-								IMethod jdtMethod = AopReferenceModelUtils
-										.getMethod(jdtTargetType, m.getName(),
-												m.getParameterTypes().length);
-								IAopReference ref = new AopReference(info
-										.getType(), jdtAspectMethod, jdtMethod,
-										info, file, bean);
-								aopProject.addAopReference(ref);
-							}
-						}
+					List<IMethod> matchingMethods = AopReferenceModelUtils
+							.getMatches(targetClass, info, aopProject
+									.getProject().getProject());
+					for (IMethod method : matchingMethods) {
+						IAopReference ref = new AopReference(info.getType(),
+								jdtAspectMethod, method, info, file, bean);
+						aopProject.addAopReference(ref);
 					}
 				}
 			}
@@ -281,8 +266,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 		IResource file = config.getElementResource();
 		IAopProject aopProject = ((AopReferenceModel) Activator.getModel())
 				.getProjectWithInitialization(AopReferenceModelUtils
-						.getJavaProject(info.getResource()
-								.getProject()));
+						.getJavaProject(info.getResource().getProject()));
 
 		Set<IBean> beans = config.getBeans();
 		for (IBean bean : beans) {
@@ -330,8 +314,8 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				setupClassLoaders(javaProject);
 
 				AopLog.log(AopLog.BUILDER_CLASSPATH, "AOP builder classpath: "
-					+ StringUtils.arrayToDelimitedString(
-						((URLClassLoader) weavingClassLoader).getURLs(), ";"));
+						+ StringUtils.arrayToDelimitedString(
+								((URLClassLoader) weavingClassLoader).getURLs(), ";"));
 
 				try {
 					IStructuredModel model = null;

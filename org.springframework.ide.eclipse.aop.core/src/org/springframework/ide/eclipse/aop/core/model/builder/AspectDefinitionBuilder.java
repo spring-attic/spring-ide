@@ -41,11 +41,10 @@ import org.w3c.dom.NodeList;
 
 /**
  * Builder implementation that creates {@link IAspectDefinition} from Spring xml
- * definition files. Understands aop:config tags and @AspectJ-style aspects.
- * 
+ * definition files. Understands aop:config tags and
+ * @AspectJ-style aspects.
  * @author Christian Dupuis
  * @since 2.0
- * 
  */
 @SuppressWarnings("restriction")
 public class AspectDefinitionBuilder {
@@ -230,6 +229,9 @@ public class AspectDefinitionBuilder {
 				"http://www.springframework.org/schema/aop",
 				"aspectj-autoproxy");
 		if (list.getLength() > 0) {
+			
+			List<IAspectDefinition> aspectDefinitions = new ArrayList<IAspectDefinition>();
+			
 			Node item = list.item(0);
 			List<Pattern> patternList = null;
 			NodeList include = item.getChildNodes();
@@ -257,7 +259,7 @@ public class AspectDefinitionBuilder {
 						if (AopReferenceModelBuilderUtils
 								.validateAspect(className)) {
 							createAnnotationAspectDefinition(document, file,
-									bean, id, className, aspectInfos);
+									bean, id, className, aspectDefinitions);
 						}
 					}
 					catch (Throwable e) {
@@ -268,6 +270,18 @@ public class AspectDefinitionBuilder {
 					}
 				}
 			}
+			
+			if (item.getAttributes().getNamedItem("proxy-target-class") != null) {
+				boolean proxyTargetClass = Boolean.valueOf(item.getAttributes()
+						.getNamedItem("proxy-target-class").getNodeValue());
+				if (proxyTargetClass) {
+					for (IAspectDefinition def : aspectDefinitions) {
+						def.setProxyTargetClass(proxyTargetClass);
+					}
+				}
+			}
+			
+			aspectInfos.addAll(aspectDefinitions);
 		}
 	}
 
@@ -409,6 +423,7 @@ public class AspectDefinitionBuilder {
 				"http://www.springframework.org/schema/aop", "config");
 
 		for (int i = 0; i < list.getLength(); i++) {
+			List<IAspectDefinition> aspectDefinitions = new ArrayList<IAspectDefinition>();
 			Map<String, String> rootPointcuts = new HashMap<String, String>();
 			Node node = list.item(i);
 			NodeList children = node.getChildNodes();
@@ -418,12 +433,24 @@ public class AspectDefinitionBuilder {
 			for (int j = 0; j < children.getLength(); j++) {
 				Node child = children.item(j);
 				if ("aspect".equals(child.getLocalName())) {
-					parseAspects(file, child, rootPointcuts, aspectInfos);
+					parseAspects(file, child, rootPointcuts, aspectDefinitions);
 				}
 				else if ("advisor".equals(child.getLocalName())) {
-					parseAdvisors(file, child, rootPointcuts, aspectInfos);
+					parseAdvisors(file, child, rootPointcuts, aspectDefinitions);
 				}
 			}
+
+			if (node.getAttributes().getNamedItem("proxy-target-class") != null) {
+				boolean proxyTargetClass = Boolean.valueOf(node.getAttributes()
+						.getNamedItem("proxy-target-class").getNodeValue());
+				if (proxyTargetClass) {
+					for (IAspectDefinition def : aspectDefinitions) {
+						def.setProxyTargetClass(proxyTargetClass);
+					}
+				}
+			}
+			
+			aspectInfos.addAll(aspectDefinitions);
 		}
 	}
 }

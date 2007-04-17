@@ -30,7 +30,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
+import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
+import org.springframework.ide.eclipse.aop.core.model.builder.AopReferenceModelBuilderUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
@@ -40,6 +43,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Some helper methods.
@@ -138,8 +143,7 @@ public class AopReferenceModelUtils {
 
 	public static Set<IFile> getFilesToBuild(int kind, IFile file) {
 		Set<IFile> resourcesToBuild = new HashSet<IFile>();
-		if ((kind == IncrementalProjectBuilder.AUTO_BUILD 
-				|| kind == IncrementalProjectBuilder.INCREMENTAL_BUILD)
+		if ((kind == IncrementalProjectBuilder.AUTO_BUILD || kind == IncrementalProjectBuilder.INCREMENTAL_BUILD)
 				&& file.getName().endsWith(".java")) {
 			Set<IBeansProject> projects = BeansCorePlugin.getModel()
 					.getProjects();
@@ -276,9 +280,9 @@ public class AopReferenceModelUtils {
 		return new Integer(-1);
 	}
 
-	public static List<IMethod> getMatches(Class<?> clazz,
-			Object aspectJExpressionPointcut, IProject project)
-			throws Throwable {
+	public static List<IMethod> getMatches(Class<?> targetClass,
+			Object aspectJExpressionPointcut, IAspectDefinition info,
+			IProject project) throws Throwable {
 
 		Method getMethodMatcherMethod = aspectJExpressionPointcut.getClass()
 				.getMethod("getMethodMatcher", (Class[]) null);
@@ -287,14 +291,14 @@ public class AopReferenceModelUtils {
 		Method matchesMethod = methodMatcher.getClass().getMethod("matches",
 				Method.class, Class.class);
 
-		IType jdtTargetClass = BeansModelUtils.getJavaType(project, clazz
+		IType jdtTargetClass = BeansModelUtils.getJavaType(project, targetClass
 				.getName());
-		Method[] methods = clazz.getDeclaredMethods();
+		Method[] methods = targetClass.getDeclaredMethods();
 		List<IMethod> matchingMethod = new ArrayList<IMethod>();
 		for (Method method : methods) {
-			if (Modifier.isPublic(method.getModifiers())
+			if (checkMethod(targetClass, method, info.isProxyTargetClass())
 					&& (Boolean) matchesMethod.invoke(methodMatcher, method,
-							clazz)) {
+							targetClass)) {
 				IMethod jdtMethod = AopReferenceModelUtils.getMethod(
 						jdtTargetClass, method.getName(), method
 								.getParameterTypes().length);
@@ -304,6 +308,63 @@ public class AopReferenceModelUtils {
 			}
 		}
 		return matchingMethod;
+	}
+
+	public static List<IMethod> getMatches(Class<?> targetClass,
+			IAspectDefinition info, IProject project) throws Throwable {
+		Object pc = AopReferenceModelBuilderUtils
+				.createAspectJPointcutExpression(info);
+
+		IType jdtTargetType = BeansModelUtils.getJavaType(project, targetClass
+				.getName());
+
+		Method matchesMethod = pc.getClass().getMethod("matches", Method.class,
+				Class.class);
+		List<IMethod> matchingMethod = new ArrayList<IMethod>();
+
+		for (Method m : targetClass.getDeclaredMethods()) {
+			if (checkMethod(targetClass, m, info.isProxyTargetClass())) {
+				boolean matches = (Boolean) matchesMethod.invoke(pc, m,
+						targetClass);
+				if (matches) {
+					IMethod jdtMethod = AopReferenceModelUtils.getMethod(
+							jdtTargetType, m.getName(),
+							m.getParameterTypes().length);
+					if (jdtMethod != null) {
+						matchingMethod.add(jdtMethod);
+					}
+				}
+			}
+		}
+		return matchingMethod;
+	}
+
+	private static boolean checkMethod(Class targetClass, Method targetMethod,
+			boolean allMethods) {
+		Assert.notNull(targetMethod);
+		Assert.notNull(targetClass);
+
+		if (!Modifier.isPublic(targetMethod.getModifiers())) {
+			return false;
+		}
+		else if (allMethods) {
+			return true;
+		}
+		else {
+			Class[] targetInterfaces = ClassUtils
+					.getAllInterfacesForClass(targetClass);
+			for (Class targetInterface : targetInterfaces) {
+				Method[] targetInterfaceMethods = targetInterface.getMethods();
+				for (Method targetInterfaceMethod : targetInterfaceMethods) {
+					Method targetMethodGuess = AopUtils.getMostSpecificMethod(
+							targetInterfaceMethod, targetClass);
+					if (targetMethod.equals(targetMethodGuess)) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
 	}
 
 	public static IBean getBeanFromElementId(String elementId) {

@@ -48,6 +48,8 @@ public class BeanAspectDefinition implements IAspectDefinition {
 	protected String throwing;
 
 	protected String pointcutExpressionString = null;
+	
+	protected boolean isProxyTargetClass = false;
 
 	protected IAopReference.ADVICE_TYPES type;
 
@@ -251,5 +253,13 @@ public class BeanAspectDefinition implements IAspectDefinition {
 		}
 		buf.append("]");
 		return buf.toString();
+	}
+
+	public boolean isProxyTargetClass() {
+		return this.isProxyTargetClass;
+	}
+
+	public void setProxyTargetClass(boolean proxyTargetClass) {
+		this.isProxyTargetClass = proxyTargetClass;
 	}
 }

@@ -41,6 +41,8 @@ public interface IAspectDefinition {
 	String getReturning();
 
 	String getThrowing();
+	
+	boolean isProxyTargetClass();
 
 	IAopReference.ADVICE_TYPES getType();
 
@@ -63,5 +65,7 @@ public interface IAspectDefinition {
 	void setThrowing(String throwable);
 
 	void setType(IAopReference.ADVICE_TYPES type);
+	
+	void setProxyTargetClass(boolean proxyTargetClass);
 
 }
