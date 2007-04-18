@@ -4,8 +4,10 @@
 !*******************************************************************************************
  
 feature@org.springframework.ide.eclipse.feature=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.feature
+feature@org.springframework.ide.eclipse.feature.source=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.feature.source
 
 plugin@org.springframework.ide.eclipse=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse
+plugin@org.springframework.ide.eclipse.source=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.source
 plugin@org.springframework.ide.eclipse.beans.core=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.beans.core
 plugin@org.springframework.ide.eclipse.beans.ui=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.beans.ui
 plugin@org.springframework.ide.eclipse.beans.ui.editor=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.beans.ui.editor
