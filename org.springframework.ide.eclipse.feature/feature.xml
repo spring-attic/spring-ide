@@ -237,6 +237,6 @@
          version="0.0.0"
          unpack="true"/>
 	<!--
-	<includes id="org.springframework.ide.eclipse.feature.source" version="0.0.0"/>
 	-->
+	<includes id="org.springframework.ide.eclipse.feature.source" version="0.0.0"/>
 </feature>
