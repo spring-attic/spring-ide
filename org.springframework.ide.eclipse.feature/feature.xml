@@ -158,14 +158,14 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="true"/>
+         unpack="false"/>
 
    <plugin
          id="org.springframework.webflow"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="true"/>
+         unpack="false"/>
 
    <plugin
          id="org.springframework.webflow.doc"
@@ -179,7 +179,7 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="true"/>
+         unpack="false"/>
 
    <plugin
          id="org.springframework.doc"
@@ -193,28 +193,28 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="true"/>
+         unpack="false"/>
 
    <plugin
          id="org.aspectj.aspectjrt"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="true"/>
+         unpack="false"/>
 
    <plugin
          id="jakarta.commons.logging"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="true"/>
+         unpack="false"/>
 
    <plugin
          id="jakarta.commons.collections"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="true"/>
+         unpack="false"/>
 
    <plugin
          id="org.aopalliance"
@@ -228,10 +228,8 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="true"/>
+         unpack="false"/>
 
-	<!--
-	-->
 	<includes id="org.springframework.ide.eclipse.feature.source" version="0.0.0"/>
 	
 </feature>
