@@ -96,7 +96,52 @@
 	<!-- ===================================================================== -->
 	<target name="pre.gather.bin.parts">
 		<antcall target="copy.source">
+			<param name="plugin-name" value="org.springframework.ide.eclipse.aop.core" />
+		</antcall>
+		<antcall target="copy.source">
 			<param name="plugin-name" value="org.springframework.ide.eclipse.aop.ui" />
+		</antcall>
+		<antcall target="copy.source">
+			<param name="plugin-name" value="org.springframework.ide.eclipse.aop.ui.visualiser" />
+		</antcall>
+		<antcall target="copy.source">
+			<param name="plugin-name" value="org.springframework.ide.eclipse.aop.ui.xref" />
+		</antcall>
+		<antcall target="copy.source">
+			<param name="plugin-name" value="org.springframework.ide.eclipse.beans.core" />
+		</antcall>
+		<antcall target="copy.source">
+			<param name="plugin-name" value="org.springframework.ide.eclipse.beans.ui" />
+		</antcall>
+		<antcall target="copy.source">
+			<param name="plugin-name" value="org.springframework.ide.eclipse.beans.ui.editor" />
+		</antcall>
+		<antcall target="copy.source">
+			<param name="plugin-name" value="org.springframework.ide.eclipse.beans.ui.graph" />
+		</antcall>
+		<antcall target="copy.source">
+			<param name="plugin-name" value="org.springframework.ide.eclipse.beans.ui.refactoring" />
+		</antcall>
+		<antcall target="copy.source">
+			<param name="plugin-name" value="org.springframework.ide.eclipse.beans.ui.search" />
+		</antcall>
+		<antcall target="copy.source">
+			<param name="plugin-name" value="org.springframework.ide.eclipse.core" />
+		</antcall>
+		<antcall target="copy.source">
+			<param name="plugin-name" value="org.springframework.ide.eclipse.ui" />
+		</antcall>
+		<antcall target="copy.source">
+			<param name="plugin-name" value="org.springframework.ide.eclipse.webflow.core" />
+		</antcall>
+		<antcall target="copy.source">
+			<param name="plugin-name" value="org.springframework.ide.eclipse.webflow.ui" />
+		</antcall>
+		<antcall target="copy.source">
+			<param name="plugin-name" value="org.springframework.ide.eclipse.webflow.ui.editor" />
+		</antcall>
+		<antcall target="copy.source">
+			<param name="plugin-name" value="org.springframework.ide.eclipse.webflow.ui.graph" />
 		</antcall>
 	</target>
 
