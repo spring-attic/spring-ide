@@ -97,7 +97,8 @@
 	<!--   target.folder - destination folder                                  -->
 	<!-- ===================================================================== -->
 	<target name="pre.gather.bin.parts">
-		<unzip src="${jar.name}" dest="." />
+		<mkdir dir="bin" />
+		<unzip src="${jar.name}" dest="bin" />
 		<replace file="META-INF/MANIFEST.MF" summary="yes" token="${jar.name}" value="." />
 	</target>
 
