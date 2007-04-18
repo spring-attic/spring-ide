@@ -29,7 +29,6 @@ import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 /**
  * A {@link IProjectBuilder} implementation that triggers creation of Spring
  * IDE's internal AOP reference model
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -40,9 +39,11 @@ public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 	 * @see IProjectBuilder#build(IFile, int, IProgressMonitor)
 	 */
 	public void build(IFile file, int kind, IProgressMonitor monitor) {
-		Set<IFile> filesToBuild = AopReferenceModelUtils.getFilesToBuild(kind, file);
+		Set<IFile> filesToBuild = AopReferenceModelUtils.getFilesToBuild(kind,
+				file);
 		if (filesToBuild != null && filesToBuild.size() > 0) {
-			monitor.subTask("Building Spring AOP reference model");
+			monitor.subTask("Building Spring AOP reference model ["
+					+ file.getFullPath().toString() + "]");
 			IWorkspaceRunnable validator = new AopReferenceModelBuilder(
 					filesToBuild);
 			IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -63,7 +64,8 @@ public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 
 	public void cleanup(IResource resource, IProgressMonitor monitor) {
 		try {
-			monitor.subTask("Deleting Spring AOP reference model marker");
+			monitor.subTask("Deleting Spring AOP reference model marker ["
+					+ resource.getFullPath().toString().substring(1) + "]");
 			AopReferenceModelMarkerUtils.deleteProblemMarkers(resource);
 		}
 		finally {

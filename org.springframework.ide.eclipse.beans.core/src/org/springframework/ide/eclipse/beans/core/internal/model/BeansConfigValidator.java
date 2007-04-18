@@ -88,9 +88,9 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 		if (file == null) {
 			return;
 		}
-		monitor.beginTask(BeansCorePlugin.getFormattedMessage(
+		monitor.subTask(BeansCorePlugin.getFormattedMessage(
 				"BeansProjectValidator.validateFile", file.getFullPath()
-						.toString()), IProgressMonitor.UNKNOWN);
+						.toString()));
 
 		IBeansConfig config = BeansCorePlugin.getModel().getConfig(file);
 		if (config == null) {

@@ -36,6 +36,8 @@ public class BeansProjectValidator implements IProjectBuilder {
 	}
 
 	public static void validate(IFile file, IProgressMonitor monitor) {
+		monitor.subTask("Validating Spring Bean file ["
+				+ file.getFullPath().toString() + "]");
 		IWorkspaceRunnable validator = new BeansConfigValidator(file);
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		ISchedulingRule rule = workspace.getRuleFactory().markerRule(file);
@@ -45,10 +47,20 @@ public class BeansProjectValidator implements IProjectBuilder {
 		catch (CoreException e) {
 			BeansCorePlugin.log("Error while running the validator", e);
 		}
+		finally {
+			monitor.done();
+		}
 	}
 
 	public void cleanup(IResource resource, IProgressMonitor monitor) {
-		BeansModelUtils.deleteProblemMarkers(BeansModelUtils
-				.getResourceModelElement(resource));
+		try {
+			monitor.subTask("Deleting Spring Bean problem markers ["
+					+ resource.getFullPath().toString() + "]");
+			BeansModelUtils.deleteProblemMarkers(BeansModelUtils
+					.getResourceModelElement(resource));
+		}
+		finally {
+			monitor.done();
+		}
 	}
 }
