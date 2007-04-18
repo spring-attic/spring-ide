@@ -78,7 +78,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 			if (BeansUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
 					.equals(providerID)) {
 				refreshViewerForElement(project);
-				refreshViewerForElement(BeansModelUtils
+				refreshViewerForElement(SpringCoreUtils
 						.getJavaProject(project));
 			} else if (BeansUIPlugin.SPRING_EXPLORER_CONTENT_PROVIDER_ID
 						.equals(providerID)) {

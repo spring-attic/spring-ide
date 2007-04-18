@@ -62,6 +62,7 @@ import org.springframework.util.StringUtils;
  */
 public class BeansConfigValidator implements IWorkspaceRunnable {
 
+	private static final String ASPECT_OF_METHOD_NAME = "aspectOf";
 	private static final String PLACEHOLDER_PREFIX = "${";
 	private static final String PLACEHOLDER_SUFFIX = "}";
 
@@ -801,6 +802,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 						(isStatic ? Statics.YES : Statics.NO)) == null) {
 					switch (methodType) {
 					case METHOD_TYPE_FACTORY:
+												
 						BeansModelUtils.createProblemMarker(bean,
 								(isStatic ? "Static" : "Non-static")
 								+ " factory method '" + methodName + "' "
@@ -891,8 +893,9 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 			IType type = BeansModelUtils.getJavaType(BeansModelUtils
 					.getProject(bean).getProject(), className);
 			// Skip factory-method validation for factory beans which are
-			// Spring factory beans as well
-			if (type != null
+			// Spring factory beans as well and for those aspectOf methods
+			if (type != null 
+					&& !ASPECT_OF_METHOD_NAME.equals(methodName) 
 					&& !Introspector.doesImplement(type, FactoryBean.class
 							.getName())) {
 				validateMethod(bean, type, METHOD_TYPE_FACTORY, methodName,

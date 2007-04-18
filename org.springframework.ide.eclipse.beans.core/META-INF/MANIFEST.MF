@@ -11,7 +11,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.expressions,
  org.eclipse.jdt.core,
  org.eclipse.wst.xml.core,
- org.springframework.ide.eclipse.core
+ org.springframework.ide.eclipse.core,
+ org.eclipse.ajdt.core;resolution:=optional
 Eclipse-LazyStart: true
 Export-Package: org.springframework.ide.eclipse.beans.core,
  org.springframework.ide.eclipse.beans.core.internal,

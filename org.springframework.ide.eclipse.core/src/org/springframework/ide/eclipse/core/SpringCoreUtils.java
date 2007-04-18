@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.osgi.framework.Bundle;
@@ -53,6 +54,20 @@ import org.springframework.util.StringUtils;
  * @author Christian Dupuis
  */
 public final class SpringCoreUtils {
+
+	private static final String AJDT_NATURE = 
+		"org.eclipse.ajdt.ui.ajnature";
+
+	private static final String AJDT_CLASS = 
+		"org.eclipse.ajdt.core.javaelements.AJCompilationUnitManager";
+
+	private static final boolean IS_AJDT_PRESENT;
+
+	static {
+		// this is not working if AJDT will be installed 
+		// without restarting Eclipse
+		IS_AJDT_PRESENT = isAjdtPresent();
+	}
 
 	/**
 	 * Returns the specified adapter for the given object or <code>null</code>
@@ -238,12 +253,49 @@ public final class SpringCoreUtils {
 	}
 
 	/**
+	 * Returns the corresponding Java project or <code>null</code> a for given
+	 * project.
+	 * @param project the project the Java project is requested for
+	 * @return the requested Java project or <code>null</code> if the Java
+	 * project is not defined or the project is not accessible
+	 */
+	public static IJavaProject getJavaProject(IProject project) {
+		if (project.isAccessible()) {
+			try {
+				if (project.hasNature(JavaCore.NATURE_ID)) {
+					return (IJavaProject) project.getNature(JavaCore.NATURE_ID);
+				}
+			}
+			catch (CoreException e) {
+				SpringCore.log("Error getting Java project for project '"
+						+ project.getName() + "'", e);
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Returns true if given resource's project is a Spring project.
 	 */
 	public static boolean isSpringProject(IResource resource) {
 		if (resource != null && resource.isAccessible()) {
 			try {
 				return resource.getProject().hasNature(SpringCore.NATURE_ID);
+			}
+			catch (CoreException e) {
+				SpringCore.log(e);
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Returns true if given resource's project is a ADJT project.
+	 */
+	public static boolean isAjdtProject(IResource resource) {
+		if (resource != null && resource.isAccessible()) {
+			try {
+				return resource.getProject().hasNature(AJDT_NATURE);
 			}
 			catch (CoreException e) {
 				SpringCore.log(e);
@@ -319,8 +371,7 @@ public final class SpringCoreUtils {
 						.delimitedListToStringArray(bundleClassPath, ",");
 				for (String classPathEntry : classPathEntries) {
 					if (".".equals(classPathEntry.trim())) {
-						paths.add(FileLocator.toFileURL(bundle
-								.getEntry("/")));
+						paths.add(FileLocator.toFileURL(bundle.getEntry("/")));
 					}
 					else {
 						paths.add(FileLocator.toFileURL(new URL(bundle
@@ -456,5 +507,56 @@ public final class SpringCoreUtils {
 		}
 
 		return location;
+	}
+	
+	public static boolean isTypeAjdtElement(IType type) {
+		if (IS_AJDT_PRESENT) {
+			return SpringCoreAjdtUtils.isTypeAjdtElement(type);
+		}
+		return false;
+	}
+
+	public static IType getJavaType(IProject project, String className) {
+		IJavaProject javaProject = SpringCoreUtils.getJavaProject(project);
+		if (IS_AJDT_PRESENT && javaProject != null && className != null) {
+
+			try {
+				IType type = null;
+				// First look for the type in the project
+				if (isAjdtProject(project)) {
+					type = SpringCoreAjdtUtils.getAjdtType(project, className);
+				}
+
+				if (type != null) {
+					return type;
+				}
+
+				// Then look for the type in the referenced Java projects
+				for (IProject refProject : project.getReferencedProjects()) {
+					if (isAjdtProject(refProject)) {
+						type = SpringCoreAjdtUtils.getAjdtType(project,
+								className);
+						if (type != null) {
+							return type;
+						}
+					}
+				}
+			}
+			catch (CoreException e) {
+				SpringCore
+						.log("Error getting Java type '" + className + "'", e);
+			}
+		}
+		return null;
+	}
+
+	public static boolean isAjdtPresent() {
+		try {
+			Class.forName(AJDT_CLASS);
+			return true;
+		}
+		catch (ClassNotFoundException e) {
+			return false;
+		}
 	}
 }
