@@ -95,6 +95,9 @@
 	<!--   target.folder - destination folder                                  -->
 	<!-- ===================================================================== -->
 	<target name="pre.gather.bin.parts">
+		<antcall target="copy.source">
+			<param name="plugin-name" value="org.springframework.ide.eclipse.aop.ui" />
+		</antcall>
 	</target>
 
 	<!-- ===================================================================== -->
@@ -154,14 +157,12 @@
 	<!--   temp.folder - temporary folder                                      -->
 	<!-- ===================================================================== -->
 	<target name="post.clean">
-		<antcall target="copy.source">
-				<param name="plugin-name" value="org.springframework.ide.eclipse.aop.ui"/>
-		</antcall>
 	</target>
 
 	<target name="copy.source" if="plugin-name">
-		<mkdir dir="src/${plugin-name}" />
-		<copy todir="src/${plugin-name}">
+		<mkdir dir="src/${plugin-name}_${sitePackageVersion}.${forceContextQualifier}" />
+		<ant antfile="../${plugin-name}/build.xml" target="build.sources" />
+		<copy todir="src/${plugin-name}_${sitePackageVersion}.${forceContextQualifier}">
 			<fileset dir="../${plugin-name}">
 				<include name="src.zip" />
 			</fileset>
