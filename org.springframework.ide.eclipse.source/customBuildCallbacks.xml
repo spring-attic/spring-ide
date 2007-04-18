@@ -208,7 +208,7 @@
 		<mkdir dir="src/${plugin-name}_2.0.0.${forceContextQualifier}" />
 		<ant antfile="build.xml" dir="${build.result.folder}/../../${plugin-name}" target="build.sources" />
 		<move todir="src/${plugin-name}_2.0.0.${forceContextQualifier}">
-			<fileset dir=".">
+			<fileset dir="${build.result.folder}/../../${plugin-name}">
 				<include name="src.zip" />
 			</fileset>
 		</move>
