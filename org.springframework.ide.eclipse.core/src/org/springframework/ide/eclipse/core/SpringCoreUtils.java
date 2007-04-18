@@ -49,7 +49,6 @@ import org.springframework.util.StringUtils;
 
 /**
  * Some helper methods.
- * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
@@ -319,8 +318,14 @@ public final class SpringCoreUtils {
 				String[] classPathEntries = StringUtils
 						.delimitedListToStringArray(bundleClassPath, ",");
 				for (String classPathEntry : classPathEntries) {
-					paths.add(FileLocator.toFileURL(new URL(bundle
-							.getEntry("/"), "/" + classPathEntry.trim())));
+					if (".".equals(classPathEntry.trim())) {
+						paths.add(FileLocator.toFileURL(bundle
+								.getEntry("/")));
+					}
+					else {
+						paths.add(FileLocator.toFileURL(new URL(bundle
+								.getEntry("/"), "/" + classPathEntry.trim())));
+					}
 				}
 			}
 		}
@@ -408,7 +413,7 @@ public final class SpringCoreUtils {
 		return (project.getRawLocation() != null ? project.getRawLocation()
 				: project.getLocation());
 	}
-	
+
 	public static String getClassLoaderHierachy(Class clazz) {
 		ClassLoader cls = clazz.getClassLoader();
 		StringBuffer buf = new StringBuffer(cls.getClass().getName());
@@ -419,7 +424,7 @@ public final class SpringCoreUtils {
 		}
 		return buf.toString();
 	}
-	
+
 	public static String getClassVersion(Class clazz) {
 		String version = "unkown";
 		if (clazz.getPackage().getImplementationVersion() != null) {
