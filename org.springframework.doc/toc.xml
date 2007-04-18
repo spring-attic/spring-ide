@@ -96,7 +96,7 @@
                <topic label="Compound property names" href="beans.html#beans-compound-property-names"/>
             </topic>
             <topic label="Using depends-on" href="beans.html#beans-factory-dependson"/>
-            <topic label="Lazily-instantiating beans" href="beans.html#beans-factory-lazy-init"/>
+            <topic label="Lazily-instantiated beans" href="beans.html#beans-factory-lazy-init"/>
             <topic label="Autowiring collaborators" href="beans.html#beans-factory-autowire">
                <topic label="Excluding a bean from being available for autowiring" href="beans.html#beans-factory-autowire-candidate"/>
             </topic>
@@ -365,7 +365,9 @@
             <topic label="Using @Transactional with AspectJ" href="transaction.html#transaction-declarative-aspectj"/>
          </topic>
          <topic label="Programmatic transaction management" href="transaction.html#transaction-programmatic">
-            <topic label="Using the TransactionTemplate" href="transaction.html#tx-prog-template"/>
+            <topic label="Using the TransactionTemplate" href="transaction.html#tx-prog-template">
+               <topic label="Specifying transaction settings" href="transaction.html#tx-prog-template-settings"/>
+            </topic>
             <topic label="Using the PlatformTransactionManager" href="transaction.html#transaction-programmatic-ptm"/>
          </topic>
          <topic label="Choosing between programmatic and declarative transaction management" href="transaction.html#tx-decl-vs-prog"/>
@@ -392,7 +394,7 @@
                <topic label="Examples" href="jdbc.html#jdbc-JdbcTemplate-examples">
                   <topic label="Querying (SELECT)" href="jdbc.html#jdbc-JdbcTemplate-examples-query"/>
                   <topic label="Updating (INSERT/UPDATE/DELETE)" href="jdbc.html#jdbc-JdbcTemplate-examples-update"/>
-                  <topic label="Other operations (DDL)" href="jdbc.html#jdbc-JdbcTemplate-examples-other"/>
+                  <topic label="Other operations" href="jdbc.html#jdbc-JdbcTemplate-examples-other"/>
                </topic>
                <topic label="JdbcTemplate idioms (best practices)" href="jdbc.html#jdbc-JdbcTemplate-idioms"/>
             </topic>
@@ -840,7 +842,10 @@
          <topic label="Scenarios" href="dynamic-language.html#dynamic-language-scenarios">
             <topic label="Scripted Spring MVC Controllers" href="dynamic-language.html#dynamic-language-scenarios-controllers"/>
             <topic label="Scripted Validators" href="dynamic-language.html#dynamic-language-scenarios-validators"/>
-            <topic label="AOP - advising scripted beans" href="dynamic-language.html#dynamic-language-scenarios-aop"/>
+         </topic>
+         <topic label="Bits and bobs" href="dynamic-language.html#dynamic-language-final-notes">
+            <topic label="AOP - advising scripted beans" href="dynamic-language.html#dynamic-language-final-notes-aop"/>
+            <topic label="Scoping" href="dynamic-language.html#dynamic-language-final-notes-scopes"/>
          </topic>
          <topic label="Further Resources" href="dynamic-language.html#dynamic-language-resources"/>
       </topic>
@@ -859,6 +864,19 @@
             <topic label="Custom metadata" href="metadata.html#metadata-arbitrary"/>
          </topic>
          <topic label="Using attributes to minimize MVC web tier configuration" href="metadata.html#metadata-attributes-mvc"/>
+      </topic>
+   </topic>
+   <topic label="Sample applications" href="spring-samples.html">
+      <topic label="Showcase applications" href="showcases.html">
+         <topic label="Introduction" href="showcases.html#showcases-introduction"/>
+         <topic label="Spring MVC Controllers implemented in a dynamic language" href="showcases.html#showcases-dynamvc">
+            <topic label="Build and deployment" href="showcases.html#showcases-dynamvc-build"/>
+         </topic>
+         <topic label="Implementing DAOs using SimpleJdbcTemplate and @Repository&#xA;	" href="showcases.html#showcases-java5-dao">
+            <topic label="The domain" href="showcases.html#showcases-java5-dao-the-domain"/>
+            <topic label="The data access objects" href="showcases.html#showcases-java5-dao-the-daos"/>
+            <topic label="Build" href="showcases.html#showcases-java5-dao-build"/>
+         </topic>
       </topic>
    </topic>
    <topic label="XML Schema-based configuration" href="xsd-config.html">
