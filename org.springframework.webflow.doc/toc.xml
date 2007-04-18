@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<toc label="Spring Web Flow - Reference Documentation" topic="index.html">
+<toc label="Spring Web Flow" topic="index.html">
    <topic label="Preface" href="preface.html"/>
    <topic label="Introduction" href="introduction.html">
       <topic label="Overview" href="introduction.html#introduction-overview"/>
@@ -125,6 +125,7 @@
          <topic label="A flow executor using a simple execution repository" href="flow-executor.html#executor-custom-repo"/>
          <topic label="A flow executor using a client-side continuation-based execution repository" href="flow-executor.html#executor-custom-repo2"/>
          <topic label="A flow executor using a single key execution repository" href="flow-executor.html#executor-custom-repo3"/>
+         <topic label="A flow executor setting custom conversation management attributes" href="flow-executor.html#executor-custom-repo4"/>
          <topic label="A flow executor setting system execution attributes" href="flow-executor.html#executor-excution-attributes"/>
          <topic label="A flow executor setting custom execution listeners" href="flow-executor.html#executor-excution-listeners"/>
          <topic label="A Spring 1.2 compatible flow executor configuration" href="flow-executor.html#executor-1.2-compatible"/>
@@ -153,75 +154,94 @@
          <topic label="A single flow action executing all flows" href="flow-executor.html#executor-struts-simple"/>
       </topic>
       <topic label="Java Server Faces (JSF) integration" href="flow-executor.html#executor-jsf">
-         <topic label="A typical faces-config.xml file" href="flow-executor.html#executor-jsf-simple"/>
-         <topic label="Launching a flow execution - command link" href="flow-executor.html#executor-jsf-launch-get"/>
-         <topic label="Resuming a flow execution - form" href="flow-executor.html#executor-jsf-resume-form"/>
+         <topic label="Adding Spring Web Flow extensions to faces-config.xml" href="flow-executor.html#executor-jsf-simple"/>
+         <topic label="Configuring the Web Flow system" href="flow-executor.html#executor-jsf-simple-webflow-setup"/>
+         <topic label="Launching a flow execution - JSF command link component" href="flow-executor.html#executor-jsf-launch-commandlink"/>
+         <topic label="Launching a flow execution - normal HTML anchor" href="flow-executor.html#executor-jsf-launch-normal-anchor"/>
+         <topic label="Flow definitions in a JSF environment" href="flow-executor.html#executor-jsf-sampleflow"/>
+         <topic label="Resuming a flow execution - form bound to flow execution variables" href="flow-executor.html#executor-jsf-resume-form"/>
+         <topic label="Spring Web Flow JSF Integration Samples" href="flow-executor.html#executor-jsf-sample"/>
+         <topic label="A pre Spring Web Flow 1.0.2 faces-config.xml file" href="flow-executor.html#executor-jsf-simple-pre-102"/>
+         <topic label="A pre Spring Web Flow 1.0.2 Web Flow system configuration" href="flow-executor.html#executor-jsf-webflowsystem-pre-102"/>
+         <topic label="Resuming a flow execution - pre Spring Web Flow 1.0.2" href="flow-executor.html#executor-jsf-resume-form-pre-102"/>
       </topic>
    </topic>
    <topic label="Practical Use of Spring Web Flow" href="practical.html">
       <topic label="Sample applications" href="practical.html#samples"/>
       <topic label="Running the Web Flow sample applications" href="practical.html#running-samples">
-         <topic label="Building from the Command Line" href="practical.html#d0e4075"/>
-         <topic label="Importing Projects into Eclipse" href="practical.html#d0e4083"/>
-         <topic label="Deploying projects inside Eclipse using Eclipse Web Tools (WTP)" href="practical.html#d0e4114"/>
-         <topic label="Other IDE's" href="practical.html#d0e4124"/>
-      </topic>
-      <topic label="Fileupload Example" href="practical.html#fileupload-sample">
-         <topic label="Overview" href="practical.html#d0e4132"/>
-         <topic label="Web.xml" href="practical.html#d0e4137"/>
-         <topic label="Spring MVC Context" href="practical.html#d0e4145"/>
-         <topic label="Fileupload Web Flow" href="practical.html#d0e4163"/>
-      </topic>
-      <topic label="Birthdate Example" href="practical.html#birthdate-sample">
-         <topic label="Overview" href="practical.html#d0e4191"/>
-         <topic label="Web.xml" href="practical.html#d0e4198"/>
-         <topic label="Struts Configuration" href="practical.html#d0e4209"/>
-         <topic label="Birthdate Web Flow" href="practical.html#d0e4225"/>
-         <topic label="Birthdate-alternate Web Flow" href="practical.html#d0e4266"/>
-      </topic>
-      <topic label="Shippingrate Example" href="practical.html#shippingrate-sample">
-         <topic label="Overview" href="practical.html#d0e4282"/>
-         <topic label="Web.xml" href="practical.html#d0e4287"/>
-         <topic label="Spring MVC Context" href="practical.html#d0e4298"/>
-         <topic label="Ajax Requests" href="practical.html#d0e4314"/>
-         <topic label="getRate Web Flow" href="practical.html#d0e4347"/>
-      </topic>
-      <topic label="Numberguess Example" href="practical.html#numberguess-sample">
-         <topic label="Overview" href="practical.html#d0e4380"/>
-         <topic label="Web.xml" href="practical.html#d0e4385"/>
-         <topic label="Spring MVC Context" href="practical.html#d0e4393"/>
-         <topic label="Higherlower Flow" href="practical.html#d0e4411"/>
-         <topic label="Mastermind Flow" href="practical.html#d0e4436"/>
-      </topic>
-      <topic label="Flowlauncher Example" href="practical.html#flowlauncher-sample">
-         <topic label="Overview" href="practical.html#d0e4447"/>
-         <topic label="Web.xml" href="practical.html#d0e4452"/>
-         <topic label="Spring MVC Context" href="practical.html#d0e4460"/>
-         <topic label="Sample A Web Flow" href="practical.html#d0e4474"/>
-         <topic label="Sample B Web Flow" href="practical.html#d0e4509"/>
-      </topic>
-      <topic label="Iitemlist Example" href="practical.html#itemlist-sample">
-         <topic label="Overview" href="practical.html#d0e4526"/>
-         <topic label="Web.xml" href="practical.html#d0e4531"/>
-         <topic label="Spring MVC Context" href="practical.html#d0e4539"/>
-         <topic label="Itemlist Web Flow" href="practical.html#d0e4564"/>
-         <topic label="Itemlist-alternate Web Flow" href="practical.html#d0e4592"/>
+         <topic label="Building from the Command Line" href="practical.html#d0e4230"/>
+         <topic label="Importing Projects into Eclipse" href="practical.html#d0e4238"/>
+         <topic label="Deploying projects inside Eclipse using Eclipse Web Tools (WTP)" href="practical.html#d0e4269"/>
+         <topic label="Other IDE's" href="practical.html#d0e4279"/>
       </topic>
       <topic label="Sellitem Example" href="practical.html#sellitem-sample">
-         <topic label="Overview" href="practical.html#d0e4616"/>
-         <topic label="Web.xml" href="practical.html#d0e4631"/>
-         <topic label="Services-config.xml" href="practical.html#d0e4642"/>
-         <topic label="Spring MVC Context" href="practical.html#d0e4659"/>
-         <topic label="Sellitem-beans.xml" href="practical.html#d0e4687"/>
-         <topic label="Sellitem-flow Flow Definition" href="practical.html#d0e4701"/>
-         <topic label="Sellitem-simple-flow Flow Definition" href="practical.html#d0e4731"/>
-         <topic label="Sellitem-conversation-scope-flow Flow Definition" href="practical.html#d0e4739"/>
+         <topic label="Overview" href="practical.html#d0e4287"/>
+         <topic label="Web.xml" href="practical.html#d0e4302"/>
+         <topic label="Services-config.xml" href="practical.html#d0e4313"/>
+         <topic label="Spring MVC Context" href="practical.html#d0e4330"/>
+         <topic label="Sellitem-beans.xml" href="practical.html#d0e4358"/>
+         <topic label="Sellitem-flow Flow Definition" href="practical.html#d0e4372"/>
+         <topic label="Sellitem-simple-flow Flow Definition" href="practical.html#d0e4404"/>
+         <topic label="Sellitem-conversation-scope-flow Flow Definition" href="practical.html#d0e4412"/>
       </topic>
       <topic label="Sellitem-JSF Example" href="practical.html#sellitem-JSF-sample">
-         <topic label="Overview" href="practical.html#d0e4759"/>
-         <topic label="Web.xml" href="practical.html#d0e4770"/>
-         <topic label="JSF Plumbing (faces-config.xml)" href="practical.html#d0e4783"/>
-         <topic label="Web Flow Definitions" href="practical.html#d0e4816"/>
+         <topic label="Overview" href="practical.html#d0e4432"/>
+         <topic label="Web.xml" href="practical.html#d0e4443"/>
+         <topic label="Web Flow JSF Setup in faces-config.xml" href="practical.html#d0e4456"/>
+         <topic label="Web Flow System Setup in webflow-config.xml" href="practical.html#d0e4470"/>
+         <topic label="Launching the sellitem-flow" href="practical.html#d0e4480"/>
+      </topic>
+      <topic label="Shippingrate Example" href="practical.html#shippingrate-sample">
+         <topic label="Overview" href="practical.html#d0e4515"/>
+         <topic label="Web.xml" href="practical.html#d0e4520"/>
+         <topic label="Spring MVC Context" href="practical.html#d0e4531"/>
+         <topic label="Ajax Requests" href="practical.html#d0e4547"/>
+         <topic label="getRate Web Flow" href="practical.html#d0e4577"/>
+      </topic>
+      <topic label="Numberguess Example" href="practical.html#numberguess-sample">
+         <topic label="Overview" href="practical.html#d0e4610"/>
+         <topic label="Web.xml" href="practical.html#d0e4615"/>
+         <topic label="Spring MVC Context" href="practical.html#d0e4623"/>
+         <topic label="Higherlower Flow" href="practical.html#d0e4641"/>
+         <topic label="Mastermind Flow" href="practical.html#d0e4666"/>
+      </topic>
+      <topic label="Flowlauncher Example" href="practical.html#flowlauncher-sample">
+         <topic label="Overview" href="practical.html#d0e4677"/>
+         <topic label="Web.xml" href="practical.html#d0e4682"/>
+         <topic label="Spring MVC Context" href="practical.html#d0e4690"/>
+         <topic label="Sample A Web Flow" href="practical.html#d0e4704"/>
+         <topic label="Sample B Web Flow" href="practical.html#d0e4739"/>
+      </topic>
+      <topic label="Itemlist Example" href="practical.html#itemlist-sample">
+         <topic label="Overview" href="practical.html#d0e4756"/>
+         <topic label="Web.xml" href="practical.html#d0e4761"/>
+         <topic label="Spring MVC Context" href="practical.html#d0e4769"/>
+         <topic label="Itemlist Web Flow" href="practical.html#d0e4794"/>
+         <topic label="Itemlist-alternate Web Flow" href="practical.html#d0e4822"/>
+      </topic>
+      <topic label="Fileupload Example" href="practical.html#fileupload-sample">
+         <topic label="Overview" href="practical.html#d0e4838"/>
+         <topic label="Web.xml" href="practical.html#d0e4843"/>
+         <topic label="Spring MVC Context" href="practical.html#d0e4851"/>
+         <topic label="Fileupload Web Flow" href="practical.html#d0e4869"/>
+      </topic>
+      <topic label="Birthdate Example" href="practical.html#birthdate-sample">
+         <topic label="Overview" href="practical.html#d0e4897"/>
+         <topic label="Web.xml" href="practical.html#d0e4904"/>
+         <topic label="Struts Configuration" href="practical.html#d0e4915"/>
+         <topic label="Birthdate Web Flow" href="practical.html#d0e4931"/>
+         <topic label="Birthdate-alternate Web Flow" href="practical.html#d0e4972"/>
+      </topic>
+      <topic label="Phonebook-Portlet Example" href="practical.html#phonebook-Portlet-sample">
+         <topic label="Overview" href="practical.html#d0e4988"/>
+         <topic label="Portal/Portlet Related Software Used in the Sample" href="practical.html#d0e5002">
+            <topic label="Apache Pluto" href="practical.html#d0e5007"/>
+            <topic label="Portlet MVC Framework" href="practical.html#d0e5016"/>
+            <topic label="Getting Phonebook Portlet up and Runnign with Apache Pluto" href="practical.html#d0e5024"/>
+         </topic>
+         <topic label="Portlet.xml Configuration" href="practical.html#d0e5071"/>
+         <topic label="Web.xml Configuration" href="practical.html#d0e5082"/>
+         <topic label="Portlet MVC Configuration" href="practical.html#d0e5100"/>
       </topic>
    </topic>
 </toc>
