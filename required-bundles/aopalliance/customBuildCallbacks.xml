@@ -72,6 +72,16 @@
 	</target>
 
 	<target name="post.compile.@dot">
+		<mkdir dir="bin" />
+		<unzip src="aopalliance.jar" dest="bin">
+			<patternset>
+				<exclude name="META-INF/MANIFEST.MF" />
+			</patternset>
+		</unzip>
+		<replace file="META-INF/MANIFEST.MF" summary="yes">
+			<replacetoken>aopalliance.jar</replacetoken>
+			<replacevalue>.</replacevalue>
+		</replace>
 	</target>
 
 	<!-- ===================================================================== -->
@@ -95,16 +105,6 @@
 	<!--   target.folder - destination folder                                  -->
 	<!-- ===================================================================== -->
 	<target name="pre.gather.bin.parts">
-		<mkdir dir="bin" />
-		<unzip src="aopalliance.jar" dest="bin">
-			<patternset>
-				<exclude name="META-INF/MANIFEST.MF" />
-			</patternset>
-		</unzip>
-		<replace file="META-INF/MANIFEST.MF" summary="yes">
-			<replacetoken>aopalliance.jar</replacetoken>			
-			<replacevalue>.</replacevalue>
-		</replace>
 	</target>
 
 	<!-- ===================================================================== -->
