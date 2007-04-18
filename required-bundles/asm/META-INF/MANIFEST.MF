@@ -5,9 +5,7 @@ Bundle-SymbolicName: org.objectweb.asm
 Bundle-Name: asm
 Bundle-Version: 2.2.3
 Bundle-Vendor: ObjectWeb
-Bundle-ClassPath: asm.jar, 
- asm-commons.jar,
- asm-util.jar
+Bundle-ClassPath: asm.jar, asm-commons.jar, asm-util.jar
 Export-Package: org.objectweb.asm,
  org.objectweb.asm.commons,
  org.objectweb.asm.signature,

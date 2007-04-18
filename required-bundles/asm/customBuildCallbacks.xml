@@ -120,10 +120,8 @@
 	<!-- ===================================================================== -->
 	<target name="post.gather.bin.parts">
 		<replace file="${target.folder}/META-INF/MANIFEST.MF" summary="yes">
-			<replacetoken><![CDATA[Bundle-ClassPath: asm.jar, 
- asm-commons.jar,
- asm-util.jar]]></replacetoken>
-			<replacevalue>Bundle-ClassPath: .</replacevalue>
+			<replacetoken>asm.jar, asm-commons.jar, asm-util.jar</replacetoken>
+			<replacevalue>.</replacevalue>
 		</replace>
 	</target>
 
