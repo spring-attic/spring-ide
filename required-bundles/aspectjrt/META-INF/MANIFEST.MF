@@ -5,6 +5,7 @@ Bundle-SymbolicName: org.aspectj.aspectjrt
 Bundle-Name: aspecjrt
 Bundle-Version: 1.5.3
 Bundle-Vendor: Eclipse.org
+Bundle-ClassPath: aspectjrt.jar
 Export-Package: org.aspectj.internal.lang.annotation,
  org.aspectj.internal.lang.reflect,
  org.aspectj.lang,

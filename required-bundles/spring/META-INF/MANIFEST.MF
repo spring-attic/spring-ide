@@ -7,7 +7,7 @@ Bundle-SymbolicName: org.springframework
 Bundle-Name: org.springframework
 Bundle-Version: 2.0.4
 Bundle-Vendor: Spring Framework
-Bundle-ClassPath: spring.jar
+Bundle-ClassPath: spring.jar, .
 Bundle-Localization: plugin
 Export-Package: org.aopalliance.aop,
  org.aopalliance.intercept,
