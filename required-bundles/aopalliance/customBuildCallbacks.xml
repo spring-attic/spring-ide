@@ -100,10 +100,6 @@
 				<exclude name="META-INF/MANIFEST.MF" />
 			</patternset>
 		</unzip>
-		<replace file="${target.folder}/META-INF/MANIFEST.MF" summary="yes">
-			<replacetoken>aopalliance.jar</replacetoken>
-			<replacevalue>.</replacevalue>
-		</replace>
 	</target>
 
 	<!-- ===================================================================== -->
@@ -113,6 +109,10 @@
 	<!--   target.folder - destination folder                                  -->
 	<!-- ===================================================================== -->
 	<target name="post.gather.bin.parts">
+		<replace file="${target.folder}/META-INF/MANIFEST.MF" summary="yes">
+			<replacetoken>aopalliance.jar</replacetoken>
+			<replacevalue>.</replacevalue>
+		</replace>
 	</target>
 
 	<!-- ===================================================================== -->
