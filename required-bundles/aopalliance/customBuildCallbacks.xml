@@ -4,8 +4,6 @@
 <!-- ===================================================================== -->
 <project name="Build specific targets and properties" default="noDefault">
 
-	<property name="jar.name" value="aopalliance.jar" />
-
 	<!-- ===================================================================== -->
 	<!-- Default target                                                        -->
 	<!-- ===================================================================== -->
@@ -98,8 +96,15 @@
 	<!-- ===================================================================== -->
 	<target name="pre.gather.bin.parts">
 		<mkdir dir="bin" />
-		<unzip src="${jar.name}" dest="bin" />
-		<replace file="META-INF/MANIFEST.MF" summary="yes" token="${jar.name}" value="." />
+		<unzip src="aopalliance.jar" dest="bin">
+			<patternset>
+				<exclude name="META-INF/MANIFEST.MF" />
+			</patternset>
+		</unzip>
+		<replace file="META-INF/MANIFEST.MF" summary="yes">
+			<replacetoken>aopalliance.jar</replacetoken>			
+			<replacevalue>.</replacevalue>
+		</replace>
 	</target>
 
 	<!-- ===================================================================== -->
