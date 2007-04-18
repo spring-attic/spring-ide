@@ -72,8 +72,8 @@
 	</target>
 
 	<target name="post.compile.@dot">
-		<mkdir dir="bin" />
-		<unzip src="aopalliance.jar" dest="bin">
+		<!--mkdir dir="bin" /-->
+		<unzip src="aopalliance.jar" dest=".">
 			<patternset>
 				<exclude name="META-INF/MANIFEST.MF" />
 			</patternset>
