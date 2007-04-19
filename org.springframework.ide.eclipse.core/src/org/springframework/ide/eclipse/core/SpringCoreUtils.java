@@ -242,11 +242,14 @@ public final class SpringCoreUtils {
 	 */
 	public static boolean isJavaProject(IResource resource) {
 		if (resource != null && resource.isAccessible()) {
-			try {
-				return resource.getProject().hasNature(JavaCore.NATURE_ID);
-			}
-			catch (CoreException e) {
-				SpringCore.log(e);
+			IProject project = resource.getProject();
+			if (project != null) {
+				try {
+					return project.hasNature(JavaCore.NATURE_ID);
+				}
+				catch (CoreException e) {
+					SpringCore.log(e);
+				}
 			}
 		}
 		return false;
@@ -279,11 +282,14 @@ public final class SpringCoreUtils {
 	 */
 	public static boolean isSpringProject(IResource resource) {
 		if (resource != null && resource.isAccessible()) {
-			try {
-				return resource.getProject().hasNature(SpringCore.NATURE_ID);
-			}
-			catch (CoreException e) {
-				SpringCore.log(e);
+			IProject project = resource.getProject();
+			if (project != null) {
+				try {
+					return project.hasNature(SpringCore.NATURE_ID);
+				}
+				catch (CoreException e) {
+					SpringCore.log(e);
+				}
 			}
 		}
 		return false;
@@ -294,11 +300,14 @@ public final class SpringCoreUtils {
 	 */
 	public static boolean isAjdtProject(IResource resource) {
 		if (resource != null && resource.isAccessible()) {
-			try {
-				return resource.getProject().hasNature(AJDT_NATURE);
-			}
-			catch (CoreException e) {
-				SpringCore.log(e);
+			IProject project = resource.getProject();
+			if (project != null) {
+				try {
+					return project.hasNature(AJDT_NATURE);
+				}
+				catch (CoreException e) {
+					SpringCore.log(e);
+				}
 			}
 		}
 		return false;

@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeListener;
 
 /**
@@ -66,7 +67,9 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 			if (resource instanceof IFile) {
 				IFile file = (IFile) resource;
 				if (isProjectDescriptionFile(file)) {
-					events.projectDescriptionChanged(file, eventType);
+					if (SpringCoreUtils.isSpringProject(file)) {
+						events.projectDescriptionChanged(file, eventType);
+					}
 				} else if (BeansCoreUtils.isBeansConfig(file)) {
 					events.configAdded(file, eventType);
 				}
@@ -81,7 +84,9 @@ public class BeansResourceChangeListener extends SpringResourceChangeListener {
 				if ((flags & IResourceDelta.CONTENT) != 0) {
 					IFile file = (IFile) resource;
 					if (isProjectDescriptionFile(file)) {
-						events.projectDescriptionChanged(file, eventType);
+						if (SpringCoreUtils.isSpringProject(file)) {
+							events.projectDescriptionChanged(file, eventType);
+						}
 					} else if (BeansCoreUtils.isBeansConfig(file)) {
 						events.configChanged(file, eventType);
 					} else {

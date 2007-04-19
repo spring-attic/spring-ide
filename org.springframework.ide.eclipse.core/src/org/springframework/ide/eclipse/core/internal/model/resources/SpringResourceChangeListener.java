@@ -49,24 +49,25 @@ public class SpringResourceChangeListener implements IResourceChangeListener {
 
 	public void resourceChanged(IResourceChangeEvent event) {
 		if (event.getSource() instanceof IWorkspace) {
-			IProject project = (IProject) event.getResource();
-			IResourceDelta delta = event.getDelta();
 			int eventType = event.getType();
 			switch (eventType) {
 			case IResourceChangeEvent.PRE_CLOSE:
-				if (SpringCoreUtils.isSpringProject(project)) {
-					events.projectClosed(project, eventType);
+				IProject closedProject = (IProject) event.getResource();
+				if (SpringCoreUtils.isSpringProject(closedProject)) {
+					events.projectClosed(closedProject, eventType);
 				}
 				break;
 
 			case IResourceChangeEvent.PRE_DELETE:
-				if (SpringCoreUtils.isSpringProject(project)) {
-					events.projectDeleted(project, eventType);
+				IProject openedProject = (IProject) event.getResource();
+				if (SpringCoreUtils.isSpringProject(openedProject)) {
+					events.projectDeleted(openedProject, eventType);
 				}
 				break;
 
 			case IResourceChangeEvent.PRE_BUILD:
 			case IResourceChangeEvent.POST_BUILD:
+				IResourceDelta delta = event.getDelta();
 				if (delta != null) {
 					try {
 						delta.accept(getVisitor(eventType), VISITOR_FLAGS);
