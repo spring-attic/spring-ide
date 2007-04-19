@@ -322,13 +322,13 @@ public final class BeansModelUtils {
 			// For a child bean add the parent bean
 			if (bean.isChildBean()) {
 				IBean parentBean = getBean(bean.getParentName(), context);
-				addBeanReference(BeanType.PARENT, bean, parentBean, context,
-						references, referencedBeans);
-				if (recursive) {
+				if (addBeanReference(BeanType.PARENT, bean, parentBean,
+						context, references, referencedBeans)
+						&& recursive) {
 					// Now add all parent beans and all beans which are
 					// referenced by the parent beans
-					Set<String> beanNames = new HashSet<String>(); // used to
-					// detect a cycle
+					// The HashSet is used to detect a cycle
+					Set<String> beanNames = new HashSet<String>();
 					beanNames.add(bean.getElementName());
 					beanNames.add(parentBean.getElementName());
 					while (parentBean != null && parentBean.isChildBean()) {
