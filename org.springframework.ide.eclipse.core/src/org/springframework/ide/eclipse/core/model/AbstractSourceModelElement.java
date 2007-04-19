@@ -145,16 +145,13 @@ public abstract class AbstractSourceModelElement extends
 	 * Overwrite this method if the element's name is not unique.
 	 * <p>
 	 * This method is called by {@link #getElementID()}. The default
-	 * implementation returns to
-	 * <code>getElementName() + "-" + location.getStartLine()</code> if a
-	 * {@link IModelSourceLocation} is available. Otherwise only the plain
-	 * element name is returned.
+	 * implementation returns
+	 * <code>getElementName() + ":" + getElementStartLine()</code>.
 	 * 
 	 * @see #getElementID()
 	 */
 	@Override
 	protected String getUniqueElementName() {
-		return (location != null ? getElementName() + ID_SEPARATOR
-				+ location.getStartLine() : getElementName());
+		return getElementName() + ID_SEPARATOR + getElementStartLine();
 	}
 }
