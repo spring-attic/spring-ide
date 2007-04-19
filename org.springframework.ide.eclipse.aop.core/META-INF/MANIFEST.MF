@@ -20,9 +20,7 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.beans.ui,
  org.springframework.ide.eclipse.beans.core,
  org.aspectj.aspectjweaver,
- org.objectweb.asm,
- org.eclipse.ajdt.core,
- org.eclipse.ajdt.ui
+ org.objectweb.asm
 Eclipse-LazyStart: true
 Export-Package: org.springframework.ide.eclipse.aop.core,
  org.springframework.ide.eclipse.aop.core.logging,
