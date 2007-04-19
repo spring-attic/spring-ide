@@ -435,7 +435,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 					"AopReferenceModelBuilder.pointcutIsMalformedOnBean", info, bean));
 			AopReferenceModelMarkerUtils.createProblemMarker(file, 
 					Activator.getFormattedMessage(
-							"AopReferenceModelBuilder.pointcutIsMalformedOnBean",t
+							"AopReferenceModelBuilder.pointcutIsMalformed",t
 							.getMessage()), 
 					IMarker.SEVERITY_ERROR, info.getAspectLineNumber(),
 					AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);

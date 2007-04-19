@@ -146,8 +146,7 @@ public class AspectDefinitionBuilder {
 	private static void parseAdvisors(IFile file, Node aspectNode,
 			Map<String, String> rootPointcuts,
 			List<IAspectDefinition> aspectInfos) {
-		String beanRef = BeansEditorUtils
-				.getAttribute(aspectNode, ADVICE_REF_ATTRIBUTE);
+		String beanRef = getAttribute(aspectNode, ADVICE_REF_ATTRIBUTE);
 		String className = BeansEditorUtils.getClassNameForBean(file,
 				aspectNode.getOwnerDocument(), beanRef);
 		if (StringUtils.hasText(className)) {
@@ -156,9 +155,9 @@ public class AspectDefinitionBuilder {
 			Map<String, String> pointcuts = new HashMap<String, String>();
 			parsePointcuts(pointcuts, aspectChildren);
 
-			String pointcut = BeansEditorUtils.getAttribute(aspectNode,
+			String pointcut = getAttribute(aspectNode,
 					POINTCUT_ELEMENT);
-			String pointcutRef = BeansEditorUtils.getAttribute(aspectNode,
+			String pointcutRef = getAttribute(aspectNode,
 					POINTCUT_REF_ATTRIBUTE);
 			if (!StringUtils.hasText(pointcut)) {
 				pointcut = pointcuts.get(pointcutRef);
@@ -272,7 +271,7 @@ public class AspectDefinitionBuilder {
 			for (int j = 0; j < include.getLength(); j++) {
 				if (INCLUDE_ELEMENT.equals(include.item(j).getLocalName())) {
 					patternList = new ArrayList<Pattern>();
-					String pattern = BeansEditorUtils.getAttribute(include
+					String pattern = getAttribute(include
 							.item(j), NAME_ATTRIBUTE);
 					if (StringUtils.hasText(pattern)) {
 						patternList.add(Pattern.compile(pattern));
@@ -285,7 +284,7 @@ public class AspectDefinitionBuilder {
 
 			for (int j = 0; j < list.getLength(); j++) {
 				final Node bean = list.item(j);
-				final String id = BeansEditorUtils.getAttribute(bean, ID_ATTRIBUTE);
+				final String id = getAttribute(bean, ID_ATTRIBUTE);
 				final String className = BeansEditorUtils
 						.getClassNameForBean(bean);
 				if (className != null && isIncluded(patternList, id)) {
@@ -322,8 +321,8 @@ public class AspectDefinitionBuilder {
 			Map<String, String> pointcuts, Map<String, String> rootPointcuts,
 			Node aspectNode, IAopReference.ADVICE_TYPES type) {
 		BeanAspectDefinition info = new BeanAspectDefinition();
-		String pointcut = BeansEditorUtils.getAttribute(aspectNode, POINTCUT_ELEMENT);
-		String pointcutRef = BeansEditorUtils.getAttribute(aspectNode,
+		String pointcut = getAttribute(aspectNode, POINTCUT_ELEMENT);
+		String pointcutRef = getAttribute(aspectNode,
 				POINTCUT_REF_ATTRIBUTE);
 		if (!StringUtils.hasText(pointcut)) {
 			pointcut = pointcuts.get(pointcutRef);
@@ -331,9 +330,8 @@ public class AspectDefinitionBuilder {
 				pointcut = rootPointcuts.get(pointcutRef);
 			}
 		}
-		String argNames = BeansEditorUtils
-				.getAttribute(aspectNode, ARG_NAMES_ATTRIBUTE);
-		String method = BeansEditorUtils.getAttribute(aspectNode, METHOD_ATTRIBUTE);
+		String argNames = getAttribute(aspectNode, ARG_NAMES_ATTRIBUTE);
+		String method = getAttribute(aspectNode, METHOD_ATTRIBUTE);
 		String[] argNamesArray = null;
 		if (argNames != null) {
 			argNamesArray = StringUtils
@@ -350,7 +348,7 @@ public class AspectDefinitionBuilder {
 	private static void parseAspects(IFile file, Node child,
 			Map<String, String> rootPointcuts,
 			List<IAspectDefinition> aspectInfos) {
-		String beanRef = BeansEditorUtils.getAttribute(child, "ref");
+		String beanRef = getAttribute(child, "ref");
 		String className = BeansEditorUtils.getClassNameForBean(file, child
 				.getOwnerDocument(), beanRef);
 		if (StringUtils.hasText(className)) {
@@ -362,11 +360,11 @@ public class AspectDefinitionBuilder {
 				Node aspectNode = aspectChildren.item(g);
 				IAspectDefinition info = null;
 				if (DECLARE_PARENTS_ELEMENT.equals(aspectNode.getLocalName())) {
-					String typesMatching = BeansEditorUtils.getAttribute(
+					String typesMatching = getAttribute(
 							aspectNode, TYPES_MATCHING_ATTRIBUTE);
-					String defaultImpl = BeansEditorUtils.getAttribute(
+					String defaultImpl = getAttribute(
 							aspectNode, DEFAULT_IMPL_ATTRIBUTE);
-					String implementInterface = BeansEditorUtils.getAttribute(
+					String implementInterface = getAttribute(
 							aspectNode, IMPLEMENT_INTERFACE_ATTRIBUTE);
 					if (StringUtils.hasText(typesMatching)
 							&& StringUtils.hasText(defaultImpl)
@@ -401,14 +399,14 @@ public class AspectDefinitionBuilder {
 				else if (AFTER_RETURNING_ELEMENT.equals(aspectNode.getLocalName())) {
 					info = parseAspect(pointcuts, rootPointcuts, aspectNode,
 							IAopReference.ADVICE_TYPES.AFTER_RETURNING);
-					String returning = BeansEditorUtils.getAttribute(
+					String returning = getAttribute(
 							aspectNode, RETURNING_ATTRIBUTE);
 					info.setReturning(returning);
 				}
 				else if (AFTER_THROWING_ELEMENT.equals(aspectNode.getLocalName())) {
 					info = parseAspect(pointcuts, rootPointcuts, aspectNode,
 							IAopReference.ADVICE_TYPES.AFTER_THROWING);
-					String throwing = BeansEditorUtils.getAttribute(aspectNode,
+					String throwing = getAttribute(aspectNode,
 							THROWING_ATTRIBUTE);
 					info.setThrowing(throwing);
 				}
@@ -434,8 +432,8 @@ public class AspectDefinitionBuilder {
 		for (int j = 0; j < children.getLength(); j++) {
 			Node child = children.item(j);
 			if (POINTCUT_ELEMENT.equals(child.getLocalName())) {
-				String id = BeansEditorUtils.getAttribute(child, ID_ATTRIBUTE);
-				String expression = BeansEditorUtils.getAttribute(child,
+				String id = getAttribute(child, ID_ATTRIBUTE);
+				String expression = getAttribute(child,
 						EXPRESSION_ATTRIBUTE);
 				if (StringUtils.hasText(id) && StringUtils.hasText(expression)) {
 					rootPointcuts.put(id, expression);
@@ -479,5 +477,21 @@ public class AspectDefinitionBuilder {
 			
 			aspectInfos.addAll(aspectDefinitions);
 		}
+	}
+	
+	public static final boolean hasAttribute(Node node, String attributeName) {
+		return (node != null && node.hasAttributes() && node.getAttributes()
+				.getNamedItem(attributeName) != null);
+	}
+	
+	public static final String getAttribute(Node node, String attributeName) {
+		if (hasAttribute(node, attributeName)) {
+			String value = node.getAttributes().getNamedItem(attributeName)
+					.getNodeValue();
+			value = StringUtils.replace(value, "\n", " ");
+			value = StringUtils.replace(value, "\t", " ");
+			return StringUtils.replace(value, "\r", " ");
+		}
+		return null;
 	}
 }
