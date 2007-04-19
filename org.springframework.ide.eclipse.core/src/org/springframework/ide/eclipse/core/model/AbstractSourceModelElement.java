@@ -136,7 +136,7 @@ public abstract class AbstractSourceModelElement extends
 	public String toString() {
 		StringBuffer text = new StringBuffer(getElementName());
 		text.append(" (");
-		text.append(getElementSourceLocation().getStartLine());
+		text.append(getElementStartLine());
 		text.append(')');
 		return text.toString();
 	}
