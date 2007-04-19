@@ -51,6 +51,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.util.StringUtils;
@@ -895,7 +896,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 			// Skip factory-method validation for factory beans which are
 			// Spring factory beans as well and for those aspectOf methods
 			if (type != null 
-					&& !ASPECT_OF_METHOD_NAME.equals(methodName) 
+					&& !(ASPECT_OF_METHOD_NAME.equals(methodName) && SpringCoreUtils.isTypeAjdtElement(type)) 
 					&& !Introspector.doesImplement(type, FactoryBean.class
 							.getName())) {
 				validateMethod(bean, type, METHOD_TYPE_FACTORY, methodName,

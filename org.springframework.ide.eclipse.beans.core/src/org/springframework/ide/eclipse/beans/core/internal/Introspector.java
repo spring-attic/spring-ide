@@ -320,7 +320,7 @@ public final class Introspector {
 				}
 			}
 			catch (JavaModelException e) {
-				BeansCorePlugin.log(e);
+				//BeansCorePlugin.log(e);
 			}
 		}
 		return false;
