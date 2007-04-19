@@ -13,7 +13,9 @@ package org.springframework.ide.eclipse.aop.core.model.builder;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLClassLoader;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -23,6 +25,7 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
@@ -65,14 +68,22 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("restriction")
 public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 
-	private Set<IFile> filesToBuild;
-
-	private ClassLoader weavingClassLoader;
+	private static final String PROCESSING_TOOK_MSG = "Processing took";
 
 	private ClassLoader classLoader;
 
+	private Set<IFile> filesToBuild;
+
+	private ClassLoader weavingClassLoader;
+	
+	private Map<IAspectDefinition, Object> aspectDefinitionToPoincutCache;
+
 	public AopReferenceModelBuilder(Set<IFile> filesToBuild) {
 		this.filesToBuild = filesToBuild;
+	}
+
+	private void activateWeavingClassLoader() {
+		Thread.currentThread().setContextClassLoader(weavingClassLoader);
 	}
 
 	/**
@@ -82,10 +93,10 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 	 */
 	protected void buildAopModel(IProgressMonitor monitor,
 			Set<IFile> filesToBuild) {
-		AopLog.logStart("Processing took");
-		AopLog.log(AopLog.BUILDER,
-				"Start building Spring AOP reference model from "
-						+ filesToBuild.size() + " file(s)");
+		AopLog.logStart(PROCESSING_TOOK_MSG);
+		AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
+				"AopReferenceModelBuilder.startBuildReferenceModel",
+				filesToBuild.size()));
 
 		int worked = 0;
 		for (IFile currentFile : filesToBuild) {
@@ -93,17 +104,21 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				throw new OperationCanceledException();
 			}
 
-			AopLog.log(AopLog.BUILDER, "Building Spring AOP reference model ["
-					+ currentFile.getFullPath().toString() + "]");
-			monitor.subTask("Building Spring AOP reference model ["
-					+ currentFile.getFullPath().toString() + "]");
+			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
+					"AopReferenceModelBuilder.buildingAopReferenceModel",
+					currentFile.getFullPath().toString()));
+			monitor.subTask(Activator.getFormattedMessage(
+					"AopReferenceModelBuilder.buildingAopReferenceModel",
+					currentFile.getFullPath().toString()));
 
 			AopReferenceModelMarkerUtils.deleteProblemMarkers(currentFile);
-			AopLog.log(AopLog.BUILDER_MESSAGES, "Deleted problem markers");
+			AopLog.log(AopLog.BUILDER_MESSAGES,	Activator.getFormattedMessage(
+					"AopReferenceModelBuilder.deletedProblemMarkers"));
 
-			IAopProject aopProject = buildAopReferencesFromFile(currentFile);
-			AopLog.log(AopLog.BUILDER_MESSAGES,
-					"Construted AOP reference model");
+			IAopProject aopProject = buildAopReferencesFromFile(currentFile,
+					monitor);
+			AopLog.log(AopLog.BUILDER_MESSAGES, Activator.getFormattedMessage(
+					"AopReferenceModelBuilder.constructedAopReferenceModel"));
 
 			if (aopProject != null) {
 				List<IAopReference> references = aopProject.getAllReferences();
@@ -116,17 +131,17 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 					}
 				}
 			}
-			AopLog.log(AopLog.BUILDER_MESSAGES,
-					"Created problem markers from reference model");
+			AopLog.log(AopLog.BUILDER_MESSAGES,	Activator.getFormattedMessage(
+					"AopReferenceModelBuilder.createdProblemMarkers"));
 			worked++;
 			monitor.worked(worked);
-			AopLog.log(AopLog.BUILDER,
-					"Done building Spring AOP reference model ["
-							+ currentFile.getFullPath().toString() + "]");
+			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
+					"AopReferenceModelBuilder.doneBuildingReferenceModel",
+					currentFile.getFullPath().toString()));
 
 		}
 
-		AopLog.logEnd(AopLog.BUILDER, "Processing took");
+		AopLog.logEnd(AopLog.BUILDER, PROCESSING_TOOK_MSG);
 		// update images and text decoractions
 		Activator.getModel().fireModelChanged();
 	}
@@ -136,11 +151,12 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 	 * given Aspect definition against the {@link IBean}.
 	 */
 	private void buildAopReferencesForBean(IBean bean, IModelElement context,
-			IAspectDefinition info, IResource file, IAopProject aopProject) {
+			IAspectDefinition info, IResource file, IAopProject aopProject,
+			IProgressMonitor monitor) {
 		try {
-			AopLog.log(AopLog.BUILDER, "Processing bean definition [" + bean
-					+ "] from resource ["
-					+ bean.getElementResource().getFullPath() + "]");
+			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
+					"AopReferenceModelBuilder.processingBeanDefinition", bean,
+					bean.getElementResource().getFullPath()));
 
 			// check if bean is abstract
 			if (bean.isAbstract()) {
@@ -153,8 +169,8 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 					&& info.getResource() != null
 					&& info.getResource().equals(bean.getElementResource())) {
 				// don't check advice backing bean itself
-				AopLog.log(AopLog.BUILDER_MESSAGES,
-						"Skipping bean definition [" + bean + "]");
+				AopLog.log(AopLog.BUILDER_MESSAGES,	Activator.getFormattedMessage(
+					"AopReferenceModelBuilder.skippingBeanDefinition",	bean));
 				return;
 			}
 
@@ -170,9 +186,8 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 			if (jdtTargetType == null
 					|| Introspector.doesImplement(jdtTargetType,
 							FactoryBean.class.getName())) {
-				AopLog.log(AopLog.BUILDER_MESSAGES,	"Skipping bean definition ["
-					+ bean	+ "] because either it is a FactoryBean or the IType "
-					+ "could not be resolved");
+				AopLog.log(AopLog.BUILDER_MESSAGES, Activator.getFormattedMessage(
+					"AopReferenceModelBuilder.skippingFactoryBeanDefinition", bean));
 				return;
 			}
 
@@ -202,17 +217,17 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 			}
 			else if (info instanceof JavaAspectDefinition
 					&& !(info instanceof AnnotationAspectDefinition)) {
-				JavaAspectDefinition intro = (JavaAspectDefinition) info;
 
 				IMethod jdtAspectMethod = AopReferenceModelUtils.getMethod(
 						jdtAspectType, info.getAdviceMethodName(), info
 								.getAdviceMethodParameterTypes().length);
+				
 				if (jdtAspectMethod != null) {
 
 					List<IMethod> matchingMethods = AopReferenceModelUtils
-							.getMatches(targetClass, intro
-									.getAspectJPointcutExpression(), info,
-									aopProject.getProject().getProject());
+							.getMatchesForAnnotationAspectDefinition(targetClass, 
+									info, aopProject.getProject().getProject(), 
+									this.aspectDefinitionToPoincutCache);
 					for (IMethod method : matchingMethods) {
 						IAopReference ref = new AopReference(info.getType(),
 								jdtAspectMethod, method, info, file, bean);
@@ -232,8 +247,9 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				if (jdtAspectMethod != null) {
 
 					List<IMethod> matchingMethods = AopReferenceModelUtils
-							.getMatches(targetClass, info, aopProject
-									.getProject().getProject());
+							.getMatchesBeanAspectDefinition(targetClass, 
+									info, aopProject.getProject().getProject(),
+									this.aspectDefinitionToPoincutCache);
 					for (IMethod method : matchingMethods) {
 						IAopReference ref = new AopReference(info.getType(),
 								jdtAspectMethod, method, info, file, bean);
@@ -250,18 +266,12 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 		}
 
 		// Make sure that inner beans are handled as well
-		Set<IBean> innerBeans = BeansModelUtils.getInnerBeans(bean);
-		if (innerBeans != null && innerBeans.size() > 0) {
-			for (IBean innerBean : innerBeans) {
-				buildAopReferencesForBean(innerBean, context, info, file,
-						aopProject);
-			}
-		}
-
+		buildAopReferencesFromAspectDefinitionForBeans(context, info, monitor,
+				file, aopProject, BeansModelUtils.getInnerBeans(bean));
 	}
 
 	private void buildAopReferencesFromAspectDefinition(IBeansConfig config,
-			IAspectDefinition info) {
+			IAspectDefinition info, IProgressMonitor monitor) {
 
 		IResource file = config.getElementResource();
 		IAopProject aopProject = ((AopReferenceModel) Activator.getModel())
@@ -269,13 +279,41 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 						.getJavaProject(info.getResource().getProject()));
 
 		Set<IBean> beans = config.getBeans();
-		for (IBean bean : beans) {
-			buildAopReferencesForBean(bean, config, info, file, aopProject);
+		buildAopReferencesFromAspectDefinitionForBeans(config, info, monitor,
+				file, aopProject, beans);
+	}
+
+	private void buildAopReferencesFromAspectDefinitionForBeans(
+			IModelElement config, IAspectDefinition info,
+			IProgressMonitor monitor, IResource file, IAopProject aopProject,
+			Set<IBean> beans) {
+		SubProgressMonitor subProgressMonitor = new SubProgressMonitor(monitor,
+				IProgressMonitor.UNKNOWN);
+
+		subProgressMonitor.beginTask(
+				Activator.getFormattedMessage(
+						"AopReferenceModelBuilder.buildingAopReferences"),
+						beans.size());
+		int worked = 0;
+		try {
+			for (IBean bean : beans) {
+				subProgressMonitor.subTask(
+						Activator.getFormattedMessage(
+								"AopReferenceModelBuilder.buildingAopReferencesForBean", 
+								bean.getElementName(), 
+								bean.getElementResource().getFullPath()));
+				buildAopReferencesForBean(bean, config, info, file, aopProject,
+						monitor);
+				subProgressMonitor.worked(worked++);
+			}
+		}
+		finally {
+			subProgressMonitor.done();
 		}
 	}
 
 	private void buildAopReferencesFromBeansConfigSets(IBeansProject project,
-			BeansConfig config, IAspectDefinition info) {
+			BeansConfig config, IAspectDefinition info, IProgressMonitor monitor) {
 		// check config sets as well
 		Set<IBeansConfigSet> configSets = project.getConfigSets();
 		for (IBeansConfigSet configSet : configSets) {
@@ -284,7 +322,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				for (IBeansConfig configSetConfig : configs) {
 					if (!config.equals(configSetConfig)) {
 						buildAopReferencesFromAspectDefinition(configSetConfig,
-								info);
+								info, monitor);
 					}
 				}
 			}
@@ -292,7 +330,8 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 	}
 
 	@SuppressWarnings("deprecation")
-	private IAopProject buildAopReferencesFromFile(IFile currentFile) {
+	private IAopProject buildAopReferencesFromFile(IFile currentFile,
+			IProgressMonitor monitor) {
 		IAopProject aopProject = null;
 		IBeansProject project = BeansCorePlugin.getModel().getProject(
 				currentFile.getProject());
@@ -307,15 +346,19 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 						.getProjectWithInitialization(AopReferenceModelUtils
 								.getJavaProject(config.getElementResource()
 										.getProject()));
-
+				
+				
 				aopProject.clearReferencesForResource(currentFile);
 
 				// prepare class loaders
 				setupClassLoaders(javaProject);
 
-				AopLog.log(AopLog.BUILDER_CLASSPATH, "AOP builder classpath: "
-						+ StringUtils.arrayToDelimitedString(
-								((URLClassLoader) weavingClassLoader).getURLs(), ";"));
+				AopLog.log(AopLog.BUILDER_CLASSPATH, 
+						Activator.getFormattedMessage(
+								"AopReferenceModelBuilder.aopBuilderClassPath", 
+								StringUtils.arrayToDelimitedString(
+										((URLClassLoader) weavingClassLoader)
+												.getURLs(), ";")));
 
 				try {
 					IStructuredModel model = null;
@@ -327,6 +370,10 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 							IDOMDocument document = ((DOMModelImpl) model)
 									.getDocument();
 							try {
+								// prepare aspectDefinition to poincut cache
+								this.aspectDefinitionToPoincutCache = 
+									new HashMap<IAspectDefinition, Object>();
+
 								// move beyond reading the structured model to
 								// avoid class loading problems
 								activateWeavingClassLoader();
@@ -349,11 +396,12 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 						for (IAspectDefinition info : aspectInfos) {
 
 							// build model for config
-							buildAopReferencesFromAspectDefinition(config, info);
+							buildAopReferencesFromAspectDefinition(config,
+									info, monitor);
 
 							// build model for config sets
 							buildAopReferencesFromBeansConfigSets(project,
-									config, info);
+									config, info, monitor);
 						}
 					}
 				}
@@ -368,64 +416,61 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 		return aopProject;
 	}
 
-	private void recoverClassLoader() {
-		Thread.currentThread().setContextClassLoader(classLoader);
-	}
-
-	private void activateWeavingClassLoader() {
-		Thread.currentThread().setContextClassLoader(weavingClassLoader);
-	}
-
-	private void setupClassLoaders(IJavaProject javaProject) {
-		classLoader = Thread.currentThread().getContextClassLoader();
-		weavingClassLoader = SpringCoreUtils.getClassLoader(javaProject, false);
-	}
-
 	private void handleException(Throwable t, IAspectDefinition info,
 			IBean bean, IResource file) {
 		if (t instanceof NoClassDefFoundError
 				|| t instanceof ClassNotFoundException) {
-			AopLog.log(AopLog.BUILDER, "Class dependency error ["
-					+ t.getMessage() + "] occured on aspect definition ["
-					+ info + "] while processing bean [" + bean
-					+ "]. Check if builder classpath is complete");
-			AopReferenceModelMarkerUtils.createProblemMarker(file,
-					"Build path is incomplete. Cannot find class file for "
-							+ t.getMessage(), IMarker.SEVERITY_ERROR, info
-							.getAspectLineNumber(),
+			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
+					"AopReferenceModelBuilder.classDependencyError", 
+					t.getMessage(), info, bean));
+			AopReferenceModelMarkerUtils.createProblemMarker(file, 
+					Activator.getFormattedMessage(
+							"AopReferenceModelBuilder.buildPathIncomplete", 
+							t.getMessage()), 
+					IMarker.SEVERITY_ERROR, info.getAspectLineNumber(),
 					AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
 		}
 		else if (t instanceof IllegalArgumentException) {
-			AopLog.log(AopLog.BUILDER, "Pointcut is malformed [" + info
-					+ "] while processing bean [" + bean + "]");
-			AopReferenceModelMarkerUtils.createProblemMarker(file, t
-					.getMessage(), IMarker.SEVERITY_ERROR, info
-					.getAspectLineNumber(),
+			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
+					"AopReferenceModelBuilder.pointcutIsMalformedOnBean", info, bean));
+			AopReferenceModelMarkerUtils.createProblemMarker(file, 
+					Activator.getFormattedMessage(
+							"AopReferenceModelBuilder.pointcutIsMalformedOnBean",t
+							.getMessage()), 
+					IMarker.SEVERITY_ERROR, info.getAspectLineNumber(),
 					AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
 		}
 		else if (t instanceof InvocationTargetException) {
-			AopLog.log(AopLog.BUILDER, "Exception from reflection [" + info
-					+ "] while processing bean [" + bean + "]");
+			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
+					"AopReferenceModelBuilder.exceptionFromReflectionOnBean", info, bean));
 			if (t.getCause() != null) {
 				handleException(t.getCause(), info, bean, file);
 			}
 			else {
 				Activator.log(t);
-				AopReferenceModelMarkerUtils.createProblemMarker(file, t
-						.getMessage(), IMarker.SEVERITY_WARNING, info
-						.getAspectLineNumber(),
+				AopReferenceModelMarkerUtils.createProblemMarker(file, 
+						Activator.getFormattedMessage(
+								"AopReferenceModelBuilder.exceptionFromReflection", t
+								.getMessage()), 
+						IMarker.SEVERITY_WARNING, info.getAspectLineNumber(),
 						AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
 			}
 		}
 		else {
-			AopLog.log(AopLog.BUILDER, "Exception [" + t.getMessage() + "] ["
-					+ info + "] while processing bean [" + bean + "]");
+			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
+					"AopReferenceModelBuilder.exception", t.getMessage(), info, bean));
 			Activator.log(t);
-			AopReferenceModelMarkerUtils.createProblemMarker(file, t
-					.getMessage(), IMarker.SEVERITY_WARNING, info
-					.getAspectLineNumber(),
+			AopReferenceModelMarkerUtils.createProblemMarker(file, 
+					Activator.getFormattedMessage(
+							"AopReferenceModelBuilder.exception", t
+							.getMessage()), 
+					IMarker.SEVERITY_WARNING, info.getAspectLineNumber(),
 					AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
 		}
+	}
+
+	private void recoverClassLoader() {
+		Thread.currentThread().setContextClassLoader(classLoader);
 	}
 
 	public void run(IProgressMonitor monitor) throws CoreException {
@@ -438,6 +483,13 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 			weavingClassLoader = null;
 			classLoader = null;
 			filesToBuild = null;
+			aspectDefinitionToPoincutCache.clear();
+			aspectDefinitionToPoincutCache = null;
 		}
+	}
+
+	private void setupClassLoaders(IJavaProject javaProject) {
+		classLoader = Thread.currentThread().getContextClassLoader();
+		weavingClassLoader = SpringCoreUtils.getClassLoader(javaProject, false);
 	}
 }

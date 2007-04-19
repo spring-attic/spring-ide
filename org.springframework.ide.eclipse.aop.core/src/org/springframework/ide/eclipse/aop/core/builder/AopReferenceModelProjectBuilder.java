@@ -42,8 +42,9 @@ public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 		Set<IFile> filesToBuild = AopReferenceModelUtils.getFilesToBuild(kind,
 				file);
 		if (filesToBuild != null && filesToBuild.size() > 0) {
-			monitor.subTask("Building Spring AOP reference model ["
-					+ file.getFullPath().toString() + "]");
+			monitor.subTask(Activator.getFormattedMessage(
+					"AopReferenceModelProjectBuilder.buildingAopReferenceModel", 
+					file.getFullPath()));
 			IWorkspaceRunnable validator = new AopReferenceModelBuilder(
 					filesToBuild);
 			IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -64,8 +65,9 @@ public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 
 	public void cleanup(IResource resource, IProgressMonitor monitor) {
 		try {
-			monitor.subTask("Deleting Spring AOP reference model marker ["
-					+ resource.getFullPath().toString().substring(1) + "]");
+			monitor.subTask(Activator.getFormattedMessage(
+					"AopReferenceModelProjectBuilder.deletedProblemMarkers", 
+					resource.getFullPath()));
 			AopReferenceModelMarkerUtils.deleteProblemMarkers(resource);
 		}
 		finally {

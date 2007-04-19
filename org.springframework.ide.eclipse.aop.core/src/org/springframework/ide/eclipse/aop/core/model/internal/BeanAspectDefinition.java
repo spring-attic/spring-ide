@@ -105,10 +105,10 @@ public class BeanAspectDefinition implements IAspectDefinition {
 		return node;
 	}
 
-	public Object getAspectJPointcutExpression() throws Throwable {
+	/*public Object getAspectJPointcutExpression() throws Throwable {
 		return AopReferenceModelBuilderUtils
 				.initAspectJExpressionPointcut(this);
-	}
+	}*/
 
 	public IResource getResource() {
 		return file;

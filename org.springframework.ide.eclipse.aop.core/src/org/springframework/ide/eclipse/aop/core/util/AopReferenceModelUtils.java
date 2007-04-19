@@ -15,6 +15,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -280,9 +281,20 @@ public class AopReferenceModelUtils {
 		return new Integer(-1);
 	}
 
-	public static List<IMethod> getMatches(Class<?> targetClass,
-			Object aspectJExpressionPointcut, IAspectDefinition info,
-			IProject project) throws Throwable {
+	public static List<IMethod> getMatchesForAnnotationAspectDefinition(
+			Class<?> targetClass, IAspectDefinition info, IProject project,
+			Map<IAspectDefinition, Object> aspectDefinitionCache)
+			throws Throwable {
+
+		Object aspectJExpressionPointcut = null;
+		if (aspectDefinitionCache.containsKey(info)) {
+			aspectJExpressionPointcut = aspectDefinitionCache.get(info);
+		}
+		else {
+			aspectJExpressionPointcut = AopReferenceModelBuilderUtils
+					.initAspectJExpressionPointcut(info);
+			aspectDefinitionCache.put(info, aspectJExpressionPointcut);
+		}
 
 		Method getMethodMatcherMethod = aspectJExpressionPointcut.getClass()
 				.getMethod("getMethodMatcher", (Class[]) null);
@@ -310,22 +322,32 @@ public class AopReferenceModelUtils {
 		return matchingMethod;
 	}
 
-	public static List<IMethod> getMatches(Class<?> targetClass,
-			IAspectDefinition info, IProject project) throws Throwable {
-		Object pc = AopReferenceModelBuilderUtils
+	public static List<IMethod> getMatchesBeanAspectDefinition(
+			Class<?> targetClass, IAspectDefinition info, IProject project,
+			Map<IAspectDefinition, Object> aspectDefinitionCache)
+			throws Throwable {
+
+		Object aspectJExpressionPointcut = null;
+		if (aspectDefinitionCache.containsKey(info)) {
+			aspectJExpressionPointcut = aspectDefinitionCache.get(info);
+		}
+		else {
+			aspectJExpressionPointcut = AopReferenceModelBuilderUtils
 				.createAspectJPointcutExpression(info);
+			aspectDefinitionCache.put(info, aspectJExpressionPointcut);
+		}
 
 		IType jdtTargetType = BeansModelUtils.getJavaType(project, targetClass
 				.getName());
 
-		Method matchesMethod = pc.getClass().getMethod("matches", Method.class,
-				Class.class);
+		Method matchesMethod = aspectJExpressionPointcut.getClass().getMethod(
+				"matches", Method.class, Class.class);
 		List<IMethod> matchingMethod = new ArrayList<IMethod>();
 
 		for (Method m : targetClass.getDeclaredMethods()) {
 			if (checkMethod(targetClass, m, info.isProxyTargetClass())) {
-				boolean matches = (Boolean) matchesMethod.invoke(pc, m,
-						targetClass);
+				boolean matches = (Boolean) matchesMethod.invoke(
+						aspectJExpressionPointcut, m, targetClass);
 				if (matches) {
 					IMethod jdtMethod = AopReferenceModelUtils.getMethod(
 							jdtTargetType, m.getName(),

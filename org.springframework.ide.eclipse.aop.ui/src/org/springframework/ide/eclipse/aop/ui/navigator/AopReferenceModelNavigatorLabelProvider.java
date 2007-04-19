@@ -32,9 +32,9 @@ public class AopReferenceModelNavigatorLabelProvider extends
 		if (element instanceof IRevealableReferenceNode) {
 			IRevealableReferenceNode node = (IRevealableReferenceNode) element;
 			return node.getResource().getName() + " - "
-					+ node.getResource().getFullPath().toString().substring(1);
+					+ node.getResource().getFullPath().toString().substring(1) + " " + element;
 		}
-		return super.getDescription(element);
+		return super.getDescription(element) + " " + element;
 	}
 
 	@Override

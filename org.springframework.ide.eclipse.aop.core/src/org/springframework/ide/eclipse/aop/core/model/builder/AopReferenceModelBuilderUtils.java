@@ -159,7 +159,7 @@ public class AopReferenceModelBuilderUtils {
 	public static Object createAspectJPointcutExpression(IAspectDefinition info)
 			throws Throwable {
 		try {
-			Object pc = info.getAspectJPointcutExpression();
+			Object pc = initAspectJExpressionPointcut(info);
 			Class<?> aspectJAdviceClass = getAspectJAdviceClass(info);
 			Constructor<?> ctor = aspectJAdviceClass.getConstructors()[0];
 			Object aspectJAdvice = ctor.newInstance(new Object[] {

@@ -28,8 +28,6 @@ public interface IAspectDefinition {
 
 	String getAspectClassName();
 
-	Object getAspectJPointcutExpression() throws Throwable;
-
 	int getAspectLineNumber();
 
 	String getAspectName();

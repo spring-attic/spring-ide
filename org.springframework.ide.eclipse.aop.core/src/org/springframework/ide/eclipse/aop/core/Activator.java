@@ -10,12 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.aop.core;
 
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.aop.core.model.IAopReferenceModel;
 import org.springframework.ide.eclipse.aop.core.model.internal.AopReferenceModel;
+import org.springframework.ide.eclipse.core.MessageUtils;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -24,11 +28,16 @@ public class Activator extends AbstractUIPlugin {
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.aop.core";
+	
+	private static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
 
 	// The shared instance
 	private static Activator plugin;
 
 	private static AopReferenceModel model;
+	
+	/** Resource bundle */
+	private ResourceBundle resourceBundle;
 
 	/**
 	 * The constructor
@@ -46,6 +55,11 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		model.startup();
+		try {
+			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);
+		} catch (MissingResourceException e) {
+			resourceBundle = null;
+		}
 	}
 
 	/*
@@ -55,6 +69,7 @@ public class Activator extends AbstractUIPlugin {
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
+		resourceBundle = null;
 		model.shutdown();
 		super.stop(context);
 	}
@@ -99,5 +114,36 @@ public class Activator extends AbstractUIPlugin {
 			message = "";
 		}
 		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
+	}
+	
+	public static String getFormattedMessage(String key, Object... args) {
+		return MessageUtils.format(getResourceString(key), args);
+	}
+	
+	/**
+	 * Returns the string from the plugin's resource bundle, or 'key' if not
+	 * found.
+	 */
+	public static String getResourceString(String key) {
+		String bundleString;
+		ResourceBundle bundle = getDefault().getResourceBundle();
+		if (bundle != null) {
+			try {
+				bundleString = bundle.getString(key);
+			} catch (MissingResourceException e) {
+				log(e);
+				bundleString = "!" + key + "!";
+			}
+		} else {
+			bundleString = "!" + key + "!";
+		}
+		return bundleString;
+	}
+	
+	/**
+	 * Returns the plugin's resource bundle,
+	 */
+	public final ResourceBundle getResourceBundle() {
+		return resourceBundle;
 	}
 }
