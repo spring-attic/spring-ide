@@ -6,18 +6,14 @@
 		<catalogContribution>
 			<public
 				publicId="http://www.springframework.org/schema/webflow-config"
-				uri="jar:platform:/plugin/org.springframework.webflow/spring-webflow.jar!/org/springframework/webflow/config/spring-webflow-config-1.0.xsd"
+				uri="platform:/plugin/org.springframework.webflow/org/springframework/webflow/config/spring-webflow-config-1.0.xsd"
 				webURL="http://www.springframework.org/schema/webflow-config/spring-webflow-config-1.0.xsd" />
-		</catalogContribution>
-		<catalogContribution>
 			<system
 				systemId="http://www.springframework.org/schema/webflow-config/spring-webflow-config-1.0.xsd"
-				uri="jar:platform:/plugin/org.springframework.webflow/spring-webflow.jar!/org/springframework/webflow/config/spring-webflow-config-1.0.xsd" />
-		</catalogContribution>
-		<catalogContribution>
+				uri="platform:/plugin/org.springframework.webflow/org/springframework/webflow/config/spring-webflow-config-1.0.xsd" />
 			<public
 				publicId="http://www.springframework.org/schema/webflow"
-				uri="jar:platform:/plugin/org.springframework.webflow/spring-webflow.jar!/org/springframework/webflow/engine/builder/xml/spring-webflow-1.0.xsd"
+				uri="platform:/plugin/org.springframework.webflow/org/springframework/webflow/engine/builder/xml/spring-webflow-1.0.xsd"
 				webURL="http://www.springframework.org/schema/webflow/spring-webflow-1.0.xsd" />
 		</catalogContribution>
 	</extension>
