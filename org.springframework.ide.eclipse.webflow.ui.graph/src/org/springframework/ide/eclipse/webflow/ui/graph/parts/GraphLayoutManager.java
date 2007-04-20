@@ -23,7 +23,8 @@ import org.eclipse.draw2d.graph.CompoundDirectedGraph;
 import org.eclipse.draw2d.graph.CompoundDirectedGraphLayout;
 
 /**
- * 
+ * @author Christian Dupuis
+ * @since 2.0 
  */
 class GraphLayoutManager extends AbstractLayout {
 
