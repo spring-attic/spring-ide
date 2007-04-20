@@ -41,7 +41,8 @@ import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.Webf
 import org.springframework.ide.eclipse.webflow.ui.graph.WebflowUtils;
 
 /**
- * 
+ * @author Christian Dupuis
+ * @since 2.0 
  */
 public class WebflowModelLabelProvider extends LabelProvider {
 
