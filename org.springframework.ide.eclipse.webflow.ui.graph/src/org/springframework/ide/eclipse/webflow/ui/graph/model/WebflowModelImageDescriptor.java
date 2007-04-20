@@ -29,6 +29,9 @@ import org.springframework.ide.eclipse.webflow.ui.graph.WebflowUtils;
 /**
  * An image descriptor consisting of a main icon and several adornments. The
  * adornments are computed according to flags set on creation of the descriptor.
+ * 
+ * @author Christian Dupuis
+ * @since 2.0
  */
 class WebflowModelImageDescriptor extends CompositeImageDescriptor {
 
