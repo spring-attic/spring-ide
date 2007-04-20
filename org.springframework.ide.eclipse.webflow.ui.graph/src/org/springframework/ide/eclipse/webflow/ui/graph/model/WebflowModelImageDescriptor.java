@@ -11,7 +11,7 @@
 package org.springframework.ide.eclipse.webflow.ui.graph.model;
 
 import org.eclipse.jface.resource.CompositeImageDescriptor;
-import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
@@ -30,33 +30,32 @@ import org.springframework.ide.eclipse.webflow.ui.graph.WebflowUtils;
  * An image descriptor consisting of a main icon and several adornments. The
  * adornments are computed according to flags set on creation of the descriptor.
  */
-public class WebflowModelImageDescriptor extends CompositeImageDescriptor {
+class WebflowModelImageDescriptor extends CompositeImageDescriptor {
 
-	/**
-	 * 
-	 */
-	private ImageDescriptor baseImage;
+	public static final int FLAG_STARTSTATE = 1 << 2;
 
-	/**
-	 * 
-	 */
-	private IWebflowModelElement state;
+	public static final int FLAG_ERROR = 1 << 3;
 
-	/**
-	 * 
-	 */
+	public static final int FLAG_INPUT = 1 << 4;
+
+	public static final int FLAG_OUTPUT = 1 << 5;
+
+	private Image baseImage;
+
 	private Point size;
 
+	private int flags;
+
 	/**
-	 * Create a new BeansUIImageDescriptor.
-	 * 
+	 * Create a new WebflowModelImageDescriptor.
 	 * @param baseImage an image descriptor used as the base image
 	 * @param state
 	 */
-	public WebflowModelImageDescriptor(ImageDescriptor baseImage,
+	public WebflowModelImageDescriptor(Image baseImage,
 			IWebflowModelElement state) {
 		this.baseImage = baseImage;
-		this.state = state;
+		this.flags = getFlags(state);
+		this.size = getSize();
 	}
 
 	/*
@@ -92,50 +91,73 @@ public class WebflowModelImageDescriptor extends CompositeImageDescriptor {
 		int x = 0;
 		int y = 0;
 		ImageData data = null;
-		if (this.state.getElementParent() != null
-				&& this.state.getElementParent() instanceof IWebflowState
-				&& this.state.equals(((IWebflowState) this.state
-						.getElementParent()).getStartState())) {
+		if ((flags & FLAG_INPUT) != 0) {
+			data = WebflowUIImages.DESC_OVR_INPUT.getImageData();
+			drawImage(data, x, y);
+		}
+		if ((flags & FLAG_OUTPUT) != 0) {
+			data = WebflowUIImages.DESC_OVR_OUTPUT.getImageData();
+			drawImage(data, x, y);
+		}
+		if ((flags & FLAG_STARTSTATE) != 0) {
 			data = WebflowUIImages.DESC_OVR_START_STATE.getImageData();
 			drawImage(data, x, y);
 		}
-		if (this.state != null && this.state instanceof IActionElement) {
-			IWebflowModelElement parent = this.state.getElementParent();
-
-			if (parent instanceof IEntryActions) {
-				data = WebflowUIImages.DESC_OVR_INPUT.getImageData();
-				drawImage(data, x, y);
-			}
-			else if (parent instanceof IExitActions) {
-				data = WebflowUIImages.DESC_OVR_OUTPUT.getImageData();
-				drawImage(data, x, y);
-			}
-			/*
-			 * else if (parent instanceof IRenderActions) { data =
-			 * WebflowUIImages.DESC_OVR_RENDER.getImageData(); drawImage(data,
-			 * x, y); }
-			 */
-		}
-		if (this.state instanceof IState && !WebflowUtils.isValid(this.state)) {
+		if ((flags & FLAG_ERROR) != 0) {
 			data = WebflowUIImages.DESC_OVR_ERROR.getImageData();
-			drawImage(data, x, 8);
+			drawImage(data, x, y);
 		}
-		else if ((this.state instanceof IActionElement
-				|| this.state instanceof IExceptionHandler
-				|| this.state instanceof IIf || this.state instanceof IAttributeMapper)
-				&& !WebflowUtils.isValid(this.state)) {
-			data = WebflowUIImages.DESC_OVR_ERROR.getImageData();
-			drawImage(data, x, 8);
-		}
-
 	}
 
 	/**
-	 * 
-	 * 
 	 * @param size
 	 */
 	protected void setSize(Point size) {
 		this.size = size;
 	}
+
+	private int getFlags(IWebflowModelElement element) {
+		int flags = 0;
+		if (element.getElementParent() != null
+				&& element.getElementParent() instanceof IWebflowState
+				&& element.equals(((IWebflowState) element.getElementParent())
+						.getStartState())) {
+			flags |= FLAG_STARTSTATE;
+
+		}
+		if (element != null && element instanceof IActionElement) {
+			IWebflowModelElement parent = element.getElementParent();
+
+			if (parent instanceof IEntryActions) {
+				flags |= FLAG_INPUT;
+			}
+			else if (parent instanceof IExitActions) {
+				flags |= FLAG_OUTPUT;
+			}
+		}
+		if (element instanceof IState && !WebflowUtils.isValid(element)) {
+			flags |= FLAG_ERROR;
+		}
+		else if ((element instanceof IActionElement
+				|| element instanceof IExceptionHandler
+				|| element instanceof IIf || element instanceof IAttributeMapper)
+				&& !WebflowUtils.isValid(element)) {
+			flags |= FLAG_ERROR;
+		}
+		return flags;
+	}
+
+	public int hashCode() {
+		return baseImage.hashCode() | flags | size.hashCode();
+	}
+
+	public boolean equals(final Object object) {
+		if (object == null
+				|| !WebflowModelImageDescriptor.class.equals(object.getClass()))
+			return false;
+		WebflowModelImageDescriptor other = (WebflowModelImageDescriptor) object;
+		return (baseImage.equals(other.baseImage) && flags == other.flags && size
+				.equals(other.size));
+	}
 }
+	
