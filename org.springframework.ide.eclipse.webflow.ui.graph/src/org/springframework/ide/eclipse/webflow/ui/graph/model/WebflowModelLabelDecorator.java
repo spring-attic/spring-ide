@@ -18,7 +18,8 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 
 /**
- * 
+ * @author Christian Dupuis
+ * @since 2.0
  */
 public class WebflowModelLabelDecorator implements ILabelDecorator {
 
