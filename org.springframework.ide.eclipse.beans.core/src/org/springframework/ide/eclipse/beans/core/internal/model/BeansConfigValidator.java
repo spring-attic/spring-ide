@@ -362,6 +362,20 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 							.getConstructorArgumentValues());
 				}
 
+				// For non-factory beans validate bean's init-method and
+				// destroy-method
+				if (!Introspector.doesImplement(type, FactoryBean.class
+						.getName())) {
+					if (mergedBd.isEnforceInitMethod()) {
+						validateMethod(bean, type, METHOD_TYPE_INIT, bd
+								.getInitMethodName(), 0, false);
+					}
+					if (mergedBd.isEnforceDestroyMethod()) {
+						validateMethod(bean, type, METHOD_TYPE_DESTROY, bd
+								.getDestroyMethodName(), 0, false);
+					}
+				}
+
 				// Validate bean's properties
 				validateProperties(bean, type, bd.getPropertyValues());
 			}
