@@ -24,7 +24,8 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
-import org.springframework.ide.eclipse.beans.core.internal.Introspector.Statics;
+import org.springframework.ide.eclipse.beans.core.internal.Introspector.Public;
+import org.springframework.ide.eclipse.beans.core.internal.Introspector.Static;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperLinkDetector;
@@ -145,7 +146,7 @@ public class BeansHyperLinkDetector extends AbstractHyperLinkDetector implements
 						className);
 				try {
 					IMethod method = Introspector.findMethod(type, target, 0,
-							true, Statics.DONT_CARE);
+							Public.DONT_CARE, Static.DONT_CARE);
 					if (method != null) {
 						return new JavaElementHyperlink(hyperlinkRegion, method);
 					}
@@ -183,7 +184,7 @@ public class BeansHyperLinkDetector extends AbstractHyperLinkDetector implements
 				IType type = BeansModelUtils.getJavaType(file.getProject(),
 						className);
 				IMethod method = Introspector.findMethod(type, target, -1,
-						true, Statics.YES);
+						Public.DONT_CARE, Static.YES);
 				if (method != null) {
 					return new JavaElementHyperlink(hyperlinkRegion, method);
 				}

@@ -162,5 +162,9 @@ class WebflowModelImageDescriptor extends CompositeImageDescriptor {
 		return (baseImage.equals(other.baseImage) && flags == other.flags && size
 				.equals(other.size));
 	}
+	
+	public String toString() {
+		return baseImage.toString();
+	}
 }
 	

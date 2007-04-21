@@ -22,7 +22,8 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
-import org.springframework.ide.eclipse.beans.core.internal.Introspector.Statics;
+import org.springframework.ide.eclipse.beans.core.internal.Introspector.Public;
+import org.springframework.ide.eclipse.beans.core.internal.Introspector.Static;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperLinkDetector;
@@ -87,7 +88,7 @@ public class AopHyperLinkDetector extends AbstractHyperLinkDetector implements
 							className);
 					try {
 						IMethod method = Introspector.findMethod(type, target,
-								-1, true, Statics.DONT_CARE);
+								-1, Public.DONT_CARE, Static.DONT_CARE);
 						if (method != null) {
 							return new JavaElementHyperlink(hyperlinkRegion,
 									method);

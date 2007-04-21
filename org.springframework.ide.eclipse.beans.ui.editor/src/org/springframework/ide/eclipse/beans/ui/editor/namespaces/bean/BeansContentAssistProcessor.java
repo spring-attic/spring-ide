@@ -26,7 +26,8 @@ import org.eclipse.wst.xml.core.internal.document.AttrImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
-import org.springframework.ide.eclipse.beans.core.internal.Introspector.Statics;
+import org.springframework.ide.eclipse.beans.core.internal.Introspector.Public;
+import org.springframework.ide.eclipse.beans.core.internal.Introspector.Static;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.AbstractContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.FactoryMethodSearchRequestor;
@@ -69,8 +70,8 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 			if (type != null) {
 				try {
 					Collection<?> methods = Introspector.findAllMethods(type,
-							prefix, -1, true, (isStatic ? Statics.YES
-									: Statics.DONT_CARE));
+							prefix, -1, Public.DONT_CARE, (isStatic ? Static.YES
+									: Static.DONT_CARE));
 					if (methods != null && methods.size() > 0) {
 						FactoryMethodSearchRequestor requestor = new FactoryMethodSearchRequestor(
 								request);

@@ -39,6 +39,9 @@ import org.eclipse.wst.sse.ui.internal.contentassist.ContentAssistUtils;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.core.internal.regions.DOMRegionContext;
 import org.eclipse.wst.xml.ui.internal.taginfo.XMLTagInfoHoverProcessor;
+import org.springframework.ide.eclipse.beans.core.internal.Introspector;
+import org.springframework.ide.eclipse.beans.core.internal.Introspector.Public;
+import org.springframework.ide.eclipse.beans.core.internal.Introspector.Static;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
@@ -266,6 +269,27 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 				}
 			}
 
+		}
+		if ("init-method".equals(attName) || "destroy-method".equals(attName)) {
+			String factoryMethod = attributes.getNamedItem(attName)
+				.getNodeValue();
+			if (attributes != null && attributes.getNamedItem("class") != null) {
+				String className = attributes.getNamedItem("class")
+						.getNodeValue();
+				IType type = BeansModelUtils.getJavaType(file.getProject(),
+						className);
+				try {
+					IMethod method = Introspector.findMethod(type, factoryMethod, 0,
+							Public.DONT_CARE, Static.DONT_CARE);
+					if (method != null) {
+						BeansJavaDocUtils utils = new BeansJavaDocUtils(
+								method);
+						result = utils.getJavaDoc();
+					}
+				}
+				catch (JavaModelException e) {
+				}
+			}
 		}
 		if (result != null && !"".equals(result)) {
 			return result;

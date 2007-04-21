@@ -31,7 +31,11 @@ import org.springframework.ide.eclipse.core.StringUtils;
  */
 public final class Introspector {
 
-	public enum Statics {
+	public enum Static {
+		YES, NO, DONT_CARE
+	}
+
+	public enum Public {
 		YES, NO, DONT_CARE
 	}
 
@@ -39,9 +43,9 @@ public final class Introspector {
 	 * Returns a list of all methods from given type with specified features.
 	 */
 	public static Set<IMethod> findAllMethods(IType type, String methodPrefix,
-			int argCount, boolean isPublic, Statics statics)
+			int argCount, Public publics, Static statics)
 			throws JavaModelException {
-		return findAllMethods(type, methodPrefix, argCount, isPublic, statics,
+		return findAllMethods(type, methodPrefix, argCount, publics, statics,
 				false);
 	}
 
@@ -49,7 +53,7 @@ public final class Introspector {
 	 * Returns a list of all methods from given type with specified features.
 	 */
 	public static Set<IMethod> findAllMethods(IType type, String methodPrefix,
-			int argCount, boolean isPublic, Statics statics, boolean ignoreCase)
+			int argCount, Public publics, Static statics, boolean ignoreCase)
 			throws JavaModelException {
 		Map<String, IMethod> allMethods = new HashMap<String, IMethod>();
 		while (type != null) {
@@ -57,10 +61,13 @@ public final class Introspector {
 				int flags = method.getFlags();
 				String key = method.getElementName() + method.getSignature();
 				if (!allMethods.containsKey(key)
-						&& Flags.isPublic(flags) == isPublic
-						&& (statics == Statics.DONT_CARE
-								|| (statics == Statics.YES && Flags
-										.isStatic(flags)) || (statics == Statics.NO && !Flags
+						&& (publics == Public.DONT_CARE
+								|| (publics == Public.YES && Flags
+										.isPublic(flags)) || (publics == Public.NO && !Flags
+										.isPublic(flags)))
+						&& (statics == Static.DONT_CARE
+								|| (statics == Static.YES && Flags
+										.isStatic(flags)) || (statics == Static.NO && !Flags
 								.isStatic(flags)))
 						&& (argCount == -1 || method.getNumberOfParameters() == argCount)
 						&& ((!ignoreCase && method.getElementName().startsWith(
@@ -102,7 +109,7 @@ public final class Introspector {
 		if (prefix == null) {
 			prefix = "";
 		}
-		return findAllMethods(type, prefix, 0, true, Statics.DONT_CARE);
+		return findAllMethods(type, prefix, 0, Public.DONT_CARE, Static.DONT_CARE);
 	}
 
 	/**
@@ -115,15 +122,18 @@ public final class Introspector {
 	 * @param statics one of the <code>Statics</code> constants
 	 */
 	public static IMethod findMethod(IType type, String methodName,
-			int argCount, boolean isPublic, Statics statics)
+			int argCount, Public publics, Static statics)
 			throws JavaModelException {
 		while (type != null) {
 			for (IMethod method : type.getMethods()) {
 				int flags = method.getFlags();
-				if (Flags.isPublic(flags) == isPublic
-						&& (statics == Statics.DONT_CARE
-								|| (statics == Statics.YES && Flags
-										.isStatic(flags)) || (statics == Statics.NO && !Flags
+				if ((publics == Public.DONT_CARE
+						|| (publics == Public.YES && Flags
+								.isPublic(flags)) || (publics == Public.NO && !Flags
+								.isPublic(flags)))
+						&& (statics == Static.DONT_CARE
+								|| (statics == Static.YES && Flags
+										.isStatic(flags)) || (statics == Static.NO && !Flags
 								.isStatic(flags)))
 						&& (argCount == -1 || method.getNumberOfParameters() == argCount)
 						&& methodName.equals(method.getElementName())) {
@@ -141,7 +151,7 @@ public final class Introspector {
 	public static Set<IMethod> findWritableProperties(IType type,
 			String methodPrefix) throws JavaModelException {
 		String base = StringUtils.capitalize(methodPrefix);
-		return findAllMethods(type, "set" + base, 1, true, Statics.NO);
+		return findAllMethods(type, "set" + base, 1, Public.YES, Static.NO);
 	}
 
 	/**
@@ -150,7 +160,7 @@ public final class Introspector {
 	public static Set<IMethod> findWritableProperties(IType type,
 			String methodPrefix, boolean ignoreCase) throws JavaModelException {
 		String base = StringUtils.capitalize(methodPrefix);
-		return findAllMethods(type, "set" + base, 1, true, Statics.NO,
+		return findAllMethods(type, "set" + base, 1, Public.YES, Static.NO,
 				ignoreCase);
 	}
 
@@ -160,7 +170,7 @@ public final class Introspector {
 	public static Set<IMethod> findReadableProperties(IType type,
 			String methodPrefix) throws JavaModelException {
 		String base = StringUtils.capitalize(methodPrefix);
-		return findAllMethods(type, "get" + base, 0, true, Statics.NO);
+		return findAllMethods(type, "get" + base, 0, Public.YES, Static.NO);
 	}
 
 	/**
@@ -169,7 +179,7 @@ public final class Introspector {
 	public static Set<IMethod> findReadableProperties(IType type,
 			String methodPrefix, boolean ignoreCase) throws JavaModelException {
 		String base = StringUtils.capitalize(methodPrefix);
-		return findAllMethods(type, "get" + base, 0, true, Statics.NO,
+		return findAllMethods(type, "get" + base, 0, Public.YES, Static.NO,
 				ignoreCase);
 	}
 
@@ -244,19 +254,19 @@ public final class Introspector {
 	public static boolean hasWritableProperty(IType type, String propertyName)
 			throws JavaModelException {
 		String base = StringUtils.capitalize(propertyName);
-		return (findMethod(type, "set" + base, 1, true, Statics.NO) != null);
+		return (findMethod(type, "set" + base, 1, Public.YES, Static.NO) != null);
 	}
 
 	public static IMethod getWritableProperty(IType type, String propertyName)
 			throws JavaModelException {
 		String base = StringUtils.capitalize(propertyName);
-		return findMethod(type, "set" + base, 1, true, Statics.NO);
+		return findMethod(type, "set" + base, 1, Public.YES, Static.NO);
 	}
 
 	public static IMethod getReadableProperty(IType type, String propertyName)
 			throws JavaModelException {
 		String base = StringUtils.capitalize(propertyName);
-		return findMethod(type, "get" + base, 0, true, Statics.NO);
+		return findMethod(type, "get" + base, 0, Public.YES, Static.NO);
 	}
 
 	/**

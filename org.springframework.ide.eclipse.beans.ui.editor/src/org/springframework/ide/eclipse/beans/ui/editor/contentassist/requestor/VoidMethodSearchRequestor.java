@@ -29,8 +29,7 @@ public class VoidMethodSearchRequestor extends MethodSearchRequestor {
 	}
 
 	public void acceptSearchMatch(IMethod method) throws CoreException {
-		if (Flags.isPublic(method.getFlags())
-				&& !Flags.isInterface(method.getFlags()) && method.exists()
+		if (!Flags.isInterface(method.getFlags()) && method.exists()
 				&& "V".equals(method.getReturnType())
 				&& ((IType) method.getParent()).isClass()
 				&& !method.isConstructor()) {

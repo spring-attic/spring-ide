@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -42,7 +43,8 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker.ErrorCode;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
-import org.springframework.ide.eclipse.beans.core.internal.Introspector.Statics;
+import org.springframework.ide.eclipse.beans.core.internal.Introspector.Public;
+import org.springframework.ide.eclipse.beans.core.internal.Introspector.Static;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
@@ -525,7 +527,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 					String getterName = "get"
 							+ StringUtils.capitalize(tokens.actualName);
 					IMethod getter = Introspector.findMethod(type, getterName,
-							0, true, Statics.NO);
+							0, Public.YES, Static.NO);
 					if (getter == null) {
 						BeansModelUtils.createProblemMarker(bean,
 								"No getter found for nested property '"
@@ -813,11 +815,13 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 			String methodName, int argCount, boolean isStatic) {
 		if (methodName != null && !hasPlaceHolder(methodName)) {
 			try {
-				if (Introspector.findMethod(type, methodName, argCount, true,
-						(isStatic ? Statics.YES : Statics.NO)) == null) {
+				IMethod method = Introspector.findMethod(type, methodName, argCount, 
+						Public.DONT_CARE, (isStatic ? Static.YES : Static.NO)); 
+				// first check if we can find any matching method regardless of
+				// visibility, if not create error marker
+				if (method == null) {
 					switch (methodType) {
 					case METHOD_TYPE_FACTORY:
-												
 						BeansModelUtils.createProblemMarker(bean,
 								(isStatic ? "Static" : "Non-static")
 								+ " factory method '" + methodName + "' "
@@ -845,6 +849,44 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 								"Destroy-method '" + methodName
 										+ "' not found in bean class",
 								IMarker.SEVERITY_ERROR,
+								bean.getElementStartLine(),
+								ErrorCode.UNDEFINED_DESTROY_METHOD,
+								bean.getElementName(), methodName);
+						break;
+					}
+				}
+				// if we find a matching method, but the visibility is not public
+				// just create a warning
+				else if (!Flags.isPublic(method.getFlags())) {
+					switch (methodType) {
+					case METHOD_TYPE_FACTORY:
+						BeansModelUtils.createProblemMarker(bean,
+								(isStatic ? "Static" : "Non-static")
+								+ " factory method '" + methodName + "' "
+								+ (argCount != -1 ? "with " + argCount
+										+ " arguments " : "")
+								+ "is not public in factory bean class",
+								IMarker.SEVERITY_WARNING,
+								bean.getElementStartLine(),
+								ErrorCode.UNDEFINED_FACTORY_BEAN_METHOD,
+								bean.getElementName(), methodName);
+						break;
+
+					case METHOD_TYPE_INIT:
+						BeansModelUtils.createProblemMarker(bean,
+								"Init-method '" + methodName
+										+ "' is not public in bean class",
+								IMarker.SEVERITY_WARNING,
+								bean.getElementStartLine(),
+								ErrorCode.UNDEFINED_INIT_METHOD,
+								bean.getElementName(), methodName);
+						break;
+
+					case METHOD_TYPE_DESTROY:
+						BeansModelUtils.createProblemMarker(bean,
+								"Destroy-method '" + methodName
+										+ "' is not public in bean class",
+								IMarker.SEVERITY_WARNING,
 								bean.getElementStartLine(),
 								ErrorCode.UNDEFINED_DESTROY_METHOD,
 								bean.getElementName(), methodName);

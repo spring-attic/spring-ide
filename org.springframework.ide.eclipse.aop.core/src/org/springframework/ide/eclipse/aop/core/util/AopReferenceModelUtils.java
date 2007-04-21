@@ -38,7 +38,8 @@ import org.springframework.ide.eclipse.aop.core.model.builder.AopReferenceModelB
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.Introspector;
-import org.springframework.ide.eclipse.beans.core.internal.Introspector.Statics;
+import org.springframework.ide.eclipse.beans.core.internal.Introspector.Public;
+import org.springframework.ide.eclipse.beans.core.internal.Introspector.Static;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -122,8 +123,8 @@ public class AopReferenceModelUtils {
 			methodName = methodName.substring(0, i);
 		}
 		try {
-			return Introspector.findMethod(type, methodName, argCount, true,
-					Statics.DONT_CARE);
+			return Introspector.findMethod(type, methodName, argCount, Public.YES,
+					Static.DONT_CARE);
 		}
 		catch (JavaModelException e) {
 		}
