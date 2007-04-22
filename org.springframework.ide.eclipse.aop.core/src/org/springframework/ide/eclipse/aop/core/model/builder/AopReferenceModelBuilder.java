@@ -215,12 +215,12 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 					}
 				}
 			}
-			else if (info instanceof JavaAspectDefinition
+			else if (info instanceof JavaAspectDefinition 
 					&& !(info instanceof AnnotationAspectDefinition)) {
 
 				IMethod jdtAspectMethod = AopReferenceModelUtils.getMethod(
 						jdtAspectType, info.getAdviceMethodName(), info
-								.getAdviceMethodParameterTypes().length);
+								.getAdviceMethodParameterTypes());
 				
 				if (jdtAspectMethod != null) {
 
@@ -243,7 +243,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 
 				IMethod jdtAspectMethod = AopReferenceModelUtils.getMethod(
 						jdtAspectType, info.getAdviceMethodName(), info
-								.getAdviceMethod().getParameterTypes().length);
+								.getAdviceMethod().getParameterTypes());
 				if (jdtAspectMethod != null) {
 
 					List<IMethod> matchingMethods = AopReferenceModelUtils

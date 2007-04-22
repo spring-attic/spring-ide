@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.aop.core.util;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -115,16 +116,64 @@ public class AopReferenceModelUtils {
 		return buf.toString();
 	}
 
-	public static IMethod getMethod(IType type, String methodName, int argCount) {
-		// TODO find a better way to bridge between reflect Methods and JDT
-		// methods
-		int i = methodName.indexOf('(');
-		if (i >= 0) {
-			methodName = methodName.substring(0, i);
+	public static IMethod getMethod(IType type, String methodName,
+			Class[] parameterTypes) {
+		String[] parameterTypesAsString = getParameterTypesAsStringArray(parameterTypes);
+		return getMethod(type, methodName, parameterTypesAsString);
+	}
+
+	private static String[] getParameterTypesAsStringArray(
+			Class[] parameterTypes) {
+		String[] parameterTypesAsString = new String[parameterTypes.length];
+		for (int i = 0; i < parameterTypes.length; i++) {
+			parameterTypesAsString[i] = parameterTypes[i].getName();
+		}
+		return parameterTypesAsString;
+	}
+
+	private static String[] getParameterTypesAsStringArray(IMethod method) {
+		String[] parameterTypesAsString = new String[method.getParameterTypes().length];
+		for (int i = 0; i < method.getParameterTypes().length; i++) {
+			parameterTypesAsString[i] = resolveClassName(method
+					.getParameterTypes()[i], method.getDeclaringType());
+		}
+		return parameterTypesAsString;
+	}
+
+	public static final String resolveClassName(String className, IType type) {
+		try {
+			className = Signature.toString(className).replace('$', '.');
+			String[][] fullInter = type.resolveType(className);
+			if (fullInter != null && fullInter.length > 0) {
+				return fullInter[0][0] + "." + fullInter[0][1];
+			}
+		}
+		catch (JavaModelException e) {
+		}
+
+		return className;
+	}
+
+	public static IMethod getMethod(IType type, String methodName,
+			String[] parameterTypes) {
+		int index = methodName.indexOf('(');
+		if (index >= 0) {
+			methodName = methodName.substring(0, index);
 		}
 		try {
-			return Introspector.findMethod(type, methodName, argCount, Public.YES,
-					Static.DONT_CARE);
+			Set<IMethod> methods = Introspector.getAllMethods(type);
+			for (IMethod method : methods) {
+				if (method.getElementName().equals(methodName)
+						&& method.getParameterTypes().length == parameterTypes.length) {
+					String[] methodParameterTypes = getParameterTypesAsStringArray(method);
+					if (Arrays.deepEquals(parameterTypes, methodParameterTypes)) {
+						return method;
+					}
+				}
+			}
+
+			return Introspector.findMethod(type, methodName,
+					parameterTypes.length, Public.YES, Static.DONT_CARE);
 		}
 		catch (JavaModelException e) {
 		}
@@ -314,7 +363,7 @@ public class AopReferenceModelUtils {
 							targetClass)) {
 				IMethod jdtMethod = AopReferenceModelUtils.getMethod(
 						jdtTargetClass, method.getName(), method
-								.getParameterTypes().length);
+								.getParameterTypes());
 				if (jdtMethod != null) {
 					matchingMethod.add(jdtMethod);
 				}
@@ -334,7 +383,7 @@ public class AopReferenceModelUtils {
 		}
 		else {
 			aspectJExpressionPointcut = AopReferenceModelBuilderUtils
-				.createAspectJPointcutExpression(info);
+					.createAspectJPointcutExpression(info);
 			aspectDefinitionCache.put(info, aspectJExpressionPointcut);
 		}
 
@@ -351,8 +400,7 @@ public class AopReferenceModelUtils {
 						aspectJExpressionPointcut, m, targetClass);
 				if (matches) {
 					IMethod jdtMethod = AopReferenceModelUtils.getMethod(
-							jdtTargetType, m.getName(),
-							m.getParameterTypes().length);
+							jdtTargetType, m.getName(), m.getParameterTypes());
 					if (jdtMethod != null) {
 						matchingMethod.add(jdtMethod);
 					}
