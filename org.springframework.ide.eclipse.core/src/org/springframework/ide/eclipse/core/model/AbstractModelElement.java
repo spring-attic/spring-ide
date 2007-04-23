@@ -95,7 +95,7 @@ public abstract class AbstractModelElement implements IModelElement {
 					int delPos = id.indexOf(ID_DELIMITER);
 					if (delPos > 0) {
 						String name = id.substring(sepPos + 1, delPos);
-						if (name.equals(getElementName()) || name.equals(getUniqueElementName())) {
+						if (name.equals(getUniqueElementName())) {
 
 							// Ask children for remaining part of id
 							id = id.substring(delPos + 1);
@@ -112,7 +112,7 @@ public abstract class AbstractModelElement implements IModelElement {
 						}
 					} else {
 						String name = id.substring(sepPos + 1);
-						if (name.equals(getElementName()) || name.equals(getUniqueElementName())) {
+						if (name.equals(getUniqueElementName())) {
 							return this;
 						}
 					}
