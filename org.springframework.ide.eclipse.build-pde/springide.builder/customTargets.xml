@@ -166,7 +166,7 @@
 		<antcall target="createNightlyBuildDist" />
 	</target>
 	<target name="publishToUpdateSiteDev" if="publishToServer">
-		<property name="publish.directory" value="${user.home}/htdocs/updatesite_nightly" />
+		<property name="publish.directory" value="/home/springide/htdocs/updatesite_nightly" />
 		<copy todir="${publish.directory}">
 			<fileset dir="${UpdateSiteStagingLocation}">
 				<exclude name="site.xml"/>
