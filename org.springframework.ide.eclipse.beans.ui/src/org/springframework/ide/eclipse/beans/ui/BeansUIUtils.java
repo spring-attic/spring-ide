@@ -15,6 +15,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.preference.IPreferencePage;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -29,6 +30,7 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.views.properties.FilePropertySource;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.ResourcePropertySource;
+import org.springframework.core.io.Resource;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeanClassReferences;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
@@ -166,18 +168,28 @@ public final class BeansUIUtils {
 	 */
 	public static IEditorPart openInEditor(IResourceModelElement element) {
 		IResourceModelElement sourceElement;
+		IResource resource = null;
 		int line;
 		if (element instanceof ISourceModelElement) {
 			ISourceModelElement source = (ISourceModelElement) element;
 			sourceElement = source.getElementSourceElement();
 			line = source.getElementStartLine();
+			
+			Resource res = source.getElementSourceLocation().getResource();
+			if (res instanceof IAdaptable) {
+				resource = (IResource) ((IAdaptable) res).getAdapter(IFile.class);
+			}
+			else {
+				resource = sourceElement.getElementResource();
+			}
+			
 		} else if (element instanceof BeansConfig) {
 			sourceElement = element;
 			line = ((BeansConfig) element).getElementStartLine();
+			resource = sourceElement.getElementResource();
 		} else {
 			return null;
 		}
-		IResource resource = sourceElement.getElementResource();
 		if (resource instanceof IFile) {
 			IFile file = (IFile) resource;
 			if (sourceElement.isElementArchived()) {

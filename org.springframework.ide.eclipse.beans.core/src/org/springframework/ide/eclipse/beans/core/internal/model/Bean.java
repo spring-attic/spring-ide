@@ -15,6 +15,9 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IType;
 import org.springframework.beans.PropertyValue;
@@ -38,14 +41,16 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * This class holds the data for a Spring bean.
- * 
  * @author Torsten Juergeleit
  */
 public class Bean extends AbstractBeansModelElement implements IBean {
 
 	private BeanDefinition definition;
+
 	private String[] aliases;
+
 	private Set<IBeanConstructorArgument> constructorArguments;
+
 	private Map<String, IBeanProperty> properties;
 
 	public Bean(IModelElement parent, BeanDefinitionHolder bdHolder) {
@@ -62,6 +67,21 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 
 	public int getElementType() {
 		return IBeansModelElementTypes.BEAN_TYPE;
+	}
+
+	@Override
+	public IResource getElementResource() {
+		// TODO is overriding this method ok??? 
+		// We need to make sure that the beans resource comes back
+		if (getElementSourceLocation() != null
+				&& getElementSourceLocation().getResource() instanceof IAdaptable) {
+			IResource resource = (IResource) ((IAdaptable) getElementSourceLocation()
+					.getResource()).getAdapter(IFile.class);
+			if (resource != null) {
+				return resource;
+			}
+		}
+		return super.getElementResource();
 	}
 
 	@Override
@@ -152,8 +172,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 
 	public boolean isInnerBean() {
 		IModelElement parent = getElementParent();
-		return !(parent instanceof IBeansConfig
-				|| parent instanceof IBeansComponent);
+		return !(parent instanceof IBeansConfig || parent instanceof IBeansComponent);
 	}
 
 	public boolean isSingleton() {
@@ -226,17 +245,18 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 			text.append(" [");
 			text.append(getClassName());
 			text.append(']');
-		} else if (getParentName() != null) {
+		}
+		else if (getParentName() != null) {
 			text.append(" <");
 			text.append(getParentName());
 			text.append('>');
 		}
 		return text.toString();
 	}
-	
+
 	/**
-	 * Lazily initialize this bean's data (constructor arguments, properties
-	 * and inner beans).
+	 * Lazily initialize this bean's data (constructor arguments, properties and
+	 * inner beans).
 	 */
 	private void initBean() {
 

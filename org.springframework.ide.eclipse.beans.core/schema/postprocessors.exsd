@@ -1,0 +1,120 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Schema file written by PDE -->
+<schema targetNamespace="org.springframework.ide.eclipse.beans.core">
+<annotation>
+      <appInfo>
+         <meta.schema plugin="org.springframework.ide.eclipse.beans.core" id="postprocessors" name="Post Processors"/>
+      </appInfo>
+      <documentation>
+         &lt;p&gt;
+This extension point is used to add post processors that re-implement functionality normally implemented by a BeasPostProcessor or BeanFactoryPostProcessor.
+      </documentation>
+   </annotation>
+
+   <element name="extension">
+      <complexType>
+         <sequence>
+            <element ref="postprocessor" minOccurs="0" maxOccurs="unbounded"/>
+         </sequence>
+         <attribute name="point" type="string" use="required">
+            <annotation>
+               <documentation>
+                  a fully-qualified name of the target extension point
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="id" type="string">
+            <annotation>
+               <documentation>
+                  an optional id
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="postprocessor">
+      <complexType>
+         <attribute name="type" type="string" use="required">
+            <annotation>
+               <documentation>
+                  an optional name
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  the URI of the namespace, e.g. &quot;http://www.springframework.org/schema/beans&quot;
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.beans.core.model.postprocess.IBeansConfigPostProcessor"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="since"/>
+      </appInfo>
+      <documentation>
+         2.0
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="examples"/>
+      </appInfo>
+      <documentation>
+         &lt;pre&gt;
+&lt;extension point=&quot;org.springframework.ide.eclipse.beans.core.postprocessors&quot;&gt;
+   &lt;postprocessor
+    type=&quot;org.springframework.beans.factory.config.PropertyPlaceholderConfigurer&quot;
+    class=&quot;&quot; /&gt;  
+&lt;/extension&gt;
+&lt;/pre&gt;
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="apiInfo"/>
+      </appInfo>
+      <documentation>
+         &lt;p&gt;
+Each post processor must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.springframework.ide.eclipse.beans.core.model.postprocess.IBeansConfigPostProcessor&lt;/samp&gt;.
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="implementation"/>
+      </appInfo>
+      <documentation>
+         &lt;p&gt;
+This plugin itself comes with a set of predefined namespace contributions.
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="copyright"/>
+      </appInfo>
+      <documentation>
+         &lt;pre&gt;
+Copyright (c) 2005, 2007 Spring IDE Developers
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/epl-v10.html
+ 
+Contributors:
+    Spring IDE Developers - initial API and implementation
+&lt;/pre&gt;
+      </documentation>
+   </annotation>
+
+</schema>

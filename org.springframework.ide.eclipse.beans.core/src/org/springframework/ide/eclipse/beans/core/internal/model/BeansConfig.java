@@ -30,11 +30,14 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.wst.xml.core.internal.XMLCorePlugin;
 import org.eclipse.wst.xml.core.internal.catalog.provisional.ICatalog;
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.parsing.AliasDefinition;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
@@ -43,6 +46,7 @@ import org.springframework.beans.factory.parsing.ImportDefinition;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.ReaderEventListener;
+import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.xml.DefaultNamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.DelegatingEntityResolver;
 import org.springframework.beans.factory.xml.DocumentDefaultsDefinition;
@@ -56,6 +60,8 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker.ErrorCode;
+import org.springframework.ide.eclipse.beans.core.internal.Introspector;
+import org.springframework.ide.eclipse.beans.core.internal.model.process.BeansConfigPostProcessorFactory;
 import org.springframework.ide.eclipse.beans.core.internal.parser.BeansDtdResolver;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
@@ -65,6 +71,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
 import org.springframework.ide.eclipse.beans.core.namespaces.DefaultModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
@@ -553,23 +560,31 @@ public class BeansConfig extends AbstractResourceModelElement implements
 				EntityResolver resolver = new XmlCatalogDelegatingEntityResolver(
 						new BeansDtdResolver(), new PluggableSchemaResolver(
 								PluggableSchemaResolver.class.getClassLoader()));
+
+				ReaderEventListener eventListener = new BeansConfigReaderEventListener(
+						this, false);
+				ProblemReporter problemReporter = new BeansConfigProblemReporter(
+						this);
+				BeanNameGenerator beanNameGenerator = new UniqueBeanNameGenerator(
+						this);
+
 				XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
 						registry);
 				reader.setDocumentLoader(new XercesDocumentLoader());
 				reader.setResourceLoader(new NoOpResourcePatternResolver());
 				reader.setEntityResolver(resolver);
 				reader.setSourceExtractor(new XmlSourceExtractor());
-				reader
-						.setEventListener(new BeansConfigReaderEventListener(
-								this));
-				reader.setProblemReporter(new BeansConfigProblemReporter(this));
+				reader.setEventListener(eventListener);
+				reader.setProblemReporter(problemReporter);
 				reader.setErrorHandler(new BeansConfigErrorHandler(this));
 				reader
 						.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(
 								NamespaceHandlerResolver.class.getClassLoader()));
-				reader.setBeanNameGenerator(new UniqueBeanNameGenerator(this));
+				reader.setBeanNameGenerator(beanNameGenerator);
 				try {
 					reader.loadBeanDefinitions(resource);
+					// post process beans config if required
+					postProcess(problemReporter, beanNameGenerator);
 				}
 				catch (Throwable e) { // handle ALL exceptions
 
@@ -580,6 +595,39 @@ public class BeansConfig extends AbstractResourceModelElement implements
 								.getMessage(), IMarker.SEVERITY_ERROR, -1,
 								ErrorCode.PARSING_FAILED);
 						BeansCorePlugin.log(e);
+					}
+				}
+
+			}
+		}
+	}
+
+	private void postProcess(ProblemReporter problemReporter,
+			BeanNameGenerator beanNameGenerator) {
+		// TODO do we need to check the components map as well???
+		ReaderEventListener readerEventListener = new BeansConfigReaderEventListener(
+				this, true);
+		for (IBean bean : getBeans()) {
+			// TODO for now only handle postprocessor that have a direct
+			// bean class
+			String beanClassName = bean.getClassName();
+			if (beanClassName != null) {
+				IType type = BeansModelUtils.getJavaType(getElementResource()
+						.getProject(), beanClassName);
+				if (type != null
+						&& (Introspector.doesImplement(type,
+								BeanFactoryPostProcessor.class.getName()) || Introspector
+								.doesImplement(type, BeanPostProcessor.class
+										.getName()))) {
+					IBeansConfigPostProcessor postProcessor = BeansConfigPostProcessorFactory
+							.createPostProcessor(beanClassName);
+					if (postProcessor != null) {
+						postProcessor
+								.postProcess(BeansConfigPostProcessorFactory
+										.createPostProcessingContext(this,
+												readerEventListener,
+												problemReporter,
+												beanNameGenerator));
 					}
 				}
 			}
@@ -682,27 +730,31 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 		private Map<String, IModelElementProvider> elementProviders;
 
-		public BeansConfigReaderEventListener(IBeansConfig config) {
+		private boolean allowExternal = false;
+
+		public BeansConfigReaderEventListener(IBeansConfig config,
+				boolean allowExternal) {
 			this.config = config;
+			this.allowExternal = allowExternal;
 			this.elementProviders = NamespaceUtils.getElementProviders();
 		}
 
 		public void defaultsRegistered(DefaultsDefinition defaultsDefinition) {
-			if (!isImported(defaultsDefinition)
+			if (allowExternal || !isImported(defaultsDefinition)
 					&& defaultsDefinition instanceof DocumentDefaultsDefinition) {
 				defaults = (DocumentDefaultsDefinition) defaultsDefinition;
 			}
 		}
 
 		public void importProcessed(ImportDefinition importDefinition) {
-			if (!isImported(importDefinition)) {
+			if (allowExternal || !isImported(importDefinition)) {
 				BeansImport imp = new BeansImport(config, importDefinition);
 				imports.add(imp);
 			}
 		}
 
 		public void aliasRegistered(AliasDefinition aliasDefinition) {
-			if (!isImported(aliasDefinition)) {
+			if (allowExternal || !isImported(aliasDefinition)) {
 				BeanAlias alias = new BeanAlias(config, aliasDefinition);
 				aliases.put(aliasDefinition.getAlias(), alias);
 			}
@@ -716,7 +768,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		 * <code>org.springframework.ide.eclipse.beans.core.namespaces</code>.
 		 */
 		public void componentRegistered(ComponentDefinition componentDefinition) {
-			if (!isImported(componentDefinition)) {
+			if (allowExternal || !isImported(componentDefinition)) {
 				String uri = NamespaceUtils
 						.getNameSpaceURI(componentDefinition);
 				IModelElementProvider provider = elementProviders.get(uri);

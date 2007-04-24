@@ -5,6 +5,9 @@
 	<extension-point id="namespaces" name="%extensionNamespaces.name"
 		schema="schema/namespaces.exsd" />
 
+	<extension-point id="postprocessors" name="%extensionPostProcessors.name"
+		schema="schema/postprocessors.exsd" />
+
 	<extension id="problemmarker" name="%beansProblemMarker"
 		point="org.eclipse.core.resources.markers">
 		<super
