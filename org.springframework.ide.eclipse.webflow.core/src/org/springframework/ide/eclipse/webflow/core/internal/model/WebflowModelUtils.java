@@ -153,7 +153,7 @@ public class WebflowModelUtils {
 		MarkerUtils.deleteMarkers(resource, PROBLEM_MARKER);
 	}
 	
-	public static List<IMethod> getActionMethods(IWebflowConfig config,
+	public static IType getActionType(IWebflowConfig config,
 			IDOMNode node) {
 		Set<IBean> beans = getBeans(config);
 		String className = null;
@@ -164,9 +164,15 @@ public class WebflowModelUtils {
 				break;
 			}
 		}
-
-		IType type = BeansModelUtils.getJavaType(config.getProject()
+		
+		return BeansModelUtils.getJavaType(config.getProject()
 				.getProject(), className);
+	}
+	
+	
+	public static List<IMethod> getActionMethods(IWebflowConfig config,
+			IDOMNode node) {
+		IType type = getActionType(config, node);
 		if (type != null) {
 			if ("bean-action".equals(node.getLocalName())) {
 				MethodSearchRequestor requestor = new MethodSearchRequestor(

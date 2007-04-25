@@ -20,8 +20,10 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.binding.convert.ConversionService;
 import org.springframework.binding.convert.support.DefaultConversionService;
+import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
@@ -53,9 +55,8 @@ public class WebflowValidationVisitor implements IWebflowModelElementVisitor {
 		SCOPE_TYPES.add("conversation");
 	}
 
-	private WebflowValidationProblemReporter problemReporter = 
-		new WebflowValidationProblemReporter();
-	
+	private WebflowValidationProblemReporter problemReporter = new WebflowValidationProblemReporter();
+
 	private ConversionService conversionService = null;
 
 	private IWebflowConfig webflowConfig = null;
@@ -341,7 +342,8 @@ public class WebflowValidationVisitor implements IWebflowModelElementVisitor {
 			getProblemReporter().error(
 					"Element 'bean-action' requires method attribute", element);
 		}
-		else {
+		else if (!Introspector.doesImplement(WebflowModelUtils.getActionType(
+				webflowConfig, action.getNode()), FactoryBean.class.getName())) {
 			List<IMethod> methods = WebflowModelUtils.getActionMethods(
 					webflowConfig, action.getNode());
 			boolean found = false;
@@ -372,7 +374,10 @@ public class WebflowValidationVisitor implements IWebflowModelElementVisitor {
 					"Referenced bean \"{0}\" cannot be found", element,
 					action.getBean());
 		}
-		if (StringUtils.hasText(action.getMethod())) {
+		if (StringUtils.hasText(action.getMethod())
+				&& !Introspector.doesImplement(WebflowModelUtils.getActionType(
+						webflowConfig, action.getNode()), FactoryBean.class
+						.getName())) {
 			List<IMethod> methods = WebflowModelUtils.getActionMethods(
 					webflowConfig, action.getNode());
 			boolean found = false;
@@ -586,7 +591,7 @@ public class WebflowValidationVisitor implements IWebflowModelElementVisitor {
 		}
 		return type;
 	}
-	
+
 	private ConversionService getConversionService() {
 		if (this.conversionService == null) {
 			this.conversionService = new DefaultConversionService();

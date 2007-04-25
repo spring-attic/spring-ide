@@ -55,13 +55,15 @@ public class WebflowProjectValidator implements IProjectBuilder {
 
 	public void cleanup(IResource resource, IProgressMonitor monitor) {
 		try {
-			monitor.subTask("Deleting Spring Web Flow problem markers [" + 
-					resource.getFullPath().toString().substring(1) + "]");
-			WebflowModelUtils.deleteProblemMarkers(resource);
+			if (resource instanceof IFile
+					&& WebflowModelUtils.isWebflowConfig(((IFile) resource))) {
+				monitor.subTask("Deleting Spring Web Flow problem markers ["
+						+ resource.getFullPath().toString().substring(1) + "]");
+				WebflowModelUtils.deleteProblemMarkers(resource);
+			}
 		}
 		finally {
 			monitor.done();
 		}
 	}
-
 }
