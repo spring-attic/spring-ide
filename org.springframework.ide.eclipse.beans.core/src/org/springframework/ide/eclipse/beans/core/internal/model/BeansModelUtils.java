@@ -77,6 +77,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -1164,7 +1165,16 @@ public final class BeansModelUtils {
 			name.append('<').append(beanName).append(">");
 		}
 		else {
-			String valueName = value.toString();
+			String valueName;
+			if (value.getClass().isArray()) {
+				valueName = "["
+						+ StringUtils
+								.arrayToDelimitedString((Object[]) value, ", ")
+						+ "]";
+			}
+			else {
+				valueName = value.toString();
+			}
 			if (valueName.length() > 30) {
 				name.append(valueName.substring(0, 12)).append(" .. ").append(
 						valueName.substring(valueName.length() - 13));
@@ -1208,6 +1218,12 @@ public final class BeansModelUtils {
 		}
 		else if (value instanceof TypedStringValue) {
 			return new BeansTypedString(parent, (TypedStringValue) value);
+		}
+		else if (value.getClass().isArray()) {
+			return new BeansTypedString(parent, "["
+					+ StringUtils
+							.arrayToDelimitedString((Object[]) value, ", ")
+					+ "]");
 		}
 		return new BeansTypedString(parent, value.toString());
 	}
