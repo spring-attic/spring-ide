@@ -6,20 +6,20 @@ Bundle-Version: 2.0.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.webflow.core.Activator
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
+Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
- org.eclipse.wst.xml.core,
- org.springframework.ide.eclipse.beans.ui.editor,
- org.eclipse.wst.sse.core,
- org.eclipse.ui.views,
- org.eclipse.wst.xml.ui,
- org.eclipse.wst.sse.ui,
- org.springframework.ide.eclipse.beans.core,
- org.springframework.ide.eclipse.core,
  org.eclipse.core.expressions,
+ org.eclipse.ui,
+ org.eclipse.ui.views,
  org.eclipse.jdt.core,
- org.springframework.binding
+ org.eclipse.wst.sse.core,
+ org.eclipse.wst.sse.ui,
+ org.eclipse.wst.xml.core,
+ org.eclipse.wst.xml.ui,
+ org.springframework.webflow;bundle-version="1.0.2";visibility:=reexport,
+ org.springframework.ide.eclipse.core,
+ org.springframework.ide.eclipse.beans.core,
+ org.springframework.ide.eclipse.beans.ui.editor
 Eclipse-LazyStart: true
 Export-Package: org.springframework.ide.eclipse.webflow.core,
  org.springframework.ide.eclipse.webflow.core.internal.model,

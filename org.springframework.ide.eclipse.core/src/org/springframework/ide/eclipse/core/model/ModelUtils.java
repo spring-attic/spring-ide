@@ -31,8 +31,8 @@ public final class ModelUtils {
 
 	/**
 	 * Returns <code>true</code> if a given {@link IModelElement element} is
-	 * not defined within the specified
-	 * {@link IResourceModelElement resource context}.
+	 * not defined within the same {@link IProject project } as the specified
+	 * {@link IModelElement context}.
 	 */
 	public static boolean isExternal(IModelElement element,
 			IModelElement context) {

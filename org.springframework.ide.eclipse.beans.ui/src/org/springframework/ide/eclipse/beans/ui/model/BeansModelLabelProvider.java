@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceLabelProvider;
+import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
@@ -106,17 +107,27 @@ public class BeansModelLabelProvider extends
 			int severity) {
 		Image image = null;
 		if (element instanceof ISourceModelElement) {
-			ILabelProvider provider = NamespaceUtils
+			INamespaceLabelProvider provider = NamespaceUtils
 					.getLabelProvider((ISourceModelElement) element);
+			IModelElement context = (parentElement instanceof IModelElement
+					? (IModelElement) parentElement : null);
 			if (provider != null) {
-				image = provider.getImage(element);
+				image = provider.getImage((ISourceModelElement) element,
+						context);
 			}
 			else {
-				image = DEFAULT_NAMESPACE_LABEL_PROVIDER.getImage(element);
+				image = DEFAULT_NAMESPACE_LABEL_PROVIDER.getImage(
+						(ISourceModelElement) element, context);
 			}
 		}
 		else if (element instanceof IModelElement) {
-			image = BeansModelImages.getImage((IModelElement) element);
+			if (parentElement instanceof IModelElement) {
+				image = BeansModelImages.getImage((IModelElement) element,
+						(IModelElement) parentElement);
+			}
+			else {
+				image = BeansModelImages.getImage((IModelElement) element);
+			}
 		}
 		else if (element instanceof ZipEntryStorage) {
 			return super.getImage(((ZipEntryStorage) element).getFile(),
@@ -138,13 +149,16 @@ public class BeansModelLabelProvider extends
 	protected String getText(Object element, Object parentElement,
 			int severity) {
 		if (element instanceof ISourceModelElement) {
-			ILabelProvider provider = NamespaceUtils
+			INamespaceLabelProvider provider = NamespaceUtils
 					.getLabelProvider((ISourceModelElement) element);
+			IModelElement context = (parentElement instanceof IModelElement
+					? (IModelElement) parentElement : null);
 			if (provider != null) {
-				return provider.getText(element);
+				return provider.getText((ISourceModelElement) element, context);
 			}
 			else {
-				return DEFAULT_NAMESPACE_LABEL_PROVIDER.getText(element);
+				return DEFAULT_NAMESPACE_LABEL_PROVIDER.getText(
+						(ISourceModelElement) element, context);
 			}
 		}
 		else if (element instanceof IModelElement) {

@@ -2,6 +2,13 @@
 <?eclipse version="3.0"?>
 <plugin>
 
+	<extension
+		point="org.springframework.ide.eclipse.beans.core.namespaces">
+		<namespace
+			namespaceHandler="org.springframework.webflow.config.WebFlowConfigNamespaceHandler"
+			uri="http://www.springframework.org/schema/webflow-config"/>
+	</extension>
+
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester

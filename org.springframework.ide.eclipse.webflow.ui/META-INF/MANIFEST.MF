@@ -24,4 +24,5 @@ Eclipse-LazyStart: true
 Bundle-Activator: org.springframework.ide.eclipse.webflow.ui.Activator
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Export-Package: org.springframework.ide.eclipse.webflow.ui,
+ org.springframework.ide.eclipse.webflow.ui.namespaces,
  org.springframework.ide.eclipse.webflow.ui.properties

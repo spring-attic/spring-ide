@@ -11,26 +11,18 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.runtime,
  org.eclipse.jface.text,
  org.eclipse.ui,
- org.eclipse.ui.ide,
- org.eclipse.ui.workbench.texteditor,
  org.eclipse.jdt.core,
- org.eclipse.jdt.ui,
  org.eclipse.wst.sse.core,
  org.eclipse.wst.sse.ui,
  org.eclipse.wst.xml.core,
  org.eclipse.wst.xml.ui,
- org.eclipse.search,
  org.springframework.ide.eclipse.core,
- org.springframework.ide.eclipse.ui,
  org.springframework.ide.eclipse.beans.core,
- org.springframework.ide.eclipse.beans.ui,
  org.springframework.ide.eclipse.beans.ui.editor,
- org.springframework.webflow;bundle-version="1.0.2";visibility:=reexport,
  org.springframework.ide.eclipse.webflow.core
 Eclipse-LazyStart: true
 Export-Package: 
  org.springframework.ide.eclipse.beans.ui.editor.namespaces.webflow,
- org.springframework.ide.eclipse.beans.ui.namespaces,
  org.springframework.ide.eclipse.webflow.ui.editor,
  org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

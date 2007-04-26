@@ -64,7 +64,7 @@ This extension point is used to add content providers and label providers for Sp
          <attribute name="labelProvider" type="string" use="required">
             <annotation>
                <documentation>
-                  an instance of &lt;samp&gt;org.eclipse.jface.viewers.ILabelProvider&lt;/samp&gt;
+                  an instance of &lt;samp&gt;org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceLabelProvider&lt;/samp&gt;
                </documentation>
                <appInfo>
                   <meta.attribute kind="java" basedOn="org.eclipse.jface.viewers.ILabelProvider"/>
@@ -117,7 +117,7 @@ This extension point is used to add content providers and label providers for Sp
       </appInfo>
       <documentation>
          &lt;p&gt;
-Each provider must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.eclipse.jface.viewers.ILabelProvider&lt;/samp&gt; or &lt;samp&gt;org.eclipse.jface.viewers.ITreeContentProvider&lt;/samp&gt;.
+Each provider must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceLabelProvider&lt;/samp&gt; or &lt;samp&gt;org.eclipse.jface.viewers.ITreeContentProvider&lt;/samp&gt;.
       </documentation>
    </annotation>
 

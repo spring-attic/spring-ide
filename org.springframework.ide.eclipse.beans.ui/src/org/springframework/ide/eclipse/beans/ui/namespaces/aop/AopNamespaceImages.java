@@ -24,22 +24,22 @@ import org.springframework.ide.eclipse.core.model.ModelUtils;
 
 /**
  * This class provides images for the beans core model's
- * {@link ISourceModelElement elements} in the namespace
+ * {@link IModelElement elements} in the namespace
  * <code>"http://www.springframework.org/schema/aop"</code>.
  * 
  * @author Torsten Juergeleit
  */
 public final class AopNamespaceImages {
 
-	public static Image getImage(ISourceModelElement element) {
+	public static Image getImage(IModelElement element) {
 		return getImage(element, null);
 	}
 
-	public static Image getImage(ISourceModelElement element,
+	public static Image getImage(IModelElement element,
 			IModelElement context) {
 		if (element instanceof IBeansComponent) {
 			String localName = ModelUtils
-					.getLocalName(element);
+					.getLocalName((IBeansComponent) element);
 			if ("config".equals(localName)) {
 				return BeansUIImages
 						.getImage(BeansUIImages.IMG_OBJS_AOP_CONFIG);
@@ -58,7 +58,8 @@ public final class AopNamespaceImages {
 					element, context);
 		} else if (element instanceof IBean
 				&& context instanceof IBeansComponent) {
-			String localName = ModelUtils.getLocalName(element);
+			String localName = ModelUtils
+					.getLocalName((ISourceModelElement) element);
 			String contextLocalName = ModelUtils
 					.getLocalName((IBeansComponent) context);
 			if (localName.equals(contextLocalName)) {

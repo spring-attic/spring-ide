@@ -156,7 +156,7 @@ public final class BeansModelLabels extends BeansUILabels {
 		}
 	}
 
-	public static void appendElementLabel(ISourceModelElement element,
+	public static void appendElementLabel(IModelElement element,
 			StringBuffer buf) {
 		if (element instanceof IBeansList) {
 			buf.append("list");

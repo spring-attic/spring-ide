@@ -8,24 +8,24 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.ui.namespaces.aop;
+package org.springframework.ide.eclipse.beans.ui.namespaces;
 
+import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.swt.graphics.Image;
-import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceLabelProvider;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
- * This class is a label provider which knows about the beans core model's
- * {@link ISourceModelElement source elements} in the namespace
- * <code>"http://www.springframework.org/schema/aop"</code>.
+ * Extends {@link IBaseLabelProvider} with the methods to provide the text
+ * and/or image for the label of a given {@link ISourceModelElement} with it's
+ * context {@link IModelElement}.
  * 
  * @author Torsten Juergeleit
+ * @since 2.0
  */
-public class AopNamespaceLabelProvider extends DefaultNamespaceLabelProvider {
+public interface INamespaceLabelProvider extends IBaseLabelProvider {
 
-	@Override
-	public Image getImage(ISourceModelElement element, IModelElement context) {
-		return AopNamespaceImages.getImage(element, context);
-	}
+	Image getImage(ISourceModelElement element, IModelElement context);
+
+	String getText(ISourceModelElement element, IModelElement parentElement);
 }

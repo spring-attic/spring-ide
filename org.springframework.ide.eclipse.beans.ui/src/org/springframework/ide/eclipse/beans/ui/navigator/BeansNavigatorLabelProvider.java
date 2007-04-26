@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.beans.ui.navigator;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
@@ -24,6 +23,7 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUILabels;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabels;
+import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -66,7 +66,7 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 					+ " - " + ((IBeansProject) element).getProject().getName();
 		}
 		else if (element instanceof ISourceModelElement) {
-			ILabelProvider provider = NamespaceUtils
+			INamespaceLabelProvider provider = NamespaceUtils
 					.getLabelProvider((ISourceModelElement) element);
 			if (provider != null && provider instanceof IDescriptionProvider) {
 				return ((IDescriptionProvider) provider)

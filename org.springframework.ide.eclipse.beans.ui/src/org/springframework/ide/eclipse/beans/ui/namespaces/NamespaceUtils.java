@@ -16,7 +16,6 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.viewers.IContentProvider;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
@@ -49,10 +48,10 @@ public class NamespaceUtils {
 	}
 
 	/**
-	 * Returns the {@link ILabelProvider} for the given
+	 * Returns the {@link INamespaceLabelProvider} for the given
 	 * {@link ISourceModelElement}'s namespace.
 	 */
-	public static ILabelProvider getLabelProvider(
+	public static INamespaceLabelProvider getLabelProvider(
 			ISourceModelElement element) {
 		IExtensionPoint point = Platform.getExtensionRegistry()
 				.getExtensionPoint(NAMESPACES_EXTENSION_POINT);
@@ -65,8 +64,8 @@ public class NamespaceUtils {
 						try {
 							Object provider = config
 								.createExecutableExtension("labelProvider");
-							if (provider instanceof ILabelProvider) {
-								return (ILabelProvider) provider;
+							if (provider instanceof INamespaceLabelProvider) {
+								return (INamespaceLabelProvider) provider;
 							}
 						} catch (CoreException e) {
 							BeansUIPlugin.log(e);
