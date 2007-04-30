@@ -1227,4 +1227,8 @@ public final class BeansModelUtils {
 		}
 		return new BeansTypedString(parent, value.toString());
 	}
+
+	public static boolean isInnerBean(IBean bean) {
+		return !(bean.getElementParent() instanceof IBeansConfig);
+	}
 }

@@ -38,11 +38,11 @@ public class BeansUILabels {
 	/** Add element description insted of element name */
 	public static final int DESCRIPTION = 1 << 2;
 
-	protected static final boolean isFlagged(int flags, int flag) {
+	public static final boolean isFlagged(int flags, int flag) {
 		return (flags & flag) != 0;
 	}
 
-	protected static boolean appendNodeName(ISourceModelElement element,
+	public static boolean appendNodeName(ISourceModelElement element,
 			StringBuffer buf) {
 		String nodeName = ModelUtils.getNodeName(element);
 		if (nodeName != null) {

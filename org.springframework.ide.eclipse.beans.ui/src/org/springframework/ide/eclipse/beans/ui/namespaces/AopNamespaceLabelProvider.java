@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.ui.namespaces.aop;
+package org.springframework.ide.eclipse.beans.ui.namespaces;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.swt.graphics.Image;
@@ -17,26 +17,21 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 
 /**
- * This class provides images for the beans core model's
- * {@link IModelElement elements} in the namespace
+ * This class is a label provider which knows about the beans core model's
+ * {@link ISourceModelElement source elements} in the namespace
  * <code>"http://www.springframework.org/schema/aop"</code>.
  * 
  * @author Torsten Juergeleit
  */
-public final class AopNamespaceImages {
+public class AopNamespaceLabelProvider extends DefaultNamespaceLabelProvider {
 
-	public static Image getImage(IModelElement element) {
-		return getImage(element, null);
-	}
-
-	public static Image getImage(IModelElement element,
-			IModelElement context) {
+	@Override
+	public Image getImage(ISourceModelElement element, IModelElement context) {
 		if (element instanceof IBeansComponent) {
 			String localName = ModelUtils
 					.getLocalName((IBeansComponent) element);
@@ -53,9 +48,6 @@ public final class AopNamespaceImages {
 			if ("pointcut".equals(localName)) {
 				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_POINTCUT);
 			}
-			return BeansModelImages.getDecoratedImage(BeansUIImages
-					.getImage(BeansUIImages.IMG_OBJS_NAMESPACE_COMPONENT),
-					element, context);
 		} else if (element instanceof IBean
 				&& context instanceof IBeansComponent) {
 			String localName = ModelUtils
@@ -113,10 +105,7 @@ public final class AopNamespaceImages {
 							.getImage(BeansUIImages.IMG_OBJS_INTRODUCTION);
 				}
 			}
-			return BeansModelImages.getDecoratedImage(BeansUIImages
-					.getImage(BeansUIImages.IMG_OBJS_NAMESPACE_BEAN), element,
-					context);
 		}
-		return BeansModelImages.getImage(element, context);
+		return super.getImage(element, context);
 	}
 }

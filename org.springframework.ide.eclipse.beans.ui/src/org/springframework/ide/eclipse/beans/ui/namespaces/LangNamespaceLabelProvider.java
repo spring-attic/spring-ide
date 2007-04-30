@@ -8,29 +8,31 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.webflow.ui.namespaces;
+package org.springframework.ide.eclipse.beans.ui.namespaces;
 
 import org.eclipse.swt.graphics.Image;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
-import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceLabelProvider;
+import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
-import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
 
 /**
- * @author Christian Dupuis
- * @since 2.0
+ * This class is a label provider which knows about the beans core model's
+ * {@link ISourceModelElement source elements} in the namespace
+ * <code>"http://www.springframework.org/schema/lang"</code>.
+ * 
+ * @author Torsten Juergeleit
  */
-public class WebflowLabelProvider extends DefaultNamespaceLabelProvider {
+public class LangNamespaceLabelProvider extends DefaultNamespaceLabelProvider {
 
 	@Override
 	public Image getImage(ISourceModelElement element, IModelElement context) {
 		if (element instanceof IBean
-				&& (context instanceof IBeansConfig
-						|| context instanceof IBeansConfigSet)) {
-			return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW);
+				&& !BeansModelUtils.isInnerBean((IBean) element)) {
+			return BeansModelImages.getDecoratedImage(BeansUIImages
+					.getImage(BeansUIImages.IMG_OBJS_SCRIPT), element, context);
 		}
 		return super.getImage(element, context);
 	}

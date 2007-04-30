@@ -69,10 +69,14 @@ public final class BeansModelImages implements BeansModelImageFlags {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONSTRUCTOR);
 		} else if (element instanceof IBeanProperty) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_PROPERTY);
-		} else if (element instanceof IBeansList || element instanceof IBeansSet
-				|| element instanceof IBeansMap
-				|| element instanceof IBeansMapEntry
-				|| element instanceof IBeansProperties) {
+		} else if (element instanceof IBeansList
+				|| element instanceof IBeansSet) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_LIST);
+		} else if (element instanceof IBeansMap) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_MAP);
+		} else if (element instanceof IBeansProperties) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_PROPERTIES);
+		} else if (element instanceof IBeansMapEntry) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_COLLECTION);
 		} else if (element instanceof IBeanReference) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_REFERENCE);

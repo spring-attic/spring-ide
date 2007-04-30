@@ -26,7 +26,6 @@ Export-Package: org.springframework.ide.eclipse.beans.ui,
  org.springframework.ide.eclipse.beans.ui.model,
  org.springframework.ide.eclipse.beans.ui.model.properties,
  org.springframework.ide.eclipse.beans.ui.namespaces,
- org.springframework.ide.eclipse.beans.ui.namespaces.beans,
  org.springframework.ide.eclipse.beans.ui.navigator,
  org.springframework.ide.eclipse.beans.ui.properties,
  org.springframework.ide.eclipse.beans.ui.wizards

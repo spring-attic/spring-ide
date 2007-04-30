@@ -5,7 +5,7 @@
 	<extension
 		point="org.springframework.ide.eclipse.beans.ui.namespaces">
 		<namespace
-			labelProvider="org.springframework.ide.eclipse.webflow.ui.namespaces.WebflowLabelProvider"
+			labelProvider="org.springframework.ide.eclipse.webflow.ui.namespaces.WebflowConfigNamespaceLabelProvider"
 			uri="http://www.springframework.org/schema/webflow-config" />
 	</extension>
 

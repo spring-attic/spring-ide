@@ -8,9 +8,8 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.ui.namespaces.beans;
+package org.springframework.ide.eclipse.beans.ui.namespaces;
 
-import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceLabelProvider;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**

@@ -27,5 +27,5 @@ public interface INamespaceLabelProvider extends IBaseLabelProvider {
 
 	Image getImage(ISourceModelElement element, IModelElement context);
 
-	String getText(ISourceModelElement element, IModelElement parentElement);
+	String getText(ISourceModelElement element, IModelElement context);
 }

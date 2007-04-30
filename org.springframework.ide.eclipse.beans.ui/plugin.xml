@@ -11,11 +11,27 @@
       <namespace
             name="Spring Beans"
             uri="http://www.springframework.org/schema/beans"
-            labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.beans.BeansNamespaceLabelProvider"/>
+            labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.BeansNamespaceLabelProvider"/>
       <namespace
             name="Spring AOP"
             uri="http://www.springframework.org/schema/aop"
-            labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.aop.AopNamespaceLabelProvider"/>
+            labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.AopNamespaceLabelProvider"/>
+      <namespace
+            name="Spring TX"
+            uri="http://www.springframework.org/schema/tx"
+            labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.TxNamespaceLabelProvider"/>
+      <namespace
+            name="Spring Jee"
+            uri="http://www.springframework.org/schema/jee"
+            labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.JeeNamespaceLabelProvider"/>
+      <namespace
+            name="Spring Util"
+            uri="http://www.springframework.org/schema/util"
+            labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.UtilNamespaceLabelProvider"/>
+      <namespace
+            name="Spring Lang"
+            uri="http://www.springframework.org/schema/lang"
+            labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.LangNamespaceLabelProvider"/>
    </extension>
 
    <extension

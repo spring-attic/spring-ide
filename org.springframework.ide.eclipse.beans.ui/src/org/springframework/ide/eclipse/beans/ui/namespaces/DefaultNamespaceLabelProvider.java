@@ -16,6 +16,7 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.ViewerLabel;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.navigator.IDescriptionProvider;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
@@ -30,18 +31,17 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  * 
  * @author Torsten Juergeleit
  */
-public class DefaultNamespaceLabelProvider implements
-		INamespaceLabelProvider, ITreePathLabelProvider,
-		IDescriptionProvider {
+public class DefaultNamespaceLabelProvider implements INamespaceLabelProvider,
+		ITreePathLabelProvider, IDescriptionProvider {
 
 	public Image getImage(ISourceModelElement element, IModelElement context) {
-		if (element instanceof IBean) {
-			if (!NamespaceUtils.DEFAULT_NAMESPACE_URI.equals(NamespaceUtils
-					.getNameSpaceURI((IBean) element))) {
-				return BeansModelImages.getDecoratedImage(BeansUIImages
-						.getImage(BeansUIImages.IMG_OBJS_NAMESPACE_BEAN),
-						element, context);
-			}
+		if (element instanceof IBean
+				&& !NamespaceUtils.DEFAULT_NAMESPACE_URI.equals(NamespaceUtils
+						.getNameSpaceURI(element))
+				&& !BeansModelUtils.isInnerBean((IBean) element)) {
+			return BeansModelImages.getDecoratedImage(BeansUIImages
+					.getImage(BeansUIImages.IMG_OBJS_NAMESPACE_BEAN), element,
+					context);
 		}
 		else if (element instanceof IBeansComponent) {
 			return BeansModelImages.getDecoratedImage(BeansUIImages
