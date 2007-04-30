@@ -386,10 +386,10 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			return false;
 		}
 		BeansConfig that = (BeansConfig) other;
+		if (!ObjectUtils.nullSafeEquals(this.isArchived, that.isArchived))
+			return false;
 		if (this.defaults != null && that.defaults != null
 				&& this.defaults != that.defaults) {
-			if (!ObjectUtils.nullSafeEquals(this.isArchived, that.isArchived))
-				return false;
 			if (!ObjectUtils.nullSafeEquals(this.defaults.getLazyInit(),
 					that.defaults.getLazyInit()))
 				return false;
@@ -414,10 +414,8 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 	@Override
 	public int hashCode() {
-		int hashCode = 1;
+		int hashCode = ObjectUtils.nullSafeHashCode(isArchived);
 		if (defaults != null) {
-			hashCode = getElementType() * hashCode
-					+ ObjectUtils.nullSafeHashCode(isArchived);
 			hashCode = getElementType() * hashCode
 					+ ObjectUtils.nullSafeHashCode(defaults.getLazyInit());
 			hashCode = getElementType() * hashCode
