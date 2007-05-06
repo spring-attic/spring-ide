@@ -83,8 +83,6 @@ public class ProjectBuilderDefinition {
 
 	/**
 	 * Returns true if the wrapped {@link IProjectBuilder} is enabled.
-	 * @param project
-	 * @return
 	 */
 	public boolean isEnabled(IProject project) {
 		return SpringCorePreferences.getProjectPreferences(project).getBoolean(
