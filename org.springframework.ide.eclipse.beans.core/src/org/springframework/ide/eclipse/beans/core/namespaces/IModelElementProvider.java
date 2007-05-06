@@ -20,6 +20,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  * {@link ComponentDefinition} into a {@link ISourceModelElement}.
  * 
  * @author Torsten Juergeleit
+ * @since 2.0
  */
 public interface IModelElementProvider {
 
@@ -27,10 +28,8 @@ public interface IModelElementProvider {
 	 * Returns the corresponding {@link ISourceModelElement} for the given
 	 * {@link ComponentDefinition}.
 	 * 
-	 * @param config
-	 *            the config the requested model element belongs to
-	 * @param definition
-	 *            the Spring component the model element is created from
+	 * @param config  the config the requested model element belongs to
+	 * @param definition  the Spring component the model element is created from
 	 */
 	ISourceModelElement getElement(IBeansConfig config,
 			ComponentDefinition definition);

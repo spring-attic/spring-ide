@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  * {@link IBeansComponent}(s).
  * 
  * @author Torsten Juergeleit
+ * @since 2.0
  */
 public class DefaultModelElementProvider implements IModelElementProvider {
 

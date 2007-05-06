@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
  * Some helper methods.
  * 
  * @author Torsten Juergeleit
+ * @since 2.0
  */
 public class NamespaceUtils {
 
