@@ -192,17 +192,19 @@ public class AopReferenceModelUtils {
 		return resourcesToBuild;
 	}
 
-	public static Set<IFile> getFilesToBuild(int kind, IFile file) {
-		Set<IFile> resourcesToBuild = new HashSet<IFile>();
-		if ((kind == IncrementalProjectBuilder.AUTO_BUILD || kind == IncrementalProjectBuilder.INCREMENTAL_BUILD)
-				&& file.getName().endsWith(".java")) {
+	public static Set<IFile> getFilesToBuild(int kind, IResource resource) {
+		Set<IFile> files = new HashSet<IFile>();
+		if ((kind == IncrementalProjectBuilder.AUTO_BUILD
+				|| kind == IncrementalProjectBuilder.INCREMENTAL_BUILD)
+				&& resource instanceof IFile
+				&& resource.getName().endsWith(".java")) {
 			Set<IBeansProject> projects = BeansCorePlugin.getModel()
 					.getProjects();
 			if (projects != null) {
 				for (IBeansProject project : projects) {
 					if (project != null) {
 						Set<IBeansConfig> configs = project.getConfigs();
-						IJavaElement element = JavaCore.create(file);
+						IJavaElement element = JavaCore.create(resource);
 						if (element instanceof ICompilationUnit) {
 							try {
 								IType[] types = ((ICompilationUnit) element)
@@ -216,7 +218,7 @@ public class AopReferenceModelUtils {
 											.getBeanClasses();
 									for (String className : allBeanClasses) {
 										if (typeNames.contains(className)) {
-											resourcesToBuild.add((IFile) config
+											files.add((IFile) config
 													.getElementResource());
 										}
 									}
@@ -229,10 +231,10 @@ public class AopReferenceModelUtils {
 				}
 			}
 		}
-		else if (BeansCoreUtils.isBeansConfig(file)) {
-			resourcesToBuild.add(file);
+		else if (BeansCoreUtils.isBeansConfig(resource)) {
+			files.add((IFile) resource);
 		}
-		return resourcesToBuild;
+		return files;
 	}
 
 	public static IJavaProject getJavaProject(IBeansConfig config) {

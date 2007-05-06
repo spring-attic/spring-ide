@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.project;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -30,22 +29,21 @@ public interface IProjectBuilder {
 
 	/**
 	 * For every modified file within a Spring project this method is called.
-	 * @param file modified file *
-	 * @param kind the kind of build being requested. Valid values are
+	 * @param file  the modified {@link IResource}
+	 * @param kind  the kind of build being requested. Valid values are
 	 * <ul>
 	 * <li><code>FULL_BUILD</code>- indicates a full build.</li>
-	 * <li><code>INCREMENTAL_BUILD</code>- indicates an incremental build.
-	 * </li>
+	 * <li><code>INCREMENTAL_BUILD</code>- indicates an incremental build.</li>
 	 * <li><code>AUTO_BUILD</code>- indicates an automatically triggered
 	 * incremental build (autobuilding on).</li>
 	 * </ul>
 	 * @param monitor a progress monitor, or <code>null</code> if progress
 	 * reporting and cancellation are not desired
 	 */
-	void build(IFile file, int kind, IProgressMonitor monitor);
+	void build(IResource resource, int kind, IProgressMonitor monitor);
 
 	/**
-	 * Clean up the created UI contributions
+	 * Clean up the created UI contributions.
 	 * @param resource the resource
 	 * @param monitor a progress monitor, or <code>null</code> if progress
 	 * reporting and cancellation are not desired

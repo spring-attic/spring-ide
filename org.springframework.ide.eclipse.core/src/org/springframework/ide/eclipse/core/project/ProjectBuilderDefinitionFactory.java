@@ -21,7 +21,7 @@ import org.springframework.ide.eclipse.core.SpringCore;
 
 /**
  * Helper class that loads {@link ProjectBuilderDefinition} from the Platforms
- * enxtension point registry.
+ * extension point registry.
  * @author Christian Dupuis
  * @since 2.0
  */

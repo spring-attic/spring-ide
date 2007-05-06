@@ -27,46 +27,46 @@ import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 
 /**
- * A {@link IProjectBuilder} implementation that triggers creation of Spring
- * IDE's internal AOP reference model
+ * {@link IProjectBuilder} that triggers creation of Spring IDE's internal AOP
+ * reference model
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings("restriction")
 public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 
-	/**
-	 * @see IProjectBuilder#build(IFile, int, IProgressMonitor)
-	 */
-	public void build(IFile file, int kind, IProgressMonitor monitor) {
-		Set<IFile> filesToBuild = AopReferenceModelUtils.getFilesToBuild(kind,
-				file);
-		if (filesToBuild != null && filesToBuild.size() > 0) {
-			monitor.subTask(Activator.getFormattedMessage(
-					"AopReferenceModelProjectBuilder.buildingAopReferenceModel", 
-					file.getFullPath()));
-			IWorkspaceRunnable validator = new AopReferenceModelBuilder(
-					filesToBuild);
-			IWorkspace workspace = ResourcesPlugin.getWorkspace();
-			ISchedulingRule rule = workspace.getRuleFactory().markerRule(
-					workspace.getRoot());
-			try {
-				workspace
-						.run(validator, rule, IWorkspace.AVOID_UPDATE, monitor);
+	public void build(IResource resource, int kind, IProgressMonitor monitor) {
+		try {
+			if (resource instanceof IFile) {
+				Set<IFile> filesToBuild = AopReferenceModelUtils
+						.getFilesToBuild(kind, (IFile) resource);
+				if (filesToBuild != null && filesToBuild.size() > 0) {
+					monitor.subTask(Activator.getFormattedMessage(
+							"AopReferenceModelProjectBuilder.buildingAopReferenceModel",
+							resource.getFullPath()));
+					IWorkspaceRunnable validator = new AopReferenceModelBuilder(
+							filesToBuild);
+					IWorkspace workspace = ResourcesPlugin.getWorkspace();
+					ISchedulingRule rule = workspace.getRuleFactory()
+							.markerRule(workspace.getRoot());
+					try {
+						workspace.run(validator, rule, IWorkspace.AVOID_UPDATE,
+								monitor);
+					}
+					catch (CoreException e) {
+						Activator.log(e);
+					}
+				}
 			}
-			catch (CoreException e) {
-				Activator.log(e);
-			}
-			finally {
-				monitor.done();
-			}
+		}
+		finally {
+			monitor.done();
 		}
 	}
 
 	public void cleanup(IResource resource, IProgressMonitor monitor) {
 		try {
 			monitor.subTask(Activator.getFormattedMessage(
-					"AopReferenceModelProjectBuilder.deletedProblemMarkers", 
+					"AopReferenceModelProjectBuilder.deletedProblemMarkers",
 					resource.getFullPath()));
 			AopReferenceModelMarkerUtils.deleteProblemMarkers(resource);
 		}

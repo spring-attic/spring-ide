@@ -318,8 +318,11 @@ public class WebflowModelUtils {
 		}
 	}
 
-	public static boolean isWebflowConfig(IFile file) {
-		return getWebflowConfig(file) != null;
+	public static boolean isWebflowConfig(IResource resource) {
+		if (resource instanceof IFile && resource.isAccessible()) {
+			return getWebflowConfig((IFile) resource) != null;
+		}
+		return false;
 	}
 
 	public static boolean isStateIdUnique(IState state) {

@@ -30,9 +30,9 @@ import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowValida
  */
 public class WebflowProjectValidator implements IProjectBuilder {
 
-	public void build(IFile file, int kind, IProgressMonitor monitor) {
-		if (WebflowModelUtils.isWebflowConfig(file)) {
-			validate(file, monitor);
+	public void build(IResource resource, int kind, IProgressMonitor monitor) {
+		if (WebflowModelUtils.isWebflowConfig(resource)) {
+			validate((IFile) resource, monitor);
 		}
 	}
 

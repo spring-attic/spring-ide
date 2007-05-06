@@ -29,23 +29,25 @@ import org.springframework.ide.eclipse.core.project.IProjectBuilder;
  */
 public class BeansProjectValidator implements IProjectBuilder {
 
-	public void build(IFile file, int kind, IProgressMonitor monitor) {
-		if (BeansCoreUtils.isBeansConfig(file)) {
-			validate(file, monitor);
+	public void build(IResource resource, int kind, IProgressMonitor monitor) {
+		if (BeansCoreUtils.isBeansConfig(resource)) {
+			validate((IFile) resource, monitor);
 		}
 	}
 
-	public static void validate(IFile file, IProgressMonitor monitor) {
-		monitor.subTask("Validating Spring Bean file ["
-				+ file.getFullPath().toString() + "]");
-		IWorkspaceRunnable validator = new BeansConfigValidator(file);
+	public static void validate(IFile configFile, IProgressMonitor monitor) {
+		monitor.subTask("Validating Spring Beans config file ["
+				+ configFile.getFullPath().toString() + "]");
+		IWorkspaceRunnable validator = new BeansConfigValidator(configFile);
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		ISchedulingRule rule = workspace.getRuleFactory().markerRule(file);
+		ISchedulingRule rule = workspace.getRuleFactory()
+				.markerRule(configFile);
 		try {
 			workspace.run(validator, rule, IWorkspace.AVOID_UPDATE, monitor);
 		}
 		catch (CoreException e) {
-			BeansCorePlugin.log("Error while running the validator", e);
+			BeansCorePlugin.log("Error while running Spring Beans " +
+					"config validator", e);
 		}
 		finally {
 			monitor.done();
@@ -54,7 +56,7 @@ public class BeansProjectValidator implements IProjectBuilder {
 
 	public void cleanup(IResource resource, IProgressMonitor monitor) {
 		try {
-			monitor.subTask("Deleting Spring Bean problem markers ["
+			monitor.subTask("Deleting Spring Beans problem markers ["
 					+ resource.getFullPath().toString() + "]");
 			BeansModelUtils.deleteProblemMarkers(BeansModelUtils
 					.getResourceModelElement(resource));

@@ -99,10 +99,15 @@ This extension-point is used to add one or more builders to the list of Spring p
       </appInfo>
       <documentation>
          &lt;pre&gt;
-&lt;extension point=&quot;org.springframework.ide.eclipse.core.builders&quot;
-      id=&quot;beansvalidator&quot; name=&quot;Spring Beans Config Validator&quot;&gt; 
-   &lt;run class=&quot;org.springframework.ide.eclipse.beans.core.internal.project.BeansConfigValidator&quot;/&gt; 
-&lt;/extension&gt; 
+&lt;extension point=&quot;org.springframework.ide.eclipse.core.builders&quot;&gt;
+	&lt;builder 
+		id=&quot;beansvalidator&quot; 
+		name=&quot;%beansValidator.name&quot;
+		enabledByDefault=&quot;true&quot;
+		description=&quot;%beansValidator.description&quot;
+		class=&quot;org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectValidator&quot;&gt;
+	&lt;/builder&gt;
+&lt;/extension&gt;
 &lt;/pre&gt;
 
 If this extension was defined in a plug-in with id &lt;samp&gt;org.springframework.ide.eclipse.beans.core&lt;/samp&gt;, the fully qualified name of this builder would be &lt;samp&gt;org.springframework.ide.eclipse.beans.core.beansvalidator&lt;/samp&gt;.
