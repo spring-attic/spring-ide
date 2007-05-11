@@ -72,10 +72,10 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 
 	private ClassLoader classLoader;
 
+	private ClassLoader weavingClassLoader;
+
 	private Set<IFile> filesToBuild;
 
-	private ClassLoader weavingClassLoader;
-	
 	private Map<IAspectDefinition, Object> aspectDefinitionToPoincutCache;
 
 	public AopReferenceModelBuilder(Set<IFile> filesToBuild) {
