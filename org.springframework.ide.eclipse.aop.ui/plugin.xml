@@ -229,8 +229,8 @@
 	</extension>
 
 	<extension point="org.eclipse.ui.bindings">
-		<!-- Key binding for the inplace view (Alt+Shift+S)-->
-		<key sequence="M3+M2+S"
+		<!-- Key binding for the inplace view (Alt+Shift+G)-->
+		<key sequence="M3+M2+G"
 			contextId="org.eclipse.ui.textEditorScope"
 			commandId="org.springframework.ide.eclipse.aop.ui.inplace.show"
 			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
