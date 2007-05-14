@@ -114,7 +114,7 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 	protected Image getImage(Object element, Object parentElement,
 			int severity) {
 		if (element instanceof IBeansProject) {
-			Image image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_BEAN);
+			Image image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_VIRTUAL_FOLDER);
 			if (isDecorating()) {
 				image = SpringUIUtils.getDecoratedImage(image, severity);
 			}

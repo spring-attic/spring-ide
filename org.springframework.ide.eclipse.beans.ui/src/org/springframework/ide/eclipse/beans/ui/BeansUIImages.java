@@ -82,6 +82,7 @@ public class BeansUIImages {
 	public static final String IMG_OBJS_ALIAS = NAME_PREFIX + "alias_obj.gif";
 	public static final String IMG_OBJS_DESCRIPTION = NAME_PREFIX + "description_obj.gif";
 	public static final String IMG_OBJS_BEAN = NAME_PREFIX + "bean_obj.gif";
+	public static final String IMG_OBJS_VIRTUAL_FOLDER = NAME_PREFIX + "virtual_folder_obj.gif";
 	public static final String IMG_OBJS_BEAN_REF = NAME_PREFIX + "beanref_obj.gif";
 	public static final String IMG_OBJS_CONSTRUCTOR = NAME_PREFIX + "constructor_obj.gif";
 	public static final String IMG_OBJS_PROPERTY = NAME_PREFIX + "property_obj.gif";
@@ -125,6 +126,7 @@ public class BeansUIImages {
 	public static final ImageDescriptor DESC_OBJS_ALIAS = createManaged(OBJECT, IMG_OBJS_ALIAS);
 	public static final ImageDescriptor DESC_OBJS_DESCRIPTION = createManaged(OBJECT, IMG_OBJS_DESCRIPTION);
 	public static final ImageDescriptor DESC_OBJS_BEAN = createManaged(OBJECT, IMG_OBJS_BEAN);
+	public static final ImageDescriptor DESC_OBJS_VIRTUAL_FOLDER = createManaged(OBJECT, IMG_OBJS_VIRTUAL_FOLDER);
 	public static final ImageDescriptor DESC_OBJS_BEAN_REF = createManaged(OBJECT, IMG_OBJS_BEAN_REF);
 	public static final ImageDescriptor DESC_OBJS_CONSTRUCTOR = createManaged(OBJECT, IMG_OBJS_CONSTRUCTOR);
 	public static final ImageDescriptor DESC_OBJS_PROPERTY = createManaged(OBJECT, IMG_OBJS_PROPERTY);

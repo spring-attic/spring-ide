@@ -35,7 +35,6 @@ import org.springframework.ide.eclipse.webflow.ui.editor.Activator;
  * plugin class. This may mean the same package directory as the package holding
  * this class. The images are declared using <code>this.getClass()</code> to
  * ensure they are looked up via this plugin class.
- * 
  * @see org.eclipse.jface.resource.ImageRegistry
  */
 public class WebflowUIImages {
@@ -93,6 +92,9 @@ public class WebflowUIImages {
 	 */
 	public static final String IMG_OBJS_WEBFLOW = NAME_PREFIX
 			+ "spring_webflow_obj.gif";
+
+	public static final String IMG_OBJS_VIRTUAL_FOLDER = NAME_PREFIX
+			+ "virtual_folder_obj.gif";
 
 	/**
 	 * 
@@ -162,8 +164,7 @@ public class WebflowUIImages {
 	/**
 	 * 
 	 */
-	public static final String IMG_OVR_ERROR = NAME_PREFIX
-		+ "error_ovr.gif";
+	public static final String IMG_OVR_ERROR = NAME_PREFIX + "error_ovr.gif";
 
 	/**
 	 * 
@@ -215,8 +216,7 @@ public class WebflowUIImages {
 	/**
 	 * 
 	 */
-	public static final String IMG_OVR_RENDER = NAME_PREFIX
-			+ "render_ovr.gif";
+	public static final String IMG_OVR_RENDER = NAME_PREFIX + "render_ovr.gif";
 
 	/**
 	 * 
@@ -270,6 +270,9 @@ public class WebflowUIImages {
 	 */
 	public static final ImageDescriptor DESC_OBJS_WEBFLOW = createManaged(
 			STRUCTURE, IMG_OBJS_WEBFLOW);
+
+	public static final ImageDescriptor DESC_OBJS_VIRTUAL_FOLDER = createManaged(
+			STRUCTURE, IMG_OBJS_VIRTUAL_FOLDER);
 
 	/**
 	 * 
@@ -457,7 +460,7 @@ public class WebflowUIImages {
 	 * 
 	 * @param key 
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public static Image getImage(String key) {
 		return getImageRegistry().get(key);
@@ -466,9 +469,8 @@ public class WebflowUIImages {
 	/**
 	 * Sets the three image descriptors for enabled, disabled, and hovered to an
 	 * action. The actions are retrieved from the *tool16 folders.
-	 * 
-	 * @param action 
-	 * @param iconName 
+	 * @param action
+	 * @param iconName
 	 */
 	public static void setToolImageDescriptors(IAction action, String iconName) {
 		setImageDescriptors(action, "tool16", iconName);
@@ -477,9 +479,8 @@ public class WebflowUIImages {
 	/**
 	 * Sets the three image descriptors for enabled, disabled, and hovered to an
 	 * action. The actions are retrieved from the *lcl16 folders.
-	 * 
-	 * @param action 
-	 * @param iconName 
+	 * @param action
+	 * @param iconName
 	 */
 	public static void setLocalImageDescriptors(IAction action, String iconName) {
 		setImageDescriptors(action, "lcl16", iconName);
@@ -489,18 +490,15 @@ public class WebflowUIImages {
 	 * Helper method to access the image registry from the JavaPlugin class.
 	 */
 	/* package *//**
-	 * 
-	 * 
-	 * @return 
-	 */
+					 * @return
+					 */
 	static ImageRegistry getImageRegistry() {
 		if (imageRegistry == null) {
 			imageRegistry = new ImageRegistry();
 			for (Iterator<String> iter = imageDescriptors.keySet().iterator(); iter
 					.hasNext();) {
 				String key = iter.next();
-				imageRegistry.put(key, imageDescriptors
-						.get(key));
+				imageRegistry.put(key, imageDescriptors.get(key));
 			}
 			imageDescriptors = null;
 		}
@@ -511,11 +509,9 @@ public class WebflowUIImages {
 	// -------------------
 
 	/**
-	 * 
-	 * 
-	 * @param action 
-	 * @param type 
-	 * @param relPath 
+	 * @param action
+	 * @param type
+	 * @param relPath
 	 */
 	private static void setImageDescriptors(IAction action, String type,
 			String relPath) {
@@ -538,12 +534,9 @@ public class WebflowUIImages {
 	}
 
 	/**
-	 * 
-	 * 
-	 * @param prefix 
-	 * @param name 
-	 * 
-	 * @return 
+	 * @param prefix
+	 * @param name
+	 * @return
 	 */
 	private static ImageDescriptor createManaged(String prefix, String name) {
 		try {
@@ -564,12 +557,9 @@ public class WebflowUIImages {
 	}
 
 	/**
-	 * 
-	 * 
-	 * @param prefix 
-	 * @param name 
-	 * 
-	 * @return 
+	 * @param prefix
+	 * @param name
+	 * @return
 	 */
 	private static ImageDescriptor create(String prefix, String name) {
 		try {
@@ -581,14 +571,10 @@ public class WebflowUIImages {
 	}
 
 	/**
-	 * 
-	 * 
-	 * @param prefix 
-	 * @param name 
-	 * 
-	 * @return 
-	 * 
-	 * @throws MalformedURLException 
+	 * @param prefix
+	 * @param name
+	 * @return
+	 * @throws MalformedURLException
 	 */
 	private static URL makeIconFileURL(String prefix, String name)
 			throws MalformedURLException {

@@ -24,9 +24,7 @@ import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.Webf
 
 /**
  * {@link ICommonLabelProvider} which knows about the beans core model's
- * {@link IModelElement elements} and the {@link IWebflowConfig}
- * elements.
- * 
+ * {@link IModelElement elements} and the {@link IWebflowConfig} elements.
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -70,17 +68,25 @@ public class WebflowNavigatorLabelProvider extends BeansNavigatorLabelProvider {
 	}
 
 	protected String getFileDescription(IFile file) {
-		return file.getName() + " - " + file.getFullPath().makeRelative()
-				.removeLastSegments(1).toString();
+		return file.getName()
+				+ " - "
+				+ file.getFullPath().makeRelative().removeLastSegments(1)
+						.toString();
 	}
 
 	@Override
-	protected Image getImage(Object element, Object parentElement,
-			int severity) {
-		if (element instanceof IWebflowConfig
-				|| element instanceof IWebflowProject) {
+	protected Image getImage(Object element, Object parentElement, int severity) {
+		if (element instanceof IWebflowConfig) {
 			Image image = WebflowUIImages
 					.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW);
+			if (isDecorating()) {
+				image = SpringUIUtils.getDecoratedImage(image, severity);
+			}
+			return image;
+		}
+		else if (element instanceof IWebflowProject) {
+			Image image = WebflowUIImages
+					.getImage(WebflowUIImages.IMG_OBJS_VIRTUAL_FOLDER);
 			if (isDecorating()) {
 				image = SpringUIUtils.getDecoratedImage(image, severity);
 			}
@@ -90,8 +96,7 @@ public class WebflowNavigatorLabelProvider extends BeansNavigatorLabelProvider {
 	}
 
 	@Override
-	protected String getText(Object element, Object parentElement,
-			int severity) {
+	protected String getText(Object element, Object parentElement, int severity) {
 		if (element instanceof IWebflowProject) {
 			return "Web Flow"; // TODO Externalize text
 		}
