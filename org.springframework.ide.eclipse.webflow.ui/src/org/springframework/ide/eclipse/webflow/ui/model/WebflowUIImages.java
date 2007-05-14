@@ -23,47 +23,44 @@ import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.webflow.ui.Activator;
 
 /**
- * The images provided by the Spring UI plugin. Initialize the image registry by
- * declaring all of the required graphics. This involves creating JFace image
- * descriptors describing how to create/find the image should it be needed. The
- * image is not actually allocated until requested. Prefix conventions Wizard
- * Banners WIZBAN_ Preference Banners PREF_BAN_ Property Page Banners PROPBAN_
- * Color toolbar CTOOL_ Enable toolbar ETOOL_ Disable toolbar DTOOL_ Local
- * enabled toolbar ELCL_ Local Disable toolbar DLCL_ Object large OBJL_ Object
- * small OBJS_ View VIEW_ Product images PROD_ Misc images MISC_ Where are the
- * images? The images (typically gifs) are found in the same location as this
- * plugin class. This may mean the same package directory as the package holding
- * this class. The images are declared using <code>this.getClass()</code> to
- * ensure they are looked up via this plugin class.
- * 
+ * The images provided by the Spring Beans UI plugin.
+ * Initialize the image registry by declaring all of the required
+ * graphics. This involves creating JFace image descriptors describing
+ * how to create/find the image should it be needed.
+ * The image is not actually allocated until requested.
+ *
+ * Prefix conventions
+ *		Wizard Banners			WIZBAN_
+ *		Preference Banners		PREF_BAN_
+ *		Property Page Banners	PROPBAN_
+ *		Color toolbar			CTOOL_
+ *		Enable toolbar			ETOOL_
+ *		Disable toolbar			DTOOL_
+ *		Local enabled toolbar	ELCL_
+ *		Local Disable toolbar	DLCL_
+ *		Object large			OBJL_
+ *		Object small			OBJS_
+ *		View 					VIEW_
+ *		Product images			PROD_
+ *		Misc images				MISC_
+ *
+ * Where are the images?
+ *		The images (typically gifs) are found in the same location as this
+ *		plugin class. This may mean the same package directory as the
+ *		package holding this class. The images are declared using
+ *		<code>this.getClass()</code> to ensure they are looked up via
+ *		this plugin class.
+ *
  * @see org.eclipse.jface.resource.ImageRegistry
  */
 public class WebflowUIImages {
 
-	/**
-	 * 
-	 */
 	private static final String ICON_PATH_PREFIX = "";
-
-	/**
-	 * 
-	 */
 	private static final String NAME_PREFIX = Activator.PLUGIN_ID + '.';
-
-	/**
-	 * 
-	 */
 	private static final int NAME_PREFIX_LENGTH = NAME_PREFIX.length();
-
-	/**
-	 * 
-	 */
 	private static final String STRUCTURE = "icons/full/ovr16/";
 
-	/* Declare Common paths */
-	/**
-	 * 
-	 */
+	/** Declare Common paths */
 	private static URL ICON_BASE_URL = null;
 
 	static {
@@ -85,11 +82,8 @@ public class WebflowUIImages {
 	 */
 	private static ImageRegistry imageRegistry;
 
-	/*
-	 * Available cached Images in the Java plugin image registry.
-	 */
 	/**
-	 * 
+	 * Available cached Images in the Java plugin image registry.
 	 */
 	public static final String IMG_OVR_WEBFLOW = NAME_PREFIX
 			+ "webflow_ovr.gif";
@@ -100,10 +94,6 @@ public class WebflowUIImages {
 	/**
 	 * Returns the <code>Image<code> identified by the given key,
 	 * or <code>null</code> if it does not exist.
-	 * 
-	 * @param key 
-	 * 
-	 * @return 
 	 */
 	public static Image getImage(String key) {
 		return getImageRegistry().get(key);
@@ -112,9 +102,6 @@ public class WebflowUIImages {
 	/**
 	 * Sets the three image descriptors for enabled, disabled, and hovered to an
 	 * action. The actions are retrieved from the *tool16 folders.
-	 * 
-	 * @param action 
-	 * @param iconName 
 	 */
 	public static void setToolImageDescriptors(IAction action, String iconName) {
 		setImageDescriptors(action, "tool16", iconName);
@@ -123,9 +110,6 @@ public class WebflowUIImages {
 	/**
 	 * Sets the three image descriptors for enabled, disabled, and hovered to an
 	 * action. The actions are retrieved from the *lcl16 folders.
-	 * 
-	 * @param action 
-	 * @param iconName 
 	 */
 	public static void setLocalImageDescriptors(IAction action, String iconName) {
 		setImageDescriptors(action, "lcl16", iconName);
@@ -134,11 +118,7 @@ public class WebflowUIImages {
 	/*
 	 * Helper method to access the image registry from the JavaPlugin class.
 	 */
-	/* package *//**
-	 * 
-	 * 
-	 * @return 
-	 */
+	/* package */
 	static ImageRegistry getImageRegistry() {
 		if (imageRegistry == null) {
 			imageRegistry = new ImageRegistry();
@@ -155,14 +135,6 @@ public class WebflowUIImages {
 
 	// ---- Helper methods to access icons on the file system
 	// -------------------
-
-	/**
-	 * 
-	 * 
-	 * @param action 
-	 * @param type 
-	 * @param relPath 
-	 */
 	private static void setImageDescriptors(IAction action, String type,
 			String relPath) {
 		try {
@@ -183,14 +155,6 @@ public class WebflowUIImages {
 		action.setImageDescriptor(create("e" + type, relPath));
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param prefix 
-	 * @param name 
-	 * 
-	 * @return 
-	 */
 	private static ImageDescriptor createManaged(String prefix, String name) {
 		try {
 			ImageDescriptor result = ImageDescriptor
@@ -209,14 +173,6 @@ public class WebflowUIImages {
 		}
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param prefix 
-	 * @param name 
-	 * 
-	 * @return 
-	 */
 	private static ImageDescriptor create(String prefix, String name) {
 		try {
 			return ImageDescriptor.createFromURL(makeIconFileURL(prefix, name));
@@ -226,16 +182,6 @@ public class WebflowUIImages {
 		}
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param prefix 
-	 * @param name 
-	 * 
-	 * @return 
-	 * 
-	 * @throws MalformedURLException 
-	 */
 	private static URL makeIconFileURL(String prefix, String name)
 			throws MalformedURLException {
 		if (ICON_BASE_URL == null) {
