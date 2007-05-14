@@ -17,8 +17,8 @@ import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.Match;
 import org.eclipse.ui.PartInitException;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchContentProvider;
+import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchLabelProvider;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
@@ -43,7 +43,7 @@ public class BeansSearchResultPage extends AbstractTextSearchViewPage {
 
 	protected void configureTreeViewer(TreeViewer viewer) {
 		viewer.setUseHashlookup(true);
-		viewer.setLabelProvider(new BeansModelLabelProvider(true));
+		viewer.setLabelProvider(new BeansSearchLabelProvider(true));
 		BeansSearchContentProvider provider = new BeansSearchContentProvider();
 		viewer.setContentProvider(provider);
 		this.provider = provider;
