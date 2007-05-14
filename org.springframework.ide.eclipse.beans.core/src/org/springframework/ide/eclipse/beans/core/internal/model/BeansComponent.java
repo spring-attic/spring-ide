@@ -14,11 +14,13 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -101,5 +103,27 @@ public class BeansComponent extends AbstractBeansModelElement implements
 		text.append(", components=");
 		text.append(components);
 		return text.toString();
+	}
+	
+	@Override
+	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
+
+		// Visit only this element
+		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
+			
+			for (IBeansComponent carg : getComponents()) {
+				carg.accept(visitor, monitor);
+				if (monitor.isCanceled()) {
+					return;
+				}
+			}
+
+			for (IBean bean : getBeans()) {
+				bean.accept(visitor, monitor);
+				if (monitor.isCanceled()) {
+					return;
+				}
+			}
+		}
 	}
 }
