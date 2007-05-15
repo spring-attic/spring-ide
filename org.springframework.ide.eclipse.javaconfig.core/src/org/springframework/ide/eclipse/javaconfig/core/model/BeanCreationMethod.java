@@ -18,11 +18,12 @@ package org.springframework.ide.eclipse.javaconfig.core.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.config.java.annotation.Bean;
 import org.springframework.config.java.annotation.Configuration;
 
 /**
- * Holds information about a single
- * @Bean annotated method in a {@link Configuration} class.
+ * Holds information about a single {@link Bean} annotated method in a
+ * {@link Configuration} class.
  * @author Christian Dupuis
  * @since 2.0
  */
