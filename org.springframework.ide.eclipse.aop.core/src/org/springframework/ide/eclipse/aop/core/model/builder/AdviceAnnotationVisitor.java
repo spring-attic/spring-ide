@@ -34,32 +34,31 @@ import org.springframework.ide.eclipse.aop.core.model.internal.AnnotationIntrodu
 import org.springframework.util.StringUtils;
 
 /**
- * ASM-based Visitor that collects all @AspectJ-style annotations
- * 
+ * ASM-based Visitor that collects all
+ * @AspectJ-style annotations
  * @author Christian Dupuis
  * @since 2.0
- *  
  */
 @SuppressWarnings("restriction")
 public class AdviceAnnotationVisitor extends EmptyVisitor {
 
-	private static final String BEFORE_ANNOTATION_DESC = "L"
-			+ Before.class.getName().replace('.', '/') + ";";
+	private static final String BEFORE_ANNOTATION_DESC = Type
+			.getDescriptor(Before.class);
 
-	private static final String AFTER_ANNOTATION_DESC = "L"
-			+ After.class.getName().replace('.', '/') + ";";
+	private static final String AFTER_ANNOTATION_DESC = Type
+			.getDescriptor(After.class);
 
-	private static final String AFTERRETURNING_ANNOTATION_DESC = "L"
-			+ AfterReturning.class.getName().replace('.', '/') + ";";
+	private static final String AFTERRETURNING_ANNOTATION_DESC = Type
+			.getDescriptor(AfterReturning.class);
 
-	private static final String AFTERTHROWING_ANNOTATION_DESC = "L"
-			+ AfterThrowing.class.getName().replace('.', '/') + ";";
+	private static final String AFTERTHROWING_ANNOTATION_DESC = Type
+			.getDescriptor(AfterThrowing.class);
 
-	private static final String AROUND_ANNOTATION_DESC = "L"
-			+ Around.class.getName().replace('.', '/') + ";";
+	private static final String AROUND_ANNOTATION_DESC = Type
+			.getDescriptor(Around.class);
 
-	private static final String DECLARE_PARENTS_ANNOTATION_DESC = "L"
-			+ DeclareParents.class.getName().replace('.', '/') + ";";
+	private static final String DECLARE_PARENTS_ANNOTATION_DESC = Type
+			.getDescriptor(DeclareParents.class);
 
 	private static Map<String, ADVICE_TYPES> ANNOTATION_TYPES = null;
 

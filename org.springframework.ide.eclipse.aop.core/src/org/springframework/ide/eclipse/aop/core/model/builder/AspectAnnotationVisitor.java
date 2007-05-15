@@ -16,24 +16,24 @@ import java.util.List;
 import org.aspectj.lang.annotation.Aspect;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
 
 /**
  * ASM-based visitor that checks if a certain class has the
- * @Aspect annotation
- * 
+ * @Aspect annotation.
  * @author Christian Dupuis
  * @since 2.0
- * 
  */
 public class AspectAnnotationVisitor extends EmptyVisitor {
 
 	private ClassInfo classInfo = new ClassInfo();
 
-	private static final String ASPECT_ANNOTATION_DESC = "L"
-			+ Aspect.class.getName().replace('.', '/') + ";";
+	private static final String ASPECT_ANNOTATION_DESC = Type
+			.getDescriptor(Aspect.class);
 
-	private static final String OBJECT_CLASS = "java/lang/Object";
+	private static final String OBJECT_CLASS = Type
+			.getInternalName(Object.class);
 
 	@Override
 	public void visit(int version, int access, String name, String signature,
