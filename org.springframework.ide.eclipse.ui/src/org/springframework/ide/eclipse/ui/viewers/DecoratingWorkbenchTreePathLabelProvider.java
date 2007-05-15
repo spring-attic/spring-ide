@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.ui.viewers;
 
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreePathLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreePath;
@@ -30,11 +31,11 @@ public class DecoratingWorkbenchTreePathLabelProvider extends LabelProvider
 		implements ITreePathLabelProvider {
 
 	private boolean isDecorating;
-	private WorkbenchLabelProvider wbLabelProvider;
+	private ILabelProvider wbLabelProvider;
 
 	public DecoratingWorkbenchTreePathLabelProvider(boolean isDecorating) {
 		this.isDecorating = isDecorating;
-		this.wbLabelProvider = new WorkbenchLabelProvider();
+		this.wbLabelProvider = WorkbenchLabelProvider.getDecoratingWorkbenchLabelProvider();
 	}
 
 	public final boolean isDecorating() {
