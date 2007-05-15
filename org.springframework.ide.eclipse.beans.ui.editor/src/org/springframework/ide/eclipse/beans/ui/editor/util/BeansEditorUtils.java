@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.beans.ui.editor.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,7 +68,6 @@ import org.w3c.dom.NodeList;
 
 /**
  * Collection of helper methods for beans XML editor.
- * 
  * @author Christian Dupuis
  */
 @SuppressWarnings("restriction")
@@ -91,7 +89,7 @@ public class BeansEditorUtils {
 
 	protected static final String DOUBLE_QUOTE = "\""; //$NON-NLS-1$
 
-	protected static final char DOUBLE_QUOTE_CHAR = '\"'; 
+	protected static final char DOUBLE_QUOTE_CHAR = '\"';
 
 	protected static final String DOUBLE_QUOTE_ENTITY = "&quot;"; //$NON-NLS-1$
 
@@ -123,7 +121,7 @@ public class BeansEditorUtils {
 
 	protected static final String SINGLE_QUOTE = "'"; //$NON-NLS-1$
 
-	protected static final char SINGLE_QUOTE_CHAR = '\''; 
+	protected static final char SINGLE_QUOTE_CHAR = '\'';
 
 	protected static final String SINGLE_QUOTE_ENTITY = "&#039;"; //$NON-NLS-1$
 
@@ -171,41 +169,37 @@ public class BeansEditorUtils {
 
 	public static final List getBeansFromConfigSets(IFile file) {
 		List<IBean> beans = new ArrayList<IBean>();
-		Map<String, IBeansConfig> configsMap = new HashMap<String, IBeansConfig>();
+		List<IBeansConfig> configs = new ArrayList<IBeansConfig>();
 		IBeansProject project = BeansCorePlugin.getModel().getProject(
 				file.getProject());
+		
 		if (project != null) {
 			Set<IBeansConfigSet> configSets = project.getConfigSets();
 
 			for (IBeansConfigSet configSet : configSets) {
 				if (configSet.hasConfig(file)
 						|| !BeansCoreUtils.isBeansConfig(file)) {
-					Set<IBeansConfig> configs = configSet.getConfigs();
-					for (IBeansConfig beansConfig : configs) {
-						if (beansConfig != null) {
-							IResource resource = beansConfig
-									.getElementResource();
-							if (resource != null
-									&& !configsMap.containsKey(resource
-											.getName())
-									&& !resource.getFullPath().equals(
-											file.getFullPath())) {
-								configsMap.put(resource.getName(), beansConfig);
-							}
-						}
-					}
+					Set<IBeansConfig> bcs = configSet.getConfigs();
+					configs.addAll(bcs);
 				}
 			}
 		}
 
-		Iterator paths = configsMap.keySet().iterator();
-		while (paths.hasNext()) {
-			IBeansConfig beansConfig = configsMap
-					.get(paths.next());
-			beans.addAll(beansConfig.getBeans());
-			Set<IBeansComponent> components = beansConfig.getComponents();
+		for (IBeansConfig bc : configs) {
+			Set<IBean> bs = bc.getBeans();
+			for (IBean b : bs) {
+				if (!b.getElementResource().equals(file)) {
+					beans.add(b);
+				}
+			}
+			Set<IBeansComponent> components = bc.getComponents();
 			for (IBeansComponent component : components) {
-				beans.addAll(component.getBeans());
+				bs = component.getBeans();
+				for (IBean b : bs) {
+					if (!b.getElementResource().equals(file)) {
+						beans.add(b);
+					}
+				}
 			}
 		}
 		return beans;
@@ -363,8 +357,9 @@ public class BeansEditorUtils {
 
 					if (parentId.equals(bean.getElementName())) {
 						getClassNamesOfBeans(file, document, bean
-								.getElementName(), BeansModelUtils.getBeanClass(bean, null), bean
-								.getParentName(), classNames, beans);
+								.getElementName(), BeansModelUtils
+								.getBeanClass(bean, null),
+								bean.getParentName(), classNames, beans);
 						break;
 					}
 				}
@@ -421,7 +416,6 @@ public class BeansEditorUtils {
 
 	/**
 	 * Returns the non-blocking Progress Monitor form the StatuslineManger
-	 * 
 	 * @return the progress monitor
 	 */
 	public static final IProgressMonitor getProgressMonitor() {
@@ -530,8 +524,8 @@ public class BeansEditorUtils {
 					propertyPaths.add(tok.nextToken());
 				}
 
-				int regionLength = (propertyPaths
-						.get(segmentCount - 1)).length();
+				int regionLength = (propertyPaths.get(segmentCount - 1))
+						.length();
 
 				return new Region(regionOffset, regionLength);
 			}
@@ -643,7 +637,6 @@ public class BeansEditorUtils {
 
 	/**
 	 * Returns the node from given document at specified offset.
-	 * 
 	 * @param offset the offset with given document
 	 * @return Node either element, doctype, text, or null
 	 */

@@ -19,12 +19,11 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposal;
 import org.springframework.ide.eclipse.beans.ui.editor.outline.DelegatingLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
@@ -79,8 +78,8 @@ public class BeanReferenceSearchRequestor {
 				buf.append(fileName);
 				String displayText = buf.toString();
 
-				Image image = BeansModelImages.getImage(bean, BeansCorePlugin
-						.getModel().getConfig(file));
+				Image image = BeansUIPlugin.getLabelProvider().getImage(bean);
+				
 				BeansJavaCompletionProposal proposal = null;
 				if (this.requiredTypes.contains(bean.getClassName())) {
 					proposal = new BeansJavaCompletionProposal(
