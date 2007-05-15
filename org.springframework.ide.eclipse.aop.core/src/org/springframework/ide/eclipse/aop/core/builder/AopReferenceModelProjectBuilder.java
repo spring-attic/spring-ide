@@ -37,14 +37,14 @@ public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 	public void build(IResource resource, int kind, IProgressMonitor monitor) {
 		try {
 			if (resource instanceof IFile) {
-				Set<IFile> filesToBuild = AopReferenceModelUtils
+				Set<IFile> affectedFiles = AopReferenceModelUtils
 						.getAffectedFiles(kind, (IFile) resource);
-				if (filesToBuild != null && filesToBuild.size() > 0) {
+				if (affectedFiles != null && affectedFiles.size() > 0) {
 					monitor.subTask(Activator.getFormattedMessage(
 							"AopReferenceModelProjectBuilder.buildingAopReferenceModel",
 							resource.getFullPath()));
 					IWorkspaceRunnable validator = new AopReferenceModelBuilder(
-							filesToBuild);
+							affectedFiles);
 					IWorkspace workspace = ResourcesPlugin.getWorkspace();
 					ISchedulingRule rule = workspace.getRuleFactory()
 							.markerRule(workspace.getRoot());
