@@ -15,6 +15,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeanClassReferences;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
@@ -139,6 +140,8 @@ public class BeansModelLabelProvider extends
 		if (image != null) {
 			if (isDecorating()) {
 				image = SpringUIUtils.getDecoratedImage(image, severity);
+				image = PlatformUI.getWorkbench().getDecoratorManager()
+             		.getLabelDecorator().decorateImage(image, element);
 			}
 			return image;
 		}
