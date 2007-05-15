@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.core.internal.model.project;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
@@ -18,6 +21,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.springframework.ide.eclipse.core.project.AbstractProjectBuilder;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
@@ -26,13 +30,27 @@ import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowValida
 /**
  * {@link IProjectBuilder} that validates Spring Web Flow configuration files.
  * @author Christian Dupuis
+ * @author Torsten Juergeleit
  * @since 2.0
  */
-public class WebflowProjectValidator implements IProjectBuilder {
+public class WebflowProjectValidator extends AbstractProjectBuilder {
 
-	public void build(IResource resource, int kind, IProgressMonitor monitor) {
+	@Override
+	protected Set<IResource> getAffectedResources(IResource resource,
+			int kind) {
+		Set<IResource> resources = new LinkedHashSet<IResource>();
 		if (WebflowModelUtils.isWebflowConfig(resource)) {
-			validate((IFile) resource, monitor);
+			resources.add(resource);
+		}
+		return resources;
+	}
+
+	protected void build(Set<IResource> affectedResources, int kind,
+			IProgressMonitor monitor) throws CoreException {
+		for (IResource resource : affectedResources) {
+			if (resource instanceof IFile) {
+				validate((IFile) resource, monitor);
+			}
 		}
 	}
 

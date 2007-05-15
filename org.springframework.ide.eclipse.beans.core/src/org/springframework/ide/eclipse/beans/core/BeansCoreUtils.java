@@ -27,7 +27,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 public class BeansCoreUtils {
 
 	/**
-	 * Returns true if given resource is a Spring bean factory config file.
+	 * Returns <code>true</code> if given resource is a Spring bean factory
+	 * config file.
 	 */
 	public static boolean isBeansConfig(IResource resource) {
 		if (resource instanceof IFile) {

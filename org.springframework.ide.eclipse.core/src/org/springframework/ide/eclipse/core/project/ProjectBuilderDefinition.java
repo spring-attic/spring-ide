@@ -94,4 +94,9 @@ public class ProjectBuilderDefinition {
 				BUILDER_PREFIX + this.id, isEnabled);
 		this.isEnabled = isEnabled;
 	}
+
+	@Override
+	public String toString() {
+		return (name != null ? name : projectBuilder.getClass().getName());
+	}
 }

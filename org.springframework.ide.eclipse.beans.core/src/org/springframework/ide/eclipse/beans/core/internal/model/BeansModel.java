@@ -24,11 +24,9 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.BeansResourceChangeListener;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.IBeansResourceChangeEvents;
-import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectValidator;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
@@ -394,23 +392,6 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 					}
 				}
 				notifyListeners(config, Type.REMOVED);
-			}
-		}
-
-		public void beanClassChanged(String className,
-				Set<IBeansConfig> configs, int eventType) {
-			if (eventType == IResourceChangeEvent.POST_BUILD) {
-				if (DEBUG) {
-					System.out.println("Bean class '" + className
-							+ "' changed");
-				}
-				IProgressMonitor monitor = new NullProgressMonitor();
-				for (IBeansConfig config : configs) {
-					IFile file = BeansModelUtils.getFile(config);
-					if (file != null) {
-						BeansProjectValidator.validate(file, monitor);
-					}
-				}
 			}
 		}
 	}

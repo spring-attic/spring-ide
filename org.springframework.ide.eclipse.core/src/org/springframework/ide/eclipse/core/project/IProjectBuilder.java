@@ -10,8 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.project;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.springframework.ide.eclipse.core.internal.project.SpringProjectBuilder;
 
 /**
  * This interface defines the contract for the
@@ -24,29 +29,38 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * <li>may implement other methods</li>
  * </ul>
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public interface IProjectBuilder {
 
 	/**
-	 * For every modified file within a Spring project this method is called.
-	 * @param file  the modified {@link IResource}
-	 * @param kind  the kind of build being requested. Valid values are
+	 * This method is the main entry point to the builder called by the
+	 * {@link SpringProjectBuilder}.
+	 * @param project the project this builder is started for
+	 * @param kind the kind of build being requested. Valid values are
 	 * <ul>
-	 * <li><code>FULL_BUILD</code>- indicates a full build.</li>
-	 * <li><code>INCREMENTAL_BUILD</code>- indicates an incremental build.</li>
-	 * <li><code>AUTO_BUILD</code>- indicates an automatically triggered
-	 * incremental build (autobuilding on).</li>
+	 * <li>{@link IncrementalProjectBuilder.FULL_BUILD} - indicates a full
+	 * build.</li>
+	 * <li>{@link IncrementalProjectBuilder.INCREMENTAL_BUILD}Ê- indicates an
+	 * incremental build.</li>
+	 * <li>{@link IncrementalProjectBuilder.AUTO_BUILD}Ê- indicates an
+	 * automatically triggered incremental build (autobuilding on).</li>
 	 * </ul>
+	 * @param delta the resource delta recording the changes since the last time
+	 * 			this builder was run or <code>null</code> for a full build
 	 * @param monitor a progress monitor, or <code>null</code> if progress
-	 * reporting and cancellation are not desired
+	 * 			reporting and cancellation are not desired
 	 */
-	void build(IResource resource, int kind, IProgressMonitor monitor);
-
+	void build(IProject project, int kind, IResourceDelta delta,
+			IProgressMonitor monitor) throws CoreException;
+	
 	/**
-	 * Clean up the created UI contributions.
-	 * @param resource the resource
-	 * @param monitor a progress monitor, or <code>null</code> if progress
-	 * reporting and cancellation are not desired
+	 * Cleanup the contributions (e.g. problem markers) created by this builder
+	 * from a given resource.
+	 * @param resource  the resource the contributions should be removed from
+	 * @param monitor  a progress monitor, or <code>null</code> if progress
+	 * 			reporting and cancellation are not desired
 	 */
-	void cleanup(IResource resource, IProgressMonitor monitor);
+	void cleanup(IResource resource, IProgressMonitor monitor)
+			throws CoreException;
 }

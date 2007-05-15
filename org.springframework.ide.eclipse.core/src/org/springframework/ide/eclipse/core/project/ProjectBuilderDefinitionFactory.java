@@ -31,15 +31,16 @@ public class ProjectBuilderDefinitionFactory {
 			+ ".builders";
 
 	public static List<ProjectBuilderDefinition> getProjectBuilderDefinitions() {
-		List<ProjectBuilderDefinition> builderDefinitions = new ArrayList<ProjectBuilderDefinition>();
+		List<ProjectBuilderDefinition> builderDefinitions =
+				new ArrayList<ProjectBuilderDefinition>();
 		for (IExtension extension : Platform.getExtensionRegistry()
 				.getExtensionPoint(BUILDERS_EXTENSION_POINT).getExtensions()) {
 			for (IConfigurationElement element : extension
 					.getConfigurationElements()) {
 				try {
-					ProjectBuilderDefinition builderHolder = new ProjectBuilderDefinition(
-							element);
-					builderDefinitions.add(builderHolder);
+					ProjectBuilderDefinition builderDefinition =
+							new ProjectBuilderDefinition(element);
+					builderDefinitions.add(builderDefinition);
 				}
 				catch (CoreException e) {
 					SpringCore.log(e);

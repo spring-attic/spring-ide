@@ -26,22 +26,22 @@ public interface IBeansProjectMarker {
 	 * This can be used to recognize those markers in the workspace that flag
 	 * problems related with Spring Beans projects.
 	 */
-	public static final String PROBLEM_MARKER = BeansCorePlugin.PLUGIN_ID
-			+ ".problemmarker";
+	String PROBLEM_MARKER = BeansCorePlugin.PLUGIN_ID + ".problemmarker";
+
 	/**
 	 * Error code marker attribute (value <code>"errorCode"</code>).
 	 */
-	public static final String ERROR_CODE = "errorCode";
+	String ERROR_CODE = "errorCode";
 
 	/**
 	 * Bean ID marker attribute (value <code>"beanID"</code>).
 	 */
-	public static final String BEAN_ID = "beanID";
+	String BEAN_ID = "beanID";
 
 	/**
 	 * Error data marker attribute (value <code>"errorData"</code>).
 	 */
-	public static final String ERROR_DATA = "errorData";
+	String ERROR_DATA = "errorData";
 
 	// Codes used for attribute 'ERROR_CODE'
 	public enum ErrorCode {

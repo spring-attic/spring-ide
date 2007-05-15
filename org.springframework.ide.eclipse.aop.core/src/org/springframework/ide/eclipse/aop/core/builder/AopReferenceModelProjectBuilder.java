@@ -10,20 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.aop.core.builder;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.aop.core.Activator;
-import org.springframework.ide.eclipse.aop.core.model.builder.AopReferenceModelBuilder;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelMarkerUtils;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
+import org.springframework.ide.eclipse.core.project.AbstractProjectBuilder;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 
 /**
@@ -32,29 +29,40 @@ import org.springframework.ide.eclipse.core.project.IProjectBuilder;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class AopReferenceModelProjectBuilder implements IProjectBuilder {
+public class AopReferenceModelProjectBuilder extends AbstractProjectBuilder {
 
-	public void build(IResource resource, int kind, IProgressMonitor monitor) {
+	protected Set<IResource> getAffectedResources(IResource resource,
+			int kind) {
+		Set<IResource> resources = new LinkedHashSet<IResource>();
+		if (resource instanceof IFile) {
+			resources.addAll(AopReferenceModelUtils.getAffectedFiles(kind,
+					resource));
+		}
+		return resources;
+	}
+
+	@Override
+	protected void build(Set<IResource> affectedResources, int kind,
+			IProgressMonitor monitor) throws CoreException {
 		try {
-			if (resource instanceof IFile) {
-				Set<IFile> affectedFiles = AopReferenceModelUtils
-						.getAffectedFiles(kind, (IFile) resource);
-				if (affectedFiles != null && affectedFiles.size() > 0) {
-					monitor.subTask(Activator.getFormattedMessage(
-							"AopReferenceModelProjectBuilder.buildingAopReferenceModel",
-							resource.getFullPath()));
-					IWorkspaceRunnable validator = new AopReferenceModelBuilder(
-							affectedFiles);
-					IWorkspace workspace = ResourcesPlugin.getWorkspace();
-					ISchedulingRule rule = workspace.getRuleFactory()
-							.markerRule(workspace.getRoot());
-					try {
-						workspace.run(validator, rule, IWorkspace.AVOID_UPDATE,
-								monitor);
-					}
-					catch (CoreException e) {
-						Activator.log(e);
-					}
+			for (IResource resource : affectedResources) {
+				if (resource instanceof IFile) {
+// FIXME
+//						monitor.subTask(Activator.getFormattedMessage(
+//								"AopReferenceModelProjectBuilder.buildingAopReferenceModel",
+//								resource.getFullPath()));
+//						IWorkspaceRunnable validator = new AopReferenceModelBuilder(
+//								filesToBuild);
+//						IWorkspace workspace = ResourcesPlugin.getWorkspace();
+//						ISchedulingRule rule = workspace.getRuleFactory()
+//								.markerRule(workspace.getRoot());
+//						try {
+//							workspace.run(validator, rule, IWorkspace.AVOID_UPDATE,
+//									monitor);
+//						}
+//						catch (CoreException e) {
+//							Activator.log(e);
+//						}
 				}
 			}
 		}
