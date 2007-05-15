@@ -81,7 +81,13 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 	public AopReferenceModelBuilder(Set<IFile> filesToBuild) {
 		this.filesToBuild = filesToBuild;
 	}
-
+	
+	/**
+	 * Activates the weaving class loader as thread context classloader.
+	 * 
+	 * <p>Use {@link #recoverClassLoader()} to recover the original thread 
+	 * context classlaoder
+	 */
 	private void activateWeavingClassLoader() {
 		Thread.currentThread().setContextClassLoader(weavingClassLoader);
 	}
@@ -91,8 +97,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 	 * @param monitor the progressMonitor
 	 * @param filesToBuild the files to build the model from
 	 */
-	protected void buildAopModel(IProgressMonitor monitor,
-			Set<IFile> filesToBuild) {
+	protected void buildAopModel(IProgressMonitor monitor) {
 		AopLog.logStart(PROCESSING_TOOK_MSG);
 		AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
 				"AopReferenceModelBuilder.startBuildReferenceModel",
@@ -473,10 +478,14 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 		Thread.currentThread().setContextClassLoader(classLoader);
 	}
 
+	/**
+	 * Implementation for {@link IWorkspaceRunnable#run(IProgressMonitor)} 
+	 * method that triggers the building of the aop reference model.
+	 */
 	public void run(IProgressMonitor monitor) throws CoreException {
 		try {
 			if (!monitor.isCanceled()) {
-				this.buildAopModel(monitor, this.filesToBuild);
+				this.buildAopModel(monitor);
 			}
 		}
 		finally {
