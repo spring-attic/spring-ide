@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="spring-webflow.jar" sourcepath="/org.springframework.source/src/org.springframework.webflow_1.0.1/spring-webflowsrc.zip"/>
+	<classpathentry exported="true" kind="lib" path="spring-webflow.jar" sourcepath="/org.springframework.source/src/org.springframework.webflow_1.0.3/spring-webflowsrc.zip"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="bin"/>
