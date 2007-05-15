@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+   <extension
+         point="org.springframework.ide.eclipse.beans.core.postprocessors">
+      <postprocessor
+      		type="org.springframework.config.java.process.ConfigurationPostProcessor"
+            class="org.springframework.ide.eclipse.javaconfig.core.process.ConfigurationPostProcessor"
+            />
+   </extension>
+	
+</plugin>

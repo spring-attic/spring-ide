@@ -1,0 +1,36 @@
+Manifest-Version: 1.0
+Implementation-Title: Spring JavaConfig
+Implementation-Version: 1.0 M1
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.springframework.javaconfig
+Bundle-Name: org.springframework.javaconfig
+Bundle-Version: 1.0.0
+Bundle-Vendor: Spring JavaConfig
+Bundle-ClassPath: spring-javaconfig.jar
+Bundle-Localization: plugin
+Export-Package: org.springframework.aop.framework,
+ org.springframework.beans,
+ org.springframework.config.java,
+ org.springframework.config.java.analysis,
+ org.springframework.config.java.annotation,
+ org.springframework.config.java.annotation.aop,
+ org.springframework.config.java.annotation.aop.targetsource,
+ org.springframework.config.java.context,
+ org.springframework.config.java.listener,
+ org.springframework.config.java.listener.aop,
+ org.springframework.config.java.listener.aop.targetsource,
+ org.springframework.config.java.listener.registry,
+ org.springframework.config.java.naming,
+ org.springframework.config.java.parsing,
+ org.springframework.config.java.process,
+ org.springframework.config.java.propertysource,
+ org.springframework.config.java.support,
+ org.springframework.config.java.support.cglib,
+ org.springframework.config.java.template,
+ org.springframework.config.java.template.mvc,
+ org.springframework.config.java.test,
+ org.springframework.config.java.testing,
+ org.springframework.config.java.testing.config,
+ org.springframework.config.java.util,
+ org.springframework.transaction
+Require-Bundle: org.springframework

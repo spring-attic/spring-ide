@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+   
+   	<extension point="org.eclipse.ui.decorators">
+		<decorator lightweight="true" label="%javaConfigDecorator.label"
+			class="org.springframework.ide.eclipse.javaconfig.ui.decorator.JavaConfigImageDecorator"
+			state="true" adaptable="true"
+			id="org.springframework.ide.eclipse.javaconfig.ui.decorator.javaconfiguidecorator">
+			<description>%javaConfigDecorator.description</description>
+			<enablement>
+				<objectClass name="java.lang.Object"></objectClass>
+			</enablement>
+		</decorator>
+	</extension>
+	
+</plugin>

@@ -24,6 +24,8 @@ plugin@org.springframework.ide.eclipse.aop.ui.visualiser=SVN,trunk,svn://localho
 plugin@org.springframework.ide.eclipse.aop.ui.xref=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.aop.ui.xref
 plugin@org.springframework.doc=SVN,trunk,svn://localhost,,org.springframework.doc
 plugin@org.springframework.source=SVN,trunk,svn://localhost,,org.springframework.source
+plugin@org.springframework.ide.eclipse.javaconfig.core=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.javaconfig.core
+plugin@org.springframework.ide.eclipse.javaconfig.ui=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.javaconfig.ui
 plugin@org.springframework.ide.eclipse.webflow.core=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.webflow.core
 plugin@org.springframework.ide.eclipse.webflow.ui=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.webflow.ui
 plugin@org.springframework.ide.eclipse.webflow.ui.editor=SVN,trunk,svn://localhost,,org.springframework.ide.eclipse.webflow.ui.editor
@@ -39,5 +41,6 @@ plugin@jakarta.commons.logging=SVN,trunk,svn://localhost,,required-bundles/commo
 plugin@org.springframework=SVN,trunk,svn://localhost,,required-bundles/spring
 plugin@org.springframework.webflow=SVN,trunk,svn://localhost,,required-bundles/spring-webflow
 plugin@org.springframework.binding=SVN,trunk,svn://localhost,,required-bundles/spring-binding
+plugin@org.springframework.javaconfig=SVN,trunk,svn://localhost,,required-bundles/spring-javaconfig
 plugin@org.objectweb.asm=SVN,trunk,svn://localhost,,required-bundles/asm
 
