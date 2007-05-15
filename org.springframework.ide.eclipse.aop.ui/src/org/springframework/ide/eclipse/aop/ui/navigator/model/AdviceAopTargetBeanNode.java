@@ -86,13 +86,18 @@ public class AdviceAopTargetBeanNode implements IReferenceNode,
 
 	public int getLineNumber() {
 		IBean bean = AopReferenceModelUtils
-			.getBeanFromElementId(this.references.get(0).getTargetBeanId());
+				.getBeanFromElementId(this.references.get(0).getTargetBeanId());
 		if (bean != null) {
 			return bean.getElementStartLine();
 		}
 		else {
 			return -1;
 		}
+	}
+
+	public IBean getTargetBean() {
+		return AopReferenceModelUtils.getBeanFromElementId(this.references.get(
+				0).getTargetBeanId()); 
 	}
 
 	public IResource getResource() {
