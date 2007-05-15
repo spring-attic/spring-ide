@@ -18,7 +18,17 @@ package org.springframework.ide.eclipse.javaconfig.core.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.config.java.annotation.Configuration;
+
+/**
+ * Holds information about a single
+ * @Bean annotated method in a {@link Configuration} class.
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 public class BeanCreationMethod {
+
+	private String owningClassName;
 
 	private List<String> aliases = new ArrayList<String>();
 
@@ -42,9 +52,11 @@ public class BeanCreationMethod {
 
 	private boolean isPublic;
 
-	public BeanCreationMethod(String beanName, String beanClassName) {
+	public BeanCreationMethod(String beanName, String beanClassName,
+			String owningClassName) {
 		this.name = beanName;
 		this.returnTypeName = beanClassName;
+		this.owningClassName = owningClassName;
 	}
 
 	public void addAlias(String alias) {
@@ -133,6 +145,10 @@ public class BeanCreationMethod {
 
 	public void addParameterTypes(String parameterType) {
 		this.parameterTypes.add(parameterType);
+	}
+
+	public String getOwningClassName() {
+		return owningClassName;
 	}
 
 }

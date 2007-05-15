@@ -42,7 +42,7 @@ public class JdtModelSourceLocationFactory {
 	public static IModelSourceLocation getModelSourceLocation(IBean bean,
 			BeanCreationMethod beanCreationMethod) {
 
-		String className = BeansModelUtils.getBeanClass(bean, null);
+		String className = beanCreationMethod.getOwningClassName();
 		String methodName = beanCreationMethod.getName();
 		List<String> parameterTypeNames = beanCreationMethod
 				.getParameterTypes();

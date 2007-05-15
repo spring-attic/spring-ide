@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.javaconfig.core.process;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -92,13 +93,20 @@ public class ConfigurationPostProcessor implements IBeansConfigPostProcessor {
 		String beanClassName = BeansModelUtils.getBeanClass(bean, beansConfig);
 		if (beanClassName != null) {
 			try {
-				ClassReader reader = new ClassReader(classLoader
-						.getResourceAsStream(getClassFileName(beanClassName)));
-				ConfigurationClassVisitor v = new ConfigurationClassVisitor();
-				reader.accept(v, false);
 
-				List<BeanCreationMethod> beanCreationMethods = v
-						.getBeanCreationMethods();
+				List<BeanCreationMethod> beanCreationMethods = new ArrayList<BeanCreationMethod>();
+
+				String superClassName = beanClassName;
+				do {
+					ClassReader reader = new ClassReader(
+							classLoader
+									.getResourceAsStream(getClassFileName(superClassName)));
+					ConfigurationClassVisitor v = new ConfigurationClassVisitor();
+					reader.accept(v, false);
+					superClassName = v.getSuperClassName();
+					beanCreationMethods.addAll(v.getBeanCreationMethods());
+				} while (superClassName != null);
+
 				if (beanCreationMethods != null) {
 					for (BeanCreationMethod beanCreationMethod : beanCreationMethods) {
 						processSingleBeanCreationMethod(postProcessingContext,

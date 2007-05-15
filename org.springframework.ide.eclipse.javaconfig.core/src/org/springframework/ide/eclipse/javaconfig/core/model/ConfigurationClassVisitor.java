@@ -28,11 +28,11 @@ import org.springframework.config.java.annotation.Configuration;
  */
 public class ConfigurationClassVisitor extends EmptyVisitor {
 
-	private static class BeanMethodVisitor extends EmptyVisitor {
+	private static class BeanCreationMethodVisitor extends EmptyVisitor {
 
 		private final BeanCreationMethod beanCreationMethod;
 
-		public BeanMethodVisitor(BeanCreationMethod beanCreationMethod) {
+		public BeanCreationMethodVisitor(BeanCreationMethod beanCreationMethod) {
 			this.beanCreationMethod = beanCreationMethod;
 		}
 
@@ -117,6 +117,8 @@ public class ConfigurationClassVisitor extends EmptyVisitor {
 	private boolean isConfigurationAnnotationPresent = false;
 
 	private String superClassName = null;
+	
+	private String className = null;
 
 	public List<BeanCreationMethod> getBeanCreationMethods() {
 		List<BeanCreationMethod> validBeanCreationMethods = new ArrayList<BeanCreationMethod>();
@@ -135,8 +137,9 @@ public class ConfigurationClassVisitor extends EmptyVisitor {
 	public void visit(int version, int access, String name, String signature,
 			String superName, String[] interfaces) {
 		if (!OBJECT_CLASS.equals(superName)) {
-			superClassName = superName;
+			this.superClassName = superName;
 		}
+		this.className = name.replace('/', '.');
 	}
 
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
@@ -155,7 +158,7 @@ public class ConfigurationClassVisitor extends EmptyVisitor {
 		if (isConfigurationAnnotationPresent) {
 
 			BeanCreationMethod beanCreationMethod = new BeanCreationMethod(
-					name, Type.getReturnType(desc).getClassName());
+					name, Type.getReturnType(desc).getClassName(), this.className);
 			this.beanCreationMethods.push(beanCreationMethod);
 
 			beanCreationMethod.setPublic(Opcodes.ACC_PUBLIC == access);
@@ -166,7 +169,7 @@ public class ConfigurationClassVisitor extends EmptyVisitor {
 							.getClassName());
 				}
 			}
-			return new BeanMethodVisitor(beanCreationMethod);
+			return new BeanCreationMethodVisitor(beanCreationMethod);
 		}
 		else {
 			return new EmptyVisitor();
