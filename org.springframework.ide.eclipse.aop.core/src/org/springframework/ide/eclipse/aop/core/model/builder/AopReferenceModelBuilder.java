@@ -74,12 +74,12 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 
 	private ClassLoader weavingClassLoader;
 
-	private Set<IFile> filesToBuild;
+	private Set<IFile> affectedFiles;
 
 	private Map<IAspectDefinition, Object> aspectDefinitionToPoincutCache;
 
-	public AopReferenceModelBuilder(Set<IFile> filesToBuild) {
-		this.filesToBuild = filesToBuild;
+	public AopReferenceModelBuilder(Set<IFile> affectedFiles) {
+		this.affectedFiles = affectedFiles;
 	}
 	
 	/**
@@ -101,10 +101,10 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 		AopLog.logStart(PROCESSING_TOOK_MSG);
 		AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
 				"AopReferenceModelBuilder.startBuildReferenceModel",
-				filesToBuild.size()));
+				affectedFiles.size()));
 
 		int worked = 0;
-		for (IFile currentFile : filesToBuild) {
+		for (IFile currentFile : affectedFiles) {
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
@@ -491,7 +491,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 		finally {
 			weavingClassLoader = null;
 			classLoader = null;
-			filesToBuild = null;
+			affectedFiles = null;
 			aspectDefinitionToPoincutCache.clear();
 			aspectDefinitionToPoincutCache = null;
 		}

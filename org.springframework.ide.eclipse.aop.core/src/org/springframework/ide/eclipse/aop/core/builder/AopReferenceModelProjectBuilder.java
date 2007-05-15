@@ -38,7 +38,7 @@ public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 		try {
 			if (resource instanceof IFile) {
 				Set<IFile> filesToBuild = AopReferenceModelUtils
-						.getFilesToBuild(kind, (IFile) resource);
+						.getAffectedFiles(kind, (IFile) resource);
 				if (filesToBuild != null && filesToBuild.size() > 0) {
 					monitor.subTask(Activator.getFormattedMessage(
 							"AopReferenceModelProjectBuilder.buildingAopReferenceModel",

@@ -55,6 +55,8 @@ import org.springframework.util.ClassUtils;
  */
 public class AopReferenceModelUtils {
 
+	private static final String JAVA_FILE_EXTENSION = ".java";
+
 	public static String getJavaElementLinkName(IJavaElement je) {
 		if (je == null) {
 			return "";
@@ -180,7 +182,7 @@ public class AopReferenceModelUtils {
 		return null;
 	}
 
-	public static Set<IFile> getFilesToBuildFromBeansProject(IProject file) {
+	public static Set<IFile> getAffectedFilesFromBeansProject(IProject file) {
 		Set<IFile> resourcesToBuild = new HashSet<IFile>();
 		IBeansProject bp = BeansCorePlugin.getModel().getProject(
 				file.getProject());
@@ -192,12 +194,12 @@ public class AopReferenceModelUtils {
 		return resourcesToBuild;
 	}
 
-	public static Set<IFile> getFilesToBuild(int kind, IResource resource) {
+	public static Set<IFile> getAffectedFiles(int kind, IResource resource) {
 		Set<IFile> files = new HashSet<IFile>();
 		if ((kind == IncrementalProjectBuilder.AUTO_BUILD
 				|| kind == IncrementalProjectBuilder.INCREMENTAL_BUILD)
 				&& resource instanceof IFile
-				&& resource.getName().endsWith(".java")) {
+				&& resource.getName().endsWith(JAVA_FILE_EXTENSION)) {
 			Set<IBeansProject> projects = BeansCorePlugin.getModel()
 					.getProjects();
 			if (projects != null) {
