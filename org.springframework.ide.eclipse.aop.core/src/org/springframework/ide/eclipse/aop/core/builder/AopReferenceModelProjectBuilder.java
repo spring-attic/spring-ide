@@ -15,9 +15,14 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.aop.core.Activator;
+import org.springframework.ide.eclipse.aop.core.model.builder.AopReferenceModelBuilder;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelMarkerUtils;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.core.project.AbstractProjectBuilder;
@@ -25,14 +30,19 @@ import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 
 /**
  * {@link IProjectBuilder} that triggers creation of Spring IDE's internal AOP
- * reference model
+ * reference model.
  * @author Christian Dupuis
  * @since 2.0
+ * @see AbstractProjectBuilder
  */
 public class AopReferenceModelProjectBuilder extends AbstractProjectBuilder {
 
-	protected Set<IResource> getAffectedResources(IResource resource,
-			int kind) {
+	/**
+	 * Returns a {@link Set} of {@link IResource} instances that need to be
+	 * rebuild in the context of the current <code>resource</code> and
+	 * <code>kind</code>
+	 */
+	protected Set<IResource> getAffectedResources(IResource resource, int kind) {
 		Set<IResource> resources = new LinkedHashSet<IResource>();
 		if (resource instanceof IFile) {
 			resources.addAll(AopReferenceModelUtils.getAffectedFiles(kind,
@@ -41,36 +51,36 @@ public class AopReferenceModelProjectBuilder extends AbstractProjectBuilder {
 		return resources;
 	}
 
+	/**
+	 * Starts creation of AOP reference model by passing the Set of
+	 * affectedResources on to a new instance of
+	 * {@link AopReferenceModelBuilder}.
+	 */
 	@Override
 	protected void build(Set<IResource> affectedResources, int kind,
 			IProgressMonitor monitor) throws CoreException {
 		try {
-			for (IResource resource : affectedResources) {
-				if (resource instanceof IFile) {
-// FIXME
-//						monitor.subTask(Activator.getFormattedMessage(
-//								"AopReferenceModelProjectBuilder.buildingAopReferenceModel",
-//								resource.getFullPath()));
-//						IWorkspaceRunnable validator = new AopReferenceModelBuilder(
-//								filesToBuild);
-//						IWorkspace workspace = ResourcesPlugin.getWorkspace();
-//						ISchedulingRule rule = workspace.getRuleFactory()
-//								.markerRule(workspace.getRoot());
-//						try {
-//							workspace.run(validator, rule, IWorkspace.AVOID_UPDATE,
-//									monitor);
-//						}
-//						catch (CoreException e) {
-//							Activator.log(e);
-//						}
-				}
-			}
+			monitor.subTask(Activator.getFormattedMessage(
+					"AopReferenceModelProjectBuilder.buildingAopReferenceModel"));
+			IWorkspaceRunnable referenceModelBuilder = new AopReferenceModelBuilder(
+					affectedResources);
+			IWorkspace workspace = ResourcesPlugin.getWorkspace();
+			ISchedulingRule rule = workspace.getRuleFactory().markerRule(
+					workspace.getRoot());
+			workspace.run(referenceModelBuilder, rule, IWorkspace.AVOID_UPDATE,
+					monitor);
+		}
+		catch (CoreException e) {
+			Activator.log(e);
 		}
 		finally {
 			monitor.done();
 		}
 	}
 
+	/**
+	 * Removes the AOP reference model markers
+	 */
 	public void cleanup(IResource resource, IProgressMonitor monitor) {
 		try {
 			monitor.subTask(Activator.getFormattedMessage(

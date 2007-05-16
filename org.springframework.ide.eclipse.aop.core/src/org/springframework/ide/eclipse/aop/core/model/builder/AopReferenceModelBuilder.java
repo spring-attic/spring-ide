@@ -74,12 +74,12 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 
 	private ClassLoader weavingClassLoader;
 
-	private Set<IFile> affectedFiles;
+	private Set<IResource> affectedResources;
 
 	private Map<IAspectDefinition, Object> aspectDefinitionToPoincutCache;
 
-	public AopReferenceModelBuilder(Set<IFile> affectedFiles) {
-		this.affectedFiles = affectedFiles;
+	public AopReferenceModelBuilder(Set<IResource> affectedResources) {
+		this.affectedResources = affectedResources;
 	}
 	
 	/**
@@ -101,51 +101,54 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 		AopLog.logStart(PROCESSING_TOOK_MSG);
 		AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
 				"AopReferenceModelBuilder.startBuildReferenceModel",
-				affectedFiles.size()));
+				affectedResources.size()));
 
 		int worked = 0;
-		for (IFile currentFile : affectedFiles) {
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-
-			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
-					"AopReferenceModelBuilder.buildingAopReferenceModel",
-					currentFile.getFullPath().toString()));
-			monitor.subTask(Activator.getFormattedMessage(
-					"AopReferenceModelBuilder.buildingAopReferenceModel",
-					currentFile.getFullPath().toString()));
-
-			AopReferenceModelMarkerUtils.deleteProblemMarkers(currentFile);
-			AopLog.log(AopLog.BUILDER_MESSAGES,	Activator.getFormattedMessage(
-					"AopReferenceModelBuilder.deletedProblemMarkers"));
-
-			IAopProject aopProject = buildAopReferencesFromFile(currentFile,
-					monitor);
-			AopLog.log(AopLog.BUILDER_MESSAGES, Activator.getFormattedMessage(
-					"AopReferenceModelBuilder.constructedAopReferenceModel"));
-
-			if (aopProject != null) {
-				List<IAopReference> references = aopProject.getAllReferences();
-				for (IAopReference reference : references) {
-					if (reference.getDefinition().getResource().equals(
-							currentFile)
-							|| reference.getResource().equals(currentFile)) {
-						AopReferenceModelMarkerUtils.createMarker(reference,
-								currentFile);
+		for (IResource currentResource : affectedResources) {
+			if (currentResource instanceof IFile) {
+				IFile currentFile = (IFile) currentResource;
+				
+				if (monitor.isCanceled()) {
+					throw new OperationCanceledException();
+				}
+	
+				AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
+						"AopReferenceModelBuilder.buildingAopReferenceModel",
+						currentFile.getFullPath().toString()));
+				monitor.subTask(Activator.getFormattedMessage(
+						"AopReferenceModelBuilder.buildingAopReferenceModel",
+						currentFile.getFullPath().toString()));
+	
+				AopReferenceModelMarkerUtils.deleteProblemMarkers(currentFile);
+				AopLog.log(AopLog.BUILDER_MESSAGES,	Activator.getFormattedMessage(
+						"AopReferenceModelBuilder.deletedProblemMarkers"));
+	
+				IAopProject aopProject = buildAopReferencesFromFile(currentFile,
+						monitor);
+				AopLog.log(AopLog.BUILDER_MESSAGES, Activator.getFormattedMessage(
+						"AopReferenceModelBuilder.constructedAopReferenceModel"));
+	
+				if (aopProject != null) {
+					List<IAopReference> references = aopProject.getAllReferences();
+					for (IAopReference reference : references) {
+						if (reference.getDefinition().getResource().equals(
+								currentFile)
+								|| reference.getResource().equals(currentFile)) {
+							AopReferenceModelMarkerUtils.createMarker(reference,
+									currentFile);
+						}
 					}
 				}
+				AopLog.log(AopLog.BUILDER_MESSAGES,	Activator.getFormattedMessage(
+						"AopReferenceModelBuilder.createdProblemMarkers"));
+				worked++;
+				monitor.worked(worked);
+				AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
+						"AopReferenceModelBuilder.doneBuildingReferenceModel",
+						currentFile.getFullPath().toString()));
+	
 			}
-			AopLog.log(AopLog.BUILDER_MESSAGES,	Activator.getFormattedMessage(
-					"AopReferenceModelBuilder.createdProblemMarkers"));
-			worked++;
-			monitor.worked(worked);
-			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
-					"AopReferenceModelBuilder.doneBuildingReferenceModel",
-					currentFile.getFullPath().toString()));
-
 		}
-
 		AopLog.logEnd(AopLog.BUILDER, PROCESSING_TOOK_MSG);
 		// update images and text decoractions
 		Activator.getModel().fireModelChanged();
@@ -491,7 +494,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 		finally {
 			weavingClassLoader = null;
 			classLoader = null;
-			affectedFiles = null;
+			affectedResources = null;
 			aspectDefinitionToPoincutCache.clear();
 			aspectDefinitionToPoincutCache = null;
 		}
