@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.core.io.xml;
 import org.springframework.beans.factory.xml.DocumentLoader;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.ide.eclipse.core.SpringCore;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
@@ -53,9 +53,9 @@ public class XercesDocumentLoader implements DocumentLoader {
 		catch (LinkageError e) {
 			// log the Xerces location to the Error log in order to debug the location
 			SpringCore.log(SpringCore.getFormattedMessage(
-					"Plugin.xerces_location", SpringCoreUtils
-					.getClassVersion(org.apache.xerces.impl.Version.class), SpringCoreUtils
-					.getClassLocation(org.apache.xerces.impl.Version.class), SpringCoreUtils
+					"Plugin.xerces_location", ClassUtils
+					.getClassVersion(org.apache.xerces.impl.Version.class), ClassUtils
+					.getClassLocation(org.apache.xerces.impl.Version.class), ClassUtils
 					.getClassLoaderHierachy(org.apache.xerces.impl.Version.class)), e);
 			throw new SAXException(SpringCore
 					.getResourceString("Plugin.wrong_xerces_message"));

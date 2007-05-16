@@ -26,11 +26,11 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessingContext;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.core.java.ClassUtils;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.javaconfig.core.model.BeanCreationMethod;
 import org.springframework.ide.eclipse.javaconfig.core.model.ConfigurationClassVisitor;
 import org.springframework.ide.eclipse.javaconfig.core.model.JdtModelSourceLocationFactory;
-import org.springframework.util.StringUtils;
 
 /**
  * A {@link IBeansConfigPostProcessor} implementation that process a
@@ -45,8 +45,6 @@ import org.springframework.util.StringUtils;
  */
 public class ConfigurationPostProcessor implements IBeansConfigPostProcessor {
 
-	private static final String CLASS_FILE_SUFFIX = ".class";
-
 	/**
 	 * Entry point for post processing Spring JavaConfig configuration
 	 * @see IBeansConfigPostProcessor#postProcess(IBeansConfigPostProcessingContext)
@@ -57,7 +55,7 @@ public class ConfigurationPostProcessor implements IBeansConfigPostProcessor {
 		IBeansConfig beansConfig = postProcessingContext
 				.getBeansConfigRegistrySupport().getBeansConfig();
 
-		ClassLoader classLoader = SpringCoreUtils.getClassLoader(beansConfig
+		ClassLoader classLoader = JdtUtils.getClassLoader(beansConfig
 				.getElementResource());
 
 		postProcessBeansConfig(postProcessingContext, beansConfig, classLoader);
@@ -98,9 +96,9 @@ public class ConfigurationPostProcessor implements IBeansConfigPostProcessor {
 
 				String superClassName = beanClassName;
 				do {
-					ClassReader reader = new ClassReader(
-							classLoader
-									.getResourceAsStream(getClassFileName(superClassName)));
+					ClassReader reader = new ClassReader(classLoader
+							.getResourceAsStream(ClassUtils
+									.getClassFileName(superClassName)));
 					ConfigurationClassVisitor v = new ConfigurationClassVisitor();
 					reader.accept(v, false);
 					superClassName = v.getSuperClassName();
@@ -159,10 +157,5 @@ public class ConfigurationPostProcessor implements IBeansConfigPostProcessor {
 											.getBeanNameGenerator()
 											.generateBeanName(bd, null)));
 		}
-	}
-
-	private String getClassFileName(String className) {
-		className = StringUtils.replace(className, ".", "/");
-		return className + CLASS_FILE_SUFFIX;
 	}
 }

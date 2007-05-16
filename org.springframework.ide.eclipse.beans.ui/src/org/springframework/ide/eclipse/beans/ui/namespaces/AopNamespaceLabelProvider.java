@@ -12,11 +12,11 @@ package org.springframework.ide.eclipse.beans.ui.namespaces;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.swt.graphics.Image;
-import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
+import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;

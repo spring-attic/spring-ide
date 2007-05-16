@@ -16,11 +16,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.core.io.FileResource;
-import org.springframework.ide.eclipse.core.model.DefaultModelSourceLocation;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 
 /**
@@ -57,13 +56,12 @@ public class JdtModelSourceLocationFactory {
 			catch (JavaModelException e) {
 				// don't care about that here
 			}
-			// TODO refactor AopReferenceModelUtils.getMethod to eclipse.core
-			IMethod method = AopReferenceModelUtils.getMethod(type, methodName,
+			IMethod method = JdtUtils.getMethod(type, methodName,
 					parameterTypeNames.toArray(new String[parameterTypeNames
 							.size()]));
 			if (method != null) {
-				int l = AopReferenceModelUtils.getLineNumber(method);
-				return new DefaultModelSourceLocation(l, l, new FileResource(
+				int l = JdtUtils.getLineNumber(method);
+				return new JdtModelSourceLocation(l, l, new FileResource(
 						file));
 			}
 		}

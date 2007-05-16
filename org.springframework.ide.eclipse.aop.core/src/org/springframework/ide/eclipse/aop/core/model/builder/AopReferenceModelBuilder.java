@@ -49,14 +49,15 @@ import org.springframework.ide.eclipse.aop.core.model.internal.JavaAspectDefinit
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelMarkerUtils;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.core.java.ClassUtils;
+import org.springframework.ide.eclipse.core.java.Introspector;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.util.StringUtils;
 
@@ -199,8 +200,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				return;
 			}
 
-			Class<?> targetClass = AopReferenceModelBuilderUtils
-					.loadClass(className);
+			Class<?> targetClass = ClassUtils.loadClass(className);
 
 			if (info instanceof BeanIntroductionDefinition) {
 				BeanIntroductionDefinition intro = (BeanIntroductionDefinition) info;
@@ -226,7 +226,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 			else if (info instanceof JavaAspectDefinition 
 					&& !(info instanceof AnnotationAspectDefinition)) {
 
-				IMethod jdtAspectMethod = AopReferenceModelUtils.getMethod(
+				IMethod jdtAspectMethod = JdtUtils.getMethod(
 						jdtAspectType, info.getAdviceMethodName(), info
 								.getAdviceMethodParameterTypes());
 				
@@ -249,7 +249,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 					return;
 				}
 
-				IMethod jdtAspectMethod = AopReferenceModelUtils.getMethod(
+				IMethod jdtAspectMethod = JdtUtils.getMethod(
 						jdtAspectType, info.getAdviceMethodName(), info
 								.getAdviceMethod().getParameterTypes());
 				if (jdtAspectMethod != null) {
@@ -283,7 +283,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 
 		IResource file = config.getElementResource();
 		IAopProject aopProject = ((AopReferenceModel) Activator.getModel())
-				.getProjectWithInitialization(AopReferenceModelUtils
+				.getProjectWithInitialization(JdtUtils
 						.getJavaProject(info.getResource().getProject()));
 
 		Set<IBean> beans = config.getBeans();
@@ -351,7 +351,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 
 			if (javaProject != null) {
 				aopProject = ((AopReferenceModel) Activator.getModel())
-						.getProjectWithInitialization(AopReferenceModelUtils
+						.getProjectWithInitialization(JdtUtils
 								.getJavaProject(config.getElementResource()
 										.getProject()));
 				
@@ -502,6 +502,6 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 
 	private void setupClassLoaders(IJavaProject javaProject) {
 		classLoader = Thread.currentThread().getContextClassLoader();
-		weavingClassLoader = SpringCoreUtils.getClassLoader(javaProject, false);
+		weavingClassLoader = JdtUtils.getClassLoader(javaProject, false);
 	}
 }

@@ -42,9 +42,6 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker.ErrorCode;
-import org.springframework.ide.eclipse.beans.core.internal.Introspector;
-import org.springframework.ide.eclipse.beans.core.internal.Introspector.Public;
-import org.springframework.ide.eclipse.beans.core.internal.Introspector.Static;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
@@ -53,7 +50,10 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.core.java.Introspector;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.core.java.Introspector.Public;
+import org.springframework.ide.eclipse.core.java.Introspector.Static;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.util.StringUtils;
@@ -952,7 +952,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 			// Skip factory-method validation for factory beans which are
 			// Spring factory beans as well and for those aspectOf methods
 			if (type != null 
-					&& !(ASPECT_OF_METHOD_NAME.equals(methodName) && SpringCoreUtils.isTypeAjdtElement(type)) 
+					&& !(ASPECT_OF_METHOD_NAME.equals(methodName) && JdtUtils.isTypeAjdtElement(type)) 
 					&& !Introspector.doesImplement(type, FactoryBean.class
 							.getName())) {
 				validateMethod(bean, type, METHOD_TYPE_FACTORY, methodName,

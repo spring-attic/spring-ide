@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.core;
+package org.springframework.ide.eclipse.core.java;
 
 import java.util.List;
 
@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.springframework.ide.eclipse.core.SpringCore;
 
 /**
  * Utility class that tries to locate {@link IType} instances from the AJDT type
@@ -26,11 +27,11 @@ import org.eclipse.jdt.core.IType;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class SpringCoreAjdtUtils {
+public class AjdtUtils {
 
 	@SuppressWarnings("unchecked")
 	public static IType getAjdtType(IProject project, String className) {
-		IJavaProject javaProject = SpringCoreUtils.getJavaProject(project);
+		IJavaProject javaProject = JdtUtils.getJavaProject(project);
 		if (javaProject != null && className != null) {
 			try {
 				List<AJCompilationUnit> ajcus = AJCompilationUnitManager.INSTANCE

@@ -10,14 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -31,22 +24,15 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.osgi.framework.Bundle;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Some helper methods.
@@ -54,20 +40,6 @@ import org.springframework.util.StringUtils;
  * @author Christian Dupuis
  */
 public final class SpringCoreUtils {
-
-	private static final String AJDT_NATURE = 
-		"org.eclipse.ajdt.ui.ajnature";
-
-	private static final String AJDT_CLASS = 
-		"org.eclipse.ajdt.core.javaelements.AJCompilationUnitManager";
-
-	private static final boolean IS_AJDT_PRESENT;
-
-	static {
-		// this is not working if AJDT will be installed 
-		// without restarting Eclipse
-		IS_AJDT_PRESENT = isAjdtPresent();
-	}
 
 	/**
 	 * Returns the specified adapter for the given object or <code>null</code>
@@ -238,46 +210,6 @@ public final class SpringCoreUtils {
 	}
 
 	/**
-	 * Returns true if given resource's project is a Java project.
-	 */
-	public static boolean isJavaProject(IResource resource) {
-		if (resource != null && resource.isAccessible()) {
-			IProject project = resource.getProject();
-			if (project != null) {
-				try {
-					return project.hasNature(JavaCore.NATURE_ID);
-				}
-				catch (CoreException e) {
-					SpringCore.log(e);
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Returns the corresponding Java project or <code>null</code> a for given
-	 * project.
-	 * @param project the project the Java project is requested for
-	 * @return the requested Java project or <code>null</code> if the Java
-	 * project is not defined or the project is not accessible
-	 */
-	public static IJavaProject getJavaProject(IProject project) {
-		if (project.isAccessible()) {
-			try {
-				if (project.hasNature(JavaCore.NATURE_ID)) {
-					return (IJavaProject) project.getNature(JavaCore.NATURE_ID);
-				}
-			}
-			catch (CoreException e) {
-				SpringCore.log("Error getting Java project for project '"
-						+ project.getName() + "'", e);
-			}
-		}
-		return null;
-	}
-
-	/**
 	 * Returns true if given resource's project is a Spring project.
 	 */
 	public static boolean isSpringProject(IResource resource) {
@@ -286,24 +218,6 @@ public final class SpringCoreUtils {
 			if (project != null) {
 				try {
 					return project.hasNature(SpringCore.NATURE_ID);
-				}
-				catch (CoreException e) {
-					SpringCore.log(e);
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Returns true if given resource's project is a ADJT project.
-	 */
-	public static boolean isAjdtProject(IResource resource) {
-		if (resource != null && resource.isAccessible()) {
-			IProject project = resource.getProject();
-			if (project != null) {
-				try {
-					return project.hasNature(AJDT_NATURE);
 				}
 				catch (CoreException e) {
 					SpringCore.log(e);
@@ -346,226 +260,8 @@ public final class SpringCoreUtils {
 		return false;
 	}
 
-	public static ClassLoader getClassLoader(IResource resource) {
-		if (isJavaProject(resource)) {
-			return getClassLoader(JavaCore.create(resource.getProject()));
-		}
-		return Thread.currentThread().getContextClassLoader();
-	}
-
-	public static ClassLoader getClassLoader(IJavaProject project,
-			boolean useParentClassLoader) {
-		List<URL> paths = getClassPathURLs(project, useParentClassLoader);
-		if (useParentClassLoader) {
-			return new URLClassLoader(paths.toArray(new URL[paths.size()]),
-					Thread.currentThread().getContextClassLoader());
-		}
-		else {
-			return new URLClassLoader(paths.toArray(new URL[paths.size()]));
-		}
-	}
-
-	public static ClassLoader getClassLoader(IJavaProject project) {
-		return getClassLoader(project, true);
-	}
-
-	private static List<URL> getBundleClassPath(String bundleId) {
-		List<URL> paths = new ArrayList<URL>();
-		try {
-			Bundle bundle = Platform.getBundle(bundleId);
-			if (bundle != null) {
-				String bundleClassPath = (String) bundle.getHeaders().get(
-						org.osgi.framework.Constants.BUNDLE_CLASSPATH);
-				String[] classPathEntries = StringUtils
-						.delimitedListToStringArray(bundleClassPath, ",");
-				for (String classPathEntry : classPathEntries) {
-					if (".".equals(classPathEntry.trim())) {
-						paths.add(FileLocator.toFileURL(bundle.getEntry("/")));
-					}
-					else {
-						paths.add(FileLocator.toFileURL(new URL(bundle
-								.getEntry("/"), "/" + classPathEntry.trim())));
-					}
-				}
-			}
-		}
-		catch (MalformedURLException e) {
-			SpringCore.log(e);
-		}
-		catch (IOException e) {
-			SpringCore.log(e);
-		}
-		return paths;
-	}
-
-	public static List<URL> getClassPathURLs(IJavaProject project,
-			boolean useParentClassLoader) {
-		List<URL> paths = new ArrayList<URL>();
-
-		if (!useParentClassLoader) {
-			// add required libraries from osgi bundles
-			paths.addAll(getBundleClassPath("org.springframework"));
-			paths.addAll(getBundleClassPath("org.aspectj.aspectjweaver"));
-			paths.addAll(getBundleClassPath("jakarta.commons.logging"));
-			paths.addAll(getBundleClassPath("org.objectweb.asm"));
-		}
-
-		try {
-			// configured classpath
-			IClasspathEntry[] classpath = project.getResolvedClasspath(true);
-			// build output, relative to project
-			IPath location = getProjectLocation(project.getProject());
-			IPath outputPath = location.append(project.getOutputLocation()
-					.removeFirstSegments(1));
-			for (int i = 0; i < classpath.length; i++) {
-				IClasspathEntry path = classpath[i];
-				if (path.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
-					File file = path.getPath().toFile();
-					if (file.exists()) {
-						URL url = path.getPath().toFile().toURL();
-						paths.add(url);
-					}
-					else {
-						IPath relPath = path.getPath().removeFirstSegments(1);
-						URL url = new URL("file:" + location + File.separator
-								+ relPath.toOSString());
-						paths.add(url);
-					}
-				}
-			}
-			// add all depending java projects
-			for (IJavaProject p : getAllDependingJavaProjects(project)) {
-				paths.addAll(getClassPathURLs(p, true));
-			}
-			paths.add(outputPath.toFile().toURL());
-		}
-		catch (Exception e) {
-			// ignore
-		}
-		return paths;
-	}
-
-	public static List<IJavaProject> getAllDependingJavaProjects(
-			IJavaProject project) {
-		List<IJavaProject> javaProjects = new ArrayList<IJavaProject>();
-		IJavaModel model = JavaCore.create(ResourcesPlugin.getWorkspace()
-				.getRoot());
-		if (model != null) {
-			try {
-				String[] names = project.getRequiredProjectNames();
-				IJavaProject[] projects = model.getJavaProjects();
-				for (int index = 0; index < projects.length; index++) {
-					for (int offset = 0; offset < names.length; offset++) {
-						String name = projects[index].getProject().getName();
-						if (name.equals(names[offset])) {
-							javaProjects.add(projects[index]);
-						}
-					}
-				}
-			}
-			catch (JavaModelException exception) {
-			}
-		}
-		return javaProjects;
-	}
-
 	public static IPath getProjectLocation(IProject project) {
 		return (project.getRawLocation() != null ? project.getRawLocation()
 				: project.getLocation());
-	}
-
-	public static String getClassLoaderHierachy(Class clazz) {
-		ClassLoader cls = clazz.getClassLoader();
-		StringBuffer buf = new StringBuffer(cls.getClass().getName());
-		while (cls.getParent() != null) {
-			cls = cls.getParent();
-			buf.append(" -> ");
-			buf.append(cls.getClass().getName());
-		}
-		return buf.toString();
-	}
-
-	public static String getClassVersion(Class clazz) {
-		String version = "unkown";
-		if (clazz.getPackage().getImplementationVersion() != null) {
-			version = clazz.getPackage().getImplementationVersion();
-		}
-		return version;
-	}
-
-	public static String getClassLocation(Class clazz) {
-		Assert.notNull(clazz);
-		String resourceName = ClassUtils.getClassFileName(clazz);
-		String location = null;
-		try {
-			URL url = clazz.getResource(resourceName);
-			if (url != null) {
-				URL nativeUrl = FileLocator.resolve(url);
-				if (nativeUrl != null) {
-					location = nativeUrl.getFile();
-				}
-			}
-		}
-		catch (IOException e) {
-		}
-
-		if (location != null) {
-			// remove path behind jar file
-			int ix = location.lastIndexOf('!');
-			location = location.substring(0, ix);
-		}
-
-		return location;
-	}
-	
-	public static boolean isTypeAjdtElement(IType type) {
-		if (IS_AJDT_PRESENT) {
-			return SpringCoreAjdtUtils.isTypeAjdtElement(type);
-		}
-		return false;
-	}
-
-	public static IType getJavaType(IProject project, String className) {
-		IJavaProject javaProject = SpringCoreUtils.getJavaProject(project);
-		if (IS_AJDT_PRESENT && javaProject != null && className != null) {
-
-			try {
-				IType type = null;
-				// First look for the type in the project
-				if (isAjdtProject(project)) {
-					type = SpringCoreAjdtUtils.getAjdtType(project, className);
-				}
-
-				if (type != null) {
-					return type;
-				}
-
-				// Then look for the type in the referenced Java projects
-				for (IProject refProject : project.getReferencedProjects()) {
-					if (isAjdtProject(refProject)) {
-						type = SpringCoreAjdtUtils.getAjdtType(project,
-								className);
-						if (type != null) {
-							return type;
-						}
-					}
-				}
-			}
-			catch (CoreException e) {
-				SpringCore
-						.log("Error getting Java type '" + className + "'", e);
-			}
-		}
-		return null;
-	}
-
-	public static boolean isAjdtPresent() {
-		try {
-			Class.forName(AJDT_CLASS);
-			return true;
-		}
-		catch (ClassNotFoundException e) {
-			return false;
-		}
 	}
 }

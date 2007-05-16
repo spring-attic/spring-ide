@@ -26,7 +26,7 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
-import org.springframework.util.StringUtils;
+import org.springframework.ide.eclipse.core.java.ClassUtils;
 
 /**
  * Helper class for {@link AopReferenceModelBuilder} and
@@ -39,15 +39,11 @@ public class AopReferenceModelBuilderUtils {
 
 	private static final String AJC_MAGIC = "ajc$";
 
-	/** The ".class" file suffix */
-	private static final String CLASS_FILE_SUFFIX = ".class";
-
 	public static boolean validateAspect(String className) throws Throwable {
 		ClassLoader classLoader = Thread.currentThread()
 				.getContextClassLoader();
-		InputStream is = classLoader
-				.getResourceAsStream(AopReferenceModelBuilderUtils
-						.getClassFileName(className));
+		InputStream is = classLoader.getResourceAsStream(ClassUtils
+				.getClassFileName(className));
 
 		// check if class exists on class path
 		if (is == null) {
@@ -89,9 +85,8 @@ public class AopReferenceModelBuilderUtils {
 			// check if super class is Aspect as well and abstract
 			if (v.getClassInfo().getSuperType() != null) {
 				reader = new ClassReader(classLoader
-						.getResourceAsStream(AopReferenceModelBuilderUtils
-								.getClassFileName(v.getClassInfo()
-										.getSuperType())));
+						.getResourceAsStream(ClassUtils.getClassFileName(v
+								.getClassInfo().getSuperType())));
 				AspectAnnotationVisitor sv = new AspectAnnotationVisitor();
 				reader.accept(sv, false);
 
@@ -108,8 +103,8 @@ public class AopReferenceModelBuilderUtils {
 			throws InstantiationException, IllegalAccessException,
 			InvocationTargetException, ClassNotFoundException,
 			NoSuchMethodException {
-		Class<?> expressionPointcutClass = loadClass(AspectJExpressionPointcut.class
-				.getName());
+		Class<?> expressionPointcutClass = ClassUtils
+				.loadClass(AspectJExpressionPointcut.class.getName());
 		Object pc = expressionPointcutClass.newInstance();
 		for (Method m : expressionPointcutClass.getMethods()) {
 			if (m.getName().equals("setExpression")) {
@@ -118,15 +113,9 @@ public class AopReferenceModelBuilderUtils {
 		}
 		Method setDeclarationScopeMethod = expressionPointcutClass.getMethod(
 				"setPointcutDeclarationScope", Class.class);
-		setDeclarationScopeMethod.invoke(pc, loadClass(info
+		setDeclarationScopeMethod.invoke(pc, ClassUtils.loadClass(info
 				.getAspectClassName()));
 		return pc;
-	}
-
-	public static Class<?> loadClass(String className)
-			throws ClassNotFoundException {
-		ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		return loader.loadClass(className);
 	}
 
 	public static Class<?> getAspectJAdviceClass(IAspectDefinition info)
@@ -188,25 +177,13 @@ public class AopReferenceModelBuilderUtils {
 				setArgumentNamesFromStringArrayMethod.invoke(aspectJAdvice,
 						new Object[] { info.getArgNames() });
 			}
-			
-			Method getPointuctMethod = aspectJAdviceClass
-					.getMethod("getPointcut", (Class[]) null);
-			return getPointuctMethod.invoke(aspectJAdvice,
-					(Object[]) null);
+
+			Method getPointuctMethod = aspectJAdviceClass.getMethod(
+					"getPointcut", (Class[]) null);
+			return getPointuctMethod.invoke(aspectJAdvice, (Object[]) null);
 		}
 		catch (InvocationTargetException e) {
 			throw e.getCause();
 		}
-	}
-
-	/**
-	 * Determine the name of the class file, relative to the containing package:
-	 * e.g. "String.class"
-	 * @param clazz the class
-	 * @return the file name of the ".class" file
-	 */
-	public static String getClassFileName(String className) {
-		className = StringUtils.replace(className, ".", "/");
-		return className + CLASS_FILE_SUFFIX;
 	}
 }

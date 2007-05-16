@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.aop.core.util;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -38,14 +37,12 @@ import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.builder.AopReferenceModelBuilderUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
-import org.springframework.ide.eclipse.beans.core.internal.Introspector;
-import org.springframework.ide.eclipse.beans.core.internal.Introspector.Public;
-import org.springframework.ide.eclipse.beans.core.internal.Introspector.Static;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -118,70 +115,6 @@ public class AopReferenceModelUtils {
 		return buf.toString();
 	}
 
-	public static IMethod getMethod(IType type, String methodName,
-			Class[] parameterTypes) {
-		String[] parameterTypesAsString = getParameterTypesAsStringArray(parameterTypes);
-		return getMethod(type, methodName, parameterTypesAsString);
-	}
-
-	private static String[] getParameterTypesAsStringArray(
-			Class[] parameterTypes) {
-		String[] parameterTypesAsString = new String[parameterTypes.length];
-		for (int i = 0; i < parameterTypes.length; i++) {
-			parameterTypesAsString[i] = parameterTypes[i].getName();
-		}
-		return parameterTypesAsString;
-	}
-
-	private static String[] getParameterTypesAsStringArray(IMethod method) {
-		String[] parameterTypesAsString = new String[method.getParameterTypes().length];
-		for (int i = 0; i < method.getParameterTypes().length; i++) {
-			parameterTypesAsString[i] = resolveClassName(method
-					.getParameterTypes()[i], method.getDeclaringType());
-		}
-		return parameterTypesAsString;
-	}
-
-	public static final String resolveClassName(String className, IType type) {
-		try {
-			className = Signature.toString(className).replace('$', '.');
-			String[][] fullInter = type.resolveType(className);
-			if (fullInter != null && fullInter.length > 0) {
-				return fullInter[0][0] + "." + fullInter[0][1];
-			}
-		}
-		catch (JavaModelException e) {
-		}
-
-		return className;
-	}
-
-	public static IMethod getMethod(IType type, String methodName,
-			String[] parameterTypes) {
-		int index = methodName.indexOf('(');
-		if (index >= 0) {
-			methodName = methodName.substring(0, index);
-		}
-		try {
-			Set<IMethod> methods = Introspector.getAllMethods(type);
-			for (IMethod method : methods) {
-				if (method.getElementName().equals(methodName)
-						&& method.getParameterTypes().length == parameterTypes.length) {
-					String[] methodParameterTypes = getParameterTypesAsStringArray(method);
-					if (Arrays.deepEquals(parameterTypes, methodParameterTypes)) {
-						return method;
-					}
-				}
-			}
-
-			return Introspector.findMethod(type, methodName,
-					parameterTypes.length, Public.YES, Static.DONT_CARE);
-		}
-		catch (JavaModelException e) {
-		}
-		return null;
-	}
-
 	public static Set<IFile> getAffectedFilesFromBeansProject(IProject file) {
 		Set<IFile> resourcesToBuild = new HashSet<IFile>();
 		IBeansProject bp = BeansCorePlugin.getModel().getProject(
@@ -238,7 +171,7 @@ public class AopReferenceModelUtils {
 		}
 		return files;
 	}
-
+	
 	public static IJavaProject getJavaProject(IBeansConfig config) {
 		if (config != null) {
 			IJavaProject project = JavaCore.create(config.getElementResource()
@@ -248,91 +181,6 @@ public class AopReferenceModelUtils {
 		else {
 			return null;
 		}
-	}
-
-	public static IJavaProject getJavaProject(IResource config) {
-		IJavaProject project = JavaCore.create(config.getProject());
-		return project;
-	}
-
-	public static IJavaProject getJavaProject(IProject project) {
-		IJavaProject jp = JavaCore.create(project);
-		return jp;
-	}
-
-	public static int getLineNumber(IJavaElement element) {
-
-		if (element != null && element instanceof IMethod) {
-			try {
-				IMethod method = (IMethod) element;
-				int lines = 0;
-				String targetsource;
-				if (method.getDeclaringType() != null
-						&& method.getDeclaringType().getCompilationUnit() != null) {
-					targetsource = method.getDeclaringType()
-							.getCompilationUnit().getSource();
-					String sourceuptomethod = targetsource.substring(0, method
-							.getNameRange().getOffset());
-
-					char[] chars = new char[sourceuptomethod.length()];
-					sourceuptomethod.getChars(0, sourceuptomethod.length(),
-							chars, 0);
-					for (char element0 : chars) {
-						if (element0 == '\n') {
-							lines++;
-						}
-					}
-					return new Integer(lines + 1);
-				}
-			}
-			catch (JavaModelException e) {
-			}
-		}
-		else if (element != null && element instanceof IType) {
-			try {
-				IType type = (IType) element;
-				int lines = 0;
-				String targetsource;
-				targetsource = type.getCompilationUnit().getSource();
-				String sourceuptomethod = targetsource.substring(0, type
-						.getNameRange().getOffset());
-
-				char[] chars = new char[sourceuptomethod.length()];
-				sourceuptomethod.getChars(0, sourceuptomethod.length(), chars,
-						0);
-				for (char element0 : chars) {
-					if (element0 == '\n') {
-						lines++;
-					}
-				}
-				return new Integer(lines + 1);
-			}
-			catch (JavaModelException e) {
-			}
-		}
-		else if (element != null && element instanceof IField) {
-			try {
-				IField type = (IField) element;
-				int lines = 0;
-				String targetsource;
-				targetsource = type.getCompilationUnit().getSource();
-				String sourceuptomethod = targetsource.substring(0, type
-						.getNameRange().getOffset());
-
-				char[] chars = new char[sourceuptomethod.length()];
-				sourceuptomethod.getChars(0, sourceuptomethod.length(), chars,
-						0);
-				for (char element0 : chars) {
-					if (element0 == '\n') {
-						lines++;
-					}
-				}
-				return new Integer(lines + 1);
-			}
-			catch (JavaModelException e) {
-			}
-		}
-		return new Integer(-1);
 	}
 
 	public static List<IMethod> getMatchesForAnnotationAspectDefinition(
@@ -365,7 +213,7 @@ public class AopReferenceModelUtils {
 			if (checkMethod(targetClass, method, info.isProxyTargetClass())
 					&& (Boolean) matchesMethod.invoke(methodMatcher, method,
 							targetClass)) {
-				IMethod jdtMethod = AopReferenceModelUtils.getMethod(
+				IMethod jdtMethod = JdtUtils.getMethod(
 						jdtTargetClass, method.getName(), method
 								.getParameterTypes());
 				if (jdtMethod != null) {
@@ -403,7 +251,7 @@ public class AopReferenceModelUtils {
 				boolean matches = (Boolean) matchesMethod.invoke(
 						aspectJExpressionPointcut, m, targetClass);
 				if (matches) {
-					IMethod jdtMethod = AopReferenceModelUtils.getMethod(
+					IMethod jdtMethod = JdtUtils.getMethod(
 							jdtTargetType, m.getName(), m.getParameterTypes());
 					if (jdtMethod != null) {
 						matchingMethod.add(jdtMethod);

@@ -12,6 +12,7 @@ Export-Package: org.springframework.ide.eclipse.core,
  org.springframework.ide.eclipse.core.internal.project,
  org.springframework.ide.eclipse.core.io,
  org.springframework.ide.eclipse.core.io.xml,
+ org.springframework.ide.eclipse.core.java,
  org.springframework.ide.eclipse.core.model,
  org.springframework.ide.eclipse.core.model.xml,
  org.springframework.ide.eclipse.core.project

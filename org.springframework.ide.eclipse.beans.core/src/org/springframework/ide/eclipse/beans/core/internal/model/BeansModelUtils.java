@@ -50,7 +50,6 @@ import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.BeansTags;
 import org.springframework.ide.eclipse.beans.core.BeansTags.Tag;
 import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker.ErrorCode;
-import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConnection.BeanType;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
@@ -67,9 +66,10 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansTypedString;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.io.xml.LineNumberPreservingDOMParser;
+import org.springframework.ide.eclipse.core.java.Introspector;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
@@ -761,7 +761,7 @@ public final class BeansModelUtils {
 	 * the project is not accessible
 	 */
 	public static IType getJavaType(IProject project, String className) {
-		IJavaProject javaProject = SpringCoreUtils.getJavaProject(project);
+		IJavaProject javaProject = JdtUtils.getJavaProject(project);
 		if (javaProject != null && className != null) {
 
 			// For inner classes replace '$' by '.'
@@ -779,7 +779,7 @@ public final class BeansModelUtils {
 
 				// Then look for the type in the referenced Java projects
 				for (IProject refProject : project.getReferencedProjects()) {
-					IJavaProject refJavaProject = SpringCoreUtils
+					IJavaProject refJavaProject = JdtUtils
 							.getJavaProject(refProject);
 					if (refJavaProject != null) {
 						type = refJavaProject.findType(className);
@@ -790,7 +790,7 @@ public final class BeansModelUtils {
 				}
 
 				// fall back and try to locate the class using AJDT
-				return SpringCoreUtils.getJavaType(project, className);
+				return JdtUtils.getJavaType(project, className);
 			}
 			catch (CoreException e) {
 				BeansCorePlugin.log("Error getting Java type '" + className

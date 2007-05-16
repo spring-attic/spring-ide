@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelContentProvider;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
@@ -78,7 +79,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 			if (BeansUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
 					.equals(providerID)) {
 				refreshViewerForElement(project);
-				refreshViewerForElement(SpringCoreUtils
+				refreshViewerForElement(JdtUtils
 						.getJavaProject(project));
 			} else if (BeansUIPlugin.SPRING_EXPLORER_CONTENT_PROVIDER_ID
 						.equals(providerID)) {

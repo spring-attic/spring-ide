@@ -24,7 +24,7 @@ import org.springframework.ide.eclipse.aop.core.model.IAnnotationAopDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.core.SpringCore;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 @SuppressWarnings("restriction")
 public class AopReferenceModelMarkerUtils {
@@ -108,8 +108,8 @@ public class AopReferenceModelMarkerUtils {
 			createProblemMarker(reference.getTarget().getResource(),
 					"aspect declarations <"
 							+ reference.getDefinition().getAspectName() + ">",
-					1, AopReferenceModelUtils.getLineNumber(reference
-							.getTarget()), markerId, sourceResource);
+					1, JdtUtils.getLineNumber(reference.getTarget()), markerId,
+					sourceResource);
 			if (AopReferenceModelUtils.getBeanFromElementId(reference
 					.getTargetBeanId()) != null) {
 				createProblemMarker(AopReferenceModelUtils
@@ -123,15 +123,13 @@ public class AopReferenceModelMarkerUtils {
 			}
 		}
 		else {
-			createProblemMarker(
-					reference.getTarget().getResource(),
+			createProblemMarker(reference.getTarget().getResource(),
 					"advised by "
 							+ AopReferenceModelUtils
 									.getJavaElementLinkName(reference
-											.getSource()),
-					1,
-					AopReferenceModelUtils.getLineNumber(reference.getTarget()),
-					markerId, sourceResource);
+											.getSource()), 1, JdtUtils
+							.getLineNumber(reference.getTarget()), markerId,
+					sourceResource);
 			if (AopReferenceModelUtils.getBeanFromElementId(reference
 					.getTargetBeanId()) != null) {
 				createProblemMarker(AopReferenceModelUtils
@@ -158,9 +156,9 @@ public class AopReferenceModelMarkerUtils {
 						"declared on "
 								+ AopReferenceModelUtils
 										.getJavaElementLinkName(reference
-												.getTarget()), 1,
-						AopReferenceModelUtils.getLineNumber(reference
-								.getSource()), markerId, sourceResource);
+												.getTarget()), 1, JdtUtils
+								.getLineNumber(reference.getSource()),
+						markerId, sourceResource);
 			}
 			else {
 				createProblemMarker(sourceResource, "declared on "
@@ -176,9 +174,9 @@ public class AopReferenceModelMarkerUtils {
 						"advises "
 								+ AopReferenceModelUtils
 										.getJavaElementLinkName(reference
-												.getTarget()), 1,
-						AopReferenceModelUtils.getLineNumber(reference
-								.getSource()), markerId, sourceResource);
+												.getTarget()), 1, JdtUtils
+								.getLineNumber(reference.getSource()),
+						markerId, sourceResource);
 			}
 			createProblemMarker(reference.getDefinition().getResource(),
 					"advises "
@@ -217,10 +215,9 @@ public class AopReferenceModelMarkerUtils {
 		}
 
 		// delete markers on depending projects
-		IJavaProject jp = AopReferenceModelUtils.getJavaProject(resource);
+		IJavaProject jp = JdtUtils.getJavaProject(resource);
 		if (jp != null) {
-			List<IJavaProject> jps = SpringCoreUtils
-					.getAllDependingJavaProjects(jp);
+			List<IJavaProject> jps = JdtUtils.getAllDependingJavaProjects(jp);
 			for (IJavaProject p : jps) {
 				try {
 					IProject project = p.getProject();

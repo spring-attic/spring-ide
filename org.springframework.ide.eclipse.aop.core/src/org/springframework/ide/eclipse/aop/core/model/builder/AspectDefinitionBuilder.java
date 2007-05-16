@@ -35,6 +35,7 @@ import org.springframework.ide.eclipse.aop.core.model.internal.BeanAspectDefinit
 import org.springframework.ide.eclipse.aop.core.model.internal.BeanIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.model.internal.JavaAspectDefinition;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
+import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -103,7 +104,7 @@ public class AspectDefinitionBuilder {
 		ClassLoader classLoader = Thread.currentThread()
 				.getContextClassLoader();
 		ClassReader reader = new ClassReader(classLoader
-				.getResourceAsStream(AopReferenceModelBuilderUtils
+				.getResourceAsStream(ClassUtils
 						.getClassFileName(className)));
 		AdviceAnnotationVisitor v = new AdviceAnnotationVisitor(
 				(IDOMNode) bean, id, className);

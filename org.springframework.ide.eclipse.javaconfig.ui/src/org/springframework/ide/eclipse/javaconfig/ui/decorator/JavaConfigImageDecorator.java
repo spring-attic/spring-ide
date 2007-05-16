@@ -19,9 +19,9 @@ import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceAopTargetBea
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.core.model.DefaultModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
+import org.springframework.ide.eclipse.javaconfig.core.model.JdtModelSourceLocation;
 import org.springframework.ide.eclipse.javaconfig.ui.Activator;
 import org.springframework.ide.eclipse.javaconfig.ui.util.JavaConfigUIImages;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
@@ -68,12 +68,8 @@ public class JavaConfigImageDecorator extends LabelProvider implements
 	}
 
 	private void calculateDecorationForBean(IDecoration decoration, IBean bean) {
-		// the check isn't very safe, but for now only the JavaConfig support
-		// uses the DefaultModelSourceLocation and therefore it is enough to
-		// check if the source location is of that type
-		// TODO revisit
 		if (bean.getElementSourceLocation() != null
-				&& bean.getElementSourceLocation() instanceof DefaultModelSourceLocation) {
+				&& bean.getElementSourceLocation() instanceof JdtModelSourceLocation) {
 			decoration.addOverlay(JavaConfigUIImages.DESC_OVR_ANNOTATION,
 					IDecoration.BOTTOM_LEFT);
 		}

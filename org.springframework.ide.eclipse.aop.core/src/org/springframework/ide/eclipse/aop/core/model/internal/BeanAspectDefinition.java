@@ -19,7 +19,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
-import org.springframework.ide.eclipse.aop.core.model.builder.AopReferenceModelBuilderUtils;
+import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.util.StringUtils;
 
 @SuppressWarnings("restriction")
@@ -48,7 +48,7 @@ public class BeanAspectDefinition implements IAspectDefinition {
 	protected String throwing;
 
 	protected String pointcutExpressionString = null;
-	
+
 	protected boolean isProxyTargetClass = false;
 
 	protected IAopReference.ADVICE_TYPES type;
@@ -105,10 +105,10 @@ public class BeanAspectDefinition implements IAspectDefinition {
 		return node;
 	}
 
-	/*public Object getAspectJPointcutExpression() throws Throwable {
-		return AopReferenceModelBuilderUtils
-				.initAspectJExpressionPointcut(this);
-	}*/
+	/*
+	 * public Object getAspectJPointcutExpression() throws Throwable { return
+	 * AopReferenceModelBuilderUtils .initAspectJExpressionPointcut(this); }
+	 */
 
 	public IResource getResource() {
 		return file;
@@ -199,8 +199,7 @@ public class BeanAspectDefinition implements IAspectDefinition {
 
 	public Method getAdviceMethod() {
 		try {
-			Class<?> aspectClass = AopReferenceModelBuilderUtils
-					.loadClass(this.aspectClassName);
+			Class<?> aspectClass = ClassUtils.loadClass(this.aspectClassName);
 			Method method = BeanUtils.resolveSignature(this.adivceMethodName,
 					aspectClass);
 			return method;

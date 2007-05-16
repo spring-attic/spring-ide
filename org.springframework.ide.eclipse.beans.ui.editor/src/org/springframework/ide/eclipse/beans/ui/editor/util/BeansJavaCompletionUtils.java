@@ -39,11 +39,11 @@ import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
-import org.springframework.ide.eclipse.beans.core.internal.Introspector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposal;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposalCollector;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.CompilationUnitHelper;
+import org.springframework.ide.eclipse.core.java.Introspector;
 import org.w3c.dom.Node;
 
 @SuppressWarnings("restriction")

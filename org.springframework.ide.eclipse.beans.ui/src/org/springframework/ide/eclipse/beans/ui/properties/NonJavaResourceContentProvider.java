@@ -31,8 +31,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
  * This content provider is used to display a tree of non-java resources.
@@ -60,7 +60,7 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 		try {
 			if (element instanceof IProject) {
 				IProject project = (IProject) element;
-				if (SpringCoreUtils.isJavaProject(project)) {
+				if (JdtUtils.isJavaProject(project)) {
 					element = JavaCore.create(project);
 				}
 			}
