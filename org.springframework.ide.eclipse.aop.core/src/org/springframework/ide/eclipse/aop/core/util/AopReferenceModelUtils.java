@@ -21,7 +21,6 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -129,9 +128,12 @@ public class AopReferenceModelUtils {
 
 	public static Set<IFile> getAffectedFiles(int kind, IResource resource) {
 		Set<IFile> files = new HashSet<IFile>();
-		if ((kind == IncrementalProjectBuilder.AUTO_BUILD
-				|| kind == IncrementalProjectBuilder.INCREMENTAL_BUILD)
-				&& resource instanceof IFile
+		
+		// since we moved to the new AbstractProjectBuilder we don't need the
+		// following check.
+		//if ((kind == IncrementalProjectBuilder.AUTO_BUILD
+		//		|| kind == IncrementalProjectBuilder.INCREMENTAL_BUILD)
+		if (resource instanceof IFile
 				&& resource.getName().endsWith(JAVA_FILE_EXTENSION)) {
 			Set<IBeansProject> projects = BeansCorePlugin.getModel()
 					.getProjects();
