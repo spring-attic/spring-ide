@@ -115,15 +115,15 @@ public class AopReferenceModelUtils {
 	}
 
 	public static Set<IFile> getAffectedFilesFromBeansProject(IProject file) {
-		Set<IFile> resourcesToBuild = new HashSet<IFile>();
+		Set<IFile> affectedFiles = new HashSet<IFile>();
 		IBeansProject bp = BeansCorePlugin.getModel().getProject(
 				file.getProject());
 		if (bp != null && bp.getConfigs() != null && bp.getConfigs().size() > 0) {
 			for (IBeansConfig config : bp.getConfigs()) {
-				resourcesToBuild.add((IFile) config.getElementResource());
+				affectedFiles.add((IFile) config.getElementResource());
 			}
 		}
-		return resourcesToBuild;
+		return affectedFiles;
 	}
 
 	public static Set<IFile> getAffectedFiles(int kind, IResource resource) {
