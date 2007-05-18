@@ -32,8 +32,6 @@ public class OpenBeansGraphAction extends AbstractBeansEditorPartAction {
 	public static final String OPEN_FILE = "Open_beans_graph";
 
 	/**
-	 * 
-	 * 
 	 * @param editor
 	 */
 	public OpenBeansGraphAction(IEditorPart editor) {
@@ -57,7 +55,8 @@ public class OpenBeansGraphAction extends AbstractBeansEditorPartAction {
 	public void run() {
 		IBean bean = getBean();
 		if (bean != null) {
-			GraphEditorInput graphEditorInput = new GraphEditorInput(bean);
+			GraphEditorInput graphEditorInput = new GraphEditorInput(bean
+					.getElementID());
 			SpringUIUtils.openInEditor(graphEditorInput, GraphEditor.EDITOR_ID);
 		}
 	}
