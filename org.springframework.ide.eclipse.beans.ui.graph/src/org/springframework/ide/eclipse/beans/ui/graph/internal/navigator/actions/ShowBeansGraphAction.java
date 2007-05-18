@@ -80,9 +80,9 @@ public class ShowBeansGraphAction extends AbstractNavigatorAction {
 		IEditorInput input;
 		if (element instanceof IBeansConfig
 				|| element instanceof IBeansConfigSet) {
-			input = new GraphEditorInput(element);
+			input = new GraphEditorInput(element.getElementID());
 		} else {
-			input = new GraphEditorInput(element, context);
+			input = new GraphEditorInput(element.getElementID(), context.getElementID());
 		}
 		SpringUIUtils.openInEditor(input, GraphEditor.EDITOR_ID);
 	}

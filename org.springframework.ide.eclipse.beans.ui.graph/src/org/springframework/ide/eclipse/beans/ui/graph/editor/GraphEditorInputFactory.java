@@ -49,17 +49,17 @@ public class GraphEditorInputFactory implements IElementFactory {
 	private static final String TAG_CONTEXT = "context";
 
 	public IAdaptable createElement(IMemento memento) {
-		String elementID = memento.getString(TAG_ELEMENT);
-		String contextID = memento.getString(TAG_CONTEXT);
-		if (elementID != null && contextID != null) {
+		String elementId = memento.getString(TAG_ELEMENT);
+		String contextId = memento.getString(TAG_CONTEXT);
+		if (elementId != null && contextId != null) {
 			IBeansModel model = BeansCorePlugin.getModel();
-			IModelElement element = model.getElement(elementID);
+			IModelElement element = model.getElement(elementId);
 			if (element != null) {
-				IModelElement context = model.getElement(contextID);
+				IModelElement context = model.getElement(contextId);
 				if (context != null) {
-					return new GraphEditorInput(element, context);
+					return new GraphEditorInput(elementId, contextId);
 				} else {
-					return new GraphEditorInput(element);
+					return new GraphEditorInput(elementId);
 				}
 			}
 		}
