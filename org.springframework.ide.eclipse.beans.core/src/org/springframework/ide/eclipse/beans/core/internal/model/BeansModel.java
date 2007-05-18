@@ -336,9 +336,14 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 						.getProject());
 				project.reset();
 				notifyListeners(project, Type.CHANGED);
-				scheduleProjectBuildInBackground(project.getProject(), ResourcesPlugin
-						.getWorkspace().getRuleFactory().buildRule(),
-						new Object[] { ResourcesPlugin.FAMILY_MANUAL_BUILD });
+				
+				if (ResourcesPlugin.getWorkspace().isAutoBuilding()) {
+					scheduleProjectBuildInBackground(
+							project.getProject(),
+							ResourcesPlugin.getWorkspace().getRuleFactory()
+									.buildRule(),
+							new Object[] { ResourcesPlugin.FAMILY_MANUAL_BUILD });
+				}
 			}
 		}
 
@@ -423,13 +428,14 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				@Override
 				public IStatus runInWorkspace(IProgressMonitor monitor) {
 					try {
-						project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+						project.build(IncrementalProjectBuilder.FULL_BUILD,
+								monitor);
 						return Status.OK_STATUS;
 					}
 					catch (CoreException e) {
 						return new MultiStatus(BeansCorePlugin.PLUGIN_ID, 1,
-								"Error during build of project [" + project.getName()
-								+ "]", e);
+								"Error during build of project ["
+										+ project.getName() + "]", e);
 					}
 				}
 			};
