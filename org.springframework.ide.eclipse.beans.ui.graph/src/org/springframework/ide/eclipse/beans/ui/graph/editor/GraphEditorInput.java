@@ -82,7 +82,10 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 	public GraphEditorInput(String elementId, String contextId) {
 		this.elementId = elementId;
 		this.contextId = contextId;
-		
+		init();
+	}
+
+	protected void init() {
 		IModelElement element = BeansCorePlugin.getModel().getElement(elementId);
 		IModelElement context = BeansCorePlugin.getModel().getElement(contextId);
 		
