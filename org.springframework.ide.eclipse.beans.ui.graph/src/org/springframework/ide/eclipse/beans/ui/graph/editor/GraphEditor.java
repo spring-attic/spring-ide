@@ -78,9 +78,11 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.graph.BeansGraphPlugin;
 import org.springframework.ide.eclipse.beans.ui.graph.actions.GraphContextMenuProvider;
 import org.springframework.ide.eclipse.beans.ui.graph.actions.OpenConfigFile;
@@ -131,21 +133,33 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	 */
 	private class GraphEditorInputModelChangeListener implements
 			IModelChangeListener {
-		
+
 		public void elementChanged(ModelChangeEvent event) {
 			final GraphEditorInput beansInput = (GraphEditorInput) getEditorInput();
 			boolean refresh = false;
 
 			IModelElement changedElement = event.getElement();
+			IModelElement originalInputElement = beansInput.getElement();
+			IModelElement originalContextElement = beansInput.getElement();
+			
+			// check if changes appeared in a spring config file
 			if (changedElement instanceof IBeansConfig) {
 				IResource changedResource = ((IBeansConfig) changedElement)
 						.getElementResource();
-				IModelElement originalInputElement = beansInput.getElement();
-				IModelElement originalContextElement = beansInput.getElement();
 				refresh = checkForRefresh(changedResource, originalInputElement)
 						|| checkForRefresh(changedResource,
 								originalContextElement);
 			}
+			// changes occured in the project configuration; added config file
+			// to project or beans config set
+			else if (changedElement instanceof IBeansProject) {
+				IBeansProject beansProject = (IBeansProject) changedElement;
+				refresh = (BeansModelUtils.getChildForElement(beansProject,
+						originalInputElement) != null || BeansModelUtils
+						.getChildForElement(beansProject,
+								originalContextElement) != null);
+			}
+
 			if (refresh) {
 				Display display = getSite().getShell().getDisplay();
 				display.asyncExec(new Runnable() {
@@ -161,7 +175,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 		private boolean checkForRefresh(IResource changedResource,
 				IModelElement originalInputElement) {
 			boolean refresh = false;
-			
+
 			if (originalInputElement instanceof IBean) {
 				IResource originalResource = ((IBean) originalInputElement)
 						.getElementResource();
