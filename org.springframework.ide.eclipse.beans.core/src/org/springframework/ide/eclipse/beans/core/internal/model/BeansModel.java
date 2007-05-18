@@ -22,8 +22,16 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.BeansResourceChangeListener;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.IBeansResourceChangeEvents;
@@ -46,7 +54,6 @@ import org.springframework.util.ObjectUtils;
  * <p>
  * The single instance of {@link IBeansModel} is available from the static
  * method {@link BeansCorePlugin#getModel()}.
- * 
  * @author Torsten Juergeleit
  */
 public class BeansModel extends AbstractModel implements IBeansModel {
@@ -71,13 +78,11 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 
 	@Override
 	public IModelElement[] getElementChildren() {
-		return getProjects().toArray(
-				new IModelElement[getProjects().size()]);
+		return getProjects().toArray(new IModelElement[getProjects().size()]);
 	}
 
 	@Override
-	public void accept(IModelElementVisitor visitor,
-			IProgressMonitor monitor) {
+	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 		// Ask this model's projects
 		synchronized (projects) {
 			for (IBeansProject project : projects.values()) {
@@ -219,7 +224,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	public String toString() {
 		StringBuffer text = new StringBuffer("Beans model:\n");
 		synchronized (projects) {
-			for (IBeansProject project : projects.values()) { 
+			for (IBeansProject project : projects.values()) {
 				text.append(" Configs of project '");
 				text.append(project.getElementName());
 				text.append("':\n");
@@ -227,7 +232,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 					text.append("  ");
 					text.append(config);
 					text.append('\n');
-					for (IBean bean :config.getBeans()) {
+					for (IBean bean : config.getBeans()) {
 						text.append("   ");
 						text.append(bean);
 						text.append('\n');
@@ -236,7 +241,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				text.append(" Config sets of project '");
 				text.append(project.getElementName());
 				text.append("':\n");
-				for (IBeansConfigSet configSet :project.getConfigSets()) {
+				for (IBeansConfigSet configSet : project.getConfigSets()) {
 					text.append("  ");
 					text.append(configSet);
 					text.append('\n');
@@ -305,8 +310,8 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 
 		public void projectClosed(IProject project, int eventType) {
 			if (DEBUG) {
-				System.out.println("Project '" + project.getName()
-						+ "' closed");
+				System.out
+						.println("Project '" + project.getName() + "' closed");
 			}
 			IBeansProject proj = projects.remove(project);
 			notifyListeners(proj, Type.REMOVED);
@@ -331,6 +336,9 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 						.getProject());
 				project.reset();
 				notifyListeners(project, Type.CHANGED);
+				scheduleProjectBuildInBackground(project.getProject(), ResourcesPlugin
+						.getWorkspace().getRuleFactory().buildRule(),
+						new Object[] { ResourcesPlugin.FAMILY_MANUAL_BUILD });
 			}
 		}
 
@@ -351,8 +359,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		}
 
 		public void configChanged(IFile file, int eventType) {
-			IBeansProject project = projects.get(file
-					.getProject());
+			IBeansProject project = projects.get(file.getProject());
 			BeansConfig config = (BeansConfig) project.getConfig(file);
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
@@ -360,7 +367,8 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 							+ "' changed");
 				}
 				notifyListeners(config, Type.CHANGED);
-			} else {
+			}
+			else {
 				// Reset corresponding BeansConfig BEFORE the project builder
 				// starts validating this BeansConfig
 				config.reload();
@@ -393,6 +401,43 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				}
 				notifyListeners(config, Type.REMOVED);
 			}
+		}
+
+		private void scheduleProjectBuildInBackground(final IProject project,
+				ISchedulingRule rule, final Object[] jobFamilies) {
+			Job job = new WorkspaceJob("Build workspace") {
+
+				@Override
+				public boolean belongsTo(Object family) {
+					if (jobFamilies == null || family == null) {
+						return false;
+					}
+					for (int i = 0; i < jobFamilies.length; i++) {
+						if (family.equals(jobFamilies[i])) {
+							return true;
+						}
+					}
+					return false;
+				}
+
+				@Override
+				public IStatus runInWorkspace(IProgressMonitor monitor) {
+					try {
+						project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+						return Status.OK_STATUS;
+					}
+					catch (CoreException e) {
+						return new MultiStatus(BeansCorePlugin.PLUGIN_ID, 1,
+								"Error during build of project [" + project.getName()
+								+ "]", e);
+					}
+				}
+			};
+			if (rule != null) {
+				job.setRule(rule);
+			}
+			job.setUser(true);
+			job.schedule();
 		}
 	}
 }

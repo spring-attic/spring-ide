@@ -13,16 +13,6 @@ package org.springframework.ide.eclipse.beans.ui.properties;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.WorkspaceJob;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -144,14 +134,6 @@ public class ProjectPropertyPage extends PropertyPage {
 			BeansModelLabelDecorator.update();
 		}
 
-		// now rebuild the project
-		if (configFilesTab.hasUserMadeChanges()
-				|| configSetsTab.hasUserMadeChanges()) {
-			runInBackground(project, ResourcesPlugin.getWorkspace()
-					.getRuleFactory().buildRule(),
-					new Object[] { ResourcesPlugin.FAMILY_MANUAL_BUILD });
-		}
-
 		return super.performOk();
 	}
 
@@ -164,52 +146,5 @@ public class ProjectPropertyPage extends PropertyPage {
 			configSetsTab.dispose();
 		}
 		super.dispose();
-	}
-
-	private void runInBackground(final IProject project, ISchedulingRule rule,
-			final Object[] jobFamilies) {
-		Job job = new WorkspaceJob("Build project") {
-
-			/*
-			 * (non-Javadoc)
-			 * @see org.eclipse.core.runtime.jobs.Job#belongsTo(java.lang.Object)
-			 */
-			public boolean belongsTo(Object family) {
-				if (jobFamilies == null || family == null) {
-					return false;
-				}
-				for (int i = 0; i < jobFamilies.length; i++) {
-					if (family.equals(jobFamilies[i])) {
-						return true;
-					}
-				}
-				return false;
-			}
-
-			/*
-			 * (non-Javadoc)
-			 * @see org.eclipse.core.resources.WorkspaceJob#runInWorkspace(org.eclipse.core.runtime.IProgressMonitor)
-			 */
-			public IStatus runInWorkspace(IProgressMonitor monitor) {
-				return execute(project, monitor);
-			}
-		};
-		if (rule != null) {
-			job.setRule(rule);
-		}
-		job.setUser(true);
-		job.schedule();
-	}
-
-	private IStatus execute(IProject project, IProgressMonitor monitor) {
-		try {
-			project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
-			return Status.OK_STATUS;
-		}
-		catch (CoreException e) {
-			return new MultiStatus(BeansUIPlugin.PLUGIN_ID, 1,
-					"Error during build of project [" + project.getName() + "]",
-					e);
-		}
 	}
 }
