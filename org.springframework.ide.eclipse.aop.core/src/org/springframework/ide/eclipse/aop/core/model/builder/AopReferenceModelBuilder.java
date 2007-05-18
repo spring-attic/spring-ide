@@ -412,6 +412,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 									config, info, monitor);
 						}
 					}
+
 				}
 				catch (IOException e) {
 					Activator.log(e);
@@ -435,7 +436,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 					Activator.getFormattedMessage(
 							"AopReferenceModelBuilder.buildPathIncomplete", 
 							t.getMessage()), 
-					IMarker.SEVERITY_ERROR, info.getAspectLineNumber(),
+					IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
 					AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
 		}
 		else if (t instanceof IllegalArgumentException) {

@@ -51,21 +51,19 @@ import org.springframework.util.StringUtils;
  * @since 2.0
  */
 public class JdtUtils {
-	
-	private static final String AJDT_NATURE = 
-		"org.eclipse.ajdt.ui.ajnature";
 
-	private static final String AJDT_CLASS = 
-		"org.eclipse.ajdt.core.javaelements.AJCompilationUnitManager";
+	private static final String AJDT_NATURE = "org.eclipse.ajdt.ui.ajnature";
+
+	private static final String AJDT_CLASS = "org.eclipse.ajdt.core.javaelements.AJCompilationUnitManager";
 
 	private static final boolean IS_AJDT_PRESENT;
 
 	static {
-		// this is not working if AJDT will be installed 
+		// this is not working if AJDT will be installed
 		// without restarting Eclipse
 		IS_AJDT_PRESENT = isAjdtPresent();
 	}
-	
+
 	public static IJavaProject getJavaProject(IResource config) {
 		IJavaProject project = JavaCore.create(config.getProject());
 		return project;
@@ -265,7 +263,7 @@ public class JdtUtils {
 	public static List<URL> getClassPathURLs(IJavaProject project,
 			boolean useParentClassLoader) {
 		List<URL> paths = new ArrayList<URL>();
-	
+
 		if (!useParentClassLoader) {
 			// add required libraries from osgi bundles
 			paths.addAll(getBundleClassPath("org.springframework"));
@@ -273,14 +271,16 @@ public class JdtUtils {
 			paths.addAll(getBundleClassPath("jakarta.commons.logging"));
 			paths.addAll(getBundleClassPath("org.objectweb.asm"));
 		}
-	
+
 		try {
 			// configured classpath
 			IClasspathEntry[] classpath = project.getResolvedClasspath(true);
 			// build output, relative to project
-			IPath location = SpringCoreUtils.getProjectLocation(project.getProject());
+			IPath location = SpringCoreUtils.getProjectLocation(project
+					.getProject());
 			IPath outputPath = location.append(project.getOutputLocation()
 					.removeFirstSegments(1));
+
 			for (int i = 0; i < classpath.length; i++) {
 				IClasspathEntry path = classpath[i];
 				if (path.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
@@ -294,6 +294,15 @@ public class JdtUtils {
 						URL url = new URL("file:" + location + File.separator
 								+ relPath.toOSString());
 						paths.add(url);
+					}
+				}
+				// add source output locations for different source folders
+				else if (path.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+					IPath sourceOutputPath = path.getOutputLocation();
+					if (sourceOutputPath != null) {
+						sourceOutputPath = location.append(sourceOutputPath
+								.removeFirstSegments(1));
+						paths.add(sourceOutputPath.toFile().toURL());
 					}
 				}
 			}
@@ -358,23 +367,22 @@ public class JdtUtils {
 	public static IType getJavaType(IProject project, String className) {
 		IJavaProject javaProject = getJavaProject(project);
 		if (IS_AJDT_PRESENT && javaProject != null && className != null) {
-	
+
 			try {
 				IType type = null;
 				// First look for the type in the project
 				if (isAjdtProject(project)) {
 					type = AjdtUtils.getAjdtType(project, className);
 				}
-	
+
 				if (type != null) {
 					return type;
 				}
-	
+
 				// Then look for the type in the referenced Java projects
 				for (IProject refProject : project.getReferencedProjects()) {
 					if (isAjdtProject(refProject)) {
-						type = AjdtUtils.getAjdtType(project,
-								className);
+						type = AjdtUtils.getAjdtType(project, className);
 						if (type != null) {
 							return type;
 						}

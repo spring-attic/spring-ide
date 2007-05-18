@@ -39,6 +39,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -126,8 +127,8 @@ public class AopReferenceModelUtils {
 		return affectedFiles;
 	}
 
-	public static Set<IFile> getAffectedFiles(int kind, IResource resource) {
-		Set<IFile> files = new HashSet<IFile>();
+	public static Set<IResource> getAffectedFiles(int kind, IResource resource) {
+		Set<IResource> files = new HashSet<IResource>();
 		
 		// since we moved to the new AbstractProjectBuilder we don't need the
 		// following check.
@@ -169,7 +170,24 @@ public class AopReferenceModelUtils {
 			}
 		}
 		else if (BeansCoreUtils.isBeansConfig(resource)) {
+			IBeansConfig beansConfig = (IBeansConfig) 
+				BeansModelUtils.getResourceModelElement(resource);
 			files.add((IFile) resource);
+			
+			// add confis from config set
+			IBeansProject project = BeansCorePlugin.getModel().getProject(
+					resource.getProject());
+			if (project != null) {
+				Set<IBeansConfigSet> configSets = project.getConfigSets();
+				for (IBeansConfigSet configSet : configSets) {
+					if (configSet.getConfigs().contains(beansConfig)) {
+						Set<IBeansConfig> bcs = configSet.getConfigs();
+						for (IBeansConfig bc : bcs) {
+							files.add(bc.getElementResource());
+						}
+					}
+				}
+			}
 		}
 		return files;
 	}
