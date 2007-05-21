@@ -97,6 +97,13 @@ public class WebflowNavigatorContentProvider implements ICommonContentProvider,
 		if (element instanceof IWebflowModelElement) {
 			return ((IWebflowModelElement) element).getElementParent();
 		}
+		else if (element instanceof IFile) {
+			IWebflowConfig config = WebflowModelUtils
+					.getWebflowConfig((IFile) element);
+			if (config != null) {
+				return config.getProject();
+			}
+		}
 		return null;
 	}
 
