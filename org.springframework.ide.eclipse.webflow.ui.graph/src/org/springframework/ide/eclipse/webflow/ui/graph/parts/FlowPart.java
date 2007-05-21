@@ -36,6 +36,8 @@ public class FlowPart extends ChildrenStatePart implements
 
 	private static final String CONNECTION_LAYER = "Connection Layer";
 
+	//private Label flowLabel;
+
 	private AnimatedFanConnectionRouter fanRouter = null;
 
 	private ShortestPathConnectionRouter router = null;
@@ -98,8 +100,80 @@ public class FlowPart extends ChildrenStatePart implements
 		};
 
 		f.setLayoutManager(new GraphLayoutManager(this));
+
+		//addFlowRootLabel(f);
+
 		return f;
 	}
+
+	/*private void addFlowRootLabel(IFigure f) {
+
+		IWebflowState webflowState = (IWebflowState) getModel();
+		IWebflowConfig webflowConfig = (IWebflowConfig) webflowState
+				.getElementParent();
+
+		StringBuilder labelTextBuilder = new StringBuilder();
+
+		if (webflowState.getOutputMapper() != null) {
+			List<IMapping> mapping = webflowState.getOutputMapper()
+					.getMapping();
+		}
+		else {
+			labelTextBuilder.append("void ");
+		}
+		labelTextBuilder.append(webflowConfig.getName());
+		labelTextBuilder.append("(");
+		if (webflowState.getInputMapper() != null) {
+			List<IInputAttribute> inputAttributes = webflowState
+					.getInputMapper().getInputAttributes();
+			for (IInputAttribute inputAttribute : inputAttributes) {
+				String source = inputAttribute.getName();
+				labelTextBuilder.append(source);
+				labelTextBuilder.append(", ");
+			}
+			List<IMapping> mappings = webflowState.getInputMapper()
+					.getMapping();
+			for (IMapping mapping : mappings) {
+				String source = mapping.getSource();
+				String type = mapping.getFrom();
+				if (type != null) {
+					labelTextBuilder.append(type);
+					labelTextBuilder.append(" ");
+				}
+				labelTextBuilder.append(source);
+				labelTextBuilder.append(", ");
+			}
+		}
+
+		String labelText = labelTextBuilder.toString();
+		if (labelText.endsWith(", ")) {
+			labelText = labelText.substring(0, labelText.length() - 2);
+		}
+		labelTextBuilder = new StringBuilder(labelText);
+		labelTextBuilder.append(")");
+
+		if (flowLabel == null) {
+
+			flowLabel = new Label(labelTextBuilder.toString(), WebflowUIImages
+					.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW));
+
+			flowLabel.setLabelAlignment(PositionConstants.LEFT);
+			flowLabel.setFont(JFaceResources
+					.getFont(JFaceResources.DEFAULT_FONT));
+
+			f.add(flowLabel);
+		}
+		else {
+			flowLabel.setText(labelTextBuilder.toString());
+		}
+		
+		Rectangle rec = flowLabel.getBounds();
+		rec.x = 5;
+		rec.y = 5;
+		rec.height = flowLabel.getPreferredSize().height;
+		rec.width = flowLabel.getPreferredSize().width;
+		flowLabel.setBounds(rec);
+	}*/
 
 	public void deactivate() {
 		getViewer().getEditDomain().getCommandStack()
@@ -132,6 +206,8 @@ public class FlowPart extends ChildrenStatePart implements
 			fanRouter.setSeparation(20);
 			router = new ShortestPathConnectionRouter(getFigure());
 		}
+		
+		//addFlowRootLabel(getFigure());
 
 		fanRouter.setNextRouter(router);
 		cLayer.setConnectionRouter(fanRouter);
