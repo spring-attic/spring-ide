@@ -274,7 +274,7 @@ public class MappingEditorDialog extends TitleAreaDialog implements
 		targetCollectionLabel.setText("Target Collection");
 		targetCollectionText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
 		if (this.property != null && this.property.getTargetCollection() != null) {
-			this.requiredText.setText(this.property.getTargetCollection());
+			this.targetCollectionText.setText(this.property.getTargetCollection());
 		}
 		targetCollectionText.setLayoutData(new GridData(
 				GridData.FILL_HORIZONTAL));
@@ -291,7 +291,7 @@ public class MappingEditorDialog extends TitleAreaDialog implements
 		fromLabel.setText("From");
 		fromText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
 		if (this.property != null && this.property.getFrom() != null) {
-			this.requiredText.setText(this.property.getFrom());
+			this.fromText.setText(this.property.getFrom());
 		}
 		fromText.setLayoutData(new GridData(
 				GridData.FILL_HORIZONTAL));
@@ -311,7 +311,7 @@ public class MappingEditorDialog extends TitleAreaDialog implements
 		toLabel.setText("To");
 		toText = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
 		if (this.property != null && this.property.getTo() != null) {
-			this.requiredText.setText(this.property.getTo());
+			this.toText.setText(this.property.getTo());
 		}
 		toText.setLayoutData(new GridData(
 				GridData.FILL_HORIZONTAL));
