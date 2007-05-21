@@ -22,13 +22,20 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -263,5 +270,54 @@ public final class SpringCoreUtils {
 	public static IPath getProjectLocation(IProject project) {
 		return (project.getRawLocation() != null ? project.getRawLocation()
 				: project.getLocation());
+	}
+	
+	/**
+	 * Triggers a build of the given {@link IProject} instance.
+	 * @param project the project to build
+	 */
+	public static void buildProject(IProject project) {
+		if (ResourcesPlugin.getWorkspace().isAutoBuilding()) {
+			scheduleBuildInBackground(project, ResourcesPlugin.getWorkspace()
+					.getRuleFactory().buildRule(),
+					new Object[] { ResourcesPlugin.FAMILY_MANUAL_BUILD });
+		}
+	}
+
+	private static void scheduleBuildInBackground(final IProject project,
+			ISchedulingRule rule, final Object[] jobFamilies) {
+		Job job = new WorkspaceJob("Build workspace") {
+
+			@Override
+			public boolean belongsTo(Object family) {
+				if (jobFamilies == null || family == null) {
+					return false;
+				}
+				for (int i = 0; i < jobFamilies.length; i++) {
+					if (family.equals(jobFamilies[i])) {
+						return true;
+					}
+				}
+				return false;
+			}
+
+			@Override
+			public IStatus runInWorkspace(IProgressMonitor monitor) {
+				try {
+					project.build(IncrementalProjectBuilder.FULL_BUILD,	monitor);
+					return Status.OK_STATUS;
+				}
+				catch (CoreException e) {
+					return new MultiStatus(SpringCore.PLUGIN_ID, 1,
+							"Error during build of project ["
+									+ project.getName() + "]", e);
+				}
+			}
+		};
+		if (rule != null) {
+			job.setRule(rule);
+		}
+		job.setUser(true);
+		job.schedule();
 	}
 }

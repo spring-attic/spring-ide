@@ -22,16 +22,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.WorkspaceJob;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.BeansResourceChangeListener;
 import org.springframework.ide.eclipse.beans.core.internal.model.resources.IBeansResourceChangeEvents;
@@ -337,13 +329,8 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				project.reset();
 				notifyListeners(project, Type.CHANGED);
 				
-				if (ResourcesPlugin.getWorkspace().isAutoBuilding()) {
-					scheduleProjectBuildInBackground(
-							project.getProject(),
-							ResourcesPlugin.getWorkspace().getRuleFactory()
-									.buildRule(),
-							new Object[] { ResourcesPlugin.FAMILY_MANUAL_BUILD });
-				}
+				// trigger build of project
+				SpringCoreUtils.buildProject(project.getProject());
 			}
 		}
 
@@ -408,42 +395,6 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			}
 		}
 
-		private void scheduleProjectBuildInBackground(final IProject project,
-				ISchedulingRule rule, final Object[] jobFamilies) {
-			Job job = new WorkspaceJob("Build workspace") {
-
-				@Override
-				public boolean belongsTo(Object family) {
-					if (jobFamilies == null || family == null) {
-						return false;
-					}
-					for (int i = 0; i < jobFamilies.length; i++) {
-						if (family.equals(jobFamilies[i])) {
-							return true;
-						}
-					}
-					return false;
-				}
-
-				@Override
-				public IStatus runInWorkspace(IProgressMonitor monitor) {
-					try {
-						project.build(IncrementalProjectBuilder.FULL_BUILD,
-								monitor);
-						return Status.OK_STATUS;
-					}
-					catch (CoreException e) {
-						return new MultiStatus(BeansCorePlugin.PLUGIN_ID, 1,
-								"Error during build of project ["
-										+ project.getName() + "]", e);
-					}
-				}
-			};
-			if (rule != null) {
-				job.setRule(rule);
-			}
-			job.setUser(true);
-			job.schedule();
-		}
+		
 	}
 }
