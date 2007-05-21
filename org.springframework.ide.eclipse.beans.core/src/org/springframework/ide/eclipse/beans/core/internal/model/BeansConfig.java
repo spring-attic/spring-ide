@@ -55,7 +55,9 @@ import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
@@ -80,6 +82,7 @@ import org.springframework.ide.eclipse.core.io.StorageResource;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.io.xml.XercesDocumentLoader;
 import org.springframework.ide.eclipse.core.java.Introspector;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
@@ -569,7 +572,17 @@ public class BeansConfig extends AbstractResourceModelElement implements
 				XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
 						registry);
 				reader.setDocumentLoader(new XercesDocumentLoader());
-				reader.setResourceLoader(new NoOpResourcePatternResolver());
+
+				// set the resource loader to use the customized project class
+				// loader
+				if (JdtUtils.isJavaProject(file)) {
+					reader.setResourceLoader(new PathMatchingResourcePatternResolver(
+						JdtUtils.getClassLoader(JdtUtils.getJavaProject(file.getProject()))));
+				}
+				else {
+					reader.setResourceLoader(new NoOpResourcePatternResolver());
+				}
+
 				reader.setEntityResolver(resolver);
 				reader.setSourceExtractor(new XmlSourceExtractor());
 				reader.setEventListener(eventListener);
@@ -581,6 +594,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 				reader.setBeanNameGenerator(beanNameGenerator);
 				try {
 					reader.loadBeanDefinitions(resource);
+					
 					// post process beans config if required
 					postProcess(problemReporter, beanNameGenerator);
 				}
@@ -595,19 +609,18 @@ public class BeansConfig extends AbstractResourceModelElement implements
 						BeansCorePlugin.log(e);
 					}
 				}
-
 			}
 		}
 	}
 
 	private void postProcess(ProblemReporter problemReporter,
 			BeanNameGenerator beanNameGenerator) {
-		// TODO do we need to check the components map as well???
 		ReaderEventListener readerEventListener = new BeansConfigReaderEventListener(
 				this, true);
+
+		// TODO CD do we need to check the components map as well?
 		for (IBean bean : getBeans()) {
-			// TODO for now only handle postprocessor that have a direct
-			// bean class
+			// for now only handle postprocessor that have a direct bean class
 			String beanClassName = bean.getClassName();
 			if (beanClassName != null) {
 				IType type = BeansModelUtils.getJavaType(getElementResource()
@@ -795,6 +808,11 @@ public class BeansConfig extends AbstractResourceModelElement implements
 					// config's resource
 					return !config.getElementResource().equals(
 							((IAdaptable) resource).getAdapter(IFile.class));
+				}
+				// TODO CD if we want to support class path imports we need to
+				// revise this
+				else if (resource instanceof ClassPathResource) {
+					return true;
 				}
 			}
 			return false;
