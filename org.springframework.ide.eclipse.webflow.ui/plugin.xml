@@ -78,6 +78,10 @@
          <possibleChildren>
 			<or>
 				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject"/>
+				<and>
+					<instanceof value="org.eclipse.core.resources.IFile"/>
+					<test property="org.springframework.ide.eclipse.webflow.core.model.isWebflowConfig"/>
+				</and>
 				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement"/>
 			</or>
          </possibleChildren>
@@ -99,10 +103,7 @@
 	         </enablement>
 	      </actionProvider>
       </navigatorContent>
-   </extension>
 
-   <extension
-         point="org.eclipse.ui.navigator.navigatorContent">
       <navigatorContent
             id="org.springframework.ide.eclipse.webflow.ui.navigator.projectExplorerContent"
             name="%navigatorContentName"
@@ -126,6 +127,10 @@
          <possibleChildren>
          	<or>
 				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject"/>
+				<and>
+					<instanceof value="org.eclipse.core.resources.IFile"/>
+					<test property="org.springframework.ide.eclipse.webflow.core.model.isWebflowConfig"/>
+				</and>
 				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement"/>
 			</or>
          </possibleChildren>

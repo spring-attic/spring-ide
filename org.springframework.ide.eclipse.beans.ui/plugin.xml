@@ -199,6 +199,10 @@
 		 </triggerPoints>
          <possibleChildren>
 			<or>
+				<and>
+					<instanceof value="org.eclipse.core.resources.IFile"/>
+					<test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
+				</and>
 				<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
 			</or>
          </possibleChildren>
@@ -236,13 +240,17 @@
 					<test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
 				</and>
 				<instanceof value="org.springframework.ide.eclipse.core.model.ISpringProject"/>
-				<instanceof value="org.eclipse.jdt.core.IType"/>
 				<instanceof value="org.springframework.ide.eclipse.core.io.ZipEntryStorage"/>
 				<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
+				<instanceof value="org.eclipse.jdt.core.IType"/>
 			</or>
 		 </triggerPoints>
          <possibleChildren>
 			<or>
+				<and>
+					<instanceof value="org.eclipse.core.resources.IFile"/>
+					<test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
+				</and>
 				<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
 			</or>
          </possibleChildren>
