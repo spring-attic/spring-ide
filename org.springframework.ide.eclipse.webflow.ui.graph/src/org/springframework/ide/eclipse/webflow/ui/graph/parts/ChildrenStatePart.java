@@ -38,6 +38,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IExceptionHandler;
 import org.springframework.ide.eclipse.webflow.core.model.IInlineFlowState;
 import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.ISubflowState;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.springframework.ide.eclipse.webflow.ui.graph.actions.EditPropertiesAction;
 import org.springframework.ide.eclipse.webflow.ui.graph.figures.CompoundStateFigure;
@@ -50,24 +51,14 @@ import org.springframework.ide.eclipse.webflow.ui.graph.policies.StateContainerH
 import org.springframework.ide.eclipse.webflow.ui.graph.policies.StateEditPolicy;
 import org.springframework.ide.eclipse.webflow.ui.graph.policies.StateNodeEditPolicy;
 
-/**
- * 
- */
 public abstract class ChildrenStatePart extends AbstractStatePart implements
 		NodeEditPart {
 
-	/**
-	 * 
-	 */
 	protected static ILabelProvider labelProvider = new DecoratingLabelProvider(
 			new WebflowModelLabelProvider(), new WebflowModelLabelDecorator());
 
 	protected WebflowModelLabelProvider eLabelProvider = new WebflowModelLabelProvider();
 
-	/**
-	 * @param graph
-	 * @param map
-	 */
 	protected void applyChildrenResults(CompoundDirectedGraph graph, Map map) {
 
 		for (int i = 0; i < getChildren().size(); i++) {
@@ -76,9 +67,6 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 		}
 	}
 
-	/**
-	 * 
-	 */
 	protected void applyMaxWidths() {
 		int width = 0;
 		for (int i = 0; i < getChildren().size(); i++) {
@@ -104,10 +92,6 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 		}
 	}
 
-	/**
-	 * @param graph
-	 * @param map
-	 */
 	protected void applyChildrenResultsToOwn(CompoundDirectedGraph graph,
 			Map map) {
 		Node n = (Node) map.get(this);
@@ -126,21 +110,12 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#applyGraphResults(org.eclipse.draw2d.graph.CompoundDirectedGraph,
-	 * java.util.Map)
-	 */
 	protected void applyGraphResults(CompoundDirectedGraph graph, Map map) {
 		applyOwnResults(graph, map);
 		applyChildrenResults(graph, map);
 		applyChildrenResultsToOwn(graph, map);
 	}
 
-	/**
-	 * @param graph
-	 * @param map
-	 */
 	protected void applyOwnResults(CompoundDirectedGraph graph, Map map) {
 		Node n = (Node) map.get(this);
 
@@ -165,11 +140,6 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#contributeNodesToGraph(org.eclipse.draw2d.graph.CompoundDirectedGraph,
-	 * org.eclipse.draw2d.graph.Subgraph, java.util.Map)
-	 */
 	@SuppressWarnings("unchecked")
 	public void contributeNodesToGraph(CompoundDirectedGraph graph, Subgraph s,
 			Map map) {
@@ -218,10 +188,6 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#createEditPolicies()
-	 */
 	protected void createEditPolicies() {
 		installEditPolicy(EditPolicy.GRAPHICAL_NODE_ROLE,
 				new StateNodeEditPolicy());
@@ -235,12 +201,8 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 		installEditPolicy(EditPolicy.DIRECT_EDIT_ROLE, null);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
-	 */
 	protected IFigure createFigure() {
-		CompoundStateFigure figure = new CompoundStateFigure();
+		CompoundStateFigure figure = new CompoundStateFigure((IWebflowModelElement) getModel());
 		((Label) figure.getHeader())
 				.setIcon(labelProvider.getImage(getModel()));
 		((Label) figure.getHeader()).setIconTextGap(5);
@@ -248,46 +210,16 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 		return figure;
 	}
 
-	/**
-	 * @param requestLoc
-	 * @return
-	 */
 	private boolean directEditHitTest(Point requestLoc) {
-		/*
-		 * IFigure header = ((SubgraphFigure) getFigure()).getHeader();
-		 * header.translateToRelative(requestLoc); if
-		 * (header.containsPoint(requestLoc)) return true;
-		 */
 		return false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#getContentPane()
-	 */
 	public IFigure getContentPane() {
 		if (getFigure() instanceof SubgraphFigure)
 			return ((SubgraphFigure) getFigure()).getContents();
 		return getFigure();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#performDirectEdit()
-	 */
-	protected void performDirectEdit() {
-		/*
-		 * if (manager == null) { Label l = ((Label) ((SubgraphFigure)
-		 * getFigure()).getHeader()); manager = new StateDirectEditManager(this,
-		 * TextCellEditor.class, new StateCellEditorLocator(l), l); }
-		 * manager.show();
-		 */
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.ui.graph.parts.AbstractStatePart#performRequest(org.eclipse.gef.Request)
-	 */
 	public void performRequest(Request request) {
 		if (request.getType() == RequestConstants.REQ_DIRECT_EDIT) {
 			if (request instanceof DirectEditRequest
@@ -310,10 +242,6 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.gef.editparts.AbstractEditPart#refreshVisuals()
-	 */
 	protected void refreshVisuals() {
 		((Label) ((SubgraphFigure) getFigure()).getHeader())
 				.setText(labelProvider.getText(getModel()));
@@ -326,10 +254,6 @@ public abstract class ChildrenStatePart extends AbstractStatePart implements
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.gef.editparts.AbstractEditPart#setSelected(int)
-	 */
 	public void setSelected(int value) {
 		super.setSelected(value);
 		if (!(getModel() instanceof IWebflowState)

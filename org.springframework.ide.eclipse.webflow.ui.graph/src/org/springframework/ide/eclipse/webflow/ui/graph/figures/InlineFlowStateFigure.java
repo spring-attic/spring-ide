@@ -10,11 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.ui.graph.figures;
 
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 
 /**
- * 
+ * @author Christian Dupuis
+ * @since 2.0
  */
 public class InlineFlowStateFigure extends CompoundStateFigure {
 
-   
+	public InlineFlowStateFigure(IWebflowModelElement model) {
+		super(model);
+	}
 }

@@ -18,30 +18,17 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.graphics.Color;
 
 /**
- * 
+ * @author Christian Dupuis
+ * @since 2.0
  */
 public class StateLabel extends Label {
 
-    /**
-     * 
-     */
     public static final Color COLOR = new Color(null, 0, 0, 0);
 
-    /**
-     * 
-     */
     private boolean hasFocus;
 
-    /**
-     * 
-     */
     private boolean selected;
     
-    /**
-     * 
-     * 
-     * @return 
-     */
     private Rectangle getSelectionRectangle() {
         Rectangle bounds = getTextBounds();
         bounds.expand(new Insets(1, 1, 1, 1));
@@ -50,9 +37,6 @@ public class StateLabel extends Label {
         return bounds;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.draw2d.Label#paintFigure(org.eclipse.draw2d.Graphics)
-     */
     protected void paintFigure(Graphics graphics) {
         graphics.fillRectangle(getBounds());
         if (selected) {
@@ -73,21 +57,11 @@ public class StateLabel extends Label {
         super.paintFigure(graphics);
     }
 
-    /**
-     * 
-     * 
-     * @param b 
-     */
     public void setFocus(boolean b) {
         hasFocus = b;
         repaint();
     }
 
-    /**
-     * 
-     * 
-     * @param b 
-     */
     public void setSelected(boolean b) {
         selected = b;
         repaint();

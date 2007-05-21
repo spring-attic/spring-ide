@@ -12,107 +12,75 @@ package org.springframework.ide.eclipse.webflow.ui.graph;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.springframework.ide.eclipse.webflow.core.internal.model.ActionState;
+import org.springframework.ide.eclipse.webflow.core.internal.model.DecisionState;
+import org.springframework.ide.eclipse.webflow.core.internal.model.EndState;
+import org.springframework.ide.eclipse.webflow.core.internal.model.SubflowState;
+import org.springframework.ide.eclipse.webflow.core.internal.model.ViewState;
+import org.springframework.ide.eclipse.webflow.ui.graph.preferences.WebflowGraphPreferences;
 
 /**
- * 
+ * The Activator of the Web Flow Graph OSGi bundle
+ * @author Christian Dupuis
+ * @since 2.0
  */
 public class Activator extends AbstractUIPlugin {
 
-    /**
-     * 
-     */
-    public static final String PLUGIN_ID = "org.springframework.ide.eclipse.webflow.ui.graph";
+	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.webflow.ui.graph";
 
-    // The shared instance
-	/**
-     * 
-     */
-    private static Activator plugin;
-    
-    /**
-     * The constructor.
-     */
+	private static Activator plugin;
+
 	public Activator() {
 		plugin = this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
-	 */
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
-	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
-	 */
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
-	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
 	}
 
-	/**
-	 * Returns the shared instance.
-	 * 
-	 * @return the shared instance
-	 */
 	public static Activator getDefault() {
 		return plugin;
 	}
 
-
-	/**
-	 * 
-	 * 
-	 * @param status 
-	 */
 	public static void log(IStatus status) {
 		getDefault().getLog().log(status);
 	}
 
-	/**
-	 * Writes the message to the plug-in's log.
-	 * 
-	 * @param exception 
-	 * @param message the text to write to the log
-	 */
 	public static void log(String message, Throwable exception) {
 		IStatus status = createErrorStatus(message, exception);
 		getDefault().getLog().log(status);
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param exception 
-	 */
 	public static void log(Throwable exception) {
 		getDefault().getLog().log(
 				createErrorStatus("Internal Error", exception));
 	}
 
-	/**
-	 * Returns a new <code>IStatus</code> for this plug-in.
-	 * 
-	 * @param exception 
-	 * @param message 
-	 * 
-	 * @return 
-	 */
 	public static IStatus createErrorStatus(String message, Throwable exception) {
 		if (message == null) {
 			message = "";
 		}
 		return new Status(Status.ERROR, PLUGIN_ID, 0, message, exception);
+	}
+
+	protected void initializeDefaultPreferences(IPreferenceStore store) {
+		store.setDefault(WebflowGraphPreferences.getPreferenceName(ViewState.class.getName()),
+				WebflowGraphPreferences.getDefaultColorStringForModelElementClass(ViewState.class));
+		store.setDefault(WebflowGraphPreferences.getPreferenceName(ActionState.class.getName()),
+				WebflowGraphPreferences.getDefaultColorStringForModelElementClass(ActionState.class));
+		store.setDefault(WebflowGraphPreferences.getPreferenceName(EndState.class.getName()),
+				WebflowGraphPreferences.getDefaultColorStringForModelElementClass(EndState.class));
+		store.setDefault(WebflowGraphPreferences.getPreferenceName(SubflowState.class.getName()),
+				WebflowGraphPreferences.getDefaultColorStringForModelElementClass(SubflowState.class));
+		store.setDefault(WebflowGraphPreferences.getPreferenceName(DecisionState.class.getName()),
+				WebflowGraphPreferences.getDefaultColorStringForModelElementClass(DecisionState.class));
 	}
 }

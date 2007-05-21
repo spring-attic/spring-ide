@@ -204,6 +204,14 @@
             description="%navigatorfilterHideNonSpringElementsDescription"
             class="org.springframework.ide.eclipse.ui.navigator.filters.NonSpringElementsFilter"
             activeByDefault="false"/>
+            
    </extension>
+   
+   <extension point="org.eclipse.ui.preferencePages">
+	 	<page id="org.springframework.ide.eclipse.ui.preferencePage"
+ 			name="Spring IDE"
+    		class="org.springframework.ide.eclipse.ui.dialogs.SpringPreferencePage">
+   		</page>
+   	</extension>
 
 </plugin>

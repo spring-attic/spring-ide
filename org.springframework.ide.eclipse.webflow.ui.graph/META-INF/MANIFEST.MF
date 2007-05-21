@@ -33,5 +33,6 @@ Export-Package: org.springframework.ide.eclipse.webflow.ui.graph,
  org.springframework.ide.eclipse.webflow.ui.graph.figures,
  org.springframework.ide.eclipse.webflow.ui.graph.model,
  org.springframework.ide.eclipse.webflow.ui.graph.parts,
- org.springframework.ide.eclipse.webflow.ui.graph.policies
+ org.springframework.ide.eclipse.webflow.ui.graph.policies,
+ org.springframework.ide.eclipse.webflow.ui.graph.preferences
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
