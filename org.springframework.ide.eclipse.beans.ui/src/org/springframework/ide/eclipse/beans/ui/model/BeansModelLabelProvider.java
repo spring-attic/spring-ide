@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.model;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -166,9 +165,6 @@ public class BeansModelLabelProvider extends
 		}
 		else if (element instanceof IModelElement) {
 			return BeansModelLabels.getElementLabel((IModelElement) element, 0);
-		}
-		if (element instanceof IFile) {
-			return ((IFile) element).getName();
 		}
 		else if (element instanceof ZipEntryStorage) {
 			ZipEntryStorage storage = (ZipEntryStorage) element;
