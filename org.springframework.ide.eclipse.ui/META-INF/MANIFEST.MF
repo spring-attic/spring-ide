@@ -16,12 +16,15 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface.text,
  org.eclipse.jdt.core,
  org.eclipse.jdt.ui,
- org.springframework.ide.eclipse.core
+ org.springframework.ide.eclipse.core,
+ org.eclipse.ui.navigator.resources
 Export-Package: org.springframework.ide.eclipse.ui,
  org.springframework.ide.eclipse.ui.dialogs,
  org.springframework.ide.eclipse.ui.editors,
  org.springframework.ide.eclipse.ui.navigator.actions,
  org.springframework.ide.eclipse.ui.navigator.filters,
- org.springframework.ide.eclipse.ui.viewers
+ org.springframework.ide.eclipse.ui.viewers,
+ org.springframework.ide.eclipse.ui.workingsets,
+ org.springframework.ide.eclipse.ui.workingsets.actions
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

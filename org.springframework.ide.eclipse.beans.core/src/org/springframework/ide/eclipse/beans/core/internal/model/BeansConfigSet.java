@@ -18,6 +18,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.ui.IPersistableElement;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
@@ -344,5 +345,14 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 			}
 			beanClassBeans.add(bean);
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Object getAdapter(Class adapter) {
+		if (adapter == IPersistableElement.class) {
+			return new BeansModelElementToPersistableElementAdapter(this);
+		}
+		return super.getAdapter(adapter);
 	}
 }

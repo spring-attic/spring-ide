@@ -15,6 +15,7 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonContentProvider;
 import org.springframework.ide.eclipse.core.SpringCore;
@@ -29,8 +30,8 @@ import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 
 /**
  * This {@link ICommonContentProvider} knows about the Spring projects.
- * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
 public class SpringNavigatorContentProvider implements ICommonContentProvider,
@@ -70,6 +71,9 @@ public class SpringNavigatorContentProvider implements ICommonContentProvider,
 	}
 
 	public Object[] getElements(Object inputElement) {
+		if (inputElement instanceof IWorkingSet) {
+			return IModelElement.NO_CHILDREN;
+		}
 		return SpringCore.getModel().getProjects().toArray();
 	}
 

@@ -5,6 +5,10 @@
          name="Project Explorer Filters"
          schema="schema/projectExplorer.exsd"/>
 
+   <extension-point id="contentContribution"
+         name="Content Contribution"
+         schema="schema/contentContribution.exsd"/>
+
    <extension
          point="org.eclipse.ui.ide.projectNatureImages">
       <image
@@ -133,14 +137,14 @@
       <viewer viewerId="org.springframework.ide.eclipse.ui.navigator.springExplorer"/>
       <viewerContentBinding viewerId="org.springframework.ide.eclipse.ui.navigator.springExplorer">
          <includes>
-            <contentExtension
-                  isRoot="true"
-                  pattern="org.springframework.ide.eclipse.ui.navigator.springExplorerContent"/>
+            <contentExtension pattern="org.springframework.ide.eclipse.ui.navigator.workingsets"/>
+            <contentExtension pattern="org.springframework.ide.eclipse.ui.navigator.springExplorerContent"/>
          </includes>
       </viewerContentBinding>
       <viewerActionBinding viewerId="org.springframework.ide.eclipse.ui.navigator.springExplorer">
          <includes>
             <actionExtension pattern="org.springframework.ide.eclipse.ui.navigator.springExplorerActions"/>
+            <actionExtension pattern="org.springframework.ide.eclipse.ui.navigator.springExplorerWorkingSetActions"/>
          </includes>
       </viewerActionBinding>
    </extension>
@@ -168,8 +172,20 @@
 				</adapt>
             </enablement>
          </actionProvider>
+         <actionProvider
+            class="org.springframework.ide.eclipse.ui.workingsets.actions.WorkingSetActionProvider"
+            id="org.springframework.ide.eclipse.ui.navigator.springExplorerWorkingSetActions">
+           <enablement>
+                <or>
+					<adapt type="org.eclipse.core.resources.IResource" />	 
+					<adapt type="java.util.Collection"> 
+						<count value="0" />
+					</adapt>
+				</or>
+           </enablement>            
+      </actionProvider>
       </navigatorContent>
-
+      
       <navigatorContent
             id="org.springframework.ide.eclipse.ui.navigator.projectExplorerContent"
             name="%navigatorContentName"
@@ -205,6 +221,25 @@
             class="org.springframework.ide.eclipse.ui.navigator.filters.NonSpringElementsFilter"
             activeByDefault="false"/>
             
+      <navigatorContent
+            activeByDefault="true"
+            contentProvider="org.springframework.ide.eclipse.ui.workingsets.WorkingSetsContentProvider"
+            icon="icons/full/obj16/workingsets_obj.gif"
+            id="org.springframework.ide.eclipse.ui.navigator.workingsets"
+            labelProvider="org.springframework.ide.eclipse.ui.workingsets.WorkingSetsLabelProvider"
+            name="%workingsets.extension.name"
+            priority="higher">
+         <triggerPoints>
+            <instanceof value="org.eclipse.ui.IWorkingSet"/>
+         </triggerPoints>
+         <possibleChildren>
+            <instanceof value="java.lang.Object"/>
+         </possibleChildren>
+         <commonSorter
+               class="org.springframework.ide.eclipse.ui.workingsets.WorkingSetViewerSorter"
+               id="org.springframework.ide.eclipse.ui.navigator.workingsets.sorter"/>  
+      </navigatorContent>
+            
    </extension>
    
    <extension point="org.eclipse.ui.preferencePages">
@@ -213,5 +248,15 @@
     		class="org.springframework.ide.eclipse.ui.dialogs.SpringPreferencePage">
    		</page>
    	</extension>
+   	
+   	<extension
+         point="org.eclipse.ui.workingSets">
+      <workingSet
+            name="%workingSets.name"
+            pageClass="org.springframework.ide.eclipse.ui.workingsets.SpringWorkingSetPage"
+            icon="/icons/full/obj16/workingsets_obj.gif"
+            id="org.springframework.ide.eclipse.ui.springWorkingSetPage">
+      </workingSet>
+   </extension>
 
 </plugin>

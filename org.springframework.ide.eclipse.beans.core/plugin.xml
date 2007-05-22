@@ -36,5 +36,11 @@
 			properties="isBeansConfig" 
 			type="org.eclipse.core.resources.IFile" />
 	</extension>
+	
+	<extension point="org.eclipse.ui.elementFactories">
+		<factory id="org.springframework.ide.eclipse.beans.core.factoryId"
+			class="org.springframework.ide.eclipse.beans.core.internal.model.BeansModelElementFactory" />      
+	</extension>
+ 
 
 </plugin>

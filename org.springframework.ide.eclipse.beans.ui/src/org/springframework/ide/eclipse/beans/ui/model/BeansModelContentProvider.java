@@ -30,6 +30,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceContentProvider;
 import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -60,19 +61,15 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 
 	public BeansModelContentProvider(boolean refresh) {
 		this.refresh = refresh;
+		if (refresh) {
+			BeansCorePlugin.getModel().addChangeListener(this);
+		}
 	}
 
 	public final void inputChanged(Viewer viewer, Object oldInput,
 			Object newInput) {
 		if (viewer instanceof StructuredViewer) {
 			this.viewer = (StructuredViewer) viewer;
-			if (refresh) {
-				if (oldInput == null && newInput != null) {
-					BeansCorePlugin.getModel().addChangeListener(this);
-				} else if (oldInput != null && newInput == null) {
-					BeansCorePlugin.getModel().removeChangeListener(this);
-				}
-			}
 		} else {
 			this.viewer = null;
 		}
@@ -227,6 +224,10 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 		} else if (element instanceof IModelElement) {
 			if (element instanceof IBeansConfig) {
 				return ((IBeansConfig) element).getElementResource();
+			}
+			else if (element instanceof IBeansProject) {
+				return SpringCore.getModel().getProject(
+						((IBeansProject) element).getProject());
 			}
 			return ((IModelElement) element).getElementParent();
 		} else if (element instanceof IFile) {

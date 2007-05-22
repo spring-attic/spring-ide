@@ -31,6 +31,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.ui.IPersistableElement;
 import org.eclipse.wst.xml.core.internal.XMLCorePlugin;
 import org.eclipse.wst.xml.core.internal.catalog.provisional.ICatalog;
 import org.springframework.beans.BeanMetadataElement;
@@ -946,5 +947,17 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			}
 			return null;
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Object getAdapter(Class adapter) {
+		if (adapter == IPersistableElement.class) {
+			return new BeansModelElementToPersistableElementAdapter(this);
+		}
+		else if (adapter == IResource.class) {
+			return getElementResource();
+		}
+		return super.getAdapter(adapter);
 	}
 }
