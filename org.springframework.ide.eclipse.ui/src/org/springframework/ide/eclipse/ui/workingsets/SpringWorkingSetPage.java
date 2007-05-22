@@ -184,20 +184,11 @@ public class SpringWorkingSetPage extends WizardPage implements IWorkingSetPage 
 
 	private ITreeContentProvider contentProvider = new SpringExplorerAdaptingContentProvider();
 
-	// setSelection
-
-	/**
-	 * Creates a new instance of the receiver.
-	 */
 	public SpringWorkingSetPage() {
 		super("springWorkingSet", "Spring Working Set", null);
 		setDescription("Enter a working set name and select the working set elements.");
 	}
 
-	/**
-	 * Overrides method in WizardPage.
-	 * @see org.eclipse.jface.wizard.WizardPage#createControl(Composite)
-	 */
 	public void createControl(Composite parent) {
 		Font font = parent.getFont();
 		Composite composite = new Composite(parent, SWT.NULL);
@@ -314,7 +305,6 @@ public class SpringWorkingSetPage extends WizardPage implements IWorkingSetPage 
 	/**
 	 * Collects all checked resources in the specified container.
 	 * @param checkedResources the output, list of checked resources
-	 * @param container the container to collect checked resources in
 	 */
 	private void findCheckedResources(List<IAdaptable> checkedResources,
 			Object[] checkedElements) {
@@ -337,10 +327,6 @@ public class SpringWorkingSetPage extends WizardPage implements IWorkingSetPage 
 						.getAdapter(IPersistableElement.class) != null;
 	}
 
-	/**
-	 * Implements IWorkingSetPage.
-	 * @see org.eclipse.ui.dialogs.IWorkingSetPage#finish()
-	 */
 	public void finish() {
 		List<IAdaptable> resources = new ArrayList<IAdaptable>(10);
 		findCheckedResources(resources, tree.getCheckedElements());
@@ -358,26 +344,14 @@ public class SpringWorkingSetPage extends WizardPage implements IWorkingSetPage 
 		}
 	}
 
-	/**
-	 * Implements IWorkingSetPage.
-	 * @see org.eclipse.ui.dialogs.IWorkingSetPage#getSelection()
-	 */
 	public IWorkingSet getSelection() {
 		return workingSet;
 	}
 
-	/**
-	 * Returns the name entered in the working set name field.
-	 * @return the name entered in the working set name field.
-	 */
 	private String getWorkingSetName() {
 		return text.getText();
 	}
 
-	/**
-	 * Called when the checked state of a tree item changes.
-	 * @param event the checked state change event.
-	 */
 	private void handleCheckStateChange(final CheckStateChangedEvent event) {
 		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
 			public void run() {
@@ -389,10 +363,6 @@ public class SpringWorkingSetPage extends WizardPage implements IWorkingSetPage 
 		});
 	}
 
-	/**
-	 * Sets the checked state of tree items based on the initial working set, if
-	 * any.
-	 */
 	private void initializeCheckedState() {
 		if (workingSet == null) {
 			return;
@@ -437,10 +407,6 @@ public class SpringWorkingSetPage extends WizardPage implements IWorkingSetPage 
 		});
 	}
 
-	/**
-	 * Implements IWorkingSetPage.
-	 * @see org.eclipse.ui.dialogs.IWorkingSetPage#setSelection(IWorkingSet)
-	 */
 	public void setSelection(IWorkingSet workingSet) {
 		if (workingSet == null) {
 			throw new IllegalArgumentException("Working set must not be null"); //$NON-NLS-1$
@@ -453,14 +419,6 @@ public class SpringWorkingSetPage extends WizardPage implements IWorkingSetPage 
 		}
 	}
 
-	/**
-	 * Sets the checked state of the container's members.
-	 * @param container the container whose children should be checked/unchecked
-	 * @param state true=check all members in the container. false=uncheck all
-	 * members in the container.
-	 * @param checkExpandedState true=recurse into sub-containers and set the
-	 * checked state. false=only set checked state of members of this container
-	 */
 	private void setSubtreeChecked(Object container, boolean state,
 			boolean checkExpandedState) {
 		// checked state is set lazily on expand, don't set it if container is
@@ -485,11 +443,6 @@ public class SpringWorkingSetPage extends WizardPage implements IWorkingSetPage 
 		}
 	}
 
-	/**
-	 * Check and gray the resource parent if all resources of the parent are
-	 * checked.
-	 * @param child the resource whose parent checked state should be set.
-	 */
 	private void updateParentState(Object child) {
 		if (child == null || contentProvider.getParent(child) == null) {
 			return;
@@ -507,10 +460,6 @@ public class SpringWorkingSetPage extends WizardPage implements IWorkingSetPage 
 		updateParentState(parent);
 	}
 
-	/**
-	 * Validates the working set name and the checked state of the resource
-	 * tree.
-	 */
 	private void validateInput() {
 		String errorMessage = null;
 		String infoMessage = null;
