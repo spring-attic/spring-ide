@@ -67,11 +67,11 @@ public abstract class WebflowGraphPreferences {
 
 	static {
 		DEFAULT_COLORS = new HashMap<Class, Color>();
-		DEFAULT_COLORS.put(ViewState.class, DEFAULT_COLOR);
-		DEFAULT_COLORS.put(ActionState.class, DEFAULT_COLOR);
-		DEFAULT_COLORS.put(DecisionState.class, DEFAULT_COLOR);
-		DEFAULT_COLORS.put(EndState.class, DEFAULT_COLOR);
-		DEFAULT_COLORS.put(SubflowState.class, DEFAULT_COLOR);
+		DEFAULT_COLORS.put(ViewState.class, ColorFactory.getColor(new RGB(198, 220, 235))); // #c6dceb
+		DEFAULT_COLORS.put(ActionState.class, ColorFactory.getColor(new RGB(203, 235, 169))); // #cbeba9
+		DEFAULT_COLORS.put(SubflowState.class, ColorFactory.getColor(new RGB(154, 212, 167))); // #9ad4a7
+		DEFAULT_COLORS.put(DecisionState.class, ColorFactory.getColor(new RGB(255, 239, 169))); // #ffefa9
+		DEFAULT_COLORS.put(EndState.class, ColorFactory.getColor(new RGB(220, 220, 220))); // #dedede
 	}
 
 	private static Map<Class, Color> classToColorMapCache = new ConcurrentHashMap<Class, Color>();
@@ -99,7 +99,7 @@ public abstract class WebflowGraphPreferences {
 		IEclipsePreferences node = context.getNode(Activator.PLUGIN_ID);
 
 		String value = node.get(getPreferenceName(element.getName()),
-				DEFAULT_COLOR_STRING);
+				getDefaultColorStringForModelElementClass(element));
 		RGB rgb = StringConverter.asRGB(value);
 
 		return ColorFactory.getColor(rgb);
