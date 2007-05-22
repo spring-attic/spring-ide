@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.webflow.ui.workingsets;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.ui.IWorkingSet;
-import org.springframework.ide.eclipse.ui.workingsets.IWorkingSetFilter;
+import org.springframework.ide.eclipse.ui.workingsets.IWorkingSetsFilter;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 
@@ -23,7 +23,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class WebflowWorkingSetsViewerFilter implements IWorkingSetFilter {
+public class WebflowWorkingSetsViewerFilter implements IWorkingSetsFilter {
 
 	public boolean isInWorkingSet(IAdaptable[] elements, Object parentElement,
 			Object element) {

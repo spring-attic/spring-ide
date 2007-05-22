@@ -22,15 +22,15 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
-import org.springframework.ide.eclipse.ui.workingsets.IWorkingSetFilter;
+import org.springframework.ide.eclipse.ui.workingsets.IWorkingSetsFilter;
 
 /**
- * {@link IWorkingSetFilter} that filters those {@link IModelElement}s that are
+ * {@link IWorkingSetsFilter} that filters those {@link IModelElement}s that are
  * not in a given list of elements derived form a {@link IWorkingSet}.t
  * @author Christian Dupuis
  * @since 2.0
  */
-public class BeansWorkingSetsViewerFilter implements IWorkingSetFilter {
+public class BeansWorkingSetsViewerFilter implements IWorkingSetsFilter {
 
 	public boolean isInWorkingSet(IAdaptable[] elements, Object parentElement,
 			Object element) {

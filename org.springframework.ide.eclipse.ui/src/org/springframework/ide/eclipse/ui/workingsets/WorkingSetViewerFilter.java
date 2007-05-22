@@ -61,7 +61,7 @@ public class WorkingSetViewerFilter extends ViewerFilter {
 				&& element instanceof IWorkingSet) {
 			return true;
 		}
-		for (IWorkingSetFilter filter : getWorkingSetFilter()) {
+		for (IWorkingSetsFilter filter : getWorkingSetFilter()) {
 			if (filter.isInWorkingSet(getElementsFromWorkingSet(parentElement), parentElement, element)) {
 				return true;
 			}
@@ -88,8 +88,8 @@ public class WorkingSetViewerFilter extends ViewerFilter {
 		return workingSet.getElements();
 	}
 
-	private Set<IWorkingSetFilter> getWorkingSetFilter() {
-		Set<IWorkingSetFilter> workingSetFilter = new HashSet<IWorkingSetFilter>();
+	private Set<IWorkingSetsFilter> getWorkingSetFilter() {
+		Set<IWorkingSetsFilter> workingSetFilter = new HashSet<IWorkingSetsFilter>();
 		IExtensionPoint point = Platform
 				.getExtensionRegistry()
 				.getExtensionPoint(
@@ -103,8 +103,8 @@ public class WorkingSetViewerFilter extends ViewerFilter {
 						try {
 							Object handler = config
 									.createExecutableExtension("viewerFilter");
-							if (handler instanceof IWorkingSetFilter) {
-								IWorkingSetFilter contentProvider = (IWorkingSetFilter) handler;
+							if (handler instanceof IWorkingSetsFilter) {
+								IWorkingSetsFilter contentProvider = (IWorkingSetsFilter) handler;
 								workingSetFilter.add(contentProvider);
 							}
 						}
