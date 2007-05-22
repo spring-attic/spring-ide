@@ -28,7 +28,7 @@ import org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorLabe
  * @since 2.0
  * @see WebflowNavigatorLabelProvider
  */
-public class WebflowWorkingSetsLabelProvider implements
+public class WebflowWorkingSetLabelProvider implements
 		IElementSpecificLabelProvider {
 
 	private WebflowNavigatorLabelProvider labelProvider = new WebflowNavigatorLabelProvider();

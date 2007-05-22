@@ -19,7 +19,7 @@ import org.eclipse.ui.IWorkingSet;
  * @author Christian Dupuis
  * @since 2.0
  */
-public interface IWorkingSetsFilter {
+public interface IWorkingSetFilter {
 
 	/**
 	 * Verifies if the <code>element</code> is covered by the

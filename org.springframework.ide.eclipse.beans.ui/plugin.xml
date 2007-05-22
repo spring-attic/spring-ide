@@ -329,9 +329,9 @@
          point="org.springframework.ide.eclipse.ui.contentContribution">
   
       <contentContribution
-            contentProvider="org.springframework.ide.eclipse.beans.ui.workingsets.BeansWorkingSetsContentProvider"
-            labelProvider="org.springframework.ide.eclipse.beans.ui.workingsets.BeansWorkingSetsLabelProvider"
-            viewerFilter="org.springframework.ide.eclipse.beans.ui.workingsets.BeansWorkingSetsViewerFilter"/>
+            contentProvider="org.springframework.ide.eclipse.beans.ui.workingsets.BeansWorkingSetContentProvider"
+            labelProvider="org.springframework.ide.eclipse.beans.ui.workingsets.BeansWorkingSetLabelProvider"
+            viewerFilter="org.springframework.ide.eclipse.beans.ui.workingsets.BeansWorkingSetViewerFilter"/>
             
    </extension>
 

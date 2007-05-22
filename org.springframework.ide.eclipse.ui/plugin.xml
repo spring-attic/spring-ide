@@ -223,10 +223,10 @@
             
       <navigatorContent
             activeByDefault="true"
-            contentProvider="org.springframework.ide.eclipse.ui.workingsets.WorkingSetsContentProvider"
+            contentProvider="org.springframework.ide.eclipse.ui.workingsets.WorkingSetContentProvider"
             icon="icons/full/obj16/workingsets_obj.gif"
             id="org.springframework.ide.eclipse.ui.navigator.workingsets"
-            labelProvider="org.springframework.ide.eclipse.ui.workingsets.WorkingSetsLabelProvider"
+            labelProvider="org.springframework.ide.eclipse.ui.workingsets.WorkingSetLabelProvider"
             name="%workingsets.extension.name"
             priority="higher">
          <triggerPoints>

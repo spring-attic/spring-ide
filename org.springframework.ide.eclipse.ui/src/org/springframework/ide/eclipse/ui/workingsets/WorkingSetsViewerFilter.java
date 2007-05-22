@@ -53,7 +53,7 @@ public class WorkingSetsViewerFilter extends ViewerFilter {
 				&& element instanceof IWorkingSet) {
 			return true;
 		}
-		for (IWorkingSetsFilter filter : WorkingSetsUtils.getViewerFilter()) {
+		for (IWorkingSetFilter filter : WorkingSetUtils.getViewerFilter()) {
 			if (filter.isInWorkingSet(getElementsFromWorkingSet(parentElement),
 					parentElement, element)) {
 				return true;

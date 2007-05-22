@@ -26,7 +26,7 @@ import org.eclipse.ui.navigator.IExtensionActivationListener;
 import org.eclipse.ui.navigator.IExtensionStateModel;
 import org.eclipse.ui.navigator.INavigatorContentService;
 import org.springframework.ide.eclipse.ui.workingsets.WorkingSetsViewerFilter;
-import org.springframework.ide.eclipse.ui.workingsets.WorkingSetsContentProvider;
+import org.springframework.ide.eclipse.ui.workingsets.WorkingSetContentProvider;
 
 /**
  * @author Christian Dupuis
@@ -122,11 +122,11 @@ public class WorkingSetActionProvider extends CommonActionProvider {
 
 			if (newWorkingSet != null
 					&& !contentService
-							.isActive(WorkingSetsContentProvider.EXTENSION_ID)) {
+							.isActive(WorkingSetContentProvider.EXTENSION_ID)) {
 				contentService
 						.getActivationService()
 						.activateExtensions(
-								new String[] { WorkingSetsContentProvider.EXTENSION_ID },
+								new String[] { WorkingSetContentProvider.EXTENSION_ID },
 								false);
 				contentService.getActivationService()
 						.persistExtensionActivations();
@@ -156,11 +156,11 @@ public class WorkingSetActionProvider extends CommonActionProvider {
 				String[] theNavigatorExtensionIds, boolean isActive) {
 
 			for (int i = 0; i < theNavigatorExtensionIds.length; i++) {
-				if (WorkingSetsContentProvider.EXTENSION_ID
+				if (WorkingSetContentProvider.EXTENSION_ID
 						.equals(theNavigatorExtensionIds[i])) {
 					if (isActive) {
 						extensionStateModel = contentService
-								.findStateModel(WorkingSetsContentProvider.EXTENSION_ID);
+								.findStateModel(WorkingSetContentProvider.EXTENSION_ID);
 						workingSetRootModeActionGroup
 								.setStateModel(extensionStateModel);
 
@@ -208,7 +208,7 @@ public class WorkingSetActionProvider extends CommonActionProvider {
 		contentService = aSite.getContentService();
 
 		extensionStateModel = contentService
-				.findStateModel(WorkingSetsContentProvider.EXTENSION_ID);
+				.findStateModel(WorkingSetContentProvider.EXTENSION_ID);
 
 		workingSetActionGroup = new WorkingSetFilterActionGroup(aSite
 				.getViewSite().getShell(), filterChangeListener);
@@ -218,7 +218,7 @@ public class WorkingSetActionProvider extends CommonActionProvider {
 					viewer, extensionStateModel);
 		}
 
-		if (contentService.isActive(WorkingSetsContentProvider.EXTENSION_ID)) {
+		if (contentService.isActive(WorkingSetContentProvider.EXTENSION_ID)) {
 			managerChangeListener.listen();
 		}
 
@@ -236,11 +236,11 @@ public class WorkingSetActionProvider extends CommonActionProvider {
 		boolean showWorkingSets = true;
 		if (aMemento != null) {
 			Integer showWorkingSetsInt = aMemento
-					.getInteger(WorkingSetsContentProvider.SHOW_TOP_LEVEL_WORKING_SETS);
+					.getInteger(WorkingSetContentProvider.SHOW_TOP_LEVEL_WORKING_SETS);
 			showWorkingSets = showWorkingSetsInt == null
 					|| showWorkingSetsInt.intValue() == 1;
 			extensionStateModel.setBooleanProperty(
-					WorkingSetsContentProvider.SHOW_TOP_LEVEL_WORKING_SETS,
+					WorkingSetContentProvider.SHOW_TOP_LEVEL_WORKING_SETS,
 					showWorkingSets);
 			workingSetRootModeActionGroup
 					.setShowTopLevelWorkingSets(showWorkingSets);
@@ -266,10 +266,10 @@ public class WorkingSetActionProvider extends CommonActionProvider {
 
 		if (aMemento != null) {
 			int showWorkingSets = extensionStateModel
-					.getBooleanProperty(WorkingSetsContentProvider.SHOW_TOP_LEVEL_WORKING_SETS) ? 1
+					.getBooleanProperty(WorkingSetContentProvider.SHOW_TOP_LEVEL_WORKING_SETS) ? 1
 					: 0;
 			aMemento.putInteger(
-					WorkingSetsContentProvider.SHOW_TOP_LEVEL_WORKING_SETS,
+					WorkingSetContentProvider.SHOW_TOP_LEVEL_WORKING_SETS,
 					showWorkingSets);
 
 			if (viewer != null) {

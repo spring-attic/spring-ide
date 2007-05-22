@@ -25,7 +25,7 @@ import org.springframework.ide.eclipse.ui.SpringUIPlugin;
  * @author Christian Dupuis
  * @since 2.0
  */
-public abstract class WorkingSetsUtils {
+public abstract class WorkingSetUtils {
 
 	public static final String EXTENSION_POINT = SpringUIPlugin.PLUGIN_ID
 			+ ".contentContribution";
@@ -66,7 +66,7 @@ public abstract class WorkingSetsUtils {
 				IElementSpecificLabelProvider.class);
 	}
 
-	public static Set<IWorkingSetsFilter> getViewerFilter() {
-		return getExecutableExtension("viewerFilter", IWorkingSetsFilter.class);
+	public static Set<IWorkingSetFilter> getViewerFilter() {
+		return getExecutableExtension("viewerFilter", IWorkingSetFilter.class);
 	}
 }

@@ -27,7 +27,7 @@ import org.springframework.ide.eclipse.ui.workingsets.IElementSpecificLabelProvi
  * @since 2.0
  * @see BeansNavigatorLabelProvider
  */
-public class BeansWorkingSetsLabelProvider implements
+public class BeansWorkingSetLabelProvider implements
 		IElementSpecificLabelProvider {
 
 	private BeansNavigatorLabelProvider labelProvider = new BeansNavigatorLabelProvider();

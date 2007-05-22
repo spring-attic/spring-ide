@@ -22,7 +22,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class BeansWorkingSetsContentProvider extends
+public class BeansWorkingSetContentProvider extends
 		BeansNavigatorContentProvider implements ITreeContentProvider {
 
 	public Object[] getChildren(Object parentElement) {

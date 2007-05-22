@@ -20,7 +20,7 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class WorkingSetsLabelProvider implements ILabelProvider {
+public class WorkingSetLabelProvider implements ILabelProvider {
 
 	private WorkbenchLabelProvider labelProvider = new WorkbenchLabelProvider();
 

@@ -20,7 +20,7 @@ import org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorCont
  * @author Christian Dupuis
  * @since 2.0
  */
-public class WebflowWorkingSetsContentProvider extends
+public class WebflowWorkingSetContentProvider extends
 		WebflowNavigatorContentProvider {
 	
 	public Object[] getChildren(Object parentElement) {

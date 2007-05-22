@@ -32,7 +32,7 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.internal.navigator.resources.plugin.WorkbenchNavigatorMessages;
 import org.eclipse.ui.internal.navigator.resources.plugin.WorkbenchNavigatorPlugin;
 import org.eclipse.ui.navigator.IExtensionStateModel;
-import org.springframework.ide.eclipse.ui.workingsets.WorkingSetsContentProvider;
+import org.springframework.ide.eclipse.ui.workingsets.WorkingSetContentProvider;
 
 /**
  * @author Christian Dupuis
@@ -76,9 +76,9 @@ public class WorkingSetRootModeActionGroup extends ActionGroup {
 		 */
 		public void run() {
 			if (stateModel
-					.getBooleanProperty(WorkingSetsContentProvider.SHOW_TOP_LEVEL_WORKING_SETS) != groupWorkingSets) {
+					.getBooleanProperty(WorkingSetContentProvider.SHOW_TOP_LEVEL_WORKING_SETS) != groupWorkingSets) {
 				stateModel.setBooleanProperty(
-						WorkingSetsContentProvider.SHOW_TOP_LEVEL_WORKING_SETS,
+						WorkingSetContentProvider.SHOW_TOP_LEVEL_WORKING_SETS,
 						groupWorkingSets);
 
 				structuredViewer.getControl().setRedraw(false);
@@ -232,7 +232,7 @@ public class WorkingSetRootModeActionGroup extends ActionGroup {
 		}
 		if (stateModel != null) {
 			stateModel.setBooleanProperty(
-					WorkingSetsContentProvider.SHOW_TOP_LEVEL_WORKING_SETS,
+					WorkingSetContentProvider.SHOW_TOP_LEVEL_WORKING_SETS,
 					showTopLevelWorkingSets);
 		}
 

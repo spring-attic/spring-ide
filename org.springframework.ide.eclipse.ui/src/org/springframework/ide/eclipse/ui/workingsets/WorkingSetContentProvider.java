@@ -35,7 +35,7 @@ import org.springframework.ide.eclipse.core.model.ISpringProject;
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public class WorkingSetsContentProvider implements ICommonContentProvider {
+public class WorkingSetContentProvider implements ICommonContentProvider {
 
 	public static final String EXTENSION_ID = "org.springframework.ide.eclipse.ui.navigator.workingsets"; //$NON-NLS-1$
 

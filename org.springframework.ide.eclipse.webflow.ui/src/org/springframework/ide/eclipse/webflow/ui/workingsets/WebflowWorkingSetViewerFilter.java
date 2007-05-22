@@ -12,18 +12,20 @@ package org.springframework.ide.eclipse.webflow.ui.workingsets;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.ui.IWorkingSet;
-import org.springframework.ide.eclipse.ui.workingsets.IWorkingSetsFilter;
+import org.springframework.ide.eclipse.ui.workingsets.IWorkingSetFilter;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 
 /**
- * {@link IWorkingSetsFilter} that filters {@link IWebflowModelElement} that are
+ * {@link IWorkingSetFilter} that filters {@link IWebflowModelElement} that are
  * not part of the {@link IWorkingSet}.
  * @author Christian Dupuis
  * @since 2.0
  */
-public class WebflowWorkingSetsViewerFilter implements IWorkingSetsFilter {
+public class WebflowWorkingSetViewerFilter implements IWorkingSetFilter {
 
 	public boolean isInWorkingSet(IAdaptable[] elements, Object parentElement,
 			Object element) {
@@ -38,8 +40,25 @@ public class WebflowWorkingSetsViewerFilter implements IWorkingSetsFilter {
 			}
 			return false;
 		}
-		// let pass all other elements
-		return true;
+		else if (element instanceof IWebflowProject) {
+			for (IAdaptable adaptable : elements) {
+				IResource resource = (IResource) adaptable
+						.getAdapter(IResource.class);
+				if (WebflowModelUtils.isWebflowConfig(resource)) {
+					return true;
+				}
+			}
+		}
+		else if (parentElement instanceof TreePath) {
+			TreePath treePath = (TreePath) parentElement;
+			for (int i = 0; i < treePath.getSegmentCount(); i++) {
+				if (treePath.getSegment(i) instanceof IWebflowProject) {
+					return true;
+				}
+			}
+		}
+		// let suppress all other elements
+		return false;
 	}
 
 }

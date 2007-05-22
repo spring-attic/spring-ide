@@ -68,7 +68,7 @@ public class SpringWorkingSetPage extends WizardPage implements IWorkingSetPage 
 	public class SpringExplorerAdaptingContentProvider implements
 			ITreeContentProvider {
 
-		private Set<ITreeContentProvider> contentProviders = WorkingSetsUtils.getContentProvider();
+		private Set<ITreeContentProvider> contentProviders = WorkingSetUtils.getContentProvider();
 
 		private ITreeContentProvider rootContentProvider = new SpringNavigatorContentProvider();
 
@@ -124,7 +124,7 @@ public class SpringWorkingSetPage extends WizardPage implements IWorkingSetPage 
 
 	private class SpringExplorerAdaptingLabelProvider implements ILabelProvider {
 
-		private Set<IElementSpecificLabelProvider> labelProviders = WorkingSetsUtils.getLabelProvider();
+		private Set<IElementSpecificLabelProvider> labelProviders = WorkingSetUtils.getLabelProvider();
 
 		private ILabelProvider rootLabelProviders = new SpringNavigatorLabelProvider();
 
