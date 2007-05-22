@@ -67,10 +67,6 @@ public class WebflowEditorInput implements IEditorInput, IPersistableElement {
 		return config;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.IPersistableElement#getFactoryId()
-	 */
 	public String getFactoryId() {
 		return WebflowEditorInputFactory.getFactoryId();
 	}
@@ -103,10 +99,6 @@ public class WebflowEditorInput implements IEditorInput, IPersistableElement {
 		return isValid;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.IPersistableElement#saveState(org.eclipse.ui.IMemento)
-	 */
 	public void saveState(IMemento memento) {
 		if (this.isValid) {
 			WebflowEditorInputFactory.saveState(memento, this);

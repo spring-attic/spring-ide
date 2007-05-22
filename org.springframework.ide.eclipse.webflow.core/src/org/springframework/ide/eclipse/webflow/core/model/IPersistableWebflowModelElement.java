@@ -12,27 +12,24 @@ package org.springframework.ide.eclipse.webflow.core.model;
 
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
-import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.eclipse.core.runtime.IAdaptable;
 
-public interface IWebflowConfig extends IWebflowModelElement, IPersistableWebflowModelElement {
+public interface IPersistableWebflowModelElement extends IAdaptable {
 
-	void setResource(IFile file);
+	int MODEL = 1;
 
-	IFile getResource();
+	int PROJECT = 2;
 
-	Set<IModelElement> getBeansConfigs();
+	int CONFIG = 3;
 
-	void setBeansConfigs(Set<IModelElement> beansConfigs);
+	IPersistableWebflowModelElement getPersistableElementParent();
 
-	void setBeansConfigsElementIds(Set<String> beansConfigs);
+	String getElementID();
 
-	void addBeansConfigElementId(String id);
+	int getElementType();
 
-	IWebflowProject getProject();
-
-	void setName(String name);
-
-	String getName();
+	String getElementName();
+	
+	Set<IPersistableWebflowModelElement> getElementChildren();
 
 }

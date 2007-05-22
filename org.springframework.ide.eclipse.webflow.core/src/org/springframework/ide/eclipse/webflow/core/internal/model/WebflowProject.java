@@ -10,69 +10,46 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.webflow.core.internal.model.project.WebflowProjectDescription;
 import org.springframework.ide.eclipse.webflow.core.internal.model.project.WebflowProjectDescriptionReader;
 import org.springframework.ide.eclipse.webflow.core.internal.model.project.WebflowProjectDescriptionWriter;
+import org.springframework.ide.eclipse.webflow.core.model.IPersistableWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModel;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 
 /**
- * 
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
-public class WebflowProject implements IWebflowProject {
+public class WebflowProject extends AbstractPersistableWebflowModelElement
+		implements IWebflowProject {
 
-	/**
-	 * 
-	 */
 	private final IProject project;
 
 	private final IWebflowModel model;
 
-	/**
-	 * 
-	 */
 	private WebflowProjectDescription description;
 
-	/**
-	 * 
-	 * 
-	 * @param project
-	 */
 	public WebflowProject(IProject project, IWebflowModel model) {
 		this.project = project;
 		this.model = model;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowProject#getConfigs()
-	 */
 	public List<IWebflowConfig> getConfigs() {
 		return getDescription().getConfigs();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowProject#getProject()
-	 */
 	public IProject getProject() {
 		return this.project;
 	}
 
-	/**
-	 * Returns lazily loaded project description. <b>This nature's project has
-	 * to be set first!!! </b>
-	 * 
-	 * @return
-	 */
 	private WebflowProjectDescription getDescription() {
 		if (description == null) {
 			description = WebflowProjectDescriptionReader.read(this);
@@ -80,10 +57,6 @@ public class WebflowProject implements IWebflowProject {
 		return description;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowProject#setConfigs(java.util.List)
-	 */
 	public void setConfigs(List<IWebflowConfig> configs) {
 		WebflowProjectDescription description = getDescription();
 		description.setConfigs(configs);
@@ -92,10 +65,6 @@ public class WebflowProject implements IWebflowProject {
 		model.fireModelChangedEvent(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowProject#getConfig(org.eclipse.core.resources.IFile)
-	 */
 	public IWebflowConfig getConfig(IFile file) {
 		List<IWebflowConfig> configs = getDescription().getConfigs();
 		if (configs != null) {
@@ -105,6 +74,28 @@ public class WebflowProject implements IWebflowProject {
 				}
 			}
 		}
+		return null;
+	}
+
+	public String getElementName() {
+		return this.project.getName();
+	}
+
+	public int getElementType() {
+		return PROJECT;
+	}
+
+	public IPersistableWebflowModelElement getPersistableElementParent() {
+		return this.model;
+	}
+
+	public Set<IPersistableWebflowModelElement> getElementChildren() {
+		Set<IPersistableWebflowModelElement> children = new HashSet<IPersistableWebflowModelElement>();
+		children.addAll(this.getConfigs());
+		return children;
+	}
+
+	public Object getAdapter(Class adapter) {
 		return null;
 	}
 }

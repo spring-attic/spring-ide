@@ -15,44 +15,16 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 
-/**
- * 
- */
-public interface IWebflowProject {
+public interface IWebflowProject extends IPersistableWebflowModelElement {
 
-	/**
-	 * 
-	 */
 	String DESCRIPTION_FILE = ".springWebflow";
 
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
 	List<IWebflowConfig> getConfigs();
 
-	/**
-	 * 
-	 * 
-	 * @param configs
-	 */
 	void setConfigs(List<IWebflowConfig> configs);
 
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
 	IProject getProject();
 
-	/**
-	 * 
-	 * 
-	 * @param file
-	 * 
-	 * @return
-	 */
 	IWebflowConfig getConfig(IFile file);
 
 }

@@ -197,14 +197,15 @@
          point="org.springframework.ide.eclipse.ui.projectExplorer">
       <filter class="org.springframework.ide.eclipse.webflow.ui.navigator.filters.NonSpringArtefactsFilter"/>
    </extension>
-   <!--
+
    <extension
          point="org.springframework.ide.eclipse.ui.contentContribution">
       <contentContribution
-            contentProvider="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorContentProvider"
+            contentProvider="org.springframework.ide.eclipse.webflow.ui.workingsets.WebflowWorkingSetsContentProvider"
             labelProvider="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorLabelProvider"
-            packagePattern="org.springframework.ide.eclipse.webflow."/>
+            packagePattern="org.springframework.ide.eclipse.webflow."
+            viewerFilter="org.springframework.ide.eclipse.webflow.ui.workingsets.WebflowWorkingSetsViewerFilter" />
             
    </extension>
-   -->
+
 </plugin>

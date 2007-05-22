@@ -15,12 +15,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.ui.IPersistableElement;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IPersistableWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
@@ -31,23 +35,15 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public class WebflowConfig implements IWebflowConfig {
+public class WebflowConfig extends AbstractPersistableWebflowModelElement
+		implements IWebflowConfig, IAdaptable {
 
-	/**
-	 * 
-	 */
 	private Set<String> beansConfigs = new HashSet<String>();
 
-	/**
-	 * 
-	 */
 	private IFile resource;
 
 	private String name;
 
-	/**
-	 * 
-	 */
 	@SuppressWarnings("unused")
 	private IWebflowProject project;
 
@@ -55,25 +51,17 @@ public class WebflowConfig implements IWebflowConfig {
 		return project;
 	}
 
-	/**
-	 * @param project
-	 */
 	public WebflowConfig(IWebflowProject project) {
 		this.project = project;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig#getBeansConfigs()
-	 */
 	public java.util.Set<IModelElement> getBeansConfigs() {
 		IBeansModel model = BeansCorePlugin.getModel();
 
 		java.util.Set<IModelElement> configs = new HashSet<IModelElement>();
 		if (beansConfigs != null) {
 			for (String configName : this.beansConfigs) {
-				IModelElement config = model
-						.getElement(configName);
+				IModelElement config = model.getElement(configName);
 				if (config != null) {
 					configs.add(config);
 				}
@@ -83,18 +71,10 @@ public class WebflowConfig implements IWebflowConfig {
 		return configs;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig#getResource()
-	 */
 	public IFile getResource() {
 		return this.resource;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig#setBeansConfigs(java.util.List)
-	 */
 	public void setBeansConfigs(java.util.Set<IModelElement> beansConfigs) {
 		this.beansConfigs = new HashSet<String>();
 		if (beansConfigs != null) {
@@ -108,10 +88,6 @@ public class WebflowConfig implements IWebflowConfig {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig#setResource(org.eclipse.core.resources.IFile)
-	 */
 	public void setResource(IFile file) {
 		this.resource = file;
 
@@ -126,18 +102,10 @@ public class WebflowConfig implements IWebflowConfig {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig#setBeansConfigsElementIds(java.util.List)
-	 */
 	public void setBeansConfigsElementIds(java.util.Set<String> beansConfigs) {
 		this.beansConfigs = beansConfigs;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig#addBeansConfigElementId(java.lang.String)
-	 */
 	public void addBeansConfigElementId(String id) {
 		this.beansConfigs.add(id);
 	}
@@ -159,15 +127,12 @@ public class WebflowConfig implements IWebflowConfig {
 	public void addPropertyChangeListener(PropertyChangeListener l) {
 	}
 
-
 	public void fireStructureChange(String prop, Object child) {
 	}
 
-	
 	public IWebflowModelElement getElementParent() {
 		return null;
 	}
-
 
 	public int getElementStartLine() {
 		return 0;
@@ -176,7 +141,6 @@ public class WebflowConfig implements IWebflowConfig {
 	public IDOMNode getNode() {
 		return null;
 	}
-	
 
 	public void init(IDOMNode node, IWebflowModelElement parent) {
 	}
@@ -184,7 +148,33 @@ public class WebflowConfig implements IWebflowConfig {
 	public void removePropertyChangeListener(PropertyChangeListener l) {
 	}
 
-
 	public void setElementParent(IWebflowModelElement parent) {
+	}
+
+	public String getElementName() {
+		return this.name;
+	}
+
+	public int getElementType() {
+		return CONFIG;
+	}
+
+	public IPersistableWebflowModelElement getPersistableElementParent() {
+		return project;
+	}
+
+	public Set<IPersistableWebflowModelElement> getElementChildren() {
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public Object getAdapter(Class adapter) {
+		if (adapter == IPersistableElement.class) {
+			return new WebflowModelElementToPersistableElementAdapter(this);
+		}
+		else if (adapter == IResource.class) {
+			return getResource();
+		}
+		return null;
 	}
 }

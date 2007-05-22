@@ -27,8 +27,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 /**
- * 
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -36,129 +34,48 @@ import org.w3c.dom.NodeList;
 public abstract class WebflowModelElement implements IWebflowModelElement,
 		IAdaptable {
 
-	/**
-	 * The node.
-	 */
 	protected IDOMNode node = null;
 
-	/**
-	 * The parent.
-	 */
 	protected IWebflowModelElement parent;
 
-	/**
-	 * The Constructor.
-	 */
 	protected WebflowModelElement() {
 	}
 
-	/**
-	 * The listeners.
-	 */
 	transient protected PropertyChangeSupport listeners = new PropertyChangeSupport(
 			this);
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement#addPropertyChangeListener(java.beans.PropertyChangeListener)
-	 */
-	/**
-	 * 
-	 * 
-	 * @param l
-	 */
 	public void addPropertyChangeListener(PropertyChangeListener l) {
 		listeners.addPropertyChangeListener(l);
 	}
 
-	/**
-	 * Fire property change.
-	 * 
-	 * @param newValue the new value
-	 * @param old the old
-	 * @param prop the prop
-	 */
 	public void firePropertyChange(String prop, Object old, Object newValue) {
 		listeners.firePropertyChange(prop, old, newValue);
 	}
 
-	/**
-	 * Fire property change.
-	 * 
-	 * @param prop the prop
-	 */
 	public void firePropertyChange(String prop) {
 		listeners.firePropertyChange(prop, "old", "newValue");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement#fireStructureChange(java.lang.String,
-	 * java.lang.Object)
-	 */
-	/**
-	 * 
-	 * 
-	 * @param child
-	 * @param prop
-	 */
 	public void fireStructureChange(String prop, Object child) {
 		listeners.firePropertyChange(prop, null, child);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement#removePropertyChangeListener(java.beans.PropertyChangeListener)
-	 */
-	/**
-	 * 
-	 * 
-	 * @param l
-	 */
 	public void removePropertyChangeListener(PropertyChangeListener l) {
 		listeners.removePropertyChangeListener(l);
 	}
 
-	/**
-	 * Gets the attribute.
-	 * 
-	 * @param attributeName the attribute name
-	 * 
-	 * @return the attribute
-	 */
 	protected String getAttribute(String attributeName) {
 		return getAttribute(this.node, attributeName);
 	}
 
-	/**
-	 * Gets the attribute.
-	 * 
-	 * @param attributeName the attribute name
-	 * @param node the node
-	 * 
-	 * @return the attribute
-	 */
 	protected String getAttribute(IDOMNode node, String attributeName) {
 		return BeansEditorUtils.getAttribute(node, attributeName);
 	}
 
-	/**
-	 * Sets the attribute.
-	 * 
-	 * @param attributeName the attribute name
-	 * @param value the value
-	 */
 	protected void setAttribute(String attributeName, String value) {
 		setAttribute(this.node, attributeName, value);
 	}
 
-	/**
-	 * Sets the attribute.
-	 * 
-	 * @param attributeName the attribute name
-	 * @param value the value
-	 * @param node the node
-	 */
 	protected void setAttribute(IDOMNode node, String attributeName,
 			String value) {
 
@@ -166,7 +83,6 @@ public abstract class WebflowModelElement implements IWebflowModelElement,
 			value = null;
 		}
 
-		// String oldValue = BeansEditorUtils.getAttribute(node, attributeName);
 		node.getModel().aboutToChangeModel();
 		if (value != null) {
 			((Element) node).setAttribute(attributeName, value);
@@ -179,13 +95,6 @@ public abstract class WebflowModelElement implements IWebflowModelElement,
 		firePropertyChange(PROPS, null, value);
 	}
 
-	/**
-	 * Gets the children node by tag name.
-	 * 
-	 * @param tagName the tag name
-	 * 
-	 * @return the children node by tag name
-	 */
 	protected List<IDOMNode> getChildrenNodeByTagName(String tagName) {
 		List<IDOMNode> nodes = new ArrayList<IDOMNode>();
 		NodeList children = this.node.getChildNodes();
@@ -203,64 +112,23 @@ public abstract class WebflowModelElement implements IWebflowModelElement,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement#getNode()
-	 */
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
 	public IDOMNode getNode() {
 		return this.node;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement#getElementParent()
-	 */
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
 	public IWebflowModelElement getElementParent() {
 		return this.parent;
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param parent
-	 */
 	public void setElementParent(IWebflowModelElement parent) {
 		this.parent = parent;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement#init(org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode,
-	 * org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement)
-	 */
-	/**
-	 * 
-	 * 
-	 * @param node
-	 * @param parent
-	 */
 	public void init(IDOMNode node, IWebflowModelElement parent) {
 		this.node = node;
 		this.parent = parent;
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param key
-	 * 
-	 * @return
-	 */
 	public Object getAdapter(Class key) {
 		if (IPropertySource.class == key) {
 			if (node instanceof IDOMNode) {

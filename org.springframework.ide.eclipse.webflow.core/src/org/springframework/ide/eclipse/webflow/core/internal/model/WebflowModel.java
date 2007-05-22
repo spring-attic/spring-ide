@@ -13,9 +13,11 @@ package org.springframework.ide.eclipse.webflow.core.internal.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -29,36 +31,25 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeListener;
+import org.springframework.ide.eclipse.webflow.core.model.IPersistableWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModel;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelListener;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 
-/**
- * 
- */
-public class WebflowModel implements IWebflowModel, IResourceChangeListener {
+public class WebflowModel extends AbstractPersistableWebflowModelElement
+		implements IWebflowModel, IResourceChangeListener {
 
 	private List<IWebflowModelListener> listners = new ArrayList<IWebflowModelListener>();
 
-	/**
-	 * 
-	 */
 	private Map<IProject, IWebflowProject> projects;
 
 	private IResourceChangeListener workspaceListener;
 
-	/**
-	 * 
-	 */
 	public WebflowModel() {
 		this.projects = new HashMap<IProject, IWebflowProject>();
 	}
 
-	/**
-	 * @param project
-	 * @return
-	 */
 	public boolean hasProject(IProject project) {
 		if (project != null && project.isAccessible()
 				&& projects.containsKey(project)
@@ -68,10 +59,6 @@ public class WebflowModel implements IWebflowModel, IResourceChangeListener {
 		return false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.internal.model.IWebflowModel#getProject(org.eclipse.core.resources.IProject)
-	 */
 	public IWebflowProject getProject(IProject project) {
 		if (hasProject(project)) {
 			return (IWebflowProject) projects.get(project);
@@ -79,30 +66,16 @@ public class WebflowModel implements IWebflowModel, IResourceChangeListener {
 		return new WebflowProject(project, this);
 	}
 
-	/**
-	 * @param name
-	 * @return
-	 */
 	public IWebflowProject getProject(String name) {
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(
 				name);
 		return getProject(project);
 	}
 
-	/**
-	 * Returns a collection of all <code>IBeansProject</code> s defined in
-	 * this model.
-	 * @return
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.IWebFlowProject
-	 */
 	public Collection getProjects() {
 		return projects.values();
 	}
 
-	/**
-	 * @param configFile
-	 * @return
-	 */
 	public IWebflowConfig getConfig(IFile configFile) {
 		if (configFile != null) {
 			IWebflowProject project = getProject(configFile.getProject());
@@ -113,9 +86,6 @@ public class WebflowModel implements IWebflowModel, IResourceChangeListener {
 		return null;
 	}
 
-	/**
-	 * 
-	 */
 	public void startup() {
 		initialize();
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -128,9 +98,6 @@ public class WebflowModel implements IWebflowModel, IResourceChangeListener {
 				SpringResourceChangeListener.LISTENER_FLAGS);
 	}
 
-	/**
-	 * 
-	 */
 	public void shutdown() {
 		initialize();
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -144,9 +111,6 @@ public class WebflowModel implements IWebflowModel, IResourceChangeListener {
 		projects.clear();
 	}
 
-	/**
-	 * 
-	 */
 	private void initialize() {
 		this.projects.clear();
 		List projects = getBeansProjects();
@@ -159,12 +123,6 @@ public class WebflowModel implements IWebflowModel, IResourceChangeListener {
 		}
 	}
 
-	/**
-	 * Returns a list of all <code>IProject</code> s with the Beans project
-	 * nature.
-	 * @return list of all <code>IProject</code> s with the Beans project
-	 * nature
-	 */
 	private static List<IProject> getBeansProjects() {
 		List<IProject> springProjects = new ArrayList<IProject>();
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot()
@@ -234,5 +192,27 @@ public class WebflowModel implements IWebflowModel, IResourceChangeListener {
 	public synchronized void removeProject(IProject project) {
 		initialize();
 		fireModelChangedEvent(null);
+	}
+
+	public String getElementName() {
+		return "WebflowModel";
+	}
+
+	public int getElementType() {
+		return MODEL;
+	}
+
+	public IPersistableWebflowModelElement getPersistableElementParent() {
+		return null;
+	}
+
+	public Set<IPersistableWebflowModelElement> getElementChildren() {
+		Set<IPersistableWebflowModelElement> children = new HashSet<IPersistableWebflowModelElement>();
+		children.addAll(this.projects.values());
+		return children;
+	}
+
+	public Object getAdapter(Class adapter) {
+		return null;
 	}
 }

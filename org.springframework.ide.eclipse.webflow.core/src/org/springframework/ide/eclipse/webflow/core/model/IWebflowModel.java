@@ -16,7 +16,7 @@ import org.eclipse.core.resources.IProject;
  * @author Christian Dupuis
  * @since 2.0 
  */
-public interface IWebflowModel {
+public interface IWebflowModel extends IPersistableWebflowModelElement {
 
 	IWebflowProject getProject(IProject project);
 	
@@ -29,4 +29,6 @@ public interface IWebflowModel {
 	void removeModelChangeListener(IWebflowModelListener listener);
 
 	void fireModelChangedEvent(IWebflowProject project);
+	
+	IPersistableWebflowModelElement getElement(String id);
 }

@@ -8,31 +8,26 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.webflow.core.model;
-
-import java.util.Set;
+package org.springframework.ide.eclipse.webflow.ui.workingsets;
 
 import org.eclipse.core.resources.IFile;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorContentProvider;
 
-public interface IWebflowConfig extends IWebflowModelElement, IPersistableWebflowModelElement {
-
-	void setResource(IFile file);
-
-	IFile getResource();
-
-	Set<IModelElement> getBeansConfigs();
-
-	void setBeansConfigs(Set<IModelElement> beansConfigs);
-
-	void setBeansConfigsElementIds(Set<String> beansConfigs);
-
-	void addBeansConfigElementId(String id);
-
-	IWebflowProject getProject();
-
-	void setName(String name);
-
-	String getName();
-
+/**
+ * Simple wrapper of {@link WebflowNavigatorContentProvider} that prevents children
+ * of a {@link IFile} instance.
+ * @author Christian Dupuis
+ * @since 2.0
+ */
+public class WebflowWorkingSetsContentProvider extends
+		WebflowNavigatorContentProvider {
+	
+	public Object[] getChildren(Object parentElement) {
+		if (parentElement instanceof IFile) {
+			return IModelElement.NO_CHILDREN;
+		}
+		return super.getChildren(parentElement);
+	}
+	
 }
