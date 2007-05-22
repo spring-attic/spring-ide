@@ -466,10 +466,6 @@ public class SpringWorkingSetPage extends WizardPage implements IWorkingSetPage 
 		// checked state is set lazily on expand, don't set it if container is
 		// collapsed
 
-		if (tree.getExpandedState(container) == false && state
-				&& checkExpandedState) {
-			return;
-		}
 		Object[] members = contentProvider.getChildren(container);
 		for (int i = members.length - 1; i >= 0; i--) {
 			Object element = members[i];
