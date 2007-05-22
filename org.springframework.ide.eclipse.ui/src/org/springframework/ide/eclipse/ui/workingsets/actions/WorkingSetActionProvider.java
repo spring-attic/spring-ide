@@ -25,7 +25,7 @@ import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.eclipse.ui.navigator.IExtensionActivationListener;
 import org.eclipse.ui.navigator.IExtensionStateModel;
 import org.eclipse.ui.navigator.INavigatorContentService;
-import org.springframework.ide.eclipse.ui.workingsets.WorkingSetViewerFilter;
+import org.springframework.ide.eclipse.ui.workingsets.WorkingSetsViewerFilter;
 import org.springframework.ide.eclipse.ui.workingsets.WorkingSetsContentProvider;
 
 /**
@@ -53,7 +53,7 @@ public class WorkingSetActionProvider extends CommonActionProvider {
 
 	private IExtensionStateModel extensionStateModel;
 
-	private WorkingSetViewerFilter workingSetFilter = null;
+	private WorkingSetsViewerFilter workingSetFilter = null;
 
 	public class WorkingSetManagerListener implements IPropertyChangeListener {
 
@@ -202,7 +202,7 @@ public class WorkingSetActionProvider extends CommonActionProvider {
 	public void init(ICommonActionExtensionSite aSite) {
 		viewer = aSite.getStructuredViewer();
 
-		workingSetFilter = new WorkingSetViewerFilter();
+		workingSetFilter = new WorkingSetsViewerFilter();
 		viewer.addFilter(workingSetFilter);
 
 		contentService = aSite.getContentService();

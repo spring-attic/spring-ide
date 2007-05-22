@@ -62,15 +62,8 @@ This extension-point is used to specify one or more content provider that are us
                   
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn="org.eclipse.jface.viewers.ILabelProvider"/>
+                  <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.ui.workingsets.ISupportingLabelProvider"/>
                </appInfo>
-            </annotation>
-         </attribute>
-         <attribute name="packagePattern" type="string" use="required">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
             </annotation>
          </attribute>
          <attribute name="viewerFilter" type="string">
@@ -107,7 +100,6 @@ This extension-point is used to specify one or more content provider that are us
       &lt;contentContribution
             contentProvider=&quot;org.springframework.ide.eclipse.beans.ui.workingsets.BeansWorkingSetsContentProvider&quot;
             labelProvider=&quot;org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorLabelProvider&quot;
-            packagePattern=&quot;org.springframework.ide.eclipse.beans.&quot;
             viewerFilter=&quot;org.springframework.ide.eclipse.beans.ui.workingsets.BeansWorkingSetViewerFilter&quot;/&gt;
             
    &lt;/extension&gt;

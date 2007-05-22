@@ -19,7 +19,7 @@ import org.eclipse.jface.viewers.ViewerSorter;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class WorkingSetViewerSorter extends ViewerSorter {
+public class WorkingSetsViewerSorter extends ViewerSorter {
 
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		if (viewer instanceof StructuredViewer) {

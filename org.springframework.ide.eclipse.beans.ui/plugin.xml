@@ -327,11 +327,10 @@
    
    <extension
          point="org.springframework.ide.eclipse.ui.contentContribution">
-
+  
       <contentContribution
             contentProvider="org.springframework.ide.eclipse.beans.ui.workingsets.BeansWorkingSetsContentProvider"
-            labelProvider="org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorLabelProvider"
-            packagePattern="org.springframework.ide.eclipse.beans."
+            labelProvider="org.springframework.ide.eclipse.beans.ui.workingsets.BeansWorkingSetsLabelProvider"
             viewerFilter="org.springframework.ide.eclipse.beans.ui.workingsets.BeansWorkingSetsViewerFilter"/>
             
    </extension>

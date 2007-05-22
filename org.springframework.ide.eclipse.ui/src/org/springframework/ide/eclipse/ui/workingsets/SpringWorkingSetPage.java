@@ -12,10 +12,8 @@ package org.springframework.ide.eclipse.ui.workingsets;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.internal.resources.WorkspaceRoot;
@@ -23,12 +21,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.fieldassist.FieldAssistColors;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
@@ -75,37 +68,9 @@ public class SpringWorkingSetPage extends WizardPage implements IWorkingSetPage 
 	public class SpringExplorerAdaptingContentProvider implements
 			ITreeContentProvider {
 
-		private Set<ITreeContentProvider> contentProviders = new HashSet<ITreeContentProvider>();
+		private Set<ITreeContentProvider> contentProviders = WorkingSetsUtils.getContentProvider();
 
 		private ITreeContentProvider rootContentProvider = new SpringNavigatorContentProvider();
-
-		public SpringExplorerAdaptingContentProvider() {
-			IExtensionPoint point = Platform
-					.getExtensionRegistry()
-					.getExtensionPoint(
-							"org.springframework.ide.eclipse.ui.contentContribution");
-			if (point != null) {
-				for (IExtension extension : point.getExtensions()) {
-					for (IConfigurationElement config : extension
-							.getConfigurationElements()) {
-						String uri = config.getAttribute("contentProvider");
-						if (uri != null
-								&& config.getAttribute("labelProvider") != null) {
-							try {
-								Object handler = config
-										.createExecutableExtension("contentProvider");
-								if (handler instanceof ITreeContentProvider) {
-									ITreeContentProvider contentProvider = (ITreeContentProvider) handler;
-									contentProviders.add(contentProvider);
-								}
-							}
-							catch (CoreException e) {
-							}
-						}
-					}
-				}
-			}
-		}
 
 		public void dispose() {
 		}
@@ -159,48 +124,18 @@ public class SpringWorkingSetPage extends WizardPage implements IWorkingSetPage 
 
 	private class SpringExplorerAdaptingLabelProvider implements ILabelProvider {
 
-		private Map<String, ILabelProvider> labelProviders = new HashMap<String, ILabelProvider>();
+		private Set<IElementSpecificLabelProvider> labelProviders = WorkingSetsUtils.getLabelProvider();
 
 		private ILabelProvider rootLabelProviders = new SpringNavigatorLabelProvider();
-
-		public SpringExplorerAdaptingLabelProvider() {
-			IExtensionPoint point = Platform
-					.getExtensionRegistry()
-					.getExtensionPoint(
-							"org.springframework.ide.eclipse.ui.contentContribution");
-			if (point != null) {
-				for (IExtension extension : point.getExtensions()) {
-					for (IConfigurationElement config : extension
-							.getConfigurationElements()) {
-						String uri = config.getAttribute("labelProvider");
-						String pattern = config.getAttribute("packagePattern");
-						if (uri != null
-								&& config.getAttribute("contentProvider") != null) {
-							try {
-								Object handler = config
-										.createExecutableExtension("labelProvider");
-								if (handler instanceof ILabelProvider) {
-									ILabelProvider labelProvider = (ILabelProvider) handler;
-									labelProviders.put(pattern, labelProvider);
-								}
-							}
-							catch (CoreException e) {
-							}
-						}
-					}
-				}
-			}
-		}
 
 		public Image getImage(Object element) {
 			if (element instanceof ISpringProject) {
 				return rootLabelProviders.getImage(element);
 			}
 			else {
-				for (Map.Entry<String, ILabelProvider> entry : labelProviders
-						.entrySet()) {
-					if (element.getClass().getName().startsWith(entry.getKey())) {
-						return entry.getValue().getImage(element);
+				for (IElementSpecificLabelProvider labelProvider : labelProviders) {
+					if (labelProvider.supportsElement(element)) {
+						return labelProvider.getImage(element);
 					}
 				}
 			}
@@ -212,10 +147,9 @@ public class SpringWorkingSetPage extends WizardPage implements IWorkingSetPage 
 				return rootLabelProviders.getText(element);
 			}
 			else {
-				for (Map.Entry<String, ILabelProvider> entry : labelProviders
-						.entrySet()) {
-					if (element.getClass().getName().startsWith(entry.getKey())) {
-						return entry.getValue().getText(element);
+				for (IElementSpecificLabelProvider labelProvider : labelProviders) {
+					if (labelProvider.supportsElement(element)) {
+						return labelProvider.getText(element);
 					}
 				}
 			}

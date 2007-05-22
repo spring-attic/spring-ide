@@ -236,7 +236,7 @@
             <instanceof value="java.lang.Object"/>
          </possibleChildren>
          <commonSorter
-               class="org.springframework.ide.eclipse.ui.workingsets.WorkingSetViewerSorter"
+               class="org.springframework.ide.eclipse.ui.workingsets.WorkingSetsViewerSorter"
                id="org.springframework.ide.eclipse.ui.navigator.workingsets.sorter"/>  
       </navigatorContent>
             

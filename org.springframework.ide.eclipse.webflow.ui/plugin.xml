@@ -202,8 +202,7 @@
          point="org.springframework.ide.eclipse.ui.contentContribution">
       <contentContribution
             contentProvider="org.springframework.ide.eclipse.webflow.ui.workingsets.WebflowWorkingSetsContentProvider"
-            labelProvider="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorLabelProvider"
-            packagePattern="org.springframework.ide.eclipse.webflow."
+            labelProvider="org.springframework.ide.eclipse.webflow.ui.workingsets.WebflowWorkingSetsLabelProvider"
             viewerFilter="org.springframework.ide.eclipse.webflow.ui.workingsets.WebflowWorkingSetsViewerFilter" />
             
    </extension>

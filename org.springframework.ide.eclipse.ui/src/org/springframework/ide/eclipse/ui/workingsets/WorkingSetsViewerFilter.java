@@ -10,15 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.ui.workingsets;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -30,7 +22,7 @@ import org.eclipse.ui.internal.AggregateWorkingSet;
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public class WorkingSetViewerFilter extends ViewerFilter {
+public class WorkingSetsViewerFilter extends ViewerFilter {
 
 	private IWorkingSet workingSet;
 
@@ -61,8 +53,9 @@ public class WorkingSetViewerFilter extends ViewerFilter {
 				&& element instanceof IWorkingSet) {
 			return true;
 		}
-		for (IWorkingSetsFilter filter : getWorkingSetFilter()) {
-			if (filter.isInWorkingSet(getElementsFromWorkingSet(parentElement), parentElement, element)) {
+		for (IWorkingSetsFilter filter : WorkingSetsUtils.getViewerFilter()) {
+			if (filter.isInWorkingSet(getElementsFromWorkingSet(parentElement),
+					parentElement, element)) {
 				return true;
 			}
 		}
@@ -86,34 +79,5 @@ public class WorkingSetViewerFilter extends ViewerFilter {
 			}
 		}
 		return workingSet.getElements();
-	}
-
-	private Set<IWorkingSetsFilter> getWorkingSetFilter() {
-		Set<IWorkingSetsFilter> workingSetFilter = new HashSet<IWorkingSetsFilter>();
-		IExtensionPoint point = Platform
-				.getExtensionRegistry()
-				.getExtensionPoint(
-						"org.springframework.ide.eclipse.ui.contentContribution");
-		if (point != null) {
-			for (IExtension extension : point.getExtensions()) {
-				for (IConfigurationElement config : extension
-						.getConfigurationElements()) {
-					String uri = config.getAttribute("viewerFilter");
-					if (uri != null) {
-						try {
-							Object handler = config
-									.createExecutableExtension("viewerFilter");
-							if (handler instanceof IWorkingSetsFilter) {
-								IWorkingSetsFilter contentProvider = (IWorkingSetsFilter) handler;
-								workingSetFilter.add(contentProvider);
-							}
-						}
-						catch (CoreException e) {
-						}
-					}
-				}
-			}
-		}
-		return workingSetFilter;
 	}
 }
