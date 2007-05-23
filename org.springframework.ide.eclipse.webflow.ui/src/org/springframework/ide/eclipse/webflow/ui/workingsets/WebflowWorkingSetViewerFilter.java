@@ -10,12 +10,18 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.ui.workingsets;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.ui.IWorkingSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
+import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.ui.workingsets.IWorkingSetFilter;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 
@@ -29,36 +35,68 @@ public class WebflowWorkingSetViewerFilter implements IWorkingSetFilter {
 
 	public boolean isInWorkingSet(IAdaptable[] elements, Object parentElement,
 			Object element) {
-		if (element instanceof IResource
-				&& WebflowModelUtils.isWebflowConfig((IResource) element)) {
-			for (IAdaptable adaptable : elements) {
-				IResource resource = (IResource) adaptable
-						.getAdapter(IResource.class);
-				if (resource != null && resource.equals(element)) {
-					return true;
-				}
+
+		if (element instanceof ISpringProject) {
+			IProject project = ((ISpringProject) element).getProject();
+			if (checkProject(elements, project)) {
+				return true;
 			}
-			return false;
 		}
 		else if (element instanceof IWebflowProject) {
-			for (IAdaptable adaptable : elements) {
-				IResource resource = (IResource) adaptable
-						.getAdapter(IResource.class);
-				if (WebflowModelUtils.isWebflowConfig(resource)) {
-					return true;
-				}
+			IProject project = ((IWebflowProject) element).getProject();
+			if (checkProject(elements, project)) {
+				return true;
 			}
 		}
+		// check if the TreePath contains a IBeansProject
 		else if (parentElement instanceof TreePath) {
-			TreePath treePath = (TreePath) parentElement;
-			for (int i = 0; i < treePath.getSegmentCount(); i++) {
-				if (treePath.getSegment(i) instanceof IWebflowProject) {
-					return true;
+			IProject project = getProjectFromTreePath((TreePath) parentElement);
+			if (checkProject(elements, project)) {
+				for (IAdaptable adaptable : elements) {
+					if (element.equals(adaptable)) {
+						return true;
+					}
+					else if (adaptable instanceof IFile) {
+						IWebflowConfig wc = WebflowModelUtils.getWebflowConfig(
+								(IFile) adaptable);
+						if (element.equals(wc)) {
+							return true;
+						}
+					}
+					
+					if (element instanceof IBeansModelElement
+							&& !(element instanceof IBeansConfigSet)) {
+						return true;
+					}
 				}
 			}
 		}
-		// let suppress all other elements
+
 		return false;
 	}
 
+	private boolean checkProject(IAdaptable[] elements, IProject project) {
+		if (project == null) {
+			return false;
+		}
+		for (IAdaptable adaptable : elements) {
+			IResource resource = (IResource) adaptable
+					.getAdapter(IResource.class);
+			if (resource != null && WebflowModelUtils.isWebflowConfig(resource)) {
+				if (project.equals(resource.getProject())) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private IProject getProjectFromTreePath(TreePath treePath) {
+		for (int i = 0; i < treePath.getSegmentCount(); i++) {
+			if (treePath.getSegment(i) instanceof IWebflowProject) {
+				return ((IWebflowProject) treePath.getSegment(i)).getProject();
+			}
+		}
+		return null;
+	}
 }
