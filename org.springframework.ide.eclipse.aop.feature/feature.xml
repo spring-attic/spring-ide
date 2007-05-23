@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.springframework.ide.eclipse.aop.feature"
+      label="%featureName"
+      version="2.0.0.qualifier"
+      provider-name="%providerName">
+
+   <description>
+      %description
+   </description>
+
+   <copyright>
+      %copyright
+   </copyright>
+
+   <license url="%licenseUrl">
+      %license
+   </license>
+
+   <url>
+      <update label="%updateSiteName" url="http://springide.org/updatesite/"/>
+   </url>
+
+   <requires>
+      <import feature="org.eclipse.wst.xml_ui.feature" version="1.5.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.jdt" version="3.2.0" match="greaterOrEqual"/>
+   </requires>
+
+   <plugin
+         id="org.springframework.ide.eclipse.aop.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.aop.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.aop.ui.xref"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.aop.ui.visualiser"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+         
+	<includes id="org.springframework.ide.eclipse.aop.feature.source" version="0.0.0"/>
+	
+</feature>

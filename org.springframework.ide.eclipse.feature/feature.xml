@@ -22,6 +22,22 @@
       <update label="%updateSiteName" url="http://springide.org/updatesite/"/>
    </url>
 
+   <includes
+         id="org.springframework.ide.eclipse.feature.source"
+         version="0.0.0"/>
+
+   <includes
+         id="org.springframework.ide.eclipse.aop.feature"
+         version="0.0.0"
+         name="Spring IDE AOP"
+         optional="true"/>
+
+   <includes
+         id="org.springframework.ide.eclipse.webflow.feature"
+         version="0.0.0"
+         name="Spring IDE Web Flow"
+         optional="true"/>
+
    <requires>
       <import feature="org.eclipse.wst.xml_ui.feature" version="1.5.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.jdt" version="3.2.0" match="greaterOrEqual"/>
@@ -97,34 +113,6 @@
          version="0.0.0"
          unpack="false"/>
 
-   <plugin
-         id="org.springframework.ide.eclipse.aop.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.ide.eclipse.aop.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.ide.eclipse.aop.ui.xref"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.ide.eclipse.aop.ui.visualiser"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-         
    <plugin
          id="org.springframework.ide.eclipse.webflow.core"
          download-size="0"
@@ -251,6 +239,4 @@
          version="0.0.0"
          unpack="false"/>
 
-	<includes id="org.springframework.ide.eclipse.feature.source" version="0.0.0"/>
-	
 </feature>
