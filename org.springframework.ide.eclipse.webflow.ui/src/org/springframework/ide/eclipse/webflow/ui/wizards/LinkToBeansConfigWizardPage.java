@@ -47,7 +47,8 @@ public class LinkToBeansConfigWizardPage extends WizardPage {
 	
 	protected LinkToBeansConfigWizardPage(String pageName) {
 		super(pageName);
-		setDescription("Define details for the Spring Web Flow definition file");
+		setTitle("New Web Flow Definition file");
+		setDescription("Define details for the Spring Web Flow Definition file");
 	}
 
 	public void createControl(Composite parent) {

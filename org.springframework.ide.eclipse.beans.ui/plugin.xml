@@ -92,7 +92,7 @@
          	%wizards.newProject.description
          </description>
       </wizard>
-      <!--wizard
+      <wizard
             id="org.springframework.ide.eclipse.beans.ui.wizards.newBeansConfig"
             name="%wizards.newConfig.name"
             class="org.springframework.ide.eclipse.beans.ui.wizards.NewBeansConfigWizard"
@@ -104,7 +104,7 @@
          <selection
                class="org.eclipse.core.resources.IResource">
          </selection>
-      </wizard-->
+      </wizard>
    </extension>
  
    <extension
@@ -327,12 +327,23 @@
    
    <extension
          point="org.springframework.ide.eclipse.ui.contentContribution">
-  
       <contentContribution
             contentProvider="org.springframework.ide.eclipse.beans.ui.workingsets.BeansWorkingSetContentProvider"
             labelProvider="org.springframework.ide.eclipse.beans.ui.workingsets.BeansWorkingSetLabelProvider"
             viewerFilter="org.springframework.ide.eclipse.beans.ui.workingsets.BeansWorkingSetViewerFilter"/>
-            
    </extension>
-
+   
+   <extension point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+       	  <newWizardShortcut
+             id="org.springframework.ide.eclipse.beans.ui.wizards.newBeansConfig">
+          </newWizardShortcut>
+      </perspectiveExtension>
+      <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+          <newWizardShortcut
+                id="org.springframework.ide.eclipse.beans.ui.wizards.newBeansConfig">
+          </newWizardShortcut>
+      </perspectiveExtension>
+	</extension>
+	
 </plugin>

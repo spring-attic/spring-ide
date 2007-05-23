@@ -204,7 +204,19 @@
             contentProvider="org.springframework.ide.eclipse.webflow.ui.workingsets.WebflowWorkingSetContentProvider"
             labelProvider="org.springframework.ide.eclipse.webflow.ui.workingsets.WebflowWorkingSetLabelProvider"
             viewerFilter="org.springframework.ide.eclipse.webflow.ui.workingsets.WebflowWorkingSetViewerFilter" />
-            
    </extension>
+   
+      <extension point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+       	  <newWizardShortcut
+             id="org.springframework.ide.eclipse.webflow.ui.wizard.newWebflowConfigWizard">
+          </newWizardShortcut>
+      </perspectiveExtension>
+      <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+          <newWizardShortcut
+                id="org.springframework.ide.eclipse.webflow.ui.wizard.newWebflowConfigWizard">
+          </newWizardShortcut>
+      </perspectiveExtension>
+	</extension>
 
 </plugin>

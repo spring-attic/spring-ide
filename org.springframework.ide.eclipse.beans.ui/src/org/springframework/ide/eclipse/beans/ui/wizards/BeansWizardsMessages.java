@@ -54,6 +54,12 @@ public final class BeansWizardsMessages extends NLS {
 	public static String NewProjectPage_output;
 	public static String NewProjectPage_noOutput;
 
+	public static String NewConfig_windowTitle;
+	public static String NewConfig_title;
+	public static String NewConfig_xsdDescription;
+	public static String NewConfig_fileDescription;
+	public static String NewConfig_configSetDescription;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, BeansWizardsMessages.class);
 	}

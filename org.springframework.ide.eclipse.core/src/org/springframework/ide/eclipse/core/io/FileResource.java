@@ -112,7 +112,6 @@ public class FileResource extends AbstractResource implements IAdaptable {
 		return file.getName();
 	}
 
-	@Override
 	public String getDescription() {
 		return "file [" + (file != null ? file.getRawLocation() : "") + "]";
 	}

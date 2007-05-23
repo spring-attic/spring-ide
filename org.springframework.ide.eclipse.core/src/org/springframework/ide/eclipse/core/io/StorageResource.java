@@ -50,7 +50,6 @@ public class StorageResource extends AbstractResource implements IAdaptable {
 		}
 	}
 
-	@Override
 	public String getDescription() {
 		return "storage [" + (storage != null ? storage.getName() : "") + "]";
 	}

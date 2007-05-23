@@ -32,7 +32,8 @@ public class NewWebflowConfigFilePage extends WizardNewFileCreationPage {
 	public NewWebflowConfigFilePage(String pageName,
 			IStructuredSelection selection) {
 		super(pageName, selection);
-		setDescription("Select the location and name of the Spring Web Flow definition file");
+		setTitle("New Web Flow Definition file");
+		setDescription("Select the location and give a name for the new Spring Web Flow Definition file");
 	}
 
 	protected InputStream getInitialContents() {

@@ -15,9 +15,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 
 /**
- * This {@link ILabelProvider}Êdelegates to the {@link BeansModelLabelProvider}
+ * This {@link ILabelProvider} delegates to the {@link BeansModelLabelProvider}
  * and uses the {@link IBeansConfig}'s name.
- * 
  * @author Christian Dupuis
  * @since 2.0
  */

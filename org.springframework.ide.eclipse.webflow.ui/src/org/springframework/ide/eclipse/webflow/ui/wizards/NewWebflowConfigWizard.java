@@ -56,7 +56,7 @@ public class NewWebflowConfigWizard extends Wizard implements INewWizard {
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		this.selection = selection;
 		setNeedsProgressMonitor(true);
-		setWindowTitle("Create Spring Web Flow definition");
+		setWindowTitle("Create a new Spring Web Flow Definition file");
 		setDefaultPageImageDescriptor(BeansUIImages.DESC_WIZ_CONFIG);
 	}
 

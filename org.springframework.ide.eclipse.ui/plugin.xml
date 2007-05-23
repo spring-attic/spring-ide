@@ -244,7 +244,7 @@
    
    <extension point="org.eclipse.ui.preferencePages">
 	 	<page id="org.springframework.ide.eclipse.ui.preferencePage"
- 			name="Spring IDE"
+ 			name="Spring"
     		class="org.springframework.ide.eclipse.ui.dialogs.SpringPreferencePage">
    		</page>
    	</extension>
