@@ -47,14 +47,16 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
  * @author Torsten Juergeleit
  */
-public class NewSpringProjectWizard extends Wizard
-			implements INewWizard, IExecutableExtension  {
+public class NewSpringProjectWizard extends Wizard implements INewWizard,
+		IExecutableExtension {
 
 	private NewSpringProjectCreationPage mainPage;
+
 	private IProject newProject;
 
 	public NewSpringProjectWizard() {
@@ -63,9 +65,8 @@ public class NewSpringProjectWizard extends Wizard
 
 	/**
 	 * Returns the newly created project.
-	 * 
 	 * @return the created project, or <code>null</code> if project not
-	 *         created
+	 * created
 	 */
 	public IProject getNewProject() {
 		return newProject;
@@ -86,13 +87,13 @@ public class NewSpringProjectWizard extends Wizard
 		addPage(mainPage);
 	}
 
-    /**
-     * Stores the configuration element for the wizard. The config element will
-     * be used in <code>performFinish</code> to set the result perspective.
-     */
-    public void setInitializationData(IConfigurationElement config,
-            String propertyName, Object data) {
-    }
+	/**
+	 * Stores the configuration element for the wizard. The config element will
+	 * be used in <code>performFinish</code> to set the result perspective.
+	 */
+	public void setInitializationData(IConfigurationElement config,
+			String propertyName, Object data) {
+	}
 
 	@Override
 	public boolean performFinish() {
@@ -115,17 +116,15 @@ public class NewSpringProjectWizard extends Wizard
 		description.setLocation(newPath);
 
 		// initialize a JCC page in UI thread
-		final JavaCapabilityConfigurationPage jccp =
-				new JavaCapabilityConfigurationPage();
+		final JavaCapabilityConfigurationPage jccp = new JavaCapabilityConfigurationPage();
 		if (isJavaProject) {
 			IJavaProject jproject = JavaCore.create(project);
-			IPath source = (sourceDir.length() == 0 ? project
-					.getFullPath() : project.getFolder(sourceDir)
-					.getFullPath());
-			IPath output = (outputDir.length() == 0 ? project
-					.getFullPath() : project.getFolder(outputDir)
-					.getFullPath());
+			IPath source = (sourceDir.length() == 0 ? project.getFullPath()
+					: project.getFolder(sourceDir).getFullPath());
+			IPath output = (outputDir.length() == 0 ? project.getFullPath()
+					: project.getFolder(outputDir).getFullPath());
 			IClasspathEntry[] cpEntries = new IClasspathEntry[] {
+					JdtUtils.getJREVariableEntry(),
 					JavaCore.newSourceEntry(source) };
 			jccp.init(jproject, output, cpEntries, true);
 		}
@@ -145,7 +144,8 @@ public class NewSpringProjectWizard extends Wizard
 					try {
 						jccp.configureJavaProject(new SubProgressMonitor(
 								monitor, 1000));
-					} catch (InterruptedException e) {
+					}
+					catch (InterruptedException e) {
 						throw new OperationCanceledException(e.getMessage());
 					}
 				}
@@ -156,35 +156,42 @@ public class NewSpringProjectWizard extends Wizard
 		// run the new project creation operation
 		try {
 			getContainer().run(true, true, op);
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException e) {
 			return false;
-		} catch (InvocationTargetException e) {
+		}
+		catch (InvocationTargetException e) {
 
 			// ie.- one of the steps resulted in a core exception
 			Throwable t = e.getTargetException();
 			if (t instanceof CoreException) {
-				if (((CoreException) t).getStatus().getCode() ==
-							IResourceStatus.CASE_VARIANT_EXISTS) {
-					MessageDialog.openError(getShell(),
-								BeansWizardsMessages.NewProject_errorMessage,
-								NLS.bind(BeansWizardsMessages.
-										NewProject_caseVariantExistsError,
+				if (((CoreException) t).getStatus().getCode() == IResourceStatus.CASE_VARIANT_EXISTS) {
+					MessageDialog
+							.openError(
+									getShell(),
+									BeansWizardsMessages.NewProject_errorMessage,
+									NLS
+											.bind(
+													BeansWizardsMessages.NewProject_caseVariantExistsError,
 													project.getName()));
-				} else {
+				}
+				else {
 					ErrorDialog.openError(getShell(),
-							BeansWizardsMessages.NewProject_errorMessage,
-							null, // no special message
+							BeansWizardsMessages.NewProject_errorMessage, null, // no
+																				// special
+																				// message
 							((CoreException) t).getStatus());
 				}
-			} else {
+			}
+			else {
 				// CoreExceptions are handled above, but unexpected runtime
 				// exceptions and errors may still occur.
-				BeansUIPlugin.getDefault().getLog().log(new Status(
-						IStatus.ERROR, BeansUIPlugin.PLUGIN_ID, 0,
-						t.toString(), t));
+				BeansUIPlugin.getDefault().getLog().log(
+						new Status(IStatus.ERROR, BeansUIPlugin.PLUGIN_ID, 0, t
+								.toString(), t));
 				MessageDialog.openError(getShell(),
-						BeansWizardsMessages.NewProject_errorMessage,
-						NLS.bind(BeansWizardsMessages.NewProject_internalError,
+						BeansWizardsMessages.NewProject_errorMessage, NLS.bind(
+								BeansWizardsMessages.NewProject_internalError,
 								t.getMessage()));
 			}
 			return false;
@@ -195,21 +202,17 @@ public class NewSpringProjectWizard extends Wizard
 
 	/**
 	 * Creates a project resource given the project handle and description.
-	 * 
-	 * @param projectHandle
-	 *            the project handle to create a project resource for
-	 * @param description
-	 *            the project description to create a project resource for
-	 * @param monitor
-	 *            the progress monitor to show visual progress with
-	 * 
-	 * @exception CoreException  if the operation fails
-	 * @exception OperationCanceledException  if the operation is canceled
+	 * @param projectHandle the project handle to create a project resource for
+	 * @param description the project description to create a project resource
+	 * for
+	 * @param monitor the progress monitor to show visual progress with
+	 * @exception CoreException if the operation fails
+	 * @exception OperationCanceledException if the operation is canceled
 	 */
 	protected void createSpringProject(IProject projectHandle,
-				IProjectDescription description, Set<String> configExtensions,
-				IProgressMonitor monitor) throws CoreException,
-						OperationCanceledException {
+			IProjectDescription description, Set<String> configExtensions,
+			IProgressMonitor monitor) throws CoreException,
+			OperationCanceledException {
 		try {
 			monitor.beginTask(BeansWizardsMessages.NewProject_createProject, 8);
 
@@ -237,7 +240,8 @@ public class NewSpringProjectWizard extends Wizard
 			project.setConfigExtensions(configExtensions);
 			project.saveDescription();
 			monitor.worked(2);
-		} finally {
+		}
+		finally {
 			monitor.done();
 		}
 	}

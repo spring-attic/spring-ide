@@ -26,6 +26,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IField;
@@ -37,6 +39,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
@@ -448,5 +451,34 @@ public class JdtUtils {
 			return AjdtUtils.isTypeAjdtElement(type);
 		}
 		return false;
+	}
+
+	/**
+	 * Creates specified Java project.
+	 */
+	public static IJavaProject createJavaProject(String projectName,
+			IProgressMonitor monitor) throws CoreException {
+		IProject project = SpringCoreUtils.createProject(projectName, null,
+				monitor);
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+		if (!project.hasNature(JavaCore.NATURE_ID)) {
+			SpringCoreUtils.addProjectNature(project, JavaCore.NATURE_ID,
+					monitor);
+		}
+		IJavaProject jproject = JavaCore.create(project);
+		// append JRE entry
+		jproject.setRawClasspath(
+				new IClasspathEntry[] { getJREVariableEntry() }, monitor);
+		jproject.setOutputLocation(project.getFullPath(), monitor);
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+		return jproject;
+	}
+
+	public static IClasspathEntry getJREVariableEntry() {
+		return JavaRuntime.getDefaultJREContainerEntry();
 	}
 }

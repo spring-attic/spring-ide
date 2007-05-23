@@ -36,9 +36,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Bundle;
 
 /**
@@ -105,26 +102,6 @@ public final class SpringCoreUtils {
 			project.open(monitor);
 		}
 		return project;
-	}
-
-	/**
-	 * Creates specified Java project.
-	 */
-	public static IJavaProject createJavaProject(String projectName,
-			IProgressMonitor monitor) throws CoreException {
-		IProject project = createProject(projectName, null, monitor);
-		if (monitor.isCanceled()) {
-			throw new OperationCanceledException();
-		}
-		if (!project.hasNature(JavaCore.NATURE_ID)) {
-			addProjectNature(project, JavaCore.NATURE_ID, monitor);
-		}
-		IJavaProject jproject = JavaCore.create(project);
-		if (monitor.isCanceled()) {
-			throw new OperationCanceledException();
-		}
-		jproject.setRawClasspath(new IClasspathEntry[0], monitor);
-		return jproject;
 	}
 
 	/**
@@ -271,7 +248,7 @@ public final class SpringCoreUtils {
 		return (project.getRawLocation() != null ? project.getRawLocation()
 				: project.getLocation());
 	}
-	
+
 	/**
 	 * Triggers a build of the given {@link IProject} instance.
 	 * @param project the project to build
@@ -304,7 +281,9 @@ public final class SpringCoreUtils {
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) {
 				try {
-					project.build(IncrementalProjectBuilder.FULL_BUILD,	monitor);
+					project
+							.build(IncrementalProjectBuilder.FULL_BUILD,
+									monitor);
 					return Status.OK_STATUS;
 				}
 				catch (CoreException e) {
