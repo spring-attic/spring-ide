@@ -370,11 +370,11 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 						.getName())) {
 					if (mergedBd.isEnforceInitMethod()) {
 						validateMethod(bean, type, METHOD_TYPE_INIT, bd
-								.getInitMethodName(), 0, false);
+								.getInitMethodName(), 0, Static.DONT_CARE);
 					}
 					if (mergedBd.isEnforceDestroyMethod()) {
 						validateMethod(bean, type, METHOD_TYPE_DESTROY, bd
-								.getDestroyMethodName(), 0, false);
+								.getDestroyMethodName(), 0, Static.DONT_CARE);
 					}
 				}
 
@@ -405,7 +405,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 						&& !bd.isAbstract() ? bd.getConstructorArgumentValues()
 						.getArgumentCount() : -1);
 				validateFactoryMethod(bean, mergedClassName, methodName,
-						argCount, true);
+						argCount, Static.YES);
 			}
 		}
 
@@ -812,18 +812,18 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 	}
 
 	protected void validateMethod(IBean bean, IType type, int methodType,
-			String methodName, int argCount, boolean isStatic) {
+			String methodName, int argCount, Static statics) {
 		if (methodName != null && !hasPlaceHolder(methodName)) {
 			try {
 				IMethod method = Introspector.findMethod(type, methodName, argCount, 
-						Public.DONT_CARE, (isStatic ? Static.YES : Static.NO)); 
+						Public.DONT_CARE, statics); 
 				// first check if we can find any matching method regardless of
 				// visibility, if not create error marker
 				if (method == null) {
 					switch (methodType) {
 					case METHOD_TYPE_FACTORY:
 						BeansModelUtils.createProblemMarker(bean,
-								(isStatic ? "Static" : "Non-static")
+								(statics == Static.YES ? "Static" : "Non-static")
 								+ " factory method '" + methodName + "' "
 								+ (argCount != -1 ? "with " + argCount
 										+ " arguments " : "")
@@ -861,7 +861,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 					switch (methodType) {
 					case METHOD_TYPE_FACTORY:
 						BeansModelUtils.createProblemMarker(bean,
-								(isStatic ? "Static" : "Non-static")
+								(statics == Static.YES ? "Static" : "Non-static")
 								+ " factory method '" + methodName + "' "
 								+ (argCount != -1 ? "with " + argCount
 										+ " arguments " : "")
@@ -926,7 +926,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 								&& factoryBd.getFactoryMethodName() == null) {
 							validateFactoryMethod(bean, factoryBd
 									.getBeanClassName(), methodName, -1,
-									false);
+									Static.NO);
 						}
 					}
 				}
@@ -945,7 +945,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 	}
 
 	protected void validateFactoryMethod(IBean bean, String className,
-			String methodName, int argCount, boolean isStatic) {
+			String methodName, int argCount, Static statics) {
 		if (className != null && !hasPlaceHolder(className)) {
 			IType type = BeansModelUtils.getJavaType(BeansModelUtils
 					.getProject(bean).getProject(), className);
@@ -956,7 +956,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 					&& !Introspector.doesImplement(type, FactoryBean.class
 							.getName())) {
 				validateMethod(bean, type, METHOD_TYPE_FACTORY, methodName,
-						argCount, isStatic);
+						argCount, statics);
 			}
 		}
 	}
