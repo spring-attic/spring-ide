@@ -52,6 +52,7 @@ import org.eclipse.swt.graphics.ImageData;
  *
  * @see org.eclipse.jface.resource.ImageRegistry
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
 public class SpringUIImages implements SpringUIImageFlags {
@@ -81,10 +82,13 @@ public class SpringUIImages implements SpringUIImageFlags {
 	public static final String IMG_OBJS_PROJECT = NAME_PREFIX + "project_obj.gif";
 	public static final String IMG_OBJS_SPRING = NAME_PREFIX + "spring_obj.gif";
 	public static final String IMG_OBJS_ERROR = NAME_PREFIX + "error_obj.gif";
+	
+	public static final String IMG_WIZ_WORKINGSET = NAME_PREFIX + "workingset_wiz.png";
 
 	// Use IPath and toOSString to build the names to ensure they have the slashes correct
 	private final static String OBJECT = "obj16/"; //basic colors - size 16x16
 	private final static String OVR = "ovr16/"; //basic colors - size 7x8
+	private final static String WIZBAN = "wizban/"; //basic colors - size 16x16
 
 	public static final ImageDescriptor DESC_OBJS_PROJECT = createManaged(OBJECT, IMG_OBJS_PROJECT);
 	public static final ImageDescriptor DESC_OBJS_SPRING = createManaged(OBJECT, IMG_OBJS_SPRING);
@@ -93,6 +97,8 @@ public class SpringUIImages implements SpringUIImageFlags {
 	public static final ImageDescriptor DESC_OVR_SPRING = create(OVR, "spring_ovr.gif");
 	public static final ImageDescriptor DESC_OVR_ERROR = create(OVR, "error_ovr.gif");
 	public static final ImageDescriptor DESC_OVR_WARNING = create(OVR, "warning_ovr.gif");
+	
+	public static final ImageDescriptor DESC_WIZ_WORKINGSET = createManaged(WIZBAN, IMG_WIZ_WORKINGSET);
 
 	/*
 	 * Helper method to initialize the image registry from the Spring UI Plugin

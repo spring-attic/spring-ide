@@ -55,6 +55,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.IWorkingSetPage;
 import org.eclipse.ui.internal.ide.IDEWorkbenchPlugin;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
+import org.springframework.ide.eclipse.ui.SpringUIImages;
 import org.springframework.ide.eclipse.ui.internal.navigator.SpringNavigatorContentProvider;
 import org.springframework.ide.eclipse.ui.internal.navigator.SpringNavigatorLabelProvider;
 
@@ -185,7 +186,7 @@ public class SpringWorkingSetPage extends WizardPage implements IWorkingSetPage 
 	private ITreeContentProvider contentProvider = new SpringExplorerAdaptingContentProvider();
 
 	public SpringWorkingSetPage() {
-		super("springWorkingSet", "Spring Working Set", null);
+		super("springWorkingSet", "Spring Working Set", SpringUIImages.DESC_WIZ_WORKINGSET);
 		setDescription("Enter a working set name and select the working set elements.");
 	}
 
