@@ -595,7 +595,6 @@ public class BeansConfig extends AbstractResourceModelElement implements
 				reader.setBeanNameGenerator(beanNameGenerator);
 				try {
 					reader.loadBeanDefinitions(resource);
-					
 					// post process beans config if required
 					postProcess(problemReporter, beanNameGenerator);
 				}
