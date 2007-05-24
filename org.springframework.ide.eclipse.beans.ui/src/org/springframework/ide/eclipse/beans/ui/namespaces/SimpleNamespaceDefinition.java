@@ -8,25 +8,31 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.core.xsd;
+package org.springframework.ide.eclipse.beans.ui.namespaces;
+
+import org.eclipse.swt.graphics.Image;
 
 /**
- * Default implementation of {@link IXmlSchemaDefinition}.
+ * Default implementation of {@link INamespaceDefinition}.
  * @author Christian Dupuis
  * @since 2.0
  */
-public class DefaultSchemaDefinition implements IXmlSchemaDefinition {
-	
+public class SimpleNamespaceDefinition implements INamespaceDefinition {
+
 	private final String prefix;
-	
+
 	private final String uri;
-	
+
 	private final String location;
-	
-	public DefaultSchemaDefinition(final String prefix, final String uri, final String location) {
+
+	private final Image image;
+
+	public SimpleNamespaceDefinition(final String prefix, final String uri,
+			final String location, final Image image) {
 		this.prefix = prefix;
 		this.uri = uri;
 		this.location = location;
+		this.image = image;
 	}
 
 	public String getNamespacePrefix() {
@@ -39,5 +45,9 @@ public class DefaultSchemaDefinition implements IXmlSchemaDefinition {
 
 	public String getSchemaLocation() {
 		return location;
+	}
+
+	public Image getNamespaceImage() {
+		return image;
 	}
 }

@@ -81,6 +81,30 @@ This extension point is used to add content providers and label providers for Sp
                </appInfo>
             </annotation>
          </attribute>
+          <attribute name="prefix" type="string" use="required">
+            <annotation>
+               <documentation>
+                  the prefix used for this namespace in xml files
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="schemaLocation" type="string" use="required">
+            <annotation>
+               <documentation>
+                  The location of the xsd schema file
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="icon" type="string">
+            <annotation>
+               <documentation>
+                  an optional icon for this namespace declaration
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="resource"/>
+               </appInfo>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

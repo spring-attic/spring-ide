@@ -266,6 +266,7 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 					throws InvocationTargetException, InterruptedException {
 				IBeansModel beansModel = BeansCorePlugin.getModel();
 				try {
+					// TODO add nested beans in components
 					beanList.addAll(BeansModelUtils.getBeans(beansModel, monitor));
 				} catch (OperationCanceledException e) {
 					throw new InterruptedException();

@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.wizards;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -26,17 +26,17 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
-import org.springframework.ide.eclipse.core.xsd.IXmlSchemaDefinition;
-import org.springframework.ide.eclipse.core.xsd.XmlSchemaDefinitionFactory;
+import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceDefinition;
+import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
 
 /**
- * {@link WizardPage} that displays a list of {@link IXmlSchemaDefinition}s to
+ * {@link WizardPage} that displays a list of {@link INamespaceDefinition}s to
  * the user in order to allow for selecting the desired XSD namespace
  * declarations.
  * @author Christian Dupuis
  * @since 2.0
  */
-public class XsdSelectionWizardPage extends WizardPage {
+public class NamespaceSelectionWizardPage extends WizardPage {
 
 	public class XsdLabelProvider implements ILabelProvider {
 
@@ -54,14 +54,18 @@ public class XsdSelectionWizardPage extends WizardPage {
 		}
 
 		public Image getImage(Object element) {
+			if (element instanceof INamespaceDefinition) {
+				INamespaceDefinition xsdDef = (INamespaceDefinition) element;
+				return xsdDef.getNamespaceImage();
+			}
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_XSD);
 		}
 
 		public String getText(Object element) {
-			if (element instanceof IXmlSchemaDefinition) {
-				IXmlSchemaDefinition xsdDef = (IXmlSchemaDefinition) element;
+			if (element instanceof INamespaceDefinition) {
+				INamespaceDefinition xsdDef = (INamespaceDefinition) element;
 				return xsdDef.getNamespacePrefix() + " - "
-						+ xsdDef.getNamespaceURI();
+						+ xsdDef.getSchemaLocation();
 			}
 			return "";
 		}
@@ -74,8 +78,7 @@ public class XsdSelectionWizardPage extends WizardPage {
 		}
 
 		public Object[] getElements(Object obj) {
-			return XmlSchemaDefinitionFactory.getXmlSchemaDefinitions()
-					.toArray();
+			return NamespaceUtils.getNamespaceDefinitions().toArray();
 		}
 
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
@@ -91,7 +94,7 @@ public class XsdSelectionWizardPage extends WizardPage {
 
 	private CheckboxTableViewer xsdViewer;
 
-	protected XsdSelectionWizardPage(String pageName) {
+	protected NamespaceSelectionWizardPage(String pageName) {
 		super(pageName);
 		setTitle(BeansWizardsMessages.NewConfig_title);
 		setDescription(BeansWizardsMessages.NewConfig_xsdDescription);
@@ -122,12 +125,12 @@ public class XsdSelectionWizardPage extends WizardPage {
 		xsdViewer.setInput(this); // activate content provider
 	}
 
-	public Set<IXmlSchemaDefinition> getXmlSchemaDefinitions() {
-		Set<IXmlSchemaDefinition> defs = new HashSet<IXmlSchemaDefinition>();
+	public List<INamespaceDefinition> getXmlSchemaDefinitions() {
+		List<INamespaceDefinition> defs = new ArrayList<INamespaceDefinition>();
 		Object[] checkedElements = xsdViewer.getCheckedElements();
 		if (checkedElements != null) {
 			for (int i = 0; i < checkedElements.length; i++) {
-				defs.add((IXmlSchemaDefinition) checkedElements[i]);
+				defs.add((INamespaceDefinition) checkedElements[i]);
 			}
 		}
 		return defs;

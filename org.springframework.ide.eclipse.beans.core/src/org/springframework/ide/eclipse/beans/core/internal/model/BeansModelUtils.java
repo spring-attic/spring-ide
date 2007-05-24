@@ -206,6 +206,7 @@ public final class BeansModelUtils {
 	}
 
 	/**
+	 * TODO add compenent beans
 	 * Returns a list of all beans which belong to the given model element.
 	 * @param element the model element which contains beans
 	 * @param monitor the progress monitor to indicate progess; mark the monitor

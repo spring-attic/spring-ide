@@ -8,19 +8,23 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.core.xsd;
+package org.springframework.ide.eclipse.beans.ui.namespaces;
+
+import org.eclipse.swt.graphics.Image;
 
 /**
  * Interface describing a XSD namespace declaration.
  * @author Christian Dupuis
  * @since 2.0
  */
-public interface IXmlSchemaDefinition {
+public interface INamespaceDefinition {
 
 	String getNamespacePrefix();
 
 	String getNamespaceURI();
 
 	String getSchemaLocation();
+	
+	Image getNamespaceImage();
 
 }

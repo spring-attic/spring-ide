@@ -369,23 +369,24 @@ public class JdtUtils {
 
 	public static IType getJavaType(IProject project, String className) {
 		IJavaProject javaProject = getJavaProject(project);
-		if (IS_AJDT_PRESENT && javaProject != null && className != null) {
+		if (javaProject != null && className != null) {
 
 			try {
-				IType type = null;
-				// First look for the type in the project
-				if (isAjdtProject(project)) {
-					type = AjdtUtils.getAjdtType(project, className);
-				}
-
+				IType type = javaProject.findType(className);
+				
 				if (type != null) {
 					return type;
 				}
 
+				// First look for the type in the project
+				if (IS_AJDT_PRESENT && isAjdtProject(project)) {
+					type = AjdtUtils.getAjdtType(project, className);
+				}
+
 				// Then look for the type in the referenced Java projects
 				for (IProject refProject : project.getReferencedProjects()) {
-					if (isAjdtProject(refProject)) {
-						type = AjdtUtils.getAjdtType(project, className);
+					if (IS_AJDT_PRESENT && isAjdtProject(refProject)) {
+						type = AjdtUtils.getAjdtType(refProject, className);
 						if (type != null) {
 							return type;
 						}

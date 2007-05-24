@@ -15,7 +15,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.util.Set;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -23,8 +25,8 @@ import org.eclipse.ui.dialogs.WizardNewFileCreationPage;
 import org.eclipse.wst.sse.core.internal.encoding.CommonEncodingPreferenceNames;
 import org.eclipse.wst.xml.core.internal.XMLCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.core.xsd.IXmlSchemaDefinition;
-import org.springframework.ide.eclipse.core.xsd.XmlSchemaDefinitionFactory;
+import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceDefinition;
+import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
 
 /**
  * {@link WizardNewFileCreationPage} that enables to select a folder and a name
@@ -35,7 +37,7 @@ import org.springframework.ide.eclipse.core.xsd.XmlSchemaDefinitionFactory;
 @SuppressWarnings("restriction")
 public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 
-	private Set<IXmlSchemaDefinition> xmlSchemaDefinitions;
+	private List<INamespaceDefinition> xmlSchemaDefinitions;
 
 	public NewBeansConfigFilePage(String pageName,
 			IStructuredSelection selection) {
@@ -47,8 +49,8 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 	protected InputStream createXMLDocument() throws Exception {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		String charSet = getUserPreferredCharset();
-		IXmlSchemaDefinition defaultXsd = XmlSchemaDefinitionFactory
-				.getDefaultXmlSchemaDefinition();
+		INamespaceDefinition defaultXsd = NamespaceUtils
+				.getDefaultNamespaceDefinition();
 		PrintWriter writer = new PrintWriter(new OutputStreamWriter(
 				outputStream, charSet));
 		writer.println("<?xml version=\"1.0\" encoding=\"" + charSet + "\"?>"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -70,7 +72,7 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 
 	private String getNamespaceMappings() {
 		StringBuilder builder = new StringBuilder();
-		for (IXmlSchemaDefinition def : xmlSchemaDefinitions) {
+		for (INamespaceDefinition def : xmlSchemaDefinitions) {
 			builder.append("\t");
 			builder.append("xmlns:");
 			builder.append(def.getNamespacePrefix());
@@ -83,7 +85,16 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 
 	private String getSchemaLocations() {
 		StringBuilder builder = new StringBuilder();
-		for (IXmlSchemaDefinition def : xmlSchemaDefinitions) {
+
+		INamespaceDefinition defaultXsd = NamespaceUtils
+				.getDefaultNamespaceDefinition();
+		builder.append("\t\t");
+		builder.append(defaultXsd.getNamespaceURI());
+		builder.append(" ");
+		builder.append(defaultXsd.getSchemaLocation());
+		builder.append("\r\n");
+
+		for (INamespaceDefinition def : xmlSchemaDefinitions) {
 			builder.append("\t\t");
 			builder.append(def.getNamespaceURI());
 			builder.append(" ");
@@ -111,7 +122,15 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 	}
 
 	public void setXmlSchemaDefinitions(
-			Set<IXmlSchemaDefinition> xmlSchemaDefinitions) {
+			List<INamespaceDefinition> xmlSchemaDefinitions) {
 		this.xmlSchemaDefinitions = xmlSchemaDefinitions;
+		Collections.sort(this.xmlSchemaDefinitions,
+				new Comparator<INamespaceDefinition>() {
+					public int compare(INamespaceDefinition o1,
+							INamespaceDefinition o2) {
+						return o1.getNamespacePrefix().compareTo(
+								o2.getNamespacePrefix());
+					}
+				});
 	}
 }

@@ -40,7 +40,7 @@ public class NewBeansConfigWizard extends Wizard implements INewWizard {
 
 	private LinkToBeansConfigSetWizardPage linkPage;
 
-	private XsdSelectionWizardPage xsdPage;
+	private NamespaceSelectionWizardPage xsdPage;
 
 	private IStructuredSelection selection;
 
@@ -70,7 +70,7 @@ public class NewBeansConfigWizard extends Wizard implements INewWizard {
 	public void addPages() {
 		super.addPages();
 		mainPage = new NewBeansConfigFilePage("beansNewConfigPage", selection);
-		xsdPage = new XsdSelectionWizardPage("xsdPage");
+		xsdPage = new NamespaceSelectionWizardPage("xsdPage");
 		linkPage = new LinkToBeansConfigSetWizardPage("beansLinkConfigPage");
 		addPage(mainPage);
 		addPage(xsdPage);
