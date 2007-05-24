@@ -245,7 +245,6 @@ public final class SpringUIUtils {
 			try {
 				provider.connect(input);
 			} catch (CoreException e) {
-				SpringUIPlugin.log(e);
 				return;
 			}
 			IDocument document = provider.getDocument(input);
@@ -254,7 +253,7 @@ public final class SpringUIUtils {
 				textEditor.selectAndReveal(lineRegion.getOffset(), lineRegion
 						.getLength());
 			} catch (BadLocationException e) {
-				SpringUIPlugin.log(e);
+				// ignore if specified line is not available in document
 			}
 			provider.disconnect(input);
 		}
