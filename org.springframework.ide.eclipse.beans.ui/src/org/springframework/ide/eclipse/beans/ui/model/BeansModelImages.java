@@ -135,7 +135,7 @@ public final class BeansModelImages implements BeansModelImageFlags {
 			if (!bd.isSingleton()) {
 				flags |= FLAG_PROTOTYPE;
 			}
-			// TODO uncomment once we have Spring 2.1 in the OSGi bundle
+			// TODO CD uncomment once we have Spring 2.1 OSGi bundle
 			/*if (bd instanceof AnnotatedBeanDefinition) {
 				flags |= FLAG_ANNOTATION;
 			}*/

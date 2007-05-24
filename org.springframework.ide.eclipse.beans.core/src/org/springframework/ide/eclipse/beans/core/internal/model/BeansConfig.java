@@ -92,7 +92,6 @@ import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
-import org.springframework.ide.eclipse.core.model.java.JavaSourceExtractor;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceExtractor;
 import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Element;
@@ -889,7 +888,8 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		public CompositeSourceExtractor(IProject project) {
 			this.sourceExtractors = new HashSet<SourceExtractor>();
 			this.sourceExtractors.add(new XmlSourceExtractor());
-			this.sourceExtractors.add(new JavaSourceExtractor(project));
+			// TODO CD uncomment once we have Spring 2.1 OSGi bundle
+			// this.sourceExtractors.add(new JavaSourceExtractor(project));
 		}
 
 		public Object extractSource(Object sourceCandidate,
