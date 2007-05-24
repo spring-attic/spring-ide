@@ -40,62 +40,73 @@ public class AopReferenceModelBuilderUtils {
 	private static final String AJC_MAGIC = "ajc$";
 
 	public static boolean validateAspect(String className) throws Throwable {
+
 		ClassLoader classLoader = Thread.currentThread()
 				.getContextClassLoader();
-		InputStream is = classLoader.getResourceAsStream(ClassUtils
-				.getClassFileName(className));
+		InputStream inputStream = null;
+		
+		try {
+			inputStream = classLoader.getResourceAsStream(ClassUtils
+					.getClassFileName(className));
 
-		// check if class exists on class path
-		if (is == null) {
-			return false;
+			// check if class exists on class path
+			if (inputStream == null) {
+				return false;
+			}
+
+			ClassReader reader = new ClassReader(inputStream);
+			AspectAnnotationVisitor v = new AspectAnnotationVisitor();
+			reader.accept(v, false);
+
+			if (!v.getClassInfo().hasAspectAnnotation()) {
+				return false;
+			}
+			else {
+				// we know it's an aspect, but we don't know whether it is an
+				// @AspectJ aspect or a code style aspect.
+				// This is an *unclean* test whilst waiting for AspectJ to
+				// provide
+				// us with something better
+				for (String m : v.getClassInfo().getMethodNames()) {
+					if (m.startsWith(AJC_MAGIC)) {
+						// must be a code style aspect
+						return false;
+					}
+				}
+				// validate supported instantiation models
+				if (v.getClassInfo().getAspectAnnotation().getValue() != null) {
+					if (v.getClassInfo().getAspectAnnotation().getValue()
+							.toUpperCase().equals(
+									PerClauseKind.PERCFLOW.toString())) {
+						return false;
+					}
+					if (v.getClassInfo().getAspectAnnotation().getValue()
+							.toUpperCase().toString().equals(
+									PerClauseKind.PERCFLOWBELOW.toString())) {
+						return false;
+					}
+				}
+
+				// check if super class is Aspect as well and abstract
+				if (v.getClassInfo().getSuperType() != null) {
+					reader = new ClassReader(classLoader
+							.getResourceAsStream(ClassUtils.getClassFileName(v
+									.getClassInfo().getSuperType())));
+					AspectAnnotationVisitor sv = new AspectAnnotationVisitor();
+					reader.accept(sv, false);
+
+					if (sv.getClassInfo().getAspectAnnotation() != null
+							&& !((sv.getClassInfo().getModifier() & Opcodes.ACC_ABSTRACT) != 0)) {
+						return false;
+					}
+				}
+				return true;
+			}
 		}
-
-		ClassReader reader = new ClassReader(is);
-		AspectAnnotationVisitor v = new AspectAnnotationVisitor();
-		reader.accept(v, false);
-
-		if (!v.getClassInfo().hasAspectAnnotation()) {
-			return false;
-		}
-		else {
-			// we know it's an aspect, but we don't know whether it is an
-			// @AspectJ aspect or a code style aspect.
-			// This is an *unclean* test whilst waiting for AspectJ to provide
-			// us with something better
-			for (String m : v.getClassInfo().getMethodNames()) {
-				if (m.startsWith(AJC_MAGIC)) {
-					// must be a code style aspect
-					return false;
-				}
+		finally {
+			if (inputStream != null) {
+				inputStream.close();
 			}
-			// validate supported instantiation models
-			if (v.getClassInfo().getAspectAnnotation().getValue() != null) {
-				if (v.getClassInfo().getAspectAnnotation().getValue()
-						.toUpperCase()
-						.equals(PerClauseKind.PERCFLOW.toString())) {
-					return false;
-				}
-				if (v.getClassInfo().getAspectAnnotation().getValue()
-						.toUpperCase().toString().equals(
-								PerClauseKind.PERCFLOWBELOW.toString())) {
-					return false;
-				}
-			}
-
-			// check if super class is Aspect as well and abstract
-			if (v.getClassInfo().getSuperType() != null) {
-				reader = new ClassReader(classLoader
-						.getResourceAsStream(ClassUtils.getClassFileName(v
-								.getClassInfo().getSuperType())));
-				AspectAnnotationVisitor sv = new AspectAnnotationVisitor();
-				reader.accept(sv, false);
-
-				if (sv.getClassInfo().getAspectAnnotation() != null
-						&& !((sv.getClassInfo().getModifier() & Opcodes.ACC_ABSTRACT) != 0)) {
-					return false;
-				}
-			}
-			return true;
 		}
 	}
 

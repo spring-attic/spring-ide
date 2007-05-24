@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.aop.core.model.builder;
 
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,32 +52,59 @@ import org.w3c.dom.NodeList;
 public class AspectDefinitionBuilder {
 
 	private static final String ADVICE_REF_ATTRIBUTE = "advice-ref";
+
 	private static final String ADVISOR_ELEMENT = "advisor";
+
 	private static final String AFTER_ELEMENT = "after";
+
 	private static final String AFTER_RETURNING_ELEMENT = "after-returning";
+
 	private static final String AFTER_THROWING_ELEMENT = "after-throwing";
+
 	private static final String AOP_NAMESPACE_URI = "http://www.springframework.org/schema/aop";
+
 	private static final String ARG_NAMES_ATTRIBUTE = "arg-names";
+
 	private static final String AROUND_ELEMENT = "around";
+
 	private static final String ASPECT_ELEMENT = "aspect";
+
 	private static final String ASPECTJ_AUTOPROXY_ELEMENT = "aspectj-autoproxy";
+
 	private static final String BEAN_ELEMENT = "bean";
+
 	private static final String BEANS_NAMESPACE_URI = "http://www.springframework.org/schema/beans";
+
 	private static final String BEFORE_ELEMENT = "before";
+
 	private static final String CONFIG_ELEMENT = "config";
+
 	private static final String DECLARE_PARENTS_ELEMENT = "declare-parents";
+
 	private static final String DEFAULT_IMPL_ATTRIBUTE = "default-impl";
+
 	private static final String EXPRESSION_ATTRIBUTE = "expression";
+
 	private static final String ID_ATTRIBUTE = "id";
+
 	private static final String IMPLEMENT_INTERFACE_ATTRIBUTE = "implement-interface";
+
 	private static final String INCLUDE_ELEMENT = "include";
+
 	private static final String METHOD_ATTRIBUTE = "method";
+
 	private static final String NAME_ATTRIBUTE = "name";
+
 	private static final String POINTCUT_ELEMENT = "pointcut";
+
 	private static final String POINTCUT_REF_ATTRIBUTE = "pointcut-ref";
+
 	private static final String PROXY_TARGET_CLASS_ATTRIBUTE = "proxy-target-class";
+
 	private static final String RETURNING_ATTRIBUTE = "returning";
+
 	private static final String THROWING_ATTRIBUTE = "throwing";
+
 	private static final String TYPES_MATCHING_ATTRIBUTE = "types-matching";
 
 	private static void addAspectDefinition(IAspectDefinition info,
@@ -103,18 +131,28 @@ public class AspectDefinitionBuilder {
 
 		ClassLoader classLoader = Thread.currentThread()
 				.getContextClassLoader();
-		ClassReader reader = new ClassReader(classLoader
-				.getResourceAsStream(ClassUtils
-						.getClassFileName(className)));
-		AdviceAnnotationVisitor v = new AdviceAnnotationVisitor(
-				(IDOMNode) bean, id, className);
-		reader.accept(v, false);
+		InputStream inputStream = null;
 
-		List<IAspectDefinition> aspectDefinitions = v.getAspectDefinitions();
-		for (IAspectDefinition def : aspectDefinitions) {
-			def.setResource(file);
-			def.setDocument(document);
-			addAspectDefinition(def, aspectInfos);
+		try {
+			inputStream = classLoader.getResourceAsStream(ClassUtils
+					.getClassFileName(className));
+			ClassReader reader = new ClassReader(inputStream);
+			AdviceAnnotationVisitor v = new AdviceAnnotationVisitor(
+					(IDOMNode) bean, id, className);
+			reader.accept(v, false);
+
+			List<IAspectDefinition> aspectDefinitions = v
+					.getAspectDefinitions();
+			for (IAspectDefinition def : aspectDefinitions) {
+				def.setResource(file);
+				def.setDocument(document);
+				addAspectDefinition(def, aspectInfos);
+			}
+		}
+		finally {
+			if (inputStream != null) {
+				inputStream.close();
+			}
 		}
 	}
 
@@ -156,8 +194,7 @@ public class AspectDefinitionBuilder {
 			Map<String, String> pointcuts = new HashMap<String, String>();
 			parsePointcuts(pointcuts, aspectChildren);
 
-			String pointcut = getAttribute(aspectNode,
-					POINTCUT_ELEMENT);
+			String pointcut = getAttribute(aspectNode, POINTCUT_ELEMENT);
 			String pointcutRef = getAttribute(aspectNode,
 					POINTCUT_REF_ATTRIBUTE);
 			if (!StringUtils.hasText(pointcut)) {
@@ -249,8 +286,13 @@ public class AspectDefinitionBuilder {
 				}
 			}
 			catch (Throwable e) {
-				AopLog.log(AopLog.BUILDER_MESSAGES, Activator.getFormattedMessage(
-						"AspectDefinitionBuilder.exceptionOnAdvisorNode", aspectNode));
+				AopLog
+						.log(
+								AopLog.BUILDER_MESSAGES,
+								Activator
+										.getFormattedMessage(
+												"AspectDefinitionBuilder.exceptionOnAdvisorNode",
+												aspectNode));
 				Activator.log(e);
 			}
 		}
@@ -260,20 +302,19 @@ public class AspectDefinitionBuilder {
 			IFile file, final List<IAspectDefinition> aspectInfos) {
 		NodeList list;
 		list = document.getDocumentElement().getElementsByTagNameNS(
-				AOP_NAMESPACE_URI,
-				ASPECTJ_AUTOPROXY_ELEMENT);
+				AOP_NAMESPACE_URI, ASPECTJ_AUTOPROXY_ELEMENT);
 		if (list.getLength() > 0) {
-			
+
 			List<IAspectDefinition> aspectDefinitions = new ArrayList<IAspectDefinition>();
-			
+
 			Node item = list.item(0);
 			List<Pattern> patternList = null;
 			NodeList include = item.getChildNodes();
 			for (int j = 0; j < include.getLength(); j++) {
 				if (INCLUDE_ELEMENT.equals(include.item(j).getLocalName())) {
 					patternList = new ArrayList<Pattern>();
-					String pattern = getAttribute(include
-							.item(j), NAME_ATTRIBUTE);
+					String pattern = getAttribute(include.item(j),
+							NAME_ATTRIBUTE);
 					if (StringUtils.hasText(pattern)) {
 						patternList.add(Pattern.compile(pattern));
 					}
@@ -297,23 +338,29 @@ public class AspectDefinitionBuilder {
 						}
 					}
 					catch (Throwable e) {
-						AopLog.log(AopLog.BUILDER_MESSAGES,	Activator.getFormattedMessage(
-								"AspectDefinitionBuilder.exceptionOnNode", item));
+						AopLog
+								.log(
+										AopLog.BUILDER_MESSAGES,
+										Activator
+												.getFormattedMessage(
+														"AspectDefinitionBuilder.exceptionOnNode",
+														item));
 						Activator.log(e);
 					}
 				}
 			}
-			
+
 			if (item.getAttributes().getNamedItem(PROXY_TARGET_CLASS_ATTRIBUTE) != null) {
 				boolean proxyTargetClass = Boolean.valueOf(item.getAttributes()
-						.getNamedItem(PROXY_TARGET_CLASS_ATTRIBUTE).getNodeValue());
+						.getNamedItem(PROXY_TARGET_CLASS_ATTRIBUTE)
+						.getNodeValue());
 				if (proxyTargetClass) {
 					for (IAspectDefinition def : aspectDefinitions) {
 						def.setProxyTargetClass(proxyTargetClass);
 					}
 				}
 			}
-			
+
 			aspectInfos.addAll(aspectDefinitions);
 		}
 	}
@@ -323,8 +370,7 @@ public class AspectDefinitionBuilder {
 			Node aspectNode, IAopReference.ADVICE_TYPES type) {
 		BeanAspectDefinition info = new BeanAspectDefinition();
 		String pointcut = getAttribute(aspectNode, POINTCUT_ELEMENT);
-		String pointcutRef = getAttribute(aspectNode,
-				POINTCUT_REF_ATTRIBUTE);
+		String pointcutRef = getAttribute(aspectNode, POINTCUT_REF_ATTRIBUTE);
 		if (!StringUtils.hasText(pointcut)) {
 			pointcut = pointcuts.get(pointcutRef);
 			if (!StringUtils.hasText(pointcut)) {
@@ -361,12 +407,12 @@ public class AspectDefinitionBuilder {
 				Node aspectNode = aspectChildren.item(g);
 				IAspectDefinition info = null;
 				if (DECLARE_PARENTS_ELEMENT.equals(aspectNode.getLocalName())) {
-					String typesMatching = getAttribute(
-							aspectNode, TYPES_MATCHING_ATTRIBUTE);
-					String defaultImpl = getAttribute(
-							aspectNode, DEFAULT_IMPL_ATTRIBUTE);
-					String implementInterface = getAttribute(
-							aspectNode, IMPLEMENT_INTERFACE_ATTRIBUTE);
+					String typesMatching = getAttribute(aspectNode,
+							TYPES_MATCHING_ATTRIBUTE);
+					String defaultImpl = getAttribute(aspectNode,
+							DEFAULT_IMPL_ATTRIBUTE);
+					String implementInterface = getAttribute(aspectNode,
+							IMPLEMENT_INTERFACE_ATTRIBUTE);
 					if (StringUtils.hasText(typesMatching)
 							&& StringUtils.hasText(defaultImpl)
 							&& StringUtils.hasText(implementInterface)) {
@@ -397,14 +443,16 @@ public class AspectDefinitionBuilder {
 					info = parseAspect(pointcuts, rootPointcuts, aspectNode,
 							IAopReference.ADVICE_TYPES.AFTER);
 				}
-				else if (AFTER_RETURNING_ELEMENT.equals(aspectNode.getLocalName())) {
+				else if (AFTER_RETURNING_ELEMENT.equals(aspectNode
+						.getLocalName())) {
 					info = parseAspect(pointcuts, rootPointcuts, aspectNode,
 							IAopReference.ADVICE_TYPES.AFTER_RETURNING);
-					String returning = getAttribute(
-							aspectNode, RETURNING_ATTRIBUTE);
+					String returning = getAttribute(aspectNode,
+							RETURNING_ATTRIBUTE);
 					info.setReturning(returning);
 				}
-				else if (AFTER_THROWING_ELEMENT.equals(aspectNode.getLocalName())) {
+				else if (AFTER_THROWING_ELEMENT.equals(aspectNode
+						.getLocalName())) {
 					info = parseAspect(pointcuts, rootPointcuts, aspectNode,
 							IAopReference.ADVICE_TYPES.AFTER_THROWING);
 					String throwing = getAttribute(aspectNode,
@@ -434,8 +482,7 @@ public class AspectDefinitionBuilder {
 			Node child = children.item(j);
 			if (POINTCUT_ELEMENT.equals(child.getLocalName())) {
 				String id = getAttribute(child, ID_ATTRIBUTE);
-				String expression = getAttribute(child,
-						EXPRESSION_ATTRIBUTE);
+				String expression = getAttribute(child, EXPRESSION_ATTRIBUTE);
 				if (StringUtils.hasText(id) && StringUtils.hasText(expression)) {
 					rootPointcuts.put(id, expression);
 				}
@@ -468,23 +515,24 @@ public class AspectDefinitionBuilder {
 
 			if (node.getAttributes().getNamedItem(PROXY_TARGET_CLASS_ATTRIBUTE) != null) {
 				boolean proxyTargetClass = Boolean.valueOf(node.getAttributes()
-						.getNamedItem(PROXY_TARGET_CLASS_ATTRIBUTE).getNodeValue());
+						.getNamedItem(PROXY_TARGET_CLASS_ATTRIBUTE)
+						.getNodeValue());
 				if (proxyTargetClass) {
 					for (IAspectDefinition def : aspectDefinitions) {
 						def.setProxyTargetClass(proxyTargetClass);
 					}
 				}
 			}
-			
+
 			aspectInfos.addAll(aspectDefinitions);
 		}
 	}
-	
+
 	public static final boolean hasAttribute(Node node, String attributeName) {
 		return (node != null && node.hasAttributes() && node.getAttributes()
 				.getNamedItem(attributeName) != null);
 	}
-	
+
 	public static final String getAttribute(Node node, String attributeName) {
 		if (hasAttribute(node, attributeName)) {
 			String value = node.getAttributes().getNamedItem(attributeName)
