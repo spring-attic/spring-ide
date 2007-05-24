@@ -286,8 +286,8 @@ public class AspectDefinitionBuilder {
 		}
 	}
 
-	private void parseAnnotationAspects(final IDOMDocument document,
-			IFile file, final List<IAspectDefinition> aspectInfos) {
+	private void parseAnnotationAspects(IDOMDocument document,
+			IFile file, List<IAspectDefinition> aspectInfos) {
 		NodeList list;
 		list = document.getDocumentElement().getElementsByTagNameNS(
 				AOP_NAMESPACE_URI, ASPECTJ_AUTOPROXY_ELEMENT);
@@ -313,9 +313,9 @@ public class AspectDefinitionBuilder {
 					BEANS_NAMESPACE_URI, BEAN_ELEMENT);
 
 			for (int j = 0; j < list.getLength(); j++) {
-				final Node bean = list.item(j);
-				final String id = getAttribute(bean, ID_ATTRIBUTE);
-				final String className = BeansEditorUtils
+				Node bean = list.item(j);
+				String id = getAttribute(bean, ID_ATTRIBUTE);
+				String className = BeansEditorUtils
 						.getClassNameForBean(bean);
 				if (className != null && isIncluded(patternList, id)) {
 					try {

@@ -46,7 +46,6 @@ import org.springframework.ide.eclipse.aop.core.model.internal.BeanIntroductionD
 import org.springframework.ide.eclipse.aop.core.model.internal.JavaAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelMarkerUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -338,7 +337,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				currentFile.getProject());
 
 		if (project != null) {
-			IBeansConfig config = (BeansConfig) project.getConfig(currentFile);
+			IBeansConfig config = project.getConfig(currentFile);
 			IJavaProject javaProject = JdtUtils.getJavaProject(project.getProject());
 
 			if (javaProject != null) {
