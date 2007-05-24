@@ -13,9 +13,7 @@ package org.springframework.ide.eclipse.aop.core.model.builder;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLClassLoader;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -47,7 +45,6 @@ import org.springframework.ide.eclipse.aop.core.model.internal.AopReferenceModel
 import org.springframework.ide.eclipse.aop.core.model.internal.BeanIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.model.internal.JavaAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelMarkerUtils;
-import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -76,8 +73,6 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 	private ClassLoader weavingClassLoader;
 
 	private Set<IResource> affectedResources;
-
-	private Map<IAspectDefinition, Object> aspectDefinitionToPoincutCache;
 
 	public AopReferenceModelBuilder(Set<IResource> affectedResources) {
 		this.affectedResources = affectedResources;
@@ -161,7 +156,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 	 */
 	private void buildAopReferencesForBean(IBean bean, IModelElement context,
 			IAspectDefinition info, IResource file, IAopProject aopProject,
-			IProgressMonitor monitor) {
+			AspectDefinitionMatchingFactory builderUtils, IProgressMonitor monitor) {
 		try {
 			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
 					"AopReferenceModelBuilder.processingBeanDefinition", bean,
@@ -232,10 +227,9 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				
 				if (jdtAspectMethod != null) {
 
-					List<IMethod> matchingMethods = AopReferenceModelUtils
-							.getMatchesForAnnotationAspectDefinition(targetClass, 
-									info, aopProject.getProject().getProject(), 
-									this.aspectDefinitionToPoincutCache);
+					List<IMethod> matchingMethods = builderUtils.
+						getMatchesForAnnotationAspectDefinition(targetClass, 
+									info, aopProject.getProject().getProject());
 					for (IMethod method : matchingMethods) {
 						IAopReference ref = new AopReference(info.getType(),
 								jdtAspectMethod, method, info, file, bean);
@@ -254,10 +248,9 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 								.getAdviceMethod().getParameterTypes());
 				if (jdtAspectMethod != null) {
 
-					List<IMethod> matchingMethods = AopReferenceModelUtils
-							.getMatchesBeanAspectDefinition(targetClass, 
-									info, aopProject.getProject().getProject(),
-									this.aspectDefinitionToPoincutCache);
+					List<IMethod> matchingMethods = builderUtils
+							.getMatchesForBeanAspectDefinition(targetClass, 
+									info, aopProject.getProject().getProject());
 					for (IMethod method : matchingMethods) {
 						IAopReference ref = new AopReference(info.getType(),
 								jdtAspectMethod, method, info, file, bean);
@@ -274,12 +267,12 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 		}
 
 		// Make sure that inner beans are handled as well
-		buildAopReferencesFromAspectDefinitionForBeans(context, info, monitor,
+		buildAopReferencesFromAspectDefinitionForBeans(context, info, builderUtils, monitor,
 				file, aopProject, BeansModelUtils.getInnerBeans(bean));
 	}
 
 	private void buildAopReferencesFromAspectDefinition(IBeansConfig config,
-			IAspectDefinition info, IProgressMonitor monitor) {
+			IAspectDefinition info, AspectDefinitionMatchingFactory builderUtils, IProgressMonitor monitor) {
 
 		IResource file = config.getElementResource();
 		IAopProject aopProject = ((AopReferenceModel) Activator.getModel())
@@ -287,12 +280,12 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 						.getJavaProject(info.getResource().getProject()));
 
 		Set<IBean> beans = config.getBeans();
-		buildAopReferencesFromAspectDefinitionForBeans(config, info, monitor,
+		buildAopReferencesFromAspectDefinitionForBeans(config, info, builderUtils, monitor,
 				file, aopProject, beans);
 	}
 
 	private void buildAopReferencesFromAspectDefinitionForBeans(
-			IModelElement config, IAspectDefinition info,
+			IModelElement config, IAspectDefinition info, AspectDefinitionMatchingFactory builderUtils,
 			IProgressMonitor monitor, IResource file, IAopProject aopProject,
 			Set<IBean> beans) {
 		SubProgressMonitor subProgressMonitor = new SubProgressMonitor(monitor,
@@ -311,7 +304,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 								bean.getElementName(), 
 								bean.getElementResource().getFullPath()));
 				buildAopReferencesForBean(bean, config, info, file, aopProject,
-						monitor);
+						builderUtils, monitor);
 				subProgressMonitor.worked(worked++);
 			}
 		}
@@ -321,7 +314,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 	}
 
 	private void buildAopReferencesFromBeansConfigSets(IBeansProject project,
-			BeansConfig config, IAspectDefinition info, IProgressMonitor monitor) {
+			IBeansConfig config, IAspectDefinition info, AspectDefinitionMatchingFactory builderUtils, IProgressMonitor monitor) {
 		// check config sets as well
 		Set<IBeansConfigSet> configSets = project.getConfigSets();
 		for (IBeansConfigSet configSet : configSets) {
@@ -330,7 +323,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				for (IBeansConfig configSetConfig : configs) {
 					if (!config.equals(configSetConfig)) {
 						buildAopReferencesFromAspectDefinition(configSetConfig,
-								info, monitor);
+								info, builderUtils, monitor);
 					}
 				}
 			}
@@ -345,15 +338,12 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				currentFile.getProject());
 
 		if (project != null) {
-			BeansConfig config = (BeansConfig) project.getConfig(currentFile);
-			IJavaProject javaProject = AopReferenceModelUtils
-					.getJavaProject(config);
+			IBeansConfig config = (BeansConfig) project.getConfig(currentFile);
+			IJavaProject javaProject = JdtUtils.getJavaProject(project.getProject());
 
 			if (javaProject != null) {
 				aopProject = ((AopReferenceModel) Activator.getModel())
-						.getProjectWithInitialization(JdtUtils
-								.getJavaProject(config.getElementResource()
-										.getProject()));
+						.getProjectWithInitialization(javaProject);
 				
 				
 				aopProject.clearReferencesForResource(currentFile);
@@ -378,14 +368,16 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 							IDOMDocument document = ((DOMModelImpl) model)
 									.getDocument();
 							try {
-								// prepare aspectDefinition to poincut cache
-								this.aspectDefinitionToPoincutCache = 
-									new HashMap<IAspectDefinition, Object>();
-
+								
+								
+								
 								// move beyond reading the structured model to
 								// avoid class loading problems
 								activateWeavingClassLoader();
-								aspectInfos = AspectDefinitionBuilder
+								AspectDefinitionBuilder definitionBuilder = 
+									new AspectDefinitionBuilder();
+								
+								aspectInfos = definitionBuilder
 										.buildAspectDefinitions(document,
 												currentFile);
 							}
@@ -401,15 +393,19 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 					}
 
 					if (aspectInfos != null) {
+						
+						AspectDefinitionMatchingFactory builderUtils = 
+							new AspectDefinitionMatchingFactory();
+						
 						for (IAspectDefinition info : aspectInfos) {
 
 							// build model for config
 							buildAopReferencesFromAspectDefinition(config,
-									info, monitor);
+									info, builderUtils, monitor);
 
 							// build model for config sets
 							buildAopReferencesFromBeansConfigSets(project,
-									config, info, monitor);
+									config, info, builderUtils, monitor);
 						}
 					}
 
@@ -496,8 +492,6 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 			weavingClassLoader = null;
 			classLoader = null;
 			affectedResources = null;
-			aspectDefinitionToPoincutCache.clear();
-			aspectDefinitionToPoincutCache = null;
 		}
 	}
 
