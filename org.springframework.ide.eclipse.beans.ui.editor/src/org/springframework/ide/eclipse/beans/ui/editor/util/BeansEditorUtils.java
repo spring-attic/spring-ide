@@ -184,7 +184,11 @@ public class BeansEditorUtils {
 				}
 			}
 		}
-
+		
+		if (BeansCoreUtils.isBeansConfig(file)) {
+			configs.add(project.getConfig(file));
+		}
+		
 		for (IBeansConfig bc : configs) {
 			Set<IBean> bs = bc.getBeans();
 			for (IBean b : bs) {
