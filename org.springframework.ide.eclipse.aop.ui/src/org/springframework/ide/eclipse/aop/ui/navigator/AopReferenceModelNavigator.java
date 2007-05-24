@@ -195,6 +195,9 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 				.addPostSelectionListener(this);
 
 		makeActions();
+		
+		// somehow we need to set the tooltip of the view manually 
+		setTitleToolTip("Beans Cross References View");
 	}
 
 	@Override
