@@ -15,8 +15,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -84,9 +84,11 @@ public class WorkingSetContentProvider implements ICommonContentProvider {
 				switch (rootMode) {
 				case WORKING_SETS:
 					Set<IWorkingSet> filteredWorkingSet = new HashSet<IWorkingSet>();
-					IWorkingSet[] workingSets = ((AggregateWorkingSet) workingSet).getComponents();
+					IWorkingSet[] workingSets = ((AggregateWorkingSet) workingSet)
+							.getComponents();
 					for (IWorkingSet ws : workingSets) {
-						if ("org.springframework.ide.eclipse.ui.springWorkingSetPage".equals(ws.getId())) {
+						if ("org.springframework.ide.eclipse.ui.springWorkingSetPage"
+								.equals(ws.getId())) {
 							filteredWorkingSet.add(ws);
 						}
 					}
@@ -104,15 +106,15 @@ public class WorkingSetContentProvider implements ICommonContentProvider {
 		Set<ISpringProject> projects = new HashSet<ISpringProject>();
 		IAdaptable[] elements = workingSet.getElements();
 		for (IAdaptable element : elements) {
-			IResource resource = (IResource) element.getAdapter(IResource.class);
-			if (resource != null) {
-				IProject project = resource.getProject();
-				if (project != null) {
-					ISpringProject springProject = SpringCore.getModel().getProject(
-							project);
-					if (springProject != null) {
-						projects.add(springProject);
-					}
+			IProject project = (IProject) element.getAdapter(IProject.class);
+			if (project == null && element instanceof IFile) {
+				project = ((IFile) element).getProject();
+			}
+			if (project != null) {
+				ISpringProject springProject = SpringCore.getModel()
+						.getProject(project);
+				if (springProject != null) {
+					projects.add(springProject);
 				}
 			}
 		}

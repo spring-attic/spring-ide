@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.ui.IPersistableElement;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -352,6 +353,11 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 	public Object getAdapter(Class adapter) {
 		if (adapter == IPersistableElement.class) {
 			return new BeansModelElementToPersistableElementAdapter(this);
+		}
+		else if (adapter == IProject.class) {
+			if (getElementParent() instanceof IBeansProject) {
+				return ((IBeansProject) getElementParent()).getProject();
+			}
 		}
 		return super.getAdapter(adapter);
 	}

@@ -375,19 +375,8 @@ public class SpringWorkingSetPage extends WizardPage implements IWorkingSetPage 
 				tree.setCheckedElements(items);
 				for (int i = 0; i < items.length; i++) {
 					IAdaptable item = items[i];
-					IContainer container = null;
 					IResource resource = null;
 
-					if (item instanceof IContainer) {
-						container = (IContainer) item;
-					}
-					else {
-						container = (IContainer) item
-								.getAdapter(IContainer.class);
-					}
-					if (container != null) {
-						setSubtreeChecked(container, true, true);
-					}
 					if (item instanceof IResource) {
 						resource = (IResource) item;
 					}
@@ -400,8 +389,11 @@ public class SpringWorkingSetPage extends WizardPage implements IWorkingSetPage 
 							tree.setGrayChecked(project, true);
 						}
 					}
-					else {
+					else if (resource != null){
 						updateParentState(resource);
+					}
+					else {
+						updateParentState(item);
 					}
 				}
 			}
