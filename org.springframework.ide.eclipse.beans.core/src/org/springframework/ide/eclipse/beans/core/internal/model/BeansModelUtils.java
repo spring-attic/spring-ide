@@ -206,7 +206,6 @@ public final class BeansModelUtils {
 	}
 
 	/**
-	 * TODO add compenent beans
 	 * Returns a list of all beans which belong to the given model element.
 	 * @param element the model element which contains beans
 	 * @param monitor the progress monitor to indicate progess; mark the monitor
@@ -238,6 +237,13 @@ public final class BeansModelUtils {
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();
 						}
+						Set<IBeansComponent> components = config.getComponents();
+						for (IBeansComponent componet : components) {
+							beans.addAll(componet.getBeans());
+						}
+						if (monitor.isCanceled()) {
+							throw new OperationCanceledException();
+						}
 					}
 					monitor.worked(worked++);
 					if (monitor.isCanceled()) {
@@ -259,6 +265,13 @@ public final class BeansModelUtils {
 					monitor.subTask("Loading Spring Bean defintion from file '"
 							+ config.getElementName() + "'");
 					beans.addAll(config.getBeans());
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+					Set<IBeansComponent> components = config.getComponents();
+					for (IBeansComponent componet : components) {
+						beans.addAll(componet.getBeans());
+					}
 					monitor.worked(worked++);
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
@@ -274,6 +287,9 @@ public final class BeansModelUtils {
 		}
 		else if (element instanceof IBeansConfigSet) {
 			beans.addAll(((IBeansConfigSet) element).getBeans());
+		}
+		else if (element instanceof IBeansComponent) {
+			beans.addAll(((IBeansComponent) element).getBeans());
 		}
 		else if (element instanceof IBean) {
 			beans.add((IBean) element);

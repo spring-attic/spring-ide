@@ -30,4 +30,5 @@ public interface BeansModelImageFlags extends SpringUIImageFlags {
     public static final int FLAG_ABSTRACT = 1 << 6;
     public static final int FLAG_PROTOTYPE = 1 << 7;
     public static final int FLAG_LAZY_INIT = 1 << 8;
+    public static final int FLAG_ANNOTATION = 1 << 9;
 }

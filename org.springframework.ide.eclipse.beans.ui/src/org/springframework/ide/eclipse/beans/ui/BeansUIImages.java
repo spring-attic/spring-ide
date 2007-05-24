@@ -165,6 +165,7 @@ public class BeansUIImages {
 	public static final ImageDescriptor DESC_OVR_FACTORY = create(OVR, "factory_ovr.gif");
 	public static final ImageDescriptor DESC_OVR_PROTOTYPE = create(OVR, "prototype_ovr.gif");
 	public static final ImageDescriptor DESC_OVR_ABSTRACT = create(OVR, "abstract_ovr.gif");
+	public static final ImageDescriptor DESC_OVR_ANNOTATION = create(OVR, "annotation_ovr.gif");
 
 	public static final ImageDescriptor DESC_WIZ_PROJECT = createManaged(WIZBAN, IMG_WIZ_PROJECT);
 	public static final ImageDescriptor DESC_WIZ_CONFIG = createManaged(WIZBAN, IMG_WIZ_CONFIG);

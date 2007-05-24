@@ -135,6 +135,10 @@ public final class BeansModelImages implements BeansModelImageFlags {
 			if (!bd.isSingleton()) {
 				flags |= FLAG_PROTOTYPE;
 			}
+			// TODO uncomment once we have Spring 2.1 in the OSGi bundle
+			/*if (bd instanceof AnnotatedBeanDefinition) {
+				flags |= FLAG_ANNOTATION;
+			}*/
 		}
 		return flags;
 	}
@@ -150,6 +154,10 @@ public final class BeansModelImages implements BeansModelImageFlags {
 		@Override
 		protected void drawOverlays() {
 			int flags = getFlags();
+			if ((flags & BeansModelImages.FLAG_ANNOTATION) != 0) {
+				ImageData data = BeansUIImages.DESC_OVR_ANNOTATION.getImageData();
+				drawImage(data, 0, getSize().y - data.height);
+			}
 			if ((flags & BeansModelImages.FLAG_WARNING) != 0) {
 				ImageData data = BeansUIImages.DESC_OVR_WARNING.getImageData();
 				drawImage(data, 0, getSize().y - data.height);

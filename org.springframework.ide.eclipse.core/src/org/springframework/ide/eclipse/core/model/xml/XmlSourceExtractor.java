@@ -17,16 +17,15 @@ import org.w3c.dom.Node;
 
 /**
  * A {@link SourceExtractor} implementation which retrieves
- * {@link XmlSourceLocation XML source location} from a given
- * {@link Node DOM node} using Apache's Xerces XML parser.
- * 
+ * {@link XmlSourceLocation} from a given
+ * {@link Node} using Apache's Xerces XML parser.
  * @author Torsten Juergeleit
  */
 public class XmlSourceExtractor implements SourceExtractor {
 
 	public Object extractSource(Object sourceCandidate,
 			Resource definingResource) {
-
+		
 		if (sourceCandidate instanceof Node) {
 			Node node = (Node) sourceCandidate;
 			int startLine = LineNumberPreservingDOMParser

@@ -47,6 +47,7 @@ import org.springframework.beans.factory.parsing.ImportDefinition;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.ReaderEventListener;
+import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.xml.DefaultNamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.DelegatingEntityResolver;
@@ -91,6 +92,7 @@ import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
+import org.springframework.ide.eclipse.core.model.java.JavaSourceExtractor;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceExtractor;
 import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Element;
@@ -585,13 +587,12 @@ public class BeansConfig extends AbstractResourceModelElement implements
 				}
 
 				reader.setEntityResolver(resolver);
-				reader.setSourceExtractor(new XmlSourceExtractor());
+				reader.setSourceExtractor(new CompositeSourceExtractor(file.getProject()));
 				reader.setEventListener(eventListener);
 				reader.setProblemReporter(problemReporter);
 				reader.setErrorHandler(new BeansConfigErrorHandler(this));
-				reader
-						.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(
-								NamespaceHandlerResolver.class.getClassLoader()));
+				reader.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(
+						NamespaceHandlerResolver.class.getClassLoader()));
 				reader.setBeanNameGenerator(beanNameGenerator);
 				try {
 					reader.loadBeanDefinitions(resource);
@@ -878,6 +879,28 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		public BeanDefinition parse(Element element, ParserContext parserContext) {
 			// do nothing
 			return null;
+		}
+	}
+	
+	private static class CompositeSourceExtractor implements SourceExtractor {
+		
+		private Set<SourceExtractor> sourceExtractors;
+
+		public CompositeSourceExtractor(IProject project) {
+			this.sourceExtractors = new HashSet<SourceExtractor>();
+			this.sourceExtractors.add(new XmlSourceExtractor());
+			this.sourceExtractors.add(new JavaSourceExtractor(project));
+		}
+
+		public Object extractSource(Object sourceCandidate,
+				Resource definingResource) {
+			for (SourceExtractor sourceExtractor : sourceExtractors) {
+				Object object = sourceExtractor.extractSource(sourceCandidate, definingResource);
+				if (!object.equals(sourceCandidate)) {
+					return object;
+				}
+			}
+			return sourceCandidate;
 		}
 	}
 
