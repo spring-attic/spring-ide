@@ -894,10 +894,13 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 		public Object extractSource(Object sourceCandidate,
 				Resource definingResource) {
-			for (SourceExtractor sourceExtractor : sourceExtractors) {
-				Object object = sourceExtractor.extractSource(sourceCandidate, definingResource);
-				if (!object.equals(sourceCandidate)) {
-					return object;
+			if (sourceCandidate != null) {
+				for (SourceExtractor sourceExtractor : sourceExtractors) {
+					Object object = sourceExtractor.extractSource(
+							sourceCandidate, definingResource);
+					if (!sourceCandidate.equals(object)) {
+						return object;
+					}
 				}
 			}
 			return sourceCandidate;
