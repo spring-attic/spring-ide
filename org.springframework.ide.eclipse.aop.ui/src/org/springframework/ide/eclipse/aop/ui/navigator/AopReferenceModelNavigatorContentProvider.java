@@ -385,8 +385,11 @@ public class AopReferenceModelNavigatorContentProvider implements
 		Map<IBean, BeanReferenceNode> beansRefs = new HashMap<IBean, BeanReferenceNode>();
 		for (IBean bean : beans) {
 			if (bean.getElementStartLine() >= startLine
-					&& bean.getElementEndLine() <= endLine) {
-				BeanReferenceNode rn = new BeanReferenceNode(bean.getElementID());
+					&& bean.getElementEndLine() <= endLine
+					&& BeansCorePlugin.getModel().getElement(
+							bean.getElementID()) != null) {
+				BeanReferenceNode rn = new BeanReferenceNode(bean
+						.getElementID());
 				nodes.add(rn);
 				beansRefs.put(bean, rn);
 			}
