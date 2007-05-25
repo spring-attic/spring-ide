@@ -25,6 +25,7 @@ import org.eclipse.draw2d.graph.EdgeList;
 import org.eclipse.draw2d.graph.Node;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Font;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConnection;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConnection.BeanType;
@@ -36,13 +37,14 @@ import org.springframework.ide.eclipse.beans.ui.graph.figures.BeanFigure;
 /**
  * This class builds the graphical representation of the model data (given as
  * {@link GraphEditorInput}) via GEF's {@link DirectedGraphLayout}.
- * 
  * @author Torsten Juergeleit
  */
 public class Graph implements IAdaptable {
 
-	/* Max width of rows with orphan beans (unconnected beans) if no subgraph
-	 * is available */
+	/*
+	 * Max width of rows with orphan beans (unconnected beans) if no subgraph is
+	 * available
+	 */
 	private static final int MAX_ORPHAN_ROW_WIDTH = 600;
 
 	/* Default amount of empty space to be left around a node */
@@ -51,7 +53,8 @@ public class Graph implements IAdaptable {
 	private static final String ERROR_TITLE = "Graph.error.title";
 
 	private GraphEditorInput input;
-	private	DirectedGraph graph;
+
+	private DirectedGraph graph;
 
 	public Graph(GraphEditorInput input) {
 		this.input = input;
@@ -73,15 +76,18 @@ public class Graph implements IAdaptable {
 
 			// Add all beans references from bean (parent, factory or
 			// depends-on beans) to list of graph edges
-			Iterator beanRefs = BeansModelUtils.getBeanReferences(
-						 bean.getBean(), input.getContext(), false).iterator();
+			Iterator beanRefs = BeansModelUtils
+					.getBeanReferences(
+							bean.getBean(),
+							BeansCorePlugin.getModel().getElement(
+									input.getContextId()), false).iterator();
 			while (beanRefs.hasNext()) {
 				BeansConnection beanRef = (BeansConnection) beanRefs.next();
 				Bean targetBean = getBean(beanRef.getTarget().getElementName());
-				if (targetBean != null && targetBean != bean &&
-										beanRef.getSource() instanceof IBean) {
+				if (targetBean != null && targetBean != bean
+						&& beanRef.getSource() instanceof IBean) {
 					graph.edges.add(new Reference(beanRef.getType(), bean,
-												  targetBean));
+							targetBean));
 				}
 			}
 
@@ -90,15 +96,16 @@ public class Graph implements IAdaptable {
 			ConstructorArgument[] cargs = bean.getConstructorArguments();
 			for (ConstructorArgument carg : cargs) {
 				Iterator cargRefs = BeansModelUtils.getBeanReferences(
-										 carg.getBeanConstructorArgument(),
-										 input.getContext(), false).iterator();
+						carg.getBeanConstructorArgument(),
+						BeansCorePlugin.getModel().getElement(
+								input.getContextId()), false).iterator();
 				while (cargRefs.hasNext()) {
 					BeansConnection beanRef = (BeansConnection) cargRefs.next();
-					Bean targetBean = getBean(
-										 beanRef.getTarget().getElementName());
+					Bean targetBean = getBean(beanRef.getTarget()
+							.getElementName());
 					if (targetBean != null && targetBean != bean) {
 						graph.edges.add(new Reference(beanRef.getType(), bean,
-													  targetBean, carg));
+								targetBean, carg));
 					}
 				}
 			}
@@ -107,15 +114,16 @@ public class Graph implements IAdaptable {
 			Property[] properties = bean.getProperties();
 			for (Property property : properties) {
 				Iterator propRefs = BeansModelUtils.getBeanReferences(
-										 property.getBeanProperty(),
-										 input.getContext(), false).iterator();
+						property.getBeanProperty(),
+						BeansCorePlugin.getModel().getElement(
+								input.getContextId()), false).iterator();
 				while (propRefs.hasNext()) {
 					BeansConnection beanRef = (BeansConnection) propRefs.next();
-					Bean targetBean = getBean(
-										 beanRef.getTarget().getElementName());
+					Bean targetBean = getBean(beanRef.getTarget()
+							.getElementName());
 					if (targetBean != null && targetBean != bean) {
 						graph.edges.add(new Reference(beanRef.getType(), bean,
-													  targetBean, property));
+								targetBean, property));
 					}
 				}
 			}
@@ -145,7 +153,7 @@ public class Graph implements IAdaptable {
 		while (beans.hasNext()) {
 			Bean bean = (Bean) beans.next();
 
-			// Calculate bean's dimension with a temporary bean figure 
+			// Calculate bean's dimension with a temporary bean figure
 			BeanFigure dummy = new BeanFigure(bean);
 			dummy.setFont(font);
 			Dimension size = dummy.getPreferredSize();
@@ -167,7 +175,8 @@ public class Graph implements IAdaptable {
 			if (bean.incoming.isEmpty() && bean.outgoing.isEmpty()) {
 				orphanBeans.add(bean);
 				graph.nodes.remove(bean);
-			} else {
+			}
+			else {
 				Reference reference = new Reference(BeanType.STANDARD, root,
 						bean);
 				reference.weight = 0;
@@ -187,7 +196,7 @@ public class Graph implements IAdaptable {
 					e.invert();
 				}
 			}
-	
+
 			// Remove temporary root and root edges
 			for (int i = 0; i < rootEdges.size(); i++) {
 				Edge e = rootEdges.getEdge(i);
@@ -196,26 +205,26 @@ public class Graph implements IAdaptable {
 				graph.edges.remove(e);
 			}
 			graph.nodes.remove(root);
-	
+
 			// Re-align nodes and edges' bend points topmost vertical position
-			int maxY = 0;  // max height of graph
-			int maxX = 0;  // max width of graph
+			int maxY = 0; // max height of graph
+			int maxX = 0; // max width of graph
 			int ranks = graph.ranks.size();
 			if (ranks > 1) {
 				int deltaY = graph.ranks.getRank(1).getNode(0).y;
 				Iterator nodes = graph.nodes.iterator();
 				while (nodes.hasNext()) {
 					Bean node = (Bean) nodes.next();
-	
-					// Move node vertically and update max height 
+
+					// Move node vertically and update max height
 					node.y -= deltaY;
 					if ((node.y + node.height) > maxY) {
-						maxY =  node.y + node.height;
+						maxY = node.y + node.height;
 					}
-	
+
 					// Update max width
 					if ((node.x + node.width) > maxX) {
-						maxX =  node.x + node.width;
+						maxX = node.x + node.width;
 					}
 				}
 				Iterator edges = graph.edges.iterator();
@@ -230,27 +239,28 @@ public class Graph implements IAdaptable {
 					}
 				}
 			}
-	
+
 			// Re-add all unconnected beans to the bottom of the graph
-			int x = 0;   // current horizontal position in current row
-			int y = maxY;  // current row
+			int x = 0; // current horizontal position in current row
+			int y = maxY; // current row
 			if (maxY > 0) {
 				y += DEFAULT_PADDING.getHeight();
 			}
 			if (maxX < MAX_ORPHAN_ROW_WIDTH) {
 				maxX = MAX_ORPHAN_ROW_WIDTH;
 			}
-			maxY = 0;  // max height of all figures in current row
+			maxY = 0; // max height of all figures in current row
 			beans = orphanBeans.iterator();
 			while (beans.hasNext()) {
 				Bean bean = (Bean) beans.next();
-	
+
 				// If current row is filled then start new row
 				if ((x + bean.width) > maxX) {
 					bean.x = x = 0;
 					bean.y = y += maxY + DEFAULT_PADDING.getHeight();
-					maxY = bean.height; 
-				} else {
+					maxY = bean.height;
+				}
+				else {
 					bean.y = y;
 					bean.x = x;
 					if (bean.height > maxY) {
@@ -260,7 +270,8 @@ public class Graph implements IAdaptable {
 				x += bean.width + DEFAULT_PADDING.getWidth();
 				graph.nodes.add(bean);
 			}
-		} catch (RuntimeException e) {
+		}
+		catch (RuntimeException e) {
 
 			// If an error occured during layouting (graph contains cylces,
 			// graph not fully connected, ...) then clear graph, invalidate
@@ -269,10 +280,9 @@ public class Graph implements IAdaptable {
 			graph = new DirectedGraph();
 			input.setHasError(true);
 
-			MessageDialog.openError(
-					BeansGraphPlugin.getActiveWorkbenchWindow().getShell(),
-					BeansGraphPlugin.getResourceString(ERROR_TITLE),
-					e.getMessage());
+			MessageDialog.openError(BeansGraphPlugin.getActiveWorkbenchWindow()
+					.getShell(), BeansGraphPlugin
+					.getResourceString(ERROR_TITLE), e.getMessage());
 
 		}
 	}

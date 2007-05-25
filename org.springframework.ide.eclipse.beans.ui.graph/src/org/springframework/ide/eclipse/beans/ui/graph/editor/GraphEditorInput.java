@@ -47,37 +47,41 @@ import org.springframework.util.ObjectUtils;
  * or {@link IBeanConfigSet}). This list of beans is accessible via
  * {@link #getBeans()}. This context used for bean look-up is accessible via
  * {@link #getContext()}.
- * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
 public class GraphEditorInput implements IEditorInput, IPersistableElement {
 
 	private String elementId;
+
 	private String contextId;
+
 	private String name;
+
 	private String toolTip;
+
 	private Map<String, Bean> beans;
+
 	private boolean hasError;
 
 	/**
-	 * Creates a list with all beans which are referenced from the model
-	 * element defined by given ID.
-	 * @param elementID  the model element's ID
-	 * @throws IllegalArgumentException  if unsupported model element is
-	 * 				 					specified 
+	 * Creates a list with all beans which are referenced from the model element
+	 * defined by given ID.
+	 * @param elementID the model element's ID
+	 * @throws IllegalArgumentException if unsupported model element is
+	 * specified
 	 */
 	public GraphEditorInput(String elementId) {
-		this(elementId,	getContext(elementId));
+		this(elementId, getContext(elementId));
 	}
 
 	/**
-	 * Creates a list with all beans which are referenced from the model
-	 * element defined by given ID.
-	 * @param elementId  the model element's ID
-	 * @param contextId  the context's ID
-	 * @throws IllegalArgumentException  if unsupported model element or
-	 * 									context is specified 
+	 * Creates a list with all beans which are referenced from the model element
+	 * defined by given ID.
+	 * @param elementId the model element's ID
+	 * @param contextId the context's ID
+	 * @throws IllegalArgumentException if unsupported model element or context
+	 * is specified
 	 */
 	public GraphEditorInput(String elementId, String contextId) {
 		this.elementId = elementId;
@@ -86,9 +90,11 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 	}
 
 	protected void init() {
-		IModelElement element = BeansCorePlugin.getModel().getElement(elementId);
-		IModelElement context = BeansCorePlugin.getModel().getElement(contextId);
-		
+		IModelElement element = BeansCorePlugin.getModel()
+				.getElement(elementId);
+		IModelElement context = BeansCorePlugin.getModel()
+				.getElement(contextId);
+
 		// Prepare name and tooltip for given element and context
 		if (element instanceof IBeansConfig) {
 			String toolTipPrefix = BeansGraphPlugin
@@ -103,32 +109,36 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 							+ storage.getFile().getProjectRelativePath()
 									.toString() + " - "
 							+ storage.getFullPath().toString();
-				} else {
+				}
+				else {
 					name = resource.getName();
 					toolTip = toolTipPrefix + resource.getFullPath().toString();
 				}
-			} else {
+			}
+			else {
 				name = BeansGraphPlugin
 						.getResourceString("ShowGraphAction.name.undefined");
 				toolTip = BeansGraphPlugin
 						.getResourceString("ShowGraphAction.name.config")
 						+ name;
 			}
-		} else if (element instanceof IBeansConfigSet) {
+		}
+		else if (element instanceof IBeansConfigSet) {
 			IModelElement parent = ((IBeansConfigSet) element)
 					.getElementParent();
 			name = element.getElementName();
 			toolTip = BeansGraphPlugin
 					.getResourceString("ShowGraphAction.name.configSet")
 					+ parent.getElementName() + '/' + element.getElementName();
-		} else if (element instanceof IBeansComponent
-				|| element instanceof IBean) {
+		}
+		else if (element instanceof IBeansComponent || element instanceof IBean) {
 			name = element.getElementName();
 			StringBuffer buffer = new StringBuffer();
 			if (element instanceof IBeansComponent) {
 				buffer.append(BeansGraphPlugin
 						.getResourceString("ShowGraphAction.name.component"));
-			} else {
+			}
+			else {
 				buffer.append(BeansGraphPlugin
 						.getResourceString("ShowGraphAction.name.bean"));
 			}
@@ -137,7 +147,8 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 						.getResourceString("ShowGraphAction.name.config"));
 				buffer.append(context.getElementName());
 				buffer.append(": ");
-			} else if (context instanceof IBeansConfigSet) {
+			}
+			else if (context instanceof IBeansConfigSet) {
 				buffer.append(BeansGraphPlugin
 						.getResourceString("ShowGraphAction.name.configSet"));
 				buffer.append(context.getElementParent().getElementName());
@@ -147,7 +158,8 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 			}
 			buffer.append(element.getElementName());
 			toolTip = buffer.toString();
-		} else {
+		}
+		else {
 			throw new IllegalArgumentException("Unsupported model element "
 					+ element);
 		}
@@ -160,14 +172,16 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 	 */
 	protected void createBeansMap() {
 		Set<IBean> list = new LinkedHashSet<IBean>();
-		if (getElement() instanceof IBeansConfig) {
-			list.addAll(((IBeansConfig) getElement()).getBeans());
-		} else if (getElement() instanceof IBeansConfigSet) {
-			list.addAll(((IBeansConfigSet) getElement()).getBeans());
-		} else if (getElement() instanceof IBean) {
-			list.add((IBean) getElement());
-			for (BeansConnection beanRef : BeansModelUtils
-					.getBeanReferences(getElement(), getContext(), true)) {
+		if (getElement(elementId) instanceof IBeansConfig) {
+			list.addAll(((IBeansConfig) getElement(elementId)).getBeans());
+		}
+		else if (getElement(elementId) instanceof IBeansConfigSet) {
+			list.addAll(((IBeansConfigSet) getElement(elementId)).getBeans());
+		}
+		else if (getElement(elementId) instanceof IBean) {
+			list.add((IBean) getElement(elementId));
+			for (BeansConnection beanRef : BeansModelUtils.getBeanReferences(
+					getElement(elementId), getElement(contextId), true)) {
 				if (beanRef.getType() != BeanType.INNER) {
 					list.add(beanRef.getTarget());
 				}
@@ -181,16 +195,20 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 		}
 	}
 
+	private IModelElement getElement(String elementId) {
+		return BeansCorePlugin.getModel().getElement(elementId);
+	}
+
 	public String getName() {
 		return name;
 	}
 
-	public IModelElement getElement() {
-		return BeansCorePlugin.getModel().getElement(elementId);
+	public String getElementId() {
+		return elementId;
 	}
-	
-	public IModelElement getContext() {
-		return BeansCorePlugin.getModel().getElement(contextId);
+
+	public String getContextId() {
+		return contextId;
 	}
 
 	public Map getBeans() {
@@ -203,7 +221,7 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 
 	public Object getAdapter(Class adapter) {
 		if (adapter == IModelElement.class) {
-			return getElement();
+			return getElement(elementId);
 		}
 		return null;
 	}
@@ -255,7 +273,8 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 	private static IModelElement getContext(IModelElement element) {
 		if (element instanceof IBean) {
 			return element.getElementParent();
-		} else if (element instanceof IBeanConstructorArgument
+		}
+		else if (element instanceof IBeanConstructorArgument
 				|| element instanceof IBeanProperty) {
 			return element.getElementParent().getElementParent();
 		}

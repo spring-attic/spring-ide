@@ -92,6 +92,7 @@ import org.springframework.ide.eclipse.beans.ui.graph.parts.GraphicalPartFactory
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
+import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 
 /**
  * Beans Graph Editor
@@ -139,9 +140,11 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 			boolean refresh = false;
 
 			IModelElement changedElement = event.getElement();
-			IModelElement originalInputElement = beansInput.getElement();
-			IModelElement originalContextElement = beansInput.getElement();
-			
+			IModelElement originalInputElement = BeansCorePlugin.getModel()
+					.getElement(beansInput.getElementId());
+			IModelElement originalContextElement = BeansCorePlugin.getModel()
+					.getElement(beansInput.getContextId());
+
 			// check if changes appeared in a spring config file
 			if (changedElement instanceof IBeansConfig) {
 				IResource changedResource = ((IBeansConfig) changedElement)
@@ -158,6 +161,17 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 						originalInputElement) != null || BeansModelUtils
 						.getChildForElement(beansProject,
 								originalContextElement) != null);
+			}
+
+			// most likely a close or remove of project or config
+			if (!refresh && event.getType() == Type.REMOVED
+					&& originalInputElement == null) {
+				Display display = getSite().getShell().getDisplay();
+				display.asyncExec(new Runnable() {
+					public void run() {
+						closeEditor();
+					}
+				});
 			}
 
 			if (refresh) {
@@ -207,6 +221,11 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 			graph = null;
 		}
 	}
+	
+	protected void closeEditor() {
+		getSite().getPage().closeEditor(this, false);
+	}
+
 
 	/**
 	 * Sets the contents of the GraphicalViewer after it has been created.

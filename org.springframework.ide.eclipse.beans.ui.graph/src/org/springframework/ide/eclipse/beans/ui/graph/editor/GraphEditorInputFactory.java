@@ -82,7 +82,7 @@ public class GraphEditorInputFactory implements IElementFactory {
 	 * @param input  the graph editor input
 	 */
 	public static void saveState(IMemento memento, GraphEditorInput input) {
-		memento.putString(TAG_ELEMENT, input.getElement().getElementID());
-		memento.putString(TAG_CONTEXT, input.getContext().getElementID());
+		memento.putString(TAG_ELEMENT, input.getElementId());
+		memento.putString(TAG_CONTEXT, input.getContextId());
 	}
 }
