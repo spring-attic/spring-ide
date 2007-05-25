@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
@@ -132,8 +133,8 @@ public class BeansModelLabelDecorator extends LabelProvider implements
 
 						// Decorate Java class file
 						IType javaType = ((IClassFile) element).getType();
-						if (project.isBeanClass(javaType
-								.getFullyQualifiedName())) {
+						if (BeansModelUtils.isBeanClass(
+								javaType.getFullyQualifiedName())) {
 							decoration.addOverlay(BeansUIImages
 									.DESC_OVR_SPRING);
 						}
@@ -142,8 +143,8 @@ public class BeansModelLabelDecorator extends LabelProvider implements
 						// Decorate Java source file
 						for (IType javaType : ((ICompilationUnit) element)
 								.getTypes()) {
-							if (project.isBeanClass(javaType
-									.getFullyQualifiedName())) {
+							if (BeansModelUtils.isBeanClass(
+									javaType.getFullyQualifiedName())) {
 								decoration.addOverlay(BeansUIImages
 										.DESC_OVR_SPRING);
 								break;

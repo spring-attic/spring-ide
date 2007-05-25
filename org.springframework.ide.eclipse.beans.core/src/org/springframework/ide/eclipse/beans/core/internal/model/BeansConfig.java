@@ -335,7 +335,8 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	}
 
 	public Set<IBean> getBeans() {
-
+		// TODO CD eventually add nestend component beans to the 
+		// outgoing list.
 		// Lazily initialization of this config
 		readConfig();
 		return Collections.unmodifiableSet(new LinkedHashSet<IBean>(beans
@@ -820,7 +821,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	}
 
 	/**
-	 * This {@link NamespaceHandlerResolver}Êprovides a
+	 * This {@link NamespaceHandlerResolver} provides a
 	 * {@link NamespaceHandler} for a given namespace URI. Depending on this
 	 * namespace URI the returned namespace handler is one of the following (in
 	 * the provided order):

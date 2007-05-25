@@ -237,7 +237,8 @@ public final class BeansModelUtils {
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();
 						}
-						Set<IBeansComponent> components = config.getComponents();
+						Set<IBeansComponent> components = config
+								.getComponents();
 						for (IBeansComponent componet : components) {
 							beans.addAll(componet.getBeans());
 						}
@@ -1185,9 +1186,8 @@ public final class BeansModelUtils {
 			String valueName;
 			if (value.getClass().isArray()) {
 				valueName = "["
-						+ StringUtils
-								.arrayToDelimitedString((Object[]) value, ", ")
-						+ "]";
+						+ StringUtils.arrayToDelimitedString((Object[]) value,
+								", ") + "]";
 			}
 			else {
 				valueName = value.toString();
@@ -1244,8 +1244,22 @@ public final class BeansModelUtils {
 		}
 		return new BeansTypedString(parent, value.toString());
 	}
+	
+	/**
+	 * Checks if a given <code>className</code> is used as a bean class. The
+	 * check iterates the complete {@link IBeansModel} and not "only" the current
+	 * {@link IBeansProject}.
+	 * @param className
+	 * @return
+	 */
+	public static boolean isBeanClass(String className) {
+		Set<IBeansConfig> beans = BeansCorePlugin.getModel().getConfigs(
+				className);
+		return beans != null && beans.size() > 0;
+	}
 
 	public static boolean isInnerBean(IBean bean) {
 		return !(bean.getElementParent() instanceof IBeansConfig);
 	}
+
 }
