@@ -37,22 +37,23 @@ import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedAopReferenc
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedDeclareParentAopReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.core.model.IModelChangeListener;
+import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
+import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 import org.w3c.dom.Element;
 
 /**
  * Customized extension of the {@link CommonNavigator} that links to the current
  * selected element in the Java Editor or Spring IDE's XML Editor.
- *
  * @author Christian Dupuis
  * @since 2.0
- *
  */
 @SuppressWarnings("restriction")
 public class AopReferenceModelNavigator extends CommonNavigator implements
-		ISelectionListener {
+		ISelectionListener, IModelChangeListener {
 
-	public static final String ID = 
-		"org.springframework.ide.eclipse.aop.ui.navigator.aopReferenceModelNavigator";
+	public static final String ID = "org.springframework.ide.eclipse.aop.ui.navigator.aopReferenceModelNavigator";
 
 	public static final String BEAN_REFS_FOR_FILE_ID = ID + ".beanRefsForFile";
 
@@ -193,16 +194,18 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 		super.createPartControl(aParent);
 		getSite().getWorkbenchWindow().getSelectionService()
 				.addPostSelectionListener(this);
-
-		makeActions();
+		BeansCorePlugin.getModel().addChangeListener(this);
 		
-		// somehow we need to set the tooltip of the view manually 
+		makeActions();
+
+		// somehow we need to set the tooltip of the view manually
 		setTitleToolTip("Beans Cross References View");
 	}
 
 	@Override
 	public void dispose() {
 		super.dispose();
+		BeansCorePlugin.getModel().removeChangeListener(this);
 		getSite().getWorkbenchWindow().getSelectionService()
 				.removeSelectionListener(this);
 	}
@@ -275,6 +278,16 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 			lastElement = element;
 			lastSelection = selection;
 			lastWorkbenchPart = part;
+		}
+	}
+
+	/**
+	 * Refreshed the view on added and changed events so that no closed project
+	 * artefacts will be displayed in the references view.
+	 */
+	public void elementChanged(ModelChangeEvent event) {
+		if (event.getType() == Type.ADDED || event.getType() == Type.REMOVED) {
+			updateTreeViewer(lastWorkbenchPart, lastSelection, false);
 		}
 	}
 }
