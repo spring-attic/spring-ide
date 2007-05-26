@@ -11,7 +11,11 @@
 package org.springframework.ide.eclipse.core.java;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.springframework.util.Assert;
@@ -30,12 +34,6 @@ public class ClassUtils {
 	public static String getClassFileName(String className) {
 		className = StringUtils.replace(className, ".", "/");
 		return className + CLASS_FILE_SUFFIX;
-	}
-
-	public static Class<?> loadClass(String className)
-			throws ClassNotFoundException {
-		ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		return loader.loadClass(className);
 	}
 
 	public static String getClassLoaderHierachy(Class clazz) {
@@ -83,4 +81,40 @@ public class ClassUtils {
 		return version;
 	}
 
+	public static Object invokeMethod(Object target, String methodName,
+			Object... parameters) throws NoSuchMethodException,
+			IllegalArgumentException, IllegalAccessException,
+			InvocationTargetException {
+
+		if (target == null) {
+			return null;
+		}
+		
+		Class targetClass = target.getClass();
+		Method targetMethod = null;
+
+		List<Object> parameterClasses = new ArrayList<Object>();
+		if (parameters != null && parameters.length > 0) {
+			for (Object parameter : parameters) {
+				parameterClasses.add(parameter.getClass());
+			}
+			targetMethod = targetClass.getMethod(methodName, parameterClasses
+					.toArray(new Class[parameterClasses.size()]));
+		}
+		else {
+			targetMethod = targetClass.getMethod(methodName, (Class[]) null);
+		}
+
+		if (targetMethod != null) {
+			return targetMethod.invoke(target, parameters);
+		}
+		return null;
+
+	}
+
+	public static Class<?> loadClass(String className)
+			throws ClassNotFoundException {
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		return loader.loadClass(className);
+	}
 }
