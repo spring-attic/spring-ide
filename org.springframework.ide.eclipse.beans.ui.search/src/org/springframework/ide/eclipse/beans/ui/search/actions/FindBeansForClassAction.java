@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.beans.ui.search.actions;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
@@ -67,7 +66,7 @@ public class FindBeansForClassAction extends Action
 			} else if (obj instanceof IClassFile) {
 				try {
 					return ((IClassFile) obj).getType().getFullyQualifiedName();
-				} catch (JavaModelException e) {
+				} catch (Exception e) {
 					// Can't do nothing here
 				}
 			}
