@@ -71,7 +71,6 @@ public class BeansProjectValidator extends AbstractProjectBuilder {
 					}
 				}
 				catch (JavaModelException e) {
-					BeansCorePlugin.log(e);
 				}
 			}
 		}
