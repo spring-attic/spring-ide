@@ -24,7 +24,6 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.structure.JavaMoveRefactoring;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CreateTargetQueries;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMoveWizard;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgQueries;
@@ -77,7 +76,7 @@ public class BeansMoveRefactorAction extends AbstractBeansRefactorAction {
 								wizard,
 								shell,
 								RefactoringMessages.OpenRefactoringWizardAction_refactoring,
-								true);
+								RefactoringSaveHelper.SAVE_ALL_ALWAYS_ASK);
 			}
 		}
 	}
