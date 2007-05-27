@@ -28,7 +28,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
  */
 public class BeansModelPropertyTester extends PropertyTester {
 
-	@Override
+	// @Override TODO CD don't add the annotation as this breaks on Eclipse 3.3
 	public boolean test(Object receiver, String property, Object[] args,
 			Object expectedValue) {
 		if (receiver instanceof IFile && "isBeansConfig".equals(property)) {
