@@ -7,14 +7,14 @@
       </appInfo>
       <documentation>
          &lt;p&gt;
-This extension-point is used to add one or more builders to the list of Spring project builders. These builders are called for every modified file during incremental build of a Spring project.
+This extension-point is used to add one or more builders to the list of Spring project builders. These builders are called during incremental build of a Spring project.
       </documentation>
    </annotation>
 
    <element name="extension">
       <complexType>
-         <sequence minOccurs="0" maxOccurs="unbounded">
-            <element ref="builder"/>
+         <sequence>
+            <element ref="builder" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -63,7 +63,14 @@ This extension-point is used to add one or more builders to the list of Spring p
          <attribute name="name" type="string" use="required">
             <annotation>
                <documentation>
-                  an name
+                  a name
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="description" type="string">
+            <annotation>
+               <documentation>
+                  an optional description
                </documentation>
             </annotation>
          </attribute>
@@ -71,13 +78,6 @@ This extension-point is used to add one or more builders to the list of Spring p
             <annotation>
                <documentation>
                   specifies if the builder is enabled by default
-               </documentation>
-            </annotation>
-         </attribute>
-         <attribute name="description" type="string">
-            <annotation>
-               <documentation>
-                  
                </documentation>
             </annotation>
          </attribute>
@@ -100,17 +100,16 @@ This extension-point is used to add one or more builders to the list of Spring p
       <documentation>
          &lt;pre&gt;
 &lt;extension point=&quot;org.springframework.ide.eclipse.core.builders&quot;&gt;
-	&lt;builder 
-		id=&quot;beansvalidator&quot; 
-		name=&quot;%beansValidator.name&quot;
-		enabledByDefault=&quot;true&quot;
-		description=&quot;%beansValidator.description&quot;
-		class=&quot;org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectValidator&quot;&gt;
-	&lt;/builder&gt;
+   &lt;builder id=&quot;aopreferencemodelbuilder&quot; 
+      name=&quot;%aopBuilder.name&quot;
+      description=&quot;%aopBuilder.description&quot;
+      enabledByDefault=&quot;true&quot;
+      class=&quot;org.springframework.ide.eclipse.aop.core.builder.AopReferenceModelProjectBuilder&quot;&gt;
+   &lt;/builder&gt;
 &lt;/extension&gt;
 &lt;/pre&gt;
 
-If this extension was defined in a plug-in with id &lt;samp&gt;org.springframework.ide.eclipse.beans.core&lt;/samp&gt;, the fully qualified name of this builder would be &lt;samp&gt;org.springframework.ide.eclipse.beans.core.beansvalidator&lt;/samp&gt;.
+If this extension was defined in a plug-in with id &lt;samp&gt;org.springframework.ide.eclipse.aop.core&lt;/samp&gt;, the fully qualified name of this validator would be &lt;samp&gt;org.springframework.ide.eclipse.aop.core.aopreferencemodelbuilder&lt;/samp&gt;.
       </documentation>
    </annotation>
 

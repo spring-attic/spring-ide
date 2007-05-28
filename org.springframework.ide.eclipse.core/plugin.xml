@@ -2,7 +2,8 @@
 <?eclipse version="3.0"?>
 <plugin>
 
-   <extension-point id="builders" name="&amp;buildersName" schema="schema/builders.exsd"/>
+   <extension-point id="builders" name="%buildersName" schema="schema/builders.exsd"/>
+   <extension-point id="validators" name="%validatorsName" schema="schema/validators.exsd"/>
 
    <extension
          id="springnature"

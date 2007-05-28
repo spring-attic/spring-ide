@@ -1,0 +1,223 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Schema file written by PDE -->
+<schema targetNamespace="org.springframework.ide.eclipse.core">
+<annotation>
+      <appInfo>
+         <meta.schema plugin="org.springframework.ide.eclipse.core" id="validators" name="Spring Project Validators"/>
+      </appInfo>
+      <documentation>
+         &lt;p&gt;
+This extension-point is used to add one or more validators (and it&apos;s validation rules) to the list of Spring project validators. These validators are called for every modified resource during incremental build of a Spring project.
+      </documentation>
+   </annotation>
+
+   <element name="extension">
+      <complexType>
+         <sequence>
+            <element ref="validator" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="rules" minOccurs="0" maxOccurs="unbounded"/>
+         </sequence>
+         <attribute name="point" type="string" use="required">
+            <annotation>
+               <documentation>
+                  the full-qualified name of the extension point (that is &lt;samp&gt;org.springframework.ide.eclipse.core.validators&lt;/samp&gt;)
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="id" type="string">
+            <annotation>
+               <documentation>
+                  an optional id
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string">
+            <annotation>
+               <documentation>
+                  an optional name
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="validator">
+      <complexType>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  the full-qualified name of a class which implements 
+&lt;samp&gt;org.springframework.ide.eclipse.core.model.validation.IValidator&lt;/samp&gt;
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.core.model.validation.IValidator"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="id" type="string" use="required">
+            <annotation>
+               <documentation>
+                  an id
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string" use="required">
+            <annotation>
+               <documentation>
+                  a name
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="description" type="string">
+            <annotation>
+               <documentation>
+                  an optional description
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="enabledByDefault" type="boolean">
+            <annotation>
+               <documentation>
+                  specifies if the validator is enabled by default
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="rules">
+      <complexType>
+         <sequence>
+            <element ref="rule" minOccurs="1" maxOccurs="unbounded"/>
+         </sequence>
+         <attribute name="valiatorId" type="string" use="required">
+            <annotation>
+               <documentation>
+                  the id of validator these rules belong to
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="rule">
+      <complexType>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  the full-qualified name of a class which implements 
+&lt;samp&gt;org.springframework.ide.eclipse.core.model.validation.IValidationRule&lt;/samp&gt;
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.core.model.validation.IValidationRule"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="id" type="string" use="required">
+            <annotation>
+               <documentation>
+                  an id
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string" use="required">
+            <annotation>
+               <documentation>
+                  a name
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="description" type="string">
+            <annotation>
+               <documentation>
+                  an optional description
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="enabledByDefault" type="boolean">
+            <annotation>
+               <documentation>
+                  specifies if the validation rule is enabled by default
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="since"/>
+      </appInfo>
+      <documentation>
+         2.0
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="examples"/>
+      </appInfo>
+      <documentation>
+         &lt;pre&gt;
+&lt;extension point=&quot;org.springframework.ide.eclipse.core.validators&quot;&gt;
+   &lt;validator id=&quot;beansvalidator&quot; 
+      name=&quot;%beansValidator.name&quot;
+      enabledByDefault=&quot;true&quot;
+      description=&quot;%beansValidator.description&quot;
+      class=&quot;org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansConfigValidator&quot;&gt;
+   &lt;/validator&gt;
+   &lt;rules validatorId=&quot;org.springframework.ide.eclipse.core.beansvalidator&quot;&gt;
+      &lt;rule id=&quot;checkbeanid&quot;
+         name=&quot;%beansValidatorRule.checkBeanID.name&quot;
+         description=&quot;%beansValidatorRule.checkBeanID.description&quot;
+         enabledByDefault=&quot;true&quot;
+         class=&quot;org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.CheckBeanIdRule&quot;&gt;
+      &lt;/rule&gt;
+   &lt;/rules&gt;
+&lt;/extension&gt;
+&lt;/pre&gt;
+
+If this extension was defined in a plug-in with id &lt;samp&gt;org.springframework.ide.eclipse.beans.core&lt;/samp&gt;, the fully qualified name of this builder would be &lt;samp&gt;org.springframework.ide.eclipse.beans.core.beansvalidator&lt;/samp&gt;.
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="apiInfo"/>
+      </appInfo>
+      <documentation>
+         &lt;p&gt;
+Each validator must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.springframework.ide.eclipse.core.model.validation.IValidator&lt;/samp&gt;.
+Each validation rule must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.springframework.ide.eclipse.core.model.validation.IValidationRule&lt;/samp&gt;.
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="implementation"/>
+      </appInfo>
+      <documentation>
+         &lt;p&gt;
+This plugin itself does not have any predefined validators and validation rules.
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="copyright"/>
+      </appInfo>
+      <documentation>
+         &lt;pre&gt;
+Copyright (c) 2005, 2007 Spring IDE Developers
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/epl-v10.html
+ 
+Contributors:
+    Spring IDE Developers - initial API and implementation
+&lt;/pre&gt;
+      </documentation>
+   </annotation>
+
+</schema>
