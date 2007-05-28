@@ -38,7 +38,7 @@ import org.springframework.util.ReflectionUtils;
  * Uses Spring AOP's {@link AspectJExpressionPointcut} infrastructure to
  * determine matches.
  * <p>
- * With Spring 2.1 this class is already ready to suport the bean pointcut
+ * With Spring 2.1 this class is already ready to support the bean pointcut
  * primitive as well.
  * @author Christian Dupuis
  * @since 2.0
@@ -72,7 +72,7 @@ public class AspectDefinitionMatcher {
 	}*/
 
 	/**
-	 * Checks if the given matching candidate mathod is a legal match for Spring
+	 * Checks if the given matching candidate method is a legal match for Spring
 	 * AOP.
 	 * <p>
 	 * Legal matches need to be public and either defined on the class and/or
