@@ -10,10 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
@@ -74,11 +72,5 @@ public class BeansStructuredTextViewerConfiguration extends
 			return new BeansTextHoverProcessor();
 		}
 		return super.getTextHover(sourceViewer, contentType, stateMask);
-	}
-
-	public static void main(String[] args) {
-		NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.US);
-		Integer number = 10000;
-		System.out.println(nf.format(number));
 	}
 }
