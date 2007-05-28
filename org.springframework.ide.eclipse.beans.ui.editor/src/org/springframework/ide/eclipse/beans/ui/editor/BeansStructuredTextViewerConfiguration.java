@@ -16,13 +16,9 @@ import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.jface.text.ITextHover;
-import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
-import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.wst.sse.core.text.IStructuredPartitions;
 import org.eclipse.wst.xml.core.text.IXMLPartitions;
@@ -48,18 +44,6 @@ public class BeansStructuredTextViewerConfiguration extends
 			processors = super.getContentAssistProcessors(sourceViewer,
 					partitionType);
 		}
-
-		IContentAssistant ca = super.getContentAssistant(sourceViewer);
-		if (ca != null && ca instanceof ContentAssistant) {
-			ContentAssistant contentAssistant = (ContentAssistant) ca;
-			contentAssistant.enableAutoActivation(true);
-			contentAssistant.setAutoActivationDelay(50);
-			contentAssistant.setProposalSelectorBackground(new Color(Activator
-					.getActiveWorkbenchShell().getDisplay(), new RGB(255, 255,
-					255)));
-			contentAssistant.setRestoreCompletionProposalSize(Activator
-					.getDefault().getDialogSettings());
-		}
 		return processors;
 	}
 
@@ -79,8 +63,7 @@ public class BeansStructuredTextViewerConfiguration extends
 				allDetectors.add(detector);
 			}
 		}
-		return allDetectors
-				.toArray(new IHyperlinkDetector[0]);
+		return allDetectors.toArray(new IHyperlinkDetector[0]);
 	}
 
 	@Override
@@ -93,10 +76,9 @@ public class BeansStructuredTextViewerConfiguration extends
 		return super.getTextHover(sourceViewer, contentType, stateMask);
 	}
 
-    
-    public static void main(String[] args) {
-    	NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.US);
-    	Integer number = 10000;
-    	System.out.println(nf.format(number));
-    }
+	public static void main(String[] args) {
+		NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.US);
+		Integer number = 10000;
+		System.out.println(nf.format(number));
+	}
 }
