@@ -57,7 +57,7 @@ public class BeansProjectValidator extends AbstractProjectBuilder {
 				// Now check for a bean class or source file
 				try {
 					IJavaElement element = JavaCore.create(resource);
-					if (element != null) {
+					if (element != null && element.exists()) {
 						if (element instanceof IClassFile) {
 							IType type = ((IClassFile) element).getType();
 							resources.addAll(getBeanConfigResources(type));
@@ -71,6 +71,7 @@ public class BeansProjectValidator extends AbstractProjectBuilder {
 					}
 				}
 				catch (JavaModelException e) {
+					BeansCorePlugin.log(e);
 				}
 			}
 		}
