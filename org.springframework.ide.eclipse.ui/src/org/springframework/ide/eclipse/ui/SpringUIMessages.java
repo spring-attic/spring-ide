@@ -39,6 +39,11 @@ public final class SpringUIMessages extends NLS {
 	public static String ProjectBuilderPropertyPage_noBuilderDescription;
 	public static String ProjectBuilderPropertyPage_builderDescription;
 
+	public static String ProjectValidatorPropertyPage_title;
+	public static String ProjectValidatorPropertyPage_description;
+	public static String ProjectValidatorPropertyPage_noBuilderDescription;
+	public static String ProjectValidatorPropertyPage_builderDescription;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, SpringUIMessages.class);
 	}

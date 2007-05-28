@@ -19,7 +19,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -33,24 +32,20 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
-import org.eclipse.ui.dialogs.PropertyPage;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinition;
 import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinitionFactory;
 import org.springframework.ide.eclipse.ui.SpringUIMessages;
 
 /**
- * Provides an {@link PropertyPage} that allows to manage the enablement of
- * {@link IProjectBuilder} for the underlying {@link IProject}.
- * @author Torsten Juergeleit
+ * UI component that allows to enable or disable {@link IProjectBuilder}s on a
+ * per project basis.
  * @author Christian Dupuis
  * @since 2.0
  */
-public class ProjectBuilderPropertyPage extends PropertyPage {
+public class ProjectBuilderPropertyTab {
 
 	private static class ProjectBuilderDefinitionContentProvider implements
 			IStructuredContentProvider {
@@ -89,20 +84,16 @@ public class ProjectBuilderPropertyPage extends PropertyPage {
 
 	private Text descriptionText;
 
-	public ProjectBuilderPropertyPage() {
+	private IProject project;
+
+	public ProjectBuilderPropertyTab(IProject project) {
 		this.projectBuilderDefinitions = ProjectBuilderDefinitionFactory
 				.getProjectBuilderDefinitions();
-		noDefaultAndApplyButton();
+		this.project = project;
 	}
 
-	@Override
-	protected Control createContents(Composite parent) {
-		TabFolder folder = new TabFolder(parent, SWT.NONE);
-		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
-		TabItem item = new TabItem(folder, SWT.NONE);
-		item.setText(SpringUIMessages.ProjectBuilderPropertyPage_title);
-
-		Composite composite = new Composite(folder, SWT.NONE);
+	public Control createContents(Composite parent) {
+		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
@@ -150,18 +141,14 @@ public class ProjectBuilderPropertyPage extends PropertyPage {
 		data.heightHint = 30;
 		descriptionText.setLayoutData(data);
 
-		item.setControl(composite);
-
-		Dialog.applyDialogFont(folder);
-
-		return folder;
+		return composite;
 	}
 
 	private List<ProjectBuilderDefinition> getEnabledProjectBuilderDefinitions() {
 		List<ProjectBuilderDefinition> builderDefinitions = this.projectBuilderDefinitions;
 		List<ProjectBuilderDefinition> filteredBuilderDefinitions = new ArrayList<ProjectBuilderDefinition>();
 		for (ProjectBuilderDefinition builderDefinition : builderDefinitions) {
-			if (builderDefinition.isEnabled((IProject) getElement())) {
+			if (builderDefinition.isEnabled(project)) {
 				filteredBuilderDefinitions.add(builderDefinition);
 			}
 		}
@@ -194,7 +181,6 @@ public class ProjectBuilderPropertyPage extends PropertyPage {
 	}
 
 	public boolean performOk() {
-		final IProject project = (IProject) getElement();
 		final List checkElements = Arrays.asList(this.builderViewer
 				.getCheckedElements());
 
@@ -224,7 +210,6 @@ public class ProjectBuilderPropertyPage extends PropertyPage {
 		}
 		catch (InterruptedException e) {
 		}
-
-		return super.performOk();
+		return true;
 	}
 }
