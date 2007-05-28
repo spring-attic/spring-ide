@@ -16,25 +16,41 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
 
 /**
- * Wraps an {@link IValidator} and all the information from it's definition
- * via the corresponding extension point.
+ * Wraps an {@link IValidator} and all the information from it's definition via
+ * the corresponding extension point.
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
 public class ValidatorDefinition {
 
-	private static final String ENABLEMENT_PREFIX = "validator.rule.enable.";
+	private static final String ENABLEMENT_PREFIX = "validator.enable.";
+
 	private static final String CLASS_ATTRIBUTE = "class";
+
 	private static final String ID_ATTRIBUTE = "id";
+
+	private static final String ICON_ATTRIBUTE = "icon";
+
 	private static final String NAME_ATTRIBUTE = "name";
+
 	private static final String ENABLED_BY_DEFAULT_ATTRIBUTE = "enabledByDefault";
+
 	private static final String DESCRIPTION_ATTRIBUTE = "description";
 
 	private IValidator validator;
+
 	private String id;
+
 	private String name;
+
 	private boolean isEnabled = true;
+
 	private String description;
+
+	private String iconUri;
+
+	private String namespaceUri;
 
 	public ValidatorDefinition(IConfigurationElement element)
 			throws CoreException {
@@ -51,6 +67,8 @@ public class ValidatorDefinition {
 				+ element.getAttribute(ID_ATTRIBUTE);
 		name = element.getAttribute(NAME_ATTRIBUTE);
 		description = element.getAttribute(DESCRIPTION_ATTRIBUTE);
+		iconUri = element.getAttribute(ICON_ATTRIBUTE);
+		namespaceUri = element.getDeclaringExtension().getNamespaceIdentifier();
 		String enabledByDefault = element
 				.getAttribute(ENABLED_BY_DEFAULT_ATTRIBUTE);
 		if (enabledByDefault != null) {
@@ -72,6 +90,14 @@ public class ValidatorDefinition {
 
 	public String getDescription() {
 		return description;
+	}
+
+	public String getIconUri() {
+		return iconUri;
+	}
+
+	public String getNamespaceUri() {
+		return namespaceUri;
 	}
 
 	/**
