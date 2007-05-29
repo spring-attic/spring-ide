@@ -89,6 +89,7 @@ public class WebflowProject extends AbstractModelElement
 
 	public IModelElement[] getElementChildren() {
 		Set<IModelElement> children = new HashSet<IModelElement>();
+		children.addAll(getConfigs());
 		return children.toArray(new IModelElement[children.size()]);
 	}
 

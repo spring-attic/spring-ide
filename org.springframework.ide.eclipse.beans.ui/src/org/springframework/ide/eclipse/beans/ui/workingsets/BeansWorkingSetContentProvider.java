@@ -13,8 +13,10 @@ package org.springframework.ide.eclipse.beans.ui.workingsets;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorContentProvider;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.ISpringProject;
 
 /**
  * Simple extension of the {@link BeansNavigatorContentProvider} that prevents
@@ -32,6 +34,14 @@ public class BeansWorkingSetContentProvider extends
 		else if (parentElement instanceof IFile) {
 			return IModelElement.NO_CHILDREN;
 		}
-		return super.getChildren(parentElement);
+		else if (parentElement instanceof IBeansModelElement) {
+			return super.getChildren(parentElement);
+		}
+		else if (parentElement instanceof ISpringProject) {
+			return super.getChildren(parentElement);
+		}
+		else {
+			return IModelElement.NO_CHILDREN;
+		}
 	}
 }
