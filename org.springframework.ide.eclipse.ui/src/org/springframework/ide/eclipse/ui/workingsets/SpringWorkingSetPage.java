@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.internal.resources.WorkspaceRoot;
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;

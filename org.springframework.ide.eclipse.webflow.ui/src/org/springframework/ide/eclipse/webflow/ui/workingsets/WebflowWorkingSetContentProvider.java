@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.webflow.ui.workingsets;
 import org.eclipse.core.resources.IFile;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
-import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 import org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorContentProvider;
 
 /**
