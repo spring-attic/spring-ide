@@ -38,7 +38,6 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModel;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelListener;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
-import org.springframework.util.ClassUtils;
 
 public class WebflowModel extends AbstractModelElement implements
 		IWebflowModel, IResourceChangeListener {
