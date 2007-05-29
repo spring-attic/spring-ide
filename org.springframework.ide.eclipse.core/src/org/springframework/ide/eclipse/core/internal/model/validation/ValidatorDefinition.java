@@ -25,7 +25,7 @@ import org.springframework.ide.eclipse.core.model.validation.IValidator;
  */
 public class ValidatorDefinition {
 
-	private static final String ENABLEMENT_PREFIX = "validator.rule.enable.";
+	private static final String ENABLEMENT_PREFIX = "validator.enable.";
 	private static final String CLASS_ATTRIBUTE = "class";
 	private static final String ID_ATTRIBUTE = "id";
 	private static final String NAME_ATTRIBUTE = "name";
