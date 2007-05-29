@@ -46,7 +46,6 @@ public class ValidatorDefinition {
 		init(element);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void init(IConfigurationElement element) throws CoreException {
 		Object executable = element.createExecutableExtension(CLASS_ATTRIBUTE);
 		if (executable instanceof IValidator) {

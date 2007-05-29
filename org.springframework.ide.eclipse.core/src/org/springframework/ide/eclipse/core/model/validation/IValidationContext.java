@@ -22,17 +22,19 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  * @author Torsten Juergeleit
  * @since 2.0
  */
-public interface IValidationContext <T extends IModelElement> {
+public interface IValidationContext <E extends IModelElement> {
 
 	IResource getResource();
 
-	T getRootElement();
+	E getRootElement();
 
-	void warning(IValidationRule<IModelElement> rule, IModelElement element,
-			String message);
+	void warning(IValidationRule rule,
+			String errorId, IModelElement element, String message,
+			ValidationProblemAttribute... attributes);
 
-	void error(IValidationRule<IModelElement> rule, IModelElement element,
-			String message);
+	void error(IValidationRule rule,
+			String errorId, IModelElement element, String message,
+			ValidationProblemAttribute... attributes);
 	
 	Set<ValidationProblem> getProblems();
 }

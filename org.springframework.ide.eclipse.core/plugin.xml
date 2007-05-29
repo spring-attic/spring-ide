@@ -19,7 +19,7 @@
          id="springbuilder"
          name="%springBuilder">
       <builder hasNature="true">
-         <run class="org.springframework.ide.eclipse.core.internal.project.SpringProjectBuilder"/>
+         <run class="org.springframework.ide.eclipse.core.internal.project.SpringProjectContributionManager"/>
       </builder>
    </extension>
 

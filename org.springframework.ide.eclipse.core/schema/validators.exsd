@@ -100,7 +100,7 @@ This extension-point is used to add one or more validators (and it&apos;s valida
          <sequence>
             <element ref="rule" minOccurs="1" maxOccurs="unbounded"/>
          </sequence>
-         <attribute name="valiatorId" type="string" use="required">
+         <attribute name="validatorId" type="string" use="required">
             <annotation>
                <documentation>
                   the id of validator these rules belong to

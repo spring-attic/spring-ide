@@ -22,22 +22,22 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  * @author Torsten Juergeleit
  * @since 2.0
  */
-public interface IValidationRule <T extends IModelElement> {
+public interface IValidationRule<E extends IModelElement,
+		C extends IValidationContext> {
 
 	/**
 	 * Returns <code>true</code> if ths rule is able to validate the given
-	 * {@link IModelElement}.
+	 * {@link IModelElement} with the specified {@link IValidationContext}.
 	 */
-	boolean supports(T element);
+	boolean supports(IModelElement element, IValidationContext context);
 
 	/**
 	 * Validates the given {@link IModelElement}.
-	 * @param element  the element to be validated
-	 * @param context  the context which encapsulates all the information
-	 * 				neccessary during validation
+	 * @param element the element to be validated
+	 * @param context the context which encapsulates all the information
+	 * neccessary during validation
 	 * @param monitor a progress monitor, or <code>null</code> if progress
-	 * 			reporting and cancellation are not desired
+	 * reporting and cancellation are not desired
 	 */
-	void validate(T element, IValidationContext context,
-			IProgressMonitor monitor);
+	void validate(E element, C context, IProgressMonitor monitor);
 }

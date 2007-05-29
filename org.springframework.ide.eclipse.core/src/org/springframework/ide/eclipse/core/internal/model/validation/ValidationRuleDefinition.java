@@ -13,10 +13,7 @@ package org.springframework.ide.eclipse.core.internal.model.validation;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
-import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 
 /**
@@ -26,8 +23,7 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class ValidationRuleDefinition
-		implements IValidationRule<IModelElement> {
+public class ValidationRuleDefinition {
 
 	private static final String ENABLEMENT_PREFIX = "validator.rule.enable.";
 	private static final String CLASS_ATTRIBUTE = "class";
@@ -37,7 +33,7 @@ public class ValidationRuleDefinition
 	private static final String DESCRIPTION_ATTRIBUTE = "description";
 
 	private String validatorID;
-	private IValidationRule<IModelElement> rule;
+	private IValidationRule rule;
 	private String id;
 	private String name;
 	private boolean isEnabled = true;
@@ -57,11 +53,10 @@ public class ValidationRuleDefinition
 		init(element);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void init(IConfigurationElement element) throws CoreException {
 		Object executable = element.createExecutableExtension(CLASS_ATTRIBUTE);
 		if (executable instanceof IValidationRule) {
-			rule = (IValidationRule<IModelElement>) executable;
+			rule = (IValidationRule) executable;
 		}
 		id = element.getContributor().getName() + "."
 				+ element.getAttribute(ID_ATTRIBUTE) + "-" + validatorID;
@@ -78,7 +73,7 @@ public class ValidationRuleDefinition
 		return validatorID;
 	}
 
-	public IValidationRule<IModelElement> getRule() {
+	public IValidationRule getRule() {
 		return rule;
 	}
 
@@ -106,15 +101,6 @@ public class ValidationRuleDefinition
 		SpringCorePreferences.getProjectPreferences(project).putBoolean(
 				ENABLEMENT_PREFIX + id, isEnabled);
 		this.isEnabled = isEnabled;
-	}
-
-	public boolean supports(IModelElement element) {
-		return rule.supports(element);
-	}
-
-	public void validate(IModelElement element, IValidationContext context,
-			IProgressMonitor monitor) {
-		rule.validate(element, context, monitor);
 	}
 
 	@Override

@@ -30,6 +30,8 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidatorDefinition;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidatorDefinitionFactory;
+import org.springframework.ide.eclipse.core.model.validation.IValidator;
+import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 import org.springframework.ide.eclipse.core.project.IProjectContributor;
 import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinition;
 import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinitionFactory;
@@ -37,15 +39,16 @@ import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinitionFact
 /**
  * Incremental project builder which implements the Strategy GOF pattern. For
  * every modified {@link IResource} within a Spring project all implementations
- * of the interface
- * {@link org.springframework.ide.eclipse.core.project.IProjectBuilder} provided
- * via the extension point
- * <code>org.springframework.ide.eclipse.core.builders</code> are called.
+ * of the interface {@link IProjectBuilder} provided via the extension point
+ * <code>org.springframework.ide.eclipse.core.builders</code> and the
+ * interface {@link IValidator} provided via the extension point
+ * <code>org.springframework.ide.eclipse.core.validators</code> are called.
  * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
+ * @since 2.0
  */
-public class SpringProjectBuilder extends IncrementalProjectBuilder {
+public class SpringProjectContributionManager extends IncrementalProjectBuilder {
 
 	protected final IProject[] build(final int kind, Map args,
 			final IProgressMonitor monitor) throws CoreException {
@@ -68,10 +71,10 @@ public class SpringProjectBuilder extends IncrementalProjectBuilder {
 		for (final ValidatorDefinition validatorDefinition
 				: ValidatorDefinitionFactory.getValidatorDefinitions()) {
 			if (validatorDefinition.isEnabled(project)) {
-//				Set<IResource> affectedResources = getAffectedResources(
-//						validatorDefinition.getValidator(), project, kind,
-//						delta);
-//				runValidator(validatorDefinition, affectedResources, monitor);
+				Set<IResource> affectedResources = getAffectedResources(
+						validatorDefinition.getValidator(), project, kind,
+						delta);
+				runValidator(validatorDefinition, affectedResources, monitor);
 			}
 		}
 		return null;

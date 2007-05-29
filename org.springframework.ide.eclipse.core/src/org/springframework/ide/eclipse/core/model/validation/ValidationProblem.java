@@ -20,36 +20,48 @@ import org.springframework.util.ObjectUtils;
  */
 public class ValidationProblem {
 
-	private String ruleID;
+	private String ruleId;
+	private String errorId;
 	private int severity;
 	private String message;
 	private IResource resource;
 	private int line;
+	private ValidationProblemAttribute[] attributes;
 
 	public ValidationProblem(int severity, String message, IResource resource) {
-		this((String) null, severity, message, resource, -1);
+		this(null, null, severity, message, resource, -1);
 	}
 
 	public ValidationProblem(int severity, String message, IResource resource,
-			int line) {
-		this((String) null, severity, message, resource, line);
+			int line, ValidationProblemAttribute... attributes) {
+		this(null, null, severity, message, resource, line, attributes);
 	}
 
-	public ValidationProblem(String ruleID, int severity,
-			String message, IResource resource, int line) {
-		this.ruleID = ruleID;
+	public ValidationProblem(String ruleId, String errorId, int severity,
+			String message, IResource resource, int line,
+			ValidationProblemAttribute... attributes) {
+		this.ruleId = ruleId;
 		this.severity = severity;
 		this.message = message;
 		this.resource = resource;
 		this.line = line;
+		this.attributes = attributes;
 	}
 
 	/**
 	 * Returns the ID of the {@link IValidationRule} which raised this problem
 	 * or <code>null</code> if no validation rule was involved.
 	 */
-	public String getRuleID() {
-		return ruleID;
+	public String getRuleId() {
+		return ruleId;
+	}
+
+	/**
+	 * Returns the ID of the error which raised this problem
+	 * or <code>null</code> if no error was involved.
+	 */
+	public String getErrorId() {
+		return errorId;
 	}
 
 	/**
@@ -81,14 +93,23 @@ public class ValidationProblem {
 		return line;
 	}
 
+	/**
+	 * Returns the attributes or <code>null</code> if not available.
+	 */
+	public ValidationProblemAttribute[] getAttributes() {
+		return attributes;
+	}
+
 	@Override
 	public int hashCode() {
-		int hashCode = ObjectUtils.nullSafeHashCode(ruleID);
-		hashCode = 2 * hashCode + severity;
-		hashCode = 3 * hashCode + ObjectUtils.nullSafeHashCode(message);
-		hashCode = 4 * hashCode + ObjectUtils.nullSafeHashCode(resource);
-		hashCode = 5 * hashCode + line;
-		return 6 * hashCode + super.hashCode();
+		int hashCode = ObjectUtils.nullSafeHashCode(ruleId);
+		hashCode = 2 * hashCode + ObjectUtils.nullSafeHashCode(errorId);
+		hashCode = 3 * hashCode + severity;
+		hashCode = 4 * hashCode + ObjectUtils.nullSafeHashCode(message);
+		hashCode = 5 * hashCode + ObjectUtils.nullSafeHashCode(resource);
+		hashCode = 6 * hashCode + line;
+		hashCode = 7 * hashCode + ObjectUtils.nullSafeHashCode(attributes);
+		return 8 * hashCode + super.hashCode();
 	}
 
 	@Override
@@ -100,17 +121,13 @@ public class ValidationProblem {
 			return false;
 		}
 		ValidationProblem that = (ValidationProblem) other;
-		if (!ObjectUtils.nullSafeEquals(this.ruleID, that.ruleID)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.ruleId, that.ruleId)) return false;
+		if (!ObjectUtils.nullSafeEquals(this.errorId, that.errorId)) return false;
 		if (this.severity != that.severity) return false;
 		if (!ObjectUtils.nullSafeEquals(this.message, that.message)) return false;
 		if (!ObjectUtils.nullSafeEquals(this.resource, that.resource)) return false;
 		if (this.line != that.line) return false;
+		if (!ObjectUtils.nullSafeEquals(this.attributes, that.attributes)) return false;
 		return super.equals(other);
-	}
-
-	@Override
-	public String toString() {
-		// TODO Auto-generated method stub
-		return super.toString();
 	}
 }
