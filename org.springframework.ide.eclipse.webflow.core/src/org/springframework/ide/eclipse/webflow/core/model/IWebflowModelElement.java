@@ -12,8 +12,8 @@ package org.springframework.ide.eclipse.webflow.core.model;
 
 import java.beans.PropertyChangeListener;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * 
@@ -22,7 +22,13 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public interface IWebflowModelElement {
+public interface IWebflowModelElement extends IModelElement {
+	
+	int MODEL = 1;
+
+	int PROJECT = 2;
+
+	int CONFIG = 3;
 
 	String ADD_CHILDREN = "add_children";
 
@@ -40,8 +46,6 @@ public interface IWebflowModelElement {
 
 	void fireStructureChange(String prop, Object child);
 
-	IWebflowModelElement getElementParent();
-
 	int getElementStartLine();
 
 	IDOMNode getNode();
@@ -51,7 +55,5 @@ public interface IWebflowModelElement {
 	void removePropertyChangeListener(PropertyChangeListener l);
 
 	void setElementParent(IWebflowModelElement parent);
-
-	void accept(IWebflowModelElementVisitor visitor, IProgressMonitor monitor);
 
 }

@@ -21,6 +21,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.webflow.core.model.ITransition;
 import org.springframework.ide.eclipse.webflow.core.model.ITransitionableTo;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.springframework.ide.eclipse.webflow.ui.graph.dialogs.DialogUtils;
 
@@ -69,7 +70,7 @@ public class CreateStateCommand extends Command {
 			if (targetConnections.get(i) instanceof IIfTransition) {
 				IIfTransition t = (IIfTransition) targetConnections.get(i);
 				t.setToState(null);
-				t.getElementParent().fireStructureChange(
+				((IWebflowModelElement) t.getElementParent()).fireStructureChange(
 						WebflowModelElement.OUTPUTS, t);
 			}
 		}

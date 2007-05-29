@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.webflow.core.internal.model;
 
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
-import org.springframework.ide.eclipse.webflow.core.model.IPersistableWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 
 /**
  * Utility class tha adapts a given {@link IPersistableWebflowModelElement} to
@@ -23,10 +23,10 @@ import org.springframework.ide.eclipse.webflow.core.model.IPersistableWebflowMod
 public class WebflowModelElementToPersistableElementAdapter implements
 		IPersistableElement {
 
-	private final IPersistableWebflowModelElement webflowModelElement;
+	private final IWebflowModelElement webflowModelElement;
 
 	public WebflowModelElementToPersistableElementAdapter(
-			final IPersistableWebflowModelElement webflowModelElement) {
+			final IWebflowModelElement webflowModelElement) {
 		this.webflowModelElement = webflowModelElement;
 	}
 

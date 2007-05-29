@@ -14,8 +14,9 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 
-public interface IWebflowProject extends IPersistableWebflowModelElement {
+public interface IWebflowProject extends IModelElement {
 
 	String DESCRIPTION_FILE = ".springWebflow";
 

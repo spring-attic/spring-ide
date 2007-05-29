@@ -44,7 +44,7 @@ public class DeleteActionCommand extends Command {
 	 * 
 	 */
 	protected void primExecute() {
-		IWebflowModelElement parent = child.getElementParent();
+		IWebflowModelElement parent = (IWebflowModelElement) child.getElementParent();
 		if (parent instanceof IEntryActions) {
 			index = ((IEntryActions) parent).getEntryActions().indexOf(child);
 			((IEntryActions) parent).removeEntryAction(child);
@@ -83,7 +83,7 @@ public class DeleteActionCommand extends Command {
 	 * @see org.eclipse.gef.commands.Command#undo()
 	 */
 	public void undo() {
-		IWebflowModelElement parent = child.getElementParent();
+		IWebflowModelElement parent = (IWebflowModelElement) child.getElementParent();
 		if (parent instanceof IEntryActions) {
 			((IEntryActions) parent).addEntryAction(child, index);
 		}

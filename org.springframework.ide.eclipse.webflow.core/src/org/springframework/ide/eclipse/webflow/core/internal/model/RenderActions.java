@@ -15,33 +15,23 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IRenderActions;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
-import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.w3c.dom.NodeList;
 
 /**
- * 
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public class RenderActions extends WebflowModelElement implements
+public class RenderActions extends AbstractModelElement implements
 		IRenderActions {
 
-	/**
-	 * The render actions.
-	 */
 	private List<IActionElement> renderActions = null;
 
-	/**
-	 * Init.
-	 * 
-	 * @param node the node
-	 * @param parent the parent
-	 */
 	@Override
 	public void init(IDOMNode node, IWebflowModelElement parent) {
 		super.init(node, parent);
@@ -79,15 +69,6 @@ public class RenderActions extends WebflowModelElement implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.IActionState#addAction(org.springframework.ide.eclipse.web.core.model.IAction)
-	 */
-	/**
-	 * Adds the render action.
-	 * 
-	 * @param action the action
-	 */
 	public void addRenderAction(IActionElement action) {
 		if (!this.renderActions.contains(action)) {
 			this.renderActions.add(action);
@@ -98,17 +79,6 @@ public class RenderActions extends WebflowModelElement implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.flow.core.model.IActionState#addAction(org.springframework.ide.eclipse.web.flow.core.model.IAction,
-	 * int)
-	 */
-	/**
-	 * Adds the render action.
-	 * 
-	 * @param i the i
-	 * @param action the action
-	 */
 	public void addRenderAction(IActionElement action, int i) {
 		if (!this.renderActions.contains(action)) {
 			if (this.renderActions.size() > i) {
@@ -125,28 +95,10 @@ public class RenderActions extends WebflowModelElement implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.IActionState#getActions()
-	 */
-	/**
-	 * Gets the render actions.
-	 * 
-	 * @return the render actions
-	 */
 	public List<IActionElement> getRenderActions() {
 		return this.renderActions;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.web.core.model.IActionState#removeAction(org.springframework.ide.eclipse.web.core.model.IAction)
-	 */
-	/**
-	 * Removes the render action.
-	 * 
-	 * @param action the action
-	 */
 	public void removeRenderAction(IActionElement action) {
 		if (this.renderActions.contains(action)) {
 			this.renderActions.remove(action);
@@ -156,20 +108,12 @@ public class RenderActions extends WebflowModelElement implements
 		}
 	}
 
-	/**
-	 * Creates the new.
-	 * 
-	 * @param parent the parent
-	 */
 	public void createNew(IWebflowModelElement parent) {
 		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
 				.createElement("render-actions");
 		init(node, parent);
 	}
 
-	/**
-	 * Removes the all.
-	 */
 	public void removeAll() {
 		for (IActionElement action : this.renderActions) {
 			getNode().removeChild(action.getNode());
@@ -177,7 +121,7 @@ public class RenderActions extends WebflowModelElement implements
 		this.renderActions = new ArrayList<IActionElement>();
 	}
 
-	public void accept(IWebflowModelElementVisitor visitor,
+	public void accept(IModelElementVisitor visitor,
 			IProgressMonitor monitor) {
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
@@ -188,5 +132,11 @@ public class RenderActions extends WebflowModelElement implements
 				state.accept(visitor, monitor);
 			}
 		}
+	}
+	
+	public IModelElement[] getElementChildren() {
+		List<IModelElement> children = new ArrayList<IModelElement>();
+		children.addAll(getRenderActions());
+		return children.toArray(new IModelElement[children.size()]);
 	}
 }

@@ -58,7 +58,7 @@ public class ExceptionHandlerCloneCommand extends Command {
 	 * @see org.eclipse.gef.commands.Command#undo()
 	 */
 	public void undo() {
-		IWebflowModelElement parent = child.getElementParent();
+		IWebflowModelElement parent = (IWebflowModelElement) child.getElementParent();
 		((IState) parent).removeExceptionHandler(child);
 	}
 

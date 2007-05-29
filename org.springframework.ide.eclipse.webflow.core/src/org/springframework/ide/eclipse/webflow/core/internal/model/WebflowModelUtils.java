@@ -152,9 +152,8 @@ public class WebflowModelUtils {
 	public static void deleteProblemMarkers(IResource resource) {
 		MarkerUtils.deleteMarkers(resource, PROBLEM_MARKER);
 	}
-	
-	public static IType getActionType(IWebflowConfig config,
-			IDOMNode node) {
+
+	public static IType getActionType(IWebflowConfig config, IDOMNode node) {
 		Set<IBean> beans = getBeans(config);
 		String className = null;
 		for (IBean bean : beans) {
@@ -164,12 +163,11 @@ public class WebflowModelUtils {
 				break;
 			}
 		}
-		
-		return BeansModelUtils.getJavaType(config.getProject()
-				.getProject(), className);
+
+		return BeansModelUtils.getJavaType(config.getProject().getProject(),
+				className);
 	}
-	
-	
+
 	public static List<IMethod> getActionMethods(IWebflowConfig config,
 			IDOMNode node) {
 		IType type = getActionType(config, node);
@@ -285,18 +283,22 @@ public class WebflowModelUtils {
 		return false;
 	}
 
-	public static IWebflowState getWebflowState(IWebflowModelElement element, boolean resolveToRoot) {
+	public static IWebflowState getWebflowState(IWebflowModelElement element,
+			boolean resolveToRoot) {
 		if (element != null) {
 			if (element instanceof IWebflowState) {
-				if (resolveToRoot && element.getElementParent() instanceof InlineFlowState) {
-					return getWebflowState(element.getElementParent(), resolveToRoot);
+				if (resolveToRoot
+						&& element.getElementParent() instanceof InlineFlowState) {
+					return getWebflowState((IWebflowModelElement) element
+							.getElementParent(), resolveToRoot);
 				}
 				else {
 					return (IWebflowState) element;
 				}
 			}
 			else {
-				return getWebflowState(element.getElementParent(), resolveToRoot);
+				return getWebflowState((IWebflowModelElement) element
+						.getElementParent(), resolveToRoot);
 			}
 		}
 		else {
@@ -310,7 +312,8 @@ public class WebflowModelUtils {
 				return (IState) element;
 			}
 			else {
-				return getState(element.getElementParent());
+				return getState((IWebflowModelElement) element
+						.getElementParent());
 			}
 		}
 		else {

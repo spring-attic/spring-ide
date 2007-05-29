@@ -11,10 +11,14 @@
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IDecisionState;
@@ -33,7 +37,6 @@ import org.springframework.ide.eclipse.webflow.core.model.ITransitionableFrom;
 import org.springframework.ide.eclipse.webflow.core.model.ITransitionableTo;
 import org.springframework.ide.eclipse.webflow.core.model.IVar;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
-import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.w3c.dom.NodeList;
 
@@ -273,7 +276,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 									if (!((ITransitionableTo) state)
 											.getInputTransitions().contains(
 													ifTrans)) {
-										ifTrans.getElementParent()
+										((IWebflowModelElement) ifTrans.getElementParent())
 												.fireStructureChange(OUTPUTS,
 														ifTrans);
 										((ITransitionableTo) state)
@@ -289,7 +292,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 									if (!((ITransitionableTo) state)
 											.getInputTransitions().contains(
 													ifTrans)) {
-										ifTrans.getElementParent()
+										((IWebflowModelElement) ifTrans.getElementParent())
 												.fireStructureChange(OUTPUTS,
 														ifTrans);
 										((ITransitionableTo) state)
@@ -628,7 +631,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 		}
 	}
 
-	public void accept(IWebflowModelElementVisitor visitor,
+	public void accept(IModelElementVisitor visitor,
 			IProgressMonitor monitor) {
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
@@ -675,9 +678,22 @@ public class WebflowState extends AbstractTransitionableFrom implements
 				getInputMapper().accept(visitor, monitor);
 			}
 			if (getOutputMapper() != null) {
-				getOutputMapper().accept(visitor, monitor);
+				getInputMapper().accept(visitor, monitor);
 			}
 		}
+	}
+	
+	public IModelElement[] getElementChildren() {
+		Set<IModelElement> children = new HashSet<IModelElement>();
+		children.addAll(getStates());
+		children.addAll(getImports());
+		children.addAll(getInlineFlowStates());
+		children.addAll(getAttributes());
+		children.addAll(getVars());
+		children.addAll(getExceptionHandlers());
+		children.add(getInputMapper());
+		children.add(getInputMapper());
+		return children.toArray(new IModelElement[children.size()]);
 	}
 
 	public IGlobalTransitions getGlobalTransitions() {

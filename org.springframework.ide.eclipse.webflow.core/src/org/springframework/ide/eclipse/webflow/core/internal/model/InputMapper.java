@@ -15,39 +15,26 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.IInputAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.IInputMapper;
 import org.springframework.ide.eclipse.webflow.core.model.IMapping;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
-import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.w3c.dom.NodeList;
 
 /**
- * 
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
 @SuppressWarnings("restriction")
 public class InputMapper extends AbstractModelElement implements IInputMapper {
 
-	/**
-	 * The input attributes.
-	 */
 	private List<IInputAttribute> inputAttributes = null;
 
-	/**
-	 * The mappings.
-	 */
 	private List<IMapping> mappings = null;
 
-	/**
-	 * Init.
-	 * 
-	 * @param node the node
-	 * @param parent the parent
-	 */
 	@Override
 	public void init(IDOMNode node, IWebflowModelElement parent) {
 		super.init(node, parent);
@@ -72,29 +59,14 @@ public class InputMapper extends AbstractModelElement implements IInputMapper {
 		}
 	}
 
-	/**
-	 * Gets the input attributes.
-	 * 
-	 * @return the input attributes
-	 */
 	public List<IInputAttribute> getInputAttributes() {
 		return this.inputAttributes;
 	}
 
-	/**
-	 * Gets the mapping.
-	 * 
-	 * @return the mapping
-	 */
 	public List<IMapping> getMapping() {
 		return this.mappings;
 	}
 
-	/**
-	 * Adds the input attribute.
-	 * 
-	 * @param action the action
-	 */
 	public void addInputAttribute(IInputAttribute action) {
 		if (!this.inputAttributes.contains(action)) {
 			WebflowModelXmlUtils.insertNode(action.getNode(), node);
@@ -104,12 +76,6 @@ public class InputMapper extends AbstractModelElement implements IInputMapper {
 		}
 	}
 
-	/**
-	 * Adds the input attribute.
-	 * 
-	 * @param i the i
-	 * @param action the action
-	 */
 	public void addInputAttribute(IInputAttribute action, int i) {
 		if (!this.inputAttributes.contains(action)) {
 			WebflowModelXmlUtils.insertNode(action.getNode(), node);
@@ -119,9 +85,6 @@ public class InputMapper extends AbstractModelElement implements IInputMapper {
 		}
 	}
 
-	/**
-	 * Removes the all input attribute.
-	 */
 	public void removeAllInputAttribute() {
 		for (IInputAttribute action : this.inputAttributes) {
 			getNode().removeChild(action.getNode());
@@ -129,11 +92,6 @@ public class InputMapper extends AbstractModelElement implements IInputMapper {
 		this.inputAttributes = new ArrayList<IInputAttribute>();
 	}
 
-	/**
-	 * Removes the input attribute.
-	 * 
-	 * @param action the action
-	 */
 	public void removeInputAttribute(IInputAttribute action) {
 		if (this.inputAttributes.contains(action)) {
 			this.inputAttributes.remove(action);
@@ -142,11 +100,6 @@ public class InputMapper extends AbstractModelElement implements IInputMapper {
 		}
 	}
 
-	/**
-	 * Adds the mapping.
-	 * 
-	 * @param action the action
-	 */
 	public void addMapping(IMapping action) {
 		if (!this.mappings.contains(action)) {
 			WebflowModelXmlUtils.insertNode(action.getNode(), node);
@@ -156,12 +109,6 @@ public class InputMapper extends AbstractModelElement implements IInputMapper {
 		}
 	}
 
-	/**
-	 * Adds the mapping.
-	 * 
-	 * @param i the i
-	 * @param action the action
-	 */
 	public void addMapping(IMapping action, int i) {
 		if (!this.mappings.contains(action)) {
 			WebflowModelXmlUtils.insertNode(action.getNode(), node);
@@ -171,9 +118,6 @@ public class InputMapper extends AbstractModelElement implements IInputMapper {
 		}
 	}
 
-	/**
-	 * Removes the all mapping.
-	 */
 	public void removeAllMapping() {
 		for (IMapping action : this.mappings) {
 			getNode().removeChild(action.getNode());
@@ -181,11 +125,6 @@ public class InputMapper extends AbstractModelElement implements IInputMapper {
 		this.mappings = new ArrayList<IMapping>();
 	}
 
-	/**
-	 * Removes the mapping.
-	 * 
-	 * @param action the action
-	 */
 	public void removeMapping(IMapping action) {
 		if (this.mappings.contains(action)) {
 			this.mappings.remove(action);
@@ -194,18 +133,13 @@ public class InputMapper extends AbstractModelElement implements IInputMapper {
 		}
 	}
 
-	/**
-	 * Creates the new.
-	 * 
-	 * @param parent the parent
-	 */
 	public void createNew(IWebflowModelElement parent) {
 		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
 				.createElement("input-mapper");
 		init(node, parent);
 	}
 
-	public void accept(IWebflowModelElementVisitor visitor,
+	public void accept(IModelElementVisitor visitor,
 			IProgressMonitor monitor) {
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
@@ -222,5 +156,12 @@ public class InputMapper extends AbstractModelElement implements IInputMapper {
 				state.accept(visitor, monitor);
 			}
 		}
+	}
+	
+	public IModelElement[] getElementChildren() {
+		List<IModelElement> children = new ArrayList<IModelElement>();
+		children.addAll(getAttributes());
+		children.addAll(getInputAttributes());
+		return children.toArray(new IModelElement[children.size()]);
 	}
 }

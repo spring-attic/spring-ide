@@ -11,12 +11,13 @@
 package org.springframework.ide.eclipse.webflow.core.model;
 
 import org.eclipse.core.resources.IProject;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * @author Christian Dupuis
  * @since 2.0 
  */
-public interface IWebflowModel extends IPersistableWebflowModelElement {
+public interface IWebflowModel extends IWebflowModelElement {
 
 	IWebflowProject getProject(IProject project);
 	
@@ -30,5 +31,5 @@ public interface IWebflowModel extends IPersistableWebflowModelElement {
 
 	void fireModelChangedEvent(IWebflowProject project);
 	
-	IPersistableWebflowModelElement getElement(String id);
+	IModelElement getElement(String id);
 }

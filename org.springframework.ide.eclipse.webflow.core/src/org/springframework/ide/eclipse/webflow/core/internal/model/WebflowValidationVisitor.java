@@ -25,21 +25,22 @@ import org.springframework.binding.convert.ConversionService;
 import org.springframework.binding.convert.support.DefaultConversionService;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
-import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 /**
- * {@link IWebflowModelElementVisitor} implementation that collects and stores
+ * {@link IModelElementVisitor} implementation that collects and stores
  * {@link WebflowValidationProblem} in an internal list.
  * @author Christian Dupuis
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public class WebflowValidationVisitor implements IWebflowModelElementVisitor {
+public class WebflowValidationVisitor implements IModelElementVisitor {
 
 	private static final String EXPRESSION_PREFIX = "${";
 
@@ -72,99 +73,103 @@ public class WebflowValidationVisitor implements IWebflowModelElementVisitor {
 		return problemReporter;
 	}
 
-	public boolean visit(IWebflowModelElement element, IProgressMonitor monitor) {
-		if (element instanceof WebflowState) {
-			validateWebflowState(element);
-			return true;
-		}
-		else if (element instanceof Attribute) {
-			validateAttribute(element);
-			return true;
-		}
-		else if (element instanceof Variable) {
-			validateVar(element);
-			return true;
-		}
-		else if (element instanceof InputAttribute) {
-			validateInputAttribute(element);
-			return true;
-		}
-		else if (element instanceof OutputAttribute) {
-			validateOutputAttribute(element);
-			return true;
-		}
-		else if (element instanceof Mapping) {
-			validateMapping(element);
-			return true;
-		}
-		else if (element instanceof ExceptionHandler) {
-			validateExceptionHandler(element);
-			return true;
-		}
-		else if (element instanceof Import) {
-			validateImport(element);
-			return true;
-		}
-		else if (element instanceof InlineFlowState) {
-			validateInlineFlow(element);
-			return true;
-		}
-		else if (element instanceof Action) {
-			validateAction(element);
-			return true;
-		}
-		else if (element instanceof EvaluateAction) {
-			validateEvaluateAction(element);
-			return true;
-		}
-		else if (element instanceof BeanAction) {
-			validateBeanAction(element);
-			return true;
-		}
-		else if (element instanceof Set) {
-			validateSet(element);
-			return true;
-		}
-		else if (element instanceof EvaluationResult) {
-			validateEvaluationResult(element);
-			return true;
-		}
-		else if (element instanceof ActionState) {
-			validateActionState(element);
-			return true;
-		}
-		else if (element instanceof ViewState) {
-			validateViewState(element);
-			return true;
-		}
-		else if (element instanceof DecisionState) {
-			validateDecisionState(element);
-			return true;
-		}
-		else if (element instanceof EndState) {
-			validateEndState(element);
-			return true;
-		}
-		else if (element instanceof SubflowState) {
-			validateSubflowState(element);
-			return true;
-		}
-		else if (element instanceof StateTransition) {
-			validateTransition(element);
-			return true;
-		}
-		else if (element instanceof AttributeMapper) {
-			validateAttributeMapper(element);
-			return true;
-		}
-		else if (element instanceof RenderActions) {
-			return true;
-		}
-		else if (element instanceof ExitActions) {
-			return true;
-		}
-		else if (element instanceof EntryActions) {
-			return true;
+	public boolean visit(IModelElement modelElement, IProgressMonitor monitor) {
+		if (modelElement instanceof IWebflowModelElement) {
+			IWebflowModelElement element = (IWebflowModelElement) modelElement;
+
+			if (element instanceof WebflowState) {
+				validateWebflowState(element);
+				return true;
+			}
+			else if (element instanceof Attribute) {
+				validateAttribute(element);
+				return true;
+			}
+			else if (element instanceof Variable) {
+				validateVar(element);
+				return true;
+			}
+			else if (element instanceof InputAttribute) {
+				validateInputAttribute(element);
+				return true;
+			}
+			else if (element instanceof OutputAttribute) {
+				validateOutputAttribute(element);
+				return true;
+			}
+			else if (element instanceof Mapping) {
+				validateMapping(element);
+				return true;
+			}
+			else if (element instanceof ExceptionHandler) {
+				validateExceptionHandler(element);
+				return true;
+			}
+			else if (element instanceof Import) {
+				validateImport(element);
+				return true;
+			}
+			else if (element instanceof InlineFlowState) {
+				validateInlineFlow(element);
+				return true;
+			}
+			else if (element instanceof Action) {
+				validateAction(element);
+				return true;
+			}
+			else if (element instanceof EvaluateAction) {
+				validateEvaluateAction(element);
+				return true;
+			}
+			else if (element instanceof BeanAction) {
+				validateBeanAction(element);
+				return true;
+			}
+			else if (element instanceof Set) {
+				validateSet(element);
+				return true;
+			}
+			else if (element instanceof EvaluationResult) {
+				validateEvaluationResult(element);
+				return true;
+			}
+			else if (element instanceof ActionState) {
+				validateActionState(element);
+				return true;
+			}
+			else if (element instanceof ViewState) {
+				validateViewState(element);
+				return true;
+			}
+			else if (element instanceof DecisionState) {
+				validateDecisionState(element);
+				return true;
+			}
+			else if (element instanceof EndState) {
+				validateEndState(element);
+				return true;
+			}
+			else if (element instanceof SubflowState) {
+				validateSubflowState(element);
+				return true;
+			}
+			else if (element instanceof StateTransition) {
+				validateTransition(element);
+				return true;
+			}
+			else if (element instanceof AttributeMapper) {
+				validateAttributeMapper(element);
+				return true;
+			}
+			else if (element instanceof RenderActions) {
+				return true;
+			}
+			else if (element instanceof ExitActions) {
+				return true;
+			}
+			else if (element instanceof EntryActions) {
+				return true;
+			}
 		}
 		return false;
 	}

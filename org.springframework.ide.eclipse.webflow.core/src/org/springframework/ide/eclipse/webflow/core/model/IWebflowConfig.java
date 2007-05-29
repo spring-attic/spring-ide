@@ -15,7 +15,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
-public interface IWebflowConfig extends IWebflowModelElement, IPersistableWebflowModelElement {
+public interface IWebflowConfig extends IWebflowModelElement {
 
 	void setResource(IFile file);
 

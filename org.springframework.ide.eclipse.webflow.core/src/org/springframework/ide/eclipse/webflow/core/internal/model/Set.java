@@ -10,16 +10,18 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.ISet;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
-import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 
 /**
- * 
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -27,65 +29,30 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVi
 public class Set extends AbstractAction implements ISet,
 		ICloneableModelElement<Set> {
 
-	/**
-	 * Gets the attribute.
-	 * 
-	 * @return the attribute
-	 */
 	public String getAttribute() {
 		return getAttribute("attribute");
 	}
 
-	/**
-	 * Gets the scope.
-	 * 
-	 * @return the scope
-	 */
 	public String getScope() {
 		return getAttribute("scope");
 	}
 
-	/**
-	 * Gets the value.
-	 * 
-	 * @return the value
-	 */
 	public String getValue() {
 		return getAttribute("value");
 	}
 
-	/**
-	 * Sets the attribute.
-	 * 
-	 * @param attribute the attribute
-	 */
 	public void setAttribute(String attribute) {
 		setAttribute("attribute", attribute);
 	}
 
-	/**
-	 * Sets the scope.
-	 * 
-	 * @param scope the scope
-	 */
 	public void setScope(String scope) {
 		setAttribute("scope", scope);
 	}
 
-	/**
-	 * Sets the value.
-	 * 
-	 * @param value the value
-	 */
 	public void setValue(String value) {
 		setAttribute("value", value);
 	}
 
-	/**
-	 * Clone model element.
-	 * 
-	 * @return the set
-	 */
 	public Set cloneModelElement() {
 		Set state = new Set();
 		state.init((IDOMNode) this.node.cloneNode(true), parent);
@@ -93,11 +60,6 @@ public class Set extends AbstractAction implements ISet,
 		return state;
 	}
 
-	/**
-	 * Apply clone values.
-	 * 
-	 * @param element the element
-	 */
 	public void applyCloneValues(Set element) {
 		if (element != null) {
 			if (this.node.getParentNode() != null) {
@@ -111,19 +73,19 @@ public class Set extends AbstractAction implements ISet,
 		}
 	}
 
-	/**
-	 * Creates the new.
-	 * 
-	 * @param parent the parent
-	 */
 	public void createNew(IWebflowModelElement parent) {
 		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
 				.createElement("set");
 		init(node, parent);
 	}
 
-	public void accept(IWebflowModelElementVisitor visitor,
+	public void accept(IModelElementVisitor visitor,
 			IProgressMonitor monitor) {
 		visitor.visit(this, monitor);
+	}
+	
+	public IModelElement[] getElementChildren() {
+		List<IModelElement> children = new ArrayList<IModelElement>();
+		return children.toArray(new IModelElement[children.size()]);
 	}
 }

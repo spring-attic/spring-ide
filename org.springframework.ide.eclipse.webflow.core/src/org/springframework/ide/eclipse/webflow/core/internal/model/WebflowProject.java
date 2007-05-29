@@ -16,10 +16,12 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.internal.model.project.WebflowProjectDescription;
 import org.springframework.ide.eclipse.webflow.core.internal.model.project.WebflowProjectDescriptionReader;
 import org.springframework.ide.eclipse.webflow.core.internal.model.project.WebflowProjectDescriptionWriter;
-import org.springframework.ide.eclipse.webflow.core.model.IPersistableWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModel;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
@@ -28,7 +30,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class WebflowProject extends AbstractPersistableWebflowModelElement
+public class WebflowProject extends AbstractModelElement
 		implements IWebflowProject {
 
 	private final IProject project;
@@ -85,17 +87,24 @@ public class WebflowProject extends AbstractPersistableWebflowModelElement
 		return PROJECT;
 	}
 
-	public IPersistableWebflowModelElement getPersistableElementParent() {
-		return this.model;
-	}
-
-	public Set<IPersistableWebflowModelElement> getElementChildren() {
-		Set<IPersistableWebflowModelElement> children = new HashSet<IPersistableWebflowModelElement>();
-		children.addAll(this.getConfigs());
-		return children;
+	public IModelElement[] getElementChildren() {
+		Set<IModelElement> children = new HashSet<IModelElement>();
+		return children.toArray(new IModelElement[children.size()]);
 	}
 
 	public Object getAdapter(Class adapter) {
 		return null;
+	}
+	
+	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
+		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
+			for (IWebflowConfig project : getConfigs()) {
+				project.accept(visitor, monitor);
+			}
+		}
+	}
+	
+	public IModelElement getElementParent() {
+		return this.model;
 	}
 }

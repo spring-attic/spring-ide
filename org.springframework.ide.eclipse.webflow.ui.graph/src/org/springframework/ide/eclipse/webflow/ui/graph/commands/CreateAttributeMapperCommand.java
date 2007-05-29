@@ -38,7 +38,7 @@ public class CreateAttributeMapperCommand extends Command {
 		int result = 0;
 		if (!isMove) {
 			result = DialogUtils.openPropertiesDialog(
-					((IWebflowModelElement) parent).getElementParent(),
+					(IWebflowModelElement) ((IWebflowModelElement) parent).getElementParent(),
 					newChild, true, 1);
 		}
 		if (result == Dialog.OK) {

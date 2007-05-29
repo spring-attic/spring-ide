@@ -10,8 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IExceptionHandler;
@@ -19,7 +24,6 @@ import org.springframework.ide.eclipse.webflow.core.model.IRenderActions;
 import org.springframework.ide.eclipse.webflow.core.model.ITransition;
 import org.springframework.ide.eclipse.webflow.core.model.IViewState;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
-import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.w3c.dom.NodeList;
 
@@ -149,7 +153,7 @@ public class ViewState extends AbstractTransitionableFrom implements
 		super.fireStructureChange(MOVE_CHILDREN, new Integer(1));
 	}
 
-	public void accept(IWebflowModelElementVisitor visitor,
+	public void accept(IModelElementVisitor visitor,
 			IProgressMonitor monitor) {
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
@@ -187,5 +191,16 @@ public class ViewState extends AbstractTransitionableFrom implements
 				state.accept(visitor, monitor);
 			}
 		}
+	}
+	
+	public IModelElement[] getElementChildren() {
+		List<IModelElement> children = new ArrayList<IModelElement>();
+		children.addAll(getAttributes());
+		children.add(getEntryActions());
+		children.add(getExitActions());
+		children.add(getRenderActions());
+		children.addAll(getExceptionHandlers());
+		children.addAll(getOutputTransitions());
+		return children.toArray(new IModelElement[children.size()]);
 	}
 }

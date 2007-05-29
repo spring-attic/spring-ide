@@ -10,11 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IIf;
 import org.springframework.ide.eclipse.webflow.core.model.IIfTransition;
 import org.springframework.ide.eclipse.webflow.core.model.ITransitionableTo;
-import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.w3c.dom.Node;
 
@@ -137,7 +141,7 @@ public class IfTransition extends Transition implements IIfTransition {
 		}
 	}
 
-	public void accept(IWebflowModelElementVisitor visitor,
+	public void accept(IModelElementVisitor visitor,
 			IProgressMonitor monitor) {
 		visitor.visit(this, monitor);
 	}
@@ -149,5 +153,10 @@ public class IfTransition extends Transition implements IIfTransition {
 		else {
 			setAttribute("else", id);
 		}
+	}
+	
+	public IModelElement[] getElementChildren() {
+		List<IModelElement> children = new ArrayList<IModelElement>();
+		return children.toArray(new IModelElement[children.size()]);
 	}
 }

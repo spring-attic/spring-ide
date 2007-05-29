@@ -129,7 +129,7 @@ class WebflowModelImageDescriptor extends CompositeImageDescriptor {
 
 		}
 		if (element != null && element instanceof IActionElement) {
-			IWebflowModelElement parent = element.getElementParent();
+			IWebflowModelElement parent = (IWebflowModelElement) element.getElementParent();
 
 			if (parent instanceof IEntryActions) {
 				flags |= FLAG_INPUT;

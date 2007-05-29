@@ -10,14 +10,18 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeMapper;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IInputMapper;
 import org.springframework.ide.eclipse.webflow.core.model.IOutputMapper;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
-import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.w3c.dom.NodeList;
 
 /**
@@ -172,7 +176,7 @@ public class AttributeMapper extends AbstractModelElement implements
 		init(node, parent);
 	}
 
-	public void accept(IWebflowModelElementVisitor visitor,
+	public void accept(IModelElementVisitor visitor,
 			IProgressMonitor monitor) {
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
@@ -187,4 +191,12 @@ public class AttributeMapper extends AbstractModelElement implements
 			}
 		}
 	}
+	
+	public IModelElement[] getElementChildren() {
+		List<IModelElement> children = new ArrayList<IModelElement>();
+		children.add(getInputMapper());
+		children.add(getOutputMapper());
+		return children.toArray(new IModelElement[children.size()]);
+	}
+
 }

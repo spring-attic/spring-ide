@@ -58,7 +58,7 @@ public class AttributeMapperCloneCommand extends Command {
 	 * @see org.eclipse.gef.commands.Command#undo()
 	 */
 	public void undo() {
-		IWebflowModelElement parent = child.getElementParent();
+		IWebflowModelElement parent = (IWebflowModelElement) child.getElementParent();
 		((ISubflowState) parent).setAttributeMapper(null);
 	}
 

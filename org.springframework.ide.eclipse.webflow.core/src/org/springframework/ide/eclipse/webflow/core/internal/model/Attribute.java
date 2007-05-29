@@ -10,11 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
-import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 
 /**
  * 
@@ -23,7 +27,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVi
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public class Attribute extends WebflowModelElement implements IAttribute {
+public class Attribute extends AbstractModelElement implements IAttribute {
 
 	/**
 	 * 
@@ -90,8 +94,13 @@ public class Attribute extends WebflowModelElement implements IAttribute {
 		init(node, parent);
 	}
 
-	public void accept(IWebflowModelElementVisitor visitor,
+	public void accept(IModelElementVisitor visitor,
 			IProgressMonitor monitor) {
 		visitor.visit(this, monitor);
+	}
+	
+	public IModelElement[] getElementChildren() {
+		List<IModelElement> children = new ArrayList<IModelElement>();
+		return children.toArray(new IModelElement[children.size()]);
 	}
 }

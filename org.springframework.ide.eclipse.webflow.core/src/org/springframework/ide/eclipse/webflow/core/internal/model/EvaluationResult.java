@@ -10,15 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IEvaluationResult;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
-import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 
 /**
- * 
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -26,75 +28,35 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVi
 public class EvaluationResult extends AbstractModelElement implements
 		IEvaluationResult {
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IEvaluationResult#getName()
-	 */
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
 	public String getName() {
 		return getAttribute("name");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IEvaluationResult#getScope()
-	 */
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
 	public String getScope() {
 		return getAttribute("scope");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IEvaluationResult#setName(java.lang.String)
-	 */
-	/**
-	 * 
-	 * 
-	 * @param name
-	 */
 	public void setName(String name) {
 		setAttribute("name", name);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IEvaluationResult#setScope(java.lang.String)
-	 */
-	/**
-	 * 
-	 * 
-	 * @param scope
-	 */
 	public void setScope(String scope) {
 		setAttribute("scope", scope);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.webflow.core.model.IEvaluationResult#createNew(org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement)
-	 */
-	/**
-	 * 
-	 * 
-	 * @param parent
-	 */
 	public void createNew(IWebflowModelElement parent) {
 		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
 				.createElement("evaluation-result");
 		init(node, parent);
 	}
 
-	public void accept(IWebflowModelElementVisitor visitor,
+	public void accept(IModelElementVisitor visitor,
 			IProgressMonitor monitor) {
 		visitor.visit(this, monitor);
+	}
+	
+	public IModelElement[] getElementChildren() {
+		List<IModelElement> children = new ArrayList<IModelElement>();
+		return children.toArray(new IModelElement[children.size()]);
 	}
 }

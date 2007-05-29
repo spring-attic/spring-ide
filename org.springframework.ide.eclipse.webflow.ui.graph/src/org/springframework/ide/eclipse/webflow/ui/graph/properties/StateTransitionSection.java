@@ -231,7 +231,7 @@ public class StateTransitionSection extends AbstractPropertySection implements
 						new WebflowModelLabelDecorator()));
 		dialog.setBlockOnOpen(true);
 		dialog.setElements(WebflowModelXmlUtils.getStates(
-				this.stateTransition.getElementParent(), false).toArray());
+				(IWebflowModelElement) this.stateTransition.getElementParent(), false).toArray());
 		dialog.setEmptySelectionMessage("Enter a valid state id");
 		dialog.setTitle("State reference");
 		dialog.setMessage("Please select a state reference");

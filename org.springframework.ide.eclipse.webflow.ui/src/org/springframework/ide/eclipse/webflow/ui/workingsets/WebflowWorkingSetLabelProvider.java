@@ -16,7 +16,6 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.ui.workingsets.IElementSpecificLabelProvider;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
-import org.springframework.ide.eclipse.webflow.core.model.IPersistableWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModel;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorLabelProvider;
@@ -35,7 +34,6 @@ public class WebflowWorkingSetLabelProvider implements
 
 	public boolean supportsElement(Object object) {
 		return object instanceof IWebflowModelElement
-				|| object instanceof IPersistableWebflowModelElement
 				|| (object instanceof IResource && WebflowModelUtils
 						.isWebflowConfig((IResource) object));
 	}

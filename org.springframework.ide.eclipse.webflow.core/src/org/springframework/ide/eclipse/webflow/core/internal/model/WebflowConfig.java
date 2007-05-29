@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
-import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -19,15 +20,12 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IPersistableElement;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.webflow.core.model.IPersistableWebflowModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
-import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
-import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 
 /**
@@ -35,7 +33,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public class WebflowConfig extends AbstractPersistableWebflowModelElement
+public class WebflowConfig extends AbstractModelElement
 		implements IWebflowConfig, IAdaptable {
 
 	private Set<String> beansConfigs = new HashSet<String>();
@@ -118,37 +116,8 @@ public class WebflowConfig extends AbstractPersistableWebflowModelElement
 		this.name = name;
 	}
 
-	/** */
-	public void accept(IWebflowModelElementVisitor visitor,
+	public void accept(IModelElementVisitor visitor,
 			IProgressMonitor monitor) {
-
-	}
-
-	public void addPropertyChangeListener(PropertyChangeListener l) {
-	}
-
-	public void fireStructureChange(String prop, Object child) {
-	}
-
-	public IWebflowModelElement getElementParent() {
-		return null;
-	}
-
-	public int getElementStartLine() {
-		return 0;
-	}
-
-	public IDOMNode getNode() {
-		return null;
-	}
-
-	public void init(IDOMNode node, IWebflowModelElement parent) {
-	}
-
-	public void removePropertyChangeListener(PropertyChangeListener l) {
-	}
-
-	public void setElementParent(IWebflowModelElement parent) {
 	}
 
 	public String getElementName() {
@@ -158,13 +127,10 @@ public class WebflowConfig extends AbstractPersistableWebflowModelElement
 	public int getElementType() {
 		return CONFIG;
 	}
-
-	public IPersistableWebflowModelElement getPersistableElementParent() {
-		return project;
-	}
-
-	public Set<IPersistableWebflowModelElement> getElementChildren() {
-		return null;
+ 
+	public IModelElement[] getElementChildren() {
+		List<IModelElement> children = new ArrayList<IModelElement>();
+		return children.toArray(new IModelElement[children.size()]);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -176,5 +142,9 @@ public class WebflowConfig extends AbstractPersistableWebflowModelElement
 			return getResource();
 		}
 		return null;
+	}
+	
+	public IModelElement getElementParent() {
+		return this.project;
 	}
 }

@@ -29,16 +29,19 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeListener;
-import org.springframework.ide.eclipse.webflow.core.model.IPersistableWebflowModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModel;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelListener;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
+import org.springframework.util.ClassUtils;
 
-public class WebflowModel extends AbstractPersistableWebflowModelElement
-		implements IWebflowModel, IResourceChangeListener {
+public class WebflowModel extends AbstractModelElement implements
+		IWebflowModel, IResourceChangeListener {
 
 	private List<IWebflowModelListener> listners = new ArrayList<IWebflowModelListener>();
 
@@ -72,7 +75,7 @@ public class WebflowModel extends AbstractPersistableWebflowModelElement
 		return getProject(project);
 	}
 
-	public Collection getProjects() {
+	public Collection<IWebflowProject> getProjects() {
 		return projects.values();
 	}
 
@@ -194,25 +197,25 @@ public class WebflowModel extends AbstractPersistableWebflowModelElement
 		fireModelChangedEvent(null);
 	}
 
-	public String getElementName() {
-		return "WebflowModel";
-	}
-
-	public int getElementType() {
-		return MODEL;
-	}
-
-	public IPersistableWebflowModelElement getPersistableElementParent() {
-		return null;
-	}
-
-	public Set<IPersistableWebflowModelElement> getElementChildren() {
-		Set<IPersistableWebflowModelElement> children = new HashSet<IPersistableWebflowModelElement>();
+	public IModelElement[] getElementChildren() {
+		Set<IModelElement> children = new HashSet<IModelElement>();
 		children.addAll(this.projects.values());
-		return children;
+		return children.toArray(new IModelElement[children.size()]);
 	}
 
 	public Object getAdapter(Class adapter) {
 		return null;
+	}
+
+	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
+		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
+			for (IWebflowProject project : getProjects()) {
+				project.accept(visitor, monitor);
+			}
+		}
+	}
+	
+	public String getElementName() {
+		return "WebflowModel";
 	}
 }

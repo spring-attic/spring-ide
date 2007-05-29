@@ -12,6 +12,8 @@ package org.springframework.ide.eclipse.webflow.ui.workingsets;
 
 import org.eclipse.core.resources.IFile;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 import org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorContentProvider;
 
 /**
@@ -25,6 +27,9 @@ public class WebflowWorkingSetContentProvider extends
 	
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof IFile) {
+			return IModelElement.NO_CHILDREN;
+		}
+		else if (parentElement instanceof IWebflowConfig) {
 			return IModelElement.NO_CHILDREN;
 		}
 		return super.getChildren(parentElement);

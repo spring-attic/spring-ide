@@ -15,20 +15,19 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IStateTransition;
 import org.springframework.ide.eclipse.webflow.core.model.ITransitionableFrom;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
-import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * 
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -36,33 +35,16 @@ import org.w3c.dom.NodeList;
 public class StateTransition extends Transition implements IStateTransition,
 		ICloneableModelElement<IStateTransition> {
 
-	/**
-	 * The actions.
-	 */
 	private List<IActionElement> actions = null;
 
-	/**
-	 * The Constructor.
-	 */
 	public StateTransition() {
 		super(null);
 	}
 
-	/**
-	 * The Constructor.
-	 * 
-	 * @param webflowState the webflow state
-	 */
 	public StateTransition(IWebflowState webflowState) {
 		super(webflowState);
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param node
-	 * @param parent
-	 */
 	@Override
 	public void init(IDOMNode node, IWebflowModelElement parent) {
 		super.init(node, parent);
@@ -100,11 +82,6 @@ public class StateTransition extends Transition implements IStateTransition,
 		}
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param action
-	 */
 	public void addAction(IActionElement action) {
 		if (!this.actions.contains(action)) {
 			this.actions.add(action);
@@ -114,12 +91,6 @@ public class StateTransition extends Transition implements IStateTransition,
 		}
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param i
-	 * @param action
-	 */
 	public void addAction(IActionElement action, int i) {
 		if (!this.actions.contains(action)) {
 			this.actions.add(i, action);
@@ -128,29 +99,14 @@ public class StateTransition extends Transition implements IStateTransition,
 		}
 	}
 
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
 	public List<IActionElement> getActions() {
 		return this.actions;
 	}
 
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
 	public String getOn() {
 		return getAttribute("on");
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param action
-	 */
 	public void removeAction(IActionElement action) {
 		if (this.actions.contains(action)) {
 			this.actions.remove(action);
@@ -159,29 +115,14 @@ public class StateTransition extends Transition implements IStateTransition,
 		}
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param on
-	 */
 	public void setOn(String on) {
 		setAttribute("on", on);
 	}
 
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
 	public ITransitionableFrom getFromState() {
 		return (ITransitionableFrom) this.parent;
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param fromState
-	 */
 	public void setFromState(ITransitionableFrom fromState) {
 		Node parent = this.node.getParentNode();
 		if (parent != null) {
@@ -191,22 +132,11 @@ public class StateTransition extends Transition implements IStateTransition,
 		this.parent = fromState;
 	}
 
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
 	@Override
 	public IWebflowModelElement getElementParent() {
 		return this.parent;
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param webflowState
-	 * @param parent
-	 */
 	public void createNew(IWebflowModelElement parent, IWebflowState webflowState) {
 		this.webflowState = webflowState;
 		IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
@@ -214,22 +144,12 @@ public class StateTransition extends Transition implements IStateTransition,
 		init(node, parent);
 	}
 
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
 	public IStateTransition cloneModelElement() {
 		StateTransition state = new StateTransition(this.webflowState);
 		state.init((IDOMNode) this.node.cloneNode(true), parent);
 		return state;
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param element
-	 */
 	public void applyCloneValues(IStateTransition element) {
 		if (element != null) {
 			if (this.node.getParentNode() != null) {
@@ -243,11 +163,6 @@ public class StateTransition extends Transition implements IStateTransition,
 		}
 	}
 
-	/**
-	 * Inits the from clone.
-	 * 
-	 * @param cloneNode the clone node
-	 */
 	public void initFromClone(IDOMNode cloneNode) {
 
 		removeAll();
@@ -301,9 +216,6 @@ public class StateTransition extends Transition implements IStateTransition,
 		node = newNode;
 	}
 
-	/**
-	 * 
-	 */
 	public void removeAll() {
 		for (IActionElement action : this.actions) {
 			getNode().removeChild(action.getNode());
@@ -319,7 +231,7 @@ public class StateTransition extends Transition implements IStateTransition,
 		setAttribute("on-exception", exception);
 	}
 
-	public void accept(IWebflowModelElementVisitor visitor,
+	public void accept(IModelElementVisitor visitor,
 			IProgressMonitor monitor) {
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
@@ -342,5 +254,12 @@ public class StateTransition extends Transition implements IStateTransition,
 	
 	public void setToStateId(String id) {
 		setAttribute("to", id);
+	}
+	
+	public IModelElement[] getElementChildren() {
+		List<IModelElement> children = new ArrayList<IModelElement>();
+		children.addAll(getAttributes());
+		children.addAll(getActions());
+		return children.toArray(new IModelElement[children.size()]);
 	}
 }

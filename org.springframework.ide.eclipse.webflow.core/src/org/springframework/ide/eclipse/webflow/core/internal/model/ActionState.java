@@ -15,6 +15,8 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IActionState;
 import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
@@ -22,7 +24,6 @@ import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement
 import org.springframework.ide.eclipse.webflow.core.model.IExceptionHandler;
 import org.springframework.ide.eclipse.webflow.core.model.ITransition;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
-import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.w3c.dom.NodeList;
 
@@ -188,7 +189,7 @@ public class ActionState extends AbstractTransitionableFrom implements
 		this.actions = new ArrayList<IActionElement>();
 	}
 
-	public void accept(IWebflowModelElementVisitor visitor,
+	public void accept(IModelElementVisitor visitor,
 			IProgressMonitor monitor) {
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
@@ -230,4 +231,16 @@ public class ActionState extends AbstractTransitionableFrom implements
 			}
 		}
 	}
+	
+	public IModelElement[] getElementChildren() {
+		List<IModelElement> children = new ArrayList<IModelElement>();
+		children.addAll(getAttributes());
+		children.add(getEntryActions());
+		children.addAll(getActions());
+		children.add(getExitActions());
+		children.addAll(getExceptionHandlers());
+		children.addAll(getOutputTransitions());
+		return children.toArray(new IModelElement[children.size()]);
+	}
+
 }

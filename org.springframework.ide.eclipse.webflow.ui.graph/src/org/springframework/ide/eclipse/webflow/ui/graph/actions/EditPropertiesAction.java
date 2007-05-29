@@ -122,7 +122,7 @@ public class EditPropertiesAction extends SelectionAction {
 		if (openDialog) {
 			if (((IWebflowModelElement) child).getElementParent() instanceof IWebflowModelElement) {
 				result = DialogUtils.openPropertiesDialog(
-						((IWebflowModelElement) child).getElementParent(),
+						(IWebflowModelElement)((IWebflowModelElement) child).getElementParent(),
 						(IWebflowModelElement) newChild, false);
 			}
 			else {

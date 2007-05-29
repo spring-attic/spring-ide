@@ -21,6 +21,7 @@ import org.eclipse.wst.sse.core.internal.provisional.INodeNotifier;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.properties.XMLPropertySource;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
@@ -116,7 +117,7 @@ public abstract class WebflowModelElement implements IWebflowModelElement,
 		return this.node;
 	}
 
-	public IWebflowModelElement getElementParent() {
+	public IModelElement getElementParent() {
 		return this.parent;
 	}
 

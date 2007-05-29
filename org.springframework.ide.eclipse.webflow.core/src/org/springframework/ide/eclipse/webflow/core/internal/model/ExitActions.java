@@ -15,33 +15,23 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IExitActions;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
-import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.w3c.dom.NodeList;
 
 /**
- * 
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public class ExitActions extends WebflowModelElement implements IExitActions {
+public class ExitActions extends AbstractModelElement implements IExitActions {
 
-	/**
-	 * The exit actions.
-	 */
 	private List<IActionElement> exitActions = null;
 
-	/**
-	 * Init.
-	 * 
-	 * @param node the node
-	 * @param parent the parent
-	 */
 	@Override
 	public void init(IDOMNode node, IWebflowModelElement parent) {
 		super.init(node, parent);
@@ -79,11 +69,6 @@ public class ExitActions extends WebflowModelElement implements IExitActions {
 		}
 	}
 
-	/**
-	 * Adds the exit action.
-	 * 
-	 * @param action the action
-	 */
 	public void addExitAction(IActionElement action) {
 		if (!this.exitActions.contains(action)) {
 			this.exitActions.add(action);
@@ -94,12 +79,6 @@ public class ExitActions extends WebflowModelElement implements IExitActions {
 		}
 	}
 
-	/**
-	 * Adds the exit action.
-	 * 
-	 * @param i the i
-	 * @param action the action
-	 */
 	public void addExitAction(IActionElement action, int i) {
 		if (!this.exitActions.contains(action)) {
 			if (this.exitActions.size() > i) {
@@ -116,20 +95,10 @@ public class ExitActions extends WebflowModelElement implements IExitActions {
 		}
 	}
 
-	/**
-	 * Gets the exit actions.
-	 * 
-	 * @return the exit actions
-	 */
 	public List<IActionElement> getExitActions() {
 		return this.exitActions;
 	}
 
-	/**
-	 * Removes the exit action.
-	 * 
-	 * @param action the action
-	 */
 	public void removeExitAction(IActionElement action) {
 		if (this.exitActions.contains(action)) {
 			this.exitActions.remove(action);
@@ -139,11 +108,6 @@ public class ExitActions extends WebflowModelElement implements IExitActions {
 		}
 	}
 
-	/**
-	 * Creates the new.
-	 * 
-	 * @param parent the parent
-	 */
 	public void createNew(IWebflowModelElement parent) {
 		if (parent instanceof IWebflowState) {
 			IDOMNode node = (IDOMNode) parent.getNode().getOwnerDocument()
@@ -157,9 +121,6 @@ public class ExitActions extends WebflowModelElement implements IExitActions {
 		}
 	}
 
-	/**
-	 * Removes the all.
-	 */
 	public void removeAll() {
 		for (IActionElement action : this.exitActions) {
 			getNode().removeChild(action.getNode());
@@ -167,7 +128,7 @@ public class ExitActions extends WebflowModelElement implements IExitActions {
 		this.exitActions = new ArrayList<IActionElement>();
 	}
 
-	public void accept(IWebflowModelElementVisitor visitor,
+	public void accept(IModelElementVisitor visitor,
 			IProgressMonitor monitor) {
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 			for (IActionElement state : getExitActions()) {
@@ -177,5 +138,11 @@ public class ExitActions extends WebflowModelElement implements IExitActions {
 				state.accept(visitor, monitor);
 			}
 		}
+	}
+	
+	public IModelElement[] getElementChildren() {
+		List<IModelElement> children = new ArrayList<IModelElement>();
+		children.addAll(getExitActions());
+		return children.toArray(new IModelElement[children.size()]);
 	}
 }

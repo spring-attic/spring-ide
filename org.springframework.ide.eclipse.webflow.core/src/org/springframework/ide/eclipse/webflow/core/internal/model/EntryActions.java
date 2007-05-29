@@ -15,10 +15,11 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IEntryActions;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
-import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.w3c.dom.NodeList;
 
@@ -29,7 +30,7 @@ import org.w3c.dom.NodeList;
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public class EntryActions extends WebflowModelElement implements IEntryActions {
+public class EntryActions extends AbstractModelElement implements IEntryActions {
 
 	/**
 	 * The entry actions.
@@ -168,7 +169,7 @@ public class EntryActions extends WebflowModelElement implements IEntryActions {
 		this.entryActions = new ArrayList<IActionElement>();
 	}
 
-	public void accept(IWebflowModelElementVisitor visitor,
+	public void accept(IModelElementVisitor visitor,
 			IProgressMonitor monitor) {
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
@@ -179,5 +180,11 @@ public class EntryActions extends WebflowModelElement implements IEntryActions {
 				state.accept(visitor, monitor);
 			}
 		}
+	}
+	
+	public IModelElement[] getElementChildren() {
+		List<IModelElement> children = new ArrayList<IModelElement>();
+		children.addAll(getEntryActions());
+		return children.toArray(new IModelElement[children.size()]);
 	}
 }

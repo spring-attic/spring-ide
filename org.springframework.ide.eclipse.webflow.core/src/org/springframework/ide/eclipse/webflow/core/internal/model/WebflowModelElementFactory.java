@@ -14,7 +14,6 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.ui.IElementFactory;
 import org.eclipse.ui.IMemento;
 import org.springframework.ide.eclipse.webflow.core.Activator;
-import org.springframework.ide.eclipse.webflow.core.model.IPersistableWebflowModelElement;
 
 /**
  * {@link IElementFactory} implementation that is capable of re-creating

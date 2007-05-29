@@ -44,7 +44,7 @@ public class ActionOrphanChildCommand extends Command {
 	 * @see org.eclipse.gef.commands.Command#execute()
 	 */
 	public void execute() {
-		parent = child.getElementParent();
+		parent = (IWebflowModelElement) child.getElementParent();
 		if (parent instanceof IEntryActions) {
 			index = ((IEntryActions) parent).getEntryActions().indexOf(child);
 			((IEntryActions) parent).removeEntryAction(child);
