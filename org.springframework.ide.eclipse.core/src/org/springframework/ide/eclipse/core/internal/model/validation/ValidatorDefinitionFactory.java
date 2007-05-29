@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.core.model.validation;
+package org.springframework.ide.eclipse.core.internal.model.validation;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -29,19 +29,20 @@ public class ValidatorDefinitionFactory {
 
 	public static final String VALIDATORS_EXTENSION_POINT = SpringCore.PLUGIN_ID
 			+ ".validators";
-
 	public static final String VALIDATOR_ELEMENT = "validator";
 
 	public static Set<ValidatorDefinition> getValidatorDefinitions() {
-		Set<ValidatorDefinition> validatorDefinitions = new LinkedHashSet<ValidatorDefinition>();
+		Set<ValidatorDefinition> validatorDefinitions =
+				new LinkedHashSet<ValidatorDefinition>();
 		for (IExtension extension : Platform.getExtensionRegistry()
-				.getExtensionPoint(VALIDATORS_EXTENSION_POINT).getExtensions()) {
+				.getExtensionPoint(VALIDATORS_EXTENSION_POINT)
+						.getExtensions()) {
 			for (IConfigurationElement element : extension
 					.getConfigurationElements()) {
 				if (VALIDATOR_ELEMENT.equals(element.getName())) {
 					try {
-						ValidatorDefinition validatorDefinition = new ValidatorDefinition(
-								element);
+						ValidatorDefinition validatorDefinition =
+									new ValidatorDefinition(element);
 						validatorDefinitions.add(validatorDefinition);
 					}
 					catch (CoreException e) {

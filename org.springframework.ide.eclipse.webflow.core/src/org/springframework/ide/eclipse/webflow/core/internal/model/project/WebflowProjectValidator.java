@@ -21,7 +21,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.springframework.ide.eclipse.core.project.AbstractProjectBuilder;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
@@ -33,11 +32,10 @@ import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowValida
  * @author Torsten Juergeleit
  * @since 2.0
  */
-public class WebflowProjectValidator extends AbstractProjectBuilder {
+public class WebflowProjectValidator implements IProjectBuilder {
 
-	@Override
-	protected Set<IResource> getAffectedResources(IResource resource,
-			int kind) {
+	public Set<IResource> getAffectedResources(IResource resource, int kind)
+			throws CoreException {
 		Set<IResource> resources = new LinkedHashSet<IResource>();
 		if (WebflowModelUtils.isWebflowConfig(resource)) {
 			resources.add(resource);
@@ -45,7 +43,7 @@ public class WebflowProjectValidator extends AbstractProjectBuilder {
 		return resources;
 	}
 
-	protected void build(Set<IResource> affectedResources, int kind,
+	public void build(Set<IResource> affectedResources, int kind,
 			IProgressMonitor monitor) throws CoreException {
 		for (IResource resource : affectedResources) {
 			if (resource instanceof IFile) {

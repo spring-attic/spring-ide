@@ -171,15 +171,34 @@ public final class SpringCoreUtils {
 	}
 
 	/**
+	 * Adds given builder to specified project.
+	 */
+	public static void addProjectBuilder(IProject project, String builderID,
+			IProgressMonitor monitor) throws CoreException {
+		IProjectDescription desc = project.getDescription();
+		ICommand builderCommand = getProjectBuilderCommand(desc, builderID);
+		if (builderCommand == null) {
+
+			// Add a new build spec
+			ICommand command = desc.newCommand();
+			command.setBuilderName(builderID);
+
+			// Commit the spec change into the project
+			addProjectBuilderCommand(desc, command);
+			project.setDescription(desc, monitor);
+		}
+	}
+
+	/**
 	 * Removes given builder from specified project.
 	 */
-	public static void removeProjectBuilder(IProject project, String builder,
+	public static void removeProjectBuilder(IProject project, String builderID,
 			IProgressMonitor monitor) throws CoreException {
-		if (project != null && builder != null) {
+		if (project != null && builderID != null) {
 			IProjectDescription desc = project.getDescription();
 			ICommand[] commands = desc.getBuildSpec();
 			for (int i = commands.length - 1; i >= 0; i--) {
-				if (commands[i].getBuilderName().equals(builder)) {
+				if (commands[i].getBuilderName().equals(builderID)) {
 					ICommand[] newCommands = new ICommand[commands.length - 1];
 					System.arraycopy(commands, 0, newCommands, 0, i);
 					System.arraycopy(commands, i + 1, newCommands, i,
@@ -191,6 +210,51 @@ public final class SpringCoreUtils {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Adds (or updates) a builder in given project description.
+	 */
+	public static void addProjectBuilderCommand(IProjectDescription description,
+			 ICommand command) throws CoreException {
+		ICommand[] oldCommands = description.getBuildSpec();
+		ICommand oldBuilderCommand = getProjectBuilderCommand(description,
+				command.getBuilderName());
+		ICommand[] newCommands;
+		if (oldBuilderCommand == null) {
+
+			// Add given builder to the end of the builder list
+			newCommands = new ICommand[oldCommands.length + 1];
+			System.arraycopy(oldCommands, 0, newCommands, 0,
+							 oldCommands.length);
+			newCommands[oldCommands.length] = command;
+		} else {
+
+			// Replace old builder with given new one
+			for (int i = 0, max = oldCommands.length; i < max; i++) {
+				if (oldCommands[i] == oldBuilderCommand) {
+					oldCommands[i] = command;
+					break;
+				}
+			}
+			newCommands = oldCommands;
+		}
+		description.setBuildSpec(newCommands);
+	}
+
+	/**
+	 * Returns specified builder from given project description.
+	 */
+	public static ICommand getProjectBuilderCommand(
+			IProjectDescription description, String builderID)
+			throws CoreException {
+		ICommand[] commands = description.getBuildSpec();
+		for (int i = commands.length - 1; i >= 0; i--) {
+			if (commands[i].getBuilderName().equals(builderID)) {
+				return commands[i];
+			}
+		}
+		return null;
 	}
 
 	/**

@@ -119,7 +119,8 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 			if (configSet.hasConfig(config.getElementName())) {
 				DefaultBeanDefinitionRegistry registry = new
 						DefaultBeanDefinitionRegistry(null);
-				registry.setAllowAliasOverriding(false);
+				registry.setAllowAliasOverriding(configSet
+						.isAllowAliasOverriding());
 				registry.setAllowBeanDefinitionOverriding(configSet
 						.isAllowBeanDefinitionOverriding());
 				for (IBeansConfig cfg : configSet.getConfigs()) {

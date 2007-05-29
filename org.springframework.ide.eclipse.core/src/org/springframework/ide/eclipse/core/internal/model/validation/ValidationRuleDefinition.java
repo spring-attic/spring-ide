@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.core.model.validation;
+package org.springframework.ide.eclipse.core.internal.model.validation;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -16,47 +16,31 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
+import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 
 /**
  * Wraps a {@link IValidationRule} and all the information from it's definition
  * via the corresponding extension point.
  * @author Torsten Juergeleit
- * @author Christian Dupuis
  * @since 2.0
  */
-public class ValidationRuleDefinition implements IValidationRule<IModelElement> {
+public class ValidationRuleDefinition
+		implements IValidationRule<IModelElement> {
 
 	private static final String ENABLEMENT_PREFIX = "validator.rule.enable.";
-
 	private static final String CLASS_ATTRIBUTE = "class";
-
 	private static final String ID_ATTRIBUTE = "id";
-
 	private static final String NAME_ATTRIBUTE = "name";
-
 	private static final String ENABLED_BY_DEFAULT_ATTRIBUTE = "enabledByDefault";
-
 	private static final String DESCRIPTION_ATTRIBUTE = "description";
 
 	private String validatorID;
-
 	private IValidationRule<IModelElement> rule;
-
 	private String id;
-
 	private String name;
-
 	private boolean isEnabled = true;
-
 	private String description;
-
-	public ValidationRuleDefinition(String validatorID, String id, String name,
-			String description) {
-		this.description = description;
-		this.validatorID = validatorID;
-		this.name = name;
-		this.id = id;
-	}
 
 	public ValidationRuleDefinition(String validatorID,
 			IConfigurationElement element) throws CoreException {

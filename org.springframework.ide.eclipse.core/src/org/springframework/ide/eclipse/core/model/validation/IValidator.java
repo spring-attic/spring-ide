@@ -13,33 +13,34 @@ package org.springframework.ide.eclipse.core.model.validation;
 import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.springframework.ide.eclipse.core.project.IProjectContributor;
 
 /**
+ * This interface defines the contract for the
+ * <code>org.springframework.ide.eclipse.core.validators</code> extension point.
+ * <p>
+ * All builders must implement this interface according to the following
+ * guidelines:
+ * <ul>
+ * <li>must supply a public, no-argument constructor</li>
+ * <li>may implement other methods</li>
+ * </ul>
  * @author Torsten Juergeleit
  * @since 2.0
  */
-public interface IValidator {
+public interface IValidator extends IProjectContributor {
 
 	/**
-	 * Returns <code>true</code> if ths validator is able to validate the given
-	 * {@link IResource}.
-	 */
-	boolean supports(IResource resource);
-
-	/**
-	 * Validates the given {@link IResource}.
-	 * @param resource  the resource to be validated
-	 * @param context  the context which encapsulates all the information
-	 * 				neccessary during validation
+	 * Validates all the given affected resources.
+	 * <p>
+	 * This implementation does nothing.
+	 * </p>
+	 * @param affectedResources  the resource affected by this build
 	 * @param monitor a progress monitor, or <code>null</code> if progress
 	 * 			reporting and cancellation are not desired
 	 */
-	void validate(IResource resource, IProgressMonitor monitor);
-
-	/**
-	 * Returns a list of validation problems occured during the last call of
-	 * {@link #validate(IResource, IProgressMonitor)}.
-	 */
-	Set<ValidationProblem> getProblems();
+	void validate(Set<IResource> affectedResources,
+			IProgressMonitor monitor) throws CoreException;
 }

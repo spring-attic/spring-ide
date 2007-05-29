@@ -10,13 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.project;
 
-import org.eclipse.core.resources.IProject;
+import java.util.Set;
+
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.springframework.ide.eclipse.core.internal.project.SpringProjectBuilder;
 
 /**
  * This interface defines the contract for the
@@ -31,13 +30,12 @@ import org.springframework.ide.eclipse.core.internal.project.SpringProjectBuilde
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-public interface IProjectBuilder {
+public interface IProjectBuilder extends IProjectContributor {
 
 	/**
-	 * This method is the main entry point to the builder called by the
-	 * {@link SpringProjectBuilder}.
-	 * @param project the project this builder is started for
-	 * @param kind the kind of build being requested. Valid values are
+	 * Builds all the given affected resources.
+	 * @param affectedResources  the resource affected by this build
+	 * @param kind  the kind of build being requested. Valid values are
 	 * <ul>
 	 * <li>{@link IncrementalProjectBuilder.FULL_BUILD} - indicates a full
 	 * build.</li>
@@ -46,21 +44,9 @@ public interface IProjectBuilder {
 	 * <li>{@link IncrementalProjectBuilder.AUTO_BUILD}Ê- indicates an
 	 * automatically triggered incremental build (autobuilding on).</li>
 	 * </ul>
-	 * @param delta the resource delta recording the changes since the last time
-	 * 			this builder was run or <code>null</code> for a full build
-	 * @param monitor a progress monitor, or <code>null</code> if progress
-	 * 			reporting and cancellation are not desired
-	 */
-	void build(IProject project, int kind, IResourceDelta delta,
-			IProgressMonitor monitor) throws CoreException;
-	
-	/**
-	 * Cleanup the contributions (e.g. problem markers) created by this builder
-	 * from a given resource.
-	 * @param resource  the resource the contributions should be removed from
 	 * @param monitor  a progress monitor, or <code>null</code> if progress
 	 * 			reporting and cancellation are not desired
 	 */
-	void cleanup(IResource resource, IProgressMonitor monitor)
-			throws CoreException;
+	void build(Set<IResource> affectedResources, int kind,
+			IProgressMonitor monitor) throws CoreException;
 }

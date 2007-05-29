@@ -974,6 +974,14 @@ public final class BeansModelUtils {
 	}
 
 	public static void createProblemMarker(IModelElement element,
+			String message, int severity) {
+		int line = (element instanceof ISourceModelElement
+				? ((ISourceModelElement) element).getElementStartLine() : -1);
+		createProblemMarker(element, message, severity, line, ErrorCode.NONE,
+				null, null);
+	}
+
+	public static void createProblemMarker(IModelElement element,
 			String message, int severity, int line, ErrorCode errorCode) {
 		createProblemMarker(element, message, severity, line, errorCode, null,
 				null);

@@ -25,7 +25,6 @@ import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.builder.AopReferenceModelBuilder;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelMarkerUtils;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
-import org.springframework.ide.eclipse.core.project.AbstractProjectBuilder;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 
 /**
@@ -33,16 +32,16 @@ import org.springframework.ide.eclipse.core.project.IProjectBuilder;
  * reference model.
  * @author Christian Dupuis
  * @since 2.0
- * @see AbstractProjectBuilder
  */
-public class AopReferenceModelProjectBuilder extends AbstractProjectBuilder {
+public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 
 	/**
 	 * Returns a {@link Set} of {@link IResource} instances that need to be
 	 * rebuild in the context of the current <code>resource</code> and
 	 * <code>kind</code>
 	 */
-	protected Set<IResource> getAffectedResources(IResource resource, int kind) {
+	public Set<IResource> getAffectedResources(IResource resource, int kind)
+			throws CoreException {
 		Set<IResource> resources = new LinkedHashSet<IResource>();
 		if (resource instanceof IFile) {
 			resources.addAll(AopReferenceModelUtils.getAffectedFiles(kind,
@@ -56,8 +55,7 @@ public class AopReferenceModelProjectBuilder extends AbstractProjectBuilder {
 	 * affectedResources on to a new instance of
 	 * {@link AopReferenceModelBuilder}.
 	 */
-	@Override
-	protected void build(Set<IResource> affectedResources, int kind,
+	public void build(Set<IResource> affectedResources, int kind,
 			IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.subTask(Activator.getFormattedMessage(

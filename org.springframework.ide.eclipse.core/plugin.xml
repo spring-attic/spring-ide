@@ -10,24 +10,16 @@
          name="%springNature"
          point="org.eclipse.core.resources.natures">
       <runtime>
-         <run
-               class="org.springframework.ide.eclipse.core.internal.project.SpringProjectNature">
-         </run>
+         <run class="org.springframework.ide.eclipse.core.internal.project.SpringProjectNature"/>
       </runtime>
-      <builder
-            id="org.springframework.ide.eclipse.core.springbuilder">
-      </builder>
+      <builder id="org.springframework.ide.eclipse.core.springbuilder"/>
    </extension>
 
-   <extension
+   <extension point="org.eclipse.core.resources.builders"
          id="springbuilder"
-         name="%springBuilder"
-         point="org.eclipse.core.resources.builders">
-      <builder
-            hasNature="true">
-         <run
-               class="org.springframework.ide.eclipse.core.internal.project.SpringProjectBuilder">
-         </run>
+         name="%springBuilder">
+      <builder hasNature="true">
+         <run class="org.springframework.ide.eclipse.core.internal.project.SpringProjectBuilder"/>
       </builder>
    </extension>
 

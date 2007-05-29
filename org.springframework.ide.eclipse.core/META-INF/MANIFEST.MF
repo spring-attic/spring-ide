@@ -9,6 +9,7 @@ Bundle-Activator: org.springframework.ide.eclipse.core.SpringCore
 Export-Package: org.springframework.ide.eclipse.core,
  org.springframework.ide.eclipse.core.internal.model,
  org.springframework.ide.eclipse.core.internal.model.resources,
+ org.springframework.ide.eclipse.core.internal.model.validation,
  org.springframework.ide.eclipse.core.internal.project,
  org.springframework.ide.eclipse.core.io,
  org.springframework.ide.eclipse.core.io.xml,

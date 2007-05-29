@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.core.model.validation;
+package org.springframework.ide.eclipse.core.internal.model.validation;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
