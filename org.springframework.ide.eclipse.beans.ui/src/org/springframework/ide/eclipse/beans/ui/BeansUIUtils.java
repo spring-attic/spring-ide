@@ -174,7 +174,6 @@ public final class BeansUIUtils {
 			ISourceModelElement source = (ISourceModelElement) element;
 			sourceElement = source.getElementSourceElement();
 			line = source.getElementStartLine();
-			
 			Resource res = source.getElementSourceLocation().getResource();
 			if (res instanceof IAdaptable) {
 				resource = (IResource) ((IAdaptable) res).getAdapter(IFile.class);
@@ -182,7 +181,6 @@ public final class BeansUIUtils {
 			else {
 				resource = sourceElement.getElementResource();
 			}
-			
 		} else if (element instanceof BeansConfig) {
 			sourceElement = element;
 			line = ((BeansConfig) element).getElementStartLine();

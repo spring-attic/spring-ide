@@ -44,13 +44,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
+import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinitionFactory;
+import org.springframework.ide.eclipse.core.internal.model.validation.ValidatorDefinition;
+import org.springframework.ide.eclipse.core.internal.model.validation.ValidatorDefinitionFactory;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 import org.springframework.ide.eclipse.core.model.validation.IValidator;
-import org.springframework.ide.eclipse.core.model.validation.ValidationRuleDefinition;
-import org.springframework.ide.eclipse.core.model.validation.ValidationRuleDefinitionFactory;
-import org.springframework.ide.eclipse.core.model.validation.ValidatorDefinition;
-import org.springframework.ide.eclipse.core.model.validation.ValidatorDefinitionFactory;
 import org.springframework.ide.eclipse.ui.SpringUIMessages;
 import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 

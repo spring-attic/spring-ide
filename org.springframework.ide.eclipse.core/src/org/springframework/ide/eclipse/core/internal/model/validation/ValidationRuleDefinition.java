@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
  * Wraps a {@link IValidationRule} and all the information from it's definition
  * via the corresponding extension point.
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
 public class ValidationRuleDefinition
@@ -41,6 +42,14 @@ public class ValidationRuleDefinition
 	private String name;
 	private boolean isEnabled = true;
 	private String description;
+
+	public ValidationRuleDefinition(String validatorID, String id, String name,
+			String description) {
+		this.validatorID = validatorID;
+		this.id = id;
+		this.name = name;
+		this.description = description;
+	}
 
 	public ValidationRuleDefinition(String validatorID,
 			IConfigurationElement element) throws CoreException {
