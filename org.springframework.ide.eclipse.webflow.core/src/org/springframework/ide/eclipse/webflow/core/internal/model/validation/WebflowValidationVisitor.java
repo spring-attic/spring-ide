@@ -23,15 +23,13 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings("restriction")
 public class WebflowValidationVisitor implements IModelElementVisitor {
 
 	private java.util.Set<ValidationRuleDefinition> validationRules;
 
-	private IValidationContext<IWebflowModelElement> validationContext;
+	private IValidationContext validationContext;
 
-	public WebflowValidationVisitor(
-			IValidationContext<IWebflowModelElement> validationContext,
+	public WebflowValidationVisitor(IValidationContext validationContext,
 			java.util.Set<ValidationRuleDefinition> validationRules) {
 		this.validationRules = validationRules;
 		this.validationContext = validationContext;
@@ -41,7 +39,8 @@ public class WebflowValidationVisitor implements IModelElementVisitor {
 	public boolean visit(IModelElement modelElement, IProgressMonitor monitor) {
 		if (modelElement instanceof IWebflowModelElement) {
 			IWebflowModelElement element = (IWebflowModelElement) modelElement;
-			for (ValidationRuleDefinition validationRule : this.validationRules) {
+			for (ValidationRuleDefinition validationRule
+					: this.validationRules) {
 				if (validationRule.getRule().supports(element,
 						this.validationContext)) {
 					validationRule.getRule().validate(element,

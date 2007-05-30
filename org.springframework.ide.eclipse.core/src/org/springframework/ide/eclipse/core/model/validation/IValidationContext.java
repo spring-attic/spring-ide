@@ -12,21 +12,20 @@ package org.springframework.ide.eclipse.core.model.validation;
 
 import java.util.Set;
 
-import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
- * Context that gets passed to an {@link IValidationRule}, encapsulating all
- * relevant information used during validation.
+ * Context that gets passed to an {@link IValidationRule}, encapsulating a list
+ * {@link ValidationProblem}s created during validation.
  * 
  * @author Torsten Juergeleit
  * @since 2.0
  */
-public interface IValidationContext <E extends IModelElement> {
+public interface IValidationContext {
 
-	IResource getResource();
+	IModelElement getRootElement();
 
-	E getRootElement();
+	Set<ValidationProblem> getProblems();
 
 	void warning(IValidationRule rule,
 			String errorId, IModelElement element, String message,
@@ -35,6 +34,4 @@ public interface IValidationContext <E extends IModelElement> {
 	void error(IValidationRule rule,
 			String errorId, IModelElement element, String message,
 			ValidationProblemAttribute... attributes);
-	
-	Set<ValidationProblem> getProblems();
 }

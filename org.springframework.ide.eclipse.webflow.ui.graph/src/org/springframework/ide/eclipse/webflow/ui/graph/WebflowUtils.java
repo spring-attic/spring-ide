@@ -191,7 +191,7 @@ public abstract class WebflowUtils {
 			IWebflowConfig config = (IWebflowConfig) webflowState
 					.getElementParent();
 			WebflowValidationContext validationContext = new WebflowValidationContext(
-					config.getElementResource(), webflowState, config);
+					webflowState, config);
 			WebflowValidationVisitor validationVisitor = new WebflowValidationVisitor(
 					validationContext, ValidationRuleDefinitionFactory
 							.getEnabledRuleDefinitions(

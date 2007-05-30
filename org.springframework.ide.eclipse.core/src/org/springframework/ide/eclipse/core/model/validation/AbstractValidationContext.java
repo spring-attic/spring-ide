@@ -24,17 +24,12 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  * @author Torsten Juergeleit
  * @since 2.0
  */
-public abstract class AbstractValidationContext {
+public abstract class AbstractValidationContext implements IValidationContext {
 
-	private IResource resource;
 	private Set<ValidationProblem> problems;
 
-	public AbstractValidationContext(IResource resource) {
-		this.resource = resource;
+	public AbstractValidationContext() {
 		this.problems = new LinkedHashSet<ValidationProblem>();
-	}
-	public IResource getResource() {
-		return resource;
 	}
 
 	public Set<ValidationProblem> getProblems() {
@@ -55,9 +50,9 @@ public abstract class AbstractValidationContext {
 				IMarker.SEVERITY_ERROR, message, attributes));
 	}
 
-	private ValidationProblem createProblem(IValidationRule rule, String errorId,
-			IModelElement element, int severity, String message,
-			ValidationProblemAttribute... attributes) {
+	protected final ValidationProblem createProblem(IValidationRule rule,
+			String errorId, IModelElement element, int severity,
+			String message, ValidationProblemAttribute... attributes) {
 		String ruleID = (rule instanceof ValidationRuleDefinition
 				? ((ValidationRuleDefinition) rule).getID() : null);
 		IResource resource = (element instanceof IResourceModelElement
