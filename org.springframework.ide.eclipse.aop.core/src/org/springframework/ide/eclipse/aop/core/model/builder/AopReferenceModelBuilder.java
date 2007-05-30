@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.aop.core.model.builder;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -28,10 +28,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.wst.sse.core.StructuredModelManager;
-import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
-import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.logging.AopLog;
@@ -66,27 +62,59 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("restriction")
 public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 
+	private static class DefaultWeavingClassLoaderSupport implements IWeavingClassLoaderSupport {
+
+		private ClassLoader classLoader;
+
+		private ClassLoader weavingClassLoader;
+
+		public DefaultWeavingClassLoaderSupport(IJavaProject javaProject) {
+			setupClassLoaders(javaProject);
+		}
+
+		/**
+		 * Activates the weaving class loader as thread context classloader.
+		 * <p>
+		 * Use {@link #recoverClassLoader()} to recover the original thread
+		 * context classlaoder
+		 */
+		private void activateWeavingClassLoader() {
+			Thread.currentThread().setContextClassLoader(weavingClassLoader);
+		}
+
+		public void executeWeavingClassLoaderAwareCallback(IWeavingClassLoaderAwareCallback callback)
+				throws Throwable {
+			try {
+				activateWeavingClassLoader();
+				callback.doInActiveWeavingClassLoader();
+			}
+			finally {
+				recoverClassLoader();
+			}
+		}
+
+		public ClassLoader getWeavingClassLoader() {
+			return this.weavingClassLoader;
+		}
+
+		private void recoverClassLoader() {
+			Thread.currentThread().setContextClassLoader(classLoader);
+		}
+
+		private void setupClassLoaders(IJavaProject javaProject) {
+			classLoader = Thread.currentThread().getContextClassLoader();
+			weavingClassLoader = JdtUtils.getClassLoader(javaProject, false);
+		}
+	}
+
 	private static final String PROCESSING_TOOK_MSG = "Processing took";
-
-	private ClassLoader classLoader;
-
-	private ClassLoader weavingClassLoader;
 
 	private Set<IResource> affectedResources;
 
+	private IWeavingClassLoaderSupport classLoaderSupport;
+
 	public AopReferenceModelBuilder(Set<IResource> affectedResources) {
 		this.affectedResources = affectedResources;
-	}
-
-	/**
-	 * Activates the weaving class loader as thread context classloader.
-	 * 
-	 * <p>
-	 * Use {@link #recoverClassLoader()} to recover the original thread context
-	 * classlaoder
-	 */
-	private void activateWeavingClassLoader() {
-		Thread.currentThread().setContextClassLoader(weavingClassLoader);
 	}
 
 	/**
@@ -151,9 +179,9 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 	 * Builds AOP refererences for given {@link IBean} instances. Matches the
 	 * given Aspect definition against the {@link IBean}.
 	 */
-	private void buildAopReferencesForBean(IBean bean, IModelElement context,
-			IAspectDefinition info, IResource file, IAopProject aopProject,
-			AspectDefinitionMatcher builderUtils, IProgressMonitor monitor) {
+	private void buildAopReferencesForBean(final IBean bean, final IModelElement context,
+			final IAspectDefinition info, final IResource file, final IAopProject aopProject,
+			final AspectDefinitionMatcher matcher, IProgressMonitor monitor) {
 		try {
 			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
 					"AopReferenceModelBuilder.processingBeanDefinition", bean, bean
@@ -164,7 +192,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				return;
 			}
 
-			String className = BeansModelUtils.getBeanClass(bean, context);
+			final String className = BeansModelUtils.getBeanClass(bean, context);
 			if (className != null && info.getAspectName() != null
 					&& info.getAspectName().equals(bean.getElementName())
 					&& info.getResource() != null
@@ -175,12 +203,9 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				return;
 			}
 
-			// use the weavingClassLoader to pointcut matching
-			activateWeavingClassLoader();
-
-			IType jdtTargetType = BeansModelUtils.getJavaType(file.getProject(), className);
-			IType jdtAspectType = BeansModelUtils.getJavaType(aopProject.getProject().getProject(),
-					info.getAspectClassName());
+			final IType jdtTargetType = BeansModelUtils.getJavaType(file.getProject(), className);
+			final IType jdtAspectType = BeansModelUtils.getJavaType(aopProject.getProject()
+					.getProject(), info.getAspectClassName());
 
 			// check type not found and exclude factory beans
 			if (jdtTargetType == null
@@ -190,74 +215,79 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				return;
 			}
 
-			Class<?> targetClass = ClassUtils.loadClass(className);
+			// do in context of active weaving class loader
+			this.classLoaderSupport
+					.executeWeavingClassLoaderAwareCallback(new IWeavingClassLoaderAwareCallback() {
 
-			if (info instanceof BeanIntroductionDefinition) {
-				BeanIntroductionDefinition intro = (BeanIntroductionDefinition) info;
-				if (intro.getTypeMatcher().matches(targetClass)) {
-					IMember jdtAspectMember = null;
-					if (intro instanceof AnnotationIntroductionDefinition) {
-						String fieldName = ((AnnotationIntroductionDefinition) intro)
-								.getDefiningField();
-						jdtAspectMember = jdtAspectType.getField(fieldName);
-					}
-					else {
-						jdtAspectMember = jdtAspectType;
-					}
+						public void doInActiveWeavingClassLoader() throws Throwable {
+							Class<?> targetClass = ClassUtils.loadClass(className);
+							// handle introductions first
+							if (info instanceof BeanIntroductionDefinition) {
+								BeanIntroductionDefinition intro = (BeanIntroductionDefinition) info;
+								if (intro.getTypeMatcher().matches(targetClass)) {
+									IMember jdtAspectMember = null;
+									if (intro instanceof AnnotationIntroductionDefinition) {
+										String fieldName = ((AnnotationIntroductionDefinition) intro)
+												.getDefiningField();
+										jdtAspectMember = jdtAspectType.getField(fieldName);
+									}
+									else {
+										jdtAspectMember = jdtAspectType;
+									}
 
-					if (jdtAspectMember != null) {
-						IAopReference ref = new AopReference(info.getType(), jdtAspectMember,
-								jdtTargetType, info, file, bean);
-						aopProject.addAopReference(ref);
-					}
-				}
-			}
-			else if (info instanceof BeanAspectDefinition) {
-				IMethod jdtAspectMethod = null;
+									if (jdtAspectMember != null) {
+										IAopReference ref = new AopReference(info.getType(),
+												jdtAspectMember, jdtTargetType, info, file, bean);
+										aopProject.addAopReference(ref);
+									}
+								}
+							}
+							else if (info instanceof BeanAspectDefinition) {
+								IMethod jdtAspectMethod = null;
 
-				if (info instanceof JavaAspectDefinition
-						&& !(info instanceof AnnotationAspectDefinition)) {
-					jdtAspectMethod = JdtUtils.getMethod(jdtAspectType, info.getAdviceMethodName(),
-							info.getAdviceMethodParameterTypes());
-				}
-				else {
-					// validate the aspect definition
-					if (info.getAdviceMethod() == null) {
-						return;
-					}
-					jdtAspectMethod = JdtUtils.getMethod(jdtAspectType, info.getAdviceMethodName(),
-							info.getAdviceMethod().getParameterTypes());
-				}
+								if (info instanceof JavaAspectDefinition
+										&& !(info instanceof AnnotationAspectDefinition)) {
+									jdtAspectMethod = JdtUtils.getMethod(jdtAspectType, info
+											.getAdviceMethodName(), info
+											.getAdviceMethodParameterTypes());
+								}
+								else {
+									// validate the aspect definition
+									if (info.getAdviceMethod() == null) {
+										return;
+									}
+									jdtAspectMethod = JdtUtils.getMethod(jdtAspectType, info
+											.getAdviceMethodName(), info.getAdviceMethod()
+											.getParameterTypes());
+								}
 
-				if (jdtAspectMethod != null) {
+								if (jdtAspectMethod != null) {
 
-					List<IMethod> matchingMethods = builderUtils.matches(
-							targetClass, bean.getElementName(), info, aopProject.getProject()
-									.getProject());
-					for (IMethod method : matchingMethods) {
-						IAopReference ref = new AopReference(info.getType(), jdtAspectMethod,
-								method, info, file, bean);
-						aopProject.addAopReference(ref);
-					}
+									List<IMethod> matchingMethods = matcher.matches(targetClass,
+											bean.getElementName(), info, aopProject.getProject()
+													.getProject());
+									for (IMethod method : matchingMethods) {
+										IAopReference ref = new AopReference(info.getType(),
+												jdtAspectMethod, method, info, file, bean);
+										aopProject.addAopReference(ref);
+									}
 
-				}
-			}
+								}
+							}
+						}
+					});
 		}
 		catch (Throwable t) {
 			handleException(t, info, bean, file);
 		}
-		finally {
-			recoverClassLoader();
-		}
 
 		// Make sure that inner beans are handled as well
-		buildAopReferencesFromAspectDefinitionForBeans(context, info, builderUtils, monitor, file,
+		buildAopReferencesFromAspectDefinitionForBeans(context, info, matcher, monitor, file,
 				aopProject, BeansModelUtils.getInnerBeans(bean));
 	}
 
 	private void buildAopReferencesFromAspectDefinition(IBeansConfig config,
-			IAspectDefinition info, AspectDefinitionMatcher builderUtils,
-			IProgressMonitor monitor) {
+			IAspectDefinition info, AspectDefinitionMatcher builderUtils, IProgressMonitor monitor) {
 
 		IResource file = config.getElementResource();
 		IAopProject aopProject = ((AopReferenceModel) Activator.getModel())
@@ -270,8 +300,8 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 	}
 
 	private void buildAopReferencesFromAspectDefinitionForBeans(IModelElement config,
-			IAspectDefinition info, AspectDefinitionMatcher builderUtils,
-			IProgressMonitor monitor, IResource file, IAopProject aopProject, Set<IBean> beans) {
+			IAspectDefinition info, AspectDefinitionMatcher builderUtils, IProgressMonitor monitor,
+			IResource file, IAopProject aopProject, Set<IBean> beans) {
 		SubProgressMonitor subProgressMonitor = new SubProgressMonitor(monitor,
 				IProgressMonitor.UNKNOWN);
 
@@ -295,8 +325,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 	}
 
 	private void buildAopReferencesFromBeansConfigSets(IBeansProject project, IBeansConfig config,
-			IAspectDefinition info, AspectDefinitionMatcher builderUtils,
-			IProgressMonitor monitor) {
+			IAspectDefinition info, AspectDefinitionMatcher builderUtils, IProgressMonitor monitor) {
 		// check config sets as well
 		Set<IBeansConfigSet> configSets = project.getConfigSets();
 		for (IBeansConfigSet configSet : configSets) {
@@ -328,68 +357,41 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				aopProject.clearReferencesForResource(currentFile);
 
 				// prepare class loaders
-				setupClassLoaders(javaProject);
+				this.classLoaderSupport = createWeavingClassLoaderSupport(javaProject);
 
 				AopLog.log(AopLog.BUILDER_CLASSPATH, Activator.getFormattedMessage(
 						"AopReferenceModelBuilder.aopBuilderClassPath", StringUtils
-								.arrayToDelimitedString(((URLClassLoader) weavingClassLoader)
-										.getURLs(), ";")));
+								.arrayToDelimitedString(((URLClassLoader) classLoaderSupport
+										.getWeavingClassLoader()).getURLs(), ";")));
 
-				try {
-					IStructuredModel model = null;
-					List<IAspectDefinition> aspectInfos = null;
-					try {
-						model = StructuredModelManager.getModelManager().getModelForRead(
-								currentFile);
-						if (model != null) {
-							IDOMDocument document = ((DOMModelImpl) model).getDocument();
-							try {
-
-								// move beyond reading the structured model to
-								// avoid class loading problems
-								activateWeavingClassLoader();
-								AspectDefinitionBuilder definitionBuilder = new AspectDefinitionBuilder();
-
-								aspectInfos = definitionBuilder.buildAspectDefinitions(document,
-										currentFile);
-							}
-							finally {
-								recoverClassLoader();
-							}
-						}
-					}
-					finally {
-						if (model != null) {
-							model.releaseFromRead();
-						}
-					}
-
-					if (aspectInfos != null) {
-
-						AspectDefinitionMatcher builderUtils = new AspectDefinitionMatcher();
-
-						for (IAspectDefinition info : aspectInfos) {
-
-							// build model for config
-							buildAopReferencesFromAspectDefinition(config, info, builderUtils,
-									monitor);
-
-							// build model for config sets
-							buildAopReferencesFromBeansConfigSets(project, config, info,
-									builderUtils, monitor);
-						}
-					}
-
+				List<IAspectDefinition> aspectInfos = new ArrayList<IAspectDefinition>();
+				Set<IAspectDefinitionBuilder> builders = AspectDefinitionBuilderFactory
+						.getAspectDefinitionBuilder();
+				for (IAspectDefinitionBuilder builder : builders) {
+					aspectInfos.addAll(builder.buildAspectDefinitions(currentFile,
+							this.classLoaderSupport));
 				}
-				catch (IOException e) {
-					Activator.log(e);
-				}
-				catch (CoreException e) {
-					Activator.log(e);
+
+				if (aspectInfos != null) {
+
+					AspectDefinitionMatcher builderUtils = new AspectDefinitionMatcher();
+					for (IAspectDefinition info : aspectInfos) {
+
+						// build model for config
+						buildAopReferencesFromAspectDefinition(config, info, builderUtils, monitor);
+
+						// build model for config sets
+						buildAopReferencesFromBeansConfigSets(project, config, info, builderUtils,
+								monitor);
+					}
 				}
 			}
 		}
 		return aopProject;
+	}
+
+	protected IWeavingClassLoaderSupport createWeavingClassLoaderSupport(IJavaProject javaProject) {
+		return new DefaultWeavingClassLoaderSupport(javaProject);
 	}
 
 	private void handleException(Throwable t, IAspectDefinition info, IBean bean, IResource file) {
@@ -435,10 +437,6 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 		}
 	}
 
-	private void recoverClassLoader() {
-		Thread.currentThread().setContextClassLoader(classLoader);
-	}
-
 	/**
 	 * Implementation for {@link IWorkspaceRunnable#run(IProgressMonitor)}
 	 * method that triggers the building of the aop reference model.
@@ -450,15 +448,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 			}
 		}
 		finally {
-			recoverClassLoader();
-			weavingClassLoader = null;
-			classLoader = null;
 			affectedResources = null;
 		}
-	}
-
-	private void setupClassLoaders(IJavaProject javaProject) {
-		classLoader = Thread.currentThread().getContextClassLoader();
-		weavingClassLoader = JdtUtils.getClassLoader(javaProject, false);
 	}
 }

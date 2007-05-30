@@ -21,7 +21,6 @@ import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.DeclareParents;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -85,15 +84,15 @@ public class AdviceAnnotationVisitor extends EmptyVisitor {
 
 	private IAspectDefinition lastAspectDefinition = null;
 
-	private IDOMNode node;
+	private int aspectLineNumber;
 
 	private String aspectName;
 
 	private String aspectClassName;
 
-	public AdviceAnnotationVisitor(IDOMNode node, String aspectName,
-			String aspectClassName) {
-		this.node = node;
+	public AdviceAnnotationVisitor(String aspectName,
+			String aspectClassName, int aspectLineNumber) {
+		this.aspectLineNumber = aspectLineNumber;
 		this.aspectName = aspectName;
 		this.aspectClassName = aspectClassName;
 	}
@@ -109,7 +108,7 @@ public class AdviceAnnotationVisitor extends EmptyVisitor {
 
 			def.setAspectClassName(aspectClassName);
 			def.setAdviceMethodName(visitedMethod);
-			def.setNode(node);
+			def.setAspectLineNumber(aspectLineNumber);
 			def.setAspectName(aspectName);
 			def.setType(ANNOTATION_TYPES.get(desc));
 
@@ -128,7 +127,7 @@ public class AdviceAnnotationVisitor extends EmptyVisitor {
 
 			def.setAspectClassName(aspectClassName);
 			def.setAspectName(aspectName);
-			def.setNode(node);
+			def.setAspectLineNumber(aspectLineNumber);
 
 			visitedMethod = null;
 			visitedField = null;

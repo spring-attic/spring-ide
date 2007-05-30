@@ -13,9 +13,7 @@ package org.springframework.ide.eclipse.aop.core.model;
 import java.lang.reflect.Method;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 
-@SuppressWarnings("restriction")
 public interface IAspectDefinition {
 
 	Method getAdviceMethod();
@@ -53,8 +51,8 @@ public interface IAspectDefinition {
 	void setAspectClassName(String className);
 
 	void setAspectName(String aspectName);
-
-	void setDocument(IDOMDocument document);
+	
+	void setAspectLineNumber(int lineNumber);
 
 	void setResource(IResource file);
 

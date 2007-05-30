@@ -82,9 +82,7 @@ public class ClassUtils {
 	}
 
 	public static Object invokeMethod(Object target, String methodName,
-			Object... parameters) throws NoSuchMethodException,
-			IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException {
+			Object... parameters) throws Throwable {
 
 		if (target == null) {
 			return null;
@@ -106,7 +104,12 @@ public class ClassUtils {
 		}
 
 		if (targetMethod != null) {
-			return targetMethod.invoke(target, parameters);
+			try {
+				return targetMethod.invoke(target, parameters);
+			}
+			catch (InvocationTargetException e) {
+				throw e.getCause();
+			}
 		}
 		return null;
 

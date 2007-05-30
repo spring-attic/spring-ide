@@ -13,8 +13,6 @@ package org.springframework.ide.eclipse.aop.core.model.internal;
 import java.lang.reflect.Method;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.beans.BeanUtils;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
@@ -22,7 +20,6 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES
 import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.util.StringUtils;
 
-@SuppressWarnings("restriction")
 public class BeanAspectDefinition implements IAspectDefinition {
 
 	protected String adivceMethodName;
@@ -35,13 +32,9 @@ public class BeanAspectDefinition implements IAspectDefinition {
 
 	protected int aspectLineNumber = -1;
 
-	protected String aspectName;
-
-	protected IDOMDocument document;
+	protected String aspectName = "";
 
 	protected IResource file;
-
-	protected IDOMNode node;
 
 	protected String returning;
 
@@ -57,7 +50,7 @@ public class BeanAspectDefinition implements IAspectDefinition {
 	public boolean equals(Object obj) {
 		if (obj instanceof BeanAspectDefinition) {
 			BeanAspectDefinition other = (BeanAspectDefinition) obj;
-			return other.getNode().equals(node)
+			return other.getAspectLineNumber() == getAspectLineNumber()
 					&& other.getAdviceMethodName().equals(adivceMethodName)
 					&& other.getAdviceMethodParameterTypes().equals(
 							adivceMethodParameterTypes);
@@ -85,30 +78,9 @@ public class BeanAspectDefinition implements IAspectDefinition {
 		return aspectLineNumber;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#getAspectName()
-	 */
 	public String getAspectName() {
 		return aspectName;
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#getDocument()
-	 */
-	public IDOMDocument getDocument() {
-		return document;
-	}
-
-	public IDOMNode getNode() {
-		return node;
-	}
-
-	/*
-	 * public Object getAspectJPointcutExpression() throws Throwable { return
-	 * AopReferenceModelBuilderUtils .initAspectJExpressionPointcut(this); }
-	 */
 
 	public IResource getResource() {
 		return file;
@@ -128,7 +100,7 @@ public class BeanAspectDefinition implements IAspectDefinition {
 
 	@Override
 	public int hashCode() {
-		int hc = node.hashCode();
+		int hc = aspectName.hashCode();
 		hc = 23 * hc + type.hashCode();
 		hc = 25 * hc + aspectLineNumber;
 		return hc;
@@ -146,10 +118,6 @@ public class BeanAspectDefinition implements IAspectDefinition {
 		this.aspectClassName = aspectClassName;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#setAspectName(java.lang.String)
-	 */
 	public void setAspectName(String aspectName) {
 		if (!StringUtils.hasText(aspectName)) {
 			this.aspectName = "anonymous aspect";
@@ -159,18 +127,8 @@ public class BeanAspectDefinition implements IAspectDefinition {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.aop.ui.IBeanAspectDefinition#setDocument(org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument)
-	 */
-	public void setDocument(IDOMDocument document) {
-		this.document = document;
-		this.aspectLineNumber = this.document.getStructuredDocument()
-				.getLineOfOffset(this.node.getStartOffset()) + 1;
-	}
-
-	public void setNode(IDOMNode node) {
-		this.node = node;
+	public void setAspectLineNumber(int aspectLineNumber) {
+		this.aspectLineNumber = aspectLineNumber;
 	}
 
 	public void setResource(IResource file) {

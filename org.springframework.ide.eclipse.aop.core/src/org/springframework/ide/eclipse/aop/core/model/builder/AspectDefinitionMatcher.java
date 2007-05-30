@@ -22,7 +22,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -51,25 +50,17 @@ public class AspectDefinitionMatcher {
 	 * {@link ProxyCreationContext} introduced by Spring 2.1
 	 */
 	// TODO CD uncomment once we have Spring 2.1 OSGi bundle
-	/*private static class BeanNameExposingReflectionUtils {
-
-		public static void doWithMethods(String targetBeanName,
-				Class targetClass, MethodCallback mc) throws Throwable {
-
-			// expose bean name on thread local
-			Object proxyCreationContext = ClassUtils.loadClass(
-					ProxyCreationContext.class.getName()).newInstance();
-			ClassUtils.invokeMethod(proxyCreationContext,
-					"notifyProxyCreationStart", targetBeanName);
-			try {
-				ReflectionUtils.doWithMethods(targetClass, mc);
-			}
-			finally {
-				ClassUtils.invokeMethod(proxyCreationContext,
-						"notifyProxyCreationComplete");
-			}
-		}
-	}*/
+	/*
+	 * private static class BeanNameExposingReflectionUtils { public static void
+	 * doWithMethods(String targetBeanName, Class targetClass, MethodCallback
+	 * mc) throws Throwable { // expose bean name on thread local Object
+	 * proxyCreationContext = ClassUtils.loadClass(
+	 * ProxyCreationContext.class.getName()).newInstance();
+	 * ClassUtils.invokeMethod(proxyCreationContext, "notifyProxyCreationStart",
+	 * targetBeanName); try { ReflectionUtils.doWithMethods(targetClass, mc); }
+	 * finally { ClassUtils.invokeMethod(proxyCreationContext,
+	 * "notifyProxyCreationComplete"); } } }
+	 */
 
 	/**
 	 * Checks if the given matching candidate method is a legal match for Spring
@@ -152,11 +143,10 @@ public class AspectDefinitionMatcher {
 		final IType jdtTargetType = BeansModelUtils.getJavaType(project,
 				targetClass.getName());
 		final List<IMethod> matchingMethod = new ArrayList<IMethod>();
-
 		// TODO CD uncomment once we have Spring 2.1 OSGi bundle
 		// BeanNameExposingReflectionUtils.doWithMethods(targetBeanName,
-		ReflectionUtils.doWithMethods(
-				targetClass, new ReflectionUtils.MethodCallback() {
+		ReflectionUtils.doWithMethods(targetClass,
+				new ReflectionUtils.MethodCallback() {
 					public void doWith(Method method)
 							throws IllegalArgumentException,
 							IllegalAccessException {
@@ -177,11 +167,17 @@ public class AspectDefinitionMatcher {
 									}
 								}
 							}
-							catch (InvocationTargetException e) {
-								Activator.log(e);
-							}
-							catch (NoSuchMethodException e) {
-								Activator.log(e);
+							catch (Throwable e) {
+								if (e instanceof IllegalArgumentException) {
+									throw (IllegalArgumentException) e;
+								}
+								else if (e instanceof IllegalAccessException) {
+									throw (IllegalAccessException) e;
+								}
+								else {
+									// Get the original exception out
+									throw new RuntimeException(e);
+								}
 							}
 						}
 					}
@@ -191,9 +187,7 @@ public class AspectDefinitionMatcher {
 	}
 
 	private Object initAspectJExpressionPointcut(IAspectDefinition info)
-			throws InstantiationException, IllegalAccessException,
-			InvocationTargetException, ClassNotFoundException,
-			NoSuchMethodException {
+			throws Throwable {
 
 		Class<?> expressionPointcutClass = ClassUtils
 				.loadClass(AspectJExpressionPointcut.class.getName());
