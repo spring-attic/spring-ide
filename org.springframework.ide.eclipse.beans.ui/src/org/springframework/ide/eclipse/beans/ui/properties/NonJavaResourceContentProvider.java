@@ -188,7 +188,11 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 		if (root != null && root.getKind() == IPackageFragmentRoot.K_BINARY) {
 			for (int i = 0; i < nonJavaResources.length; i++) {
 				Object resource = nonJavaResources[i];
-				if (resource instanceof IStorage) {
+				if (resource instanceof IFile) {
+					nonJavaResources[i] = resource;
+				}
+				else if (resource instanceof IStorage
+						&& root.getResource() instanceof IFile) {
 					IStorage storage = (IStorage) resource;
 					nonJavaResources[i] = new ZipEntryStorage((IFile) root
 							.getResource(), storage.getFullPath().toString());
