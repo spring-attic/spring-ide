@@ -13,6 +13,8 @@ package org.springframework.ide.eclipse.ui.dialogs;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,11 +69,11 @@ public class ProjectValidatorPropertyTab {
 
 		private Set<ValidatorDefinition> validatorDefinitions;
 
-		private Map<ValidatorDefinition, Set<ValidationRuleDefinition>> validationRuleDefinitions;
+		private Map<ValidatorDefinition, List<ValidationRuleDefinition>> validationRuleDefinitions;
 
 		public ProjectValidatorContentProvider(
 				Set<ValidatorDefinition> validatorDefinitions,
-				Map<ValidatorDefinition, Set<ValidationRuleDefinition>> validationRuleDefinitions) {
+				Map<ValidatorDefinition, List<ValidationRuleDefinition>> validationRuleDefinitions) {
 			this.validatorDefinitions = validatorDefinitions;
 			this.validationRuleDefinitions = validationRuleDefinitions;
 		}
@@ -120,7 +122,7 @@ public class ProjectValidatorPropertyTab {
 				return ((ValidatorDefinition) element).getName();
 			}
 			else if (element instanceof ValidationRuleDefinition) {
-				return ((ValidationRuleDefinition) element).getDescription();
+				return ((ValidationRuleDefinition) element).getName();
 			}
 			return super.getText(element);
 		}
@@ -156,7 +158,7 @@ public class ProjectValidatorPropertyTab {
 
 	private Set<ValidatorDefinition> validatorDefinitions;
 
-	private Map<ValidatorDefinition, Set<ValidationRuleDefinition>> validationRuleDefinitions;
+	private Map<ValidatorDefinition, List<ValidationRuleDefinition>> validationRuleDefinitions;
 
 	private CheckboxTreeViewer validatorViewer;
 
@@ -169,10 +171,21 @@ public class ProjectValidatorPropertyTab {
 	public ProjectValidatorPropertyTab(Shell shell, IProject project) {
 		this.validatorDefinitions = ValidatorDefinitionFactory
 				.getValidatorDefinitions();
-		this.validationRuleDefinitions = new HashMap<ValidatorDefinition, Set<ValidationRuleDefinition>>();
+		this.validationRuleDefinitions = new HashMap<ValidatorDefinition, List<ValidationRuleDefinition>>();
 		for (ValidatorDefinition def : this.validatorDefinitions) {
-			validationRuleDefinitions.put(def, ValidationRuleDefinitionFactory
-					.getRuleDefinitions(def.getID()));
+			List<ValidationRuleDefinition> rules = new ArrayList<ValidationRuleDefinition>();
+			rules.addAll(ValidationRuleDefinitionFactory.getRuleDefinitions(def
+					.getID()));
+
+			Collections.sort(rules, new Comparator<ValidationRuleDefinition>() {
+
+				public int compare(ValidationRuleDefinition o1,
+						ValidationRuleDefinition o2) {
+					return o1.getName().compareTo(o2.getName());
+				}
+			});
+
+			validationRuleDefinitions.put(def, rules);
 		}
 		this.project = project;
 		this.shell = shell;
@@ -299,7 +312,7 @@ public class ProjectValidatorPropertyTab {
 				filteredValidatorDefinitions.add(builderDefinition);
 			}
 		}
-		for (Set<ValidationRuleDefinition> defs : this.validationRuleDefinitions
+		for (List<ValidationRuleDefinition> defs : this.validationRuleDefinitions
 				.values()) {
 			for (ValidationRuleDefinition def : defs) {
 				if (def.isEnabled(project)) {
@@ -366,7 +379,7 @@ public class ProjectValidatorPropertyTab {
 			protected void execute(IProgressMonitor monitor)
 					throws CoreException, InvocationTargetException,
 					InterruptedException {
-				for (Map.Entry<ValidatorDefinition, Set<ValidationRuleDefinition>> def : validationRuleDefinitions
+				for (Map.Entry<ValidatorDefinition, List<ValidationRuleDefinition>> def : validationRuleDefinitions
 						.entrySet()) {
 					boolean enableValidator = false;
 					for (ValidationRuleDefinition rule : def.getValue()) {

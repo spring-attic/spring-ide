@@ -18,6 +18,7 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.webflow.core.model.IInlineFlowState;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.w3c.dom.NodeList;
@@ -40,7 +41,8 @@ public class InlineFlowState extends AbstractState implements IInlineFlowState {
 			for (int i = 0; i < children.getLength(); i++) {
 				IDOMNode child = (IDOMNode) children.item(i);
 				if ("flow".equals(child.getLocalName())) {
-					state = new WebflowState();
+					state = new WebflowState((IWebflowConfig) parent
+							.getElementParent());
 					state.init(child, this);
 				}
 			}
@@ -57,13 +59,12 @@ public class InlineFlowState extends AbstractState implements IInlineFlowState {
 		init(node, parent);
 	}
 
-	public void accept(IModelElementVisitor visitor,
-			IProgressMonitor monitor) {
+	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 			getWebFlowState().accept(visitor, monitor);
 		}
 	}
-	
+
 	public IModelElement[] getElementChildren() {
 		List<IModelElement> children = new ArrayList<IModelElement>();
 		children.add(getWebFlowState());

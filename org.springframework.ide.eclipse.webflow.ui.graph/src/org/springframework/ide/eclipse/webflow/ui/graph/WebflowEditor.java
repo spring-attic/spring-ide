@@ -748,7 +748,7 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 			}
 			if (model != null) {
 				IDOMDocument document = ((DOMModelImpl) model).getDocument();
-				this.diagram = new WebflowState();
+				this.diagram = new WebflowState(webflowEditorInput.getConfig());
 				IDOMNode root = (IDOMNode) document.getDocumentElement();
 				IDOMNode rootClone = (IDOMNode) root.cloneNode(true);
 				webflowEditorInput.initLineNumbers(root, rootClone);

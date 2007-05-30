@@ -22,6 +22,8 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.properties.XMLPropertySource;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
@@ -69,7 +71,7 @@ public abstract class WebflowModelElement implements IWebflowModelElement,
 		return getAttribute(this.node, attributeName);
 	}
 
-	protected String getAttribute(IDOMNode node, String attributeName) {
+	public String getAttribute(IDOMNode node, String attributeName) {
 		return BeansEditorUtils.getAttribute(node, attributeName);
 	}
 
@@ -150,4 +152,17 @@ public abstract class WebflowModelElement implements IWebflowModelElement,
 		return this.node.getStructuredDocument().getLineOfOffset(
 				this.node.getStartOffset()) + 1;
 	}
+	
+	public int getElementEndLine() {
+		return getElementStartLine();
+	}
+
+	public IResourceModelElement getElementSourceElement() {
+		return null;
+	}
+
+	public IModelSourceLocation getElementSourceLocation() {
+		return null;
+	}
+	
 }

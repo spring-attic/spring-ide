@@ -37,6 +37,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.model.IInlineFlowState;
 import org.springframework.ide.eclipse.webflow.core.model.IState;
@@ -97,20 +98,11 @@ public class WebflowModelUtils {
 			+ ".problemmarker";
 
 	public static void createMarkerFromProblemReporter(
-			WebflowValidationProblemReporter problemReporter, IFile file) {
-		if (problemReporter.hasErrors()) {
-			for (WebflowValidationProblem problem : problemReporter.getErrors()) {
+			Set<ValidationProblem> validationProblems, IFile file) {
+		if (validationProblems != null && validationProblems.size() > 0) {
+			for (ValidationProblem problem : validationProblems) {
 				createProblemMarker(file, problem.getMessage(),
-						IMarker.SEVERITY_ERROR, problem.getElement()
-								.getElementStartLine());
-			}
-		}
-		if (problemReporter.hasWarnings()) {
-			for (WebflowValidationProblem problem : problemReporter
-					.getWarnings()) {
-				createProblemMarker(file, problem.getMessage(),
-						IMarker.SEVERITY_WARNING, problem.getElement()
-								.getElementStartLine());
+						problem.getSeverity(), problem.getLine());
 			}
 		}
 	}
@@ -256,7 +248,8 @@ public class WebflowModelUtils {
 			}
 			if (model != null) {
 				IDOMDocument document = ((DOMModelImpl) model).getDocument();
-				IWebflowState webflowState = new WebflowState();
+				IWebflowState webflowState = new WebflowState(WebflowModelUtils
+						.getWebflowConfig(file));
 				webflowState.init((IDOMNode) document.getDocumentElement(),
 						null);
 				return webflowState;
@@ -332,7 +325,9 @@ public class WebflowModelUtils {
 		IWebflowState webflowState = getWebflowState(state, false);
 		List<IState> foundStates = new ArrayList<IState>();
 		if (webflowState != null) {
-			List<IState> states = webflowState.getStates();
+			List<IState> states = new ArrayList<IState>();
+			states.addAll(webflowState.getStates());
+			states.addAll(webflowState.getInlineFlowStates());
 			for (IState s : states) {
 				if (s.getId().equals(state.getId())) {
 					foundStates.add(s);

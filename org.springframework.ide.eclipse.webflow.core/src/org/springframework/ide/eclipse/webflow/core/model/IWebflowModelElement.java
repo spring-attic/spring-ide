@@ -14,6 +14,8 @@ import java.beans.PropertyChangeListener;
 
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
  * 
@@ -22,7 +24,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public interface IWebflowModelElement extends IModelElement {
+public interface IWebflowModelElement extends IModelElement, IResourceModelElement, ISourceModelElement {
 	
 	int MODEL = 1;
 

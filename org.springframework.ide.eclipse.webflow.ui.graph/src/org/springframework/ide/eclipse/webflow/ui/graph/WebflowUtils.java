@@ -25,10 +25,12 @@ import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
+import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinitionFactory;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
-import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowValidationProblem;
-import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowValidationProblemReporter;
-import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowValidationVisitor;
+import org.springframework.ide.eclipse.webflow.core.internal.model.validation.WebflowValidationContext;
+import org.springframework.ide.eclipse.webflow.core.internal.model.validation.WebflowValidationVisitor;
+import org.springframework.ide.eclipse.webflow.core.internal.model.validation.WebflowValidator;
 import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
@@ -177,32 +179,36 @@ public abstract class WebflowUtils {
 	}
 
 	public static boolean isValid(IWebflowModelElement element) {
-		WebflowValidationProblemReporter problemReporter = validate(element);
-		return problemReporter == null
-				|| !problemReporter.hasErrors();
+		Set<ValidationProblem> validationProblems = validate(element);
+		return validationProblems == null || validationProblems.size() == 0;
 	}
 
-	public static WebflowValidationProblemReporter validate(
+	public static Set<ValidationProblem> validate(
 			IWebflowModelElement element) {
 		IWebflowState webflowState = WebflowModelUtils.getWebflowState(element,
 				true);
 		if (webflowState != null) {
 			IWebflowConfig config = (IWebflowConfig) webflowState
 					.getElementParent();
-			WebflowValidationVisitor visitor = new WebflowValidationVisitor(
-					config);
-			element.accept(visitor, new NullProgressMonitor());
-			return visitor.getProblemReporter();
+			WebflowValidationContext validationContext = new WebflowValidationContext(
+					config.getElementResource(), webflowState, config);
+			WebflowValidationVisitor validationVisitor = new WebflowValidationVisitor(
+					validationContext, ValidationRuleDefinitionFactory
+							.getEnabledRuleDefinitions(
+									WebflowValidator.VALIDATOR_ID, config
+											.getElementResource().getProject()));
+			webflowState.accept(validationVisitor, new NullProgressMonitor());
+			return validationContext.getProblems();
 		}
 		return null;
 	}
 
 	public static String getErrorTooltip(IWebflowModelElement element) {
 		StringBuffer buf = new StringBuffer();
-		WebflowValidationProblemReporter problemReporter = validate(element);
-		if (problemReporter != null && problemReporter.getErrors().size() > 0) {
+		Set<ValidationProblem> validationProblems = validate(element);
+		if (validationProblems != null && validationProblems.size() > 0) {
 			buf.append("\n\nProblems:");
-			for (WebflowValidationProblem problem : problemReporter.getErrors()) {
+			for (ValidationProblem problem : validationProblems) {
 				buf.append("\n");
 				buf.append(problem.getMessage());
 			}

@@ -16,6 +16,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
@@ -107,5 +108,13 @@ public class WebflowProject extends AbstractModelElement
 	
 	public IModelElement getElementParent() {
 		return this.model;
+	}
+
+	public IResource getElementResource() {
+		return this.project;
+	}
+
+	public boolean isElementArchived() {
+		return false;
 	}
 }

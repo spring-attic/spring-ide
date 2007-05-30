@@ -36,6 +36,7 @@ import org.springframework.ide.eclipse.webflow.core.model.ITransition;
 import org.springframework.ide.eclipse.webflow.core.model.ITransitionableFrom;
 import org.springframework.ide.eclipse.webflow.core.model.ITransitionableTo;
 import org.springframework.ide.eclipse.webflow.core.model.IVar;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 import org.w3c.dom.NodeList;
@@ -47,6 +48,12 @@ import org.w3c.dom.NodeList;
 @SuppressWarnings("restriction")
 public class WebflowState extends AbstractTransitionableFrom implements
 		IWebflowState, ICloneableModelElement<IWebflowState> {
+	
+	private final IWebflowConfig webflowConfig;
+	
+	public WebflowState(IWebflowConfig webflowConfig) {
+		this.webflowConfig = webflowConfig;
+	}
 	
 	/**
 	 * The imports.
@@ -535,7 +542,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 	 * @return
 	 */
 	public IWebflowState cloneModelElement() {
-		WebflowState state = new WebflowState();
+		WebflowState state = new WebflowState(this.webflowConfig);
 		state.init((IDOMNode) this.node.cloneNode(true), parent);
 		return state;
 	}
@@ -709,5 +716,9 @@ public class WebflowState extends AbstractTransitionableFrom implements
 			WebflowModelXmlUtils.insertNode(inputMapper.getNode(), getNode());
 		}
 		super.fireStructureChange(ADD_CHILDREN, inputMapper);
+	}
+	
+	public IModelElement getElementParent() {
+		return this.webflowConfig;
 	}
 }

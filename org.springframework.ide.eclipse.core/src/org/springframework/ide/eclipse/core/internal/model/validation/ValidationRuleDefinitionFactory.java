@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.core.internal.model.validation;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
@@ -30,6 +31,7 @@ public class ValidationRuleDefinitionFactory {
 	public static final String VALIDATORS_EXTENSION_POINT = SpringCore.PLUGIN_ID
 			+ ".validators";
 	public static final String RULES_ELEMENT = "rules";
+	public static final String RULE_ELEMENT = "rule";
 	public static final String VALIDATOR_ID_ATTRIBUTE = "validatorId";
 
 	public static Set<ValidationRuleDefinition> getRuleDefinitions(
@@ -45,7 +47,7 @@ public class ValidationRuleDefinitionFactory {
 					String id = element.getAttribute(VALIDATOR_ID_ATTRIBUTE);
 					if (validatorID.equals(id)) {
 						for (IConfigurationElement ruleElement : element
-								.getChildren(RULES_ELEMENT)) {
+								.getChildren(RULE_ELEMENT)) {
 							try {
 								ValidationRuleDefinition ruleDefinition =
 										new ValidationRuleDefinition(
@@ -61,5 +63,18 @@ public class ValidationRuleDefinitionFactory {
 			}
 		}
 		return ruleDefinitions;
+	}
+	
+	public static Set<ValidationRuleDefinition> getEnabledRuleDefinitions(
+			String validatorID, IProject project) {
+		Set<ValidationRuleDefinition> validationRuleDefinitions = 
+			new LinkedHashSet<ValidationRuleDefinition>();
+		for (ValidationRuleDefinition validationRuleDefinition : 
+			getRuleDefinitions(validatorID)) {
+			if (validationRuleDefinition.isEnabled(project)) {
+				validationRuleDefinitions.add(validationRuleDefinition);
+			}
+		}
+		return validationRuleDefinitions;
 	}
 }

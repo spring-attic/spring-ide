@@ -147,4 +147,12 @@ public class WebflowConfig extends AbstractModelElement
 	public IModelElement getElementParent() {
 		return this.project;
 	}
+
+	public IResource getElementResource() {
+		return this.resource;
+	}
+
+	public boolean isElementArchived() {
+		return false;
+	}
 }

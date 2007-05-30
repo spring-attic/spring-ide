@@ -217,4 +217,12 @@ public class WebflowModel extends AbstractModelElement implements
 	public String getElementName() {
 		return "WebflowModel";
 	}
+
+	public IResource getElementResource() {
+		return null;
+	}
+
+	public boolean isElementArchived() {
+		return false;
+	}
 }

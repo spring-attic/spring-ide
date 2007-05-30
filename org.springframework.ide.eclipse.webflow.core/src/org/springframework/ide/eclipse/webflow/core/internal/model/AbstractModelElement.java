@@ -15,8 +15,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
@@ -236,5 +238,19 @@ public abstract class AbstractModelElement extends WebflowModelElement
 	public String getElementName() {
 		return ClassUtils.getShortName(getClass()) + " ("
 				+ getElementStartLine() + ")";
+	}
+
+	public IResource getElementResource() {
+		IResource resource = null;
+		IResourceModelElement parent = (IResourceModelElement) getElementParent();
+		while (resource == null && parent != null) {
+			resource = parent.getElementResource();
+			parent = (IResourceModelElement) getElementParent();
+		}
+		return resource;
+	}
+
+	public boolean isElementArchived() {
+		return false;
 	}
 }

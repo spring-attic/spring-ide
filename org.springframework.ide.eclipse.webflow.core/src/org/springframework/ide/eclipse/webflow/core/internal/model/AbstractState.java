@@ -152,16 +152,6 @@ public abstract class AbstractState extends AbstractModelElement implements
 	}
 
 	/**
-	 * Gets the element parent.
-	 * 
-	 * @return the element parent
-	 */
-	@Override
-	public IWebflowModelElement getElementParent() {
-		return this.parent;
-	}
-
-	/**
 	 * Gets the exception handlers.
 	 * 
 	 * @return the exception handlers

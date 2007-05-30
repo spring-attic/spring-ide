@@ -6,28 +6,15 @@
 		point="org.springframework.ide.eclipse.beans.core.namespaces">
 		<namespace
 			namespaceHandler="org.springframework.webflow.config.WebFlowConfigNamespaceHandler"
-			uri="http://www.springframework.org/schema/webflow-config"/>
+			uri="http://www.springframework.org/schema/webflow-config" />
 	</extension>
 
-   <extension
-         point="org.eclipse.core.expressions.propertyTesters">
-      <propertyTester
-            class="org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelPropertyTester"
-            id="org.springframework.ide.eclipse.webflow.core.webflowModelTester"
-            namespace="org.springframework.ide.eclipse.webflow.core.model"
-            properties="isWebflowConfig"
-            type="org.eclipse.core.resources.IFile"/>
-   </extension>
-   
-   	<extension 
-		point="org.springframework.ide.eclipse.core.builders">
-		<builder
-			id="webflowvalidator" 
-			name="%webflowvalidator.name"
-			enabledByDefault="true"
-			description="%webflowvalidator.description"
-			class="org.springframework.ide.eclipse.webflow.core.internal.model.project.WebflowProjectValidator">
-		</builder>
+	<extension point="org.eclipse.core.expressions.propertyTesters">
+		<propertyTester
+			class="org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelPropertyTester"
+			id="org.springframework.ide.eclipse.webflow.core.webflowModelTester"
+			namespace="org.springframework.ide.eclipse.webflow.core.model"
+			properties="isWebflowConfig" type="org.eclipse.core.resources.IFile" />
 	</extension>
 
 	<extension id="problemmarker" name="%webflowProblemMarker"
@@ -36,10 +23,96 @@
 			type="org.springframework.ide.eclipse.core.problemmarker" />
 		<persistent value="true" />
 	</extension>
-	
+
 	<extension point="org.eclipse.ui.elementFactories">
-		<factory id="org.springframework.ide.eclipse.webflow.core.factoryId"
-			class="org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelElementFactory" />      
+		<factory
+			id="org.springframework.ide.eclipse.webflow.core.factoryId"
+			class="org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelElementFactory" />
+	</extension>
+	
+	<extension
+		point="org.springframework.ide.eclipse.core.validators">
+		<validator
+			class="org.springframework.ide.eclipse.webflow.core.internal.model.validation.WebflowValidator"
+			enabledByDefault="true"
+			icon="icons/full/obj16/spring_webflow_obj.gif"
+			id="validator"
+			name="Spring Web Flow Validator" />
+  <rules validatorId="org.springframework.ide.eclipse.webflow.core.validator">
+     <rule
+           class="org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules.ActionStateValidationRule"
+           id="validation.actionstate"
+           name="Action State Validation Rule"/>
+     <rule
+           class="org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules.ActionValidationRule"
+           id="validation.action"
+           name="Action Validation Rule"/>
+     <rule
+           class="org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules.AttributeMapperValidationRule"
+           id="validation.attributemapper"
+           name="Attribute Mapper Validation Rule"/>
+     <rule
+           class="org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules.AttributeValidationRule"
+           id="validation.attribute"
+           name="Attribute Validation Rule"/>
+     <rule
+           class="org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules.BeanActionValidationRule"
+           id="validation.beanaction"
+           name="Bean Action Validation Rule"/>
+     <rule
+           class="org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules.EvaluationActionValidationRule"
+           id="validation.evaluationaction"
+           name="Evaluation Action Validation Rule"/>
+     <rule
+           class="org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules.EvaluationResultValidationRule"
+           id="validation.evaluationresult"
+           name="Evaluation Result Validation Rule"/>
+     <rule
+           class="org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules.ExceptionHandlerValidationRule"
+           id="validation.exceptionhandler"
+           name="Exception Handler Validation Rule"/>
+     <rule
+           class="org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules.ImportValidationRule"
+           id="validation.import"
+           name="Import Validation Rule"/>
+     <rule
+           class="org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules.InputAttributeValidationRule"
+           id="validation.inputattribute"
+           name="Input Attribute Validation Rule"/>
+     <rule
+           class="org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules.MappingValidationRule"
+           id="validation.mapping"
+           name="Mapping Validation Rule"/>
+     <rule
+           class="org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules.OutputAttributeValidationRule"
+           id="validation.set"
+           name="Set Validation Rule"/>
+     <rule
+           class="org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules.SetValidationRule"
+           id="validation.outputattribute"
+           name="Output Attribute Validation Rule"/>
+     <rule
+           class="org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules.StateValidationRule"
+           id="validation.state"
+           name="State Validation Rule"/>
+     <rule
+           class="org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules.SubflowStateValidationRule"
+           id="validation.subflowstate"
+           name="Sub Flow State Validation Rule"/>
+     <rule
+           class="org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules.TransitionValidationRule"
+           id="validation.transition"
+           name="Transition Validation Rule"/>
+     <rule
+           class="org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules.VariableValidationRule"
+           id="validation.variable"
+           name="Variable Validation Rule"/>
+     <rule
+           class="org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules.WebflowStateValidationRule"
+           id="validation.webflowstate"
+           name="Web Flow Validation Rule"/>
+  </rules>
+
 	</extension>
 
 </plugin>
