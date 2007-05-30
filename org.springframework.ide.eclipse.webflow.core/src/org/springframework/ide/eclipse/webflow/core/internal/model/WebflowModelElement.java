@@ -18,6 +18,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.wst.sse.core.internal.provisional.INodeNotifier;
+import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.properties.XMLPropertySource;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
@@ -149,8 +150,11 @@ public abstract class WebflowModelElement implements IWebflowModelElement,
 	}
 
 	public int getElementStartLine() {
-		return this.node.getStructuredDocument().getLineOfOffset(
-				this.node.getStartOffset()) + 1;
+		IStructuredDocument doc = node.getStructuredDocument();
+		if (doc != null) {
+			return doc.getLineOfOffset(node.getStartOffset()) + 1;
+		}
+		return -1;
 	}
 	
 	public int getElementEndLine() {

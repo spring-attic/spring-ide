@@ -105,7 +105,8 @@ public class StateTransitionPart extends AbstractConnectionEditPart implements
 					.getState().getElementParent()).getStartState();
 			IState sourceState = ((AbstractStatePart) source.data).getState();
 			IState targetState = ((AbstractStatePart) target.data).getState();
-			if (startState.getId().equals(targetState.getId())) {
+			if (startState != null
+					&& startState.getId().equals(targetState.getId())) {
 				e = new Edge(this, target, source);
 			}
 			else {
