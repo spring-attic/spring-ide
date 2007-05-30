@@ -16,8 +16,14 @@ package org.springframework.ide.eclipse.aop.core.model.builder;
  */
 public interface IWeavingClassLoaderSupport {
 
-	ClassLoader getWeavingClassLoader();
+	interface IWeavingClassLoaderAwareCallback {
 
-	void executeWeavingClassLoaderAwareCallback(IWeavingClassLoaderAwareCallback callback)
+		void doInActiveWeavingClassLoader() throws Throwable;
+
+	}
+
+	void executeCallback(IWeavingClassLoaderAwareCallback callback)
 			throws Throwable;
+
+	ClassLoader getWeavingClassLoader();
 }

@@ -82,7 +82,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 			Thread.currentThread().setContextClassLoader(weavingClassLoader);
 		}
 
-		public void executeWeavingClassLoaderAwareCallback(IWeavingClassLoaderAwareCallback callback)
+		public void executeCallback(IWeavingClassLoaderAwareCallback callback)
 				throws Throwable {
 			try {
 				activateWeavingClassLoader();
@@ -217,7 +217,8 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 
 			// do in context of active weaving class loader
 			this.classLoaderSupport
-					.executeWeavingClassLoaderAwareCallback(new IWeavingClassLoaderAwareCallback() {
+					.executeCallback(
+							new IWeavingClassLoaderSupport.IWeavingClassLoaderAwareCallback() {
 
 						public void doInActiveWeavingClassLoader() throws Throwable {
 							Class<?> targetClass = ClassUtils.loadClass(className);

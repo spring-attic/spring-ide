@@ -210,7 +210,8 @@ public class AnnotationAspectDefinitionBuilder extends
 
 			try {
 				classLoaderSupport
-						.executeWeavingClassLoaderAwareCallback(new IWeavingClassLoaderAwareCallback() {
+						.executeCallback(
+								new IWeavingClassLoaderSupport.IWeavingClassLoaderAwareCallback() {
 
 							public void doInActiveWeavingClassLoader()
 									throws Throwable {
