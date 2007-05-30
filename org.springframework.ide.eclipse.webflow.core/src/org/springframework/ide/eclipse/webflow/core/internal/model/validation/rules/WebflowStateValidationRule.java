@@ -41,9 +41,8 @@ public class WebflowStateValidationRule implements
 			Element node = (Element) state.getNode();
 			NodeList startStateNodes = node.getElementsByTagName("start-state");
 			if (startStateNodes == null || startStateNodes.getLength() == 0) {
-				context
-						.error(this, "NO_START_STATE", state,
-								"Start state definition is missing. Add a 'start-state' element");
+				context.error(this, "NO_START_STATE", state,
+						"Start state definition is missing. Add a 'start-state' element");
 			}
 			else if (startStateNodes.getLength() == 1) {
 				IDOMNode startStateNode = (IDOMNode) startStateNodes.item(0);
@@ -56,7 +55,7 @@ public class WebflowStateValidationRule implements
 					context.error(this,
 						"NO_START_STATE_IDREF_INVALID",	state, MessageUtils.format(
 							"Start state definition references non-existing state \"{0}\"",
-							state, idref));
+							idref));
 				}
 			}
 		}
