@@ -21,7 +21,6 @@ import org.springframework.ide.eclipse.webflow.core.internal.model.validation.We
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings("restriction")
 public class ActionStateValidationRule implements
 		IValidationRule<ActionState, WebflowValidationContext> {
 

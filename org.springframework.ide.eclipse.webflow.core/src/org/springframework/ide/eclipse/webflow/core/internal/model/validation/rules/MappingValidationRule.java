@@ -27,7 +27,6 @@ import org.springframework.util.StringUtils;
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings("restriction")
 public class MappingValidationRule implements
 		IValidationRule<Mapping, WebflowValidationContext> {
 
