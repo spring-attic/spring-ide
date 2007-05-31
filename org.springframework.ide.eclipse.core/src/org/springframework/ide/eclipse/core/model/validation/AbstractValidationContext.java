@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.core.model.validation;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -40,14 +39,14 @@ public abstract class AbstractValidationContext implements IValidationContext {
 			IModelElement element, String message,
 			ValidationProblemAttribute... attributes) {
 		problems.add(createProblem(rule, errorId, element,
-				IMarker.SEVERITY_WARNING, message, attributes));
+				SEVERITY_WARNING, message, attributes));
 	}
 
 	public void error(IValidationRule rule, String errorId,
 			IModelElement element, String message,
 			ValidationProblemAttribute... attributes) {
 		problems.add(createProblem(rule, errorId, element,
-				IMarker.SEVERITY_ERROR, message, attributes));
+				SEVERITY_ERROR, message, attributes));
 	}
 
 	protected final ValidationProblem createProblem(IValidationRule rule,

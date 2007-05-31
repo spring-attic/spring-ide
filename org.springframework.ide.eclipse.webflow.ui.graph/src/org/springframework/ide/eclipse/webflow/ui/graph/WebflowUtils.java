@@ -11,10 +11,13 @@
 package org.springframework.ide.eclipse.webflow.ui.graph;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -25,11 +28,9 @@ import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
-import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinitionFactory;
+import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
-import org.springframework.ide.eclipse.webflow.core.internal.model.validation.WebflowValidationContext;
-import org.springframework.ide.eclipse.webflow.core.internal.model.validation.WebflowValidationVisitor;
 import org.springframework.ide.eclipse.webflow.core.internal.model.validation.WebflowValidator;
 import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
@@ -183,22 +184,22 @@ public abstract class WebflowUtils {
 		return validationProblems == null || validationProblems.size() == 0;
 	}
 
-	public static Set<ValidationProblem> validate(
-			IWebflowModelElement element) {
+	public static Set<ValidationProblem> validate(IWebflowModelElement element) {
 		IWebflowState webflowState = WebflowModelUtils.getWebflowState(element,
 				true);
 		if (webflowState != null) {
 			IWebflowConfig config = (IWebflowConfig) webflowState
 					.getElementParent();
-			WebflowValidationContext validationContext = new WebflowValidationContext(
-					webflowState, config);
-			WebflowValidationVisitor validationVisitor = new WebflowValidationVisitor(
-					validationContext, ValidationRuleDefinitionFactory
-							.getEnabledRuleDefinitions(
-									WebflowValidator.VALIDATOR_ID, config
-											.getElementResource().getProject()));
-			webflowState.accept(validationVisitor, new NullProgressMonitor());
-			return validationContext.getProblems();
+			NoMarkerCreatingWebflowValidator validator = new NoMarkerCreatingWebflowValidator();
+			Set<IResource> affectedResources = new HashSet<IResource>();
+			affectedResources.add(config.getElementResource());
+			try {
+				validator
+						.validate(affectedResources, new NullProgressMonitor());
+				return validator.getValidationProblems();
+			}
+			catch (CoreException e) {
+			}
 		}
 		return null;
 	}
@@ -227,6 +228,31 @@ public abstract class WebflowUtils {
 			}
 		}
 		return stateIds.toArray(new String[stateIds.size()]);
+	}
+
+	private static class NoMarkerCreatingWebflowValidator extends
+			WebflowValidator {
+
+		private Set<ValidationProblem> validationProblems = 
+			new HashSet<ValidationProblem>();
+
+		protected void createProblemMarker(IResource resource,
+				ValidationProblem problem) {
+			if (problem.getSeverity() == IValidationContext.SEVERITY_ERROR) {
+				validationProblems.add(problem);
+			}
+		}
+
+		public void cleanup(IResource resource, IProgressMonitor monitor) {
+		}
+
+		public Set<ValidationProblem> getValidationProblems() {
+			return this.validationProblems;
+		}
+
+		public boolean hasErrors() {
+			return this.validationProblems.size() > 0;
+		}
 	}
 
 }
