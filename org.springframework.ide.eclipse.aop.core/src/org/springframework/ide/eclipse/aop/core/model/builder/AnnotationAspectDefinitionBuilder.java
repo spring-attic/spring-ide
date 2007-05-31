@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -177,6 +178,11 @@ public class AnnotationAspectDefinitionBuilder extends
 
 			Set<IBean> beans = new HashSet<IBean>();
 			beans.addAll(beansConfig.getBeans());
+
+			Set<IBeansComponent> components = beansConfig.getComponents();
+			for (IBeansComponent component : components) {
+				beans.addAll(component.getBeans());
+			}
 
 			for (final IBean bean : beans) {
 				parseAnnotationAspectFromSingleBean(beansConfig,
