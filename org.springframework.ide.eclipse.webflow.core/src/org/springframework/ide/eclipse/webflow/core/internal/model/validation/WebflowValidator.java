@@ -104,7 +104,7 @@ public class WebflowValidator extends AbstractValidator {
 
 	@Override
 	protected boolean supports(IModelElement element) {
-		return (element instanceof IWebflowModelElement);
+		return element instanceof IWebflowModelElement;
 	}
 
 	@Override

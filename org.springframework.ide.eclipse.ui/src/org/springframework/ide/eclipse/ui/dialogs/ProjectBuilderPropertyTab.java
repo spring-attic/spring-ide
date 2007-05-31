@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -27,6 +28,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -37,7 +39,9 @@ import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinition;
 import org.springframework.ide.eclipse.core.project.ProjectBuilderDefinitionFactory;
+import org.springframework.ide.eclipse.ui.SpringUIImages;
 import org.springframework.ide.eclipse.ui.SpringUIMessages;
+import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 
 /**
  * UI component that allows to enable or disable {@link IProjectBuilder}s on a
@@ -75,6 +79,32 @@ public class ProjectBuilderPropertyTab {
 				return ((ProjectBuilderDefinition) element).getName();
 			}
 			return super.getText(element);
+		}
+		
+		public Image getImage(Object element) {
+			Image image = null;
+			if (element instanceof ProjectBuilderDefinition) {
+				String icon = ((ProjectBuilderDefinition) element).getIconUri();
+				String ns = ((ProjectBuilderDefinition) element).getNamespaceUri();
+				if (icon != null && ns != null) {
+					image = SpringUIPlugin.getDefault().getImageRegistry().get(
+							icon);
+					if (image == null) {
+						ImageDescriptor imageDescriptor = SpringUIPlugin
+								.imageDescriptorFromPlugin(ns, icon);
+						SpringUIPlugin.getDefault().getImageRegistry().put(
+								icon, imageDescriptor);
+						image = SpringUIPlugin.getDefault().getImageRegistry()
+								.get(icon);
+					}
+				}
+			}
+			if (image == null) {
+				return SpringUIImages.getImage(SpringUIImages.IMG_OBJS_RULE);
+			}
+			else {
+				return image;
+			}
 		}
 	}
 

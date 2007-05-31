@@ -35,6 +35,8 @@ public class ProjectBuilderDefinition {
 
 	private static final String DESCRIPTION_ATTRIBUTE = "description";
 
+	private static final String ICON_ATTRIBUTE = "icon";
+
 	private String description;
 
 	private String id;
@@ -42,6 +44,10 @@ public class ProjectBuilderDefinition {
 	private boolean isEnabled = true;
 
 	private String name;
+
+	private String iconUri;
+	
+	private String namespaceUri;
 
 	private IProjectBuilder projectBuilder;
 
@@ -71,9 +77,11 @@ public class ProjectBuilderDefinition {
 		if (builder instanceof IProjectBuilder) {
 			projectBuilder = (IProjectBuilder) builder;
 		}
+		this.namespaceUri = element.getDeclaringExtension().getNamespaceIdentifier();
 		this.id = element.getAttribute(ID_ATTRIBUTE);
 		this.name = element.getAttribute(NAME_ATTRIBUTE);
 		this.description = element.getAttribute(DESCRIPTION_ATTRIBUTE);
+		this.iconUri = element.getAttribute(ICON_ATTRIBUTE);
 		String enabledByDefault = element
 				.getAttribute(ENABLED_BY_DEFAULT_ATTRIBUTE);
 		if (enabledByDefault != null) {
@@ -98,5 +106,13 @@ public class ProjectBuilderDefinition {
 	@Override
 	public String toString() {
 		return (name != null ? name : projectBuilder.getClass().getName());
+	}
+
+	public String getIconUri() {
+		return iconUri;
+	}
+
+	public String getNamespaceUri() {
+		return namespaceUri;
 	}
 }

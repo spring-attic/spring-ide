@@ -53,6 +53,7 @@ import org.springframework.ide.eclipse.core.internal.model.validation.ValidatorD
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 import org.springframework.ide.eclipse.core.model.validation.IValidator;
+import org.springframework.ide.eclipse.ui.SpringUIImages;
 import org.springframework.ide.eclipse.ui.SpringUIMessages;
 import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 
@@ -146,7 +147,7 @@ public class ProjectValidatorPropertyTab {
 				}
 			}
 			if (image == null) {
-				return super.getImage(element);
+				return SpringUIImages.getImage(SpringUIImages.IMG_OBJS_RULE);
 			}
 			else {
 				return image;
