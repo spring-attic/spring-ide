@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.aop.core.model.internal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -66,8 +67,8 @@ public class AopReferenceModel implements IAopReferenceModel {
 		}
 	}
 
-	public List<IAopProject> getProjects() {
-		return null;
+	public Collection<IAopProject> getProjects() {
+		return this.projects.values();
 	}
 
 	@Deprecated

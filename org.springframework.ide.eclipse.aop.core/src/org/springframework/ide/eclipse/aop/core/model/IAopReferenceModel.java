@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.aop.core.model;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
@@ -38,8 +39,8 @@ public interface IAopReferenceModel {
 	List<IAopReference> getAllReferencesForResource(IResource resource);
 
 	IAopProject getProject(IJavaProject project);
-
-	List<IAopProject> getProjects();
+	
+	Collection<IAopProject> getProjects();
 
 	boolean isAdvice(IJavaElement je);
 

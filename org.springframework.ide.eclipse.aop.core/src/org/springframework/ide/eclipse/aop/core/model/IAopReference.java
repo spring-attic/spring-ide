@@ -29,8 +29,6 @@ public interface IAopReference {
 
 	IMember getTarget();
 
-	//IBean getTargetBean();
-	
 	String getTargetBeanId();
 
 }
