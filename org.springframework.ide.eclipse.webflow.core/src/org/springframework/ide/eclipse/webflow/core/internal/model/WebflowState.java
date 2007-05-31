@@ -39,6 +39,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IVar;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
+import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 /**
@@ -48,13 +49,13 @@ import org.w3c.dom.NodeList;
 @SuppressWarnings("restriction")
 public class WebflowState extends AbstractTransitionableFrom implements
 		IWebflowState, ICloneableModelElement<IWebflowState> {
-	
+
 	private final IWebflowConfig webflowConfig;
-	
+
 	public WebflowState(IWebflowConfig webflowConfig) {
 		this.webflowConfig = webflowConfig;
 	}
-	
+
 	/**
 	 * The imports.
 	 */
@@ -84,7 +85,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 	 * The vars.
 	 */
 	private List<IVar> vars;
-	
+
 	private IGlobalTransitions globalTransition;
 
 	/**
@@ -99,108 +100,111 @@ public class WebflowState extends AbstractTransitionableFrom implements
 		this.states = new ArrayList<IState>();
 		this.vars = new ArrayList<IVar>();
 
-		NodeList children = node.getChildNodes();
-		if (children != null && children.getLength() > 0) {
-			for (int i = 0; i < children.getLength(); i++) {
-				IDOMNode child = (IDOMNode) children.item(i);
-				if ("action-state".equals(child.getLocalName())) {
-					ActionState state = new ActionState();
-					state.init(child, this);
-					this.states.add(state);
-				}
-				else if ("view-state".equals(child.getLocalName())) {
-					ViewState state = new ViewState();
-					state.init(child, this);
-					this.states.add(state);
-				}
-				else if ("decision-state".equals(child.getLocalName())) {
-					DecisionState state = new DecisionState();
-					state.init(child, this);
-					this.states.add(state);
-				}
-				else if ("end-state".equals(child.getLocalName())) {
-					EndState state = new EndState();
-					state.init(child, this);
-					this.states.add(state);
-				}
-				else if ("subflow-state".equals(child.getLocalName())) {
-					SubflowState state = new SubflowState();
-					state.init(child, this);
-					this.states.add(state);
-				}
-				else if ("inline-flow".equals(child.getLocalName())) {
-					InlineFlowState state = new InlineFlowState();
-					state.init(child, this);
-					this.inlineFlows.add(state);
-				}
-				else if ("import".equals(child.getLocalName())) {
-					Import im = new Import();
-					im.init(child, this);
-					this.imports.add(im);
-				}
-				else if ("var".equals(child.getLocalName())) {
-					Variable var = new Variable();
-					var.init(child, this);
-					this.vars.add(var);
-				}
-				else if ("start-actions".equals(child.getLocalName())) {
-					this.entryActions = new EntryActions();
-					this.entryActions.init(child, this);
-				}
-				else if ("end-actions".equals(child.getLocalName())) {
-					this.exitActions = new ExitActions();
-					this.exitActions.init(child, this);
-				}
-				else if ("input-mapper".equals(child.getLocalName())) {
-					this.inputMapper = new InputMapper();
-					this.inputMapper.init(child, this);
-				}
-				else if ("output-mapper".equals(child.getLocalName())) {
-					this.outputMapper = new OutputMapper();
-					this.outputMapper.init(child, this);
-				}
-				else if ("output-mapper".equals(child.getLocalName())) {
-					this.outputMapper = new OutputMapper();
-					this.outputMapper.init(child, this);
-				}
-				else if ("global-transitions".equals(child.getLocalName())) {
-					this.globalTransition = new GlobalTransitions();
-					this.globalTransition.init(child, this);
-				}
-			}
-		}
+		if (node != null) {
 
-		// reconnect transistions
-		for (IState state : this.states) {
-			if (state instanceof ITransitionableFrom) {
-				for (ITransition trans : ((ITransitionableFrom) state)
-						.getOutputTransitions()) {
-					if (trans instanceof IStateTransition) {
-						if (((IStateTransition) trans).getToState() != null) {
-							((IStateTransition) trans).getToState()
-									.getInputTransitions().add(trans);
-						}
+			NodeList children = node.getChildNodes();
+			if (children != null && children.getLength() > 0) {
+				for (int i = 0; i < children.getLength(); i++) {
+					IDOMNode child = (IDOMNode) children.item(i);
+					if ("action-state".equals(child.getLocalName())) {
+						ActionState state = new ActionState();
+						state.init(child, this);
+						this.states.add(state);
+					}
+					else if ("view-state".equals(child.getLocalName())) {
+						ViewState state = new ViewState();
+						state.init(child, this);
+						this.states.add(state);
+					}
+					else if ("decision-state".equals(child.getLocalName())) {
+						DecisionState state = new DecisionState();
+						state.init(child, this);
+						this.states.add(state);
+					}
+					else if ("end-state".equals(child.getLocalName())) {
+						EndState state = new EndState();
+						state.init(child, this);
+						this.states.add(state);
+					}
+					else if ("subflow-state".equals(child.getLocalName())) {
+						SubflowState state = new SubflowState();
+						state.init(child, this);
+						this.states.add(state);
+					}
+					else if ("inline-flow".equals(child.getLocalName())) {
+						InlineFlowState state = new InlineFlowState();
+						state.init(child, this);
+						this.inlineFlows.add(state);
+					}
+					else if ("import".equals(child.getLocalName())) {
+						Import im = new Import();
+						im.init(child, this);
+						this.imports.add(im);
+					}
+					else if ("var".equals(child.getLocalName())) {
+						Variable var = new Variable();
+						var.init(child, this);
+						this.vars.add(var);
+					}
+					else if ("start-actions".equals(child.getLocalName())) {
+						this.entryActions = new EntryActions();
+						this.entryActions.init(child, this);
+					}
+					else if ("end-actions".equals(child.getLocalName())) {
+						this.exitActions = new ExitActions();
+						this.exitActions.init(child, this);
+					}
+					else if ("input-mapper".equals(child.getLocalName())) {
+						this.inputMapper = new InputMapper();
+						this.inputMapper.init(child, this);
+					}
+					else if ("output-mapper".equals(child.getLocalName())) {
+						this.outputMapper = new OutputMapper();
+						this.outputMapper.init(child, this);
+					}
+					else if ("output-mapper".equals(child.getLocalName())) {
+						this.outputMapper = new OutputMapper();
+						this.outputMapper.init(child, this);
+					}
+					else if ("global-transitions".equals(child.getLocalName())) {
+						this.globalTransition = new GlobalTransitions();
+						this.globalTransition.init(child, this);
 					}
 				}
-				if (state instanceof IDecisionState) {
-					for (IIf i : ((IDecisionState) state).getIfs()) {
-						if (i.getThenTransition() != null
-								&& i.getThenTransition().getToState() != null
-								&& !i.getThenTransition().getToState()
-										.getInputTransitions().contains(
-												i.getThenTransition())) {
-							i.getThenTransition().getToState()
-									.getInputTransitions().add(
-											i.getThenTransition());
+			}
+
+			// reconnect transistions
+			for (IState state : this.states) {
+				if (state instanceof ITransitionableFrom) {
+					for (ITransition trans : ((ITransitionableFrom) state)
+							.getOutputTransitions()) {
+						if (trans instanceof IStateTransition) {
+							if (((IStateTransition) trans).getToState() != null) {
+								((IStateTransition) trans).getToState()
+										.getInputTransitions().add(trans);
+							}
 						}
-						if (i.getElseTransition() != null
-								&& i.getElseTransition().getToState() != null
-								&& !i.getElseTransition().getToState()
-										.getInputTransitions().contains(
-												i.getElseTransition())) {
-							i.getElseTransition().getToState()
-									.getInputTransitions().add(
-											i.getElseTransition());
+					}
+					if (state instanceof IDecisionState) {
+						for (IIf i : ((IDecisionState) state).getIfs()) {
+							if (i.getThenTransition() != null
+									&& i.getThenTransition().getToState() != null
+									&& !i.getThenTransition().getToState()
+											.getInputTransitions().contains(
+													i.getThenTransition())) {
+								i.getThenTransition().getToState()
+										.getInputTransitions().add(
+												i.getThenTransition());
+							}
+							if (i.getElseTransition() != null
+									&& i.getElseTransition().getToState() != null
+									&& !i.getElseTransition().getToState()
+											.getInputTransitions().contains(
+													i.getElseTransition())) {
+								i.getElseTransition().getToState()
+										.getInputTransitions().add(
+												i.getElseTransition());
+							}
 						}
 					}
 				}
@@ -232,8 +236,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 			}
 			IVar refState = this.vars.get(refIndex);
 			this.getImports().add(i, pm);
-			WebflowModelXmlUtils.insertBefore(pm.getNode(), refState
-					.getNode());
+			WebflowModelXmlUtils.insertBefore(pm.getNode(), refState.getNode());
 			super.firePropertyChange(ADD_CHILDREN, new Integer(i), pm);
 		}
 
@@ -283,7 +286,8 @@ public class WebflowState extends AbstractTransitionableFrom implements
 									if (!((ITransitionableTo) state)
 											.getInputTransitions().contains(
 													ifTrans)) {
-										((IWebflowModelElement) ifTrans.getElementParent())
+										((IWebflowModelElement) ifTrans
+												.getElementParent())
 												.fireStructureChange(OUTPUTS,
 														ifTrans);
 										((ITransitionableTo) state)
@@ -299,7 +303,8 @@ public class WebflowState extends AbstractTransitionableFrom implements
 									if (!((ITransitionableTo) state)
 											.getInputTransitions().contains(
 													ifTrans)) {
-										((IWebflowModelElement) ifTrans.getElementParent())
+										((IWebflowModelElement) ifTrans
+												.getElementParent())
 												.fireStructureChange(OUTPUTS,
 														ifTrans);
 										((ITransitionableTo) state)
@@ -518,11 +523,19 @@ public class WebflowState extends AbstractTransitionableFrom implements
 		IState oldState = getStartState();
 
 		List<IDOMNode> nodes = getChildrenNodeByTagName("start-state");
-		IDOMNode node = nodes.get(0);
-		setAttribute(node, "idref", state.getId());
+		if (nodes != null && nodes.size() > 0) {
+			IDOMNode node = nodes.get(0);
+			setAttribute(node, "idref", state.getId());
+		}
+		else {
+			Element startNode = getNode().getOwnerDocument().createElement(
+					"start-state");
+			WebflowModelXmlUtils.insertNode(startNode, node);
+			setAttribute((IDOMNode) startNode, "idref", state.getId());
+		}
 
-		//removeState(state);
-		//addState(state, 0);
+		// removeState(state);
+		// addState(state, 0);
 		if (oldState != null) {
 			oldState.fireStructureChange(PROPS, oldState);
 		}
@@ -638,8 +651,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 		}
 	}
 
-	public void accept(IModelElementVisitor visitor,
-			IProgressMonitor monitor) {
+	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
 			for (IState state : getStates()) {
@@ -689,7 +701,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 			}
 		}
 	}
-	
+
 	public IModelElement[] getElementChildren() {
 		Set<IModelElement> children = new HashSet<IModelElement>();
 		children.addAll(getStates());
@@ -717,7 +729,7 @@ public class WebflowState extends AbstractTransitionableFrom implements
 		}
 		super.fireStructureChange(ADD_CHILDREN, inputMapper);
 	}
-	
+
 	public IModelElement getElementParent() {
 		return this.webflowConfig;
 	}

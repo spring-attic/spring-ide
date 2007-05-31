@@ -95,7 +95,8 @@ public class StateTreeEditPart extends AbstractTreeEditPart implements
 				children.addAll(properties.getAttributes());
 			}
 		}
-		if (getModel() instanceof IState && !(getModel() instanceof IWebflowState)) {
+		if (getModel() instanceof IState
+				&& !(getModel() instanceof IWebflowState)) {
 			IState state = (IState) getModel();
 			if (state.getEntryActions() != null) {
 				children.addAll((state.getEntryActions().getEntryActions()));
@@ -123,15 +124,20 @@ public class StateTreeEditPart extends AbstractTreeEditPart implements
 					.getInlineFlowStates());
 		}
 		else if (getModel() instanceof IWebflowState) {
-			children.addAll(((IWebflowState) getState()).getStates());
-			children.addAll(((IWebflowState) getState()).getInlineFlowStates());
+			if (((IWebflowState) getState()).getStates() != null
+					&& ((IWebflowState) getState()).getInlineFlowStates() != null) {
+				children.addAll(((IWebflowState) getState()).getStates());
+				children.addAll(((IWebflowState) getState())
+						.getInlineFlowStates());
+			}
 		}
 		else if (getModel() instanceof IDecisionState) {
 			if (((IDecisionState) getModel()).getIfs() != null) {
 				children.addAll(((IDecisionState) getModel()).getIfs());
 			}
 		}
-		if (getModel() instanceof IState && !(getModel() instanceof IWebflowState)) {
+		if (getModel() instanceof IState
+				&& !(getModel() instanceof IWebflowState)) {
 			IState state = (IState) getModel();
 			if (state.getExitActions() != null) {
 				children.addAll((state.getExitActions().getExitActions()));

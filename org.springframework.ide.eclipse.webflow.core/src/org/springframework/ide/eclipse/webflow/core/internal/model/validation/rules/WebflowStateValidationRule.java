@@ -39,26 +39,35 @@ public class WebflowStateValidationRule implements
 
 		if (state.getStartState() == null) {
 			Element node = (Element) state.getNode();
-			NodeList startStateNodes = node.getElementsByTagName("start-state");
-			if (startStateNodes == null || startStateNodes.getLength() == 0) {
-				context.error(this, "NO_START_STATE", state,
+			if (node != null) {
+				NodeList startStateNodes = node
+						.getElementsByTagName("start-state");
+				if (startStateNodes == null || startStateNodes.getLength() == 0) {
+					context.error(this, "NO_START_STATE", state,
 						"Start state definition is missing. Add a 'start-state' element");
-			}
-			else if (startStateNodes.getLength() == 1) {
-				IDOMNode startStateNode = (IDOMNode) startStateNodes.item(0);
-				String idref = state.getAttribute(startStateNode, "idref");
-				if (idref == null) {
-					context.error(this, "NO_START_STATE_IDREF", state,
-							"Start state definition misses 'idref' attribute");
 				}
-				else if (idref != null) {
-					context.error(this,
-						"NO_START_STATE_IDREF_INVALID",	state, MessageUtils.format(
+				else if (startStateNodes.getLength() == 1) {
+					IDOMNode startStateNode = (IDOMNode) startStateNodes
+							.item(0);
+					String idref = state.getAttribute(startStateNode, "idref");
+					if (idref == null) {
+						context.error(this, "NO_START_STATE_IDREF", state,
+							"Start state definition misses 'idref' attribute");
+					}
+					else if (idref != null) {
+						context.error(this,
+							"NO_START_STATE_IDREF_INVALID",	state,
+							MessageUtils.format(
 							"Start state definition references non-existing state \"{0}\"",
 							idref));
+					}
 				}
+			}
+			else {
+				context.error(this, "NO_FLOW", state,
+						"Flow definition misses 'flow' element");
+
 			}
 		}
 	}
-
 }

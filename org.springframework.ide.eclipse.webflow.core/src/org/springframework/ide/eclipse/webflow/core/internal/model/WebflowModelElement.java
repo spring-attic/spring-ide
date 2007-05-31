@@ -101,19 +101,18 @@ public abstract class WebflowModelElement implements IWebflowModelElement,
 
 	protected List<IDOMNode> getChildrenNodeByTagName(String tagName) {
 		List<IDOMNode> nodes = new ArrayList<IDOMNode>();
-		NodeList children = this.node.getChildNodes();
-		if (children != null && children.getLength() > 0) {
-			for (int i = 0; i < children.getLength(); i++) {
-				if (children.item(i).getLocalName() != null
-						&& children.item(i).getLocalName().equals(tagName)) {
-					nodes.add((IDOMNode) children.item(i));
+		if (this.node != null) {
+			NodeList children = this.node.getChildNodes();
+			if (children != null && children.getLength() > 0) {
+				for (int i = 0; i < children.getLength(); i++) {
+					if (children.item(i).getLocalName() != null
+							&& children.item(i).getLocalName().equals(tagName)) {
+						nodes.add((IDOMNode) children.item(i));
+					}
 				}
 			}
-			return nodes;
 		}
-		else {
-			return null;
-		}
+		return nodes;
 	}
 
 	public IDOMNode getNode() {
@@ -150,13 +149,15 @@ public abstract class WebflowModelElement implements IWebflowModelElement,
 	}
 
 	public int getElementStartLine() {
-		IStructuredDocument doc = node.getStructuredDocument();
-		if (doc != null) {
-			return doc.getLineOfOffset(node.getStartOffset()) + 1;
+		if (node != null) {
+			IStructuredDocument doc = node.getStructuredDocument();
+			if (doc != null) {
+				return doc.getLineOfOffset(node.getStartOffset()) + 1;
+			}
 		}
 		return -1;
 	}
-	
+
 	public int getElementEndLine() {
 		return getElementStartLine();
 	}
@@ -168,5 +169,5 @@ public abstract class WebflowModelElement implements IWebflowModelElement,
 	public IModelSourceLocation getElementSourceLocation() {
 		return null;
 	}
-	
+
 }
