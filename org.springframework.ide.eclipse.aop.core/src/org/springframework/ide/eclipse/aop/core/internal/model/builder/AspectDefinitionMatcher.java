@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.aop.core.model.builder;
+package org.springframework.ide.eclipse.aop.core.internal.model.builder;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

@@ -38,6 +38,7 @@ import org.springframework.ide.eclipse.aop.core.internal.model.BeanAspectDefinit
 import org.springframework.ide.eclipse.aop.core.internal.model.BeanIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.internal.model.JavaAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.internal.model.builder.AspectDefinitionBuilderFactory;
+import org.springframework.ide.eclipse.aop.core.internal.model.builder.AspectDefinitionMatcher;
 import org.springframework.ide.eclipse.aop.core.logging.AopLog;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
