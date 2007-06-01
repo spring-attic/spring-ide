@@ -8,8 +8,15 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.aop.core.model.internal;
+package org.springframework.ide.eclipse.aop.core.internal.model;
 
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 public class JavaAspectDefinition extends BeanAspectDefinition {
-
+	
+	public String getFactoryId() {
+		return JavaAspectDefinitionElementFactory.FACTORY_ID;
+	}
 }

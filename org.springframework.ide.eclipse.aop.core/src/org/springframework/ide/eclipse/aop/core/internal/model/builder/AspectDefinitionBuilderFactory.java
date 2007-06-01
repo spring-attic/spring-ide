@@ -8,12 +8,13 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.aop.core.model.builder;
+package org.springframework.ide.eclipse.aop.core.internal.model.builder;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
+import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder;
 
 /**
  * Factory class that creates *fresh* instances of non-threadsafe

@@ -26,15 +26,14 @@ import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
+import org.springframework.ide.eclipse.aop.core.internal.model.AnnotationAspectDefinition;
+import org.springframework.ide.eclipse.aop.core.internal.model.AnnotationIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
-import org.springframework.ide.eclipse.aop.core.model.internal.AnnotationAspectDefinition;
-import org.springframework.ide.eclipse.aop.core.model.internal.AnnotationIntroductionDefinition;
 import org.springframework.util.StringUtils;
 
 /**
- * ASM-based Visitor that collects all
- * @AspectJ-style annotations
+ * ASM-based Visitor that collects all @AspectJ-style annotations
  * @author Christian Dupuis
  * @since 2.0
  */

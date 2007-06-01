@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.aop.core.model.builder;
+package org.springframework.ide.eclipse.aop.core.internal.model.builder;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -25,13 +25,15 @@ import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.ThrowsAdvice;
 import org.springframework.ide.eclipse.aop.core.Activator;
+import org.springframework.ide.eclipse.aop.core.internal.model.BeanAspectDefinition;
+import org.springframework.ide.eclipse.aop.core.internal.model.BeanIntroductionDefinition;
+import org.springframework.ide.eclipse.aop.core.internal.model.JavaAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.logging.AopLog;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
-import org.springframework.ide.eclipse.aop.core.model.internal.BeanAspectDefinition;
-import org.springframework.ide.eclipse.aop.core.model.internal.BeanIntroductionDefinition;
-import org.springframework.ide.eclipse.aop.core.model.internal.JavaAspectDefinition;
+import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder;
+import org.springframework.ide.eclipse.aop.core.model.builder.IWeavingClassLoaderSupport;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;

@@ -8,11 +8,14 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.aop.core.model.internal;
+package org.springframework.ide.eclipse.aop.core.internal.model;
 
 import java.lang.reflect.Method;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPersistableElement;
 import org.springframework.beans.BeanUtils;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
@@ -20,7 +23,12 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES
 import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.util.StringUtils;
 
-public class BeanAspectDefinition implements IAspectDefinition {
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ */
+public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
+		IPersistableElement {
 
 	protected String adivceMethodName;
 
@@ -36,13 +44,13 @@ public class BeanAspectDefinition implements IAspectDefinition {
 
 	protected IResource file;
 
-	protected String returning;
-
-	protected String throwing;
+	protected boolean isProxyTargetClass = false;
 
 	protected String pointcutExpressionString = null;
 
-	protected boolean isProxyTargetClass = false;
+	protected String returning;
+
+	protected String throwing;
 
 	protected IAopReference.ADVICE_TYPES type;
 
@@ -56,6 +64,25 @@ public class BeanAspectDefinition implements IAspectDefinition {
 							adivceMethodParameterTypes);
 		}
 		return false;
+	}
+
+	public Object getAdapter(Class adapter) {
+		if (adapter.equals(IPersistableElement.class)) {
+			return this;
+		}
+		return null;
+	}
+
+	public Method getAdviceMethod() {
+		try {
+			Class<?> aspectClass = ClassUtils.loadClass(this.aspectClassName);
+			Method method = BeanUtils.resolveSignature(this.adivceMethodName,
+					aspectClass);
+			return method;
+		}
+		catch (ClassNotFoundException e) {
+			return null;
+		}
 	}
 
 	public String getAdviceMethodName() {
@@ -82,6 +109,14 @@ public class BeanAspectDefinition implements IAspectDefinition {
 		return aspectName;
 	}
 
+	public String getFactoryId() {
+		return BeanAspectDefinitionElementFactory.FACTORY_ID;
+	}
+
+	public String getPointcutExpression() {
+		return this.pointcutExpressionString;
+	}
+
 	public IResource getResource() {
 		return file;
 	}
@@ -106,8 +141,39 @@ public class BeanAspectDefinition implements IAspectDefinition {
 		return hc;
 	}
 
+	public boolean isProxyTargetClass() {
+		return this.isProxyTargetClass;
+	}
+
+	public void saveState(IMemento memento) {
+		memento.putString("advice-method-name", this.adivceMethodName);
+		memento.putString("advice-class-name", this.aspectClassName);
+		if (this.adivceMethodParameterTypes != null
+				&& this.adivceMethodParameterTypes.length > 0) {
+			memento.putString("adivce-method-parameter-types",
+				StringUtils.arrayToCommaDelimitedString(this.adivceMethodParameterTypes));
+		}
+		memento.putString("aspect-name", this.aspectName);
+		memento.putString("pointcut-expression", this.pointcutExpressionString);
+		memento.putString("returning", this.returning);
+		memento.putString("throwing", this.throwing);
+		if (this.argNames != null && this.argNames.length > 0) {
+			memento.putString("arg-names", StringUtils
+					.arrayToCommaDelimitedString(this.argNames));
+		}
+		memento.putInteger("aspect-line-number", this.aspectLineNumber);
+		memento.putString("file", this.file.getFullPath().toString());
+		memento.putString("proxy-target-class", Boolean
+				.toString(this.isProxyTargetClass));
+		memento.putString("advice-type", this.type.toString());
+	}
+
 	public void setAdviceMethodName(String adivceMethodName) {
 		this.adivceMethodName = adivceMethodName;
+	}
+
+	public void setAdviceMethodParameterTypes(String[] params) {
+		this.adivceMethodParameterTypes = params;
 	}
 
 	public void setArgNames(String[] argNames) {
@@ -116,6 +182,10 @@ public class BeanAspectDefinition implements IAspectDefinition {
 
 	public void setAspectClassName(String aspectClassName) {
 		this.aspectClassName = aspectClassName;
+	}
+
+	public void setAspectLineNumber(int aspectLineNumber) {
+		this.aspectLineNumber = aspectLineNumber;
 	}
 
 	public void setAspectName(String aspectName) {
@@ -127,8 +197,12 @@ public class BeanAspectDefinition implements IAspectDefinition {
 		}
 	}
 
-	public void setAspectLineNumber(int aspectLineNumber) {
-		this.aspectLineNumber = aspectLineNumber;
+	public void setPointcutExpression(String expression) {
+		this.pointcutExpressionString = expression;
+	}
+
+	public void setProxyTargetClass(boolean proxyTargetClass) {
+		this.isProxyTargetClass = proxyTargetClass;
 	}
 
 	public void setResource(IResource file) {
@@ -145,30 +219,6 @@ public class BeanAspectDefinition implements IAspectDefinition {
 
 	public void setType(IAopReference.ADVICE_TYPES type) {
 		this.type = type;
-	}
-
-	public String getPointcutExpression() {
-		return this.pointcutExpressionString;
-	}
-
-	public void setPointcutExpression(String expression) {
-		this.pointcutExpressionString = expression;
-	}
-
-	public Method getAdviceMethod() {
-		try {
-			Class<?> aspectClass = ClassUtils.loadClass(this.aspectClassName);
-			Method method = BeanUtils.resolveSignature(this.adivceMethodName,
-					aspectClass);
-			return method;
-		}
-		catch (ClassNotFoundException e) {
-			return null;
-		}
-	}
-
-	public void setAdviceMethodParameterTypes(String[] params) {
-		this.adivceMethodParameterTypes = params;
 	}
 
 	@Override
@@ -210,13 +260,5 @@ public class BeanAspectDefinition implements IAspectDefinition {
 		}
 		buf.append("]");
 		return buf.toString();
-	}
-
-	public boolean isProxyTargetClass() {
-		return this.isProxyTargetClass;
-	}
-
-	public void setProxyTargetClass(boolean proxyTargetClass) {
-		this.isProxyTargetClass = proxyTargetClass;
 	}
 }

@@ -8,57 +8,55 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.aop.core.model.internal;
+package org.springframework.ide.eclipse.aop.core.internal.model;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPersistableElement;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.util.ObjectUtils;
 
-public class AopReference implements IAopReference {
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ */
+public class AopReference implements IAopReference, IAdaptable,
+		IPersistableElement {
 
-	private ADVICE_TYPES type;
-
-	private IMember source;
-
-	private IMember target;
+	private String bean;
 
 	private IAspectDefinition definition;
 
 	private IResource file;
 
-	private String bean;
+	private IMember source;
+
+	private IMember target;
+
+	private ADVICE_TYPES type;
 
 	public AopReference(ADVICE_TYPES type, IMember source, IMember target,
 			IAspectDefinition def, IResource file, IBean bean) {
+		this(type, source, target, def, file, bean.getElementID());
+	}
+
+	public AopReference(ADVICE_TYPES type, IMember source, IMember target,
+			IAspectDefinition def, IResource file, String beanId) {
 		this.type = type;
 		this.source = source;
 		this.target = target;
 		this.definition = def;
 		this.file = file;
-		this.bean = bean.getElementID();
+		this.bean = beanId;
 	}
 
-	public IAspectDefinition getDefinition() {
-		return definition;
-	}
-
-	public ADVICE_TYPES getAdviceType() {
-		return this.type;
-	}
-
-	public IMember getSource() {
-		return this.source;
-	}
-
-	public IMember getTarget() {
-		return this.target;
-	}
-
-	public IResource getResource() {
-		return file;
+	public AopReference(ADVICE_TYPES type, IMember source, IMember target,
+			IResource file, String beanId) {
+		this(type, source, target, null, file, beanId);
 	}
 
 	@Override
@@ -75,6 +73,41 @@ public class AopReference implements IAopReference {
 		return false;
 	}
 
+	public Object getAdapter(Class adapter) {
+		if (adapter.equals(IPersistableElement.class)) {
+			return this;
+		}
+		return null;
+	}
+
+	public ADVICE_TYPES getAdviceType() {
+		return this.type;
+	}
+
+	public IAspectDefinition getDefinition() {
+		return definition;
+	}
+
+	public String getFactoryId() {
+		return AopReferenceElementFactory.FACTORY_ID;
+	}
+
+	public IResource getResource() {
+		return file;
+	}
+
+	public IMember getSource() {
+		return this.source;
+	}
+
+	public IMember getTarget() {
+		return this.target;
+	}
+
+	public String getTargetBeanId() {
+		return this.bean;
+	}
+
 	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(source);
@@ -83,6 +116,24 @@ public class AopReference implements IAopReference {
 		hashCode = 12 + ObjectUtils.nullSafeHashCode(definition
 				.getAspectLineNumber());
 		return hashCode;
+	}
+
+	public void saveState(IMemento memento) {
+		memento.putString("advice-type", this.type.toString());
+		if (this.source != null) {
+			memento.putString("source", this.source.getHandleIdentifier());
+		}
+		if (this.target != null) {
+			memento.putString("target", this.target.getHandleIdentifier());
+		}
+		if (this.file != null) {
+			memento.putString("file", this.file.getFullPath().toString());
+		}
+		memento.putString("bean", this.bean);
+	}
+
+	public void setDefinition(IAspectDefinition definition) {
+		this.definition = definition;
 	}
 
 	@Override
@@ -98,9 +149,5 @@ public class AopReference implements IAopReference {
 		buf.append(this.definition);
 		buf.append("]");
 		return buf.toString();
-	}
-
-	public String getTargetBeanId() {
-		return this.bean;
 	}
 }

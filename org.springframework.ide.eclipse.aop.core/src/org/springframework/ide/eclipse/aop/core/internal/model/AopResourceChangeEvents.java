@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.aop.core.model.internal;
+package org.springframework.ide.eclipse.aop.core.internal.model;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
@@ -22,6 +22,13 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
  */
 public class AopResourceChangeEvents extends SpringResourceChangeEventsAdapter {
 
+	private void clearProject(IProject project) {
+		IJavaProject jp = JdtUtils.getJavaProject(project);
+		Activator.getModel().removeProject(jp);
+		// commented because of workspace locking
+		// AopReferenceModelMarkerUtils.deleteProblemMarkers(project);
+	}
+
 	public boolean isSpringProject(IProject project, int eventType) {
 		IJavaProject jp = JdtUtils.getJavaProject(project);
 		return jp != null && Activator.getModel().getProject(jp) != null;
@@ -29,13 +36,6 @@ public class AopResourceChangeEvents extends SpringResourceChangeEventsAdapter {
 
 	public void projectClosed(IProject project, int eventType) {
 		clearProject(project);
-	}
-
-	private void clearProject(IProject project) {
-		IJavaProject jp = JdtUtils.getJavaProject(project);
-		Activator.getModel().removeProject(jp);
-		// commented because of workspace locking
-		// AopReferenceModelMarkerUtils.deleteProblemMarkers(project);
 	}
 
 	public void projectDeleted(IProject project, int eventType) {

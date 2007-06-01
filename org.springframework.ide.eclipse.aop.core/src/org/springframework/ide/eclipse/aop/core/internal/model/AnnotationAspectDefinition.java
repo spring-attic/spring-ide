@@ -8,11 +8,19 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.aop.core.model.internal;
+package org.springframework.ide.eclipse.aop.core.internal.model;
 
 import org.springframework.ide.eclipse.aop.core.model.IAnnotationAopDefinition;
 
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 public class AnnotationAspectDefinition extends JavaAspectDefinition implements
 		IAnnotationAopDefinition {
-
+	
+	public String getFactoryId() {
+		return AnnotationAspectDefinitionElementFactory.FACTORY_ID;
+	}
+	
 }

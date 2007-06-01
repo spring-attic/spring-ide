@@ -23,10 +23,12 @@ Require-Bundle: org.eclipse.ui,
  org.objectweb.asm
 Eclipse-LazyStart: true
 Export-Package: org.springframework.ide.eclipse.aop.core,
+ org.springframework.ide.eclipse.aop.core.builder,
+ org.springframework.ide.eclipse.aop.core.internal.model,
+ org.springframework.ide.eclipse.aop.core.internal.model.builder,
  org.springframework.ide.eclipse.aop.core.logging,
  org.springframework.ide.eclipse.aop.core.model,
  org.springframework.ide.eclipse.aop.core.model.builder,
- org.springframework.ide.eclipse.aop.core.model.internal,
  org.springframework.ide.eclipse.aop.core.util
 Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

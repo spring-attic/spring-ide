@@ -8,11 +8,16 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.aop.core.model.internal;
+package org.springframework.ide.eclipse.aop.core.internal.model;
 
+import org.eclipse.ui.IMemento;
 import org.springframework.ide.eclipse.aop.core.model.IAnnotationAopDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IIntroductionDefinition;
 
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 public class AnnotationIntroductionDefinition extends
 		BeanIntroductionDefinition implements IIntroductionDefinition,
 		IAnnotationAopDefinition {
@@ -21,6 +26,15 @@ public class AnnotationIntroductionDefinition extends
 
 	public String getDefiningField() {
 		return definingField;
+	}
+
+	public String getFactoryId() {
+		return AnnotationIntroductionDefinitionElementFactory.FACTORY_ID;
+	}
+	
+	public void saveState(IMemento memento) {
+		super.saveState(memento);
+		memento.putString("defining-field", this.definingField);
 	}
 
 	public void setDefiningField(String definingField) {

@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.aop.core.model.internal;
+package org.springframework.ide.eclipse.aop.core.internal.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,11 +19,15 @@ import org.springframework.ide.eclipse.aop.core.logging.AopLog;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 public class AopProject implements IAopProject {
 
-	private List<IAopReference> references = new ArrayList<IAopReference>();
-
 	private IJavaProject project;
+
+	private List<IAopReference> references = new ArrayList<IAopReference>();
 
 	public AopProject(IJavaProject project) {
 		this.project = project;
@@ -35,14 +39,6 @@ public class AopProject implements IAopProject {
 		this.references.add(reference);
 	}
 
-	public List<IAopReference> getAllReferences() {
-		return this.references;
-	}
-
-	public IJavaProject getProject() {
-		return this.project;
-	}
-
 	public void clearReferencesForResource(IResource resource) {
 		List<IAopReference> toRemove = new ArrayList<IAopReference>();
 		for (IAopReference reference : this.references) {
@@ -51,6 +47,14 @@ public class AopProject implements IAopProject {
 			}
 		}
 		this.references.removeAll(toRemove);
+	}
+
+	public List<IAopReference> getAllReferences() {
+		return this.references;
+	}
+
+	public IJavaProject getProject() {
+		return this.project;
 	}
 
 	public List<IAopReference> getReferencesForResource(IResource resource) {

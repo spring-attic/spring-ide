@@ -24,6 +24,8 @@ public interface IAopReference {
 	IMember getSource();
 
 	IAspectDefinition getDefinition();
+	
+	void setDefinition(IAspectDefinition definition);
 
 	IResource getResource();
 

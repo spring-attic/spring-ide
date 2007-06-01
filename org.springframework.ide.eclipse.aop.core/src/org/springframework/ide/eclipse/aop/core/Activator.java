@@ -17,8 +17,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.springframework.ide.eclipse.aop.core.internal.model.AopReferenceModel;
 import org.springframework.ide.eclipse.aop.core.model.IAopReferenceModel;
-import org.springframework.ide.eclipse.aop.core.model.internal.AopReferenceModel;
 import org.springframework.ide.eclipse.core.MessageUtils;
 
 /**

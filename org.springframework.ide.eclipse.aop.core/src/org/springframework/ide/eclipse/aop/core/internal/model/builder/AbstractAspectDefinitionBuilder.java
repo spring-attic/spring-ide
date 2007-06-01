@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.aop.core.model.builder;
+package org.springframework.ide.eclipse.aop.core.internal.model.builder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,6 +22,8 @@ import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
+import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder;
+import org.springframework.ide.eclipse.aop.core.model.builder.IWeavingClassLoaderSupport;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
 

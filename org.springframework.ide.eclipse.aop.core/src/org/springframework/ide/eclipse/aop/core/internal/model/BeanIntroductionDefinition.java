@@ -8,27 +8,54 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.aop.core.model.internal;
+package org.springframework.ide.eclipse.aop.core.internal.model;
 
+import org.eclipse.ui.IMemento;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.aspectj.TypePatternClassFilter;
 import org.springframework.aop.support.ClassFilters;
 import org.springframework.ide.eclipse.aop.core.model.IIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 
+/**
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 public class BeanIntroductionDefinition extends BeanAspectDefinition implements
 		IIntroductionDefinition {
 
-	private String introducedInterfaceName;
-
-	private ClassFilter typePatternClassFilter;
-
 	private String defaultImplName;
+
+	private String introducedInterfaceName;
 
 	private String typePattern;
 
+	private ClassFilter typePatternClassFilter;
+
 	public BeanIntroductionDefinition() {
 		setType(ADVICE_TYPES.DECLARE_PARENTS);
+	}
+
+	@Override
+	public String getAdviceMethodName() {
+		throw new IllegalArgumentException();
+	}
+
+	public String getDefaultImplName() {
+		return this.defaultImplName;
+	}
+
+	public String getFactoryId() {
+		return BeanIntroductionDefinitionElementFactory.FACTORY_ID;
+	}
+
+	public String getImplInterfaceName() {
+		return this.introducedInterfaceName;
+	}
+
+	@Override
+	public ADVICE_TYPES getType() {
+		return ADVICE_TYPES.DECLARE_PARENTS;
 	}
 
 	public ClassFilter getTypeMatcher() {
@@ -61,28 +88,17 @@ public class BeanIntroductionDefinition extends BeanAspectDefinition implements
 		return this.typePattern;
 	}
 
-	@Override
-	public String getAdviceMethodName() {
-		throw new IllegalArgumentException();
-	}
-
-	@Override
-	public ADVICE_TYPES getType() {
-		return ADVICE_TYPES.DECLARE_PARENTS;
-	}
-
-	public String getDefaultImplName() {
-		return this.defaultImplName;
-	}
-
-	public String getImplInterfaceName() {
-		return this.introducedInterfaceName;
+	public void saveState(IMemento memento) {
+		super.saveState(memento);
+		memento.putString("introduced-interface-name", this.introducedInterfaceName);
+		memento.putString("default-impl-name", this.defaultImplName);
+		memento.putString("type-pattern", this.typePattern);
 	}
 
 	public void setDefaultImplName(String defaultImplName) {
 		this.defaultImplName = defaultImplName;
 	}
-
+	
 	public void setIntroducedInterfaceName(String introducedInterfaceName) {
 		this.introducedInterfaceName = introducedInterfaceName;
 	}
@@ -90,5 +106,4 @@ public class BeanIntroductionDefinition extends BeanAspectDefinition implements
 	public void setTypePattern(String typePattern) {
 		this.typePattern = typePattern;
 	}
-
 }
