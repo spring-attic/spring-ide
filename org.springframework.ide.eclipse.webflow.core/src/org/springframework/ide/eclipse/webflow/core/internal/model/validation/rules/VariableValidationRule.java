@@ -19,8 +19,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.binding.convert.ConversionService;
 import org.springframework.binding.convert.support.DefaultConversionService;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.core.MessageUtils;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
@@ -104,12 +104,12 @@ public class VariableValidationRule implements
 	}
 
 	private IType getJavaType(String className, WebflowValidationContext context) {
-		IType type = BeansModelUtils.getJavaType(context.getWebflowConfig()
+		IType type = JdtUtils.getJavaType(context.getWebflowConfig()
 				.getProject().getProject(), className);
 		if (type == null) {
 			Class clazz = getConversionService().getClassByAlias(className);
 			if (clazz != null) {
-				type = BeansModelUtils.getJavaType(context.getWebflowConfig()
+				type = JdtUtils.getJavaType(context.getWebflowConfig()
 						.getProject().getProject(), clazz.getName());
 			}
 		}

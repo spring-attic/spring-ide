@@ -16,7 +16,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
@@ -31,7 +31,7 @@ public class OpenJavaTypeAction extends AbstractBeansConfigEditorAction {
 		if (getTextEditor() != null && getConfigFile() != null) {
 			String className = guessType(getTextEditor());
 			if (className != null && className.length() > 0) {
-				IType type = BeansModelUtils.getJavaType(getConfigFile()
+				IType type = JdtUtils.getJavaType(getConfigFile()
 						.getProject(), className);
 				if (type != null) {
 					SpringUIUtils.openInEditor(type);

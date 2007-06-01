@@ -19,13 +19,13 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperLinkDetector;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.ExternalBeanHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.JavaElementHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.NodeElementHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Node;
 
@@ -63,7 +63,7 @@ public class WebflowConfigHyperLinkDetector extends AbstractHyperLinkDetector im
 		}
 		if ("type".equals(name)) {
 			IFile file = BeansEditorUtils.getFile(document);
-			IType type = BeansModelUtils.getJavaType(file.getProject(), target);
+			IType type = JdtUtils.getJavaType(file.getProject(), target);
 			if (type != null) {
 				return new JavaElementHyperlink(hyperlinkRegion, type);
 			}

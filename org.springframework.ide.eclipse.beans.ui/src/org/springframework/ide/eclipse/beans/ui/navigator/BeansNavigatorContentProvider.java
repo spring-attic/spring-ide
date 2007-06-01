@@ -19,7 +19,6 @@ import org.eclipse.ui.navigator.CommonNavigator;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonContentProvider;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
@@ -109,7 +108,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 	protected void refreshBeanClasses(IBeansConfig config) {
 		Set<String> classes = config.getBeanClasses();
 		for (String clazz : classes) {
-			IType type = BeansModelUtils.getJavaType(config
+			IType type = JdtUtils.getJavaType(config
 					.getElementResource().getProject(), clazz);
 			if (type != null) {
 				refreshViewerForElement(type);

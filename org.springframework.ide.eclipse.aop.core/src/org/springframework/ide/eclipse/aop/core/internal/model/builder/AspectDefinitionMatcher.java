@@ -24,7 +24,6 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.Assert;
@@ -140,7 +139,7 @@ public class AspectDefinitionMatcher {
 
 		final Object aspectJExpressionPointcut = createAspectJPointcutExpression(info);
 
-		final IType jdtTargetType = BeansModelUtils.getJavaType(project,
+		final IType jdtTargetType = JdtUtils.getJavaType(project,
 				targetClass.getName());
 		final List<IMethod> matchingMethod = new ArrayList<IMethod>();
 		// TODO CD uncomment once we have Spring 2.1 OSGi bundle

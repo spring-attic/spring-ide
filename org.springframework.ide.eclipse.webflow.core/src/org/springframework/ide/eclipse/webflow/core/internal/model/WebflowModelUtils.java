@@ -36,6 +36,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 import org.springframework.ide.eclipse.webflow.core.Activator;
@@ -156,7 +157,7 @@ public class WebflowModelUtils {
 			}
 		}
 
-		return BeansModelUtils.getJavaType(config.getProject().getProject(),
+		return JdtUtils.getJavaType(config.getProject().getProject(),
 				className);
 	}
 

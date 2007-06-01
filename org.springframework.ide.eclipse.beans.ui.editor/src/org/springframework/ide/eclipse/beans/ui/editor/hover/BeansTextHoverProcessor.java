@@ -39,11 +39,11 @@ import org.eclipse.wst.sse.ui.internal.contentassist.ContentAssistUtils;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.core.internal.regions.DOMRegionContext;
 import org.eclipse.wst.xml.ui.internal.taginfo.XMLTagInfoHoverProcessor;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaDocUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
 import org.springframework.util.StringUtils;
@@ -151,7 +151,7 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 		if ("class".equals(attName) && attributes.getNamedItem("class") != null) {
 			String className = attributes.getNamedItem("class").getNodeValue();
 			if (className != null) {
-				IType type = BeansModelUtils.getJavaType(this.getResource(
+				IType type = JdtUtils.getJavaType(this.getResource(
 						document).getProject(), className);
 				if (type != null) {
 					BeansJavaDocUtils utils = new BeansJavaDocUtils(type);
@@ -251,7 +251,7 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 						.getOwnerDocument(), attributes.getNamedItem(
 						"factory-bean").getNodeValue());
 			}
-			IType type = BeansModelUtils.getJavaType(this.getResource(document)
+			IType type = JdtUtils.getJavaType(this.getResource(document)
 					.getProject(), className);
 			if (type != null) {
 				try {
@@ -276,7 +276,7 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 			if (attributes != null && attributes.getNamedItem("class") != null) {
 				String className = attributes.getNamedItem("class")
 						.getNodeValue();
-				IType type = BeansModelUtils.getJavaType(file.getProject(),
+				IType type = JdtUtils.getJavaType(file.getProject(),
 						className);
 				try {
 					IMethod method = Introspector.findMethod(type, factoryMethod, 0,

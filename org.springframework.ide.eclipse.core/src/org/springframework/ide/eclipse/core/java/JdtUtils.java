@@ -366,26 +366,71 @@ public class JdtUtils {
 		}
 		return null;
 	}
-
+	
+	/**
+	 * Returns the corresponding Java type for given full-qualified class name.
+	 * @param project the JDT project the class belongs to
+	 * @param className the full qualified class name of the requested Java type
+	 * @return the requested Java type or null if the class is not defined or
+	 * the project is not accessible
+	 */
 	public static IType getJavaType(IProject project, String className) {
-		IJavaProject javaProject = getJavaProject(project);
+		IJavaProject javaProject = JdtUtils.getJavaProject(project);
 		if (javaProject != null && className != null) {
 
+			// For inner classes replace '$' by '.'
+			int pos = className.lastIndexOf('$');
+			if (pos > 0 && pos < (className.length() - 1)) {
+				className = className.substring(0, pos) + '.'
+						+ className.substring(pos + 1);
+			}
 			try {
+				// First look for the type in the Java project
 				IType type = javaProject.findType(className);
-				
 				if (type != null) {
 					return type;
 				}
 
+				// Then look for the type in the referenced Java projects
+				for (IProject refProject : project.getReferencedProjects()) {
+					IJavaProject refJavaProject = JdtUtils
+							.getJavaProject(refProject);
+					if (refJavaProject != null) {
+						type = refJavaProject.findType(className);
+						if (type != null) {
+							return type;
+						}
+					}
+				}
+
+				// fall back and try to locate the class using AJDT
+				return getAjdtType(project, className);
+			}
+			catch (CoreException e) {
+				SpringCore.log("Error getting Java type '" + className
+						+ "'", e);
+			}
+		}
+
+		return null;
+	}
+
+
+	public static IType getAjdtType(IProject project, String className) {
+		IJavaProject javaProject = getJavaProject(project);
+		if (IS_AJDT_PRESENT && javaProject != null && className != null) {
+
+			try {
+				IType type = null;
+
 				// First look for the type in the project
-				if (IS_AJDT_PRESENT && isAjdtProject(project)) {
+				if (isAjdtProject(project)) {
 					type = AjdtUtils.getAjdtType(project, className);
 				}
 
 				// Then look for the type in the referenced Java projects
 				for (IProject refProject : project.getReferencedProjects()) {
-					if (IS_AJDT_PRESENT && isAjdtProject(refProject)) {
+					if (isAjdtProject(refProject)) {
 						type = AjdtUtils.getAjdtType(refProject, className);
 						if (type != null) {
 							return type;

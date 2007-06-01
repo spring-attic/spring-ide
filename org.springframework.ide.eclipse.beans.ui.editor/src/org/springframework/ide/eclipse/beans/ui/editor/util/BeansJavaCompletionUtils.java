@@ -39,11 +39,11 @@ import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposal;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposalCollector;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.CompilationUnitHelper;
 import org.springframework.ide.eclipse.core.java.Introspector;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.w3c.dom.Node;
 
 @SuppressWarnings("restriction")
@@ -170,7 +170,7 @@ public class BeansJavaCompletionUtils {
 			return;
 		}
 
-		IType type = BeansModelUtils.getJavaType(BeansEditorUtils.getResource(
+		IType type = JdtUtils.getJavaType(BeansEditorUtils.getResource(
 				request).getProject(), typeName);
 		try {
 			if (BeansEditorUtils.getResource(request).getProject().hasNature(
@@ -219,7 +219,7 @@ public class BeansJavaCompletionUtils {
 				.getParentNode());
 		String propertyName = BeansEditorUtils.getAttribute(node, "name");
 		if (className != null && propertyName != null && project != null) {
-			IType type = BeansModelUtils.getJavaType(project, className);
+			IType type = JdtUtils.getJavaType(project, className);
 			if (type != null) {
 				try {
 					IMethod method = Introspector.getWritableProperty(type,
@@ -237,7 +237,7 @@ public class BeansJavaCompletionUtils {
 						if (resolvedTypeNames != null
 								&& resolvedTypeNames.length > 0
 								&& resolvedTypeNames[0].length > 0) {
-							IType propertyType = BeansModelUtils.getJavaType(
+							IType propertyType = JdtUtils.getJavaType(
 									project, resolvedTypeNames[0][0] + "."
 											+ resolvedTypeNames[0][1]);
 							ITypeHierarchy hierachy = propertyType

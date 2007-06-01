@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
  * @author Torsten Juergeleit
@@ -110,7 +111,7 @@ public class RootBeanProperties implements IPropertySource {
 		if (P_ID_CLASS.equals(id)) {
 			IProject project = BeansModelUtils.getProject(bean).getProject();
 			String className = bean.getClassName();
-			IType type = BeansModelUtils.getJavaType(project, className);
+			IType type = JdtUtils.getJavaType(project, className);
 
 			// Use type only it's not a BinaryType (resource == null)
 			if (type != null && type.getResource() != null) {

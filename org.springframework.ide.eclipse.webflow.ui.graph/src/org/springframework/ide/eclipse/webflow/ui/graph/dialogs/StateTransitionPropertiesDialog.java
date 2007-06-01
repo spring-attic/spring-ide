@@ -46,7 +46,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IActionElement;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
@@ -175,7 +175,7 @@ public class StateTransitionPropertiesDialog extends TitleAreaDialog implements
 
 	protected void handleButtonPressed(Button widget) {
 		try {
-			IType throwable = BeansModelUtils.getJavaType(WebflowUtils
+			IType throwable = JdtUtils.getJavaType(WebflowUtils
 					.getActiveWebflowConfig().getProject().getProject(),
 					"java.lang.Throwable");
 			IJavaSearchScope searchScope = SearchEngine

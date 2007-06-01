@@ -16,7 +16,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.core.io.FileResource;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -45,7 +44,7 @@ public class JdtModelSourceLocationFactory {
 		String methodName = beanCreationMethod.getName();
 		List<String> parameterTypeNames = beanCreationMethod
 				.getParameterTypes();
-		IType type = BeansModelUtils.getJavaType(bean.getElementResource()
+		IType type = JdtUtils.getJavaType(bean.getElementResource()
 				.getProject(), className);
 
 		if (type != null) {

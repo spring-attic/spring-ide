@@ -28,6 +28,7 @@ import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
@@ -96,7 +97,7 @@ public abstract class WebflowUtils {
 			}
 		}
 
-		IType type = BeansModelUtils.getJavaType(getActiveFlowEditorInput()
+		IType type = JdtUtils.getJavaType(getActiveFlowEditorInput()
 				.getFile().getProject(), className);
 		if (type != null) {
 			if ("bean-action".equals(node.getLocalName())) {

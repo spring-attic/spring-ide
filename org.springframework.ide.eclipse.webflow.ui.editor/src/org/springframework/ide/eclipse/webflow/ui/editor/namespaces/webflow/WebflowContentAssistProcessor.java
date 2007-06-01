@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.B
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
@@ -184,7 +185,7 @@ public class WebflowContentAssistProcessor extends
 									.getBeanClass(bean, null);
 						}
 					}
-					IType type = BeansModelUtils.getJavaType(BeansEditorUtils
+					IType type = JdtUtils.getJavaType(BeansEditorUtils
 							.getResource(request).getProject(), className);
 					if (type != null) {
 						addActionMethodAttributeValueProposals(request,
@@ -214,7 +215,7 @@ public class WebflowContentAssistProcessor extends
 									.getBeanClass(bean, null);
 						}
 					}
-					IType type = BeansModelUtils.getJavaType(BeansEditorUtils
+					IType type = JdtUtils.getJavaType(BeansEditorUtils
 							.getResource(request).getProject(), className);
 					if (type != null) {
 						addMethodAttributeValueProposals(request, matchString,

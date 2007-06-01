@@ -30,6 +30,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.JavaElementHype
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.NodeElementHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
@@ -127,7 +128,7 @@ public class WebflowHyperLinkDetector extends AbstractHyperLinkDetector
 				|| "type".equals(name)
 				|| "type".equals(name) || "class".equals(name)) {
 			IFile file = BeansEditorUtils.getFile(document);
-			IType type = BeansModelUtils.getJavaType(file.getProject(), target);
+			IType type = JdtUtils.getJavaType(file.getProject(), target);
 			if (type != null) {
 				return new JavaElementHyperlink(hyperlinkRegion, type);
 			}
@@ -147,7 +148,7 @@ public class WebflowHyperLinkDetector extends AbstractHyperLinkDetector
 								null);
 					}
 				}
-				IType type = BeansModelUtils.getJavaType(file.getProject(),
+				IType type = JdtUtils.getJavaType(file.getProject(),
 						className);
 				if (type != null) {
 					try {

@@ -35,13 +35,13 @@ import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
  * this class tests the config file validator. The test method is to create a
@@ -84,7 +84,7 @@ public class ValidationTests extends AbstractSpringIdeTest {
 	}
 
 	private void renameBeanClassProperty() throws Exception {
-		IType type = BeansModelUtils.getJavaType(project.getProject(),
+		IType type = JdtUtils.getJavaType(project.getProject(),
 				"pack1.SimpleBean");
 		IMethod[] methods = type.getMethods();
 		for (int i = 0; i < methods.length; i++) {

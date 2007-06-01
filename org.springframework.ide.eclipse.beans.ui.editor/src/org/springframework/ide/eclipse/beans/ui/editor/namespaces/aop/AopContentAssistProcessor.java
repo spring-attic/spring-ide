@@ -20,7 +20,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.AbstractContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PointcutReferenceSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PublicMethodSearchRequestor;
@@ -29,6 +28,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.BeansCompletionUtils
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
 import org.springframework.util.StringUtils;
@@ -145,7 +145,7 @@ public class AopContentAssistProcessor extends AbstractContentAssistProcessor
 			IFile file = BeansEditorUtils.getResource(request);
 			String className = BeansEditorUtils.getClassNameForBean(file, node
 					.getOwnerDocument(), ref);
-			IType type = BeansModelUtils.getJavaType(file.getProject(),
+			IType type = JdtUtils.getJavaType(file.getProject(),
 					className);
 			if (type != null) {
 				try {

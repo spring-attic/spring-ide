@@ -205,8 +205,8 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				return;
 			}
 
-			final IType jdtTargetType = BeansModelUtils.getJavaType(file.getProject(), className);
-			final IType jdtAspectType = BeansModelUtils.getJavaType(aopProject.getProject()
+			final IType jdtTargetType = JdtUtils.getJavaType(file.getProject(), className);
+			final IType jdtAspectType = JdtUtils.getJavaType(aopProject.getProject()
 					.getProject(), info.getAspectClassName());
 
 			// check type not found and exclude factory beans

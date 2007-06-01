@@ -23,7 +23,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperLinkDetector;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.ExternalBeanHyperlink;
@@ -31,6 +30,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.JavaElementHype
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.NodeElementHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
 import org.w3c.dom.Attr;
@@ -113,7 +113,7 @@ public class BeansHyperLinkDetector extends AbstractHyperLinkDetector implements
 		}
 		if ("class".equals(name) || "value".equals(name)) {
 			IFile file = BeansEditorUtils.getFile(document);
-			IType type = BeansModelUtils.getJavaType(file.getProject(), target);
+			IType type = JdtUtils.getJavaType(file.getProject(), target);
 			if (type != null) {
 				return new JavaElementHyperlink(hyperlinkRegion, type);
 			}
@@ -142,7 +142,7 @@ public class BeansHyperLinkDetector extends AbstractHyperLinkDetector implements
 				String className = attributes.getNamedItem("class")
 						.getNodeValue();
 				IFile file = BeansEditorUtils.getFile(document);
-				IType type = BeansModelUtils.getJavaType(file.getProject(),
+				IType type = JdtUtils.getJavaType(file.getProject(),
 						className);
 				try {
 					IMethod method = Introspector.findMethod(type, target, 0,
@@ -181,7 +181,7 @@ public class BeansHyperLinkDetector extends AbstractHyperLinkDetector implements
 			}
 			try {
 				IFile file = BeansEditorUtils.getFile(document);
-				IType type = BeansModelUtils.getJavaType(file.getProject(),
+				IType type = JdtUtils.getJavaType(file.getProject(),
 						className);
 				IMethod method = Introspector.findMethod(type, target, -1,
 						Public.DONT_CARE, Static.YES);

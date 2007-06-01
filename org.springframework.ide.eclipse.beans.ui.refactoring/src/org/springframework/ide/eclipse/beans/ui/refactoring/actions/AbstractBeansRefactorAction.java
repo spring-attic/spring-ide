@@ -34,9 +34,9 @@ import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegionList;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.core.internal.regions.DOMRegionContext;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.ui.actions.AbstractBeansConfigEditorAction;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -98,7 +98,7 @@ public abstract class AbstractBeansRefactorAction extends
 				if ("bean".equals(node.getLocalName())
 						&& StringUtils.hasText(className)
 						&& "class".equals(attributeName)) {
-					je = BeansModelUtils.getJavaType(BeansEditorUtils
+					je = JdtUtils.getJavaType(BeansEditorUtils
 							.getProject(document), className);
 				}
 				else if ("property".equals(node.getLocalName())

@@ -624,7 +624,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			// for now only handle postprocessor that have a direct bean class
 			String beanClassName = bean.getClassName();
 			if (beanClassName != null) {
-				IType type = BeansModelUtils.getJavaType(getElementResource()
+				IType type = JdtUtils.getJavaType(getElementResource()
 						.getProject(), beanClassName);
 				if (type != null
 						&& (Introspector.doesImplement(type,

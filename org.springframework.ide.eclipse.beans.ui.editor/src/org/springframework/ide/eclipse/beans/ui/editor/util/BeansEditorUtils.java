@@ -58,6 +58,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.namespaces.IReferenceable
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.java.Introspector;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.ui.editors.ZipEntryEditorInput;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -321,7 +322,7 @@ public class BeansEditorUtils {
 		}
 
 		if (className != null) {
-			IType type = BeansModelUtils.getJavaType(file.getProject(),
+			IType type = JdtUtils.getJavaType(file.getProject(),
 					className);
 			if (type != null && !classNames.contains(type)) {
 				classNames.add(type);
@@ -463,7 +464,7 @@ public class BeansEditorUtils {
 		try {
 			String returnTypeString = Signature.toString(string).replace('$',
 					'.');
-			returnType = BeansModelUtils.getJavaType(contextType
+			returnType = JdtUtils.getJavaType(contextType
 					.getJavaProject().getProject(), resolveClassName(
 					returnTypeString, contextType));
 		}

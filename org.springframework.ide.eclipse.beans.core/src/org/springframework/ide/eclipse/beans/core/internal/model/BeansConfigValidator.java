@@ -334,7 +334,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 		// Validate bean class and constructor arguments - skip child beans and
 		// class names with placeholders
 		if (className != null && !hasPlaceHolder(className)) {
-			IType type = BeansModelUtils.getJavaType(BeansModelUtils
+			IType type = JdtUtils.getJavaType(BeansModelUtils
 					.getProject(bean).getProject(), className);
 			if (type == null) {
 				BeansModelUtils.createProblemMarker(bean, "Class '" + className
@@ -355,7 +355,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 		// and properties with bean class from merged bean definition - skip
 		// class names with placeholders
 		if (mergedClassName != null && !hasPlaceHolder(mergedClassName)) {
-			IType type = BeansModelUtils.getJavaType(BeansModelUtils
+			IType type = JdtUtils.getJavaType(BeansModelUtils
 					.getProject(bean).getProject(), mergedClassName);
 			if (type != null) {
 
@@ -746,7 +746,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 						String beanClassName = ((AbstractBeanDefinition) def)
 								.getBeanClassName();
 						if (beanClassName != null) {
-							IType type = BeansModelUtils.getJavaType(
+							IType type = JdtUtils.getJavaType(
 									BeansModelUtils.getProject(bean)
 											.getProject(), beanClassName);
 							if (type != null) {
@@ -948,7 +948,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 	protected void validateFactoryMethod(IBean bean, String className,
 			String methodName, int argCount, Static statics) {
 		if (className != null && !hasPlaceHolder(className)) {
-			IType type = BeansModelUtils.getJavaType(BeansModelUtils
+			IType type = JdtUtils.getJavaType(BeansModelUtils
 					.getProject(bean).getProject(), className);
 			// Skip factory-method validation for factory beans which are
 			// Spring factory beans as well and for those aspectOf methods

@@ -25,7 +25,6 @@ import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegion;
 import org.eclipse.wst.xml.core.internal.document.AttrImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.AbstractContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.FactoryMethodSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PropertyNameSearchRequestor;
@@ -36,6 +35,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.BeansCompletionUtils
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
 import org.w3c.dom.NamedNodeMap;
@@ -65,7 +65,7 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 			String factoryClassName, boolean isStatic) {
 		if (BeansEditorUtils.getResource(request) instanceof IFile) {
 			IFile file = BeansEditorUtils.getResource(request);
-			IType type = BeansModelUtils.getJavaType(file.getProject(),
+			IType type = JdtUtils.getJavaType(file.getProject(),
 					factoryClassName);
 			if (type != null) {
 				try {
@@ -96,7 +96,7 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 			ContentAssistRequest request, String prefix, String className) {
 		if (BeansEditorUtils.getResource(request) instanceof IFile) {
 			IFile file = BeansEditorUtils.getResource(request);
-			IType type = BeansModelUtils.getJavaType(file.getProject(),
+			IType type = JdtUtils.getJavaType(file.getProject(),
 					className);
 			if (type != null) {
 				try {

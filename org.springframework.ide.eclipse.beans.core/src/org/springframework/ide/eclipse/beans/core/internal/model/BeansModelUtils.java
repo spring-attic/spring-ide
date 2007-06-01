@@ -19,12 +19,10 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -768,55 +766,7 @@ public final class BeansModelUtils {
 		element.accept(visitor, new NullProgressMonitor());
 		return innerBeans;
 	}
-
-	/**
-	 * Returns the corresponding Java type for given full-qualified class name.
-	 * @param project the JDT project the class belongs to
-	 * @param className the full qualified class name of the requested Java type
-	 * @return the requested Java type or null if the class is not defined or
-	 * the project is not accessible
-	 */
-	public static IType getJavaType(IProject project, String className) {
-		IJavaProject javaProject = JdtUtils.getJavaProject(project);
-		if (javaProject != null && className != null) {
-
-			// For inner classes replace '$' by '.'
-			int pos = className.lastIndexOf('$');
-			if (pos > 0 && pos < (className.length() - 1)) {
-				className = className.substring(0, pos) + '.'
-						+ className.substring(pos + 1);
-			}
-			try {
-				// First look for the type in the Java project
-				IType type = javaProject.findType(className);
-				if (type != null) {
-					return type;
-				}
-
-				// Then look for the type in the referenced Java projects
-				for (IProject refProject : project.getReferencedProjects()) {
-					IJavaProject refJavaProject = JdtUtils
-							.getJavaProject(refProject);
-					if (refJavaProject != null) {
-						type = refJavaProject.findType(className);
-						if (type != null) {
-							return type;
-						}
-					}
-				}
-
-				// fall back and try to locate the class using AJDT
-				return JdtUtils.getJavaType(project, className);
-			}
-			catch (CoreException e) {
-				BeansCorePlugin.log("Error getting Java type '" + className
-						+ "'", e);
-			}
-		}
-
-		return null;
-	}
-
+	
 	/**
 	 * Returns the given bean's class name.
 	 * @param bean the bean to lookup the bean class name for
@@ -904,7 +854,7 @@ public final class BeansModelUtils {
 		Assert.notNull(bean);
 		String className = getBeanClass(bean, context);
 		if (className != null) {
-			return getJavaType(getProject(bean).getProject(), className);
+			return JdtUtils.getJavaType(getProject(bean).getProject(), className);
 		}
 		return null;
 	}
