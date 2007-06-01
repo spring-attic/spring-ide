@@ -8,10 +8,10 @@
 	<extension-point id="postprocessors" name="%extensionPostProcessors.name"
 		schema="schema/postprocessors.exsd" />
 
-	<extension id="problemmarker" name="%beansProblemMarker"
-		point="org.eclipse.core.resources.markers">
-		<super
-			type="org.springframework.ide.eclipse.core.problemmarker" />
+	<extension point="org.eclipse.core.resources.markers"
+			id="problemmarker"
+			name="%beansProblemMarker">
+		<super type="org.springframework.ide.eclipse.core.problemmarker" />
 		<persistent value="true" />
 		<attribute name="errorCode" />
 		<attribute name="beanID" />
@@ -41,6 +41,5 @@
 		<factory id="org.springframework.ide.eclipse.beans.core.factoryId"
 			class="org.springframework.ide.eclipse.beans.core.internal.model.BeansModelElementFactory" />      
 	</extension>
- 
 
 </plugin>

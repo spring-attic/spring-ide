@@ -66,6 +66,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansTypedString;
+import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.io.xml.LineNumberPreservingDOMParser;
 import org.springframework.ide.eclipse.core.java.Introspector;
@@ -74,7 +75,6 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
-import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -222,24 +222,20 @@ public final class BeansModelUtils {
 		if (element instanceof IBeansModel) {
 			Set<IBeansProject> projects = ((IBeansModel) element).getProjects();
 			int worked = 0;
-			monitor.beginTask("Locating Spring Bean definitions", projects
-					.size());
+			monitor.beginTask("Locating bean definitions", projects.size());
 			try {
 				for (IBeansProject project : projects) {
-					monitor
-							.subTask("Locating Spring Bean definitions in project '"
-									+ project.getElementName() + "'");
+					monitor.subTask("Locating bean definitions in project '"
+							+ project.getElementName() + "'");
 					for (IBeansConfig config : project.getConfigs()) {
-						monitor
-								.subTask("Loading Spring Bean defintion from file '"
-										+ config.getElementName() + "'");
+						monitor.subTask("Loading bean defintion from file '"
+								+ config.getElementName() + "'");
 						beans.addAll(config.getBeans());
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();
 						}
-						Set<IBeansComponent> components = config
-								.getComponents();
-						for (IBeansComponent componet : components) {
+						for (IBeansComponent componet
+								: config.getComponents()) {
 							beans.addAll(componet.getBeans());
 						}
 						if (monitor.isCanceled()) {
@@ -259,18 +255,16 @@ public final class BeansModelUtils {
 		else if (element instanceof IBeansProject) {
 			Set<IBeansConfig> configs = ((IBeansProject) element).getConfigs();
 			int worked = 0;
-			monitor.beginTask("Locating Spring Bean definitions", configs
-					.size());
+			monitor.beginTask("Locating bean definitions", configs.size());
 			try {
 				for (IBeansConfig config : configs) {
-					monitor.subTask("Loading Spring Bean defintion from file '"
+					monitor.subTask("Loading bean defintion from file '"
 							+ config.getElementName() + "'");
 					beans.addAll(config.getBeans());
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
-					Set<IBeansComponent> components = config.getComponents();
-					for (IBeansComponent componet : components) {
+					for (IBeansComponent componet : config.getComponents()) {
 						beans.addAll(componet.getBeans());
 					}
 					monitor.worked(worked++);
@@ -285,6 +279,10 @@ public final class BeansModelUtils {
 		}
 		else if (element instanceof IBeansConfig) {
 			beans.addAll(((IBeansConfig) element).getBeans());
+			for (IBeansComponent componet : ((IBeansConfig) element)
+					.getComponents()) {
+				beans.addAll(componet.getBeans());
+			}
 		}
 		else if (element instanceof IBeansConfigSet) {
 			beans.addAll(((IBeansConfigSet) element).getBeans());
@@ -1001,11 +999,21 @@ public final class BeansModelUtils {
 	public static void deleteProblemMarkers(IModelElement element) {
 		if (element instanceof IBeansProject) {
 			for (IBeansConfig config : ((IBeansProject) element).getConfigs()) {
-				ModelUtils.deleteProblemMarkers(config);
+				IResource resource = config.getElementResource();
+				MarkerUtils.deleteMarkers(resource, BeansCorePlugin.MARKER_ID);
 			}
 		}
-		else {
-			ModelUtils.deleteProblemMarkers(element);
+		else if (element instanceof IBeansConfigSet) {
+			for (IBeansConfig config : ((IBeansConfigSet) element)
+					.getConfigs()) {
+				IResource resource = config.getElementResource();
+				MarkerUtils.deleteMarkers(resource, BeansCorePlugin.MARKER_ID);
+			}
+		}
+		else if (element instanceof IResourceModelElement) {
+			IResource resource = ((IResourceModelElement) element)
+					.getElementResource();
+			MarkerUtils.deleteMarkers(resource, BeansCorePlugin.MARKER_ID);
 		}
 	}
 
@@ -1017,7 +1025,19 @@ public final class BeansModelUtils {
 	 */
 	public static void registerBeanConfig(IBeansConfig config,
 			BeanDefinitionRegistry registry) {
-		// Register bean definitions
+
+		// Register bean aliases
+		for (IBeanAlias alias : config.getAliases()) {
+			try {
+				registry.registerAlias(alias.getBeanName(), alias
+						.getElementName());
+			}
+			catch (BeansException e) {
+				// ignore - continue with next alias
+			}
+		}
+
+		// Register root bean definitions
 		for (IBean bean : config.getBeans()) {
 			try {
 				String beanName = bean.getElementName();
@@ -1039,14 +1059,27 @@ public final class BeansModelUtils {
 			}
 		}
 
-		// Register bean aliases
-		for (IBeanAlias alias : config.getAliases()) {
-			try {
-				registry.registerAlias(alias.getBeanName(), alias
-						.getElementName());
-			}
-			catch (BeansException e) {
-				// ignore - continue with next alias
+		// Register bean definitions from components
+		for (IBeansComponent component : config.getComponents()) {
+			for (IBean bean : component.getBeans()) {
+				try {
+					String beanName = bean.getElementName();
+	
+					// Register bean definition under primary name.
+					registry.registerBeanDefinition(beanName, ((Bean) bean)
+							.getBeanDefinition());
+	
+					// Register aliases for bean name, if any.
+					String[] aliases = bean.getAliases();
+					if (aliases != null) {
+						for (String alias : aliases) {
+							registry.registerAlias(beanName, alias);
+						}
+					}
+				}
+				catch (BeansException e) {
+					// ignore - continue with next bean
+				}
 			}
 		}
 	}

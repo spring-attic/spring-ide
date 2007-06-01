@@ -37,7 +37,14 @@ public class BeansCorePlugin extends Plugin {
 	 * <code>org.springframework.ide.eclipse.beans.core</code>).
 	 */
 	public static final String PLUGIN_ID =
-								   "org.springframework.ide.eclipse.beans.core";
+			"org.springframework.ide.eclipse.beans.core";
+
+	/**
+	 * The identifier for the Beans problem marker
+	 * (value <code>"org.springframework.ide.eclipse.beans.core.problemmarker"</code>).
+	 */
+	public static final String MARKER_ID = PLUGIN_ID + ".problemmarker";
+
 	private static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
 
 	/** The shared instance */

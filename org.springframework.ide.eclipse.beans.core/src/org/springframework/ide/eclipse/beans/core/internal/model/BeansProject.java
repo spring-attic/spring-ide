@@ -32,7 +32,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
-import org.springframework.ide.eclipse.core.model.ModelUtils;
+import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -163,7 +163,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 		for (IBeansConfig config : configs.values()) {
 			String configName = config.getElementName();
 			if (!configNames.contains(configName)) {
-				ModelUtils.deleteProblemMarkers(config);
+				BeansModelUtils.deleteProblemMarkers(config);
 				removeConfig(configName);
 			}
 		}
