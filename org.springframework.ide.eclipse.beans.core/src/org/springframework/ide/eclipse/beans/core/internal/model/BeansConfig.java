@@ -82,6 +82,7 @@ import org.springframework.ide.eclipse.core.io.FileResource;
 import org.springframework.ide.eclipse.core.io.FileResourceLoader;
 import org.springframework.ide.eclipse.core.io.StorageResource;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
+import org.springframework.ide.eclipse.core.io.xml.LineNumberPreservingDOMParser;
 import org.springframework.ide.eclipse.core.io.xml.XercesDocumentLoader;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -92,7 +93,9 @@ import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceExtractor;
+import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -143,6 +146,11 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	 */
 	private Map<String, Set<IBean>> beanClassesMap;
 
+	/**
+	 * List of parsing errors.
+	 */
+	private Set<ValidationProblem> problems;
+
 	public BeansConfig(IBeansProject project, String name) {
 		super(project, name);
 		init(name);
@@ -181,12 +189,22 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	}
 
 	public int getElementStartLine() {
+
+		// Lazily initialization of this config
+		readConfig();
 		IModelSourceLocation location = ModelUtils.getSourceLocation(defaults);
 		return (location != null ? location.getStartLine() : -1);
 	}
 
 	public boolean isInitialized() {
 		return beans != null;
+	}
+
+	public Set<ValidationProblem> getProblems() {
+
+		// Lazily initialization of this config
+		readConfig();
+		return problems;
 	}
 
 	@Override
@@ -243,6 +261,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			aliases = null;
 			beans = null;
 			beanClassesMap = null;
+			problems = null;
 
 			// Reset all config sets which contain this config
 			for (IBeansConfigSet configSet : ((IBeansProject) getElementParent())
@@ -426,8 +445,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 					+ ObjectUtils.nullSafeHashCode(defaults.getLazyInit());
 			hashCode = getElementType() * hashCode
 					+ ObjectUtils.nullSafeHashCode(defaults.getAutowire());
-			hashCode = getElementType()
-					* hashCode
+			hashCode = getElementType()	* hashCode
 					+ ObjectUtils.nullSafeHashCode(defaults
 							.getDependencyCheck());
 			hashCode = getElementType() * hashCode
@@ -549,6 +567,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			aliases = new LinkedHashMap<String, IBeanAlias>();
 			components = new LinkedHashSet<IBeansComponent>();
 			beans = new LinkedHashMap<String, IBean>();
+			problems = new LinkedHashSet<ValidationProblem>();
 			if (file != null && file.isAccessible()) {
 				modificationTimestamp = file.getModificationStamp();
 				Resource resource;
@@ -564,14 +583,12 @@ public class BeansConfig extends AbstractResourceModelElement implements
 				EntityResolver resolver = new XmlCatalogDelegatingEntityResolver(
 						new BeansDtdResolver(), new PluggableSchemaResolver(
 								PluggableSchemaResolver.class.getClassLoader()));
-
 				ReaderEventListener eventListener = new BeansConfigReaderEventListener(
 						this, false);
 				ProblemReporter problemReporter = new BeansConfigProblemReporter(
 						this);
 				BeanNameGenerator beanNameGenerator = new UniqueBeanNameGenerator(
 						this);
-
 				XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
 						registry);
 				reader.setDocumentLoader(new XercesDocumentLoader());
@@ -697,21 +714,26 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		}
 
 		public void fatal(Problem problem) {
+			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR,
+					getMessage(problem), getLine(problem)));
 			BeansModelUtils.createProblemMarker(config, getMessage(problem),
 					IMarker.SEVERITY_ERROR, problem, ErrorCode.PARSING_FAILED);
 			throw new BeanDefinitionParsingException(problem);
 		}
 
 		public void error(Problem problem) {
+			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR,
+					getMessage(problem), getLine(problem)));
 			BeansModelUtils.createProblemMarker(config, getMessage(problem),
 					IMarker.SEVERITY_ERROR, problem, ErrorCode.PARSING_FAILED);
 		}
 
 		public void warning(Problem problem) {
-			BeansModelUtils
-					.createProblemMarker(config, getMessage(problem),
-							IMarker.SEVERITY_WARNING, problem,
-							ErrorCode.PARSING_FAILED);
+			problems.add(new ValidationProblem(IMarker.SEVERITY_WARNING,
+					getMessage(problem), getLine(problem)));
+			BeansModelUtils.createProblemMarker(config, getMessage(problem),
+					IMarker.SEVERITY_WARNING, problem,
+					ErrorCode.PARSING_FAILED);
 		}
 
 		private String getMessage(Problem problem) {
@@ -728,6 +750,18 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			}
 			return message.toString();
 		}
+
+		private int getLine(Problem problem) {
+			Object source = problem.getLocation().getSource();
+			if (source instanceof XmlSourceLocation) {
+				return ((XmlSourceLocation) source).getStartLine();
+			}
+			else if (source instanceof Node) {
+				return LineNumberPreservingDOMParser
+						.getStartLineNumber((Node) source);
+			}
+			return -1;
+		}
 	}
 
 	/**
@@ -739,9 +773,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			ReaderEventListener {
 
 		private IBeansConfig config;
-
 		private Map<String, IModelElementProvider> elementProviders;
-
 		private boolean allowExternal = false;
 
 		public BeansConfigReaderEventListener(IBeansConfig config,
@@ -752,21 +784,21 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		}
 
 		public void defaultsRegistered(DefaultsDefinition defaultsDefinition) {
-			if (allowExternal || !isImported(defaultsDefinition)
+			if (!isExternal(defaultsDefinition)
 					&& defaultsDefinition instanceof DocumentDefaultsDefinition) {
 				defaults = (DocumentDefaultsDefinition) defaultsDefinition;
 			}
 		}
 
 		public void importProcessed(ImportDefinition importDefinition) {
-			if (allowExternal || !isImported(importDefinition)) {
+			if (allowExternal || !isExternal(importDefinition)) {
 				BeansImport imp = new BeansImport(config, importDefinition);
 				imports.add(imp);
 			}
 		}
 
 		public void aliasRegistered(AliasDefinition aliasDefinition) {
-			if (allowExternal || !isImported(aliasDefinition)) {
+			if (allowExternal || !isExternal(aliasDefinition)) {
 				BeanAlias alias = new BeanAlias(config, aliasDefinition);
 				aliases.put(aliasDefinition.getAlias(), alias);
 			}
@@ -780,7 +812,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		 * <code>org.springframework.ide.eclipse.beans.core.namespaces</code>.
 		 */
 		public void componentRegistered(ComponentDefinition componentDefinition) {
-			if (allowExternal || !isImported(componentDefinition)) {
+			if (allowExternal || !isExternal(componentDefinition)) {
 				String uri = NamespaceUtils
 						.getNameSpaceURI(componentDefinition);
 				IModelElementProvider provider = elementProviders.get(uri);
@@ -798,7 +830,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			}
 		}
 
-		private boolean isImported(BeanMetadataElement element) {
+		private boolean isExternal(BeanMetadataElement element) {
 			IModelSourceLocation location = ModelUtils
 					.getSourceLocation(element);
 			if (location != null) {
