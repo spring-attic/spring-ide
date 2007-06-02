@@ -12,14 +12,13 @@ package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
-import org.springframework.util.ObjectUtils;
 
 /**
  * {@link BeanNameGenerator} which creates a bean name which is unique within
@@ -46,16 +45,20 @@ public class UniqueBeanNameGenerator implements BeanNameGenerator {
 	public static String generateBeanName(BeanDefinition definition,
 			IBeansConfig config) {
 		StringBuffer name = new StringBuffer();
-		if (definition instanceof RootBeanDefinition) {
-			name.append(((RootBeanDefinition) definition).getBeanClassName());
-		}
-		else if (definition instanceof ChildBeanDefinition) {
-			name.append('<');
-			name.append(((ChildBeanDefinition) definition).getParentName());
-			name.append('>');
-		} else {
-			name.append(BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR);
-			ObjectUtils.getIdentityHexString(definition);
+		if (definition.getBeanClassName() == null) {
+			if (definition instanceof ChildBeanDefinition) {
+				name.append(((ChildBeanDefinition) definition).getParentName());
+				name.append("$child");
+			}
+			else if (definition instanceof AbstractBeanDefinition
+					&& ((AbstractBeanDefinition) definition)
+							.getFactoryBeanName() != null) {
+				name.append(((AbstractBeanDefinition) definition)
+						.getFactoryBeanName());
+				name.append("$created");
+			} else {
+				name.append("!!!invalid name!!!");
+			}
 		}
 		IModelSourceLocation location = ModelUtils
 				.getSourceLocation(definition);
