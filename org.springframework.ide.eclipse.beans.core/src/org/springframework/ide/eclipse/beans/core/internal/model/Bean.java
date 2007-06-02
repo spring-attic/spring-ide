@@ -69,6 +69,18 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		return IBeansModelElementTypes.BEAN_TYPE;
 	}
 
+	/**
+	 * For inner beans we have to omit the element name because it consists of
+	 * volatile stuff, like object ids.
+	 */
+	@Override
+	protected String getUniqueElementName() {
+		if (isInnerBean()) {
+			return "";
+		}
+		return super.getUniqueElementName();
+	}
+
 	@Override
 	public IResource getElementResource() {
 		// TODO is overriding this method ok??? 
