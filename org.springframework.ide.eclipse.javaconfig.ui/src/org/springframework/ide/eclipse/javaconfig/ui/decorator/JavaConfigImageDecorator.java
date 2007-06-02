@@ -68,7 +68,7 @@ public class JavaConfigImageDecorator extends LabelProvider implements
 	}
 
 	private void calculateDecorationForBean(IDecoration decoration, IBean bean) {
-		if (bean.getElementSourceLocation() != null
+		if (bean != null && bean.getElementSourceLocation() != null
 				&& bean.getElementSourceLocation() instanceof JdtModelSourceLocation) {
 			decoration.addOverlay(JavaConfigUIImages.DESC_OVR_ANNOTATION,
 					IDecoration.BOTTOM_LEFT);
