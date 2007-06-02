@@ -76,7 +76,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 	@Override
 	protected String getUniqueElementName() {
 		if (isInnerBean()) {
-			return "";
+			return "" + ID_SEPARATOR + getElementStartLine();
 		}
 		return super.getUniqueElementName();
 	}
