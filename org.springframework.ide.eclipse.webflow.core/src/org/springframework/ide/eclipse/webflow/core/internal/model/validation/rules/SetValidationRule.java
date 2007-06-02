@@ -48,21 +48,20 @@ public class SetValidationRule implements
 			IProgressMonitor monitor) {
 
 		if (!StringUtils.hasText(set.getAttribute())) {
-			context.error(this, "NO_ATTRIBUTE_ATTRIBUTE", set,
+			context.error(set, "NO_ATTRIBUTE_ATTRIBUTE",
 					"Element 'set' requires 'attribute' attribute");
 		}
 		if (!StringUtils.hasText(set.getValue())) {
-			context.error(this, "NO_VALUE_ATTRIBUTE", set,
+			context.error(set, "NO_VALUE_ATTRIBUTE",
 					"Element 'set' requires 'value' attribute");
 		}
 		if (StringUtils.hasText(set.getScope())
 				&& !SCOPE_TYPES.contains(set.getScope())) {
-			context.error(this, "NO_ATTRIBUTE_ATTRIBUTE", set,
+			context.error(set, "NO_ATTRIBUTE_ATTRIBUTE",
 					"Element 'set' requires 'attribute' attribute");
-			context
-					.error(this, "NO_VALUE_ATTRIBUTE", set, MessageUtils
-							.format("Element 'set' requires 'value' attribute",
-									set.getScope()));
+			context.error(set, "NO_VALUE_ATTRIBUTE", MessageUtils
+					.format("Element 'set' requires 'value' attribute",
+							set.getScope()));
 		}
 	}
 }

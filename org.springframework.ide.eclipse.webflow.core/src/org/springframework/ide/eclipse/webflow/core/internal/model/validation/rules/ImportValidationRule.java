@@ -33,7 +33,7 @@ public class ImportValidationRule implements
 	public void validate(Import impor, WebflowValidationContext context,
 			IProgressMonitor monitor) {
 		if (!StringUtils.hasText(impor.getResource())) {
-			context.error(this, "NO_RESOURCE_ATTRIBUTE", impor,
+			context.error(impor, "NO_RESOURCE_ATTRIBUTE",
 					"Element 'import' requires 'resource' attribute");
 		}
 	}

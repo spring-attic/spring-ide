@@ -40,17 +40,17 @@ public class AttributeValidationRule implements
 	public void validate(Attribute attribute, WebflowValidationContext context,
 			IProgressMonitor monitor) {
 		if (!StringUtils.hasText(attribute.getName())) {
-			context.error(this, "NO_NAME_ATTRIBUTE", attribute,
+			context.error(attribute, "NO_NAME_ATTRIBUTE",
 					"Element 'attribute' requires 'name' attribute");
 		}
 		if (StringUtils.hasText(attribute.getType())
 				&& getJavaType(attribute.getType(), context) == null) {
-			context.error(this, "NO_TYPE_FOUND", attribute, MessageUtils.format(
+			context.error(attribute, "NO_TYPE_FOUND", MessageUtils.format(
 					"Attribute 'type' \"{0}\" cannot be resolved", attribute
 							.getType()));
 		}
 		if (!StringUtils.hasText(attribute.getValue())) {
-			context.error(this, "NO_VALUE_ATTRIBUTE", attribute,
+			context.error(attribute, "NO_VALUE_ATTRIBUTE",
 					"Element 'attribute' requires a 'value'");
 		}
 	}
@@ -62,8 +62,7 @@ public class AttributeValidationRule implements
 			Class clazz = getConversionService().getClassByAlias(className);
 			if (clazz != null) {
 				type = JdtUtils.getJavaType(context.getWebflowConfig()
-						.getProject().getProject(), clazz
-						.getName());
+						.getProject().getProject(), clazz.getName());
 			}
 		}
 		return type;

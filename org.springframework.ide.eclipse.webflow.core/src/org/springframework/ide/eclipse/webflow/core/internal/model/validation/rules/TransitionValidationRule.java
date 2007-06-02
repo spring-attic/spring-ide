@@ -39,15 +39,15 @@ public class TransitionValidationRule implements
 			WebflowValidationContext context, IProgressMonitor monitor) {
 
 		if (!StringUtils.hasText(state.getToStateId())) {
-			context.error(this, "NO_TO_ATTRIBUTE", state,
+			context.error(state, "NO_TO_ATTRIBUTE",
 					"Element 'transition' requires 'to' attribute");
 		}
 		else if (state.getToState() == null
 				&& (!(state.getToStateId().startsWith(EXPRESSION_PREFIX) && state
 						.getToStateId().endsWith(EXPRESSION_SUFFIX)))) {
-			context.error(this, "NO_VALID_TO_ATTRIBUTE", state,
-				MessageUtils.format("Element 'transition' references a non-exiting state \"{0}\"", 
-					state.getToStateId()));
+			context.error(state, "NO_VALID_TO_ATTRIBUTE", MessageUtils
+					.format("Element 'transition' references a non-exiting state \"{0}\"", 
+								state.getToStateId()));
 		}
 	}
 }

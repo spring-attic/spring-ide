@@ -37,7 +37,7 @@ public class AttributeMapperValidationRule implements
 		if (StringUtils.hasText(state.getBean())
 				&& !WebflowModelUtils.isReferencedBeanFound(context
 						.getWebflowConfig(), state.getBean())) {
-			context.error(this, "INVALID_BEAN_REFERENCE", state, MessageUtils
+			context.error(state, "INVALID_BEAN_REFERENCE", MessageUtils
 					.format("Referenced bean \"{0}\" cannot be found", state
 							.getBean()));
 		}

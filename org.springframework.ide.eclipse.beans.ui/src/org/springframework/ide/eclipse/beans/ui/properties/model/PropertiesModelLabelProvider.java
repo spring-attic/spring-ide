@@ -23,6 +23,10 @@ import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
  */
 public class PropertiesModelLabelProvider extends BeansModelLabelProvider {
 
+	public PropertiesModelLabelProvider() {
+		super(true);
+	}
+
 	@Override
 	protected String getText(Object element, Object parentElement,
 			int severity) {

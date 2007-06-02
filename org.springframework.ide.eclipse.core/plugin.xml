@@ -23,10 +23,9 @@
       </builder>
    </extension>
 
-   <extension
+   <extension point="org.eclipse.core.resources.markers"
          id="problemmarker"
-         name="%springProblemMarker"
-         point="org.eclipse.core.resources.markers">
+         name="%springProblemMarker">
       <super type="org.eclipse.core.resources.problemmarker"/>
 	  <super type="org.eclipse.core.resources.textmarker"/>
    </extension>

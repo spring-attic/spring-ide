@@ -57,7 +57,7 @@ public class VariableValidationRule implements
 			IProgressMonitor monitor) {
 
 		if (!StringUtils.hasText(attribute.getName())) {
-			context.error(this, "NO_NAME_ATTRIBUTE", attribute,
+			context.error(attribute, "NO_NAME_ATTRIBUTE",
 					"Element 'var' requires 'name' attribute");
 		}
 		else {
@@ -65,31 +65,31 @@ public class VariableValidationRule implements
 					&& !StringUtils.hasText(attribute.getClazz())
 					&& !WebflowModelUtils.isReferencedBeanFound(context
 							.getWebflowConfig(), attribute.getName())) {
-				context.error(this, "INVALID_BEAN", attribute, MessageUtils
+				context.error(attribute, "INVALID_BEAN", MessageUtils
 						.format("Referenced bean \"{0}\" cannot be found",
 								attribute.getName()));
 			}
 		}
 		if (StringUtils.hasText(attribute.getScope())
 				&& !SCOPE_TYPES.contains(attribute.getScope())) {
-			context.error(this, "INVALID_SCOPE", attribute, MessageUtils
+			context.error(attribute, "INVALID_SCOPE", MessageUtils
 					.format("Invalid scope \"{0}\" specified", attribute
 							.getScope()));
 		}
 		if (StringUtils.hasText(attribute.getClazz())) {
 			IType type = getJavaType(attribute.getClazz(), context);
 			if (type == null) {
-				context.error(this, "INVALID_SCOPE", attribute, MessageUtils
+				context.error(attribute, "INVALID_SCOPE", MessageUtils
 						.format("Class 'var' \"{0}\" cannot be resolved",
 								attribute.getClazz()));
 			}
 			else
 				try {
 					if (type.isInterface() || Flags.isAbstract(type.getFlags())) {
-						context.error(this, "INVALID_SCOPE", attribute, 
-							MessageUtils.format(
-								"Class 'var' \"{0}\" is either an Interface or abstract",
-										attribute.getClazz()));					}
+						context.error(attribute, "INVALID_SCOPE",
+								MessageUtils.format(
+										"Class 'var' \"{0}\" is either an Interface or abstract",
+												attribute.getClazz()));					}
 				}
 				catch (JavaModelException e) {
 				}
@@ -97,7 +97,7 @@ public class VariableValidationRule implements
 		if (StringUtils.hasText(attribute.getBean())
 				&& !WebflowModelUtils.isReferencedBeanFound(context
 						.getWebflowConfig(), attribute.getBean())) {
-			context.error(this, "INVALID_BEAN", attribute, MessageUtils.format(
+			context.error(attribute, "INVALID_BEAN", MessageUtils.format(
 					"Referenced bean \"{0}\" cannot be found", attribute
 							.getBean()));
 		}

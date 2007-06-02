@@ -34,9 +34,8 @@ public class EvaluationActionValidationRule implements
 			WebflowValidationContext context, IProgressMonitor monitor) {
 
 		if (!StringUtils.hasText(action.getExpression())) {
-			context
-					.error(this, "NO_EXPRESSOIN_ATTRIBUTE", action,
-							"Element 'evaluate-action' requires 'expression' attribute");
+			context.error(action, "NO_EXPRESSOIN_ATTRIBUTE",
+					"Element 'evaluate-action' requires 'expression' attribute");
 		}
 	}
 }

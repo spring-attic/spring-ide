@@ -32,7 +32,7 @@ public class ActionStateValidationRule implements
 	public void validate(ActionState state, WebflowValidationContext context,
 			IProgressMonitor monitor) {
 		if (state.getActions().size() == 0) {
-			context.error(this, "NO_ACTIONS", state,
+			context.error(state, "NO_ACTIONS",
 					"Element 'action-state' requires action sub elements");
 		}
 	}

@@ -130,7 +130,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 					if (cfg.getElementName().equals(config.getElementName())) {
 						validateConfig(config, configSet, registry);
 					} else {
-						BeansModelUtils.registerBeanConfig(cfg, registry);
+						BeansModelUtils.register(cfg, registry);
 					}
 				}
 

@@ -25,18 +25,23 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 public interface IValidationContext {
 	
 	int SEVERITY_ERROR = IMarker.SEVERITY_ERROR;
-	
 	int SEVERITY_WARNING = IMarker.SEVERITY_WARNING;
-
-	IModelElement getRootElement();
 
 	Set<ValidationProblem> getProblems();
 
-	void warning(IValidationRule rule,
-			String errorId, IModelElement element, String message,
+	Set<IModelElement> getRootElements();
+
+	void setCurrentRootElement(IModelElement element);
+
+	IModelElement getCurrentRootElement();
+
+	void setCurrentRuleId(String ruleId);
+
+	String getCurrentRuleId();
+
+	void warning(IModelElement element, String problemId, String message,
 			ValidationProblemAttribute... attributes);
 
-	void error(IValidationRule rule,
-			String errorId, IModelElement element, String message,
+	void error(IModelElement element, String problemId, String message,
 			ValidationProblemAttribute... attributes);
 }

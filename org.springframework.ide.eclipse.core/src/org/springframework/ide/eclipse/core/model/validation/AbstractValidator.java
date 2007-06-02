@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinitionFactory;
@@ -34,9 +35,12 @@ public abstract class AbstractValidator implements IValidator {
 				affectedResources.size());
 		try {
 			for (IResource resource : affectedResources) {
-				cleanup(resource, subMonitor);
 				subMonitor.subTask("Validating resource '"
 						+ resource.getFullPath().toString() + "'");
+				cleanup(resource, subMonitor);
+				if (subMonitor.isCanceled()) {
+					throw new OperationCanceledException();
+				}
 				IValidationContext context = createContext(resource);
 				Set<ValidationRuleDefinition> ruleDefinitions =
 						ValidationRuleDefinitionFactory
@@ -44,11 +48,20 @@ public abstract class AbstractValidator implements IValidator {
 										.getProject());
 				IModelElementVisitor visitor = new ValidationVisitor(context,
 						ruleDefinitions);
-				context.getRootElement().accept(visitor, monitor);
+				for (IModelElement rootElement : context.getRootElements()) {
+					context.setCurrentRootElement(rootElement);
+					rootElement.accept(visitor, monitor);
+					if (subMonitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+				}
 				for (ValidationProblem problem : context.getProblems()) {
-					createProblemMarker(problem.getResource(), problem);
+					createProblemMarker(resource, problem);
 				}
 				subMonitor.worked(1);
+				if (subMonitor.isCanceled()) {
+					throw new OperationCanceledException();
+				}
 			}
 		}
 		finally {
@@ -103,11 +116,15 @@ public abstract class AbstractValidator implements IValidator {
 				try {
 					for (ValidationRuleDefinition ruleDefinition
 							: ruleDefinitions) {
+						if (subMonitor.isCanceled()) {
+							throw new OperationCanceledException();
+						}
 						subMonitor.subTask("Validating element '"
 								+ element.getElementName() + "' with rule '"
 								+ ruleDefinition.getName() + "'");
 						IValidationRule rule = ruleDefinition.getRule();
 						if (rule.supports(element, context)) {
+							context.setCurrentRuleId(ruleDefinition.getID());
 							rule.validate(element, context, monitor);
 						}
 						subMonitor.worked(1);

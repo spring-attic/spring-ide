@@ -37,11 +37,11 @@ public class StateValidationRule implements
 			IProgressMonitor monitor) {
 		
 		if (!StringUtils.hasText(state.getId())) {
-			context.error(this, "NO_ID", state,
+			context.error(state, "NO_ID",
 					"Element requires unique 'id' attribute");
 		}
 		else if (!WebflowModelUtils.isStateIdUnique(state)) {
-			context.error(this, "NO_UNIQUE_ID_GIVEN", state, MessageUtils.format(
+			context.error(state, "NO_UNIQUE_ID_GIVEN", MessageUtils.format(
 					"Specified state id \"{0}\" is not unique", state.getId()));
 		}
 	}

@@ -61,6 +61,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansList;
 import org.springframework.ide.eclipse.beans.core.model.IBeansMap;
 import org.springframework.ide.eclipse.beans.core.model.IBeansMapEntry;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansTypedString;
@@ -151,7 +152,7 @@ public final class BeansModelUtils {
 	 * @throws IllegalArgumentException if unsupported model element specified
 	 */
 	public static Set<IBeansConfigSet> getConfigSets(IModelElement element) {
-		Set<IBeansConfigSet> configSets = new HashSet<IBeansConfigSet>();
+		Set<IBeansConfigSet> configSets = new LinkedHashSet<IBeansConfigSet>();
 		if (element instanceof IBeansConfigSet) {
 			configSets.add((IBeansConfigSet) element);
 		}
@@ -969,49 +970,28 @@ public final class BeansModelUtils {
 
 	/**
 	 * Registers all bean definitions and aliases from given
-	 * {@link IBeansConfig} in specified {@link BeanDefinitionRegistry}. All
-	 * {@link BeansException}s thrown by the {@link BeanDefinitionRegistry} are
-	 * ignored.
+	 * {@link IBeansConfig} or {@link IBeansConfigSet} in specified
+	 * {@link BeanDefinitionRegistry}. All {@link BeansException}s thrown by
+	 * the {@link BeanDefinitionRegistry} are ignored.
 	 */
-	public static void registerBeanConfig(IBeansConfig config,
+	public static void register(IBeansModelElement element,
 			BeanDefinitionRegistry registry) {
+		if (element instanceof IBeansConfig) {
+			IBeansConfig config = (IBeansConfig) element;
 
-		// Register bean aliases
-		for (IBeanAlias alias : config.getAliases()) {
-			try {
-				registry.registerAlias(alias.getBeanName(), alias
-						.getElementName());
-			}
-			catch (BeansException e) {
-				// ignore - continue with next alias
-			}
-		}
-
-		// Register root bean definitions
-		for (IBean bean : config.getBeans()) {
-			try {
-				String beanName = bean.getElementName();
-
-				// Register bean definition under primary name.
-				registry.registerBeanDefinition(beanName, ((Bean) bean)
-						.getBeanDefinition());
-
-				// Register aliases for bean name, if any.
-				String[] aliases = bean.getAliases();
-				if (aliases != null) {
-					for (String alias : aliases) {
-						registry.registerAlias(beanName, alias);
-					}
+			// Register bean aliases
+			for (IBeanAlias alias : config.getAliases()) {
+				try {
+					registry.registerAlias(alias.getBeanName(), alias
+							.getElementName());
+				}
+				catch (BeansException e) {
+					// ignore - continue with next alias
 				}
 			}
-			catch (BeansException e) {
-				// ignore - continue with next bean
-			}
-		}
-
-		// Register bean definitions from components
-		for (IBeansComponent component : config.getComponents()) {
-			for (IBean bean : component.getBeans()) {
+	
+			// Register root bean definitions
+			for (IBean bean : config.getBeans()) {
 				try {
 					String beanName = bean.getElementName();
 	
@@ -1030,6 +1010,34 @@ public final class BeansModelUtils {
 				catch (BeansException e) {
 					// ignore - continue with next bean
 				}
+			}
+	
+			// Register bean definitions from components
+			for (IBeansComponent component : config.getComponents()) {
+				for (IBean bean : component.getBeans()) {
+					try {
+						String beanName = bean.getElementName();
+		
+						// Register bean definition under primary name.
+						registry.registerBeanDefinition(beanName, ((Bean) bean)
+								.getBeanDefinition());
+		
+						// Register aliases for bean name, if any.
+						String[] aliases = bean.getAliases();
+						if (aliases != null) {
+							for (String alias : aliases) {
+								registry.registerAlias(beanName, alias);
+							}
+						}
+					}
+					catch (BeansException e) {
+						// ignore - continue with next bean
+					}
+				}
+			}
+		} else if (element instanceof IBeansConfigSet) {
+			for (IBeansConfig config : ((IBeansConfigSet) element).getConfigs()) {
+				register(config, registry);
 			}
 		}
 	}

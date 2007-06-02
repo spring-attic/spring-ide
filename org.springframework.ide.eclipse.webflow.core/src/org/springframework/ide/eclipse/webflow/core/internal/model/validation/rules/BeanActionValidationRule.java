@@ -40,17 +40,17 @@ public class BeanActionValidationRule implements
 	public void validate(BeanAction action, WebflowValidationContext context,
 			IProgressMonitor monitor) {
 		if (!StringUtils.hasText(action.getBean())) {
-			context.error(this, "NO_BEAN_ATTRIBUTE", action,
+			context.error(action, "NO_BEAN_ATTRIBUTE",
 					"Element 'bean-action' requires bean attribute");
 		}
 		else if (!WebflowModelUtils.isReferencedBeanFound(context
 				.getWebflowConfig(), action.getBean())) {
-			context.error(this, "INVALID_BEAN", action, MessageUtils
+			context.error(action, "INVALID_BEAN", MessageUtils
 					.format("Referenced bean \"{0}\" cannot be found", action
 							.getBean()));
 		}
 		if (!StringUtils.hasText(action.getMethod())) {
-			context.error(this, "NO_METHOD_ATTRIBUTE", action,
+			context.error(action, "NO_METHOD_ATTRIBUTE",
 					"Element 'bean-action' requires method attribute");
 		}
 		else if (!Introspector.doesImplement(WebflowModelUtils.getActionType(
@@ -66,7 +66,7 @@ public class BeanActionValidationRule implements
 				}
 			}
 			if (!found) {
-				context.error(this, "INVALID_ACTION_METHOD", action, MessageUtils
+				context.error(action, "INVALID_ACTION_METHOD", MessageUtils
 					.format("Referenced action method \"{0}\" cannot be found or is not a valid action method", action
 						.getMethod()));
 			}

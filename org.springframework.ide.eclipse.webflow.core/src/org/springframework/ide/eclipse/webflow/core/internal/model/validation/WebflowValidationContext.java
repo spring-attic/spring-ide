@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.core.internal.model.validation;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidationContext;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
@@ -31,8 +34,10 @@ public class WebflowValidationContext extends AbstractValidationContext {
 		this.webflowConfig = webflowConfig;
 	}
 
-	public IModelElement getRootElement() {
-		return webflowState;
+	public Set<IModelElement> getRootElements() {
+		Set<IModelElement> rootElements = new HashSet<IModelElement>();
+		rootElements.add(webflowState);
+		return rootElements;
 	}
 
 	public IWebflowConfig getWebflowConfig() {

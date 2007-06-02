@@ -13,10 +13,7 @@ package org.springframework.ide.eclipse.core.model.validation;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.eclipse.core.resources.IResource;
-import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
 import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
@@ -26,6 +23,8 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 public abstract class AbstractValidationContext implements IValidationContext {
 
 	private Set<ValidationProblem> problems;
+	private IModelElement currentRootElement;
+	private String currentRuleId;
 
 	public AbstractValidationContext() {
 		this.problems = new LinkedHashSet<ValidationProblem>();
@@ -35,31 +34,44 @@ public abstract class AbstractValidationContext implements IValidationContext {
 		return problems;
 	}
 
-	public void warning(IValidationRule rule, String errorId,
-			IModelElement element, String message,
-			ValidationProblemAttribute... attributes) {
-		problems.add(createProblem(rule, errorId, element,
-				SEVERITY_WARNING, message, attributes));
+	public void setCurrentRootElement(IModelElement element) {
+		currentRootElement = element;
 	}
 
-	public void error(IValidationRule rule, String errorId,
-			IModelElement element, String message,
-			ValidationProblemAttribute... attributes) {
-		problems.add(createProblem(rule, errorId, element,
-				SEVERITY_ERROR, message, attributes));
+	public IModelElement getCurrentRootElement() {
+		return currentRootElement;
 	}
 
-	protected final ValidationProblem createProblem(IValidationRule rule,
-			String errorId, IModelElement element, int severity,
-			String message, ValidationProblemAttribute... attributes) {
-		String ruleID = (rule instanceof ValidationRuleDefinition
-				? ((ValidationRuleDefinition) rule).getID() : null);
-		IResource resource = (element instanceof IResourceModelElement
-				? ((IResourceModelElement) element).getElementResource()
-						: null);
+	public void setCurrentRuleId(String ruleId) {
+		currentRuleId = ruleId;
+	}
+
+	public String getCurrentRuleId() {
+		return currentRuleId;
+	}
+
+	public void warning(IModelElement element, String problemId, String message, 
+			ValidationProblemAttribute... attributes) {
+		problems.add(createProblem(element, message, SEVERITY_WARNING, problemId,  
+				attributes));
+	}
+
+	public void error(IModelElement element, String problemId, String message,
+			ValidationProblemAttribute... attributes) {
+		problems.add(createProblem(element, problemId, SEVERITY_ERROR, message,
+				attributes));
+	}
+
+	protected final ValidationProblem createProblem(IModelElement element,
+			String problemId, int severity, String message,
+			ValidationProblemAttribute... attributes) {
 		int line = (element instanceof ISourceModelElement
 				? ((ISourceModelElement) element).getElementStartLine() : -1);
-		return new ValidationProblem(ruleID, errorId, severity, message,
-				resource, line, attributes);
+		return new ValidationProblem(currentRuleId, problemId, severity,
+				message, line, attributes);
+	}
+
+	protected void addProblems(Set<ValidationProblem> problems) {
+		problems.addAll(problems);
 	}
 }

@@ -41,27 +41,22 @@ public class MappingValidationRule implements
 			IProgressMonitor monitor) {
 
 		if (!StringUtils.hasText(mapping.getSource())) {
-			context
-					.error(this, "NO_INPUT_ATTRIBUTE_ATTRIBUTE", mapping,
-							"Element 'mapping' element requires 'input-attribute' attribute");
+			context.error(mapping, "NO_INPUT_ATTRIBUTE_ATTRIBUTE",
+					"Element 'mapping' element requires 'input-attribute' attribute");
 		}
 		if (!StringUtils.hasText(mapping.getTarget())
 				&& !StringUtils.hasText(mapping.getTargetCollection())) {
-			context
-					.error(
-							this,
-							"INVALID_USAGE_OF_TARGET_ATTRIBUTE",
-							mapping,
-							"Using 'target' and 'target-collection' attributes is not allowed on 'mapping' element");
+			context.error(mapping, "INVALID_USAGE_OF_TARGET_ATTRIBUTE",
+					"Using 'target' and 'target-collection' attributes is not allowed on 'mapping' element");
 		}
 		if (StringUtils.hasText(mapping.getTo())
 				&& getJavaType(mapping.getTo(), context) == null) {
-			context.error(this, "NO_CLASS_FOUND", mapping, MessageUtils.format(
+			context.error(mapping, "NO_CLASS_FOUND", MessageUtils.format(
 					"Class 'to' \"{0}\" cannot be resolved", mapping.getTo()));
 		}
 		if (StringUtils.hasText(mapping.getFrom())
 				&& getJavaType(mapping.getFrom(), context) == null) {
-			context.error(this, "NO_CLASS_FOUND", mapping, MessageUtils.format(
+			context.error(mapping, "NO_CLASS_FOUND", MessageUtils.format(
 					"Class 'from' \"{0}\" cannot be resolved", mapping
 							.getFrom()));
 		}

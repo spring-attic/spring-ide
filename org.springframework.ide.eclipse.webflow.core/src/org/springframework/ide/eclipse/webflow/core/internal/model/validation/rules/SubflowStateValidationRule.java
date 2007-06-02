@@ -36,7 +36,7 @@ public class SubflowStateValidationRule implements
 			IProgressMonitor monitor) {
 		
 		if (!StringUtils.hasText(state.getFlow())) {
-			context.error(this, "NO_FLOW_ATTRIBUTE", state,
+			context.error(state, "NO_FLOW_ATTRIBUTE",
 					"Element 'subflow-state' requires unique 'flow' attribute");
 		}
 		else if (!WebflowModelUtils.getWebflowConfigNames(
@@ -45,10 +45,9 @@ public class SubflowStateValidationRule implements
 				&& !WebflowModelUtils.getWebflowConfigNames(
 						WebflowModelUtils.getWebflowState(state, true))
 						.contains(state.getFlow())) {
-			context
-					.error(this, "FLOW_REFERENCE_INVALID", state, MessageUtils.format(
-							"Referenced flow \"{0}\" cannot be found", state
-									.getFlow()));
+			context.error(state, "FLOW_REFERENCE_INVALID", MessageUtils.format(
+					"Referenced flow \"{0}\" cannot be found",
+							state.getFlow()));
 		}
 	}
 }

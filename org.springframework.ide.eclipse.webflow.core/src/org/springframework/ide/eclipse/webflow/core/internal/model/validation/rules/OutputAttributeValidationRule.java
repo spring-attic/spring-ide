@@ -47,14 +47,13 @@ public class OutputAttributeValidationRule implements
 	public void validate(OutputAttribute attribute,
 			WebflowValidationContext context, IProgressMonitor monitor) {
 		if (!StringUtils.hasText(attribute.getName())) {
-			context.error(this, "NO_NAME_ATTRIBUTE", attribute,
+			context.error(attribute, "NO_NAME_ATTRIBUTE",
 					"Element 'output-attribute' requires 'name' attribute");
 		}
 		if (StringUtils.hasText(attribute.getScope())
 				&& !SCOPE_TYPES.contains(attribute.getScope())) {
-			context.error(this, "", attribute, MessageUtils.format(
+			context.error(attribute, "INVALID_SCOPE", MessageUtils.format(
 					"Invalid scope \"{0}\" specified", attribute.getScope()));
 		}
 	}
-
 }

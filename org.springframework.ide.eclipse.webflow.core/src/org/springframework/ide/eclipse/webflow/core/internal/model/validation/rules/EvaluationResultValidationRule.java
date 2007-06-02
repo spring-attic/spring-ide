@@ -48,12 +48,12 @@ public class EvaluationResultValidationRule implements
 			WebflowValidationContext context, IProgressMonitor monitor) {
 
 		if (!StringUtils.hasText(result.getName())) {
-			context.error(this, "NO_ATTRIBUTE_ATTRIBUTE", result,
+			context.error(result, "NO_ATTRIBUTE_ATTRIBUTE",
 					"Element  'evaluate-result' requires 'name' attribute");
 		}
 		if (StringUtils.hasText(result.getScope())
 				&& !SCOPE_TYPES.contains(result.getScope())) {
-			context.error(this, "NO_VALUE_ATTRIBUTE", result, MessageUtils
+			context.error(result, "NO_VALUE_ATTRIBUTE", MessageUtils
 					.format("Element 'set' requires 'value' attribute", result
 							.getScope()));
 		}

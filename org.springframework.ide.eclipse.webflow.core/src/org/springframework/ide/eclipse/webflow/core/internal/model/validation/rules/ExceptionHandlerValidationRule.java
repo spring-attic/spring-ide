@@ -36,12 +36,12 @@ public class ExceptionHandlerValidationRule implements
 			WebflowValidationContext context, IProgressMonitor monitor) {
 
 		if (!StringUtils.hasText(handler.getBean())) {
-			context.error(this, "NO_BEAN_ATTRIBUTE", handler,
+			context.error(handler, "NO_BEAN_ATTRIBUTE",
 					"Element 'exception-handler' requires 'bean' attribute");
 		}
 		else if (!WebflowModelUtils.isReferencedBeanFound(context
 				.getWebflowConfig(), handler.getBean())) {
-			context.error(this, "INVALID_BEAN", handler, MessageUtils
+			context.error(handler, "INVALID_BEAN", MessageUtils
 					.format("Referenced bean \"{0}\" cannot be found", handler
 							.getBean()));
 		}

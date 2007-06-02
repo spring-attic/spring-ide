@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.model.validation;
 
-import org.eclipse.core.resources.IResource;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -24,26 +23,24 @@ public class ValidationProblem {
 	private String errorId;
 	private int severity;
 	private String message;
-	private IResource resource;
 	private int line;
 	private ValidationProblemAttribute[] attributes;
 
-	public ValidationProblem(int severity, String message, IResource resource) {
-		this(null, null, severity, message, resource, -1);
+	public ValidationProblem(int severity, String message) {
+		this(null, null, severity, message, -1);
 	}
 
-	public ValidationProblem(int severity, String message, IResource resource,
-			int line, ValidationProblemAttribute... attributes) {
-		this(null, null, severity, message, resource, line, attributes);
+	public ValidationProblem(int severity, String message, int line,
+			ValidationProblemAttribute... attributes) {
+		this(null, null, severity, message, line, attributes);
 	}
 
 	public ValidationProblem(String ruleId, String errorId, int severity,
-			String message, IResource resource, int line,
+			String message, int line,
 			ValidationProblemAttribute... attributes) {
 		this.ruleId = ruleId;
 		this.severity = severity;
 		this.message = message;
-		this.resource = resource;
 		this.line = line;
 		this.attributes = attributes;
 	}
@@ -77,13 +74,6 @@ public class ValidationProblem {
 	public String getMessage() {
 		return message;
 	}
-	
-	/**
-	 * Returns the {@link IResource}Êthis problem belongs to.
-	 */
-	public IResource getResource() {
-		return resource;
-	}
 
 	/**
 	 * Returns the line number of this problem or <code>-1</code> if not
@@ -106,10 +96,9 @@ public class ValidationProblem {
 		hashCode = 2 * hashCode + ObjectUtils.nullSafeHashCode(errorId);
 		hashCode = 3 * hashCode + severity;
 		hashCode = 4 * hashCode + ObjectUtils.nullSafeHashCode(message);
-		hashCode = 5 * hashCode + ObjectUtils.nullSafeHashCode(resource);
-		hashCode = 6 * hashCode + line;
-		hashCode = 7 * hashCode + ObjectUtils.nullSafeHashCode(attributes);
-		return 8 * hashCode + super.hashCode();
+		hashCode = 5 * hashCode + line;
+		hashCode = 6 * hashCode + ObjectUtils.nullSafeHashCode(attributes);
+		return 7 * hashCode + super.hashCode();
 	}
 
 	@Override
@@ -125,7 +114,6 @@ public class ValidationProblem {
 		if (!ObjectUtils.nullSafeEquals(this.errorId, that.errorId)) return false;
 		if (this.severity != that.severity) return false;
 		if (!ObjectUtils.nullSafeEquals(this.message, that.message)) return false;
-		if (!ObjectUtils.nullSafeEquals(this.resource, that.resource)) return false;
 		if (this.line != that.line) return false;
 		if (!ObjectUtils.nullSafeEquals(this.attributes, that.attributes)) return false;
 		return super.equals(other);
