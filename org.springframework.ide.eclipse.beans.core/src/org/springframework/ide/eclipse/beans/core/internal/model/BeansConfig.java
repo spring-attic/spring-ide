@@ -715,7 +715,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 		public void fatal(Problem problem) {
 			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR,
-					getMessage(problem), getLine(problem)));
+					getMessage(problem), getElementResource(), getLine(problem)));
 			BeansModelUtils.createProblemMarker(config, getMessage(problem),
 					IMarker.SEVERITY_ERROR, problem, ErrorCode.PARSING_FAILED);
 			throw new BeanDefinitionParsingException(problem);
@@ -723,14 +723,14 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 		public void error(Problem problem) {
 			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR,
-					getMessage(problem), getLine(problem)));
+					getMessage(problem), getElementResource(), getLine(problem)));
 			BeansModelUtils.createProblemMarker(config, getMessage(problem),
 					IMarker.SEVERITY_ERROR, problem, ErrorCode.PARSING_FAILED);
 		}
 
 		public void warning(Problem problem) {
-			problems.add(new ValidationProblem(IMarker.SEVERITY_WARNING,
-					getMessage(problem), getLine(problem)));
+			problems.add(new ValidationProblem(IMarker.SEVERITY_WARNING, 
+					getMessage(problem), getElementResource(), getLine(problem)));
 			BeansModelUtils.createProblemMarker(config, getMessage(problem),
 					IMarker.SEVERITY_WARNING, problem,
 					ErrorCode.PARSING_FAILED);
