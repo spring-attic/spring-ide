@@ -499,8 +499,8 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		if (file == null || !file.isAccessible()) {
 			modificationTimestamp = IResource.NULL_STAMP;
 			String msg = "Beans config file '" + fullPath + "' not accessible";
-			BeansModelUtils.createProblemMarker(this, msg,
-					IMarker.SEVERITY_ERROR, -1, ErrorCode.PARSING_FAILED);
+			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, msg,
+					-1));
 		}
 		else {
 			modificationTimestamp = file.getModificationStamp();
@@ -561,7 +561,18 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		}
 	}
 
-	private synchronized void readConfig() {
+	private void readConfig() {
+		parseConfig();
+
+		// Create a problem marker for every parsing error 
+		for (ValidationProblem problem : problems) {
+			BeansModelUtils.createProblemMarker(this, problem.getMessage(),
+					problem.getSeverity(), problem.getLine(),
+					ErrorCode.PARSING_FAILED);
+		}
+	}
+
+	private synchronized void parseConfig() {
 		if (imports == null) {
 			imports = new LinkedHashSet<IBeansImport>();
 			aliases = new LinkedHashMap<String, IBeanAlias>();
@@ -585,8 +596,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 								PluggableSchemaResolver.class.getClassLoader()));
 				ReaderEventListener eventListener = new BeansConfigReaderEventListener(
 						this, false);
-				ProblemReporter problemReporter = new BeansConfigProblemReporter(
-						this);
+				ProblemReporter problemReporter = new BeansConfigProblemReporter();
 				BeanNameGenerator beanNameGenerator = new UniqueBeanNameGenerator(
 						this);
 				XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
@@ -607,7 +617,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 				reader.setSourceExtractor(new CompositeSourceExtractor(file.getProject()));
 				reader.setEventListener(eventListener);
 				reader.setProblemReporter(problemReporter);
-				reader.setErrorHandler(new BeansConfigErrorHandler(this));
+				reader.setErrorHandler(new BeansConfigErrorHandler());
 				reader.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(
 						NamespaceHandlerResolver.class.getClassLoader()));
 				reader.setBeanNameGenerator(beanNameGenerator);
@@ -621,9 +631,8 @@ public class BeansConfig extends AbstractResourceModelElement implements
 					// Skip SAXParseExceptions because they're already handled
 					// by the SAX ErrorHandler
 					if (!(e.getCause() instanceof SAXParseException)) {
-						BeansModelUtils.createProblemMarker(this, e
-								.getMessage(), IMarker.SEVERITY_ERROR, -1,
-								ErrorCode.PARSING_FAILED);
+						problems.add(new ValidationProblem(
+								IMarker.SEVERITY_ERROR, e.getMessage(), -1));
 						BeansCorePlugin.log(e);
 					}
 				}
@@ -680,60 +689,38 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 	private final class BeansConfigErrorHandler implements ErrorHandler {
 
-		private IBeansConfig config;
-
-		public BeansConfigErrorHandler(IBeansConfig config) {
-			this.config = config;
+		public void warning(SAXParseException e) throws SAXException {
+			problems.add(new ValidationProblem(IMarker.SEVERITY_WARNING,
+					e.getMessage(), e.getLineNumber()));
 		}
 
-		public void warning(SAXParseException ex) throws SAXException {
-			BeansModelUtils.createProblemMarker(config, ex.getMessage(),
-					IMarker.SEVERITY_WARNING, ex.getLineNumber(),
-					ErrorCode.PARSING_FAILED);
+		public void error(SAXParseException e) throws SAXException {
+			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR,
+					e.getMessage(), e.getLineNumber()));
 		}
 
-		public void error(SAXParseException ex) throws SAXException {
-			BeansModelUtils.createProblemMarker(config, ex.getMessage(),
-					IMarker.SEVERITY_ERROR, ex.getLineNumber(),
-					ErrorCode.PARSING_FAILED);
-		}
-
-		public void fatalError(SAXParseException ex) throws SAXException {
-			BeansModelUtils.createProblemMarker(config, ex.getMessage(),
-					IMarker.SEVERITY_ERROR, ex.getLineNumber(),
-					ErrorCode.PARSING_FAILED);
+		public void fatalError(SAXParseException e) throws SAXException {
+			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR,
+					e.getMessage(), e.getLineNumber()));
 		}
 	}
 
 	private final class BeansConfigProblemReporter implements ProblemReporter {
 
-		private IBeansConfig config;
-
-		public BeansConfigProblemReporter(IBeansConfig config) {
-			this.config = config;
-		}
-
 		public void fatal(Problem problem) {
 			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR,
 					getMessage(problem), getLine(problem)));
-			BeansModelUtils.createProblemMarker(config, getMessage(problem),
-					IMarker.SEVERITY_ERROR, problem, ErrorCode.PARSING_FAILED);
 			throw new BeanDefinitionParsingException(problem);
 		}
 
 		public void error(Problem problem) {
 			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR,
 					getMessage(problem), getLine(problem)));
-			BeansModelUtils.createProblemMarker(config, getMessage(problem),
-					IMarker.SEVERITY_ERROR, problem, ErrorCode.PARSING_FAILED);
 		}
 
 		public void warning(Problem problem) {
 			problems.add(new ValidationProblem(IMarker.SEVERITY_WARNING,
 					getMessage(problem), getLine(problem)));
-			BeansModelUtils.createProblemMarker(config, getMessage(problem),
-					IMarker.SEVERITY_WARNING, problem,
-					ErrorCode.PARSING_FAILED);
 		}
 
 		private String getMessage(Problem problem) {

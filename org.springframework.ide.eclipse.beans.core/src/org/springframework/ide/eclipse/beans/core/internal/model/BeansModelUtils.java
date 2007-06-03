@@ -46,6 +46,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.BeansTags;
+import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker;
 import org.springframework.ide.eclipse.beans.core.BeansTags.Tag;
 import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker.ErrorCode;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConnection.BeanType;
@@ -951,20 +952,23 @@ public final class BeansModelUtils {
 		if (element instanceof IBeansProject) {
 			for (IBeansConfig config : ((IBeansProject) element).getConfigs()) {
 				IResource resource = config.getElementResource();
-				MarkerUtils.deleteMarkers(resource, BeansCorePlugin.MARKER_ID);
+				MarkerUtils.deleteMarkers(resource,
+						IBeansProjectMarker.PROBLEM_MARKER);
 			}
 		}
 		else if (element instanceof IBeansConfigSet) {
 			for (IBeansConfig config : ((IBeansConfigSet) element)
 					.getConfigs()) {
 				IResource resource = config.getElementResource();
-				MarkerUtils.deleteMarkers(resource, BeansCorePlugin.MARKER_ID);
+				MarkerUtils.deleteMarkers(resource,
+						IBeansProjectMarker.PROBLEM_MARKER);
 			}
 		}
 		else if (element instanceof IResourceModelElement) {
 			IResource resource = ((IResourceModelElement) element)
 					.getElementResource();
-			MarkerUtils.deleteMarkers(resource, BeansCorePlugin.MARKER_ID);
+			MarkerUtils.deleteMarkers(resource,
+					IBeansProjectMarker.PROBLEM_MARKER);
 		}
 	}
 

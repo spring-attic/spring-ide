@@ -45,7 +45,10 @@ public class UniqueBeanNameGenerator implements BeanNameGenerator {
 	public static String generateBeanName(BeanDefinition definition,
 			IBeansConfig config) {
 		StringBuffer name = new StringBuffer();
-		if (definition.getBeanClassName() == null) {
+		if (definition.getBeanClassName() != null) {
+			name.append(definition.getBeanClassName());
+		}
+		else {
 			if (definition instanceof ChildBeanDefinition) {
 				name.append(((ChildBeanDefinition) definition).getParentName());
 				name.append("$child");
