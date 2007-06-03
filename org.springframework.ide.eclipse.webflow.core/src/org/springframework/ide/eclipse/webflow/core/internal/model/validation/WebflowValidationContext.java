@@ -10,13 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.core.internal.model.validation;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidationContext;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
-import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 
 /**
  * @author Christian Dupuis
@@ -25,26 +21,14 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 public class WebflowValidationContext extends AbstractValidationContext {
 
 	private final IWebflowConfig webflowConfig;
-	
-	private final IWebflowState webflowState;
 
-	public WebflowValidationContext(IWebflowState webflowState,
-			IWebflowConfig webflowConfig) {
-		this.webflowState = webflowState;
+	public WebflowValidationContext(IWebflowConfig webflowConfig,
+			IResourceModelElement rootElement) {
+		super(rootElement);
 		this.webflowConfig = webflowConfig;
-	}
-
-	public Set<IModelElement> getRootElements() {
-		Set<IModelElement> rootElements = new HashSet<IModelElement>();
-		rootElements.add(webflowState);
-		return rootElements;
 	}
 
 	public IWebflowConfig getWebflowConfig() {
 		return webflowConfig;
-	}
-
-	public IWebflowState getWebflowState() {
-		return webflowState;
 	}
 }

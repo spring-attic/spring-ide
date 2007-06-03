@@ -14,6 +14,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
@@ -22,24 +23,21 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  */
 public abstract class AbstractValidationContext implements IValidationContext {
 
+	private IResourceModelElement rootElement;
 	private Set<ValidationProblem> problems;
-	private IModelElement currentRootElement;
 	private String currentRuleId;
 
-	public AbstractValidationContext() {
+	public AbstractValidationContext(IResourceModelElement rootElement) {
+		this.rootElement = rootElement;
 		this.problems = new LinkedHashSet<ValidationProblem>();
+	}
+
+	public IResourceModelElement getRootElement() {
+		return rootElement;
 	}
 
 	public Set<ValidationProblem> getProblems() {
 		return problems;
-	}
-
-	public void setCurrentRootElement(IModelElement element) {
-		currentRootElement = element;
-	}
-
-	public IModelElement getCurrentRootElement() {
-		return currentRootElement;
 	}
 
 	public void setCurrentRuleId(String ruleId) {

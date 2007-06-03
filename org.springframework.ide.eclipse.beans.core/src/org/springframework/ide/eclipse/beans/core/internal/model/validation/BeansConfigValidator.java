@@ -28,7 +28,10 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
+import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
+import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinitionFactory;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidator;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
@@ -39,7 +42,8 @@ import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
  */
 public class BeansConfigValidator extends AbstractValidator {
 
-	public static final String VALIDATOR_ID = "beansvalidator";
+	public static final String VALIDATOR_ID = BeansCorePlugin.PLUGIN_ID
+			+ ".beansvalidator";
 
 	public Set<IResource> getAffectedResources(IResource resource,
 			int kind) throws CoreException {
@@ -85,17 +89,35 @@ public class BeansConfigValidator extends AbstractValidator {
 	}
 
 	@Override
-	protected String getId() {
-		return BeansCorePlugin.PLUGIN_ID + "." + VALIDATOR_ID;
+	protected Set<ValidationRuleDefinition> getRuleDefinitions(
+			IResource resource) {
+		return ValidationRuleDefinitionFactory.getEnabledRuleDefinitions(
+				VALIDATOR_ID, resource.getProject());
 	}
 
 	@Override
-	protected IValidationContext createContext(IResource resource) {
+	protected Set<IResourceModelElement> getRootElements(IResource resource) {
+		Set<IResourceModelElement> rootElements =
+				new LinkedHashSet<IResourceModelElement>();
+		IBeansConfig config = BeansCorePlugin.getModel().getConfig(
+				(IFile) resource);
+		if (config != null) {
+			rootElements.addAll(BeansModelUtils.getConfigSets(config));
+			if (rootElements.isEmpty()) {
+				rootElements.add(config);
+			}
+		}
+		return rootElements;
+	}
+
+	@Override
+	protected IValidationContext createContext(IResource resource,
+			IResourceModelElement rootElement) {
 		if (resource instanceof IFile) {
 			IBeansConfig config = BeansCorePlugin.getModel()
 					.getConfig((IFile) resource);
 			if (config != null) {
-				return new BeansValidationContext(config, null);
+				return new BeansValidationContext(config, rootElement);
 			}
 		}
 		return null;

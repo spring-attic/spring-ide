@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.core.internal.model.validation;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -17,18 +18,16 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.wst.sse.core.StructuredModelManager;
-import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
-import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
+import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinitionFactory;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidator;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
-import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowState;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 
@@ -62,41 +61,35 @@ public class WebflowValidator extends AbstractValidator {
 		}
 	}
 
-	protected String getId() {
-		return VALIDATOR_ID;
+	@Override
+	protected Set<ValidationRuleDefinition> getRuleDefinitions(
+			IResource resource) {
+		return ValidationRuleDefinitionFactory.getEnabledRuleDefinitions(
+				VALIDATOR_ID, resource.getProject());
 	}
 
-	protected IValidationContext createContext(IResource resource) {
+	@Override
+	protected Set<IResourceModelElement> getRootElements(IResource resource) {
+		Set<IResourceModelElement> rootElements =
+				new HashSet<IResourceModelElement>();
 		if (resource instanceof IFile) {
-			IFile file = (IFile) resource;
-			IStructuredModel model = null;
-			try {
-				model = StructuredModelManager.getModelManager()
-						.getExistingModelForRead(resource);
-				if (model == null) {
-					model = StructuredModelManager.getModelManager()
-							.getModelForRead(file);
-
-				}
-				if (model != null) {
-					IDOMDocument document = ((DOMModelImpl) model)
-							.getDocument();
-					IWebflowState webflowState = new WebflowState(
-							WebflowModelUtils.getWebflowConfig(file));
-					webflowState.init((IDOMNode) document.getDocumentElement(),
-							null);
-
-					return new WebflowValidationContext(webflowState,
-							WebflowModelUtils.getWebflowConfig(file));
-				}
+			IWebflowState state = WebflowModelUtils.getWebflowState(
+					(IFile) resource);
+			if (state != null) {
+				rootElements.add(state);
 			}
-			catch (Exception e) {
-				Activator.log(e);
-			}
-			finally {
-				if (model != null) {
-					model.releaseFromRead();
-				}
+		}
+		return rootElements;
+	}
+
+	@Override
+	protected IValidationContext createContext(IResource resource,
+			IResourceModelElement rootElement) {
+		if (resource instanceof IFile) {
+			IWebflowConfig config = WebflowModelUtils.getWebflowConfig(
+					(IFile) resource);
+			if (config != null) {
+				return new WebflowValidationContext(config, rootElement);
 			}
 		}
 		return null;

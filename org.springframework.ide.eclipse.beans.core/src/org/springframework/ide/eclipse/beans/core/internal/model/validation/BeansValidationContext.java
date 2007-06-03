@@ -10,14 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.validation;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 
@@ -34,21 +30,12 @@ public class BeansValidationContext extends AbstractValidationContext {
 	private BeanDefinitionRegistry registry;
 
 	public BeansValidationContext(IBeansConfig config,
-			BeanDefinitionRegistry registry) {
+			IResourceModelElement rootElement) {
+		super(rootElement);
 		this.config = config;
-		this.registry = registry;
 
 		// Add parsing errors to list of validation errors
 		addProblems(((BeansConfig) config).getProblems()); 
-	}
-
-	public Set<IModelElement> getRootElements() {
-		Set<IModelElement> rootElements = new LinkedHashSet<IModelElement>();
-		rootElements.addAll(BeansModelUtils.getConfigSets(config));
-		if (rootElements.isEmpty()) {
-			rootElements.add(config);
-		}
-		return rootElements;
 	}
 
 	public IBeansConfig getConfig() {

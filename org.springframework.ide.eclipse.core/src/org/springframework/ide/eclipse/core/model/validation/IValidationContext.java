@@ -29,15 +29,7 @@ public interface IValidationContext {
 
 	Set<ValidationProblem> getProblems();
 
-	Set<IModelElement> getRootElements();
-
-	void setCurrentRootElement(IModelElement element);
-
-	IModelElement getCurrentRootElement();
-
 	void setCurrentRuleId(String ruleId);
-
-	String getCurrentRuleId();
 
 	void warning(IModelElement element, String problemId, String message,
 			ValidationProblemAttribute... attributes);

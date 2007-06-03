@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.model.validation;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
@@ -19,9 +20,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
-import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinitionFactory;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
  * @author Torsten Juergeleit
@@ -41,21 +42,23 @@ public abstract class AbstractValidator implements IValidator {
 				if (subMonitor.isCanceled()) {
 					throw new OperationCanceledException();
 				}
-				IValidationContext context = createContext(resource);
+				Set<ValidationProblem> problems =
+					new LinkedHashSet<ValidationProblem>();
 				Set<ValidationRuleDefinition> ruleDefinitions =
-						ValidationRuleDefinitionFactory
-								.getEnabledRuleDefinitions(getId(), resource
-										.getProject());
-				IModelElementVisitor visitor = new ValidationVisitor(context,
-						ruleDefinitions);
-				for (IModelElement rootElement : context.getRootElements()) {
-					context.setCurrentRootElement(rootElement);
+						getRuleDefinitions(resource);
+				for (IResourceModelElement rootElement
+						: getRootElements(resource)) {
+					IValidationContext context = createContext(resource,
+							rootElement);
+					IModelElementVisitor visitor = new ValidationVisitor(
+							context, ruleDefinitions);
 					rootElement.accept(visitor, monitor);
+					problems.addAll(context.getProblems());
 					if (subMonitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
 				}
-				for (ValidationProblem problem : context.getProblems()) {
+				for (ValidationProblem problem : problems) {
 					createProblemMarker(resource, problem);
 				}
 				subMonitor.worked(1);
@@ -70,15 +73,25 @@ public abstract class AbstractValidator implements IValidator {
 	}
 
 	/**
-	 * Returns the full-qualified ID of this validator, e.g.
-	 * "org.springframework.ide.eclipse.beans.core.validator".
+	 * Returns the list of enabled {@link ValidationRuleDefinition}s for this
+	 * validator.
 	 */
-	protected abstract String getId();
+	protected abstract Set<ValidationRuleDefinition> getRuleDefinitions(
+			IResource resource);
 
 	/**
-	 * Returns a newly created {@link IValidationContext}. 
+	 * Returns a list of {@link IResourceModelElement root model element}s for
+	 * the given {@link IResource} which should be visited by the validator.
 	 */
-	protected abstract IValidationContext createContext(IResource resource);
+	protected abstract Set<IResourceModelElement> getRootElements(
+			IResource resource);
+
+	/**
+	 * Returns a newly created {@link IValidationContext} for the given
+	 * {@link IResource} and it's {@link IModelElement root model element}.
+	 */
+	protected abstract IValidationContext createContext(IResource resource,
+			IResourceModelElement rootElement);
 
 	/**
 	 * Returns <code>true</code> if this validator is able to validate the given
