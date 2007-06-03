@@ -146,26 +146,46 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
 	}
 
 	public void saveState(IMemento memento) {
-		memento.putString("advice-method-name", this.adivceMethodName);
-		memento.putString("advice-class-name", this.aspectClassName);
+		memento.putString(
+			BeanAspectDefinitionElementFactory.ADVICE_METHOD_NAME_ATTRIBUTE,
+			this.adivceMethodName);
+		memento.putString(
+			BeanAspectDefinitionElementFactory.ADVICE_CLASS_NAME_ATTRIBUTE,
+			this.aspectClassName);
 		if (this.adivceMethodParameterTypes != null
 				&& this.adivceMethodParameterTypes.length > 0) {
-			memento.putString("adivce-method-parameter-types",
+			memento.putString(
+				BeanAspectDefinitionElementFactory.ADIVCE_METHOD_PARAMETER_TYPES_ATTRIBUTE,
 				StringUtils.arrayToCommaDelimitedString(this.adivceMethodParameterTypes));
 		}
-		memento.putString("aspect-name", this.aspectName);
-		memento.putString("pointcut-expression", this.pointcutExpressionString);
-		memento.putString("returning", this.returning);
-		memento.putString("throwing", this.throwing);
+		memento.putString(
+			BeanAspectDefinitionElementFactory.ASPECT_NAME_ATTRIBUTE,
+			this.aspectName);
+		memento.putString(
+			BeanAspectDefinitionElementFactory.POINTCUT_EXPRESSION_ATTRIBUTE,
+			this.pointcutExpressionString);
+		memento.putString(
+			BeanAspectDefinitionElementFactory.RETURNING_ATTRIBUTE,
+			this.returning);
+		memento.putString(
+			BeanAspectDefinitionElementFactory.THROWING_ATTRIBUTE,
+			this.throwing);
 		if (this.argNames != null && this.argNames.length > 0) {
-			memento.putString("arg-names", StringUtils
-					.arrayToCommaDelimitedString(this.argNames));
+			memento.putString(
+				BeanAspectDefinitionElementFactory.ARG_NAMES_ATTRIBUTE,
+				StringUtils.arrayToCommaDelimitedString(this.argNames));
 		}
-		memento.putInteger("aspect-line-number", this.aspectLineNumber);
-		memento.putString("file", this.file.getFullPath().toString());
-		memento.putString("proxy-target-class", Boolean
-				.toString(this.isProxyTargetClass));
-		memento.putString("advice-type", this.type.toString());
+		memento.putInteger(
+			BeanAspectDefinitionElementFactory.ASPECT_LINE_NUMBER_ATTRIBUTE,
+			this.aspectLineNumber);
+		memento.putString(BeanAspectDefinitionElementFactory.FILE_ATTRIBUTE,
+			this.file.getFullPath().toString());
+		memento.putString(
+			BeanAspectDefinitionElementFactory.PROXY_TARGET_CLASS_ATTRIBUTE,
+			Boolean.toString(this.isProxyTargetClass));
+		memento.putString(
+			BeanAspectDefinitionElementFactory.ADVICE_TYPE_ATTRIBUTE,
+			this.type.toString());
 	}
 
 	public void setAdviceMethodName(String adivceMethodName) {

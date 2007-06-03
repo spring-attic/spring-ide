@@ -21,6 +21,12 @@ import org.springframework.ide.eclipse.aop.core.Activator;
 public class BeanIntroductionDefinitionElementFactory extends
 		BeanAspectDefinitionElementFactory implements IElementFactory {
 
+	protected static final String TYPE_PATTERN_ATTRIBUTE = "type-pattern";
+
+	protected static final String DEFAULT_IMPL_NAME_ATTRIBUTE = "default-impl-name";
+
+	protected static final String INTRODUCED_INTERFACE_NAME_ATTRIBUTE = "introduced-interface-name";
+
 	public static String FACTORY_ID = Activator.PLUGIN_ID
 			+ ".beanIntroductionDefinitionElementFactory";
 
@@ -31,10 +37,10 @@ public class BeanIntroductionDefinitionElementFactory extends
 	protected void postPopulateAspectDefinition(
 			BeanAspectDefinition definition, IMemento memento) {
 		String introducedInterfaceName = memento
-				.getString("introduced-interface-name");
-		String defaultImplName = memento.getString("default-impl-name");
-		String typePattern = memento.getString("type-pattern");
-		
+				.getString(INTRODUCED_INTERFACE_NAME_ATTRIBUTE);
+		String defaultImplName = memento.getString(DEFAULT_IMPL_NAME_ATTRIBUTE);
+		String typePattern = memento.getString(TYPE_PATTERN_ATTRIBUTE);
+
 		BeanIntroductionDefinition def = (BeanIntroductionDefinition) definition;
 		def.setIntroducedInterfaceName(introducedInterfaceName);
 		def.setDefaultImplName(defaultImplName);

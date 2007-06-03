@@ -29,27 +29,37 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES
  */
 public class AopReferenceElementFactory implements IElementFactory {
 
+	protected static final String BEAN_ATTRIBUTE = "bean";
+
+	protected static final String FILE_ATTRIBUTE = "file";
+
+	protected static final String TARGET_ATTRIBUTE = "target";
+
+	protected static final String SOURCE_ATTRIBUTE = "source";
+
+	protected static final String ADVICE_TYPE_ATTRIBUTE = "advice-type";
+	
 	public static String FACTORY_ID = Activator.PLUGIN_ID
 			+ ".aopReferenceElementFactory";
 
 	public final IAdaptable createElement(IMemento memento) {
 		ADVICE_TYPES type = ADVICE_TYPES.valueOf(memento
-				.getString("advice-type"));
-		String sourceHandle = memento.getString("source");
+				.getString(ADVICE_TYPE_ATTRIBUTE));
+		String sourceHandle = memento.getString(SOURCE_ATTRIBUTE);
 		IJavaElement source = null;
 		if (sourceHandle != null) {
 			source = JavaCore.create(sourceHandle);
 		}
-		String targetHandle = memento.getString("target");
+		String targetHandle = memento.getString(TARGET_ATTRIBUTE);
 		IJavaElement target = null;
 		if (targetHandle != null) {
 			target = JavaCore.create(targetHandle);
 		}
-		String fileName = memento.getString("file");
+		String fileName = memento.getString(FILE_ATTRIBUTE);
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IResource member = root.findMember(fileName);
 
-		String beanId = memento.getString("bean");
+		String beanId = memento.getString(BEAN_ATTRIBUTE);
 		if (member != null && member instanceof IFile && source != null
 				&& target != null && source instanceof IMember
 				&& target instanceof IMember) {

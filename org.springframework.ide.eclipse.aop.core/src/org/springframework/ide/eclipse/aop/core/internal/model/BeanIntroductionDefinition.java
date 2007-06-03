@@ -90,15 +90,21 @@ public class BeanIntroductionDefinition extends BeanAspectDefinition implements
 
 	public void saveState(IMemento memento) {
 		super.saveState(memento);
-		memento.putString("introduced-interface-name", this.introducedInterfaceName);
-		memento.putString("default-impl-name", this.defaultImplName);
-		memento.putString("type-pattern", this.typePattern);
+		memento.putString(
+			BeanIntroductionDefinitionElementFactory.INTRODUCED_INTERFACE_NAME_ATTRIBUTE,
+			this.introducedInterfaceName);
+		memento.putString(
+			BeanIntroductionDefinitionElementFactory.DEFAULT_IMPL_NAME_ATTRIBUTE,
+			this.defaultImplName);
+		memento.putString(
+			BeanIntroductionDefinitionElementFactory.TYPE_PATTERN_ATTRIBUTE,
+			this.typePattern);
 	}
 
 	public void setDefaultImplName(String defaultImplName) {
 		this.defaultImplName = defaultImplName;
 	}
-	
+
 	public void setIntroducedInterfaceName(String introducedInterfaceName) {
 		this.introducedInterfaceName = introducedInterfaceName;
 	}

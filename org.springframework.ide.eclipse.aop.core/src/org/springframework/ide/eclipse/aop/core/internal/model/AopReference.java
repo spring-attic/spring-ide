@@ -119,17 +119,21 @@ public class AopReference implements IAopReference, IAdaptable,
 	}
 
 	public void saveState(IMemento memento) {
-		memento.putString("advice-type", this.type.toString());
+		memento.putString(AopReferenceElementFactory.ADVICE_TYPE_ATTRIBUTE,
+				this.type.toString());
 		if (this.source != null) {
-			memento.putString("source", this.source.getHandleIdentifier());
+			memento.putString(AopReferenceElementFactory.SOURCE_ATTRIBUTE,
+					this.source.getHandleIdentifier());
 		}
 		if (this.target != null) {
-			memento.putString("target", this.target.getHandleIdentifier());
+			memento.putString(AopReferenceElementFactory.TARGET_ATTRIBUTE,
+					this.target.getHandleIdentifier());
 		}
 		if (this.file != null) {
-			memento.putString("file", this.file.getFullPath().toString());
+			memento.putString(AopReferenceElementFactory.FILE_ATTRIBUTE,
+					this.file.getFullPath().toString());
 		}
-		memento.putString("bean", this.bean);
+		memento.putString(AopReferenceElementFactory.BEAN_ATTRIBUTE, this.bean);
 	}
 
 	public void setDefinition(IAspectDefinition definition) {

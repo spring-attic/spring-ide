@@ -21,6 +21,8 @@ import org.springframework.ide.eclipse.aop.core.Activator;
 public class AnnotationIntroductionDefinitionElementFactory extends
 		BeanAspectDefinitionElementFactory implements IElementFactory {
 
+	protected static final String DEFINING_FIELD_ATTRIBUTE = "defining-field";
+	
 	public static String FACTORY_ID = Activator.PLUGIN_ID
 			+ ".annotationIntroductionDefinitionElementFactory";
 
@@ -30,7 +32,7 @@ public class AnnotationIntroductionDefinitionElementFactory extends
 
 	protected void postPopulateAspectDefinition(
 			BeanAspectDefinition definition, IMemento memento) {
-		String definingField = memento.getString("defining-field");
+		String definingField = memento.getString(DEFINING_FIELD_ATTRIBUTE);
 
 		AnnotationIntroductionDefinition def = (AnnotationIntroductionDefinition) definition;
 		def.setDefiningField(definingField);

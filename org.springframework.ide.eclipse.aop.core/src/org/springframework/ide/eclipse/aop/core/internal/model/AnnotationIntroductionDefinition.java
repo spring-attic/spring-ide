@@ -31,10 +31,12 @@ public class AnnotationIntroductionDefinition extends
 	public String getFactoryId() {
 		return AnnotationIntroductionDefinitionElementFactory.FACTORY_ID;
 	}
-	
+
 	public void saveState(IMemento memento) {
 		super.saveState(memento);
-		memento.putString("defining-field", this.definingField);
+		memento.putString(
+			AnnotationIntroductionDefinitionElementFactory.DEFINING_FIELD_ATTRIBUTE,
+			this.definingField);
 	}
 
 	public void setDefiningField(String definingField) {

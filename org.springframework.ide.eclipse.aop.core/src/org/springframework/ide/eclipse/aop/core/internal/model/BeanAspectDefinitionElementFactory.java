@@ -27,6 +27,30 @@ import org.springframework.util.StringUtils;
  */
 public class BeanAspectDefinitionElementFactory implements IElementFactory {
 
+	protected static final String ADVICE_TYPE_ATTRIBUTE = "advice-type";
+
+	protected static final String PROXY_TARGET_CLASS_ATTRIBUTE = "proxy-target-class";
+
+	protected static final String FILE_ATTRIBUTE = "file";
+
+	protected static final String ASPECT_LINE_NUMBER_ATTRIBUTE = "aspect-line-number";
+
+	protected static final String ARG_NAMES_ATTRIBUTE = "arg-names";
+
+	protected static final String THROWING_ATTRIBUTE = "throwing";
+
+	protected static final String RETURNING_ATTRIBUTE = "returning";
+
+	protected static final String POINTCUT_EXPRESSION_ATTRIBUTE = "pointcut-expression";
+
+	protected static final String ASPECT_NAME_ATTRIBUTE = "aspect-name";
+
+	protected static final String ADIVCE_METHOD_PARAMETER_TYPES_ATTRIBUTE = "adivce-method-parameter-types";
+
+	protected static final String ADVICE_CLASS_NAME_ATTRIBUTE = "advice-class-name";
+
+	protected static final String ADVICE_METHOD_NAME_ATTRIBUTE = "advice-method-name";
+
 	public static String FACTORY_ID = Activator.PLUGIN_ID
 			+ ".beanAspectDefinitionElementFactory";
 
@@ -42,33 +66,34 @@ public class BeanAspectDefinitionElementFactory implements IElementFactory {
 
 	protected final void populateAspectDefinition(
 			BeanAspectDefinition definition, IMemento memento) {
-		String adivceMethodName = memento.getString("advice-method-name");
-		String aspectClassName = memento.getString("advice-class-name");
+		String adivceMethodName = memento
+				.getString(ADVICE_METHOD_NAME_ATTRIBUTE);
+		String aspectClassName = memento.getString(ADVICE_CLASS_NAME_ATTRIBUTE);
 		String adivceMethodParameterTypesString = memento
-				.getString("adivce-method-parameter-types");
+				.getString(ADIVCE_METHOD_PARAMETER_TYPES_ATTRIBUTE);
 		String[] adivceMethodParameterTypes = null;
 		if (adivceMethodParameterTypesString != null) {
 			adivceMethodParameterTypes = StringUtils
 					.delimitedListToStringArray(
 							adivceMethodParameterTypesString, ",");
 		}
-		String aspectName = memento.getString("aspect-name");
+		String aspectName = memento.getString(ASPECT_NAME_ATTRIBUTE);
 		String pointcutExpressionString = memento
-				.getString("pointcut-expression");
-		String returning = memento.getString("returning");
-		String throwing = memento.getString("throwing");
-		String argNamesString = memento.getString("arg-names");
+				.getString(POINTCUT_EXPRESSION_ATTRIBUTE);
+		String returning = memento.getString(RETURNING_ATTRIBUTE);
+		String throwing = memento.getString(THROWING_ATTRIBUTE);
+		String argNamesString = memento.getString(ARG_NAMES_ATTRIBUTE);
 		String[] argNames = null;
 		if (argNamesString != null) {
 			argNames = StringUtils.delimitedListToStringArray(argNamesString,
 					",");
 		}
-		int aspectLineNumber = memento.getInteger("aspect-line-number");
-		String fileName = memento.getString("file");
+		int aspectLineNumber = memento.getInteger(ASPECT_LINE_NUMBER_ATTRIBUTE);
+		String fileName = memento.getString(FILE_ATTRIBUTE);
 		boolean proxyTargetClass = Boolean.valueOf(memento
-				.getString("proxy-target-class"));
+				.getString(PROXY_TARGET_CLASS_ATTRIBUTE));
 		IAopReference.ADVICE_TYPES type = ADVICE_TYPES.valueOf(memento
-				.getString("advice-type"));
+				.getString(ADVICE_TYPE_ATTRIBUTE));
 
 		definition.setAdviceMethodName(adivceMethodName);
 		definition.setAspectClassName(aspectClassName);
