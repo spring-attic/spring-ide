@@ -11,11 +11,7 @@
 package org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.IType;
-import org.springframework.binding.convert.ConversionService;
-import org.springframework.binding.convert.support.DefaultConversionService;
 import org.springframework.ide.eclipse.core.MessageUtils;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
@@ -30,8 +26,6 @@ import org.springframework.util.StringUtils;
 public class MappingValidationRule implements
 		IValidationRule<Mapping, WebflowValidationContext> {
 
-	private ConversionService conversionService = null;
-
 	public boolean supports(IModelElement element, IValidationContext context) {
 		return element instanceof Mapping
 				&& context instanceof WebflowValidationContext;
@@ -41,45 +35,30 @@ public class MappingValidationRule implements
 			IProgressMonitor monitor) {
 
 		if (!StringUtils.hasText(mapping.getSource())) {
-			context.error(mapping, "NO_INPUT_ATTRIBUTE_ATTRIBUTE",
-					"Element 'mapping' element requires 'input-attribute' attribute");
+			context
+					.error(mapping, "NO_INPUT_ATTRIBUTE_ATTRIBUTE",
+							"Element 'mapping' element requires 'input-attribute' attribute");
 		}
 		if (!StringUtils.hasText(mapping.getTarget())
 				&& !StringUtils.hasText(mapping.getTargetCollection())) {
-			context.error(mapping, "INVALID_USAGE_OF_TARGET_ATTRIBUTE",
-					"Using 'target' and 'target-collection' attributes is not allowed on 'mapping' element");
+			context
+					.error(
+							mapping,
+							"INVALID_USAGE_OF_TARGET_ATTRIBUTE",
+							"Using 'target' and 'target-collection' attributes is not allowed on 'mapping' element");
 		}
 		if (StringUtils.hasText(mapping.getTo())
-				&& getJavaType(mapping.getTo(), context) == null) {
+				&& WebflowValidationRuleUtils.getJavaType(mapping.getTo(),
+						context) == null) {
 			context.error(mapping, "NO_CLASS_FOUND", MessageUtils.format(
 					"Class 'to' \"{0}\" cannot be resolved", mapping.getTo()));
 		}
 		if (StringUtils.hasText(mapping.getFrom())
-				&& getJavaType(mapping.getFrom(), context) == null) {
+				&& WebflowValidationRuleUtils.getJavaType(mapping.getFrom(),
+						context) == null) {
 			context.error(mapping, "NO_CLASS_FOUND", MessageUtils.format(
 					"Class 'from' \"{0}\" cannot be resolved", mapping
 							.getFrom()));
 		}
-	}
-
-	private IType getJavaType(String className, WebflowValidationContext context) {
-		IType type = JdtUtils.getJavaType(context.getWebflowConfig()
-				.getProject().getProject(), className);
-		if (type == null) {
-			Class clazz = getConversionService().getClassByAlias(className);
-			if (clazz != null) {
-				type = JdtUtils.getJavaType(context.getWebflowConfig()
-						.getProject().getProject(), clazz
-						.getName());
-			}
-		}
-		return type;
-	}
-
-	private ConversionService getConversionService() {
-		if (this.conversionService == null) {
-			this.conversionService = new DefaultConversionService();
-		}
-		return this.conversionService;
 	}
 }

@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.core.MessageUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -28,16 +25,6 @@ import org.springframework.util.StringUtils;
  */
 public class SetValidationRule implements
 		IValidationRule<Set, WebflowValidationContext> {
-
-	private static final List<String> SCOPE_TYPES;
-
-	static {
-		SCOPE_TYPES = new ArrayList<String>();
-		SCOPE_TYPES.add("request");
-		SCOPE_TYPES.add("flash");
-		SCOPE_TYPES.add("flow");
-		SCOPE_TYPES.add("conversation");
-	}
 
 	public boolean supports(IModelElement element, IValidationContext context) {
 		return element instanceof Set
@@ -56,12 +43,14 @@ public class SetValidationRule implements
 					"Element 'set' requires 'value' attribute");
 		}
 		if (StringUtils.hasText(set.getScope())
-				&& !SCOPE_TYPES.contains(set.getScope())) {
+				&& !WebflowValidationRuleUtils.SCOPE_TYPES.contains(set
+						.getScope())) {
 			context.error(set, "NO_ATTRIBUTE_ATTRIBUTE",
 					"Element 'set' requires 'attribute' attribute");
-			context.error(set, "NO_VALUE_ATTRIBUTE", MessageUtils
-					.format("Element 'set' requires 'value' attribute",
-							set.getScope()));
+			context
+					.error(set, "NO_VALUE_ATTRIBUTE", MessageUtils.format(
+							"Element 'set' requires 'value' attribute", set
+									.getScope()));
 		}
 	}
 }

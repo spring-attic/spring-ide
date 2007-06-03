@@ -10,17 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.springframework.binding.convert.ConversionService;
-import org.springframework.binding.convert.support.DefaultConversionService;
 import org.springframework.ide.eclipse.core.MessageUtils;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
@@ -35,18 +29,6 @@ import org.springframework.util.StringUtils;
  */
 public class VariableValidationRule implements
 		IValidationRule<Variable, WebflowValidationContext> {
-
-	private static final List<String> SCOPE_TYPES;
-
-	static {
-		SCOPE_TYPES = new ArrayList<String>();
-		SCOPE_TYPES.add("request");
-		SCOPE_TYPES.add("flash");
-		SCOPE_TYPES.add("flow");
-		SCOPE_TYPES.add("conversation");
-	}
-
-	private ConversionService conversionService = null;
 
 	public boolean supports(IModelElement element, IValidationContext context) {
 		return element instanceof Variable
@@ -65,31 +47,37 @@ public class VariableValidationRule implements
 					&& !StringUtils.hasText(attribute.getClazz())
 					&& !WebflowModelUtils.isReferencedBeanFound(context
 							.getWebflowConfig(), attribute.getName())) {
-				context.error(attribute, "INVALID_BEAN", MessageUtils
-						.format("Referenced bean \"{0}\" cannot be found",
-								attribute.getName()));
+				context.error(attribute, "INVALID_BEAN", MessageUtils.format(
+						"Referenced bean \"{0}\" cannot be found", attribute
+								.getName()));
 			}
 		}
 		if (StringUtils.hasText(attribute.getScope())
-				&& !SCOPE_TYPES.contains(attribute.getScope())) {
-			context.error(attribute, "INVALID_SCOPE", MessageUtils
-					.format("Invalid scope \"{0}\" specified", attribute
-							.getScope()));
+				&& !WebflowValidationRuleUtils.SCOPE_TYPES.contains(attribute
+						.getScope())) {
+			context.error(attribute, "INVALID_SCOPE", MessageUtils.format(
+					"Invalid scope \"{0}\" specified", attribute.getScope()));
 		}
 		if (StringUtils.hasText(attribute.getClazz())) {
-			IType type = getJavaType(attribute.getClazz(), context);
+			IType type = WebflowValidationRuleUtils.getJavaType(attribute
+					.getClazz(), context);
 			if (type == null) {
-				context.error(attribute, "INVALID_SCOPE", MessageUtils
-						.format("Class 'var' \"{0}\" cannot be resolved",
-								attribute.getClazz()));
+				context.error(attribute, "INVALID_SCOPE", MessageUtils.format(
+						"Class 'var' \"{0}\" cannot be resolved", attribute
+								.getClazz()));
 			}
 			else
 				try {
 					if (type.isInterface() || Flags.isAbstract(type.getFlags())) {
-						context.error(attribute, "INVALID_SCOPE",
-								MessageUtils.format(
-										"Class 'var' \"{0}\" is either an Interface or abstract",
-												attribute.getClazz()));					}
+						context
+								.error(
+										attribute,
+										"INVALID_SCOPE",
+										MessageUtils
+												.format(
+														"Class 'var' \"{0}\" is either an Interface or abstract",
+														attribute.getClazz()));
+					}
 				}
 				catch (JavaModelException e) {
 				}
@@ -101,25 +89,5 @@ public class VariableValidationRule implements
 					"Referenced bean \"{0}\" cannot be found", attribute
 							.getBean()));
 		}
-	}
-
-	private IType getJavaType(String className, WebflowValidationContext context) {
-		IType type = JdtUtils.getJavaType(context.getWebflowConfig()
-				.getProject().getProject(), className);
-		if (type == null) {
-			Class clazz = getConversionService().getClassByAlias(className);
-			if (clazz != null) {
-				type = JdtUtils.getJavaType(context.getWebflowConfig()
-						.getProject().getProject(), clazz.getName());
-			}
-		}
-		return type;
-	}
-
-	private ConversionService getConversionService() {
-		if (this.conversionService == null) {
-			this.conversionService = new DefaultConversionService();
-		}
-		return this.conversionService;
 	}
 }

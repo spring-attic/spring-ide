@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.core.MessageUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -29,16 +26,6 @@ import org.springframework.util.StringUtils;
 public class EvaluationResultValidationRule implements
 		IValidationRule<EvaluationResult, WebflowValidationContext> {
 
-	private static final List<String> SCOPE_TYPES;
-
-	static {
-		SCOPE_TYPES = new ArrayList<String>();
-		SCOPE_TYPES.add("request");
-		SCOPE_TYPES.add("flash");
-		SCOPE_TYPES.add("flow");
-		SCOPE_TYPES.add("conversation");
-	}
-
 	public boolean supports(IModelElement element, IValidationContext context) {
 		return element instanceof EvaluationResult
 				&& context instanceof WebflowValidationContext;
@@ -52,7 +39,7 @@ public class EvaluationResultValidationRule implements
 					"Element  'evaluate-result' requires 'name' attribute");
 		}
 		if (StringUtils.hasText(result.getScope())
-				&& !SCOPE_TYPES.contains(result.getScope())) {
+				&& !WebflowValidationRuleUtils.SCOPE_TYPES.contains(result.getScope())) {
 			context.error(result, "NO_VALUE_ATTRIBUTE", MessageUtils
 					.format("Element 'set' requires 'value' attribute", result
 							.getScope()));

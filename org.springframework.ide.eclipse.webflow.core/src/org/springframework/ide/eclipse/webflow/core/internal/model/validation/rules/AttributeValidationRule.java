@@ -11,11 +11,7 @@
 package org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.IType;
-import org.springframework.binding.convert.ConversionService;
-import org.springframework.binding.convert.support.DefaultConversionService;
 import org.springframework.ide.eclipse.core.MessageUtils;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
@@ -30,8 +26,6 @@ import org.springframework.util.StringUtils;
 public class AttributeValidationRule implements
 		IValidationRule<Attribute, WebflowValidationContext> {
 
-	private ConversionService conversionService = null;
-	
 	public boolean supports(IModelElement element, IValidationContext context) {
 		return element instanceof Attribute
 				&& context instanceof WebflowValidationContext;
@@ -44,7 +38,7 @@ public class AttributeValidationRule implements
 					"Element 'attribute' requires 'name' attribute");
 		}
 		if (StringUtils.hasText(attribute.getType())
-				&& getJavaType(attribute.getType(), context) == null) {
+				&& WebflowValidationRuleUtils.getJavaType(attribute.getType(), context) == null) {
 			context.error(attribute, "NO_TYPE_FOUND", MessageUtils.format(
 					"Attribute 'type' \"{0}\" cannot be resolved", attribute
 							.getType()));
@@ -53,25 +47,5 @@ public class AttributeValidationRule implements
 			context.error(attribute, "NO_VALUE_ATTRIBUTE",
 					"Element 'attribute' requires a 'value'");
 		}
-	}
-	
-	private IType getJavaType(String className, WebflowValidationContext context) {
-		IType type = JdtUtils.getJavaType(context.getWebflowConfig()
-				.getProject().getProject(), className);
-		if (type == null) {
-			Class clazz = getConversionService().getClassByAlias(className);
-			if (clazz != null) {
-				type = JdtUtils.getJavaType(context.getWebflowConfig()
-						.getProject().getProject(), clazz.getName());
-			}
-		}
-		return type;
-	}
-
-	private ConversionService getConversionService() {
-		if (this.conversionService == null) {
-			this.conversionService = new DefaultConversionService();
-		}
-		return this.conversionService;
 	}
 }
