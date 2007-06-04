@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.mylar.ui;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.mylar.monitor.ui.workbench.AbstractEditorTracker;
@@ -23,13 +23,19 @@ import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 
 /**
+ * {@link AbstractEditorTracker} extension that registers
+ * {@link BeansActiveFoldingListener} for every open {@link IBeansConfig}.
+ * <p>
+ * {@link #editorShouldBeRegistered(XMLMultiPageEditorPart)} determines if a 
+ * {@link IFileEditorInput} is actually a {@link IBeansConfig}.
  * @author Christian Dupuis
  * @since 2.0
  */
 @SuppressWarnings("restriction")
 public class BeansActiveFoldingEditorTracker extends AbstractEditorTracker {
 
-	protected Map<XMLMultiPageEditorPart, BeansActiveFoldingListener> editorListenerMap = new HashMap<XMLMultiPageEditorPart, BeansActiveFoldingListener>();
+	protected Map<XMLMultiPageEditorPart, BeansActiveFoldingListener> editorListenerMap = 
+		new ConcurrentHashMap<XMLMultiPageEditorPart, BeansActiveFoldingListener>();
 
 	@Override
 	public void editorOpened(IEditorPart part) {
@@ -55,7 +61,7 @@ public class BeansActiveFoldingEditorTracker extends AbstractEditorTracker {
 			}
 		}
 	}
-	
+
 	/**
 	 * Make sure that only {@link IBeansConfig} files are registered
 	 */

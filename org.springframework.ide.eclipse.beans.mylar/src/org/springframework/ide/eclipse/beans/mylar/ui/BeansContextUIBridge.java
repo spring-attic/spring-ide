@@ -28,11 +28,14 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.wst.xml.ui.internal.tabletree.XMLMultiPageEditorPart;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
+ * {@link AbstractContextUiBridge} that integrates the {@link IBeansModel} with
+ * Mylar in the UI.
  * @author Christian Dupuis
  * @since 2.0
  */

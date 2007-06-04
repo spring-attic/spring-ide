@@ -43,6 +43,8 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
+ * {@link IMylarContextListener} that handles collapsing and expanding of Xml
+ * nodes in the {@link XMLMultiPageEditorPart}.
  * @author Christian Dupuis
  * @since 2.0
  */

@@ -29,6 +29,9 @@ import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
+ * {@link AbstractUserInteractionMonitor} extension that tracks current
+ * selections in the open editor and sends back feedback to Mylar that a element
+ * has been selected and the interest level should be increased.
  * @author Christian Dupuis
  * @since 2.0
  */

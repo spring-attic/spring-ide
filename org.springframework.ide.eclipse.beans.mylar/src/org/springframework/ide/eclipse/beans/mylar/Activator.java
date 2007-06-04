@@ -22,21 +22,19 @@ import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.beans.mylar.ui.BeansActiveFoldingEditorTracker;
 
 /**
- * The activator class controls the plug-in life cycle
+ * The activator class controls the plug-in life cycle.
+ * @author Christian Dupuis
+ * @since 2.0
  */
 @SuppressWarnings("restriction")
 public class Activator extends AbstractUIPlugin {
 
-	// The plug-in ID
 	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.beans.ui.mylar";
 
 	private static Activator plugin;
 
 	private BeansActiveFoldingEditorTracker editorTracker;
 
-	/**
-	 * The constructor
-	 */
 	public Activator() {
 		plugin = this;
 	}
