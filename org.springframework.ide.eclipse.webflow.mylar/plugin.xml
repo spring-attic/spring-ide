@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+	
+	<extension point="org.eclipse.mylar.context.core.bridges">
+		<structureBridge
+			class="org.springframework.ide.eclipse.webflow.mylar.core.WebflowContextStructureBridge"
+			id="org.springframework.ide.eclipse.webflow.ui.mylar.context.webflow"
+			name="%webflowContextStructureBridge.name" />
+	</extension>
+
+</plugin>
