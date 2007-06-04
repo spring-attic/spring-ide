@@ -24,7 +24,6 @@ import org.springframework.ide.eclipse.core.StringUtils;
 
 /**
  * Helper methods for examining a Java {@link IType}.
- * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @author Pierre-Antoine Grégoire
@@ -64,7 +63,7 @@ public final class Introspector {
 						&& (publics == Public.DONT_CARE
 								|| (publics == Public.YES && Flags
 										.isPublic(flags)) || (publics == Public.NO && !Flags
-										.isPublic(flags)))
+								.isPublic(flags)))
 						&& (statics == Static.DONT_CARE
 								|| (statics == Static.YES && Flags
 										.isStatic(flags)) || (statics == Static.NO && !Flags
@@ -109,7 +108,8 @@ public final class Introspector {
 		if (prefix == null) {
 			prefix = "";
 		}
-		return findAllMethods(type, prefix, 0, Public.DONT_CARE, Static.DONT_CARE);
+		return findAllMethods(type, prefix, 0, Public.DONT_CARE,
+				Static.DONT_CARE);
 	}
 
 	/**
@@ -128,9 +128,8 @@ public final class Introspector {
 			for (IMethod method : type.getMethods()) {
 				int flags = method.getFlags();
 				if ((publics == Public.DONT_CARE
-						|| (publics == Public.YES && Flags
-								.isPublic(flags)) || (publics == Public.NO && !Flags
-								.isPublic(flags)))
+						|| (publics == Public.YES && Flags.isPublic(flags)) || (publics == Public.NO && !Flags
+						.isPublic(flags)))
 						&& (statics == Static.DONT_CARE
 								|| (statics == Static.YES && Flags
 										.isStatic(flags)) || (statics == Static.NO && !Flags
@@ -150,7 +149,7 @@ public final class Introspector {
 	 */
 	public static Set<IMethod> findWritableProperties(IType type,
 			String methodPrefix) throws JavaModelException {
-		String base = StringUtils.capitalize(methodPrefix);
+		String base = capitalize(methodPrefix);
 		return findAllMethods(type, "set" + base, 1, Public.YES, Static.NO);
 	}
 
@@ -159,7 +158,7 @@ public final class Introspector {
 	 */
 	public static Set<IMethod> findWritableProperties(IType type,
 			String methodPrefix, boolean ignoreCase) throws JavaModelException {
-		String base = StringUtils.capitalize(methodPrefix);
+		String base = capitalize(methodPrefix);
 		return findAllMethods(type, "set" + base, 1, Public.YES, Static.NO,
 				ignoreCase);
 	}
@@ -169,7 +168,7 @@ public final class Introspector {
 	 */
 	public static Set<IMethod> findReadableProperties(IType type,
 			String methodPrefix) throws JavaModelException {
-		String base = StringUtils.capitalize(methodPrefix);
+		String base = capitalize(methodPrefix);
 		return findAllMethods(type, "get" + base, 0, Public.YES, Static.NO);
 	}
 
@@ -178,7 +177,7 @@ public final class Introspector {
 	 */
 	public static Set<IMethod> findReadableProperties(IType type,
 			String methodPrefix, boolean ignoreCase) throws JavaModelException {
-		String base = StringUtils.capitalize(methodPrefix);
+		String base = capitalize(methodPrefix);
 		return findAllMethods(type, "get" + base, 0, Public.YES, Static.NO,
 				ignoreCase);
 	}
@@ -253,19 +252,19 @@ public final class Introspector {
 	 */
 	public static boolean hasWritableProperty(IType type, String propertyName)
 			throws JavaModelException {
-		String base = StringUtils.capitalize(propertyName);
+		String base = capitalize(propertyName);
 		return (findMethod(type, "set" + base, 1, Public.YES, Static.NO) != null);
 	}
 
 	public static IMethod getWritableProperty(IType type, String propertyName)
 			throws JavaModelException {
-		String base = StringUtils.capitalize(propertyName);
+		String base = capitalize(propertyName);
 		return findMethod(type, "set" + base, 1, Public.YES, Static.NO);
 	}
 
 	public static IMethod getReadableProperty(IType type, String propertyName)
 			throws JavaModelException {
-		String base = StringUtils.capitalize(propertyName);
+		String base = capitalize(propertyName);
 		return findMethod(type, "get" + base, 0, Public.YES, Static.NO);
 	}
 
@@ -295,6 +294,26 @@ public final class Introspector {
 			return false;
 		}
 		return true;
+	}
+	
+	/**
+	 * Utility method that handles property names.
+	 * <p>
+	 * See {@link java.beans.Introspector#decapitalize(String)} for the reverse
+	 * operation done in the Java SDK.
+	 * @see java.beans.Introspector#decapitalize(String)
+	 */
+	private static String capitalize(String name) {
+		if (name == null || name.length() == 0) {
+			return name;
+		}
+		if (name.length() > 1 && Character.isUpperCase(name.charAt(1))
+				&& Character.isLowerCase(name.charAt(0))) {
+			return name;
+		}
+		char chars[] = name.toCharArray();
+		chars[0] = Character.toUpperCase(chars[0]);
+		return new String(chars);
 	}
 
 	/**
@@ -330,7 +349,7 @@ public final class Introspector {
 				}
 			}
 			catch (JavaModelException e) {
-				//BeansCorePlugin.log(e);
+				// BeansCorePlugin.log(e);
 			}
 		}
 		return false;
@@ -360,9 +379,10 @@ public final class Introspector {
 		}
 		return false;
 	}
-	
+
 	/**
-	 * Returns <strong>all</strong> methods of the given {@link IType} instance.
+	 * Returns <strong>all</strong> methods of the given {@link IType}
+	 * instance.
 	 * @param type the type
 	 * @return set of {@link IMethod}
 	 * @throws JavaModelException
