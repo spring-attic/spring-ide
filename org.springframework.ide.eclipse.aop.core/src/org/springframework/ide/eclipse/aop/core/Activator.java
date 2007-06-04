@@ -60,6 +60,8 @@ public class Activator extends AbstractUIPlugin {
 		} catch (MissingResourceException e) {
 			resourceBundle = null;
 		}
+		// add default value
+		getPreferenceStore().setDefault(PLUGIN_ID + ".peristModel", true);
 	}
 
 	/*

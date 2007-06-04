@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.aop.core.internal.model;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -28,12 +27,14 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.ui.IElementFactory;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
-import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
@@ -79,11 +80,9 @@ public class AopReferenceModelPeristence {
 
 	private static final String ASPECT_DEFINITION_ELEMENT = "aspect-definition";
 
-
 	private static final String FACTORY_ID = "factory-id";
 
 	private static final String NAME_ATTRIBUTE = "name";
-
 
 	private IPath defaultFile = null;
 
@@ -163,9 +162,10 @@ public class AopReferenceModelPeristence {
 	}
 
 	protected synchronized void loadReferenceModel() {
-		if (!isPersisted()) {
+		if (!shouldModelByPersisted() || !isPersisted()) {
 			return;
 		}
+		
 		IAopReferenceModel model = Activator.getModel();
 		Reader reader = null;
 		try {
@@ -173,11 +173,10 @@ public class AopReferenceModelPeristence {
 			XMLMemento memento = XMLMemento.createReadRoot(reader);
 			createAopProjects(model, memento);
 		}
-		catch (WorkbenchException e) {
+		catch (Exception e) {
 			Activator.log("Cannot load .springAop model file", e);
-		}
-		catch (FileNotFoundException e) {
-			Activator.log("Cannot load .springAop model file", e);
+			// reinit aop reference model
+			Activator.getModel().clearProjects();
 		}
 		finally {
 			if (reader != null) {
@@ -189,8 +188,21 @@ public class AopReferenceModelPeristence {
 			}
 		}
 	}
+	
+	private boolean shouldModelByPersisted() {
+		IScopeContext context = new InstanceScope();
+		IEclipsePreferences node = context.getNode(Activator.PLUGIN_ID);
+		return node.getBoolean(Activator.PLUGIN_ID + ".persistModel", true);
+	}
 
 	protected synchronized void saveReferenceModel() {
+		if (!shouldModelByPersisted()) {
+			if (isPersisted()) {
+				defaultFile.toFile().delete();
+			}
+			return;
+		}
+		
 		XMLMemento memento = XMLMemento
 				.createWriteRoot(AOP_REFERENCE_MODEL_ELEMENT);
 		Collection<IAopProject> projects = Activator.getModel().getProjects();

@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 
 public interface IAopReferenceModel {
-
+	
 	void startup();
 
 	void shutdown();
@@ -30,9 +30,6 @@ public interface IAopReferenceModel {
 	void fireModelChanged();
 
 	List<IAopReference> getAdviceDefinition(IJavaElement je);
-
-	@Deprecated
-	List<IAopReference> getAllReferences(IJavaProject project);
 
 	List<IAopReference> getAllReferences();
 	
@@ -49,5 +46,7 @@ public interface IAopReferenceModel {
 	void registerAopModelChangedListener(IAopModelChangedListener listener);
 
 	void unregisterAopModelChangedListener(IAopModelChangedListener listener);
+	
+	void clearProjects();
 
 }

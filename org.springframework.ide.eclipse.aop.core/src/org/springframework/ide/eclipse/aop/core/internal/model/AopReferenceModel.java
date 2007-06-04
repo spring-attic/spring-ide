@@ -36,11 +36,13 @@ import org.springframework.ide.eclipse.core.internal.model.resources.SpringResou
  */
 public class AopReferenceModel implements IAopReferenceModel {
 
-	private List<IAopModelChangedListener> listeners = new LinkedList<IAopModelChangedListener>();
+	private List<IAopModelChangedListener> listeners = 
+		new LinkedList<IAopModelChangedListener>();
 
 	private AopReferenceModelPeristence persistence;
 
-	private Map<IJavaProject, IAopProject> projects = new ConcurrentHashMap<IJavaProject, IAopProject>();
+	private Map<IJavaProject, IAopProject> projects = 
+		new ConcurrentHashMap<IJavaProject, IAopProject>();
 	
 	private IResourceChangeListener workspaceListener;
 
@@ -56,10 +58,7 @@ public class AopReferenceModel implements IAopReferenceModel {
 
 	public List<IAopReference> getAdviceDefinition(IJavaElement je) {
 		List<IAopReference> advices = new LinkedList<IAopReference>();
-		IJavaProject project = je.getJavaProject();
-
-		List<IAopReference> references = getAllReferences(project);
-		for (IAopReference reference : references) {
+		for (IAopReference reference : getAllReferences()) {
 			if (reference.getSource() != null
 					&& reference.getSource().equals(je)) {
 				advices.add(reference);
@@ -74,11 +73,6 @@ public class AopReferenceModel implements IAopReferenceModel {
 			refs.addAll(e.getValue().getAllReferences());
 		}
 		return refs;
-	}
-
-	@Deprecated
-	public List<IAopReference> getAllReferences(IJavaProject project) {
-		return getAllReferences();
 	}
 
 	public List<IAopReference> getAllReferencesForResource(IResource resource) {
@@ -149,6 +143,10 @@ public class AopReferenceModel implements IAopReferenceModel {
 			}
 			break;
 		}
+	}
+	
+	public synchronized void clearProjects() {
+		this.projects.clear();
 	}
 
 	public void shutdown() {

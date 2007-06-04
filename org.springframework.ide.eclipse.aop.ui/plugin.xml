@@ -246,5 +246,13 @@
 			id="org.springframework.ide.eclipse.aop.ui.tracing.EventTraceView">
 		</view>
 	</extension>
+	
+	<extension point="org.eclipse.ui.preferencePages">
+	 	<page id="org.springframework.ide.eclipse.aop.ui.preferencePage"
+  	      	name="AOP Support"
+	      	class="org.springframework.ide.eclipse.aop.ui.preferences.AopPreferencePage"
+	      	category="org.springframework.ide.eclipse.ui.preferencePage">
+   		</page>
+	</extension>
 
 </plugin>

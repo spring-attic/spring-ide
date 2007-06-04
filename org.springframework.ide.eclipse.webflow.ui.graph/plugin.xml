@@ -125,7 +125,7 @@
    
    <extension point="org.eclipse.ui.preferencePages">
 	 	<page id="org.springframework.ide.eclipse.webflow.ui.graph.preferencePage"
-  	      	name="Web Flow Editor Colors"
+  	      	name="Web Flow Support"
 	      	class="org.springframework.ide.eclipse.webflow.ui.graph.preferences.WebflowGraphColorPreferencePage"
 	      	category="org.springframework.ide.eclipse.ui.preferencePage">
    		</page>

@@ -13,8 +13,10 @@ package org.springframework.ide.eclipse.ui.dialogs;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -26,6 +28,10 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 public class SpringPreferencePage
 	extends PreferencePage
 	implements IWorkbenchPreferencePage {
+	
+	public SpringPreferencePage() {
+		noDefaultAndApplyButton();
+	}
 
 	@Override
 	protected Control createContents(Composite parent) {
@@ -35,6 +41,12 @@ public class SpringPreferencePage
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
 		data.grabExcessHorizontalSpace = true;
 		entryTable.setLayoutData(data);
+
+		GridLayout layout = new GridLayout();
+		entryTable.setLayout(layout);
+
+		Label label = new Label(entryTable, SWT.NONE);
+		label.setText("Please select a preference page below \"Spring\".");
 		
 		return entryTable;
 	}
