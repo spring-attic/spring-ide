@@ -43,7 +43,6 @@ import org.w3c.dom.Node;
  * Detects hyperlinks in XML tags. Includes detection of bean classes and bean
  * properties in attribute values. Resolves bean references (including
  * references to parent beans or factory beans).
- * 
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  */
@@ -142,8 +141,7 @@ public class BeansHyperLinkDetector extends AbstractHyperLinkDetector implements
 				String className = attributes.getNamedItem("class")
 						.getNodeValue();
 				IFile file = BeansEditorUtils.getFile(document);
-				IType type = JdtUtils.getJavaType(file.getProject(),
-						className);
+				IType type = JdtUtils.getJavaType(file.getProject(), className);
 				try {
 					IMethod method = Introspector.findMethod(type, target, 0,
 							Public.DONT_CARE, Static.DONT_CARE);
@@ -164,14 +162,15 @@ public class BeansHyperLinkDetector extends AbstractHyperLinkDetector implements
 				if (factoryBean != null) {
 					String factoryBeanId = factoryBean.getNodeValue();
 					// TODO add factoryBean support for beans defined
-					// outside of the current
-					// xml file
+					// outside of the current xml file
 					Document doc = node.getOwnerDocument();
 					Element bean = doc.getElementById(factoryBeanId);
 					if (bean != null && bean instanceof Node) {
 						NamedNodeMap attribute = ((Node) bean).getAttributes();
-						className = attribute.getNamedItem("class")
-								.getNodeValue();
+						if (attribute.getNamedItem("class") != null) {
+							className = attribute.getNamedItem("class")
+									.getNodeValue();
+						}
 					}
 				}
 			}
@@ -181,8 +180,7 @@ public class BeansHyperLinkDetector extends AbstractHyperLinkDetector implements
 			}
 			try {
 				IFile file = BeansEditorUtils.getFile(document);
-				IType type = JdtUtils.getJavaType(file.getProject(),
-						className);
+				IType type = JdtUtils.getJavaType(file.getProject(), className);
 				IMethod method = Introspector.findMethod(type, target, -1,
 						Public.DONT_CARE, Static.YES);
 				if (method != null) {
