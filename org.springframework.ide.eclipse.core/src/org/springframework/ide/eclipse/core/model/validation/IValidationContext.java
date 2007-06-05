@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
  * Context that gets passed to an {@link IValidationRule}, encapsulating a list
@@ -27,9 +28,13 @@ public interface IValidationContext {
 	int SEVERITY_ERROR = IMarker.SEVERITY_ERROR;
 	int SEVERITY_WARNING = IMarker.SEVERITY_WARNING;
 
-	Set<ValidationProblem> getProblems();
+	IResourceModelElement getRootElement();
+
+	IResourceModelElement getContextElement();
 
 	void setCurrentRuleId(String ruleId);
+
+	Set<ValidationProblem> getProblems();
 
 	void warning(IModelElement element, String problemId, String message,
 			ValidationProblemAttribute... attributes);

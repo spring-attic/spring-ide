@@ -42,24 +42,31 @@ public abstract class AbstractValidator implements IValidator {
 				if (subMonitor.isCanceled()) {
 					throw new OperationCanceledException();
 				}
-				Set<ValidationProblem> problems =
-					new LinkedHashSet<ValidationProblem>();
+				IResourceModelElement rootElement = getRootElement(resource);
 				Set<ValidationRuleDefinition> ruleDefinitions =
 						getRuleDefinitions(resource);
-				for (IResourceModelElement rootElement
-						: getRootElements(resource)) {
-					IValidationContext context = createContext(resource,
-							rootElement);
-					IModelElementVisitor visitor = new ValidationVisitor(
-							context, ruleDefinitions);
-					rootElement.accept(visitor, monitor);
-					problems.addAll(context.getProblems());
-					if (subMonitor.isCanceled()) {
-						throw new OperationCanceledException();
+				if (rootElement != null && ruleDefinitions != null
+						&& ruleDefinitions.size() > 0) {
+					Set<ValidationProblem> problems =
+						new LinkedHashSet<ValidationProblem>();
+					for (IResourceModelElement contextElement
+							: getContextElements(rootElement)) {
+						IValidationContext context = createContext(rootElement,
+								contextElement);
+						if (context != null) {
+							IModelElementVisitor visitor =
+									new ValidationVisitor(
+											context, ruleDefinitions);
+							rootElement.accept(visitor, monitor);
+							problems.addAll(context.getProblems());
+						}
+						if (subMonitor.isCanceled()) {
+							throw new OperationCanceledException();
+						}
 					}
-				}
-				for (ValidationProblem problem : problems) {
-					createProblemMarker(resource, problem);
+					for (ValidationProblem problem : problems) {
+						createProblemMarker(resource, problem);
+					}
 				}
 				subMonitor.worked(1);
 				if (subMonitor.isCanceled()) {
@@ -80,18 +87,27 @@ public abstract class AbstractValidator implements IValidator {
 			IResource resource);
 
 	/**
-	 * Returns a list of {@link IResourceModelElement root model element}s for
+	 * Returns the {@link IResourceModelElement root element} for
 	 * the given {@link IResource} which should be visited by the validator.
 	 */
-	protected abstract Set<IResourceModelElement> getRootElements(
-			IResource resource);
+	protected abstract IResourceModelElement getRootElement(IResource resource);
+
+	/**
+	 * Returns a list of {@link IResourceModelElement context element}s for the
+	 * given {@link IResourceModelElement root element} which should be used
+	 * during validation.
+	 */
+	protected abstract Set<IResourceModelElement> getContextElements(
+			IResourceModelElement rootElement);
 
 	/**
 	 * Returns a newly created {@link IValidationContext} for the given
-	 * {@link IResource} and it's {@link IModelElement root model element}.
+	 * {@link IResourceModelElement root element} and it's
+	 * {@link IResourceModelElement context element}.
 	 */
-	protected abstract IValidationContext createContext(IResource resource,
-			IResourceModelElement rootElement);
+	protected abstract IValidationContext createContext(
+			IResourceModelElement rootElement,
+			IResourceModelElement contextElement);
 
 	/**
 	 * Returns <code>true</code> if this validator is able to validate the given

@@ -11,8 +11,12 @@
 package org.springframework.ide.eclipse.beans.core.internal.model.validation;
 
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
@@ -26,23 +30,51 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
  */
 public class BeansValidationContext extends AbstractValidationContext {
 
-	private IBeansConfig config;
-	private BeanDefinitionRegistry registry;
+	private BeanDefinitionRegistry incompleteRegistry;
+	private BeanDefinitionRegistry completeRegistry;
 
 	public BeansValidationContext(IBeansConfig config,
-			IResourceModelElement rootElement) {
-		super(rootElement);
-		this.config = config;
+			IResourceModelElement contextElement) {
+		super(config, contextElement);
 
 		// Add parsing errors to list of validation errors
-		addProblems(((BeansConfig) config).getProblems()); 
+		addProblems(((BeansConfig) config).getProblems());
+		
+		incompleteRegistry = createRegistry(config, contextElement, false);
+		completeRegistry = createRegistry(config, contextElement, true);
 	}
 
-	public IBeansConfig getConfig() {
-		return config;
+	public BeanDefinitionRegistry getIncompleteRegistry() {
+		return incompleteRegistry;
 	}
 
-	public BeanDefinitionRegistry getRegistry() {
+	public BeanDefinitionRegistry getCompleteRegistry() {
+		return completeRegistry;
+	}
+
+	private BeanDefinitionRegistry createRegistry(IBeansConfig config,
+			IResourceModelElement contextElement, boolean fillCompletely) {
+		DefaultBeanDefinitionRegistry registry =
+				new DefaultBeanDefinitionRegistry();
+		if (contextElement instanceof BeansConfigSet) {
+			IBeansConfigSet configSet = (IBeansConfigSet) contextElement;
+			if (fillCompletely) {
+				registry.setAllowAliasOverriding(true);
+				registry.setAllowBeanDefinitionOverriding(true);
+			}
+			else {
+				registry.setAllowAliasOverriding(configSet
+						.isAllowAliasOverriding());
+				registry.setAllowBeanDefinitionOverriding(configSet
+						.isAllowBeanDefinitionOverriding());
+			}
+			for (IBeansConfig csConfig : configSet.getConfigs()) {
+				if (!fillCompletely && config.equals(csConfig)) {
+					break;
+				}
+				BeansModelUtils.register(csConfig, registry);
+			}
+		}
 		return registry;
 	}
 }

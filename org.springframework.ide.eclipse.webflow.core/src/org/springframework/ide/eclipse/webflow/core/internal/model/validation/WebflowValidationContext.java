@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.core.internal.model.validation;
 
-import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidationContext;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 
 /**
  * @author Christian Dupuis
@@ -22,9 +22,9 @@ public class WebflowValidationContext extends AbstractValidationContext {
 
 	private final IWebflowConfig webflowConfig;
 
-	public WebflowValidationContext(IWebflowConfig webflowConfig,
-			IResourceModelElement rootElement) {
-		super(rootElement);
+	public WebflowValidationContext(IWebflowState state,
+			IWebflowConfig webflowConfig) {
+		super(state, null);
 		this.webflowConfig = webflowConfig;
 	}
 

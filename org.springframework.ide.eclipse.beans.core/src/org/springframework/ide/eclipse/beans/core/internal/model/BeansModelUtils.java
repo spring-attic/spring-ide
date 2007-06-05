@@ -62,7 +62,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansList;
 import org.springframework.ide.eclipse.beans.core.model.IBeansMap;
 import org.springframework.ide.eclipse.beans.core.model.IBeansMapEntry;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
-import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansTypedString;
@@ -75,6 +74,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
+import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -948,6 +948,12 @@ public final class BeansModelUtils {
 		}
 	}
 
+	public static void createProblemMarker(IResource resource,
+			ValidationProblem problem) {
+		BeansCoreUtils.createProblemMarker(resource, problem.getMessage(),
+				problem.getSeverity(), problem.getLine(), ErrorCode.NONE);
+	}
+
 	public static void deleteProblemMarkers(IModelElement element) {
 		if (element instanceof IBeansProject) {
 			for (IBeansConfig config : ((IBeansProject) element).getConfigs()) {
@@ -974,35 +980,61 @@ public final class BeansModelUtils {
 
 	/**
 	 * Registers all bean definitions and aliases from given
-	 * {@link IBeansConfig} or {@link IBeansConfigSet} in specified
-	 * {@link BeanDefinitionRegistry}. All {@link BeansException}s thrown by
-	 * the {@link BeanDefinitionRegistry} are ignored.
+	 * {@link IBeansConfig} in specified {@link BeanDefinitionRegistry}. All
+	 * {@link BeansException}s thrown by the {@link BeanDefinitionRegistry} are
+	 * ignored.
 	 */
-	public static void register(IBeansModelElement element,
+	public static void register(IBeansConfig config,
 			BeanDefinitionRegistry registry) {
-		if (element instanceof IBeansConfig) {
-			IBeansConfig config = (IBeansConfig) element;
 
-			// Register bean aliases
-			for (IBeanAlias alias : config.getAliases()) {
-				try {
-					registry.registerAlias(alias.getBeanName(), alias
-							.getElementName());
-				}
-				catch (BeansException e) {
-					// ignore - continue with next alias
+		// Register bean aliases
+		for (IBeanAlias alias : config.getAliases()) {
+			try {
+				registry.registerAlias(alias.getBeanName(), alias
+						.getElementName());
+			}
+			catch (BeansException e) {
+				// ignore - continue with next alias
+			}
+		}
+
+		// Register root bean definitions
+		for (IBean bean : config.getBeans()) {
+			String beanName = bean.getElementName();
+
+			// Register bean definition under primary name
+			try {
+				registry.registerBeanDefinition(beanName, ((Bean) bean)
+						.getBeanDefinition());
+			}
+			catch (BeansException e) {
+				// ignore - continue with next bean
+			}
+
+			// Register aliases for bean name, if any
+			String[] aliases = bean.getAliases();
+			if (aliases != null) {
+				for (String alias : aliases) {
+					try {
+						registry.registerAlias(beanName, alias);
+					}
+					catch (BeansException e) {
+						// ignore - continue with next bean
+					}
 				}
 			}
-	
-			// Register root bean definitions
-			for (IBean bean : config.getBeans()) {
+		}
+
+		// Register bean definitions from components
+		for (IBeansComponent component : config.getComponents()) {
+			for (IBean bean : component.getBeans()) {
 				try {
 					String beanName = bean.getElementName();
-	
+
 					// Register bean definition under primary name.
 					registry.registerBeanDefinition(beanName, ((Bean) bean)
 							.getBeanDefinition());
-	
+
 					// Register aliases for bean name, if any.
 					String[] aliases = bean.getAliases();
 					if (aliases != null) {
@@ -1014,34 +1046,6 @@ public final class BeansModelUtils {
 				catch (BeansException e) {
 					// ignore - continue with next bean
 				}
-			}
-	
-			// Register bean definitions from components
-			for (IBeansComponent component : config.getComponents()) {
-				for (IBean bean : component.getBeans()) {
-					try {
-						String beanName = bean.getElementName();
-		
-						// Register bean definition under primary name.
-						registry.registerBeanDefinition(beanName, ((Bean) bean)
-								.getBeanDefinition());
-		
-						// Register aliases for bean name, if any.
-						String[] aliases = bean.getAliases();
-						if (aliases != null) {
-							for (String alias : aliases) {
-								registry.registerAlias(beanName, alias);
-							}
-						}
-					}
-					catch (BeansException e) {
-						// ignore - continue with next bean
-					}
-				}
-			}
-		} else if (element instanceof IBeansConfigSet) {
-			for (IBeansConfig config : ((IBeansConfigSet) element).getConfigs()) {
-				register(config, registry);
 			}
 		}
 	}
@@ -1264,5 +1268,4 @@ public final class BeansModelUtils {
 	public static boolean isInnerBean(IBean bean) {
 		return !(bean.getElementParent() instanceof IBeansConfig);
 	}
-
 }

@@ -24,11 +24,14 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 public abstract class AbstractValidationContext implements IValidationContext {
 
 	private IResourceModelElement rootElement;
-	private Set<ValidationProblem> problems;
+	private IResourceModelElement contextElement;
 	private String currentRuleId;
+	private Set<ValidationProblem> problems;
 
-	public AbstractValidationContext(IResourceModelElement rootElement) {
+	public AbstractValidationContext(IResourceModelElement rootElement,
+			IResourceModelElement contextElement) {
 		this.rootElement = rootElement;
+		this.contextElement = contextElement;
 		this.problems = new LinkedHashSet<ValidationProblem>();
 	}
 
@@ -36,28 +39,28 @@ public abstract class AbstractValidationContext implements IValidationContext {
 		return rootElement;
 	}
 
-	public Set<ValidationProblem> getProblems() {
-		return problems;
+	public IResourceModelElement getContextElement() {
+		return contextElement;
 	}
-
+	
 	public void setCurrentRuleId(String ruleId) {
 		currentRuleId = ruleId;
 	}
 
-	public String getCurrentRuleId() {
-		return currentRuleId;
+	public Set<ValidationProblem> getProblems() {
+		return problems;
 	}
 
-	public void warning(IModelElement element, String problemId, String message, 
-			ValidationProblemAttribute... attributes) {
-		problems.add(createProblem(element, message, SEVERITY_WARNING, problemId,  
-				attributes));
+	public void warning(IModelElement element, String problemId,
+			String message, ValidationProblemAttribute... attributes) {
+		problems.add(createProblem(element, message,
+				IValidationContext.SEVERITY_WARNING, problemId, attributes));
 	}
 
 	public void error(IModelElement element, String problemId, String message,
 			ValidationProblemAttribute... attributes) {
-		problems.add(createProblem(element, problemId, SEVERITY_ERROR, message,
-				attributes));
+		problems.add(createProblem(element, problemId,
+				IValidationContext.SEVERITY_ERROR, message, attributes));
 	}
 
 	protected final ValidationProblem createProblem(IModelElement element,

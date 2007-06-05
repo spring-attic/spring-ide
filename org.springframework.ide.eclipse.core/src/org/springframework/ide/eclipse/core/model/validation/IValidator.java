@@ -34,9 +34,6 @@ public interface IValidator extends IProjectContributor {
 
 	/**
 	 * Validates all the given affected resources.
-	 * <p>
-	 * This implementation does nothing.
-	 * </p>
 	 * @param affectedResources  the resource affected by this build
 	 * @param monitor a progress monitor, or <code>null</code> if progress
 	 * 			reporting and cancellation are not desired

@@ -96,29 +96,31 @@ public class BeansConfigValidator extends AbstractValidator {
 	}
 
 	@Override
-	protected Set<IResourceModelElement> getRootElements(IResource resource) {
-		Set<IResourceModelElement> rootElements =
-				new LinkedHashSet<IResourceModelElement>();
-		IBeansConfig config = BeansCorePlugin.getModel().getConfig(
-				(IFile) resource);
-		if (config != null) {
-			rootElements.addAll(BeansModelUtils.getConfigSets(config));
-			if (rootElements.isEmpty()) {
-				rootElements.add(config);
-			}
-		}
-		return rootElements;
+	protected IResourceModelElement getRootElement(IResource resource) {
+		return BeansCorePlugin.getModel().getConfig((IFile) resource);
 	}
 
 	@Override
-	protected IValidationContext createContext(IResource resource,
+	protected Set<IResourceModelElement> getContextElements(
 			IResourceModelElement rootElement) {
-		if (resource instanceof IFile) {
-			IBeansConfig config = BeansCorePlugin.getModel()
-					.getConfig((IFile) resource);
-			if (config != null) {
-				return new BeansValidationContext(config, rootElement);
+		Set<IResourceModelElement> contextElements =
+				new LinkedHashSet<IResourceModelElement>();
+		if (rootElement instanceof IBeansConfig) {
+			contextElements.addAll(BeansModelUtils.getConfigSets(rootElement));
+			if (contextElements.isEmpty()) {
+				contextElements.add(rootElement);
 			}
+		}
+		return contextElements;
+	}
+
+	@Override
+	protected IValidationContext createContext(
+			IResourceModelElement rootElement,
+			IResourceModelElement contextElement) {
+		if (rootElement instanceof IBeansConfig) {
+			return new BeansValidationContext((IBeansConfig) rootElement,
+					contextElement);
 		}
 		return null;
 	}
@@ -131,8 +133,7 @@ public class BeansConfigValidator extends AbstractValidator {
 	@Override
 	protected void createProblemMarker(IResource resource,
 			ValidationProblem problem) {
-//		WebflowModelUtils.createProblemMarker(resource, problem.getMessage(),
-//				problem.getSeverity(), problem.getLine());
+		BeansModelUtils.createProblemMarker(resource, problem);
 	}
 
 	private List<IResource> getBeanConfigResources(IType beanClass) {

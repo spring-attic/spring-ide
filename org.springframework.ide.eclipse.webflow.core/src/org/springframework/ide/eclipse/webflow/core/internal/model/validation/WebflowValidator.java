@@ -69,28 +69,31 @@ public class WebflowValidator extends AbstractValidator {
 	}
 
 	@Override
-	protected Set<IResourceModelElement> getRootElements(IResource resource) {
-		Set<IResourceModelElement> rootElements =
-				new HashSet<IResourceModelElement>();
+	protected IResourceModelElement getRootElement(IResource resource) {
 		if (resource instanceof IFile) {
-			IWebflowState state = WebflowModelUtils.getWebflowState(
-					(IFile) resource);
-			if (state != null) {
-				rootElements.add(state);
-			}
+			return WebflowModelUtils.getWebflowState((IFile) resource);
 		}
-		return rootElements;
+		return null;
 	}
 
 	@Override
-	protected IValidationContext createContext(IResource resource,
+	protected Set<IResourceModelElement> getContextElements(
 			IResourceModelElement rootElement) {
-		if (resource instanceof IFile) {
+		Set<IResourceModelElement> contextElements =
+				new HashSet<IResourceModelElement>();
+		contextElements.add(rootElement);
+		return contextElements;
+	}
+
+	@Override
+	protected IValidationContext createContext(
+			IResourceModelElement rootElement,
+			IResourceModelElement contextElement) {
+		if (rootElement instanceof IWebflowState) {
+			IWebflowState state = (IWebflowState) rootElement;
 			IWebflowConfig config = WebflowModelUtils.getWebflowConfig(
-					(IFile) resource);
-			if (config != null) {
-				return new WebflowValidationContext(config, rootElement);
-			}
+					(IFile) state.getElementResource());
+			return new WebflowValidationContext(state, config);
 		}
 		return null;
 	}
