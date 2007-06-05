@@ -40,6 +40,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.internal.Workbench;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
+import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.beans.PropertyAccessor;
@@ -652,9 +653,14 @@ public class BeansEditorUtils {
 		try {
 			sModel = org.eclipse.wst.sse.core.StructuredModelManager
 					.getModelManager().getExistingModelForRead(document);
+			if (sModel == null && document instanceof IStructuredDocument) {
+				sModel = org.eclipse.wst.sse.core.StructuredModelManager
+					.getModelManager().getModelForRead((IStructuredDocument) document);
+			}
 			inode = sModel.getIndexedRegion(offset);
-			if (inode == null)
+			if (inode == null) {
 				inode = sModel.getIndexedRegion(offset - 1);
+			}
 		}
 		finally {
 			if (sModel != null)
