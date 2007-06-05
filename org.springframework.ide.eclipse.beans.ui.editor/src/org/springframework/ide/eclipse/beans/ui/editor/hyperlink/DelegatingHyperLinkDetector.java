@@ -27,10 +27,12 @@ public class DelegatingHyperLinkDetector implements IHyperlinkDetector {
 		IDocument document = textViewer.getDocument();
 		Node currentNode = BeansEditorUtils.getNodeByOffset(document, region
 				.getOffset());
-
-		IHyperlinkDetector detector = NamespaceUtils
+		if (currentNode != null) {
+			IHyperlinkDetector detector = NamespaceUtils
 				.getHyperlinkDetector(currentNode.getNamespaceURI());
-		return detector.detectHyperlinks(textViewer, region,
-				canShowMultipleHyperlinks);
+			return detector.detectHyperlinks(textViewer, region,
+					canShowMultipleHyperlinks);
+		}
+		return new IHyperlink[0];
 	}
 }
