@@ -13,6 +13,8 @@ package org.springframework.ide.eclipse.core.internal.model.validation;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.model.validation.IValidator;
 
@@ -100,6 +102,22 @@ public class ValidatorDefinition {
 		SpringCorePreferences.getProjectPreferences(project).putBoolean(
 				ENABLEMENT_PREFIX + id, isEnabled);
 		this.isEnabled = isEnabled;
+		cleanup(project);
+	}
+	
+	/**
+	 * Calls {@link IValidator#cleanup} on the wrapped {@link IValidator}
+	 * instance.
+	 */
+	private void cleanup(IProject project) {
+		if (!this.isEnabled) {
+			try {
+				this.validator.cleanup(project, new NullProgressMonitor());
+			}
+			catch (CoreException e) {
+				SpringCore.log(e);
+			}
+		}
 	}
 
 	@Override
