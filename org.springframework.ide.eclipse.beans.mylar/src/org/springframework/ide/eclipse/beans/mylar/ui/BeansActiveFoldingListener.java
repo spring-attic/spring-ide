@@ -224,7 +224,9 @@ public class BeansActiveFoldingListener implements IMylarContextListener {
 				workbench.getDisplay().asyncExec(new Runnable() {
 
 					public void run() {
-						if (viewer instanceof StructuredTextEditor) {
+						if (viewer instanceof StructuredTextEditor
+								&& ((StructuredTextEditor) viewer)
+										.getTextViewer() != null) {
 
 							ProjectionAnnotationModel annotationModel = ((StructuredTextEditor) viewer)
 									.getTextViewer()
