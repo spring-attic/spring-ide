@@ -10,6 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.validation.rules;
 
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+
 /**
  * Helpers for validation rules.
  * 
@@ -38,5 +45,28 @@ public final class ValidationRuleUtils {
 	 */
 	public static boolean isFactoryBeanReference(String property) {
 		return property.startsWith(FACTORY_BEAN_REFERENCE_PREFIX);
+	}
+
+	/**
+	 * Returns the given {@link IBean bean}'s bean class name. For child beans
+	 * the corresponding parents are resolved within the bean's
+	 * {@link IBeansConfig} only.
+	 */
+	public static String getBeanClassName(IBean bean) {
+		return getBeanClassName(bean, BeansModelUtils.getConfig(bean));
+	}
+
+	/**
+	 * Returns the given {@link IBean bean}'s bean class name. For child beans
+	 * the corresponding parents are resolved within the given context
+	 * ({@link IBeansConfig} or {@link IBeansConfigSet}).
+	 */
+	public static String getBeanClassName(IBean bean, IModelElement context) {
+		BeanDefinition bd = BeansModelUtils.getMergedBeanDefinition(bean,
+				context);
+		if (bd != null) {
+			return bd.getBeanClassName();
+		}
+		return null;
 	}
 }

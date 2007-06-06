@@ -63,6 +63,10 @@
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanClassRule"
 		            name="%beansValidator.rule.beanClass.name"
 		            description="%beansValidator.rule.beanClass.description"/>
+		    <rule id="beanConstructorArguments"
+		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanConstructorArgumentsRule"
+		            name="%beansValidator.rule.beanConstructorArguments.name"
+		            description="%beansValidator.rule.beanConstructorArguments.description"/>
 	    </rules>
 	</extension>
 </plugin>

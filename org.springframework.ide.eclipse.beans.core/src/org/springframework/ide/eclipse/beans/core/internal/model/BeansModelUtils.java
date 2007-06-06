@@ -618,11 +618,11 @@ public final class BeansModelUtils {
 
 	/**
 	 * Returns the merged bean definition for a given bean from specified
-	 * context (<code>IBeansConfig</code> or <code>IBeansConfigSet</code>).
+	 * context ({@link IBeansConfig} or {@link IBeansConfigSet}).
 	 * Any cyclic-references are ignored.
 	 * @param bean the bean the merged bean definition is requested for
-	 * @param context the context (<code>IBeanConfig</code> or
-	 * <code>IBeanConfigSet</code>) the beans are looked-up
+	 * @param context the context ({@link IBeanConfig} or
+	 * {@link IBeanConfigSet}) the beans are looked-up
 	 * @return given bean's merged bean definition
 	 * @throws IllegalArgumentException if unsupported context specified
 	 */
@@ -631,13 +631,15 @@ public final class BeansModelUtils {
 		BeanDefinition bd = ((Bean) bean).getBeanDefinition();
 		if (bean.isChildBean()) {
 
+			// If no context specified the use the bean's config instead
+			if (context == null) {
+				context = BeansModelUtils.getConfig(bean);
+			}
+
 			// Fill a set with all bean definitions belonging to the
 			// hierarchy of the requested bean definition
-			List<BeanDefinition> beanDefinitions = new ArrayList<BeanDefinition>(); // used
-			// to
-			// detect
-			// a
-			// cycle
+			List<BeanDefinition> beanDefinitions =
+					new ArrayList<BeanDefinition>(); // used to detect a cycle
 			beanDefinitions.add(bd);
 			addBeanDefinition(bean, context, beanDefinitions);
 
@@ -646,8 +648,8 @@ public final class BeansModelUtils {
 			RootBeanDefinition rbd = null;
 			int bdCount = beanDefinitions.size();
 			for (int i = bdCount - 1; i >= 0; i--) {
-				AbstractBeanDefinition abd = (AbstractBeanDefinition) beanDefinitions
-						.get(i);
+				AbstractBeanDefinition abd = (AbstractBeanDefinition)
+						beanDefinitions.get(i);
 				if (rbd != null) {
 					rbd.overrideFrom(abd);
 				}
