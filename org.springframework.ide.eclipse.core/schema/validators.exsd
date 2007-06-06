@@ -92,6 +92,13 @@ This extension-point is used to add one or more validators (and it&apos;s valida
                </appInfo>
             </annotation>
          </attribute>
+         <attribute name="markerId" type="string" use="required">
+            <annotation>
+               <documentation>
+                  an id of the corresponding problem marker
+               </documentation>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

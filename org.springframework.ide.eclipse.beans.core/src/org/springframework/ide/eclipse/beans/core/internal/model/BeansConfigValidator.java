@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,9 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.Flags;
@@ -50,10 +53,13 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.MarkerUtils;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.util.StringUtils;
@@ -102,7 +108,8 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 		}
 	
 		// At first delete all problem markers
-		BeansModelUtils.deleteProblemMarkers(config);
+		MarkerUtils.deleteMarkers(config.getElementResource(),
+				SpringCore.MARKER_ID);
 		monitor.worked(1);
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
@@ -206,12 +213,12 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 			if (configSet == null
 					|| BeansModelUtils.getConfig(alias).getBean(
 							alias.getElementName()) != null) {
-				BeansModelUtils.createProblemMarker(alias,
+				createProblemMarker(alias,
 						"Overrides another bean in the same config file",
 						IMarker.SEVERITY_ERROR, alias.getElementStartLine(),
 						ErrorCode.BEAN_OVERRIDE, alias.getElementName(), null);
 			} else if (!configSet.isAllowBeanDefinitionOverriding()) {
-				BeansModelUtils.createProblemMarker(alias,
+				createProblemMarker(alias,
 						"Overrides another bean in config set '"
 								+ configSet.getElementName() + "'",
 						IMarker.SEVERITY_ERROR, alias.getElementStartLine(),
@@ -225,7 +232,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 			if (al == alias) {
 				break;
 			} else if (al.getElementName().equals(alias.getElementName())) {
-				BeansModelUtils.createProblemMarker(alias,
+				createProblemMarker(alias,
 						"Overrides another alias in the same config file",
 						IMarker.SEVERITY_ERROR, alias.getElementStartLine(),
 						ErrorCode.ALIAS_OVERRIDE, alias.getElementName(),
@@ -244,7 +251,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 						break;
 					}
 					if (config.getAlias(alias.getElementName()) != null) {
-						BeansModelUtils.createProblemMarker(alias,
+						createProblemMarker(alias,
 								"Overrides another alias in config set '"
 										+ configSet.getElementName() + "'",
 								IMarker.SEVERITY_ERROR,
@@ -260,7 +267,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 			// Check if corresponding bean exists
 			if (!configSet.isIncomplete()
 					&& !registry.containsBeanDefinition(alias.getBeanName())) {
-				BeansModelUtils.createProblemMarker(alias, "Referenced bean '"
+				createProblemMarker(alias, "Referenced bean '"
 						+ alias.getBeanName() + "' not found in config set '"
 						+ configSet.getElementName() + "'",
 						IMarker.SEVERITY_WARNING, alias.getElementStartLine(),
@@ -320,7 +327,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 		try {
 			bd.validate();
 		} catch (BeanDefinitionValidationException e) {
-			BeansModelUtils.createProblemMarker(bean,
+			createProblemMarker(bean,
 					"Invalid bean definition: " + e.getMessage(),
 					IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
 					ErrorCode.INVALID_BEAN_DEFINITION, bean.getElementName(),
@@ -337,7 +344,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 			IType type = JdtUtils.getJavaType(BeansModelUtils
 					.getProject(bean).getProject(), className);
 			if (type == null) {
-				BeansModelUtils.createProblemMarker(bean, "Class '" + className
+				createProblemMarker(bean, "Class '" + className
 						+ "' not found", IMarker.SEVERITY_ERROR,
 						bean.getElementStartLine(), ErrorCode.CLASS_NOT_FOUND,
 						bean.getElementName(), className);
@@ -392,7 +399,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 				&& bd.getFactoryBeanName() == null) {
 			if (mergedClassName == null) {
 				if (!(bd instanceof ChildBeanDefinition)) {
-					BeansModelUtils.createProblemMarker(bean,
+					createProblemMarker(bean,
 							"Factory method needs class from root or parent bean",
 							IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
 							ErrorCode.BEAN_WITHOUT_CLASS_OR_PARENT,
@@ -426,13 +433,13 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 					((Bean) bean).getBeanDefinition());
 		} catch (BeanDefinitionStoreException e) {
 			if (configSet == null) {
-				BeansModelUtils.createProblemMarker(bean,
+				createProblemMarker(bean,
 						"Overrides another bean named '" + bean.getElementName()
 						+ "' in the same config file",
 						IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
 						ErrorCode.BEAN_OVERRIDE, bean.getElementName(), null);
 			} else if (!configSet.isAllowBeanDefinitionOverriding()) {
-				BeansModelUtils.createProblemMarker(bean,
+				createProblemMarker(bean,
 						"Overrides another bean named '" + bean.getElementName()
 						+ "' in config set '" + configSet.getElementName() + "'",
 						IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
@@ -447,7 +454,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 				try {
 					registry.registerAlias(bean.getElementName(), alias);
 				} catch (BeanDefinitionStoreException e) {
-					BeansModelUtils.createProblemMarker(bean, e.getMessage(),
+					createProblemMarker(bean, e.getMessage(),
 							IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
 							ErrorCode.INVALID_BEAN_ALIAS,
 							bean.getElementName(), alias);
@@ -478,7 +485,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 					if (element == null) {
 						element = bean;
 					}
-					BeansModelUtils.createProblemMarker(bean,
+					createProblemMarker(bean,
 							"No constructor with "
 									+ numArguments
 									+ (numArguments == 1 ? " argument"
@@ -530,7 +537,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 					IMethod getter = Introspector.findMethod(type, getterName,
 							0, Public.YES, Static.NO);
 					if (getter == null) {
-						BeansModelUtils.createProblemMarker(bean,
+						createProblemMarker(bean,
 								"No getter found for nested property '"
 										+ nestedPropertyName + "' in class '"
 										+ type.getFullyQualifiedName() + "'",
@@ -559,7 +566,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 
 					// Finally check property
 					if (!Introspector.isValidPropertyName(propertyName)) {
-						BeansModelUtils.createProblemMarker(bean,
+						createProblemMarker(bean,
 								"Invalid property name '" + propertyName
 										+ "' - not JavaBean compliant",
 								IMarker.SEVERITY_ERROR,
@@ -570,7 +577,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 										.getElementName(), propertyName);
 					} else if (!Introspector.hasWritableProperty(type,
 							propertyName)) {
-						BeansModelUtils.createProblemMarker(bean,
+						createProblemMarker(bean,
 								"No setter found for property '" + propertyName
 										+ "' in class '"
 										+ type.getFullyQualifiedName() + "'",
@@ -684,7 +691,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 			// Validate factory bean and it's non-static factory method
 			if (bd.getFactoryBeanName() != null) {
 				if (bd.getFactoryMethodName() == null) {
-					BeansModelUtils.createProblemMarker(bean,
+					createProblemMarker(bean,
 							"A factory bean requires a factory method",
 							IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
 							ErrorCode.NO_FACTORY_METHOD, bean.getElementName(),
@@ -717,7 +724,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 				if (refBd.isAbstract()
 						|| (refBd.getBeanClassName() == null && refBd
 								.getFactoryBeanName() == null)) {
-					BeansModelUtils.createProblemMarker(bean,
+					createProblemMarker(bean,
 							"Referenced bean '" + beanName + "' is invalid "
 							+ "(abstract or no bean class and no factory bean)",
 							IMarker.SEVERITY_ERROR,
@@ -729,7 +736,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 			    
 				// Display a warning if the bean ref contains a placeholder
 				if (hasPlaceHolder(beanName)) {
-                    BeansModelUtils.createProblemMarker(element,
+                    createProblemMarker(element,
                     		"Referenced bean '" + beanName + "' not found",
                     		IMarker.SEVERITY_WARNING,
                     		(element)
@@ -752,7 +759,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 							if (type != null) {
 								if (!Introspector.doesImplement(type,
 										FactoryBean.class.getName())) {
-									BeansModelUtils.createProblemMarker(
+									createProblemMarker(
 											element,
 											"Referenced factory bean '"
 											+ tempBeanName
@@ -766,7 +773,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 											beanName);
 								}
 							} else {
-								BeansModelUtils.createProblemMarker(
+								createProblemMarker(
 										element, "Referenced factory bean '"
 										+ tempBeanName
 										+ "' implementation class not found",
@@ -778,7 +785,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 							}
 						}
 					} catch (NoSuchBeanDefinitionException be) {
-						BeansModelUtils.createProblemMarker(element,
+						createProblemMarker(element,
 								"Referenced factory bean '" + tempBeanName
 										+ "' not found",
 								IMarker.SEVERITY_WARNING,
@@ -788,7 +795,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 								element.getElementName(), beanName);
 					}
 				} else {
-					BeansModelUtils.createProblemMarker(element,
+					createProblemMarker(element,
 							"Referenced bean '" + beanName + "' not found",
 							IMarker.SEVERITY_WARNING,
 							(element)
@@ -823,7 +830,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 				if (method == null) {
 					switch (methodType) {
 					case METHOD_TYPE_FACTORY:
-						BeansModelUtils.createProblemMarker(bean,
+						createProblemMarker(bean,
 								(statics == Static.YES ? "Static" : "Non-static")
 								+ " factory method '" + methodName + "' "
 								+ (argCount != -1 ? "with " + argCount
@@ -836,7 +843,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 						break;
 
 					case METHOD_TYPE_INIT:
-						BeansModelUtils.createProblemMarker(bean,
+						createProblemMarker(bean,
 								"Init-method '" + methodName
 										+ "' not found in bean class",
 								IMarker.SEVERITY_ERROR,
@@ -846,7 +853,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 						break;
 
 					case METHOD_TYPE_DESTROY:
-						BeansModelUtils.createProblemMarker(bean,
+						createProblemMarker(bean,
 								"Destroy-method '" + methodName
 										+ "' not found in bean class",
 								IMarker.SEVERITY_ERROR,
@@ -861,7 +868,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 				else if (!Flags.isPublic(method.getFlags())) {
 					switch (methodType) {
 					case METHOD_TYPE_FACTORY:
-						BeansModelUtils.createProblemMarker(bean,
+						createProblemMarker(bean,
 								(statics == Static.YES ? "Static" : "Non-static")
 								+ " factory method '" + methodName + "' "
 								+ (argCount != -1 ? "with " + argCount
@@ -874,7 +881,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 						break;
 
 					case METHOD_TYPE_INIT:
-						BeansModelUtils.createProblemMarker(bean,
+						createProblemMarker(bean,
 								"Init-method '" + methodName
 										+ "' is not public in bean class",
 								IMarker.SEVERITY_WARNING,
@@ -884,7 +891,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 						break;
 
 					case METHOD_TYPE_DESTROY:
-						BeansModelUtils.createProblemMarker(bean,
+						createProblemMarker(bean,
 								"Destroy-method '" + methodName
 										+ "' is not public in bean class",
 								IMarker.SEVERITY_WARNING,
@@ -911,7 +918,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 				if (factoryBd.getFactoryBeanName() == null) {
 					if (factoryBd.isAbstract()
 							|| factoryBd.getBeanClassName() == null) {
-						BeansModelUtils.createProblemMarker(bean,
+						createProblemMarker(bean,
 								"Referenced factory bean '" + beanName
 								+ "' is invalid (abstract or no bean class)",
 								IMarker.SEVERITY_ERROR,
@@ -935,7 +942,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 
 				// Skip error "parent name is equal to bean name"
 				if (!e.getBeanName().equals(bean.getElementName())) {
-					BeansModelUtils.createProblemMarker(bean, "Factory bean '"
+					createProblemMarker(bean, "Factory bean '"
 							+ beanName + "' not found", IMarker.SEVERITY_ERROR,
 							bean.getElementStartLine(),
 							ErrorCode.UNDEFINED_FACTORY_BEAN,
@@ -971,7 +978,7 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 				if (dependsBd.isAbstract()
 						|| (dependsBd.getBeanClassName() == null && dependsBd
 								.getFactoryBeanName() == null)) {
-					BeansModelUtils.createProblemMarker(bean,
+					createProblemMarker(bean,
 							"Referenced depends-on bean '" + beanName
 							+ "' is invalid (abstract or no bean class and no "
 							+ "factory bean)", IMarker.SEVERITY_ERROR,
@@ -983,12 +990,49 @@ public class BeansConfigValidator implements IWorkspaceRunnable {
 
 				// Skip error "parent name is equal to bean name"
 				if (!e.getBeanName().equals(bean.getElementName())) {
-					BeansModelUtils.createProblemMarker(bean,
+					createProblemMarker(bean,
 							"Depends-on bean '" + beanName + "' not found",
 							IMarker.SEVERITY_ERROR, bean.getElementStartLine(),
 							ErrorCode.UNDEFINED_DEPENDS_ON_BEAN,
 							bean.getElementName(), beanName);
 				}
+			}
+		}
+	}
+
+	protected void createProblemMarker(IResourceModelElement element,
+			String message, int severity, int startLine,
+			ErrorCode errorCode, String elementName, Object object) {
+		IResource resource = element.getElementResource();
+		if (resource != null && resource.isAccessible()) {
+			try {
+
+				// First check if specified marker already exists
+				IMarker[] markers = resource.findMarkers(
+						org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansConfigValidator.MARKER_ID,
+						false, IResource.DEPTH_ZERO);
+				for (IMarker marker : markers) {
+					int line = marker.getAttribute(IMarker.LINE_NUMBER, -1);
+					if (line == startLine) {
+						String msg = marker.getAttribute(IMarker.MESSAGE, "");
+						if (msg.equals(message)) {
+							return;
+						}
+					}
+				}
+
+				// Create new marker
+				IMarker marker = resource.createMarker(org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansConfigValidator.MARKER_ID);
+				Map<String, Object> attributes = new HashMap<String, Object>();
+				attributes.put(IMarker.MESSAGE, message);
+				attributes.put(IMarker.SEVERITY, new Integer(severity));
+				if (startLine > 0) {
+					attributes.put(IMarker.LINE_NUMBER, new Integer(startLine));
+				}
+				marker.setAttributes(attributes);
+			}
+			catch (CoreException e) {
+				SpringCore.log(e);
 			}
 		}
 	}

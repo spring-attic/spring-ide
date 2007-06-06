@@ -29,6 +29,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.MarkerUtils;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
@@ -49,7 +51,9 @@ public class BeansProject extends AbstractResourceModelElement implements
 	private IProject project;
 
 	protected Set<String> configExtensions;
+
 	protected Map<String, IBeansConfig> configs;
+
 	protected Map<String, IBeansConfigSet> configSets;
 
 	public BeansProject(IBeansModel model, IProject project) {
@@ -110,7 +114,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 	 * <p>
 	 * The modified project description has to be saved to disk by calling
 	 * {@link #saveDescription()}.
-	 * @param extensions  list of config extensions
+	 * @param extensions list of config extensions
 	 */
 	public void setConfigExtensions(Set<String> extensions) {
 		if (configExtensions == null) {
@@ -145,12 +149,12 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	/**
-	 * Updates the list of configs (by name) belonging to this project.
-	 * From all removed configs the Spring IDE problem markers are deleted.
+	 * Updates the list of configs (by name) belonging to this project. From all
+	 * removed configs the Spring IDE problem markers are deleted.
 	 * <p>
 	 * The modified project description has to be saved to disk by calling
 	 * {@link #saveDescription()}.
-	 * @param configNames  list of config names
+	 * @param configNames list of config names
 	 */
 	public void setConfigs(Set<String> configNames) {
 		if (configs == null) {
@@ -163,14 +167,15 @@ public class BeansProject extends AbstractResourceModelElement implements
 		for (IBeansConfig config : configs.values()) {
 			String configName = config.getElementName();
 			if (!configNames.contains(configName)) {
-				BeansModelUtils.deleteProblemMarkers(config);
+				MarkerUtils.deleteMarkers(config.getElementResource(),
+						SpringCore.MARKER_ID);
 				removeConfig(configName);
 			}
 		}
 
 		// Create new list of configs
 		configs.clear();
-		for (String configName : configNames){
+		for (String configName : configNames) {
 			configs.put(configName, new BeansConfig(this, configName));
 		}
 	}
@@ -180,20 +185,19 @@ public class BeansProject extends AbstractResourceModelElement implements
 	 * <p>
 	 * The modified project description has to be saved to disk by calling
 	 * {@link #saveDescription()}.
-	 * @param file  the config file to add
+	 * @param file the config file to add
 	 * @return <code>true</code> if config file was added to this project
 	 */
 	public boolean addConfig(IFile file) {
 		return addConfig(getConfigName(file));
 	}
 
-
 	/**
 	 * Adds the given beans config to the list of configs.
 	 * <p>
 	 * The modified project description has to be saved to disk by calling
 	 * {@link #saveDescription()}.
-	 * @param configName  the config name to add
+	 * @param configName the config name to add
 	 * @return <code>true</code> if config was added to this project
 	 */
 	public boolean addConfig(String configName) {
@@ -213,7 +217,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 	 * <p>
 	 * The modified project description has to be saved to disk by calling
 	 * {@link #saveDescription()}.
-	 * @param file  the config file to remove
+	 * @param file the config file to remove
 	 * @return <code>true</code> if config was removed to this project
 	 */
 	public boolean removeConfig(IFile file) {
@@ -231,7 +235,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 	 * <p>
 	 * The modified project description has to be saved to disk by calling
 	 * {@link #saveDescription()}.
-	 * @param configName  the config name to remove
+	 * @param configName the config name to remove
 	 * @return <code>true</code> if config was removed to this project
 	 */
 	public boolean removeConfig(String configName) {
@@ -287,7 +291,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 	 * <p>
 	 * The modified project description has to be saved to disk by calling
 	 * {@link #saveDescription()}.
-	 * @param configSets  list of {@link BeansConfigSet} instances
+	 * @param configSets list of {@link BeansConfigSet} instances
 	 */
 	public void setConfigSets(Set<IBeansConfigSet> configSets) {
 		if (this.configSets == null) {
@@ -431,7 +435,8 @@ public class BeansProject extends AbstractResourceModelElement implements
 		String configName;
 		if (file.getProject().equals(project.getProject())) {
 			configName = file.getProjectRelativePath().toString();
-		} else {
+		}
+		else {
 			configName = file.getFullPath().toString();
 		}
 		return configName;
@@ -452,7 +457,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 		BeansProjectDescriptionReader.read(this);
 
 		// Remove all invalid configs from this project
-		
+
 		for (IBeansConfig config : getConfigs()) {
 			if (config.getElementResource() == null) {
 				removeConfig(config.getElementName());

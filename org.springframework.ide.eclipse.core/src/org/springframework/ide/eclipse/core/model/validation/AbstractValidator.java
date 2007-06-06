@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
@@ -29,6 +30,11 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
  * @since 2.0
  */
 public abstract class AbstractValidator implements IValidator {
+
+	public void cleanup(IResource resource, IProgressMonitor monitor)
+			throws CoreException {
+		MarkerUtils.deleteMarkers(resource, getMarkerId());
+	}
 
 	public final void validate(Set<IResource> affectedResources,
 			IProgressMonitor monitor) throws CoreException {
@@ -47,26 +53,10 @@ public abstract class AbstractValidator implements IValidator {
 						getRuleDefinitions(resource);
 				if (rootElement != null && ruleDefinitions != null
 						&& ruleDefinitions.size() > 0) {
-					Set<ValidationProblem> problems =
-						new LinkedHashSet<ValidationProblem>();
-					for (IResourceModelElement contextElement
-							: getContextElements(rootElement)) {
-						IValidationContext context = createContext(rootElement,
-								contextElement);
-						if (context != null) {
-							IModelElementVisitor visitor =
-									new ValidationVisitor(
-											context, ruleDefinitions);
-							rootElement.accept(visitor, monitor);
-							problems.addAll(context.getProblems());
-						}
-						if (subMonitor.isCanceled()) {
-							throw new OperationCanceledException();
-						}
-					}
-					for (ValidationProblem problem : problems) {
-						createProblemMarker(resource, problem);
-					}
+					Set<ValidationProblem> problems = validate(resource,
+							rootElement, ruleDefinitions, subMonitor);
+					ValidationUtils.createProblemMarkers(resource, problems,
+							getMarkerId());
 				}
 				subMonitor.worked(1);
 				if (subMonitor.isCanceled()) {
@@ -79,6 +69,35 @@ public abstract class AbstractValidator implements IValidator {
 		}
 	}
 
+	private Set<ValidationProblem>validate(IResource resource,
+			IResourceModelElement rootElement,
+			Set<ValidationRuleDefinition> ruleDefinitions,
+			SubProgressMonitor subMonitor) {
+		Set<ValidationProblem> problems =
+				new LinkedHashSet<ValidationProblem>();
+		for (IResourceModelElement contextElement
+				: getContextElements(rootElement)) {
+			IValidationContext context = createContext(rootElement,
+					contextElement);
+			if (context != null) {
+				IModelElementVisitor visitor = new ValidationVisitor(context,
+						ruleDefinitions);
+				rootElement.accept(visitor, subMonitor);
+				problems.addAll(context.getProblems());
+			}
+			if (subMonitor.isCanceled()) {
+				throw new OperationCanceledException();
+			}
+		}
+		return problems;
+	}
+
+	/**
+	 * Returns the ID of this validator's
+	 * {@link IMarker validation problem marker} ID.
+	 */
+	protected abstract String getMarkerId();
+
 	/**
 	 * Returns the list of enabled {@link ValidationRuleDefinition}s for this
 	 * validator.
@@ -90,7 +109,8 @@ public abstract class AbstractValidator implements IValidator {
 	 * Returns the {@link IResourceModelElement root element} for
 	 * the given {@link IResource} which should be visited by the validator.
 	 */
-	protected abstract IResourceModelElement getRootElement(IResource resource);
+	protected abstract IResourceModelElement getRootElement(
+			IResource resource);
 
 	/**
 	 * Returns a list of {@link IResourceModelElement context element}s for the
@@ -114,13 +134,6 @@ public abstract class AbstractValidator implements IValidator {
 	 * element.
 	 */
 	protected abstract boolean supports(IModelElement element);
-
-	/**
-	 * Creates an {@link IMarker} on the specified resource for the given
-	 * validation problem.
-	 */
-	protected abstract void createProblemMarker(IResource resource,
-			ValidationProblem problem);
 
 	/**
 	 * {@link IModelElementVisitor} implementation that validates a specified
@@ -161,8 +174,9 @@ public abstract class AbstractValidator implements IValidator {
 				} finally {
 					subMonitor.done();
 				}
+				return true;
 			}
-			return true;
+			return false;
 		}
 	}
 }

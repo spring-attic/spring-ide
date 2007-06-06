@@ -32,7 +32,6 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanNameReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
-import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
@@ -44,11 +43,8 @@ import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.BeansTags;
-import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker;
 import org.springframework.ide.eclipse.beans.core.BeansTags.Tag;
-import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker.ErrorCode;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConnection.BeanType;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
@@ -65,17 +61,13 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansTypedString;
-import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
-import org.springframework.ide.eclipse.core.io.xml.LineNumberPreservingDOMParser;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
-import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
-import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
@@ -903,79 +895,6 @@ public final class BeansModelUtils {
 			}
 		}
 		return firstCarg;
-	}
-
-	public static void createProblemMarker(IModelElement element,
-			String message, int severity, Problem problem, ErrorCode errorCode) {
-		int line;
-		Object source = problem.getLocation().getSource();
-		if (source instanceof XmlSourceLocation) {
-			line = ((XmlSourceLocation) source).getStartLine();
-		}
-		else if (source instanceof Node) {
-			line = LineNumberPreservingDOMParser
-					.getStartLineNumber((Node) source);
-		}
-		else {
-			line = -1;
-		}
-		createProblemMarker(element, message, severity, line, errorCode, null,
-				null);
-	}
-
-	public static void createProblemMarker(IModelElement element,
-			String message, int severity) {
-		int line = (element instanceof ISourceModelElement
-				? ((ISourceModelElement) element).getElementStartLine() : -1);
-		createProblemMarker(element, message, severity, line, ErrorCode.NONE,
-				null, null);
-	}
-
-	public static void createProblemMarker(IModelElement element,
-			String message, int severity, int line, ErrorCode errorCode) {
-		createProblemMarker(element, message, severity, line, errorCode, null,
-				null);
-	}
-
-	public static void createProblemMarker(IModelElement element,
-			String message, int severity, int line, ErrorCode errorCode,
-			String beanID, String errorData) {
-		if (element instanceof IResourceModelElement) {
-			IResource resource = ((IResourceModelElement) element)
-					.getElementResource();
-			BeansCoreUtils.createProblemMarker(resource, message, severity,
-					line, errorCode, beanID, errorData);
-		}
-	}
-
-	public static void createProblemMarker(IResource resource,
-			ValidationProblem problem) {
-		BeansCoreUtils.createProblemMarker(resource, problem.getMessage(),
-				problem.getSeverity(), problem.getLine(), ErrorCode.NONE);
-	}
-
-	public static void deleteProblemMarkers(IModelElement element) {
-		if (element instanceof IBeansProject) {
-			for (IBeansConfig config : ((IBeansProject) element).getConfigs()) {
-				IResource resource = config.getElementResource();
-				MarkerUtils.deleteMarkers(resource,
-						IBeansProjectMarker.PROBLEM_MARKER);
-			}
-		}
-		else if (element instanceof IBeansConfigSet) {
-			for (IBeansConfig config : ((IBeansConfigSet) element)
-					.getConfigs()) {
-				IResource resource = config.getElementResource();
-				MarkerUtils.deleteMarkers(resource,
-						IBeansProjectMarker.PROBLEM_MARKER);
-			}
-		}
-		else if (element instanceof IResourceModelElement) {
-			IResource resource = ((IResourceModelElement) element)
-					.getElementResource();
-			MarkerUtils.deleteMarkers(resource,
-					IBeansProjectMarker.PROBLEM_MARKER);
-		}
 	}
 
 	/**

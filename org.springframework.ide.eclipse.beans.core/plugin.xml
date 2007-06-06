@@ -12,10 +12,9 @@
 			id="problemmarker"
 			name="%beansProblemMarker">
 		<super type="org.springframework.ide.eclipse.core.problemmarker" />
+		<attribute name="ruleId"/>
+		<attribute name="errorId"/>
 		<persistent value="true" />
-		<attribute name="errorCode" />
-		<attribute name="beanID" />
-		<attribute name="errorData" />
 	</extension>
 
 	<extension point="org.springframework.ide.eclipse.core.builders">
@@ -49,6 +48,7 @@
 	          name="%beansValidator.name"
 	          description="%beansValidator.description"
 			  icon="icons/full/obj16/bean_obj.gif"
+			  markerId="problemmarker"
 			  enabledByDefault="true"/>
 	    <rules validatorId="org.springframework.ide.eclipse.beans.core.beansvalidator">
 		    <rule id="beanDefinitionHolder"

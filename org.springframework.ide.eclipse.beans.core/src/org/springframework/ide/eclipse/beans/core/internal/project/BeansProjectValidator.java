@@ -31,8 +31,9 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigValidator;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.core.MarkerUtils;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 
 /**
@@ -103,10 +104,9 @@ public class BeansProjectValidator implements IProjectBuilder {
 
 	public void cleanup(IResource resource, IProgressMonitor monitor) {
 		try {
-			monitor.subTask("Deleting Spring Beans problem markers ["
+			monitor.subTask("Deleting Spring problem markers ["
 					+ resource.getFullPath().toString() + "]");
-			BeansModelUtils.deleteProblemMarkers(BeansModelUtils
-					.getResourceModelElement(resource));
+			MarkerUtils.deleteMarkers(resource, SpringCore.MARKER_ID);
 		}
 		finally {
 			monitor.done();

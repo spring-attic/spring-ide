@@ -22,13 +22,14 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModel;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesProject;
+import org.springframework.ide.eclipse.core.MarkerUtils;
+import org.springframework.ide.eclipse.core.SpringCore;
 
 /**
  * Spring project property page.
@@ -117,7 +118,8 @@ public class ProjectPropertyPage extends PropertyPage {
 			Set<IBeansConfig> currentConfigs = currentProject.getConfigs();
 			for (IBeansConfig currentConfig : currentConfigs) {
 				if (!newProject.hasConfig(currentConfig.getElementName())) {
-					BeansModelUtils.deleteProblemMarkers(currentConfig);
+					MarkerUtils.deleteMarkers(currentConfig
+							.getElementResource(), SpringCore.MARKER_ID);
 				}
 			}
 		}

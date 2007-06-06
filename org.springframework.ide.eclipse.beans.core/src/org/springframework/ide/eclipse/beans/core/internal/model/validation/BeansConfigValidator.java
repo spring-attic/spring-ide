@@ -18,7 +18,6 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -32,9 +31,10 @@ import org.springframework.ide.eclipse.core.internal.model.validation.Validation
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinitionFactory;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
+import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidator;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
-import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 
 /**
  * @author Torsten Juergeleit
@@ -44,6 +44,9 @@ public class BeansConfigValidator extends AbstractValidator {
 
 	public static final String VALIDATOR_ID = BeansCorePlugin.PLUGIN_ID
 			+ ".beansvalidator";
+
+	public static final String MARKER_ID = BeansCorePlugin.PLUGIN_ID
+			+ ".problemmarker";
 
 	public Set<IResource> getAffectedResources(IResource resource,
 			int kind) throws CoreException {
@@ -77,15 +80,9 @@ public class BeansConfigValidator extends AbstractValidator {
 		return resources;
 	}
 
-	public void cleanup(IResource resource, IProgressMonitor monitor)
-			throws CoreException {
-		if (resource instanceof IFile) {
-			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
-				(IFile) resource);
-			if (config != null) {
-				BeansModelUtils.deleteProblemMarkers(config);
-			}
-		}
+	@Override
+	protected String getMarkerId() {
+		return MARKER_ID;
 	}
 
 	@Override
@@ -97,7 +94,10 @@ public class BeansConfigValidator extends AbstractValidator {
 
 	@Override
 	protected IResourceModelElement getRootElement(IResource resource) {
-		return BeansCorePlugin.getModel().getConfig((IFile) resource);
+		if (resource instanceof IFile) {
+			return BeansCorePlugin.getModel().getConfig((IFile) resource);
+		}
+		return null;
 	}
 
 	@Override
@@ -127,13 +127,12 @@ public class BeansConfigValidator extends AbstractValidator {
 
 	@Override
 	protected boolean supports(IModelElement element) {
-		return (element instanceof IBeansModelElement);
-	}
+		return (element instanceof IBeansModelElement
 
-	@Override
-	protected void createProblemMarker(IResource resource,
-			ValidationProblem problem) {
-		BeansModelUtils.createProblemMarker(resource, problem);
+				// Ignore beans or components contributed by namespace handlers
+				&& !(element instanceof ISourceModelElement
+						&& ModelUtils.getNameSpaceURI((ISourceModelElement)
+								element) != null));
 	}
 
 	private List<IResource> getBeanConfigResources(IType beanClass) {

@@ -13,8 +13,7 @@ package org.springframework.ide.eclipse.core.internal.model.validation;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.model.validation.IValidator;
 
@@ -34,6 +33,7 @@ public class ValidatorDefinition {
 	private static final String ENABLED_BY_DEFAULT_ATTRIBUTE = "enabledByDefault";
 	private static final String DESCRIPTION_ATTRIBUTE = "description";
 	private static final String ICON_ATTRIBUTE = "icon";
+	private static final String MARKER_ID_ATTRIBUTE = "markerId";
 
 	private IValidator validator;
 	private String id;
@@ -41,6 +41,7 @@ public class ValidatorDefinition {
 	private boolean isEnabled = true;
 	private String description;
 	private String iconUri;
+	private String markerId;
 	private String namespaceUri;
 
 	public ValidatorDefinition(IConfigurationElement element)
@@ -58,6 +59,8 @@ public class ValidatorDefinition {
 		name = element.getAttribute(NAME_ATTRIBUTE);
 		description = element.getAttribute(DESCRIPTION_ATTRIBUTE);
 		iconUri = element.getAttribute(ICON_ATTRIBUTE);
+		markerId = element.getContributor().getName() + "."
+				+ element.getAttribute(MARKER_ID_ATTRIBUTE);
 		namespaceUri = element.getDeclaringExtension().getNamespaceIdentifier();
 		String enabledByDefault = element
 				.getAttribute(ENABLED_BY_DEFAULT_ATTRIBUTE);
@@ -86,6 +89,10 @@ public class ValidatorDefinition {
 		return iconUri;
 	}
 
+	public String getMarkerId() {
+		return markerId;
+	}
+
 	public String getNamespaceUri() {
 		return namespaceUri;
 	}
@@ -106,17 +113,11 @@ public class ValidatorDefinition {
 	}
 	
 	/**
-	 * Calls {@link IValidator#cleanup} on the wrapped {@link IValidator}
-	 * instance.
+	 * Delete all problem markers created by this validator in given project.
 	 */
 	private void cleanup(IProject project) {
 		if (!this.isEnabled) {
-			try {
-				this.validator.cleanup(project, new NullProgressMonitor());
-			}
-			catch (CoreException e) {
-				SpringCore.log(e);
-			}
+			MarkerUtils.deleteMarkers(project, markerId);
 		}
 	}
 

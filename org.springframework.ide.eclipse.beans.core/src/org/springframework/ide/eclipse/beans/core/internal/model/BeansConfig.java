@@ -63,8 +63,8 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
-import org.springframework.ide.eclipse.beans.core.IBeansProjectMarker.ErrorCode;
 import org.springframework.ide.eclipse.beans.core.internal.model.process.BeansConfigPostProcessorFactory;
+import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansConfigValidator;
 import org.springframework.ide.eclipse.beans.core.internal.parser.BeansDtdResolver;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
@@ -94,6 +94,7 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
+import org.springframework.ide.eclipse.core.model.validation.ValidationUtils;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceExtractor;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 import org.springframework.util.ObjectUtils;
@@ -565,11 +566,8 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		parseConfig();
 
 		// Create a problem marker for every parsing error 
-		for (ValidationProblem problem : problems) {
-			BeansModelUtils.createProblemMarker(this, problem.getMessage(),
-					problem.getSeverity(), problem.getLine(),
-					ErrorCode.PARSING_FAILED);
-		}
+		ValidationUtils.createProblemMarkers(file, problems,
+				BeansConfigValidator.MARKER_ID);
 	}
 
 	private synchronized void parseConfig() {

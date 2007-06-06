@@ -17,14 +17,12 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinitionFactory;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidator;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
-import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
@@ -36,11 +34,13 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
  * @author Torsten Juergeleit
  * @since 2.0
  */
-@SuppressWarnings("restriction")
 public class WebflowValidator extends AbstractValidator {
 
 	public static final String VALIDATOR_ID = Activator.PLUGIN_ID
 			+ ".validator";
+
+	public static final String MARKER_ID = Activator.PLUGIN_ID
+			+ ".problemmarker";
 
 	public Set<IResource> getAffectedResources(IResource resource, int kind)
 			throws CoreException {
@@ -51,14 +51,9 @@ public class WebflowValidator extends AbstractValidator {
 		return resources;
 	}
 
-	public void cleanup(IResource resource, IProgressMonitor monitor)
-			throws CoreException {
-		if (resource instanceof IFile
-				&& WebflowModelUtils.isWebflowConfig(((IFile) resource))) {
-			monitor.subTask("Deleting problem markers from '"
-					+ resource.getFullPath().toString().substring(1) + "'");
-			WebflowModelUtils.deleteProblemMarkers(resource);
-		}
+	@Override
+	protected String getMarkerId() {
+		return MARKER_ID;
 	}
 
 	@Override
@@ -101,12 +96,5 @@ public class WebflowValidator extends AbstractValidator {
 	@Override
 	protected boolean supports(IModelElement element) {
 		return element instanceof IWebflowModelElement;
-	}
-
-	@Override
-	protected void createProblemMarker(IResource resource,
-			ValidationProblem problem) {
-		WebflowModelUtils.createProblemMarker(resource, problem.getMessage(),
-				problem.getSeverity(), problem.getLine());
 	}
 }

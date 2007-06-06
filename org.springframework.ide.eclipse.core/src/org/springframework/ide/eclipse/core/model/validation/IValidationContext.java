@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.core.model.validation;
 
 import java.util.Set;
 
-import org.eclipse.core.resources.IMarker;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
@@ -24,9 +23,6 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
  * @since 2.0
  */
 public interface IValidationContext {
-	
-	int SEVERITY_ERROR = IMarker.SEVERITY_ERROR;
-	int SEVERITY_WARNING = IMarker.SEVERITY_WARNING;
 
 	IResourceModelElement getRootElement();
 

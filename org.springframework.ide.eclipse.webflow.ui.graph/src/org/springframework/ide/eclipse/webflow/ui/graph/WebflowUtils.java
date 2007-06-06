@@ -29,7 +29,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
-import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
+import org.springframework.ide.eclipse.core.model.validation.IValidationProblemMarker;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.internal.model.validation.WebflowValidator;
@@ -239,7 +239,7 @@ public abstract class WebflowUtils {
 
 		protected void createProblemMarker(IResource resource,
 				ValidationProblem problem) {
-			if (problem.getSeverity() == IValidationContext.SEVERITY_ERROR) {
+			if (problem.getSeverity() == IValidationProblemMarker.SEVERITY_ERROR) {
 				validationProblems.add(problem);
 			}
 		}

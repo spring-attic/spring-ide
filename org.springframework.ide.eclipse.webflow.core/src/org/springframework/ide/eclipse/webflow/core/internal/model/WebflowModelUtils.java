@@ -11,14 +11,11 @@
 package org.springframework.ide.eclipse.webflow.core.internal.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -34,11 +31,9 @@ import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
-import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.model.IInlineFlowState;
 import org.springframework.ide.eclipse.webflow.core.model.IState;
@@ -94,57 +89,6 @@ public class WebflowModelUtils {
 	}
 
 	private static final List<IMethod> NO_METHOD_MATCHES = new ArrayList<IMethod>();
-
-	public static final String PROBLEM_MARKER = Activator.PLUGIN_ID
-			+ ".problemmarker";
-
-	public static void createMarkerFromProblemReporter(
-			Set<ValidationProblem> validationProblems, IFile file) {
-		if (validationProblems != null && validationProblems.size() > 0) {
-			for (ValidationProblem problem : validationProblems) {
-				createProblemMarker(file, problem.getMessage(),
-						problem.getSeverity(), problem.getLine());
-			}
-		}
-	}
-
-	public static void createProblemMarker(IResource resource, String message,
-			int severity, int line) {
-		if (resource != null && resource.isAccessible()) {
-			try {
-
-				// First check if specified marker already exists
-				IMarker[] markers = resource.findMarkers(PROBLEM_MARKER, false,
-						IResource.DEPTH_ZERO);
-				for (IMarker marker : markers) {
-					int l = marker.getAttribute(IMarker.LINE_NUMBER, -1);
-					if (l == line) {
-						String msg = marker.getAttribute(IMarker.MESSAGE, "");
-						if (msg.equals(message)) {
-							return;
-						}
-					}
-				}
-
-				// Create new marker
-				IMarker marker = resource.createMarker(PROBLEM_MARKER);
-				Map<String, Object> attributes = new HashMap<String, Object>();
-				attributes.put(IMarker.MESSAGE, message);
-				attributes.put(IMarker.SEVERITY, new Integer(severity));
-				if (line > 0) {
-					attributes.put(IMarker.LINE_NUMBER, new Integer(line));
-				}
-				marker.setAttributes(attributes);
-			}
-			catch (CoreException e) {
-				Activator.log(e);
-			}
-		}
-	}
-
-	public static void deleteProblemMarkers(IResource resource) {
-		MarkerUtils.deleteMarkers(resource, PROBLEM_MARKER);
-	}
 
 	public static IType getActionType(IWebflowConfig config, IDOMNode node) {
 		Set<IBean> beans = getBeans(config);
