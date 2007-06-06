@@ -156,7 +156,7 @@
          point="org.eclipse.ui.bindings">
       <key
             sequence="M3+M2+B"
-            contextId="org.eclipse.ui.textEditorScope"
+            contextId="org.eclipse.ui.globalScope"
             commandId="org.springframework.ide.eclipse.beans.ui.commands.openBean"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
    </extension>
