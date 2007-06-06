@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.javaconfig.core.model;
 
+import org.eclipse.jdt.core.IMethod;
 import org.springframework.core.io.Resource;
 import org.springframework.ide.eclipse.core.model.DefaultModelSourceLocation;
 
@@ -19,7 +20,14 @@ import org.springframework.ide.eclipse.core.model.DefaultModelSourceLocation;
  */
 public class JdtModelSourceLocation extends DefaultModelSourceLocation {
 
-	public JdtModelSourceLocation(int startline, int endLine, Resource resource) {
+	private final IMethod method;
+	
+	public JdtModelSourceLocation(IMethod method, int startline, int endLine, Resource resource) {
 		super(startline, endLine, resource);
+		this.method = method;
+	}
+
+	public IMethod getMethod() {
+		return method;
 	}
 }

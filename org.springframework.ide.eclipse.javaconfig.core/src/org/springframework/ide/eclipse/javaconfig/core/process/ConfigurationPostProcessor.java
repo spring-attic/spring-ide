@@ -15,6 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -29,6 +34,7 @@ import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPost
 import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.javaconfig.core.model.BeanCreationMethod;
+import org.springframework.ide.eclipse.javaconfig.core.model.ConfigurationASTVistor;
 import org.springframework.ide.eclipse.javaconfig.core.model.ConfigurationClassVisitor;
 import org.springframework.ide.eclipse.javaconfig.core.model.JdtModelSourceLocationFactory;
 
@@ -89,6 +95,8 @@ public class ConfigurationPostProcessor implements IBeansConfigPostProcessor {
 			IBean bean, IBeansConfig beansConfig, ClassLoader classLoader) {
 
 		String beanClassName = BeansModelUtils.getBeanClass(bean, beansConfig);
+		IType beanType = JdtUtils.getJavaType(beansConfig.getElementResource()
+				.getProject(), beanClassName);
 		if (beanClassName != null) {
 			try {
 
@@ -105,16 +113,37 @@ public class ConfigurationPostProcessor implements IBeansConfigPostProcessor {
 					beanCreationMethods.addAll(v.getBeanCreationMethods());
 				} while (superClassName != null);
 
-				if (beanCreationMethods != null) {
+				if (beanCreationMethods != null
+						&& beanCreationMethods.size() > 0) {
+					List<BeanComponentDefinition> beanComponentDefinitions = new ArrayList<BeanComponentDefinition>();
 					for (BeanCreationMethod beanCreationMethod : beanCreationMethods) {
-						processSingleBeanCreationMethod(postProcessingContext,
-								bean, beanCreationMethod);
+						beanComponentDefinitions
+								.add(processSingleBeanCreationMethod(
+										postProcessingContext, bean,
+										beanCreationMethod));
 					}
+
+					createBeanPropertyValues(beanType, beanComponentDefinitions);
 				}
 			}
 			catch (IOException e) {
 				// we can't find the class. that is ok here.
 			}
+		}
+	}
+
+	private void createBeanPropertyValues(IType beanType, List<BeanComponentDefinition> beanComponentDefinitions) {
+		try {
+			ASTParser parser = ASTParser.newParser(AST.JLS3);
+			parser.setSource(beanType.getCompilationUnit());
+			parser.setResolveBindings(true);
+			ASTNode node = parser
+					.createAST(new NullProgressMonitor());
+			node.accept(new ConfigurationASTVistor(
+					beanComponentDefinitions));
+		}
+		catch (Exception e) {
+			// we don't care about any exception here
 		}
 	}
 
@@ -125,7 +154,7 @@ public class ConfigurationPostProcessor implements IBeansConfigPostProcessor {
 	 * @param bean the {@link IBean} to post process
 	 * @param beanCreationMethod the {@link BeanCreationMethod}
 	 */
-	private void processSingleBeanCreationMethod(
+	private BeanComponentDefinition processSingleBeanCreationMethod(
 			IBeansConfigPostProcessingContext postProcessingContext,
 			IBean bean, BeanCreationMethod beanCreationMethod) {
 
@@ -142,20 +171,20 @@ public class ConfigurationPostProcessor implements IBeansConfigPostProcessor {
 		bd.setSource(JdtModelSourceLocationFactory.getModelSourceLocation(bean,
 				beanCreationMethod));
 
+		BeanComponentDefinition beanComponentDefinition = null;
 		// create public or internal bean
 		if (beanCreationMethod.isPublic()) {
-			postProcessingContext.getBeansConfigRegistrySupport()
-					.registerComponent(
-							new BeanComponentDefinition(bd, beanCreationMethod
-									.getName()));
+			beanComponentDefinition = new BeanComponentDefinition(bd,
+					beanCreationMethod.getName());
 		}
 		else {
-			postProcessingContext.getBeansConfigRegistrySupport()
-					.registerComponent(
-							new BeanComponentDefinition(bd,
-									postProcessingContext
-											.getBeanNameGenerator()
-											.generateBeanName(bd, null)));
+			beanComponentDefinition = new BeanComponentDefinition(bd,
+					postProcessingContext.getBeanNameGenerator()
+							.generateBeanName(bd, null));
 		}
+
+		postProcessingContext.getBeansConfigRegistrySupport()
+				.registerComponent(beanComponentDefinition);
+		return beanComponentDefinition;
 	}
 }

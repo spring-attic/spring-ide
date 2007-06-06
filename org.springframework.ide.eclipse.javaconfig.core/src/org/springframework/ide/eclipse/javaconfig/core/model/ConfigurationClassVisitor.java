@@ -10,11 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.javaconfig.core.model;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
 import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -23,6 +25,9 @@ import org.springframework.config.java.annotation.Bean;
 import org.springframework.config.java.annotation.Configuration;
 
 /**
+ * ASM based {@link ClassVisitor} implementation that reads the Spring
+ * JavaConfig meta data annotations {@link Configuration} and {@link Bean} from
+ * the given {@link InputStream} representing a class.
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -117,7 +122,7 @@ public class ConfigurationClassVisitor extends EmptyVisitor {
 	private boolean isConfigurationAnnotationPresent = false;
 
 	private String superClassName = null;
-	
+
 	private String className = null;
 
 	public List<BeanCreationMethod> getBeanCreationMethods() {
@@ -158,7 +163,8 @@ public class ConfigurationClassVisitor extends EmptyVisitor {
 		if (isConfigurationAnnotationPresent) {
 
 			BeanCreationMethod beanCreationMethod = new BeanCreationMethod(
-					name, Type.getReturnType(desc).getClassName(), this.className);
+					name, Type.getReturnType(desc).getClassName(),
+					this.className);
 			this.beanCreationMethods.push(beanCreationMethod);
 
 			beanCreationMethod.setPublic(Opcodes.ACC_PUBLIC == access);

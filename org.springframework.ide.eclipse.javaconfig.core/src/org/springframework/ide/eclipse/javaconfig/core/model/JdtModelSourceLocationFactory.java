@@ -60,7 +60,7 @@ public class JdtModelSourceLocationFactory {
 							.size()]));
 			if (method != null) {
 				int l = JdtUtils.getLineNumber(method);
-				return new JdtModelSourceLocation(l, l, new FileResource(
+				return new JdtModelSourceLocation(method, l, l, new FileResource(
 						file));
 			}
 		}
