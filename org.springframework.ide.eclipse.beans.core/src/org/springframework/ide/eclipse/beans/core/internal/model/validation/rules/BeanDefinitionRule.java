@@ -18,7 +18,6 @@ import org.springframework.ide.eclipse.beans.core.internal.model.validation.Bean
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
-import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 
 /**
  * Validates a given {@link IBean}'s bean definition.
@@ -26,14 +25,15 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
  * @author Torsten Juergeleit
  * @since 2.0
  */
-public class BeanDefinitionRule implements
-		IValidationRule<IBean, BeansValidationContext> {
+public class BeanDefinitionRule extends AbstractBeanValidationRule {
 
+	@Override
 	public boolean supports(IModelElement element, IValidationContext context) {
 		return (element instanceof IBean
 				&& context instanceof BeansValidationContext);
 	}
 
+	@Override
 	public void validate(IBean bean, BeansValidationContext context,
 			IProgressMonitor monitor) {
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) ((Bean) bean)

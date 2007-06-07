@@ -26,7 +26,6 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
-import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 
 /**
  * Validates a given {@link IBean}'s constructor arguments. Skips abstract
@@ -35,13 +34,14 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
  * @author Torsten Juergeleit
  * @since 2.0
  */
-public class BeanConstructorArgumentsRule implements
-		IValidationRule<IBean, BeansValidationContext> {
+public class BeanConstructorArgumentsRule extends AbstractBeanValidationRule {
 
+	@Override
 	public boolean supports(IModelElement element, IValidationContext context) {
 		return (element instanceof Bean && !((Bean) element).isAbstract());
 	}
 
+	@Override
 	public void validate(IBean bean, BeansValidationContext context,
 			IProgressMonitor monitor) {
 		BeanDefinition bd = ((Bean) bean).getBeanDefinition();
