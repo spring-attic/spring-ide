@@ -33,7 +33,7 @@ import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPost
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
-import org.springframework.ide.eclipse.javaconfig.core.model.BeanCreationMethod;
+import org.springframework.ide.eclipse.javaconfig.core.model.BeanAnnotationMetaData;
 import org.springframework.ide.eclipse.javaconfig.core.model.ConfigurationASTVistor;
 import org.springframework.ide.eclipse.javaconfig.core.model.ConfigurationClassVisitor;
 import org.springframework.ide.eclipse.javaconfig.core.model.JdtModelSourceLocationFactory;
@@ -100,7 +100,11 @@ public class ConfigurationPostProcessor implements IBeansConfigPostProcessor {
 		if (beanClassName != null) {
 			try {
 
-				List<BeanCreationMethod> beanCreationMethods = new ArrayList<BeanCreationMethod>();
+				List<BeanAnnotationMetaData> beanAnnotationMetaData = 
+					new ArrayList<BeanAnnotationMetaData>();
+				
+				List<BeanAnnotationMetaData> externalBeanAnnotationMetaData = 
+					new ArrayList<BeanAnnotationMetaData>();
 
 				String superClassName = beanClassName;
 				do {
@@ -110,20 +114,23 @@ public class ConfigurationPostProcessor implements IBeansConfigPostProcessor {
 					ConfigurationClassVisitor v = new ConfigurationClassVisitor();
 					reader.accept(v, false);
 					superClassName = v.getSuperClassName();
-					beanCreationMethods.addAll(v.getBeanCreationMethods());
+					beanAnnotationMetaData.addAll(v.getBeanAnnotationMetaData());
+					externalBeanAnnotationMetaData.addAll(v.getExternalBeanAnnotationMetaData());
 				} while (superClassName != null);
 
-				if (beanCreationMethods != null
-						&& beanCreationMethods.size() > 0) {
-					List<BeanComponentDefinition> beanComponentDefinitions = new ArrayList<BeanComponentDefinition>();
-					for (BeanCreationMethod beanCreationMethod : beanCreationMethods) {
+				if (beanAnnotationMetaData != null
+						&& beanAnnotationMetaData.size() > 0) {
+					List<BeanComponentDefinition> beanComponentDefinitions = 
+						new ArrayList<BeanComponentDefinition>();
+					for (BeanAnnotationMetaData beanCreationMethod : beanAnnotationMetaData) {
 						beanComponentDefinitions
 								.add(processSingleBeanCreationMethod(
 										postProcessingContext, bean,
 										beanCreationMethod));
 					}
 
-					createBeanPropertyValues(beanType, beanComponentDefinitions);
+					createBeanPropertyValues(beanType, beanComponentDefinitions, 
+							externalBeanAnnotationMetaData);
 				}
 			}
 			catch (IOException e) {
@@ -132,15 +139,16 @@ public class ConfigurationPostProcessor implements IBeansConfigPostProcessor {
 		}
 	}
 
-	private void createBeanPropertyValues(IType beanType, List<BeanComponentDefinition> beanComponentDefinitions) {
+	private void createBeanPropertyValues(IType beanType,
+			List<BeanComponentDefinition> beanComponentDefinitions, 
+			List<BeanAnnotationMetaData> externalBeanAnnotationMetaData) {
 		try {
 			ASTParser parser = ASTParser.newParser(AST.JLS3);
 			parser.setSource(beanType.getCompilationUnit());
 			parser.setResolveBindings(true);
-			ASTNode node = parser
-					.createAST(new NullProgressMonitor());
-			node.accept(new ConfigurationASTVistor(
-					beanComponentDefinitions));
+			ASTNode node = parser.createAST(new NullProgressMonitor());
+			node.accept(new ConfigurationASTVistor(beanComponentDefinitions, 
+					externalBeanAnnotationMetaData));
 		}
 		catch (Exception e) {
 			// we don't care about any exception here
@@ -149,14 +157,14 @@ public class ConfigurationPostProcessor implements IBeansConfigPostProcessor {
 
 	/**
 	 * Creates a {@link RootBeanDefinition} for the given
-	 * {@link BeanCreationMethod}.
+	 * {@link BeanAnnotationMetaData}.
 	 * @param postProcessingContext the post processing context
 	 * @param bean the {@link IBean} to post process
-	 * @param beanCreationMethod the {@link BeanCreationMethod}
+	 * @param beanCreationMethod the {@link BeanAnnotationMetaData}
 	 */
 	private BeanComponentDefinition processSingleBeanCreationMethod(
 			IBeansConfigPostProcessingContext postProcessingContext,
-			IBean bean, BeanCreationMethod beanCreationMethod) {
+			IBean bean, BeanAnnotationMetaData beanCreationMethod) {
 
 		RootBeanDefinition bd = new RootBeanDefinition();
 		bd.setBeanClassName(beanCreationMethod.getReturnTypeName());

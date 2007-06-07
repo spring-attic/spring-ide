@@ -20,14 +20,15 @@ import org.springframework.core.io.Resource;
  * @since 2.0
  */
 public class DefaultModelSourceLocation implements IModelSourceLocation {
-	
+
 	private final int endLine;
-	
+
 	private final int startline;
-	
+
 	private final Resource resource;
-	
-	public DefaultModelSourceLocation(final int startline, final int endLine, final Resource resource) {
+
+	public DefaultModelSourceLocation(final int startline, final int endLine,
+			final Resource resource) {
 		this.endLine = endLine;
 		this.startline = startline;
 		this.resource = resource;

@@ -40,6 +40,8 @@ public class ConfigurationASTVistor extends ASTVisitor {
 
 	private List<BeanComponentDefinition> beanComponentDefinitions;
 
+	private List<BeanAnnotationMetaData> externalBeanAnnotationMetaData;
+
 	private List<MethodInvocation> methodInvocations;
 
 	private BeanComponentDefinition currentBeanComponentDefinition;
@@ -47,8 +49,10 @@ public class ConfigurationASTVistor extends ASTVisitor {
 	private IModelSourceLocation currentModelSourceLocation;
 
 	public ConfigurationASTVistor(
-			List<BeanComponentDefinition> beanComponentDefinitions) {
+			List<BeanComponentDefinition> beanComponentDefinitions,
+			List<BeanAnnotationMetaData> externalBeanAnnotationMetaData) {
 		this.beanComponentDefinitions = beanComponentDefinitions;
+		this.externalBeanAnnotationMetaData = externalBeanAnnotationMetaData;
 	}
 
 	private BeanComponentDefinition getBeanComponentDefinition(String methodName) {
@@ -64,6 +68,15 @@ public class ConfigurationASTVistor extends ASTVisitor {
 			}
 		}
 		return null;
+	}
+
+	private boolean isExternalBeanReference(String methodName) {
+		for (BeanAnnotationMetaData def : this.externalBeanAnnotationMetaData) {
+			if (methodName.equals(def.getName())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public boolean visit(MethodDeclaration node) {
@@ -108,11 +121,12 @@ public class ConfigurationASTVistor extends ASTVisitor {
 						if (arguments.get(0) instanceof MethodInvocation) {
 							MethodInvocation nestedInvocation = (MethodInvocation) arguments
 									.get(0);
-							String test = nestedInvocation.getName()
+							String calledMethodName = nestedInvocation.getName()
 									.getFullyQualifiedName();
-							if (getBeanComponentDefinition(test) != null) {
+							if (getBeanComponentDefinition(calledMethodName) != null
+									|| isExternalBeanReference(calledMethodName)) {
 								property = new PropertyValue(propertyName,
-										new RuntimeBeanReference(test));
+										new RuntimeBeanReference(calledMethodName));
 								startLine = root.getLineNumber(nestedInvocation
 										.getStartPosition());
 								endLine = root.getLineNumber(nestedInvocation

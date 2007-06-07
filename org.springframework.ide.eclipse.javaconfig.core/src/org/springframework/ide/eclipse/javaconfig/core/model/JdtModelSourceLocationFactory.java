@@ -38,7 +38,7 @@ public class JdtModelSourceLocationFactory {
 	 * @return a new {@link IModelSourceLocation}
 	 */
 	public static IModelSourceLocation getModelSourceLocation(IBean bean,
-			BeanCreationMethod beanCreationMethod) {
+			BeanAnnotationMetaData beanCreationMethod) {
 
 		String className = beanCreationMethod.getOwningClassName();
 		String methodName = beanCreationMethod.getName();

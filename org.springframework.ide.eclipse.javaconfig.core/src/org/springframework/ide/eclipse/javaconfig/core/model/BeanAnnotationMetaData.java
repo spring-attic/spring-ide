@@ -22,7 +22,7 @@ import org.springframework.config.java.annotation.Configuration;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class BeanCreationMethod {
+public class BeanAnnotationMetaData {
 
 	private String owningClassName;
 
@@ -44,11 +44,13 @@ public class BeanCreationMethod {
 
 	boolean isBeanCreationMethod = false;
 
+	boolean isExternalBeanReference = false;
+	
 	private String scope;
 
 	private boolean isPublic;
 
-	public BeanCreationMethod(String beanName, String beanClassName,
+	public BeanAnnotationMetaData(String beanName, String beanClassName,
 			String owningClassName) {
 		this.name = beanName;
 		this.returnTypeName = beanClassName;
@@ -145,6 +147,14 @@ public class BeanCreationMethod {
 
 	public String getOwningClassName() {
 		return owningClassName;
+	}
+
+	public boolean isExternalBeanReference() {
+		return isExternalBeanReference;
+	}
+
+	public void setExternalBeanReference(boolean isExternalBeanReference) {
+		this.isExternalBeanReference = isExternalBeanReference;
 	}
 
 }

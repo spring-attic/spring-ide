@@ -23,6 +23,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
 import org.springframework.config.java.annotation.Bean;
 import org.springframework.config.java.annotation.Configuration;
+import org.springframework.config.java.annotation.ExternalBean;
 
 /**
  * ASM based {@link ClassVisitor} implementation that reads the Spring
@@ -33,19 +34,19 @@ import org.springframework.config.java.annotation.Configuration;
  */
 public class ConfigurationClassVisitor extends EmptyVisitor {
 
-	private static class BeanCreationMethodVisitor extends EmptyVisitor {
+	private static class ConfigurationMethodVisitor extends EmptyVisitor {
 
-		private final BeanCreationMethod beanCreationMethod;
+		private final BeanAnnotationMetaData beanAnnotationMetaData;
 
-		public BeanCreationMethodVisitor(BeanCreationMethod beanCreationMethod) {
-			this.beanCreationMethod = beanCreationMethod;
+		public ConfigurationMethodVisitor(BeanAnnotationMetaData beanAnnotationMetaData) {
+			this.beanAnnotationMetaData = beanAnnotationMetaData;
 		}
 
 		public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
 			if (BEAN_ANNOTATION_DESC.equals(desc)) {
 
 				// mark precedence of @Bean annotation
-				beanCreationMethod.setBeanCreationMethod(true);
+				beanAnnotationMetaData.setBeanCreationMethod(true);
 
 				return new AnnotationVisitor() {
 
@@ -60,24 +61,24 @@ public class ConfigurationClassVisitor extends EmptyVisitor {
 						}
 						if (value != null) {
 							if ("aliases".equals(name)) {
-								beanCreationMethod.addAlias((String) value);
+								beanAnnotationMetaData.addAlias((String) value);
 							}
 							else if ("scope".equals(name)) {
-								beanCreationMethod.setScope((String) value);
+								beanAnnotationMetaData.setScope((String) value);
 							}
 							else if ("destroyMethodName".equals(name)) {
-								beanCreationMethod
+								beanAnnotationMetaData
 										.setDestoryMethodName((String) value);
 							}
 							else if ("initMethodName".equals(name)) {
-								beanCreationMethod
+								beanAnnotationMetaData
 										.setInitMethodName((String) value);
 							}
 							else if ("dependsOn".equals(name)) {
-								beanCreationMethod.addDependsOn((String) value);
+								beanAnnotationMetaData.addDependsOn((String) value);
 							}
 							else if ("allowOverriding".equals(name)) {
-								beanCreationMethod.setAllowsOverriding(Boolean
+								beanAnnotationMetaData.setAllowsOverriding(Boolean
 										.valueOf((String) value));
 							}
 						}
@@ -101,15 +102,19 @@ public class ConfigurationClassVisitor extends EmptyVisitor {
 					}
 				};
 			}
-			else {
-				return new EmptyVisitor();
+			else if (EXTERNAL_BEAN_ANNOTATION_DESC.equals(desc)) {
+				// mark precedence of @ExternalBean annotation
+				beanAnnotationMetaData.setExternalBeanReference(true);
 			}
-
+			return new EmptyVisitor();
 		}
 	}
 
 	private static final String BEAN_ANNOTATION_DESC = Type
 			.getDescriptor(Bean.class);
+
+	private static final String EXTERNAL_BEAN_ANNOTATION_DESC = Type
+			.getDescriptor(ExternalBean.class);
 
 	private static final String CONFIGURATION_ANNOTATION_DESC = Type
 			.getDescriptor(Configuration.class);
@@ -117,18 +122,31 @@ public class ConfigurationClassVisitor extends EmptyVisitor {
 	private static final String OBJECT_CLASS = Type
 			.getInternalName(Object.class);
 
-	private Stack<BeanCreationMethod> beanCreationMethods = new Stack<BeanCreationMethod>();
-
+	private Stack<BeanAnnotationMetaData> beanAnnotationMetaData = 
+		new Stack<BeanAnnotationMetaData>();
+	
 	private boolean isConfigurationAnnotationPresent = false;
 
 	private String superClassName = null;
 
 	private String className = null;
 
-	public List<BeanCreationMethod> getBeanCreationMethods() {
-		List<BeanCreationMethod> validBeanCreationMethods = new ArrayList<BeanCreationMethod>();
-		for (BeanCreationMethod beanCreationMethod : beanCreationMethods) {
-			if (beanCreationMethod.isBeanCreationMethod) {
+	public List<BeanAnnotationMetaData> getBeanAnnotationMetaData() {
+		List<BeanAnnotationMetaData> validBeanCreationMethods = 
+			new ArrayList<BeanAnnotationMetaData>();
+		for (BeanAnnotationMetaData beanCreationMethod : beanAnnotationMetaData) {
+			if (beanCreationMethod.isBeanCreationMethod()) {
+				validBeanCreationMethods.add(beanCreationMethod);
+			}
+		}
+		return validBeanCreationMethods;
+	}
+
+	public List<BeanAnnotationMetaData> getExternalBeanAnnotationMetaData() {
+		List<BeanAnnotationMetaData> validBeanCreationMethods = 
+			new ArrayList<BeanAnnotationMetaData>();
+		for (BeanAnnotationMetaData beanCreationMethod : beanAnnotationMetaData) {
+			if (beanCreationMethod.isExternalBeanReference()) {
 				validBeanCreationMethods.add(beanCreationMethod);
 			}
 		}
@@ -162,10 +180,10 @@ public class ConfigurationClassVisitor extends EmptyVisitor {
 			String signature, String[] exceptions) {
 		if (isConfigurationAnnotationPresent) {
 
-			BeanCreationMethod beanCreationMethod = new BeanCreationMethod(
+			BeanAnnotationMetaData beanCreationMethod = new BeanAnnotationMetaData(
 					name, Type.getReturnType(desc).getClassName(),
 					this.className);
-			this.beanCreationMethods.push(beanCreationMethod);
+			this.beanAnnotationMetaData.push(beanCreationMethod);
 
 			beanCreationMethod.setPublic(Opcodes.ACC_PUBLIC == access);
 			Type[] parameterTypes = Type.getArgumentTypes(desc);
@@ -175,7 +193,7 @@ public class ConfigurationClassVisitor extends EmptyVisitor {
 							.getClassName());
 				}
 			}
-			return new BeanCreationMethodVisitor(beanCreationMethod);
+			return new ConfigurationMethodVisitor(beanCreationMethod);
 		}
 		else {
 			return new EmptyVisitor();
