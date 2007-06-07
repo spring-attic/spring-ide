@@ -149,7 +149,19 @@
 		<property name="sitePackageVersion" value="2.0-rc1" />
 		<property name="featureVersion" value="2.0.0" />
 		<antcall target="generateUpdateSite" />
+		
+        <java jar="${baseLocation}/startup.jar" 
+              fork="true" 
+              failonerror="true" 
+              maxmemory="256m" 
+              dir="${buildDirectory}"> 
+            <arg line="-application org.eclipse.update.core.siteOptimizer" /> 
+            <arg line="-jarProcessor -verbose -processAll -repack -outputDir ${UpdateSiteStagingLocation}/../test" />
+            <arg line="${UpdateSiteStagingLocation}" /> 
+        </java> 
+		
 		<antcall target="publishToUpdateSiteDev" />
+		
 	</target>
 	<target name="generateUpdateSite">
 		<!-- Create the directory structure -->
