@@ -52,6 +52,10 @@
 			  markerId="problemmarker"
 			  enabledByDefault="true"/>
 	    <rules validatorId="org.springframework.ide.eclipse.beans.core.beansvalidator">
+		    <rule id="beanAlias"
+		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanAliasRule"
+		            name="%beansValidator.rule.beanAlias.name"
+		            description="%beansValidator.rule.beanAlias.description"/>
 		    <rule id="beanDefinitionHolder"
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanDefinitionHolderRule"
 		            name="%beansValidator.rule.beanDefinitionHolder.name"

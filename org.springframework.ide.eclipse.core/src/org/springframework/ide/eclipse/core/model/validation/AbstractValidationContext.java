@@ -53,8 +53,9 @@ public abstract class AbstractValidationContext implements IValidationContext {
 
 	public void warning(IModelElement element, String problemId,
 			String message, ValidationProblemAttribute... attributes) {
-		problems.add(createProblem(element, message,
-				IValidationProblemMarker.SEVERITY_WARNING, problemId, attributes));
+		problems.add(createProblem(element, problemId,
+				IValidationProblemMarker.SEVERITY_WARNING, message,
+				attributes));
 	}
 
 	public void error(IModelElement element, String problemId, String message,

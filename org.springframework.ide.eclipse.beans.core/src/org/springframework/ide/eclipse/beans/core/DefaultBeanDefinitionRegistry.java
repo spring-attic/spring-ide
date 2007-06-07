@@ -112,7 +112,7 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory
 	@Override
 	public boolean containsBeanDefinition(String beanName) {
 		String transformedBeanName = transformedBeanName(beanName);
-		return beanDefinitionMap.containsKey(transformedBeanName);
+		return beanDefinitionNames.contains(transformedBeanName);
 	}
 
 	/**
