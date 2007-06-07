@@ -156,7 +156,7 @@
               maxmemory="256m" 
               dir="${buildDirectory}"> 
             <arg line="-application org.eclipse.update.core.siteOptimizer" /> 
-            <arg line="-jarProcessor -verbose -processAll -repack -outputDir ${UpdateSiteStagingLocation}/../test" />
+            <arg line="-jarProcessor -verbose -processAll -repack -pack -outputDir ${UpdateSiteStagingLocation}" />
             <arg line="${UpdateSiteStagingLocation}" /> 
         </java> 
 		
