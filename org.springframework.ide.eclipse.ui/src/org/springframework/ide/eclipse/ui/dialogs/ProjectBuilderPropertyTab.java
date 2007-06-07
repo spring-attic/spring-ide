@@ -225,8 +225,6 @@ public class ProjectBuilderPropertyTab {
 						projectBuilderDefinition.setEnabled(true, project);
 					}
 					else {
-						projectBuilderDefinition.getProjectBuilder().cleanup(
-								project, new NullProgressMonitor());
 						projectBuilderDefinition.setEnabled(false, project);
 					}
 				}

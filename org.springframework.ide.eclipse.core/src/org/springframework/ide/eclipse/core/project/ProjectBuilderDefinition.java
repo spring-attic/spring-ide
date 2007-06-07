@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.core.project;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
 
 /**
@@ -46,7 +47,7 @@ public class ProjectBuilderDefinition {
 	private String name;
 
 	private String iconUri;
-	
+
 	private String namespaceUri;
 
 	private IProjectBuilder projectBuilder;
@@ -77,7 +78,8 @@ public class ProjectBuilderDefinition {
 		if (builder instanceof IProjectBuilder) {
 			projectBuilder = (IProjectBuilder) builder;
 		}
-		this.namespaceUri = element.getDeclaringExtension().getNamespaceIdentifier();
+		this.namespaceUri = element.getDeclaringExtension()
+				.getNamespaceIdentifier();
 		this.id = element.getAttribute(ID_ATTRIBUTE);
 		this.name = element.getAttribute(NAME_ATTRIBUTE);
 		this.description = element.getAttribute(DESCRIPTION_ATTRIBUTE);
@@ -101,6 +103,17 @@ public class ProjectBuilderDefinition {
 		SpringCorePreferences.getProjectPreferences(project).putBoolean(
 				BUILDER_PREFIX + this.id, isEnabled);
 		this.isEnabled = isEnabled;
+		cleanup(project);
+	}
+
+	private void cleanup(IProject project) {
+		if (!this.isEnabled) {
+			try {
+				getProjectBuilder().cleanup(project, new NullProgressMonitor());
+			}
+			catch (CoreException e) {
+			}
+		}
 	}
 
 	@Override
