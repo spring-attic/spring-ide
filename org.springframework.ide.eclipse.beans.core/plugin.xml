@@ -68,10 +68,6 @@
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanClassRule"
 		            name="%beansValidator.rule.beanClass.name"
 		            description="%beansValidator.rule.beanClass.description"/>
-		    <rule id="beanConstructorArguments"
-		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanConstructorArgumentsRule"
-		            name="%beansValidator.rule.beanConstructorArguments.name"
-		            description="%beansValidator.rule.beanConstructorArguments.description"/>
 		    <rule id="beanInitDestroyMethod"
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanInitDestroyMethodRule"
 		            name="%beansValidator.rule.beanInitDestroyMethod.name"
@@ -80,6 +76,14 @@
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanFactoryRule"
 		            name="%beansValidator.rule.beanFactory.name"
 		            description="%beansValidator.rule.beanFactory.description"/>
+		    <rule id="beanConstructorArguments"
+		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanConstructorArgumentsRule"
+		            name="%beansValidator.rule.beanConstructorArguments.name"
+		            description="%beansValidator.rule.beanConstructorArguments.description"/>
+		    <rule id="beanProperty"
+		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanPropertyRule"
+		            name="%beansValidator.rule.beanProperty.name"
+		            description="%beansValidator.rule.beanProperty.description"/>
 	    </rules>
 	</extension>
 </plugin>
