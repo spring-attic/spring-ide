@@ -47,7 +47,6 @@ public class BeanInitDestroyMethodRule extends
 				&& !ValidationRuleUtils.hasPlaceHolder(mergedClassName)) {
 			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean)
 					.getProject(), mergedClassName);
-
 			if (type != null) {
 
 				// For non-factory beans validate bean's init-method and

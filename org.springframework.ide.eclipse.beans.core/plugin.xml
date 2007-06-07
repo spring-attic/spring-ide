@@ -72,6 +72,10 @@
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanInitDestroyMethodRule"
 		            name="%beansValidator.rule.beanInitDestroyMethod.name"
 		            description="%beansValidator.rule.beanInitDestroyMethod.description"/>
+		    <rule id="beanFactory"
+		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanFactoryRule"
+		            name="%beansValidator.rule.beanFactory.name"
+		            description="%beansValidator.rule.beanFactory.description"/>
 	    </rules>
 	</extension>
 </plugin>
