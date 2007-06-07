@@ -8,26 +8,27 @@
 			id="org.springframework.ide.eclipse.beans.ui.mylar.context.beans"
 			name="%beansContextStructureBridge.name" />
 	</extension>
+
 	<extension point="org.eclipse.mylar.context.ui.bridges">
 		<uiBridge
 			class="org.springframework.ide.eclipse.beans.mylar.ui.BeansContextUIBridge"
-			contentType="spring_beans"
+			contentType="spring/beans"
 			id="mework.ide.eclipse.beans.ui.mylar.context.ui.beans"
 			name="%beansContextUIBridge.name" />
 	</extension>
 
 	<extension point="org.eclipse.ui.actionSets">
 		<actionSet id="org.eclipse.mylar.java.actionSet"
-			label="Mylar Java" visible="true">
+			label="Mylar Spring" visible="true">
 			<action
+				label="%toggleActiveFoldingAction.label" 
+				tooltip="%toggleActiveFoldingAction.tooltip"
+				toolbarPath="org.eclipse.ui.edit.text.actionSet.presentation/Presentation"
+				id="org.springframework.ide.eclipse.beans.ui.mylar.folding.auto"
 				class="org.eclipse.mylar.internal.java.ui.actions.ToggleActiveFoldingAction"
 				definitionId="org.springframework.ide.eclipse.beans.ui.mylar.folding.auto"
 				icon="icons/elcl16/interest-folding.gif"
-				id="org.springframework.ide.eclipse.beans.ui.mylar.folding.auto"
-				label="Automatically Fold Uninteresting Elements" style="toggle"
-				toolbarPath="org.eclipse.ui.edit.text.actionSet.presentation/Presentation"
-				tooltip="Automatically Fold Uninteresting Elements">
-			</action>
+				style="toggle" />
 		</actionSet>
 	</extension>
 
@@ -36,18 +37,22 @@
 			id="org.springframework.ide.eclipse.ui.interest"
 			objectClass="org.springframework.ide.eclipse.core.model.IModelElement">
 			<action
-				class="org.eclipse.mylar.internal.context.ui.actions.InterestDecrementAction"
-				enablesFor="*" icon="icons/elcl16/interest-decrease.gif"
+				label="%interestDecrementAction.label" 
+				tooltip="%interestDecrementAction.tooltip"
+				menubarPath="additions"
 				id="org.springframework.ide.eclipse.ui.interest.actions.InterestDecrementAction"
-				label="Remove from Focus" menubarPath="additions"
-				tooltip="Mark selected element as uninteresting">
-			</action>
-			<action label="Mark as Landmark"
-				tooltip="Make selected element a landmark" menubarPath="additions"
+				class="org.eclipse.mylar.internal.context.ui.actions.InterestDecrementAction"
+				icon="icons/elcl16/interest-decrease.gif"
+				enablesFor="*" />
+			<action 
+				label="%interestIncrementAction.label"
+				tooltip="%interestIncrementAction.tooltip" 
+				menubarPath="additions"
 				id="org.springframework.ide.eclipse.ui.interest.actions.InterestIncrementAction"
 				class="org.eclipse.mylar.internal.context.ui.actions.InterestIncrementAction"
-				icon="icons/elcl16/interest-increase.gif" enablesFor="*" />
+				icon="icons/elcl16/interest-increase.gif" 
+				enablesFor="*" />
 		</objectContribution>
 	</extension>
-
+	
 </plugin>

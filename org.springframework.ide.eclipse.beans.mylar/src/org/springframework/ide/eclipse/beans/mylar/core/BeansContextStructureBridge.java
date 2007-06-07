@@ -34,7 +34,7 @@ import org.springframework.ide.eclipse.core.model.ISpringProject;
  */
 public class BeansContextStructureBridge extends AbstractContextStructureBridge {
 
-	public static final String CONTENT_TYPE = "spring_beans";
+	public static final String CONTENT_TYPE = "spring/beans";
 
 	@Override
 	public boolean acceptsObject(Object object) {
@@ -132,12 +132,30 @@ public class BeansContextStructureBridge extends AbstractContextStructureBridge 
 
 	@Override
 	public Object getObjectForHandle(String handle) {
-		return BeansCorePlugin.getModel().getElement(handle);
+		Object obj = BeansCorePlugin.getModel().getElement(handle);
+		if (obj != null) {
+			return obj;
+		}
+		//obj = SpringCore.getModel().getElement(handle);
+		return obj;
 	}
 
 	@Override
 	public String getParentHandle(String handle) {
 		Object obj = getObjectForHandle(handle);
+		/*if (obj instanceof IBeansProject) {
+			return SpringCore.getModel().getProject(
+					((IBeansProject) obj).getProject()).getElementID();
+		}
+		else if (obj instanceof ISpringProject) {
+			AbstractContextStructureBridge parentBridge = ContextCorePlugin
+					.getDefault().getStructureBridge(parentContentType);
+			if (parentBridge != null
+					&& parentBridge instanceof ResourceStructureBridge) {
+				return parentBridge.getHandleIdentifier(((ISpringProject) obj).getProject());
+			}
+		}
+		else */
 		if (obj != null && obj instanceof IModelElement) {
 			IModelElement parent = ((IModelElement) obj).getElementParent();
 			if (parent != null) {

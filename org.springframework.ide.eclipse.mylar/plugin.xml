@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+	
+	<extension point="org.eclipse.ui.viewActions"> 
+    	<viewContribution 
+	    	id="org.eclipse.mylar.ui.projectexplorer.filter" 
+   		    targetID="org.springframework.ide.eclipse.ui.navigator.springExplorer">
+	    	<action
+	           label="%filterSpringExplorerAction.label"
+	           tooltip="%filterSpringExplorerAction.tooltip"
+	           menubarPath="mylar"
+	           toolbarPath="mylar"
+	           id="org.springframework.ide.eclipse.beans.mylar.ui.actions.filterSpringExplorerAction"
+	           class="org.springframework.ide.eclipse.mylar.ui.actions.FocusSpringExplorerAction"
+	           style="toggle"
+	           icon="icons/elcl16/interest-filtering.gif"
+	           enablesFor="*" />
+	  	</viewContribution> 
+	</extension>
+ 
+</plugin>

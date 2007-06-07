@@ -26,7 +26,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 public class WebflowContextStructureBridge extends
 		AbstractContextStructureBridge {
 
-	public static final String CONTENT_TYPE = "spring_webflow";
+	public static final String CONTENT_TYPE = "spring/webflow";
 
 	@Override
 	public boolean acceptsObject(Object object) {

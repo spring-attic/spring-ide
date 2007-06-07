@@ -89,6 +89,9 @@
 		<antcall target="copy.source">
 			<param name="plugin-name" value="org.springframework.ide.eclipse.ui" />
 		</antcall>
+		<antcall target="copy.source">
+			<param name="plugin-name" value="org.springframework.ide.eclipse.mylar" />
+		</antcall>
 		
 		<antcall target="copy.source">
 			<param name="plugin-name" value="org.springframework.ide.eclipse.aop.core" />
