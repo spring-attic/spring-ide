@@ -17,6 +17,7 @@ plugin@org.springframework.ide.eclipse.source=SVN,trunk,http://springide.org/rep
 #plugin@org.springframework.ide.eclipse.aop.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.aop.source
 #plugin@org.springframework.ide.eclipse.webflow.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.webflow.source
 #plugin@org.springframework.ide.eclipse.mylar.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.mylar.source
+plugin@org.springframework.ide.eclipse.mylar=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.mylar
 plugin@org.springframework.ide.eclipse.beans.core=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.beans.core
 plugin@org.springframework.ide.eclipse.beans.mylar=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.beans.mylar
 plugin@org.springframework.ide.eclipse.beans.ui=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.beans.ui
