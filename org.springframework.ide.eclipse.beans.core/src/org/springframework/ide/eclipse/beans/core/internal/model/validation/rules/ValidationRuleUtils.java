@@ -29,6 +29,8 @@ public final class ValidationRuleUtils {
 	public static final String PLACEHOLDER_SUFFIX = "}";
 
 	public static final String FACTORY_BEAN_REFERENCE_PREFIX = "&";
+	public static final String FACTORY_BEAN_REFERENCE_REGEXP = "["
+			+ FACTORY_BEAN_REFERENCE_PREFIX + "]";
 
 	public static final String ASPECT_OF_METHOD_NAME = "aspectOf";
 
