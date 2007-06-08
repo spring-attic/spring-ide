@@ -28,13 +28,13 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 
 /**
- * Validates a given {@link IBean}'s constructor arguments. Skips abstract
+ * Validates a given {@link IBean}'s constructor argument. Skips abstract
  * beans.
  * 
  * @author Torsten Juergeleit
  * @since 2.0
  */
-public class BeanConstructorArgumentsRule extends AbstractBeanValidationRule {
+public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 
 	@Override
 	public boolean supports(IModelElement element, IValidationContext context) {
