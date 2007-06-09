@@ -25,8 +25,6 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.ViewForm;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -47,10 +45,15 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
  * Spring Bean selection dialog.
  * 
  * @author Christian Dupuis
+ * @author Torsten Juergeleit
  */
 @SuppressWarnings("restriction")
 public class BeanListSelectionDialog extends ElementListSelectionDialog {
 
+	/**
+	 * This {@link FilterMatcher}Êuses an internally wrapped
+	 * {@link StringMatcher}Êto match a given bean's name or aliases.
+	 */
 	private class BeanFilterMatcher implements FilterMatcher {
 		private StringMatcher fMatcher;
 
@@ -68,7 +71,6 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 						}
 					}
 				}
-				
 			} 
 			return false;
 		}
@@ -89,33 +91,35 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 
 	private int fHeight = 18;
 
-	private CLabel fLabel;
+	private int fWidth = 60;
+	
+	private Point fSize;
 
 	private Point fLocation;
 
-	private Object[] fSelection = new Object[0];
-
-	private IDialogSettings fSettings;
-
-	private Point fSize;
-
-	private int fWidth = 60;
-
 	protected ILabelProvider labelProvider;
+	
+	private IDialogSettings fSettings;
+	
+	private CLabel fLabel;
 
 	public BeanListSelectionDialog(Shell parent, ILabelProvider renderer) {
 		super(parent, renderer);
+		this.labelProvider = renderer;
+
+		// Configure this dialog and it's FilteredList widget
 		setBlockOnOpen(true);
-		setEmptySelectionMessage(BeansUIPlugin
-				.getResourceString("BeanListSelectionDialog.selectionMessage"));
+		setMultipleSelection(false);
 		setIgnoreCase(true);
-		setStatusLineAboveButtons(true);
+		setAllowDuplicates(false);
+		setMatchEmptyString(true);
 		setTitle(BeansUIPlugin
 				.getResourceString("BeanListSelectionDialog.title"));
 		setMessage(BeansUIPlugin
 				.getResourceString("BeanListSelectionDialog.message"));
-		setMultipleSelection(false);
-		this.labelProvider = renderer;
+		setEmptySelectionMessage(BeansUIPlugin
+				.getResourceString("BeanListSelectionDialog.selectionMessage"));
+		setStatusLineAboveButtons(true);
 
 		IDialogSettings settings = BeansUIPlugin.getDefault()
 				.getDialogSettings();
@@ -134,6 +138,9 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 		return super.close();
 	}
 
+	/**
+	 * Adds a bordered label at the end of dialog area. 
+	 */
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		readSettings();
@@ -151,20 +158,12 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 	}
 
 	/**
-	 * Creates a filtered list.
-	 * 
-	 * @param parent
-	 *            the parent composite.
-	 * @return returns the filtered list widget.
+	 * Sets the preserved dimension of the list viewer and a
+	 * {@link BeanFilterMatcher}Êfilter matcher to the filtered list widget.
 	 */
 	@Override
 	protected FilteredList createFilteredList(Composite parent) {
-		int flags = SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL
-				| (false ? SWT.MULTI : SWT.SINGLE);
-
-		FilteredList list = new FilteredList(parent, flags, labelProvider,
-				true, false, true);
-		list.setFilterMatcher(new BeanFilterMatcher());
+		FilteredList list = super.createFilteredList(parent);
 		GridData data = new GridData();
 		data.widthHint = convertWidthInCharsToPixels(fWidth);
 		data.heightHint = convertHeightInCharsToPixels(fHeight);
@@ -173,21 +172,7 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 		data.horizontalAlignment = GridData.FILL;
 		data.verticalAlignment = GridData.FILL;
 		list.setLayoutData(data);
-		list.setFont(parent.getFont());
-		list.setFilter((getFilter() == null ? "" : getFilter()));		
-
-		list.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				handleDefaultSelected();
-			}
-
-			public void widgetSelected(SelectionEvent e) {
-				handleWidgetSelected();
-			}
-		});
-
-		fFilteredList = list;
-
+		list.setFilterMatcher(new BeanFilterMatcher());
 		return list;
 	}
 
@@ -224,8 +209,12 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 	}
 
 	/**
-	 * Handles a selection changed event. By default, the current selection is
-	 * validated.
+	 * Handles a selection changed event:
+	 * <ol>
+	 * <li>validate the current selection
+	 * <li>if an element is selected then show the element's resource (full
+	 * path and icon)
+	 * </ol>
 	 */
 	@Override
 	protected void handleSelectionChanged() {
@@ -240,23 +229,6 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 		}
 	}
 
-	private void handleWidgetSelected() {
-		Object[] newSelection = fFilteredList.getSelection();
-
-		if (newSelection.length != fSelection.length) {
-			fSelection = newSelection;
-			handleSelectionChanged();
-		} else {
-			for (int i = 0; i != newSelection.length; i++) {
-				if (!newSelection[i].equals(fSelection[i])) {
-					fSelection = newSelection;
-					handleSelectionChanged();
-					break;
-				}
-			}
-		}
-	}
-
 	@Override
 	public int open() {
 		final Set<IBean> beanList = new LinkedHashSet<IBean>();
@@ -266,8 +238,8 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 					throws InvocationTargetException, InterruptedException {
 				IBeansModel beansModel = BeansCorePlugin.getModel();
 				try {
-					// TODO add nested beans in components
-					beanList.addAll(BeansModelUtils.getBeans(beansModel, monitor));
+					beanList.addAll(BeansModelUtils.getBeans(beansModel,
+							monitor));
 				} catch (OperationCanceledException e) {
 					throw new InterruptedException();
 				}
