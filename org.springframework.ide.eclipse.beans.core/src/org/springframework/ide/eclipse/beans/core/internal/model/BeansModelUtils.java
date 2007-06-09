@@ -226,9 +226,9 @@ public final class BeansModelUtils {
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();
 						}
-						for (IBeansComponent componet
+						for (IBeansComponent component
 								: config.getComponents()) {
-							beans.addAll(componet.getBeans());
+							beans.addAll(component.getBeans());
 						}
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();
@@ -256,8 +256,8 @@ public final class BeansModelUtils {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
-					for (IBeansComponent componet : config.getComponents()) {
-						beans.addAll(componet.getBeans());
+					for (IBeansComponent component : config.getComponents()) {
+						beans.addAll(component.getBeans());
 					}
 					monitor.worked(worked++);
 					if (monitor.isCanceled()) {
@@ -271,9 +271,9 @@ public final class BeansModelUtils {
 		}
 		else if (element instanceof IBeansConfig) {
 			beans.addAll(((IBeansConfig) element).getBeans());
-			for (IBeansComponent componet : ((IBeansConfig) element)
+			for (IBeansComponent component : ((IBeansConfig) element)
 					.getComponents()) {
-				beans.addAll(componet.getBeans());
+				beans.addAll(component.getBeans());
 			}
 		}
 		else if (element instanceof IBeansConfigSet) {
