@@ -7,7 +7,7 @@
       </appInfo>
       <documentation>
          &lt;p&gt;
-This extension point is used to add post processors that re-implement functionality normally implemented by a BeasPostProcessor or BeanFactoryPostProcessor.
+This extension point is used to add post processors that re-implement functionality normally implemented by &lt;code&gt;org.springframework.beans.factory.config.BeanPostProcessor&lt;/code&gt; or &lt;code&gt;org.springframework.beans.factory.config.BeanFactoryPostProcessor&lt;/code&gt;.
       </documentation>
    </annotation>
 
@@ -38,14 +38,14 @@ This extension point is used to add post processors that re-implement functional
          <attribute name="type" type="string" use="required">
             <annotation>
                <documentation>
-                  an optional name
+                  the full qualified class name of the corresponding postprocessor, e.g. &lt;code&gt;org.springframework.beans.factory.config.BeanPostProcessor&lt;/code&gt;
                </documentation>
             </annotation>
          </attribute>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  the URI of the namespace, e.g. &quot;http://www.springframework.org/schema/beans&quot;
+                  an implementation of the interface &lt;code&gt;org.springframework.ide.eclipse.beans.core.model.postprocess.IBeansConfigPostProcessor&lt;/code&gt;
                </documentation>
                <appInfo>
                   <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.beans.core.model.postprocess.IBeansConfigPostProcessor"/>
@@ -72,8 +72,8 @@ This extension point is used to add post processors that re-implement functional
          &lt;pre&gt;
 &lt;extension point=&quot;org.springframework.ide.eclipse.beans.core.postprocessors&quot;&gt;
    &lt;postprocessor
-    type=&quot;org.springframework.beans.factory.config.PropertyPlaceholderConfigurer&quot;
-    class=&quot;&quot; /&gt;  
+      type=&quot;org.springframework.beans.factory.config.PropertyPlaceholderConfigurer&quot;
+      class=&quot;&quot;/&gt;  
 &lt;/extension&gt;
 &lt;/pre&gt;
       </documentation>
