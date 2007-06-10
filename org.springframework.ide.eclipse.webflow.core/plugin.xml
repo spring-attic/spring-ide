@@ -26,6 +26,12 @@
 		<persistent value="true" />
 	</extension>
 
+	<extension point="org.eclipse.ui.ide.markerSupport">
+		<markerTypeCategory name="%markerCategory.name">
+			<markerTypeReference id="org.springframework.ide.eclipse.webflow.core.problemmarker"/>
+		</markerTypeCategory>
+	</extension>
+
 	<extension point="org.eclipse.ui.elementFactories">
 		<factory
 			id="org.springframework.ide.eclipse.webflow.core.factoryId"

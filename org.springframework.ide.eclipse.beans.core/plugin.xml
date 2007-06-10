@@ -17,6 +17,12 @@
 		<persistent value="true" />
 	</extension>
 
+	<extension point="org.eclipse.ui.ide.markerSupport">
+		<markerTypeCategory name="%markerCategory.name">
+			<markerTypeReference id="org.springframework.ide.eclipse.beans.core.problemmarker"/>
+		</markerTypeCategory>
+	</extension>
+
 	<extension point="org.eclipse.core.expressions.propertyTesters">
 		<propertyTester
 			class="org.springframework.ide.eclipse.beans.core.internal.model.BeansModelPropertyTester"
