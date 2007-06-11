@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
+import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinitionFactory;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -127,12 +128,21 @@ public class BeansConfigValidator extends AbstractValidator {
 
 	@Override
 	protected boolean supports(IModelElement element) {
-		return (element instanceof IBeansModelElement
+		if (element instanceof IBeansModelElement) {
+			return true;
+		}
 
-				// Ignore beans or components contributed by namespace handlers
-				&& !(element instanceof ISourceModelElement
-						&& ModelUtils.getNameSpaceURI((ISourceModelElement)
-								element) != null));
+		// Ignore beans or components contributed by namespace handlers
+		if (element instanceof ISourceModelElement) {
+			String nameSpaceUri = ModelUtils
+					.getNameSpaceURI((ISourceModelElement) element);
+			if (nameSpaceUri == null
+					|| NamespaceUtils.DEFAULT_NAMESPACE_URI
+							.equals(nameSpaceUri)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private List<IResource> getBeanConfigResources(IType beanClass) {
