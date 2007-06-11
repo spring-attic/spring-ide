@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.beans.core.internal.model.validation.rul
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IType;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -23,7 +24,6 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansList;
-import org.springframework.ide.eclipse.beans.core.model.IBeansMap;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansValueHolder;
@@ -47,7 +47,10 @@ public class BeanReferenceRule implements
 		return (element instanceof Bean || element instanceof IBeansValueHolder
 				|| element instanceof IBeansList
 				|| element instanceof IBeansSet
-				|| element instanceof IBeansMap);
+// Skip IBeansMap because it's entries (IBeansMapEntry -> IBansValueHolder) are
+// validated instead 			
+//				|| element instanceof IBeansMap
+				);
 	}
 
 	public void validate(IBeansModelElement element,
@@ -67,11 +70,6 @@ public class BeanReferenceRule implements
 			for (Object entry : set.getSet()) {
 				validateValue(set, entry, context);
 			}
-		} else if (element instanceof IBeansMap) {
-			IBeansMap map = (IBeansMap) element;
-			for (Object entry : map.getMap().values()) {
-				validateValue(map, entry, context);
-			}
 		}
 	}
 
@@ -79,6 +77,21 @@ public class BeanReferenceRule implements
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) bean
 				.getBeanDefinition();
 
+		// Validate parent bean
+		if (bean.isChildBean()) {
+			String parentName = bean.getParentName();
+			if (parentName != null
+					&& !ValidationRuleUtils.hasPlaceHolder(parentName)) {
+				try {
+					context.getCompleteRegistry()
+									.getBeanDefinition(parentName);
+				} catch (NoSuchBeanDefinitionException e) {
+					context.warning(bean, "UNDEFINED_PARENT_BEAN",
+							"Parent bean '" + parentName + "' not found");
+				}
+			}
+		}
+		
 		// Validate depends-on beans
 		if (bd.getDependsOn() != null) {
 			for (String beanName : bd.getDependsOn()) {
@@ -122,7 +135,7 @@ public class BeanReferenceRule implements
 		else if (value instanceof BeanReference) {
 			beanName = ((BeanReference) value).getBeanName();
 		}
-		if (beanName != null) {
+		if (beanName != null && !ValidationRuleUtils.hasPlaceHolder(beanName)) {
 			try {
 				AbstractBeanDefinition refBd = (AbstractBeanDefinition) context
 						.getCompleteRegistry().getBeanDefinition(beanName);
@@ -136,13 +149,8 @@ public class BeanReferenceRule implements
 			}
 			catch (NoSuchBeanDefinitionException e) {
 
-				// Display a warning if the bean ref contains a placeholder
-				if (ValidationRuleUtils.hasPlaceHolder(beanName)) {
-					context.warning(element, "UNDEFINED_REFERENCED_BEAN",
-							"Referenced bean '" + beanName + "' not found");
-				}
 				// Handle factory bean references
-				else if (ValidationRuleUtils.isFactoryBeanReference(beanName)) {
+				if (ValidationRuleUtils.isFactoryBeanReference(beanName)) {
 					String tempBeanName = beanName.replaceFirst(
 							ValidationRuleUtils.FACTORY_BEAN_REFERENCE_REGEXP,
 							"");
@@ -180,11 +188,17 @@ public class BeanReferenceRule implements
 								"Referenced factory bean '" + tempBeanName
 										+ "' not found");
 					}
+					catch (BeanDefinitionStoreException be) {
+						// ignore unresolvable parent bean exceptions
+					}
 				}
 				else {
 					context.warning(element, "UNDEFINED_REFERENCED_BEAN",
 							"Referenced bean '" + beanName + "' not found");
 				}
+			}
+			catch (BeanDefinitionStoreException e) {
+				// ignore unresolvable parent bean exceptions
 			}
 		}
 	}
