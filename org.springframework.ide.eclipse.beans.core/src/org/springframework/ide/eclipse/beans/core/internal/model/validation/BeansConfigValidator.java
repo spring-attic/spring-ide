@@ -31,6 +31,8 @@ import org.springframework.ide.eclipse.core.internal.model.validation.Validation
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinitionFactory;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
+import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidator;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 
@@ -128,9 +130,9 @@ public class BeansConfigValidator extends AbstractValidator {
 		return (element instanceof IBeansModelElement
 
 				// Ignore beans or components contributed by namespace handlers
-/*				&& !(element instanceof ISourceModelElement
+				&& !(element instanceof ISourceModelElement
 						&& ModelUtils.getNameSpaceURI((ISourceModelElement)
-								element) != null)*/);
+								element) != null));
 	}
 
 	private List<IResource> getBeanConfigResources(IType beanClass) {
