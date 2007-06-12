@@ -18,6 +18,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -119,12 +120,12 @@ public class AopReferenceModelUtils {
 
 	public static Set<IResource> getAffectedFiles(int kind, IResource resource) {
 		Set<IResource> files = new HashSet<IResource>();
-		
+
 		// since we moved to the new AbstractProjectBuilder we don't need the
 		// following check.
-		//if ((kind == IncrementalProjectBuilder.AUTO_BUILD
-		//		|| kind == IncrementalProjectBuilder.INCREMENTAL_BUILD)
-		if (resource instanceof IFile
+		if ((kind == IncrementalProjectBuilder.AUTO_BUILD 
+				|| kind == IncrementalProjectBuilder.INCREMENTAL_BUILD)
+				&& resource instanceof IFile
 				&& resource.getName().endsWith(JAVA_FILE_EXTENSION)) {
 			Set<IBeansProject> projects = BeansCorePlugin.getModel()
 					.getProjects();
@@ -160,10 +161,10 @@ public class AopReferenceModelUtils {
 			}
 		}
 		else if (BeansCoreUtils.isBeansConfig(resource)) {
-			IBeansConfig beansConfig = (IBeansConfig) 
-				BeansModelUtils.getResourceModelElement(resource);
+			IBeansConfig beansConfig = (IBeansConfig) BeansModelUtils
+					.getResourceModelElement(resource);
 			files.add((IFile) resource);
-			
+
 			// add confis from config set
 			IBeansProject project = BeansCorePlugin.getModel().getProject(
 					resource.getProject());
@@ -181,7 +182,7 @@ public class AopReferenceModelUtils {
 		}
 		return files;
 	}
-	
+
 	public static IBean getBeanFromElementId(String elementId) {
 		IBeansModel model = BeansCorePlugin.getModel();
 		return (IBean) model.getElement(elementId);

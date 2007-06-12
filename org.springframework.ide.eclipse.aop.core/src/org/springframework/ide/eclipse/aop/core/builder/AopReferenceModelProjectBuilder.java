@@ -60,9 +60,7 @@ public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 	public void build(Set<IResource> affectedResources, int kind,
 			IProgressMonitor monitor) throws CoreException {
 		try {
-			monitor
-					.subTask(Activator
-							.getFormattedMessage("AopReferenceModelProjectBuilder.buildingAopReferenceModel"));
+			monitor.subTask(Activator.getFormattedMessage("AopReferenceModelProjectBuilder.buildingAopReferenceModel"));
 			IWorkspaceRunnable referenceModelBuilder = new AopReferenceModelBuilder(
 					affectedResources);
 			IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -89,8 +87,9 @@ public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 					resource.getFullPath()));
 			AopReferenceModelMarkerUtils.deleteProblemMarkers(resource);
 
+			// delete existing AOP references in case a build is disabled for
+			// a certain project.
 			IProject project = resource.getProject();
-			// reinit aop reference model
 			if (JdtUtils.isJavaProject(project)) {
 				Activator.getModel().removeProject(
 						JdtUtils.getJavaProject(project));

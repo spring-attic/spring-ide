@@ -129,7 +129,7 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 		}
 		else {
 			ResourceDeltaVisitor visitor = new ResourceDeltaVisitor(
-					contributor);
+					contributor, kind);
 			delta.accept(visitor);
 			affectedResources = visitor.getResources();
 		}
@@ -155,7 +155,8 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 
 		public boolean visit(IResource resource) throws CoreException {
 			if (resource instanceof IFile) {
-				resources.addAll(contributor.getAffectedResources(resource, 0));
+				resources.addAll(contributor.getAffectedResources(resource, 
+						IncrementalProjectBuilder.FULL_BUILD));
 			}
 			return true;
 		}
@@ -168,10 +169,12 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 
 		private IProjectContributor contributor;
 		private Set<IResource> resources;
+		private int kind = -1;
 
-		public ResourceDeltaVisitor(IProjectContributor builder) {
+		public ResourceDeltaVisitor(IProjectContributor builder, int kind) {
 			this.contributor = builder;
 			this.resources = new LinkedHashSet<IResource>();
+			this.kind = kind;
 		}
 
 		public Set<IResource> getResources() {
@@ -189,7 +192,7 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 			}
 			else if (resource instanceof IFolder) {
 				resources.addAll(contributor.getAffectedResources(resource,
-						aDelta.getKind()));
+						kind));
 				visitChildren = true;
 			}
 			else if (resource instanceof IFile) {
@@ -197,13 +200,13 @@ public class SpringProjectContributionManager extends IncrementalProjectBuilder 
 				case IResourceDelta.ADDED:
 				case IResourceDelta.CHANGED:
 					resources.addAll(contributor.getAffectedResources(resource,
-							aDelta.getKind()));
+							kind));
 					visitChildren = true;
 					break;
 
 				case IResourceDelta.REMOVED:
 					resources.addAll(contributor.getAffectedResources(resource,
-							aDelta.getKind()));
+							kind));
 					break;
 				}
 			}
