@@ -101,11 +101,11 @@ public class WebflowProjectDescriptionWriter implements
 				writer.startTag(CONFIG, null);
 				writer.printSimpleTag(FILE, config.getResource()
 						.getProjectRelativePath().toString());
-				writer.printSimpleTag(NAME, config.getName());
+				writer.printCDataTag(NAME, config.getName());
 				Set<IModelElement> beansConfigs = config.getBeansConfigs();
 				if (beansConfigs != null) {
 					for (IModelElement bc : beansConfigs) {
-						writer.printSimpleTag(BEANS_CONFIG, bc.getElementID());
+						writer.printCDataTag(BEANS_CONFIG, bc.getElementID());
 					}
 				}
 				writer.endTag(CONFIG);

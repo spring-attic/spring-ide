@@ -21,6 +21,10 @@ import java.util.HashMap;
  */
 public class XMLWriter extends PrintWriter {
 
+	private static final String CDATA_PREFIX = "<![CDATA[";
+
+	private static final String CDATA_SUFFIX = "]]>";
+
 	public static final String XML_VERSION =
 		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 
@@ -41,6 +45,14 @@ public class XMLWriter extends PrintWriter {
 		if (value != null) {
 			printTag(name, null, true, false);
 			print(getEscaped(String.valueOf(value)));
+			printTag('/' + name, null, false, true);
+		}
+	}
+
+	public void printCDataTag(String name, Object value) {
+		if (value != null) {
+			printTag(name, null, true, false);
+			print(CDATA_PREFIX + String.valueOf(value) + CDATA_SUFFIX);
 			printTag('/' + name, null, false, true);
 		}
 	}

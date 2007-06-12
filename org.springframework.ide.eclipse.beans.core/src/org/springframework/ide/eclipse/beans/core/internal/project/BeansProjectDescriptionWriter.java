@@ -80,7 +80,7 @@ public class BeansProjectDescriptionWriter implements
 
 	protected static void write(IBeansConfigSet configSet, XMLWriter writer) {
 		writer.startTag(CONFIG_SET, null);
-		writer.printSimpleTag(NAME, configSet.getElementName());
+		writer.printCDataTag(NAME, configSet.getElementName());
 		writer.printSimpleTag(OVERRIDING, new Boolean(configSet
 				.isAllowBeanDefinitionOverriding()).toString());
 		writer.printSimpleTag(INCOMPLETE, new Boolean(configSet.isIncomplete())

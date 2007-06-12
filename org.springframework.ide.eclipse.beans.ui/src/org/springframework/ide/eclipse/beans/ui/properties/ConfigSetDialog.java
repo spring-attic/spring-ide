@@ -45,7 +45,6 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesConfigSet;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModelLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesProject;
-import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
@@ -286,8 +285,7 @@ public class ConfigSetDialog extends Dialog {
 		boolean isEnabled = false;
 
 		String name = nameText.getText();
-		if (name == null || name.trim().length() == 0
-				|| !StringUtils.isAlphaNumeric(name)) {
+		if (name == null || name.trim().length() == 0) {
 			errorLabel.setText(BeansUIPlugin
 					.getResourceString(ERROR_INVALID_NAME));
 		} else if (mode == Mode.NEW
