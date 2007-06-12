@@ -14,6 +14,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -25,6 +26,7 @@ import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.builder.AopReferenceModelBuilder;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelMarkerUtils;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.project.IProjectBuilder;
 
 /**
@@ -58,8 +60,9 @@ public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 	public void build(Set<IResource> affectedResources, int kind,
 			IProgressMonitor monitor) throws CoreException {
 		try {
-			monitor.subTask(Activator.getFormattedMessage(
-					"AopReferenceModelProjectBuilder.buildingAopReferenceModel"));
+			monitor
+					.subTask(Activator
+							.getFormattedMessage("AopReferenceModelProjectBuilder.buildingAopReferenceModel"));
 			IWorkspaceRunnable referenceModelBuilder = new AopReferenceModelBuilder(
 					affectedResources);
 			IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -85,6 +88,13 @@ public class AopReferenceModelProjectBuilder implements IProjectBuilder {
 					"AopReferenceModelProjectBuilder.deletedProblemMarkers",
 					resource.getFullPath()));
 			AopReferenceModelMarkerUtils.deleteProblemMarkers(resource);
+
+			IProject project = resource.getProject();
+			// reinit aop reference model
+			if (JdtUtils.isJavaProject(project)) {
+				Activator.getModel().removeProject(
+						JdtUtils.getJavaProject(project));
+			}
 		}
 		finally {
 			monitor.done();

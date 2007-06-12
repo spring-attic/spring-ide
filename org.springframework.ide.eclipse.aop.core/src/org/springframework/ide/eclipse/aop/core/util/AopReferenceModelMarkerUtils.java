@@ -33,10 +33,10 @@ public class AopReferenceModelMarkerUtils {
 
 	private static final String MARKER_COUNT = "marker_count";
 
-	public static final String AOP_MARKER = Activator.PLUGIN_ID + ".aopmarker";
+	public static final String AOP_MARKER = Activator.PLUGIN_ID + ".marker";
 
 	public static final String AOP_PROBLEM_MARKER = Activator.PLUGIN_ID
-			+ ".aopproblemmarker";
+			+ ".problemmarker";
 
 	public static final String BEFORE_ADVICE_MARKER = Activator.PLUGIN_ID
 			+ ".beforeadvicemarker";
