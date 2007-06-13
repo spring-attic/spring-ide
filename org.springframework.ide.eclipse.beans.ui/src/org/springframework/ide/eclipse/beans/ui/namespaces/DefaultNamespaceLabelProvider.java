@@ -57,7 +57,7 @@ public class DefaultNamespaceLabelProvider implements INamespaceLabelProvider,
 			}
 			return image;
 		}
-		return BeansModelImages.getImage(element, context);
+		return BeansModelImages.getImage(element, context, isDecorating);
 	}
 
 	public String getText(ISourceModelElement element, IModelElement context,

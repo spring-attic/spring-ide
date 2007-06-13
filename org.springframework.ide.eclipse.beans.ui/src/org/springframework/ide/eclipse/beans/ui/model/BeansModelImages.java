@@ -45,17 +45,20 @@ import org.springframework.ide.eclipse.ui.AbstractCompositeImageDescriptor;
 public final class BeansModelImages implements BeansModelImageFlags {
 
 	public static Image getImage(IModelElement element) {
-		return getImage(element, null);
+		return getImage(element, null, true);
 	}
 
 	public static Image getImage(IModelElement element,
-			IModelElement context) {
+			IModelElement context, boolean isDecorationg) {
 		if (element instanceof ISpringProject
 				|| element instanceof IBeansProject) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_PROJECT);
 		} else if (element instanceof IBeansConfig) {
-			return getDecoratedImage(BeansUIImages
-					.getImage(BeansUIImages.IMG_OBJS_CONFIG), element, context);
+			Image image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONFIG);
+			if (isDecorationg) {
+				image = getDecoratedImage(image, element, context);
+			}
+			return image;
 		} else if (element instanceof IBeansConfigSet) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONFIG_SET);
 		} else if (element instanceof IBeansImport) {
@@ -63,8 +66,11 @@ public final class BeansModelImages implements BeansModelImageFlags {
 		} else if (element instanceof IBeanAlias) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_ALIAS);
 		} else if (element instanceof IBean) {
-			return getDecoratedImage(BeansUIImages
-					.getImage(BeansUIImages.IMG_OBJS_BEAN), element, context);
+			Image image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_BEAN);
+			if (isDecorationg) {
+				image = getDecoratedImage(image, element, context);
+			}
+			return image;
 		} else if (element instanceof IBeanConstructorArgument) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_CONSTRUCTOR);
 		} else if (element instanceof IBeanProperty) {

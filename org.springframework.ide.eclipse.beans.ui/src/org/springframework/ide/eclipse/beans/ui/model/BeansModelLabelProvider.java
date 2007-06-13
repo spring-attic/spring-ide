@@ -123,7 +123,7 @@ public class BeansModelLabelProvider extends
 		else if (element instanceof IModelElement) {
 			if (parentElement instanceof IModelElement) {
 				image = BeansModelImages.getImage((IModelElement) element,
-						(IModelElement) parentElement);
+						(IModelElement) parentElement, isDecorating());
 			}
 			else {
 				image = BeansModelImages.getImage((IModelElement) element);
