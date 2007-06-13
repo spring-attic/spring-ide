@@ -46,7 +46,7 @@ public class AopContentAssistProcessor extends AbstractContentAssistProcessor
 	private void addBeanReferenceProposals(ContentAssistRequest request,
 			String prefix, Document document, boolean showExternal) {
 		BeansCompletionUtils.addBeanReferenceProposals(request, prefix,
-				document.getOwnerDocument(), showExternal);
+				document, showExternal);
 	}
 
 	@Override
