@@ -17,10 +17,13 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.aopalliance.aop.Advice;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
+import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
@@ -47,6 +50,7 @@ public class AspectDefinitionMatcher {
 	/**
 	 * Utility helper class that exposes the current beanName to the
 	 * {@link ProxyCreationContext} introduced by Spring 2.1
+	 * @throws ClassNotFoundException
 	 */
 	// TODO CD uncomment once we have Spring 2.1 OSGi bundle
 	/*
@@ -60,6 +64,17 @@ public class AspectDefinitionMatcher {
 	 * finally { ClassUtils.invokeMethod(proxyCreationContext,
 	 * "notifyProxyCreationComplete"); } } }
 	 */
+
+	private boolean isInfrastructureClass(Class<?> beanClass)
+			throws ClassNotFoundException {
+		Class<?> advisorClass = ClassUtils.loadClass(Advisor.class);
+		Class<?> adviceClass = ClassUtils.loadClass(Advice.class);
+		Class<?> aopInfrastructureBean = ClassUtils
+				.loadClass(AopInfrastructureBean.class);
+		return advisorClass.isAssignableFrom(beanClass)
+				|| adviceClass.isAssignableFrom(beanClass)
+				|| aopInfrastructureBean.isAssignableFrom(beanClass);
+	}
 
 	/**
 	 * Checks if the given matching candidate method is a legal match for Spring
@@ -141,12 +156,17 @@ public class AspectDefinitionMatcher {
 	public List<IMethod> matches(final Class<?> targetClass,
 			final String targetBeanName, final IAspectDefinition info,
 			final IProject project) throws Throwable {
-
+		final List<IMethod> matchingMethod = new ArrayList<IMethod>();
+		
+		// check if bean is an infrastructure class
+		if (isInfrastructureClass(targetClass)) {
+			return matchingMethod;
+		}
+		
 		final Object aspectJExpressionPointcut = createAspectJPointcutExpression(info);
-
 		final IType jdtTargetType = JdtUtils.getJavaType(project, targetClass
 				.getName());
-		final List<IMethod> matchingMethod = new ArrayList<IMethod>();
+
 		// TODO CD uncomment once we have Spring 2.1 OSGi bundle
 		// BeanNameExposingReflectionUtils.doWithMethods(targetBeanName,
 		ReflectionUtils.doWithMethods(targetClass,
@@ -179,7 +199,7 @@ public class AspectDefinitionMatcher {
 									throw (IllegalAccessException) e;
 								}
 								else {
-									// Get the original exception out
+									// get the original exception out
 									throw new RuntimeException(e);
 								}
 							}
@@ -194,7 +214,7 @@ public class AspectDefinitionMatcher {
 			throws Throwable {
 
 		Class<?> expressionPointcutClass = ClassUtils
-				.loadClass(AspectJExpressionPointcut.class.getName());
+				.loadClass(AspectJExpressionPointcut.class);
 		Object pc = expressionPointcutClass.newInstance();
 		for (Method m : expressionPointcutClass.getMethods()) {
 			if (m.getName().equals("setExpression")) {

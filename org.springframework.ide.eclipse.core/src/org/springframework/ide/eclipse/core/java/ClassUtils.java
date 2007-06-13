@@ -87,7 +87,7 @@ public class ClassUtils {
 		if (target == null) {
 			return null;
 		}
-		
+
 		Class targetClass = target.getClass();
 		Method targetMethod = null;
 
@@ -119,5 +119,9 @@ public class ClassUtils {
 			throws ClassNotFoundException {
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		return loader.loadClass(className);
+	}
+
+	public static Class<?> loadClass(Class clazz) throws ClassNotFoundException {
+		return loadClass(clazz.getName());
 	}
 }

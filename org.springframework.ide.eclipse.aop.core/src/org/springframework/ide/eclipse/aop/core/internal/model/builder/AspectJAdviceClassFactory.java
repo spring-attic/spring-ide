@@ -19,6 +19,7 @@ import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.ide.eclipse.aop.core.model.IAdvisorDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.core.java.ClassUtils;
 
 /**
  * Factory class that creates {@link Class} instances for
@@ -36,27 +37,25 @@ public class AspectJAdviceClassFactory {
 			return null;
 		}
 
-		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		Class<?> aspectJAdviceClass = null;
 		if (info.getType() == ADVICE_TYPES.AROUND) {
-			aspectJAdviceClass = loader.loadClass(AspectJAroundAdvice.class
-					.getName());
+			aspectJAdviceClass = ClassUtils
+					.loadClass(AspectJAroundAdvice.class);
 		}
 		else if (info.getType() == ADVICE_TYPES.AFTER) {
-			aspectJAdviceClass = loader.loadClass(AspectJAfterAdvice.class
-					.getName());
+			aspectJAdviceClass = ClassUtils.loadClass(AspectJAfterAdvice.class);
 		}
 		else if (info.getType() == ADVICE_TYPES.AFTER_RETURNING) {
-			aspectJAdviceClass = loader
-					.loadClass(AspectJAfterReturningAdvice.class.getName());
+			aspectJAdviceClass = ClassUtils
+					.loadClass(AspectJAfterReturningAdvice.class);
 		}
 		else if (info.getType() == ADVICE_TYPES.AFTER_THROWING) {
-			aspectJAdviceClass = loader
-					.loadClass(AspectJAfterThrowingAdvice.class.getName());
+			aspectJAdviceClass = ClassUtils
+					.loadClass(AspectJAfterThrowingAdvice.class);
 		}
 		else if (info.getType() == ADVICE_TYPES.BEFORE) {
-			aspectJAdviceClass = loader
-					.loadClass(AspectJMethodBeforeAdvice.class.getName());
+			aspectJAdviceClass = ClassUtils
+					.loadClass(AspectJMethodBeforeAdvice.class);
 		}
 		return aspectJAdviceClass;
 	}
