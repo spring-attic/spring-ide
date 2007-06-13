@@ -220,7 +220,7 @@ public final class BeansModelUtils {
 					monitor.subTask("Locating bean definitions in project '"
 							+ project.getElementName() + "'");
 					for (IBeansConfig config : project.getConfigs()) {
-						monitor.subTask("Loading bean defintion from file '"
+						monitor.subTask("Locating bean defintions from file '"
 								+ config.getElementName() + "'");
 						beans.addAll(config.getBeans());
 						if (monitor.isCanceled()) {

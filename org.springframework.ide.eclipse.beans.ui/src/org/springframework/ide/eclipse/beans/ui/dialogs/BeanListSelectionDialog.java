@@ -51,8 +51,8 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 public class BeanListSelectionDialog extends ElementListSelectionDialog {
 
 	/**
-	 * This {@link FilterMatcher}Êuses an internally wrapped
-	 * {@link StringMatcher}Êto match a given bean's name or aliases.
+	 * This {@link FilterMatcher} uses an internally wrapped
+	 * {@link StringMatcher} to match a given bean's name or aliases.
 	 */
 	private class BeanFilterMatcher implements FilterMatcher {
 		private StringMatcher fMatcher;
