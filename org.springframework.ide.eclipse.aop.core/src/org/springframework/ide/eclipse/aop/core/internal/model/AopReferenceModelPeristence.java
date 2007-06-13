@@ -66,8 +66,8 @@ public class AopReferenceModelPeristence {
 		ELEMENT_FACTORIES.put(
 				BeanIntroductionDefinitionElementFactory.FACTORY_ID,
 				new BeanIntroductionDefinitionElementFactory());
-		ELEMENT_FACTORIES.put(JavaAspectDefinitionElementFactory.FACTORY_ID,
-				new JavaAspectDefinitionElementFactory());
+		ELEMENT_FACTORIES.put(JavaAdvisorDefinitionElementFactory.FACTORY_ID,
+				new JavaAdvisorDefinitionElementFactory());
 		ELEMENT_FACTORIES.put(AopReferenceElementFactory.FACTORY_ID,
 				new AopReferenceElementFactory());
 	}

@@ -16,6 +16,7 @@ import org.springframework.aop.aspectj.AspectJAfterReturningAdvice;
 import org.springframework.aop.aspectj.AspectJAfterThrowingAdvice;
 import org.springframework.aop.aspectj.AspectJAroundAdvice;
 import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
+import org.springframework.ide.eclipse.aop.core.model.IAdvisorDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 
@@ -29,6 +30,12 @@ public class AspectJAdviceClassFactory {
 
 	public static Class<?> getAspectJAdviceClass(IAspectDefinition info)
 			throws ClassNotFoundException {
+
+		// special case for advisor definitions
+		if (info instanceof IAdvisorDefinition) {
+			return null;
+		}
+
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		Class<?> aspectJAdviceClass = null;
 		if (info.getType() == ADVICE_TYPES.AROUND) {

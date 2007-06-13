@@ -16,7 +16,7 @@ import org.springframework.ide.eclipse.aop.core.model.IAnnotationAopDefinition;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class AnnotationAspectDefinition extends JavaAspectDefinition implements
+public class AnnotationAspectDefinition extends BeanAspectDefinition implements
 		IAnnotationAopDefinition {
 	
 	public String getFactoryId() {

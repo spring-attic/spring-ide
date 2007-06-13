@@ -17,13 +17,13 @@ import org.springframework.ide.eclipse.aop.core.Activator;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class JavaAspectDefinitionElementFactory extends
+public class JavaAdvisorDefinitionElementFactory extends
 		BeanAspectDefinitionElementFactory implements IElementFactory {
 
 	public static String FACTORY_ID = Activator.PLUGIN_ID
-			+ ".javaAspectDefinitionElementFactory";
+			+ ".javaAdvisorDefinitionElementFactory";
 
 	protected BeanAspectDefinition createAspectDefinition() {
-		return new JavaAspectDefinition();
+		return new JavaAdvisorDefinition();
 	}
 }

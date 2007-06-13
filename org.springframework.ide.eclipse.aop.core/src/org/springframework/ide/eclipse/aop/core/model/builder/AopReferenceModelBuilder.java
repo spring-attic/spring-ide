@@ -30,13 +30,12 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.ide.eclipse.aop.core.Activator;
-import org.springframework.ide.eclipse.aop.core.internal.model.AnnotationAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.internal.model.AnnotationIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.internal.model.AopReference;
 import org.springframework.ide.eclipse.aop.core.internal.model.AopReferenceModel;
 import org.springframework.ide.eclipse.aop.core.internal.model.BeanAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.internal.model.BeanIntroductionDefinition;
-import org.springframework.ide.eclipse.aop.core.internal.model.JavaAspectDefinition;
+import org.springframework.ide.eclipse.aop.core.internal.model.JavaAdvisorDefinition;
 import org.springframework.ide.eclipse.aop.core.internal.model.builder.AspectDefinitionBuilderFactory;
 import org.springframework.ide.eclipse.aop.core.internal.model.builder.AspectDefinitionMatcher;
 import org.springframework.ide.eclipse.aop.core.logging.AopLog;
@@ -248,8 +247,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 							else if (info instanceof BeanAspectDefinition) {
 								IMethod jdtAspectMethod = null;
 
-								if (info instanceof JavaAspectDefinition
-										&& !(info instanceof AnnotationAspectDefinition)) {
+								if (info instanceof JavaAdvisorDefinition) {
 									jdtAspectMethod = JdtUtils.getMethod(jdtAspectType, info
 											.getAdviceMethodName(), info
 											.getAdviceMethodParameterTypes());

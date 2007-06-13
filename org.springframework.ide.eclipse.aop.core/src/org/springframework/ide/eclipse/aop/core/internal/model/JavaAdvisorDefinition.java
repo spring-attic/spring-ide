@@ -10,13 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.aop.core.internal.model;
 
+import org.springframework.ide.eclipse.aop.core.model.IAdvisorDefinition;
+
 /**
  * @author Christian Dupuis
  * @since 2.0
  */
-public class JavaAspectDefinition extends BeanAspectDefinition {
-	
+public class JavaAdvisorDefinition extends BeanAspectDefinition implements
+		IAdvisorDefinition {
+
 	public String getFactoryId() {
-		return JavaAspectDefinitionElementFactory.FACTORY_ID;
+		return JavaAdvisorDefinitionElementFactory.FACTORY_ID;
 	}
 }

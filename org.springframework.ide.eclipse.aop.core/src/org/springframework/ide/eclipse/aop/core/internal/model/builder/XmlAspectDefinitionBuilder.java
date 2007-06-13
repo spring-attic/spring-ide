@@ -27,7 +27,7 @@ import org.springframework.aop.ThrowsAdvice;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.internal.model.BeanAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.internal.model.BeanIntroductionDefinition;
-import org.springframework.ide.eclipse.aop.core.internal.model.JavaAspectDefinition;
+import org.springframework.ide.eclipse.aop.core.internal.model.JavaAdvisorDefinition;
 import org.springframework.ide.eclipse.aop.core.logging.AopLog;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
@@ -94,7 +94,7 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 
 				if (classLoader.loadClass(MethodInterceptor.class.getName())
 						.isAssignableFrom(advisorClass)) {
-					JavaAspectDefinition info = new JavaAspectDefinition();
+					JavaAdvisorDefinition info = new JavaAdvisorDefinition();
 					info.setAspectLineNumber(getLineNumber(
 							(IDOMDocument) aspectNode.getOwnerDocument(),
 							(IDOMNode) aspectNode));
@@ -112,7 +112,7 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 				}
 				if (classLoader.loadClass(MethodBeforeAdvice.class.getName())
 						.isAssignableFrom(advisorClass)) {
-					JavaAspectDefinition info = new JavaAspectDefinition();
+					JavaAdvisorDefinition info = new JavaAdvisorDefinition();
 					info.setAspectLineNumber(getLineNumber(
 							(IDOMDocument) aspectNode.getOwnerDocument(),
 							(IDOMNode) aspectNode));
@@ -130,7 +130,7 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 				}
 				if (classLoader.loadClass(ThrowsAdvice.class.getName())
 						.isAssignableFrom(advisorClass)) {
-					JavaAspectDefinition info = new JavaAspectDefinition();
+					JavaAdvisorDefinition info = new JavaAdvisorDefinition();
 					info.setAspectLineNumber(getLineNumber(
 							(IDOMDocument) aspectNode.getOwnerDocument(),
 							(IDOMNode) aspectNode));
@@ -151,7 +151,7 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 				}
 				if (classLoader.loadClass(AfterReturningAdvice.class.getName())
 						.isAssignableFrom(advisorClass)) {
-					JavaAspectDefinition info = new JavaAspectDefinition();
+					JavaAdvisorDefinition info = new JavaAdvisorDefinition();
 					info.setAspectLineNumber(getLineNumber(
 							(IDOMDocument) aspectNode.getOwnerDocument(),
 							(IDOMNode) aspectNode));

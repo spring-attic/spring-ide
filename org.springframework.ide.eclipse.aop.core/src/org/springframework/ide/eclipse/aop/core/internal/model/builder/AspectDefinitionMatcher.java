@@ -106,27 +106,32 @@ public class AspectDefinitionMatcher {
 			Object pc = initAspectJExpressionPointcut(info);
 			Class<?> aspectJAdviceClass = AspectJAdviceClassFactory
 					.getAspectJAdviceClass(info);
-			Constructor<?> ctor = aspectJAdviceClass.getConstructors()[0];
-			Object aspectJAdvice = ctor.newInstance(new Object[] {
-					info.getAdviceMethod(), pc, null });
-			if (info.getType() == ADVICE_TYPES.AFTER_RETURNING) {
-				if (info.getReturning() != null) {
-					ClassUtils.invokeMethod(aspectJAdvice, "setReturningName",
-							info.getReturning());
+			if (aspectJAdviceClass != null) {
+				Constructor<?> ctor = aspectJAdviceClass.getConstructors()[0];
+				Object aspectJAdvice = ctor.newInstance(new Object[] {
+						info.getAdviceMethod(), pc, null });
+				if (info.getType() == ADVICE_TYPES.AFTER_RETURNING) {
+					if (info.getReturning() != null) {
+						ClassUtils.invokeMethod(aspectJAdvice,
+								"setReturningName", info.getReturning());
+					}
 				}
-			}
-			else if (info.getType() == ADVICE_TYPES.AFTER_THROWING) {
-				if (info.getThrowing() != null) {
-					ClassUtils.invokeMethod(aspectJAdvice, "setThrowingName",
-							info.getThrowing());
+				else if (info.getType() == ADVICE_TYPES.AFTER_THROWING) {
+					if (info.getThrowing() != null) {
+						ClassUtils.invokeMethod(aspectJAdvice,
+								"setThrowingName", info.getThrowing());
+					}
 				}
+				if (info.getArgNames() != null && info.getArgNames().length > 0) {
+					ClassUtils.invokeMethod(aspectJAdvice,
+							"setArgumentNamesFromStringArray",
+							new Object[] { info.getArgNames() });
+				}
+				return ClassUtils.invokeMethod(aspectJAdvice, "getPointcut");
 			}
-			if (info.getArgNames() != null && info.getArgNames().length > 0) {
-				ClassUtils.invokeMethod(aspectJAdvice,
-						"setArgumentNamesFromStringArray", new Object[] { info
-								.getArgNames() });
+			else {
+				return pc;
 			}
-			return ClassUtils.invokeMethod(aspectJAdvice, "getPointcut");
 		}
 		catch (InvocationTargetException e) {
 			throw e.getCause();
@@ -139,8 +144,8 @@ public class AspectDefinitionMatcher {
 
 		final Object aspectJExpressionPointcut = createAspectJPointcutExpression(info);
 
-		final IType jdtTargetType = JdtUtils.getJavaType(project,
-				targetClass.getName());
+		final IType jdtTargetType = JdtUtils.getJavaType(project, targetClass
+				.getName());
 		final List<IMethod> matchingMethod = new ArrayList<IMethod>();
 		// TODO CD uncomment once we have Spring 2.1 OSGi bundle
 		// BeanNameExposingReflectionUtils.doWithMethods(targetBeanName,
