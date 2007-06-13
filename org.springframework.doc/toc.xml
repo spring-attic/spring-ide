@@ -109,6 +109,7 @@
          <topic label="Bean scopes" href="beans.html#beans-factory-scopes">
             <topic label="The singleton scope" href="beans.html#beans-factory-scopes-singleton"/>
             <topic label="The prototype scope" href="beans.html#beans-factory-scopes-prototype"/>
+            <topic label="Singleton beans with prototype-bean dependencies" href="beans.html#beans-factory-scopes-sing-prot-interaction"/>
             <topic label="The other scopes" href="beans.html#beans-factory-scopes-other">
                <topic label="Initial web configuration" href="beans.html#beans-factory-scopes-other-web-configuration"/>
                <topic label="The request scope" href="beans.html#beans-factory-scopes-request"/>
@@ -156,6 +157,17 @@
          </topic>
          <topic label="Glue code and the evil singleton" href="beans.html#beans-glue-code-and-singletons">
             <topic label="Using the Singleton-helper classes" href="beans.html#beans-singleton-helper"/>
+         </topic>
+         <topic label="Annotation-based configuration" href="beans.html#beans-annotation-config">
+            <topic label="@Autowired" href="beans.html#beans-autowired-annotation"/>
+            <topic label="@Resource" href="beans.html#beans-resource-annotation"/>
+            <topic label="@PostConstruct and @PreDestroy" href="beans.html#beans-postconstruct-and-predestroy-annotations"/>
+         </topic>
+         <topic label="Classpath scanning for beans" href="beans.html#beans-classpath-scanning">
+            <topic label="@Component and @Repository" href="beans.html#beans-stereotype-annotations"/>
+            <topic label="Using filters to customize scanning" href="beans.html#beans-scanning-filters"/>
+            <topic label="Naming auto-detected beans" href="beans.html#beans-scanning-name-generator"/>
+            <topic label="Providing Scope for auto-detected beans" href="beans.html#beans-scanning-scope-resolver"/>
          </topic>
       </topic>
       <topic label="Resources" href="resources.html">

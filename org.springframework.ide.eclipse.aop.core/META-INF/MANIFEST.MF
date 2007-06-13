@@ -20,7 +20,8 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.beans.ui,
  org.springframework.ide.eclipse.beans.core,
  org.aspectj.aspectjweaver,
- org.objectweb.asm
+ org.objectweb.asm,
+ org.aopalliance
 Eclipse-LazyStart: true
 Export-Package: org.springframework.ide.eclipse.aop.core,
  org.springframework.ide.eclipse.aop.core.builder,
