@@ -31,8 +31,12 @@ public class AopReferenceModelNavigatorLabelProvider extends
 	public String getDescription(Object element) {
 		if (element instanceof IRevealableReferenceNode) {
 			IRevealableReferenceNode node = (IRevealableReferenceNode) element;
-			return node.getResource().getName() + " - "
-					+ node.getResource().getFullPath().toString().substring(1);
+			if (node.getResource() != null) {
+				return node.getResource().getName()
+						+ " - "
+						+ node.getResource().getFullPath().toString()
+								.substring(1);
+			}
 		}
 		return super.getDescription(element);
 	}
