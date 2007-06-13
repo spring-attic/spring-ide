@@ -28,7 +28,7 @@ import org.springframework.ide.eclipse.core.model.ModelUtils;
 public class UtilNamespaceLabelProvider extends DefaultNamespaceLabelProvider {
 
 	@Override
-	public Image getImage(ISourceModelElement element, IModelElement context) {
+	public Image getImage(ISourceModelElement element, IModelElement context, boolean isDecorating) {
 		if (element instanceof IBean
 				&& !BeansModelUtils.isInnerBean((IBean) element)) {
 			String localName = ModelUtils.getLocalName((IBean) element);
@@ -53,6 +53,6 @@ public class UtilNamespaceLabelProvider extends DefaultNamespaceLabelProvider {
 						.getImage(BeansUIImages.IMG_OBJS_PROPERTIES);
 			}
 		}
-		return super.getImage(element, context);
+		return super.getImage(element, context, isDecorating);
 	}
 }

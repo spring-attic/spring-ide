@@ -113,11 +113,11 @@ public class BeansModelLabelProvider extends
 					? (IModelElement) parentElement : null);
 			if (provider != null) {
 				image = provider.getImage((ISourceModelElement) element,
-						context);
+						context, isDecorating());
 			}
 			else {
 				image = DEFAULT_NAMESPACE_LABEL_PROVIDER.getImage(
-						(ISourceModelElement) element, context);
+						(ISourceModelElement) element, context, isDecorating());
 			}
 		}
 		else if (element instanceof IModelElement) {
@@ -156,11 +156,11 @@ public class BeansModelLabelProvider extends
 			IModelElement context = (parentElement instanceof IModelElement
 					? (IModelElement) parentElement : null);
 			if (provider != null) {
-				return provider.getText((ISourceModelElement) element, context);
+				return provider.getText((ISourceModelElement) element, context, isDecorating());
 			}
 			else {
 				return DEFAULT_NAMESPACE_LABEL_PROVIDER.getText(
-						(ISourceModelElement) element, context);
+						(ISourceModelElement) element, context, isDecorating());
 			}
 		}
 		else if (element instanceof IModelElement) {

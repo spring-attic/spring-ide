@@ -28,12 +28,17 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 public class TxNamespaceLabelProvider extends DefaultNamespaceLabelProvider {
 
 	@Override
-	public Image getImage(ISourceModelElement element, IModelElement context) {
+	public Image getImage(ISourceModelElement element, IModelElement context, boolean isDecorating) {
 		if (element instanceof IBean
 				&& !BeansModelUtils.isInnerBean((IBean) element)) {
-			return BeansModelImages.getDecoratedImage(BeansUIImages
-					.getImage(BeansUIImages.IMG_OBJS_TX), element, context);
+			if (isDecorating) {
+				return BeansModelImages.getDecoratedImage(BeansUIImages
+						.getImage(BeansUIImages.IMG_OBJS_TX), element,	context);
+			}
+			else {
+				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_TX);
+			}
 		}
-		return super.getImage(element, context);
+		return super.getImage(element, context, isDecorating);
 	}
 }

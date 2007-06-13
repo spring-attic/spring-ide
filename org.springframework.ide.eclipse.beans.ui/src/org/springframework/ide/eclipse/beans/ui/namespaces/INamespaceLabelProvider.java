@@ -25,7 +25,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  */
 public interface INamespaceLabelProvider extends IBaseLabelProvider {
 
-	Image getImage(ISourceModelElement element, IModelElement context);
+	Image getImage(ISourceModelElement element, IModelElement context, boolean isDecorating);
 
-	String getText(ISourceModelElement element, IModelElement context);
+	String getText(ISourceModelElement element, IModelElement context, boolean isDecorating);
 }

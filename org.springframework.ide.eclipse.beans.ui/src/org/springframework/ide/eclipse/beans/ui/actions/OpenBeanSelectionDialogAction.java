@@ -32,7 +32,7 @@ public class OpenBeanSelectionDialogAction implements
 
 	public void run(IAction action) {
 		BeanListSelectionDialog dialog = new BeanListSelectionDialog(
-				workbenchWindow.getShell(), new BeansModelLabelProvider(true));
+				workbenchWindow.getShell(), new BeansModelLabelProvider(false));
 		if (Window.OK == dialog.open()) {
 			IBean bean = (IBean) dialog.getFirstResult();
 			SpringUIUtils.openInEditor(bean);

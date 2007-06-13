@@ -25,13 +25,13 @@ import org.springframework.ide.eclipse.core.model.ModelUtils;
  * This class is a label provider which knows about the beans core model's
  * {@link ISourceModelElement source elements} in the namespace
  * <code>"http://www.springframework.org/schema/aop"</code>.
- * 
  * @author Torsten Juergeleit
  */
 public class AopNamespaceLabelProvider extends DefaultNamespaceLabelProvider {
 
 	@Override
-	public Image getImage(ISourceModelElement element, IModelElement context) {
+	public Image getImage(ISourceModelElement element, IModelElement context,
+			boolean isDecorating) {
 		if (element instanceof IBeansComponent) {
 			String localName = ModelUtils
 					.getLocalName((IBeansComponent) element);
@@ -48,8 +48,8 @@ public class AopNamespaceLabelProvider extends DefaultNamespaceLabelProvider {
 			if ("pointcut".equals(localName)) {
 				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_POINTCUT);
 			}
-		} else if (element instanceof IBean
-				&& context instanceof IBeansComponent) {
+		}
+		else if (element instanceof IBean && context instanceof IBeansComponent) {
 			String localName = ModelUtils
 					.getLocalName((ISourceModelElement) element);
 			String contextLocalName = ModelUtils
@@ -61,13 +61,15 @@ public class AopNamespaceLabelProvider extends DefaultNamespaceLabelProvider {
 							"org.springframework.aop.Pointcut")) {
 						return BeansUIImages
 								.getImage(BeansUIImages.IMG_OBJS_POINTCUT);
-					} else if (Introspector.doesImplement(type,
+					}
+					else if (Introspector.doesImplement(type,
 							"org.springframework.aop.Advisor")) {
 						return BeansUIImages
 								.getImage(BeansUIImages.IMG_OBJS_ADVICE);
 					}
 				}
-			} else {
+			}
+			else {
 				if ("before".equals(localName)) {
 					return BeansUIImages
 							.getImage(BeansUIImages.IMG_OBJS_BEFORE_ADVICE);
@@ -106,6 +108,6 @@ public class AopNamespaceLabelProvider extends DefaultNamespaceLabelProvider {
 				}
 			}
 		}
-		return super.getImage(element, context);
+		return super.getImage(element, context, isDecorating);
 	}
 }

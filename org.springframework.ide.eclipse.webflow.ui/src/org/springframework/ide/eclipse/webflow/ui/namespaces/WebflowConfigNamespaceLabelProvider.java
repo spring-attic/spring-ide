@@ -31,12 +31,12 @@ import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.Webf
 public class WebflowConfigNamespaceLabelProvider extends DefaultNamespaceLabelProvider {
 
 	@Override
-	public Image getImage(ISourceModelElement element, IModelElement context) {
+	public Image getImage(ISourceModelElement element, IModelElement context, boolean isDecorating) {
 		if (element instanceof IBean
 				&& (context instanceof IBeansConfig
 						|| context instanceof IBeansConfigSet)) {
 			return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW);
 		}
-		return super.getImage(element, context);
+		return super.getImage(element, context, isDecorating);
 	}
 }

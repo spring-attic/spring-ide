@@ -34,24 +34,34 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 public class DefaultNamespaceLabelProvider implements INamespaceLabelProvider,
 		ITreePathLabelProvider, IDescriptionProvider {
 
-	public Image getImage(ISourceModelElement element, IModelElement context) {
+	public Image getImage(ISourceModelElement element, IModelElement context,
+			boolean isDecorating) {
 		if (element instanceof IBean
 				&& !NamespaceUtils.DEFAULT_NAMESPACE_URI.equals(NamespaceUtils
 						.getNameSpaceURI(element))
 				&& !BeansModelUtils.isInnerBean((IBean) element)) {
-			return BeansModelImages.getDecoratedImage(BeansUIImages
-					.getImage(BeansUIImages.IMG_OBJS_NAMESPACE_BEAN), element,
-					context);
+			Image image = BeansUIImages
+					.getImage(BeansUIImages.IMG_OBJS_NAMESPACE_BEAN);
+			if (isDecorating) {
+				image = BeansModelImages.getDecoratedImage(image, element,
+						context);
+			}
+			return image;
 		}
 		else if (element instanceof IBeansComponent) {
-			return BeansModelImages.getDecoratedImage(BeansUIImages
-					.getImage(BeansUIImages.IMG_OBJS_NAMESPACE_COMPONENT),
-					element, context);
+			Image image = BeansUIImages
+					.getImage(BeansUIImages.IMG_OBJS_NAMESPACE_COMPONENT);
+			if (isDecorating) {
+				image = BeansModelImages.getDecoratedImage(image, element,
+						context);
+			}
+			return image;
 		}
 		return BeansModelImages.getImage(element, context);
 	}
 
-	public String getText(ISourceModelElement element, IModelElement context) {
+	public String getText(ISourceModelElement element, IModelElement context,
+			boolean isDecorating) {
 		return getElementLabel(element, 0);
 	}
 
@@ -75,8 +85,9 @@ public class DefaultNamespaceLabelProvider implements INamespaceLabelProvider,
 			Object parent = elementPath.getParentPath().getLastSegment();
 			IModelElement context = (parent instanceof IModelElement
 					? (IModelElement) parent : null);
-			label.setImage(getImage((ISourceModelElement) element, context));
-			label.setText(getText((ISourceModelElement) element, context));
+			// TODO CD revise
+			label.setImage(getImage((ISourceModelElement) element, context, false));
+			label.setText(getText((ISourceModelElement) element, context, false));
 		}
 	}
 

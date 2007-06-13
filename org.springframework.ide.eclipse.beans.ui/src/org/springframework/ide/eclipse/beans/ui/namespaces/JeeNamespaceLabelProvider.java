@@ -22,18 +22,23 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  * This class is a label provider which knows about the beans core model's
  * {@link ISourceModelElement source elements} in the namespace
  * <code>"http://www.springframework.org/schema/jee"</code>.
- * 
  * @author Torsten Juergeleit
  */
 public class JeeNamespaceLabelProvider extends DefaultNamespaceLabelProvider {
 
 	@Override
-	public Image getImage(ISourceModelElement element, IModelElement context) {
+	public Image getImage(ISourceModelElement element, IModelElement context,
+			boolean isDecorating) {
 		if (element instanceof IBean
 				&& !BeansModelUtils.isInnerBean((IBean) element)) {
-			return BeansModelImages.getDecoratedImage(BeansUIImages
-					.getImage(BeansUIImages.IMG_OBJS_EJB), element, context);
+			if (isDecorating) {
+				return BeansModelImages.getDecoratedImage(BeansUIImages
+						.getImage(BeansUIImages.IMG_OBJS_EJB), element,	context);
+			}
+			else {
+				return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_EJB);
+			}
 		}
-		return super.getImage(element, context);
+		return super.getImage(element, context, isDecorating);
 	}
 }
