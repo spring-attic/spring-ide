@@ -15,13 +15,19 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.springframework.beans.PropertyValue;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.ide.eclipse.core.model.DefaultModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
@@ -32,7 +38,8 @@ import org.springframework.util.StringUtils;
  * {@link PropertyValue}s from the given source code.
  * <p>
  * This implementation looks for {@link PropertyValue} and
- * {@link RuntimeBeanReference}s.
+ * {@link RuntimeBeanReference}s and {@link ValueHolder} that go into
+ * {@link ConstructorArgumentValues}.
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -43,6 +50,8 @@ public class ConfigurationASTVistor extends ASTVisitor {
 	private List<BeanAnnotationMetaData> externalBeanAnnotationMetaData;
 
 	private List<MethodInvocation> methodInvocations;
+
+	private List<VariableDeclarationFragment> instanceCreations;
 
 	private BeanComponentDefinition currentBeanComponentDefinition;
 
@@ -79,6 +88,14 @@ public class ConfigurationASTVistor extends ASTVisitor {
 		return false;
 	}
 
+	public boolean visit(VariableDeclarationFragment node) {
+		if (node.getInitializer() instanceof ClassInstanceCreation) {
+			instanceCreations.add(node);
+			return true;
+		}
+		return false;
+	}
+
 	public boolean visit(MethodDeclaration node) {
 		String methodName = node.getName().getFullyQualifiedName();
 		BeanComponentDefinition beanComponentDefinition = getBeanComponentDefinition(methodName);
@@ -87,6 +104,7 @@ public class ConfigurationASTVistor extends ASTVisitor {
 			currentModelSourceLocation = (IModelSourceLocation) beanComponentDefinition
 					.getBeanDefinition().getSource();
 			methodInvocations = new ArrayList<MethodInvocation>();
+			instanceCreations = new ArrayList<VariableDeclarationFragment>();
 			return true;
 		}
 		return false;
@@ -98,9 +116,75 @@ public class ConfigurationASTVistor extends ASTVisitor {
 	}
 
 	public boolean visit(ReturnStatement node) {
-		String objName = node.getExpression().toString();
 		CompilationUnit root = (CompilationUnit) node.getRoot();
+		if (node.getExpression() instanceof SimpleName) {
+			String objName = node.getExpression().toString();
+			processSimpleReturnStatementForPropertyValues(root, objName);
+			processSimpleReturnStatementForConstructorArguments(root, objName);
+		}
+		else if (node.getExpression() instanceof ClassInstanceCreation) {
+			processConstructorArgumentValue(root, (ClassInstanceCreation) node
+					.getExpression());
+		}
 
+		return true;
+	}
+
+	private void processSimpleReturnStatementForConstructorArguments(
+			CompilationUnit root, String objName) {
+		for (VariableDeclarationFragment variableDeclaration : instanceCreations) {
+			if (variableDeclaration.getInitializer() != null
+					&& variableDeclaration.getInitializer() instanceof ClassInstanceCreation
+					&& objName.equals(variableDeclaration.getName().toString())) {
+				ClassInstanceCreation instanceCreation = (ClassInstanceCreation) variableDeclaration
+						.getInitializer();
+				processConstructorArgumentValue(root, instanceCreation);
+			}
+		}
+	}
+
+	private void processConstructorArgumentValue(CompilationUnit root,
+			ClassInstanceCreation instanceCreation) {
+		for (Object obj : instanceCreation.arguments()) {
+
+			ValueHolder value = null;
+			int startLine = -1;
+			int endLine = -1;
+
+			if (obj instanceof MethodInvocation) {
+				String calledMethodName = ((MethodInvocation) obj).getName()
+						.getFullyQualifiedName();
+				if (getBeanComponentDefinition(calledMethodName) != null
+						|| isExternalBeanReference(calledMethodName)) {
+					value = new ValueHolder(new RuntimeBeanReference(
+							calledMethodName));
+					startLine = root.getLineNumber(((MethodInvocation) obj)
+							.getStartPosition());
+					endLine = root.getLineNumber(((MethodInvocation) obj)
+							.getStartPosition()
+							+ ((MethodInvocation) obj).getLength());
+				}
+			}
+
+			if (value == null) {
+				value = new ValueHolder(obj.toString());
+				startLine = root.getLineNumber(((Expression) obj)
+						.getStartPosition());
+				endLine = root.getLineNumber(((Expression) obj)
+						.getStartPosition()
+						+ ((Expression) obj).getLength());
+			}
+
+			value.setSource(new DefaultModelSourceLocation(startLine, endLine,
+					currentModelSourceLocation.getResource()));
+			currentBeanComponentDefinition.getBeanDefinition()
+					.getConstructorArgumentValues().addGenericArgumentValue(
+							value);
+		}
+	}
+
+	private void processSimpleReturnStatementForPropertyValues(
+			CompilationUnit root, String objName) {
 		for (MethodInvocation invocation : methodInvocations) {
 			// check if the recored method invocation was executed on the same
 			// object
@@ -121,12 +205,13 @@ public class ConfigurationASTVistor extends ASTVisitor {
 						if (arguments.get(0) instanceof MethodInvocation) {
 							MethodInvocation nestedInvocation = (MethodInvocation) arguments
 									.get(0);
-							String calledMethodName = nestedInvocation.getName()
-									.getFullyQualifiedName();
+							String calledMethodName = nestedInvocation
+									.getName().getFullyQualifiedName();
 							if (getBeanComponentDefinition(calledMethodName) != null
 									|| isExternalBeanReference(calledMethodName)) {
 								property = new PropertyValue(propertyName,
-										new RuntimeBeanReference(calledMethodName));
+										new RuntimeBeanReference(
+												calledMethodName));
 								startLine = root.getLineNumber(nestedInvocation
 										.getStartPosition());
 								endLine = root.getLineNumber(nestedInvocation
@@ -186,6 +271,5 @@ public class ConfigurationASTVistor extends ASTVisitor {
 				}
 			}
 		}
-		return true;
 	}
 }
