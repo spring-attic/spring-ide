@@ -206,4 +206,5 @@ Export-Package: org.springframework.aop,
 Require-Bundle: org.aopalliance,
  org.aspectj.aspectjweaver,
  jakarta.commons.logging,
- jakarta.commons.collections
+ jakarta.commons.collections,
+ org.objectweb.asm
