@@ -108,7 +108,7 @@ public class AopHyperLinkDetector extends AbstractHyperLinkDetector implements
 			}
 			return hyperlink;
 		}
-		else if ("advice-ref".equals(name)) {
+		else if ("advice-ref".equals(name) || "ref".equals(name)) {
 			Node bean = BeansEditorUtils.getFirstReferenceableNodeById(node
 					.getOwnerDocument(), target);
 			if (bean != null) {
