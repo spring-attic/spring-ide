@@ -10,12 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.ui.workingsets;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.internal.AggregateWorkingSet;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 
 /**
  * @author Christian Dupuis
@@ -23,6 +27,9 @@ import org.eclipse.ui.internal.AggregateWorkingSet;
  */
 @SuppressWarnings("restriction")
 public class WorkingSetsViewerFilter extends ViewerFilter {
+
+	private static final String WORKING_SET_ID = SpringUIPlugin.PLUGIN_ID
+			+ ".springWorkingSetPage";
 
 	private IWorkingSet workingSet;
 
@@ -40,7 +47,23 @@ public class WorkingSetsViewerFilter extends ViewerFilter {
 			return true;
 		}
 		if (element != null) {
-			return isInWorkingSet(parentElement, element);
+			if (WORKING_SET_ID.equals(workingSet.getId())) {
+				return isInWorkingSet(parentElement, element);
+			}
+			else {
+				// special handling for Java and Resource working sets; so
+				// that at least the projects are correctly filtered
+				IAdaptable[] elements = getElementsFromWorkingSet();
+				for (IAdaptable elem : elements) {
+					if (elem instanceof IJavaProject) {
+						return SpringCoreUtils.isSpringProject(((IJavaProject) elem)
+								.getProject());
+					}
+					else if (elem instanceof IProject) {
+						return SpringCoreUtils.isSpringProject(((IProject) elem));
+					}
+				}
+			}
 		}
 		return true;
 	}
@@ -78,6 +101,10 @@ public class WorkingSetsViewerFilter extends ViewerFilter {
 				}
 			}
 		}
+		return workingSet.getElements();
+	}
+
+	private IAdaptable[] getElementsFromWorkingSet() {
 		return workingSet.getElements();
 	}
 }
