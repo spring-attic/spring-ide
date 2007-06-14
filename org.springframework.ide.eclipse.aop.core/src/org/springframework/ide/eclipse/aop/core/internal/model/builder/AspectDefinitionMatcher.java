@@ -14,8 +14,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.aopalliance.aop.Advice;
 import org.eclipse.core.resources.IProject;
@@ -52,9 +52,9 @@ public class AspectDefinitionMatcher {
 	/**
 	 * Utility helper class that exposes the current beanName to the
 	 * {@link ProxyCreationContext} introduced by Spring 2.1
-	 * @throws ClassNotFoundException
 	 */
 	private static class BeanNameExposingReflectionUtils {
+		
 		public static void doWithMethods(String targetBeanName,
 				Class targetClass, MethodCallback mc) throws Throwable { 
 			// expose bean name on thread local
@@ -69,6 +69,9 @@ public class AspectDefinitionMatcher {
 				ClassUtils.invokeMethod(proxyCreationContext,
 						"notifyProxyCreationComplete");
 			}
+			
+			// do it again without the exposed bean name
+			ReflectionUtils.doWithMethods(targetClass, mc);
 		}
 	}
 
@@ -160,10 +163,10 @@ public class AspectDefinitionMatcher {
 		}
 	}
 
-	public List<IMethod> matches(final Class<?> targetClass,
+	public Set<IMethod> matches(final Class<?> targetClass,
 			final String targetBeanName, final IAspectDefinition info,
 			final IProject project) throws Throwable {
-		final List<IMethod> matchingMethod = new ArrayList<IMethod>();
+		final Set<IMethod> matchingMethod = new HashSet<IMethod>();
 
 		// check if bean is an infrastructure class
 		if (isInfrastructureClass(targetClass)) {
@@ -180,8 +183,8 @@ public class AspectDefinitionMatcher {
 							throws IllegalArgumentException,
 							IllegalAccessException {
 
-						if (checkMethod(targetClass, method, info
-								.isProxyTargetClass())) {
+						if (checkMethod(targetClass, method, info.isProxyTargetClass())
+								&& !matchingMethod.contains(method)) {
 							try {
 								boolean matches = (Boolean) ClassUtils
 										.invokeMethod(
