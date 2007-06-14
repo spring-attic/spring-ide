@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.ui.model;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -141,10 +142,9 @@ public final class BeansModelImages implements BeansModelImageFlags {
 			if (!bd.isSingleton()) {
 				flags |= FLAG_PROTOTYPE;
 			}
-			// TODO CD uncomment once we have Spring 2.1 OSGi bundle
-			/*if (bd instanceof AnnotatedBeanDefinition) {
+			if (bd instanceof AnnotatedBeanDefinition) {
 				flags |= FLAG_ANNOTATION;
-			}*/
+			}
 		}
 		return flags;
 	}
