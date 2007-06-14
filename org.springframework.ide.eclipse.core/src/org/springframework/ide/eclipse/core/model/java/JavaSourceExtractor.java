@@ -10,10 +10,20 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.model.java;
 
+import java.io.IOException;
+
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.objectweb.asm.ClassReader;
 import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.type.asm.CachingClassReaderFactory;
+import org.springframework.core.type.asm.ClassMetadataReadingVisitor;
+import org.springframework.core.type.asm.ClassReaderFactory;
+import org.springframework.ide.eclipse.core.io.FileResource;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.DefaultModelSourceLocation;
 
 /**
@@ -27,18 +37,19 @@ public class JavaSourceExtractor implements SourceExtractor {
 	
 	private final IProject project;
 	
+	private final ClassReaderFactory classReaderFactory = 
+		new CachingClassReaderFactory();
+	
 	public JavaSourceExtractor(final IProject project) {
 		this.project = project;
 	}
 
 	public Object extractSource(Object sourceCandidate,
 			Resource definingResource) {
-		// TODO CD uncomment once we have Spring 2.1 OSGi bundle
-		/*if (sourceCandidate instanceof FileSystemResource) {
-			InputStream inputStream = null;
+		if (sourceCandidate instanceof FileSystemResource) {
 			try {
-				inputStream = ((FileSystemResource) sourceCandidate).getInputStream();
-				ClassReader	reader = new ClassReader(inputStream);
+				ClassReader	reader = classReaderFactory.
+					getClassReader((FileSystemResource) sourceCandidate);
 				ClassMetadataReadingVisitor v = new ClassMetadataReadingVisitor();
 				reader.accept(v, true);
 				String className = v.getClassName();
@@ -53,16 +64,7 @@ public class JavaSourceExtractor implements SourceExtractor {
 			}
 			catch (JavaModelException e) {
 			}
-			finally {
-				if (inputStream != null) {
-					try {
-						inputStream.close();
-					}
-					catch (IOException e) {
-					}
-				}
-			}
-		}*/
+		}
 		return sourceCandidate;
 	}
 }

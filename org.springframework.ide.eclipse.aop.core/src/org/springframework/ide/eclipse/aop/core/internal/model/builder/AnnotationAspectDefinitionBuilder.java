@@ -11,13 +11,10 @@
 package org.springframework.ide.eclipse.aop.core.internal.model.builder;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import org.aspectj.lang.reflect.PerClauseKind;
@@ -25,6 +22,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
+import org.springframework.core.type.asm.CachingClassReaderFactory;
+import org.springframework.core.type.asm.ClassReaderFactory;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.logging.AopLog;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
@@ -36,14 +35,14 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
  * {@link IAspectDefinitionBuilder} implementation that creates
- * {@link IAspectDefinition} from @AspectJ-style aspects.
+ * {@link IAspectDefinition} from
+ * @AspectJ-style aspects.
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -53,7 +52,7 @@ public class AnnotationAspectDefinitionBuilder extends
 
 	private static final String AJC_MAGIC = "ajc$";
 
-	private final Map<String, ClassReader> classReaderCache = new ConcurrentHashMap<String, ClassReader>();
+	private ClassReaderFactory classReaderFactory = null;
 
 	private void addAspectDefinition(IAspectDefinition info,
 			List<IAspectDefinition> aspectInfos) {
@@ -94,38 +93,15 @@ public class AnnotationAspectDefinitionBuilder extends
 	}
 
 	private ClassReader getClassReader(String className) {
-		// check in cache first
-		if (this.classReaderCache.containsKey(className)) {
-			return this.classReaderCache.get(className);
+		// lazy initialize classReaderFactory to make sure it uses the correct
+		// classLoader
+		if (classReaderFactory == null) {
+			classReaderFactory = new CachingClassReaderFactory();
 		}
-
-		ClassLoader classLoader = Thread.currentThread()
-				.getContextClassLoader();
-		InputStream inputStream = null;
-
 		try {
-			inputStream = classLoader.getResourceAsStream(ClassUtils
-					.getClassFileName(className));
-
-			// check if class exists on class path
-			if (inputStream == null) {
-				return null;
-			}
-
-			ClassReader reader = new ClassReader(inputStream);
-			this.classReaderCache.put(className, reader);
-			return reader;
+			return classReaderFactory.getClassReader(className);
 		}
 		catch (IOException e) {
-		}
-		finally {
-			if (inputStream != null) {
-				try {
-					inputStream.close();
-				}
-				catch (IOException e) {
-				}
-			}
 		}
 		return null;
 	}
@@ -218,8 +194,7 @@ public class AnnotationAspectDefinitionBuilder extends
 
 			try {
 				classLoaderSupport
-						.executeCallback(
-								new IWeavingClassLoaderSupport.IWeavingClassLoaderAwareCallback() {
+						.executeCallback(new IWeavingClassLoaderSupport.IWeavingClassLoaderAwareCallback() {
 
 							public void doInActiveWeavingClassLoader()
 									throws Throwable {
@@ -231,10 +206,13 @@ public class AnnotationAspectDefinitionBuilder extends
 						});
 			}
 			catch (Throwable e) {
-				AopLog.log(AopLog.BUILDER_MESSAGES,
-						Activator.getFormattedMessage(
-						"AspectDefinitionBuilder.exceptionOnNode",
-						bean));
+				AopLog
+						.log(
+								AopLog.BUILDER_MESSAGES,
+								Activator
+										.getFormattedMessage(
+												"AspectDefinitionBuilder.exceptionOnNode",
+												bean));
 				Activator.log(e);
 			}
 		}

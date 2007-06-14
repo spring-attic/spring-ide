@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
+import org.springframework.aop.aspectj.ProxyCreationContext;
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
@@ -31,6 +32,7 @@ import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.ReflectionUtils.MethodCallback;
 
 /**
  * Utility class that tries to locate matches of Spring AOP configurations given
@@ -52,18 +54,23 @@ public class AspectDefinitionMatcher {
 	 * {@link ProxyCreationContext} introduced by Spring 2.1
 	 * @throws ClassNotFoundException
 	 */
-	// TODO CD uncomment once we have Spring 2.1 OSGi bundle
-	/*
-	 * private static class BeanNameExposingReflectionUtils { public static void
-	 * doWithMethods(String targetBeanName, Class targetClass, MethodCallback
-	 * mc) throws Throwable { // expose bean name on thread local Object
-	 * proxyCreationContext = ClassUtils.loadClass(
-	 * ProxyCreationContext.class.getName()).newInstance();
-	 * ClassUtils.invokeMethod(proxyCreationContext, "notifyProxyCreationStart",
-	 * targetBeanName); try { ReflectionUtils.doWithMethods(targetClass, mc); }
-	 * finally { ClassUtils.invokeMethod(proxyCreationContext,
-	 * "notifyProxyCreationComplete"); } } }
-	 */
+	private static class BeanNameExposingReflectionUtils {
+		public static void doWithMethods(String targetBeanName,
+				Class targetClass, MethodCallback mc) throws Throwable { 
+			// expose bean name on thread local
+			Object proxyCreationContext = ClassUtils.loadClass(
+					ProxyCreationContext.class).newInstance();
+			ClassUtils.invokeMethod(proxyCreationContext,
+					"notifyProxyCreationStart", targetBeanName);
+			try {
+				ReflectionUtils.doWithMethods(targetClass, mc);
+			}
+			finally {
+				ClassUtils.invokeMethod(proxyCreationContext,
+						"notifyProxyCreationComplete");
+			}
+		}
+	}
 
 	private boolean isInfrastructureClass(Class<?> beanClass)
 			throws ClassNotFoundException {
@@ -157,19 +164,17 @@ public class AspectDefinitionMatcher {
 			final String targetBeanName, final IAspectDefinition info,
 			final IProject project) throws Throwable {
 		final List<IMethod> matchingMethod = new ArrayList<IMethod>();
-		
+
 		// check if bean is an infrastructure class
 		if (isInfrastructureClass(targetClass)) {
 			return matchingMethod;
 		}
-		
+
 		final Object aspectJExpressionPointcut = createAspectJPointcutExpression(info);
 		final IType jdtTargetType = JdtUtils.getJavaType(project, targetClass
 				.getName());
 
-		// TODO CD uncomment once we have Spring 2.1 OSGi bundle
-		// BeanNameExposingReflectionUtils.doWithMethods(targetBeanName,
-		ReflectionUtils.doWithMethods(targetClass,
+		BeanNameExposingReflectionUtils.doWithMethods(targetBeanName, targetClass,
 				new ReflectionUtils.MethodCallback() {
 					public void doWith(Method method)
 							throws IllegalArgumentException,
