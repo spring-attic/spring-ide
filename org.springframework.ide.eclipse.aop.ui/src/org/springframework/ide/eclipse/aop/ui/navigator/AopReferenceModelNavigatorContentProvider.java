@@ -30,7 +30,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.SourceField;
-import org.eclipse.jdt.internal.core.SourceMethod;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -65,6 +64,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
+import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
@@ -133,7 +133,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 			IType type = (IType) parentElement;
 			List<Object> me = new ArrayList<Object>();
 			try {
-				IMethod[] methods = type.getMethods();
+				Set<IMethod> methods = Introspector.getAllMethods(type);
 				for (IMethod method : methods) {
 					if (Activator.getModel().isAdvice(method)
 							|| Activator.getModel().isAdvised(method)) {
@@ -189,8 +189,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 			node.setBeans(beans);
 			return new Object[] { node };
 		}
-		else if (parentElement instanceof IMethod
-				&& parentElement instanceof SourceMethod) {
+		else if (parentElement instanceof IMethod) {
 			IMethod method = (IMethod) parentElement;
 			List<IAopReference> references = Activator.getModel()
 					.getAllReferences();
