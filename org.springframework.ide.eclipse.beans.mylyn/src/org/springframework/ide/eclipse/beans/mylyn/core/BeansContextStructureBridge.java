@@ -117,7 +117,7 @@ public class BeansContextStructureBridge extends AbstractContextStructureBridge 
 			return CONTENT_TYPE;
 		}
 		else {
-			return ResourceStructureBridge.CONTENT_TYPE;
+			return ContextCorePlugin.CONTENT_TYPE_RESOURCE;
 		}
 	}
 

@@ -26,18 +26,18 @@
          version="0.0.0"/>
 
    <requires>
-      <import feature="org.eclipse.mylar_feature" version="2.0.0.v20070514-1800" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.mylyn"/>
    </requires>
 
    <plugin
-         id="org.springframework.ide.eclipse.beans.mylar"
+         id="org.springframework.ide.eclipse.beans.mylyn"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.springframework.ide.eclipse.webflow.mylar"
+         id="org.springframework.ide.eclipse.webflow.mylyn"
          download-size="0"
          install-size="0"
          version="0.0.0"

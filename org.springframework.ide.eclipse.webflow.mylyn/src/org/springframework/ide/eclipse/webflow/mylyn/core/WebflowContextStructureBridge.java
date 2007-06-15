@@ -9,12 +9,15 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.mylyn.context.core.AbstractContextStructureBridge;
 import org.eclipse.mylyn.context.core.ContextCorePlugin;
 import org.eclipse.mylyn.context.core.IInteractionElement;
+import org.eclipse.mylyn.internal.resources.ui.ResourceStructureBridge;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModel;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 
 /**
@@ -30,7 +33,9 @@ public class WebflowContextStructureBridge extends
 
 	@Override
 	public boolean acceptsObject(Object object) {
-		return (object instanceof IModelElement || (object instanceof IResource && WebflowModelUtils
+		return (object instanceof IWebflowModelElement
+				|| object instanceof IWebflowProject
+				|| object instanceof ISpringProject || (object instanceof IResource && WebflowModelUtils
 				.isWebflowConfig((IResource) object)));
 	}
 
@@ -46,8 +51,9 @@ public class WebflowContextStructureBridge extends
 
 			IModelElement[] children = modelElement.getElementChildren();
 			for (IModelElement child : children) {
-				IInteractionElement node = ContextCorePlugin.getContextManager()
-						.getElement(getHandleIdentifier(child));
+				IInteractionElement node = ContextCorePlugin
+						.getContextManager().getElement(
+								getHandleIdentifier(child));
 				if (node != null && node.getInterest().isInteresting()) {
 					return false;
 				}
@@ -70,6 +76,13 @@ public class WebflowContextStructureBridge extends
 				.isWebflowConfig((IResource) obj))) {
 			return canFilter(WebflowModelUtils.getWebflowConfig((IFile) obj));
 		}
+
+		AbstractContextStructureBridge parentBridge = ContextCorePlugin
+				.getDefault().getStructureBridge(parentContentType);
+		if (parentBridge != null && !parentBridge.canFilter(obj)) {
+			return false;
+		}
+
 		return true;
 	}
 
@@ -95,11 +108,18 @@ public class WebflowContextStructureBridge extends
 
 	@Override
 	public String getContentType(String handle) {
-		return CONTENT_TYPE;
+		Object obj = getObjectForHandle(handle);
+		if (obj instanceof IModelElement) {
+			return CONTENT_TYPE;
+		}
+		else {
+			return ContextCorePlugin.CONTENT_TYPE_RESOURCE;
+		}
 	}
 
 	@Override
 	public String getHandleIdentifier(Object obj) {
+
 		if (obj instanceof IModelElement) {
 			return ((IModelElement) obj).getElementID();
 		}
@@ -126,16 +146,55 @@ public class WebflowContextStructureBridge extends
 
 	@Override
 	public Object getObjectForHandle(String handle) {
-		return Activator.getModel().getElement(handle);
+		Object obj = null;
+		if (handle != null) {
+			obj = Activator.getModel().getElement(handle);
+			if (obj != null) {
+				return obj;
+			}
+			obj = SpringCore.getModel().getElement(handle);
+			if (obj != null) {
+				return obj;
+			}
+		}
+		AbstractContextStructureBridge parentBridge = ContextCorePlugin
+				.getDefault().getStructureBridge(parentContentType);
+		if (parentBridge != null) {
+			obj = parentBridge.getObjectForHandle(handle);
+		}
+		
+		return null;
 	}
 
 	@Override
 	public String getParentHandle(String handle) {
 		Object obj = getObjectForHandle(handle);
-		if (obj != null && obj instanceof IModelElement) {
+		if (obj instanceof IWebflowProject) {
+			return SpringCore.getModel().getProject(
+					((IWebflowProject) obj).getProject()).getElementID();
+		}
+		else if (obj instanceof ISpringProject) {
+			AbstractContextStructureBridge parentBridge = ContextCorePlugin
+					.getDefault().getStructureBridge(parentContentType);
+			if (parentBridge != null
+					&& parentBridge instanceof ResourceStructureBridge) {
+				return parentBridge.getHandleIdentifier(((ISpringProject) obj)
+						.getProject());
+			}
+		}
+		else if (obj != null && obj instanceof IModelElement) {
 			IModelElement parent = ((IModelElement) obj).getElementParent();
 			if (parent != null) {
 				return parent.getElementID();
+			}
+		}
+		else {
+			AbstractContextStructureBridge parentBridge = ContextCorePlugin
+					.getDefault().getStructureBridge(parentContentType);
+
+			if (parentBridge != null
+					&& parentBridge instanceof ResourceStructureBridge) {
+				return parentBridge.getParentHandle(handle);
 			}
 		}
 		return null;

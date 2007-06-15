@@ -7,7 +7,7 @@
 			class="org.springframework.ide.eclipse.webflow.mylyn.core.WebflowContextStructureBridge"
 			id="org.springframework.ide.eclipse.webflow.ui.mylyn.context.webflow"
 			name="%webflowContextStructureBridge.name" 
-			parentContentType="resources" />
+			parentContentType="resource" />
 	</extension>
 
 </plugin>
