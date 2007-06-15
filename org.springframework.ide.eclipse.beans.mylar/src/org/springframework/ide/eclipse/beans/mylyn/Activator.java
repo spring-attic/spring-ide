@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.mylar;
+package org.springframework.ide.eclipse.beans.mylyn;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
@@ -19,7 +19,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.wst.xml.ui.internal.tabletree.XMLMultiPageEditorPart;
 import org.osgi.framework.BundleContext;
-import org.springframework.ide.eclipse.beans.mylar.ui.BeansActiveFoldingEditorTracker;
+import org.springframework.ide.eclipse.beans.mylyn.ui.BeansActiveFoldingEditorTracker;
 
 /**
  * The activator class controls the plug-in life cycle.
@@ -29,7 +29,7 @@ import org.springframework.ide.eclipse.beans.mylar.ui.BeansActiveFoldingEditorTr
 @SuppressWarnings("restriction")
 public class Activator extends AbstractUIPlugin {
 
-	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.beans.ui.mylar";
+	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.beans.ui.mylyn";
 
 	private static Activator plugin;
 

@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.mylar.ui;
+package org.springframework.ide.eclipse.beans.mylyn.ui;
 
 import java.util.Iterator;
 import java.util.List;
@@ -20,12 +20,12 @@ import org.eclipse.core.runtime.Preferences.PropertyChangeEvent;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
-import org.eclipse.mylar.context.core.ContextCorePlugin;
-import org.eclipse.mylar.context.core.IMylarContext;
-import org.eclipse.mylar.context.core.IMylarContextListener;
-import org.eclipse.mylar.context.core.IMylarElement;
-import org.eclipse.mylar.context.ui.ContextUiPlugin;
-import org.eclipse.mylar.internal.context.ui.ContextUiPrefContstants;
+import org.eclipse.mylyn.context.core.ContextCorePlugin;
+import org.eclipse.mylyn.context.core.IInteractionContext;
+import org.eclipse.mylyn.context.core.IInteractionContextListener;
+import org.eclipse.mylyn.context.core.IInteractionElement;
+import org.eclipse.mylyn.context.ui.ContextUiPlugin;
+import org.eclipse.mylyn.internal.context.ui.ContextUiPrefContstants;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
@@ -38,19 +38,20 @@ import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.mylar.core.BeansContextStructureBridge;
+import org.springframework.ide.eclipse.beans.mylyn.core.BeansContextStructureBridge;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
- * {@link IMylarContextListener} that handles collapsing and expanding of Xml
- * nodes in the {@link XMLMultiPageEditorPart}.
+ * {@link IInteractionContextListener} that handles collapsing and expanding of
+ * Xml nodes in the {@link XMLMultiPageEditorPart}.
  * @author Christian Dupuis
  * @since 2.0
  */
 @SuppressWarnings( { "restriction", "deprecation" })
-public class BeansActiveFoldingListener implements IMylarContextListener {
+public class BeansActiveFoldingListener implements IInteractionContextListener {
 
-	private static BeansContextStructureBridge BRIDGE = (BeansContextStructureBridge) ContextCorePlugin
+	private static BeansContextStructureBridge BRIDGE = 
+		(BeansContextStructureBridge) ContextCorePlugin
 			.getDefault().getStructureBridge(
 					BeansContextStructureBridge.CONTENT_TYPE);
 
@@ -85,6 +86,7 @@ public class BeansActiveFoldingListener implements IMylarContextListener {
 		updateFolding();
 	}
 
+	@SuppressWarnings("unchecked")
 	private void collapseDocument(ProjectionAnnotationModel annotationModel) {
 		Iterator annotations = annotationModel.getAnnotationIterator();
 		// first collapse all
@@ -94,15 +96,15 @@ public class BeansActiveFoldingListener implements IMylarContextListener {
 		}
 	}
 
-	public void contextActivated(IMylarContext context) {
+	public void contextActivated(IInteractionContext context) {
 		updateFolding();
 	}
 
-	public void contextCleared(IMylarContext context) {
+	public void contextCleared(IInteractionContext context) {
 		updateFolding();
 	}
 
-	public void contextDeactivated(IMylarContext context) {
+	public void contextDeactivated(IInteractionContext context) {
 		updateFolding();
 	}
 
@@ -112,10 +114,11 @@ public class BeansActiveFoldingListener implements IMylarContextListener {
 				.removePropertyChangeListener(PREFERENCE_LISTENER);
 	}
 
-	public void elementDeleted(IMylarElement node) {
+	public void elementDeleted(IInteractionElement node) {
 		// ignore
 	}
 
+	@SuppressWarnings("unchecked")
 	private void expandDocument(ProjectionAnnotationModel annotationModel) {
 		Iterator annotations = annotationModel.getAnnotationIterator();
 		while (annotations.hasNext()) {
@@ -127,8 +130,9 @@ public class BeansActiveFoldingListener implements IMylarContextListener {
 	private void expandIfElementIsOfInterest(
 			ProjectionAnnotationModel annotationModel,
 			IStructuredDocument document, ISourceModelElement modelElement) {
-		IMylarElement mylarElement = ContextCorePlugin.getContextManager()
-				.getElement(BRIDGE.getHandleIdentifier(modelElement));
+		IInteractionElement mylarElement = ContextCorePlugin
+				.getContextManager().getElement(
+						BRIDGE.getHandleIdentifier(modelElement));
 		if (mylarElement != null && mylarElement.getInterest().isInteresting()) {
 			try {
 				int startOffset = document.getLineOffset(modelElement
@@ -143,11 +147,11 @@ public class BeansActiveFoldingListener implements IMylarContextListener {
 		}
 	}
 
-	public void interestChanged(List<IMylarElement> elements) {
+	public void interestChanged(List<IInteractionElement> elements) {
 		final ITextEditor viewer = (ITextEditor) editor
 				.getAdapter(ITextEditor.class);
 		final IWorkbench workbench = PlatformUI.getWorkbench();
-		for (final IMylarElement element : elements) {
+		for (final IInteractionElement element : elements) {
 			workbench.getDisplay().asyncExec(new Runnable() {
 				public void run() {
 					if (viewer instanceof StructuredTextEditor
@@ -175,15 +179,15 @@ public class BeansActiveFoldingListener implements IMylarContextListener {
 		}
 	}
 
-	public void landmarkAdded(IMylarElement element) {
+	public void landmarkAdded(IInteractionElement element) {
 		// ignore
 	}
 
-	public void landmarkRemoved(IMylarElement element) {
+	public void landmarkRemoved(IInteractionElement element) {
 		// ignore
 	}
 
-	public void relationsChanged(IMylarElement node) {
+	public void relationsChanged(IInteractionElement node) {
 		// ignore
 	}
 

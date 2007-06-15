@@ -8,16 +8,16 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.mylar.core;
+package org.springframework.ide.eclipse.beans.mylyn.core;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.mylar.context.core.AbstractContextStructureBridge;
-import org.eclipse.mylar.context.core.ContextCorePlugin;
-import org.eclipse.mylar.context.core.IMylarElement;
-import org.eclipse.mylar.internal.resources.ResourceStructureBridge;
+import org.eclipse.mylyn.context.core.AbstractContextStructureBridge;
+import org.eclipse.mylyn.context.core.ContextCorePlugin;
+import org.eclipse.mylyn.context.core.IInteractionElement;
+import org.eclipse.mylyn.internal.resources.ui.ResourceStructureBridge;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -30,7 +30,7 @@ import org.springframework.ide.eclipse.core.model.ISpringProject;
 
 /**
  * {@link AbstractContextStructureBridge} extension that integrates the
- * {@link IBeansModel} with Mylar.
+ * {@link IBeansModel} with Mylyn.
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -57,7 +57,7 @@ public class BeansContextStructureBridge extends AbstractContextStructureBridge 
 
 			IModelElement[] children = modelElement.getElementChildren();
 			for (IModelElement child : children) {
-				IMylarElement node = ContextCorePlugin.getContextManager()
+				IInteractionElement node = ContextCorePlugin.getContextManager()
 						.getElement(getHandleIdentifier(child));
 				if (node != null && node.getInterest().isInteresting()) {
 					return false;
@@ -70,7 +70,7 @@ public class BeansContextStructureBridge extends AbstractContextStructureBridge 
 				return canFilter(beansProject);
 			}
 
-			IMylarElement node = ContextCorePlugin.getContextManager()
+			IInteractionElement node = ContextCorePlugin.getContextManager()
 					.getElement(getHandleIdentifier(obj));
 			if (node != null && node.getInterest().isInteresting()) {
 				return false;

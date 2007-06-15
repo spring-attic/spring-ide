@@ -1,4 +1,4 @@
-package org.springframework.ide.eclipse.webflow.mylar.core;
+package org.springframework.ide.eclipse.webflow.mylyn.core;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,9 +6,9 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.mylar.context.core.AbstractContextStructureBridge;
-import org.eclipse.mylar.context.core.ContextCorePlugin;
-import org.eclipse.mylar.context.core.IMylarElement;
+import org.eclipse.mylyn.context.core.AbstractContextStructureBridge;
+import org.eclipse.mylyn.context.core.ContextCorePlugin;
+import org.eclipse.mylyn.context.core.IInteractionElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.webflow.core.Activator;
@@ -19,7 +19,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 
 /**
  * {@link AbstractContextStructureBridge} extension that integrates the
- * {@link IWebflowModel} with Mylar.
+ * {@link IWebflowModel} with Mylyn.
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -46,7 +46,7 @@ public class WebflowContextStructureBridge extends
 
 			IModelElement[] children = modelElement.getElementChildren();
 			for (IModelElement child : children) {
-				IMylarElement node = ContextCorePlugin.getContextManager()
+				IInteractionElement node = ContextCorePlugin.getContextManager()
 						.getElement(getHandleIdentifier(child));
 				if (node != null && node.getInterest().isInteresting()) {
 					return false;
@@ -60,7 +60,7 @@ public class WebflowContextStructureBridge extends
 				return canFilter(webflowProject);
 			}
 
-			IMylarElement node = ContextCorePlugin.getContextManager()
+			IInteractionElement node = ContextCorePlugin.getContextManager()
 					.getElement(getHandleIdentifier(obj));
 			if (node != null && node.getInterest().isInteresting()) {
 				return false;

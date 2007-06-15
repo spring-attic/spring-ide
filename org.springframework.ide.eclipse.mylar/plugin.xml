@@ -4,19 +4,58 @@
 	
 	<extension point="org.eclipse.ui.viewActions"> 
     	<viewContribution 
-	    	id="org.eclipse.mylar.ui.projectexplorer.filter" 
+	    	id="org.eclipse.mylyn.ui.projectexplorer.filter" 
    		    targetID="org.springframework.ide.eclipse.ui.navigator.springExplorer">
 	    	<action
 	           label="%filterSpringExplorerAction.label"
 	           tooltip="%filterSpringExplorerAction.tooltip"
-	           menubarPath="mylar"
-	           toolbarPath="mylar"
-	           id="org.springframework.ide.eclipse.beans.mylar.ui.actions.filterSpringExplorerAction"
-	           class="org.springframework.ide.eclipse.mylar.ui.actions.FocusSpringExplorerAction"
+	           menubarPath="mylyn"
+	           toolbarPath="mylyn"
+	           id="org.springframework.ide.eclipse.beans.mylyn.ui.actions.filterSpringExplorerAction"
+	           class="org.springframework.ide.eclipse.mylyn.ui.actions.FocusSpringExplorerAction"
 	           style="toggle"
 	           icon="icons/elcl16/interest-filtering.gif"
 	           enablesFor="*" />
 	  	</viewContribution> 
+	</extension>
+	
+	<extension point="org.eclipse.ui.actionSets">
+		<actionSet id="org.eclipse.mylyn.java.actionSet"
+			label="Mylyn Spring" 
+			visible="false">
+			<action
+				label="%toggleActiveFoldingAction.label" 
+				tooltip="%toggleActiveFoldingAction.tooltip"
+				toolbarPath="org.eclipse.ui.edit.text.actionSet.presentation/Presentation"
+				id="org.springframework.ide.eclipse.beans.ui.mylyn.folding.auto"
+				class="org.eclipse.mylyn.internal.java.ui.actions.ToggleActiveFoldingAction"
+				definitionId="org.springframework.ide.eclipse.beans.ui.mylyn.folding.auto"
+				icon="icons/elcl16/interest-folding.gif"
+				style="toggle" />
+		</actionSet>
+	</extension>
+
+	<extension point="org.eclipse.ui.popupMenus">
+		<objectContribution adaptable="true"
+			id="org.springframework.ide.eclipse.ui.interest"
+			objectClass="org.springframework.ide.eclipse.core.model.IModelElement">
+			<action
+				label="%interestDecrementAction.label" 
+				tooltip="%interestDecrementAction.tooltip"
+				menubarPath="additions"
+				id="org.springframework.ide.eclipse.ui.interest.actions.InterestDecrementAction"
+				class="org.eclipse.mylyn.internal.context.ui.actions.InterestDecrementAction"
+				icon="icons/elcl16/interest-decrease.gif"
+				enablesFor="*" />
+			<action 
+				label="%interestIncrementAction.label"
+				tooltip="%interestIncrementAction.tooltip" 
+				menubarPath="additions"
+				id="org.springframework.ide.eclipse.ui.interest.actions.InterestIncrementAction"
+				class="org.eclipse.mylyn.internal.context.ui.actions.InterestIncrementAction"
+				icon="icons/elcl16/interest-increase.gif" 
+				enablesFor="*" />
+		</objectContribution>
 	</extension>
  
 </plugin>

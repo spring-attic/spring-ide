@@ -8,13 +8,13 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.mylar.ui;
+package org.springframework.ide.eclipse.beans.mylyn.ui;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.mylar.monitor.ui.workbench.AbstractEditorTracker;
+import org.eclipse.mylyn.monitor.ui.workbench.AbstractEditorTracker;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;

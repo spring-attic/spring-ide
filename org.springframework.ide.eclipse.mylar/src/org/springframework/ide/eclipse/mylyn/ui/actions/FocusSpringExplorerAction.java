@@ -8,9 +8,10 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.mylar.ui.actions;
+package org.springframework.ide.eclipse.mylyn.ui.actions;
 
-import org.eclipse.mylar.internal.ide.ui.actions.FocusProjectExplorerAction;
+import org.eclipse.mylyn.internal.ide.ui.actions.FocusProjectExplorerAction;
+
 
 /**   
  * Extension of {@link FocusProjectExplorerAction} class that serves as a

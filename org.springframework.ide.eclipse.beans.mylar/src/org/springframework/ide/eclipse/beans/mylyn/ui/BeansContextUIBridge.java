@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.mylar.ui;
+package org.springframework.ide.eclipse.beans.mylyn.ui;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +16,9 @@ import java.util.List;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.mylar.context.core.ContextCorePlugin;
-import org.eclipse.mylar.context.core.IMylarElement;
-import org.eclipse.mylar.context.ui.AbstractContextUiBridge;
+import org.eclipse.mylyn.context.core.ContextCorePlugin;
+import org.eclipse.mylyn.context.core.IInteractionElement;
+import org.eclipse.mylyn.context.ui.AbstractContextUiBridge;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
@@ -35,7 +35,7 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
  * {@link AbstractContextUiBridge} that integrates the {@link IBeansModel} with
- * Mylar in the UI.
+ * Mylyn in the UI.
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -54,7 +54,7 @@ public class BeansContextUIBridge extends AbstractContextUiBridge {
 	}
 
 	@Override
-	public void close(IMylarElement element) {
+	public void close(IInteractionElement element) {
 		try {
 			IWorkbenchPage page = PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow().getActivePage();
@@ -99,7 +99,7 @@ public class BeansContextUIBridge extends AbstractContextUiBridge {
 	}
 
 	@Override
-	public IMylarElement getElement(IEditorInput editorInput) {
+	public IInteractionElement getElement(IEditorInput editorInput) {
 		if (editorInput != null && editorInput instanceof IFileEditorInput) {
 			IResource resource = ((IFileEditorInput) editorInput).getFile();
 			IModelElement modelElement = BeansModelUtils
@@ -121,7 +121,7 @@ public class BeansContextUIBridge extends AbstractContextUiBridge {
 	}
 
 	@Override
-	public void open(IMylarElement element) {
+	public void open(IInteractionElement element) {
 		String handle = element.getHandleIdentifier();
 		IModelElement modelElement = BeansCorePlugin.getModel().getElement(
 				handle);

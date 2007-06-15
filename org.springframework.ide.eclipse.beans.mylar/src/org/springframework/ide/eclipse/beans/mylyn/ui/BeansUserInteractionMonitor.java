@@ -8,14 +8,14 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.mylar.ui;
+package org.springframework.ide.eclipse.beans.mylyn.ui;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.mylar.monitor.ui.AbstractUserInteractionMonitor;
+import org.eclipse.mylyn.monitor.ui.AbstractUserInteractionMonitor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
@@ -30,7 +30,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
  * {@link AbstractUserInteractionMonitor} extension that tracks current
- * selections in the open editor and sends back feedback to Mylar that a element
+ * selections in the open editor and sends back feedback to Mylyn that a element
  * has been selected and the interest level should be increased.
  * @author Christian Dupuis
  * @since 2.0
