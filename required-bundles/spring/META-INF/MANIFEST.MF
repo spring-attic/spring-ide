@@ -5,10 +5,9 @@ Spring-Version: 2.1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.springframework
 Bundle-Name: org.springframework
-Bundle-Version: 2.1.0.v200706130600
+Bundle-Version: 2.1.0.v200706150600
 Bundle-Vendor: Spring Framework
 Bundle-ClassPath: spring.jar
-Bundle-Localization: plugin
 Export-Package: org.springframework.aop,
  org.springframework.aop.aspectj,
  org.springframework.aop.aspectj.annotation,
