@@ -4,9 +4,10 @@
 	
 	<extension point="org.eclipse.mylar.context.core.bridges">
 		<structureBridge
-			class="org.springframework.ide.eclipse.beans.mylar.core.BeansContextStructureBridge"
-			id="org.springframework.ide.eclipse.beans.ui.mylar.context.beans"
-			name="%beansContextStructureBridge.name" />
+        	class="org.springframework.ide.eclipse.beans.mylar.core.BeansContextStructureBridge"
+	        id="org.springframework.ide.eclipse.beans.ui.mylar.context.beans"
+    	    name="%beansContextStructureBridge.name"
+        	parentContentType="*"/>
 	</extension>
 
 	<extension point="org.eclipse.mylar.context.ui.bridges">

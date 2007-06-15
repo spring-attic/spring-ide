@@ -17,12 +17,14 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.mylar.context.core.AbstractContextStructureBridge;
 import org.eclipse.mylar.context.core.ContextCorePlugin;
 import org.eclipse.mylar.context.core.IMylarElement;
+import org.eclipse.mylar.internal.resources.ResourceStructureBridge;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
 
@@ -38,8 +40,9 @@ public class BeansContextStructureBridge extends AbstractContextStructureBridge 
 
 	@Override
 	public boolean acceptsObject(Object object) {
-		return (object instanceof IModelElement || (object instanceof IResource && BeansCoreUtils
-				.isBeansConfig((IResource) object)));
+		return (object instanceof IModelElement
+				|| (object instanceof IResource && BeansCoreUtils
+						.isBeansConfig((IResource) object)));
 	}
 
 	@Override
@@ -77,6 +80,13 @@ public class BeansContextStructureBridge extends AbstractContextStructureBridge 
 				.isBeansConfig((IResource) obj))) {
 			return canFilter(BeansModelUtils.getResourceModelElement(obj));
 		}
+		
+		AbstractContextStructureBridge parentBridge = ContextCorePlugin
+				.getDefault().getStructureBridge(parentContentType);
+		if (parentBridge != null && !parentBridge.canFilter(obj)) {
+			return false;
+		}
+		
 		return true;
 	}
 
@@ -102,7 +112,13 @@ public class BeansContextStructureBridge extends AbstractContextStructureBridge 
 
 	@Override
 	public String getContentType(String handle) {
-		return CONTENT_TYPE;
+		Object obj = getObjectForHandle(handle);
+		if (obj instanceof IModelElement) {
+			return CONTENT_TYPE;
+		}
+		else {
+			return ResourceStructureBridge.CONTENT_TYPE;
+		}
 	}
 
 	@Override
@@ -132,18 +148,30 @@ public class BeansContextStructureBridge extends AbstractContextStructureBridge 
 
 	@Override
 	public Object getObjectForHandle(String handle) {
-		Object obj = BeansCorePlugin.getModel().getElement(handle);
-		if (obj != null) {
-			return obj;
+		Object obj = null;
+		if (handle != null) {
+			obj = BeansCorePlugin.getModel().getElement(handle);
+			if (obj != null) {
+				return obj;
+			}
+			obj = SpringCore.getModel().getElement(handle);
+			if (obj != null) {
+				return obj;
+			}
 		}
-		//obj = SpringCore.getModel().getElement(handle);
+		AbstractContextStructureBridge parentBridge = ContextCorePlugin
+				.getDefault().getStructureBridge(parentContentType);
+		if (parentBridge != null) {
+			obj = parentBridge.getObjectForHandle(handle);
+		}
+
 		return obj;
 	}
 
 	@Override
 	public String getParentHandle(String handle) {
 		Object obj = getObjectForHandle(handle);
-		/*if (obj instanceof IBeansProject) {
+		if (obj instanceof IBeansProject) {
 			return SpringCore.getModel().getProject(
 					((IBeansProject) obj).getProject()).getElementID();
 		}
@@ -152,14 +180,23 @@ public class BeansContextStructureBridge extends AbstractContextStructureBridge 
 					.getDefault().getStructureBridge(parentContentType);
 			if (parentBridge != null
 					&& parentBridge instanceof ResourceStructureBridge) {
-				return parentBridge.getHandleIdentifier(((ISpringProject) obj).getProject());
+				return parentBridge.getHandleIdentifier(((ISpringProject) obj)
+						.getProject());
 			}
 		}
-		else */
-		if (obj != null && obj instanceof IModelElement) {
+		else if (obj != null && obj instanceof IModelElement) {
 			IModelElement parent = ((IModelElement) obj).getElementParent();
 			if (parent != null) {
 				return parent.getElementID();
+			}
+		}
+		else {
+			AbstractContextStructureBridge parentBridge = ContextCorePlugin
+					.getDefault().getStructureBridge(parentContentType);
+
+			if (parentBridge != null
+					&& parentBridge instanceof ResourceStructureBridge) {
+				return parentBridge.getParentHandle(handle);
 			}
 		}
 		return null;

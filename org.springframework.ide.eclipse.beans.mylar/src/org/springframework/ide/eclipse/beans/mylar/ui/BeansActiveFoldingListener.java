@@ -39,7 +39,6 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.mylar.core.BeansContextStructureBridge;
-import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
@@ -160,7 +159,7 @@ public class BeansActiveFoldingListener implements IMylarContextListener {
 								.getTextViewer().getProjectionAnnotationModel();
 
 						if (element != null) {
-							IModelElement modelElement = (IModelElement) BRIDGE
+							Object modelElement = (Object) BRIDGE
 									.getObjectForHandle(element
 											.getHandleIdentifier());
 							if (modelElement != null
