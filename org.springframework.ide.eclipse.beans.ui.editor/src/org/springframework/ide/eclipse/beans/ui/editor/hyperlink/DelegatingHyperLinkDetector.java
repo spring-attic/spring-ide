@@ -19,6 +19,12 @@ import org.springframework.ide.eclipse.beans.ui.editor.namespaces.NamespaceUtils
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.w3c.dom.Node;
 
+/**
+ * {@link IHyperlinkDetector} implementation that delegates to
+ * {@link IHyperlinkDetector}s that are contributed over the namespace
+ * extension point.
+ * @author Christian Dupuis
+ */
 public class DelegatingHyperLinkDetector implements IHyperlinkDetector {
 
 	public IHyperlink[] detectHyperlinks(ITextViewer textViewer,
@@ -29,9 +35,11 @@ public class DelegatingHyperLinkDetector implements IHyperlinkDetector {
 				.getOffset());
 		if (currentNode != null) {
 			IHyperlinkDetector detector = NamespaceUtils
-				.getHyperlinkDetector(currentNode.getNamespaceURI());
-			return detector.detectHyperlinks(textViewer, region,
-					canShowMultipleHyperlinks);
+					.getHyperlinkDetector(currentNode.getNamespaceURI());
+			if (detector != null) {
+				return detector.detectHyperlinks(textViewer, region,
+						canShowMultipleHyperlinks);
+			}
 		}
 		return new IHyperlink[0];
 	}
