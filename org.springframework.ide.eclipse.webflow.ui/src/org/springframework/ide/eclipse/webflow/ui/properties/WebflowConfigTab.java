@@ -21,6 +21,9 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -56,103 +59,46 @@ import org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorLabe
 @SuppressWarnings("deprecation")
 public class WebflowConfigTab {
 
-	/**
-	 * 
-	 */
 	private static final int TABLE_WIDTH = 250;
 
-	/**
-	 * 
-	 */
 	private static final String DESCRIPTION = "ConfigurationPropertyPage.tabConfigFiles.description";
 
-	/**
-	 * 
-	 */
 	private static final String ADD_BUTTON = "ConfigurationPropertyPage.tabConfigFiles.addButton";
 
-	/**
-	 * 
-	 */
 	private static final String REMOVE_BUTTON = "ConfigurationPropertyPage.tabConfigFiles.removeButton";
 
-	/**
-	 * 
-	 */
 	private static final String DIALOG_TITLE = "ConfigurationPropertyPage.tabConfigFiles.addConfigDialog.title";
 
-	/**
-	 * 
-	 */
 	private static final String DIALOG_MESSAGE = "ConfigurationPropertyPage.tabConfigFiles.addConfigDialog.message";
 
-	/**
-	 * 
-	 */
 	private static final String EDIT_BUTTON = "ConfigurationPropertyPage.tabConfigFiles.editButton";
 
-	/**
-	 * 
-	 */
 	private IAdaptable element;
 
-	/**
-	 * 
-	 */
 	private Table configsTable;
 
-	/**
-	 * 
-	 */
 	private TableViewer configsViewer;
 
-	/**
-	 * 
-	 */
 	private Button addButton, removeButton;
 
-	/**
-	 * 
-	 */
 	private SelectionListener buttonListener = new SelectionAdapter() {
 		public void widgetSelected(SelectionEvent e) {
 			handleButtonPressed((Button) e.widget);
 		}
 	};
 
-	/**
-	 * 
-	 */
 	private boolean hasUserMadeChanges;
 
-	/**
-	 * 
-	 */
 	private IWebflowProject project;
 
-	/**
-	 * 
-	 */
 	private Set<IWebflowConfig> configFiles;
 
-	/**
-	 * 
-	 */
 	private Map<IWebflowConfig, Set<IModelElement>> configFilesToBeansConfigs;
 
 	private Map<IWebflowConfig, String> configFilesToNames;
 
-	/**
-	 * 
-	 */
 	private Button editButton;
 
-	/**
-	 * 
-	 * 
-	 * @param element
-	 * @param project
-	 */
 	public WebflowConfigTab(IWebflowProject project, IAdaptable element) {
 		this.project = project;
 		this.element = element;
@@ -224,6 +170,11 @@ public class WebflowConfigTab {
 		configsViewer.setLabelProvider(new WebflowNavigatorLabelProvider());
 		configsViewer.setInput(this.configFiles); // activate content provider
 		configsViewer.setSorter(new ConfigFilesSorter());
+		configsViewer.addDoubleClickListener(new IDoubleClickListener() {
+			public void doubleClick(DoubleClickEvent event) {
+				handleDoubleClick(event);
+			}
+		});
 
 		// button area
 		Composite buttonArea = new Composite(tableAndButtons, SWT.NONE);
@@ -239,6 +190,17 @@ public class WebflowConfigTab {
 		removeButton = SpringUIUtils.createButton(buttonArea, Activator
 				.getResourceString(REMOVE_BUTTON), buttonListener, 0, false);
 		return composite;
+	}
+	
+	private void handleDoubleClick(DoubleClickEvent event) {
+		ISelection selection = event.getSelection();
+		if (selection instanceof IStructuredSelection) {
+			Object elem = ((IStructuredSelection) selection).getFirstElement();
+			if (elem instanceof IWebflowConfig) {
+				// Edit corresponding config
+				handleEditButtonPressed();
+			}
+		}
 	}
 
 	/**
