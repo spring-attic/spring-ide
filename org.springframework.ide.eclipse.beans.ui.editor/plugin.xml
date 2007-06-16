@@ -43,6 +43,7 @@
 
 	<extension point="org.eclipse.wst.xml.core.catalogContributions">
 		<catalogContribution>
+			<!-- Bean namespace -->
 			<public 
 				publicId="-//SPRING//DTD BEAN//EN"
 				uri="platform:/plugin/org.springframework/org/springframework/beans/factory/xml/spring-beans.dtd"
@@ -56,70 +57,120 @@
 				uri="platform:/plugin/org.springframework/org/springframework/beans/factory/xml/spring-beans-2.0.xsd"
 				webURL="http://www.springframework.org/schema/beans/spring-beans-2.0.xsd" />
 			<system
-				systemId="http://www.springframework.org/schema/beans/spring-beans-2.0.xsd"
-				uri="platform:/plugin/org.springframework/org/springframework/beans/factory/xml/spring-beans-2.0.xsd" />
-			<system
 				systemId="http://www.springframework.org/schema/beans/spring-beans.xsd"
 				uri="platform:/plugin/org.springframework/org/springframework/beans/factory/xml/spring-beans-2.0.xsd" />
+			<system
+				systemId="http://www.springframework.org/schema/beans/spring-beans-2.0.xsd"
+				uri="platform:/plugin/org.springframework/org/springframework/beans/factory/xml/spring-beans-2.0.xsd" />
+	
+			<!-- Util namespace -->
 			<public
 				publicId="http://www.springframework.org/schema/util"
 				uri="platform:/plugin/org.springframework/org/springframework/beans/factory/xml/spring-util-2.0.xsd"
 				webURL="http://www.springframework.org/schema/util/spring-util-2.0.xsd" />
 			<system
-				systemId="http://www.springframework.org/schema/util/spring-util-2.0.xsd"
-				uri="platform:/plugin/org.springframework/org/springframework/beans/factory/xml/spring-util-2.0.xsd" />
-			<system
 				systemId="http://www.springframework.org/schema/util/spring-util.xsd"
 				uri="platform:/plugin/org.springframework/org/springframework/beans/factory/xml/spring-util-2.0.xsd" />
+			<system
+				systemId="http://www.springframework.org/schema/util/spring-util-2.0.xsd"
+				uri="platform:/plugin/org.springframework/org/springframework/beans/factory/xml/spring-util-2.0.xsd" />
+
+			<!-- JMS namespace -->
+			<public
+				publicId="http://www.springframework.org/schema/jms"
+				uri="platform:/plugin/org.springframework/org/springframework/jms/config/spring-jms-2.1.xsd"
+				webURL="http://www.springframework.org/schema/jms/spring-jms-2.1.xsd" />
+			<system
+				systemId="http://www.springframework.org/schema/jms/spring-jms.xsd"
+				uri="platform:/plugin/org.springframework/org/springframework/jms/config/spring-jms-2.1.xsd" />
+			<system
+				systemId="http://www.springframework.org/schema/jms/spring-jms-2.1.xsd"
+				uri="platform:/plugin/org.springframework/org/springframework/jms/config/spring-jms-2.1.xsd" />
+
+			<!-- Context namespace -->
+			<public
+				publicId="http://www.springframework.org/schema/context"
+				uri="platform:/plugin/org.springframework/org/springframework/context/config/spring-context-2.1.xsd"
+				webURL="http://www.springframework.org/schema/context/spring-context-2.1.xsd" />
+			<system
+				systemId="http://www.springframework.org/schema/context/spring-context.xsd"
+				uri="platform:/plugin/org.springframework/org/springframework/context/config/spring-context-2.1.xsd" />
+			<system
+				systemId="http://www.springframework.org/schema/context/spring-context-2.1.xsd"
+				uri="platform:/plugin/org.springframework/org/springframework/context/config/spring-context-2.1.xsd" />
+			
+			<!-- AOP namespace -->
 			<public 
 				publicId="http://www.springframework.org/schema/aop"
 				uri="platform:/plugin/org.springframework/org/springframework/aop/config/spring-aop-2.0.xsd"
 				webURL="http://www.springframework.org/schema/aop/spring-aop-2.0.xsd" />
+			<public 
+				publicId="http://www.springframework.org/schema/aop"
+				uri="platform:/plugin/org.springframework/org/springframework/aop/config/spring-aop-2.1.xsd"
+				webURL="http://www.springframework.org/schema/aop/spring-aop-2.1.xsd" />
+			<system
+				systemId="http://www.springframework.org/schema/aop/spring-aop.xsd"
+				uri="platform:/plugin/org.springframework/org/springframework/aop/config/spring-aop-2.0.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/aop/spring-aop-2.0.xsd"
 				uri="platform:/plugin/org.springframework/org/springframework/aop/config/spring-aop-2.0.xsd" />
 			<system
-				systemId="http://www.springframework.org/schema/aop/spring-aop.xsd"
-				uri="platform:/plugin/org.springframework/org/springframework/aop/config/spring-aop-2.0.xsd" />
+				systemId="http://www.springframework.org/schema/aop/spring-aop-2.1.xsd"
+				uri="platform:/plugin/org.springframework/org/springframework/aop/config/spring-aop-2.1.xsd" />
+				
+			<!-- TX namespace -->
 			<public 
 				publicId="http://www.springframework.org/schema/tx"
 				uri="platform:/plugin/org.springframework/org/springframework/transaction/config/spring-tx-2.0.xsd"
 				webURL="http://www.springframework.org/schema/tx/spring-tx-2.0.xsd" />
+			<public 
+				publicId="http://www.springframework.org/schema/tx"
+				uri="platform:/plugin/org.springframework/org/springframework/transaction/config/spring-tx-2.1.xsd"
+				webURL="http://www.springframework.org/schema/tx/spring-tx-2.1.xsd" />
+			<system
+				systemId="http://www.springframework.org/schema/tx/spring-tx.xsd"
+				uri="platform:/plugin/org.springframework/org/springframework/transaction/config/spring-tx-2.0.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/tx/spring-tx-2.0.xsd"
 				uri="platform:/plugin/org.springframework/org/springframework/transaction/config/spring-tx-2.0.xsd" />
 			<system
-				systemId="http://www.springframework.org/schema/tx/spring-tx.xsd"
-				uri="platform:/plugin/org.springframework/org/springframework/transaction/config/spring-tx-2.0.xsd" />
+				systemId="http://www.springframework.org/schema/tx/spring-tx-2.1.xsd"
+				uri="platform:/plugin/org.springframework/org/springframework/transaction/config/spring-tx-2.1.xsd" />
+
+			<!-- JEE namespace -->
 			<public 
 				publicId="http://www.springframework.org/schema/jee"
 				uri="platform:/plugin/org.springframework/org/springframework/ejb/config/spring-jee-2.0.xsd"
 				webURL="http://www.springframework.org/schema/jee/spring-jee-2.0.xsd" />
 			<system
-				systemId="http://www.springframework.org/schema/jee/spring-jee-2.0.xsd"
-				uri="platform:/plugin/org.springframework/org/springframework/ejb/config/spring-jee-2.0.xsd" />
-			<system
 				systemId="http://www.springframework.org/schema/jee/spring-jee.xsd"
 				uri="platform:/plugin/org.springframework/org/springframework/ejb/config/spring-jee-2.0.xsd" />
+			<system
+				systemId="http://www.springframework.org/schema/jee/spring-jee-2.0.xsd"
+				uri="platform:/plugin/org.springframework/org/springframework/ejb/config/spring-jee-2.0.xsd" />
+			
+			<!-- Tool namespace -->
 			<public
 				publicId="http://www.springframework.org/schema/tool"
 				uri="platform:/plugin/org.springframework/org/springframework/beans/factory/xml/spring-tool-2.0.xsd"
 				webURL="http://www.springframework.org/schema/tool/spring-tool-2.0.xsd" />
 			<system
-				systemId="http://www.springframework.org/schema/tool/spring-tool-2.0.xsd"
-				uri="platform:/plugin/org.springframework/org/springframework/beans/factory/xml/spring-tool-2.0.xsd" />
-			<system
 				systemId="http://www.springframework.org/schema/tool/spring-tool.xsd"
 				uri="platform:/plugin/org.springframework/org/springframework/beans/factory/xml/spring-tool-2.0.xsd" />
+			<system
+				systemId="http://www.springframework.org/schema/tool/spring-tool-2.0.xsd"
+				uri="platform:/plugin/org.springframework/org/springframework/beans/factory/xml/spring-tool-2.0.xsd" />
+			
+			<!-- Lang namespace -->
 			<public
 				publicId="http://www.springframework.org/schema/lang"
 				uri="platform:/plugin/org.springframework/org/springframework/scripting/config/spring-lang-2.0.xsd"
 				webURL="http://www.springframework.org/schema/lang/spring-lang-2.0.xsd" />
 			<system
-				systemId="http://www.springframework.org/schema/lang/spring-lang-2.0.xsd"
+				systemId="http://www.springframework.org/schema/lang/spring-lang.xsd"
 				uri="platform:/plugin/org.springframework/org/springframework/scripting/config/spring-lang-2.0.xsd" />
 			<system
-				systemId="http://www.springframework.org/schema/lang/spring-lang.xsd"
+				systemId="http://www.springframework.org/schema/lang/spring-lang-2.0.xsd"
 				uri="platform:/plugin/org.springframework/org/springframework/scripting/config/spring-lang-2.0.xsd" />
 		</catalogContribution>
 	</extension>

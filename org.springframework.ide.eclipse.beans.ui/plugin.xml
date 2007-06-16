@@ -20,14 +20,14 @@
             uri="http://www.springframework.org/schema/aop"
             labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.AopNamespaceLabelProvider"
             prefix="aop"
-            schemaLocation="http://www.springframework.org/schema/aop/spring-aop-2.0.xsd"
+            schemaLocation="http://www.springframework.org/schema/aop/spring-aop-2.1.xsd"
             icon="icons/full/obj16/aspect_obj.gif"/>
       <namespace
             name="Spring Tx"
             uri="http://www.springframework.org/schema/tx"
             labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.TxNamespaceLabelProvider"
             prefix="tx"
-            schemaLocation="http://www.springframework.org/schema/tx/spring-tx-2.0.xsd"
+            schemaLocation="http://www.springframework.org/schema/tx/spring-tx-2.1.xsd"
             icon="icons/full/obj16/tx_obj.gif"/>
       <namespace
             name="Spring Jee"
