@@ -150,7 +150,7 @@
 		<property name="featureVersion" value="2.0.0" />
 		<antcall target="generateUpdateSite" />
 		
-        <java jar="${baseLocation}/startup.jar" 
+        <java jar="${eclipseLauncherJar}" 
               fork="true" 
               failonerror="true" 
               maxmemory="256m" 
