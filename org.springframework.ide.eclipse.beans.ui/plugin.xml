@@ -364,4 +364,12 @@
       </perspectiveExtension>
 	</extension>
 	
+	<extension point="org.eclipse.ui.preferencePages">
+	 	<page id="org.springframework.ide.eclipse.beans.ui.preferencePage"
+  	      	name="Beans Support"
+	      	class="org.springframework.ide.eclipse.beans.ui.preferences.BeansPreferencePage"
+	      	category="org.springframework.ide.eclipse.ui.preferencePage">
+   		</page>
+	</extension>
+	
 </plugin>

@@ -17,6 +17,7 @@ import org.eclipse.ui.navigator.CommonActionProvider;
 import org.eclipse.ui.navigator.ICommonActionConstants;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.eclipse.ui.navigator.ICommonMenuConstants;
+import org.springframework.ide.eclipse.beans.ui.navigator.actions.OpenActionWrapperAction;
 import org.springframework.ide.eclipse.beans.ui.navigator.actions.OpenConfigFileAction;
 import org.springframework.ide.eclipse.beans.ui.navigator.actions.OpenJavaElementAction;
 import org.springframework.ide.eclipse.beans.ui.navigator.actions.OpenPropertiesAction;
@@ -24,13 +25,19 @@ import org.springframework.ide.eclipse.beans.ui.navigator.actions.OpenReferenceA
 
 /**
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class BeansNavigatorActionProvider extends CommonActionProvider {
 
 	private OpenConfigFileAction openConfigAction;
+
 	private OpenReferenceAction openReferenceAction;
+
 	private OpenJavaElementAction openElementAction;
+
 	private OpenPropertiesAction openPropertiesAction;
+
+	private OpenActionWrapperAction openAction;
 
 	public BeansNavigatorActionProvider() {
 	}
@@ -41,6 +48,8 @@ public class BeansNavigatorActionProvider extends CommonActionProvider {
 		openReferenceAction = new OpenReferenceAction(site);
 		openElementAction = new OpenJavaElementAction(site);
 		openPropertiesAction = new OpenPropertiesAction(site);
+		openAction = new OpenActionWrapperAction(site, openConfigAction,
+				openElementAction);
 	}
 
 	@Override
@@ -65,9 +74,9 @@ public class BeansNavigatorActionProvider extends CommonActionProvider {
 
 	@Override
 	public void fillActionBars(IActionBars actionBars) {
-		if (openConfigAction.isEnabled()) {
+		if (openAction.isEnabled()) {
 			actionBars.setGlobalActionHandler(ICommonActionConstants.OPEN,
-					openConfigAction);
+					openAction);
 		}
 		if (openPropertiesAction.isEnabled()) {
 			actionBars.setGlobalActionHandler(ActionFactory.PROPERTIES.getId(),

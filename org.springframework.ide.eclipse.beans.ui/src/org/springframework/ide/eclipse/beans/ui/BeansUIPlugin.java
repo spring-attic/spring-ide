@@ -42,8 +42,7 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	 * Plugin identifier for Spring Beans UI (value
 	 * <code>org.springframework.ide.eclipse.beans.ui</code>).
 	 */
-	public static final String PLUGIN_ID =
-			"org.springframework.ide.eclipse.beans.ui";
+	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.beans.ui";
 
 	public static final String PROJECT_EXPLORER_CONTENT_PROVIDER_ID = PLUGIN_ID
 			+ ".navigator.projectExplorerContent";
@@ -51,13 +50,18 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	public static final String SPRING_EXPLORER_CONTENT_PROVIDER_ID = PLUGIN_ID
 			+ ".navigator.springExplorerContent";
 
+	public static final String DEFAULT_DOUBLE_CLICK_ACTION_PREFERENCE_ID = PLUGIN_ID
+			+ ".shouldOpenConfigFile";
+
 	public static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
 
 	/** The shared instance. */
 	private static BeansUIPlugin plugin;
 
 	private ResourceBundle resourceBundle;
+
 	private ImageDescriptorRegistry imageDescriptorRegistry;
+
 	private ILabelProvider labelProvider;
 
 	/**
@@ -70,7 +74,8 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 		plugin = this;
 		try {
 			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);
-		} catch (MissingResourceException e) {
+		}
+		catch (MissingResourceException e) {
 			log(e);
 			resourceBundle = null;
 		}
@@ -94,12 +99,18 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 		super.stop(context);
 	}
 
+	public void start(BundleContext context) throws Exception {
+		super.start(context);
+
+		getPreferenceStore().setDefault(DEFAULT_DOUBLE_CLICK_ACTION_PREFERENCE_ID,
+				true);
+	}
+
 	public static ImageDescriptorRegistry getImageDescriptorRegistry() {
 		return getDefault().internalGetImageDescriptorRegistry();
 	}
 
-	private synchronized ImageDescriptorRegistry
-			internalGetImageDescriptorRegistry() {
+	private synchronized ImageDescriptorRegistry internalGetImageDescriptorRegistry() {
 		if (imageDescriptorRegistry == null) {
 			imageDescriptorRegistry = new ImageDescriptorRegistry();
 		}
@@ -127,8 +138,7 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	 * Returns an {@link ImageDescriptor} for the image file at the given
 	 * plug-in relative path
 	 * 
-	 * @param path
-	 *            the path
+	 * @param path the path
 	 * @return the image descriptor
 	 */
 	public static ImageDescriptor getImageDescriptor(String path) {
@@ -160,20 +170,22 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Returns the string from the plugin's resource bundle,
-	 * or 'key' if not found.
+	 * Returns the string from the plugin's resource bundle, or 'key' if not
+	 * found.
 	 */
 	public static String getResourceString(String key) {
-	    String bundleString;
+		String bundleString;
 		ResourceBundle bundle = getDefault().getResourceBundle();
 		if (bundle != null) {
 			try {
 				bundleString = bundle.getString(key);
-			} catch (MissingResourceException e) {
-			    log(e);
+			}
+			catch (MissingResourceException e) {
+				log(e);
 				bundleString = "!" + key + "!";
 			}
-		} else {
+		}
+		else {
 			bundleString = "!" + key + "!";
 		}
 		return bundleString;
@@ -197,17 +209,17 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 		IStatus status = createErrorStatus(message, exception);
 		getDefault().getLog().log(status);
 	}
-	
+
 	public static void log(Throwable exception) {
-		getDefault().getLog().log(createErrorStatus(getResourceString(
-				"Plugin.internal_error"), exception));
+		getDefault().getLog().log(
+				createErrorStatus(getResourceString("Plugin.internal_error"),
+						exception));
 	}
 
 	/**
 	 * Returns a new {@link IStatus} for this plug-in
 	 */
-	public static IStatus createErrorStatus(String message,
-			Throwable exception) {
+	public static IStatus createErrorStatus(String message, Throwable exception) {
 		if (message == null) {
 			message = "";
 		}
