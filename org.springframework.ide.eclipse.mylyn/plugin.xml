@@ -55,6 +55,17 @@
 				class="org.eclipse.mylyn.internal.context.ui.actions.InterestIncrementAction"
 				icon="icons/elcl16/interest-increase.gif" 
 				enablesFor="*" />
+   			<enablement>
+   				<!-- the following warnings can be ignored! -->
+   				<and>
+	           		<not>
+	           			<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansConfig" />
+	           		</not>
+	           		<not>
+	           			<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig" />
+	           		</not>
+           		</and>
+   			</enablement>
 		</objectContribution>
 	</extension>
  
