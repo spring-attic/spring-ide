@@ -1,6 +1,7 @@
 package org.springframework.ide.eclipse.webflow.mylyn.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -98,7 +99,7 @@ public class WebflowContextStructureBridge extends
 			}
 			return childHandles;
 		}
-		return null;
+		return Collections.emptyList();
 	}
 
 	@Override

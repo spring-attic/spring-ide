@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.beans.mylyn.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
@@ -102,7 +103,7 @@ public class BeansContextStructureBridge extends AbstractContextStructureBridge 
 			}
 			return childHandles;
 		}
-		return null;
+		return Collections.emptyList();
 	}
 
 	@Override
