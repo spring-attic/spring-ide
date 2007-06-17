@@ -21,7 +21,7 @@
 	
 	<extension point="org.eclipse.ui.actionSets">
 		<actionSet id="org.springframework.ide.eclipse.mylyn.actionSet"
-			label="Mylyn Spring" 
+			label="%commandCategory.name" 
 			visible="false">
 			<action
 				label="%toggleActiveFoldingAction.label" 
@@ -37,8 +37,8 @@
 	
 	<extension point="org.eclipse.ui.commands">
       <category
-            name="Mylyn Spring"
-            description="Mylyn Spring Commands"
+            name="%commandCategory.name"
+            description="%commandCategory.description"
             id="org.springframework.ide.eclipse.mylyn.commands">
       </category>
 	  <command
