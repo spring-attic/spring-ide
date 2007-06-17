@@ -20,7 +20,7 @@
 	</extension>
 	
 	<extension point="org.eclipse.ui.actionSets">
-		<actionSet id="org.eclipse.mylyn.java.actionSet"
+		<actionSet id="org.springframework.ide.eclipse.mylyn.actionSet"
 			label="Mylyn Spring" 
 			visible="false">
 			<action
@@ -29,11 +29,25 @@
 				toolbarPath="org.eclipse.ui.edit.text.actionSet.presentation/Presentation"
 				id="org.springframework.ide.eclipse.beans.ui.mylyn.folding.auto"
 				class="org.eclipse.mylyn.internal.java.ui.actions.ToggleActiveFoldingAction"
-				definitionId="org.springframework.ide.eclipse.beans.ui.mylyn.folding.auto"
+				definitionId="org.springframework.ide.eclipse.mylyn.folding.auto"
 				icon="icons/elcl16/interest-folding.gif"
 				style="toggle" />
 		</actionSet>
 	</extension>
+	
+	<extension point="org.eclipse.ui.commands">
+      <category
+            name="Mylyn Spring"
+            description="Mylyn Spring Commands"
+            id="org.springframework.ide.eclipse.mylyn.commands">
+      </category>
+	  <command
+         categoryId="org.springframework.ide.eclipse.mylyn.commands"
+         description="%toggleActiveFoldingCommand.description"
+         id="org.springframework.ide.eclipse.mylyn.folding.auto"
+         name="%toggleActiveFoldingCommand.name">
+      </command>
+   </extension>
 
 	<extension point="org.eclipse.ui.popupMenus">
 		<objectContribution adaptable="true"
