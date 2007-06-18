@@ -167,6 +167,8 @@ public class ConfigurationPostProcessor implements IBeansConfigPostProcessor {
 			IBean bean, BeanAnnotationMetaData beanCreationMethod) {
 
 		RootBeanDefinition bd = new RootBeanDefinition();
+		bd.setFactoryBeanName(bean.getElementName());
+		bd.setFactoryMethodName(beanCreationMethod.getName());
 		bd.setBeanClassName(beanCreationMethod.getReturnTypeName());
 		bd.setDestroyMethodName(beanCreationMethod.getDestoryMethodName());
 		bd.setInitMethodName(beanCreationMethod.getInitMethodName());

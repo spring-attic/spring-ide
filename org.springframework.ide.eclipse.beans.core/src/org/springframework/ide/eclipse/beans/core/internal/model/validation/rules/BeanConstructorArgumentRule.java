@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.beans.core.internal.model.validation.rul
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.springframework.beans.factory.annotation.AnnotatedRootBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -54,20 +53,12 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 		// Validate merged constructor arguments in bean's class (child beans
 		// not supported)
 		String className = bd.getBeanClassName();
-		if (className != null
-				&& !ValidationRuleUtils.hasPlaceHolder(className)) {
+		if (className != null && !ValidationRuleUtils.hasPlaceHolder(className)) {
 			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean)
 					.getProject(), className);
-			try {
-				// only validate in case the type can be found and the bean class
-				// is not an interface (is can happen in JavaConfig)
-				if (type != null && !type.isInterface()) {
-					validateConstructorArguments(bean, type, mergedBd
-							.getConstructorArgumentValues(), context);
-				}
-			}
-			catch (JavaModelException e) {
-				BeansCorePlugin.log(e);
+			if (type != null) {
+				validateConstructorArguments(bean, type, mergedBd
+						.getConstructorArgumentValues(), context);
 			}
 		}
 
@@ -80,31 +71,26 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 					&& !ValidationRuleUtils.hasPlaceHolder(mergedClassName)) {
 				IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(
 						bean).getProject(), mergedClassName);
-				try {
-					if (type != null && !type.isInterface()) {
-						validateConstructorArguments(bean, type, mergedBd
-								.getConstructorArgumentValues(), context);
-					}
-				}
-				catch (JavaModelException e) {
-					BeansCorePlugin.log(e);
+				if (type != null) {
+					validateConstructorArguments(bean, type, mergedBd
+							.getConstructorArgumentValues(), context);
 				}
 			}
 		}
 	}
 
 	protected void validateConstructorArguments(IBean bean, IType type,
-			ConstructorArgumentValues argumentValues,
-			IValidationContext context) {
-		
-		// TODO CD need to add a check here if constructor has @Autowired 
-		// annotation; for now we just skip validation of ScannedRootBeanDefinition
-		
+			ConstructorArgumentValues argumentValues, IValidationContext context) {
+
+		// TODO CD need to add a check here if constructor has @Autowired
+		// annotation; for now we just skip validation of
+		// ScannedRootBeanDefinition
+
 		// Skip validation if auto-wiring or a factory are involved
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) ((Bean) bean)
 				.getBeanDefinition();
-		if (!(bd instanceof ScannedRootBeanDefinition) && 
-				bd.getAutowireMode() == AbstractBeanDefinition.AUTOWIRE_NO
+		if (!(bd instanceof ScannedRootBeanDefinition)
+				&& bd.getAutowireMode() == AbstractBeanDefinition.AUTOWIRE_NO
 				&& bd.getFactoryBeanName() == null
 				&& bd.getFactoryMethodName() == null) {
 
@@ -127,7 +113,8 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 									+ " defined in class '"
 									+ type.getFullyQualifiedName() + "'");
 				}
-			} catch (JavaModelException e) {
+			}
+			catch (JavaModelException e) {
 				BeansCorePlugin.log(e);
 			}
 		}
