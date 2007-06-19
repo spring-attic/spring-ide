@@ -281,10 +281,6 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 		catch (Throwable t) {
 			handleException(t, info, bean, file);
 		}
-
-		// Make sure that inner beans are handled as well
-		buildAopReferencesFromAspectDefinitionForBeans(context, info, matcher, monitor, file,
-				aopProject, BeansModelUtils.getInnerBeans(bean));
 	}
 
 	private void buildAopReferencesFromAspectDefinition(IBeansConfig config,
@@ -301,7 +297,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 	}
 
 	private void buildAopReferencesFromAspectDefinitionForBeans(IModelElement config,
-			IAspectDefinition info, AspectDefinitionMatcher builderUtils, IProgressMonitor monitor,
+			IAspectDefinition info, AspectDefinitionMatcher matcher, IProgressMonitor monitor,
 			IResource file, IAopProject aopProject, Set<IBean> beans) {
 		SubProgressMonitor subProgressMonitor = new SubProgressMonitor(monitor,
 				IProgressMonitor.UNKNOWN);
@@ -315,8 +311,13 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				subProgressMonitor.subTask(Activator.getFormattedMessage(
 						"AopReferenceModelBuilder.buildingAopReferencesForBean", bean
 								.getElementName(), bean.getElementResource().getFullPath()));
-				buildAopReferencesForBean(bean, config, info, file, aopProject, builderUtils,
+				buildAopReferencesForBean(bean, config, info, file, aopProject, matcher,
 						monitor);
+				
+				// Make sure that inner beans are handled as well
+				buildAopReferencesFromAspectDefinitionForBeans(config, info, matcher, monitor, file,
+						aopProject, BeansModelUtils.getInnerBeans(bean));
+				
 				subProgressMonitor.worked(worked++);
 			}
 		}
@@ -407,10 +408,10 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 		else if (t instanceof IllegalArgumentException) {
 			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
 					"AopReferenceModelBuilder.pointcutIsMalformedOnBean", info, bean));
-			AopReferenceModelMarkerUtils.createProblemMarker(file, Activator.getFormattedMessage(
+			AopReferenceModelMarkerUtils.createProblemMarker(info.getResource(), Activator.getFormattedMessage(
 					"AopReferenceModelBuilder.pointcutIsMalformed", t.getMessage()),
 					IMarker.SEVERITY_ERROR, info.getAspectLineNumber(),
-					AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
+					AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, info.getResource());
 		}
 		else if (t instanceof InvocationTargetException) {
 			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(

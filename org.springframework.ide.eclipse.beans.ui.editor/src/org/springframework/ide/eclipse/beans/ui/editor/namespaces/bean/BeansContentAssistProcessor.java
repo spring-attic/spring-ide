@@ -25,7 +25,9 @@ import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegion;
 import org.eclipse.wst.xml.core.internal.document.AttrImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
+import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.AbstractContentAssistProcessor;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposal;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.FactoryMethodSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PropertyNameSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PropertyValueSearchRequestor;
@@ -38,6 +40,7 @@ import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
+import org.springframework.util.ClassUtils;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
@@ -70,8 +73,8 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 			if (type != null) {
 				try {
 					Collection<?> methods = Introspector.findAllMethods(type,
-							prefix, -1, Public.DONT_CARE, (isStatic ? Static.YES
-									: Static.DONT_CARE));
+							prefix, -1, Public.DONT_CARE,
+							(isStatic ? Static.YES : Static.DONT_CARE));
 					if (methods != null && methods.size() > 0) {
 						FactoryMethodSearchRequestor requestor = new FactoryMethodSearchRequestor(
 								request);
@@ -96,8 +99,7 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 			ContentAssistRequest request, String prefix, String className) {
 		if (BeansEditorUtils.getResource(request) instanceof IFile) {
 			IFile file = BeansEditorUtils.getResource(request);
-			IType type = JdtUtils.getJavaType(file.getProject(),
-					className);
+			IType type = JdtUtils.getJavaType(file.getProject(), className);
 			if (type != null) {
 				try {
 					Collection<?> methods = Introspector
@@ -244,6 +246,9 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 					|| "factory-bean".equals(attributeName)) {
 				addBeanReferenceProposals(request, matchString, node, true);
 			}
+			else if ("id".equals(attributeName)) {
+				addBeanIdProposal(request, matchString, node);
+			}
 		}
 		else if ("property".equals(node.getNodeName())) {
 			Node parentNode = node.getParentNode();
@@ -292,6 +297,34 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 				addClassAttributeValueProposals(request, matchString);
 			}
 		}
+	}
+
+	private void addBeanIdProposal(ContentAssistRequest request,
+			String matchString, IDOMNode node) {
+		String className = BeansEditorUtils.getClassNameForBean(node);
+		if (className != null) {
+			String beanId = buildDefaultBeanName(className);
+			if (beanId.startsWith(matchString)) {
+				request.addProposal(new BeansJavaCompletionProposal(beanId, request
+						.getReplacementBeginPosition(), request
+						.getReplacementLength(), beanId.length(), BeansUIImages
+						.getImage(BeansUIImages.IMG_OBJS_BEAN), beanId + " - "
+						+ className, null, null, 10));
+			}
+		}
+	}
+
+	/**
+	 * Derive a default bean name from the given bean definition.
+	 * <p>
+	 * The default implementation simply builds a decapitalized version of the
+	 * short class name: e.g. "mypackage.MyJdbcDao" -> "myJdbcDao".
+	 * @param definition the bean definition to build a bean name for
+	 * @return the default bean name (never <code>null</code>)
+	 */
+	private String buildDefaultBeanName(String className) {
+		String shortClassName = ClassUtils.getShortName(className);
+		return java.beans.Introspector.decapitalize(shortClassName);
 	}
 
 	@Override
