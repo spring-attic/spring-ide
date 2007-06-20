@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces.bean;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -26,6 +27,9 @@ import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegion;
 import org.eclipse.wst.xml.core.internal.document.AttrImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.AbstractContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposal;
@@ -52,6 +56,28 @@ import org.w3c.dom.Node;
  */
 @SuppressWarnings( { "restriction", "unchecked" })
 public class BeansContentAssistProcessor extends AbstractContentAssistProcessor {
+
+	private static final String[] FILTERED_NAMES = new String[] {
+			Serializable.class.getName(), InitializingBean.class.getName(),
+			FactoryBean.class.getName(), DisposableBean.class.getName() };
+
+	private void addBeanIdProposal(ContentAssistRequest request,
+			String matchString, IDOMNode node) {
+		String className = BeansEditorUtils.getClassNameForBean(node);
+		if (className != null) {
+			createBeanIdProposals(request, matchString, className);
+
+			// add interface proposals
+			IType type = JdtUtils.getJavaType(BeansEditorUtils.getResource(
+					request).getProject(), className);
+			Set<IType> allInterfaces = Introspector
+					.getAllImplenentedInterface(type);
+			for (IType interf : allInterfaces) {
+				createBeanIdProposals(request, matchString, interf
+						.getFullyQualifiedName());
+			}
+		}
+	}
 
 	private void addBeanReferenceProposals(ContentAssistRequest request,
 			String prefix, Node node, boolean showExternal) {
@@ -112,6 +138,82 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 						while (iterator.hasNext()) {
 							requestor.acceptSearchMatch((IMethod) iterator
 									.next());
+						}
+					}
+				}
+				catch (JavaModelException e1) {
+					// do nothing
+				}
+				catch (CoreException e) {
+					// // do nothing
+				}
+			}
+		}
+	}
+
+	private void addPropertyNameAttributeNameProposals(
+			ContentAssistRequest request, String prefix, String oldPrefix,
+			Node node, List classNames, boolean attrAtLocationHasValue,
+			String nameSpacePrefix) {
+
+		PropertyNameSearchRequestor requestor = new PropertyNameSearchRequestor(
+				request, oldPrefix, attrAtLocationHasValue, nameSpacePrefix);
+		if (prefix.lastIndexOf(".") >= 0) {
+			int firstIndex = prefix.indexOf(".");
+			String firstPrefix = prefix.substring(0, firstIndex);
+			String lastPrefix = prefix.substring(firstIndex);
+			if (".".equals(lastPrefix)) {
+				lastPrefix = "";
+			}
+			else if (lastPrefix.startsWith(".")) {
+				lastPrefix = lastPrefix.substring(1);
+			}
+			for (int i = 0; i < classNames.size(); i++) {
+				IType type = (IType) classNames.get(i);
+				try {
+					Collection methods = Introspector.findReadableProperties(
+							type, firstPrefix);
+					if (methods != null && methods.size() == 1) {
+
+						Iterator iterator = methods.iterator();
+						while (iterator.hasNext()) {
+							IMethod method = (IMethod) iterator.next();
+							IType returnType = BeansEditorUtils
+									.getTypeForMethodReturnType(method, type);
+
+							if (returnType != null) {
+								List<IType> typesTemp = new ArrayList<IType>();
+								typesTemp.add(returnType);
+
+								String newPrefix = oldPrefix + firstPrefix
+										+ ".";
+								;
+
+								addPropertyNameAttributeNameProposals(request,
+										lastPrefix, newPrefix, node, typesTemp,
+										attrAtLocationHasValue, nameSpacePrefix);
+							}
+							return;
+						}
+					}
+				}
+				catch (JavaModelException e1) {
+					// do nothing
+				}
+			}
+		}
+		else {
+			for (int i = 0; i < classNames.size(); i++) {
+				IType type = (IType) classNames.get(i);
+				try {
+					Collection methods = Introspector.findWritableProperties(
+							type, prefix);
+					if (methods != null && methods.size() > 0) {
+
+						Iterator iterator = methods.iterator();
+						while (iterator.hasNext()) {
+							requestor.acceptSearchMatch((IMethod) iterator
+									.next(), false);
 						}
 					}
 				}
@@ -194,6 +296,55 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 					// // do nothing
 				}
 			}
+		}
+	}
+
+	/**
+	 * Derive a default bean name from the given bean definition.
+	 * <p>
+	 * The default implementation simply builds a decapitalized version of the
+	 * short class name: e.g. "mypackage.MyJdbcDao" -> "myJdbcDao".
+	 * @param definition the bean definition to build a bean name for
+	 * @return the default bean name (never <code>null</code>)
+	 */
+	private String buildDefaultBeanName(String className) {
+		String shortClassName = ClassUtils.getShortName(className);
+		return java.beans.Introspector.decapitalize(shortClassName);
+	}
+
+	@Override
+	protected void computeAttributeNameProposals(ContentAssistRequest request,
+			String prefix, String namespace, String namespacePrefix,
+			Node attributeNode) {
+		if ("http://www.springframework.org/schema/p".equals(namespace)) {
+			// check whether an attribute really exists for the replacement
+			// offsets AND if it possesses a value
+			IStructuredDocumentRegion sdRegion = request.getDocumentRegion();
+			boolean attrAtLocationHasValue = false;
+			NamedNodeMap attrs = attributeNode.getAttributes();
+			for (int i = 0; i < attrs.getLength(); i++) {
+				AttrImpl existingAttr = (AttrImpl) attrs.item(i);
+				ITextRegion name = existingAttr.getNameRegion();
+				if (sdRegion.getStartOffset(name) <= request
+						.getReplacementBeginPosition()
+						&& sdRegion.getStartOffset(name) + name.getLength() >= request
+								.getReplacementBeginPosition()
+								+ request.getReplacementLength()
+						&& existingAttr.getValueRegion() != null) {
+					attrAtLocationHasValue = true;
+					break;
+				}
+			}
+
+			if (prefix != null) {
+				prefix = BeansEditorUtils.attributeNameToPropertyName(prefix);
+			}
+
+			List classNames = BeansEditorUtils.getClassNamesOfBean(
+					BeansEditorUtils.getResource(request), attributeNode);
+			addPropertyNameAttributeNameProposals(request, prefix, "",
+					attributeNode, classNames, attrAtLocationHasValue,
+					namespacePrefix);
 		}
 	}
 
@@ -300,162 +451,6 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 		}
 	}
 
-	private void addBeanIdProposal(ContentAssistRequest request,
-			String matchString, IDOMNode node) {
-		String className = BeansEditorUtils.getClassNameForBean(node);
-		if (className != null) {
-			String beanId = buildDefaultBeanName(className);
-			createBeanIdProposals(request, matchString, className, beanId);
-
-			// add interface proposals
-			IType type = JdtUtils.getJavaType(BeansEditorUtils.getResource(
-					request).getProject(), className);
-			Set<IType> allInterfaces = Introspector 
-					.getAllImplenentedInterface(type);
-			for (IType interf : allInterfaces) {
-				beanId = buildDefaultBeanName(interf.getFullyQualifiedName());
-				createBeanIdProposals(request, matchString, interf
-						.getFullyQualifiedName(), beanId);
-			}
-		}
-	}
-
-	private void createBeanIdProposals(ContentAssistRequest request,
-			String matchString, String className, String beanId) {
-		if (beanId.startsWith(matchString)) {
-			request.addProposal(new BeansJavaCompletionProposal(beanId, request
-					.getReplacementBeginPosition(), request
-					.getReplacementLength(), beanId.length(), BeansUIImages
-					.getImage(BeansUIImages.IMG_OBJS_BEAN), beanId + " - "
-					+ className, null, null, 10));
-		}
-	}
-
-	/**
-	 * Derive a default bean name from the given bean definition.
-	 * <p>
-	 * The default implementation simply builds a decapitalized version of the
-	 * short class name: e.g. "mypackage.MyJdbcDao" -> "myJdbcDao".
-	 * @param definition the bean definition to build a bean name for
-	 * @return the default bean name (never <code>null</code>)
-	 */
-	private String buildDefaultBeanName(String className) {
-		String shortClassName = ClassUtils.getShortName(className);
-		return java.beans.Introspector.decapitalize(shortClassName);
-	}
-
-	@Override
-	protected void computeAttributeNameProposals(ContentAssistRequest request,
-			String prefix, String namespace, String namespacePrefix,
-			Node attributeNode) {
-		if ("http://www.springframework.org/schema/p".equals(namespace)) {
-			// check whether an attribute really exists for the replacement
-			// offsets AND if it possesses a value
-			IStructuredDocumentRegion sdRegion = request.getDocumentRegion();
-			boolean attrAtLocationHasValue = false;
-			NamedNodeMap attrs = attributeNode.getAttributes();
-			for (int i = 0; i < attrs.getLength(); i++) {
-				AttrImpl existingAttr = (AttrImpl) attrs.item(i);
-				ITextRegion name = existingAttr.getNameRegion();
-				if (sdRegion.getStartOffset(name) <= request
-						.getReplacementBeginPosition()
-						&& sdRegion.getStartOffset(name) + name.getLength() >= request
-								.getReplacementBeginPosition()
-								+ request.getReplacementLength()
-						&& existingAttr.getValueRegion() != null) {
-					attrAtLocationHasValue = true;
-					break;
-				}
-			}
-
-			if (prefix != null) {
-				prefix = BeansEditorUtils.attributeNameToPropertyName(prefix);
-			}
-
-			List classNames = BeansEditorUtils.getClassNamesOfBean(
-					BeansEditorUtils.getResource(request), attributeNode);
-			addPropertyNameAttributeNameProposals(request, prefix, "",
-					attributeNode, classNames, attrAtLocationHasValue,
-					namespacePrefix);
-		}
-	}
-
-	private void addPropertyNameAttributeNameProposals(
-			ContentAssistRequest request, String prefix, String oldPrefix,
-			Node node, List classNames, boolean attrAtLocationHasValue,
-			String nameSpacePrefix) {
-
-		PropertyNameSearchRequestor requestor = new PropertyNameSearchRequestor(
-				request, oldPrefix, attrAtLocationHasValue, nameSpacePrefix);
-		if (prefix.lastIndexOf(".") >= 0) {
-			int firstIndex = prefix.indexOf(".");
-			String firstPrefix = prefix.substring(0, firstIndex);
-			String lastPrefix = prefix.substring(firstIndex);
-			if (".".equals(lastPrefix)) {
-				lastPrefix = "";
-			}
-			else if (lastPrefix.startsWith(".")) {
-				lastPrefix = lastPrefix.substring(1);
-			}
-			for (int i = 0; i < classNames.size(); i++) {
-				IType type = (IType) classNames.get(i);
-				try {
-					Collection methods = Introspector.findReadableProperties(
-							type, firstPrefix);
-					if (methods != null && methods.size() == 1) {
-
-						Iterator iterator = methods.iterator();
-						while (iterator.hasNext()) {
-							IMethod method = (IMethod) iterator.next();
-							IType returnType = BeansEditorUtils
-									.getTypeForMethodReturnType(method, type);
-
-							if (returnType != null) {
-								List<IType> typesTemp = new ArrayList<IType>();
-								typesTemp.add(returnType);
-
-								String newPrefix = oldPrefix + firstPrefix
-										+ ".";
-								;
-
-								addPropertyNameAttributeNameProposals(request,
-										lastPrefix, newPrefix, node, typesTemp,
-										attrAtLocationHasValue, nameSpacePrefix);
-							}
-							return;
-						}
-					}
-				}
-				catch (JavaModelException e1) {
-					// do nothing
-				}
-			}
-		}
-		else {
-			for (int i = 0; i < classNames.size(); i++) {
-				IType type = (IType) classNames.get(i);
-				try {
-					Collection methods = Introspector.findWritableProperties(
-							type, prefix);
-					if (methods != null && methods.size() > 0) {
-
-						Iterator iterator = methods.iterator();
-						while (iterator.hasNext()) {
-							requestor.acceptSearchMatch((IMethod) iterator
-									.next(), false);
-						}
-					}
-				}
-				catch (JavaModelException e1) {
-					// do nothing
-				}
-				catch (CoreException e) {
-					// // do nothing
-				}
-			}
-		}
-	}
-
 	@Override
 	protected void computeTagInsertionProposals(ContentAssistRequest request,
 			IDOMNode node) {
@@ -472,5 +467,26 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 				addTemplates(request, BeansTemplateContextTypeIds.ALL);
 			}
 		}
+	}
+
+	private void createBeanIdProposals(ContentAssistRequest request,
+			String matchString, String className) {
+		String beanId = buildDefaultBeanName(className);
+		if (beanId.startsWith(matchString) && shouldNotFilter(className)) {
+			request.addProposal(new BeansJavaCompletionProposal(beanId, request
+					.getReplacementBeginPosition(), request
+					.getReplacementLength(), beanId.length(), BeansUIImages
+					.getImage(BeansUIImages.IMG_OBJS_BEAN), beanId + " - "
+					+ className, null, null, 10));
+		}
+	}
+
+	private boolean shouldNotFilter(String className) {
+		for (String filter : FILTERED_NAMES) {
+			if (className.startsWith(filter)) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
