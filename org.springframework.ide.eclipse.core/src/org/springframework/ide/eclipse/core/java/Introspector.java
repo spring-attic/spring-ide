@@ -355,7 +355,7 @@ public final class Introspector {
 		return false;
 	}
 
-	public static Set<IType> getAllImplenentedInterface(IType type) {
+	public static Set<IType> getAllImplenentedInterfaces(IType type) {
 		Set<IType> allInterfaces = new HashSet<IType>();
 		try {
 			while (type != null) {

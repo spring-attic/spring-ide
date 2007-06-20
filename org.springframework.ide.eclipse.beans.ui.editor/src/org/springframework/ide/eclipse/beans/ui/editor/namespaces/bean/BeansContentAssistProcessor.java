@@ -71,7 +71,7 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 			IType type = JdtUtils.getJavaType(BeansEditorUtils.getResource(
 					request).getProject(), className);
 			Set<IType> allInterfaces = Introspector
-					.getAllImplenentedInterface(type);
+					.getAllImplenentedInterfaces(type);
 			for (IType interf : allInterfaces) {
 				createBeanIdProposals(request, matchString, interf
 						.getFullyQualifiedName());
