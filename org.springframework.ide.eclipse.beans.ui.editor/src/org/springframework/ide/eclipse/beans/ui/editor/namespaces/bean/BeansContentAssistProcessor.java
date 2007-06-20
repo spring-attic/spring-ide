@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -304,13 +305,29 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 		String className = BeansEditorUtils.getClassNameForBean(node);
 		if (className != null) {
 			String beanId = buildDefaultBeanName(className);
-			if (beanId.startsWith(matchString)) {
-				request.addProposal(new BeansJavaCompletionProposal(beanId, request
-						.getReplacementBeginPosition(), request
-						.getReplacementLength(), beanId.length(), BeansUIImages
-						.getImage(BeansUIImages.IMG_OBJS_BEAN), beanId + " - "
-						+ className, null, null, 10));
+			createBeanIdProposals(request, matchString, className, beanId);
+
+			// add interface proposals
+			IType type = JdtUtils.getJavaType(BeansEditorUtils.getResource(
+					request).getProject(), className);
+			Set<IType> allInterfaces = Introspector 
+					.getAllImplenentedInterface(type);
+			for (IType interf : allInterfaces) {
+				beanId = buildDefaultBeanName(interf.getFullyQualifiedName());
+				createBeanIdProposals(request, matchString, interf
+						.getFullyQualifiedName(), beanId);
 			}
+		}
+	}
+
+	private void createBeanIdProposals(ContentAssistRequest request,
+			String matchString, String className, String beanId) {
+		if (beanId.startsWith(matchString)) {
+			request.addProposal(new BeansJavaCompletionProposal(beanId, request
+					.getReplacementBeginPosition(), request
+					.getReplacementLength(), beanId.length(), BeansUIImages
+					.getImage(BeansUIImages.IMG_OBJS_BEAN), beanId + " - "
+					+ className, null, null, 10));
 		}
 	}
 

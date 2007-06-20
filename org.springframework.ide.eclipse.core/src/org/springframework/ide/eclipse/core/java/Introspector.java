@@ -295,7 +295,7 @@ public final class Introspector {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Utility method that handles property names.
 	 * <p>
@@ -353,6 +353,31 @@ public final class Introspector {
 			}
 		}
 		return false;
+	}
+
+	public static Set<IType> getAllImplenentedInterface(IType type) {
+		Set<IType> allInterfaces = new HashSet<IType>();
+		try {
+			while (type != null) {
+				String[] interfaces = type.getSuperInterfaceTypeSignatures();
+				if (interfaces != null) {
+					for (String iface : interfaces) {
+						String fqin = JdtUtils.resolveClassName(iface, type);
+						IType interfaceType = type.getJavaProject().findType(
+								fqin);
+						if (interfaceType != null) {
+							allInterfaces.add(interfaceType);
+						}
+
+					}
+				}
+				type = getSuperType(type);
+			}
+		}
+		catch (JavaModelException e) {
+			// BeansCorePlugin.log(e);
+		}
+		return allInterfaces;
 	}
 
 	/**
