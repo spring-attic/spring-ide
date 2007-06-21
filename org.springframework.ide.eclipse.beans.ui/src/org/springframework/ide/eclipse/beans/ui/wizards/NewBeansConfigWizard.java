@@ -96,22 +96,27 @@ public class NewBeansConfigWizard extends Wizard implements INewWizard {
 		IFile file = mainPage.createNewFile();
 
 		BeansProject beansProject = getProject(file);
-		beansProject.addConfig(file);
-		newConfig = beansProject.getConfig(file);
+		
+		if (beansProject != null) {
+			beansProject.addConfig(file);
+			newConfig = beansProject.getConfig(file);
 
-		Set<IBeansConfigSet> configSets = linkPage.getBeansConfigSets();
-		for (IBeansConfigSet bcs : configSets) {
-			if (beansProject.equals(bcs.getElementParent())) {
-				((BeansConfigSet) bcs).addConfig(newConfig.getElementName());
+			Set<IBeansConfigSet> configSets = linkPage.getBeansConfigSets();
+			for (IBeansConfigSet bcs : configSets) {
+				if (beansProject.equals(bcs.getElementParent())) {
+					((BeansConfigSet) bcs)
+							.addConfig(newConfig.getElementName());
+				}
 			}
+
+			// Now save modified project description
+			beansProject.saveDescription();
+
+			// Finally (after saving the modified project description!!!)
+			// refresh
+			// the label decoration of all config files
+			BeansModelLabelDecorator.update();
 		}
-
-		// Now save modified project description
-		beansProject.saveDescription();
-
-		// Finally (after saving the modified project description!!!) refresh
-		// the label decoration of all config files
-		BeansModelLabelDecorator.update();
 	}
 
 	private BeansProject getProject(IFile file) {
