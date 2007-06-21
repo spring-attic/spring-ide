@@ -13,11 +13,11 @@
 		<catalogContribution>
 			<public
 				publicId="http://www.springframework.org/schema/osgi"
-				uri="platform:/plugin/org.springframework.osgi/org/springframework/osgi/config/spring-osgi.xsd"
+				uri="platform:/plugin/org.springframework.osgi.core/org/springframework/osgi/config/spring-osgi.xsd"
 				webURL="http://www.springframework.org/schema/osgi/spring-osgi.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/osgi/spring-osgi.xsd"
-				uri="platform:/plugin/org.springframework.osgi/org/springframework/osgi/config/spring-osgi.xsd" />
+				uri="platform:/plugin/org.springframework.osgi.core/org/springframework/osgi/config/spring-osgi.xsd" />
 		</catalogContribution>
 	</extension>
 	
