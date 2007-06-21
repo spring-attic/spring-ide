@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.hyperlink;
 
+import java.util.Iterator;
+
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
@@ -19,6 +22,7 @@ import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMAttr;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.StringUtils;
 import org.w3c.dom.Attr;
@@ -124,6 +128,8 @@ public abstract class AbstractHyperLinkDetector implements IHyperlinkDetector {
 		}
 		return null;
 	}
+	
+	
 
 	/**
 	 * Returns <code>true</code> if given attribute is openable.
@@ -133,5 +139,28 @@ public abstract class AbstractHyperLinkDetector implements IHyperlinkDetector {
 	protected abstract IHyperlink createHyperlink(String name, String target,
 			Node parentNode, IRegion hyperlinkRegion, IDocument document,
 			Node node, ITextViewer textViewer, IRegion cursor);
+
+	protected IHyperlink createBeanReferenceHyperlink(String target, IRegion hyperlinkRegion,
+			IDocument document, Node node, ITextViewer textViewer) {
+				Node bean = BeansEditorUtils.getFirstReferenceableNodeById(node
+						.getOwnerDocument(), target);
+				if (bean != null) {
+					IRegion region = getHyperlinkRegion(bean);
+					return new NodeElementHyperlink(hyperlinkRegion, region, textViewer);
+				}
+				else {
+					IFile file = BeansEditorUtils.getFile(document);
+					// assume this is an external reference
+					Iterator<?> beans = BeansEditorUtils.getBeansFromConfigSets(file)
+							.iterator();
+					while (beans.hasNext()) {
+						IBean modelBean = (IBean) beans.next();
+						if (modelBean.getElementName().equals(target)) {
+							return new ExternalBeanHyperlink(modelBean, hyperlinkRegion);
+						}
+					}
+				}
+				return null;
+			}
 
 }

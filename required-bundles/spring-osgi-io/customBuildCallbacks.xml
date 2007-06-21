@@ -56,75 +56,6 @@
 	</target>
 
 	<target name="pre.@dot">
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.beans.core" />
-		</antcall>
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.beans.ui" />
-		</antcall>
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.beans.mylyn" />
-		</antcall>
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.beans.ui.editor" />
-		</antcall>
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.beans.ui.graph" />
-		</antcall>
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.beans.ui.refactoring" />
-		</antcall>
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.beans.ui.search" />
-		</antcall>
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.core" />
-		</antcall>
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.javaconfig.core" />
-		</antcall>
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.javaconfig.ui" />
-		</antcall>
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.ui" />
-		</antcall>
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.mylyn" />
-		</antcall>
-		
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.aop.core" />
-		</antcall>
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.aop.ui" />
-		</antcall>
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.aop.ui.visualiser" />
-		</antcall>
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.aop.ui.xref" />
-		</antcall>
-		
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.webflow.core" />
-		</antcall>
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.webflow.mylyn" />
-		</antcall>
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.webflow.ui" />
-		</antcall>
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.webflow.ui.editor" />
-		</antcall>
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.webflow.ui.graph" />
-		</antcall>
-
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.osgi" />
-		</antcall>
 	</target>
 
 	<!-- ===================================================================== -->
@@ -164,6 +95,11 @@
 	<!--   target.folder - destination folder                                  -->
 	<!-- ===================================================================== -->
 	<target name="pre.gather.bin.parts">
+		<unzip src="spring-osgi-io.jar" dest="${target.folder}">
+			<patternset>
+				<exclude name="META-INF/MANIFEST.MF" />
+			</patternset>
+		</unzip>
 	</target>
 
 	<!-- ===================================================================== -->
@@ -173,6 +109,10 @@
 	<!--   target.folder - destination folder                                  -->
 	<!-- ===================================================================== -->
 	<target name="post.gather.bin.parts">
+		<replace file="${target.folder}/META-INF/MANIFEST.MF" summary="yes">
+			<replacetoken>spring-osgi-io.jar</replacetoken>
+			<replacevalue>.</replacevalue>
+		</replace>
 	</target>
 
 	<!-- ===================================================================== -->
@@ -223,16 +163,6 @@
 	<!--   temp.folder - temporary folder                                      -->
 	<!-- ===================================================================== -->
 	<target name="post.clean">
-	</target>
-
-	<target name="copy.source" if="plugin-name">
-		<mkdir dir="src/${plugin-name}_2.0.0.${forceContextQualifier}" />
-		<ant antfile="build.xml" dir="${build.result.folder}/../../${plugin-name}" target="build.sources" />
-		<move todir="src/${plugin-name}_2.0.0.${forceContextQualifier}">
-			<fileset dir="${build.result.folder}/../../${plugin-name}">
-				<include name="src.zip" />
-			</fileset>
-		</move>
 	</target>
 
 </project>

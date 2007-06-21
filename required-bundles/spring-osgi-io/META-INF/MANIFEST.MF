@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Implementation-Title: Spring OSGi Core
+Implementation-Version: 1.0-m3
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.springframework.osgi.io
+Bundle-Name: spring-osgi-io
+Bundle-Vendor: Spring OSGi
+Bundle-Version: 1.0.0.v200706200600
+Bundle-ClassPath: spring-osgi-io.jar
+Export-Package: org.springframework.osgi.io

@@ -1,0 +1,31 @@
+Manifest-Version: 1.0
+Implementation-Title: Spring OSGi Core
+Implementation-Version: 1.0-m3
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.springframework.osgi.core
+Bundle-Name: spring-osgi-core
+Bundle-Vendor: Spring OSGi
+Bundle-Version: 1.0.0.v200706200600
+Bundle-ClassPath: spring-osgi-core.jar
+Export-Package: org.springframework.osgi,
+ org.springframework.osgi.bundle.support,
+ org.springframework.osgi.config,
+ org.springframework.osgi.context,
+ org.springframework.osgi.context.support,
+ org.springframework.osgi.service,
+ org.springframework.osgi.service.collection,
+ org.springframework.osgi.service.exporter,
+ org.springframework.osgi.service.importer,
+ org.springframework.osgi.service.interceptor,
+ org.springframework.osgi.service.support,
+ org.springframework.osgi.service.util,
+ org.springframework.osgi.util,
+ target.classes
+Require-Bundle: org.springframework,
+ org.springframework.osgi.io,
+ org.aopalliance,
+ org.eclipse.osgi,
+ org.eclipse.osgi.services,
+ org.eclipse.osgi.util,
+ jakarta.commons.collections,
+ jakarta.commons.logging

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+	<extension
+		point="org.springframework.ide.eclipse.beans.core.namespaces">
+		<namespace
+			namespaceHandler="org.springframework.osgi.config.OsgiNamespaceHandler"
+			uri="http://www.springframework.org/schema/osgi" />
+	</extension>  
+	
+	<extension point="org.eclipse.wst.xml.core.catalogContributions">
+		<catalogContribution>
+			<public
+				publicId="http://www.springframework.org/schema/osgi"
+				uri="platform:/plugin/org.springframework.osgi/org/springframework/osgi/config/spring-osgi.xsd"
+				webURL="http://www.springframework.org/schema/osgi/spring-osgi.xsd" />
+			<system
+				systemId="http://www.springframework.org/schema/osgi/spring-osgi.xsd"
+				uri="platform:/plugin/org.springframework.osgi/org/springframework/osgi/config/spring-osgi.xsd" />
+		</catalogContribution>
+	</extension>
+	
+	<extension
+		point="org.springframework.ide.eclipse.beans.ui.namespaces">
+		<namespace
+			name="Spring OSGi"
+			labelProvider="org.springframework.ide.eclipse.osgi.ui.namespaces.OsgiConfigNamespaceLabelProvider"
+			uri="http://www.springframework.org/schema/osgi" 
+			prefix="osgi"
+			icon="icons/full/obj16/spring_osgi_obj.gif"
+			schemaLocation="http://www.springframework.org/schema/osgi/spring-osgi.xsd"/>
+	</extension>
+	
+	<extension
+		point="org.springframework.ide.eclipse.beans.ui.editor.namespaces">
+		<namespace
+			contentAssistProcessor="org.springframework.ide.eclipse.osgi.ui.editor.namespaces.osgi.OsgiContentAssistProcessor"
+			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
+			hyperLinkDetector="org.springframework.ide.eclipse.osgi.ui.editor.namespaces.osgi.OsgiHyperLinkDetector"
+			labelProvider="org.springframework.ide.eclipse.osgi.ui.editor.namespaces.osgi.OsgiOutlineLabelProvider"
+			name="Spring OSGi"
+			uri="http://www.springframework.org/schema/osgi" />
+	</extension>
+
+</plugin>
