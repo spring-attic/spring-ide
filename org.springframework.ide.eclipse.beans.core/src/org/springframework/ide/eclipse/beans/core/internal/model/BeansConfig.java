@@ -890,8 +890,8 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 		public BeanDefinitionHolder decorate(Node source,
 				BeanDefinitionHolder definition, ParserContext parserContext) {
-			// do nothing
-			return null;
+			// don't decorate bean definition holder and just return 
+			return definition;
 		}
 
 		public BeanDefinition parse(Element element, ParserContext parserContext) {
