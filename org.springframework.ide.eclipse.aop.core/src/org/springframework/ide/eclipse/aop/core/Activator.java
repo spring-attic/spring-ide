@@ -70,9 +70,9 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	@Override
 	public void stop(BundleContext context) throws Exception {
+		model.shutdown();
 		plugin = null;
 		resourceBundle = null;
-		model.shutdown();
 		super.stop(context);
 	}
 
