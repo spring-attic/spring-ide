@@ -34,6 +34,7 @@ import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -166,7 +167,7 @@ public class AopReferenceModelInplaceDialog {
 	 * Fields which are updated by the IWorkbenchWindowActionDelegate to record the selection in the
 	 * editor
 	 */
-	private Object lastSelection;
+	private ISelection lastSelection;
 
 	private IWorkbenchPart workbenchPart;
 
@@ -660,9 +661,8 @@ public class AopReferenceModelInplaceDialog {
 					KeySequence keySequence = KeySequence.getInstance(SWTKeySupport
 							.convertAcceleratorToKeyStroke(accelerator));
 					TriggerSequence[] sequences = getInvokingCommandKeySequences();
-					if (sequences == null) {
+					if (sequences == null)
 						return;
-					}
 					for (TriggerSequence element : sequences) {
 						if (element.equals(keySequence)) {
 							e.doit = false;
@@ -722,7 +722,7 @@ public class AopReferenceModelInplaceDialog {
 						.getSelectedElement(workbenchPart, lastSelection),
 						!isShowingParentCrosscutting);
 				viewer.getControl().setRedraw(true);
-			}  
+			}
 		}
 
 		isShowingParentCrosscutting = !isShowingParentCrosscutting;
@@ -1282,7 +1282,7 @@ public class AopReferenceModelInplaceDialog {
 	 * @param lastSelection
 	 *            The lastSelection to set.
 	 */
-	public void setLastSelection(Object lastSelection) {
+	public void setLastSelection(ISelection lastSelection) {
 		this.lastSelection = lastSelection;
 	}
 

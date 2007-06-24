@@ -38,6 +38,7 @@ import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedAopReferenc
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedDeclareParentAopReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
+import org.springframework.ide.eclipse.aop.ui.navigator.util.WrappingStructuredSelection;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
@@ -184,7 +185,7 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 
 	private Object lastElement;
 
-	private Object lastSelection;
+	private ISelection lastSelection;
 
 	private IWorkbenchPart lastWorkbenchPart;
 
@@ -224,11 +225,11 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 	}
 
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-		Object obj = selection;
 		if (selection instanceof IStructuredSelection) {
-			obj = ((IStructuredSelection) selection).getFirstElement();
+			selection = new WrappingStructuredSelection(
+					(IStructuredSelection) selection);
 		}
-		updateTreeViewer(part, obj, true);
+		updateTreeViewer(part, selection, true);
 	}
 
 	public void setShowBeansRefsForFileEnabled(
@@ -242,7 +243,7 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 		updateTreeViewer(lastWorkbenchPart, lastSelection, false);
 	}
 
-	private void updateTreeViewer(IWorkbenchPart part, Object selection,
+	private void updateTreeViewer(IWorkbenchPart part, ISelection selection,
 			boolean ignoreSameSelection) {
 		final Object element = AopReferenceModelNavigatorUtils
 				.getSelectedElement(part, selection);

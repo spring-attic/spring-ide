@@ -12,12 +12,12 @@ package org.springframework.ide.eclipse.aop.ui.inplace;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+import org.springframework.ide.eclipse.aop.ui.navigator.util.WrappingStructuredSelection;
 
 /**
  * {@link IWorkbenchWindowActionDelegate} implementation that opens the
@@ -55,14 +55,10 @@ public class OpenAopModelReferenceInplaceDialogAction implements
 		Shell parent = JavaPlugin.getActiveWorkbenchShell();
 		xrefDialog = new AopReferenceModelInplaceDialog(parent);
 
-		Object obj = getCurrentSelection();
-		
-		if (obj != null) {
-			xrefDialog.setLastSelection(obj);
-			xrefDialog.setWorkbenchPart(JavaPlugin.getActiveWorkbenchWindow()
-					.getActivePage().getActivePart());
-			xrefDialog.open();
-		}
+		xrefDialog.setLastSelection(getCurrentSelection());
+		xrefDialog.setWorkbenchPart(JavaPlugin.getActiveWorkbenchWindow()
+				.getActivePage().getActivePart());
+		xrefDialog.open();
 	}
 
 	/*
@@ -83,19 +79,16 @@ public class OpenAopModelReferenceInplaceDialogAction implements
 	 * Returns the current selection in the workbench
 	 */
 	@SuppressWarnings("restriction")
-	public static Object getCurrentSelection() {
+	public static ISelection getCurrentSelection() {
 		IWorkbenchWindow window = JavaPlugin.getActiveWorkbenchWindow();
-		if (window != null
-				&& window.getSelectionService().getSelection() instanceof IStructuredSelection) {
-			return ((IStructuredSelection) window.getSelectionService()
-					.getSelection()).getFirstElement();
-		}
-		else if (window != null
-				&& window.getSelectionService().getSelection() instanceof ITextSelection) {
-			return ((ITextSelection) window.getSelectionService()
-					.getSelection()).getText();
+		if (window != null) {
+			if (window.getSelectionService().getSelection() instanceof IStructuredSelection) {
+				return new WrappingStructuredSelection(
+						(IStructuredSelection) window.getSelectionService()
+								.getSelection());
+			}
+			return window.getSelectionService().getSelection();
 		}
 		return null;
 	}
-
 }
