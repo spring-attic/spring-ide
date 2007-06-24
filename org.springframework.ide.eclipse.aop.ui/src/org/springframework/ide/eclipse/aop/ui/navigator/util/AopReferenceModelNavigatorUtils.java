@@ -40,7 +40,6 @@ import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.ui.IEditorPart;
@@ -70,7 +69,12 @@ public class AopReferenceModelNavigatorUtils {
 					.getLabelDecorator());
 
 	public static Object getSelectedElement(IWorkbenchPart part,
-			ISelection selection) {
+			Object selection) {
+
+		if (selection instanceof IStructuredSelection) {
+			selection = ((IStructuredSelection) selection).getFirstElement();
+		}
+
 		Object selectedElement = getSelectedJavaElement(part, selection);
 
 		if (selectedElement == null) {
@@ -80,54 +84,52 @@ public class AopReferenceModelNavigatorUtils {
 		return selectedElement;
 	}
 
-	private static Object getSelectedXmlElement(ISelection selection) {
+	private static Object getSelectedXmlElement(Object selection) {
 		Object selectedElement = null;
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection structSelection = (IStructuredSelection) selection;
-			Object obj = structSelection.getFirstElement();
-			if (obj instanceof Element) {
-				Element elem = (Element) obj;
-				selectedElement = obj;
+			return getSelectedXmlElement(structSelection.getFirstElement());
+		}
+		else if (selection instanceof Element) {
+			Element elem = (Element) selection;
+			selectedElement = selection;
 
-				if ("http://www.springframework.org/schema/aop".equals(elem
-						.getNamespaceURI())) {
-					if ("aspect".equals(elem.getLocalName())) {
-						selectedElement = locateAspectReference(elem,
-								BeansEditorUtils.getAttribute(elem, "ref"));
-					}
-					else if ("advisor".equals(elem.getLocalName())) {
-						selectedElement = locateAspectReference(elem,
-								BeansEditorUtils.getAttribute(elem,
-										"advice-ref"));
-					}
-					else if (elem.getParentNode() != null
-							&& "aspect".equals(elem.getParentNode()
-									.getLocalName())) {
-						selectedElement = locateAspectReference(elem
-								.getParentNode(), BeansEditorUtils
-								.getAttribute(elem.getParentNode(), "ref"));
-					}
-					else if (!"config".equals(elem.getLocalName())) {
-						selectedElement = locateAspectReference(elem,
-								BeansEditorUtils.getAttribute(elem, "ref"));
-					}
+			if ("http://www.springframework.org/schema/aop".equals(elem
+					.getNamespaceURI())) {
+				if ("aspect".equals(elem.getLocalName())) {
+					selectedElement = locateAspectReference(elem,
+							BeansEditorUtils.getAttribute(elem, "ref"));
 				}
-				else if ("".equals(elem.getNamespaceURI())
-						|| "http://www.springframework.org/schema/beans"
-								.equals(elem.getNamespaceURI())) {
-					// go up until a bean is reached
-					Object parentBean = getBeanElement(elem, "bean");
-					if (parentBean != null) {
-						selectedElement = parentBean;
-					}
+				else if ("advisor".equals(elem.getLocalName())) {
+					selectedElement = locateAspectReference(elem,
+							BeansEditorUtils.getAttribute(elem, "advice-ref"));
 				}
-
+				else if (elem.getParentNode() != null
+						&& "aspect".equals(elem.getParentNode().getLocalName())) {
+					selectedElement = locateAspectReference(elem
+							.getParentNode(), BeansEditorUtils.getAttribute(
+							elem.getParentNode(), "ref"));
+				}
+				else if (!"config".equals(elem.getLocalName())) {
+					selectedElement = locateAspectReference(elem,
+							BeansEditorUtils.getAttribute(elem, "ref"));
+				}
 			}
-			else if (obj instanceof Text) {
-				Node parent = ((Text) obj).getParentNode();
-				if (parent instanceof Element) {
-					selectedElement = parent;
+			else if ("".equals(elem.getNamespaceURI())
+					|| "http://www.springframework.org/schema/beans"
+							.equals(elem.getNamespaceURI())) {
+				// go up until a bean is reached
+				Object parentBean = getBeanElement(elem, "bean");
+				if (parentBean != null) {
+					selectedElement = parentBean;
 				}
+			}
+
+		}
+		else if (selection instanceof Text) {
+			Node parent = ((Text) selection).getParentNode();
+			if (parent instanceof Element) {
+				selectedElement = parent;
 			}
 		}
 		return selectedElement;
@@ -166,7 +168,7 @@ public class AopReferenceModelNavigatorUtils {
 	}
 
 	public static IJavaElement getSelectedJavaElement(IWorkbenchPart part,
-			ISelection selection) {
+			Object selection) {
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection = (IStructuredSelection) selection;
 			Object first = structuredSelection.getFirstElement();
@@ -178,6 +180,14 @@ public class AopReferenceModelNavigatorUtils {
 		}
 		else if (part instanceof IEditorPart
 				&& selection instanceof ITextSelection) {
+			if (part instanceof JavaEditor) {
+				JavaEditor je = (JavaEditor) part;
+				ISourceReference sourceRef = computeHighlightRangeSourceReference(je);
+				IJavaElement javaElement = (IJavaElement) sourceRef;
+				return javaElement;
+			}
+		}
+		else if (selection instanceof String) {
 			if (part instanceof JavaEditor) {
 				JavaEditor je = (JavaEditor) part;
 				ISourceReference sourceRef = computeHighlightRangeSourceReference(je);

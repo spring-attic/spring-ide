@@ -272,31 +272,34 @@ public class AopReferenceModelNavigatorContentProvider implements
 			ElementImpl element = (ElementImpl) parentElement;
 			IStructuredDocument document = element.getStructuredDocument();
 			List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
+			
+			if (document != null) {
+				
+				IResource resource = getResource(document);
+				// check if resource is a Beans Config
+				if (!BeansCoreUtils.isBeansConfig(resource)) {
+					return nodes.toArray();
+				}
+				IBeansConfig beansConfig = BeansCorePlugin.getModel()
+						.getProject(resource.getProject()).getConfig(
+								(IFile) resource);
 
-			IResource resource = getResource(document);
-			// check if resource is a Beans Config
-			if (!BeansCoreUtils.isBeansConfig(resource)) {
+				int startLine = document.getLineOfOffset(element
+						.getStartOffset()) + 1;
+				int endLine = document.getLineOfOffset(element.getEndOffset()) + 1;
+				String id = BeansEditorUtils.getAttribute(element, "id");
+
+				nodes.addAll(getChildrenFromXmlLocation(resource, startLine,
+						endLine, id, beansConfig.getBeans()));
+
+				// add inner beans
+				if (nodes.size() == 0) {
+					nodes.addAll(getChildrenFromXmlLocation(resource,
+							startLine, endLine, id, BeansModelUtils
+									.getInnerBeans(beansConfig)));
+				}
 				return nodes.toArray();
 			}
-			IBeansConfig beansConfig = BeansCorePlugin.getModel().getProject(
-					resource.getProject()).getConfig((IFile) resource);
-
-			int startLine = document.getLineOfOffset(element.getStartOffset()) + 1;
-			int endLine = document.getLineOfOffset(element.getEndOffset()) + 1;
-			String id = BeansEditorUtils.getAttribute(element, "id");
-
-			nodes.addAll(getChildrenFromXmlLocation(resource, startLine,
-					endLine, id, beansConfig.getBeans()));
-
-			// add inner beans
-			if (nodes.size() == 0) {
-				nodes
-						.addAll(getChildrenFromXmlLocation(resource, startLine,
-								endLine, id, BeansModelUtils
-										.getInnerBeans(beansConfig)));
-			}
-
-			return nodes.toArray();
 		}
 		return IModelElement.NO_CHILDREN;
 	}

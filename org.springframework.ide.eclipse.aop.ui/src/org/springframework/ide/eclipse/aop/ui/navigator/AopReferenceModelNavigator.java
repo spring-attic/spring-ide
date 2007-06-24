@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Composite;
@@ -183,7 +184,7 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 
 	private Object lastElement;
 
-	private ISelection lastSelection;
+	private Object lastSelection;
 
 	private IWorkbenchPart lastWorkbenchPart;
 
@@ -195,7 +196,7 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 		getSite().getWorkbenchWindow().getSelectionService()
 				.addPostSelectionListener(this);
 		BeansCorePlugin.getModel().addChangeListener(this);
-		
+
 		makeActions();
 
 		// somehow we need to set the tooltip of the view manually
@@ -223,7 +224,11 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 	}
 
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-		updateTreeViewer(part, selection, true);
+		Object obj = selection;
+		if (selection instanceof IStructuredSelection) {
+			obj = ((IStructuredSelection) selection).getFirstElement();
+		}
+		updateTreeViewer(part, obj, true);
 	}
 
 	public void setShowBeansRefsForFileEnabled(
@@ -237,7 +242,7 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 		updateTreeViewer(lastWorkbenchPart, lastSelection, false);
 	}
 
-	private void updateTreeViewer(IWorkbenchPart part, ISelection selection,
+	private void updateTreeViewer(IWorkbenchPart part, Object selection,
 			boolean ignoreSameSelection) {
 		final Object element = AopReferenceModelNavigatorUtils
 				.getSelectedElement(part, selection);

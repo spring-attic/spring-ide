@@ -12,7 +12,9 @@ package org.springframework.ide.eclipse.aop.ui.inplace;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
@@ -53,10 +55,14 @@ public class OpenAopModelReferenceInplaceDialogAction implements
 		Shell parent = JavaPlugin.getActiveWorkbenchShell();
 		xrefDialog = new AopReferenceModelInplaceDialog(parent);
 
-		xrefDialog.setLastSelection(getCurrentSelection());
-		xrefDialog.setWorkbenchPart(JavaPlugin.getActiveWorkbenchWindow()
-				.getActivePage().getActivePart());
-		xrefDialog.open();
+		Object obj = getCurrentSelection();
+		
+		if (obj != null) {
+			xrefDialog.setLastSelection(obj);
+			xrefDialog.setWorkbenchPart(JavaPlugin.getActiveWorkbenchWindow()
+					.getActivePage().getActivePart());
+			xrefDialog.open();
+		}
 	}
 
 	/*
@@ -77,10 +83,17 @@ public class OpenAopModelReferenceInplaceDialogAction implements
 	 * Returns the current selection in the workbench
 	 */
 	@SuppressWarnings("restriction")
-	public static ISelection getCurrentSelection() {
+	public static Object getCurrentSelection() {
 		IWorkbenchWindow window = JavaPlugin.getActiveWorkbenchWindow();
-		if (window != null) {
-			return window.getSelectionService().getSelection();
+		if (window != null
+				&& window.getSelectionService().getSelection() instanceof IStructuredSelection) {
+			return ((IStructuredSelection) window.getSelectionService()
+					.getSelection()).getFirstElement();
+		}
+		else if (window != null
+				&& window.getSelectionService().getSelection() instanceof ITextSelection) {
+			return ((ITextSelection) window.getSelectionService()
+					.getSelection()).getText();
 		}
 		return null;
 	}
