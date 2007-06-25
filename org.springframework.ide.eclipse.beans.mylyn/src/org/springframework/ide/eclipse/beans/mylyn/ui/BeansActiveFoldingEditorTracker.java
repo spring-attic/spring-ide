@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.mylyn.monitor.ui.workbench.AbstractEditorTracker;
+import org.eclipse.mylyn.monitor.ui.AbstractEditorTracker;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;

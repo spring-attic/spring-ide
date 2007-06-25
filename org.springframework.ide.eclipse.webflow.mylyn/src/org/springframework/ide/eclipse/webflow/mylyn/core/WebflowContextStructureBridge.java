@@ -133,7 +133,7 @@ public class WebflowContextStructureBridge extends
 	}
 
 	@Override
-	public String getName(Object obj) {
+	public String getLabel(Object obj) {
 		if (obj instanceof IModelElement) {
 			return ((IModelElement) obj).getElementName();
 		}
