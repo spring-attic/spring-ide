@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.action.IAction;
@@ -36,6 +37,12 @@ import org.springframework.ide.eclipse.ui.SpringUIPlugin;
  * @author Torsten Juergeleit
  */
 public class AddRemoveNature implements IObjectActionDelegate {
+
+	public static final String OLD_NATURE_ID1 =
+			"org.springframework.eclipse.core.springnature";
+
+	public static final String OLD_NATURE_ID2 =
+			"org.springframework.ide.eclipse.beans.core.beansnature";
 
 	private List<IProject> selected = new ArrayList<IProject>();
 
@@ -74,10 +81,16 @@ public class AddRemoveNature implements IObjectActionDelegate {
 		while (iter.hasNext()) {
 			IProject project = (IProject) iter.next();
 			if (SpringCoreUtils.isSpringProject(project)) {
+				IProgressMonitor pm = new NullProgressMonitor();
 				try {
+					SpringCoreUtils.removeProjectNature(project, OLD_NATURE_ID1,
+							pm);
+					SpringCoreUtils.removeProjectNature(project, OLD_NATURE_ID2,
+							pm);
 					SpringCoreUtils.removeProjectNature(project,
-							  SpringCore.NATURE_ID, new NullProgressMonitor());
-				} catch (CoreException e) {
+							SpringCore.NATURE_ID, pm);
+				}
+				catch (CoreException e) {
 					MessageDialog.openError(
 							SpringUIPlugin.getActiveWorkbenchShell(),
 							SpringUIMessages.ProjectNature_errorMessage,
@@ -86,9 +99,14 @@ public class AddRemoveNature implements IObjectActionDelegate {
 								  project.getName(), e.getLocalizedMessage()));
 				}
 			} else {
+				IProgressMonitor pm = new NullProgressMonitor();
 				try {
+					SpringCoreUtils.removeProjectNature(project, OLD_NATURE_ID1,
+							pm);
+					SpringCoreUtils.removeProjectNature(project, OLD_NATURE_ID2,
+							pm);
 					SpringCoreUtils.addProjectNature(project,
-							  SpringCore.NATURE_ID, new NullProgressMonitor());
+							SpringCore.NATURE_ID, pm);
 				} catch (CoreException e) {
 					MessageDialog.openError(
 							SpringUIPlugin.getActiveWorkbenchShell(),

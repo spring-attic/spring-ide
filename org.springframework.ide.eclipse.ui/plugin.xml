@@ -24,28 +24,12 @@
             adaptable="true"
             id="org.springframework.ide.eclipse.ui.actions.nonSpringProject">
          <visibility>
-            <and>
-               <and>
-                  <not>
-                     <objectState
-                           name="nature"
-                           value="org.springframework.ide.eclipse.core.springnature">
-                     </objectState>
-                  </not>
-                  <not>
-                     <objectState
-                           name="nature"
-                           value="org.springframework.ide.eclipse.beans.core.beansnature">
-                     </objectState>
-                  </not>
-               </and>
-               <not>
-                  <objectState
-                        name="nature"
-                        value="org.springframework.eclipse.core.springnature">
-                  </objectState>
-               </not>
-            </and>
+             <not>
+                 <objectState
+                       name="nature"
+                       value="org.springframework.ide.eclipse.core.springnature">
+                 </objectState>
+             </not>
          </visibility>
          <action
                label="%popupMenus.addNature.label"
