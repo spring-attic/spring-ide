@@ -204,7 +204,9 @@ public class BeansActiveFoldingListener implements IInteractionContextListener {
 							&& ((StructuredTextEditor) viewer).getTextViewer() != null) {
 						ProjectionAnnotationModel annotationModel = ((StructuredTextEditor) viewer)
 								.getTextViewer().getProjectionAnnotationModel();
-						expandDocument(annotationModel);
+						if (annotationModel != null) {
+							expandDocument(annotationModel);
+						}
 					}
 				}
 			});
