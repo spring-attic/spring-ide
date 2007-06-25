@@ -366,7 +366,7 @@ public class JdtUtils {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Returns the corresponding Java type for given full-qualified class name.
 	 * @param project the JDT project the class belongs to
@@ -407,14 +407,13 @@ public class JdtUtils {
 				return getAjdtType(project, className);
 			}
 			catch (CoreException e) {
-				SpringCore.log("Error getting Java type '" + className
-						+ "'", e);
+				SpringCore
+						.log("Error getting Java type '" + className + "'", e);
 			}
 		}
 
 		return null;
 	}
-
 
 	public static IType getAjdtType(IProject project, String className) {
 		IJavaProject javaProject = getJavaProject(project);
@@ -526,5 +525,56 @@ public class JdtUtils {
 
 	public static IClasspathEntry getJREVariableEntry() {
 		return JavaRuntime.getDefaultJREContainerEntry();
+	}
+
+	public static IProjectClassLoaderSupport getProjectClassLoaderSupport(
+			IJavaProject je) {
+		return new DefaultProjectClassLoaderSupport(je);
+	}
+
+	static class DefaultProjectClassLoaderSupport implements
+			IProjectClassLoaderSupport {
+
+		private ClassLoader classLoader;
+
+		private ClassLoader weavingClassLoader;
+
+		public DefaultProjectClassLoaderSupport(IJavaProject javaProject) {
+			setupClassLoaders(javaProject);
+		}
+
+		/**
+		 * Activates the weaving class loader as thread context classloader.
+		 * <p>
+		 * Use {@link #recoverClassLoader()} to recover the original thread
+		 * context classlaoder
+		 */
+		private void activateWeavingClassLoader() {
+			Thread.currentThread().setContextClassLoader(weavingClassLoader);
+		}
+
+		public void executeCallback(IProjectClassLoaderAwareCallback callback)
+				throws Throwable {
+			try {
+				activateWeavingClassLoader();
+				callback.doWithActiveProjectClassLoader();
+			}
+			finally {
+				recoverClassLoader();
+			}
+		}
+
+		public ClassLoader getProjectClassLoader() {
+			return this.weavingClassLoader;
+		}
+
+		private void recoverClassLoader() {
+			Thread.currentThread().setContextClassLoader(classLoader);
+		}
+
+		private void setupClassLoaders(IJavaProject javaProject) {
+			classLoader = Thread.currentThread().getContextClassLoader();
+			weavingClassLoader = JdtUtils.getClassLoader(javaProject, false);
+		}
 	}
 }

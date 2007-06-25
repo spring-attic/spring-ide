@@ -33,9 +33,9 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder;
-import org.springframework.ide.eclipse.aop.core.model.builder.IWeavingClassLoaderSupport;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
+import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -58,7 +58,7 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 
 	public void doBuildAspectDefinitions(IDOMDocument document, IFile file,
 			List<IAspectDefinition> aspectInfos,
-			IWeavingClassLoaderSupport classLoaderSupport) {
+			IProjectClassLoaderSupport classLoaderSupport) {
 		parseXmlAspects(document, file, aspectInfos, classLoaderSupport);
 	}
 
@@ -89,7 +89,7 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 	private void parseAdvisors(final IFile file, final Node aspectNode,
 			Map<String, String> rootPointcuts,
 			final List<IAspectDefinition> aspectInfos,
-			IWeavingClassLoaderSupport classLoaderSupport) {
+			IProjectClassLoaderSupport classLoaderSupport) {
 
 		final String beanRef = getAttribute(aspectNode, ADVICE_REF_ATTRIBUTE);
 		final String className = BeansEditorUtils.getClassNameForBean(file,
@@ -107,9 +107,9 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 			try {
 
 				classLoaderSupport
-						.executeCallback(new IWeavingClassLoaderSupport.IWeavingClassLoaderAwareCallback() {
+						.executeCallback(new IProjectClassLoaderSupport.IProjectClassLoaderAwareCallback() {
 
-							public void doInActiveWeavingClassLoader()
+							public void doWithActiveProjectClassLoader()
 									throws Throwable {
 
 								Class<?> advisorClass = ClassUtils.loadClass(className);
@@ -335,7 +335,7 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 
 	private void parseXmlAspects(final IDOMDocument document, IFile file,
 			final List<IAspectDefinition> aspectInfos,
-			IWeavingClassLoaderSupport classLoaderSupport) {
+			IProjectClassLoaderSupport classLoaderSupport) {
 		NodeList list = document.getDocumentElement().getElementsByTagNameNS(
 				AOP_NAMESPACE_URI, CONFIG_ELEMENT);
 

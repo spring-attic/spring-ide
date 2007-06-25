@@ -28,13 +28,13 @@ import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.logging.AopLog;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder;
-import org.springframework.ide.eclipse.aop.core.model.builder.IWeavingClassLoaderSupport;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -83,7 +83,7 @@ public class AnnotationAspectDefinitionBuilder extends
 
 	public void doBuildAspectDefinitions(IDOMDocument document, IFile file,
 			List<IAspectDefinition> aspectInfos,
-			IWeavingClassLoaderSupport classLoaderSupport) {
+			IProjectClassLoaderSupport classLoaderSupport) {
 		if (BeansCoreUtils.isBeansConfig(file)) {
 			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig(
 					file);
@@ -133,7 +133,7 @@ public class AnnotationAspectDefinitionBuilder extends
 
 	private void parseAnnotationAspects(IDOMDocument document,
 			IBeansConfig beansConfig, List<IAspectDefinition> aspectInfos,
-			IWeavingClassLoaderSupport classLoaderSupport) {
+			IProjectClassLoaderSupport classLoaderSupport) {
 		NodeList list = document.getDocumentElement().getElementsByTagNameNS(
 				AOP_NAMESPACE_URI, ASPECTJ_AUTOPROXY_ELEMENT);
 		if (list.getLength() > 0) {
@@ -184,7 +184,7 @@ public class AnnotationAspectDefinitionBuilder extends
 	}
 
 	private void parseAnnotationAspectFromSingleBean(IBeansConfig beansConfig,
-			IWeavingClassLoaderSupport classLoaderSupport,
+			IProjectClassLoaderSupport classLoaderSupport,
 			final List<IAspectDefinition> aspectDefinitions,
 			List<Pattern> patternList, final IBean bean) {
 		final String id = bean.getElementName();
@@ -194,9 +194,9 @@ public class AnnotationAspectDefinitionBuilder extends
 
 			try {
 				classLoaderSupport
-						.executeCallback(new IWeavingClassLoaderSupport.IWeavingClassLoaderAwareCallback() {
+						.executeCallback(new IProjectClassLoaderSupport.IProjectClassLoaderAwareCallback() {
 
-							public void doInActiveWeavingClassLoader()
+							public void doWithActiveProjectClassLoader()
 									throws Throwable {
 								if (validateAspect(className)) {
 									createAnnotationAspectDefinition(bean, id,

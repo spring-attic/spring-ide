@@ -11,17 +11,24 @@
 package org.springframework.ide.eclipse.beans.core.internal.model.validation.rules;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.objectweb.asm.ClassReader;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.context.annotation.ScannedRootBeanDefinition;
+import org.springframework.core.type.asm.AnnotationMetadataReadingVisitor;
+import org.springframework.core.type.asm.ClassReaderFactory;
+import org.springframework.core.type.asm.SimpleClassReaderFactory;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -79,8 +86,8 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 		}
 	}
 
-	protected void validateConstructorArguments(IBean bean, IType type,
-			ConstructorArgumentValues argumentValues, IValidationContext context) {
+	protected void validateConstructorArguments(final IBean bean, final IType type,
+			ConstructorArgumentValues argumentValues, final IValidationContext context) {
 
 		// TODO CD need to add a check here if constructor has @Autowired
 		// annotation; for now we just skip validation of
@@ -96,7 +103,7 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 
 			// Check for default constructor if no constructor arguments are
 			// available
-			int numArguments = (argumentValues == null ? 0 : argumentValues
+			final int numArguments = (argumentValues == null ? 0 : argumentValues
 					.getArgumentCount());
 			try {
 				if (!Introspector.hasConstructor(type, numArguments, true)) {
@@ -105,18 +112,52 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 					if (element == null) {
 						element = bean;
 					}
-					context.error(bean, "NO_CONSTRUCTOR",
+					
+					// add check if prototype and configurable; do this at the 
+					// latest possible stage due to performance considerations
+					if (!(bd.isPrototype() && 
+							checkForPrecedenceOfConfigurableAnnotation(bean, type,
+								context, numArguments))) {
+						context.error(bean, "NO_CONSTRUCTOR",
 							"No constructor with "
 									+ numArguments
 									+ (numArguments == 1 ? " argument"
 											: " arguments")
 									+ " defined in class '"
 									+ type.getFullyQualifiedName() + "'");
+					}
 				}
 			}
 			catch (JavaModelException e) {
 				BeansCorePlugin.log(e);
 			}
 		}
+	}
+	
+	/**
+	 * Checks if the class under question is annotated with {@link Configurable}.
+	 */
+	private boolean checkForPrecedenceOfConfigurableAnnotation(final IBean bean, 
+			final IType type, final IValidationContext context, final int numArguments) {
+		IJavaProject jp = JdtUtils.getJavaProject(bean.getElementResource().getProject());
+		final String className = type.getFullyQualifiedName();
+		final AnnotationMetadataReadingVisitor visitor = 
+			new AnnotationMetadataReadingVisitor();
+		if (jp != null) {
+			try {
+				JdtUtils.getProjectClassLoaderSupport(jp).executeCallback(
+						new IProjectClassLoaderSupport.IProjectClassLoaderAwareCallback() {
+
+					public void doWithActiveProjectClassLoader() throws Throwable {
+						ClassReaderFactory classReaderFactory = new SimpleClassReaderFactory();
+						ClassReader classReader = classReaderFactory.getClassReader(className);
+						classReader.accept(visitor, false);
+					}});
+			}
+			catch (Throwable e) {
+				BeansCorePlugin.log(e);
+			}
+		}
+		return visitor.hasAnnotation(Configurable.class.getName());
 	}
 }

@@ -50,6 +50,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
+import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -63,56 +64,11 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("restriction")
 public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 
-	private static class DefaultWeavingClassLoaderSupport implements IWeavingClassLoaderSupport {
-
-		private ClassLoader classLoader;
-
-		private ClassLoader weavingClassLoader;
-
-		public DefaultWeavingClassLoaderSupport(IJavaProject javaProject) {
-			setupClassLoaders(javaProject);
-		}
-
-		/**
-		 * Activates the weaving class loader as thread context classloader.
-		 * <p>
-		 * Use {@link #recoverClassLoader()} to recover the original thread
-		 * context classlaoder
-		 */
-		private void activateWeavingClassLoader() {
-			Thread.currentThread().setContextClassLoader(weavingClassLoader);
-		}
-
-		public void executeCallback(IWeavingClassLoaderAwareCallback callback)
-				throws Throwable {
-			try {
-				activateWeavingClassLoader();
-				callback.doInActiveWeavingClassLoader();
-			}
-			finally {
-				recoverClassLoader();
-			}
-		}
-
-		public ClassLoader getWeavingClassLoader() {
-			return this.weavingClassLoader;
-		}
-
-		private void recoverClassLoader() {
-			Thread.currentThread().setContextClassLoader(classLoader);
-		}
-
-		private void setupClassLoaders(IJavaProject javaProject) {
-			classLoader = Thread.currentThread().getContextClassLoader();
-			weavingClassLoader = JdtUtils.getClassLoader(javaProject, false);
-		}
-	}
-
 	private static final String PROCESSING_TOOK_MSG = "Processing took";
 
 	private Set<IResource> affectedResources;
 
-	private IWeavingClassLoaderSupport classLoaderSupport;
+	private IProjectClassLoaderSupport classLoaderSupport;
 
 	public AopReferenceModelBuilder(Set<IResource> affectedResources) {
 		this.affectedResources = affectedResources;
@@ -219,9 +175,9 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 			// do in context of active weaving class loader
 			this.classLoaderSupport
 					.executeCallback(
-							new IWeavingClassLoaderSupport.IWeavingClassLoaderAwareCallback() {
+							new IProjectClassLoaderSupport.IProjectClassLoaderAwareCallback() {
 
-						public void doInActiveWeavingClassLoader() throws Throwable {
+						public void doWithActiveProjectClassLoader() throws Throwable {
 							Class<?> targetClass = ClassUtils.loadClass(className);
 							// handle introductions first
 							if (info instanceof BeanIntroductionDefinition) {
@@ -364,7 +320,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				AopLog.log(AopLog.BUILDER_CLASSPATH, Activator.getFormattedMessage(
 						"AopReferenceModelBuilder.aopBuilderClassPath", StringUtils
 								.arrayToDelimitedString(((URLClassLoader) classLoaderSupport
-										.getWeavingClassLoader()).getURLs(), ";")));
+										.getProjectClassLoader()).getURLs(), ";")));
 
 				List<IAspectDefinition> aspectInfos = new ArrayList<IAspectDefinition>();
 				Set<IAspectDefinitionBuilder> builders = AspectDefinitionBuilderFactory
@@ -392,8 +348,8 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 		return aopProject;
 	}
 
-	protected IWeavingClassLoaderSupport createWeavingClassLoaderSupport(IJavaProject javaProject) {
-		return new DefaultWeavingClassLoaderSupport(javaProject);
+	protected IProjectClassLoaderSupport createWeavingClassLoaderSupport(IJavaProject javaProject) {
+		return JdtUtils.getProjectClassLoaderSupport(javaProject);
 	}
 
 	private void handleException(Throwable t, IAspectDefinition info, IBean bean, IResource file) {

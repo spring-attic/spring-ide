@@ -8,22 +8,22 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.aop.core.model.builder;
+package org.springframework.ide.eclipse.core.java;
 
 /**
  * @author Christian Dupuis
  * @since 2.0
  */
-public interface IWeavingClassLoaderSupport {
+public interface IProjectClassLoaderSupport {
 
-	interface IWeavingClassLoaderAwareCallback {
+	interface IProjectClassLoaderAwareCallback {
 
-		void doInActiveWeavingClassLoader() throws Throwable;
+		void doWithActiveProjectClassLoader() throws Throwable;
 
 	}
 
-	void executeCallback(IWeavingClassLoaderAwareCallback callback)
+	void executeCallback(IProjectClassLoaderAwareCallback callback)
 			throws Throwable;
 
-	ClassLoader getWeavingClassLoader();
+	ClassLoader getProjectClassLoader();
 }

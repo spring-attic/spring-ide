@@ -23,7 +23,7 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder;
-import org.springframework.ide.eclipse.aop.core.model.builder.IWeavingClassLoaderSupport;
+import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
 
@@ -94,7 +94,7 @@ public abstract class AbstractAspectDefinitionBuilder implements
 	protected static final String NAME_ATTRIBUTE = "name";
 
 	public final List<IAspectDefinition> buildAspectDefinitions(IFile file,
-			IWeavingClassLoaderSupport classLoaderSupport) {
+			IProjectClassLoaderSupport classLoaderSupport) {
 		final List<IAspectDefinition> aspectInfos = new ArrayList<IAspectDefinition>();
 		
 		IStructuredModel model = null;
@@ -137,5 +137,5 @@ public abstract class AbstractAspectDefinitionBuilder implements
 	}
 	
 	protected abstract void doBuildAspectDefinitions(IDOMDocument document,
-			IFile file, List<IAspectDefinition> aspectInfos, IWeavingClassLoaderSupport classLoaderSupport);
+			IFile file, List<IAspectDefinition> aspectInfos, IProjectClassLoaderSupport classLoaderSupport);
 }

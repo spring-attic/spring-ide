@@ -14,12 +14,13 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
+import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 
 /**
  * An {@link IAspectDefinitionBuilder} is used to create instances of
  * {@link IAspectDefinition} from the given <code>file</code>.
  * <p>
- * Implementations can leverage the given {@link IWeavingClassLoaderSupport}
+ * Implementations can leverage the given {@link IProjectClassLoaderSupport}
  * to do code in the context of the current weaving class loader, being a 
  * class loader that has access to the Eclipse project's class path.
  * @author Christian Dupuis
@@ -31,5 +32,5 @@ public interface IAspectDefinitionBuilder {
 	 * Build {@link IAspectDefinition} from the given <code>file</code>.
 	 */
 	List<IAspectDefinition> buildAspectDefinitions(IFile file,
-			IWeavingClassLoaderSupport classLoaderSupprt);
+			IProjectClassLoaderSupport classLoaderSupprt);
 }
