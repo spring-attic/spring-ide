@@ -947,7 +947,16 @@ public final class BeansModelUtils {
 		}
 
 		// Register bean definitions from components
-		for (IBeansComponent component : config.getComponents()) {
+		registerComponents(config.getComponents(), registry);
+	}
+	
+	/**
+	 * Registers all {@link IBean}s and {@link IBeansComponent}s that are nested
+	 * within the given <code>components</code>.
+	 */
+	private static void registerComponents(Set<IBeansComponent> components,
+			BeanDefinitionRegistry registry) {
+		for (IBeansComponent component : components) {
 			for (IBean bean : component.getBeans()) {
 				try {
 					String beanName = bean.getElementName();
@@ -968,6 +977,9 @@ public final class BeansModelUtils {
 					// ignore - continue with next bean
 				}
 			}
+			
+			// Register bean definitions from components
+			registerComponents(component.getComponents(), registry);
 		}
 	}
 
