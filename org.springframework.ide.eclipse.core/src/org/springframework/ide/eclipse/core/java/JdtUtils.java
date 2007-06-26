@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.core.SpringCore;
@@ -443,6 +444,17 @@ public class JdtUtils {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Determines if the <code>resource</code> under question is the .classpath
+	 * file of a {@link IJavaProject}.
+	 */
+	@SuppressWarnings("restriction")
+	public static boolean isClassPathFile(IResource resource) {
+		String classPathFileName = resource.getProject().getFullPath().append(
+				JavaProject.CLASSPATH_FILENAME).toString();
+		return resource.getFullPath().toString().equals(classPathFileName);
 	}
 
 	public static boolean isAjdtPresent() {

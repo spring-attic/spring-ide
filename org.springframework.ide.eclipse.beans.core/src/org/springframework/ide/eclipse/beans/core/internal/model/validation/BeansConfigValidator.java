@@ -27,9 +27,11 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
+import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinitionFactory;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
@@ -59,6 +61,15 @@ public class BeansConfigValidator extends AbstractValidator {
 					(IFile) resource);
 			if (config != null) {
 				resources.add(resource);
+			}
+			else if (JdtUtils.isClassPathFile(resource)) {
+				IBeansProject beansProject = BeansCorePlugin.getModel().getProject(
+						resource.getProject());
+				if (beansProject != null) {
+					for (IBeansConfig beansConfig : beansProject.getConfigs()) {
+						resources.add(beansConfig.getElementResource());
+					}
+				}
 			}
 			else {
 

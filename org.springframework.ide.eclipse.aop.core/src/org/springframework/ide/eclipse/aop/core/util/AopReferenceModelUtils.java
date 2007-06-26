@@ -36,6 +36,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
  * Some helper methods.
@@ -123,8 +124,7 @@ public class AopReferenceModelUtils {
 
 		// since we moved to the new AbstractProjectBuilder we don't need the
 		// following check.
-		if ((kind == IncrementalProjectBuilder.AUTO_BUILD 
-				|| kind == IncrementalProjectBuilder.INCREMENTAL_BUILD)
+		if ((kind == IncrementalProjectBuilder.AUTO_BUILD || kind == IncrementalProjectBuilder.INCREMENTAL_BUILD)
 				&& resource instanceof IFile
 				&& resource.getName().endsWith(JAVA_FILE_EXTENSION)) {
 			Set<IBeansProject> projects = BeansCorePlugin.getModel()
@@ -162,25 +162,40 @@ public class AopReferenceModelUtils {
 		}
 		else if (BeansCoreUtils.isBeansConfig(resource)) {
 			IBeansConfig beansConfig = (IBeansConfig) BeansModelUtils
-					.getResourceModelElement(resource);
-			files.add((IFile) resource);
-
-			// add confis from config set
-			IBeansProject project = BeansCorePlugin.getModel().getProject(
+				.getResourceModelElement(resource);
+			getAffectedFilesFromBeansConfig(beansConfig, files);
+		}
+		// if the .classpath file is updated redo for every beans config
+		else if (JdtUtils.isClassPathFile(resource)) {
+			IBeansProject beansProject = BeansCorePlugin.getModel().getProject(
 					resource.getProject());
-			if (project != null) {
-				Set<IBeansConfigSet> configSets = project.getConfigSets();
-				for (IBeansConfigSet configSet : configSets) {
-					if (configSet.getConfigs().contains(beansConfig)) {
-						Set<IBeansConfig> bcs = configSet.getConfigs();
-						for (IBeansConfig bc : bcs) {
-							files.add(bc.getElementResource());
-						}
-					}
+			if (beansProject != null) {
+				for (IBeansConfig beansConfig : beansProject.getConfigs()) {
+					getAffectedFilesFromBeansConfig(beansConfig, files);
 				}
 			}
 		}
 		return files;
+	}
+
+	private static void getAffectedFilesFromBeansConfig(IBeansConfig beansConfig,
+			Set<IResource> files) {
+		files.add((IFile) beansConfig.getElementResource());
+
+		// add confis from config set
+		IBeansProject project = BeansCorePlugin.getModel().getProject(
+				beansConfig.getElementResource().getProject());
+		if (project != null) {
+			Set<IBeansConfigSet> configSets = project.getConfigSets();
+			for (IBeansConfigSet configSet : configSets) {
+				if (configSet.getConfigs().contains(beansConfig)) {
+					Set<IBeansConfig> bcs = configSet.getConfigs();
+					for (IBeansConfig bc : bcs) {
+						files.add(bc.getElementResource());
+					}
+				}
+			}
+		}
 	}
 
 	public static IBean getBeanFromElementId(String elementId) {

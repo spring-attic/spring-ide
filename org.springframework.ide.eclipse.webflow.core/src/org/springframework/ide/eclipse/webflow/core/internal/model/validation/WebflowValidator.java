@@ -19,17 +19,23 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinitionFactory;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidator;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
+import org.springframework.ide.eclipse.core.model.validation.IValidator;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModel;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 
 /**
+ * {@link IValidator} implementation that is responsible for validating the
+ * {@link IWebflowModel}.
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  * @since 2.0
@@ -47,6 +53,16 @@ public class WebflowValidator extends AbstractValidator {
 		Set<IResource> resources = new LinkedHashSet<IResource>();
 		if (WebflowModelUtils.isWebflowConfig(resource)) {
 			resources.add(resource);
+		}
+		else if (JdtUtils.isClassPathFile(resource)) {
+			IWebflowProject webflowProject = Activator.getModel().getProject(
+					resource.getProject());
+			if (webflowProject != null) {
+				for (IWebflowConfig webflowConfig : webflowProject.getConfigs()) {
+					resources.add(webflowConfig.getElementResource());
+				}
+			}
+
 		}
 		return resources;
 	}
@@ -74,8 +90,7 @@ public class WebflowValidator extends AbstractValidator {
 	@Override
 	protected Set<IResourceModelElement> getContextElements(
 			IResourceModelElement rootElement) {
-		Set<IResourceModelElement> contextElements =
-				new HashSet<IResourceModelElement>();
+		Set<IResourceModelElement> contextElements = new HashSet<IResourceModelElement>();
 		contextElements.add(rootElement);
 		return contextElements;
 	}
@@ -86,8 +101,8 @@ public class WebflowValidator extends AbstractValidator {
 			IResourceModelElement contextElement) {
 		if (rootElement instanceof IWebflowState) {
 			IWebflowState state = (IWebflowState) rootElement;
-			IWebflowConfig config = WebflowModelUtils.getWebflowConfig(
-					(IFile) state.getElementResource());
+			IWebflowConfig config = WebflowModelUtils
+					.getWebflowConfig((IFile) state.getElementResource());
 			return new WebflowValidationContext(state, config);
 		}
 		return null;
