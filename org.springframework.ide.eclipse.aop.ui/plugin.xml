@@ -40,8 +40,12 @@
 				</or>
 			</triggerPoints>
 			<possibleChildren>
-				<instanceof
-					value="org.springframework.ide.eclipse.aop.ui.navigator.model.IReferenceNode" />
+				<or>
+					<instanceof
+						value="org.springframework.ide.eclipse.aop.ui.navigator.model.IReferenceNode" />
+					<instanceof
+						value="org.eclipse.core.resources.IWorkspaceRoot" />
+				</or>
 			</possibleChildren>
 			<commonSorter
 				id="org.springframework.ide.eclipse.aop.ui.navigator.projectExplorerContent"

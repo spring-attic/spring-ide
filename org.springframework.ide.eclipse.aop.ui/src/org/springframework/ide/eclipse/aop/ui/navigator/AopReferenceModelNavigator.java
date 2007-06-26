@@ -48,7 +48,7 @@ import org.w3c.dom.Element;
 /**
  * Customized extension of the {@link CommonNavigator} that links to the current
  * selected element in the Java Editor or Spring IDE's XML Editor.
- * @author Christian Dupuis
+ * @author Christian Dupuis'
  * @since 2.0
  */
 @SuppressWarnings("restriction")
@@ -199,9 +199,6 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 		BeansCorePlugin.getModel().addChangeListener(this);
 
 		makeActions();
-
-		// somehow we need to set the tooltip of the view manually
-		setTitleToolTip("Beans Cross References View");
 	}
 
 	@Override

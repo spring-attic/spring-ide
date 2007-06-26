@@ -144,7 +144,10 @@
             activeByDefault="true">
          <triggerPoints/>
          <possibleChildren>
-			<instanceof value="org.springframework.ide.eclipse.core.model.ISpringProject"/>
+         	<or>
+				<instanceof value="org.springframework.ide.eclipse.core.model.ISpringProject"/>
+				<instanceof	value="org.eclipse.core.resources.IWorkspaceRoot" />
+			</or>
          </possibleChildren>
          <actionProvider
 				id="org.springframework.ide.eclipse.ui.navigator.springExplorerActions"

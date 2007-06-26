@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.aop.ui.navigator;
 
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.navigator.ICommonLabelProvider;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.IReferenceNode;
@@ -53,6 +54,9 @@ public class AopReferenceModelNavigatorLabelProvider extends
 	public String getText(Object element, Object parentElement, int severity) {
 		if (element instanceof IReferenceNode) {
 			return ((IReferenceNode) element).getText();
+		}
+		else if (element instanceof IWorkspaceRoot) {
+			return "Beans Cross References";
 		}
 		return super.getText(element, parentElement, severity);
 	}

@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.ui.internal.navigator;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
@@ -84,6 +85,9 @@ public class SpringNavigatorLabelProvider extends SpringUILabelProvider
 		if (element instanceof ISpringProject
 				&& SpringCoreUtils.getAdapter(parentElement, IProject.class) != null) {
 			return "Spring Elements"; // TODO Externalize string
+		}
+		else if (element instanceof IWorkspaceRoot) {
+			return "Spring Explorer";
 		}
 		return super.getText(element, parentElement, severity);
 	}
