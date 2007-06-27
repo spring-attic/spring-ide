@@ -56,6 +56,13 @@
          unpack="false"/>
 
    <plugin
+         id="org.springframework.ide.eclipse.mylyn"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="org.springframework.ide.eclipse.osgi"
          download-size="0"
          install-size="0"
@@ -78,6 +85,13 @@
 
    <plugin
          id="org.springframework.ide.eclipse.beans.ui.graph"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.beans.ui.mylyn"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -141,6 +155,13 @@
 
    <plugin
          id="org.springframework.ide.eclipse.webflow.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.webflow.mylyn"
          download-size="0"
          install-size="0"
          version="0.0.0"
