@@ -9,14 +9,14 @@ feature@org.springframework.ide.eclipse.feature.source=SVN,trunk,http://springid
 #feature@org.springframework.ide.eclipse.aop.feature.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.aop.feature.source
 #feature@org.springframework.ide.eclipse.webflow.feature=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.webflow.feature
 #feature@org.springframework.ide.eclipse.webflow.feature.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.webflow.feature.source
-#feature@org.springframework.ide.eclipse.mylyn.feature=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.mylyn.feature
-#feature@org.springframework.ide.eclipse.mylyn.feature.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.mylyn.feature.source
+feature@org.springframework.ide.eclipse.mylyn.feature=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.mylyn.feature
+feature@org.springframework.ide.eclipse.mylyn.feature.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.mylyn.feature.source
 
 plugin@org.springframework.ide.eclipse=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse
 plugin@org.springframework.ide.eclipse.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.source
 #plugin@org.springframework.ide.eclipse.aop.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.aop.source
 #plugin@org.springframework.ide.eclipse.webflow.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.webflow.source
-#plugin@org.springframework.ide.eclipse.mylyn.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.mylyn.source
+plugin@org.springframework.ide.eclipse.mylyn.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.mylyn.source
 plugin@org.springframework.ide.eclipse.mylyn=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.mylyn
 plugin@org.springframework.ide.eclipse.osgi=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.osgi
 plugin@org.springframework.ide.eclipse.aop.core=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.aop.core
