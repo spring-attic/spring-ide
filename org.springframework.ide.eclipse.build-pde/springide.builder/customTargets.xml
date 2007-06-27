@@ -144,12 +144,12 @@
 	<target name="postBuild">
 		<antcall target="gatherLogs" />
 		<property name="UpdateSiteStagingLocation" value="${buildDirectory}/../../updatesite_nightly" />
-<!--		<delete dir="${UpdateSiteStagingLocation}" />
+		<delete dir="${UpdateSiteStagingLocation}" />
 		<property name="sitePackagePrefix" value="springide_updatesite" />
 		<property name="sitePackageVersion" value="2.0" />
 		<property name="featureVersion" value="2.0.0" />
 		<antcall target="generateUpdateSite" />
-		
+<!--		
         <java jar="${eclipseLauncherJar}" 
               fork="true" 
               failonerror="true" 
