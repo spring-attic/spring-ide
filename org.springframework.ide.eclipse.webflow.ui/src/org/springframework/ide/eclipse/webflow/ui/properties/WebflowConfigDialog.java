@@ -112,6 +112,12 @@ public class WebflowConfigDialog extends Dialog {
 	protected Control createDialogArea(Composite parent) {
 		// create composite
 		Composite composite = (Composite) super.createDialogArea(parent);
+		GridLayout layout = new GridLayout();
+		layout.marginHeight = 3;
+		layout.marginWidth = 3;
+		composite.setLayout(layout);
+		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		
 		Label nameLabel = new Label(composite, SWT.NONE);
 		nameLabel.setText("Specify a flow id");
 		nameText = new Text(composite, SWT.SINGLE | SWT.BORDER);
