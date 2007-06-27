@@ -13,6 +13,10 @@
 			<property name="type" value="feature" />
 			<property name="id" value="org.springframework.ide.eclipse.feature" />
 		</ant>
+		<ant antfile="${genericTargets}" target="${target}">
+			<property name="type" value="feature" />
+			<property name="id" value="org.springframework.ide.eclipse.mylyn.feature" />
+		</ant>
  	</target>
  
  	<!-- ===================================================================== -->
@@ -25,6 +29,12 @@
  	<target name="assemble.org.springframework.ide.eclipse.feature">
 		<ant antfile="${assembleScriptName}" dir="${buildDirectory}">
 			<property name="archiveName" value="springide.zip" />
+		</ant>
+ 	</target>
+
+	<target name="assemble.org.springframework.ide.eclipse.mylyn.feature">
+		<ant antfile="${assembleScriptName}" dir="${buildDirectory}">
+			<property name="archiveName" value="springide-mylyn.zip" />
 		</ant>
  	</target>
   

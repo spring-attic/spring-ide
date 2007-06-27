@@ -57,10 +57,13 @@
 
 	<target name="pre.@dot">
 		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.webflow.mylar" />
+			<param name="plugin-name" value="org.springframework.ide.eclipse.webflow.mylyn" />
 		</antcall>
 		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.beans.mylar" />
+			<param name="plugin-name" value="org.springframework.ide.eclipse.mylyn" />
+		</antcall>
+		<antcall target="copy.source">
+			<param name="plugin-name" value="org.springframework.ide.eclipse.beans.mylyn" />
 		</antcall>
 	</target>
 
