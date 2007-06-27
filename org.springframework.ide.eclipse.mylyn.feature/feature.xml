@@ -30,21 +30,21 @@
          id="org.springframework.ide.eclipse.webflow.mylyn"
          download-size="0"
          install-size="0"
-         version="2.0.0.v200706271108"
+         version="2.0.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.mylyn"
          download-size="0"
          install-size="0"
-         version="2.0.0.v200706271108"
+         version="2.0.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.springframework.ide.eclipse.mylyn"
          download-size="0"
          install-size="0"
-         version="2.0.0.v200706271108"
+         version="2.0.0.qualifier"
          unpack="false"/>
 
 </feature>
