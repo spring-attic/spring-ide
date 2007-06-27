@@ -13,5 +13,17 @@
                   includes="features/*, plugins/*, site.xml"/>
     </zip>
   </target>
+	
+  <target name="repack">
+	<java jar="D:\tools\eclipse-SDK-3.2.1-wtp-springide-win32\eclipse\startup.jar" 
+          fork="true" 
+          failonerror="true" 
+          maxmemory="256m" 
+          dir="."> 
+        <arg line="-application org.eclipse.update.core.siteOptimizer" /> 
+        <arg line="-jarProcessor -verbose -processAll -repack -pack -outputDir ." />
+        <arg line="." /> 
+    </java> 
+  </target>
 
 </project>

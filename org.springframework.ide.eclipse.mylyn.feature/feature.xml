@@ -21,33 +21,30 @@
       <update label="%updateSiteName" url="http://springide.org/updatesite/"/>
    </url>
 
-   <includes
-         id="org.springframework.ide.eclipse.mylyn.feature.source"
-         version="0.0.0"/>
-
    <requires>
-      <import plugin="org.eclipse.mylyn"/>
+      <import feature="org.eclipse.mylyn_feature" version="2.0.0" match="greaterOrEqual"/>
+      <import feature="org.springframework.ide.eclipse.feature" version="2.0.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
-         id="org.springframework.ide.eclipse.mylyn"
+         id="org.springframework.ide.eclipse.webflow.mylyn"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="2.0.0.v200706271108"
          unpack="false"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.mylyn"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="2.0.0.v200706271108"
          unpack="false"/>
 
    <plugin
-         id="org.springframework.ide.eclipse.webflow.mylyn"
+         id="org.springframework.ide.eclipse.mylyn"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="2.0.0.v200706271108"
          unpack="false"/>
 
 </feature>
