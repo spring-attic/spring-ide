@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.springframework.ide.eclipse.mylar.feature.source"
+      id="org.springframework.ide.eclipse.mylyn.feature.source"
       label="%featureName"
       version="2.0.0.qualifier"
       provider-name="%providerName">
@@ -25,7 +25,6 @@
          id="org.springframework.ide.eclipse.mylyn.source"
          download-size="0"
          install-size="0"
-         version="0.0.0"
-         unpack="true"/>
+         version="0.0.0"/>
 
 </feature>
