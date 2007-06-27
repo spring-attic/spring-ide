@@ -146,7 +146,7 @@
 		<property name="UpdateSiteStagingLocation" value="${buildDirectory}/../../updatesite_nightly" />
 		<delete dir="${UpdateSiteStagingLocation}" />
 		<property name="sitePackagePrefix" value="springide_updatesite" />
-		<property name="sitePackageVersion" value="2.0" />
+		<property name="sitePackageVersion" value="2.0.1" />
 		<property name="featureVersion" value="2.0.1" />
 		<antcall target="generateUpdateSite" />
 
