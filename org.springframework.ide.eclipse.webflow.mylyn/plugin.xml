@@ -5,7 +5,7 @@
 	<extension point="org.eclipse.mylyn.context.core.bridges">
 		<structureBridge
 			class="org.springframework.ide.eclipse.webflow.mylyn.core.WebflowContextStructureBridge"
-			id="org.springframework.ide.eclipse.webflow.ui.mylyn.context.webflow"
+			id="org.springframework.ide.eclipse.webflow.mylyn.context.core.webflow"
 			name="%webflowContextStructureBridge.name" 
 			parentContentType="resource" />
 	</extension>

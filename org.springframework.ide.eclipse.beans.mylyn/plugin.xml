@@ -5,7 +5,7 @@
 	<extension point="org.eclipse.mylyn.context.core.bridges">
 		<structureBridge
         	class="org.springframework.ide.eclipse.beans.mylyn.core.BeansContextStructureBridge"
-	        id="org.springframework.ide.eclipse.beans.ui.mylyn.context.beans"
+	        id="org.springframework.ide.eclipse.beans.mylyn.context.core.beans"
     	    name="%beansContextStructureBridge.name"
         	parentContentType="resource"/>
 	</extension>
@@ -14,7 +14,7 @@
 		<uiBridge
 			class="org.springframework.ide.eclipse.beans.mylyn.ui.BeansContextUIBridge"
 			contentType="spring/beans"
-			id="mework.ide.eclipse.beans.ui.mylyn.context.ui.beans"
+			id="org.springframework.ide.eclipse.beans.mylyn.context.ui.beans"
 			name="%beansContextUIBridge.name" />
 	</extension>
 
