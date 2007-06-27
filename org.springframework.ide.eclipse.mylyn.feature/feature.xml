@@ -2,7 +2,7 @@
 <feature
       id="org.springframework.ide.eclipse.mylyn.feature"
       label="%featureName"
-      version="2.0.0.qualifier"
+      version="2.0.1.qualifier"
       provider-name="%providerName">
 
    <description>
@@ -23,28 +23,28 @@
 
    <requires>
       <import feature="org.eclipse.mylyn_feature" version="2.0.0" match="greaterOrEqual"/>
-      <import feature="org.springframework.ide.eclipse.feature" version="2.0.0" match="greaterOrEqual"/>
+      <import feature="org.springframework.ide.eclipse.feature" version="2.0.1" match="greaterOrEqual"/>
    </requires>
 
    <plugin
          id="org.springframework.ide.eclipse.webflow.mylyn"
          download-size="0"
          install-size="0"
-         version="2.0.0.qualifier"
+         version="2.0.1.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.mylyn"
          download-size="0"
          install-size="0"
-         version="2.0.0.qualifier"
+         version="2.0.1.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.springframework.ide.eclipse.mylyn"
          download-size="0"
          install-size="0"
-         version="2.0.0.qualifier"
+         version="2.0.1.qualifier"
          unpack="false"/>
 
 </feature>

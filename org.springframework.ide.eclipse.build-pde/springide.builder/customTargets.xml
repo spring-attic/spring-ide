@@ -147,7 +147,7 @@
 		<delete dir="${UpdateSiteStagingLocation}" />
 		<property name="sitePackagePrefix" value="springide_updatesite" />
 		<property name="sitePackageVersion" value="2.0" />
-		<property name="featureVersion" value="2.0.0" />
+		<property name="featureVersion" value="2.0.1" />
 		<antcall target="generateUpdateSite" />
 
 		<java jar="${eclipseLauncherJar}" 
