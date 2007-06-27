@@ -9,10 +9,10 @@
  	<!-- Add on <ant> task for each top level element being built.             -->
  	<!-- ===================================================================== -->
  	<target name="allElementsDelegator">
-		<ant antfile="${genericTargets}" target="${target}">
+<!--		<ant antfile="${genericTargets}" target="${target}">
 			<property name="type" value="feature" />
 			<property name="id" value="org.springframework.ide.eclipse.feature" />
-		</ant>
+		</ant> -->
 		<ant antfile="${genericTargets}" target="${target}">
 			<property name="type" value="feature" />
 			<property name="id" value="org.springframework.ide.eclipse.mylyn.feature" />
