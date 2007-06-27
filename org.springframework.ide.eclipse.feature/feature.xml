@@ -55,13 +55,6 @@
          version="0.0.0"
          unpack="false"/>
 
-<!--   <plugin
-         id="org.springframework.ide.eclipse.mylyn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/> -->
-
    <plugin
          id="org.springframework.ide.eclipse.osgi"
          download-size="0"
@@ -89,13 +82,6 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-
-<!--   <plugin
-         id="org.springframework.ide.eclipse.beans.mylyn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/> -->
 
    <plugin
          id="org.springframework.ide.eclipse.beans.ui.editor"
@@ -159,13 +145,6 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-
-<!--   <plugin
-         id="org.springframework.ide.eclipse.webflow.mylyn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/> -->
 
    <plugin
          id="org.springframework.ide.eclipse.webflow.ui.editor"
@@ -293,6 +272,28 @@
          version="0.0.0"
          unpack="false"/>
 
+   <plugin
+         id="org.springframework.ide.eclipse.webflow.mylyn"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.beans.mylyn"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+
+   <plugin
+         id="org.springframework.ide.eclipse.mylyn"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+                  
 	<includes id="org.springframework.ide.eclipse.feature.source" version="0.0.0"/>
 	
 </feature>
