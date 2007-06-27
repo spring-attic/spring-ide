@@ -149,8 +149,8 @@
 		<property name="sitePackageVersion" value="2.0" />
 		<property name="featureVersion" value="2.0.0" />
 		<antcall target="generateUpdateSite" />
-<!--		
-        <java jar="${eclipseLauncherJar}" 
+
+		<java jar="${eclipseLauncherJar}" 
               fork="true" 
               failonerror="true" 
               maxmemory="256m" 
@@ -160,7 +160,7 @@
             <arg line="${UpdateSiteStagingLocation}" /> 
         </java> 
 		
-		<antcall target="publishToUpdateSiteDev" /> -->
+		<antcall target="publishToUpdateSiteDev" />
 		
 	</target>
 	<target name="generateUpdateSite">
