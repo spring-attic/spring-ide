@@ -22,7 +22,7 @@
    </url>
 
    <includes
-         id="org.springframework.ide.eclipse.mylar.feature.source"
+         id="org.springframework.ide.eclipse.mylyr.feature.source"
          version="0.0.0"/>
 
    <requires>
