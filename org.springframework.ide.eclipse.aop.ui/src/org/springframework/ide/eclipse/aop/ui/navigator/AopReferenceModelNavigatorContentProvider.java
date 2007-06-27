@@ -446,26 +446,30 @@ public class AopReferenceModelNavigatorContentProvider implements
 	}
 
 	private IResource getResource(IStructuredDocument document) {
-		IStructuredModel model = StructuredModelManager.getModelManager()
-				.getModelForRead(document);
-		IResource resource = null;
-		try {
-			String baselocation = model.getBaseLocation();
-			if (baselocation != null) {
-				// copied from JSPTranslationAdapter#getJavaProject
-				IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-				IPath filePath = new Path(baselocation);
-				if (filePath.segmentCount() > 0) {
-					resource = root.getFile(filePath);
+		if (document != null) {
+			IStructuredModel model = StructuredModelManager.getModelManager()
+					.getModelForRead(document);
+			IResource resource = null;
+			try {
+				String baselocation = model.getBaseLocation();
+				if (baselocation != null) {
+					// copied from JSPTranslationAdapter#getJavaProject
+					IWorkspaceRoot root = ResourcesPlugin.getWorkspace()
+							.getRoot();
+					IPath filePath = new Path(baselocation);
+					if (filePath.segmentCount() > 0) {
+						resource = root.getFile(filePath);
+					}
 				}
 			}
-		}
-		finally {
-			if (model != null) {
-				model.releaseFromRead();
+			finally {
+				if (model != null) {
+					model.releaseFromRead();
+				}
 			}
+			return resource;
 		}
-		return resource;
+		return null;
 	}
 
 	public Object getParent(Object element) {
