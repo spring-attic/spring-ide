@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.aop.core.model.builder;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -247,7 +248,15 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				.getProjectWithInitialization(JdtUtils.getJavaProject(info.getResource()
 						.getProject()));
 
-		Set<IBean> beans = config.getBeans();
+		Set<IBean> beans = new LinkedHashSet<IBean>();
+		beans.addAll(config.getBeans());
+		
+		// add component registered beans
+		// TODO CD consider adding components as potential weaving candidates
+		/*for (IBeansComponent component : config.getComponents()) {
+			beans.addAll(component.getBeans());
+		}*/
+		
 		buildAopReferencesFromAspectDefinitionForBeans(config, info, builderUtils, monitor, file,
 				aopProject, beans);
 	}
