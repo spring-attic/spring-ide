@@ -12,10 +12,12 @@ package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -47,6 +49,7 @@ import org.springframework.util.ObjectUtils;
  * The single instance of {@link IBeansModel} is available from the static
  * method {@link BeansCorePlugin#getModel()}.
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class BeansModel extends AbstractModel implements IBeansModel {
 
@@ -56,16 +59,19 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
 
 	/**
-	 * The table of Spring Beans projects (synchronized for concurrent access)
+	 * The table of Spring Beans projects
 	 */
 	protected Map<IProject, IBeansProject> projects;
+	
+	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
+	private final Lock r = rwl.readLock();
+	private final Lock w = rwl.writeLock(); 
 
 	private IResourceChangeListener workspaceListener;
 
 	public BeansModel() {
 		super(null, IBeansModel.ELEMENT_NAME);
-		projects = Collections
-				.synchronizedMap(new LinkedHashMap<IProject, IBeansProject>());
+		projects = new ConcurrentHashMap<IProject, IBeansProject>();
 	}
 
 	@Override
@@ -76,13 +82,17 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	@Override
 	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 		// Ask this model's projects
-		synchronized (projects) {
+		try {
+			r.lock();
 			for (IBeansProject project : projects.values()) {
 				project.accept(visitor, monitor);
 				if (monitor.isCanceled()) {
 					return;
 				}
 			}
+		}
+		finally {
+			r.unlock();
 		}
 	}
 
@@ -92,11 +102,15 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		}
 
 		// Load all projects
-		synchronized (projects) {
+		try {
+			w.lock();
 			projects.clear();
 			for (IProject project : SpringCoreUtils.getSpringProjects()) {
 				projects.put(project, new BeansProject(this, project));
 			}
+		}
+		finally {
+			w.unlock();
 		}
 
 		// Add a ResourceChangeListener to the Eclipse Workspace
@@ -117,12 +131,25 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		workspace.removeResourceChangeListener(workspaceListener);
 		workspaceListener = null;
 
-		// Remove all projects
-		projects.clear();
+		
+		try {
+			w.lock();
+			// Remove all projects
+			projects.clear();
+		}
+		finally {
+			w.unlock();
+		}
 	}
 
 	public IBeansProject getProject(IProject project) {
-		return projects.get(project);
+		try {
+			r.lock();
+			return projects.get(project);
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public IBeansProject getProject(String name) {
@@ -142,8 +169,14 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	 * Returns a collection of all projects defined in this model.
 	 */
 	public Set<IBeansProject> getProjects() {
-		return Collections.unmodifiableSet(new HashSet<IBeansProject>(projects
-				.values()));
+		try {
+			r.lock();
+			return Collections.unmodifiableSet(new HashSet<IBeansProject>(projects
+					.values()));
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public IBeansConfig getConfig(IFile configFile) {
@@ -180,7 +213,8 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	 */
 	public Set<IBeansConfig> getConfigs(String className) {
 		Set<IBeansConfig> configs = new LinkedHashSet<IBeansConfig>();
-		synchronized (projects) {
+		try {
+			r.lock();
 			for (IBeansProject project : projects.values()) {
 				for (IBeansConfig config : project.getConfigs()) {
 					if (config.isBeanClass(className)) {
@@ -188,6 +222,9 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 					}
 				}
 			}
+		}
+		finally {
+			r.unlock();
 		}
 		return configs;
 	}
@@ -200,9 +237,15 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		if (!(other instanceof BeansModel)) {
 			return false;
 		}
-		BeansModel that = (BeansModel) other;
-		if (!ObjectUtils.nullSafeEquals(this.projects, that.projects))
-			return false;
+		try {
+			r.lock();
+			BeansModel that = (BeansModel) other;
+			if (!ObjectUtils.nullSafeEquals(this.projects, that.projects))
+				return false;
+		}
+		finally {
+			r.unlock();
+		}
 		return super.equals(other);
 	}
 
@@ -215,7 +258,8 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 	@Override
 	public String toString() {
 		StringBuffer text = new StringBuffer("Beans model:\n");
-		synchronized (projects) {
+		try {
+			r.lock();
 			for (IBeansProject project : projects.values()) {
 				text.append(" Configs of project '");
 				text.append(project.getElementName());
@@ -240,6 +284,9 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				}
 			}
 		}
+		finally {
+			r.unlock();
+		}
 		return text.toString();
 	}
 
@@ -260,7 +307,13 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 							+ "project '" + project.getName() + "'");
 				}
 				BeansProject proj = new BeansProject(BeansModel.this, project);
-				projects.put(project, proj);
+				try {
+					w.lock();
+					projects.put(project, proj);
+				}
+				finally {
+					w.unlock();
+				}
 				notifyListeners(proj, Type.CHANGED);
 			}
 		}
@@ -271,7 +324,14 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 					System.out.println("Spring beans nature removed from "
 							+ "project '" + project.getName() + "'");
 				}
-				IBeansProject proj = projects.remove(project);
+				IBeansProject proj = null;
+				try {
+					w.lock();
+					proj = projects.remove(project);
+				}
+				finally {
+					w.unlock();
+				}
 				notifyListeners(proj, Type.CHANGED);
 			}
 		}
@@ -283,7 +343,13 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 							+ "' added");
 				}
 				BeansProject proj = new BeansProject(BeansModel.this, project);
-				projects.put(project, proj);
+				try {
+					w.lock();
+					projects.put(project, proj);
+				}
+				finally {
+					w.unlock();
+				}
 				notifyListeners(proj, Type.ADDED);
 			}
 		}
@@ -295,7 +361,13 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 							+ "' opened");
 				}
 				BeansProject proj = new BeansProject(BeansModel.this, project);
-				projects.put(project, proj);
+				try {
+					w.lock();
+					projects.put(project, proj);
+				}
+				finally {
+					w.unlock();
+				}
 				notifyListeners(proj, Type.ADDED);
 			}
 		}
@@ -305,7 +377,14 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				System.out
 						.println("Project '" + project.getName() + "' closed");
 			}
-			IBeansProject proj = projects.remove(project);
+			IBeansProject proj = null;
+			try {
+				w.lock();
+				proj = projects.remove(project);
+			}
+			finally {
+				w.unlock();
+			}
 			notifyListeners(proj, Type.REMOVED);
 		}
 
@@ -314,7 +393,14 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				System.out.println("Project '" + project.getName()
 						+ "' deleted");
 			}
-			IBeansProject proj = projects.remove(project);
+			IBeansProject proj = null;
+			try {
+				w.lock();
+				proj = projects.remove(project);
+			}
+			finally {
+				w.unlock();
+			}
 			notifyListeners(proj, Type.REMOVED);
 		}
 
@@ -324,8 +410,15 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 					System.out.println("Project description '"
 							+ file.getFullPath() + "' changed");
 				}
-				BeansProject project = (BeansProject) projects.get(file
-						.getProject());
+				BeansProject project = null;
+				try {
+					r.lock();
+					project = (BeansProject) projects.get(file
+							.getProject());
+				}
+				finally {
+					r.unlock();
+				}
 				project.reset();
 				notifyListeners(project, Type.CHANGED);
 				
@@ -340,8 +433,15 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 					System.out.println("Config '" + file.getFullPath()
 							+ "' added");
 				}
-				BeansProject project = (BeansProject) projects.get(file
-						.getProject());
+				BeansProject project = null;
+				try {
+					r.lock();
+					project = (BeansProject) projects.get(file
+							.getProject());
+				}
+				finally {
+					r.unlock();
+				}
 				if (project.addConfig(file)) {
 					project.saveDescription();
 				}
@@ -351,7 +451,15 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		}
 
 		public void configChanged(IFile file, int eventType) {
-			IBeansProject project = projects.get(file.getProject());
+			BeansProject project = null;
+			try {
+				r.lock();
+				project = (BeansProject) projects.get(file
+						.getProject());
+			}
+			finally {
+				r.unlock();
+			}
 			BeansConfig config = (BeansConfig) project.getConfig(file);
 			if (eventType == IResourceChangeEvent.POST_BUILD) {
 				if (DEBUG) {
@@ -373,23 +481,35 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 					System.out.println("Config '" + file.getFullPath()
 							+ "' removed");
 				}
-				IBeansProject project = projects.get(file.getProject());
+				BeansProject project = null;
+				try {
+					r.lock();
+					project = (BeansProject) projects.get(file
+							.getProject());
+				}
+				finally {
+					r.unlock();
+				}
 
 				// Before removing the config from it's project keep a copy for
 				// notifying the listeners
 				BeansConfig config = (BeansConfig) project.getConfig(file);
-				if (((BeansProject) project).removeConfig(file)) {
-					((BeansProject) project).saveDescription();
+				if (project.removeConfig(file)) {
+					project.saveDescription();
 				}
 
 				// Remove config from config sets where referenced as external
 				// config
-				synchronized (projects) {
+				try {
+					r.lock();
 					for (IBeansProject proj : projects.values()) {
 						if (((BeansProject) proj).removeConfig(file)) {
 							((BeansProject) proj).saveDescription();
 						}
 					}
+				}
+				finally {
+					r.unlock();
 				}
 				notifyListeners(config, Type.REMOVED);
 			}

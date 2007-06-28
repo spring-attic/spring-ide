@@ -15,15 +15,17 @@
  */
 package org.springframework.ide.eclipse.beans.core.internal.model.process;
 
+import java.util.Collection;
+
 import org.springframework.beans.factory.parsing.AliasDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.parsing.ReaderEventListener;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigRegistrationSupport;
 
 /**
- * Utitity that provides methods to register elements with the
+ * Utility that provides methods to register elements with the
  * {@link BeansConfig}.
  * 
  * @author Christian Dupuis
@@ -33,18 +35,18 @@ import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigRegi
 public class BeansConfigRegistrationSupport implements
 		IBeansConfigRegistrationSupport {
 
-	private final IBeansConfig beansConfig;
+	private final Collection<IBean> beans;
 
 	private final ReaderEventListener readerEventListener;
 
-	public BeansConfigRegistrationSupport(final IBeansConfig beansConfig,
+	public BeansConfigRegistrationSupport(final Collection<IBean> beans,
 			final ReaderEventListener readerEventListener) {
-		this.beansConfig = beansConfig;
+		this.beans = beans;
 		this.readerEventListener = readerEventListener;
 	}
 
-	public IBeansConfig getBeansConfig() {
-		return beansConfig;
+	public Collection<IBean> getBeans() {
+		return beans;
 	}
 
 	public void registerAlias(AliasDefinition aliasDefinition) {

@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.process;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
@@ -21,7 +25,7 @@ import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.ReaderEventListener;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessingContext;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
 
@@ -74,10 +78,14 @@ public class BeansConfigPostProcessorFactory {
 	 * Helper method to create a new {@link IBeansConfigPostProcessingContext}.
 	 */
 	public static IBeansConfigPostProcessingContext createPostProcessingContext(
-			IBeansConfig beansConfig, ReaderEventListener readerEventListener,
+			java.util.Collection<IBean> beans,
+			ReaderEventListener readerEventListener,
 			ProblemReporter problemReporter, BeanNameGenerator beanNameGenerator) {
+		List<IBean> beansClone = new ArrayList<IBean>();
+		beansClone.addAll(beans);
 		return new BeansConfigPostProcessingContext(beanNameGenerator,
-				problemReporter, new BeansConfigRegistrationSupport(
-						beansConfig, readerEventListener));
+				problemReporter, new BeansConfigRegistrationSupport(Collections
+						.unmodifiableCollection(beansClone),
+						readerEventListener));
 	}
 }

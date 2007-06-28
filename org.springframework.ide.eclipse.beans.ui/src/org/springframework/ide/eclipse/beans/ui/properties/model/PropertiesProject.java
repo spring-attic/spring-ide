@@ -34,8 +34,8 @@ public class PropertiesProject extends BeansProject {
 	/**
 	 * Create a deep copy of given beans project.
 	 */
-	public PropertiesProject(IBeansProject project) {
-		super(null, project.getProject());
+	public PropertiesProject(PropertiesModel model, IBeansProject project) {
+		super(model, project.getProject());
 		configExtensions = new LinkedHashSet<String>(project
 				.getConfigExtensions());
 

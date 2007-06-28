@@ -21,6 +21,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -87,6 +89,7 @@ import org.springframework.ide.eclipse.core.io.xml.XercesDocumentLoader;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.AbstractResourceModelElement;
+import org.springframework.ide.eclipse.core.model.ILazyInitializedModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
@@ -114,7 +117,7 @@ import org.xml.sax.SAXParseException;
  */
 @SuppressWarnings("restriction")
 public class BeansConfig extends AbstractResourceModelElement implements
-		IBeansConfig {
+		IBeansConfig, ILazyInitializedModelElement {
 
 	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = new DefaultModelElementProvider();
 
@@ -147,6 +150,12 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	 * corresponding class
 	 */
 	private Map<String, Set<IBean>> beanClassesMap;
+	private volatile boolean isBeanClassesMapPopulated = false;
+
+	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
+	private final Lock r = rwl.readLock();
+	private final Lock w = rwl.writeLock();
+	private volatile boolean isModelPopulated = false;
 
 	/**
 	 * List of parsing errors.
@@ -164,9 +173,9 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 	@Override
 	public IModelElement[] getElementChildren() {
-
 		// Lazily initialization of this config
 		readConfig();
+
 		List<ISourceModelElement> children = new ArrayList<ISourceModelElement>(
 				getImports());
 		children.addAll(getAliases());
@@ -191,27 +200,32 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	}
 
 	public int getElementStartLine() {
-
 		// Lazily initialization of this config
 		readConfig();
+
 		IModelSourceLocation location = ModelUtils.getSourceLocation(defaults);
 		return (location != null ? location.getStartLine() : -1);
 	}
 
 	public boolean isInitialized() {
-		return beans != null;
+		return isModelPopulated;
 	}
 
 	public Set<ValidationProblem> getProblems() {
-
 		// Lazily initialization of this config
 		readConfig();
-		return problems;
+
+		try {
+			r.lock();
+			return problems;
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	@Override
 	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
-
 		// First visit this config
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
@@ -257,129 +271,219 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	public void reload() {
 		if (file != null && file.isAccessible()
 				&& modificationTimestamp < file.getModificationStamp()) {
-			modificationTimestamp = IResource.NULL_STAMP;
-			defaults = null;
-			imports = null;
-			aliases = null;
-			beans = null;
-			beanClassesMap = null;
-			problems = null;
+			try {
+				w.lock();
+				isModelPopulated = false;
+				modificationTimestamp = IResource.NULL_STAMP;
+				defaults = null;
+				imports = null;
+				aliases = null;
+				beans = null;
+				isBeanClassesMapPopulated = false;
+				beanClassesMap = null;
+				problems = null;
 
-			// Reset all config sets which contain this config
-			for (IBeansConfigSet configSet : ((IBeansProject) getElementParent())
-					.getConfigSets()) {
-				if (configSet.hasConfig(getElementName())) {
-					((BeansConfigSet) configSet).reset();
+				// Reset all config sets which contain this config
+				for (IBeansConfigSet configSet : ((IBeansProject) getElementParent())
+						.getConfigSets()) {
+					if (configSet.hasConfig(getElementName())) {
+						((BeansConfigSet) configSet).reset();
+					}
 				}
+			}
+			finally {
+				w.unlock();
 			}
 		}
 	}
 
 	public String getDefaultLazyInit() {
-
 		// Lazily initialization of this config
 		readConfig();
-		return (defaults != null ? defaults.getLazyInit() : DEFAULT_LAZY_INIT);
+
+		try {
+			r.lock();
+			return (defaults != null ? defaults.getLazyInit()
+					: DEFAULT_LAZY_INIT);
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public String getDefaultAutowire() {
-
 		// Lazily initialization of this config
 		readConfig();
-		return (defaults != null ? defaults.getAutowire() : DEFAULT_AUTO_WIRE);
+
+		try {
+			r.lock();
+			return (defaults != null ? defaults.getAutowire()
+					: DEFAULT_AUTO_WIRE);
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public String getDefaultDependencyCheck() {
-
 		// Lazily initialization of this config
 		readConfig();
-		return (defaults != null ? defaults.getDependencyCheck()
-				: DEFAULT_DEPENDENCY_CHECK);
+
+		try {
+			r.lock();
+			return (defaults != null ? defaults.getDependencyCheck()
+					: DEFAULT_DEPENDENCY_CHECK);
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public String getDefaultInitMethod() {
-
 		// Lazily initialization of this config
 		readConfig();
-		return (defaults != null && defaults.getInitMethod() != null ? defaults
-				.getInitMethod() : DEFAULT_INIT_METHOD);
+
+		try {
+			r.lock();
+			return (defaults != null && defaults.getInitMethod() != null ? defaults
+					.getInitMethod()
+					: DEFAULT_INIT_METHOD);
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public String getDefaultDestroyMethod() {
-
 		// Lazily initialization of this config
 		readConfig();
-		return (defaults != null && defaults.getDestroyMethod() != null ? defaults
-				.getDestroyMethod()
-				: DEFAULT_DESTROY_METHOD);
+
+		try {
+			r.lock();
+			return (defaults != null && defaults.getDestroyMethod() != null ? defaults
+					.getDestroyMethod()
+					: DEFAULT_DESTROY_METHOD);
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public String getDefaultMerge() {
-
 		// Lazily initialization of this config
 		readConfig();
 
-		// This default value was introduced with Spring 2.0 -> so we have
-		// to check for an empty string here as well
-		return (defaults != null && defaults.getMerge() != null
-				&& defaults.getMerge().length() > 0 ? defaults.getMerge()
-				: DEFAULT_MERGE);
+		try {
+			r.lock();
+			// This default value was introduced with Spring 2.0 -> so we have
+			// to check for an empty string here as well
+			return (defaults != null && defaults.getMerge() != null
+					&& defaults.getMerge().length() > 0 ? defaults.getMerge()
+					: DEFAULT_MERGE);
+		}
+		finally {
+			r.unlock();
+		}
+
 	}
 
 	public Set<IBeansImport> getImports() {
-
 		// Lazily initialization of this config
 		readConfig();
-		return Collections.unmodifiableSet(imports);
+
+		try {
+			r.lock();
+			return Collections.unmodifiableSet(imports);
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public Set<IBeanAlias> getAliases() {
-
 		// Lazily initialization of this config
 		readConfig();
-		return Collections.unmodifiableSet(new LinkedHashSet<IBeanAlias>(
-				aliases.values()));
+
+		try {
+			r.lock();
+			return Collections.unmodifiableSet(new LinkedHashSet<IBeanAlias>(
+					aliases.values()));
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public IBeanAlias getAlias(String name) {
 		if (name != null) {
-			return aliases.get(name);
+			try {
+				r.lock();
+				return aliases.get(name);
+			}
+			finally {
+				r.unlock();
+			}
 		}
 		return null;
 	}
 
 	public Set<IBeansComponent> getComponents() {
-
 		// Lazily initialization of this config
 		readConfig();
-		return Collections.unmodifiableSet(components);
+
+		try {
+			r.lock();
+			return Collections.unmodifiableSet(components);
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public Set<IBean> getBeans() {
-		// TODO CD eventually add nestend component beans to the 
-		// outgoing list.
 		// Lazily initialization of this config
 		readConfig();
-		return Collections.unmodifiableSet(new LinkedHashSet<IBean>(beans
-				.values()));
+		
+		try {
+			r.lock();
+			// TODO CD eventually add nestend component beans to the
+			// outgoing list.
+			return Collections.unmodifiableSet(new LinkedHashSet<IBean>(beans
+					.values()));
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public IBean getBean(String name) {
 		if (name != null) {
-
 			// Lazily initialization of this config
 			readConfig();
-			return beans.get(name);
+
+			try {
+				r.lock();
+				return beans.get(name);
+			}
+			finally {
+				r.unlock();
+			}
 		}
 		return null;
 	}
 
 	public boolean hasBean(String name) {
 		if (name != null) {
-
 			// Lazily initialization of this config
 			readConfig();
-			return beans.containsKey(name);
+
+			try {
+				r.lock();
+				return beans.containsKey(name);
+			}
+			finally {
+				r.unlock();
+			}
 		}
 		return false;
 	}
@@ -415,26 +519,32 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		BeansConfig that = (BeansConfig) other;
 		if (!ObjectUtils.nullSafeEquals(this.isArchived, that.isArchived))
 			return false;
-		if (this.defaults != null && that.defaults != null
-				&& this.defaults != that.defaults) {
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getLazyInit(),
-					that.defaults.getLazyInit()))
-				return false;
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getAutowire(),
-					that.defaults.getAutowire()))
-				return false;
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getDependencyCheck(),
-					that.defaults.getDependencyCheck()))
-				return false;
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getInitMethod(),
-					that.defaults.getInitMethod()))
-				return false;
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getDestroyMethod(),
-					that.defaults.getDestroyMethod()))
-				return false;
-			if (!ObjectUtils.nullSafeEquals(this.defaults.getMerge(),
-					that.defaults.getMerge()))
-				return false;
+		try {
+			r.lock();
+			if (this.defaults != null && that.defaults != null
+					&& this.defaults != that.defaults) {
+				if (!ObjectUtils.nullSafeEquals(this.defaults.getLazyInit(),
+						that.defaults.getLazyInit()))
+					return false;
+				if (!ObjectUtils.nullSafeEquals(this.defaults.getAutowire(),
+						that.defaults.getAutowire()))
+					return false;
+				if (!ObjectUtils.nullSafeEquals(this.defaults.getDependencyCheck(),
+						that.defaults.getDependencyCheck()))
+					return false;
+				if (!ObjectUtils.nullSafeEquals(this.defaults.getInitMethod(),
+						that.defaults.getInitMethod()))
+					return false;
+				if (!ObjectUtils.nullSafeEquals(this.defaults.getDestroyMethod(),
+						that.defaults.getDestroyMethod()))
+					return false;
+				if (!ObjectUtils.nullSafeEquals(this.defaults.getMerge(),
+						that.defaults.getMerge()))
+					return false;
+			}
+		}
+		finally {
+			r.unlock();
 		}
 		return super.equals(other);
 	}
@@ -442,20 +552,27 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(isArchived);
-		if (defaults != null) {
-			hashCode = getElementType() * hashCode
-					+ ObjectUtils.nullSafeHashCode(defaults.getLazyInit());
-			hashCode = getElementType() * hashCode
-					+ ObjectUtils.nullSafeHashCode(defaults.getAutowire());
-			hashCode = getElementType()	* hashCode
-					+ ObjectUtils.nullSafeHashCode(defaults
-							.getDependencyCheck());
-			hashCode = getElementType() * hashCode
-					+ ObjectUtils.nullSafeHashCode(defaults.getInitMethod());
-			hashCode = getElementType() * hashCode
-					+ ObjectUtils.nullSafeHashCode(defaults.getDestroyMethod());
-			hashCode = getElementType() * hashCode
-					+ ObjectUtils.nullSafeHashCode(defaults.getMerge());
+		try {
+			r.lock();
+			if (defaults != null) {
+				hashCode = getElementType() * hashCode
+						+ ObjectUtils.nullSafeHashCode(defaults.getLazyInit());
+				hashCode = getElementType() * hashCode
+						+ ObjectUtils.nullSafeHashCode(defaults.getAutowire());
+				hashCode = getElementType()
+						* hashCode
+						+ ObjectUtils.nullSafeHashCode(defaults
+								.getDependencyCheck());
+				hashCode = getElementType() * hashCode
+						+ ObjectUtils.nullSafeHashCode(defaults.getInitMethod());
+				hashCode = getElementType() * hashCode
+						+ ObjectUtils.nullSafeHashCode(defaults.getDestroyMethod());
+				hashCode = getElementType() * hashCode
+						+ ObjectUtils.nullSafeHashCode(defaults.getMerge());
+			}
+		}
+		finally {
+			r.unlock();
 		}
 		return getElementType() * hashCode + super.hashCode();
 	}
@@ -501,8 +618,8 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		if (file == null || !file.isAccessible()) {
 			modificationTimestamp = IResource.NULL_STAMP;
 			String msg = "Beans config file '" + fullPath + "' not accessible";
-			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, msg,
-					-1));
+			problems
+					.add(new ValidationProblem(IMarker.SEVERITY_ERROR, msg, -1));
 		}
 		else {
 			modificationTimestamp = file.getModificationStamp();
@@ -513,13 +630,23 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	 * Returns lazily initialized map with all bean classes used in this config.
 	 */
 	private Map<String, Set<IBean>> getBeanClassesMap() {
-		if (beanClassesMap == null) {
-			beanClassesMap = new LinkedHashMap<String, Set<IBean>>();
-			for (IBeansComponent component : getComponents()) {
-				addComponentBeanClasses(component, beanClassesMap);
+		if (!this.isBeanClassesMapPopulated) {
+			try {
+				w.lock();
+				if (this.isBeanClassesMapPopulated) {
+					return beanClassesMap;
+				}
+				beanClassesMap = new LinkedHashMap<String, Set<IBean>>();
+				for (IBeansComponent component : getComponents()) {
+					addComponentBeanClasses(component, beanClassesMap);
+				}
+				for (IBean bean : getBeans()) {
+					addBeanClasses(bean, beanClassesMap);
+				}
 			}
-			for (IBean bean : getBeans()) {
-				addBeanClasses(bean, beanClassesMap);
+			finally {
+				this.isBeanClassesMapPopulated = true;
+				w.unlock();
 			}
 		}
 		return beanClassesMap;
@@ -566,75 +693,98 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	private void readConfig() {
 		parseConfig();
 
-		// Create a problem marker for every parsing error 
+		// Create a problem marker for every parsing error
 		ValidationUtils.createProblemMarkers(file, problems,
 				BeansConfigValidator.MARKER_ID);
 	}
 
-	private synchronized void parseConfig() {
-		if (imports == null) {
-			imports = new LinkedHashSet<IBeansImport>();
-			aliases = new LinkedHashMap<String, IBeanAlias>();
-			components = new LinkedHashSet<IBeansComponent>();
-			beans = new LinkedHashMap<String, IBean>();
-			problems = new LinkedHashSet<ValidationProblem>();
-			if (file != null && file.isAccessible()) {
-				modificationTimestamp = file.getModificationStamp();
-				Resource resource;
-				if (isArchived) {
-					resource = new StorageResource(new ZipEntryStorage(file
-							.getProject(), getElementName()));
+	private void parseConfig() {
+		if (!this.isModelPopulated) {
+			try {
+				w.lock();
+				if (this.isModelPopulated) {
+					return;
 				}
-				else {
-					resource = new FileResource(file);
-				}
+				imports = new LinkedHashSet<IBeansImport>();
+				aliases = new LinkedHashMap<String, IBeanAlias>();
+				components = new LinkedHashSet<IBeansComponent>();
+				beans = new LinkedHashMap<String, IBean>();
+				problems = new LinkedHashSet<ValidationProblem>();
+				if (file != null && file.isAccessible()) {
+					modificationTimestamp = file.getModificationStamp();
+					Resource resource;
+					if (isArchived) {
+						resource = new StorageResource(new ZipEntryStorage(file
+								.getProject(), getElementName()));
+					}
+					else {
+						resource = new FileResource(file);
+					}
 
-				DefaultBeanDefinitionRegistry registry = new DefaultBeanDefinitionRegistry();
-				EntityResolver resolver = new XmlCatalogDelegatingEntityResolver(
-						new BeansDtdResolver(), new PluggableSchemaResolver(
-								PluggableSchemaResolver.class.getClassLoader()));
-				ReaderEventListener eventListener = new BeansConfigReaderEventListener(
-						this, false);
-				ProblemReporter problemReporter = new BeansConfigProblemReporter();
-				BeanNameGenerator beanNameGenerator = new UniqueBeanNameGenerator(
-						this);
-				XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
-						registry);
-				reader.setDocumentLoader(new XercesDocumentLoader());
+					DefaultBeanDefinitionRegistry registry = new DefaultBeanDefinitionRegistry();
+					EntityResolver resolver = new XmlCatalogDelegatingEntityResolver(
+							new BeansDtdResolver(),
+							new PluggableSchemaResolver(
+									PluggableSchemaResolver.class
+											.getClassLoader()));
+					ReaderEventListener eventListener = new BeansConfigReaderEventListener(
+							this, false);
+					ProblemReporter problemReporter = new BeansConfigProblemReporter();
+					BeanNameGenerator beanNameGenerator = new UniqueBeanNameGenerator(
+							this);
+					XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(
+							registry);
+					reader.setDocumentLoader(new XercesDocumentLoader());
 
-				// set the resource loader to use the customized project class
-				// loader
-				if (JdtUtils.isJavaProject(file)) {
-					reader.setResourceLoader(new PathMatchingResourcePatternResolver(
-						JdtUtils.getClassLoader(JdtUtils.getJavaProject(file.getProject()))));
-				}
-				else {
-					reader.setResourceLoader(new NoOpResourcePatternResolver());
-				}
+					// set the resource loader to use the customized project
+					// class
+					// loader
+					if (JdtUtils.isJavaProject(file)) {
+						reader
+								.setResourceLoader(new PathMatchingResourcePatternResolver(
+										JdtUtils.getClassLoader(JdtUtils
+												.getJavaProject(file
+														.getProject()))));
+					}
+					else {
+						reader
+								.setResourceLoader(new NoOpResourcePatternResolver());
+					}
 
-				reader.setEntityResolver(resolver);
-				reader.setSourceExtractor(new CompositeSourceExtractor(file.getProject()));
-				reader.setEventListener(eventListener);
-				reader.setProblemReporter(problemReporter);
-				reader.setErrorHandler(new BeansConfigErrorHandler());
-				reader.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(
-						NamespaceHandlerResolver.class.getClassLoader()));
-				reader.setBeanNameGenerator(beanNameGenerator);
-				try {
-					reader.loadBeanDefinitions(resource);
-					// post process beans config if required
-					postProcess(problemReporter, beanNameGenerator);
-				}
-				catch (Throwable e) { // handle ALL exceptions
+					reader.setEntityResolver(resolver);
+					reader.setSourceExtractor(new CompositeSourceExtractor(file
+							.getProject()));
+					reader.setEventListener(eventListener);
+					reader.setProblemReporter(problemReporter);
+					reader.setErrorHandler(new BeansConfigErrorHandler());
+					reader
+							.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(
+									NamespaceHandlerResolver.class
+											.getClassLoader()));
+					reader.setBeanNameGenerator(beanNameGenerator);
+					try {
+						reader.loadBeanDefinitions(resource);
+						// post process beans config if required
+						postProcess(problemReporter, beanNameGenerator);
+					}
+					catch (Throwable e) { // handle ALL exceptions
 
-					// Skip SAXParseExceptions because they're already handled
-					// by the SAX ErrorHandler
-					if (!(e.getCause() instanceof SAXParseException)) {
-						problems.add(new ValidationProblem(
-								IMarker.SEVERITY_ERROR, e.getMessage(), -1));
-						BeansCorePlugin.log(e);
+						// Skip SAXParseExceptions because they're already
+						// handled
+						// by the SAX ErrorHandler
+						if (!(e.getCause() instanceof SAXParseException)) {
+							problems
+									.add(new ValidationProblem(
+											IMarker.SEVERITY_ERROR, e
+													.getMessage(), -1));
+							BeansCorePlugin.log(e);
+						}
 					}
 				}
+			}
+			finally {
+				this.isModelPopulated = true;
+				w.unlock();
 			}
 		}
 	}
@@ -645,7 +795,9 @@ public class BeansConfig extends AbstractResourceModelElement implements
 				this, true);
 
 		// TODO CD do we need to check the components map as well?
-		for (IBean bean : getBeans()) {
+		List<IBean> beansClone = new ArrayList<IBean>();
+		beansClone.addAll(beans.values());
+		for (IBean bean : beansClone) {
 			// for now only handle postprocessor that have a direct bean class
 			String beanClassName = bean.getClassName();
 			if (beanClassName != null) {
@@ -661,7 +813,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 					if (postProcessor != null) {
 						postProcessor
 								.postProcess(BeansConfigPostProcessorFactory
-										.createPostProcessingContext(this,
+										.createPostProcessingContext(beans.values(),
 												readerEventListener,
 												problemReporter,
 												beanNameGenerator));
@@ -689,18 +841,18 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	private final class BeansConfigErrorHandler implements ErrorHandler {
 
 		public void warning(SAXParseException e) throws SAXException {
-			problems.add(new ValidationProblem(IMarker.SEVERITY_WARNING,
-					e.getMessage(), e.getLineNumber()));
+			problems.add(new ValidationProblem(IMarker.SEVERITY_WARNING, e
+					.getMessage(), e.getLineNumber()));
 		}
 
 		public void error(SAXParseException e) throws SAXException {
-			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR,
-					e.getMessage(), e.getLineNumber()));
+			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, e
+					.getMessage(), e.getLineNumber()));
 		}
 
 		public void fatalError(SAXParseException e) throws SAXException {
-			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR,
-					e.getMessage(), e.getLineNumber()));
+			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, e
+					.getMessage(), e.getLineNumber()));
 		}
 	}
 
@@ -759,7 +911,9 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			ReaderEventListener {
 
 		private IBeansConfig config;
+
 		private Map<String, IModelElementProvider> elementProviders;
+
 		private boolean allowExternal = false;
 
 		public BeansConfigReaderEventListener(IBeansConfig config,
@@ -839,10 +993,9 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	}
 
 	/**
-	 * This {@link NamespaceHandlerResolver} provides a
-	 * {@link NamespaceHandler} for a given namespace URI. Depending on this
-	 * namespace URI the returned namespace handler is one of the following (in
-	 * the provided order):
+	 * This {@link NamespaceHandlerResolver} provides a {@link NamespaceHandler}
+	 * for a given namespace URI. Depending on this namespace URI the returned
+	 * namespace handler is one of the following (in the provided order):
 	 * <ol>
 	 * <li>a namespace handler provided by the Spring framework</li>
 	 * <li>a namespace handler contributed via the extension point
@@ -890,7 +1043,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 		public BeanDefinitionHolder decorate(Node source,
 				BeanDefinitionHolder definition, ParserContext parserContext) {
-			// don't decorate bean definition holder and just return 
+			// don't decorate bean definition holder and just return
 			return definition;
 		}
 
@@ -899,9 +1052,9 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			return null;
 		}
 	}
-	
+
 	private static class CompositeSourceExtractor implements SourceExtractor {
-		
+
 		private Set<SourceExtractor> sourceExtractors;
 
 		public CompositeSourceExtractor(IProject project) {
@@ -991,7 +1144,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			return null;
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public Object getAdapter(Class adapter) {

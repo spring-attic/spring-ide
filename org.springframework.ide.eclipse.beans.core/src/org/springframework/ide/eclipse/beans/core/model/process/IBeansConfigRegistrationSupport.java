@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.model.process;
 
+import java.util.Collection;
+
 import org.springframework.beans.factory.parsing.AliasDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 
 /**
@@ -25,10 +28,10 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 public interface IBeansConfigRegistrationSupport {
 
 	/**
-	 * Retuns the {@link IBeansConfig} that should be post processed.
+	 * Retuns a set if {@link IBean} that should be post processed.
 	 * @return
 	 */
-	IBeansConfig getBeansConfig();
+	Collection<IBean> getBeans();
 
 	/**
 	 * Register a new {@link ComponentDefinition} with the {@link IBeansConfig}.

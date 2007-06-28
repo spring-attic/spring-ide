@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabels;
 import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
+import org.springframework.ide.eclipse.core.model.ILazyInitializedModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
@@ -34,8 +35,8 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
 /**
  * {@link ICommonLabelProvider} which knows about the beans core model's
  * {@link IModelElement elements}.
- * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 		implements ICommonLabelProvider {
@@ -127,7 +128,7 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 	protected String getText(Object element, Object parentElement,
 			int severity) {
 		if (element instanceof IBeansProject) {
-			return "Beans";	// TODO Externalize string
+			return "Beans";	// TODO CD Externalize string
 		}
 		else if (element instanceof IBeansConfig
 				&& (parentElement instanceof ISpringProject
@@ -137,6 +138,10 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 		else if (element instanceof IFile
 				&& parentElement instanceof IBeansProject) {
 			return ((IFile) element).getProjectRelativePath().toString();
+		}
+		else if (element instanceof ILazyInitializedModelElement 
+				&& !((ILazyInitializedModelElement) element).isInitialized()) {
+			return "loading model content..."; // TODO CD Externalize string
 		}
 		return super.getText(element, parentElement, severity);
 	}

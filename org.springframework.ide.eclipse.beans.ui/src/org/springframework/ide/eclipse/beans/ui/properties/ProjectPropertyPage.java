@@ -79,9 +79,8 @@ public class ProjectPropertyPage extends PropertyPage {
 		// Build temporary beans core model with a cloned "real" Spring project
 		IProject project = (IProject) getElement();
 		model = new PropertiesModel();
-		PropertiesProject modelProject = new PropertiesProject(BeansCorePlugin
+		PropertiesProject modelProject = new PropertiesProject(model, BeansCorePlugin
 				.getModel().getProject(project));
-		modelProject.setElementParent(model);
 		model.addProject(modelProject);
 
 		// Build folder with tabs

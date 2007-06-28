@@ -12,8 +12,8 @@ package org.springframework.ide.eclipse.javaconfig.core.process;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IType;
@@ -58,28 +58,24 @@ public class ConfigurationPostProcessor implements IBeansConfigPostProcessor {
 	public void postProcess(
 			IBeansConfigPostProcessingContext postProcessingContext) {
 
-		IBeansConfig beansConfig = postProcessingContext
-				.getBeansConfigRegistrySupport().getBeansConfig();
+		Collection<IBean> beans = postProcessingContext
+				.getBeansConfigRegistrySupport().getBeans();
 
-		ClassLoader classLoader = JdtUtils.getClassLoader(beansConfig
-				.getElementResource());
-
-		postProcessBeansConfig(postProcessingContext, beansConfig, classLoader);
+		if (beans.iterator().hasNext()) {
+			ClassLoader classLoader = JdtUtils.getClassLoader(beans.iterator()
+					.next().getElementResource());
+			postProcessBeans(postProcessingContext, beans, classLoader);
+		}
 	}
 
 	/**
 	 * Post process a {@link IBeansConfig} using the given classLoader
-	 * @param postProcessingContext the post processing context
-	 * @param beansConfig the {@link IBeansConfig} that should be post processed
-	 * @param classLoader the {@link ClassLoader} to use
 	 */
-	private void postProcessBeansConfig(
+	private void postProcessBeans(
 			IBeansConfigPostProcessingContext postProcessingContext,
-			IBeansConfig beansConfig, ClassLoader classLoader) {
-		Set<IBean> beans = beansConfig.getBeans();
+			Collection<IBean> beans, ClassLoader classLoader) {
 		for (IBean bean : beans) {
-			postProcessBean(postProcessingContext, bean, beansConfig,
-					classLoader);
+			postProcessBean(postProcessingContext, bean, classLoader);
 		}
 	}
 
@@ -92,19 +88,17 @@ public class ConfigurationPostProcessor implements IBeansConfigPostProcessor {
 	 */
 	private void postProcessBean(
 			IBeansConfigPostProcessingContext postProcessingContext,
-			IBean bean, IBeansConfig beansConfig, ClassLoader classLoader) {
+			IBean bean, ClassLoader classLoader) {
 
-		String beanClassName = BeansModelUtils.getBeanClass(bean, beansConfig);
-		IType beanType = JdtUtils.getJavaType(beansConfig.getElementResource()
+		String beanClassName = BeansModelUtils.getBeanClass(bean, null);
+		IType beanType = JdtUtils.getJavaType(bean.getElementResource()
 				.getProject(), beanClassName);
 		if (beanClassName != null) {
 			try {
 
-				List<BeanAnnotationMetaData> beanAnnotationMetaData = 
-					new ArrayList<BeanAnnotationMetaData>();
-				
-				List<BeanAnnotationMetaData> externalBeanAnnotationMetaData = 
-					new ArrayList<BeanAnnotationMetaData>();
+				List<BeanAnnotationMetaData> beanAnnotationMetaData = new ArrayList<BeanAnnotationMetaData>();
+
+				List<BeanAnnotationMetaData> externalBeanAnnotationMetaData = new ArrayList<BeanAnnotationMetaData>();
 
 				String superClassName = beanClassName;
 				do {
@@ -114,14 +108,15 @@ public class ConfigurationPostProcessor implements IBeansConfigPostProcessor {
 					ConfigurationClassVisitor v = new ConfigurationClassVisitor();
 					reader.accept(v, false);
 					superClassName = v.getSuperClassName();
-					beanAnnotationMetaData.addAll(v.getBeanAnnotationMetaData());
-					externalBeanAnnotationMetaData.addAll(v.getExternalBeanAnnotationMetaData());
+					beanAnnotationMetaData
+							.addAll(v.getBeanAnnotationMetaData());
+					externalBeanAnnotationMetaData.addAll(v
+							.getExternalBeanAnnotationMetaData());
 				} while (superClassName != null);
 
 				if (beanAnnotationMetaData != null
 						&& beanAnnotationMetaData.size() > 0) {
-					List<BeanComponentDefinition> beanComponentDefinitions = 
-						new ArrayList<BeanComponentDefinition>();
+					List<BeanComponentDefinition> beanComponentDefinitions = new ArrayList<BeanComponentDefinition>();
 					for (BeanAnnotationMetaData beanCreationMethod : beanAnnotationMetaData) {
 						beanComponentDefinitions
 								.add(processSingleBeanCreationMethod(
@@ -129,7 +124,8 @@ public class ConfigurationPostProcessor implements IBeansConfigPostProcessor {
 										beanCreationMethod));
 					}
 
-					createBeanPropertyValues(beanType, beanComponentDefinitions, 
+					createBeanPropertyValues(beanType,
+							beanComponentDefinitions,
 							externalBeanAnnotationMetaData);
 				}
 			}
@@ -140,14 +136,14 @@ public class ConfigurationPostProcessor implements IBeansConfigPostProcessor {
 	}
 
 	private void createBeanPropertyValues(IType beanType,
-			List<BeanComponentDefinition> beanComponentDefinitions, 
+			List<BeanComponentDefinition> beanComponentDefinitions,
 			List<BeanAnnotationMetaData> externalBeanAnnotationMetaData) {
 		try {
 			ASTParser parser = ASTParser.newParser(AST.JLS3);
 			parser.setSource(beanType.getCompilationUnit());
 			parser.setResolveBindings(true);
 			ASTNode node = parser.createAST(new NullProgressMonitor());
-			node.accept(new ConfigurationASTVistor(beanComponentDefinitions, 
+			node.accept(new ConfigurationASTVistor(beanComponentDefinitions,
 					externalBeanAnnotationMetaData));
 		}
 		catch (Exception e) {

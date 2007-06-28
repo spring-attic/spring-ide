@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceConte
 import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
+import org.springframework.ide.eclipse.core.model.ILazyInitializedModelElement;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
@@ -188,6 +189,13 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 		Set<ISourceModelElement> children =
 				new LinkedHashSet<ISourceModelElement>();
 		for (IBeansConfig config : configSet.getConfigs()) {
+			// TODO CD move this to BeansNavigatorContentProvider
+			if (config instanceof ILazyInitializedModelElement 
+					&& !((ILazyInitializedModelElement) config).isInitialized()) {
+				// if it is a lazy model element add only in case already
+				// initialized
+				break;
+			}
 			Object[] configChildren = getChildren(config);
 			for (Object child : configChildren) {
 				if (child instanceof IBean

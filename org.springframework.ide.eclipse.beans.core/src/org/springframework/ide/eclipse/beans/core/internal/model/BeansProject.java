@@ -15,6 +15,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -42,13 +44,18 @@ import org.springframework.util.ObjectUtils;
  * lazily read from the corresponding project description XML file defined in
  * {@link IBeansProject#DESCRIPTION_FILE}. The information can be persisted by
  * calling the method {@link #saveDescription()}.
- * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class BeansProject extends AbstractResourceModelElement implements
 		IBeansProject {
+	
+	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
+	private final Lock r = rwl.readLock();
+	private final Lock w = rwl.writeLock(); 
+	private volatile boolean modelPopulated = false;
 
-	private IProject project;
+	private final IProject project;
 
 	protected Set<String> configExtensions;
 
@@ -83,7 +90,6 @@ public class BeansProject extends AbstractResourceModelElement implements
 
 	@Override
 	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
-
 		// First visit this project
 		if (!monitor.isCanceled() && visitor.visit(this, monitor)) {
 
@@ -117,35 +123,59 @@ public class BeansProject extends AbstractResourceModelElement implements
 	 * @param extensions list of config extensions
 	 */
 	public void setConfigExtensions(Set<String> extensions) {
-		if (configExtensions == null) {
+		if (!this.modelPopulated) {
 			populateModel();
 		}
-		configExtensions.clear();
-		configExtensions.addAll(extensions);
+		try {
+			w.lock();
+			configExtensions.clear();
+			configExtensions.addAll(extensions);
+		}
+		finally {
+			w.unlock();
+		}
 	}
 
 	public boolean addConfigExtension(String extension) {
 		if (extension != null && extension.length() > 0) {
-			if (configExtensions == null) {
+			if (!this.modelPopulated) {
 				populateModel();
 			}
-			if (!configExtensions.contains(extension)) {
-				configExtensions.add(extension);
-				return true;
+			try {
+				w.lock();
+				if (!configExtensions.contains(extension)) {
+					configExtensions.add(extension);
+					return true;
+				}
+			}
+			finally {
+				w.unlock();
 			}
 		}
 		return false;
 	}
 
 	public Set<String> getConfigExtensions() {
-		if (configExtensions == null) {
+		if (!this.modelPopulated) {
 			populateModel();
 		}
-		return Collections.unmodifiableSet(configExtensions);
+		try {
+			r.lock();
+			return Collections.unmodifiableSet(configExtensions);
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public boolean hasConfigExtension(String extension) {
-		return getConfigExtensions().contains(extension);
+		try {
+			r.lock();
+			return getConfigExtensions().contains(extension);
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	/**
@@ -157,26 +187,31 @@ public class BeansProject extends AbstractResourceModelElement implements
 	 * @param configNames list of config names
 	 */
 	public void setConfigs(Set<String> configNames) {
-		if (configs == null) {
+		if (!this.modelPopulated) {
 			populateModel();
 		}
-
-		// Look for removed configs and
-		// 1. delete all problem markers from them
-		// 2. remove config from any config set
-		for (IBeansConfig config : configs.values()) {
-			String configName = config.getElementName();
-			if (!configNames.contains(configName)) {
-				MarkerUtils.deleteMarkers(config.getElementResource(),
-						SpringCore.MARKER_ID);
-				removeConfig(configName);
+		try {
+			w.lock();
+			// Look for removed configs and
+			// 1. delete all problem markers from them
+			// 2. remove config from any config set
+			for (IBeansConfig config : configs.values()) {
+				String configName = config.getElementName();
+				if (!configNames.contains(configName)) {
+					MarkerUtils.deleteMarkers(config.getElementResource(),
+							SpringCore.MARKER_ID);
+					removeConfig(configName);
+				}
+			}
+	
+			// Create new list of configs
+			configs.clear();
+			for (String configName : configNames) {
+				configs.put(configName, new BeansConfig(this, configName));
 			}
 		}
-
-		// Create new list of configs
-		configs.clear();
-		for (String configName : configNames) {
-			configs.put(configName, new BeansConfig(this, configName));
+		finally {
+			w.unlock();
 		}
 	}
 
@@ -201,12 +236,18 @@ public class BeansProject extends AbstractResourceModelElement implements
 	 * @return <code>true</code> if config was added to this project
 	 */
 	public boolean addConfig(String configName) {
-		if (configs == null) {
+		if (!this.modelPopulated) {
 			populateModel();
 		}
-		if (configName.length() > 0 && !configs.containsKey(configName)) {
-			configs.put(configName, new BeansConfig(this, configName));
-			return true;
+		try {
+			w.lock();
+			if (configName.length() > 0 && !configs.containsKey(configName)) {
+				configs.put(configName, new BeansConfig(this, configName));
+				return true;
+			}
+		}
+		finally {
+			w.unlock();
 		}
 		return false;
 	}
@@ -240,7 +281,13 @@ public class BeansProject extends AbstractResourceModelElement implements
 	 */
 	public boolean removeConfig(String configName) {
 		if (hasConfig(configName)) {
-			configs.remove(configName);
+			try {
+				w.lock();
+				configs.remove(configName);
+			}
+			finally {
+				w.unlock();
+			}
 			removeConfigFromConfigSets(configName);
 			return true;
 		}
@@ -252,10 +299,16 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	public boolean hasConfig(String configName) {
-		if (configs == null) {
+		if (!this.modelPopulated) {
 			populateModel();
 		}
-		return configs.containsKey(configName);
+		try {
+			r.lock();
+			return configs.containsKey(configName);
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public IBeansConfig getConfig(IFile file) {
@@ -266,24 +319,42 @@ public class BeansProject extends AbstractResourceModelElement implements
 		if (configName != null && configName.charAt(0) == '/') {
 			return BeansCorePlugin.getModel().getConfig(configName);
 		}
-		if (configs == null) {
+		if (!this.modelPopulated) {
 			populateModel();
 		}
-		return configs.get(configName);
+		try {
+			r.lock();
+			return configs.get(configName);
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public Set<String> getConfigNames() {
-		if (configs == null) {
+		if (!this.modelPopulated) {
 			populateModel();
 		}
-		return new LinkedHashSet<String>(configs.keySet());
+		try {
+			r.lock();
+			return new LinkedHashSet<String>(configs.keySet());
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public Set<IBeansConfig> getConfigs() {
-		if (configs == null) {
+		if (!this.modelPopulated) {
 			populateModel();
 		}
-		return new LinkedHashSet<IBeansConfig>(configs.values());
+		try {
+			r.lock();
+			return new LinkedHashSet<IBeansConfig>(configs.values());
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	/**
@@ -294,49 +365,85 @@ public class BeansProject extends AbstractResourceModelElement implements
 	 * @param configSets list of {@link BeansConfigSet} instances
 	 */
 	public void setConfigSets(Set<IBeansConfigSet> configSets) {
-		if (this.configSets == null) {
+		if (!this.modelPopulated) {
 			populateModel();
 		}
-		this.configSets.clear();
-		for (IBeansConfigSet configSet : configSets) {
-			this.configSets.put(configSet.getElementName(), configSet);
+		try {
+			w.lock();
+			this.configSets.clear();
+			for (IBeansConfigSet configSet : configSets) {
+				this.configSets.put(configSet.getElementName(), configSet);
+			}
+		}
+		finally {
+			w.unlock();
 		}
 	}
 
 	public boolean addConfigSet(IBeansConfigSet configSet) {
-		if (configSets == null) {
+		if (!this.modelPopulated) {
 			populateModel();
 		}
-		if (!configSets.values().contains(configSet)) {
-			configSets.put(configSet.getElementName(), configSet);
-			return true;
+		try {
+			r.lock();
+			if (!configSets.values().contains(configSet)) {
+				configSets.put(configSet.getElementName(), configSet);
+				return true;
+			}
+		}
+		finally {
+			r.unlock();
 		}
 		return false;
 	}
 
 	public void removeConfigSet(String configSetName) {
-		configSets.remove(configSetName);
+		try {
+			w.lock();
+			configSets.remove(configSetName);
+		}
+		finally {
+			w.unlock();
+		}
 	}
 
 	public boolean hasConfigSet(String configSetName) {
-		if (configSets == null) {
+		if (!this.modelPopulated) {
 			populateModel();
 		}
-		return configSets.containsKey(configSetName);
+		try {
+			r.lock();
+			return configSets.containsKey(configSetName);
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public IBeansConfigSet getConfigSet(String configSetName) {
-		if (configSets == null) {
+		if (!this.modelPopulated) {
 			populateModel();
 		}
-		return configSets.get(configSetName);
+		try {
+			r.lock();
+			return configSets.get(configSetName);
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public Set<IBeansConfigSet> getConfigSets() {
-		if (configSets == null) {
+		if (!this.modelPopulated) {
 			populateModel();
 		}
-		return new LinkedHashSet<IBeansConfigSet>(configSets.values());
+		try {
+			r.lock();
+			return new LinkedHashSet<IBeansConfigSet>(configSets.values());
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public boolean isBeanClass(String className) {
@@ -371,7 +478,13 @@ public class BeansProject extends AbstractResourceModelElement implements
 	 * defined in {@link IBeansProject#DESCRIPTION_FILE}.
 	 */
 	public void saveDescription() {
-		BeansProjectDescriptionWriter.write(this);
+		try {
+			w.lock();
+			BeansProjectDescriptionWriter.write(this);
+		}
+		finally {
+			w.unlock();
+		}
 	}
 
 	/**
@@ -380,9 +493,16 @@ public class BeansProject extends AbstractResourceModelElement implements
 	 * description file.
 	 */
 	public void reset() {
-		configExtensions = null;
-		configs = null;
-		configSets = null;
+		try {
+			w.lock();
+			this.modelPopulated = false;
+			configExtensions = null;
+			configs = null;
+			configSets = null;
+		}
+		finally {
+			w.unlock();
+		}
 	}
 
 	@Override
@@ -407,21 +527,33 @@ public class BeansProject extends AbstractResourceModelElement implements
 
 	@Override
 	public String toString() {
-		return "Project=" + getElementName() + ", ConfigExtensions="
+		try {
+			r.lock();
+			return "Project=" + getElementName() + ", ConfigExtensions="
 				+ configExtensions + ", Configs=" + configs.values()
 				+ ", ConfigsSets=" + configSets;
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	private boolean removeConfigFromConfigSets(String configName) {
-		if (configSets == null) {
+		if (!this.modelPopulated) {
 			populateModel();
 		}
 		boolean hasRemoved = false;
-		for (IBeansConfigSet configSet : configSets.values()) {
-			if (configSet.hasConfig(configName)) {
-				((BeansConfigSet) configSet).removeConfig(configName);
-				hasRemoved = true;
+		try {
+			r.lock();
+			for (IBeansConfigSet configSet : configSets.values()) {
+				if (configSet.hasConfig(configName)) {
+					((BeansConfigSet) configSet).removeConfig(configName);
+					hasRemoved = true;
+				}
 			}
+		}
+		finally {
+			r.unlock();
 		}
 		return hasRemoved;
 	}
@@ -448,31 +580,41 @@ public class BeansProject extends AbstractResourceModelElement implements
 	 * {@link ISpringProject.DESCRIPTION_FILE}).
 	 */
 	private void populateModel() {
-
-		// Initialize the model's data structures and read the project
-		// description file
-		configExtensions = new LinkedHashSet<String>();
-		configs = new LinkedHashMap<String, IBeansConfig>();
-		configSets = new LinkedHashMap<String, IBeansConfigSet>();
-		BeansProjectDescriptionReader.read(this);
-
-		// Remove all invalid configs from this project
-
-		for (IBeansConfig config : getConfigs()) {
-			if (config.getElementResource() == null) {
-				removeConfig(config.getElementName());
+		try {
+			w.lock();
+			if (this.modelPopulated) {
+				return;
 			}
-		}
-
-		// Remove all invalid config names from from this project's config sets
-		IBeansModel model = BeansCorePlugin.getModel();
-		for (IBeansConfigSet configSet : configSets.values()) {
-			for (String configName : configSet.getConfigNames()) {
-				if (!hasConfig(configName)
-						&& model.getConfig(configName) == null) {
-					((BeansConfigSet) configSet).removeConfig(configName);
+			// Initialize the model's data structures and read the project
+			// description file
+			configExtensions = new LinkedHashSet<String>();
+			configs = new LinkedHashMap<String, IBeansConfig>();
+			configSets = new LinkedHashMap<String, IBeansConfigSet>();
+			this.modelPopulated = true;
+			BeansProjectDescriptionReader.read(this);
+	
+			// Remove all invalid configs from this project
+	
+			for (IBeansConfig config : getConfigs()) {
+				if (config.getElementResource() == null) {
+					removeConfig(config.getElementName());
 				}
 			}
+	
+			// Remove all invalid config names from from this project's config sets
+			IBeansModel model = BeansCorePlugin.getModel();
+			for (IBeansConfigSet configSet : configSets.values()) {
+				for (String configName : configSet.getConfigNames()) {
+					if (!hasConfig(configName)
+							&& model.getConfig(configName) == null) {
+						((BeansConfigSet) configSet).removeConfig(configName);
+					}
+				}
+			}
+			
+		}
+		finally {
+			w.unlock();
 		}
 	}
 }
