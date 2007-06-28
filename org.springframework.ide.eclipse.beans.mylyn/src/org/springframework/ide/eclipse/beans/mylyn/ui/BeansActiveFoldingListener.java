@@ -50,8 +50,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 @SuppressWarnings( { "restriction", "deprecation" })
 public class BeansActiveFoldingListener implements IInteractionContextListener {
 
-	private static BeansContextStructureBridge BRIDGE = 
-		(BeansContextStructureBridge) ContextCorePlugin
+	private static BeansContextStructureBridge BRIDGE = (BeansContextStructureBridge) ContextCorePlugin
 			.getDefault().getStructureBridge(
 					BeansContextStructureBridge.CONTENT_TYPE);
 
@@ -88,11 +87,13 @@ public class BeansActiveFoldingListener implements IInteractionContextListener {
 
 	@SuppressWarnings("unchecked")
 	private void collapseDocument(ProjectionAnnotationModel annotationModel) {
-		Iterator annotations = annotationModel.getAnnotationIterator();
-		// first collapse all
-		while (annotations.hasNext()) {
-			Annotation annotation = (Annotation) annotations.next();
-			annotationModel.collapse(annotation);
+		if (annotationModel != null) {
+			Iterator annotations = annotationModel.getAnnotationIterator();
+			// first collapse all
+			while (annotations.hasNext()) {
+				Annotation annotation = (Annotation) annotations.next();
+				annotationModel.collapse(annotation);
+			}
 		}
 	}
 
@@ -130,19 +131,22 @@ public class BeansActiveFoldingListener implements IInteractionContextListener {
 	private void expandIfElementIsOfInterest(
 			ProjectionAnnotationModel annotationModel,
 			IStructuredDocument document, ISourceModelElement modelElement) {
-		IInteractionElement mylarElement = ContextCorePlugin
-				.getContextManager().getElement(
-						BRIDGE.getHandleIdentifier(modelElement));
-		if (mylarElement != null && mylarElement.getInterest().isInteresting()) {
-			try {
-				int startOffset = document.getLineOffset(modelElement
-						.getElementStartLine());
-				int endOffset = document.getLineOffset(modelElement
-						.getElementEndLine());
-				int length = endOffset - startOffset;
-				annotationModel.expandAll(startOffset, length);
-			}
-			catch (BadLocationException e) {
+		if (annotationModel != null) {
+			IInteractionElement mylarElement = ContextCorePlugin
+					.getContextManager().getElement(
+							BRIDGE.getHandleIdentifier(modelElement));
+			if (mylarElement != null
+					&& mylarElement.getInterest().isInteresting()) {
+				try {
+					int startOffset = document.getLineOffset(modelElement
+							.getElementStartLine());
+					int endOffset = document.getLineOffset(modelElement
+							.getElementEndLine());
+					int length = endOffset - startOffset;
+					annotationModel.expandAll(startOffset, length);
+				}
+				catch (BadLocationException e) {
+				}
 			}
 		}
 	}
