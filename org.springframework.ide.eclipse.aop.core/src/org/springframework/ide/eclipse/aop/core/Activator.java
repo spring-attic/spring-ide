@@ -29,6 +29,8 @@ public class Activator extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.aop.core";
 	
+	public static final String PERSIST_AOP_MODEL_PREFERENCE = PLUGIN_ID + ".messages";
+
 	private static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
 
 	// The shared instance
@@ -61,7 +63,7 @@ public class Activator extends AbstractUIPlugin {
 			resourceBundle = null;
 		}
 		// add default value
-		getPreferenceStore().setDefault(PLUGIN_ID + ".peristModel", true);
+		getPreferenceStore().setDefault(PERSIST_AOP_MODEL_PREFERENCE, true);
 	}
 
 	/*

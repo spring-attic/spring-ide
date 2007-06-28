@@ -192,7 +192,7 @@ public class AopReferenceModelPeristence {
 	private boolean shouldModelByPersisted() {
 		IScopeContext context = new InstanceScope();
 		IEclipsePreferences node = context.getNode(Activator.PLUGIN_ID);
-		return node.getBoolean(Activator.PLUGIN_ID + ".persistModel", true);
+		return node.getBoolean(Activator.PERSIST_AOP_MODEL_PREFERENCE, true);
 	}
 
 	protected synchronized void saveReferenceModel() {

@@ -70,9 +70,8 @@ public class AopPreferencePage extends PreferencePage implements
 		colorComposite2.setLayout(layout);
 		colorComposite2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		booleanEditor = new BooleanFieldEditor(Activator.PLUGIN_ID
-				+ ".persistModel", "Persist AOP Reference Model",
-				colorComposite2);
+		booleanEditor = new BooleanFieldEditor(Activator.PERSIST_AOP_MODEL_PREFERENCE, 
+				"Persist AOP Reference Model", colorComposite2);
 		booleanEditor.setPage(this);
 		booleanEditor.setPreferenceStore(getPreferenceStore());
 		booleanEditor.load();
