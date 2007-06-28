@@ -10,17 +10,20 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.navigator;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.CommonNavigator;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonContentProvider;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelContentProvider;
@@ -29,8 +32,10 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.ILazyInitializedModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
  * This class is a content provider for the {@link CommonNavigator} which knows
@@ -73,7 +78,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 		// element (use parent because IBeansConfigSets need to be updated as well)
 		else if (parentElement instanceof ILazyInitializedModelElement 
 				&& !((ILazyInitializedModelElement) parentElement).isInitialized()){
-			Display.getCurrent().asyncExec(new Runnable() {
+			SpringUIUtils.getStandardDisplay().asyncExec(new Runnable() {
 				public void run() {
 					superGetChildren(parentElement);
 					refreshViewerForElement(((IModelElement) parentElement).getElementParent());
@@ -82,6 +87,27 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 			return IModelElement.NO_CHILDREN;
 		}
 		return super.getChildren(parentElement);
+	}
+	
+	protected Object[] getConfigSetChildren(IBeansConfigSet configSet) {
+		Set<ISourceModelElement> children =
+				new LinkedHashSet<ISourceModelElement>();
+		for (IBeansConfig config : configSet.getConfigs()) {
+			if (config instanceof ILazyInitializedModelElement 
+					&& !((ILazyInitializedModelElement) config).isInitialized()) {
+				// if it is a lazy model element add only in case already
+				// initialized
+				break;
+			}
+			Object[] configChildren = getChildren(config);
+			for (Object child : configChildren) {
+				if (child instanceof IBean
+						|| child instanceof IBeansComponent) {
+					children.add((ISourceModelElement) child);
+				}
+			}
+		}
+		return children.toArray();
 	}
 	
 	private Object[] superGetChildren(Object parentElement) {
