@@ -331,7 +331,12 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				}
 
 				if (aspectInfos != null) {
-
+					
+					// remove references for all definitions
+					for (IAspectDefinition info : aspectInfos) {
+						aopProject.clearReferencesForResource(info.getResource());
+					}
+					
 					AspectDefinitionMatcher builderUtils = new AspectDefinitionMatcher();
 					for (IAspectDefinition info : aspectInfos) {
 

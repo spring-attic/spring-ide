@@ -59,9 +59,8 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
 		if (obj instanceof BeanAspectDefinition) {
 			BeanAspectDefinition other = (BeanAspectDefinition) obj;
 			return other.getAspectLineNumber() == getAspectLineNumber()
-					&& other.getAdviceMethodName().equals(adivceMethodName)
-					&& other.getAdviceMethodParameterTypes().equals(
-							adivceMethodParameterTypes);
+					&& other.getAspectName().equals(aspectName)
+					&& other.getType().equals(type);
 		}
 		return false;
 	}
@@ -146,46 +145,52 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
 	}
 
 	public void saveState(IMemento memento) {
+		memento
+				.putString(
+						BeanAspectDefinitionElementFactory.ADVICE_METHOD_NAME_ATTRIBUTE,
+						this.adivceMethodName);
 		memento.putString(
-			BeanAspectDefinitionElementFactory.ADVICE_METHOD_NAME_ATTRIBUTE,
-			this.adivceMethodName);
-		memento.putString(
-			BeanAspectDefinitionElementFactory.ADVICE_CLASS_NAME_ATTRIBUTE,
-			this.aspectClassName);
+				BeanAspectDefinitionElementFactory.ADVICE_CLASS_NAME_ATTRIBUTE,
+				this.aspectClassName);
 		if (this.adivceMethodParameterTypes != null
 				&& this.adivceMethodParameterTypes.length > 0) {
-			memento.putString(
-				BeanAspectDefinitionElementFactory.ADIVCE_METHOD_PARAMETER_TYPES_ATTRIBUTE,
-				StringUtils.arrayToCommaDelimitedString(this.adivceMethodParameterTypes));
+			memento
+					.putString(
+							BeanAspectDefinitionElementFactory.ADIVCE_METHOD_PARAMETER_TYPES_ATTRIBUTE,
+							StringUtils
+									.arrayToCommaDelimitedString(this.adivceMethodParameterTypes));
 		}
 		memento.putString(
-			BeanAspectDefinitionElementFactory.ASPECT_NAME_ATTRIBUTE,
-			this.aspectName);
+				BeanAspectDefinitionElementFactory.ASPECT_NAME_ATTRIBUTE,
+				this.aspectName);
+		memento
+				.putString(
+						BeanAspectDefinitionElementFactory.POINTCUT_EXPRESSION_ATTRIBUTE,
+						this.pointcutExpressionString);
 		memento.putString(
-			BeanAspectDefinitionElementFactory.POINTCUT_EXPRESSION_ATTRIBUTE,
-			this.pointcutExpressionString);
+				BeanAspectDefinitionElementFactory.RETURNING_ATTRIBUTE,
+				this.returning);
 		memento.putString(
-			BeanAspectDefinitionElementFactory.RETURNING_ATTRIBUTE,
-			this.returning);
-		memento.putString(
-			BeanAspectDefinitionElementFactory.THROWING_ATTRIBUTE,
-			this.throwing);
+				BeanAspectDefinitionElementFactory.THROWING_ATTRIBUTE,
+				this.throwing);
 		if (this.argNames != null && this.argNames.length > 0) {
 			memento.putString(
-				BeanAspectDefinitionElementFactory.ARG_NAMES_ATTRIBUTE,
-				StringUtils.arrayToCommaDelimitedString(this.argNames));
+					BeanAspectDefinitionElementFactory.ARG_NAMES_ATTRIBUTE,
+					StringUtils.arrayToCommaDelimitedString(this.argNames));
 		}
-		memento.putInteger(
-			BeanAspectDefinitionElementFactory.ASPECT_LINE_NUMBER_ATTRIBUTE,
-			this.aspectLineNumber);
+		memento
+				.putInteger(
+						BeanAspectDefinitionElementFactory.ASPECT_LINE_NUMBER_ATTRIBUTE,
+						this.aspectLineNumber);
 		memento.putString(BeanAspectDefinitionElementFactory.FILE_ATTRIBUTE,
-			this.file.getFullPath().toString());
+				this.file.getFullPath().toString());
+		memento
+				.putString(
+						BeanAspectDefinitionElementFactory.PROXY_TARGET_CLASS_ATTRIBUTE,
+						Boolean.toString(this.isProxyTargetClass));
 		memento.putString(
-			BeanAspectDefinitionElementFactory.PROXY_TARGET_CLASS_ATTRIBUTE,
-			Boolean.toString(this.isProxyTargetClass));
-		memento.putString(
-			BeanAspectDefinitionElementFactory.ADVICE_TYPE_ATTRIBUTE,
-			this.type.toString());
+				BeanAspectDefinitionElementFactory.ADVICE_TYPE_ATTRIBUTE,
+				this.type.toString());
 	}
 
 	public void setAdviceMethodName(String adivceMethodName) {
