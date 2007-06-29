@@ -14,6 +14,10 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.CommonNavigator;
@@ -32,6 +36,7 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.ILazyInitializedModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
@@ -75,41 +80,56 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 		// check for lazy loading and/or long running elements; if a element is
 		// marked to be long-running, execute the call to super.getChildren()
 		// asynchronous and refresh the underlying viewer with the given parent
-		// element (use parent because IBeansConfigSets need to be updated as well)
-		else if (parentElement instanceof ILazyInitializedModelElement 
-				&& !((ILazyInitializedModelElement) parentElement).isInitialized()){
-			SpringUIUtils.getStandardDisplay().asyncExec(new Runnable() {
-				public void run() {
-					superGetChildren(parentElement);
-					refreshViewerForElement(((IModelElement) parentElement).getElementParent());
-				}
-			});
+		// element (use parent because IBeansConfigSets need to be updated as
+		// well)
+		else if (parentElement instanceof ILazyInitializedModelElement
+				&& !((ILazyInitializedModelElement) parentElement)
+						.isInitialized()) {
+			triggerDeferredLoading(parentElement);
 			return IModelElement.NO_CHILDREN;
 		}
 		return super.getChildren(parentElement);
 	}
-	
+
 	protected Object[] getConfigSetChildren(IBeansConfigSet configSet) {
-		Set<ISourceModelElement> children =
-				new LinkedHashSet<ISourceModelElement>();
-		for (IBeansConfig config : configSet.getConfigs()) {
-			if (config instanceof ILazyInitializedModelElement 
+		Set<ISourceModelElement> children = new LinkedHashSet<ISourceModelElement>();
+		for (final IBeansConfig config : configSet.getConfigs()) {
+			if (config instanceof ILazyInitializedModelElement
 					&& !((ILazyInitializedModelElement) config).isInitialized()) {
-				// if it is a lazy model element add only in case already
-				// initialized
+				triggerDeferredLoading(config);
 				break;
 			}
 			Object[] configChildren = getChildren(config);
 			for (Object child : configChildren) {
-				if (child instanceof IBean
-						|| child instanceof IBeansComponent) {
+				if (child instanceof IBean || child instanceof IBeansComponent) {
 					children.add((ISourceModelElement) child);
 				}
 			}
 		}
 		return children.toArray();
 	}
-	
+
+	private void triggerDeferredLoading(final Object config) {
+		Job job = new Job("Loading model content from resource '"
+				+ ((IResourceModelElement) config).getElementResource()
+						.getFullPath().toString() + "'") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				superGetChildren(config);
+				SpringUIUtils.getStandardDisplay().asyncExec(new Runnable() {
+					public void run() {
+						refreshViewerForElement(((IModelElement) config)
+								.getElementParent());
+					}
+
+				});
+				return Status.OK_STATUS;
+			}
+		};
+		job.setPriority(Job.SHORT);
+		job.schedule();
+	}
+
 	private Object[] superGetChildren(Object parentElement) {
 		return super.getChildren(parentElement);
 	}
@@ -123,16 +143,18 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 			if (BeansUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
 					.equals(providerID)) {
 				refreshViewerForElement(project);
-				refreshViewerForElement(JdtUtils
-						.getJavaProject(project));
-			} else if (BeansUIPlugin.SPRING_EXPLORER_CONTENT_PROVIDER_ID
-						.equals(providerID)) {
+				refreshViewerForElement(JdtUtils.getJavaProject(project));
+			}
+			else if (BeansUIPlugin.SPRING_EXPLORER_CONTENT_PROVIDER_ID
+					.equals(providerID)) {
 				refreshViewerForElement(SpringCore.getModel().getProject(
 						project));
-			} else {
+			}
+			else {
 				super.elementChanged(event);
 			}
-		} else if (element instanceof IBeansConfig) {
+		}
+		else if (element instanceof IBeansConfig) {
 			IBeansConfig config = (IBeansConfig) element;
 			refreshViewerForElement(config.getElementResource());
 
@@ -142,7 +164,8 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 					.equals(providerID)) {
 				refreshBeanClasses(config);
 			}
-		} else {
+		}
+		else {
 			super.elementChanged(event);
 		}
 	}
@@ -153,8 +176,8 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 	protected void refreshBeanClasses(IBeansConfig config) {
 		Set<String> classes = config.getBeanClasses();
 		for (String clazz : classes) {
-			IType type = JdtUtils.getJavaType(config
-					.getElementResource().getProject(), clazz);
+			IType type = JdtUtils.getJavaType(config.getElementResource()
+					.getProject(), clazz);
 			if (type != null) {
 				refreshViewerForElement(type);
 			}

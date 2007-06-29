@@ -519,32 +519,26 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		BeansConfig that = (BeansConfig) other;
 		if (!ObjectUtils.nullSafeEquals(this.isArchived, that.isArchived))
 			return false;
-		try {
-			r.lock();
-			if (this.defaults != null && that.defaults != null
-					&& this.defaults != that.defaults) {
-				if (!ObjectUtils.nullSafeEquals(this.defaults.getLazyInit(),
-						that.defaults.getLazyInit()))
-					return false;
-				if (!ObjectUtils.nullSafeEquals(this.defaults.getAutowire(),
-						that.defaults.getAutowire()))
-					return false;
-				if (!ObjectUtils.nullSafeEquals(this.defaults.getDependencyCheck(),
-						that.defaults.getDependencyCheck()))
-					return false;
-				if (!ObjectUtils.nullSafeEquals(this.defaults.getInitMethod(),
-						that.defaults.getInitMethod()))
-					return false;
-				if (!ObjectUtils.nullSafeEquals(this.defaults.getDestroyMethod(),
-						that.defaults.getDestroyMethod()))
-					return false;
-				if (!ObjectUtils.nullSafeEquals(this.defaults.getMerge(),
-						that.defaults.getMerge()))
-					return false;
-			}
-		}
-		finally {
-			r.unlock();
+		if (this.defaults != null && that.defaults != null
+				&& this.defaults != that.defaults) {
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getLazyInit(),
+					that.defaults.getLazyInit()))
+				return false;
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getAutowire(),
+					that.defaults.getAutowire()))
+				return false;
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getDependencyCheck(),
+					that.defaults.getDependencyCheck()))
+				return false;
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getInitMethod(),
+					that.defaults.getInitMethod()))
+				return false;
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getDestroyMethod(),
+					that.defaults.getDestroyMethod()))
+				return false;
+			if (!ObjectUtils.nullSafeEquals(this.defaults.getMerge(),
+					that.defaults.getMerge()))
+				return false;
 		}
 		return super.equals(other);
 	}
@@ -552,27 +546,21 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	@Override
 	public int hashCode() {
 		int hashCode = ObjectUtils.nullSafeHashCode(isArchived);
-		try {
-			r.lock();
-			if (defaults != null) {
-				hashCode = getElementType() * hashCode
-						+ ObjectUtils.nullSafeHashCode(defaults.getLazyInit());
-				hashCode = getElementType() * hashCode
-						+ ObjectUtils.nullSafeHashCode(defaults.getAutowire());
-				hashCode = getElementType()
-						* hashCode
-						+ ObjectUtils.nullSafeHashCode(defaults
-								.getDependencyCheck());
-				hashCode = getElementType() * hashCode
-						+ ObjectUtils.nullSafeHashCode(defaults.getInitMethod());
-				hashCode = getElementType() * hashCode
-						+ ObjectUtils.nullSafeHashCode(defaults.getDestroyMethod());
-				hashCode = getElementType() * hashCode
-						+ ObjectUtils.nullSafeHashCode(defaults.getMerge());
-			}
-		}
-		finally {
-			r.unlock();
+		if (defaults != null) {
+			hashCode = getElementType() * hashCode
+					+ ObjectUtils.nullSafeHashCode(defaults.getLazyInit());
+			hashCode = getElementType() * hashCode
+					+ ObjectUtils.nullSafeHashCode(defaults.getAutowire());
+			hashCode = getElementType()
+					* hashCode
+					+ ObjectUtils.nullSafeHashCode(defaults
+							.getDependencyCheck());
+			hashCode = getElementType() * hashCode
+					+ ObjectUtils.nullSafeHashCode(defaults.getInitMethod());
+			hashCode = getElementType() * hashCode
+					+ ObjectUtils.nullSafeHashCode(defaults.getDestroyMethod());
+			hashCode = getElementType() * hashCode
+					+ ObjectUtils.nullSafeHashCode(defaults.getMerge());
 		}
 		return getElementType() * hashCode + super.hashCode();
 	}
