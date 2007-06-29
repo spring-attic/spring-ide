@@ -85,7 +85,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 		else if (parentElement instanceof ILazyInitializedModelElement
 				&& !((ILazyInitializedModelElement) parentElement)
 						.isInitialized()) {
-			triggerDeferredLoading(parentElement);
+			triggerDeferredElementLoading(parentElement);
 			return IModelElement.NO_CHILDREN;
 		}
 		return super.getChildren(parentElement);
@@ -96,7 +96,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 		for (final IBeansConfig config : configSet.getConfigs()) {
 			if (config instanceof ILazyInitializedModelElement
 					&& !((ILazyInitializedModelElement) config).isInitialized()) {
-				triggerDeferredLoading(config);
+				triggerDeferredElementLoading(config);
 				break;
 			}
 			Object[] configChildren = getChildren(config);
@@ -109,7 +109,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 		return children.toArray();
 	}
 
-	private void triggerDeferredLoading(final Object config) {
+	private void triggerDeferredElementLoading(final Object config) {
 		Job job = new Job("Loading model content from resource '"
 				+ ((IResourceModelElement) config).getElementResource()
 						.getFullPath().toString() + "'") {
