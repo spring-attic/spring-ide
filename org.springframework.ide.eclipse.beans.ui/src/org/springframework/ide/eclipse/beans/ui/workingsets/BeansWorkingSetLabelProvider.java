@@ -17,6 +17,7 @@ import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorLabelProvider;
+import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.ui.workingsets.IElementSpecificLabelProvider;
 
 
@@ -34,7 +35,7 @@ public class BeansWorkingSetLabelProvider implements
 
 	public boolean supportsElement(Object object) {
 		return (object instanceof IBeansModelElement || (object instanceof IResource && BeansCoreUtils
-				.isBeansConfig((IResource) object)));
+				.isBeansConfig((IResource) object)) || (object instanceof ZipEntryStorage));
 	}
 
 	public String getText(Object object) {
