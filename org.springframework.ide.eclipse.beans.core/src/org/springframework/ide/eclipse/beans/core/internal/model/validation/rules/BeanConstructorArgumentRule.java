@@ -98,10 +98,6 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 			final IType type, ConstructorArgumentValues argumentValues,
 			final BeansValidationContext context) {
 
-		// TODO CD need to add a check here if constructor has @Autowired
-		// annotation; for now we just skip validation of
-		// ScannedRootBeanDefinition
-
 		// Skip validation if auto-wiring or a factory are involved
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) ((Bean) bean)
 				.getBeanDefinition();
@@ -177,7 +173,8 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 
 						public void doWithActiveProjectClassLoader()
 								throws Throwable {
-							ClassReaderFactory classReaderFactory = new SimpleClassReaderFactory();
+							ClassReaderFactory classReaderFactory = 
+								new SimpleClassReaderFactory();
 							ClassReader classReader = classReaderFactory
 									.getClassReader(className);
 							classReader.accept(visitor, false);
