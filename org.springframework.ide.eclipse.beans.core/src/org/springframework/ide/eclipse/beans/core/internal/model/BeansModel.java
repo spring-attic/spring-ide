@@ -514,7 +514,5 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 				notifyListeners(config, Type.REMOVED);
 			}
 		}
-
-		
 	}
 }

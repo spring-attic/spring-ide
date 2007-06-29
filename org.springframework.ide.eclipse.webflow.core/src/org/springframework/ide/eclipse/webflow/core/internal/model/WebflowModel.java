@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
+import org.springframework.ide.eclipse.webflow.core.internal.model.resources.WebflowResourceChangeListener;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModel;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelListener;
@@ -94,7 +95,7 @@ public class WebflowModel extends AbstractModelElement implements
 		workspace.addResourceChangeListener(this);
 
 		// Add a ResourceChangeListener to the Eclipse Workspace
-		workspaceListener = new SpringResourceChangeListener(
+		workspaceListener = new WebflowResourceChangeListener(
 				new WebflowResourceChangeEvents());
 		workspace.addResourceChangeListener(workspaceListener,
 				SpringResourceChangeListener.LISTENER_FLAGS);
