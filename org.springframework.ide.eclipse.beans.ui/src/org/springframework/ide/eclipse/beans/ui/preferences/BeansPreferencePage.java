@@ -10,14 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.preferences;
 
-import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -33,7 +32,7 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 public class BeansPreferencePage extends PreferencePage implements
 		IWorkbenchPreferencePage {
 
-	private BooleanFieldEditor booleanEditor;
+	private RadioGroupFieldEditor radioEditor;
 
 	protected Control createContents(Composite parent) {
 
@@ -48,36 +47,26 @@ public class BeansPreferencePage extends PreferencePage implements
 		entryTable.setLayout(layout);
 
 		Label label = new Label(entryTable, SWT.NONE);
-		label
-				.setText("Use this preference page to specify the default Double Click Action\n"
-						+ "on the Spring Explorer.");
+		label.setText("Use this preference page to specify the default Double Click Action\n"
+			+ "on the Spring Explorer.");
 
-		Composite colorComposite = new Composite(entryTable, SWT.NONE);
-
-		colorComposite.setLayout(new GridLayout());
+		Composite radioComposite = new Composite(entryTable, SWT.NONE);
+		radioComposite.setLayout(new GridLayout());
 
 		// Create a data that takes up the extra space in the dialog.
-		colorComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		radioComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		Group group = new Group(colorComposite, SWT.NONE);
-		layout.marginWidth = 3;
-		layout.marginHeight = 3;
-		group.setLayout(layout);
-		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		group.setText("Default Double Click Action");
-
-		Composite colorComposite2 = new Composite(group, SWT.NONE);
+		Composite radioComposite2 = new Composite(radioComposite, SWT.NONE);
 		layout.marginLeft = 2;
-		colorComposite2.setLayout(layout);
-		colorComposite2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-		booleanEditor = new BooleanFieldEditor(
+		radioComposite2.setLayout(layout);
+		radioComposite2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		radioEditor = new RadioGroupFieldEditor(
 				BeansUIPlugin.DEFAULT_DOUBLE_CLICK_ACTION_PREFERENCE_ID,
-				"checked = open Configuration File, unchecked = open Java Element",
-				colorComposite2);
-		booleanEditor.setPage(this);
-		booleanEditor.setPreferenceStore(getPreferenceStore());
-		booleanEditor.load();
+				"Default Double Click Action", 1, new String[][] {{"Open Configuration File", "true"}, {"Open Java Element", "false"}},
+				radioComposite2, true);
+		radioEditor.setPage(this);
+		radioEditor.setPreferenceStore(getPreferenceStore());
+		radioEditor.load();
 
 		return entryTable;
 	}
@@ -88,11 +77,11 @@ public class BeansPreferencePage extends PreferencePage implements
 	}
 
 	protected void performDefaults() {
-		booleanEditor.loadDefault();
+		radioEditor.loadDefault();
 	}
 
 	public boolean performOk() {
-		booleanEditor.store();
+		radioEditor.store();
 		return super.performOk();
 	}
 
