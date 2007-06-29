@@ -17,7 +17,7 @@ import org.eclipse.draw2d.Viewport;
 import org.eclipse.draw2d.parts.ScrollableThumbnail;
 import org.eclipse.draw2d.parts.Thumbnail;
 import org.eclipse.gef.LayerConstants;
-import org.eclipse.gef.editparts.ScalableFreeformRootEditPart;
+import org.eclipse.gef.editparts.ScalableRootEditPart;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -31,10 +31,10 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 public class GraphOutlinePage extends Page implements IContentOutlinePage {
 
 	private Canvas overview;
-	private ScalableFreeformRootEditPart rootEditPart;
+	private ScalableRootEditPart rootEditPart;
 	private Thumbnail thumbnail;
 
-	public GraphOutlinePage(ScalableFreeformRootEditPart rootEditPart) {
+	public GraphOutlinePage(ScalableRootEditPart rootEditPart) {
 		this.rootEditPart = rootEditPart;
 	}
 

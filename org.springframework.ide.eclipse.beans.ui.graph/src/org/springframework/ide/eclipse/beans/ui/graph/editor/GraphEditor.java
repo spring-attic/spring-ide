@@ -39,7 +39,6 @@ import org.eclipse.gef.LayerConstants;
 import org.eclipse.gef.RootEditPart;
 import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.gef.editparts.LayerManager;
-import org.eclipse.gef.editparts.ScalableFreeformRootEditPart;
 import org.eclipse.gef.editparts.ScalableRootEditPart;
 import org.eclipse.gef.editparts.ZoomManager;
 import org.eclipse.gef.ui.actions.ActionBarContributor;
@@ -318,9 +317,9 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 	protected GraphOutlinePage getOutlinePage() {
 		if (outlinePage == null && getGraphicalViewer() != null) {
 			RootEditPart rootEditPart = getGraphicalViewer().getRootEditPart();
-			if (rootEditPart instanceof ScalableFreeformRootEditPart) {
+			if (rootEditPart instanceof ScalableRootEditPart) {
 				outlinePage = new GraphOutlinePage(
-						(ScalableFreeformRootEditPart) rootEditPart);
+						(ScalableRootEditPart) rootEditPart);
 			}
 		}
 		return outlinePage;
