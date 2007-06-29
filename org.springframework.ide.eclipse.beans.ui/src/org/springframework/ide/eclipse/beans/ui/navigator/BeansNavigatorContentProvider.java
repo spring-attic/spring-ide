@@ -23,12 +23,14 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.CommonNavigator;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonContentProvider;
+import org.eclipse.ui.progress.IProgressConstants;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
+import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelContentProvider;
 import org.springframework.ide.eclipse.core.SpringCore;
@@ -97,7 +99,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 			if (config instanceof ILazyInitializedModelElement
 					&& !((ILazyInitializedModelElement) config).isInitialized()) {
 				triggerDeferredElementLoading(config);
-				break;
+				continue;
 			}
 			Object[] configChildren = getChildren(config);
 			for (Object child : configChildren) {
@@ -110,12 +112,14 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 	}
 
 	private void triggerDeferredElementLoading(final Object config) {
-		Job job = new Job("Loading model content from resource '"
-				+ ((IResourceModelElement) config).getElementResource()
-						.getFullPath().toString() + "'") {
+		Job job = new Job("Loading model content") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				monitor.beginTask("Loading model content from resource '"
+						+ ((IResourceModelElement) config).getElementResource()
+								.getFullPath().toString() + "'", 2);
 				superGetChildren(config);
+				monitor.worked(1);
 				SpringUIUtils.getStandardDisplay().asyncExec(new Runnable() {
 					public void run() {
 						refreshViewerForElement(((IModelElement) config)
@@ -123,10 +127,13 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 					}
 
 				});
+				monitor.worked(2);
+				monitor.done();
 				return Status.OK_STATUS;
 			}
 		};
-		job.setPriority(Job.SHORT);
+		job.setPriority(Job.INTERACTIVE);
+		job.setProperty(IProgressConstants.ICON_PROPERTY, BeansUIImages.DESC_OBJS_SPRING);
 		job.schedule();
 	}
 
