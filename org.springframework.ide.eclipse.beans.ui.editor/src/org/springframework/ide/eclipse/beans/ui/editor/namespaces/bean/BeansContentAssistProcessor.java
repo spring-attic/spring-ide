@@ -477,7 +477,7 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 					.getReplacementBeginPosition(), request
 					.getReplacementLength(), beanId.length(), BeansUIImages
 					.getImage(BeansUIImages.IMG_OBJS_BEAN), beanId + " - "
-					+ className, null, null, 10));
+					+ className, null, null, 10, null));
 		}
 	}
 

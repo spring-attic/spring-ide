@@ -4,7 +4,8 @@
 
 	<extension point="org.eclipse.core.runtime.contentTypes">
 		<content-type id="beansConfig" name="%contentTypeName"
-			base-type="org.eclipse.core.runtime.xml" priority="high"
+			base-type="org.eclipse.core.runtime.xml" 
+			priority="normal"
 			default-charset="UTF-8">
 			<describer
 				class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber">

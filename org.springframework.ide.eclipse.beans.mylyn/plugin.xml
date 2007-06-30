@@ -17,5 +17,26 @@
 			id="org.springframework.ide.eclipse.beans.mylyn.context.ui.beans"
 			name="%beansContextUIBridge.name" />
 	</extension>
+	
+	<extension point="org.eclipse.wst.sse.ui.editorConfiguration">
+		<sourceViewerConfiguration
+			class="org.springframework.ide.eclipse.beans.mylyn.ui.editor.BeansContextBasedStructuredTextViewerConfiguration"
+			target="org.springframework.ide.eclipse.beans.mylyn.beansConfig" />
+		<contentOutlineConfiguration
+			class="org.springframework.ide.eclipse.beans.ui.editor.outline.BeansContentOutlineConfiguration"
+			target="org.springframework.ide.eclipse.beans.mylyn.beansConfig" />
+	</extension>
+	
+	<extension point="org.eclipse.core.runtime.contentTypes">
+		<content-type id="beansConfig" name="%contentTypeName"
+			base-type="org.eclipse.core.runtime.xml" 
+			priority="high"
+			default-charset="UTF-8">
+			<describer
+				class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber">
+				<parameter name="element" value="beans" />
+			</describer>
+		</content-type>
+	</extension>
 
 </plugin>

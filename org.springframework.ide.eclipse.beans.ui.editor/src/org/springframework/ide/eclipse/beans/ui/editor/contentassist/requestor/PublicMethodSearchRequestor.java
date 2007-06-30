@@ -84,7 +84,7 @@ public class PublicMethodSearchRequestor extends MethodSearchRequestor {
 				BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
 						replaceText, request.getReplacementBeginPosition(),
 						request.getReplacementLength(), replaceText.length(),
-						image, displayText, null, javadoc, relevance);
+						image, displayText, null, javadoc, relevance, method);
 
 				request.addProposal(proposal);
 				methods.add(method.getSignature());

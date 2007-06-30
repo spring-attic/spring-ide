@@ -59,6 +59,8 @@ public class BeansJavaCompletionProposal implements ICompletionProposal,
 	private boolean fUpdateLengthOnValidate;
 
 	private char[] fTriggers;
+	
+	private Object proposedObject = null;
 
 	/**
 	 * Constructor with relevance and replacement length update flag.
@@ -81,7 +83,7 @@ public class BeansJavaCompletionProposal implements ICompletionProposal,
 			Image image, String displayString,
 			IContextInformation contextInformation,
 			String additionalProposalInfo, int relevance,
-			boolean updateReplacementLengthOnValidate) {
+			boolean updateReplacementLengthOnValidate, Object proposedObject) {
 
 		fReplacementString = "\"" + replacementString;
 		fReplacementOffset = replacementOffset;
@@ -94,16 +96,17 @@ public class BeansJavaCompletionProposal implements ICompletionProposal,
 		fRelevance = relevance;
 		fUpdateLengthOnValidate = updateReplacementLengthOnValidate;
 		fOriginalReplacementLength = fReplacementLength;
+		this.proposedObject = proposedObject;
 	}
 
 	public BeansJavaCompletionProposal(String replacementString,
 			int replacementOffset, int replacementLength, int cursorPosition,
 			Image image, String displayString,
 			IContextInformation contextInformation,
-			String additionalProposalInfo, int relevance) {
+			String additionalProposalInfo, int relevance, Object proposedObject) {
 		this(replacementString, replacementOffset, replacementLength,
 				cursorPosition, image, displayString, contextInformation,
-				additionalProposalInfo, relevance, true);
+				additionalProposalInfo, relevance, true, proposedObject);
 	}
 
 	public void apply(IDocument document) {
@@ -402,5 +405,9 @@ public class BeansJavaCompletionProposal implements ICompletionProposal,
 
 	public boolean isAutoInsertable() {
 		return true;
+	}
+
+	public Object getProposedObject() {
+		return proposedObject;
 	}
 }

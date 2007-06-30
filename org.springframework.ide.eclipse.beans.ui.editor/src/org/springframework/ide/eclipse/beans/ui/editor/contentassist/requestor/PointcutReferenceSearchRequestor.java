@@ -65,7 +65,8 @@ public class PointcutReferenceSearchRequestor {
 						image, displayText, null, BeansEditorUtils
 								.createAdditionalProposalInfo(pointcutNode,
 										file),
-						PointcutReferenceSearchRequestor.LOCAL_BEAN_RELEVANCE);
+						PointcutReferenceSearchRequestor.LOCAL_BEAN_RELEVANCE, 
+						pointcutNode);
 
 				request.addProposal(proposal);
 				beans.add(key);

@@ -111,7 +111,8 @@ public class BeansJavaCompletionUtils {
 							.getReplacementLength(), prop
 							.getReplacementString().length(), prop.getImage(),
 					prop.getDisplayString(), null, prop
-							.getAdditionalProposalInfo(), prop.getRelevance());
+							.getAdditionalProposalInfo(), prop.getRelevance(),
+					prop.getJavaElement());
 
 			request.addProposal(proposal);
 		}
@@ -123,7 +124,8 @@ public class BeansJavaCompletionUtils {
 							.getReplacementLength(), prop
 							.getQualifiedTypeName().length(), prop.getImage(),
 					prop.getDisplayString(), null, prop
-							.getAdditionalProposalInfo(), prop.getRelevance());
+							.getAdditionalProposalInfo(), prop.getRelevance(),
+					prop.getJavaElement());
 
 			request.addProposal(proposal);
 		}
@@ -170,8 +172,8 @@ public class BeansJavaCompletionUtils {
 			return;
 		}
 
-		IType type = JdtUtils.getJavaType(BeansEditorUtils.getResource(
-				request).getProject(), typeName);
+		IType type = JdtUtils.getJavaType(BeansEditorUtils.getResource(request)
+				.getProject(), typeName);
 		try {
 			if (BeansEditorUtils.getResource(request).getProject().hasNature(
 					JavaCore.NATURE_ID)) {
@@ -199,7 +201,7 @@ public class BeansJavaCompletionUtils {
 										+ " - "
 										+ foundType.getPackageFragment()
 												.getElementName(), null, null,
-								10);
+								10, foundType);
 						request.addProposal(proposal);
 						sortMap.put(foundType.getFullyQualifiedName(),
 								foundType);
@@ -237,8 +239,8 @@ public class BeansJavaCompletionUtils {
 						if (resolvedTypeNames != null
 								&& resolvedTypeNames.length > 0
 								&& resolvedTypeNames[0].length > 0) {
-							IType propertyType = JdtUtils.getJavaType(
-									project, resolvedTypeNames[0][0] + "."
+							IType propertyType = JdtUtils.getJavaType(project,
+									resolvedTypeNames[0][0] + "."
 											+ resolvedTypeNames[0][1]);
 							ITypeHierarchy hierachy = propertyType
 									.newTypeHierarchy(JavaCore.create(project),

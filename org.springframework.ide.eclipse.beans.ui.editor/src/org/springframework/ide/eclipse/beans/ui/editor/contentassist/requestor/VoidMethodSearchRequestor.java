@@ -75,7 +75,7 @@ public class VoidMethodSearchRequestor extends MethodSearchRequestor {
 						replaceText, request.getReplacementBeginPosition(),
 						request.getReplacementLength(), replaceText.length(),
 						image, displayText, null, javadoc,
-						MethodSearchRequestor.METHOD_RELEVANCE);
+						MethodSearchRequestor.METHOD_RELEVANCE, method);
 
 				request.addProposal(proposal);
 				methods.add(method.getSignature());

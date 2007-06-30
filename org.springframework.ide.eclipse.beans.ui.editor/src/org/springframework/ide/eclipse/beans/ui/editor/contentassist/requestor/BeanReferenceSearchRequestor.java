@@ -91,7 +91,7 @@ public class BeanReferenceSearchRequestor {
 							displayText,
 							null,
 							BeansEditorUtils.createAdditionalProposalInfo(bean),
-							BeanReferenceSearchRequestor.TYPE_MATCHING_RELEVANCE);
+							BeanReferenceSearchRequestor.TYPE_MATCHING_RELEVANCE, bean);
 				}
 				else {
 					proposal = new BeansJavaCompletionProposal(
@@ -103,7 +103,7 @@ public class BeanReferenceSearchRequestor {
 							displayText,
 							null,
 							BeansEditorUtils.createAdditionalProposalInfo(bean),
-							BeanReferenceSearchRequestor.RELEVANCE);
+							BeanReferenceSearchRequestor.RELEVANCE, bean);
 				}
 
 				request.addProposal(proposal);
@@ -156,7 +156,7 @@ public class BeanReferenceSearchRequestor {
 										.length(), image, displayText, null,
 								BeansEditorUtils.createAdditionalProposalInfo(
 										beanNode, file),
-								TYPE_MATCHING_RELEVANCE);
+								TYPE_MATCHING_RELEVANCE, beanNode);
 					}
 					else {
 						proposal = new BeansJavaCompletionProposal(replaceText,
@@ -164,7 +164,7 @@ public class BeanReferenceSearchRequestor {
 										.getReplacementLength(), replaceText
 										.length(), image, displayText, null,
 								BeansEditorUtils.createAdditionalProposalInfo(
-										beanNode, file), RELEVANCE);
+										beanNode, file), RELEVANCE, beanNode);
 					}
 
 					request.addProposal(proposal);

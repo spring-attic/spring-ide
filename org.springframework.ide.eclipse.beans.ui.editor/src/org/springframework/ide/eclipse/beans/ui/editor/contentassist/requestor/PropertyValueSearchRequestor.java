@@ -94,7 +94,7 @@ public class PropertyValueSearchRequestor {
 						replaceText, request.getReplacementBeginPosition(),
 						request.getReplacementLength(), replaceText.length(),
 						image, displayText, null, javadoc,
-						PropertyValueSearchRequestor.METHOD_RELEVANCE);
+						PropertyValueSearchRequestor.METHOD_RELEVANCE, method);
 
 				request.addProposal(proposal);
 				methods.put(key, method);
