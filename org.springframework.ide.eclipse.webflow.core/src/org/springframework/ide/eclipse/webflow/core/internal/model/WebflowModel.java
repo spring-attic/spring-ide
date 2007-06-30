@@ -12,12 +12,14 @@ package org.springframework.ide.eclipse.webflow.core.internal.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -43,6 +45,12 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 public class WebflowModel extends AbstractModelElement implements
 		IWebflowModel, IResourceChangeListener {
 
+	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
+
+	private final Lock r = rwl.readLock();
+
+	private final Lock w = rwl.writeLock();
+
 	private List<IWebflowModelListener> listners = new ArrayList<IWebflowModelListener>();
 
 	private Map<IProject, IWebflowProject> projects;
@@ -50,21 +58,33 @@ public class WebflowModel extends AbstractModelElement implements
 	private IResourceChangeListener workspaceListener;
 
 	public WebflowModel() {
-		this.projects = new HashMap<IProject, IWebflowProject>();
+		this.projects = new ConcurrentHashMap<IProject, IWebflowProject>();
 	}
 
 	public boolean hasProject(IProject project) {
-		if (project != null && project.isAccessible()
-				&& projects.containsKey(project)
-				&& SpringCoreUtils.isSpringProject(project)) {
-			return true;
+		try {
+			r.lock();
+			if (project != null && project.isAccessible()
+					&& projects.containsKey(project)
+					&& SpringCoreUtils.isSpringProject(project)) {
+				return true;
+			}
+		}
+		finally {
+			r.unlock();
 		}
 		return false;
 	}
 
 	public IWebflowProject getProject(IProject project) {
-		if (hasProject(project)) {
-			return (IWebflowProject) projects.get(project);
+		try {
+			r.lock();
+			if (hasProject(project)) {
+				return (IWebflowProject) projects.get(project);
+			}
+		}
+		finally {
+			r.unlock();
 		}
 		return new WebflowProject(project, this);
 	}
@@ -76,7 +96,13 @@ public class WebflowModel extends AbstractModelElement implements
 	}
 
 	public Collection<IWebflowProject> getProjects() {
-		return projects.values();
+		try {
+			r.lock();
+			return projects.values();
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	public IWebflowConfig getConfig(IFile configFile) {
@@ -115,14 +141,21 @@ public class WebflowModel extends AbstractModelElement implements
 	}
 
 	private void initialize() {
-		this.projects.clear();
-		List projects = getBeansProjects();
-		if (!projects.isEmpty()) {
-			Iterator iter = projects.iterator();
-			while (iter.hasNext()) {
-				IProject project = (IProject) iter.next();
-				this.projects.put(project, new WebflowProject(project, this));
+		try {
+			w.lock();
+			this.projects.clear();
+			List projects = getBeansProjects();
+			if (!projects.isEmpty()) {
+				Iterator iter = projects.iterator();
+				while (iter.hasNext()) {
+					IProject project = (IProject) iter.next();
+					this.projects.put(project,
+							new WebflowProject(project, this));
+				}
 			}
+		}
+		finally {
+			w.unlock();
 		}
 	}
 
@@ -192,14 +225,20 @@ public class WebflowModel extends AbstractModelElement implements
 		}
 	}
 
-	public synchronized void removeProject(IProject project) {
+	public void removeProject(IProject project) {
 		initialize();
 		fireModelChangedEvent(null);
 	}
 
 	public IModelElement[] getElementChildren() {
 		Set<IModelElement> children = new HashSet<IModelElement>();
-		children.addAll(this.projects.values());
+		try {
+			r.lock();
+			children.addAll(this.projects.values());
+		}
+		finally {
+			r.unlock();
+		}
 		return children.toArray(new IModelElement[children.size()]);
 	}
 
@@ -214,7 +253,7 @@ public class WebflowModel extends AbstractModelElement implements
 			}
 		}
 	}
-	
+
 	public String getElementName() {
 		return "WebflowModel";
 	}

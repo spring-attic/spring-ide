@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -33,8 +35,14 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
  * @since 2.0
  */
 @SuppressWarnings("restriction")
-public class WebflowConfig extends AbstractModelElement
-		implements IWebflowConfig, IAdaptable {
+public class WebflowConfig extends AbstractModelElement implements
+		IWebflowConfig, IAdaptable {
+
+	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
+
+	private final Lock r = rwl.readLock();
+
+	private final Lock w = rwl.writeLock();
 
 	private Set<String> beansConfigs = new HashSet<String>();
 
@@ -43,7 +51,7 @@ public class WebflowConfig extends AbstractModelElement
 	private String name;
 
 	@SuppressWarnings("unused")
-	private IWebflowProject project;
+	private final IWebflowProject project;
 
 	public IWebflowProject getProject() {
 		return project;
@@ -56,15 +64,21 @@ public class WebflowConfig extends AbstractModelElement
 	public java.util.Set<IModelElement> getBeansConfigs() {
 		IBeansModel model = BeansCorePlugin.getModel();
 
-		java.util.Set<IModelElement> configs = new HashSet<IModelElement>();
-		if (beansConfigs != null) {
-			for (String configName : this.beansConfigs) {
-				IModelElement config = model.getElement(configName);
-				if (config != null) {
-					configs.add(config);
+		Set<IModelElement> configs = new HashSet<IModelElement>();
+		try {
+			r.lock();
+			if (beansConfigs != null) {
+				for (String configName : this.beansConfigs) {
+					IModelElement config = model.getElement(configName);
+					if (config != null) {
+						configs.add(config);
+					}
 				}
-			}
 
+			}
+		}
+		finally {
+			r.unlock();
 		}
 		return configs;
 	}
@@ -73,22 +87,27 @@ public class WebflowConfig extends AbstractModelElement
 		return this.resource;
 	}
 
-	public void setBeansConfigs(java.util.Set<IModelElement> beansConfigs) {
-		this.beansConfigs = new HashSet<String>();
-		if (beansConfigs != null) {
-			for (IModelElement config : beansConfigs) {
-				if (BeansModelUtils.getProject(config) != null
-						&& BeansModelUtils.getProject(config).getProject()
-								.equals(project.getProject())) {
-					this.beansConfigs.add(config.getElementID());
+	public void setBeansConfigs(Set<IModelElement> beansConfigs) {
+		try {
+			w.lock();
+			this.beansConfigs = new HashSet<String>();
+			if (beansConfigs != null) {
+				for (IModelElement config : beansConfigs) {
+					if (BeansModelUtils.getProject(config) != null
+							&& BeansModelUtils.getProject(config).getProject()
+									.equals(project.getProject())) {
+						this.beansConfigs.add(config.getElementID());
+					}
 				}
 			}
+		}
+		finally {
+			w.unlock();
 		}
 	}
 
 	public void setResource(IFile file) {
 		this.resource = file;
-
 		if (this.name == null && this.resource != null) {
 			int i = this.resource.getName().lastIndexOf('.');
 			if (i > 0) {
@@ -100,12 +119,24 @@ public class WebflowConfig extends AbstractModelElement
 		}
 	}
 
-	public void setBeansConfigsElementIds(java.util.Set<String> beansConfigs) {
-		this.beansConfigs = beansConfigs;
+	public void setBeansConfigsElementIds(Set<String> beansConfigs) {
+		try {
+			w.lock();
+			this.beansConfigs = beansConfigs;
+		}
+		finally {
+			w.unlock();
+		}
 	}
 
 	public void addBeansConfigElementId(String id) {
-		this.beansConfigs.add(id);
+		try {
+			w.lock();
+			this.beansConfigs.add(id);
+		}
+		finally {
+			w.unlock();
+		}
 	}
 
 	public String getName() {
@@ -116,8 +147,7 @@ public class WebflowConfig extends AbstractModelElement
 		this.name = name;
 	}
 
-	public void accept(IModelElementVisitor visitor,
-			IProgressMonitor monitor) {
+	public void accept(IModelElementVisitor visitor, IProgressMonitor monitor) {
 	}
 
 	public String getElementName() {
@@ -127,10 +157,16 @@ public class WebflowConfig extends AbstractModelElement
 	public int getElementType() {
 		return CONFIG;
 	}
- 
+
 	public IModelElement[] getElementChildren() {
 		List<IModelElement> children = new ArrayList<IModelElement>();
-		return children.toArray(new IModelElement[children.size()]);
+		try {
+			r.lock();
+			return children.toArray(new IModelElement[children.size()]);
+		}
+		finally {
+			r.unlock();
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -143,7 +179,7 @@ public class WebflowConfig extends AbstractModelElement
 		}
 		return null;
 	}
-	
+
 	public IModelElement getElementParent() {
 		return this.project;
 	}
