@@ -7,7 +7,6 @@ Bundle-Name: org.springframework.binding
 Bundle-Version: 1.0.3
 Bundle-Vendor: Spring Binding
 Bundle-ClassPath: spring-binding.jar
-Bundle-Localization: plugin
 Export-Package: 
  org.springframework.binding.collection,
  org.springframework.binding.convert,

@@ -7,7 +7,6 @@ Bundle-Name: org.springframework.javaconfig
 Bundle-Version: 1.0.0
 Bundle-Vendor: Spring JavaConfig
 Bundle-ClassPath: spring-javaconfig.jar
-Bundle-Localization: plugin
 Export-Package: org.springframework.config.java.annotation,
  org.springframework.config.java.annotation.aop,
  org.springframework.config.java.annotation.aop.targetsource,
