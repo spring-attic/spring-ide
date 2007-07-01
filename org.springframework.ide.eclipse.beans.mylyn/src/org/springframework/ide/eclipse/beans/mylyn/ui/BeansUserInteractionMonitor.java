@@ -11,8 +11,6 @@
 package org.springframework.ide.eclipse.beans.mylyn.ui;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.mylyn.monitor.ui.AbstractUserInteractionMonitor;
@@ -21,12 +19,9 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.wst.xml.ui.internal.tabletree.XMLMultiPageEditorPart;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
-import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
-import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
  * {@link AbstractUserInteractionMonitor} extension that tracks current
@@ -50,69 +45,17 @@ public class BeansUserInteractionMonitor extends AbstractUserInteractionMonitor 
 			if (editorInput instanceof IFileEditorInput) {
 				IFile file = ((IFileEditorInput) editorInput).getFile();
 				if (BeansCoreUtils.isBeansConfig(file)) {
-					IBeansConfig beansConfig = BeansCorePlugin.getModel()
-							.getConfig(file);
 					int startLine = ((ITextSelection) selection).getStartLine() + 1;
 					int endLine = ((ITextSelection) selection).getEndLine() + 1;
 
-					ModelVisitor v = new ModelVisitor(startLine, endLine, file);
-					beansConfig.accept(v, new NullProgressMonitor());
-					IModelElement mostspecificElement = v.getElement();
+					IModelElement mostspecificElement = BeansModelUtils
+							.getMostSpecificModelElement(startLine, endLine,
+									file, null);
 					if (mostspecificElement != null) {
 						super.handleElementSelection(part, mostspecificElement,
 								contributeToContext);
 					}
 				}
-			}
-		}
-	}
-
-	private static class ModelVisitor implements IModelElementVisitor {
-
-		private final int startLine;
-
-		private final int endLine;
-
-		private final IFile file;
-
-		private IModelElement element;
-
-		public IModelElement getElement() {
-			return element;
-		}
-
-		public ModelVisitor(final int startLine, final int endLine,
-				final IFile file) {
-			this.startLine = startLine;
-			this.endLine = endLine;
-			this.file = file;
-		}
-
-		public boolean visit(IModelElement element, IProgressMonitor monitor) {
-			if (element instanceof ISourceModelElement) {
-				ISourceModelElement sourceElement = (ISourceModelElement) element;
-				if (sourceElement.getElementResource().equals(file)
-						&& sourceElement.getElementStartLine() <= startLine
-						&& endLine <= sourceElement.getElementEndLine()) {
-					this.element = element;
-
-					if (sourceElement.getElementStartLine() == startLine
-							&& endLine == sourceElement.getElementEndLine()) {
-						return false;
-					}
-					else {
-						return true;
-					}
-				}
-				else {
-					return false;
-				}
-			}
-			else if (element instanceof IBeansConfig) {
-				return true;
-			}
-			else {
-				return false;
 			}
 		}
 	}

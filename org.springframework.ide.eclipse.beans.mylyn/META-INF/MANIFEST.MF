@@ -24,7 +24,11 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.mylyn.java.ui,
  org.eclipse.mylyn.ide.ui,
  org.eclipse.mylyn.resources.ui,
- org.springframework.ide.eclipse.beans.ui.editor
+ org.springframework.ide.eclipse.beans.ui.editor,
+ org.eclipse.jdt.core,
+ org.eclipse.jdt.ui,
+ org.eclipse.wst.xml.core,
+ org.springframework.ide.eclipse.mylyn
 Eclipse-LazyStart: true
 Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

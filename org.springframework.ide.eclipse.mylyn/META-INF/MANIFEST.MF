@@ -16,6 +16,16 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.mylyn.java.ui,
  org.springframework.ide.eclipse.core,
  org.eclipse.core.resources,
- org.eclipse.ui.navigator
+ org.eclipse.ui.navigator,
+ org.springframework.ide.eclipse.beans.ui.editor,
+ org.eclipse.jdt.core,
+ org.eclipse.jdt.ui,
+ org.eclipse.wst.xml.core,
+ org.eclipse.wst.sse.ui,
+ org.eclipse.wst.xml.ui
 Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Export-Package: org.springframework.ide.eclipse.mylyn,
+ org.springframework.ide.eclipse.mylyn.ui,
+ org.springframework.ide.eclipse.mylyn.ui.actions,
+ org.springframework.ide.eclipse.mylyn.ui.editor

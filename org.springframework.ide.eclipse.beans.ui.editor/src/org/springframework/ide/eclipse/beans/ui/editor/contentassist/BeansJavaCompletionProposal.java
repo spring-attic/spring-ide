@@ -410,4 +410,8 @@ public class BeansJavaCompletionProposal implements ICompletionProposal,
 	public Object getProposedObject() {
 		return proposedObject;
 	}
+
+	public void setRelevance(int relevance) {
+		fRelevance = relevance;
+	}
 }
