@@ -43,6 +43,7 @@ import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.BeansTags;
 import org.springframework.ide.eclipse.beans.core.BeansTags.Tag;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConnection.BeanType;
@@ -226,8 +227,7 @@ public final class BeansModelUtils {
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();
 						}
-						for (IBeansComponent component
-								: config.getComponents()) {
+						for (IBeansComponent component : config.getComponents()) {
 							beans.addAll(component.getBeans());
 						}
 						if (monitor.isCanceled()) {
@@ -618,8 +618,8 @@ public final class BeansModelUtils {
 
 	/**
 	 * Returns the merged bean definition for a given bean from specified
-	 * context ({@link IBeansConfig} or {@link IBeansConfigSet}).
-	 * Any cyclic-references are ignored.
+	 * context ({@link IBeansConfig} or {@link IBeansConfigSet}). Any
+	 * cyclic-references are ignored.
 	 * @param bean the bean the merged bean definition is requested for
 	 * @param context the context ({@link IBeanConfig} or
 	 * {@link IBeanConfigSet}) the beans are looked-up
@@ -638,8 +638,11 @@ public final class BeansModelUtils {
 
 			// Fill a set with all bean definitions belonging to the
 			// hierarchy of the requested bean definition
-			List<BeanDefinition> beanDefinitions =
-					new ArrayList<BeanDefinition>(); // used to detect a cycle
+			List<BeanDefinition> beanDefinitions = new ArrayList<BeanDefinition>(); // used
+																					// to
+																					// detect
+																					// a
+																					// cycle
 			beanDefinitions.add(bd);
 			addBeanDefinition(bean, context, beanDefinitions);
 
@@ -648,8 +651,8 @@ public final class BeansModelUtils {
 			RootBeanDefinition rbd = null;
 			int bdCount = beanDefinitions.size();
 			for (int i = bdCount - 1; i >= 0; i--) {
-				AbstractBeanDefinition abd = (AbstractBeanDefinition)
-						beanDefinitions.get(i);
+				AbstractBeanDefinition abd = (AbstractBeanDefinition) beanDefinitions
+						.get(i);
 				if (rbd != null) {
 					rbd.overrideFrom(abd);
 				}
@@ -762,7 +765,7 @@ public final class BeansModelUtils {
 		element.accept(visitor, new NullProgressMonitor());
 		return innerBeans;
 	}
-	
+
 	/**
 	 * Returns the given bean's class name.
 	 * @param bean the bean to lookup the bean class name for
@@ -850,7 +853,8 @@ public final class BeansModelUtils {
 		Assert.notNull(bean);
 		String className = getBeanClass(bean, context);
 		if (className != null) {
-			return JdtUtils.getJavaType(getProject(bean).getProject(), className);
+			return JdtUtils.getJavaType(getProject(bean).getProject(),
+					className);
 		}
 		return null;
 	}
@@ -949,10 +953,10 @@ public final class BeansModelUtils {
 		// Register bean definitions from components
 		registerComponents(config.getComponents(), registry);
 	}
-	
+
 	/**
-	 * Registers all {@link IBean}s and {@link IBeansComponent}s that are nested
-	 * within the given <code>components</code>.
+	 * Registers all {@link IBean}s and {@link IBeansComponent}s that are
+	 * nested within the given <code>components</code>.
 	 */
 	private static void registerComponents(Set<IBeansComponent> components,
 			BeanDefinitionRegistry registry) {
@@ -977,7 +981,7 @@ public final class BeansModelUtils {
 					// ignore - continue with next bean
 				}
 			}
-			
+
 			// Register bean definitions from components
 			registerComponents(component.getComponents(), registry);
 		}
@@ -1176,19 +1180,20 @@ public final class BeansModelUtils {
 		else if (value instanceof TypedStringValue) {
 			return new BeansTypedString(parent, (TypedStringValue) value);
 		}
-		else if (value.getClass().isArray()) {
+		else if (value != null && value.getClass().isArray()) {
 			return new BeansTypedString(parent, "["
 					+ StringUtils
 							.arrayToDelimitedString((Object[]) value, ", ")
 					+ "]");
 		}
-		return new BeansTypedString(parent, value.toString());
+		return new BeansTypedString(parent, (value != null ? value.toString()
+				: "null"));
 	}
-	
+
 	/**
 	 * Checks if a given <code>className</code> is used as a bean class. The
-	 * check iterates the complete {@link IBeansModel} and not "only" the current
-	 * {@link IBeansProject}.
+	 * check iterates the complete {@link IBeansModel} and not "only" the
+	 * current {@link IBeansProject}.
 	 * @param className
 	 * @return
 	 */
@@ -1200,5 +1205,78 @@ public final class BeansModelUtils {
 
 	public static boolean isInnerBean(IBean bean) {
 		return !(bean.getElementParent() instanceof IBeansConfig);
+	}
+	
+	/**
+	 * Returns the most specific {@link IModelElement} that corresponds to the
+	 * given <code>startLine</code> and <code>endLine</code> line numbers.
+	 * <p>
+	 * Client should be aware of possible <code>null</code> returns in case on
+	 * {@link IModelElement} can be found at the given location.
+	 * @since 2.0.1
+	 */
+	public static IModelElement getMostSpecificModelElement(int startLine,
+			int endLine, IFile resource, IProgressMonitor monitor) {
+		if (BeansCoreUtils.isBeansConfig(resource)) {
+			
+			if (monitor == null) {
+				monitor = new NullProgressMonitor();
+			}
+			
+			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig(
+						resource);
+			ModelElementDetermingModelVisitor v = new ModelElementDetermingModelVisitor(
+					startLine, endLine, resource);
+			beansConfig.accept(v, monitor);
+			return v.getElement();
+		}
+		return null;
+	}
+
+	private static class ModelElementDetermingModelVisitor implements
+			IModelElementVisitor {
+
+		private final int startLine;
+
+		private final int endLine;
+
+		private final IFile file;
+
+		private IModelElement element;
+
+		public IModelElement getElement() {
+			return element;
+		}
+
+		public ModelElementDetermingModelVisitor(final int startLine,
+				final int endLine, final IFile file) {
+			this.startLine = startLine;
+			this.endLine = endLine;
+			this.file = file;
+		}
+
+		public boolean visit(IModelElement element, IProgressMonitor monitor) {
+			if (element instanceof ISourceModelElement) {
+				ISourceModelElement sourceElement = (ISourceModelElement) element;
+				if (sourceElement.getElementResource().equals(file)
+						&& sourceElement.getElementStartLine() <= startLine
+						&& endLine <= sourceElement.getElementEndLine()) {
+					this.element = element;
+
+					if (sourceElement.getElementStartLine() == startLine
+							&& endLine == sourceElement.getElementEndLine()) {
+						return false;
+					}
+					return true;
+				}
+				return false;
+			}
+			else if (element instanceof IBeansConfig) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
 	}
 }
