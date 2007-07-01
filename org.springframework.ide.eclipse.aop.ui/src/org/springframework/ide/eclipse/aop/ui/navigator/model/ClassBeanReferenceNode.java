@@ -45,4 +45,7 @@ public class ClassBeanReferenceNode implements IReferenceNode {
 		return true;
 	}
 
+	public Object getReferenceParticipant() {
+		return null;
+	}
 }

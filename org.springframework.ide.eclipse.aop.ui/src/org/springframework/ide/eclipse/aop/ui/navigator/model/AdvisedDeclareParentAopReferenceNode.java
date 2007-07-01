@@ -60,4 +60,7 @@ public class AdvisedDeclareParentAopReferenceNode implements IReferenceNode {
 		return true;
 	}
 
+	public Object getReferenceParticipant() {
+		return null;
+	}
 }

@@ -21,5 +21,7 @@ public interface IReferenceNode {
 	String getText();
 
 	Image getImage();
+	
+	Object getReferenceParticipant();
 
 }

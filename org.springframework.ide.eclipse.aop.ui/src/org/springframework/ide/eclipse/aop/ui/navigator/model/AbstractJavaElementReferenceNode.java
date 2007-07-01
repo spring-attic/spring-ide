@@ -71,5 +71,9 @@ public class AbstractJavaElementReferenceNode {
 	public IMember getElement() {
 		return element;
 	}
+	
+	public Object getReferenceParticipant() {
+		return element;
+	}
 
 }

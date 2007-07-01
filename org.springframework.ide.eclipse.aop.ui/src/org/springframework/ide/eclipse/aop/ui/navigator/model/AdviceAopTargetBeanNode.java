@@ -97,11 +97,16 @@ public class AdviceAopTargetBeanNode implements IReferenceNode,
 
 	public IBean getTargetBean() {
 		return AopReferenceModelUtils.getBeanFromElementId(this.references.get(
-				0).getTargetBeanId()); 
+				0).getTargetBeanId());
 	}
 
 	public IResource getResource() {
 		return references.get(0).getResource();
+	}
+
+	public Object getReferenceParticipant() {
+		return AopReferenceModelUtils.getBeanFromElementId(this.references.get(
+				0).getTargetBeanId());
 	}
 
 }

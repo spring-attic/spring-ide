@@ -100,4 +100,9 @@ public class AdvisedAopTargetBeanNode implements IReferenceNode,
 			return null;
 		}
 	}
+
+	public Object getReferenceParticipant() {
+		return AopReferenceModelUtils.getBeanFromElementId(this.references.get(
+				0).getTargetBeanId());
+	}
 }

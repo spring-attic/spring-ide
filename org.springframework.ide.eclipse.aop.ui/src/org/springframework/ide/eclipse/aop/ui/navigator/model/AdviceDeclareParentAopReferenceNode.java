@@ -44,5 +44,9 @@ public class AdviceDeclareParentAopReferenceNode implements IReferenceNode {
 	public boolean hasChildren() {
 		return true;
 	}
+	
+	public Object getReferenceParticipant() {
+		return null;
+	}
 
 }

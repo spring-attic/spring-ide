@@ -114,5 +114,8 @@ public class AdviceRootAopReferenceNode implements IReferenceNode,
 	public IResource getResource() {
 		return reference.get(0).getResource();
 	}
-
+	
+	public Object getReferenceParticipant() {
+		return reference.get(0).getDefinition();
+	}
 }

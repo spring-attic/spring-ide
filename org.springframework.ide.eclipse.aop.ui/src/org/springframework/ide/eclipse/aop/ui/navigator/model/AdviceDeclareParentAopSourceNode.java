@@ -81,5 +81,8 @@ public class AdviceDeclareParentAopSourceNode implements IReferenceNode,
 	public IResource getResource() {
 		return references.get(0).getResource();
 	}
-
+	
+	public Object getReferenceParticipant() {
+		return references.get(0).getDefinition();
+	}
 }

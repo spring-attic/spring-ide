@@ -183,4 +183,8 @@ public class BeanReferenceNode implements IReferenceNode,
 	public List<IAopReference> getDeclareParentReferences() {
 		return declareParentReferences;
 	}
+	
+	public Object getReferenceParticipant() {
+		return getBean();
+	}
 }

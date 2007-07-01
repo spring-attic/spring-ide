@@ -39,4 +39,7 @@ public class InnerBeansReferenceNode implements IReferenceNode {
 		return true;
 	}
 
+	public Object getReferenceParticipant() {
+		return null;
+	}
 }

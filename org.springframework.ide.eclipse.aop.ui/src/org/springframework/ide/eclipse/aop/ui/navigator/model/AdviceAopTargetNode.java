@@ -120,4 +120,7 @@ public class AdviceAopTargetNode implements IReferenceNode,
 		return references.get(0).getResource();
 	}
 
+	public Object getReferenceParticipant() {
+		return references.get(0).getDefinition();
+	}
 }

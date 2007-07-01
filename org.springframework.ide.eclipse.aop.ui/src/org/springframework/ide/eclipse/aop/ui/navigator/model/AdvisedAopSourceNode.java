@@ -103,4 +103,7 @@ public class AdvisedAopSourceNode implements IReferenceNode,
 		return references.getResource();
 	}
 
+	public Object getReferenceParticipant() {
+		return references.getDefinition();
+	}
 }

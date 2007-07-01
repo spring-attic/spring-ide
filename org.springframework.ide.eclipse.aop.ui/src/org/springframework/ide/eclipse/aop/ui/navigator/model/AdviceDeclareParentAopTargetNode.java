@@ -84,4 +84,8 @@ public class AdviceDeclareParentAopTargetNode implements IReferenceNode,
 		return reference.getTarget().getResource();
 	}
 
+	public Object getReferenceParticipant() {
+		return AopReferenceModelUtils.getBeanFromElementId(this.reference
+				.getTargetBeanId());
+	}
 }

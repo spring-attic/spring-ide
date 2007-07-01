@@ -59,4 +59,8 @@ public class JavaElementReferenceNode implements IRevealableReferenceNode {
 	public IResource getResource() {
 		return method.getResource();
 	}
+	
+	public Object getReferenceParticipant() {
+		return method;
+	}
 }

@@ -45,4 +45,8 @@ public class AdvisedAopReferenceNode implements IReferenceNode {
 		return true;
 	}
 
+	public Object getReferenceParticipant() {
+		return null;
+	}
+
 }
