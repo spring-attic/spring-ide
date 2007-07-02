@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.beans.ui.navigator.actions.OpenConfigFile
 import org.springframework.ide.eclipse.beans.ui.navigator.actions.OpenJavaElementAction;
 import org.springframework.ide.eclipse.beans.ui.navigator.actions.OpenPropertiesAction;
 import org.springframework.ide.eclipse.beans.ui.navigator.actions.OpenReferenceAction;
+import org.springframework.ide.eclipse.beans.ui.navigator.actions.BeansValidationAction;
 
 /**
  * @author Torsten Juergeleit
@@ -30,14 +31,11 @@ import org.springframework.ide.eclipse.beans.ui.navigator.actions.OpenReferenceA
 public class BeansNavigatorActionProvider extends CommonActionProvider {
 
 	private OpenConfigFileAction openConfigAction;
-
 	private OpenReferenceAction openReferenceAction;
-
 	private OpenJavaElementAction openElementAction;
-
 	private OpenPropertiesAction openPropertiesAction;
-
 	private OpenActionWrapperAction openAction;
+	private BeansValidationAction validationAction;
 
 	public BeansNavigatorActionProvider() {
 	}
@@ -50,6 +48,7 @@ public class BeansNavigatorActionProvider extends CommonActionProvider {
 		openPropertiesAction = new OpenPropertiesAction(site);
 		openAction = new OpenActionWrapperAction(site, openConfigAction,
 				openElementAction);
+		validationAction = new BeansValidationAction(site);
 	}
 
 	@Override
@@ -65,6 +64,10 @@ public class BeansNavigatorActionProvider extends CommonActionProvider {
 		if (openElementAction.isEnabled()) {
 			menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN,
 					openElementAction);
+		}
+		if (validationAction.isEnabled()) {
+			menu.appendToGroup(ICommonMenuConstants.GROUP_BUILD,
+					validationAction);
 		}
 		if (openPropertiesAction.isEnabled()) {
 			menu.appendToGroup(ICommonMenuConstants.GROUP_PROPERTIES,

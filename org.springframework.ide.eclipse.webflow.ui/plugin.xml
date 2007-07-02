@@ -94,7 +94,7 @@
 				class="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowModelNavigatorSorter" />
 	      <actionProvider
 	            id="org.springframework.ide.eclipse.webflow.ui.navigator.springExplorerActions"
-	            class="org.springframework.ide.eclipse.webflow.ui.navigator.actions.WebflowNavigatorActionProvider">
+	            class="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorActionProvider">
 	         <enablement>
 				<or>
 					<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject"/>
@@ -143,7 +143,7 @@
 				class="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowModelNavigatorSorter"/>
 	      <actionProvider
 	            id="org.springframework.ide.eclipse.webflow.ui.navigator.projectExplorerActions"
-	            class="org.springframework.ide.eclipse.webflow.ui.navigator.actions.WebflowNavigatorActionProvider">
+	            class="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorActionProvider">
 		     <enablement>
 		     	<or>
 					<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject"/>

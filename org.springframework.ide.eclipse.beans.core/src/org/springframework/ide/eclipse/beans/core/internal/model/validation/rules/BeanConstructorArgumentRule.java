@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.validation.rules;
 
+import java.io.FileNotFoundException;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
@@ -173,11 +175,16 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 
 						public void doWithActiveProjectClassLoader()
 								throws Throwable {
-							ClassReaderFactory classReaderFactory = 
-								new SimpleClassReaderFactory();
-							ClassReader classReader = classReaderFactory
-									.getClassReader(className);
-							classReader.accept(visitor, false);
+							try { 
+								ClassReaderFactory classReaderFactory = 
+									new SimpleClassReaderFactory();
+								ClassReader classReader = classReaderFactory
+										.getClassReader(className);
+								classReader.accept(visitor, false);
+							}
+							catch (FileNotFoundException e) {
+								BeansCorePlugin.log(e);
+							}
 						}
 					});
 			}

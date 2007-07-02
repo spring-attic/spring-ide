@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.webflow.ui.navigator.actions;
+package org.springframework.ide.eclipse.webflow.ui.navigator;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.ui.IActionBars;
@@ -17,6 +17,11 @@ import org.eclipse.ui.navigator.CommonActionProvider;
 import org.eclipse.ui.navigator.ICommonActionConstants;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.eclipse.ui.navigator.ICommonMenuConstants;
+import org.springframework.ide.eclipse.webflow.ui.navigator.actions.OpenActionWrapperAction;
+import org.springframework.ide.eclipse.webflow.ui.navigator.actions.OpenConfigFileAction;
+import org.springframework.ide.eclipse.webflow.ui.navigator.actions.OpenPropertiesAction;
+import org.springframework.ide.eclipse.webflow.ui.navigator.actions.OpenWebflowGraphAction;
+import org.springframework.ide.eclipse.webflow.ui.navigator.actions.WebflowValidationAction;
 
 /**
  * @author Christian Dupuis
@@ -28,6 +33,7 @@ public class WebflowNavigatorActionProvider extends CommonActionProvider {
 	private OpenPropertiesAction openPropertiesAction;
 	private OpenWebflowGraphAction openGraphAction;
 	private OpenActionWrapperAction openActionWrapperAction;
+	private WebflowValidationAction validationAction;
 
 	public WebflowNavigatorActionProvider() {
 	}
@@ -39,6 +45,7 @@ public class WebflowNavigatorActionProvider extends CommonActionProvider {
 		openGraphAction = new OpenWebflowGraphAction(site);
 		openActionWrapperAction = new OpenActionWrapperAction(site,
 				openConfigAction, openGraphAction);
+		validationAction = new WebflowValidationAction(site);
 	}
 
 	@Override
@@ -50,6 +57,10 @@ public class WebflowNavigatorActionProvider extends CommonActionProvider {
 		if (openGraphAction.isEnabled()) {
 			menu.appendToGroup(ICommonMenuConstants.GROUP_OPEN,
 					openGraphAction);
+		}
+		if (validationAction.isEnabled()) {
+			menu.appendToGroup(ICommonMenuConstants.GROUP_BUILD,
+					validationAction);
 		}
 		if (openPropertiesAction.isEnabled()) {
 			menu.appendToGroup(ICommonMenuConstants.GROUP_PROPERTIES,
