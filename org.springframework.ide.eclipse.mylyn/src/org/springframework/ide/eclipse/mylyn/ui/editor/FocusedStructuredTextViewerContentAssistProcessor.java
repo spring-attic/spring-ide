@@ -96,7 +96,9 @@ public class FocusedStructuredTextViewerContentAssistProcessor implements
 		ICompletionProposal[] rawProposals = processor
 				.computeCompletionProposals(viewer, offset);
 		List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
-		proposals.addAll(Arrays.asList(rawProposals));
+		if (rawProposals != null && rawProposals.length > 0) {
+			proposals.addAll(Arrays.asList(rawProposals));
+		}
 
 		if (!ContextCorePlugin.getContextManager().isContextActive()) {
 			return rawProposals;
