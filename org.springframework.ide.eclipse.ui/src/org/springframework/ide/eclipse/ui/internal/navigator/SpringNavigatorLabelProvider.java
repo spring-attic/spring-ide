@@ -69,19 +69,17 @@ public class SpringNavigatorLabelProvider extends SpringUILabelProvider
 	}
 
 	@Override
-	protected Image getImage(Object element, Object parentElement,
-			int severity) {
+	protected Image getImage(Object element, Object parentElement) {
 		if (element instanceof ISpringProject
 				&& SpringUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
 						.equals(providerID)) {
 			return SpringUIImages.getImage(SpringUIImages.IMG_OBJS_SPRING);
 		}
-		return super.getImage(element, parentElement, severity);
+		return super.getImage(element, parentElement);
 	}
 
 	@Override
-	protected String getText(Object element, Object parentElement,
-			int severity) {
+	protected String getText(Object element, Object parentElement) {
 		if (element instanceof ISpringProject
 				&& SpringCoreUtils.getAdapter(parentElement, IProject.class) != null) {
 			return "Spring Elements"; // TODO Externalize string
@@ -89,6 +87,6 @@ public class SpringNavigatorLabelProvider extends SpringUILabelProvider
 		else if (element instanceof IWorkspaceRoot) {
 			return "Spring Explorer";
 		}
-		return super.getText(element, parentElement, severity);
+		return super.getText(element, parentElement);
 	}
 }

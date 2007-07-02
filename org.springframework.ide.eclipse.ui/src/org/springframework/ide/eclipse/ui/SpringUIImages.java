@@ -19,7 +19,6 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
 
 /**
  * The images provided by the Spring UI plugin.
@@ -211,7 +210,7 @@ public class SpringUIImages implements SpringUIImageFlags {
 
 		@Override
 		protected void drawOverlays() {
-			int flags = getFlags();
+			/*int flags = getFlags();
 			if ((flags & FLAG_WARNING) != 0) {
 				ImageData data = DESC_OVR_WARNING.getImageData();
 				drawImage(data, 0, getSize().y - data.height);
@@ -219,7 +218,7 @@ public class SpringUIImages implements SpringUIImageFlags {
 			if ((flags & FLAG_ERROR) != 0) {
 				ImageData data = DESC_OVR_ERROR.getImageData();
 				drawImage(data, 0, getSize().y - data.height);
-			}
+			}*/
 		}
 	}
 }

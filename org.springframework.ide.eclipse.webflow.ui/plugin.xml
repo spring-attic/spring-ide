@@ -192,6 +192,8 @@
             <or>
                <objectClass name="org.eclipse.core.resources.IFolder"/>
                <objectClass name="org.eclipse.core.resources.IFile"/>
+               <objectClass name="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement"/>
+               <objectClass name="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject"/>
             </or>
          </enablement>
       </decorator>

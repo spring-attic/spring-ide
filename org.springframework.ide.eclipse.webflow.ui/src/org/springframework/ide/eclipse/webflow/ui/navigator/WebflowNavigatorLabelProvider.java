@@ -11,13 +11,10 @@
 package org.springframework.ide.eclipse.webflow.ui.navigator;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.navigator.ICommonLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorLabelProvider;
-import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
@@ -29,27 +26,6 @@ import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.Webf
  * @since 2.0
  */
 public class WebflowNavigatorLabelProvider extends BeansNavigatorLabelProvider {
-
-	@Override
-	protected int getSeverity(Object element, Object parentElement) {
-		if (element instanceof IWebflowProject) {
-			int severity = 0;
-			for (IWebflowConfig config : ((IWebflowProject) element)
-					.getConfigs()) {
-				severity = MarkerUtils.getHighestSeverityFromMarkersInRange(
-						config.getResource(), -1, -1);
-				if (severity == IMarker.SEVERITY_ERROR) {
-					break;
-				}
-			}
-			return severity;
-		}
-		else if (element instanceof IWebflowConfig) {
-			return MarkerUtils.getHighestSeverityFromMarkersInRange(
-					((IWebflowConfig) element).getResource(), -1, -1);
-		}
-		return super.getSeverity(element, parentElement);
-	}
 
 	@Override
 	public String getDescription(Object element) {
@@ -75,28 +51,19 @@ public class WebflowNavigatorLabelProvider extends BeansNavigatorLabelProvider {
 	}
 
 	@Override
-	protected Image getImage(Object element, Object parentElement, int severity) {
+	protected Image getImage(Object element, Object parentElement) {
 		if (element instanceof IWebflowConfig) {
-			Image image = WebflowUIImages
-					.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW);
-			if (isDecorating()) {
-				image = SpringUIUtils.getDecoratedImage(image, severity);
-			}
-			return image;
+			return WebflowUIImages.getImage(WebflowUIImages.IMG_OBJS_WEBFLOW);
 		}
 		else if (element instanceof IWebflowProject) {
-			Image image = WebflowUIImages
+			return WebflowUIImages
 					.getImage(WebflowUIImages.IMG_OBJS_VIRTUAL_FOLDER);
-			if (isDecorating()) {
-				image = SpringUIUtils.getDecoratedImage(image, severity);
-			}
-			return image;
 		}
-		return super.getImage(element, parentElement, severity);
+		return super.getImage(element, parentElement);
 	}
 
 	@Override
-	protected String getText(Object element, Object parentElement, int severity) {
+	protected String getText(Object element, Object parentElement) {
 		if (element instanceof IWebflowProject) {
 			return "Web Flow"; // TODO Externalize text
 		}
@@ -114,6 +81,6 @@ public class WebflowNavigatorLabelProvider extends BeansNavigatorLabelProvider {
 				&& parentElement instanceof IWebflowProject) {
 			return ((IFile) element).getProjectRelativePath().toString();
 		}
-		return super.getText(element, parentElement, severity);
+		return super.getText(element, parentElement);
 	}
 }

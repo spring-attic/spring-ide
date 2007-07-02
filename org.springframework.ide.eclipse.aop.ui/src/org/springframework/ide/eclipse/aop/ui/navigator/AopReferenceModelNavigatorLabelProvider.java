@@ -27,7 +27,11 @@ import org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorLabelPro
  */
 public class AopReferenceModelNavigatorLabelProvider extends
 		BeansNavigatorLabelProvider {
-
+	
+	public AopReferenceModelNavigatorLabelProvider() {
+		super(true);
+	}
+	
 	@Override
 	public String getDescription(Object element) {
 		if (element instanceof IRevealableReferenceNode) {
@@ -43,21 +47,21 @@ public class AopReferenceModelNavigatorLabelProvider extends
 	}
 
 	@Override
-	public Image getImage(Object element, Object parentElement, int severity) {
+	public Image getImage(Object element, Object parentElement) {
 		if (element instanceof IReferenceNode) {
 			return ((IReferenceNode) element).getImage();
 		}
-		return super.getImage(element, parentElement, severity);
+		return super.getImage(element, parentElement);
 	}
 
 	@Override
-	public String getText(Object element, Object parentElement, int severity) {
+	public String getText(Object element, Object parentElement) {
 		if (element instanceof IReferenceNode) {
 			return ((IReferenceNode) element).getText();
 		}
 		else if (element instanceof IWorkspaceRoot) {
 			return "Beans Cross References";
 		}
-		return super.getText(element, parentElement, severity);
+		return super.getText(element, parentElement);
 	}
 }

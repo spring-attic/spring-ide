@@ -12,14 +12,20 @@ package org.springframework.ide.eclipse.webflow.ui.model;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
+import org.springframework.ide.eclipse.core.MarkerUtils;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.ui.SpringLabelDecorator;
+import org.springframework.ide.eclipse.ui.SpringUIImages;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModel;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelListener;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 import org.springframework.ide.eclipse.webflow.ui.Activator;
@@ -32,11 +38,23 @@ import org.springframework.ide.eclipse.webflow.ui.Activator;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class WebflowModelLabelDecorator extends LabelProvider implements
-		ILightweightLabelDecorator {
+public class WebflowModelLabelDecorator extends LabelProvider
+		implements ILightweightLabelDecorator {
 
 	public static final String DECORATOR_ID = Activator.PLUGIN_ID
 			+ ".model.webflowModelLabelDecorator";
+
+	public static final void update() {
+		SpringUIUtils.getStandardDisplay().asyncExec(new Runnable() {
+			public void run() {
+				IWorkbench workbench = PlatformUI.getWorkbench();
+				workbench.getDecoratorManager().update(DECORATOR_ID);
+				workbench.getDecoratorManager().update(
+						SpringLabelDecorator.DECORATOR_ID);
+			}
+
+		});
+	}
 
 	private IWebflowModelListener listener;
 
@@ -49,14 +67,48 @@ public class WebflowModelLabelDecorator extends LabelProvider implements
 		org.springframework.ide.eclipse.webflow.core.Activator.getModel()
 				.registerModelChangeListener(listener);
 	}
+	
+	private void addErrorOverlay(IDecoration decoration, int severity) {
+		if (severity == IMarker.SEVERITY_WARNING) {
+			decoration.addOverlay(SpringUIImages.DESC_OVR_WARNING,
+					IDecoration.BOTTOM_LEFT);
+		}
+		else if (severity == IMarker.SEVERITY_ERROR) {
+			decoration.addOverlay(SpringUIImages.DESC_OVR_ERROR,
+					IDecoration.BOTTOM_LEFT);
+		}
+	}
 
 	public void decorate(Object element, IDecoration decoration) {
-
 		if (element instanceof IFolder) {
 			decorateFolder((IFolder) element, decoration);
 		}
 		else if (element instanceof IFile) {
 			decorateFile((IFile) element, decoration);
+		}
+		else if (element instanceof IWebflowModelElement) {
+			decorateWebflowModelElement(((IModelElement) element),
+					decoration);
+		}
+		else if (element instanceof IWebflowProject) {
+			decorateWebflowModelElement(((IModelElement) element),
+					decoration);
+		}
+	}
+
+	protected void decorateFile(IFile file, IDecoration decoration) {
+		IWebflowModel model = org.springframework.ide.eclipse.webflow.core.Activator
+				.getModel();
+		if (model.hasProject(file.getProject())) {
+			IWebflowProject project = model.getProject(file.getProject());
+			for (IWebflowConfig config : project.getConfigs()) {
+				// The following comparison works for archived config files too
+				if (config.getResource().equals(file)) {
+					addErrorOverlay(decoration, getSeverity(config));
+					decoration.addOverlay(WebflowUIImages.DESC_OVR_WEBFLOW);
+					break;
+				}
+			}
 		}
 	}
 
@@ -76,38 +128,41 @@ public class WebflowModelLabelDecorator extends LabelProvider implements
 		}
 	}
 
-	protected void decorateFile(IFile file, IDecoration decoration) {
-		IWebflowModel model = org.springframework.ide.eclipse.webflow.core.Activator
-				.getModel();
-		if (model.hasProject(file.getProject())) {
-			IWebflowProject project = model.getProject(file.getProject());
-			for (IWebflowConfig config : project.getConfigs()) {
-				// The following comparison works for archived config files too
-				if (config.getResource().equals(file)) {
-					decoration.addOverlay(WebflowUIImages.DESC_OVR_WEBFLOW);
-					break;
-				}
-			}
-		}
+	/**
+	 * Adds error and warning decorations to {@link IWebflowModelElement}.
+	 * @since 2.1
+	 */
+	private void decorateWebflowModelElement(IModelElement element,
+			IDecoration decoration) {
+		addErrorOverlay(decoration, getSeverity(element));
 	}
 
-	@Override
-	public boolean isLabelProperty(Object element, String property) {
-		return false;
-	}
-
-	@Override
 	public void dispose() {
 		org.springframework.ide.eclipse.webflow.core.Activator.getModel()
 				.removeModelChangeListener(listener);
 	}
-
-	public static final void update() {
-		SpringUIUtils.getStandardDisplay().asyncExec(new Runnable() {
-			public void run() {
-				IWorkbench workbench = PlatformUI.getWorkbench();
-				workbench.getDecoratorManager().update(DECORATOR_ID);
+	
+	public boolean isLabelProperty(Object element, String property) {
+		return false;
+	}
+	
+	protected int getSeverity(Object element) {
+		if (element instanceof IWebflowProject) {
+			int severity = 0;
+			for (IWebflowConfig config : ((IWebflowProject) element)
+					.getConfigs()) {
+				severity = MarkerUtils.getHighestSeverityFromMarkersInRange(
+						config.getResource(), -1, -1);
+				if (severity == IMarker.SEVERITY_ERROR) {
+					break;
+				}
 			}
-		});
+			return severity;
+		}
+		else if (element instanceof IWebflowConfig) {
+			return MarkerUtils.getHighestSeverityFromMarkersInRange(
+					((IWebflowConfig) element).getResource(), -1, -1);
+		}
+		return 0;
 	}
 }

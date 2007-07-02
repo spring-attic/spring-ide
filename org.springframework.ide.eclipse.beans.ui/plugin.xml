@@ -86,6 +86,7 @@
                <objectClass name="org.eclipse.core.resources.IFolder"/>
                <objectClass name="org.eclipse.core.resources.IFile"/>
                <objectClass name="org.eclipse.jdt.core.IJavaElement"/>
+               <objectClass name="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
             </or>
          </enablement>
       </decorator>

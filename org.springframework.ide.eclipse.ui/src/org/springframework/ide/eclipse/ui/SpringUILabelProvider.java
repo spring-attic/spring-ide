@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.ui;
 
 import org.eclipse.swt.graphics.Image;
-import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.ui.viewers.DecoratingWorkbenchTreePathLabelProvider;
 
@@ -30,34 +29,20 @@ public class SpringUILabelProvider extends
 	}
 
 	@Override
-	protected int getSeverity(Object element, Object parentElement) {
-		if (element instanceof ISpringProject) {
-			return MarkerUtils.getHighestSeverityFromMarkersInRange(
-					((ISpringProject) element).getProject(), -1, -1);
-		}
-		return super.getSeverity(element, parentElement);
-	}
-
-	@Override
-	protected Image getImage(Object element, Object parentElement,
-			int severity) {
+	protected Image getImage(Object element, Object parentElement) {
 		if (element instanceof ISpringProject) {
 			Image image = SpringUIImages
 					.getImage(SpringUIImages.IMG_OBJS_PROJECT);
-			if (isDecorating()) {
-				image = SpringUIUtils.getDecoratedImage(image, severity);
-			}
 			return image;
 		}
-		return super.getImage(element, parentElement, severity);
+		return super.getImage(element, parentElement);
 	}
 
 	@Override
-	protected String getText(Object element, Object parentElement,
-			int severity) {
+	protected String getText(Object element, Object parentElement) {
 		if (element instanceof ISpringProject) {
 			return ((ISpringProject) element).getProject().getName();
 		}
-		return super.getText(element, parentElement, severity);
+		return super.getText(element, parentElement);
 	}
 }

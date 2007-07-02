@@ -30,7 +30,6 @@ import org.springframework.ide.eclipse.core.model.ILazyInitializedModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
  * {@link ICommonLabelProvider} which knows about the beans core model's
@@ -112,21 +111,16 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 	}
 
 	@Override
-	protected Image getImage(Object element, Object parentElement,
-			int severity) {
+	protected Image getImage(Object element, Object parentElement) {
 		if (element instanceof IBeansProject) {
 			Image image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_VIRTUAL_FOLDER);
-			if (isDecorating()) {
-				image = SpringUIUtils.getDecoratedImage(image, severity);
-			}
 			return image;
 		}
-		return super.getImage(element, parentElement, severity);
+		return super.getImage(element, parentElement);
 	}
 
 	@Override
-	protected String getText(Object element, Object parentElement,
-			int severity) {
+	protected String getText(Object element, Object parentElement) {
 		if (element instanceof IBeansProject) {
 			return "Beans";	// TODO CD Externalize string
 		}
@@ -143,6 +137,6 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 				&& !((ILazyInitializedModelElement) element).isInitialized()) {
 			return "loading model content..."; // TODO CD Externalize string
 		}
-		return super.getText(element, parentElement, severity);
+		return super.getText(element, parentElement);
 	}
 }

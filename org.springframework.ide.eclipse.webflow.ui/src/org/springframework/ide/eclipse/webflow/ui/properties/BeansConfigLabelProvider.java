@@ -27,11 +27,10 @@ public class BeansConfigLabelProvider extends BeansModelLabelProvider {
 	}
 
 	@Override
-	protected String getText(Object element, Object parentElement,
-			int severity) {
+	protected String getText(Object element, Object parentElement) {
 		if (element instanceof IBeansConfig) {
 			return ((IBeansConfig) element).getElementName();
 		}
-		return super.getText(element, parentElement, severity);
+		return super.getText(element, parentElement);
 	}
 }

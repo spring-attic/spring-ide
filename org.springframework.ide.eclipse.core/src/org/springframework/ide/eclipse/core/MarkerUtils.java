@@ -15,7 +15,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
 /**
- * Some {@link IMarker}Êhelper methods.
+ * Some {@link IMarker} helper methods.
  * 
  * @author Torsten Juergeleit
  */
@@ -25,7 +25,8 @@ public final class MarkerUtils {
 			int startLine, int endLine) {
 		int severity = -1;
 		try {
-			IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true,
+			// TODO CD change this to SpringCore.MARKER_ID or IMarker.PROBLEM
+			IMarker[] markers = resource.findMarkers(SpringCore.MARKER_ID, true,
 					IResource.DEPTH_INFINITE);
 			for (IMarker marker : markers) {
 				if (startLine == -1

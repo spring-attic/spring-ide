@@ -245,5 +245,24 @@
             id="org.springframework.ide.eclipse.ui.springWorkingSetPage">
       </workingSet>
    </extension>
+   
+   <extension
+         point="org.eclipse.ui.decorators">
+      <decorator
+            lightweight="true"
+            adaptable="false"
+            location="TOP_RIGHT"
+            label="%decorator.label"
+            state="true"
+            class="org.springframework.ide.eclipse.ui.SpringLabelDecorator"
+            id="org.springframework.ide.eclipse.ui.model.modelLabelDecorator">
+         <description>
+            %decorator.description
+         </description>
+         <enablement>
+         	<objectClass name=" org.springframework.ide.eclipse.core.model.ISpringProject"/>
+         </enablement>
+      </decorator>
+   </extension>
 
 </plugin>

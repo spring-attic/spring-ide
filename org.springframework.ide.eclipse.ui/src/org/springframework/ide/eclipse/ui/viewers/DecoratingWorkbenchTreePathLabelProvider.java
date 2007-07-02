@@ -17,7 +17,6 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.ViewerLabel;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
  * This template implementation of the {@link ITreePathLabelProvider} interface
@@ -50,14 +49,12 @@ public class DecoratingWorkbenchTreePathLabelProvider extends LabelProvider
 
 	@Override
 	public final Image getImage(Object element) {
-		int severity = (isDecorating ? getSeverity(element, null) : 0);
-		return getImage(element, null, severity);
+		return getImage(element, null);
 	}
 
 	@Override
 	public final String getText(Object element) {
-		int severity = (isDecorating ? getSeverity(element, null) : 0);
-		return getText(element, null, severity);
+		return getText(element, null);
 	}
 
 	public final void updateLabel(ViewerLabel label, TreePath elementPath) {
@@ -71,43 +68,24 @@ public class DecoratingWorkbenchTreePathLabelProvider extends LabelProvider
 			else {
 				parentElement = null;
 			}
-			int severity = (isDecorating ? getSeverity(element, parentElement)
-					: 0);
-			label.setImage(getImage(element, parentElement, severity));
-			label.setText(getText(element, parentElement, severity));
+			label.setImage(getImage(element, parentElement));
+			label.setText(getText(element, parentElement));
 		}
-	}
-
-	/**
-	 * Returns one of the <code>IMarker.SEVERITY_xxx</code> constants or
-	 * <code>0</code> for the given {@link TreePath} element and it's parent
-	 * element.
-	 */
-	protected int getSeverity(Object element, Object parentElement) {
-		return 0;
 	}
 
 	/**
 	 * Returns the decorated image for the given {@link TreePath} element, it's
-	 * parent element and the corresponding the
-	 * <code>IMarker.SEVERITY_xxx</code> constant.
+	 * parent element.
 	 */
-	protected Image getImage(Object element, Object parentElement,
-			int severity) {
-		Image image = wbLabelProvider.getImage(element);
-		if (isDecorating) {
-			image = SpringUIUtils.getDecoratedImage(image, severity);
-		}
-		return image;
+	protected Image getImage(Object element, Object parentElement) {
+		return wbLabelProvider.getImage(element);
 	}
 
 	/**
 	 * Returns the decorated text for the given {@link TreePath} element, it's
-	 * parent element and the corresponding the
-	 * <code>IMarker.SEVERITY_xxx</code> constant.
+	 * parent element.
 	 */
-	protected String getText(Object element, Object parentElement,
-			int severity) {
+	protected String getText(Object element, Object parentElement) {
 		return wbLabelProvider.getText(element);
 	}
 }

@@ -35,11 +35,10 @@ public class BeansSearchLabelProvider extends BeansModelLabelProvider {
 	}	
 
 	@Override
-	protected String getText(Object element, Object parentElement,
-			int severity) {
+	protected String getText(Object element, Object parentElement) {
 		if (element instanceof IFile) {
 			return ((IFile) element).getProjectRelativePath().toString();
 		}
-		return super.getText(element, parentElement, severity);
+		return super.getText(element, parentElement);
 	}
 }

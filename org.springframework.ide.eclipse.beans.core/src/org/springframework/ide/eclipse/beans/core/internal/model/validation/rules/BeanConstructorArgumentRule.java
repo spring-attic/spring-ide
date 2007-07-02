@@ -150,7 +150,7 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 	private boolean checkIfAutowiredAnnotationPostProcessorIsRegistered
 		(BeansValidationContext context) {
 		try {
-			return context.getIncompleteRegistry().getBeanDefinition(
+			return context.getCompleteRegistry().getBeanDefinition(
 				AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME) != null;
 		}
 		catch (NoSuchBeanDefinitionException e) {

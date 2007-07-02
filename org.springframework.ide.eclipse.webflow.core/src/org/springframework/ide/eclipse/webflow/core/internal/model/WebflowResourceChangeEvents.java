@@ -16,6 +16,7 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeEventsAdapter;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.internal.model.resources.IWebflowResourceChangeEvents;
+import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 
 /**
  * @author Christian Dupuis
@@ -53,6 +54,11 @@ public class WebflowResourceChangeEvents extends
 	}
 
 	public void configChanged(IFile file, int eventType) {
+		IProject project = file.getProject();
+		IWebflowProject wfp = Activator.getModel().getProject(project);
+		if (wfp != null) {
+			Activator.getModel().fireModelChangedEvent(wfp);
+		}
 	}
 
 	public void configRemoved(IFile file, int eventType) {

@@ -164,14 +164,14 @@ public final class BeansModelImages implements BeansModelImageFlags {
 				ImageData data = BeansUIImages.DESC_OVR_ANNOTATION.getImageData();
 				drawImage(data, 0, getSize().y - data.height);
 			}
-			if ((flags & BeansModelImages.FLAG_WARNING) != 0) {
+			/*if ((flags & BeansModelImages.FLAG_WARNING) != 0) {
 				ImageData data = BeansUIImages.DESC_OVR_WARNING.getImageData();
 				drawImage(data, 0, getSize().y - data.height);
 			}
 			if ((flags & BeansModelImages.FLAG_ERROR) != 0) {
 				ImageData data = BeansUIImages.DESC_OVR_ERROR.getImageData();
 				drawImage(data, 0, getSize().y - data.height);
-			}
+			}*/
 			if ((flags & BeansModelImages.FLAG_EXTERNAL) != 0) {
 				ImageData data = BeansUIImages.DESC_OVR_EXTERNAL.getImageData();
 				drawImage(data, getSize().x - data.width, getSize().y
