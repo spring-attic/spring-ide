@@ -41,6 +41,13 @@
          unpack="false"/>
 
    <plugin
+         id="org.springframework.ide.eclipse.aop.mylyn"
+         download-size="0"
+         install-size="0"
+         version="2.0.1.qualifier"
+         unpack="false"/>
+
+   <plugin
          id="org.springframework.ide.eclipse.mylyn"
          download-size="0"
          install-size="0"

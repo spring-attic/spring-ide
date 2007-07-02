@@ -36,10 +36,10 @@ public class AopReferenceModelNavigatorLabelProvider extends
 				return node.getResource().getName()
 						+ " - "
 						+ node.getResource().getFullPath().toString()
-								.substring(1);
+								.substring(1) + element;
 			}
 		}
-		return super.getDescription(element);
+		return super.getDescription(element) + element;
 	}
 
 	@Override

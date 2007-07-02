@@ -65,6 +65,9 @@
 		<antcall target="copy.source">
 			<param name="plugin-name" value="org.springframework.ide.eclipse.beans.mylyn" />
 		</antcall>
+		<antcall target="copy.source">
+			<param name="plugin-name" value="org.springframework.ide.eclipse.aop.mylyn" />
+		</antcall>
 	</target>
 
 	<!-- ===================================================================== -->
