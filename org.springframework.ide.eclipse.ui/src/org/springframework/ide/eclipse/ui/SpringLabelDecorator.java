@@ -14,6 +14,8 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
@@ -29,7 +31,30 @@ public class SpringLabelDecorator extends LabelProvider implements
 	public static final String DECORATOR_ID = SpringUIPlugin.PLUGIN_ID
 			+ ".model.modelLabelDecorator";
 
-	private void addErrorOverlay(IDecoration decoration, int severity) {
+	public void decorate(Object element, IDecoration decoration) {
+		if (element instanceof ISpringProject) {
+			decorateModelElement(((ISpringProject) element), decoration);
+		}
+	}
+
+	public static void update() {
+		SpringUIUtils.getStandardDisplay().asyncExec(new Runnable() {
+			public void run() {
+				IWorkbench workbench = PlatformUI.getWorkbench();
+				workbench.getDecoratorManager().update(DECORATOR_ID);
+			}
+		});
+	}
+
+	/**
+	 * Adds error and warning decorations to {@link IBeansModelElement}.
+	 */
+	private void decorateModelElement(IModelElement element,
+			IDecoration decoration) {
+		addErrorOverlay(decoration, getSeverity(element));
+	}
+
+	protected final void addErrorOverlay(IDecoration decoration, int severity) {
 		if (severity == IMarker.SEVERITY_WARNING) {
 			decoration.addOverlay(SpringUIImages.DESC_OVR_WARNING,
 					IDecoration.BOTTOM_LEFT);
@@ -40,21 +65,6 @@ public class SpringLabelDecorator extends LabelProvider implements
 		}
 	}
 
-	public void decorate(Object element, IDecoration decoration) {
-		if (element instanceof ISpringProject) {
-			decorateModelElement(((ISpringProject) element), decoration);
-		}
-	}
-
-	/**
-	 * Adds error and warning decorations to {@link IBeansModelElement}.
-	 * @since 2.1
-	 */
-	private void decorateModelElement(IModelElement element,
-			IDecoration decoration) {
-		addErrorOverlay(decoration, getSeverity(element));
-	}
-	
 	protected int getSeverity(Object element) {
 		if (element instanceof ISpringProject) {
 			return MarkerUtils.getHighestSeverityFromMarkersInRange(

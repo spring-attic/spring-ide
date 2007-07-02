@@ -15,13 +15,11 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.ui.SpringLabelDecorator;
-import org.springframework.ide.eclipse.ui.SpringUIImages;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModel;
@@ -38,7 +36,7 @@ import org.springframework.ide.eclipse.webflow.ui.Activator;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class WebflowModelLabelDecorator extends LabelProvider
+public class WebflowModelLabelDecorator extends SpringLabelDecorator
 		implements ILightweightLabelDecorator {
 
 	public static final String DECORATOR_ID = Activator.PLUGIN_ID
@@ -68,17 +66,6 @@ public class WebflowModelLabelDecorator extends LabelProvider
 				.registerModelChangeListener(listener);
 	}
 	
-	private void addErrorOverlay(IDecoration decoration, int severity) {
-		if (severity == IMarker.SEVERITY_WARNING) {
-			decoration.addOverlay(SpringUIImages.DESC_OVR_WARNING,
-					IDecoration.BOTTOM_LEFT);
-		}
-		else if (severity == IMarker.SEVERITY_ERROR) {
-			decoration.addOverlay(SpringUIImages.DESC_OVR_ERROR,
-					IDecoration.BOTTOM_LEFT);
-		}
-	}
-
 	public void decorate(Object element, IDecoration decoration) {
 		if (element instanceof IFolder) {
 			decorateFolder((IFolder) element, decoration);

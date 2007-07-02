@@ -13,8 +13,6 @@ package org.springframework.ide.eclipse.beans.ui.model;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
-import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
@@ -117,7 +115,7 @@ public final class BeansModelImages implements BeansModelImageFlags {
 		return BeansUIPlugin.getImageDescriptorRegistry().get(descriptor);
 	}
 
-	private static int getFlags(IModelElement element,
+	protected static int getFlags(IModelElement element,
 			IModelElement context) {
 		int flags = 0;
 		if (element instanceof IBeansConfig) {
@@ -125,25 +123,8 @@ public final class BeansModelImages implements BeansModelImageFlags {
 				flags |= FLAG_EXTERNAL;
 			}
 		} else if (element instanceof Bean) {
-			Bean bean = (Bean) element;
 			if (ModelUtils.isExternal(element, context)) {
 				flags |= FLAG_EXTERNAL;
-			}
-			BeanDefinition bd = bean.getBeanDefinition();
-			if (bean.isChildBean()) {
-				flags |= FLAG_CHILD;
-			}
-			if (bean.isFactory()) {
-				flags |= FLAG_FACTORY;
-			}
-			if (bean.isAbstract()) {
-				flags |= FLAG_ABSTRACT;
-			}
-			if (!bd.isSingleton()) {
-				flags |= FLAG_PROTOTYPE;
-			}
-			if (bd instanceof AnnotatedBeanDefinition) {
-				flags |= FLAG_ANNOTATION;
 			}
 		}
 		return flags;
@@ -160,39 +141,10 @@ public final class BeansModelImages implements BeansModelImageFlags {
 		@Override
 		protected void drawOverlays() {
 			int flags = getFlags();
-			if ((flags & BeansModelImages.FLAG_ANNOTATION) != 0) {
-				ImageData data = BeansUIImages.DESC_OVR_ANNOTATION.getImageData();
-				drawImage(data, 0, getSize().y - data.height);
-			}
-			/*if ((flags & BeansModelImages.FLAG_WARNING) != 0) {
-				ImageData data = BeansUIImages.DESC_OVR_WARNING.getImageData();
-				drawImage(data, 0, getSize().y - data.height);
-			}
-			if ((flags & BeansModelImages.FLAG_ERROR) != 0) {
-				ImageData data = BeansUIImages.DESC_OVR_ERROR.getImageData();
-				drawImage(data, 0, getSize().y - data.height);
-			}*/
 			if ((flags & BeansModelImages.FLAG_EXTERNAL) != 0) {
 				ImageData data = BeansUIImages.DESC_OVR_EXTERNAL.getImageData();
 				drawImage(data, getSize().x - data.width, getSize().y
 						- data.height);
-			}
-			if ((flags & FLAG_CHILD) != 0) {
-				ImageData data = BeansUIImages.DESC_OVR_CHILD.getImageData();
-				drawImage(data, getSize().x - data.width, 0);
-			}
-			if ((flags & FLAG_FACTORY) != 0) {
-				ImageData data = BeansUIImages.DESC_OVR_FACTORY.getImageData();
-				drawImage(data, 0, 0);
-			}
-			if ((flags & FLAG_ABSTRACT) != 0) {
-				ImageData data = BeansUIImages.DESC_OVR_ABSTRACT.getImageData();
-				drawImage(data, getSize().x - data.width, 0);
-			}
-			if ((flags & FLAG_PROTOTYPE) != 0) {
-				ImageData data = BeansUIImages.DESC_OVR_PROTOTYPE
-						.getImageData();
-				drawImage(data, getSize().x / 2 - data.width / 2 - 1, 0);
 			}
 		}
 	}

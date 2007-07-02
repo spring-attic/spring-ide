@@ -22,10 +22,12 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
@@ -41,7 +43,6 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.ide.eclipse.ui.SpringLabelDecorator;
-import org.springframework.ide.eclipse.ui.SpringUIImages;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
@@ -53,19 +54,18 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-public class BeansModelLabelDecorator extends LabelProvider implements
-		ILightweightLabelDecorator {
+public class BeansModelLabelDecorator extends SpringLabelDecorator
+		implements ILightweightLabelDecorator {
 
 	public static final String DECORATOR_ID = BeansUIPlugin.PLUGIN_ID
 			+ ".model.beansModelLabelDecorator";
 
-	public static final void update() {
+	public static void update() {
+		SpringLabelDecorator.update();
 		SpringUIUtils.getStandardDisplay().asyncExec(new Runnable() {
 			public void run() {
 				IWorkbench workbench = PlatformUI.getWorkbench();
 				workbench.getDecoratorManager().update(DECORATOR_ID);
-				workbench.getDecoratorManager().update(
-						SpringLabelDecorator.DECORATOR_ID);
 			}
 		});
 	}
@@ -85,17 +85,6 @@ public class BeansModelLabelDecorator extends LabelProvider implements
 		BeansCorePlugin.getModel().addChangeListener(listener);
 	}
 
-	private void addErrorOverlay(IDecoration decoration, int severity) {
-		if (severity == IMarker.SEVERITY_WARNING) {
-			decoration.addOverlay(SpringUIImages.DESC_OVR_WARNING,
-					IDecoration.BOTTOM_LEFT);
-		}
-		else if (severity == IMarker.SEVERITY_ERROR) {
-			decoration.addOverlay(SpringUIImages.DESC_OVR_ERROR,
-					IDecoration.BOTTOM_LEFT);
-		}
-	}
-
 	public void decorate(Object element, IDecoration decoration) {
 		if (element instanceof IFolder) {
 			decorateFolder((IFolder) element, decoration);
@@ -107,8 +96,39 @@ public class BeansModelLabelDecorator extends LabelProvider implements
 			decorateJavaElement(((IJavaElement) element), decoration);
 		}
 		else if (element instanceof IBeansModelElement) {
+			if (element instanceof Bean) {
+				decorateBean((Bean) element, decoration);
+			}
 			decorateBeansModelElement(((IBeansModelElement) element),
 					decoration);
+		}
+	}
+	
+	/**
+	 * Adds decorations to {@link Bean}s.
+	 * @since 2.1
+	 */
+	private void decorateBean(Bean bean, IDecoration decoration) {
+		BeanDefinition bd = bean.getBeanDefinition();
+		if (bean.isChildBean()) {
+			decoration.addOverlay(BeansUIImages.DESC_OVR_CHILD,
+					IDecoration.TOP_RIGHT);
+		}
+		if (bean.isFactory()) {
+			decoration.addOverlay(BeansUIImages.DESC_OVR_FACTORY,
+					IDecoration.TOP_LEFT);
+		}
+		if (bean.isAbstract()) {
+			decoration.addOverlay(BeansUIImages.DESC_OVR_ABSTRACT,
+					IDecoration.BOTTOM_RIGHT);
+		}
+		if (!bd.isSingleton()) {
+			decoration.addOverlay(BeansUIImages.DESC_OVR_PROTOTYPE,
+					IDecoration.BOTTOM_RIGHT);
+		}
+		if (bd instanceof AnnotatedBeanDefinition) {
+			decoration.addOverlay(BeansUIImages.DESC_OVR_ANNOTATION,
+					IDecoration.BOTTOM_LEFT);
 		}
 	}
 
@@ -214,11 +234,6 @@ public class BeansModelLabelDecorator extends LabelProvider implements
 		BeansCorePlugin.getModel().removeChangeListener(listener);
 	}
 
-	@Override
-	public boolean isLabelProperty(Object element, String property) {
-		return false;
-	}
-	
 	protected int getSeverity(Object element) {
 		int severity = 0;
 		if (element instanceof ISourceModelElement) {
@@ -266,5 +281,10 @@ public class BeansModelLabelDecorator extends LabelProvider implements
 					resource, -1, -1);
 		}
 		return severity;
+	}
+
+	@Override
+	public boolean isLabelProperty(Object element, String property) {
+		return false;
 	}
 }
