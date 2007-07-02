@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+	
+	<extension point="org.eclipse.ui.viewActions"> 
+    	<viewContribution 
+	    	id="org.springframework.ide.eclipse.aop.mylyn.ui.filter" 
+   		    targetID="org.springframework.ide.eclipse.aop.ui.navigator.aopReferenceModelNavigator">
+	    	<action
+	           label="%filterAopReferenceModelNavigatorAction.label"
+	           tooltip="%filterAopReferenceModelNavigatorAction.tooltip"
+	           menubarPath="mylyn"
+	           toolbarPath="mylyn"
+	           id="org.springframework.ide.eclipse.beans.mylyn.ui.actions.filterSpringExplorerAction"
+	           class="org.springframework.ide.eclipse.aop.mylyn.ui.actions.FocusAopReferenceModelNavigatorAction"
+	           style="toggle"
+	           icon="icons/elcl16/interest-filtering.gif"
+	           enablesFor="*" />
+	  	</viewContribution> 
+	</extension>
+	
+</plugin>
