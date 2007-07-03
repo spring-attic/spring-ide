@@ -92,7 +92,8 @@ public final class BeansUIUtils {
 			if (input instanceof IFileEditorInput) {
 				IFile file = ((IFileEditorInput) input).getFile();
 				return BeansCorePlugin.getModel().getConfig(file);
-			} else if (input instanceof ZipEntryEditorInput) {
+			}
+			else if (input instanceof ZipEntryEditorInput) {
 				ZipEntryStorage storage = (ZipEntryStorage) ((ZipEntryEditorInput) input)
 						.getStorage();
 				IBeansProject project = BeansCorePlugin.getModel().getProject(
@@ -106,9 +107,9 @@ public final class BeansUIUtils {
 	}
 
 	/**
-	 * Returns a corresponding instance of <code>IPropertySource</code> for the
-	 * given model element ID or null.
-	 * @param id  the model element ID
+	 * Returns a corresponding instance of <code>IPropertySource</code> for
+	 * the given model element ID or null.
+	 * @param id the model element ID
 	 */
 	public static IPropertySource getPropertySource(String id) {
 		IModelElement element = BeansCorePlugin.getModel().getElement(id);
@@ -116,38 +117,46 @@ public final class BeansUIUtils {
 	}
 
 	/**
-	 * Returns a corresponding instance of <code>IPropertySource</code> for the
-	 * given <code>IModelElement</code> or null.
+	 * Returns a corresponding instance of <code>IPropertySource</code> for
+	 * the given <code>IModelElement</code> or null.
 	 */
 	public static IPropertySource getPropertySource(IModelElement element) {
 		if (element instanceof IBeansProject) {
-			return new ResourcePropertySource(
-										((IBeansProject) element).getProject());
-		} else if (element instanceof IBeansConfig) {
+			return new ResourcePropertySource(((IBeansProject) element)
+					.getProject());
+		}
+		else if (element instanceof IBeansConfig) {
 			IFile file = (IFile) ((IBeansConfig) element).getElementResource();
 			if (file != null && file.exists()) {
 				return new FilePropertySource(file);
 			}
-		} else if (element instanceof IBeansConfigSet) {
+		}
+		else if (element instanceof IBeansConfigSet) {
 			return new ConfigSetProperties(((IBeansConfigSet) element));
-			
-		} else if (element instanceof IBean) {
+
+		}
+		else if (element instanceof IBean) {
 			IBean bean = ((IBean) element);
 			if (bean.isRootBean()) {
 				return new RootBeanProperties(bean);
-			} else if (bean.isChildBean()){
-				return new ChildBeanProperties(bean);
-			} else {
-// FIXME add support for factory beans
-//				return new FactoryBeanProperties(bean);
 			}
-		} else if (element instanceof IBeanConstructorArgument) {
+			else if (bean.isChildBean()) {
+				return new ChildBeanProperties(bean);
+			}
+			else {
+				// FIXME add support for factory beans
+				// return new FactoryBeanProperties(bean);
+			}
+		}
+		else if (element instanceof IBeanConstructorArgument) {
 			return new ConstructorArgumentProperties(
-											(IBeanConstructorArgument) element);
-		} else if (element instanceof IBeanProperty) {
+					(IBeanConstructorArgument) element);
+		}
+		else if (element instanceof IBeanProperty) {
 			return new PropertyProperties((IBeanProperty) element);
-		} else if (element instanceof BeanClassReferences) {
-// TODO implement IPropertySource for BeanClassReferences
+		}
+		else if (element instanceof BeanClassReferences) {
+			// TODO implement IPropertySource for BeanClassReferences
 		}
 		return null;
 	}
@@ -158,15 +167,20 @@ public final class BeansUIUtils {
 					.getResourceString("PropertiesPage.title")
 					+ project.getName();
 			IPreferencePage page = new ProjectPropertyPage(project, block);
-			SpringUIUtils.showPreferencePage(ProjectPropertyPage.ID,
-					page, title);
+			SpringUIUtils.showPreferencePage(ProjectPropertyPage.ID, page,
+					title);
 		}
+	}
+
+	public static IEditorPart openInEditor(IResourceModelElement element) {
+		return openInEditor(element, true);
 	}
 
 	/**
 	 * Opens given {@link IResourceModelElement} in associated editor.
 	 */
-	public static IEditorPart openInEditor(IResourceModelElement element) {
+	public static IEditorPart openInEditor(IResourceModelElement element,
+			boolean activate) {
 		IResourceModelElement sourceElement;
 		IResource resource = null;
 		int line;
@@ -176,19 +190,28 @@ public final class BeansUIUtils {
 			line = source.getElementStartLine();
 			Resource res = source.getElementSourceLocation().getResource();
 			if (res instanceof IAdaptable) {
-				resource = (IResource) ((IAdaptable) res).getAdapter(IFile.class);
+				resource = (IResource) ((IAdaptable) res)
+						.getAdapter(IFile.class);
 			}
 			else {
 				resource = sourceElement.getElementResource();
 			}
-		} else if (element instanceof BeansConfig) {
+		}
+		else if (element instanceof BeansConfig) {
 			sourceElement = element;
 			line = ((BeansConfig) element).getElementStartLine();
 			resource = sourceElement.getElementResource();
-		} else {
+		}
+		else {
 			return null;
 		}
+		
+		
 		if (resource instanceof IFile) {
+			
+			// add to history
+			BeansUIActivationHistory.addToHistory(element);
+			
 			IFile file = (IFile) resource;
 			if (sourceElement.isElementArchived()) {
 				try {
@@ -202,11 +225,13 @@ public final class BeansUIUtils {
 					marker.setAttribute(IMarker.LINE_NUMBER, line);
 					IDE.gotoMarker(editor, marker);
 					return editor;
-				} catch (CoreException e) {
+				}
+				catch (CoreException e) {
 					BeansCorePlugin.log(e);
 				}
-			} else {
-				return SpringUIUtils.openInEditor(file, line);
+			}
+			else {
+				return SpringUIUtils.openInEditor(file, line, activate);
 			}
 		}
 		return null;
@@ -214,8 +239,7 @@ public final class BeansUIUtils {
 
 	public static IModelElement getSelectedElement(ISelection selection,
 			IModelElement contextElement) {
-		if (selection instanceof IStructuredSelection
-				&& !selection.isEmpty()) {
+		if (selection instanceof IStructuredSelection && !selection.isEmpty()) {
 			IStructuredSelection sSelection = (IStructuredSelection) selection;
 			for (Object sElement : sSelection.toArray()) {
 				if (sElement instanceof Element) {
@@ -235,7 +259,8 @@ public final class BeansUIUtils {
 				IBeansConfig config = (IBeansConfig) element;
 				if (config.isElementArchived()) {
 					path.addParent(new ZipEntryStorage(config));
-				} else {
+				}
+				else {
 					path.addParent(config.getElementResource());
 				}
 			}
