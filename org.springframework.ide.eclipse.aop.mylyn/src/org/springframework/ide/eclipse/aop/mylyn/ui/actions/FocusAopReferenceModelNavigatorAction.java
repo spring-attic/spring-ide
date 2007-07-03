@@ -28,7 +28,9 @@ import org.springframework.ide.eclipse.aop.mylyn.ui.AopReferenceModelNavigatorIn
  * @since 2.0
  */
 public class FocusAopReferenceModelNavigatorAction extends FocusCommonNavigatorAction {
-
+	
+	private boolean isLinkingEnabled = false;
+	
 	public FocusAopReferenceModelNavigatorAction() {
 		super(new AopReferenceModelNavigatorInterestFilter(), true, true, true);
 	}
@@ -48,5 +50,16 @@ public class FocusAopReferenceModelNavigatorAction extends FocusCommonNavigatorA
 		}
 		return viewers;
 	}
-
+	
+	@Override
+	protected void setDefaultLinkingEnabled(boolean on) {
+		// override to always stay in the same state
+		super.setDefaultLinkingEnabled(isLinkingEnabled);
+	}
+	
+	@Override
+	protected boolean isDefaultLinkingEnabled() {
+		isLinkingEnabled = super.isDefaultLinkingEnabled();
+		return isLinkingEnabled;
+	}
 }
