@@ -10,15 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.ui.navigator.actions;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
@@ -26,59 +26,62 @@ import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.navigator.CommonNavigator;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.eclipse.ui.progress.IProgressConstants;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidatorDefinition;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidatorDefinitionFactory;
+import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.validation.IValidator;
 import org.springframework.ide.eclipse.ui.SpringUIImages;
 
 /**
- * Abstract extension to {@link AbstractNavigatorAction} that can that handles
- * validation requests for the current selection.
- * <p>
- * This class is intended to be subclassed by clients. Subclasses should
- * implement the {@link #getResourcesFromSelectedObject(Object)} method,
- * returning a {@link Set} of {@link IResource} that should be validated.
+ * {@link CommonNavigator} action which triggers all {@link IValidator} defined
+ * for the selected {@link IModelElement}.
  * @author Christian Dupuis
+ * @author Torsten Juergeleit
  * @since 2.0.1
  */
-public abstract class AbstractValidationAction extends AbstractNavigatorAction {
+public class ValidationAction extends AbstractNavigatorAction {
 
-	private Set<IResource> selectedResources;
+	private Map<ValidatorDefinition, Set<IResource>> validatorResources;
 
-	public AbstractValidationAction(ICommonActionExtensionSite site) {
+	public ValidationAction(ICommonActionExtensionSite site) {
 		super(site, "Validate", SpringUIImages.DESC_OBJS_SPRING);
 	}
 
 	/**
-	 * Return a {@link Set} of {@link IResource} that should be validated.
-	 * @param object one of the selected objects
+	 * Creates a map of all {@link ValidatorDefinition}s and their
+	 * {@link IResource}s which should be validated for the currently selected
+	 * {@link IModelElement}s.
+	 * <p>
+	 * Note: This will not call {@link ValidatorDefinition#isEnabled(IProject)}.
+	 * This is by intention because it provides a way to trigger a validation
+	 * even though it is disabled for automatic build.
 	 */
-	protected abstract Set<IResource> getResourcesFromSelectedObject(
-			Object object);
-
-	public boolean isEnabled(IStructuredSelection selection) {
-		this.selectedResources = new LinkedHashSet<IResource>();
+	public final boolean isEnabled(IStructuredSelection selection) {
+		validatorResources = new LinkedHashMap<ValidatorDefinition,
+				Set<IResource>>();
 		if (selection.size() > 0) {
-			for (Object obj : selection.toList()) {
-				if (obj instanceof IFile) {
-					this.selectedResources.add((IFile) obj);
-				}
-				else if (obj instanceof IAdaptable
-						&& ((IAdaptable) obj).getAdapter(IResource.class) != null) {
-					IResource resource = (IResource) ((IAdaptable) obj)
-							.getAdapter(IResource.class);
-					this.selectedResources.add(resource);
-				}
-				else {
-					Set<IResource> resources = getResourcesFromSelectedObject(obj);
-					if (resources != null) {
-						this.selectedResources.addAll(resources);
+			for (ValidatorDefinition validatorDefinition
+					: ValidatorDefinitionFactory.getValidatorDefinitions()) {
+				IValidator validator = validatorDefinition.getValidator();
+				for (Object object : selection.toList()) {
+					Set<IResource> resources = validator.getResources(object);
+					if (resources != null && resources.size() > 0) {
+						Set<IResource> valResources = validatorResources
+								.get(validatorDefinition);
+						if (valResources == null) {
+							valResources = new LinkedHashSet<IResource>();
+							validatorResources.put(validatorDefinition,
+									valResources);
+						}
+						valResources.addAll(resources);
 					}
 				}
 			}
 		}
-		return this.selectedResources.size() > 0;
+		return validatorResources.size() > 0;
 	}
 
 	@Override
@@ -86,12 +89,13 @@ public abstract class AbstractValidationAction extends AbstractNavigatorAction {
 		Job job = new Job("Validating") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Set<ValidatorDefinition> validators = ValidatorDefinitionFactory
-						.getValidatorDefinitions();
-				monitor.beginTask("Validating selection", validators.size());
+				monitor.beginTask("Validating selected model elements",
+						validatorResources.size());
 				int i = 0;
-				for (final ValidatorDefinition validatorDefinition : validators) {
-					runValidator(validatorDefinition, monitor);
+				for (final ValidatorDefinition validatorDefinition
+						: validatorResources.keySet()) {
+					runValidator(validatorDefinition, validatorResources
+							.get(validatorDefinition), monitor);
 					monitor.worked(i++);
 				}
 				monitor.done();
@@ -106,29 +110,25 @@ public abstract class AbstractValidationAction extends AbstractNavigatorAction {
 	}
 
 	/**
-	 * Calls the given {@link ValidatorDefinition} to validate the calculated
+	 * Calls the given {@link ValidatorDefinition} to validate the given
 	 * resources.
-	 * <p>
-	 * Note: This will not call {@link ValidatorDefinition#isEnabled(IProject)}.
-	 * This is by intention because it provides a way to trigger a validation
-	 * allthough it is disabled for automatic build.
 	 */
 	private void runValidator(final ValidatorDefinition validatorDefinition,
-			final IProgressMonitor monitor) {
+			final Set<IResource> resources, final IProgressMonitor monitor) {
 		ISafeRunnable code = new ISafeRunnable() {
 			public void handleException(Throwable e) {
 				// nothing to do - exception is already logged
 			}
 
 			public void run() throws Exception {
+				IValidator validator = validatorDefinition.getValidator();
 				Set<IResource> affectedResources = new LinkedHashSet<IResource>();
-				for (IResource resource : selectedResources) {
-					affectedResources.addAll(validatorDefinition.getValidator()
-						.getAffectedResources(resource, 
-								IncrementalProjectBuilder.INCREMENTAL_BUILD));
+				for (IResource resource : resources) {
+					affectedResources.addAll(validator.getAffectedResources(
+							resource,
+							IncrementalProjectBuilder.INCREMENTAL_BUILD));
 				}
-				validatorDefinition.getValidator().validate(affectedResources,
-						monitor);
+				validator.validate(affectedResources, monitor);
 			}
 		};
 		SafeRunner.run(code);

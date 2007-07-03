@@ -26,20 +26,22 @@ import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinitionFactory;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
-import org.springframework.ide.eclipse.core.model.ISourceModelElement;
-import org.springframework.ide.eclipse.core.model.ModelUtils;
+import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidator;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
+import org.springframework.ide.eclipse.core.model.validation.IValidator;
 
 /**
+ * {@link IValidator} implementation that is responsible for validating the
+ * {@link IBeansModelElement}s.
  * @author Torsten Juergeleit
  * @since 2.0
  */
@@ -50,6 +52,36 @@ public class BeansConfigValidator extends AbstractValidator {
 
 	public static final String MARKER_ID = BeansCorePlugin.PLUGIN_ID
 			+ ".problemmarker";
+
+	public Set<IResource> getResources(Object object) {
+		Set<IResource> resources = new LinkedHashSet<IResource>();
+		if (object instanceof ISpringProject) {
+			object = BeansCorePlugin.getModel().getProject(
+					((ISpringProject) object).getProject());
+		}
+		else if (object instanceof IFile) {
+			object = BeansCorePlugin.getModel().getConfig((IFile) object);
+		}
+		if (object instanceof IBeansModelElement) {
+			if (object instanceof IBeansProject) {
+				for (IBeansConfig config : ((IBeansProject) object)
+						.getConfigs()) {
+					resources.add(config.getElementResource());
+				}
+			}
+			else if (object instanceof IBeansConfigSet) {
+				for (IBeansConfig config : ((IBeansConfigSet) object)
+						.getConfigs()) {
+					resources.add(config.getElementResource());
+				}
+			}
+			else if (object instanceof IResourceModelElement) {
+				resources.add(((IResourceModelElement) object)
+						.getElementResource());
+			}
+		}
+		return resources;
+	}
 
 	public Set<IResource> getAffectedResources(IResource resource,
 			int kind) throws CoreException {
@@ -139,21 +171,7 @@ public class BeansConfigValidator extends AbstractValidator {
 
 	@Override
 	protected boolean supports(IModelElement element) {
-		if (element instanceof IBeansModelElement) {
-			return true;
-		}
-
-		// Ignore beans or components contributed by namespace handlers
-		if (element instanceof ISourceModelElement) {
-			String nameSpaceUri = ModelUtils
-					.getNameSpaceURI((ISourceModelElement) element);
-			if (nameSpaceUri == null
-					|| NamespaceUtils.DEFAULT_NAMESPACE_URI
-							.equals(nameSpaceUri)) {
-				return true;
-			}
-		}
-		return false;
+		return (element instanceof IBeansModelElement);
 	}
 
 	private List<IResource> getBeanConfigResources(IType beanClass) {

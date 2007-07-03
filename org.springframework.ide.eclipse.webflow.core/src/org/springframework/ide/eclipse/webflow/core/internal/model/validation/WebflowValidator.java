@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.core.internal.model.validation.Validation
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
+import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidator;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidator;
@@ -48,6 +49,34 @@ public class WebflowValidator extends AbstractValidator {
 	public static final String MARKER_ID = Activator.PLUGIN_ID
 			+ ".problemmarker";
 
+	public Set<IResource> getResources(Object object) {
+		Set<IResource> resources = new LinkedHashSet<IResource>();
+		if (object instanceof ISpringProject) {
+			object = Activator.getModel().getProject(
+					((ISpringProject) object).getProject());
+		}
+		else if (object instanceof IFile) {
+			IWebflowProject project = Activator.getModel().getProject(
+					((IFile) object).getProject());
+			if (project != null) {
+				object = project.getConfig((IFile) object);
+			}
+		}
+		if (object instanceof IWebflowModelElement) {
+			if (object instanceof IWebflowProject) {
+				for (IWebflowConfig wc : ((IWebflowProject) object)
+						.getConfigs()) {
+					resources.add(wc.getElementResource());
+				}
+			}
+			else if (object instanceof IResourceModelElement) {
+				resources.add(((IResourceModelElement) object)
+						.getElementResource());
+			}
+		}
+		return resources;
+	}
+
 	public Set<IResource> getAffectedResources(IResource resource, int kind)
 			throws CoreException {
 		Set<IResource> resources = new LinkedHashSet<IResource>();
@@ -58,8 +87,8 @@ public class WebflowValidator extends AbstractValidator {
 			IWebflowProject webflowProject = Activator.getModel().getProject(
 					resource.getProject());
 			if (webflowProject != null) {
-				for (IWebflowConfig webflowConfig : webflowProject.getConfigs()) {
-					resources.add(webflowConfig.getElementResource());
+				for (IWebflowConfig config : webflowProject.getConfigs()) {
+					resources.add(config.getElementResource());
 				}
 			}
 
@@ -110,6 +139,6 @@ public class WebflowValidator extends AbstractValidator {
 
 	@Override
 	protected boolean supports(IModelElement element) {
-		return element instanceof IWebflowModelElement;
+		return (element instanceof IWebflowModelElement);
 	}
 }

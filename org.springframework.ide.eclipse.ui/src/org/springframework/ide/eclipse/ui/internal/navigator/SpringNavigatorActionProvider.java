@@ -19,6 +19,7 @@ import org.eclipse.ui.navigator.CommonActionProvider;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.eclipse.ui.navigator.ICommonMenuConstants;
 import org.springframework.ide.eclipse.ui.SpringUIPlugin;
+import org.springframework.ide.eclipse.ui.navigator.actions.ValidationAction;
 
 /**
  * @author Torsten Juergeleit
@@ -27,18 +28,24 @@ import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 public class SpringNavigatorActionProvider extends CommonActionProvider {
 
 	private IWorkbenchAction openPropertiesAction;
+	private ValidationAction validationAction;
 
 	public SpringNavigatorActionProvider() {
 	}
 
 	@Override
 	public void init(ICommonActionExtensionSite site) {
+		validationAction = new ValidationAction(site);
 		openPropertiesAction = IDEActionFactory.OPEN_PROJECT_PROPERTIES
 				.create(SpringUIPlugin.getActiveWorkbenchWindow());
 	}
 
 	@Override
 	public void fillContextMenu(IMenuManager menu) {
+		if (validationAction.isEnabled()) {
+			menu.appendToGroup(ICommonMenuConstants.GROUP_BUILD,
+					validationAction);
+		}
 		if (openPropertiesAction.isEnabled()) {
 			menu.appendToGroup(ICommonMenuConstants.GROUP_PROPERTIES,
 					openPropertiesAction);

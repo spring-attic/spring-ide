@@ -33,6 +33,15 @@ import org.springframework.ide.eclipse.core.project.IProjectContributor;
 public interface IValidator extends IProjectContributor {
 
 	/**
+	 * Returns a list of {@link IResource}s which are represented by the given
+	 * object.
+	 * @param object the object for which the corresponding {@link IResource}s
+	 * should be retrieved
+	 * @since 2.0.1
+	 */
+	Set<IResource> getResources(Object object);
+
+	/**
 	 * Validates all the given affected resources.
 	 * @param affectedResources  the resource affected by this build
 	 * @param monitor a progress monitor, or <code>null</code> if progress

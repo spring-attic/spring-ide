@@ -22,7 +22,7 @@ import org.springframework.ide.eclipse.beans.ui.navigator.actions.OpenConfigFile
 import org.springframework.ide.eclipse.beans.ui.navigator.actions.OpenJavaElementAction;
 import org.springframework.ide.eclipse.beans.ui.navigator.actions.OpenPropertiesAction;
 import org.springframework.ide.eclipse.beans.ui.navigator.actions.OpenReferenceAction;
-import org.springframework.ide.eclipse.beans.ui.navigator.actions.BeansValidationAction;
+import org.springframework.ide.eclipse.ui.navigator.actions.ValidationAction;
 
 /**
  * @author Torsten Juergeleit
@@ -35,7 +35,7 @@ public class BeansNavigatorActionProvider extends CommonActionProvider {
 	private OpenJavaElementAction openElementAction;
 	private OpenPropertiesAction openPropertiesAction;
 	private OpenActionWrapperAction openAction;
-	private BeansValidationAction validationAction;
+	private ValidationAction validationAction;
 
 	public BeansNavigatorActionProvider() {
 	}
@@ -48,7 +48,7 @@ public class BeansNavigatorActionProvider extends CommonActionProvider {
 		openPropertiesAction = new OpenPropertiesAction(site);
 		openAction = new OpenActionWrapperAction(site, openConfigAction,
 				openElementAction);
-		validationAction = new BeansValidationAction(site);
+		validationAction = new ValidationAction(site);
 	}
 
 	@Override

@@ -17,11 +17,11 @@ import org.eclipse.ui.navigator.CommonActionProvider;
 import org.eclipse.ui.navigator.ICommonActionConstants;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.eclipse.ui.navigator.ICommonMenuConstants;
+import org.springframework.ide.eclipse.ui.navigator.actions.ValidationAction;
 import org.springframework.ide.eclipse.webflow.ui.navigator.actions.OpenActionWrapperAction;
 import org.springframework.ide.eclipse.webflow.ui.navigator.actions.OpenConfigFileAction;
 import org.springframework.ide.eclipse.webflow.ui.navigator.actions.OpenPropertiesAction;
 import org.springframework.ide.eclipse.webflow.ui.navigator.actions.OpenWebflowGraphAction;
-import org.springframework.ide.eclipse.webflow.ui.navigator.actions.WebflowValidationAction;
 
 /**
  * @author Christian Dupuis
@@ -33,7 +33,7 @@ public class WebflowNavigatorActionProvider extends CommonActionProvider {
 	private OpenPropertiesAction openPropertiesAction;
 	private OpenWebflowGraphAction openGraphAction;
 	private OpenActionWrapperAction openActionWrapperAction;
-	private WebflowValidationAction validationAction;
+	private ValidationAction validationAction;
 
 	public WebflowNavigatorActionProvider() {
 	}
@@ -45,7 +45,7 @@ public class WebflowNavigatorActionProvider extends CommonActionProvider {
 		openGraphAction = new OpenWebflowGraphAction(site);
 		openActionWrapperAction = new OpenActionWrapperAction(site,
 				openConfigAction, openGraphAction);
-		validationAction = new WebflowValidationAction(site);
+		validationAction = new ValidationAction(site);
 	}
 
 	@Override
