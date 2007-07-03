@@ -23,7 +23,7 @@ import org.springframework.ide.eclipse.core.model.ISpringProject;
 /**
  * This decorator adds an overlay image to all Spring Projects.
  * @author Christian Dupuis
- * @since 2.1
+ * @since 2.0.1
  */
 public class SpringLabelDecorator extends LabelProvider implements
 		ILightweightLabelDecorator {

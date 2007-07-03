@@ -15,8 +15,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.ui.SpringLabelDecorator;
@@ -43,15 +41,8 @@ public class WebflowModelLabelDecorator extends SpringLabelDecorator
 			+ ".model.webflowModelLabelDecorator";
 
 	public static final void update() {
-		SpringUIUtils.getStandardDisplay().asyncExec(new Runnable() {
-			public void run() {
-				IWorkbench workbench = PlatformUI.getWorkbench();
-				workbench.getDecoratorManager().update(DECORATOR_ID);
-				workbench.getDecoratorManager().update(
-						SpringLabelDecorator.DECORATOR_ID);
-			}
-
-		});
+		SpringUIUtils.updateDecorator(SpringLabelDecorator.DECORATOR_ID);
+		SpringUIUtils.updateDecorator(DECORATOR_ID);
 	}
 
 	private IWebflowModelListener listener;
@@ -117,7 +108,7 @@ public class WebflowModelLabelDecorator extends SpringLabelDecorator
 
 	/**
 	 * Adds error and warning decorations to {@link IWebflowModelElement}.
-	 * @since 2.1
+	 * @since 2.0.1
 	 */
 	private void decorateWebflowModelElement(IModelElement element,
 			IDecoration decoration) {

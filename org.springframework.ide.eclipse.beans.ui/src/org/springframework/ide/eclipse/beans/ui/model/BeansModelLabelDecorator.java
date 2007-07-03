@@ -22,8 +22,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PlatformUI;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
@@ -61,13 +59,8 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator
 			+ ".model.beansModelLabelDecorator";
 
 	public static void update() {
-		SpringLabelDecorator.update();
-		SpringUIUtils.getStandardDisplay().asyncExec(new Runnable() {
-			public void run() {
-				IWorkbench workbench = PlatformUI.getWorkbench();
-				workbench.getDecoratorManager().update(DECORATOR_ID);
-			}
-		});
+		SpringUIUtils.updateDecorator(SpringLabelDecorator.DECORATOR_ID);
+		SpringUIUtils.updateDecorator(DECORATOR_ID);
 	}
 
 	private IModelChangeListener listener;
@@ -106,7 +99,7 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator
 	
 	/**
 	 * Adds decorations to {@link Bean}s.
-	 * @since 2.1
+	 * @since 2.0.1
 	 */
 	private void decorateBean(Bean bean, IDecoration decoration) {
 		BeanDefinition bd = bean.getBeanDefinition();
@@ -134,7 +127,7 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator
 
 	/**
 	 * Adds error and warning decorations to {@link IBeansModelElement}.
-	 * @since 2.1
+	 * @since 2.0.1
 	 */
 	private void decorateBeansModelElement(IBeansModelElement element,
 			IDecoration decoration) {

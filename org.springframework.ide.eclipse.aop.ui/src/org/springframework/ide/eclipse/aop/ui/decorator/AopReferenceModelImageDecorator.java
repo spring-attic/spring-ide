@@ -18,8 +18,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAnnotationAopDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
@@ -50,14 +48,8 @@ public class AopReferenceModelImageDecorator extends BeansModelLabelDecorator
 			+ ".decorator.adviceimagedecorator";
 
 	public static void update() {
-		// make sure we update the beans model decorator as well
-		BeansModelLabelDecorator.update();
-		SpringUIUtils.getStandardDisplay().asyncExec(new Runnable() {
-			public void run() {
-				IWorkbench workbench = PlatformUI.getWorkbench();
-				workbench.getDecoratorManager().update(DECORATOR_ID);
-			}
-		});
+		SpringUIUtils.updateDecorator(BeansModelLabelDecorator.DECORATOR_ID);
+		SpringUIUtils.updateDecorator(DECORATOR_ID);
 	}
 
 	private IAopModelChangedListener listener;
