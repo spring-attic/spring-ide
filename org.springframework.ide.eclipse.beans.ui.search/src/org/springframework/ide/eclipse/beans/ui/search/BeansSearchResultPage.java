@@ -17,10 +17,10 @@ import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.Match;
 import org.eclipse.ui.PartInitException;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchContentProvider;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchLabelProvider;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
  * {@link ISearchResultPage} which displays the results from searching the
@@ -64,7 +64,7 @@ public class BeansSearchResultPage extends AbstractTextSearchViewPage {
 			boolean activate) throws PartInitException {
 		Object element = match.getElement();
 		if (element instanceof ISourceModelElement) {
-			SpringUIUtils.openInEditor((ISourceModelElement) element, activate);
+			BeansUIUtils.openInEditor((ISourceModelElement) element, activate);
 		}
 	}
 }

@@ -16,9 +16,8 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.dialogs.BeanListSelectionDialog;
-import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
  * Action that opens the Bean SelectionDialog
@@ -32,10 +31,10 @@ public class OpenBeanSelectionDialogAction implements
 
 	public void run(IAction action) {
 		BeanListSelectionDialog dialog = new BeanListSelectionDialog(
-				workbenchWindow.getShell(), new BeansModelLabelProvider(false));
+				workbenchWindow.getShell());
 		if (Window.OK == dialog.open()) {
 			IBean bean = (IBean) dialog.getFirstResult();
-			SpringUIUtils.openInEditor(bean);
+			BeansUIUtils.openInEditor(bean);
 		}
 	}
 

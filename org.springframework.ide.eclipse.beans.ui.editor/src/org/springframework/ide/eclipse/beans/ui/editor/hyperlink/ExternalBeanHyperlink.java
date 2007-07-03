@@ -10,12 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.hyperlink;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class ExternalBeanHyperlink implements IHyperlink {
 
@@ -44,8 +43,7 @@ public class ExternalBeanHyperlink implements IHyperlink {
 	}
 
 	public void open() {
-		SpringUIUtils.openInEditor((IFile) modelElement.getElementResource(),
-				modelElement.getElementStartLine());
+		BeansUIUtils.openInEditor(modelElement);
 	}
 
 }

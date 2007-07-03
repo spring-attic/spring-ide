@@ -11,35 +11,62 @@
 package org.springframework.ide.eclipse.beans.ui.dialogs;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.IOpenListener;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.OpenEvent;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.ViewForm;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.ui.dialogs.FilteredList;
-import org.eclipse.ui.dialogs.FilteredList.FilterMatcher;
-import org.eclipse.ui.internal.misc.StringMatcher;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.SelectionStatusDialog;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
+import org.springframework.ide.eclipse.beans.ui.BeansUIActivationHistory;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 
 /**
  * Spring Bean selection dialog.
@@ -47,38 +74,43 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  */
-@SuppressWarnings("restriction")
-public class BeanListSelectionDialog extends ElementListSelectionDialog {
+public class BeanListSelectionDialog extends SelectionStatusDialog {
 
 	/**
-	 * This {@link FilterMatcher} uses an internally wrapped
-	 * {@link StringMatcher} to match a given bean's name or aliases.
+	 * Implements a {@link ViewFilter} based on content typed in the filter
+	 * field
 	 */
-	private class BeanFilterMatcher implements FilterMatcher {
-		private StringMatcher fMatcher;
+	private static class BeanFilter extends ViewerFilter {
 
-		public boolean match(Object element) {
+		private Pattern pattern;
+
+		@Override
+		public boolean select(Viewer viewer, Object parentElement,
+				Object element) {
+			if (pattern == null) {
+				return BeansUIActivationHistory.getBeanActivationHistory()
+						.contains(element);
+			}
 			if (element instanceof IBean) {
 				IBean bean = (IBean) element;
-				if (fMatcher.match(bean.getElementName())) {
-					return true;
-				}
-				String[] aliases = bean.getAliases();
-				if (aliases != null) {
-					for (String alias : aliases) {
-						if (fMatcher.match(alias)) {
-							return true;
-						}
-					}
-				}
-			} 
+				String beanString = bean.getElementName() + " - "
+						+ bean.getClassName();
+				return pattern.matcher(beanString).find();
+			}
 			return false;
 		}
 
-		public void setFilter(String pattern, boolean ignoreCase,
-				boolean ignoreWildCards) {
-			fMatcher = new StringMatcher(pattern + '*', ignoreCase,
-					ignoreWildCards);
+		public void setFilterText(String filterText) {
+			if (filterText.trim().equals("")) {
+				pattern = null;
+			}
+			else {
+				filterText = filterText.replace("\\", "\\\\");
+				filterText = filterText.replace(".", "\\.");
+				filterText = filterText.replace("*", ".*");
+				filterText = filterText.replace("?", ".?");
+				pattern = Pattern.compile(filterText, Pattern.CASE_INSENSITIVE);
+			}
 		}
 	}
 
@@ -91,35 +123,28 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 
 	private int fHeight = 18;
 
-	private int fWidth = 60;
-	
-	private Point fSize;
+	private CLabel fLabel;
 
 	private Point fLocation;
 
-	protected ILabelProvider labelProvider;
-	
 	private IDialogSettings fSettings;
-	
-	private CLabel fLabel;
 
-	public BeanListSelectionDialog(Shell parent, ILabelProvider renderer) {
-		super(parent, renderer);
-		this.labelProvider = renderer;
+	private Point fSize;
 
-		// Configure this dialog and it's FilteredList widget
-		setBlockOnOpen(true);
-		setMultipleSelection(false);
-		setIgnoreCase(true);
-		setAllowDuplicates(false);
-		setMatchEmptyString(true);
+	private int fWidth = 60;
+
+	private final LabelProvider labelProvider = new BeansModelLabelProvider(
+			true);
+
+	private TableViewer viewer;
+
+	public BeanListSelectionDialog(Shell parent) {
+		super(parent);
 		setTitle(BeansUIPlugin
 				.getResourceString("BeanListSelectionDialog.title"));
-		setMessage(BeansUIPlugin
-				.getResourceString("BeanListSelectionDialog.message"));
-		setEmptySelectionMessage(BeansUIPlugin
-				.getResourceString("BeanListSelectionDialog.selectionMessage"));
 		setStatusLineAboveButtons(true);
+		setShellStyle(getShellStyle() | SWT.RESIZE);
+		setBlockOnOpen(true);
 
 		IDialogSettings settings = BeansUIPlugin.getDefault()
 				.getDialogSettings();
@@ -138,42 +163,174 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 		return super.close();
 	}
 
-	/**
-	 * Adds a bordered label at the end of dialog area. 
-	 */
+	@Override
+	protected void computeResult() {
+		setResult(((IStructuredSelection) viewer.getSelection()).toList());
+	}
+
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		readSettings();
-		Composite contents = (Composite) super.createDialogArea(parent);
+		Composite area = (Composite) super.createDialogArea(parent);
 
-		ViewForm fForm = new ViewForm(contents, SWT.BORDER | SWT.FLAT);
-		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		Label message = new Label(area, SWT.NONE);
+		message.setText(BeansUIPlugin
+				.getResourceString("BeanListSelectionDialog.message"));
+		final Text filterText = new Text(area, SWT.SINGLE | SWT.BORDER);
+		filterText.setLayoutData(new GridData(SWT.FILL, SWT.DEFAULT, true,
+				false));
+
+		Label matches = new Label(area, SWT.NONE);
+		matches.setText("&Matching beans:");
+		viewer = new TableViewer(area, SWT.SINGLE | SWT.BORDER);
+		Control control = viewer.getControl();
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd.widthHint = convertWidthInCharsToPixels(fWidth);
+		gd.heightHint = convertHeightInCharsToPixels(fHeight);
+		gd.grabExcessVerticalSpace = true;
+		gd.grabExcessHorizontalSpace = true;
+		gd.horizontalAlignment = GridData.FILL;
+		gd.verticalAlignment = GridData.FILL;
+		control.setLayoutData(gd);
+
+		viewer.setLabelProvider(labelProvider);
+		viewer.setContentProvider(new ArrayContentProvider());
+
+		final Set<IBean> beanList = new LinkedHashSet<IBean>();
+		final List<IBean> historyList = new ArrayList<IBean>();
+		IRunnableWithProgress runnable = new IRunnableWithProgress() {
+			public void run(final IProgressMonitor monitor)
+					throws InvocationTargetException, InterruptedException {
+				try {
+
+					List<IBean> historyBeans = BeansUIActivationHistory
+							.getBeanActivationHistory();
+					Collections.reverse(historyBeans);
+					historyList.addAll(historyBeans);
+
+					Set<IBean> beans = new HashSet<IBean>();
+					IBeansModel beansModel = BeansCorePlugin.getModel();
+					beans.addAll(BeansModelUtils.getBeans(beansModel, monitor));
+
+					beanList.addAll(historyBeans);
+					beanList.addAll(beans);
+				}
+				catch (OperationCanceledException e) {
+					throw new InterruptedException();
+				}
+			}
+		};
+
+		try {
+			IRunnableContext context = new ProgressMonitorDialog(getShell());
+			context.run(true, true, runnable);
+		}
+		catch (InvocationTargetException e) {
+		}
+		catch (InterruptedException e) {
+		}
+
+		viewer.setInput(beanList);
+
+		final BeanListSelectionDialog.BeanFilter filter = new BeanListSelectionDialog.BeanFilter();
+		viewer.addFilter(filter);
+		viewer.setComparator(new ViewerComparator() {
+
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				IBean t1 = getCorrespondingTask(e1);
+				IBean t2 = getCorrespondingTask(e2);
+				boolean isInHistory1 = historyList.contains(t1);
+				boolean isInHistory2 = historyList.contains(t2);
+
+				// Being on task history takes precedence...
+				if (isInHistory1 && !isInHistory2) {
+					return -1;
+				}
+				if (!isInHistory1 && isInHistory2) {
+					return 1;
+				}
+
+				// Both are in task history; who is more recent?
+				if (isInHistory1 && isInHistory2) {
+					return historyList.indexOf(t1) - historyList.indexOf(t2);
+				}
+
+				// Both are not in task history; sort by summary...
+				return labelProvider.getText(e1).compareTo(
+						labelProvider.getText(e2));
+			}
+
+			private IBean getCorrespondingTask(Object o) {
+				if (o instanceof IBean) {
+					return (IBean) o;
+				}
+				return null;
+			}
+
+		});
+		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+
+			public void selectionChanged(SelectionChangedEvent event) {
+				handleSelectionChanged();
+			}
+		});
+
+		viewer.addOpenListener(new IOpenListener() {
+
+			public void open(OpenEvent event) {
+				if (getOkButton().getEnabled()) {
+					okPressed();
+				}
+			}
+
+		});
+
+		filterText.addKeyListener(new KeyAdapter() {
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.keyCode == SWT.ARROW_DOWN) {
+					viewer.getControl().setFocus();
+				}
+			}
+
+		});
+		filterText.addModifyListener(new ModifyListener() {
+
+			public void modifyText(ModifyEvent e) {
+				filter.setFilterText(filterText.getText());
+				viewer.refresh(false);
+				Object first = viewer.getElementAt(0);
+				if (first != null) {
+					viewer.setSelection(new StructuredSelection(first));
+				}
+			}
+
+		});
+
+		ViewForm fForm = new ViewForm(area, SWT.BORDER | SWT.FLAT);
+		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
 		fForm.setLayoutData(gd);
 		fLabel = new CLabel(fForm, SWT.FLAT);
 		fLabel.setFont(fForm.getFont());
 		fForm.setContent(fLabel);
 
-		return contents;
-	}
+		IWorkbenchWindow window = PlatformUI.getWorkbench()
+				.getActiveWorkbenchWindow();
+		ISelection selection = window.getSelectionService().getSelection();
+		if (selection instanceof ITextSelection) {
+			String text = ((ITextSelection) selection).getText();
+			int n = text.indexOf('\n');
+			if (n > -1) {
+				text.substring(0, n);
+			}
+			filterText.setText(text);
+			filterText.setSelection(0, text.length());
+		}
 
-	/**
-	 * Sets the preserved dimension of the list viewer and a
-	 * {@link BeanFilterMatcher}Êfilter matcher to the filtered list widget.
-	 */
-	@Override
-	protected FilteredList createFilteredList(Composite parent) {
-		FilteredList list = super.createFilteredList(parent);
-		GridData data = new GridData();
-		data.widthHint = convertWidthInCharsToPixels(fWidth);
-		data.heightHint = convertHeightInCharsToPixels(fHeight);
-		data.grabExcessVerticalSpace = true;
-		data.grabExcessHorizontalSpace = true;
-		data.horizontalAlignment = GridData.FILL;
-		data.verticalAlignment = GridData.FILL;
-		list.setLayoutData(data);
-		list.setFilterMatcher(new BeanFilterMatcher());
-		return list;
+		return area;
 	}
 
 	@Override
@@ -216,49 +373,24 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 	 * path and icon)
 	 * </ol>
 	 */
-	@Override
 	protected void handleSelectionChanged() {
 		validateCurrentSelection();
-		if (getSelectedElements().length == 1) {
-			IBean bean = (IBean) getSelectedElements()[0];
-			fLabel.setImage(labelProvider.getImage(bean.getElementParent()));
-			fLabel.setText(bean.getElementResource().getFullPath().toString());
-		} else {
+		if (!viewer.getSelection().isEmpty()) {
+			ISelection sel = viewer.getSelection();
+			if (sel instanceof IStructuredSelection) {
+				IBean bean = (IBean) ((IStructuredSelection) sel)
+						.getFirstElement();
+				fLabel
+						.setImage(labelProvider.getImage(bean
+								.getElementParent()));
+				fLabel.setText(bean.getElementResource().getFullPath()
+						.toString());
+			}
+		}
+		else {
 			fLabel.setImage(null);
 			fLabel.setText(null);
 		}
-	}
-
-	@Override
-	public int open() {
-		final Set<IBean> beanList = new LinkedHashSet<IBean>();
-
-		IRunnableWithProgress runnable = new IRunnableWithProgress() {
-			public void run(final IProgressMonitor monitor)
-					throws InvocationTargetException, InterruptedException {
-				IBeansModel beansModel = BeansCorePlugin.getModel();
-				try {
-					beanList.addAll(BeansModelUtils.getBeans(beansModel,
-							monitor));
-				} catch (OperationCanceledException e) {
-					throw new InterruptedException();
-				}
-			}
-		};
-
-		try {
-			IRunnableContext context = new ProgressMonitorDialog(getShell());
-			context.run(true, true, runnable);
-		} catch (InvocationTargetException e) {
-			return CANCEL;
-		} catch (InterruptedException e) {
-			// cancelled by user
-			return CANCEL;
-		}
-
-		setElements(beanList.toArray());
-
-		return super.open();
 	}
 
 	/**
@@ -270,7 +402,8 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 			int x = fSettings.getInt("x");
 			int y = fSettings.getInt("y");
 			fLocation = new Point(x, y);
-		} catch (NumberFormatException e) {
+		}
+		catch (NumberFormatException e) {
 			fLocation = null;
 		}
 		try {
@@ -278,9 +411,34 @@ public class BeanListSelectionDialog extends ElementListSelectionDialog {
 			int height = fSettings.getInt("height");
 			fSize = new Point(width, height);
 
-		} catch (NumberFormatException e) {
+		}
+		catch (NumberFormatException e) {
 			fSize = null;
 		}
+	}
+
+	/**
+	 * Validates the current selection and updates the status line accordingly.
+	 * @return boolean <code>true</code> if the current selection is valid.
+	 */
+	protected boolean validateCurrentSelection() {
+		IStatus status;
+		if (viewer.getSelection().isEmpty()) {
+			status = new Status(
+					IStatus.ERROR,
+					PlatformUI.PLUGIN_ID,
+					IStatus.ERROR,
+					"",
+					null);
+		}
+		else {
+			status = new Status(IStatus.OK, PlatformUI.PLUGIN_ID, IStatus.OK,
+					"", //$NON-NLS-1$
+					null);
+		}
+
+		updateStatus(status);
+		return status.isOK();
 	}
 
 	/**

@@ -29,9 +29,9 @@ import org.eclipse.wst.xml.ui.internal.tabletree.XMLMultiPageEditorPart;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
  * {@link AbstractContextUiBridge} that integrates the {@link IBeansModel} with
@@ -127,7 +127,7 @@ public class BeansContextUIBridge extends AbstractContextUiBridge {
 				handle);
 		if (modelElement != null
 				&& modelElement instanceof IResourceModelElement) {
-			SpringUIUtils.openInEditor((IResourceModelElement) modelElement);
+			BeansUIUtils.openInEditor((IResourceModelElement) modelElement);
 		}
 	}
 }

@@ -31,13 +31,13 @@ import org.eclipse.search.ui.text.Match;
 import org.eclipse.ui.PartInitException;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchResult;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchScope;
 import org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanClassQuery;
 import org.springframework.ide.eclipse.beans.ui.search.internal.queries.BeanPropertyQuery;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -53,9 +53,11 @@ public class BeansJavaSearchParticipant implements IQueryParticipant,
 		IMatchPresentation {
 
 	private static final int SEARCH_FOR_TYPES = 0;
+
 	private static final int SEARCH_FOR_FIELDS = 1;
 
 	private static final int LIMIT_TO_REF = 2;
+
 	private static final int LIMIT_TO_ALL = 3;
 
 	private int searchFor = -1;
@@ -88,32 +90,35 @@ public class BeansJavaSearchParticipant implements IQueryParticipant,
 			else if (elementQuerySpecification.getElement() instanceof IField) {
 				IField field = ((IField) elementQuerySpecification.getElement());
 				search = field.getElementName();
-				getTypeHierachy(monitor, requiredTypeNames, field.getDeclaringType());
+				getTypeHierachy(monitor, requiredTypeNames, field
+						.getDeclaringType());
 			}
 			else if (elementQuerySpecification.getElement() instanceof IMethod) {
 				IMethod method = ((IMethod) elementQuerySpecification
 						.getElement());
 				search = method.getElementName();
-				// do property name magic 
+				// do property name magic
 				if (search.startsWith("set")) {
 					search = StringUtils.uncapitalize(search.substring(3));
 				}
-				getTypeHierachy(monitor, requiredTypeNames, method.getDeclaringType());
+				getTypeHierachy(monitor, requiredTypeNames, method
+						.getDeclaringType());
 			}
 			else {
 				search = elementQuerySpecification.getElement()
 						.getElementName();
 			}
-			
+
 			int type = ((ElementQuerySpecification) querySpecification)
 					.getElement().getElementType();
 			if (type == IJavaElement.TYPE) {
 				searchFor = SEARCH_FOR_TYPES;
-			} else if (type == IJavaElement.FIELD
-					|| type == IJavaElement.METHOD) {
+			}
+			else if (type == IJavaElement.FIELD || type == IJavaElement.METHOD) {
 				searchFor = SEARCH_FOR_FIELDS;
 			}
-		} else {
+		}
+		else {
 			searchFor = ((PatternQuerySpecification) querySpecification)
 					.getSearchFor();
 			search = ((PatternQuerySpecification) querySpecification)
@@ -147,7 +152,8 @@ public class BeansJavaSearchParticipant implements IQueryParticipant,
 							if (requiredTypeNames.contains(beanClass)) {
 								requestor.reportMatch(match);
 							}
-						} else {
+						}
+						else {
 							requestor.reportMatch(match);
 						}
 					}
@@ -179,7 +185,7 @@ public class BeansJavaSearchParticipant implements IQueryParticipant,
 	public void showMatch(Match match, int currentOffset, int currentLength,
 			boolean activate) throws PartInitException {
 		if (match.getElement() instanceof IResourceModelElement) {
-			SpringUIUtils.openInEditor((IResourceModelElement) match
+			BeansUIUtils.openInEditor((IResourceModelElement) match
 					.getElement(), activate);
 		}
 	}
