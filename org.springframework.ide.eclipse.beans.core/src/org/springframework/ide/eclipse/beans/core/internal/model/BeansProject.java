@@ -53,7 +53,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 	private final Lock r = rwl.readLock();
 	private final Lock w = rwl.writeLock(); 
-	private volatile boolean modelPopulated = false;
+	protected volatile boolean modelPopulated = false;
 
 	private final IProject project;
 

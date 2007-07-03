@@ -87,7 +87,8 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 		else if (parentElement instanceof ILazyInitializedModelElement
 				&& !((ILazyInitializedModelElement) parentElement)
 						.isInitialized()) {
-			triggerDeferredElementLoading(parentElement);
+			triggerDeferredElementLoading(parentElement, 
+					((IModelElement) parentElement).getElementParent());
 			return IModelElement.NO_CHILDREN;
 		}
 		return super.getChildren(parentElement);
@@ -98,7 +99,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 		for (final IBeansConfig config : configSet.getConfigs()) {
 			if (config instanceof ILazyInitializedModelElement
 					&& !((ILazyInitializedModelElement) config).isInitialized()) {
-				triggerDeferredElementLoading(config);
+				triggerDeferredElementLoading(config, configSet);
 				continue;
 			}
 			Object[] configChildren = getChildren(config);
@@ -111,7 +112,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 		return children.toArray();
 	}
 
-	private void triggerDeferredElementLoading(final Object config) {
+	private void triggerDeferredElementLoading(final Object config, final Object parent) {
 		Job job = new Job("Loading model content") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -122,8 +123,8 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 				monitor.worked(1);
 				SpringUIUtils.getStandardDisplay().asyncExec(new Runnable() {
 					public void run() {
-						refreshViewerForElement(((IModelElement) config)
-								.getElementParent());
+						refreshViewerForElement(config);
+						refreshViewerForElement(parent);
 					}
 
 				});

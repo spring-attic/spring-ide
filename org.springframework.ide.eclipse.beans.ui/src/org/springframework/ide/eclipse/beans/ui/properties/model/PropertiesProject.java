@@ -46,8 +46,10 @@ public class PropertiesProject extends BeansProject {
 
 		configSets = new LinkedHashMap<String, IBeansConfigSet>();
 		for (IBeansConfigSet configSet : project.getConfigSets()) {
-			super.addConfigSet(new PropertiesConfigSet(this, configSet));
+			configSets.put(configSet.getElementName(), new PropertiesConfigSet(this, configSet));
 		}
+		
+		modelPopulated = true;
 	}
 
 	@Override
