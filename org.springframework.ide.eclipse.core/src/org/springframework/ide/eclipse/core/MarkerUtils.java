@@ -24,26 +24,29 @@ public final class MarkerUtils {
 	public static int getHighestSeverityFromMarkersInRange(IResource resource,
 			int startLine, int endLine) {
 		int severity = -1;
-		try {
-			// TODO CD change this to SpringCore.MARKER_ID or IMarker.PROBLEM
-			IMarker[] markers = resource.findMarkers(SpringCore.MARKER_ID, true,
-					IResource.DEPTH_INFINITE);
-			for (IMarker marker : markers) {
-				if (startLine == -1
-						|| isMarkerInRange(marker, startLine, endLine)) {
-					int sev = marker.getAttribute(IMarker.SEVERITY, -1);
-					if (sev == IMarker.SEVERITY_WARNING) {
-						severity = sev;
-					}
-					else if (sev == IMarker.SEVERITY_ERROR) {
-						severity = sev;
-						break;
+		if (resource != null) {
+			try {
+				// TODO CD change this to SpringCore.MARKER_ID or
+				// IMarker.PROBLEM
+				IMarker[] markers = resource.findMarkers(SpringCore.MARKER_ID,
+						true, IResource.DEPTH_INFINITE);
+				for (IMarker marker : markers) {
+					if (startLine == -1
+							|| isMarkerInRange(marker, startLine, endLine)) {
+						int sev = marker.getAttribute(IMarker.SEVERITY, -1);
+						if (sev == IMarker.SEVERITY_WARNING) {
+							severity = sev;
+						}
+						else if (sev == IMarker.SEVERITY_ERROR) {
+							severity = sev;
+							break;
+						}
 					}
 				}
 			}
-		}
-		catch (CoreException e) {
-			// ignore
+			catch (CoreException e) {
+				// ignore
+			}
 		}
 		return severity;
 	}

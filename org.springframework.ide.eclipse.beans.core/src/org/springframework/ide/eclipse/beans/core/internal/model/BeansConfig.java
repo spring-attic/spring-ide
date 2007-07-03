@@ -606,8 +606,9 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		if (file == null || !file.isAccessible()) {
 			modificationTimestamp = IResource.NULL_STAMP;
 			String msg = "Beans config file '" + fullPath + "' not accessible";
-			problems
-					.add(new ValidationProblem(IMarker.SEVERITY_ERROR, msg, -1));
+			problems = new LinkedHashSet<ValidationProblem>();
+			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, msg,
+					-1));
 		}
 		else {
 			modificationTimestamp = file.getModificationStamp();
