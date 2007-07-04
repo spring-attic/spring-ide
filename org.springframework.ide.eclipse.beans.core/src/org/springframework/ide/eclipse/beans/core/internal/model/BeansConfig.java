@@ -729,15 +729,12 @@ public class BeansConfig extends AbstractResourceModelElement implements
 					// class
 					// loader
 					if (JdtUtils.isJavaProject(file)) {
-						reader
-								.setResourceLoader(new PathMatchingResourcePatternResolver(
-										JdtUtils.getClassLoader(JdtUtils
-												.getJavaProject(file
-														.getProject()))));
+						reader.setResourceLoader(new PathMatchingResourcePatternResolver(
+								JdtUtils.getClassLoader(JdtUtils.getJavaProject(file
+									.getProject()))));
 					}
 					else {
-						reader
-								.setResourceLoader(new NoOpResourcePatternResolver());
+						reader.setResourceLoader(new NoOpResourcePatternResolver());
 					}
 
 					reader.setEntityResolver(resolver);
@@ -746,10 +743,8 @@ public class BeansConfig extends AbstractResourceModelElement implements
 					reader.setEventListener(eventListener);
 					reader.setProblemReporter(problemReporter);
 					reader.setErrorHandler(new BeansConfigErrorHandler());
-					reader
-							.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(
-									NamespaceHandlerResolver.class
-											.getClassLoader()));
+					reader.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(
+							NamespaceHandlerResolver.class.getClassLoader()));
 					reader.setBeanNameGenerator(beanNameGenerator);
 					try {
 						reader.loadBeanDefinitions(resource);
@@ -997,7 +992,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 		private static final NamespaceHandler NO_OP_NAMESPACE_HANDLER = new NoOpNamespaceHandler();
 
-		private Map<String, NamespaceHandler> namespaceHandlers;
+		private final Map<String, NamespaceHandler> namespaceHandlers;
 
 		public DelegatingNamespaceHandlerResolver(ClassLoader classLoader) {
 			super(classLoader);
@@ -1038,6 +1033,11 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 		public BeanDefinition parse(Element element, ParserContext parserContext) {
 			// do nothing
+			
+			// emit a warning that the NamespaceHandler cannot be found
+			parserContext.getReaderContext().warning(
+					"Unable to locate Spring NamespaceHandler for XML schema namespace [" 
+					+ element.getNamespaceURI() + "]", parserContext.extractSource(element.getParentNode()));
 			return null;
 		}
 	}

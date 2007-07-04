@@ -98,7 +98,7 @@ public class ValidationProblem {
 		hashCode = 4 * hashCode + ObjectUtils.nullSafeHashCode(message);
 		hashCode = 5 * hashCode + line;
 		hashCode = 6 * hashCode + ObjectUtils.nullSafeHashCode(attributes);
-		return 7 * hashCode + super.hashCode();
+		return 7 * hashCode;
 	}
 
 	@Override
