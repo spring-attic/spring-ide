@@ -39,7 +39,7 @@ public interface IValidator extends IProjectContributor {
 	 * should be retrieved
 	 * @since 2.0.1
 	 */
-	Set<IResource> getResources(Object object);
+	Set<IResource> deriveResources(Object object);
 
 	/**
 	 * Validates all the given affected resources.

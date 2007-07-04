@@ -67,7 +67,7 @@ public class ValidationAction extends AbstractNavigatorAction {
 					: ValidatorDefinitionFactory.getValidatorDefinitions()) {
 				IValidator validator = validatorDefinition.getValidator();
 				for (Object object : selection.toList()) {
-					Set<IResource> resources = validator.getResources(object);
+					Set<IResource> resources = validator.deriveResources(object);
 					if (resources != null && resources.size() > 0) {
 						Set<IResource> valResources = validatorResources
 								.get(validatorDefinition);
@@ -116,6 +116,7 @@ public class ValidationAction extends AbstractNavigatorAction {
 	private void runValidator(final ValidatorDefinition validatorDefinition,
 			final Set<IResource> resources, final IProgressMonitor monitor) {
 		ISafeRunnable code = new ISafeRunnable() {
+			
 			public void handleException(Throwable e) {
 				// nothing to do - exception is already logged
 			}

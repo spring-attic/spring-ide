@@ -53,7 +53,7 @@ public class BeansConfigValidator extends AbstractValidator {
 	public static final String MARKER_ID = BeansCorePlugin.PLUGIN_ID
 			+ ".problemmarker";
 
-	public Set<IResource> getResources(Object object) {
+	public Set<IResource> deriveResources(Object object) {
 		Set<IResource> resources = new LinkedHashSet<IResource>();
 		if (object instanceof ISpringProject) {
 			object = BeansCorePlugin.getModel().getProject(
