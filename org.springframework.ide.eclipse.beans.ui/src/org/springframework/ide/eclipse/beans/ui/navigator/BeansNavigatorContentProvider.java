@@ -87,7 +87,7 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 		else if (parentElement instanceof ILazyInitializedModelElement
 				&& !((ILazyInitializedModelElement) parentElement)
 						.isInitialized()) {
-			triggerDeferredElementLoading(parentElement, 
+			triggerDeferredElementLoading(parentElement,
 					((IModelElement) parentElement).getElementParent());
 			return IModelElement.NO_CHILDREN;
 		}
@@ -112,7 +112,8 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 		return children.toArray();
 	}
 
-	private void triggerDeferredElementLoading(final Object config, final Object parent) {
+	private void triggerDeferredElementLoading(final Object config,
+			final Object parent) {
 		Job job = new Job("Loading model content") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -125,8 +126,11 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 					public void run() {
 						refreshViewerForElement(config);
 						refreshViewerForElement(parent);
+						if (parent instanceof IBeansProject) {
+							refreshViewerForElement(SpringCore.getModel()
+									.getProject(((IBeansProject) parent).getProject()));
+						}
 					}
-
 				});
 				monitor.worked(2);
 				monitor.done();
@@ -134,7 +138,8 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 			}
 		};
 		job.setPriority(Job.INTERACTIVE);
-		job.setProperty(IProgressConstants.ICON_PROPERTY, BeansUIImages.DESC_OBJS_SPRING);
+		job.setProperty(IProgressConstants.ICON_PROPERTY,
+				BeansUIImages.DESC_OBJS_SPRING);
 		job.schedule();
 	}
 
