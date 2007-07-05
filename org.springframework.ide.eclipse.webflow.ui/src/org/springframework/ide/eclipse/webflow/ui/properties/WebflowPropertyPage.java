@@ -40,48 +40,24 @@ import org.springframework.ide.eclipse.webflow.ui.model.WebflowModelLabelDecorat
  */
 public class WebflowPropertyPage extends PropertyPage {
 
-	/**
-	 * 
-	 */
-	public static final String ID = "org.springframework.ide.eclipse.webflow."
-			+ "ui.properties.ConfigurationPropertyPage";
+	public static final String ID = Activator.PLUGIN_ID + ".properties.projectPropertyPage";
 
-	/**
-	 * 
-	 */
 	private static final String TITLE = "ConfigurationPropertyPage.title";
 
-	/**
-	 * 
-	 */
 	private static final String CONFIG_FILES_LABEL = "ConfigurationPropertyPage.tabConfigFiles.label";
 
-	/**
-	 * 
-	 */
 	private WebflowConfigTab configFilesBlock;
 
-	/**
-	 * 
-	 */
 	public WebflowPropertyPage() {
 		this(null);
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param project 
-	 */
 	public WebflowPropertyPage(IProject project) {
 		setElement(project);
 		setTitle(Activator.getResourceString(TITLE));
 		noDefaultAndApplyButton();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.preference.PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
-	 */
 	protected Control createContents(Composite parent) {
 
 		// Build project model
@@ -100,9 +76,6 @@ public class WebflowPropertyPage extends PropertyPage {
 		return folder;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.preference.PreferencePage#performOk()
-	 */
 	public boolean performOk() {
 		IWebflowProject project = getSpringProject();
 
@@ -151,19 +124,11 @@ public class WebflowPropertyPage extends PropertyPage {
 		return null;
 	}
 
-	/**
-	 * 
-	 * 
-	 * @return 
-	 */
 	protected IWebflowProject getSpringProject() {
 		return (IWebflowProject) org.springframework.ide.eclipse.webflow.core.Activator
 				.getModel().getProject((IProject) getElement());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
-	 */
 	public void dispose() {
 		super.dispose();
 	}

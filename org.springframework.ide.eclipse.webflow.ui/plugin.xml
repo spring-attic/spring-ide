@@ -16,7 +16,7 @@
  	<extension
          point="org.eclipse.ui.propertyPages">
       <page
-            id="org.springframework.ide.eclipse.web.flow.ui.properties.ConfigurationPropertyPage"
+            id="org.springframework.ide.eclipse.webflow.ui.properties.projectPropertyPage"
             class="org.springframework.ide.eclipse.webflow.ui.properties.WebflowPropertyPage"
             name="%configurationPropertyPage"
             objectClass="org.eclipse.core.resources.IProject"

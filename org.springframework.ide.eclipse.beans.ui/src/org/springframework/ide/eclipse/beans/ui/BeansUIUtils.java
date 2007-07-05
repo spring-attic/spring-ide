@@ -16,7 +16,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.jface.preference.IPreferencePage;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
@@ -163,12 +162,7 @@ public final class BeansUIUtils {
 
 	public static void showProjectPropertyPage(IProject project, int block) {
 		if (project != null) {
-			String title = BeansUIPlugin
-					.getResourceString("PropertiesPage.title")
-					+ project.getName();
-			IPreferencePage page = new ProjectPropertyPage(project, block);
-			SpringUIUtils.showPreferencePage(ProjectPropertyPage.ID, page,
-					title);
+			SpringUIUtils.showPreferenceDialog(ProjectPropertyPage.ID, project);
 		}
 	}
 

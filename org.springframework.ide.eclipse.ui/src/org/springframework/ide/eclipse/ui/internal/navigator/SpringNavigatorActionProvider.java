@@ -13,21 +13,20 @@ package org.springframework.ide.eclipse.ui.internal.navigator;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.actions.ActionFactory;
-import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
-import org.eclipse.ui.ide.IDEActionFactory;
 import org.eclipse.ui.navigator.CommonActionProvider;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.eclipse.ui.navigator.ICommonMenuConstants;
-import org.springframework.ide.eclipse.ui.SpringUIPlugin;
+import org.springframework.ide.eclipse.ui.navigator.actions.OpenPropertiesAction;
 import org.springframework.ide.eclipse.ui.navigator.actions.ValidationAction;
 
 /**
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
 public class SpringNavigatorActionProvider extends CommonActionProvider {
 
-	private IWorkbenchAction openPropertiesAction;
+	private OpenPropertiesAction openPropertiesAction;
 	private ValidationAction validationAction;
 
 	public SpringNavigatorActionProvider() {
@@ -36,8 +35,7 @@ public class SpringNavigatorActionProvider extends CommonActionProvider {
 	@Override
 	public void init(ICommonActionExtensionSite site) {
 		validationAction = new ValidationAction(site);
-		openPropertiesAction = IDEActionFactory.OPEN_PROJECT_PROPERTIES
-				.create(SpringUIPlugin.getActiveWorkbenchWindow());
+		openPropertiesAction = new OpenPropertiesAction(site);
 	}
 
 	@Override

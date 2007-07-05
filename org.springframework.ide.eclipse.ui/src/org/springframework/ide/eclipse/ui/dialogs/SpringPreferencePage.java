@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 
 /**
  * Empty preference page that serves as a placeholder
@@ -28,6 +29,8 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 public class SpringPreferencePage
 	extends PreferencePage
 	implements IWorkbenchPreferencePage {
+	
+	public static String ID = SpringUIPlugin.PLUGIN_ID + ".projectPropertyPage";
 	
 	public SpringPreferencePage() {
 		noDefaultAndApplyButton();

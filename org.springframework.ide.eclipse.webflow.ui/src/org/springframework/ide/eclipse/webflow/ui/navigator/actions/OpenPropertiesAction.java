@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.webflow.ui.navigator.actions;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.preference.IPreferencePage;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
@@ -73,10 +72,7 @@ public class OpenPropertiesAction extends AbstractNavigatorAction {
 
 	private static void showProjectPropertyPage(IProject project) {
 		if (project != null) {
-			String title = "";
-			IPreferencePage page = new WebflowPropertyPage(project);
-			SpringUIUtils.showPreferencePage(WebflowPropertyPage.ID, page,
-					title);
+			SpringUIUtils.showPreferenceDialog(WebflowPropertyPage.ID, project);
 		}
 	}
 }

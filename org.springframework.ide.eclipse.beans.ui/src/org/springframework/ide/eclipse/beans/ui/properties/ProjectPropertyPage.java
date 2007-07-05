@@ -38,7 +38,7 @@ import org.springframework.ide.eclipse.core.SpringCore;
 public class ProjectPropertyPage extends PropertyPage {
 
 	public static final String ID = BeansUIPlugin.PLUGIN_ID
-			+ ".ui.properties.ProjectPropertyPage";
+			+ ".properties.ProjectPropertyPage";
 
 	private static final String PREFIX = "ConfigurationPropertyPage.";
 
