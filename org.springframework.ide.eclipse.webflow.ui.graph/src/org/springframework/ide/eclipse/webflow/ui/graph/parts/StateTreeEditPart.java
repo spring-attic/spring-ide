@@ -59,7 +59,9 @@ public class StateTreeEditPart extends AbstractTreeEditPart implements
 	 */
 	public void activate() {
 		super.activate();
-		((IWebflowModelElement) getModel()).addPropertyChangeListener(this);
+		if (getModel() != null) {
+			((IWebflowModelElement) getModel()).addPropertyChangeListener(this);
+		}
 	}
 
 	/*
@@ -79,7 +81,9 @@ public class StateTreeEditPart extends AbstractTreeEditPart implements
 	 * @see org.eclipse.gef.editparts.AbstractEditPart#deactivate()
 	 */
 	public void deactivate() {
-		((IWebflowModelElement) getModel()).removePropertyChangeListener(this);
+		if (getModel() != null) {
+			((IWebflowModelElement) getModel()).removePropertyChangeListener(this);
+		}
 		super.deactivate();
 	}
 

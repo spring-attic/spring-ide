@@ -77,6 +77,7 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.SaveAsDialog;
+import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
@@ -91,6 +92,7 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.core.internal.provisional.format.FormatProcessorXML;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowConfig;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowState;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
@@ -109,7 +111,6 @@ import org.w3c.dom.Node;
 /**
  * {@link GraphicalEditorWithFlyoutPalette} that contributes the WebflowEditor
  * to the Eclipse workbench
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -191,7 +192,7 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 				thumbnail = null;
 			}
 			super.dispose();
-			//WebflowEditor.this.outlinePage = null;
+			// WebflowEditor.this.outlinePage = null;
 		}
 
 		public Object getAdapter(Class type) {
@@ -392,7 +393,9 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 		public void partActivated(IWorkbenchPart part) {
 			if (part != WebflowEditor.this)
 				return;
-			if (!((WebflowEditorInput) getEditorInput()).getFile().exists()) {
+			if (getEditorInput() instanceof WebflowEditorInput
+					&& !((WebflowEditorInput) getEditorInput()).getFile()
+							.exists()) {
 				Shell shell = getSite().getShell();
 				String title = "res";
 				String message = "erer";
@@ -532,8 +535,10 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 		getSite().getWorkbenchWindow().getPartService().removePartListener(
 				partListener);
 		partListener = null;
-		((WebflowEditorInput) getEditorInput()).getFile().getWorkspace()
-				.removeResourceChangeListener(resourceListener);
+		if (getEditorInput() instanceof WebflowEditorInput) {
+			((WebflowEditorInput) getEditorInput()).getFile().getWorkspace()
+					.removeResourceChangeListener(resourceListener);
+		}
 
 		if (this.diagram != null) {
 			diagram = null;
@@ -630,7 +635,9 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	protected void initializeGraphicalViewer() {
-		getGraphicalViewer().setContents(diagram);
+		if (diagram != null) {
+			getGraphicalViewer().setContents(diagram);
+		}
 	}
 
 	public boolean isDirty() {
@@ -732,30 +739,48 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 	}
 
 	protected void setInput(IEditorInput input) {
-		superSetInput(input);
-		WebflowEditorInput webflowEditorInput = ((WebflowEditorInput) input);
-		this.file = webflowEditorInput.getFile();
-		setPartName(this.file.getName());
-		
-		try {
-			model = null;
-			model = StructuredModelManager.getModelManager()
-					.getExistingModelForEdit(this.file);
-			if (model == null) {
-				model = StructuredModelManager.getModelManager()
-						.getModelForEdit(this.file);
 
-			}
-			if (model != null) {
-				IDOMDocument document = ((DOMModelImpl) model).getDocument();
-				this.diagram = new WebflowState(webflowEditorInput.getConfig());
-				IDOMNode root = (IDOMNode) document.getDocumentElement();
-				IDOMNode rootClone = (IDOMNode) root.cloneNode(true);
-				webflowEditorInput.initLineNumbers(root, rootClone);
-				this.diagram.init(rootClone, webflowEditorInput.getConfig());
+		if (input instanceof FileEditorInput) {
+			IFile tempFile = ((FileEditorInput) input).getFile();
+			if (WebflowModelUtils.isWebflowConfig(tempFile)) {
+				input = new WebflowEditorInput(WebflowModelUtils
+						.getWebflowConfig(tempFile));
 			}
 		}
-		catch (Exception e) {
+
+		if (input instanceof WebflowEditorInput) {
+
+			superSetInput(input);
+			WebflowEditorInput webflowEditorInput = ((WebflowEditorInput) input);
+			this.file = webflowEditorInput.getFile();
+			setPartName(this.file.getName());
+
+			try {
+				model = null;
+				model = StructuredModelManager.getModelManager()
+						.getExistingModelForEdit(this.file);
+				if (model == null) {
+					model = StructuredModelManager.getModelManager()
+							.getModelForEdit(this.file);
+
+				}
+				if (model != null) {
+					IDOMDocument document = ((DOMModelImpl) model)
+							.getDocument();
+					this.diagram = new WebflowState(webflowEditorInput
+							.getConfig());
+					IDOMNode root = (IDOMNode) document.getDocumentElement();
+					IDOMNode rootClone = (IDOMNode) root.cloneNode(true);
+					webflowEditorInput.initLineNumbers(root, rootClone);
+					this.diagram
+							.init(rootClone, webflowEditorInput.getConfig());
+				}
+			}
+			catch (Exception e) {
+			}
+		}
+		else {
+			super.setInput(input);
 		}
 	}
 
