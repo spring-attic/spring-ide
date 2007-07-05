@@ -110,8 +110,7 @@ public class BeansJavaCompletionUtils {
 							.getReplacementBeginPosition(), request
 							.getReplacementLength(), prop
 							.getReplacementString().length(), prop.getImage(),
-					prop.getDisplayString(), null, prop
-							.getAdditionalProposalInfo(), prop.getRelevance(),
+					prop.getDisplayString(), null, prop.getRelevance(),
 					prop.getJavaElement());
 
 			request.addProposal(proposal);
@@ -123,8 +122,7 @@ public class BeansJavaCompletionUtils {
 							.getReplacementBeginPosition(), request
 							.getReplacementLength(), prop
 							.getQualifiedTypeName().length(), prop.getImage(),
-					prop.getDisplayString(), null, prop
-							.getAdditionalProposalInfo(), prop.getRelevance(),
+					prop.getDisplayString(), null, prop.getRelevance(),
 					prop.getJavaElement());
 
 			request.addProposal(proposal);
@@ -200,7 +198,7 @@ public class BeansJavaCompletionUtils {
 								foundType.getElementName()
 										+ " - "
 										+ foundType.getPackageFragment()
-												.getElementName(), null, null,
+												.getElementName(), null, 
 								10, foundType);
 						request.addProposal(proposal);
 						sortMap.put(foundType.getFullyQualifiedName(),

@@ -20,7 +20,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposal;
-import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaDocUtils;
 
 @SuppressWarnings("restriction")
 public class FactoryMethodSearchRequestor extends PublicMethodSearchRequestor {
@@ -76,14 +75,11 @@ public class FactoryMethodSearchRequestor extends PublicMethodSearchRequestor {
 				Image image = imageProvider.getImageLabel(method, method
 						.getFlags()
 						| JavaElementImageProvider.SMALL_ICONS);
-				BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
-				String javadoc = utils.getJavaDoc();
-
+				
 				BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
 						replaceText, request.getReplacementBeginPosition(),
 						request.getReplacementLength(), replaceText.length(),
-						image, displayText, null, javadoc,
-						MethodSearchRequestor.METHOD_RELEVANCE, method);
+						image, displayText, null, MethodSearchRequestor.METHOD_RELEVANCE, method);
 
 				request.addProposal(proposal);
 				methods.add(method.getSignature());

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -20,12 +22,14 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension5;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.wst.sse.core.internal.util.Debug;
 import org.eclipse.wst.sse.ui.internal.contentassist.IRelevanceCompletionProposal;
 import org.eclipse.wst.sse.ui.internal.contentassist.IRelevanceConstants;
+import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 
 /**
  * An implementation of ICompletionProposal whose values can be read after
@@ -34,9 +38,8 @@ import org.eclipse.wst.sse.ui.internal.contentassist.IRelevanceConstants;
 @SuppressWarnings("restriction")
 public class BeansJavaCompletionProposal implements ICompletionProposal,
 		ICompletionProposalExtension, ICompletionProposalExtension2,
-		ICompletionProposalExtension4, IRelevanceCompletionProposal {
-
-	private String fAdditionalProposalInfo;
+		ICompletionProposalExtension4, ICompletionProposalExtension5,
+		IRelevanceCompletionProposal {
 
 	private IContextInformation fContextInformation;
 
@@ -56,33 +59,27 @@ public class BeansJavaCompletionProposal implements ICompletionProposal,
 
 	private String fReplacementString = null;
 
+	private char[] fTriggers;
+
 	private boolean fUpdateLengthOnValidate;
 
-	private char[] fTriggers;
-	
 	private Object proposedObject = null;
 
 	/**
-	 * Constructor with relevance and replacement length update flag.
-	 * 
-	 * If the <code>updateReplacementLengthOnValidate</code> flag is true,
-	 * then when the user types, the replacement length will be incremented by
-	 * the number of new characters inserted from the original position.
-	 * Otherwise the replacement length will not change on validate.
-	 * 
-	 * ex.
-	 * 
-	 * <tag |name="attr"> - the replacement length is 4 <tag i|name="attr"> -
-	 * the replacement length is now 5 <tag id|name="attr"> - the replacement
-	 * length is now 6 <tag |name="attr"> - the replacementlength is now 4 again
-	 * <tag |name="attr"> - the replacment length remains 4
-	 * 
+	 * Constructor with relevance and replacement length update flag. If the
+	 * <code>updateReplacementLengthOnValidate</code> flag is true, then when
+	 * the user types, the replacement length will be incremented by the number
+	 * of new characters inserted from the original position. Otherwise the
+	 * replacement length will not change on validate. ex. <tag |name="attr"> -
+	 * the replacement length is 4 <tag i|name="attr"> - the replacement length
+	 * is now 5 <tag id|name="attr"> - the replacement length is now 6 <tag
+	 * |name="attr"> - the replacementlength is now 4 again <tag |name="attr"> -
+	 * the replacment length remains 4
 	 */
 	public BeansJavaCompletionProposal(String replacementString,
 			int replacementOffset, int replacementLength, int cursorPosition,
 			Image image, String displayString,
-			IContextInformation contextInformation,
-			String additionalProposalInfo, int relevance,
+			IContextInformation contextInformation, int relevance,
 			boolean updateReplacementLengthOnValidate, Object proposedObject) {
 
 		fReplacementString = "\"" + replacementString;
@@ -92,7 +89,6 @@ public class BeansJavaCompletionProposal implements ICompletionProposal,
 		fImage = image;
 		fDisplayString = displayString;
 		fContextInformation = contextInformation;
-		fAdditionalProposalInfo = additionalProposalInfo;
 		fRelevance = relevance;
 		fUpdateLengthOnValidate = updateReplacementLengthOnValidate;
 		fOriginalReplacementLength = fReplacementLength;
@@ -102,11 +98,11 @@ public class BeansJavaCompletionProposal implements ICompletionProposal,
 	public BeansJavaCompletionProposal(String replacementString,
 			int replacementOffset, int replacementLength, int cursorPosition,
 			Image image, String displayString,
-			IContextInformation contextInformation,
-			String additionalProposalInfo, int relevance, Object proposedObject) {
+			IContextInformation contextInformation, int relevance,
+			Object proposedObject) {
 		this(replacementString, replacementOffset, replacementLength,
 				cursorPosition, image, displayString, contextInformation,
-				additionalProposalInfo, relevance, true, proposedObject);
+				relevance, true, proposedObject);
 	}
 
 	public void apply(IDocument document) {
@@ -142,7 +138,6 @@ public class BeansJavaCompletionProposal implements ICompletionProposal,
 
 	/*
 	 * (non-Javadoc)
-	 * 
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension#apply(org.eclipse.jface.text.IDocument,
 	 * char, int)
 	 */
@@ -247,24 +242,19 @@ public class BeansJavaCompletionProposal implements ICompletionProposal,
 	}
 
 	public String getAdditionalProposalInfo() {
-		// return fProposal.getAdditionalProposalInfo();
-		return fAdditionalProposalInfo;
+		return BeansEditorUtils.createAdditionalProposalInfo(
+				getProposedObject(), new NullProgressMonitor());
+	}
+
+	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+		return BeansEditorUtils.createAdditionalProposalInfo(
+				getProposedObject(), monitor);
 	}
 
 	public IContextInformation getContextInformation() {
-		// return fProposal.getContextInformation();
 		return fContextInformation;
 	}
 
-	public void setContextInformation(IContextInformation contextInfo) {
-		fContextInformation = contextInfo;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension#getContextInformationPosition()
-	 */
 	public int getContextInformationPosition() {
 		return getCursorPosition();
 	}
@@ -273,18 +263,16 @@ public class BeansJavaCompletionProposal implements ICompletionProposal,
 		return fCursorPosition;
 	}
 
-	public void setCursorPosition(int pos) {
-		fCursorPosition = pos;
-	}
-
 	public String getDisplayString() {
-		// return fProposal.getDisplayString();
 		return fDisplayString;
 	}
 
 	public Image getImage() {
-		// return fProposal.getImage();
 		return fImage;
+	}
+
+	public Object getProposedObject() {
+		return proposedObject;
 	}
 
 	public int getRelevance() {
@@ -304,12 +292,11 @@ public class BeansJavaCompletionProposal implements ICompletionProposal,
 	}
 
 	public Point getSelection(IDocument document) {
-		// return fProposal.getSelection(document);
 		CompletionProposal proposal = new CompletionProposal(
 				getReplacementString(), getReplacementOffset(),
 				getReplacementLength(), getCursorPosition(), getImage(),
 				getDisplayString(), getContextInformation(),
-				getAdditionalProposalInfo());
+				null);
 		return proposal.getSelection(document);
 	}
 
@@ -321,25 +308,39 @@ public class BeansJavaCompletionProposal implements ICompletionProposal,
 		return fTriggers;
 	}
 
-	public void setTriggerCharacters(char[] triggers) {
-		fTriggers = triggers;
+	public boolean isAutoInsertable() {
+		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension#isValidFor(org.eclipse.jface.text.IDocument,
-	 * int)
-	 */
 	public boolean isValidFor(IDocument document, int offset) {
 		return validate(document, offset, null);
 	}
 
-	/**
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#selected(org.eclipse.jface.text.ITextViewer,
-	 * boolean)
-	 */
 	public void selected(ITextViewer viewer, boolean smartToggle) {
+	}
+
+	public void setContextInformation(IContextInformation contextInfo) {
+		fContextInformation = contextInfo;
+	}
+
+	public void setCursorPosition(int pos) {
+		fCursorPosition = pos;
+	}
+
+	public void setRelevance(int relevance) {
+		fRelevance = relevance;
+	}
+
+	public void setReplacementOffset(int replacementOffset) {
+		fReplacementOffset = replacementOffset;
+	}
+
+	public void setReplacementString(String replacementString) {
+		fReplacementString = replacementString;
+	}
+
+	public void setTriggerCharacters(char[] triggers) {
+		fTriggers = triggers;
 	}
 
 	// code is borrowed from JavaCompletionProposal
@@ -363,18 +364,9 @@ public class BeansJavaCompletionProposal implements ICompletionProposal,
 		return false;
 	}
 
-	/**
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#unselected(org.eclipse.jface.text.ITextViewer)
-	 */
 	public void unselected(ITextViewer viewer) {
 	}
 
-	/**
-	 * borrowed from JavaCompletionProposal
-	 * 
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#validate(org.eclipse.jface.text.IDocument,
-	 * int, org.eclipse.jface.text.DocumentEvent)
-	 */
 	public boolean validate(IDocument document, int offset, DocumentEvent event) {
 		if (offset < fReplacementOffset)
 			return false;
@@ -387,31 +379,5 @@ public class BeansJavaCompletionProposal implements ICompletionProposal,
 			fReplacementLength = delta + fOriginalReplacementLength;
 		}
 		return validated || validatedClass;
-	}
-
-	/**
-	 * @param replacementOffset The fReplacementOffset to set.
-	 */
-	public void setReplacementOffset(int replacementOffset) {
-		fReplacementOffset = replacementOffset;
-	}
-
-	/**
-	 * @param replacementString The fReplacementString to set.
-	 */
-	public void setReplacementString(String replacementString) {
-		fReplacementString = replacementString;
-	}
-
-	public boolean isAutoInsertable() {
-		return true;
-	}
-
-	public Object getProposedObject() {
-		return proposedObject;
-	}
-
-	public void setRelevance(int relevance) {
-		fRelevance = relevance;
 	}
 }

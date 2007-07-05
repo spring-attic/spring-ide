@@ -79,7 +79,7 @@ public class BeanReferenceSearchRequestor {
 				String displayText = buf.toString();
 
 				Image image = BeansUIPlugin.getLabelProvider().getImage(bean);
-				
+
 				BeansJavaCompletionProposal proposal = null;
 				if (this.requiredTypes.contains(bean.getClassName())) {
 					proposal = new BeansJavaCompletionProposal(
@@ -90,19 +90,14 @@ public class BeanReferenceSearchRequestor {
 							image,
 							displayText,
 							null,
-							BeansEditorUtils.createAdditionalProposalInfo(bean),
-							BeanReferenceSearchRequestor.TYPE_MATCHING_RELEVANCE, bean);
+							BeanReferenceSearchRequestor.TYPE_MATCHING_RELEVANCE,
+							bean);
 				}
 				else {
-					proposal = new BeansJavaCompletionProposal(
-							replaceText,
-							request.getReplacementBeginPosition(),
-							request.getReplacementLength(),
-							replaceText.length(),
-							image,
-							displayText,
-							null,
-							BeansEditorUtils.createAdditionalProposalInfo(bean),
+					proposal = new BeansJavaCompletionProposal(replaceText,
+							request.getReplacementBeginPosition(), request
+									.getReplacementLength(), replaceText
+									.length(), image, displayText, null,
 							BeanReferenceSearchRequestor.RELEVANCE, bean);
 				}
 
@@ -154,8 +149,6 @@ public class BeanReferenceSearchRequestor {
 								request.getReplacementBeginPosition(), request
 										.getReplacementLength(), replaceText
 										.length(), image, displayText, null,
-								BeansEditorUtils.createAdditionalProposalInfo(
-										beanNode, file),
 								TYPE_MATCHING_RELEVANCE, beanNode);
 					}
 					else {
@@ -163,8 +156,7 @@ public class BeanReferenceSearchRequestor {
 								request.getReplacementBeginPosition(), request
 										.getReplacementLength(), replaceText
 										.length(), image, displayText, null,
-								BeansEditorUtils.createAdditionalProposalInfo(
-										beanNode, file), RELEVANCE, beanNode);
+								RELEVANCE, beanNode);
 					}
 
 					request.addProposal(proposal);

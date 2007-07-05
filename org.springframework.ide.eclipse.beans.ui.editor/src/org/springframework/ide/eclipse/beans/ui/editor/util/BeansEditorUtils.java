@@ -27,10 +27,12 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.internal.ui.text.java.ProposalInfo;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -38,10 +40,12 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.internal.Workbench;
+import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
+import org.eclipse.wst.xml.core.internal.document.ElementImpl;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.PropertyAccessorUtils;
@@ -174,7 +178,7 @@ public class BeansEditorUtils {
 		List<IBeansConfig> configs = new ArrayList<IBeansConfig>();
 		IBeansProject project = BeansCorePlugin.getModel().getProject(
 				file.getProject());
-		
+
 		if (project != null) {
 			Set<IBeansConfigSet> configSets = project.getConfigSets();
 
@@ -186,11 +190,11 @@ public class BeansEditorUtils {
 				}
 			}
 		}
-		
+
 		if (BeansCoreUtils.isBeansConfig(file)) {
 			configs.add(project.getConfig(file));
 		}
-		
+
 		for (IBeansConfig bc : configs) {
 			Set<IBean> bs = bc.getBeans();
 			for (IBean b : bs) {
@@ -253,9 +257,28 @@ public class BeansEditorUtils {
 		else {
 			buf.append("default");
 		}
-		buf.append("<br><b>filename:</b> ");
-		buf.append(file.getProjectRelativePath());
+		if (file != null) {
+			buf.append("<br><b>filename:</b> ");
+			buf.append(file.getProjectRelativePath());
+		}
 		return buf.toString();
+	}
+
+	public static final String createAdditionalProposalInfo(Object obj,
+			IProgressMonitor monitor) {
+		if (obj instanceof IBean) {
+			return createAdditionalProposalInfo((IBean) obj);
+		}
+		else if (obj instanceof ElementImpl) {
+			ElementImpl node = (ElementImpl) obj;
+			IStructuredDocument document = node.getStructuredDocument();
+			IFile resource = getFile(document);
+			return createAdditionalProposalInfo((Node) obj, resource);
+		}
+		else if (obj instanceof IMember) {
+			return new ProposalInfo((IMember) obj).getInfo(monitor);
+		}
+		return null;
 	}
 
 	public static final String createAdditionalProposalInfo(IBean bean) {
@@ -323,8 +346,7 @@ public class BeansEditorUtils {
 		}
 
 		if (className != null) {
-			IType type = JdtUtils.getJavaType(file.getProject(),
-					className);
+			IType type = JdtUtils.getJavaType(file.getProject(), className);
 			if (type != null && !classNames.contains(type)) {
 				classNames.add(type);
 			}
@@ -465,9 +487,9 @@ public class BeansEditorUtils {
 		try {
 			String returnTypeString = Signature.toString(string).replace('$',
 					'.');
-			returnType = JdtUtils.getJavaType(contextType
-					.getJavaProject().getProject(), resolveClassName(
-					returnTypeString, contextType));
+			returnType = JdtUtils.getJavaType(contextType.getJavaProject()
+					.getProject(), resolveClassName(returnTypeString,
+					contextType));
 		}
 		catch (IllegalArgumentException e) {
 			// do Nothing
@@ -655,7 +677,8 @@ public class BeansEditorUtils {
 					.getModelManager().getExistingModelForRead(document);
 			if (sModel == null && document instanceof IStructuredDocument) {
 				sModel = org.eclipse.wst.sse.core.StructuredModelManager
-					.getModelManager().getModelForRead((IStructuredDocument) document);
+						.getModelManager().getModelForRead(
+								(IStructuredDocument) document);
 			}
 			inode = sModel.getIndexedRegion(offset);
 			if (inode == null) {
@@ -701,7 +724,6 @@ public class BeansEditorUtils {
 	public static final IFile getFile(IDocument document) {
 		IFile resource = null;
 		String baselocation = null;
-
 		if (document != null) {
 			IStructuredModel model = null;
 			try {
@@ -742,6 +764,32 @@ public class BeansEditorUtils {
 			project = file.getProject();
 		}
 		return project;
+	}
+
+	public static IFile getFile(IStructuredDocument document) {
+		if (document != null) {
+			IStructuredModel model = StructuredModelManager.getModelManager()
+					.getModelForRead(document);
+			IFile resource = null;
+			try {
+				String baselocation = model.getBaseLocation();
+				if (baselocation != null) {
+					IWorkspaceRoot root = ResourcesPlugin.getWorkspace()
+							.getRoot();
+					IPath filePath = new Path(baselocation);
+					if (filePath.segmentCount() > 0) {
+						resource = root.getFile(filePath);
+					}
+				}
+			}
+			finally {
+				if (model != null) {
+					model.releaseFromRead();
+				}
+			}
+			return resource;
+		}
+		return null;
 	}
 
 	/**

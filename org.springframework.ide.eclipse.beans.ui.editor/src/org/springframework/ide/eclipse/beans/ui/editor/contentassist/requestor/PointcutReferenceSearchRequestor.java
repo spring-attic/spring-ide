@@ -18,7 +18,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCompletionProposal;
-import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
@@ -62,10 +61,8 @@ public class PointcutReferenceSearchRequestor {
 				BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
 						replaceText, request.getReplacementBeginPosition(),
 						request.getReplacementLength(), replaceText.length(),
-						image, displayText, null, BeansEditorUtils
-								.createAdditionalProposalInfo(pointcutNode,
-										file),
-						PointcutReferenceSearchRequestor.LOCAL_BEAN_RELEVANCE, 
+						image, displayText, null,
+						PointcutReferenceSearchRequestor.LOCAL_BEAN_RELEVANCE,
 						pointcutNode);
 
 				request.addProposal(proposal);

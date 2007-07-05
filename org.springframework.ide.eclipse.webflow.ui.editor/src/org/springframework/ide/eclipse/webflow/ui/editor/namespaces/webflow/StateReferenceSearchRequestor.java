@@ -62,7 +62,7 @@ public class StateReferenceSearchRequestor {
 			Image image = labelProvider.getImage(node);
 			BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(id, request.getReplacementBeginPosition(),
 					request.getReplacementLength(), id.length(), image, displayText, null,
-					null, StateReferenceSearchRequestor.RELEVANCE, node);
+					StateReferenceSearchRequestor.RELEVANCE, node);
 			request.addProposal(proposal);
 			beans.add(id);
 		}
