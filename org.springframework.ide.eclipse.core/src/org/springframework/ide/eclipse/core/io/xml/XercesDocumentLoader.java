@@ -51,12 +51,12 @@ public class XercesDocumentLoader implements DocumentLoader {
 			return parser.getDocument();
 		}
 		catch (LinkageError e) {
-			// log the Xerces location to the Error log in order to debug the location
-			SpringCore.log(SpringCore.getFormattedMessage(
-					"Plugin.xerces_location", ClassUtils
-					.getClassVersion(org.apache.xerces.impl.Version.class), ClassUtils
-					.getClassLocation(org.apache.xerces.impl.Version.class), ClassUtils
-					.getClassLoaderHierachy(org.apache.xerces.impl.Version.class)), e);
+			logXercesLocation(e);
+			throw new SAXException(SpringCore
+					.getResourceString("Plugin.wrong_xerces_message"));
+		}
+		catch (ClassCastException e) {
+			logXercesLocation(e);
 			throw new SAXException(SpringCore
 					.getResourceString("Plugin.wrong_xerces_message"));
 		}
@@ -64,5 +64,17 @@ public class XercesDocumentLoader implements DocumentLoader {
 			throw new SAXException(SpringCore
 					.getResourceString("Plugin.wrong_xerces_message"));
 		}
+	}
+
+	/**
+	 * Logs the location of the Xerces XML parser's class
+	 * {@link org.apache.xerces.impl.Version} to the error log.
+	 */
+	protected void logXercesLocation(Throwable throwable) throws SAXException {
+		Class xercesVersion = org.apache.xerces.impl.Version.class;
+		SpringCore.log(SpringCore.getFormattedMessage("Plugin.xerces_location",
+				ClassUtils.getClassVersion(xercesVersion),
+				ClassUtils.getClassLocation(xercesVersion),
+				ClassUtils.getClassLoaderHierachy(xercesVersion)), throwable);
 	}
 }
