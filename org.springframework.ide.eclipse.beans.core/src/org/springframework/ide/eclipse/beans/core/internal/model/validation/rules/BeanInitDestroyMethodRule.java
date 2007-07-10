@@ -10,10 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.validation.rules;
 
+import java.util.Set;
+
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
@@ -45,8 +50,7 @@ public class BeanInitDestroyMethodRule extends
 		String mergedClassName = mergedBd.getBeanClassName();
 		if (mergedClassName != null
 				&& !ValidationRuleUtils.hasPlaceHolder(mergedClassName)) {
-			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean)
-					.getProject(), mergedClassName);
+			IType type = extractBeanClass(mergedBd, bean, mergedClassName);
 			if (type != null) {
 
 				// For non-factory beans validate bean's init-method and
@@ -66,5 +70,33 @@ public class BeanInitDestroyMethodRule extends
 				}
 			}
 		}
+	}
+
+	private IType extractBeanClass(AbstractBeanDefinition bd, IBean bean,
+			String mergedClassName) {
+		IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean)
+				.getProject(), mergedClassName);
+		if (bd.getFactoryMethodName() != null) {
+			String factoryMethod = bd.getFactoryMethodName();
+			try {
+				int argCount = (bd instanceof RootBeanDefinition
+						&& !bd.isAbstract() ? bd.getConstructorArgumentValues()
+						.getArgumentCount() : -1);
+				Set<IMethod> methods = Introspector.getAllMethods(type);
+				for (IMethod method : methods) {
+					if (factoryMethod.equals(method.getElementName())
+							&& method.getParameterNames().length == argCount) {
+						String className = JdtUtils.resolveClassName(method
+								.getReturnType(), type);
+						type = JdtUtils.getJavaType(bean.getElementResource()
+								.getProject(), className);
+						break;
+					}
+				}
+			}
+			catch (JavaModelException e) {
+			}
+		}
+		return type;
 	}
 }

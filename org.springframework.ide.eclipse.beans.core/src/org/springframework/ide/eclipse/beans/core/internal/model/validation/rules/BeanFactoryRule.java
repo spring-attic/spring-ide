@@ -85,7 +85,8 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 									.getConstructorArgumentValues()
 									.getArgumentCount() : -1);
 							validateFactoryMethod(bean, mergedClassName,
-									methodName, argCount, Static.YES, context);
+									methodName, argCount, Static.DONT_CARE, 
+									context);
 						}
 					}
 				}
