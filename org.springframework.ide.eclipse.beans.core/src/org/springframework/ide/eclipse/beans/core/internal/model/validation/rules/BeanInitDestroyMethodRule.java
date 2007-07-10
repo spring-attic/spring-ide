@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.core.java.Introspector.Static;
  * beans.
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
 public class BeanInitDestroyMethodRule extends
@@ -72,6 +73,11 @@ public class BeanInitDestroyMethodRule extends
 		}
 	}
 
+	/**
+	 * Extracts the {@link IType} of a bean definition.
+	 * <p>
+	 * Honors <code>factory-method</code>s.
+	 */
 	private IType extractBeanClass(AbstractBeanDefinition bd, IBean bean,
 			String mergedClassName) {
 		IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean)
