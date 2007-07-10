@@ -65,6 +65,7 @@ public class WebflowHyperLinkDetector extends AbstractHyperLinkDetector
 		VALID_ATTRIBUTES.add("then");
 		VALID_ATTRIBUTES.add("else");
 		VALID_ATTRIBUTES.add("type");
+		VALID_ATTRIBUTES.add("name");
 	}
 
 	/**
@@ -91,7 +92,7 @@ public class WebflowHyperLinkDetector extends AbstractHyperLinkDetector
 		if (name == null) {
 			return null;
 		}
-		if ("bean".equals(name)) {
+		if ("bean".equals(name) || "name".equals(name)) {
 			IFile file = BeansEditorUtils.getFile(document);
 			IWebflowConfig config = Activator.getModel().getProject(
 					file.getProject()).getConfig(file);

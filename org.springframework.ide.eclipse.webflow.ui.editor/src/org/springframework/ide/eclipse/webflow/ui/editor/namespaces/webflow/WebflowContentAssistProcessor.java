@@ -266,6 +266,10 @@ public class WebflowContentAssistProcessor extends
 			else if ("class".equals(attributeName)) {
 				addClassAttributeValueProposals(request, matchString);
 			}
+			// name
+			else if ("name".equals(attributeName)) {
+				addBeanReferenceProposals(request, matchString);
+			}
 		}
 		else if ("if".equals(nodeName)) {
 			// then
