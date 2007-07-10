@@ -88,6 +88,7 @@ public class AopReferenceModelNavigatorInterestFilter extends InterestFilter {
 			if (object.getChildren() != null && object.getChildren().length > 0) {
 				for (Object child : object.getChildren()) {
 					if (child instanceof IReferenceNode) {
+						// TODO CD add support for IAspectDefinition
 						if (isInterestingReferenceParticipant((IReferenceNode) child)) {
 							return true;
 						}
