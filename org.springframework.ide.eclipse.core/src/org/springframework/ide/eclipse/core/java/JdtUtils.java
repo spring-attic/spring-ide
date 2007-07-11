@@ -377,7 +377,7 @@ public class JdtUtils {
 	 */
 	public static IType getJavaType(IProject project, String className) {
 		IJavaProject javaProject = JdtUtils.getJavaProject(project);
-		if (javaProject != null && className != null) {
+		if (className != null) {
 
 			// For inner classes replace '$' by '.'
 			int pos = className.lastIndexOf('$');
@@ -386,10 +386,13 @@ public class JdtUtils {
 						+ className.substring(pos + 1);
 			}
 			try {
+				IType type = null;
 				// First look for the type in the Java project
-				IType type = javaProject.findType(className);
-				if (type != null) {
-					return type;
+				if (javaProject != null) {
+					type = javaProject.findType(className);
+					if (type != null) {
+						return type;
+					}
 				}
 
 				// Then look for the type in the referenced Java projects

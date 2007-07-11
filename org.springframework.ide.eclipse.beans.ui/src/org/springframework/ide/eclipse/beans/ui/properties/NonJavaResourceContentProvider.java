@@ -38,6 +38,7 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
  * This content provider is used to display a tree of non-java resources.
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class NonJavaResourceContentProvider implements ITreeContentProvider {
 
@@ -66,6 +67,9 @@ public class NonJavaResourceContentProvider implements ITreeContentProvider {
 			}
 			if (element instanceof IJavaProject) {
 				return getPackageFragmentRoots((IJavaProject) element);
+			}
+			if (element instanceof IProject) {
+				return getResources((IProject) element);
 			}
 			if (element instanceof IPackageFragmentRoot) {
 				return getPackageFragments((IPackageFragmentRoot) element);
