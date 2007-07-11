@@ -80,8 +80,11 @@ public class DefaultModelElementProvider implements IModelElementProvider {
 	private IBean createBean(IBeansConfig config,
 			ComponentDefinition definition) {
 		BeanDefinition[] beanDefs = definition.getBeanDefinitions();
-		if (beanDefs.length > 0 && beanDefs[0].getRole()
-				!= BeanDefinition.ROLE_INFRASTRUCTURE) {
+		if (beanDefs.length > 0) {
+			// TODO CD commented because we need to get those infrastructure 
+			// beans now
+			//&& beanDefs[0].getRole()
+			//	!= BeanDefinition.ROLE_INFRASTRUCTURE) {
 			BeanDefinitionHolder holder;
 			if (definition instanceof BeanComponentDefinition) {
 				holder = (BeanComponentDefinition) definition;
