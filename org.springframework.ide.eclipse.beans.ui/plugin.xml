@@ -169,6 +169,7 @@
          <includes>
             <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.springExplorerContent"/>
             <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.filters.hideBeansConfigSets"/>
+            <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.filters.hideInfrstructureBean"/>
             <contentExtension pattern="org.springframework.ide.eclipse.beans.ui.navigator.linkHelper"/>
          </includes>
       </viewerContentBinding>
@@ -314,6 +315,18 @@
             activeByDefault="false">
 				<filterExpression>
 					<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet"/>
+				</filterExpression>
+      </commonFilter>
+      <commonFilter
+            id="org.springframework.ide.eclipse.beans.ui.navigator.filters.hideInfrstructureBean"
+            name="%navigatorfilterHideInfrstructureBeanName"
+            description="%navigatorfilterHideInfrstructureBeanDescription"
+            activeByDefault="true">
+				<filterExpression>
+					<and>
+						<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBean"/>
+						<test property="org.springframework.ide.eclipse.beans.core.model.isInfrstructureBean"/>
+					</and>
 				</filterExpression>
       </commonFilter>
    </extension>

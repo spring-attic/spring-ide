@@ -12,7 +12,9 @@ package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IFile;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 
 /**
  * This {@link PropertyTester} is used to check properties of the BeansCoreModel
@@ -22,9 +24,12 @@ import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
  * <ul>
  * <li><strong>isBeansConfig</strong> checks if a given {@link IFile} is a
  * BeansConfig file</li>
+ * <li><strong>isInfrstructureBean</strong> checks if a given {@link IBean} is
+ * a {@link BeanDefinition#ROLE_INFRASTRUCTURE}</li>
  * </ul>
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class BeansModelPropertyTester extends PropertyTester {
 
@@ -36,6 +41,14 @@ public class BeansModelPropertyTester extends PropertyTester {
 					.isBeansConfig((IFile) receiver);
 			return expectedValue == null ? isBeansConfig
 					: isBeansConfig == ((Boolean) expectedValue).booleanValue();
+		}
+		else if (receiver instanceof Bean
+				&& "isInfrstructureBean".equals(property)) {
+			boolean isInfrstructureBean = ((Bean) receiver).getBeanDefinition()
+					.getRole() == BeanDefinition.ROLE_INFRASTRUCTURE;
+			return expectedValue == null ? isInfrstructureBean
+					: isInfrstructureBean == ((Boolean) expectedValue)
+							.booleanValue();
 		}
 		return false;
 	}

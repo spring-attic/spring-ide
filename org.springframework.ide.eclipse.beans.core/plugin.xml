@@ -8,6 +8,9 @@
 	<extension-point id="postprocessors" name="%extensionPostProcessors.name"
 		schema="schema/postprocessors.exsd" />
 
+	<extension-point id="resolvers" name="%extensionResolvers.name"
+		schema="schema/resolvers.exsd" />
+
 	<extension point="org.eclipse.core.resources.markers"
 			id="problemmarker"
 			name="%beansProblemMarker">
@@ -28,8 +31,8 @@
 			class="org.springframework.ide.eclipse.beans.core.internal.model.BeansModelPropertyTester"
 			id="org.springframework.ide.eclipse.beans.core.beansModelTester"
 			namespace="org.springframework.ide.eclipse.beans.core.model"
-			properties="isBeansConfig" 
-			type="org.eclipse.core.resources.IFile" />
+			properties="isBeansConfig, isInfrstructureBean" 
+			type="java.lang.Object" />
 	</extension>
 	
 	<extension point="org.eclipse.ui.elementFactories">
