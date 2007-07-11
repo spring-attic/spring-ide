@@ -67,12 +67,6 @@ public class OpenPropertiesAction extends AbstractNavigatorAction {
 
 	@Override
 	public void run() {
-		showProjectPropertyPage(project);
-	}
-
-	private static void showProjectPropertyPage(IProject project) {
-		if (project != null) {
-			SpringUIUtils.showPreferenceDialog(WebflowPropertyPage.ID, project);
-		}
+		SpringUIUtils.showPreferenceDialog(WebflowPropertyPage.ID, project);
 	}
 }

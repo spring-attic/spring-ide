@@ -30,10 +30,10 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceContentProvider;
 import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
-import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
@@ -222,14 +222,10 @@ public class BeansModelContentProvider implements ITreeContentProvider,
 			}
 			return DEFAULT_NAMESPACE_CONTENT_PROVIDER.getParent(element);
 		} else if (element instanceof IModelElement) {
-			if (element instanceof IBeansConfig) {
-				return ((IBeansConfig) element).getElementResource();
+			if (element instanceof IBeansConfig
+					|| element instanceof IBeansProject) {
+				return ((IResourceModelElement) element).getElementResource();
 			}
-			else if (element instanceof IBeansProject) {
-				return SpringCore.getModel().getProject(
-						((IBeansProject) element).getProject());
-			}
-			return ((IModelElement) element).getElementParent();
 		} else if (element instanceof IFile) {
 			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
 					(IFile) element);

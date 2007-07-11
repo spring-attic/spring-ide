@@ -82,14 +82,16 @@ public class SpringNavigatorContentProvider implements ICommonContentProvider,
 	}
 
 	public Object[] getChildren(Object parentElement) {
-		IProject project = SpringCoreUtils.getAdapter(parentElement,
-				IProject.class);
-		if (project != null) {
-			ISpringProject springProject = SpringCore.getModel().getProject(
-					project);
-			if (springProject != null) {
-				if (SpringUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
-						.equals(providerID)) {
+
+		// Show virtual folder "Spring Elements" only in project explorer
+		if (SpringUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
+				.equals(providerID)) {
+			IProject project = SpringCoreUtils.getAdapter(parentElement,
+					IProject.class);
+			if (project != null) {
+				ISpringProject springProject = SpringCore.getModel()
+						.getProject(project);
+				if (springProject != null) {
 					return new Object[] { springProject };
 				}
 			}
