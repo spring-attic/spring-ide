@@ -20,10 +20,6 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
@@ -37,8 +33,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonContentProvider;
-import org.eclipse.wst.sse.core.StructuredModelManager;
-import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.xml.core.internal.document.ElementImpl;
 import org.springframework.ide.eclipse.aop.core.Activator;
@@ -69,6 +63,7 @@ import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
  * {@link ICommonContentProvider} that contributes elements from the
@@ -273,7 +268,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 			IStructuredDocument document = element.getStructuredDocument();
 			List<IReferenceNode> nodes = new ArrayList<IReferenceNode>();
 
-			IResource resource = getResource(document);
+			IResource resource = SpringUIUtils.getFile(document);
 			// check if resource is a Beans Config
 			if (!BeansCoreUtils.isBeansConfig(resource)) {
 				return nodes.toArray();
@@ -443,33 +438,6 @@ public class AopReferenceModelNavigatorContentProvider implements
 			}
 		}
 		return nodes;
-	}
-
-	private IResource getResource(IStructuredDocument document) {
-		if (document != null) {
-			IStructuredModel model = StructuredModelManager.getModelManager()
-					.getModelForRead(document);
-			IResource resource = null;
-			try {
-				String baselocation = model.getBaseLocation();
-				if (baselocation != null) {
-					// copied from JSPTranslationAdapter#getJavaProject
-					IWorkspaceRoot root = ResourcesPlugin.getWorkspace()
-							.getRoot();
-					IPath filePath = new Path(baselocation);
-					if (filePath.segmentCount() > 0) {
-						resource = root.getFile(filePath);
-					}
-				}
-			}
-			finally {
-				if (model != null) {
-					model.releaseFromRead();
-				}
-			}
-			return resource;
-		}
-		return null;
 	}
 
 	public Object getParent(Object element) {
