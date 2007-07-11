@@ -11,13 +11,7 @@
 package org.springframework.ide.eclipse.beans.mylyn.ui.editor;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
-import org.eclipse.wst.sse.core.StructuredModelManager;
-import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.xml.core.internal.document.ElementImpl;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -26,6 +20,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.bean.BeansContentAssistProcessor;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.mylyn.ui.editor.FocusedStructuredTextViewerContentAssistProcessor;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
  * {@link IContentAssistProcessor} that delegates to a nested
@@ -57,7 +52,7 @@ public class FocusedBeansContentAssistProcessor extends
 			else if (element != null && element instanceof ElementImpl) {
 				ElementImpl node = (ElementImpl) element;
 				IStructuredDocument document = node.getStructuredDocument();
-				IFile resource = getResource(document);
+				IFile resource = SpringUIUtils.getFile(document);
 				if (document != null) {
 					int startLine = document.getLineOfOffset(node
 							.getStartOffset()) + 1;
@@ -74,31 +69,5 @@ public class FocusedBeansContentAssistProcessor extends
 			}
 		}
 		return handle;
-	}
-
-	private IFile getResource(IStructuredDocument document) {
-		if (document != null) {
-			IStructuredModel model = StructuredModelManager.getModelManager()
-					.getModelForRead(document);
-			IFile resource = null;
-			try {
-				String baselocation = model.getBaseLocation();
-				if (baselocation != null) {
-					IWorkspaceRoot root = ResourcesPlugin.getWorkspace()
-							.getRoot();
-					IPath filePath = new Path(baselocation);
-					if (filePath.segmentCount() > 0) {
-						resource = root.getFile(filePath);
-					}
-				}
-			}
-			finally {
-				if (model != null) {
-					model.releaseFromRead();
-				}
-			}
-			return resource;
-		}
-		return null;
 	}
 }

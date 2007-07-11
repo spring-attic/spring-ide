@@ -13,10 +13,14 @@ package org.springframework.ide.eclipse.ui;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
@@ -50,6 +54,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -61,6 +66,9 @@ import org.eclipse.ui.internal.dialogs.PropertyPageContributorManager;
 import org.eclipse.ui.internal.dialogs.PropertyPageManager;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.wst.sse.core.StructuredModelManager;
+import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
+import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.ui.dialogs.SpringPreferencePage;
@@ -212,7 +220,8 @@ public final class SpringUIUtils {
 		}
 		if (targetNode != null) {
 			return openPreferenceNode(propertyPageId, targetNode,
-					SpringUIMessages.PropertiesPage_title + project.getName(), project);
+					SpringUIMessages.PropertiesPage_title + project.getName(),
+					project);
 		}
 		return false;
 	}
@@ -439,6 +448,38 @@ public final class SpringUIUtils {
 				workbench.getDecoratorManager().update(decoratorId);
 			}
 		});
+	}
+
+	public static IFile getFile(IStructuredDocument document) {
+		if (document != null) {
+			IStructuredModel model = StructuredModelManager.getModelManager()
+					.getModelForRead(document);
+			IFile resource = null;
+			try {
+				String baselocation = model.getBaseLocation();
+				if (baselocation != null) {
+					IWorkspaceRoot root = ResourcesPlugin.getWorkspace()
+							.getRoot();
+					IPath filePath = new Path(baselocation);
+					if (filePath.segmentCount() > 0) {
+						resource = root.getFile(filePath);
+					}
+				}
+			}
+			finally {
+				if (model != null) {
+					model.releaseFromRead();
+				}
+			}
+			return resource;
+		}
+		// fall back
+		IEditorPart editor = SpringUIUtils.getActiveEditor();
+		if (editor != null
+				&& editor.getEditorInput() instanceof IFileEditorInput) {
+			return ((IFileEditorInput) editor.getEditorInput()).getFile();
+		}
+		return null;
 	}
 
 	// TODO CD remove if really not required anymore
