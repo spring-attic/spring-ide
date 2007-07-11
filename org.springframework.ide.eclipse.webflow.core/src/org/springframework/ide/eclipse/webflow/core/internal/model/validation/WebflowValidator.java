@@ -17,6 +17,11 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
+import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinitionFactory;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -92,6 +97,24 @@ public class WebflowValidator extends AbstractValidator {
 				}
 			}
 
+		}
+		else if (BeansCoreUtils.isBeansConfig(resource)) {
+			IBeansConfig bc = BeansCorePlugin.getModel().getConfig(
+					(IFile) resource);
+			IWebflowProject wp = Activator.getModel().getProject(
+					resource.getProject());
+			for (IWebflowConfig fc : wp.getConfigs()) {
+				if (fc.getBeansConfigs().contains(bc)) {
+					resources.add(fc.getElementResource());
+				}
+
+				for (IModelElement me : fc.getBeansConfigs()) {
+					if (me instanceof IBeansConfigSet
+							&& ((IBeansConfigSet) me).getConfigs().contains(bc)) {
+						resources.add(fc.getElementResource());
+					}
+				}
+			}
 		}
 		return resources;
 	}
