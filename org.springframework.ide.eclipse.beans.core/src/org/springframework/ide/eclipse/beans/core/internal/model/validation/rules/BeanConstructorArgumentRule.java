@@ -22,7 +22,6 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.annotation.AnnotationConfigUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -30,6 +29,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.ScannedRootBeanDefinition;
 import org.springframework.core.type.asm.AnnotationMetadataReadingVisitor;
 import org.springframework.core.type.asm.ClassReaderFactory;
@@ -119,14 +119,15 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 					if (element == null) {
 						element = bean;
 					}
-					
-					AnnotationMetadata metadata = getAnnotationMetadata(bean, type);
+
+					AnnotationMetadata metadata = getAnnotationMetadata(bean,
+							type);
 					// add check if prototype and configurable and if constructor
-					// is autowired do this at the latest possible stage due to 
+					// is autowired do this at the latest possible stage due to
 					// performance considerations
-					if (!((bd.isPrototype() && metadata.hasConfigurableAnnotation()))
-							|| (metadata.isConstructorAutowired() 
-									&& checkIfAutowiredAnnotationPostProcessorIsRegistered(context))) {
+					if (!(bd.isPrototype() && metadata.hasConfigurableAnnotation())
+							&& !(metadata.isConstructorAutowired() && 
+									checkIfAutowiredAnnotationPostProcessorIsRegistered(context))) {
 						context.error(bean, "NO_CONSTRUCTOR",
 								"No constructor with "
 										+ numArguments
@@ -142,13 +143,13 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 			}
 		}
 	}
-	
+
 	/**
-	 * Checks if a {@link AutowiredAnnotationBeanPostProcessor} has been registered
-	 * in the {@link BeanDefinitionRegistry}.
+	 * Checks if a {@link AutowiredAnnotationBeanPostProcessor} has been
+	 * registered in the {@link BeanDefinitionRegistry}.
 	 */
-	private boolean checkIfAutowiredAnnotationPostProcessorIsRegistered
-		(BeansValidationContext context) {
+	private boolean checkIfAutowiredAnnotationPostProcessorIsRegistered(
+			BeansValidationContext context) {
 		try {
 			return context.getCompleteRegistry().getBeanDefinition(
 				AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME) != null;
@@ -159,11 +160,11 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 	}
 
 	/**
-	 * Retrieves a instance of {@link AnnotationMetadata} that contains information
-	 * about used annotations in the class under question
+	 * Retrieves a instance of {@link AnnotationMetadata} that contains
+	 * information about used annotations in the class under question
 	 */
-	private AnnotationMetadata getAnnotationMetadata(
-			final IBean bean, final IType type) {
+	private AnnotationMetadata getAnnotationMetadata(final IBean bean,
+			final IType type) {
 		IJavaProject jp = JdtUtils.getJavaProject(bean.getElementResource()
 				.getProject());
 		final String className = type.getFullyQualifiedName();
@@ -172,14 +173,12 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 			try {
 				JdtUtils.getProjectClassLoaderSupport(jp).executeCallback(
 					new IProjectClassLoaderSupport.IProjectClassLoaderAwareCallback() {
-
 						public void doWithActiveProjectClassLoader()
-								throws Throwable {
-							try { 
-								ClassReaderFactory classReaderFactory = 
-									new SimpleClassReaderFactory();
+							throws Throwable {
+							try {
+								ClassReaderFactory classReaderFactory = new SimpleClassReaderFactory();
 								ClassReader classReader = classReaderFactory
-										.getClassReader(className);
+									.getClassReader(className);
 								classReader.accept(visitor, false);
 							}
 							catch (FileNotFoundException e) {
@@ -230,7 +229,7 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 		public boolean isConstructorAutowired() {
 			return isConstructorAutowired;
 		}
-		
+
 		public boolean hasConfigurableAnnotation() {
 			return super.hasAnnotation(Configurable.class.getName());
 		}
