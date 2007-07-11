@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.internal.resources.Workspace;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -294,9 +295,14 @@ public class JdtUtils {
 						paths.add(url);
 					}
 					else {
+						String projectName = path.getPath().segment(0);
+						IProject pathProject = ResourcesPlugin.getWorkspace()
+								.getRoot().getProject(projectName);
+						IPath pathLocation = SpringCoreUtils
+								.getProjectLocation(pathProject);
 						IPath relPath = path.getPath().removeFirstSegments(1);
-						URL url = new URL("file:" + location + File.separator
-								+ relPath.toOSString());
+						URL url = new URL("file:" + pathLocation
+								+ File.separator + relPath.toOSString());
 						paths.add(url);
 					}
 				}
