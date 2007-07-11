@@ -580,29 +580,30 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	 */
 	private void init(String name) {
 		IContainer container;
+		String fileName;
 		String fullPath;
 
 		// At first check for a config file in a JAR
 		int pos = name.indexOf(ZipEntryStorage.DELIMITER);
 		if (pos != -1) {
 			isArchived = true;
-			container = (IProject) ((IResourceModelElement) getElementParent())
-					.getElementResource();
-			name = name.substring(0, pos);
-			fullPath = container.getFullPath().append(name).toString();
-
-			// Now check for an external config file
+			fileName = name.substring(0, pos);
+		} else {
+			fileName = name;
 		}
-		else if (name.charAt(0) == '/') {
+			
+		// Now check for an external config file
+		if (name.charAt(0) == '/') {
 			container = ResourcesPlugin.getWorkspace().getRoot();
-			fullPath = name;
+			fullPath = fileName;
 		}
 		else {
 			container = (IProject) ((IResourceModelElement) getElementParent())
 					.getElementResource();
-			fullPath = container.getFullPath().append(name).toString();
+			fullPath = container.getFullPath().append(fileName).toString();
 		}
-		file = (IFile) container.findMember(name);
+
+		file = (IFile) container.findMember(fileName);
 		if (file == null || !file.isAccessible()) {
 			modificationTimestamp = IResource.NULL_STAMP;
 			String msg = "Beans config file '" + fullPath + "' not accessible";
