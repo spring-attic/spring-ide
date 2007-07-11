@@ -222,8 +222,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 								if (jdtAspectMethod != null) {
 
 									Set<IMethod> matchingMethods = matcher.matches(targetClass,
-											bean.getElementName(), info, aopProject.getProject()
-													.getProject());
+											bean, info, aopProject.getProject().getProject());
 									for (IMethod method : matchingMethods) {
 										IAopReference ref = new AopReference(info.getType(),
 												jdtAspectMethod, method, info, file, bean);

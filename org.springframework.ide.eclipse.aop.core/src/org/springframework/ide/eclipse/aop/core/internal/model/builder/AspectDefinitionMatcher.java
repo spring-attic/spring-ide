@@ -28,6 +28,7 @@ import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.Assert;
@@ -54,14 +55,15 @@ public class AspectDefinitionMatcher {
 	 * {@link ProxyCreationContext} introduced by Spring 2.1
 	 */
 	private static class BeanNameExposingReflectionUtils {
-		
-		public static void doWithMethods(String targetBeanName,
-				Class targetClass, MethodCallback mc) throws Throwable { 
+
+		public static void doWithMethods(IBean targetBean, Class targetClass,
+				MethodCallback mc) throws Throwable {
 			// expose bean name on thread local
 			Object proxyCreationContext = ClassUtils.loadClass(
 					ProxyCreationContext.class).newInstance();
 			ClassUtils.invokeMethod(proxyCreationContext,
-					"notifyProxyCreationStart", targetBeanName);
+					"notifyProxyCreationStart", new Object[] {targetBean.getElementName(),
+					targetBean.isInnerBean()}, new Class[] {String.class, boolean.class });
 			try {
 				ReflectionUtils.doWithMethods(targetClass, mc);
 			}
@@ -69,7 +71,7 @@ public class AspectDefinitionMatcher {
 				ClassUtils.invokeMethod(proxyCreationContext,
 						"notifyProxyCreationComplete");
 			}
-			
+
 			// do it again without the exposed bean name
 			ReflectionUtils.doWithMethods(targetClass, mc);
 		}
@@ -164,7 +166,7 @@ public class AspectDefinitionMatcher {
 	}
 
 	public Set<IMethod> matches(final Class<?> targetClass,
-			final String targetBeanName, final IAspectDefinition info,
+			final IBean targetBean, final IAspectDefinition info,
 			final IProject project) throws Throwable {
 		final Set<IMethod> matchingMethod = new HashSet<IMethod>();
 
@@ -177,13 +179,14 @@ public class AspectDefinitionMatcher {
 		final IType jdtTargetType = JdtUtils.getJavaType(project, targetClass
 				.getName());
 
-		BeanNameExposingReflectionUtils.doWithMethods(targetBeanName, targetClass,
+		BeanNameExposingReflectionUtils.doWithMethods(targetBean, targetClass,
 				new ReflectionUtils.MethodCallback() {
 					public void doWith(Method method)
 							throws IllegalArgumentException,
 							IllegalAccessException {
 
-						if (checkMethod(targetClass, method, info.isProxyTargetClass())
+						if (checkMethod(targetClass, method, info
+								.isProxyTargetClass())
 								&& !matchingMethod.contains(method)) {
 							try {
 								boolean matches = (Boolean) ClassUtils

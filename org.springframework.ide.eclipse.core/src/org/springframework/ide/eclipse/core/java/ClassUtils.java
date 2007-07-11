@@ -115,6 +115,38 @@ public class ClassUtils {
 
 	}
 
+	/**
+	 * Invokes a target method identified by given <code>methodName</code>,
+	 * <code>parameters</code> and <code>parameterClasses</code>.
+	 * <p>
+	 * Note: This method - in contrast to the
+	 * {@link #invokeMethod(Object, String, Object...)} method - does support
+	 * primitive types as parameter types.
+	 * @since 2.0.1
+	 */
+	public static Object invokeMethod(Object target, String methodName,
+			Object[] parameters, Class[] parameterClasses) throws Throwable {
+
+		if (target == null) {
+			return null;
+		}
+
+		Class targetClass = target.getClass();
+		Method targetMethod = targetClass.getMethod(methodName,
+				parameterClasses);
+
+		if (targetMethod != null) {
+			try {
+				return targetMethod.invoke(target, parameters);
+			}
+			catch (InvocationTargetException e) {
+				throw e.getCause();
+			}
+		}
+		return null;
+
+	}
+
 	public static Class<?> loadClass(String className)
 			throws ClassNotFoundException {
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
