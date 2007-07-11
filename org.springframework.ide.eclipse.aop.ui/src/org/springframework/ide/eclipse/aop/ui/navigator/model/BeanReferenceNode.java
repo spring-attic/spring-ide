@@ -27,7 +27,6 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
@@ -57,8 +56,7 @@ public class BeanReferenceNode implements IReferenceNode,
 
 		IBean bean = AopReferenceModelUtils.getBeanFromElementId(beanId);
 
-		IType type = JdtUtils.getJavaType(bean.getElementResource()
-				.getProject(), BeansModelUtils.getBeanClass(bean, null));
+		IType type = BeansModelUtils.getBeanType(bean, null);
 		if (type != null) {
 			List<IAopReference> references = Activator.getModel()
 					.getAllReferences();
@@ -124,11 +122,8 @@ public class BeanReferenceNode implements IReferenceNode,
 
 			List<IReferenceNode> children = new ArrayList<IReferenceNode>();
 			children.add(new BeanClassReferenceNode(
-					new BeanClassTargetReferenceNode(JdtUtils
-							.getJavaType(
-									bean.getElementResource().getProject(),
-									BeansModelUtils.getBeanClass(bean, null)),
-							this)));
+					new BeanClassTargetReferenceNode(BeansModelUtils
+							.getBeanType(bean, null), this)));
 			if (this.innerBeanNodes.size() > 0) {
 				children.add(new InnerBeansReferenceNode(this.innerBeanNodes));
 			}
@@ -183,7 +178,7 @@ public class BeanReferenceNode implements IReferenceNode,
 	public List<IAopReference> getDeclareParentReferences() {
 		return declareParentReferences;
 	}
-	
+
 	public Object getReferenceParticipant() {
 		return getBean();
 	}
