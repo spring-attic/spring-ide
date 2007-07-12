@@ -131,25 +131,25 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	private boolean isArchived;
 
 	/** Defaults values for this beans config file */
-	private DocumentDefaultsDefinition defaults;
+	private volatile DocumentDefaultsDefinition defaults;
 
 	/** List of imports (in registration order) */
-	private Set<IBeansImport> imports;
+	private volatile Set<IBeansImport> imports;
 
 	/** List of aliases (in registration order) */
-	private Map<String, IBeanAlias> aliases;
+	private volatile Map<String, IBeanAlias> aliases;
 
 	/** List of components (in registration order) */
-	private Set<IBeansComponent> components;
+	private volatile Set<IBeansComponent> components;
 
 	/** List of bean names mapped beans (in registration order) */
-	private Map<String, IBean> beans;
+	private volatile Map<String, IBean> beans;
 
 	/**
 	 * List of bean class names mapped to list of beans implementing the
 	 * corresponding class
 	 */
-	private Map<String, Set<IBean>> beanClassesMap;
+	private volatile Map<String, Set<IBean>> beanClassesMap;
 	private volatile boolean isBeanClassesMapPopulated = false;
 
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();

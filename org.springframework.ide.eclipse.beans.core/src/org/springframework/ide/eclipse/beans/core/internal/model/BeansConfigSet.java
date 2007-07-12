@@ -51,13 +51,13 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 	private boolean allowBeanDefinitionOverriding;
 	private boolean isIncomplete;
 
-	private Map<String, IBeanAlias> aliasesMap;
+	private volatile Map<String, IBeanAlias> aliasesMap;
 	private volatile boolean isAliasesMapPopulated = false;
-	private Set<IBeansComponent> components;
+	private volatile Set<IBeansComponent> components;
 	private volatile boolean isComponentsPopulated = false;
-	private Map<String, IBean> beansMap;
+	private volatile Map<String, IBean> beansMap;
 	private volatile boolean isBeansMapPopulated = false;
-	private Map<String, Set<IBean>> beanClassesMap;
+	private volatile Map<String, Set<IBean>> beanClassesMap;
 	private volatile boolean isBeanClassesMapPopulated = false;
 
 	public BeansConfigSet(IBeansProject project, String name) {
