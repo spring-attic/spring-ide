@@ -57,11 +57,11 @@ public class BeansProject extends AbstractResourceModelElement implements
 
 	private final IProject project;
 
-	protected Set<String> configExtensions;
+	protected volatile Set<String> configExtensions;
 
-	protected Map<String, IBeansConfig> configs;
+	protected volatile Map<String, IBeansConfig> configs;
 
-	protected Map<String, IBeansConfigSet> configSets;
+	protected volatile Map<String, IBeansConfigSet> configSets;
 
 	public BeansProject(IBeansModel model, IProject project) {
 		super(model, project.getName());
