@@ -755,13 +755,10 @@ public class BeansConfig extends AbstractResourceModelElement implements
 					catch (Throwable e) { // handle ALL exceptions
 
 						// Skip SAXParseExceptions because they're already
-						// handled
-						// by the SAX ErrorHandler
+						// handled by the SAX ErrorHandler
 						if (!(e.getCause() instanceof SAXParseException)) {
-							problems
-									.add(new ValidationProblem(
-											IMarker.SEVERITY_ERROR, e
-													.getMessage(), -1));
+							problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, 
+									e.getMessage(), -1));
 							BeansCorePlugin.log(e);
 						}
 					}
