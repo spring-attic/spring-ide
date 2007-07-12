@@ -33,7 +33,7 @@ import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES
 import org.springframework.util.StringUtils;
 
 /**
- * ASM-based Visitor that collects all @AspectJ-style annotations
+ * ASM-based Visitor that collects all <code>@AspectJ<code>-style annotations
  * @author Christian Dupuis
  * @since 2.0
  */

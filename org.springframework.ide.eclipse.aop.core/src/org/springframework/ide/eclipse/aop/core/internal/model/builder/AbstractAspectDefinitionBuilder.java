@@ -36,7 +36,7 @@ import org.w3c.dom.Node;
 @SuppressWarnings( { "restriction", "unused" })
 public abstract class AbstractAspectDefinitionBuilder implements
 		IAspectDefinitionBuilder {
-	
+
 	protected static final String ADVICE_REF_ATTRIBUTE = "advice-ref";
 
 	protected static final String ADVISOR_ELEMENT = "advisor";
@@ -96,14 +96,21 @@ public abstract class AbstractAspectDefinitionBuilder implements
 	public final List<IAspectDefinition> buildAspectDefinitions(IFile file,
 			IProjectClassLoaderSupport classLoaderSupport) {
 		final List<IAspectDefinition> aspectInfos = new ArrayList<IAspectDefinition>();
-		
+
 		IStructuredModel model = null;
 		try {
-			model = StructuredModelManager.getModelManager().getModelForRead(
-					file);
+			model = StructuredModelManager.getModelManager()
+					.getExistingModelForRead(file);
+			if (model == null) {
+				model = StructuredModelManager.getModelManager()
+						.getModelForRead(file);
+			}
 			if (model != null) {
 				IDOMDocument document = ((DOMModelImpl) model).getDocument();
-				doBuildAspectDefinitions(document, file, aspectInfos, classLoaderSupport);
+				if (document != null && document.getDocumentElement() != null) {
+					doBuildAspectDefinitions(document, file, aspectInfos,
+							classLoaderSupport);
+				}
 			}
 		}
 		catch (IOException e) {
@@ -119,7 +126,7 @@ public abstract class AbstractAspectDefinitionBuilder implements
 		}
 		return aspectInfos;
 	}
-	
+
 	protected String getAttribute(Node node, String attributeName) {
 		if (hasAttribute(node, attributeName)) {
 			String value = node.getAttributes().getNamedItem(attributeName)
@@ -135,7 +142,8 @@ public abstract class AbstractAspectDefinitionBuilder implements
 		return (node != null && node.hasAttributes() && node.getAttributes()
 				.getNamedItem(attributeName) != null);
 	}
-	
+
 	protected abstract void doBuildAspectDefinitions(IDOMDocument document,
-			IFile file, List<IAspectDefinition> aspectInfos, IProjectClassLoaderSupport classLoaderSupport);
+			IFile file, List<IAspectDefinition> aspectInfos,
+			IProjectClassLoaderSupport classLoaderSupport);
 }

@@ -192,7 +192,6 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 								}
 							}
 						});
-
 			}
 			catch (Throwable e) {
 				AopLog.log(AopLog.BUILDER_MESSAGES,

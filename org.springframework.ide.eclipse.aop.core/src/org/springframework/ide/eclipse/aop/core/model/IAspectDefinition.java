@@ -38,9 +38,9 @@ public interface IAspectDefinition {
 
 	String getThrowing();
 	
-	boolean isProxyTargetClass();
-
 	IAopReference.ADVICE_TYPES getType();
+
+	boolean isProxyTargetClass();
 
 	void setAdviceMethodName(String methodname);
 
@@ -50,18 +50,18 @@ public interface IAspectDefinition {
 
 	void setAspectClassName(String className);
 
-	void setAspectName(String aspectName);
-	
 	void setAspectLineNumber(int lineNumber);
+	
+	void setAspectName(String aspectName);
+
+	void setProxyTargetClass(boolean proxyTargetClass);
 
 	void setResource(IResource file);
 
 	void setReturning(String returning);
 
 	void setThrowing(String throwable);
-
-	void setType(IAopReference.ADVICE_TYPES type);
 	
-	void setProxyTargetClass(boolean proxyTargetClass);
+	void setType(IAopReference.ADVICE_TYPES type);
 
 }
