@@ -18,7 +18,6 @@ import java.util.Set;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
-import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
 
 /**
@@ -28,7 +27,7 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
  */
 public class PropertiesConfigSet extends BeansConfigSet {
 
-	public PropertiesConfigSet(IBeansProject project, String name) {
+	public PropertiesConfigSet(PropertiesProject project, String name) {
 		super(project, name, new HashSet<String>());
 	}
 
@@ -36,7 +35,7 @@ public class PropertiesConfigSet extends BeansConfigSet {
 	 * Creates a deep copy of given config set associated with the specified
 	 * project.
 	 */
-	public PropertiesConfigSet(IBeansProject project,
+	public PropertiesConfigSet(PropertiesProject project,
 			IBeansConfigSet configSet) {
 		super(project, configSet.getElementName(), configSet.getConfigNames());
 		super.setAllowAliasOverriding(configSet.isAllowAliasOverriding());

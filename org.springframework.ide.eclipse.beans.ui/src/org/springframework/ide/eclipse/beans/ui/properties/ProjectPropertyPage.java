@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.properties;
 
-import java.util.Set;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
@@ -79,20 +77,20 @@ public class ProjectPropertyPage extends PropertyPage {
 		// Build temporary beans core model with a cloned "real" Spring project
 		IProject project = (IProject) getElement();
 		model = new PropertiesModel();
-		PropertiesProject modelProject = new PropertiesProject(model, BeansCorePlugin
-				.getModel().getProject(project));
+		PropertiesProject modelProject = new PropertiesProject(model,
+				BeansCorePlugin.getModel().getProject(project));
 		model.addProject(modelProject);
 
 		// Build folder with tabs
 		TabFolder folder = new TabFolder(parent, SWT.NONE);
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		configFilesTab = new ConfigFilesTab(model, project);
+		configFilesTab = new ConfigFilesTab(model, modelProject);
 		TabItem item = new TabItem(folder, SWT.NONE);
 		item.setText(BeansUIPlugin.getResourceString(CONFIG_FILES_LABEL));
 		item.setControl(configFilesTab.createControl(folder));
 
-		configSetsTab = new ConfigSetsTab(model, project);
+		configSetsTab = new ConfigSetsTab(model, modelProject);
 		item = new TabItem(folder, SWT.NONE);
 		item.setText(BeansUIPlugin.getResourceString(CONFIG_SETS_LABEL));
 		item.setControl(configSetsTab.createControl(folder));
@@ -114,8 +112,7 @@ public class ProjectPropertyPage extends PropertyPage {
 
 		// At first delete all problem markers from the removed config files
 		if (configFilesTab.hasUserMadeChanges()) {
-			Set<IBeansConfig> currentConfigs = currentProject.getConfigs();
-			for (IBeansConfig currentConfig : currentConfigs) {
+			for (IBeansConfig currentConfig : currentProject.getConfigs()) {
 				if (!newProject.hasConfig(currentConfig.getElementName())) {
 					MarkerUtils.deleteMarkers(currentConfig
 							.getElementResource(), SpringCore.MARKER_ID);

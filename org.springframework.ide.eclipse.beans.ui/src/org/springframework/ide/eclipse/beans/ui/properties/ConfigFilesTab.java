@@ -16,7 +16,6 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jface.resource.JFaceColors;
@@ -110,9 +109,9 @@ public class ConfigFilesTab {
 
 	private boolean hasUserMadeChanges;
 
-	public ConfigFilesTab(PropertiesModel model, IProject project) {
+	public ConfigFilesTab(PropertiesModel model, PropertiesProject project) {
 		this.model = model;
-		this.project = (PropertiesProject) model.getProject(project);
+		this.project = project;
 	}
 
 	public boolean hasUserMadeChanges() {

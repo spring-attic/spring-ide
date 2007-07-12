@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.beans.ui.properties;
 
 import java.util.Set;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -92,9 +91,9 @@ public class ConfigSetsTab {
 
 	private boolean hasUserMadeChanges;
 
-	public ConfigSetsTab(PropertiesModel model, IProject project) {
+	public ConfigSetsTab(PropertiesModel model, PropertiesProject project) {
 		this.model = model;
-		this.project = (PropertiesProject) model.getProject(project);
+		this.project = project;
 	}
 
 	public boolean hasUserMadeChanges() {

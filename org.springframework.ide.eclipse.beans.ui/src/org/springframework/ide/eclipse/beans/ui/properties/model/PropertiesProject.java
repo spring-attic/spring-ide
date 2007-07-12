@@ -36,20 +36,25 @@ public class PropertiesProject extends BeansProject {
 	 */
 	public PropertiesProject(PropertiesModel model, IBeansProject project) {
 		super(model, project.getProject());
+
+		// At first mark this project as already populated - otherwise the super
+		// class accidently tries to populate the project from the config file
+		modelPopulated = true;
+
 		configExtensions = new LinkedHashSet<String>(project
 				.getConfigExtensions());
 
 		configs = new LinkedHashMap<String, IBeansConfig>();
 		for (IBeansConfig config : project.getConfigs()) {
-			super.addConfig(config.getElementName());
+			configs.put(config.getElementName(), new PropertiesConfig(this,
+					config.getElementName()));
 		}
 
 		configSets = new LinkedHashMap<String, IBeansConfigSet>();
 		for (IBeansConfigSet configSet : project.getConfigSets()) {
-			configSets.put(configSet.getElementName(), new PropertiesConfigSet(this, configSet));
+			configSets.put(configSet.getElementName(), new PropertiesConfigSet(
+					this, configSet));
 		}
-		
-		modelPopulated = true;
 	}
 
 	@Override

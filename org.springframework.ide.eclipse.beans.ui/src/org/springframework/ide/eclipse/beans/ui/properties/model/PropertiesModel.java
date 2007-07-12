@@ -26,6 +26,6 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 public class PropertiesModel extends BeansModel {
 
 	public void addProject(PropertiesProject project) {
-		projects.put(project.getProject(), project);
+		super.addProject(project);
 	}
 }

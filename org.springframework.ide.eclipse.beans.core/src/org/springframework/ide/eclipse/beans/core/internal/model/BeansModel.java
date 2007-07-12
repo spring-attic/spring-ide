@@ -57,15 +57,15 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			+ "/model/debug";
 
 	public static boolean DEBUG = BeansCorePlugin.isDebug(DEBUG_OPTION);
-
-	/**
-	 * The table of Spring Beans projects
-	 */
-	protected Map<IProject, IBeansProject> projects;
 	
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 	private final Lock r = rwl.readLock();
 	private final Lock w = rwl.writeLock(); 
+
+	/**
+	 * The table of Spring Beans projects
+	 */
+	private volatile Map<IProject, IBeansProject> projects;
 
 	private IResourceChangeListener workspaceListener;
 
@@ -106,7 +106,7 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 			w.lock();
 			projects.clear();
 			for (IProject project : SpringCoreUtils.getSpringProjects()) {
-				projects.put(project, new BeansProject(this, project));
+				addProject(new BeansProject(this, project));
 			}
 		}
 		finally {
@@ -119,6 +119,10 @@ public class BeansModel extends AbstractModel implements IBeansModel {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.addResourceChangeListener(workspaceListener,
 				BeansResourceChangeListener.LISTENER_FLAGS);
+	}
+
+	protected void addProject(IBeansProject project) {
+		projects.put(project.getProject(), project);
 	}
 
 	public void shutdown() {
