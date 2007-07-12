@@ -182,7 +182,8 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 								classReader.accept(visitor, false);
 							}
 							catch (FileNotFoundException e) {
-								BeansCorePlugin.log(e);
+								// ignore any missing files here as this will be
+								// reported as missing bean class
 							}
 						}
 					});
