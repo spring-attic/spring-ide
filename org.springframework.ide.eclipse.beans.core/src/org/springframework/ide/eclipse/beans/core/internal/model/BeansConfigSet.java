@@ -80,9 +80,13 @@ public class BeansConfigSet extends AbstractResourceModelElement implements
 		try {
 			w.lock();
 			aliasesMap = null;
+			isAliasesMapPopulated = false;
 			components= null;
+			isComponentsPopulated = false;
 			beansMap = null;
+			isBeansMapPopulated = false;
 			beanClassesMap = null;
+			isBeanClassesMapPopulated = false;
 		}
 		finally {
 			w.unlock();
