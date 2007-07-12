@@ -611,8 +611,12 @@ public class WebflowEditor extends GraphicalEditorWithFlyoutPalette implements
 			sharedKeyHandler.put(KeyStroke.getPressed(SWT.F2, 0),
 					getActionRegistry().getAction(
 							GEFActionConstants.DIRECT_EDIT));
-			// sharedKeyHandler.put(, 0), getActionRegistry()
-			// .getAction(EditPropertiesAction.EDITPROPERTIES));
+			// TODO CD uncomment this once it is agreed and the appropriate actions
+			// are implemented
+			//sharedKeyHandler.put(KeyStroke.getPressed(SWT.F3, 0),
+			//		getActionRegistry().getAction(OpenConfigFileAction.OPEN_FILE));
+			//sharedKeyHandler.put(KeyStroke.getPressed(SWT.F3, SWT.CTRL),
+			//		getActionRegistry().getAction(OpenConfigFileAction.OPEN_FILE));
 		}
 		return sharedKeyHandler;
 	}
