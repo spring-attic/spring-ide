@@ -31,12 +31,14 @@ import org.springframework.ide.eclipse.core.java.Introspector.Static;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
+import org.springframework.scripting.ScriptFactory;
 import org.springframework.util.StringUtils;
 
 /**
  * Validates a given {@link IBeanProperty}'s accessor methods in bean class.
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
 public class BeanPropertyRule implements
@@ -59,7 +61,10 @@ public class BeanPropertyRule implements
 				&& !ValidationRuleUtils.hasPlaceHolder(mergedClassName)) {
 			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(
 					bean).getProject(), mergedClassName);
-			if (type != null) {
+			// Don't validate property names on ScriptFactory implementations
+			// as these property values are injected into the created object
+			if (type != null && !Introspector.doesImplement(type, 
+					ScriptFactory.class.getName())) {
 				validateProperty(property, type, context);
 			}
 		}
