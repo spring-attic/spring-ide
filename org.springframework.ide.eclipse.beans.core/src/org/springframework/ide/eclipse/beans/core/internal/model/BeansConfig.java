@@ -62,7 +62,6 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.internal.model.process.BeansConfigPostProcessorFactory;
@@ -81,7 +80,6 @@ import org.springframework.ide.eclipse.beans.core.namespaces.DefaultModelElement
 import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.io.FileResource;
-import org.springframework.ide.eclipse.core.io.FileResourceLoader;
 import org.springframework.ide.eclipse.core.io.StorageResource;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.io.xml.LineNumberPreservingDOMParser;
@@ -727,16 +725,9 @@ public class BeansConfig extends AbstractResourceModelElement implements
 					reader.setDocumentLoader(new XercesDocumentLoader());
 
 					// set the resource loader to use the customized project
-					// class
-					// loader
-					if (JdtUtils.isJavaProject(file)) {
-						reader.setResourceLoader(new PathMatchingResourcePatternResolver(
-								JdtUtils.getClassLoader(JdtUtils.getJavaProject(file
-									.getProject()))));
-					}
-					else {
-						reader.setResourceLoader(new NoOpResourcePatternResolver());
-					}
+					// class loader
+					reader.setResourceLoader(new PathMatchingResourcePatternResolver(
+						JdtUtils.getClassLoader(file.getProject())));
 
 					reader.setEntityResolver(resolver);
 					reader.setSourceExtractor(new CompositeSourceExtractor(file
@@ -805,7 +796,8 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		}
 	}
 
-	private final class NoOpResourcePatternResolver extends FileResourceLoader
+	// TODO CD remove once we agree that this is not needed anymore
+	/* private final class NoOpResourcePatternResolver extends FileResourceLoader
 			implements ResourcePatternResolver {
 
 		public Resource[] getResources(String locationPattern)
@@ -818,7 +810,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			}
 			return new Resource[] { getResource(locationPattern) };
 		}
-	}
+	} */
 
 	private final class BeansConfigErrorHandler implements ErrorHandler {
 
@@ -987,21 +979,28 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	 */
 	private static final class DelegatingNamespaceHandlerResolver extends
 			DefaultNamespaceHandlerResolver {
-
-		private static final NamespaceHandler NO_OP_NAMESPACE_HANDLER = new NoOpNamespaceHandler();
+		
+		private static final NamespaceHandler NO_OP_NAMESPACE_HANDLER = 
+			new NoOpNamespaceHandler();
 
 		private final Map<String, NamespaceHandler> namespaceHandlers;
+		
+		private final Set<NamespaceHandlerResolver> namespaceHandlerResolvers;
 
 		public DelegatingNamespaceHandlerResolver(ClassLoader classLoader) {
 			super(classLoader);
 			namespaceHandlers = NamespaceUtils.getNamespaceHandlers();
+			namespaceHandlerResolvers = NamespaceUtils.getNamespaceHandlerResolvers();
 		}
 
 		@Override
 		public NamespaceHandler resolve(String namespaceUri) {
 
+			NamespaceHandler namespaceHandler = null;
+			
 			// First check for a namespace handler provided by Spring
-			NamespaceHandler namespaceHandler = super.resolve(namespaceUri);
+			namespaceHandler = super.resolve(namespaceUri);
+
 			if (namespaceHandler != null) {
 				return namespaceHandler;
 			}
@@ -1012,6 +1011,14 @@ public class BeansConfig extends AbstractResourceModelElement implements
 				return namespaceHandler;
 			}
 
+			// Then check the contributed NamespaceHandlerResolver
+			for (NamespaceHandlerResolver resolver : namespaceHandlerResolvers) {
+				namespaceHandler = resolver.resolve(namespaceUri);
+				if (namespaceHandler != null) {
+					return namespaceHandler;
+				}
+			}
+			
 			// Finally use a no-op namespace handler
 			return NO_OP_NAMESPACE_HANDLER;
 		}
@@ -1070,10 +1077,13 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	 */
 	private static class XmlCatalogDelegatingEntityResolver extends
 			DelegatingEntityResolver {
-
+		
+		private final Set<EntityResolver> entityResolvers;
+		
 		public XmlCatalogDelegatingEntityResolver(EntityResolver dtdResolver,
 				EntityResolver schemaResolver) {
 			super(dtdResolver, schemaResolver);
+			this.entityResolvers = NamespaceUtils.getEntityResolvers();
 		}
 
 		@Override
@@ -1084,7 +1094,19 @@ public class BeansConfig extends AbstractResourceModelElement implements
 				return inputSource;
 			}
 
-			return resolveEntityViaXmlCatalog(publicId, systemId);
+			inputSource = resolveEntityViaXmlCatalog(publicId, systemId);
+			if (inputSource != null) {
+				return inputSource;
+			}
+			
+			for (EntityResolver entityResolver : this.entityResolvers) {
+				inputSource = entityResolver.resolveEntity(publicId, systemId);
+				if (inputSource != null) {
+					return inputSource;
+				}
+			}
+			
+			return inputSource;
 		}
 
 		public InputSource resolveEntityViaXmlCatalog(String publicId,

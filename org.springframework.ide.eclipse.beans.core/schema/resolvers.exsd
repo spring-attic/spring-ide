@@ -1,0 +1,149 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Schema file written by PDE -->
+<schema targetNamespace="org.springframework.ide.eclipse.beans.core">
+<annotation>
+      <appInfo>
+         <meta.schema plugin="org.springframework.ide.eclipse.beans.core" id="resolvers" name="Resolvers"/>
+      </appInfo>
+      <documentation>
+         &lt;p&gt;
+This extension point is used to add namespace handlers resolvers and entity resolvers
+      </documentation>
+   </annotation>
+
+   <element name="extension">
+      <complexType>
+         <sequence>
+            <element ref="namespaceHandlerResolver" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="entityResolver" minOccurs="0" maxOccurs="unbounded"/>
+         </sequence>
+         <attribute name="point" type="string" use="required">
+            <annotation>
+               <documentation>
+                  a fully-qualified name of the target extension point
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="id" type="string">
+            <annotation>
+               <documentation>
+                  an optional id
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string">
+            <annotation>
+               <documentation>
+                  an optional name
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="namespaceHandlerResolver">
+      <annotation>
+         <appInfo>
+            <meta.element labelAttribute="uri"/>
+         </appInfo>
+      </annotation>
+      <complexType>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  an instance of &lt;samp&gt;org.springframework.beans.factory.xml.NamespaceHandlerResolver&lt;/samp&gt;
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn=":org.springframework.beans.factory.xml.NamespaceHandlerResolver"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="entityResolver">
+      <annotation>
+         <appInfo>
+            <meta.element labelAttribute="uri"/>
+         </appInfo>
+      </annotation>
+      <complexType>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  an instance of &lt;samp&gt;org.xml.sax.EntityResolver&lt;/samp&gt;
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn=":org.xml.sax.EntityResolver"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="since"/>
+      </appInfo>
+      <documentation>
+         2.0
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="examples"/>
+      </appInfo>
+      <documentation>
+         &lt;pre&gt;
+&lt;extension point=&quot;org.springframework.ide.eclipse.beans.core.namespaces&quot;&gt;
+   &lt;namespace name=&quot;Spring AOP&quot;
+      uri=&quot;http://www.springframework.org/schema/aop&quot;
+      namespaceHandler=&quot;org.springframework.ide.eclipse.core.namespaces.aop.AopNamespaceHandler&quot;/&gt;
+      elementProvider=&quot;org.springframework.ide.eclipse.core.namespaces.aop.AopNamespaceModelElementProvider&quot;/&gt;
+&lt;/extension&gt;
+&lt;/pre&gt;
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="apiInfo"/>
+      </appInfo>
+      <documentation>
+         &lt;p&gt;
+Each namespace handler must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.springframework.beans.factory.xml.NamespaceHandler&lt;/samp&gt;.
+
+Each provider must supply a public, no-argument constructor and implement the interface &lt;samp&gt;org.springframework.ide.eclipse.core.namespaces.IModelElementProvider&lt;/samp&gt;.
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="implementation"/>
+      </appInfo>
+      <documentation>
+         &lt;p&gt;
+This plugin itself comes with a set of predefined namespace contributions.
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="copyright"/>
+      </appInfo>
+      <documentation>
+         &lt;pre&gt;
+Copyright (c) 2005, 2007 Spring IDE Developers
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/epl-v10.html
+ 
+Contributors:
+    Spring IDE Developers - initial API and implementation
+&lt;/pre&gt;
+      </documentation>
+   </annotation>
+
+</schema>
