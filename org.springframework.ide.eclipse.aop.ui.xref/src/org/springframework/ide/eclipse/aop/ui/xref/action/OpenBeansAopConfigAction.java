@@ -51,7 +51,7 @@ public class OpenBeansAopConfigAction extends Action implements
 		if (isEnabled()) {
 			IResource resource = aopNode.getResouce();
 			if (resource instanceof IFile && resource.exists()) {
-				int line = aopNode.getDefinition().getAspectLineNumber();
+				int line = aopNode.getDefinition().getAspectStartLineNumber();
 				SpringUIUtils.openInEditor((IFile) resource, line);
 			}
 		}

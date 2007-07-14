@@ -164,7 +164,7 @@ public class AopReferenceModelMarkerUtils {
 				createProblemMarker(sourceResource, "declared on "
 						+ AopReferenceModelUtils
 								.getJavaElementLinkName(reference.getTarget()),
-						1, reference.getDefinition().getAspectLineNumber(),
+						1, reference.getDefinition().getAspectStartLineNumber(),
 						markerId, sourceResource);
 			}
 		}
@@ -183,7 +183,7 @@ public class AopReferenceModelMarkerUtils {
 							+ AopReferenceModelUtils
 									.getJavaElementLinkName(reference
 											.getTarget()), 1, reference
-							.getDefinition().getAspectLineNumber(), markerId,
+							.getDefinition().getAspectStartLineNumber(), markerId,
 					sourceResource);
 		}
 	}

@@ -104,11 +104,11 @@ public class AdviceRootAopReferenceNode implements IReferenceNode,
 	public void openAndReveal() {
 		IResource resource = reference.get(0).getDefinition().getResource();
 		SpringUIUtils.openInEditor((IFile) resource, reference.get(0)
-				.getDefinition().getAspectLineNumber());
+				.getDefinition().getAspectStartLineNumber());
 	}
 
 	public int getLineNumber() {
-		return reference.get(0).getDefinition().getAspectLineNumber();
+		return reference.get(0).getDefinition().getAspectStartLineNumber();
 	}
 
 	public IResource getResource() {

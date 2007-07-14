@@ -38,7 +38,9 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
 
 	protected String aspectClassName;
 
-	protected int aspectLineNumber = -1;
+	protected int aspectStartLineNumber = -1;
+
+	protected int aspectEndLineNumber = -1;
 
 	protected String aspectName = "";
 
@@ -54,11 +56,13 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
 
 	protected IAopReference.ADVICE_TYPES type;
 
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof BeanAspectDefinition) {
 			BeanAspectDefinition other = (BeanAspectDefinition) obj;
-			return other.getAspectLineNumber() == getAspectLineNumber()
+			return other.getAspectStartLineNumber() == getAspectStartLineNumber()
+					&& other.getAspectEndLineNumber() == getAspectEndLineNumber()
 					&& other.getAspectName().equals(aspectName)
 					&& other.getType().equals(type);
 		}
@@ -100,8 +104,8 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
 		return aspectClassName;
 	}
 
-	public int getAspectLineNumber() {
-		return aspectLineNumber;
+	public int getAspectStartLineNumber() {
+		return aspectStartLineNumber;
 	}
 
 	public String getAspectName() {
@@ -136,7 +140,8 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
 	public int hashCode() {
 		int hc = aspectName.hashCode();
 		hc = 23 * hc + type.hashCode();
-		hc = 25 * hc + aspectLineNumber;
+		hc = 25 * hc + aspectStartLineNumber;
+		hc = 25 * hc + aspectEndLineNumber;
 		return hc;
 	}
 
@@ -180,8 +185,12 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
 		}
 		memento
 				.putInteger(
-						BeanAspectDefinitionElementFactory.ASPECT_LINE_NUMBER_ATTRIBUTE,
-						this.aspectLineNumber);
+						BeanAspectDefinitionElementFactory.ASPECT_START_LINE_NUMBER_ATTRIBUTE,
+						this.aspectStartLineNumber);
+		memento
+		.putInteger(
+				BeanAspectDefinitionElementFactory.ASPECT_END_LINE_NUMBER_ATTRIBUTE,
+				this.aspectEndLineNumber);
 		memento.putString(BeanAspectDefinitionElementFactory.FILE_ATTRIBUTE,
 				this.file.getFullPath().toString());
 		memento
@@ -209,8 +218,12 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
 		this.aspectClassName = aspectClassName;
 	}
 
-	public void setAspectLineNumber(int aspectLineNumber) {
-		this.aspectLineNumber = aspectLineNumber;
+	public void setAspectStartLineNumber(int aspectLineNumber) {
+		this.aspectStartLineNumber = aspectLineNumber;
+	}
+
+	public void setAspectEndLineNumber(int aspectLineNumber) {
+		this.aspectEndLineNumber = aspectLineNumber;
 	}
 
 	public void setAspectName(String aspectName) {
@@ -254,7 +267,7 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
 			buf.append(" [");
 			buf.append(this.file.getFullPath().toFile());
 			buf.append(":");
-			buf.append(getAspectLineNumber());
+			buf.append(getAspectStartLineNumber());
 			buf.append("]");
 		}
 		buf.append(" advise type [");
@@ -285,5 +298,9 @@ public class BeanAspectDefinition implements IAspectDefinition, IAdaptable,
 		}
 		buf.append("]");
 		return buf.toString();
+	}
+
+	public int getAspectEndLineNumber() {
+		return this.aspectEndLineNumber;
 	}
 }

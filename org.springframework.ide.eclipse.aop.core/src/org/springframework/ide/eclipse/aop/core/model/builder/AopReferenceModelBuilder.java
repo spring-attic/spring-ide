@@ -379,7 +379,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 					"AopReferenceModelBuilder.pointcutIsMalformedOnBean", info, bean));
 			AopReferenceModelMarkerUtils.createProblemMarker(info.getResource(), Activator.getFormattedMessage(
 					"AopReferenceModelBuilder.pointcutIsMalformed", t.getMessage()),
-					IMarker.SEVERITY_ERROR, info.getAspectLineNumber(),
+					IMarker.SEVERITY_ERROR, info.getAspectStartLineNumber(),
 					AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, info.getResource());
 		}
 		else if (t instanceof InvocationTargetException) {
@@ -393,7 +393,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				AopReferenceModelMarkerUtils.createProblemMarker(file, Activator
 						.getFormattedMessage("AopReferenceModelBuilder.exceptionFromReflection", t
 								.getMessage()), IMarker.SEVERITY_WARNING, info
-						.getAspectLineNumber(), AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER,
+						.getAspectStartLineNumber(), AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER,
 						file);
 			}
 		}
@@ -403,7 +403,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 			Activator.log(t);
 			AopReferenceModelMarkerUtils.createProblemMarker(file, Activator.getFormattedMessage(
 					"AopReferenceModelBuilder.exception", t.getMessage()),
-					IMarker.SEVERITY_WARNING, info.getAspectLineNumber(),
+					IMarker.SEVERITY_WARNING, info.getAspectStartLineNumber(),
 					AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
 		}
 	}

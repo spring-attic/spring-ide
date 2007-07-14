@@ -13,7 +13,17 @@ package org.springframework.ide.eclipse.aop.core.model;
 import java.lang.reflect.Method;
 
 import org.eclipse.core.resources.IResource;
+import org.springframework.ide.eclipse.aop.core.internal.model.AopReferenceModel;
 
+/**
+ * Central interface of the {@link AopReferenceModel}.
+ * <p>
+ * A implementation of {@link IAspectDefinition} contains all meta data required
+ * identify an aspect definition
+ * @author Christian Dupuis
+ * @since 2.0
+ *
+ */
 public interface IAspectDefinition {
 
 	Method getAdviceMethod();
@@ -26,7 +36,9 @@ public interface IAspectDefinition {
 
 	String getAspectClassName();
 
-	int getAspectLineNumber();
+	int getAspectStartLineNumber();
+	
+	int getAspectEndLineNumber();
 
 	String getAspectName();
 
@@ -41,8 +53,11 @@ public interface IAspectDefinition {
 	IAopReference.ADVICE_TYPES getType();
 
 	boolean isProxyTargetClass();
+	
+	// TODO CD move into other interface
+	void setResource(IResource file);
 
-	void setAdviceMethodName(String methodname);
+	/*void setAdviceMethodName(String methodname);
 
 	void setAdviceMethodParameterTypes(String[] params);
 
@@ -50,18 +65,18 @@ public interface IAspectDefinition {
 
 	void setAspectClassName(String className);
 
-	void setAspectLineNumber(int lineNumber);
+	void setAspectStartLineNumber(int lineNumber);
+
+	void setAspectEndLineNumber(int lineNumber);
 	
 	void setAspectName(String aspectName);
 
 	void setProxyTargetClass(boolean proxyTargetClass);
 
-	void setResource(IResource file);
-
 	void setReturning(String returning);
 
 	void setThrowing(String throwable);
 	
-	void setType(IAopReference.ADVICE_TYPES type);
+	void setType(IAopReference.ADVICE_TYPES type); */
 
 }

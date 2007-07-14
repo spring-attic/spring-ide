@@ -88,7 +88,7 @@ public class AdvisedAopSourceNode implements IReferenceNode,
 	public void openAndReveal() {
 		IResource resource = references.getDefinition().getResource();
 		SpringUIUtils.openInEditor((IFile) resource, references.getDefinition()
-				.getAspectLineNumber());
+				.getAspectStartLineNumber());
 	}
 
 	public IAopReference getReference() {
@@ -96,7 +96,7 @@ public class AdvisedAopSourceNode implements IReferenceNode,
 	}
 
 	public int getLineNumber() {
-		return references.getDefinition().getAspectLineNumber();
+		return references.getDefinition().getAspectStartLineNumber();
 	}
 
 	public IResource getResource() {

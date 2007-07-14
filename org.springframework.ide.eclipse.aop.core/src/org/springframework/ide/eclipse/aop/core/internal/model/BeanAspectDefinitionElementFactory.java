@@ -33,7 +33,9 @@ public class BeanAspectDefinitionElementFactory implements IElementFactory {
 
 	protected static final String FILE_ATTRIBUTE = "file";
 
-	protected static final String ASPECT_LINE_NUMBER_ATTRIBUTE = "aspect-line-number";
+	protected static final String ASPECT_START_LINE_NUMBER_ATTRIBUTE = "aspect-start-line-number";
+
+	protected static final String ASPECT_END_LINE_NUMBER_ATTRIBUTE = "aspect-end-line-number";
 
 	protected static final String ARG_NAMES_ATTRIBUTE = "arg-names";
 
@@ -88,7 +90,8 @@ public class BeanAspectDefinitionElementFactory implements IElementFactory {
 			argNames = StringUtils.delimitedListToStringArray(argNamesString,
 					",");
 		}
-		int aspectLineNumber = memento.getInteger(ASPECT_LINE_NUMBER_ATTRIBUTE);
+		int aspectStartLineNumber = memento.getInteger(ASPECT_START_LINE_NUMBER_ATTRIBUTE);
+		int aspectEndLineNumber = memento.getInteger(ASPECT_END_LINE_NUMBER_ATTRIBUTE);
 		String fileName = memento.getString(FILE_ATTRIBUTE);
 		boolean proxyTargetClass = Boolean.valueOf(memento
 				.getString(PROXY_TARGET_CLASS_ATTRIBUTE));
@@ -103,7 +106,8 @@ public class BeanAspectDefinitionElementFactory implements IElementFactory {
 		definition.setReturning(returning);
 		definition.setThrowing(throwing);
 		definition.setArgNames(argNames);
-		definition.setAspectLineNumber(aspectLineNumber);
+		definition.setAspectStartLineNumber(aspectStartLineNumber);
+		definition.setAspectEndLineNumber(aspectEndLineNumber);
 		definition.setProxyTargetClass(proxyTargetClass);
 		definition.setType(type);
 

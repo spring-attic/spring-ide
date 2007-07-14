@@ -67,8 +67,8 @@ public class AopReference implements IAopReference, IAdaptable,
 					&& ((getSource() == null && other.getSource() == null) || (getSource() != null && getSource()
 							.equals(other.getSource())))
 					&& getResource().equals(other.getResource())
-					&& getDefinition().getAspectLineNumber() == other
-							.getDefinition().getAspectLineNumber();
+					&& getDefinition().getAspectStartLineNumber() == other
+							.getDefinition().getAspectStartLineNumber();
 		}
 		return false;
 	}
@@ -114,7 +114,7 @@ public class AopReference implements IAopReference, IAdaptable,
 		hashCode = 21 + ObjectUtils.nullSafeHashCode(target);
 		hashCode = 24 + ObjectUtils.nullSafeHashCode(file);
 		hashCode = 12 + ObjectUtils.nullSafeHashCode(definition
-				.getAspectLineNumber());
+				.getAspectStartLineNumber());
 		return hashCode;
 	}
 

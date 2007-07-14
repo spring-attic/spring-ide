@@ -83,15 +83,18 @@ public class AdviceAnnotationVisitor extends EmptyVisitor {
 
 	private IAspectDefinition lastAspectDefinition = null;
 
-	private int aspectLineNumber;
+	private int aspectStartLineNumber;
+
+	private int aspectEndLineNumber;
 
 	private String aspectName;
 
 	private String aspectClassName;
 
 	public AdviceAnnotationVisitor(String aspectName,
-			String aspectClassName, int aspectLineNumber) {
-		this.aspectLineNumber = aspectLineNumber;
+			String aspectClassName, int aspectStartLineNumber, int aspectEndLineNumber) {
+		this.aspectStartLineNumber = aspectStartLineNumber;
+		this.aspectEndLineNumber = aspectEndLineNumber;
 		this.aspectName = aspectName;
 		this.aspectClassName = aspectClassName;
 	}
@@ -107,7 +110,8 @@ public class AdviceAnnotationVisitor extends EmptyVisitor {
 
 			def.setAspectClassName(aspectClassName);
 			def.setAdviceMethodName(visitedMethod);
-			def.setAspectLineNumber(aspectLineNumber);
+			def.setAspectStartLineNumber(aspectStartLineNumber);
+			def.setAspectEndLineNumber(aspectEndLineNumber);
 			def.setAspectName(aspectName);
 			def.setType(ANNOTATION_TYPES.get(desc));
 
@@ -126,7 +130,8 @@ public class AdviceAnnotationVisitor extends EmptyVisitor {
 
 			def.setAspectClassName(aspectClassName);
 			def.setAspectName(aspectName);
-			def.setAspectLineNumber(aspectLineNumber);
+			def.setAspectStartLineNumber(aspectStartLineNumber);
+			def.setAspectEndLineNumber(aspectEndLineNumber);
 
 			visitedMethod = null;
 			visitedField = null;
@@ -144,14 +149,16 @@ public class AdviceAnnotationVisitor extends EmptyVisitor {
 							.setPointcutExpression(value.toString());
 				}
 				else if ("argNames".equals(name)) {
-					lastAspectDefinition.setArgNames(StringUtils
+					((AnnotationAspectDefinition) lastAspectDefinition).setArgNames(StringUtils
 							.commaDelimitedListToStringArray(value.toString()));
 				}
 				else if ("returning".equals(name)) {
-					lastAspectDefinition.setReturning(value.toString());
+					((AnnotationAspectDefinition) lastAspectDefinition)
+						.setReturning(value.toString());
 				}
 				else if ("throwing".equals(name)) {
-					lastAspectDefinition.setThrowing(value.toString());
+					((AnnotationAspectDefinition) lastAspectDefinition)
+						.setThrowing(value.toString());
 				}
 			}
 			else if (lastAspectDefinition instanceof AnnotationIntroductionDefinition) {

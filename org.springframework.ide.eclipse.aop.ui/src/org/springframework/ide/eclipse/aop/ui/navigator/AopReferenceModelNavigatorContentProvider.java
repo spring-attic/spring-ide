@@ -309,8 +309,8 @@ public class AopReferenceModelNavigatorContentProvider implements
 
 		for (IAopReference reference : references) {
 			if (reference.getDefinition().getAspectName().equals(id)
-					|| (reference.getDefinition().getAspectLineNumber() >= startLine
-							&& reference.getDefinition().getAspectLineNumber() <= endLine && resource
+					|| (reference.getDefinition().getAspectStartLineNumber() >= startLine
+							&& reference.getDefinition().getAspectStartLineNumber() <= endLine && resource
 							.equals(reference.getDefinition().getResource()))) {
 				if (reference.getAdviceType() == ADVICE_TYPES.DECLARE_PARENTS) {
 					if (foundIntroductionSourceReferences.containsKey(reference
@@ -413,7 +413,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 				for (Map.Entry<IBean, BeanReferenceNode> n : beansRefs
 						.entrySet()) {
 					if (n.getKey().getElementStartLine() == entry.getKey()
-							.getAspectLineNumber()
+							.getAspectStartLineNumber()
 							|| entry.getKey().getAspectName().equals(
 									n.getKey().getElementName())) {
 						beansRefs.get(n.getKey()).getAspectReferences().addAll(
@@ -428,7 +428,7 @@ public class AopReferenceModelNavigatorContentProvider implements
 				for (Map.Entry<IBean, BeanReferenceNode> n : beansRefs
 						.entrySet()) {
 					if (n.getKey().getElementStartLine() == entry.getKey()
-							.getAspectLineNumber()
+							.getAspectStartLineNumber()
 							|| entry.getKey().getAspectName().equals(
 									n.getKey().getElementName())) {
 						beansRefs.get(n.getKey()).getDeclareParentReferences()

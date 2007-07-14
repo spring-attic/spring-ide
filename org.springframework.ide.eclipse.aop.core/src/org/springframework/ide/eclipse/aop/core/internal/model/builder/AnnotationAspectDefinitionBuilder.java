@@ -25,6 +25,7 @@ import org.objectweb.asm.Opcodes;
 import org.springframework.core.type.asm.CachingClassReaderFactory;
 import org.springframework.core.type.asm.ClassReaderFactory;
 import org.springframework.ide.eclipse.aop.core.Activator;
+import org.springframework.ide.eclipse.aop.core.internal.model.AnnotationAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.logging.AopLog;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder;
@@ -70,7 +71,7 @@ public class AnnotationAspectDefinitionBuilder extends
 		}
 
 		AdviceAnnotationVisitor v = new AdviceAnnotationVisitor(id, className,
-				bean.getElementStartLine());
+				bean.getElementStartLine(), bean.getElementEndLine());
 		classReader.accept(v, false);
 
 		List<IAspectDefinition> aspectDefinitions = v.getAspectDefinitions();
@@ -174,7 +175,8 @@ public class AnnotationAspectDefinitionBuilder extends
 						.getNodeValue());
 				if (proxyTargetClass) {
 					for (IAspectDefinition def : aspectDefinitions) {
-						def.setProxyTargetClass(proxyTargetClass);
+						((AnnotationAspectDefinition) def).
+							setProxyTargetClass(proxyTargetClass);
 					}
 				}
 			}
@@ -206,13 +208,8 @@ public class AnnotationAspectDefinitionBuilder extends
 						});
 			}
 			catch (Throwable e) {
-				AopLog
-						.log(
-								AopLog.BUILDER_MESSAGES,
-								Activator
-										.getFormattedMessage(
-												"AspectDefinitionBuilder.exceptionOnNode",
-												bean));
+				AopLog.log(AopLog.BUILDER_MESSAGES,	Activator.getFormattedMessage(
+					"AspectDefinitionBuilder.exceptionOnNode", bean));
 				Activator.log(e);
 			}
 		}
