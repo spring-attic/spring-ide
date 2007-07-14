@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.UniqueBeanNameG
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
@@ -39,14 +40,14 @@ public class DefaultModelElementProvider implements IModelElementProvider {
 			ComponentDefinition definition) {
 		if (definition instanceof CompositeComponentDefinition
 				|| definition.getBeanDefinitions().length > 1) {
-			return createComponent(config, definition);
+			return createComponent(config, config, definition);
 		}
 		return createBean(config, definition);
 	}
 
-	private IBeansComponent createComponent(IBeansConfig config,
+	private IBeansComponent createComponent(IBeansModelElement parent, IBeansConfig config,
 			ComponentDefinition definition) {
-		BeansComponent component = new BeansComponent(config, definition);
+		BeansComponent component = new BeansComponent(parent, definition);
 
 		// Create beans from wrapped bean definitions
 		for (BeanDefinition beanDef : definition.getBeanDefinitions()) {
@@ -65,9 +66,9 @@ public class DefaultModelElementProvider implements IModelElementProvider {
 					definition).getNestedComponents()) {
 				if (compDef instanceof CompositeComponentDefinition
 						|| compDef.getBeanDefinitions().length > 1) {
-					component.addComponent(createComponent(config, compDef));
+					component.addComponent(createComponent(component, config, compDef));
 				} else {
-					IBean bean = createBean(config, compDef);
+					IBean bean = createBean(component, compDef);
 					if (bean != null) {
 						component.addBean(bean);
 					}
@@ -77,7 +78,7 @@ public class DefaultModelElementProvider implements IModelElementProvider {
 		return component;
 	}
 
-	private IBean createBean(IBeansConfig config,
+	private IBean createBean(IBeansModelElement config,
 			ComponentDefinition definition) {
 		BeanDefinition[] beanDefs = definition.getBeanDefinitions();
 		if (beanDefs.length > 0) {
