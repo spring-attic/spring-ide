@@ -86,6 +86,10 @@
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanReferenceRule"
 		            name="%beansValidator.rule.beanReference.name"
 		            description="%beansValidator.rule.beanReference.description"/>
+		    <rule id="requiredProperty"
+		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.RequiredPropertyRule"
+		            name="%beansValidator.rule.requiredProperty.name"
+		            description="%beansValidator.rule.requiredProperty.description"/>
 	    </rules>
 	</extension>
 </plugin>

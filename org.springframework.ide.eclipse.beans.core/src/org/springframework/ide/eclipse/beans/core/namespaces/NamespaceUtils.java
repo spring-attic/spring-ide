@@ -11,7 +11,9 @@
 package org.springframework.ide.eclipse.beans.core.namespaces;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -20,24 +22,29 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Platform;
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.xml.NamespaceHandler;
+import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
+import org.xml.sax.EntityResolver;
 
 /**
- * Some helper methods.
+ * Some helper methods that deal with loading extension point contributions.
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
 public class NamespaceUtils {
 
-	public static final String NAMESPACES_EXTENSION_POINT = BeansCorePlugin
-			.PLUGIN_ID + ".namespaces";
+	public static final String NAMESPACES_EXTENSION_POINT = BeansCorePlugin.PLUGIN_ID
+			+ ".namespaces";
 
-	public static final String DEFAULT_NAMESPACE_URI =
-			"http://www.springframework.org/schema/beans"; 
+	public static final String RESOLVERS_EXTENSION_POINT = BeansCorePlugin.PLUGIN_ID
+			+ ".resolvers";
+
+	public static final String DEFAULT_NAMESPACE_URI = "http://www.springframework.org/schema/beans";
 
 	/**
 	 * Returns the namespace URI for the given {@link BeanMetadataElement} or
@@ -60,8 +67,7 @@ public class NamespaceUtils {
 	 * Returns a {@link Map} with all registered {@link NamespaceHandler}s.
 	 */
 	public static Map<String, NamespaceHandler> getNamespaceHandlers() {
-		Map<String, NamespaceHandler> handlers =
-				new HashMap<String, NamespaceHandler>();
+		Map<String, NamespaceHandler> handlers = new HashMap<String, NamespaceHandler>();
 		IExtensionPoint point = Platform.getExtensionRegistry()
 				.getExtensionPoint(NAMESPACES_EXTENSION_POINT);
 		if (point != null) {
@@ -72,11 +78,10 @@ public class NamespaceUtils {
 					if (uri != null
 							&& config.getAttribute("namespaceHandler") != null) {
 						try {
-							Object handler = config.createExecutableExtension(
-									"namespaceHandler");
+							Object handler = config
+									.createExecutableExtension("namespaceHandler");
 							if (handler instanceof NamespaceHandler) {
-								NamespaceHandler namespaceHandler = 
-									(NamespaceHandler) handler;
+								NamespaceHandler namespaceHandler = (NamespaceHandler) handler;
 								namespaceHandler.init();
 								handlers.put(uri, namespaceHandler);
 							}
@@ -95,8 +100,7 @@ public class NamespaceUtils {
 	 * Returns a {@link Map} with all registered {@link IModelElementProvider}s.
 	 */
 	public static Map<String, IModelElementProvider> getElementProviders() {
-		Map<String, IModelElementProvider> providers =
-				new HashMap<String, IModelElementProvider>();
+		Map<String, IModelElementProvider> providers = new HashMap<String, IModelElementProvider>();
 		IExtensionPoint point = Platform.getExtensionRegistry()
 				.getExtensionPoint(NAMESPACES_EXTENSION_POINT);
 		if (point != null) {
@@ -107,8 +111,8 @@ public class NamespaceUtils {
 					if (uri != null
 							&& config.getAttribute("elementProvider") != null) {
 						try {
-							Object provider = config.createExecutableExtension(
-									"elementProvider");
+							Object provider = config
+									.createExecutableExtension("elementProvider");
 							if (provider instanceof IModelElementProvider) {
 								providers.put(uri,
 										(IModelElementProvider) provider);
@@ -122,5 +126,72 @@ public class NamespaceUtils {
 			}
 		}
 		return providers;
+	}
+
+	/**
+	 * Returns a {@link Set} with all registered
+	 * {@link NamespaceHandlerResolver}s.
+	 * @since 2.0.1
+	 */
+	public static Set<NamespaceHandlerResolver> getNamespaceHandlerResolvers() {
+		Set<NamespaceHandlerResolver> handlers = new HashSet<NamespaceHandlerResolver>();
+		IExtensionPoint point = Platform.getExtensionRegistry()
+				.getExtensionPoint(RESOLVERS_EXTENSION_POINT);
+		if (point != null) {
+			for (IExtension extension : point.getExtensions()) {
+				for (IConfigurationElement config : extension
+						.getConfigurationElements()) {
+					if ("namespaceHandlerResolver".equals(config.getName())
+							&& config.getAttribute("class") != null) {
+						try {
+							Object handler = config
+									.createExecutableExtension("class");
+							if (handler instanceof NamespaceHandlerResolver) {
+								NamespaceHandlerResolver namespaceHandlerResolver 
+									= (NamespaceHandlerResolver) handler;
+								handlers.add(namespaceHandlerResolver);
+							}
+						}
+						catch (CoreException e) {
+							BeansCorePlugin.log(e);
+						}
+					}
+				}
+			}
+		}
+		return handlers;
+	}
+
+	/**
+	 * Returns a {@link Set} with all registered
+	 * {@link EntityResolver}s.
+	 * @since 2.0.1
+	 */
+	public static Set<EntityResolver> getEntityResolvers() {
+		Set<EntityResolver> handlers = new HashSet<EntityResolver>();
+		IExtensionPoint point = Platform.getExtensionRegistry()
+				.getExtensionPoint(RESOLVERS_EXTENSION_POINT);
+		if (point != null) {
+			for (IExtension extension : point.getExtensions()) {
+				for (IConfigurationElement config : extension
+						.getConfigurationElements()) {
+					if ("entityResolver".equals(config.getName())
+							&& config.getAttribute("class") != null) {
+						try {
+							Object handler = config
+									.createExecutableExtension("class");
+							if (handler instanceof EntityResolver) {
+								EntityResolver entityResolver = (EntityResolver) handler;
+								handlers.add(entityResolver);
+							}
+						}
+						catch (CoreException e) {
+							BeansCorePlugin.log(e);
+						}
+					}
+				}
+			}
+		}
+		return handlers;
 	}
 }

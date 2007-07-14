@@ -10,13 +10,19 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.validation;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.objectweb.asm.ClassReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.core.type.asm.CachingClassReaderFactory;
+import org.springframework.core.type.asm.ClassReaderFactory;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
@@ -26,12 +32,16 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
  * relevant information used during validation.
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
 public class BeansValidationContext extends AbstractValidationContext {
 
 	private BeanDefinitionRegistry incompleteRegistry;
+
 	private BeanDefinitionRegistry completeRegistry;
+
+	private ClassReaderFactory classReaderFactory;
 
 	public BeansValidationContext(IBeansConfig config,
 			IResourceModelElement contextElement) {
@@ -39,7 +49,7 @@ public class BeansValidationContext extends AbstractValidationContext {
 
 		// Add parsing errors to list of validation errors
 		addProblems(((BeansConfig) config).getProblems());
-		
+
 		incompleteRegistry = createRegistry(config, contextElement, false);
 		completeRegistry = createRegistry(config, contextElement, true);
 	}
@@ -54,8 +64,7 @@ public class BeansValidationContext extends AbstractValidationContext {
 
 	private BeanDefinitionRegistry createRegistry(IBeansConfig config,
 			IResourceModelElement contextElement, boolean fillCompletely) {
-		DefaultBeanDefinitionRegistry registry =
-				new DefaultBeanDefinitionRegistry();
+		DefaultBeanDefinitionRegistry registry = new DefaultBeanDefinitionRegistry();
 		if (contextElement instanceof BeansConfigSet) {
 			IBeansConfigSet configSet = (IBeansConfigSet) contextElement;
 			if (fillCompletely) {
@@ -83,5 +92,34 @@ public class BeansValidationContext extends AbstractValidationContext {
 			}
 		}
 		return registry;
+	}
+
+	/**
+	 * Returns a {@link ClassReaderFactory}.
+	 * <p>
+	 * The purpose of this method is to enable caching of {@link ClassReader}
+	 * instances throughout the entire validation process.
+	 * @return a {@link ClassReaderFactory} instance
+	 * @since 2.0.1
+	 */
+	public ClassReaderFactory getClassReaderFactory() {
+		synchronized (this) {
+			if (this.classReaderFactory == null) {
+				this.classReaderFactory = new CachingClassReaderFactory(
+						JdtUtils.getClassLoader(getRootElement()
+								.getElementResource().getProject(), false));
+			}
+		}
+		return this.classReaderFactory;
+	}
+
+	public IProject getRootElementProject() {
+		return (getRootElement().getElementResource() != null ? getRootElement()
+				.getElementResource().getProject()
+				: null);
+	}
+
+	public IResource getRootElementResource() {
+		return getRootElement().getElementResource();
 	}
 }

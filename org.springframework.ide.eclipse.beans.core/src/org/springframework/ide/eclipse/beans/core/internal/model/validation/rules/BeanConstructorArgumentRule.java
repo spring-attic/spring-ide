@@ -10,10 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.validation.rules;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.objectweb.asm.AnnotationVisitor;
@@ -33,13 +32,11 @@ import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.ScannedRootBeanDefinition;
 import org.springframework.core.type.asm.AnnotationMetadataReadingVisitor;
 import org.springframework.core.type.asm.ClassReaderFactory;
-import org.springframework.core.type.asm.SimpleClassReaderFactory;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -120,8 +117,8 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 						element = bean;
 					}
 
-					AnnotationMetadata metadata = getAnnotationMetadata(bean,
-							type);
+					AnnotationMetadata metadata = getAnnotationMetadata(
+							context.getClassReaderFactory(), bean, type);
 					// add check if prototype and configurable and if constructor
 					// is autowired do this at the latest possible stage due to
 					// performance considerations
@@ -155,6 +152,19 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 				AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME) != null;
 		}
 		catch (NoSuchBeanDefinitionException e) {
+			// fall back for manual installation of the post processor
+			for (String name : context.getCompleteRegistry()
+					.getBeanDefinitionNames()) {
+				BeanDefinition db = context.getCompleteRegistry()
+						.getBeanDefinition(name);
+				if (db.getBeanClassName() != null
+						&& Introspector.doesExtend(JdtUtils.getJavaType(context
+								.getRootElementProject(), db.getBeanClassName()),
+								AutowiredAnnotationBeanPostProcessor.class
+										.getName())) {
+					return true;
+				}
+			}
 			return false;
 		}
 	}
@@ -163,34 +173,17 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 	 * Retrieves a instance of {@link AnnotationMetadata} that contains
 	 * information about used annotations in the class under question
 	 */
-	private AnnotationMetadata getAnnotationMetadata(final IBean bean,
-			final IType type) {
-		IJavaProject jp = JdtUtils.getJavaProject(bean.getElementResource()
-				.getProject());
+	private AnnotationMetadata getAnnotationMetadata(final ClassReaderFactory classReaderFactory, 
+			final IBean bean, final IType type) {
 		final String className = type.getFullyQualifiedName();
 		final AnnotationMetadata visitor = new AnnotationMetadata();
-		if (jp != null) {
-			try {
-				JdtUtils.getProjectClassLoaderSupport(jp).executeCallback(
-					new IProjectClassLoaderSupport.IProjectClassLoaderAwareCallback() {
-						public void doWithActiveProjectClassLoader()
-							throws Throwable {
-							try {
-								ClassReaderFactory classReaderFactory = new SimpleClassReaderFactory();
-								ClassReader classReader = classReaderFactory
-									.getClassReader(className);
-								classReader.accept(visitor, false);
-							}
-							catch (FileNotFoundException e) {
-								// ignore any missing files here as this will be
-								// reported as missing bean class
-							}
-						}
-					});
-			}
-			catch (Throwable e) {
-				BeansCorePlugin.log(e);
-			}
+		try {
+			ClassReader classReader = classReaderFactory.getClassReader(className);
+			classReader.accept(visitor, false);
+		}
+		catch (IOException e) {
+			// ignore any missing files here as this will be
+			// reported as missing bean class
 		}
 		return visitor;
 	}

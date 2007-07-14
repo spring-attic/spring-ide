@@ -154,6 +154,14 @@ public final class Introspector {
 	}
 
 	/**
+	 * Returns a list of all setters.
+	 */
+	public static Set<IMethod> findAllWritableProperties(IType type) 
+		throws JavaModelException {
+		return findAllMethods(type, "set", 1, Public.YES, Static.NO);
+	}
+
+	/**
 	 * Returns a list of all setters with the given prefix.
 	 */
 	public static Set<IMethod> findWritableProperties(IType type,
@@ -381,8 +389,8 @@ public final class Introspector {
 	}
 
 	/**
-	 * Returns <code>true</code> if the given Java type extends the specified
-	 * class.
+	 * Returns <code>true</code> if the given Java type extends or is the 
+	 * specified class.
 	 * @param type the Java type to be examined
 	 * @param className the full qualified name of the class we are looking for
 	 */
@@ -390,12 +398,10 @@ public final class Introspector {
 		if (className != null && className.length() > 0) {
 			try {
 				while (type != null) {
-					type = getSuperType(type);
-					if (type != null) {
-						if (className.equals(type.getFullyQualifiedName())) {
-							return true;
-						}
+					if (className.equals(type.getFullyQualifiedName())) {
+						return true;
 					}
+					type = getSuperType(type);
 				}
 			}
 			catch (JavaModelException e) {

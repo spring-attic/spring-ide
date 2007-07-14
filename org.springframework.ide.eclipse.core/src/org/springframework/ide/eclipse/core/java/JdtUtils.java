@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.internal.resources.Workspace;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -40,7 +39,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.core.SpringCore;
@@ -56,6 +54,11 @@ import org.springframework.util.StringUtils;
  * @since 2.0
  */
 public class JdtUtils {
+	
+	/**
+	 * Name of file containing project classpath
+	 */
+	private static final String CLASSPATH_FILENAME = ".classpath"; 
 
 	private static final String AJDT_NATURE = "org.eclipse.ajdt.ui.ajnature";
 
@@ -242,11 +245,11 @@ public class JdtUtils {
 		return paths;
 	}
 
-	public static ClassLoader getClassLoader(IJavaProject project) {
+	public static ClassLoader getClassLoader(IProject project) {
 		return getClassLoader(project, true);
 	}
 
-	public static ClassLoader getClassLoader(IJavaProject project,
+	public static ClassLoader getClassLoader(IProject project,
 			boolean useParentClassLoader) {
 		List<URL> paths = getClassPathURLs(project, useParentClassLoader);
 		if (useParentClassLoader) {
@@ -259,13 +262,10 @@ public class JdtUtils {
 	}
 
 	public static ClassLoader getClassLoader(IResource resource) {
-		if (isJavaProject(resource)) {
-			return getClassLoader(JavaCore.create(resource.getProject()));
-		}
-		return Thread.currentThread().getContextClassLoader();
+		return getClassLoader(resource.getProject());
 	}
 
-	public static List<URL> getClassPathURLs(IJavaProject project,
+	public static List<URL> getClassPathURLs(IProject project,
 			boolean useParentClassLoader) {
 		List<URL> paths = new ArrayList<URL>();
 
@@ -278,49 +278,59 @@ public class JdtUtils {
 		}
 
 		try {
-			// configured classpath
-			IClasspathEntry[] classpath = project.getResolvedClasspath(true);
-			// build output, relative to project
-			IPath location = SpringCoreUtils.getProjectLocation(project
-					.getProject());
-			IPath outputPath = location.append(project.getOutputLocation()
-					.removeFirstSegments(1));
+			if (isJavaProject(project)) {
+				IJavaProject jp = JavaCore.create(project);
+				// configured classpath
+				IClasspathEntry[] classpath = jp.getResolvedClasspath(true);
+				// build output, relative to project
+				IPath location = SpringCoreUtils.getProjectLocation(project
+						.getProject());
+				IPath outputPath = location.append(jp.getOutputLocation()
+						.removeFirstSegments(1));
 
-			for (int i = 0; i < classpath.length; i++) {
-				IClasspathEntry path = classpath[i];
-				if (path.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
-					File file = path.getPath().toFile();
-					if (file.exists()) {
-						URL url = path.getPath().toFile().toURL();
-						paths.add(url);
+				for (int i = 0; i < classpath.length; i++) {
+					IClasspathEntry path = classpath[i];
+					if (path.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
+						File file = path.getPath().toFile();
+						if (file.exists()) {
+							URL url = path.getPath().toFile().toURL();
+							paths.add(url);
+						}
+						else {
+							String projectName = path.getPath().segment(0);
+							IProject pathProject = ResourcesPlugin
+									.getWorkspace().getRoot().getProject(
+											projectName);
+							IPath pathLocation = SpringCoreUtils
+									.getProjectLocation(pathProject);
+							IPath relPath = path.getPath().removeFirstSegments(
+									1);
+							URL url = new URL("file:" + pathLocation
+									+ File.separator + relPath.toOSString());
+							paths.add(url);
+						}
 					}
-					else {
-						String projectName = path.getPath().segment(0);
-						IProject pathProject = ResourcesPlugin.getWorkspace()
-								.getRoot().getProject(projectName);
-						IPath pathLocation = SpringCoreUtils
-								.getProjectLocation(pathProject);
-						IPath relPath = path.getPath().removeFirstSegments(1);
-						URL url = new URL("file:" + pathLocation
-								+ File.separator + relPath.toOSString());
-						paths.add(url);
+					// add source output locations for different source folders
+					else if (path.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+						IPath sourceOutputPath = path.getOutputLocation();
+						if (sourceOutputPath != null) {
+							sourceOutputPath = location.append(sourceOutputPath
+									.removeFirstSegments(1));
+							paths.add(sourceOutputPath.toFile().toURL());
+						}
 					}
 				}
-				// add source output locations for different source folders
-				else if (path.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-					IPath sourceOutputPath = path.getOutputLocation();
-					if (sourceOutputPath != null) {
-						sourceOutputPath = location.append(sourceOutputPath
-								.removeFirstSegments(1));
-						paths.add(sourceOutputPath.toFile().toURL());
-					}
+				// add all depending java projects
+				for (IJavaProject p : getAllDependingJavaProjects(jp)) {
+					paths.addAll(getClassPathURLs(p.getProject(), true));
+				}
+				paths.add(outputPath.toFile().toURL());
+			}
+			else {
+				for (IProject p : project.getReferencedProjects()) {
+					getClassPathURLs(p, useParentClassLoader);
 				}
 			}
-			// add all depending java projects
-			for (IJavaProject p : getAllDependingJavaProjects(project)) {
-				paths.addAll(getClassPathURLs(p, true));
-			}
-			paths.add(outputPath.toFile().toURL());
 		}
 		catch (Exception e) {
 			// ignore
@@ -456,13 +466,12 @@ public class JdtUtils {
 	}
 
 	/**
-	 * Determines if the <code>resource</code> under question is the .classpath
-	 * file of a {@link IJavaProject}.
+	 * Determines if the <code>resource</code> under question is the
+	 * .classpath file of a {@link IJavaProject}.
 	 */
-	@SuppressWarnings("restriction")
 	public static boolean isClassPathFile(IResource resource) {
 		String classPathFileName = resource.getProject().getFullPath().append(
-				JavaProject.CLASSPATH_FILENAME).toString();
+				CLASSPATH_FILENAME).toString();
 		return resource.getFullPath().toString().equals(classPathFileName);
 	}
 
@@ -595,7 +604,7 @@ public class JdtUtils {
 
 		private void setupClassLoaders(IJavaProject javaProject) {
 			classLoader = Thread.currentThread().getContextClassLoader();
-			weavingClassLoader = JdtUtils.getClassLoader(javaProject, false);
+			weavingClassLoader = JdtUtils.getClassLoader(javaProject.getProject(), false);
 		}
 	}
 }
