@@ -56,8 +56,8 @@ plugin@org.springframework=SVN,trunk,http://springide.org/repos,,required-bundle
 plugin@org.springframework.webflow=SVN,trunk,http://springide.org/repos,,required-bundles/spring-webflow
 plugin@org.springframework.binding=SVN,trunk,http://springide.org/repos,,required-bundles/spring-binding
 plugin@org.springframework.javaconfig=SVN,trunk,http://springide.org/repos,,required-bundles/spring-javaconfig
-plugin@org.springframework.osgi.core=SVN,trunk,http://springide.org/repos,,required-bundles/spring-osgi-core
-plugin@org.springframework.osgi.io=SVN,trunk,http://springide.org/repos,,required-bundles/spring-osgi-io
+plugin@org.springframework.osgi.spring-osgi-core=SVN,trunk,http://springide.org/repos,,required-bundles/spring-osgi-core
+plugin@org.springframework.osgi.spring-osgi-io=SVN,trunk,http://springide.org/repos,,required-bundles/spring-osgi-io
 plugin@org.springframework.javaconfig=SVN,trunk,http://springide.org/repos,,required-bundles/spring-javaconfig
 plugin@org.objectweb.asm=SVN,trunk,http://springide.org/repos,,required-bundles/asm
 
