@@ -45,8 +45,8 @@ public class DefaultModelElementProvider implements IModelElementProvider {
 		return createBean(config, definition);
 	}
 
-	private IBeansComponent createComponent(IBeansModelElement parent, IBeansConfig config,
-			ComponentDefinition definition) {
+	private IBeansComponent createComponent(IBeansModelElement parent,
+			IBeansConfig config, ComponentDefinition definition) {
 		BeansComponent component = new BeansComponent(parent, definition);
 
 		// Create beans from wrapped bean definitions
@@ -60,13 +60,14 @@ public class DefaultModelElementProvider implements IModelElementProvider {
 			}
 		}
 
-		// Create components or beans component definitions
+		// Create components or beans from nested component definitions
 		if (definition instanceof CompositeComponentDefinition) {
 			for (ComponentDefinition compDef : ((CompositeComponentDefinition)
 					definition).getNestedComponents()) {
 				if (compDef instanceof CompositeComponentDefinition
 						|| compDef.getBeanDefinitions().length > 1) {
-					component.addComponent(createComponent(component, config, compDef));
+					component.addComponent(createComponent(component, config,
+							compDef));
 				} else {
 					IBean bean = createBean(component, compDef);
 					if (bean != null) {
@@ -78,7 +79,7 @@ public class DefaultModelElementProvider implements IModelElementProvider {
 		return component;
 	}
 
-	private IBean createBean(IBeansModelElement config,
+	private IBean createBean(IBeansModelElement parent,
 			ComponentDefinition definition) {
 		BeanDefinition[] beanDefs = definition.getBeanDefinitions();
 		if (beanDefs.length > 0) {
@@ -89,7 +90,7 @@ public class DefaultModelElementProvider implements IModelElementProvider {
 				holder = new BeanDefinitionHolder(definition
 						.getBeanDefinitions()[0], definition.getName());
 			}
-			return new Bean(config, holder);
+			return new Bean(parent, holder);
 		}
 		return null;
 	}
