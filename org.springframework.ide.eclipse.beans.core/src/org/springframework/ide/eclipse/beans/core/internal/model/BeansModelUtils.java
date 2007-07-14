@@ -639,10 +639,10 @@ public final class BeansModelUtils {
 			// Fill a set with all bean definitions belonging to the
 			// hierarchy of the requested bean definition
 			List<BeanDefinition> beanDefinitions = new ArrayList<BeanDefinition>(); // used
-																					// to
-																					// detect
-																					// a
-																					// cycle
+			// to
+			// detect
+			// a
+			// cycle
 			beanDefinitions.add(bd);
 			addBeanDefinition(bean, context, beanDefinitions);
 
@@ -1206,7 +1206,7 @@ public final class BeansModelUtils {
 	public static boolean isInnerBean(IBean bean) {
 		return !(bean.getElementParent() instanceof IBeansConfig);
 	}
-	
+
 	/**
 	 * Returns the most specific {@link IModelElement} that corresponds to the
 	 * given <code>startLine</code> and <code>endLine</code> line numbers.
@@ -1218,13 +1218,13 @@ public final class BeansModelUtils {
 	public static IModelElement getMostSpecificModelElement(int startLine,
 			int endLine, IFile resource, IProgressMonitor monitor) {
 		if (BeansCoreUtils.isBeansConfig(resource)) {
-			
+
 			if (monitor == null) {
 				monitor = new NullProgressMonitor();
 			}
-			
+
 			IBeansConfig beansConfig = BeansCorePlugin.getModel().getConfig(
-						resource);
+					resource);
 			ModelElementDetermingModelVisitor v = new ModelElementDetermingModelVisitor(
 					startLine, endLine, resource);
 			beansConfig.accept(v, monitor);
@@ -1236,9 +1236,9 @@ public final class BeansModelUtils {
 	private static class ModelElementDetermingModelVisitor implements
 			IModelElementVisitor {
 
-		private final int startLine;
+		private int startLine;
 
-		private final int endLine;
+		private int endLine;
 
 		private final IFile file;
 
@@ -1250,7 +1250,12 @@ public final class BeansModelUtils {
 
 		public ModelElementDetermingModelVisitor(final int startLine,
 				final int endLine, final IFile file) {
-			this.startLine = startLine;
+			if (startLine + 1 == endLine) {
+				this.startLine = startLine + 1;
+			}
+			else {
+				this.startLine = startLine;
+			}
 			this.endLine = endLine;
 			this.file = file;
 		}
@@ -1259,12 +1264,15 @@ public final class BeansModelUtils {
 			if (element instanceof ISourceModelElement) {
 				ISourceModelElement sourceElement = (ISourceModelElement) element;
 				if (sourceElement.getElementResource().equals(file)
-						&& sourceElement.getElementStartLine() <= startLine
+						&& (sourceElement.getElementStartLine() <= startLine || sourceElement
+								.getElementStartLine() -1 <= startLine)
 						&& endLine <= sourceElement.getElementEndLine()) {
 					this.element = element;
 
 					if (sourceElement.getElementStartLine() == startLine
 							&& endLine == sourceElement.getElementEndLine()) {
+						startLine = -1;
+						endLine = -1;
 						return false;
 					}
 					return true;

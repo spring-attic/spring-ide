@@ -13,11 +13,14 @@ package org.springframework.ide.eclipse.beans.mylyn.ui;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.mylyn.monitor.ui.AbstractUserInteractionMonitor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.tabletree.XMLMultiPageEditorPart;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -45,8 +48,22 @@ public class BeansUserInteractionMonitor extends AbstractUserInteractionMonitor 
 			if (editorInput instanceof IFileEditorInput) {
 				IFile file = ((IFileEditorInput) editorInput).getFile();
 				if (BeansCoreUtils.isBeansConfig(file)) {
+					
 					int startLine = ((ITextSelection) selection).getStartLine() + 1;
 					int endLine = ((ITextSelection) selection).getEndLine() + 1;
+
+					IStructuredSelection sel = (IStructuredSelection) selection;
+					Object obj = sel.getFirstElement();
+					if (obj instanceof IDOMNode) {
+						IDOMNode node = (IDOMNode) obj;
+						startLine = ((IDOMDocument) node
+								.getOwnerDocument()).getStructuredDocument()
+								.getLineOfOffset(node.getStartOffset()) + 1;
+						endLine = ((IDOMDocument) node
+								.getOwnerDocument()).getStructuredDocument()
+								.getLineOfOffset(node.getEndOffset()) + 1;
+					}
+					
 
 					IModelElement mostspecificElement = BeansModelUtils
 							.getMostSpecificModelElement(startLine, endLine,

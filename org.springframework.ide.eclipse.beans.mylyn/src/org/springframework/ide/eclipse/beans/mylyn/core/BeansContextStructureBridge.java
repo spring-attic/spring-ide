@@ -63,6 +63,9 @@ public class BeansContextStructureBridge extends AbstractContextStructureBridge 
 				if (node != null && node.getInterest().isInteresting()) {
 					return false;
 				}
+				if (!canFilter(child)) {
+					return false;
+				}
 			}
 
 			if (modelElement instanceof ISpringProject) {

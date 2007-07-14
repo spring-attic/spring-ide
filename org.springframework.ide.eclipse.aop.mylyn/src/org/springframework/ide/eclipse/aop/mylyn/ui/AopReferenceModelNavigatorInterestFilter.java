@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.aop.mylyn.ui;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.Viewer;
@@ -21,20 +22,17 @@ import org.eclipse.mylyn.context.core.IInteractionElement;
 import org.eclipse.mylyn.context.ui.InterestFilter;
 import org.eclipse.mylyn.internal.context.core.InteractionContextManager;
 import org.eclipse.swt.widgets.Tree;
+import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.IReferenceNode;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 
 /**
- * Extension of Mylyn's {@link InterestFilter} that understands the Spring
- * Explorer root node {@link ISpringProject}.
  * @author Christian Dupuis
- * @since 2.0
+ * @since 2.0.1
  */
 public class AopReferenceModelNavigatorInterestFilter extends InterestFilter {
 
 	private Object temporarilyUnfiltered = null;
-
-	public AopReferenceModelNavigatorInterestFilter() {
-	}
 
 	@Override
 	public boolean select(Viewer viewer, Object parent, Object object) {
@@ -73,22 +71,33 @@ public class AopReferenceModelNavigatorInterestFilter extends InterestFilter {
 	private boolean isInterestingReferenceParticipant(IReferenceNode object) {
 		if (object != null) {
 			if (object.getReferenceParticipant() != null) {
+				Object element = object.getReferenceParticipant();
+				if (element instanceof IAspectDefinition) {
+					IAspectDefinition def = (IAspectDefinition) element;
+					element = BeansModelUtils.getMostSpecificModelElement(def
+							.getAspectStartLineNumber(), def
+							.getAspectEndLineNumber(), (IFile) def
+							.getResource(), null);
+				}
 				AbstractContextStructureBridge bridge = ContextCorePlugin
-						.getDefault().getStructureBridge(
-								object.getReferenceParticipant());
+						.getDefault().getStructureBridge(element);
 				if (bridge != null) {
-					String handle = bridge.getHandleIdentifier(object.getReferenceParticipant());
-					IInteractionElement element = ContextCorePlugin
+					String handle = bridge.getHandleIdentifier(element);
+					IInteractionElement interestElement = ContextCorePlugin
 							.getContextManager().getElement(handle);
-					if (element != null && isInteresting(element)) {
+					if (element != null && isInteresting(interestElement)) {
 						return true;
 					}
+					// TODO CD uncomment this if *really* only interested elements
+					// should be displayed
+					/*else {
+						return false;
+					}*/
 				}
 			}
 			if (object.getChildren() != null && object.getChildren().length > 0) {
 				for (Object child : object.getChildren()) {
 					if (child instanceof IReferenceNode) {
-						// TODO CD add support for IAspectDefinition
 						if (isInterestingReferenceParticipant((IReferenceNode) child)) {
 							return true;
 						}
@@ -100,7 +109,6 @@ public class AopReferenceModelNavigatorInterestFilter extends InterestFilter {
 	}
 
 	protected boolean isRootElement(Object object) {
-		// TODO CD add logic here
 		return object instanceof IReferenceNode;
 	}
 
