@@ -89,7 +89,13 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		if (labelProvider != null) {
-			labelProvider.dispose();
+
+			// Unfortunately with Eclipse 3.3 we can't call
+			// WorkbenchLabelLabelProvider.dispose()
+			// from here anymore because at this time the Workbench is
+			// already shutdown -> WorkbenchPlugin.shutdown() was called
+
+			// labelProvider.dispose();
 			labelProvider = null;
 		}
 		if (imageDescriptorRegistry != null) {
