@@ -21,7 +21,7 @@ Export-Package: edu.emory.mathcs.backport.java.util.concurrent;uses:="
  y.mathcs.backport.java.util,edu.emory.mathcs.backport.java.util.concu
  rrent.locks";version=3.0,edu.emory.mathcs.backport.java.util.concurre
  nt.atomic;version=3.0
-Bundle-Version: 3.0.0.SNAPSHOT
+Bundle-Version: 3.0.0
 Bundle-Name: backport-util-concurrent
 Bundle-Description: The Spring-OSGi project makes it easy to build Spr
  ing applications

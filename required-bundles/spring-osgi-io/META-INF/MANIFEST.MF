@@ -11,7 +11,7 @@ Export-Package: org.springframework.osgi.io;uses:="org.springframework
  .core.io.support,org.springframework.core.io,org.springframework.core
  ,org.osgi.framework,org.apache.commons.logging,org.springframework.ut
  il";version=1.0.0.m3
-Bundle-Version: 1.0.0.m3_SNAPSHOT
+Bundle-Version: 1.0.0.m3_v200707150600
 Bundle-Name: spring-osgi-io
 Bundle-Description: Spring/OSGi IO abstract classes. Provides Resource
  , ResourceLoader and ResourcePatternResolver

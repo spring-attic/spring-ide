@@ -171,7 +171,7 @@ Export-Package: org.springframework.osgi;version="1.0.0.m3",
    org.osgi.framework,
    org.apache.commons.logging,
    org.springframework.util"
-Bundle-Version: 1.0.0.m3_SNAPSHOT
+Bundle-Version: 1.0.0.m3_v200707150600
 Bundle-Name: spring-osgi-core
 Bundle-Description: Spring/OSGi core classes. Offers OSGi-based applic
  ation context and importer/exporter functionality.

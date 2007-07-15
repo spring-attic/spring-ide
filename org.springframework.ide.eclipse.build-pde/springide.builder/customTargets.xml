@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Build specific targets and properties" default="noDefault">
 
+	<property name="UpdateSiteStagingLocation" value="${buildDirectory}/../../updatesite_nightly" />
+	
 	<!-- ===================================================================== -->
 	<!-- Run a given ${target} on all elements being built -->
 	<!-- Add on <ant> task for each top level element being built. -->
@@ -144,8 +146,6 @@
 	<!-- ===================================================================== -->
 	<target name="postBuild">
 		<antcall target="gatherLogs" />
-		<property name="UpdateSiteStagingLocation" value="${buildDirectory}/../../updatesite_nightly" />
-		<delete dir="${UpdateSiteStagingLocation}" />
 		<property name="sitePackagePrefix" value="springide_updatesite" />
 		<property name="sitePackageVersion" value="2.0.1" />
 		<property name="featureVersion" value="2.0.1" />

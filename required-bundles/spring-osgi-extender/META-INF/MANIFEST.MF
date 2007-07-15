@@ -28,7 +28,7 @@ Export-Package: org.springframework.osgi.extender.support;uses:="org.s
  ing,org.springframework.context,org.springframework.osgi.util,org.spr
  ingframework.osgi.context.support,org.springframework.core.task,org.s
  pringframework.util";version=1.0.0.m3
-Bundle-Version: 1.0.0.m3_SNAPSHOT
+Bundle-Version: 1.0.0.m3_v200707150600
 Bundle-Name: spring-osgi-extender
 Bundle-Description: Spring/OSGi extender. Listens for and bootstraps S
  pring-powered OSGi bundles.
