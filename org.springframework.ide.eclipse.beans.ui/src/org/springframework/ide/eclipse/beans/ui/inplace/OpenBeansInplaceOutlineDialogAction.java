@@ -64,7 +64,7 @@ public class OpenBeansInplaceOutlineDialogAction implements
 	public void selectionChanged(IAction action, ISelection selection) {
 		// Have selected something in the editor - therefore
 		// want to close the inplace view if haven't already done so
-		if (dialog != null && dialog.isOpen()) {
+		if (selection != null && dialog != null && dialog.isOpen()) {
 			dialog.dispose();
 			dialog = null;
 		}

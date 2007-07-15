@@ -54,7 +54,8 @@ public class BeansUserInteractionMonitor extends AbstractUserInteractionMonitor 
 
 					IStructuredSelection sel = (IStructuredSelection) selection;
 					Object obj = sel.getFirstElement();
-					if (obj instanceof IDOMNode) {
+					if (obj instanceof IDOMNode && ((IDOMNode) obj)
+							.getOwnerDocument() != null) {
 						IDOMNode node = (IDOMNode) obj;
 						startLine = ((IDOMDocument) node
 								.getOwnerDocument()).getStructuredDocument()

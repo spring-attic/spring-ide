@@ -395,13 +395,13 @@
 				label="%beansViewInplace.label"
 				class="org.springframework.ide.eclipse.beans.ui.inplace.OpenBeansInplaceOutlineDialogAction"
 				menubarPath="navigate/showIn" id="openInplace">
-				<enablement>
+				<!--<enablement>
 					<or>
 						<objectClass name="org.w3c.dom.Node" />
 						<objectClass
 							name="org.eclipse.jface.text.TextSelection" />
 					</or>
-				</enablement>
+				</enablement>-->
 			</action>
 		</actionSet>
 	</extension>
