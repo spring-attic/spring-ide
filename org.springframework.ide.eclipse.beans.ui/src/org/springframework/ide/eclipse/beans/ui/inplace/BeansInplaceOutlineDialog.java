@@ -1337,6 +1337,9 @@ public class BeansInplaceOutlineDialog {
 				if (mostspecificElement != null) {
 					this.lastSelection = mostspecificElement;
 				}
+				else {
+					this.lastSelection = BeansCorePlugin.getModel().getConfig(file);
+				}
 			}
 		}
 	}
