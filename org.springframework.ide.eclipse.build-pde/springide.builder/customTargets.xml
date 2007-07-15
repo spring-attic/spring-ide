@@ -67,6 +67,7 @@
 	<!-- ===================================================================== -->
 	<target name="preSetup">
 		<delete dir="${buildDirectory}" />
+		<delete dir="${UpdateSiteStagingLocation}" />
 		<tstamp />
 	</target>
 
