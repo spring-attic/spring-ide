@@ -5,7 +5,7 @@ Spring-Version: 2.1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.springframework
 Bundle-Name: org.springframework
-Bundle-Version: 2.1.0.v200707100600
+Bundle-Version: 2.1.0.m3_v200707100600
 Bundle-Vendor: Spring Framework
 Bundle-ClassPath: spring.jar
 Export-Package: org.springframework.aop;version="2.1.0",

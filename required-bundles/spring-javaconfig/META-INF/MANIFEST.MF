@@ -4,7 +4,7 @@ Implementation-Version: 1.0 M2a
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.springframework.javaconfig
 Bundle-Name: org.springframework.javaconfig
-Bundle-Version: 1.0.0
+Bundle-Version: 1.0.0.m3_v200707150600
 Bundle-Vendor: Spring JavaConfig
 Bundle-ClassPath: spring-javaconfig.jar
 Export-Package: org.springframework.config.java.annotation,
