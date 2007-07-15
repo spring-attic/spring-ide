@@ -1,0 +1,47 @@
+Manifest-Version: 1
+Created-By: Bnd-0.0.133
+Bundle-License: http://www.apache.org/licenses/LICENSE-2.0
+Import-Package: edu.emory.mathcs.backport.java.util;version=3.0,edu.em
+ ory.mathcs.backport.java.util.concurrent;version=3.0,edu.emory.mathcs
+ .backport.java.util.concurrent.atomic;version=3.0,edu.emory.mathcs.ba
+ ckport.java.util.concurrent.helpers;version=3.0,edu.emory.mathcs.back
+ port.java.util.concurrent.locks;version=3.0,sun.misc;resolution:=opti
+ onal
+Include-Resource: src/main/resources/
+Export-Package: edu.emory.mathcs.backport.java.util.concurrent;uses:="
+ edu.emory.mathcs.backport.java.util,edu.emory.mathcs.backport.java.ut
+ il.concurrent.atomic,edu.emory.mathcs.backport.java.util.concurrent.l
+ ocks,edu.emory.mathcs.backport.java.util.concurrent.helpers";version=
+ 3.0,edu.emory.mathcs.backport.java.util;uses:=edu.emory.mathcs.backpo
+ rt.java.util.concurrent.helpers;version=3.0,edu.emory.mathcs.backport
+ .java.util.concurrent.locks;uses:="edu.emory.mathcs.backport.java.uti
+ l.concurrent,edu.emory.mathcs.backport.java.util.concurrent.helpers";
+ version=3.0,edu.emory.mathcs.backport.java.util.concurrent.helpers;us
+ es:="sun.misc,edu.emory.mathcs.backport.java.util.concurrent,edu.emor
+ y.mathcs.backport.java.util,edu.emory.mathcs.backport.java.util.concu
+ rrent.locks";version=3.0,edu.emory.mathcs.backport.java.util.concurre
+ nt.atomic;version=3.0
+Bundle-Version: 3.0.0.SNAPSHOT
+Bundle-Name: backport-util-concurrent
+Bundle-Description: The Spring-OSGi project makes it easy to build Spr
+ ing applications
+  that run in an OSGi framework. A Spring applicatio
+ n written in this
+  way provides better separation of modules, the ab
+ ility to
+  dynamically add, remove, and update modules in a running s
+ ystem, the
+  ability to deploy multiple versions of a module simultan
+ eously (and
+  have clients automatically bind to the appropriate one)
+ , and a dynamic
+  service model.
+Private-Package: !*
+Bundle-DocURL: http://www.springframework.org
+Spring-Version: 2.0.5
+Bundle-ManifestVersion: 2
+Bundle-Vendor: Spring Framework
+Implementation-Title: Spring OSGi Framework
+Bundle-SymbolicName: org.springframework.osgi.backport.util.concurrent
+Implementation-Version: 2.0.5
+

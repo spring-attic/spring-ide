@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Osgibridge Plug-in
+Bundle-SymbolicName: org.springframework.ide.eclipse.beans.osgibridge;singleton:=true
+Bundle-Version: 2.0.1.qulifier
+Bundle-Activator: org.springframework.ide.eclipse.beans.osgibridge.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.springframework.osgi.spring-osgi-extender,
+ org.springframework,
+ org.springframework.ide.eclipse.beans.core,
+ org.springframework.osgi.spring-osgi-core,
+ org.eclipse.wst.xml.core
+Eclipse-LazyStart: true

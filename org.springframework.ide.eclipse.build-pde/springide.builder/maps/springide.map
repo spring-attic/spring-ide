@@ -25,6 +25,7 @@ plugin@org.springframework.ide.eclipse.aop.mylyn=SVN,trunk,http://springide.org/
 plugin@org.springframework.ide.eclipse.aop.ui.visualiser=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.aop.ui.visualiser
 plugin@org.springframework.ide.eclipse.aop.ui.xref=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.aop.ui.xref
 plugin@org.springframework.ide.eclipse.beans.core=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.beans.core
+plugin@org.springframework.ide.eclipse.beans.osgibridge=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.beans.osgibridge
 plugin@org.springframework.ide.eclipse.beans.mylyn=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.beans.mylyn
 plugin@org.springframework.ide.eclipse.beans.ui=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.beans.ui
 plugin@org.springframework.ide.eclipse.beans.ui.editor=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.beans.ui.editor
@@ -57,7 +58,9 @@ plugin@org.springframework.webflow=SVN,trunk,http://springide.org/repos,,require
 plugin@org.springframework.binding=SVN,trunk,http://springide.org/repos,,required-bundles/spring-binding
 plugin@org.springframework.javaconfig=SVN,trunk,http://springide.org/repos,,required-bundles/spring-javaconfig
 plugin@org.springframework.osgi.spring-osgi-core=SVN,trunk,http://springide.org/repos,,required-bundles/spring-osgi-core
+plugin@org.springframework.osgi.spring-osgi-extender=SVN,trunk,http://springide.org/repos,,required-bundles/spring-osgi-extender
 plugin@org.springframework.osgi.spring-osgi-io=SVN,trunk,http://springide.org/repos,,required-bundles/spring-osgi-io
+plugin@org.springframework.osgi.backport.util.concurrent=SVN,trunk,http://springide.org/repos,,required-bundles/backport-util-concurrent
 plugin@org.springframework.javaconfig=SVN,trunk,http://springide.org/repos,,required-bundles/spring-javaconfig
 plugin@org.objectweb.asm=SVN,trunk,http://springide.org/repos,,required-bundles/asm
 

@@ -70,6 +70,13 @@
          unpack="false"/>
 
    <plugin
+         id="org.springframework.ide.eclipse.beans.osgibridge"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="org.springframework.ide.eclipse.beans.ui"
          download-size="0"
          install-size="0"
@@ -190,6 +197,20 @@
 
    <plugin
          id="org.springframework.osgi.spring-osgi-io"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.osgi.spring-osgi-extender"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.osgi.backport.util.concurrent"
          download-size="0"
          install-size="0"
          version="0.0.0"
