@@ -134,6 +134,11 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 							refreshViewerForElement(SpringCore.getModel()
 									.getProject(((IBeansProject) parent).getProject()));
 						}
+						if (BeansUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
+								.equals(providerID) && config instanceof IResourceModelElement) {
+							refreshViewerForElement(((IResourceModelElement) config)
+									.getElementResource());
+						}
 					}
 				});
 				monitor.worked(2);
