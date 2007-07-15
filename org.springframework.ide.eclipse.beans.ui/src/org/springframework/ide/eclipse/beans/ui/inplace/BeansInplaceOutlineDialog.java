@@ -15,7 +15,6 @@ import java.util.List;
 
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jface.action.Action;
@@ -27,7 +26,6 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.bindings.TriggerSequence;
 import org.eclipse.jface.bindings.keys.KeySequence;
 import org.eclipse.jface.bindings.keys.SWTKeySupport;
-import org.eclipse.jface.commands.ActionHandler;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.util.Geometry;
@@ -51,6 +49,8 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseAdapter;
@@ -88,14 +88,9 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
-import org.eclipse.ui.contexts.IContextService;
-import org.eclipse.ui.handlers.IHandlerActivation;
-import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.navigator.INavigatorContentService;
 import org.eclipse.ui.navigator.NavigatorContentServiceFactory;
@@ -217,27 +212,12 @@ public class BeansInplaceOutlineDialog {
 
 	private TreeViewer viewer;
 
-	private IKeyBindingService fKeyBindingService;
-
-	private String[] fKeyBindingScopes;
-
-	private IAction fShowViewMenuAction;
-
-	private IHandlerActivation handlerActivation;
-
-	/**
-	 * For testing purposes need to be able to get hold of the
-	 * XReferenceInplaceDialog instance
-	 */
-	public static BeansInplaceOutlineDialog dialog;
-
 	/**
 	 * Constructor which takes the parent shell
 	 */
 	public BeansInplaceOutlineDialog(Shell parent) {
 		parentShell = parent;
 		shellStyle = SWT.RESIZE;
-		dialog = this;
 	}
 
 	/**
@@ -570,39 +550,6 @@ public class BeansInplaceOutlineDialog {
 		viewMenuButton.setDisabledImage(JavaPluginImages
 				.get(JavaPluginImages.IMG_DLCL_VIEW_MENU));
 		viewMenuButton.setToolTipText("Menu");
-
-		// Used to enable the menu to be accessed from the keyboard
-		// Key binding service
-		IWorkbenchPart part = JavaPlugin.getActivePage().getActivePart();
-		IWorkbenchPartSite site = part.getSite();
-		fKeyBindingService = site.getKeyBindingService();
-
-		// Remember current scope and then set window context.
-		fKeyBindingScopes = fKeyBindingService.getScopes();
-		fKeyBindingService
-				.setScopes(new String[] { IContextService.CONTEXT_ID_WINDOW });
-
-		// Create show view menu action
-		fShowViewMenuAction = new Action("showViewMenu") { //$NON-NLS-1$
-			/*
-			 * @see org.eclipse.jface.action.Action#run()
-			 */
-			@Override
-			public void run() {
-				showViewMenu();
-			}
-		};
-		fShowViewMenuAction.setEnabled(true);
-		fShowViewMenuAction
-				.setActionDefinitionId(sectionName + ".showView"); //$NON-NLS-1$
-
-		// Register action with handler service
-		IHandlerService handlerService = (IHandlerService) PlatformUI
-				.getWorkbench().getAdapter(IHandlerService.class);
-		handlerActivation = handlerService.activateHandler(fShowViewMenuAction
-				.getActionDefinitionId(),
-				new ActionHandler(fShowViewMenuAction));
-
 		viewMenuButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -620,7 +567,14 @@ public class BeansInplaceOutlineDialog {
 		Point topLeft = new Point(bounds.x, bounds.y + bounds.height);
 		topLeft = dialogShell.toDisplay(topLeft);
 		aMenu.setLocation(topLeft.x, topLeft.y);
+		aMenu.addMenuListener(new MenuListener() {
 
+			public void menuHidden(MenuEvent e) {
+				isDeactivateListenerActive = true;
+			}
+
+			public void menuShown(MenuEvent e) {
+			}});
 		aMenu.setVisible(true);
 	}
 
@@ -1198,19 +1152,7 @@ public class BeansInplaceOutlineDialog {
 			parentShell = null;
 			viewer = null;
 			composite = null;
-			dialog = null;
 		}
-		IHandlerService handlerService = (IHandlerService) PlatformUI
-				.getWorkbench().getAdapter(IHandlerService.class);
-		handlerService.deactivateHandler(handlerActivation);
-
-		// Restore editor's key binding scope
-		if (fKeyBindingScopes != null && fKeyBindingService != null) {
-			fKeyBindingService.setScopes(fKeyBindingScopes);
-			fKeyBindingScopes = null;
-			fKeyBindingService = null;
-		}
-
 	}
 
 	// ------------------ moving actions --------------------------
