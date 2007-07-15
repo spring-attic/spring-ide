@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.aop.ui.navigator.util;
+package org.springframework.ide.eclipse.ui.dialogs;
 
 import java.util.ArrayList;
 import java.util.Iterator;

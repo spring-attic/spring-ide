@@ -38,11 +38,11 @@ import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedAopReferenc
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedDeclareParentAopReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.IRevealableReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelNavigatorUtils;
-import org.springframework.ide.eclipse.aop.ui.navigator.util.WrappingStructuredSelection;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent.Type;
+import org.springframework.ide.eclipse.ui.dialogs.WrappingStructuredSelection;
 import org.w3c.dom.Element;
 
 /**
