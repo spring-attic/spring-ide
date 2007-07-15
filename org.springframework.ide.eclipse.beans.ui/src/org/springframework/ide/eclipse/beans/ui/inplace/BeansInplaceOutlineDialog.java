@@ -594,7 +594,7 @@ public class BeansInplaceOutlineDialog {
 		};
 		fShowViewMenuAction.setEnabled(true);
 		fShowViewMenuAction
-				.setActionDefinitionId("org.eclipse.ui.window.showViewMenu"); //$NON-NLS-1$
+				.setActionDefinitionId(sectionName + ".showView"); //$NON-NLS-1$
 
 		// Register action with handler service
 		IHandlerService handlerService = (IHandlerService) PlatformUI
