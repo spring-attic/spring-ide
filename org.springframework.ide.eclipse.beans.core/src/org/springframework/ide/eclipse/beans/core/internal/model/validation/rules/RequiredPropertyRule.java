@@ -25,11 +25,9 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.core.type.asm.AnnotationMetadataReadingVisitor;
 import org.springframework.core.type.asm.ClassReaderFactory;
@@ -67,7 +65,9 @@ public class RequiredPropertyRule extends AbstractBeanValidationRule {
 			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean)
 					.getProject(), className);
 			if (type != null
-					&& checkIfRequiredAnnotationPostProcessorIsRegistered(context)) {
+					&& ValidationRuleUtils.checkIfBeanIsRegistered(
+							AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME, 
+							RequiredAnnotationBeanPostProcessor.class.getName(), context)) {
 				validatePropertyValues(type, bean, mergedBd, context);
 			}
 		}
@@ -102,37 +102,6 @@ public class RequiredPropertyRule extends AbstractBeanValidationRule {
 		}
 		catch (JavaModelException e) {
 			BeansCorePlugin.log(e);
-		}
-	}
-
-	/**
-	 * Checks if a {@link RequiredAnnotationBeanPostProcessor} has been
-	 * registered in the {@link BeanDefinitionRegistry}.
-	 */
-	private boolean checkIfRequiredAnnotationPostProcessorIsRegistered(
-			BeansValidationContext context) {
-		try {
-			return context
-					.getCompleteRegistry()
-					.getBeanDefinition(
-							AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME) != null;
-		}
-		catch (NoSuchBeanDefinitionException e) {
-			// fall back for manual installation of the post processor
-			for (String name : context.getCompleteRegistry()
-					.getBeanDefinitionNames()) {
-				BeanDefinition db = context.getCompleteRegistry()
-						.getBeanDefinition(name);
-				if (db.getBeanClassName() != null
-						&& Introspector.doesExtend(JdtUtils
-								.getJavaType(context.getRootElementProject(),
-										db.getBeanClassName()),
-								RequiredAnnotationBeanPostProcessor.class
-										.getName())) {
-					return true;
-				}
-			}
-			return false;
 		}
 	}
 

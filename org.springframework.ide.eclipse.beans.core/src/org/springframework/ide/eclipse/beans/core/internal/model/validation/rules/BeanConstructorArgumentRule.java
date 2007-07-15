@@ -20,14 +20,12 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.ScannedRootBeanDefinition;
 import org.springframework.core.type.asm.AnnotationMetadataReadingVisitor;
@@ -124,7 +122,9 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 					// performance considerations
 					if (!(bd.isPrototype() && metadata.hasConfigurableAnnotation())
 							&& !(metadata.isConstructorAutowired() && 
-									checkIfAutowiredAnnotationPostProcessorIsRegistered(context))) {
+									ValidationRuleUtils.checkIfBeanIsRegistered(
+											AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME, 
+											AutowiredAnnotationBeanPostProcessor.class.getName(), context))) {
 						context.error(bean, "NO_CONSTRUCTOR",
 								"No constructor with "
 										+ numArguments
@@ -138,34 +138,6 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 			catch (JavaModelException e) {
 				BeansCorePlugin.log(e);
 			}
-		}
-	}
-
-	/**
-	 * Checks if a {@link AutowiredAnnotationBeanPostProcessor} has been
-	 * registered in the {@link BeanDefinitionRegistry}.
-	 */
-	private boolean checkIfAutowiredAnnotationPostProcessorIsRegistered(
-			BeansValidationContext context) {
-		try {
-			return context.getCompleteRegistry().getBeanDefinition(
-				AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME) != null;
-		}
-		catch (NoSuchBeanDefinitionException e) {
-			// fall back for manual installation of the post processor
-			for (String name : context.getCompleteRegistry()
-					.getBeanDefinitionNames()) {
-				BeanDefinition db = context.getCompleteRegistry()
-						.getBeanDefinition(name);
-				if (db.getBeanClassName() != null
-						&& Introspector.doesExtend(JdtUtils.getJavaType(context
-								.getRootElementProject(), db.getBeanClassName()),
-								AutowiredAnnotationBeanPostProcessor.class
-										.getName())) {
-					return true;
-				}
-			}
-			return false;
 		}
 	}
 
