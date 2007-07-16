@@ -22,9 +22,11 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
+import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -54,29 +56,51 @@ public class RequiredPropertyRule extends AbstractBeanValidationRule {
 		return element instanceof Bean;
 	}
 
+	/**
+	 * Validates the given {@link IBean}.
+	 * <p>
+	 * First checks if the bean is not abstract and if the
+	 * {@link RequiredAnnotationBeanPostProcessor} is registered in the
+	 * application context. If so the bean class is scanned by using an
+	 * ASM-based {@link ClassVisitor} for any {@link Required} annotated
+	 * property setters.
+	 */
 	@Override
 	public void validate(IBean bean, BeansValidationContext context,
 			IProgressMonitor monitor) {
 		BeanDefinition mergedBd = BeansModelUtils.getMergedBeanDefinition(bean,
 				context.getContextElement());
-
-		String className = mergedBd.getBeanClassName();
-		if (className != null && !ValidationRuleUtils.hasPlaceHolder(className)) {
-			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean)
-					.getProject(), className);
-			if (type != null
-					&& ValidationRuleUtils.checkIfBeanIsRegistered(
-							AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME, 
-							RequiredAnnotationBeanPostProcessor.class.getName(), context)) {
-				validatePropertyValues(type, bean, mergedBd, context);
+		if (!mergedBd.isAbstract()) {
+			String className = mergedBd.getBeanClassName();
+			if (className != null
+					&& !ValidationRuleUtils.hasPlaceHolder(className)) {
+				IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(
+						bean).getProject(), className);
+				if (type != null
+						&& ValidationRuleUtils
+								.checkIfBeanIsRegistered(
+										AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
+										RequiredAnnotationBeanPostProcessor.class
+												.getName(), context)) {
+					validatePropertyNames(type, bean, mergedBd, context);
+				}
 			}
 		}
 	}
 
-	private void validatePropertyValues(IType type, IBean bean,
+	/**
+	 * Validates {@link PropertyValues} of given {link BeanDefinition} if all
+	 * required are configured.
+	 * @param type the type whose hierachy to check for {@link Required}
+	 * annotated properties
+	 * @param bean the underlying {@link IBean} instance
+	 * @param mergedBd the {@link BeanDefinition} behind the {@link IBean}
+	 * @param context context to retrieve a {@link ClassReaderFactory} and
+	 * report errors
+	 */
+	private void validatePropertyNames(IType type, IBean bean,
 			BeanDefinition mergedBd, BeansValidationContext context) {
 		try {
-
 			RequiredAnnotationMetadata annotationMetadata = getRequiredAnnotationMetadata(
 					context.getClassReaderFactory(), bean, type);
 
@@ -115,7 +139,8 @@ public class RequiredPropertyRule extends AbstractBeanValidationRule {
 		String className = type.getFullyQualifiedName();
 		RequiredAnnotationMetadata visitor = new RequiredAnnotationMetadata();
 		try {
-			while (className != null && !Object.class.getName().equals(className)) {
+			while (className != null
+					&& !Object.class.getName().equals(className)) {
 				ClassReader classReader = classReaderFactory
 						.getClassReader(className);
 				classReader.accept(visitor, false);
