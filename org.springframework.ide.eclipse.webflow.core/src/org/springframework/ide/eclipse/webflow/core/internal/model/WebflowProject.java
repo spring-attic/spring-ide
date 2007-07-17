@@ -117,4 +117,14 @@ public class WebflowProject extends AbstractModelElement
 	public boolean isElementArchived() {
 		return false;
 	}
+
+	
+	public IWebflowConfig getConfig(String flowId) {
+		for (IWebflowConfig config : getConfigs()) {
+			if (config.getName().equals(flowId)) {
+				return config;
+			}
+		}
+		return null;
+	}
 }

@@ -27,5 +27,7 @@ public interface IWebflowProject extends IModelElement {
 	IProject getProject();
 
 	IWebflowConfig getConfig(IFile file);
+	
+	IWebflowConfig getConfig(String flowId);
 
 }

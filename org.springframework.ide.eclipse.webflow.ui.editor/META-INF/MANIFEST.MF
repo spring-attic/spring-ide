@@ -19,7 +19,9 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.core,
  org.springframework.ide.eclipse.beans.core,
  org.springframework.ide.eclipse.beans.ui.editor,
- org.springframework.ide.eclipse.webflow.core
+ org.springframework.ide.eclipse.webflow.core,
+ org.eclipse.ui.ide,
+ org.springframework.ide.eclipse.ui
 Eclipse-LazyStart: true
 Export-Package: 
  org.springframework.ide.eclipse.beans.ui.editor.namespaces.webflow,

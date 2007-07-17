@@ -24,29 +24,31 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionU
 import org.w3c.dom.Node;
 
 /**
- * 
+ * {@link AbstractContentAssistProcessor} implementation that is used within the
+ * Spring Beans XML Editor extensions.
+ * <p>
+ * This implementation is responsible to provide content assist support for the
+ * <code><flow:*></code> namespace.
+ * @author Christian Dupuis
+ * @since 2.0
  */
 @SuppressWarnings("restriction")
-public class WebflowConfigContentAssistProcessor extends AbstractContentAssistProcessor {
+public class WebflowConfigContentAssistProcessor extends
+		AbstractContentAssistProcessor {
 
-	/**
-	 * 
-	 * 
-	 * @param node 
-	 * @param prefix 
-	 * @param showExternal 
-	 * @param request 
-	 */
-	private void addBeanReferenceProposals(ContentAssistRequest request, String prefix, Node node, boolean showExternal) {
+	private void addBeanReferenceProposals(ContentAssistRequest request,
+			String prefix, Node node, boolean showExternal) {
 		if (prefix == null) {
 			prefix = "";
 		}
 
 		IFile file = BeansEditorUtils.getResource(request);
 		if (node.getOwnerDocument() != null) {
-			BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(request, BeansJavaCompletionUtils
-					.getPropertyTypes(node, file.getProject()));
-			Map<String, Node> beanNodes = BeansEditorUtils.getReferenceableNodes(node.getOwnerDocument());
+			BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(
+					request, BeansJavaCompletionUtils.getPropertyTypes(node,
+							file.getProject()));
+			Map<String, Node> beanNodes = BeansEditorUtils
+					.getReferenceableNodes(node.getOwnerDocument());
 			for (Map.Entry<String, Node> n : beanNodes.entrySet()) {
 				Node beanNode = n.getValue();
 				requestor.acceptSearchMatch(n.getKey(), beanNode, file, prefix);
@@ -61,41 +63,20 @@ public class WebflowConfigContentAssistProcessor extends AbstractContentAssistPr
 		}
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param prefix 
-	 * @param request 
-	 */
-	private void addClassAttributeValueProposals(ContentAssistRequest request, String prefix) {
+	private void addClassAttributeValueProposals(ContentAssistRequest request,
+			String prefix) {
 		BeansJavaCompletionUtils.addClassValueProposals(request, prefix);
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param namespace 
-	 * @param attributeNode 
-	 * @param prefix 
-	 * @param namespacePrefix 
-	 * @param request 
-	 */
 	@Override
-	protected void computeAttributeNameProposals(ContentAssistRequest request, String prefix, String namespace,
-			String namespacePrefix, Node attributeNode) {
+	protected void computeAttributeNameProposals(ContentAssistRequest request,
+			String prefix, String namespace, String namespacePrefix,
+			Node attributeNode) {
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param attributeName 
-	 * @param node 
-	 * @param request 
-	 * @param matchString 
-	 */
 	@Override
-	protected void computeAttributeValueProposals(ContentAssistRequest request, IDOMNode node, String matchString,
-			String attributeName) {
+	protected void computeAttributeValueProposals(ContentAssistRequest request,
+			IDOMNode node, String matchString, String attributeName) {
 		String nodeName = node.getNodeName();
 		String prefix = node.getPrefix();
 		if (prefix != null) {
@@ -124,13 +105,8 @@ public class WebflowConfigContentAssistProcessor extends AbstractContentAssistPr
 		}
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param node 
-	 * @param request 
-	 */
 	@Override
-	protected void computeTagInsertionProposals(ContentAssistRequest request, IDOMNode node) {
+	protected void computeTagInsertionProposals(ContentAssistRequest request,
+			IDOMNode node) {
 	}
 }
