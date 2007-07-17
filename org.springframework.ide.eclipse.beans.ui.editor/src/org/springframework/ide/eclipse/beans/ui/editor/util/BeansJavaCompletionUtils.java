@@ -46,21 +46,43 @@ import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.w3c.dom.Node;
 
+/**
+ * Utility class provides methods to trigger content assist for package and
+ * class content assist requests.
+ * @author Christian Dupuis
+ * @since 1.3.6
+ */
 @SuppressWarnings("restriction")
 public class BeansJavaCompletionUtils {
 
-	private static CompletionProposalComparator comparator = new CompletionProposalComparator();
+	private static final String CLASS_NAME = "_xxx";
 
 	private static final String CLASS_SOURCE_END = "\n" + "    }\n" + "}";
 
-	private static final String CLASS_SOURCE_START = "public class _xxx {\n"
-			+ "    public void main(String[] args) {\n" + "        ";
+	private static final String CLASS_SOURCE_START = "public class "
+			+ CLASS_NAME + " {\n" + "    public void main(String[] args) {\n"
+			+ "        ";
 
+	private static CompletionProposalComparator comparator = new CompletionProposalComparator();
+
+	/**
+	 * Add class and package content assist proposals that match the given
+	 * <code>prefix</code>.
+	 * @param request the {@link ContentAssistRequest} to add the proposals
+	 * @param prefix the prefix
+	 */
 	public static void addClassValueProposals(ContentAssistRequest request,
 			String prefix) {
 		addClassValueProposals(request, prefix, false);
 	}
 
+	/**
+	 * Add class and package content assist proposals that match the given
+	 * <code>prefix</code>.
+	 * @param request the {@link ContentAssistRequest} to add the proposals
+	 * @param prefix the prefix
+	 * @param interfaceRequired true if only interfaces are requested
+	 */
 	public static void addClassValueProposals(ContentAssistRequest request,
 			String prefix, boolean interfaceRequired) {
 
@@ -69,23 +91,22 @@ public class BeansJavaCompletionUtils {
 		}
 
 		try {
-			IFile file = BeansEditorUtils.getResource(request);
-			IJavaProject project = JavaCore.create(file.getProject());
-			IPackageFragment root = project.getPackageFragments()[0];
-			ICompilationUnit unit = root.getCompilationUnit("_xxx.java")
-					.getWorkingCopy(
-							CompilationUnitHelper.getInstance()
-									.getWorkingCopyOwner(),
-							CompilationUnitHelper.getInstance()
-									.getProblemRequestor(),
-							BeansEditorUtils.getProgressMonitor());
-			String source = CLASS_SOURCE_START + prefix + CLASS_SOURCE_END;
+			ICompilationUnit unit = createSourceCompilationUnit(request, prefix);
+			
+			String sourceStart = CLASS_SOURCE_START + prefix;
+			String packageName = null;
+			int dot = prefix.lastIndexOf('.');
+			if (dot > -1) {
+				packageName = prefix.substring(0, dot);
+				sourceStart = "package " + packageName + ";\n" + sourceStart;
+			}
+			String source = sourceStart + CLASS_SOURCE_END;
 			setContents(unit, source);
 
 			BeansJavaCompletionProposalCollector collector = new BeansJavaCompletionProposalCollector(
 					unit, interfaceRequired);
-			unit.codeComplete(CLASS_SOURCE_START.length() + prefix.length(),
-					collector, DefaultWorkingCopyOwner.PRIMARY);
+			unit.codeComplete(sourceStart.length(), collector,
+					DefaultWorkingCopyOwner.PRIMARY);
 
 			IJavaCompletionProposal[] props = collector
 					.getJavaCompletionProposals();
@@ -93,7 +114,7 @@ public class BeansJavaCompletionUtils {
 			ICompletionProposal[] proposals = order(props);
 
 			for (ICompletionProposal comProposal : proposals) {
-				processJavaCompletionProposal(request, comProposal);
+				processJavaCompletionProposal(request, comProposal, packageName);
 			}
 		}
 		catch (Exception e) {
@@ -101,68 +122,13 @@ public class BeansJavaCompletionUtils {
 		}
 	}
 
-	protected static void processJavaCompletionProposal(
-			ContentAssistRequest request, ICompletionProposal comProposal) {
-		if (comProposal instanceof JavaCompletionProposal) {
-			JavaCompletionProposal prop = (JavaCompletionProposal) comProposal;
-			BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-					prop.getReplacementString(), request
-							.getReplacementBeginPosition(), request
-							.getReplacementLength(), prop
-							.getReplacementString().length(), prop.getImage(),
-					prop.getDisplayString(), null, prop.getRelevance(),
-					prop.getJavaElement());
-
-			request.addProposal(proposal);
-		}
-		else if (comProposal instanceof LazyJavaTypeCompletionProposal) {
-			LazyJavaTypeCompletionProposal prop = (LazyJavaTypeCompletionProposal) comProposal;
-			BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
-					prop.getQualifiedTypeName(), request
-							.getReplacementBeginPosition(), request
-							.getReplacementLength(), prop
-							.getQualifiedTypeName().length(), prop.getImage(),
-					prop.getDisplayString(), null, prop.getRelevance(),
-					prop.getJavaElement());
-
-			request.addProposal(proposal);
-		}
-	}
-
 	/**
-	 * Order the given proposals.
+	 * Add class assist proposals that match the given <code>prefix</code> and
+	 * are part of the sub class hierarchy of the given <code>typeName</code>.
+	 * @param request the {@link ContentAssistRequest} to add the proposals
+	 * @param prefix the prefix
+	 * @param typeName the super class of the request proposals
 	 */
-	@SuppressWarnings("unchecked")
-	private static ICompletionProposal[] order(ICompletionProposal[] proposals) {
-		Arrays.sort(proposals, comparator);
-		return proposals;
-	}
-
-	/**
-	 * Set contents of the compilation unit to the translated jsp text.
-	 * 
-	 * @param the ICompilationUnit on which to set the buffer contents
-	 */
-	private static void setContents(ICompilationUnit cu, String source) {
-		if (cu == null)
-			return;
-
-		synchronized (cu) {
-			IBuffer buffer;
-			try {
-
-				buffer = cu.getBuffer();
-			}
-			catch (JavaModelException e) {
-				e.printStackTrace();
-				buffer = null;
-			}
-
-			if (buffer != null)
-				buffer.setContents(source);
-		}
-	}
-
 	public static void addTypeHierachyAttributeValueProposals(
 			ContentAssistRequest request, final String prefix, String typeName) {
 
@@ -198,8 +164,8 @@ public class BeansJavaCompletionUtils {
 								foundType.getElementName()
 										+ " - "
 										+ foundType.getPackageFragment()
-												.getElementName(), null, 
-								10, foundType);
+												.getElementName(), null, 10,
+								foundType);
 						request.addProposal(proposal);
 						sortMap.put(foundType.getFullyQualifiedName(),
 								foundType);
@@ -213,6 +179,34 @@ public class BeansJavaCompletionUtils {
 		}
 	}
 
+	private static ICompilationUnit createSourceCompilationUnit(
+			ContentAssistRequest request, String prefix)
+			throws JavaModelException {
+		IFile file = BeansEditorUtils.getResource(request);
+		IJavaProject project = JavaCore.create(file.getProject());
+		IPackageFragment root = getPackageFragment(project, prefix);
+		ICompilationUnit unit = root.getCompilationUnit("_xxx.java")
+				.getWorkingCopy(
+						CompilationUnitHelper.getInstance()
+								.getWorkingCopyOwner(),
+						BeansEditorUtils.getProgressMonitor());
+		return unit;
+	}
+
+	private static IPackageFragment getPackageFragment(IJavaProject project,
+			String prefix) throws JavaModelException {
+		int dot = prefix.lastIndexOf('.');
+		if (dot > -1) {
+			String packageName = prefix.substring(0, dot);
+			IPackageFragment[] packages = project.getPackageFragments();
+			for (IPackageFragment p : packages) {
+				if (p.getElementName().equals(packageName))
+					return p;
+			}
+		}
+		return project.getPackageFragments()[0];
+	}
+	
 	public static List<String> getPropertyTypes(Node node, IProject project) {
 		List<String> requiredTypes = new ArrayList<String>();
 		String className = BeansEditorUtils.getClassNameForBean(node
@@ -260,6 +254,75 @@ public class BeansJavaCompletionUtils {
 			}
 		}
 		return requiredTypes;
+	}
+
+	/**
+	 * Order the given proposals.
+	 */
+	@SuppressWarnings("unchecked")
+	private static ICompletionProposal[] order(ICompletionProposal[] proposals) {
+		Arrays.sort(proposals, comparator);
+		return proposals;
+	}
+
+	private static void processJavaCompletionProposal(
+			ContentAssistRequest request, ICompletionProposal comProposal,
+			String packageName) {
+		if (comProposal instanceof JavaCompletionProposal) {
+			JavaCompletionProposal prop = (JavaCompletionProposal) comProposal;
+			BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
+					prop.getReplacementString(), request
+							.getReplacementBeginPosition(), request
+							.getReplacementLength(), prop
+							.getReplacementString().length(), prop.getImage(),
+					prop.getDisplayString(), null, prop.getRelevance(), prop
+							.getJavaElement());
+
+			request.addProposal(proposal);
+		}
+		else if (comProposal instanceof LazyJavaTypeCompletionProposal) {
+			LazyJavaTypeCompletionProposal prop = (LazyJavaTypeCompletionProposal) comProposal;
+
+			if (prop.getQualifiedTypeName().equals(
+					packageName + "." + CLASS_NAME)
+					|| prop.getQualifiedTypeName().equals(CLASS_NAME)) {
+				return;
+			}
+
+			BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
+					prop.getQualifiedTypeName(), request
+							.getReplacementBeginPosition(), request
+							.getReplacementLength(), prop
+							.getQualifiedTypeName().length(), prop.getImage(),
+					prop.getDisplayString(), null, prop.getRelevance(), prop
+							.getJavaElement());
+
+			request.addProposal(proposal);
+		}
+	}
+
+	/**
+	 * Set contents of the compilation unit to the translated jsp text.
+	 * @param the ICompilationUnit on which to set the buffer contents
+	 */
+	private static void setContents(ICompilationUnit cu, String source) {
+		if (cu == null)
+			return;
+
+		synchronized (cu) {
+			IBuffer buffer;
+			try {
+
+				buffer = cu.getBuffer();
+			}
+			catch (JavaModelException e) {
+				e.printStackTrace();
+				buffer = null;
+			}
+
+			if (buffer != null)
+				buffer.setContents(source);
+		}
 	}
 
 }
