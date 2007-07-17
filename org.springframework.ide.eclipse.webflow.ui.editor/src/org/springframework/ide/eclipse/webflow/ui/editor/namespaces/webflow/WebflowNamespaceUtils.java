@@ -45,8 +45,12 @@ public class WebflowNamespaceUtils {
 	}
 
 	public static String[] getWebflowConfigNames() {
-		IWebflowProject project = getActiveWebflowConfig().getProject();
-		return WebflowModelUtils.getWebflowConfigNames(project).toArray(
-				new String[0]);
+		IWebflowConfig webflowConfig = getActiveWebflowConfig();
+		if (webflowConfig != null) {
+			IWebflowProject project = webflowConfig.getProject();
+			return WebflowModelUtils.getWebflowConfigNames(project).toArray(
+					new String[0]);
+		}
+		return new String[0];
 	}
 }
