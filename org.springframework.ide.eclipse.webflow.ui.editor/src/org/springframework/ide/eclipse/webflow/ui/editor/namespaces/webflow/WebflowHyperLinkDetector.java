@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.NodeElementHype
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
@@ -47,9 +48,6 @@ import org.w3c.dom.NodeList;
 public class WebflowHyperLinkDetector extends AbstractHyperLinkDetector
 		implements IHyperlinkDetector {
 
-	/**
-	 * 
-	 */
 	private static final Set<String> VALID_ATTRIBUTES;
 
 	static {
@@ -66,6 +64,7 @@ public class WebflowHyperLinkDetector extends AbstractHyperLinkDetector
 		VALID_ATTRIBUTES.add("else");
 		VALID_ATTRIBUTES.add("type");
 		VALID_ATTRIBUTES.add("name");
+		VALID_ATTRIBUTES.add("flow");
 	}
 
 	/**
@@ -78,16 +77,9 @@ public class WebflowHyperLinkDetector extends AbstractHyperLinkDetector
 		return VALID_ATTRIBUTES.contains(attr.getLocalName());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperLinkDetector#createHyperlink(java.lang.String,
-	 * java.lang.String, org.w3c.dom.Node, org.eclipse.jface.text.IRegion,
-	 * org.eclipse.jface.text.IDocument, org.w3c.dom.Node,
-	 * org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
-	 */
 	@Override
-	protected IHyperlink createHyperlink(String name, String target,
-			Node parentNode, IRegion hyperlinkRegion, IDocument document,
+	protected IHyperlink createHyperlink(final String name, final String target,
+			Node parentNode, final IRegion hyperlinkRegion, IDocument document,
 			Node node, ITextViewer textViewer, IRegion cursor) {
 		if (name == null) {
 			return null;
@@ -149,8 +141,7 @@ public class WebflowHyperLinkDetector extends AbstractHyperLinkDetector
 								null);
 					}
 				}
-				IType type = JdtUtils.getJavaType(file.getProject(),
-						className);
+				IType type = JdtUtils.getJavaType(file.getProject(), className);
 				if (type != null) {
 					try {
 						Set<IMethod> methods = Introspector.getAllMethods(type);
@@ -166,6 +157,31 @@ public class WebflowHyperLinkDetector extends AbstractHyperLinkDetector
 					catch (JavaModelException e) {
 					}
 				}
+			}
+		}
+		else if ("flow".equals(name)) {
+			IFile file = BeansEditorUtils.getFile(document);
+			final IWebflowConfig config = Activator.getModel().getProject(
+					file.getProject()).getConfig(target);
+			if (config != null) {
+				return new IHyperlink() {
+
+					public IRegion getHyperlinkRegion() {
+						return hyperlinkRegion;
+					}
+
+					public String getHyperlinkText() {
+						return target;
+					}
+
+					public String getTypeLabel() {
+						return name;
+					}
+
+					public void open() {
+						SpringUIUtils.openInEditor(config.getResource(), -1);
+					}
+				};
 			}
 		}
 		return null;
