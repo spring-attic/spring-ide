@@ -92,7 +92,7 @@ public class BeansJavaCompletionUtils {
 
 		try {
 			ICompilationUnit unit = createSourceCompilationUnit(request, prefix);
-			
+
 			String sourceStart = CLASS_SOURCE_START + prefix;
 			String packageName = null;
 			int dot = prefix.lastIndexOf('.');
@@ -112,9 +112,10 @@ public class BeansJavaCompletionUtils {
 					.getJavaCompletionProposals();
 
 			ICompletionProposal[] proposals = order(props);
-
+			boolean innerClass = prefix.indexOf('$') > prefix.lastIndexOf('.');
 			for (ICompletionProposal comProposal : proposals) {
-				processJavaCompletionProposal(request, comProposal, packageName);
+				processJavaCompletionProposal(request, comProposal,
+						packageName, innerClass);
 			}
 		}
 		catch (Exception e) {
@@ -206,7 +207,7 @@ public class BeansJavaCompletionUtils {
 		}
 		return project.getPackageFragments()[0];
 	}
-	
+
 	public static List<String> getPropertyTypes(Node node, IProject project) {
 		List<String> requiredTypes = new ArrayList<String>();
 		String className = BeansEditorUtils.getClassNameForBean(node
@@ -267,7 +268,7 @@ public class BeansJavaCompletionUtils {
 
 	private static void processJavaCompletionProposal(
 			ContentAssistRequest request, ICompletionProposal comProposal,
-			String packageName) {
+			String packageName, boolean innerClass) {
 		if (comProposal instanceof JavaCompletionProposal) {
 			JavaCompletionProposal prop = (JavaCompletionProposal) comProposal;
 			BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
@@ -287,6 +288,13 @@ public class BeansJavaCompletionUtils {
 					packageName + "." + CLASS_NAME)
 					|| prop.getQualifiedTypeName().equals(CLASS_NAME)) {
 				return;
+			}
+
+			if (prop.getJavaElement() instanceof IType) {
+				if (!((((IType) prop.getJavaElement()).getDeclaringType() == null && !innerClass) || (((IType) prop
+						.getJavaElement()).getDeclaringType() != null && innerClass))) {
+					return;
+				}
 			}
 
 			BeansJavaCompletionProposal proposal = new BeansJavaCompletionProposal(
