@@ -46,7 +46,8 @@ public class BeanClassRule extends AbstractBeanValidationRule {
 				.hasPlaceHolder(className)) {
 			IType type = JdtUtils.getJavaType(BeansModelUtils
 					.getProject(bean).getProject(), className);
-			if (type == null) {
+			if (type == null || 
+					(type.getDeclaringType() != null && className.indexOf('$') ==-1)) {
 				context.error(bean, "CLASS_NOT_FOUND", "Class '" + className
 						+ "' not found");
 			}

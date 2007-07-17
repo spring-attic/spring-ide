@@ -394,19 +394,22 @@ public class JdtUtils {
 	public static IType getJavaType(IProject project, String className) {
 		IJavaProject javaProject = JdtUtils.getJavaProject(project);
 		if (className != null) {
-
+			boolean innerClass = false;
 			// For inner classes replace '$' by '.'
 			int pos = className.lastIndexOf('$');
 			if (pos > 0 && pos < (className.length() - 1)) {
 				className = className.substring(0, pos) + '.'
 						+ className.substring(pos + 1);
+				innerClass = true;
 			}
 			try {
 				IType type = null;
 				// First look for the type in the Java project
 				if (javaProject != null) {
 					type = javaProject.findType(className);
-					if (type != null) {
+					if (type != null
+							&& ((type.getDeclaringType() == null && !innerClass) || (type
+									.getDeclaringType() != null && innerClass))) {
 						return type;
 					}
 				}
