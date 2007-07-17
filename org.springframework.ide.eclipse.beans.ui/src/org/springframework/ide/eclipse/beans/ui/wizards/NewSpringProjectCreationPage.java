@@ -40,6 +40,7 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class NewSpringProjectCreationPage extends WizardNewProjectCreationPage {
 
@@ -49,6 +50,8 @@ public class NewSpringProjectCreationPage extends WizardNewProjectCreationPage {
 	private Text outputDirText;
 	private Label outputDirLabel;
 	private Text extensionsText;
+	
+	private Button enableProjectFacetsButton;
 
 	public NewSpringProjectCreationPage(String pageName) {
 		super(pageName);
@@ -56,6 +59,10 @@ public class NewSpringProjectCreationPage extends WizardNewProjectCreationPage {
 
 	public boolean isJavaProject() {
 		return isJavaButton.getSelection();
+	}
+
+	public boolean enableProjectFacets() {
+		return enableProjectFacetsButton.getSelection();
 	}
 
 	public String getSourceDirectory() {
@@ -135,6 +142,10 @@ public class NewSpringProjectCreationPage extends WizardNewProjectCreationPage {
 		outputDirText = createText(javaGroup);
 		outputDirText.setText(store
 				.getString(PreferenceConstants.SRCBIN_BINNAME));
+		
+		enableProjectFacetsButton = createButton(container, SWT.CHECK, 2, 0);
+		enableProjectFacetsButton.setText(BeansWizardsMessages.NewProjectPage_enableProjectFacets);
+		enableProjectFacetsButton.setSelection(false);
 	}
 
 	private Button createButton(Composite container, int style, int span,

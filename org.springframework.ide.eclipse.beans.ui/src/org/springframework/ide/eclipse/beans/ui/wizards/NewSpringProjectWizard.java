@@ -40,6 +40,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import org.eclipse.wst.common.project.facet.core.internal.FacetedProjectNature;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
@@ -51,7 +52,9 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
+@SuppressWarnings("restriction")
 public class NewSpringProjectWizard extends Wizard implements INewWizard,
 		IExecutableExtension {
 
@@ -102,6 +105,7 @@ public class NewSpringProjectWizard extends Wizard implements INewWizard,
 		final IProject project = mainPage.getProjectHandle();
 		final Set<String> configExtensions = mainPage.getConfigExtensions();
 		final boolean isJavaProject = mainPage.isJavaProject();
+		final boolean enableProjectFacets = mainPage.enableProjectFacets();
 		final String sourceDir = mainPage.getSourceDirectory().trim();
 		final String outputDir = mainPage.getOutputDirectory().trim();
 
@@ -138,6 +142,13 @@ public class NewSpringProjectWizard extends Wizard implements INewWizard,
 						BeansWizardsMessages.NewProject_createNewProject, 2000);
 				createSpringProject(project, description, configExtensions,
 						new SubProgressMonitor(monitor, 1000));
+				
+				// add project facet nature to enable corresponding functionality
+				if (enableProjectFacets) {
+					SpringCoreUtils.addProjectNature(project, 
+							FacetedProjectNature.NATURE_ID, monitor);
+				}
+				
 				if (isJavaProject) {
 
 					// convert to java project

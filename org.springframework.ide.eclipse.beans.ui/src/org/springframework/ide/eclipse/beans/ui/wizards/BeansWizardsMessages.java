@@ -53,6 +53,7 @@ public final class BeansWizardsMessages extends NLS {
 	public static String NewProjectPage_source;
 	public static String NewProjectPage_output;
 	public static String NewProjectPage_noOutput;
+	public static String NewProjectPage_enableProjectFacets;
 
 	public static String NewConfig_windowTitle;
 	public static String NewConfig_title;
