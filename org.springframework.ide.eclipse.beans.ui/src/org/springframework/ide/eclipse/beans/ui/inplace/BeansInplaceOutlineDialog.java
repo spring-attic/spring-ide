@@ -1225,9 +1225,10 @@ public class BeansInplaceOutlineDialog {
 		tracker.setStippled(true);
 		Rectangle[] r = new Rectangle[] { dialogShell.getBounds() };
 		tracker.setRectangles(r);
-
+		isDeactivateListenerActive = false;
 		if (tracker.open()) {
 			dialogShell.setBounds(tracker.getRectangles()[0]);
+			isDeactivateListenerActive = true;
 		}
 	}
 

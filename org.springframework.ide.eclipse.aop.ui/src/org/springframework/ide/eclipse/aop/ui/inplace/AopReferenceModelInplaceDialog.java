@@ -459,7 +459,7 @@ public class AopReferenceModelInplaceDialog {
 				if (statusTextFont != null && !statusTextFont.isDisposed())
 					statusTextFont.dispose();
 
-				dialogShell = null;
+				// dialogShell = null;
 				viewer = null;
 				composite = null;
 				filterText = null;
@@ -1216,9 +1216,10 @@ public class AopReferenceModelInplaceDialog {
 		tracker.setStippled(true);
 		Rectangle[] r = new Rectangle[] { dialogShell.getBounds() };
 		tracker.setRectangles(r);
-
-		if (tracker.open()) {
+		isDeactivateListenerActive = false;
+		if (tracker.open()) {   
 			dialogShell.setBounds(tracker.getRectangles()[0]);
+			isDeactivateListenerActive = true;
 		}
 	}
 
