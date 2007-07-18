@@ -482,7 +482,7 @@ public class BeansInplaceOutlineDialog {
 				if (statusTextFont != null && !statusTextFont.isDisposed())
 					statusTextFont.dispose();
 
-				dialogShell = null;
+				// dialogShell = null;
 				viewer = null;
 				composite = null;
 				filterText = null;
