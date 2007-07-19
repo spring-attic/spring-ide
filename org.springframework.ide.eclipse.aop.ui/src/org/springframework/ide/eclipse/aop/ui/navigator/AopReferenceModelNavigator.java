@@ -240,10 +240,38 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 		updateTreeViewer(lastWorkbenchPart, lastSelection, false);
 	}
 
-	private void updateTreeViewer(IWorkbenchPart part, ISelection selection,
-			boolean ignoreSameSelection) {
+	private void updateTreeViewer(final IWorkbenchPart part, final ISelection selection,
+			final boolean ignoreSameSelection) {
+		// Abort if this happens after disposes
+		Control ctrl = getCommonViewer().getControl();
+		if (ctrl == null || ctrl.isDisposed()) {
+			return;
+		}
+
+			// Are we in the UI thread?
+		if (ctrl.getDisplay().getThread() == Thread.currentThread()) {
+			determineAndRefreshViewer(part, selection, ignoreSameSelection);
+		}
+		else {
+			ctrl.getDisplay().asyncExec(new Runnable() {
+				public void run() {
+
+					// Abort if this happens after disposes
+					Control ctrl = getCommonViewer().getControl();
+					if (ctrl == null || ctrl.isDisposed()) {
+						return;
+					}
+					determineAndRefreshViewer(part, selection,
+							ignoreSameSelection);
+				}
+			});
+		}
+	}
+
+	private void determineAndRefreshViewer(IWorkbenchPart part,
+			ISelection selection, boolean ignoreSameSelection) {
 		final Object element = AopReferenceModelNavigatorUtils
-				.getSelectedElement(part, selection);
+			.getSelectedElement(part, selection);
 		if (element == null
 				|| (element.equals(lastElement) && ignoreSameSelection)) {
 			return;
@@ -251,37 +279,12 @@ public class AopReferenceModelNavigator extends CommonNavigator implements
 		if ((element instanceof IType || element instanceof IMethod
 				|| element instanceof IField || element instanceof Element)
 				&& isLinkingEnabled()) {
-
-			final Object rootElement = calculateRootElement(element,
-					showBeansRefsForFileEnabled);
-
-			// Abort if this happens after disposes
-			Control ctrl = getCommonViewer().getControl();
-			if (ctrl == null || ctrl.isDisposed()) {
-				return;
-			}
-
-			// Are we in the UI thread?
-			if (ctrl.getDisplay().getThread() == Thread.currentThread()) {
-				refreshViewer(getCommonViewer(), rootElement, element);
-			}
-			else {
-				ctrl.getDisplay().asyncExec(new Runnable() {
-					public void run() {
-
-						// Abort if this happens after disposes
-						Control ctrl = getCommonViewer().getControl();
-						if (ctrl == null || ctrl.isDisposed()) {
-							return;
-						}
-						refreshViewer(getCommonViewer(), rootElement, element);
-					}
-				});
-			}
-			lastElement = element;
-			lastSelection = selection;
-			lastWorkbenchPart = part;
+			refreshViewer(getCommonViewer(), calculateRootElement(element,
+					showBeansRefsForFileEnabled), element);
 		}
+		lastElement = element;
+		lastSelection = selection;
+		lastWorkbenchPart = part;
 	}
 
 	/**
