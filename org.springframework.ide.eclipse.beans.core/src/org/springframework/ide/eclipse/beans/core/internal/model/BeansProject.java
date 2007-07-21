@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -190,6 +192,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 		if (!this.modelPopulated) {
 			populateModel();
 		}
+		List<IResource> deleteMarkersFrom = new ArrayList<IResource>();
 		try {
 			w.lock();
 			// Look for removed configs and
@@ -198,9 +201,11 @@ public class BeansProject extends AbstractResourceModelElement implements
 			for (IBeansConfig config : configs.values()) {
 				String configName = config.getElementName();
 				if (!configNames.contains(configName)) {
-					MarkerUtils.deleteMarkers(config.getElementResource(),
-							SpringCore.MARKER_ID);
 					removeConfig(configName);
+
+					// Defer deletion of problem markers until write lock is
+					// released
+					deleteMarkersFrom.add(config.getElementResource());
 				}
 			}
 	
@@ -212,6 +217,13 @@ public class BeansProject extends AbstractResourceModelElement implements
 		}
 		finally {
 			w.unlock();
+		}
+
+		// Delete the problem markers after the write lock is released -
+		// otherwise this may be interfering with a ResourceChangeListener
+		// referring to this beans project
+		for (IResource configResource : deleteMarkersFrom) {
+			MarkerUtils.deleteMarkers(configResource, SpringCore.MARKER_ID);
 		}
 	}
 
@@ -316,7 +328,8 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	public IBeansConfig getConfig(String configName) {
-		if (configName != null && configName.charAt(0) == '/') {
+		if (configName != null && configName.length() > 0
+				&& configName.charAt(0) == '/') {
 			return BeansCorePlugin.getModel().getConfig(configName);
 		}
 		if (!this.modelPopulated) {
@@ -478,13 +491,11 @@ public class BeansProject extends AbstractResourceModelElement implements
 	 * defined in {@link IBeansProject#DESCRIPTION_FILE}.
 	 */
 	public void saveDescription() {
-		try {
-			w.lock();
-			BeansProjectDescriptionWriter.write(this);
-		}
-		finally {
-			w.unlock();
-		}
+
+		// We can't acquire the write lock here - otherwise this may be
+		// interfering with a ResourceChangeListener referring to this beans
+		// project
+		BeansProjectDescriptionWriter.write(this);
 	}
 
 	/**
@@ -600,8 +611,9 @@ public class BeansProject extends AbstractResourceModelElement implements
 					removeConfig(config.getElementName());
 				}
 			}
-	
-			// Remove all invalid config names from from this project's config sets
+
+			// Remove all invalid config names from from this project's config
+			// sets
 			IBeansModel model = BeansCorePlugin.getModel();
 			for (IBeansConfigSet configSet : configSets.values()) {
 				for (String configName : configSet.getConfigNames()) {
@@ -611,7 +623,6 @@ public class BeansProject extends AbstractResourceModelElement implements
 					}
 				}
 			}
-			
 		}
 		finally {
 			w.unlock();
