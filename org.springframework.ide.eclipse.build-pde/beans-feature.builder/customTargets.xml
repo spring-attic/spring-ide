@@ -2,6 +2,7 @@
 <project name="Build specific targets and properties" default="noDefault">
 
 	<property name="UpdateSiteStagingLocation" value="${buildDirectory}/../../updatesite_nightly" />
+	<property name="EclipseStagingLocation" value="${buildDirectory}/../../eclipse_stage" />
 	
 	<!-- ===================================================================== -->
 	<!-- Run a given ${target} on all elements being built -->
@@ -70,6 +71,7 @@
 	<target name="preSetup">
 		<delete dir="${buildDirectory}" />
 		<delete dir="${UpdateSiteStagingLocation}" />
+		<delete dir="${EclipseStagingLocation}" />
 		<tstamp />
 	</target>
 
@@ -150,7 +152,8 @@
 		<property name="sitePackageVersion" value="2.0.1" />
 		<property name="featureVersion" value="2.0.1" />
 		<antcall target="generateUpdateSite" />
-
+		<antcall target="createEclipseStaging" />
+		
 		<java jar="${eclipseLauncherJar}" 
               fork="true" 
               failonerror="true" 
@@ -167,6 +170,7 @@
 	<target name="generateUpdateSite">
 		<!-- Create the directory structure -->
 		<mkdir dir="${UpdateSiteStagingLocation}" />
+		<mkdir dir="${EclipseStagingLocation}" />
 		<mkdir dir="${UpdateSiteStagingLocation}/features" />
 		<mkdir dir="${UpdateSiteStagingLocation}/plugins" />
 		<!-- Build the jar files -->
@@ -232,6 +236,15 @@
 		<zipfileset dir="${UpdateSiteStagingLocation}"/>
 	</zip>
 </target>
+<target name="createEclipseStaging" >
+	<copy todir="${EclipseStagingLocation}">
+		<fileset dir="${UpdateSiteStagingLocation}">
+			<exclude name="site.xml"/>
+			<exclude name="*.zip"/>
+		</fileset>
+	</copy>
+</target>
+
 
 
 <!-- ===================================================================== -->
