@@ -109,6 +109,10 @@ public class AspectDefinitionMatcher {
 		else {
 			Class[] targetInterfaces = org.springframework.util.ClassUtils
 					.getAllInterfacesForClass(targetClass);
+			// if target class does not implement any interface allow match
+			if (targetInterfaces == null || targetInterfaces.length == 0) {
+				return true;
+			}
 			for (Class targetInterface : targetInterfaces) {
 				Method[] targetInterfaceMethods = targetInterface.getMethods();
 				for (Method targetInterfaceMethod : targetInterfaceMethods) {

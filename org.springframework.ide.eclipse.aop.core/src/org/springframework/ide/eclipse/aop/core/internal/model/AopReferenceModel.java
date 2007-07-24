@@ -36,15 +36,15 @@ import org.springframework.ide.eclipse.core.internal.model.resources.SpringResou
  */
 public class AopReferenceModel implements IAopReferenceModel {
 
-	private List<IAopModelChangedListener> listeners = 
-		new LinkedList<IAopModelChangedListener>();
+	private List<IAopModelChangedListener> listeners = new LinkedList<IAopModelChangedListener>();
 
 	private AopReferenceModelPeristence persistence;
 
-	private Map<IJavaProject, IAopProject> projects = 
-		new ConcurrentHashMap<IJavaProject, IAopProject>();
-	
+	private Map<IJavaProject, IAopProject> projects = new ConcurrentHashMap<IJavaProject, IAopProject>();
+
 	private IResourceChangeListener workspaceListener;
+	
+	//private IModelChangeListener modelChangeListener;
 
 	public void addProject(IJavaProject project, IAopProject aopProject) {
 		this.projects.put(project, aopProject);
@@ -144,7 +144,7 @@ public class AopReferenceModel implements IAopReferenceModel {
 			break;
 		}
 	}
-	
+
 	public synchronized void clearProjects() {
 		this.projects.clear();
 	}
@@ -154,12 +154,14 @@ public class AopReferenceModel implements IAopReferenceModel {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.removeResourceChangeListener(workspaceListener);
 		workspaceListener = null;
-		
+
 		// Persist model
 		persistence.saveReferenceModel();
-		
+
 		// Remove all projects
 		projects.clear();
+		
+		//BeansCorePlugin.getModel().removeChangeListener(modelChangeListener);
 	}
 
 	public void startup() {
@@ -169,13 +171,34 @@ public class AopReferenceModel implements IAopReferenceModel {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.addResourceChangeListener(workspaceListener,
 				SpringResourceChangeListener.LISTENER_FLAGS);
-		
+
 		persistence = new AopReferenceModelPeristence();
 		persistence.loadReferenceModel();
+		
+		//modelChangeListener = new AopBeansModelListener();
+		//BeansCorePlugin.getModel().addChangeListener(modelChangeListener);
 	}
 
 	public void unregisterAopModelChangedListener(
 			IAopModelChangedListener listener) {
 		this.listeners.remove(listener);
 	}
+
+	/*private class AopBeansModelListener implements IModelChangeListener {
+
+		public void elementChanged(ModelChangeEvent event) {
+			if (event.getType() == ModelChangeEvent.Type.REMOVED
+					&& event.getSource() instanceof IResource) {
+				IResource resource = (IResource) event.getSource();
+				IJavaProject jp = JdtUtils.getJavaProject(resource.getProject());
+				if (jp != null) {
+					IAopProject ap = getProject(jp);
+					if (ap != null) {
+						ap.clearReferencesForResource(resource);
+						AopReferenceModelMarkerUtils.deleteProblemMarkers(resource);
+					}
+				}
+			}
+		}
+	}*/
 }
