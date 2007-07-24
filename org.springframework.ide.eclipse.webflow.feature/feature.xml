@@ -27,7 +27,7 @@
          name=""/>
 
    <requires>
-      <import feature="org.springframework.ide.eclipse.feature" version="2.0.1.qualifier" match="greaterOrEqual"/>
+      <import feature="org.springframework.ide.eclipse.feature" version="0.0.0" />
    </requires>
 
    <plugin
