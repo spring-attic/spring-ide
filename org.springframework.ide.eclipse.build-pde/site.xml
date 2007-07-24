@@ -4,5 +4,6 @@
 		This site provides plugins supporting the Spring Framework
 		(http://www.springframework.org/) within the Eclipse platform.
 	</description>
-	<category-def name="Spring IDE" label="Spring IDE" />
+	<category-def name="Features" label="Features" />
+	<category-def name="Integrations" label="Integrations" />
 </site>

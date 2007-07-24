@@ -71,7 +71,6 @@
 	<target name="preSetup">
 		<delete dir="${buildDirectory}" />
 		<delete dir="${UpdateSiteStagingLocation}" />
-		<delete dir="${EclipseStagingLocation}" />
 		<tstamp />
 	</target>
 
@@ -153,7 +152,7 @@
 		<property name="featureVersion" value="2.0.1" />
 		<antcall target="generateUpdateSite" />
 		<antcall target="createEclipseStaging" />
-		
+
 		<java jar="${eclipseLauncherJar}" 
               fork="true" 
               failonerror="true" 
@@ -170,7 +169,6 @@
 	<target name="generateUpdateSite">
 		<!-- Create the directory structure -->
 		<mkdir dir="${UpdateSiteStagingLocation}" />
-		<mkdir dir="${EclipseStagingLocation}" />
 		<mkdir dir="${UpdateSiteStagingLocation}/features" />
 		<mkdir dir="${UpdateSiteStagingLocation}/plugins" />
 		<!-- Build the jar files -->
@@ -195,12 +193,12 @@
 			<replacevalue>
 				<![CDATA[
 	<feature
-		url="features/org.springframework.ide.eclipse.feature_@VERSION@.jar"
-		id="org.springframework.ide.eclipse.feature" version="@VERSION@">
-		<category name="Features" />
+		url="features/org.springframework.ide.eclipse.javaconfig.feature_@VERSION@.jar"
+		id="org.springframework.ide.eclipse.javaconfig.feature" version="@VERSION@">
+		<category name="Integrations" />
 	</feature>
 
-	<category-def name="Features" label="Spring IDE" />]]></replacevalue>
+	<category-def name="Features" label="Features" />]]></replacevalue>
 		</replace>
 		<replace file="${publish.directory}/site.xml" token="@VERSION@" value="${featureVersion}.${forceContextQualifier}" summary="yes" />
 
@@ -216,13 +214,13 @@
 	</target>
 	<target name="createNightlyBuildSiteXml" unless="isNightlyBuild">
 		<replace file="${UpdateSiteStagingLocation}/site.xml" summary="yes">
-			<replacetoken><![CDATA[<category-def name="Spring IDE" label="Spring IDE" />]]></replacetoken>
+			<replacetoken><![CDATA[<category-def name="Features" label="Features" />]]></replacetoken>
 			<replacevalue>
 				<![CDATA[
 	<feature
-		url="features/org.springframework.ide.eclipse.feature_@VERSION@.jar"
-		id="org.springframework.ide.eclipse.feature" version="@VERSION@">
-		<category name="Features" />
+		url="features/org.springframework.ide.eclipse.javaconfig.feature_@VERSION@.jar"
+		id="org.springframework.ide.eclipse.javaconfig.feature" version="@VERSION@">
+		<category name="Integrations" />
 	</feature>
 
 	<category-def name="Features" label="Features" />]]></replacevalue>
@@ -244,7 +242,6 @@
 		</fileset>
 	</copy>
 </target>
-
 
 
 <!-- ===================================================================== -->
