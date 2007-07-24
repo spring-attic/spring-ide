@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor;
 
+import java.beans.Introspector;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -127,9 +128,7 @@ public class PropertyValueSearchRequestor {
 		String replaceText = method.getElementName().substring("set".length(),
 				method.getElementName().length());
 		if (replaceText != null) {
-			char c = replaceText.charAt(0);
-			replaceText = replaceText.substring(1, replaceText.length());
-			replaceText = Character.toLowerCase(c) + replaceText;
+			replaceText = Introspector.decapitalize(replaceText);
 		}
 		return replaceText;
 	}
