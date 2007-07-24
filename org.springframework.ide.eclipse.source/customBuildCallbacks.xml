@@ -80,12 +80,14 @@
 		<antcall target="copy.source">
 			<param name="plugin-name" value="org.springframework.ide.eclipse.core" />
 		</antcall>
+<!--
 		<antcall target="copy.source">
 			<param name="plugin-name" value="org.springframework.ide.eclipse.javaconfig.core" />
 		</antcall>
 		<antcall target="copy.source">
 			<param name="plugin-name" value="org.springframework.ide.eclipse.javaconfig.ui" />
 		</antcall>
+-->
 		<antcall target="copy.source">
 			<param name="plugin-name" value="org.springframework.ide.eclipse.ui" />
 		</antcall>

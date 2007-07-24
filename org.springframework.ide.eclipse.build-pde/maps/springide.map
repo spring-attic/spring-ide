@@ -5,10 +5,10 @@
  
 feature@org.springframework.ide.eclipse.feature=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.feature
 feature@org.springframework.ide.eclipse.feature.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.feature.source
-#feature@org.springframework.ide.eclipse.aop.feature=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.aop.feature
-#feature@org.springframework.ide.eclipse.aop.feature.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.aop.feature.source
-#feature@org.springframework.ide.eclipse.webflow.feature=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.webflow.feature
-#feature@org.springframework.ide.eclipse.webflow.feature.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.webflow.feature.source
+feature@org.springframework.ide.eclipse.aop.feature=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.aop.feature
+feature@org.springframework.ide.eclipse.aop.feature.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.aop.feature.source
+feature@org.springframework.ide.eclipse.webflow.feature=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.webflow.feature
+feature@org.springframework.ide.eclipse.webflow.feature.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.webflow.feature.source
 feature@org.springframework.ide.eclipse.mylyn.feature=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.mylyn.feature
 feature@org.springframework.ide.eclipse.mylyn.feature.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.mylyn.feature.source
 
