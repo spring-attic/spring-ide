@@ -21,9 +21,12 @@
       <update label="%updateSiteName" url="http://springide.org/updatesite/"/>
    </url>
 
+   <includes
+         id="org.springframework.ide.eclipse.mylyn.feature.source"
+         version="0.0.0"/>
+
    <requires>
-      <import feature="org.eclipse.mylyn_feature" version="2.0.0" match="greaterOrEqual"/>
-      <import feature="org.springframework.ide.eclipse.feature" version="2.0.1" match="greaterOrEqual"/>
+      <import feature="org.springframework.ide.eclipse.feature" version="2.0.1.qualifier"/>
    </requires>
 
    <plugin

@@ -89,7 +89,10 @@
 		<antcall target="copy.source">
 			<param name="plugin-name" value="org.springframework.ide.eclipse.ui" />
 		</antcall>
-		
+		<antcall target="copy.source">
+			<param name="plugin-name" value="org.springframework.ide.eclipse.osgi" />
+		</antcall>
+<!--		
 		<antcall target="copy.source">
 			<param name="plugin-name" value="org.springframework.ide.eclipse.aop.core" />
 		</antcall>
@@ -102,7 +105,8 @@
 		<antcall target="copy.source">
 			<param name="plugin-name" value="org.springframework.ide.eclipse.aop.ui.xref" />
 		</antcall>
-		
+-->
+<!--		
 		<antcall target="copy.source">
 			<param name="plugin-name" value="org.springframework.ide.eclipse.webflow.core" />
 		</antcall>
@@ -115,7 +119,8 @@
 		<antcall target="copy.source">
 			<param name="plugin-name" value="org.springframework.ide.eclipse.webflow.ui.graph" />
 		</antcall>
-		
+-->	
+<!--		
 		<antcall target="copy.source">
 			<param name="plugin-name" value="org.springframework.ide.eclipse.webflow.mylyn" />
 		</antcall>
@@ -128,10 +133,7 @@
 		<antcall target="copy.source">
 			<param name="plugin-name" value="org.springframework.ide.eclipse.mylyn" />
 		</antcall>
-
-		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.osgi" />
-		</antcall>
+-->
 	</target>
 
 	<!-- ===================================================================== -->

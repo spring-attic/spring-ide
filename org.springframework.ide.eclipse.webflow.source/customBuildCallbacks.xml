@@ -60,7 +60,7 @@
 			<param name="plugin-name" value="org.springframework.ide.eclipse.webflow.core" />
 		</antcall>
 		<antcall target="copy.source">
-			<param name="plugin-name" value="org.springframework.ide.eclipse.webflow.ui" />
+			<param name="plugin-name" value="org.springframework.ide.eclipse.webflow.core" />
 		</antcall>
 		<antcall target="copy.source">
 			<param name="plugin-name" value="org.springframework.ide.eclipse.webflow.ui.editor" />
