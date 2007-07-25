@@ -200,7 +200,7 @@
 		<category name="Features" />
 	</feature>
 
-	<category-def name="Features" label="Spring IDE" />]]></replacevalue>
+	<category-def name="Features" label="Features" />]]></replacevalue>
 		</replace>
 		<replace file="${publish.directory}/site.xml" token="@VERSION@" value="${featureVersion}.${forceContextQualifier}" summary="yes" />
 
@@ -216,7 +216,7 @@
 	</target>
 	<target name="createNightlyBuildSiteXml" unless="isNightlyBuild">
 		<replace file="${UpdateSiteStagingLocation}/site.xml" summary="yes">
-			<replacetoken><![CDATA[<category-def name="Spring IDE" label="Spring IDE" />]]></replacetoken>
+			<replacetoken><![CDATA[<category-def name="Features" label="Features" />]]></replacetoken>
 			<replacevalue>
 				<![CDATA[
 	<feature
@@ -232,8 +232,12 @@
 <target name="createNightlyBuildDist">
 	<property name="buildDist.name" value="${sitePackagePrefix}_${sitePackageVersion}_${forceContextQualifier}" />
 	<property name="buildDist.file" value="${UpdateSiteStagingLocation}/${buildDist.name}.zip" />
+	<delete file="${buildDist.file}" />
 	<zip zipfile="${buildDist.file}" filesonly="true">
-		<zipfileset dir="${UpdateSiteStagingLocation}"/>
+		<zipfileset dir="${UpdateSiteStagingLocation}">
+			<exclude name="*.zip"/>
+			<exclude name="**/*.gz"/>
+		</zipfileset>
 	</zip>
 </target>
 <target name="createEclipseStaging" >
@@ -241,6 +245,7 @@
 		<fileset dir="${UpdateSiteStagingLocation}">
 			<exclude name="site.xml"/>
 			<exclude name="*.zip"/>
+			<exclude name="**/*.gz"/>
 		</fileset>
 	</copy>
 </target>
