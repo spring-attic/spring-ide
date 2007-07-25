@@ -185,7 +185,7 @@
 				<exclude name="site.xml"/>
 			</fileset>
 		</copy>
-		<copy file="site.xml" tofile="${publish.directory}/site.xml" overwrite="false" />
+		<copy file="${builder}/../site.xml" tofile="${publish.directory}/site.xml" overwrite="false" />
 		<replace file="${publish.directory}/site.xml" summary="yes">
 			<replacetoken><![CDATA[<category-def name="Features" label="Features" />]]></replacetoken>
 			<replacevalue><![CDATA[
@@ -209,7 +209,7 @@
 		</ant>
 	</target>
 	<target name="copyNightlyBuildSiteXml" unless="isNightlyBuild">
-		<copy file="site.xml" tofile="${updateSiteStagingLocation}/site.xml" overwrite="false" />
+		<copy file="${builder}/../site.xml" tofile="${updateSiteStagingLocation}/site.xml" overwrite="false" />
 	</target>
 	<target name="createNightlyBuildSiteXml" unless="isNightlyBuild">
 		<replace file="${updateSiteStagingLocation}/site.xml" summary="yes">
@@ -223,9 +223,9 @@
 
 	<category-def name="Features" label="Features" />]]></replacevalue>
 		</replace>
-		<replace file="${publish.directory}/site.xml" token="@VERSION@" value="${featureVersion}.${forceContextQualifier}" summary="yes" />
-		<replace file="${publish.directory}/site.xml" token="@FEATURE@" value="${featureName}" summary="yes" />
-		<replace file="${publish.directory}/site.xml" token="@CATEGORY@" value="${featureCategory}.${forceContextQualifier}" summary="yes" />
+		<replace file="${updateSiteStagingLocation}/site.xml" token="@VERSION@" value="${featureVersion}.${forceContextQualifier}" summary="yes" />
+		<replace file="${updateSiteStagingLocation}/site.xml" token="@FEATURE@" value="${featureName}" summary="yes" />
+		<replace file="${updateSiteStagingLocation}/site.xml" token="@CATEGORY@" value="${featureCategory}.${forceContextQualifier}" summary="yes" />
 	</target>
 	
 	<target name="createNightlyBuildDist">
