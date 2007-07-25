@@ -199,7 +199,7 @@
 		</replace>
 		<replace file="${publish.directory}/site.xml" token="@VERSION@" value="${featureVersion}.${forceContextQualifier}" summary="yes" />
 		<replace file="${publish.directory}/site.xml" token="@FEATURE@" value="${featureName}" summary="yes" />
-		<replace file="${publish.directory}/site.xml" token="@CATEGORY@" value="${featureCategory}.${forceContextQualifier}" summary="yes" />
+		<replace file="${publish.directory}/site.xml" token="@CATEGORY@" value="${featureCategory}" summary="yes" />
 
 	</target>
 	<target name="updateSiteExport">
@@ -225,7 +225,7 @@
 		</replace>
 		<replace file="${updateSiteStagingLocation}/site.xml" token="@VERSION@" value="${featureVersion}.${forceContextQualifier}" summary="yes" />
 		<replace file="${updateSiteStagingLocation}/site.xml" token="@FEATURE@" value="${featureName}" summary="yes" />
-		<replace file="${updateSiteStagingLocation}/site.xml" token="@CATEGORY@" value="${featureCategory}.${forceContextQualifier}" summary="yes" />
+		<replace file="${updateSiteStagingLocation}/site.xml" token="@CATEGORY@" value="${featureCategory}" summary="yes" />
 	</target>
 	
 	<target name="createNightlyBuildDist">
