@@ -5,5 +5,6 @@
 		(http://www.springframework.org/) within the Eclipse platform.
 	</description>
 	<category-def name="Features" label="Features" />
+	<category-def name="Extensions" label="Extensions" />
 	<category-def name="Integrations" label="Integrations" />
 </site>
