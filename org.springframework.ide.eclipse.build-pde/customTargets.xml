@@ -185,7 +185,7 @@
 				<exclude name="site.xml"/>
 			</fileset>
 		</copy>
-		<copy file="${builder}/../site.xml" tofile="${publish.directory}/site.xml" overwrite="false" />
+		<copy file="site.xml" tofile="${publish.directory}/site.xml" overwrite="false" />
 		<replace file="${publish.directory}/site.xml" summary="yes">
 			<replacetoken><![CDATA[<category-def name="Features" label="Features" />]]></replacetoken>
 			<replacevalue><![CDATA[
@@ -209,7 +209,7 @@
 		</ant>
 	</target>
 	<target name="copyNightlyBuildSiteXml" unless="isNightlyBuild">
-		<copy file="${builder}/../site.xml" tofile="${updateSiteStagingLocation}/site.xml" overwrite="false" />
+		<copy file="site.xml" tofile="${updateSiteStagingLocation}/site.xml" overwrite="false" />
 	</target>
 	<target name="createNightlyBuildSiteXml" unless="isNightlyBuild">
 		<replace file="${updateSiteStagingLocation}/site.xml" summary="yes">
