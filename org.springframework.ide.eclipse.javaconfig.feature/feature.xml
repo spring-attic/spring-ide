@@ -28,6 +28,7 @@
 
    <requires>
       <import feature="org.springframework.ide.eclipse.feature" version="2.0.1"/>
+      <import feature="org.springframework.ide.eclipse.aop.feature" version="2.0.1"/>
    </requires>
 
    <plugin
