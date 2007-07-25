@@ -187,14 +187,14 @@
 		</copy>
 		<copy file="${builder}/../site.xml" tofile="${publish.directory}/site.xml" overwrite="false" />
 		<replace file="${publish.directory}/site.xml" summary="yes">
-			<replacetoken><![CDATA[<category-def name="Features" label="Features" />]]></replacetoken>
+			<replacetoken><![CDATA[<category-def name="Core" label="Core" />]]></replacetoken>
 			<replacevalue><![CDATA[<feature
 		url="features/@FEATURE@_@VERSION@.jar"
 		id="@FEATURE@" version="@VERSION@">
 		<category name="@CATEGORY@" />
 	</feature>
 
-	<category-def name="Features" label="Features" />]]></replacevalue>
+	<category-def name="Core" label="Core" />]]></replacevalue>
 		</replace>
 		<replace file="${publish.directory}/site.xml" token="@VERSION@" value="${featureVersion}.${forceContextQualifier}" summary="yes" />
 		<replace file="${publish.directory}/site.xml" token="@FEATURE@" value="${featureName}" summary="yes" />
@@ -212,14 +212,14 @@
 	</target>
 	<target name="createNightlyBuildSiteXml" unless="isNightlyBuild">
 		<replace file="${updateSiteStagingLocation}/site.xml" summary="yes">
-			<replacetoken><![CDATA[<category-def name="Features" label="Features" />]]></replacetoken>
+			<replacetoken><![CDATA[<category-def name="Core" label="Core" />]]></replacetoken>
 			<replacevalue><![CDATA[<feature
 		url="features/@FEATURE@_@VERSION@.jar"
 		id="@FEATURE@" version="@VERSION@">
 		<category name="@CATEGORY@" />
 	</feature>
 
-	<category-def name="Features" label="Features" />]]></replacevalue>
+	<category-def name="Core" label="Core" />]]></replacevalue>
 		</replace>
 		<replace file="${updateSiteStagingLocation}/site.xml" token="@VERSION@" value="${featureVersion}.${forceContextQualifier}" summary="yes" />
 		<replace file="${updateSiteStagingLocation}/site.xml" token="@FEATURE@" value="${featureName}" summary="yes" />

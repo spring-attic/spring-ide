@@ -7,7 +7,7 @@
 	<property name="eclipseStagingLocation" value="${buildDirectory}/../../eclipse_stage" />
 
 	<property name="featureName" value="org.springframework.ide.eclipse.feature" />
-	<property name="featureCategory" value="Features" />
+	<property name="featureCategory" value="Core" />
 	
 	<!-- ===================================================================== -->
 	<!-- Steps to do before setup -->
