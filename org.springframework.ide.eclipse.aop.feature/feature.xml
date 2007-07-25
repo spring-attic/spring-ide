@@ -3,7 +3,8 @@
       id="org.springframework.ide.eclipse.aop.feature"
       label="%featureName"
       version="2.0.1.qualifier"
-      provider-name="%providerName">
+      provider-name="%providerName"
+      plugin="org.springframework.ide.eclipse">
 
    <description>
       %description

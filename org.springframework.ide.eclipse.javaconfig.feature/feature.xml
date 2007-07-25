@@ -3,7 +3,8 @@
       id="org.springframework.ide.eclipse.javaconfig.feature"
       label="%featureName"
       version="2.0.1.qualifier"
-      provider-name="%providerName">
+      provider-name="%providerName"
+      plugin="org.springframework.ide.eclipse">
 
    <description>
       %description
@@ -22,8 +23,8 @@
    </url>
 
    <includes
-   		id="org.springframework.ide.eclipse.javaconfig.feature.source"
-   		version="0.0.0" />
+         id="org.springframework.ide.eclipse.javaconfig.feature.source"
+         version="0.0.0"/>
 
    <requires>
       <import feature="org.springframework.ide.eclipse.feature" version="2.0.1"/>
@@ -43,8 +44,7 @@
          version="0.0.0"
          unpack="false"/>
 
-   
-    <plugin
+   <plugin
          id="org.springframework.javaconfig"
          download-size="0"
          install-size="0"
