@@ -99,7 +99,7 @@
 			<replacetoken>version="2.0.1"</replacetoken>
 			<replacevalue>version="@VERSION@"</replacevalue>
 		</replace>
-		<replace file="feature.xml" token="@VERSION@" value="${forceContextQualifier}" 
+		<replace file="feature.xml" token="@VERSION@" value="2.0.1.v${forceContextQualifier}" 
 			summary="yes" />
 	</target>
 
