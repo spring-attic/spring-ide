@@ -270,12 +270,11 @@ public class AopReferenceModelNavigatorContentProvider implements
 
 			IResource resource = SpringUIUtils.getFile(document);
 			// check if resource is a Beans Config
-			if (!BeansCoreUtils.isBeansConfig(resource)) {
+			if (!BeansCoreUtils.isBeansConfig(resource) || document == null) {
 				return nodes.toArray();
 			}
 			IBeansConfig beansConfig = BeansCorePlugin.getModel().getProject(
 					resource.getProject()).getConfig((IFile) resource);
-
 			int startLine = document.getLineOfOffset(element.getStartOffset()) + 1;
 			int endLine = document.getLineOfOffset(element.getEndOffset()) + 1;
 			String id = BeansEditorUtils.getAttribute(element, "id");
