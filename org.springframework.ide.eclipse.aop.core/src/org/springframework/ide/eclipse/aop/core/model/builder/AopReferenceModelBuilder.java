@@ -240,7 +240,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 	}
 
 	private void buildAopReferencesFromAspectDefinition(IBeansConfig config,
-			IAspectDefinition info, AspectDefinitionMatcher builderUtils, IProgressMonitor monitor) {
+			IAspectDefinition info, AspectDefinitionMatcher matcher, IProgressMonitor monitor) {
 
 		IResource file = config.getElementResource();
 		IAopProject aopProject = ((AopReferenceModel) Activator.getModel())
@@ -256,7 +256,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 			beans.addAll(component.getBeans());
 		}*/
 		
-		buildAopReferencesFromAspectDefinitionForBeans(config, info, builderUtils, monitor, file,
+		buildAopReferencesFromAspectDefinitionForBeans(config, info, matcher, monitor, file,
 				aopProject, beans);
 	}
 
@@ -291,7 +291,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 	}
 
 	private void buildAopReferencesFromBeansConfigSets(IBeansProject project, IBeansConfig config,
-			IAspectDefinition info, AspectDefinitionMatcher builderUtils, IProgressMonitor monitor) {
+			IAspectDefinition info, AspectDefinitionMatcher matcher, IProgressMonitor monitor) {
 		// check config sets as well
 		Set<IBeansConfigSet> configSets = project.getConfigSets();
 		for (IBeansConfigSet configSet : configSets) {
@@ -299,7 +299,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				Set<IBeansConfig> configs = configSet.getConfigs();
 				for (IBeansConfig configSetConfig : configs) {
 					if (!config.equals(configSetConfig)) {
-						buildAopReferencesFromAspectDefinition(configSetConfig, info, builderUtils,
+						buildAopReferencesFromAspectDefinition(configSetConfig, info, matcher,
 								monitor);
 					}
 				}
@@ -345,14 +345,14 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 						aopProject.clearReferencesForResource(info.getResource());
 					}
 					
-					AspectDefinitionMatcher builderUtils = new AspectDefinitionMatcher();
+					AspectDefinitionMatcher matcher = new AspectDefinitionMatcher();
 					for (IAspectDefinition info : aspectInfos) {
 
 						// build model for config
-						buildAopReferencesFromAspectDefinition(config, info, builderUtils, monitor);
+						buildAopReferencesFromAspectDefinition(config, info, matcher, monitor);
 
 						// build model for config sets
-						buildAopReferencesFromBeansConfigSets(project, config, info, builderUtils,
+						buildAopReferencesFromBeansConfigSets(project, config, info, matcher,
 								monitor);
 					}
 				}
