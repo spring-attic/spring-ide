@@ -310,8 +310,15 @@ public class JdtUtils {
 							paths.add(url);
 						}
 					}
-					// add source output locations for different source folders
 					else if (path.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+						// add source path as well for non java resources
+						IPath sourcePath = path.getPath();
+						if (sourcePath != null) {
+							sourcePath = location.append(sourcePath
+									.removeFirstSegments(1));
+							paths.add(sourcePath.toFile().toURL());
+						}
+						// add source output locations for different source folders
 						IPath sourceOutputPath = path.getOutputLocation();
 						if (sourceOutputPath != null) {
 							sourceOutputPath = location.append(sourceOutputPath
