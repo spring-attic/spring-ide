@@ -183,4 +183,9 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory
 		}
 		return text.toString();
 	}
+
+	public void removeBeanDefinition(String beanName)
+			throws NoSuchBeanDefinitionException {
+		throw new BeanCreationException(beanName, "Not implemented");
+	}
 }
