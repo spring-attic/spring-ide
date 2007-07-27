@@ -324,9 +324,9 @@ public class BeansInplaceOutlineDialog {
 
 		// add filter from the common navigator
 		INavigatorContentService contentService = NavigatorContentServiceFactory.INSTANCE
-				.createContentService("org.springframework.ide.eclipse.beans.ui.navigator.springExplorerContent");
+				.createContentService("org.springframework.ide.eclipse.ui.navigator.springExplorer");
 		ViewerFilter[] viewFilters = contentService.getFilterService()
-				.getVisibleFilters(true);
+				.getVisibleFilters(false);
 		for (ViewerFilter viewFilter : viewFilters) {
 			viewer.addFilter(viewFilter);
 		}
