@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.swt.graphics.Image;
@@ -27,7 +26,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 
 /**
  * @author Christian Dupuis
@@ -109,9 +108,7 @@ public class BeanReferenceNode implements IReferenceNode,
 	public void openAndReveal() {
 		IBean bean = AopReferenceModelUtils.getBeanFromElementId(this.beanId);
 		if (bean != null) {
-			IResource resource = bean.getElementResource();
-			SpringUIUtils.openInEditor((IFile) resource, bean
-					.getElementStartLine());
+			BeansUIUtils.openInEditor(bean);
 		}
 	}
 

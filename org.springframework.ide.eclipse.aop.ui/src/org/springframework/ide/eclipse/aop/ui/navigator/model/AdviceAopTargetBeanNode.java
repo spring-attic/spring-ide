@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.aop.ui.navigator.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
@@ -21,7 +20,7 @@ import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 
 /**
  * @author Christian Dupuis
@@ -75,8 +74,7 @@ public class AdviceAopTargetBeanNode implements IReferenceNode,
 		IBean bean = AopReferenceModelUtils
 				.getBeanFromElementId(this.references.get(0).getTargetBeanId());
 		if (bean != null) {
-			SpringUIUtils.openInEditor((IFile) bean.getElementResource(), bean
-					.getElementEndLine());
+			BeansUIUtils.openInEditor(bean);
 		}
 	}
 
