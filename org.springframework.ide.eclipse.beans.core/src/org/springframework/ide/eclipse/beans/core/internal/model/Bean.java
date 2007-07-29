@@ -208,6 +208,14 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 		return true;
 	}
 
+	public boolean isInfrastructure() {
+		if (definition instanceof AbstractBeanDefinition) {
+			return ((AbstractBeanDefinition) definition).getRole() == 
+				BeanDefinition.ROLE_INFRASTRUCTURE;
+		}
+		return false;
+	}
+
 	public boolean isFactory() {
 		if (definition instanceof AbstractBeanDefinition) {
 			AbstractBeanDefinition bd = (AbstractBeanDefinition) definition;

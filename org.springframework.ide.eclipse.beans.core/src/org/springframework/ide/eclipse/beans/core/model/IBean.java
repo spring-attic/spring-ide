@@ -42,6 +42,8 @@ public interface IBean extends IBeansModelElement, ISourceModelElement {
 	public boolean isLazyInit();
 
 	public boolean isFactory();
+	
+	public boolean isInfrastructure();
 
 	/**
 	 * Returns array of aliases defined for this bean or <code>null</code> if

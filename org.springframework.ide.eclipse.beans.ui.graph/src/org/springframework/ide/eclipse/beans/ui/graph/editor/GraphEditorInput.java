@@ -191,7 +191,9 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 		// Marshall all beans into a graph bean node
 		beans = new LinkedHashMap<String, Bean>();
 		for (IBean bean : list) {
-			beans.put(bean.getElementName(), new Bean(bean));
+			if (!bean.isInfrastructure()) {
+				beans.put(bean.getElementName(), new Bean(bean));
+			}
 		}
 	}
 

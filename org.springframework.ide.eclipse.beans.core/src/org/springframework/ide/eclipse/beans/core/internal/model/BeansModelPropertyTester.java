@@ -33,7 +33,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
  */
 public class BeansModelPropertyTester extends PropertyTester {
 
-	// @Override TODO CD don't add the annotation as this breaks on Eclipse 3.3
 	public boolean test(Object receiver, String property, Object[] args,
 			Object expectedValue) {
 		if (receiver instanceof IFile && "isBeansConfig".equals(property)) {
@@ -42,10 +41,9 @@ public class BeansModelPropertyTester extends PropertyTester {
 			return expectedValue == null ? isBeansConfig
 					: isBeansConfig == ((Boolean) expectedValue).booleanValue();
 		}
-		else if (receiver instanceof Bean
+		else if (receiver instanceof IBean
 				&& "isInfrstructureBean".equals(property)) {
-			boolean isInfrstructureBean = ((Bean) receiver).getBeanDefinition()
-					.getRole() == BeanDefinition.ROLE_INFRASTRUCTURE;
+			boolean isInfrstructureBean = ((IBean) receiver).isInfrastructure();
 			return expectedValue == null ? isInfrstructureBean
 					: isInfrstructureBean == ((Boolean) expectedValue)
 							.booleanValue();

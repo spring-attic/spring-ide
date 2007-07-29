@@ -41,9 +41,7 @@ public class BeanDefinitionHolderRule extends AbstractBeanValidationRule {
 			IProgressMonitor monitor) {
 
 		// only validate bean override for non-infrastructure beans
-		if (bean instanceof Bean
-				&& ((Bean) bean).getBeanDefinition().getRole() 
-				!= BeanDefinition.ROLE_INFRASTRUCTURE) {
+		if (bean instanceof Bean && !bean.isInfrastructure()) {
 			validateBeanNameAndAlias((Bean) bean, context);
 		}
 	}
