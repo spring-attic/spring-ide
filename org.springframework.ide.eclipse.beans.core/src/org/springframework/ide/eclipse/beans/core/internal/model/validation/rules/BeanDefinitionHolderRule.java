@@ -12,6 +12,8 @@ package org.springframework.ide.eclipse.beans.core.internal.model.validation.rul
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -23,22 +25,42 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
  * Validates a given root {@link IBean}'s name and aliases.
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
 public class BeanDefinitionHolderRule extends AbstractBeanValidationRule {
 
 	@Override
 	public boolean supports(IModelElement element, IValidationContext context) {
-		return (element instanceof IBean && !((IBean) element).isInnerBean()
-				&& context instanceof BeansValidationContext);
+		return (element instanceof IBean && !((IBean) element).isInnerBean() && 
+				context instanceof BeansValidationContext);
 	}
 
 	@Override
 	public void validate(IBean bean, BeansValidationContext context,
 			IProgressMonitor monitor) {
+
+		// only validate bean override for non-infrastructure beans
+		if (bean instanceof Bean
+				&& ((Bean) bean).getBeanDefinition().getRole() 
+				!= BeanDefinition.ROLE_INFRASTRUCTURE) {
+			validateBeanNameAndAlias((Bean) bean, context);
+		}
+	}
+
+	/**
+	 * Validates if the given {@link BeanDefinition} nested in the passed
+	 * {@link IBean} can be registered in the <code>context</code>.
+	 * <p>
+	 * The implementation relies on the fact that a {@link BeanDefinitionRegistry}
+	 * throws a {@link BeanDefinitionStoreException} if the bean name is already
+	 * choosen.
+	 */
+	private void validateBeanNameAndAlias(Bean bean,
+			BeansValidationContext context) {
 		try {
 			context.getIncompleteRegistry().registerBeanDefinition(
-					bean.getElementName(), ((Bean) bean).getBeanDefinition());
+					bean.getElementName(), bean.getBeanDefinition());
 		}
 		catch (BeanDefinitionStoreException e) {
 			if (context.getContextElement() instanceof IBeansConfigSet) {
@@ -71,4 +93,3 @@ public class BeanDefinitionHolderRule extends AbstractBeanValidationRule {
 		}
 	}
 }
-
