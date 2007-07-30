@@ -53,7 +53,7 @@ public class AopHyperLinkDetector extends AbstractHyperLinkDetector implements
 		String attrName = attr.getName();
 		return ("method".equals(attrName) || "ref".equals(attrName)
 				|| "pointcut-ref".equals(attrName)
-				|| "advice-ref".equals(attrName)
+				|| "advice-ref".equals(attrName) || "delegate-ref".equals(attrName)
 				|| "implement-interface".equals(attrName) || "default-impl"
 				.equals(attrName));
 	}

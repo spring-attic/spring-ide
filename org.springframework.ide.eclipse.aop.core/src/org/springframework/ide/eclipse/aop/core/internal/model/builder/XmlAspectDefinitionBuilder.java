@@ -259,14 +259,25 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 							DEFAULT_IMPL_ATTRIBUTE);
 					String implementInterface = getAttribute(aspectNode,
 							IMPLEMENT_INTERFACE_ATTRIBUTE);
+					String delegateRef = getAttribute(aspectNode, 
+							DELEGATE_REF_ATTRIBUTE);
 					if (StringUtils.hasText(typesMatching)
-							&& StringUtils.hasText(defaultImpl)
+							&& (StringUtils.hasText(defaultImpl) || StringUtils.hasText(delegateRef))
 							&& StringUtils.hasText(implementInterface)) {
 						info = new BeanIntroductionDefinition();
 						((BeanIntroductionDefinition) info)
 								.setIntroducedInterfaceName(implementInterface);
 						((BeanIntroductionDefinition) info)
 								.setTypePattern(typesMatching);
+						if (StringUtils.hasText(delegateRef)) {
+							Node delegateBean = BeansEditorUtils
+									.getFirstReferenceableNodeById(aspectNode
+											.getOwnerDocument(), delegateRef);
+							if (delegateBean != null) {
+								defaultImpl = BeansEditorUtils
+										.getClassNameForBean(delegateBean);
+							}
+						}
 						((BeanIntroductionDefinition) info)
 								.setDefaultImplName(defaultImpl);
 						((BeanIntroductionDefinition) info)
@@ -274,7 +285,6 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 						((BeanIntroductionDefinition) info)
 								.setAspectName(beanRef);
 						setLineNumbers(info, (IDOMNode) aspectNode);
-
 					}
 				}
 				else if (BEFORE_ELEMENT.equals(aspectNode.getLocalName())) {

@@ -94,6 +94,10 @@ public class AopContentAssistProcessor extends AbstractContentAssistProcessor
 				&& BeansEditorUtils.hasAttribute(node.getParentNode(), "ref")) {
 			addMethodAttributeValueProposals(request, matchString, node);
 		}
+		if ("delegate-ref".equals(attributeName)) {
+			addBeanReferenceProposals(request, matchString, node
+					.getOwnerDocument(), true);
+		}
 	}
 
 	private void addClassAttributeValueProposals(ContentAssistRequest request,

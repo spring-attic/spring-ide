@@ -63,6 +63,8 @@ public abstract class AbstractAspectDefinitionBuilder implements
 
 	protected static final String DEFAULT_IMPL_ATTRIBUTE = "default-impl";
 
+	protected static final String DELEGATE_REF_ATTRIBUTE = "delegate-ref";
+
 	protected static final String EXPRESSION_ATTRIBUTE = "expression";
 
 	protected static final String ID_ATTRIBUTE = "id";
