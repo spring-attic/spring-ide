@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
-import org.springframework.aop.aspectj.ProxyCreationContext;
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
@@ -51,25 +50,22 @@ import org.springframework.util.ReflectionUtils.MethodCallback;
 public class AspectDefinitionMatcher {
 
 	/**
-	 * Utility helper class that exposes the current beanName to the
-	 * {@link ProxyCreationContext} introduced by Spring 2.1
+	 * Utility helper class that exposes the current beanName 
 	 */
 	private static class BeanNameExposingReflectionUtils {
 
 		public static void doWithMethods(IBean targetBean, Class targetClass,
-				MethodCallback mc) throws Throwable {
-			// expose bean name on thread local
-			Object proxyCreationContext = ClassUtils.loadClass(
-					ProxyCreationContext.class).newInstance();
-			ClassUtils.invokeMethod(proxyCreationContext,
-					"notifyProxyCreationStart", new Object[] {targetBean.getElementName(),
-					targetBean.isInnerBean()}, new Class[] {String.class, boolean.class });
+				Object aspectJExpressionPointcut, MethodCallback mc) throws Throwable {
+			ClassUtils.invokeMethod(aspectJExpressionPointcut,
+					"setCurrentProxiedBeanName", new Object[] {
+					targetBean.getElementName()}, new Class[] {String.class});
 			try {
 				ReflectionUtils.doWithMethods(targetClass, mc);
 			}
 			finally {
-				ClassUtils.invokeMethod(proxyCreationContext,
-						"notifyProxyCreationComplete");
+				ClassUtils.invokeMethod(aspectJExpressionPointcut,
+						"setCurrentProxiedBeanName", new Object[] {null}, 
+						new Class[] {String.class});
 			}
 
 			// do it again without the exposed bean name
@@ -183,8 +179,8 @@ public class AspectDefinitionMatcher {
 		final IType jdtTargetType = JdtUtils.getJavaType(project, targetClass
 				.getName());
 
-		BeanNameExposingReflectionUtils.doWithMethods(targetBean, targetClass,
-				new ReflectionUtils.MethodCallback() {
+		BeanNameExposingReflectionUtils.doWithMethods(targetBean, targetClass, 
+				aspectJExpressionPointcut, new ReflectionUtils.MethodCallback() {
 					public void doWith(Method method)
 							throws IllegalArgumentException,
 							IllegalAccessException {
@@ -229,7 +225,7 @@ public class AspectDefinitionMatcher {
 			throws Throwable {
 
 		Class<?> expressionPointcutClass = ClassUtils
-				.loadClass(AspectJExpressionPointcut.class);
+				.loadClass(BeanNameAwareAspectJExpressionPointcut.class);
 		Object pc = expressionPointcutClass.newInstance();
 		for (Method m : expressionPointcutClass.getMethods()) {
 			if (m.getName().equals("setExpression")) {

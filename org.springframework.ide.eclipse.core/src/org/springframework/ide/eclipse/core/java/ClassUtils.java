@@ -136,6 +136,11 @@ public class ClassUtils {
 				parameterClasses);
 
 		if (targetMethod != null) {
+			
+			if (!targetMethod.isAccessible()) {
+				targetMethod.setAccessible(true);
+			}
+			
 			try {
 				return targetMethod.invoke(target, parameters);
 			}

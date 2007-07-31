@@ -54,11 +54,11 @@ import org.springframework.util.StringUtils;
  * @since 2.0
  */
 public class JdtUtils {
-	
+
 	/**
 	 * Name of file containing project classpath
 	 */
-	private static final String CLASSPATH_FILENAME = ".classpath"; 
+	private static final String CLASSPATH_FILENAME = ".classpath";
 
 	private static final String AJDT_NATURE = "org.eclipse.ajdt.ui.ajnature";
 
@@ -223,16 +223,23 @@ public class JdtUtils {
 			if (bundle != null) {
 				String bundleClassPath = (String) bundle.getHeaders().get(
 						org.osgi.framework.Constants.BUNDLE_CLASSPATH);
-				String[] classPathEntries = StringUtils
-						.delimitedListToStringArray(bundleClassPath, ",");
-				for (String classPathEntry : classPathEntries) {
-					if (".".equals(classPathEntry.trim())) {
-						paths.add(FileLocator.toFileURL(bundle.getEntry("/")));
+				if (bundleClassPath != null) {
+					String[] classPathEntries = StringUtils
+							.delimitedListToStringArray(bundleClassPath, ",");
+					for (String classPathEntry : classPathEntries) {
+						if (".".equals(classPathEntry.trim())) {
+							paths.add(FileLocator.toFileURL(bundle
+									.getEntry("/")));
+						}
+						else {
+							paths.add(FileLocator
+									.toFileURL(new URL(bundle.getEntry("/"),
+											"/" + classPathEntry.trim())));
+						}
 					}
-					else {
-						paths.add(FileLocator.toFileURL(new URL(bundle
-								.getEntry("/"), "/" + classPathEntry.trim())));
-					}
+				}
+				else {
+					paths.add(FileLocator.toFileURL(bundle.getEntry("/")));
 				}
 			}
 		}
@@ -275,6 +282,7 @@ public class JdtUtils {
 			paths.addAll(getBundleClassPath("org.aspectj.aspectjweaver"));
 			paths.addAll(getBundleClassPath("jakarta.commons.logging"));
 			paths.addAll(getBundleClassPath("org.objectweb.asm"));
+			paths.addAll(getBundleClassPath("org.springframework.ide.eclipse.aop.core"));
 		}
 
 		try {
@@ -318,7 +326,8 @@ public class JdtUtils {
 									.removeFirstSegments(1));
 							paths.add(sourcePath.toFile().toURL());
 						}
-						// add source output locations for different source folders
+						// add source output locations for different source
+						// folders
 						IPath sourceOutputPath = path.getOutputLocation();
 						if (sourceOutputPath != null) {
 							sourceOutputPath = location.append(sourceOutputPath
@@ -614,7 +623,8 @@ public class JdtUtils {
 
 		private void setupClassLoaders(IJavaProject javaProject) {
 			classLoader = Thread.currentThread().getContextClassLoader();
-			weavingClassLoader = JdtUtils.getClassLoader(javaProject.getProject(), false);
+			weavingClassLoader = JdtUtils.getClassLoader(javaProject
+					.getProject(), false);
 		}
 	}
 }
