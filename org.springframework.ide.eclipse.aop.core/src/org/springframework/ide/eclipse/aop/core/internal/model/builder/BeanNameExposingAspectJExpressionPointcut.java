@@ -20,7 +20,7 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcut;
  * @author Christian Dupuis
  * @since 2.0.1
  */
-public class BeanNameAwareAspectJExpressionPointcut extends
+public class BeanNameExposingAspectJExpressionPointcut extends
 		AspectJExpressionPointcut {
 
 	private static final long serialVersionUID = -1624034556102242297L;

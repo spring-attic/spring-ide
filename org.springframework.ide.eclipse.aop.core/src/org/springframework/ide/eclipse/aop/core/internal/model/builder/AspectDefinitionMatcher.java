@@ -225,7 +225,7 @@ public class AspectDefinitionMatcher {
 			throws Throwable {
 
 		Class<?> expressionPointcutClass = ClassUtils
-				.loadClass(BeanNameAwareAspectJExpressionPointcut.class);
+				.loadClass(BeanNameExposingAspectJExpressionPointcut.class);
 		Object pc = expressionPointcutClass.newInstance();
 		for (Method m : expressionPointcutClass.getMethods()) {
 			if (m.getName().equals("setExpression")) {
