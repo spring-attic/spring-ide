@@ -247,7 +247,7 @@
 			icon="icons/full/obj16/console_view.gif"
 			category="org.springframework.ide.eclipse.ui.views"
 			class="org.springframework.ide.eclipse.aop.ui.tracing.EventTraceView"
-			id="org.springframework.ide.eclipse.aop.ui.tracing.EventTraceView">
+			id="org.springframework.ide.eclipse.aop.ui.tracing.eventTraceView">
 		</view>
 	</extension>
 	
@@ -257,6 +257,25 @@
 	      	class="org.springframework.ide.eclipse.aop.ui.preferences.AopPreferencePage"
 	      	category="org.springframework.ide.eclipse.ui.preferencePage">
    		</page>
+	</extension>
+
+	<extension point="org.eclipse.ui.perspectiveExtensions">
+		<perspectiveExtension
+			targetID="org.eclipse.jdt.ui.JavaPerspective">
+			<viewShortcut
+				id="org.springframework.ide.eclipse.aop.ui.navigator.aopReferenceModelNavigator" />
+			<viewShortcut
+				id="org.springframework.ide.eclipse.aop.ui.tracing.eventTraceView" />
+			<view 
+				closeable="true"
+				id="org.springframework.ide.eclipse.aop.ui.navigator.aopReferenceModelNavigator"
+				minimized="false" 
+				moveable="true" 
+				ratio="0.5" 
+				relationship="bottom"
+				relative="org.eclipse.ui.views.ContentOutline" 
+				visible="false" />
+		</perspectiveExtension>
 	</extension>
 
 </plugin>

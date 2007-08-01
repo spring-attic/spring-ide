@@ -262,4 +262,21 @@
       </decorator>
    </extension>
 
+   <extension point="org.eclipse.ui.perspectiveExtensions">
+   	<perspectiveExtension
+   		targetID="org.eclipse.jdt.ui.JavaPerspective">
+   		<viewShortcut
+   			id="org.springframework.ide.eclipse.ui.navigator.springExplorer" />
+   		<view 
+   			closeable="true"
+   			id="org.springframework.ide.eclipse.ui.navigator.springExplorer"
+   			minimized="false" 
+   			moveable="true" 
+   			ratio="0.5"
+   			relationship="bottom"
+   			relative="org.eclipse.ui.views.ContentOutline" 
+   			visible="true" />
+   	</perspectiveExtension>
+   </extension>
+
 </plugin>
