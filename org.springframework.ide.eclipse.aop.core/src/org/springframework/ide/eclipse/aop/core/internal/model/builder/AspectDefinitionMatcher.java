@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.IType;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.framework.AopInfrastructureBean;
+import org.springframework.aop.framework.autoproxy.ProxyCreationContext;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
@@ -41,14 +42,13 @@ import org.springframework.util.ReflectionUtils.MethodCallback;
  * Uses Spring AOP's {@link AspectJExpressionPointcut} infrastructure to
  * determine matches.
  * <p>
- * With Spring 2.1 this class is already ready to support the bean pointcut
- * primitive as well.
+ * With Spring 2.1 this class supports the bean pointcut primitive as well.
  * @author Christian Dupuis
  * @since 2.0
  */
 @SuppressWarnings("restriction")
 public class AspectDefinitionMatcher {
-
+	
 	/**
 	 * Utility helper class that exposes the current beanName 
 	 */
@@ -56,34 +56,24 @@ public class AspectDefinitionMatcher {
 
 		public static void doWithMethods(IBean targetBean, Class targetClass,
 				Object aspectJExpressionPointcut, MethodCallback mc) throws Throwable {
-			ClassUtils.invokeMethod(aspectJExpressionPointcut,
-					"setCurrentProxiedBeanName", new Object[] {
-					targetBean.getElementName()}, new Class[] {String.class});
+			
+			// expose bean name on thread local
+			Class<?> proxyCreationContextClass = ClassUtils
+					.loadClass(ProxyCreationContext.class);
+			ClassUtils.invokeMethod(proxyCreationContextClass,
+					"setCurrentProxiedBeanName", new Object[] { targetBean
+							.getElementName() }, new Class[] { String.class });
 			try {
 				ReflectionUtils.doWithMethods(targetClass, mc);
 			}
 			finally {
-				ClassUtils.invokeMethod(aspectJExpressionPointcut,
-						"setCurrentProxiedBeanName", new Object[] {null}, 
-						new Class[] {String.class});
+				ClassUtils.invokeMethod(proxyCreationContextClass,
+						"setCurrentProxiedBeanName", new Object[] { null },
+						new Class[] { String.class });
 			}
-
-			// do it again without the exposed bean name
-			ReflectionUtils.doWithMethods(targetClass, mc);
 		}
 	}
-
-	private boolean isInfrastructureClass(Class<?> beanClass)
-			throws ClassNotFoundException {
-		Class<?> advisorClass = ClassUtils.loadClass(Advisor.class);
-		Class<?> adviceClass = ClassUtils.loadClass(Advice.class);
-		Class<?> aopInfrastructureBean = ClassUtils
-				.loadClass(AopInfrastructureBean.class);
-		return advisorClass.isAssignableFrom(beanClass)
-				|| adviceClass.isAssignableFrom(beanClass)
-				|| aopInfrastructureBean.isAssignableFrom(beanClass);
-	}
-
+	
 	/**
 	 * Checks if the given matching candidate method is a legal match for Spring
 	 * AOP.
@@ -165,6 +155,33 @@ public class AspectDefinitionMatcher {
 		}
 	}
 
+	private Object initAspectJExpressionPointcut(IAspectDefinition info)
+			throws Throwable {
+
+		Class<?> expressionPointcutClass = ClassUtils
+				.loadClass(AspectJExpressionPointcut.class);
+		Object pc = expressionPointcutClass.newInstance();
+		for (Method m : expressionPointcutClass.getMethods()) {
+			if (m.getName().equals("setExpression")) {
+				m.invoke(pc, info.getPointcutExpression());
+			}
+		}
+		ClassUtils.invokeMethod(pc, "setPointcutDeclarationScope", ClassUtils
+				.loadClass(info.getAspectClassName()));
+		return pc;
+	}
+
+	private boolean isInfrastructureClass(Class<?> beanClass)
+			throws ClassNotFoundException {
+		Class<?> advisorClass = ClassUtils.loadClass(Advisor.class);
+		Class<?> adviceClass = ClassUtils.loadClass(Advice.class);
+		Class<?> aopInfrastructureBean = ClassUtils
+				.loadClass(AopInfrastructureBean.class);
+		return advisorClass.isAssignableFrom(beanClass)
+				|| adviceClass.isAssignableFrom(beanClass)
+				|| aopInfrastructureBean.isAssignableFrom(beanClass);
+	}
+
 	public Set<IMethod> matches(final Class<?> targetClass,
 			final IBean targetBean, final IAspectDefinition info,
 			final IProject project) throws Throwable {
@@ -210,6 +227,7 @@ public class AspectDefinitionMatcher {
 									throw (IllegalAccessException) e;
 								}
 								else {
+									org.springframework.ide.eclipse.aop.core.Activator.log(e);
 									// get the original exception out
 									throw new RuntimeException(e);
 								}
@@ -219,21 +237,5 @@ public class AspectDefinitionMatcher {
 				});
 
 		return matchingMethod;
-	}
-
-	private Object initAspectJExpressionPointcut(IAspectDefinition info)
-			throws Throwable {
-
-		Class<?> expressionPointcutClass = ClassUtils
-				.loadClass(BeanNameExposingAspectJExpressionPointcut.class);
-		Object pc = expressionPointcutClass.newInstance();
-		for (Method m : expressionPointcutClass.getMethods()) {
-			if (m.getName().equals("setExpression")) {
-				m.invoke(pc, info.getPointcutExpression());
-			}
-		}
-		ClassUtils.invokeMethod(pc, "setPointcutDeclarationScope", ClassUtils
-				.loadClass(info.getAspectClassName()));
-		return pc;
 	}
 }

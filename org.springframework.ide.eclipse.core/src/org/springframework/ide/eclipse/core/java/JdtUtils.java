@@ -282,7 +282,6 @@ public class JdtUtils {
 			paths.addAll(getBundleClassPath("org.aspectj.aspectjweaver"));
 			paths.addAll(getBundleClassPath("jakarta.commons.logging"));
 			paths.addAll(getBundleClassPath("org.objectweb.asm"));
-			paths.addAll(getBundleClassPath("org.springframework.ide.eclipse.aop.core"));
 		}
 
 		try {

@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.core.java;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
@@ -19,6 +18,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -88,36 +88,25 @@ public class ClassUtils {
 			return null;
 		}
 
-		Class targetClass = target.getClass();
-		Method targetMethod = null;
-
-		List<Object> parameterClasses = new ArrayList<Object>();
 		if (parameters != null && parameters.length > 0) {
+			List<Object> parameterClasses = new ArrayList<Object>();
 			for (Object parameter : parameters) {
 				parameterClasses.add(parameter.getClass());
 			}
-			targetMethod = targetClass.getMethod(methodName, parameterClasses
-					.toArray(new Class[parameterClasses.size()]));
+			return invokeMethod(target, methodName, parameters, 
+					parameterClasses.toArray(new Class[parameterClasses.size()]));
 		}
 		else {
-			targetMethod = targetClass.getMethod(methodName, (Class[]) null);
+			return invokeMethod(target, methodName, parameters, new Class[0]);
 		}
-
-		if (targetMethod != null) {
-			try {
-				return targetMethod.invoke(target, parameters);
-			}
-			catch (InvocationTargetException e) {
-				throw e.getCause();
-			}
-		}
-		return null;
-
 	}
 
 	/**
 	 * Invokes a target method identified by given <code>methodName</code>,
 	 * <code>parameters</code> and <code>parameterClasses</code>.
+	 * <p>
+	 * If the <code>target</code> is an instance of {@link Class} this method
+	 * assumes that the invocation should be made statically.
 	 * <p>
 	 * Note: This method - in contrast to the
 	 * {@link #invokeMethod(Object, String, Object...)} method - does support
@@ -132,20 +121,19 @@ public class ClassUtils {
 		}
 
 		Class targetClass = target.getClass();
-		Method targetMethod = targetClass.getMethod(methodName,
-				parameterClasses);
+		if (target instanceof Class) {
+			targetClass = (Class) target;
+		}
+		Method targetMethod = ReflectionUtils.findMethod(targetClass, 
+				methodName, parameterClasses);
 
 		if (targetMethod != null) {
-			
-			if (!targetMethod.isAccessible()) {
-				targetMethod.setAccessible(true);
+			ReflectionUtils.makeAccessible(targetMethod);
+			if (target instanceof Class) {
+				return ReflectionUtils.invokeMethod(targetMethod, null, parameters);
 			}
-			
-			try {
-				return targetMethod.invoke(target, parameters);
-			}
-			catch (InvocationTargetException e) {
-				throw e.getCause();
+			else {
+				return ReflectionUtils.invokeMethod(targetMethod, target, parameters);
 			}
 		}
 		return null;
