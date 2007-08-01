@@ -70,15 +70,16 @@
          </topic>
          <topic label="Dependencies" href="beans.html#beans-dependencies">
             <topic label="Injecting dependencies" href="beans.html#beans-factory-collaborators">
+               <topic label="Constructor Injection" href="beans.html#beans-constructor-injection">
+                  <topic label="Constructor Argument Resolution" href="beans.html#beans-factory-ctor-arguments-resolution">
+                     <topic label="Constructor Argument Type Matching" href="beans.html#beans-factory-ctor-arguments-type"/>
+                     <topic label="Constructor Argument Index" href="beans.html#beans-factory-ctor-arguments-index"/>
+                  </topic>
+               </topic>
                <topic label="Setter Injection" href="beans.html#beans-setter-injection"/>
-               <topic label="Constructor Injection" href="beans.html#beans-constructor-injection"/>
                <topic label="Some examples" href="beans.html#beans-some-examples"/>
             </topic>
-            <topic label="Constructor Argument Resolution" href="beans.html#beans-factory-ctor-arguments-resolution">
-               <topic label="Constructor Argument Type Matching" href="beans.html#beans-factory-ctor-arguments-type"/>
-               <topic label="Constructor Argument Index" href="beans.html#beans-factory-ctor-arguments-index"/>
-            </topic>
-            <topic label="Bean properties and constructor arguments detailed" href="beans.html#beans-factory-properties-detailed">
+            <topic label="Dependencies and configuration in detail" href="beans.html#beans-factory-properties-detailed">
                <topic label="Straight values (primitives, Strings, etc.)" href="beans.html#beans-value-element">
                   <topic label="The idref element" href="beans.html#beans-idref-element"/>
                </topic>
@@ -150,14 +151,13 @@
             <topic label="Customizing instantiation logic using FactoryBeans" href="beans.html#beans-factory-extension-factorybean"/>
          </topic>
          <topic label="The ApplicationContext" href="beans.html#context-introduction">
+            <topic label="BeanFactory or ApplicationContext?" href="beans.html#context-introduction-ctx-vs-beanfactory"/>
             <topic label="Internationalization using MessageSources" href="beans.html#context-functionality-messagesource"/>
             <topic label="Events" href="beans.html#context-functionality-events"/>
             <topic label="Convenient access to low-level resources" href="beans.html#context-functionality-resources"/>
             <topic label="Convenient ApplicationContext instantiation for web applications" href="beans.html#context-create"/>
          </topic>
-         <topic label="Glue code and the evil singleton" href="beans.html#beans-glue-code-and-singletons">
-            <topic label="Using the Singleton-helper classes" href="beans.html#beans-singleton-helper"/>
-         </topic>
+         <topic label="Glue code and the evil singleton" href="beans.html#beans-glue-code-and-singletons"/>
          <topic label="Annotation-based configuration" href="beans.html#beans-annotation-config">
             <topic label="@Autowired" href="beans.html#beans-autowired-annotation"/>
             <topic label="@Resource" href="beans.html#beans-resource-annotation"/>
@@ -167,8 +167,9 @@
             <topic label="@Component and @Repository" href="beans.html#beans-stereotype-annotations"/>
             <topic label="Using filters to customize scanning" href="beans.html#beans-scanning-filters"/>
             <topic label="Naming auto-detected beans" href="beans.html#beans-scanning-name-generator"/>
-            <topic label="Providing Scope for auto-detected beans" href="beans.html#beans-scanning-scope-resolver"/>
+            <topic label="Providing a scope for auto-detected beans" href="beans.html#beans-scanning-scope-resolver"/>
          </topic>
+         <topic label="Registering a LoadTimeWeaver" href="beans.html#context-load-time-weaver"/>
       </topic>
       <topic label="Resources" href="resources.html">
          <topic label="Introduction" href="resources.html#resources-introduction"/>
@@ -205,7 +206,9 @@
          <topic label="Bean manipulation and the BeanWrapper" href="validation.html#beans-beans">
             <topic label="Setting and getting basic and nested properties" href="validation.html#beans-beans-conventions"/>
             <topic label="Built-in PropertyEditor implementations" href="validation.html#beans-beans-conversion">
-               <topic label="Registering additional custom PropertyEditors" href="validation.html#beans-beans-conversion-customeditor-registration"/>
+               <topic label="Registering additional custom PropertyEditors" href="validation.html#beans-beans-conversion-customeditor-registration">
+                  <topic label="Using PropertyEditorRegistrars" href="validation.html#beans-beans-conversion-customeditor-registration-per"/>
+               </topic>
             </topic>
          </topic>
       </topic>
@@ -275,7 +278,18 @@
             </topic>
             <topic label="Other Spring aspects for AspectJ" href="aop.html#aop-ajlib-other"/>
             <topic label="Configuring AspectJ aspects using Spring IoC" href="aop.html#aop-aj-configure"/>
-            <topic label="Using AspectJ Load-time weaving (LTW) with Spring applications" href="aop.html#aop-aj-ltw"/>
+            <topic label="Load-time weaving with AspectJ in the Spring Framework" href="aop.html#aop-aj-ltw">
+               <topic label="A first example" href="aop.html#aop-aj-ltw-first-example"/>
+               <topic label="Aspects" href="aop.html#aop-aj-ltw-the-aspects"/>
+               <topic label="'META-INF/aop.xml'" href="aop.html#aop-aj-ltw-aop_dot_xml"/>
+               <topic label="Required libraries (JARS)" href="aop.html#aop-aj-ltw-libraries"/>
+               <topic label="Spring configuration" href="aop.html#aop-aj-ltw-spring"/>
+               <topic label="Agents" href="aop.html#aop-aj-ltw-agents"/>
+               <topic label="Environment-specific configuration" href="aop.html#aop-aj-ltw-environments">
+                  <topic label="Tomcat" href="aop.html#aop-aj-ltw-environments-tomcat"/>
+                  <topic label="GlassFish" href="aop.html#aop-aj-ltw-environments-glassfish"/>
+               </topic>
+            </topic>
          </topic>
          <topic label="Further Resources" href="aop.html#aop-resources"/>
       </topic>
@@ -372,6 +386,11 @@
             <topic label="&lt;tx:advice/&gt; settings" href="transaction.html#transaction-declarative-txadvice-settings"/>
             <topic label="Using @Transactional" href="transaction.html#transaction-declarative-annotations">
                <topic label="@Transactional settings" href="transaction.html#transaction-declarative-attransactional-settings"/>
+            </topic>
+            <topic label="Transaction propagation" href="transaction.html#tx-propagation">
+               <topic label="Required" href="transaction.html#tx-propagation-required"/>
+               <topic label="RequiresNew" href="transaction.html#tx-propagation-requires_new"/>
+               <topic label="Nested" href="transaction.html#tx-propagation-nested"/>
             </topic>
             <topic label="Advising transactional operations" href="transaction.html#transaction-declarative-applying-more-than-just-tx-advice"/>
             <topic label="Using @Transactional with AspectJ" href="transaction.html#transaction-declarative-aspectj"/>
@@ -738,8 +757,9 @@
             <topic label="Asynchronous Reception - Message-Driven POJOs" href="jms.html#jms-asynchronousMessageReception"/>
             <topic label="The SessionAwareMessageListener interface" href="jms.html#jms-receiving-async-session-aware-message-listener"/>
             <topic label="The MessageListenerAdapter" href="jms.html#jms-receiving-async-message-listener-adapter"/>
-            <topic label="Participating in transactions" href="jms.html#jms-tx-participation"/>
+            <topic label="Processing messages within transactions" href="jms.html#jms-tx-participation"/>
          </topic>
+         <topic label="JMS Namespace Support" href="jms.html#jms-namespace"/>
       </topic>
       <topic label="JMX" href="jmx.html">
          <topic label="Introduction" href="jmx.html#jmx-introduction"/>
@@ -917,8 +937,16 @@
             <topic label="&lt;jee:remote-slsb/&gt;" href="xsd-config.html#xsd-config-body-schemas-jee-remote-slsb"/>
          </topic>
          <topic label="The lang schema" href="xsd-config.html#xsd-config-body-schemas-lang"/>
+         <topic label="The jms schema" href="xsd-config.html#xsd-config-body-schemas-jms"/>
          <topic label="The tx (transaction) schema" href="xsd-config.html#xsd-config-body-schemas-tx"/>
          <topic label="The aop schema" href="xsd-config.html#xsd-config-body-schemas-aop"/>
+         <topic label="The context schema" href="xsd-config.html#xsd-config-body-schemas-context">
+            <topic label="&lt;property-placeholder/&gt;" href="xsd-config.html#xsd-config-body-schemas-context-pphc"/>
+            <topic label="&lt;annotation-config/&gt;" href="xsd-config.html#xsd-config-body-schemas-context-ac"/>
+            <topic label="&lt;component-scan/&gt;" href="xsd-config.html#xsd-config-body-schemas-context-component-scan"/>
+            <topic label="&lt;load-time-weaver/&gt;" href="xsd-config.html#xsd-config-body-schemas-context-ltw"/>
+            <topic label="&lt;spring-configured/&gt;" href="xsd-config.html#xsd-config-body-schemas-context-sc"/>
+         </topic>
          <topic label="The tool schema" href="xsd-config.html#xsd-config-body-schemas-tool"/>
          <topic label="The beans schema" href="xsd-config.html#xsd-config-body-schemas-beans"/>
       </topic>
