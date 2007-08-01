@@ -128,7 +128,7 @@ public class NewSpringProjectWizard extends Wizard implements INewWizard,
 			IPath output = (outputDir.length() == 0 ? project.getFullPath()
 					: project.getFolder(outputDir).getFullPath());
 			IClasspathEntry[] cpEntries = new IClasspathEntry[] {
-					JdtUtils.getJREVariableEntry(),
+					JdtUtils.getJreVariableEntry(),
 					JavaCore.newSourceEntry(source) };
 			jccp.init(jproject, output, cpEntries, true);
 		}

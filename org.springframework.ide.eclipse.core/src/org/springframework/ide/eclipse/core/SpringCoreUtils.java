@@ -345,8 +345,7 @@ public final class SpringCoreUtils {
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) {
 				try {
-					project
-							.build(IncrementalProjectBuilder.FULL_BUILD,
+					project.build(IncrementalProjectBuilder.FULL_BUILD,
 									monitor);
 					return Status.OK_STATUS;
 				}
