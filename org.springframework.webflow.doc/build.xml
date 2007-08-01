@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+
+<!--
+    Build file for the reference documentation of the Spring Framework.
+
+    $Id: builddoc.xml 1617 2007-03-08 22:58:47Z cdupuis $
+
+    This script requires a "lib" directory containing the necessary third party JAR files.
+    See build.properties for the definitions of the properties used in this file.
+-->
+
+<project name="spring-docs" default="usage" basedir=".">
+
+	<property file="build.properties" />
+
+	<target name="usage">
+		<echo message="" />
+		<echo message="spring-docs build file" />
+		<echo message="------------------------------------------------------" />
+		<echo message="" />
+		<echo message="Available targets:" />
+		<echo message="" />
+		<echo message="doc.html --> build HTML documentation" />
+		<echo message="doc.clean --> delete HTML documentation" />
+		<echo message="" />
+	</target>
+
+
+	<target name="doc.clean" description="Delete temporary and distribution directories for docs">
+		<delete quiet="true" dir="${basedir}/${dist.ref.dir}" />
+		<delete quiet="true" file="${basedir}/doc.zip" />
+		<delete quiet="true" file="${basedir}/toc.xml" />
+		<delete quiet="true" dir="${basedir}/../samples" />
+	</target>
+
+
+	<target name="doc.html" description="Compile reference documentation to chunked html" depends="doc.clean">
+
+		<copy todir="${basedir}/${doc.ref.dir}">
+			<fileset dir="${spring.home}/docs/reference">
+				<include name="**/*" />
+			</fileset>
+		</copy>
+
+		<mkdir dir="${basedir}/${dist.ref.dir}" />
+
+		<copy file="${basedir}/styles/eclipse.xsl" todir="${basedir}/${doc.ref.dir}/styles" />
+
+		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${basedir}/${dist.ref.dir}">
+			<classpath>
+				<fileset dir="${basedir}/${doc.ref.dir}/lib">
+					<include name="**/*.jar" />
+				</fileset>
+			</classpath>
+			<arg value="${basedir}/${doc.ref.dir}/src/index.xml" />
+			<arg value="${basedir}/${doc.ref.dir}/styles/eclipse.xsl" />
+		</java>
+
+		<move file="${basedir}/${dist.ref.dir}/toc.xml" todir="${basedir}" />
+
+		<zip destfile="${basedir}/doc.zip">
+			<fileset dir="${basedir}/${doc.ref.dir}/src">
+				<include name="images/*" />
+			</fileset>
+			<fileset file="${basedir}/${doc.ref.dir}/styles/html.css" />
+			<fileset dir="${basedir}/${dist.ref.dir}" excludes="toc.xml" />
+		</zip>
+	</target>
+
+</project>
