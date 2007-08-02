@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.validation;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -50,7 +50,7 @@ public class BeansValidationContext extends AbstractValidationContext {
 
 	private ClassReaderFactory classReaderFactory;
 
-	private Map<String, BeanLookupResultHolder> beanLookupCache;
+	private Map<String, BeanDefinition> beanLookupCache;
 
 	public BeansValidationContext(IBeansConfig config,
 			IResourceModelElement contextElement) {
@@ -62,7 +62,7 @@ public class BeansValidationContext extends AbstractValidationContext {
 		incompleteRegistry = createRegistry(config, contextElement, false);
 		completeRegistry = createRegistry(config, contextElement, true);
 
-		beanLookupCache = new ConcurrentHashMap<String, BeanLookupResultHolder>();
+		beanLookupCache = new HashMap<String, BeanDefinition>();
 	}
 
 	public BeanDefinitionRegistry getIncompleteRegistry() {
@@ -155,29 +155,12 @@ public class BeansValidationContext extends AbstractValidationContext {
 
 		String key = beanClass + KEY_SEPARATOR_CHAR + beanName;
 		if (beanLookupCache.containsKey(key)) {
-			return beanLookupCache.get(key).isBeanRegistered();
+			return beanLookupCache.get(key) != null;
 		}
-		BeanLookupResultHolder holder = new BeanLookupResultHolder(
-				ValidationRuleUtils.getBeanDefinition(beanName, beanClass, this));
-		beanLookupCache.put(key, holder);
-		return holder.isBeanRegistered();
-	}
-
-	private static class BeanLookupResultHolder {
-
-		private final BeanDefinition beanDefinition;
-
-		protected BeanLookupResultHolder(BeanDefinition beanDefinition) {
-			this.beanDefinition = beanDefinition;
-		}
-
-		public BeanDefinition getBeanDefinition() {
-			return beanDefinition;
-		}
-
-		public boolean isBeanRegistered() {
-			return beanDefinition != null;
-		}
-
+		BeanDefinition bd = ValidationRuleUtils.getBeanDefinition(beanName, 
+				beanClass, this);
+		// as we don't use a Hashtable we can insert null values
+		beanLookupCache.put(key, bd);
+		return bd != null;
 	}
 }
