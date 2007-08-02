@@ -122,9 +122,9 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 					// performance considerations
 					if (!(bd.isPrototype() && metadata.hasConfigurableAnnotation())
 							&& !(metadata.isConstructorAutowired() && 
-									ValidationRuleUtils.checkIfBeanIsRegistered(
+									context.isBeanRegistered(
 											AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME, 
-											AutowiredAnnotationBeanPostProcessor.class.getName(), context))) {
+											AutowiredAnnotationBeanPostProcessor.class.getName()))) {
 						context.error(bean, "NO_CONSTRUCTOR",
 								"No constructor with "
 										+ numArguments

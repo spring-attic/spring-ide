@@ -76,12 +76,9 @@ public class RequiredPropertyRule extends AbstractBeanValidationRule {
 					&& !ValidationRuleUtils.hasPlaceHolder(className)) {
 				IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(
 						bean).getProject(), className);
-				if (type != null
-						&& ValidationRuleUtils
-								.checkIfBeanIsRegistered(
-										AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
-										RequiredAnnotationBeanPostProcessor.class
-												.getName(), context)) {
+				if (type != null && context.isBeanRegistered(
+					AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
+					RequiredAnnotationBeanPostProcessor.class.getName())) {
 					validatePropertyNames(type, bean, mergedBd, context);
 				}
 			}

@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  * Helpers for validation rules.
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
 public final class ValidationRuleUtils {
@@ -85,10 +86,10 @@ public final class ValidationRuleUtils {
 	/**
 	 * Checks if a been registered in the {@link BeanDefinitionRegistry}.
 	 */
-	public static boolean checkIfBeanIsRegistered(String beanName, String beanClass,
+	public static BeanDefinition getBeanDefinition(String beanName, String beanClass,
 			BeansValidationContext context) {
 		try {
-			return context.getCompleteRegistry().getBeanDefinition(beanName) != null;
+			return context.getCompleteRegistry().getBeanDefinition(beanName);
 		}
 		catch (NoSuchBeanDefinitionException e) {
 			// fall back for manual installation of the post processor
@@ -101,14 +102,14 @@ public final class ValidationRuleUtils {
 							&& Introspector.doesExtend(JdtUtils.getJavaType(
 									context.getRootElementProject(), db
 											.getBeanClassName()), beanClass)) {
-						return true;
+						return db;
 					}
 				}
 				catch (BeanDefinitionStoreException e1) {
 					// ignore here
 				}
 			}
-			return false;
+			return null;
 		}
 	}
 }
