@@ -18,6 +18,7 @@ import java.util.Set;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.StringUtils;
@@ -26,7 +27,7 @@ import org.springframework.ide.eclipse.core.StringUtils;
  * Helper methods for examining a Java {@link IType}.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
- * @author Pierre-Antoine GrŽgoire
+ * @author Pierre-Antoine Gregoire
  */
 public final class Introspector {
 
@@ -332,32 +333,16 @@ public final class Introspector {
 	 * looking for
 	 */
 	public static boolean doesImplement(IType type, String interfaceName) {
-		if (interfaceName != null && interfaceName.length() > 0) {
+		if (type != null && type.exists() && interfaceName != null && interfaceName.length() > 0) {
 			try {
-				while (type != null) {
-					String[] interfaces = type.getSuperInterfaceNames();
-					if (interfaces != null) {
-						for (String iface : interfaces) {
-							if (iface.equals(interfaceName)) {
-								return true;
-							}
-
-							// Check if this interface extends the given
-							// interface
-							IType ifaceType = type.getJavaProject().findType(
-									iface);
-							if (ifaceType != null) {
-								if (doesImplement(ifaceType, interfaceName)) {
-									return true;
-								}
-							}
-						}
-					}
-					type = getSuperType(type);
+				IType requiredType = type.getJavaProject().findType(interfaceName);
+				if (requiredType != null && requiredType.isInterface()) {
+					ITypeHierarchy hierachy = SuperTypeHierarchyCache.getTypeHierarchy(type);
+					return hierachy.contains(requiredType);
 				}
 			}
 			catch (JavaModelException e) {
-				// BeansCorePlugin.log(e);
+				SpringCore.log(e);
 			}
 		}
 		return false;
@@ -395,13 +380,12 @@ public final class Introspector {
 	 * @param className the full qualified name of the class we are looking for
 	 */
 	public static boolean doesExtend(IType type, String className) {
-		if (className != null && className.length() > 0) {
+		if (type != null && type.exists() && className != null && className.length() > 0) {
 			try {
-				while (type != null) {
-					if (className.equals(type.getFullyQualifiedName())) {
-						return true;
-					}
-					type = getSuperType(type);
+				IType requiredType = type.getJavaProject().findType(className);
+				if (requiredType != null && !requiredType.isInterface()) {
+					ITypeHierarchy hierachy = SuperTypeHierarchyCache.getTypeHierarchy(type);
+					return hierachy.contains(requiredType);
 				}
 			}
 			catch (JavaModelException e) {
