@@ -148,10 +148,10 @@ public class JdtUtils {
 					if (path.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
 						File file = path.getPath().toFile();
 						if (file.exists()) {
-							URL url = path.getPath().toFile().toURL();
-							paths.add(url);
+							paths.add(file.toURL());
 						}
 						else {
+							// case for project relative links
 							String projectName = path.getPath().segment(0);
 							IProject pathProject = ResourcesPlugin
 									.getWorkspace().getRoot().getProject(
@@ -160,9 +160,11 @@ public class JdtUtils {
 									.getProjectLocation(pathProject);
 							IPath relPath = path.getPath().removeFirstSegments(
 									1);
-							URL url = new URL("file:" + pathLocation
-									+ File.separator + relPath.toOSString());
-							paths.add(url);
+							file = new File(pathLocation + File.separator + 
+									relPath.toOSString());
+							if (file.exists()) {
+								paths.add(file.toURL());
+							}
 						}
 					}
 					else if (path.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
