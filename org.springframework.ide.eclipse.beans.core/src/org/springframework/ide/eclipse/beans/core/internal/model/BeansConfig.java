@@ -679,14 +679,6 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	}
 
 	private void readConfig() {
-		parseConfig();
-
-		// Create a problem marker for every parsing error
-		ValidationUtils.createProblemMarkers(file, problems,
-				BeansConfigValidator.MARKER_ID);
-	}
-
-	private void parseConfig() {
 		if (!this.isModelPopulated) {
 			try {
 				w.lock();
@@ -758,6 +750,10 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			finally {
 				this.isModelPopulated = true;
 				w.unlock();
+				
+				// Create a problem marker for every parsing error
+				ValidationUtils.createProblemMarkers(file, problems,
+						BeansConfigValidator.MARKER_ID);
 			}
 		}
 	}

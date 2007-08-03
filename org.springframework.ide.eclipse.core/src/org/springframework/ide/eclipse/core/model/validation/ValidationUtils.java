@@ -32,8 +32,10 @@ public final class ValidationUtils {
 	 */
 	public static void createProblemMarkers(IResource resource,
 			Set<ValidationProblem> problems, String markerId) {
-		for (ValidationProblem problem : problems) {
-			createProblemMarker(resource, problem, markerId);
+		if (problems != null) {
+			for (ValidationProblem problem : problems) {
+				createProblemMarker(resource, problem, markerId);
+			}
 		}
 	}
 

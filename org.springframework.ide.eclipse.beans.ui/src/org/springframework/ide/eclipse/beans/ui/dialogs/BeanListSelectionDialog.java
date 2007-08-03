@@ -83,13 +83,18 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 	private static class BeanFilter extends ViewerFilter {
 
 		private Pattern pattern;
+		
+		private List<IBean> beanActivationHistory;
+		
+		protected BeanFilter(List<IBean> historyBeans) {
+			this.beanActivationHistory = historyBeans;
+		}
 
 		@Override
 		public boolean select(Viewer viewer, Object parentElement,
 				Object element) {
 			if (pattern == null) {
-				return BeansUIActivationHistory.getBeanActivationHistory()
-						.contains(element);
+				return beanActivationHistory.contains(element);
 			}
 			if (element instanceof IBean) {
 				IBean bean = (IBean) element;
@@ -198,13 +203,14 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 
 		final Set<IBean> beanList = new LinkedHashSet<IBean>();
 		final List<IBean> historyList = new ArrayList<IBean>();
+		final List<IBean> historyBeans = new ArrayList<IBean>();
 		IRunnableWithProgress runnable = new IRunnableWithProgress() {
 			public void run(final IProgressMonitor monitor)
 					throws InvocationTargetException, InterruptedException {
 				try {
 
-					List<IBean> historyBeans = BeansUIActivationHistory
-							.getBeanActivationHistory();
+					historyBeans.addAll(BeansUIActivationHistory
+							.getBeanActivationHistory());
 					Collections.reverse(historyBeans);
 					historyList.addAll(historyBeans);
 
@@ -232,7 +238,7 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 
 		viewer.setInput(beanList);
 
-		final BeanListSelectionDialog.BeanFilter filter = new BeanListSelectionDialog.BeanFilter();
+		final BeanListSelectionDialog.BeanFilter filter = new BeanListSelectionDialog.BeanFilter(historyBeans);
 		viewer.addFilter(filter);
 		viewer.setComparator(new ViewerComparator() {
 
