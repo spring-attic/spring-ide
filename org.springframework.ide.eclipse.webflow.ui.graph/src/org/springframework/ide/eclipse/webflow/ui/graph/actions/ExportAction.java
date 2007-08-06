@@ -54,21 +54,10 @@ import org.springframework.ide.eclipse.webflow.ui.graph.WebflowImages;
  */
 public class ExportAction extends WorkbenchPartAction {
 
-	/**
-	 * 
-	 */
 	public static final String ID = "Export_action";
 
-	/**
-	 * 
-	 */
 	private WebflowEditor editor;
 
-	/**
-	 * 
-	 * 
-	 * @param part
-	 */
 	public ExportAction(WebflowEditor part) {
 		super(part);
 		this.editor = part;
@@ -79,10 +68,6 @@ public class ExportAction extends WorkbenchPartAction {
 		setDisabledImageDescriptor(WebflowImages.DESC_OBJS_EXPORT_DISABLED);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jface.action.Action#run()
-	 */
 	public void run() {
 		SaveAsDialog dialog = new SaveAsDialog(getWorkbenchPart().getSite()
 				.getShell());
@@ -183,15 +168,6 @@ public class ExportAction extends WorkbenchPartAction {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.ui.actions.WorkbenchPartAction#calculateEnabled()
-	 */
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.gef.ui.actions.WorkbenchPartAction#calculateEnabled()
-	 */
 	protected boolean calculateEnabled() {
 		return true;
 	}

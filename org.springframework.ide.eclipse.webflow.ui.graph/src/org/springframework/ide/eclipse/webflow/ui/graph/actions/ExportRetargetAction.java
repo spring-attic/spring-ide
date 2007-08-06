@@ -13,19 +13,10 @@ package org.springframework.ide.eclipse.webflow.ui.graph.actions;
 import org.eclipse.ui.actions.RetargetAction;
 import org.springframework.ide.eclipse.webflow.ui.graph.WebflowImages;
 
-/**
- * 
- */
 public class ExportRetargetAction extends RetargetAction {
 
-    /**
-     * 
-     */
     public static final String ID = "Export_action";
 
-    /**
-     * 
-     */
     public ExportRetargetAction() {
         super(ExportAction.ID, "Export");
         setToolTipText("Exports the web flow to an image");

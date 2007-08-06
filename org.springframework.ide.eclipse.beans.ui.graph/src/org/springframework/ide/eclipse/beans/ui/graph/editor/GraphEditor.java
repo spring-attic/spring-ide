@@ -88,6 +88,7 @@ import org.springframework.ide.eclipse.beans.ui.graph.actions.OpenConfigFile;
 import org.springframework.ide.eclipse.beans.ui.graph.actions.OpenJavaType;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Graph;
 import org.springframework.ide.eclipse.beans.ui.graph.parts.GraphicalPartFactory;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
@@ -578,7 +579,7 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 		dialog.create();
 		dialog.setMessage(BeansGraphPlugin
 				.getResourceString("Editor.SaveAsDialog.message"));
-		dialog.setOriginalName("graph.jpg");
+		dialog.setOriginalName("graph.png");
 		dialog.open();
 		IPath path = dialog.getResult();
 		if (path != null) {
@@ -588,7 +589,8 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 			if (ext == null
 					|| ext.length() == 0
 					|| !(ext.equalsIgnoreCase("jpg") || ext
-							.equalsIgnoreCase("bmp"))) {
+							.equalsIgnoreCase("bmp") || ext
+							.equalsIgnoreCase("png"))) {
 				ErrorDialog
 						.openError(
 								getSite().getShell(),
@@ -599,9 +601,28 @@ public class GraphEditor extends EditorPart implements ISelectionListener {
 										.createErrorStatus(BeansGraphPlugin
 												.getResourceString("Editor.SaveAsDialog.error")));
 			}
+			else if (ext.equalsIgnoreCase("PNG")
+					&& !SpringCoreUtils.isEclipseSameOrNewer(3, 3)) {
+				ErrorDialog
+						.openError(
+								getSite().getShell(),
+								"Problem",
+								"Exporting to PNG format is only supported on Eclipse 3.3 or newer",
+								BeansGraphPlugin
+									.createErrorStatus(BeansGraphPlugin
+										.getResourceString("Editor.SaveAsDialog.error")));
+			}
 			else {
-				saveImage(file, (ext.equalsIgnoreCase("jpg") ? SWT.IMAGE_JPEG
-						: SWT.IMAGE_BMP));
+				if ("PNG".equalsIgnoreCase(ext)) {
+					saveImage(file, SWT.IMAGE_PNG);
+				}
+				else if ("JPG".equalsIgnoreCase(ext)
+						|| "JPEG".equalsIgnoreCase(ext)) {
+					saveImage(file, SWT.IMAGE_JPEG);
+				}
+				else if ("BMP".equalsIgnoreCase(ext)) {
+					saveImage(file, SWT.IMAGE_BMP);
+				}
 			}
 		}
 	}
