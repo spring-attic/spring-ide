@@ -34,7 +34,6 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
@@ -639,10 +638,7 @@ public final class BeansModelUtils {
 			// Fill a set with all bean definitions belonging to the
 			// hierarchy of the requested bean definition
 			List<BeanDefinition> beanDefinitions = new ArrayList<BeanDefinition>(); // used
-			// to
-			// detect
-			// a
-			// cycle
+			// to detect a cycle
 			beanDefinitions.add(bd);
 			addBeanDefinition(bean, context, beanDefinitions);
 
@@ -651,8 +647,7 @@ public final class BeansModelUtils {
 			RootBeanDefinition rbd = null;
 			int bdCount = beanDefinitions.size();
 			for (int i = bdCount - 1; i >= 0; i--) {
-				AbstractBeanDefinition abd = (AbstractBeanDefinition) beanDefinitions
-						.get(i);
+				BeanDefinition abd = beanDefinitions.get(i);
 				if (rbd != null) {
 					rbd.overrideFrom(abd);
 				}
@@ -661,7 +656,6 @@ public final class BeansModelUtils {
 						rbd = new RootBeanDefinition((RootBeanDefinition) abd);
 					}
 					else {
-
 						// root of hierarchy is not a root bean definition
 						break;
 					}
@@ -1117,7 +1111,7 @@ public final class BeansModelUtils {
 			}
 			else {
 				name.append('<');
-				name.append(((ChildBeanDefinition) value).getParentName());
+				name.append(((BeanDefinition) value).getParentName());
 				name.append('>');
 			}
 		}

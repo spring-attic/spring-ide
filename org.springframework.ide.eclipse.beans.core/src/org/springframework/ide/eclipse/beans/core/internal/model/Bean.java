@@ -26,7 +26,6 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
@@ -168,10 +167,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 	}
 
 	public String getParentName() {
-		if (definition instanceof ChildBeanDefinition) {
-			return ((ChildBeanDefinition) definition).getParentName();
-		}
-		return null;
+		return definition.getParentName();
 	}
 
 	public boolean isRootBean() {
@@ -179,7 +175,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 	}
 
 	public boolean isChildBean() {
-		return (definition instanceof ChildBeanDefinition);
+		return definition.getParentName() != null;
 	}
 
 	public boolean isInnerBean() {

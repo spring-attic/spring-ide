@@ -12,10 +12,8 @@ package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
-import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
@@ -49,14 +47,12 @@ public class UniqueBeanNameGenerator implements BeanNameGenerator {
 			name.append(definition.getBeanClassName());
 		}
 		else {
-			if (definition instanceof ChildBeanDefinition) {
-				name.append(((ChildBeanDefinition) definition).getParentName());
+			if (definition.getParentName() != null) {
+				name.append(definition.getParentName());
 				name.append("$child");
 			}
-			else if (definition instanceof AbstractBeanDefinition
-					&& ((AbstractBeanDefinition) definition)
-							.getFactoryBeanName() != null) {
-				name.append(((AbstractBeanDefinition) definition)
+			else if (definition.getFactoryBeanName() != null) {
+				name.append(definition
 						.getFactoryBeanName());
 				name.append("$created");
 			} else {

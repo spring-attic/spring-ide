@@ -104,9 +104,8 @@ public class BeanReferenceRule implements
 			BeansValidationContext context) {
 		if (beanName != null && !ValidationRuleUtils.hasPlaceHolder(beanName)) {
 			try {
-				AbstractBeanDefinition dependsBd = (AbstractBeanDefinition)
-						context.getCompleteRegistry()
-								.getBeanDefinition(beanName);
+				BeanDefinition dependsBd = context.getCompleteRegistry()
+					.getBeanDefinition(beanName);
 				if (dependsBd.isAbstract()
 						|| (dependsBd.getBeanClassName() == null && dependsBd
 								.getFactoryBeanName() == null)) {
@@ -137,8 +136,8 @@ public class BeanReferenceRule implements
 		}
 		if (beanName != null && !ValidationRuleUtils.hasPlaceHolder(beanName)) {
 			try {
-				AbstractBeanDefinition refBd = (AbstractBeanDefinition) context
-						.getCompleteRegistry().getBeanDefinition(beanName);
+				BeanDefinition refBd = context.getCompleteRegistry().
+					getBeanDefinition(beanName);
 				if (refBd.isAbstract() || (refBd.getBeanClassName() == null
 						&& refBd.getFactoryBeanName() == null)) {
 					context.error(element, "INVALID_REFERENCED_BEAN",
@@ -157,8 +156,7 @@ public class BeanReferenceRule implements
 					try {
 						BeanDefinition def = context.getCompleteRegistry()
 								.getBeanDefinition(tempBeanName);
-						String beanClassName = ((AbstractBeanDefinition) def)
-								.getBeanClassName();
+						String beanClassName = def.getBeanClassName();
 						if (beanClassName != null) {
 							IType type = JdtUtils.getJavaType(BeansModelUtils
 									.getProject(element).getProject(),

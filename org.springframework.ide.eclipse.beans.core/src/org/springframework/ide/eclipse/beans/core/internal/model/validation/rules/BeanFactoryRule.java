@@ -16,7 +16,6 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -69,7 +68,7 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 					if (methodName != null && !ValidationRuleUtils
 							.hasPlaceHolder(methodName)) {
 						if (mergedClassName == null) {
-							if (!(bd instanceof ChildBeanDefinition)) {
+							if (bd.getParentName() == null) {
 								context.error(bean,
 										"BEAN_WITHOUT_CLASS_OR_PARENT",
 										"Factory method needs class from root "
