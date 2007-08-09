@@ -56,7 +56,6 @@ import org.w3c.dom.Text;
 
 /**
  * Helper methods for {@link AopReferenceModelNavigator}.
- * 
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -189,11 +188,9 @@ public class AopReferenceModelNavigatorUtils {
 	}
 
 	/**
-	 * Computes and returns the source reference.
-	 * 
-	 * This is taken from the computeHighlightRangeSourceReference() method in
-	 * the JavaEditor class which is used to populate the outline view
-	 * 
+	 * Computes and returns the source reference. This is taken from the
+	 * computeHighlightRangeSourceReference() method in the JavaEditor class
+	 * which is used to populate the outline view
 	 * @return the computed source reference
 	 */
 	public static ISourceReference computeHighlightRangeSourceReference(
@@ -247,10 +244,9 @@ public class AopReferenceModelNavigatorUtils {
 	private static boolean selectedOutsideJavaElement = false;
 
 	/**
-	 * Returns the most narrow java element including the given offset.
-	 * 
-	 * This is taken from the getElementAt(int offset, boolean reconcile) method
-	 * in the CompilationUnitEditor class.
+	 * Returns the most narrow java element including the given offset. This is
+	 * taken from the getElementAt(int offset, boolean reconcile) method in the
+	 * CompilationUnitEditor class.
 	 */
 	private static IJavaElement getElementAt(JavaEditor editor, int offset,
 			boolean reconcile) {
@@ -339,9 +335,12 @@ public class AopReferenceModelNavigatorUtils {
 	public static int getLineNumber(IMember member) {
 		try {
 			ICompilationUnit compUnit = member.getCompilationUnit();
-			Document document = new Document(compUnit.getBuffer().getContents());
-			return document
-					.getLineOfOffset(member.getSourceRange().getOffset());
+			if (compUnit != null) {
+				Document document = new Document(compUnit.getBuffer()
+						.getContents());
+				return document.getLineOfOffset(member.getSourceRange()
+						.getOffset());
+			}
 		}
 		catch (JavaModelException e) {
 		}

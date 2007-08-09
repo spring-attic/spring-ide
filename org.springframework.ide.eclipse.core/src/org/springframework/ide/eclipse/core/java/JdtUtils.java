@@ -510,7 +510,7 @@ public class JdtUtils {
 			catch (JavaModelException e) {
 			}
 		}
-		else if (element != null && element instanceof IType) {
+		else if (element != null && element instanceof IType && ((IType) element).getCompilationUnit() != null) {
 			try {
 				IType type = (IType) element;
 				int lines = 0;

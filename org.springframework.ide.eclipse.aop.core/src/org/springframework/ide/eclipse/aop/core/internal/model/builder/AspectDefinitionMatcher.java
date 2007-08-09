@@ -14,7 +14,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.aopalliance.aop.Advice;
@@ -26,6 +28,7 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.autoproxy.ProxyCreationContext;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -33,7 +36,6 @@ import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.ReflectionUtils.MethodCallback;
 
 /**
  * Utility class that tries to locate matches of Spring AOP configurations given
@@ -49,30 +51,8 @@ import org.springframework.util.ReflectionUtils.MethodCallback;
 @SuppressWarnings("restriction")
 public class AspectDefinitionMatcher {
 	
-	/**
-	 * Utility helper class that exposes the current beanName 
-	 */
-	private static class BeanNameExposingReflectionUtils {
-
-		public static void doWithMethods(IBean targetBean, Class targetClass,
-				Object aspectJExpressionPointcut, MethodCallback mc) throws Throwable {
-			
-			// expose bean name on thread local
-			Class<?> proxyCreationContextClass = ClassUtils
-					.loadClass(ProxyCreationContext.class);
-			ClassUtils.invokeMethod(proxyCreationContextClass,
-					"setCurrentProxiedBeanName", new Object[] { targetBean
-							.getElementName() }, new Class[] { String.class });
-			try {
-				ReflectionUtils.doWithMethods(targetClass, mc);
-			}
-			finally {
-				ClassUtils.invokeMethod(proxyCreationContextClass,
-						"setCurrentProxiedBeanName", new Object[] { null },
-						new Class[] { String.class });
-			}
-		}
-	}
+	private Map<IAspectDefinition, Object> pointcutExpressionCache = 
+		new HashMap<IAspectDefinition, Object>();
 	
 	/**
 	 * Checks if the given matching candidate method is a legal match for Spring
@@ -120,7 +100,14 @@ public class AspectDefinitionMatcher {
 	private Object createAspectJPointcutExpression(IAspectDefinition info)
 			throws Throwable {
 		try {
+			
+			if (pointcutExpressionCache.containsKey(info)) {
+				return pointcutExpressionCache.get(info);
+			}
+			
 			Object pc = initAspectJExpressionPointcut(info);
+			pointcutExpressionCache.put(info, pc);
+			
 			Class<?> aspectJAdviceClass = AspectJAdviceClassFactory
 					.getAspectJAdviceClass(info);
 			if (aspectJAdviceClass != null) {
@@ -171,40 +158,34 @@ public class AspectDefinitionMatcher {
 		return pc;
 	}
 
-	private boolean isInfrastructureClass(Class<?> beanClass)
-			throws ClassNotFoundException {
-		Class<?> advisorClass = ClassUtils.loadClass(Advisor.class);
-		Class<?> adviceClass = ClassUtils.loadClass(Advice.class);
-		Class<?> aopInfrastructureBean = ClassUtils
-				.loadClass(AopInfrastructureBean.class);
-		return advisorClass.isAssignableFrom(beanClass)
-				|| adviceClass.isAssignableFrom(beanClass)
-				|| aopInfrastructureBean.isAssignableFrom(beanClass);
-	}
-
-	public Set<IMethod> matches(final Class<?> targetClass,
+	private Set<IMethod> internalMatches(final Class<?> targetClass,
 			final IBean targetBean, final IAspectDefinition info,
 			final IProject project) throws Throwable {
-		final Set<IMethod> matchingMethod = new HashSet<IMethod>();
+		final Set<IMethod> matchingMethods = new HashSet<IMethod>();
 
 		// check if bean is an infrastructure class
 		if (isInfrastructureClass(targetClass)) {
-			return matchingMethod;
+			return matchingMethods;
 		}
 
 		final Object aspectJExpressionPointcut = createAspectJPointcutExpression(info);
+
+		if (!((Boolean) ClassUtils.invokeMethod(aspectJExpressionPointcut, 
+				"matches", targetClass))) {
+			return matchingMethods;
+		}
+		
 		final IType jdtTargetType = JdtUtils.getJavaType(project, targetClass
 				.getName());
 
-		BeanNameExposingReflectionUtils.doWithMethods(targetBean, targetClass, 
-				aspectJExpressionPointcut, new ReflectionUtils.MethodCallback() {
+		ReflectionUtils.doWithMethods(targetClass, new ReflectionUtils.MethodCallback() {
 					public void doWith(Method method)
 							throws IllegalArgumentException,
 							IllegalAccessException {
 
 						if (checkMethod(targetClass, method, info
 								.isProxyTargetClass())
-								&& !matchingMethod.contains(method)) {
+								&& !matchingMethods.contains(method)) {
 							try {
 								boolean matches = (Boolean) ClassUtils
 										.invokeMethod(
@@ -215,7 +196,7 @@ public class AspectDefinitionMatcher {
 											jdtTargetType, method.getName(),
 											method.getParameterTypes());
 									if (jdtMethod != null) {
-										matchingMethod.add(jdtMethod);
+										matchingMethods.add(jdtMethod);
 									}
 								}
 							}
@@ -227,7 +208,7 @@ public class AspectDefinitionMatcher {
 									throw (IllegalAccessException) e;
 								}
 								else {
-									org.springframework.ide.eclipse.aop.core.Activator.log(e);
+									Activator.log(e);
 									// get the original exception out
 									throw new RuntimeException(e);
 								}
@@ -235,7 +216,38 @@ public class AspectDefinitionMatcher {
 						}
 					}
 				});
-
-		return matchingMethod;
+		return matchingMethods;
+	}
+	
+	private boolean isInfrastructureClass(Class<?> beanClass)
+			throws ClassNotFoundException {
+		Class<?> advisorClass = ClassUtils.loadClass(Advisor.class);
+		Class<?> adviceClass = ClassUtils.loadClass(Advice.class);
+		Class<?> aopInfrastructureBean = ClassUtils
+				.loadClass(AopInfrastructureBean.class);
+		return advisorClass.isAssignableFrom(beanClass)
+				|| adviceClass.isAssignableFrom(beanClass)
+				|| aopInfrastructureBean.isAssignableFrom(beanClass);
+	}
+			
+	public Set<IMethod> matches(final Class<?> targetClass,
+			final IBean targetBean, final IAspectDefinition info,
+			final IProject project) throws Throwable {
+		
+		// expose bean name on thread local
+		Class<?> proxyCreationContextClass = ClassUtils
+			.loadClass(ProxyCreationContext.class);
+		ClassUtils.invokeMethod(proxyCreationContextClass,
+				"setCurrentProxiedBeanName", new Object[] { targetBean
+				.getElementName() }, new Class[] { String.class });
+		try {
+			return internalMatches(targetClass, targetBean, info, project);
+		}
+		finally {
+			// reset bean name on thread local
+			ClassUtils.invokeMethod(proxyCreationContextClass,
+					"setCurrentProxiedBeanName", new Object[] { null },
+					new Class[] { String.class });
+		}
 	}
 }
