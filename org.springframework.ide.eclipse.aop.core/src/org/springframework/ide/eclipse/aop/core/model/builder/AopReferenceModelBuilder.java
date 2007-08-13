@@ -382,7 +382,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 					IMarker.SEVERITY_ERROR, info.getAspectStartLineNumber(),
 					AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, info.getResource());
 		}
-		else if (t instanceof InvocationTargetException) {
+		else if (t instanceof InvocationTargetException || t instanceof RuntimeException) {
 			AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
 					"AopReferenceModelBuilder.exceptionFromReflectionOnBean", info, bean));
 			if (t.getCause() != null) {

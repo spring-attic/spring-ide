@@ -28,7 +28,6 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.autoproxy.ProxyCreationContext;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -208,7 +207,6 @@ public class AspectDefinitionMatcher {
 									throw (IllegalAccessException) e;
 								}
 								else {
-									Activator.log(e);
 									// get the original exception out
 									throw new RuntimeException(e);
 								}
