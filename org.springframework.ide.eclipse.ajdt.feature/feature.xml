@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.springframework.ide.eclipse.ajdt.feature"
+      label="%featureName"
+      version="2.0.1.qualifier"
+      provider-name="%providerName"
+      plugin="org.springframework.ide.eclipse">
+
+   <description>
+      %description
+   </description>
+
+   <copyright>
+      %copyright
+   </copyright>
+
+   <license url="%licenseUrl">
+      %license
+   </license>
+
+   <url>
+      <update label="%updateSiteName" url="http://springide.org/updatesite/"/>
+   </url>
+
+   <includes
+         id="org.springframework.ide.eclipse.ajdt.feature.source"
+         version="0.0.0"/>
+
+   <requires>
+      <import feature="org.springframework.ide.eclipse.feature" version="2.0.1" />
+      <import feature="org.springframework.ide.eclipse.aop.feature" version="2.0.1" />
+      <import feature="org.eclipse.ajdt" />
+   </requires>
+
+   <plugin
+         id="org.springframework.ide.eclipse.ajdt.ui.xref"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.springframework.ide.eclipse.ajdt.ui.visualiser"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
