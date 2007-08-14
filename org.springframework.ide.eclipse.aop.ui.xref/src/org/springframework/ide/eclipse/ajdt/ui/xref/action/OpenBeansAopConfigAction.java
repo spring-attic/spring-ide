@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.aop.ui.xref.action;
+package org.springframework.ide.eclipse.ajdt.ui.xref.action;
 
 import org.eclipse.contribution.xref.internal.ui.providers.TreeObject;
 import org.eclipse.core.resources.IFile;
@@ -19,7 +19,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
-import org.springframework.ide.eclipse.aop.ui.xref.AopReferenceModelNode;
+import org.springframework.ide.eclipse.ajdt.ui.xref.AopReferenceModelNode;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**

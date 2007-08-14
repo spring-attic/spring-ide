@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.aop.ui.visualiser;
+package org.springframework.ide.eclipse.ajdt.ui.visualiser;
 
 import java.util.ArrayList;
 import java.util.Hashtable;

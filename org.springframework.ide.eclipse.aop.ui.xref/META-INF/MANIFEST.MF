@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
-Bundle-SymbolicName: org.springframework.ide.eclipse.aop.ui.xref;singleton:=true
+Bundle-SymbolicName: org.springframework.ide.eclipse.ajdt.ui.xref;singleton:=true
 Bundle-Version: 2.0.1.qualifier
-Bundle-Activator: org.springframework.ide.eclipse.aop.ui.xref.Activator
+Bundle-Activator: org.springframework.ide.eclipse.ajdt.ui.xref.Activator
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.contribution.xref.ui,

@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.aop.ui.xref;
+package org.springframework.ide.eclipse.ajdt.ui.visualiser;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -19,7 +19,7 @@ import org.osgi.framework.BundleContext;
 public class Activator extends AbstractUIPlugin {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.aop.ui.xref";
+	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.aop.ui.visualiser";
 
 	// The shared instance
 	private static Activator plugin;
