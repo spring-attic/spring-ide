@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -60,6 +59,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
+import org.eclipse.ui.internal.misc.StringMatcher;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -74,6 +74,7 @@ import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  */
+@SuppressWarnings("restriction")
 public class BeanListSelectionDialog extends SelectionStatusDialog {
 
 	/**
@@ -82,7 +83,7 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 	 */
 	private static class BeanFilter extends ViewerFilter {
 
-		private Pattern pattern;
+		private StringMatcher matcher;
 		
 		private List<IBean> beanActivationHistory;
 		
@@ -93,28 +94,35 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 		@Override
 		public boolean select(Viewer viewer, Object parentElement,
 				Object element) {
-			if (pattern == null) {
+			if (matcher == null) {
 				return beanActivationHistory.contains(element);
 			}
 			if (element instanceof IBean) {
 				IBean bean = (IBean) element;
-				String beanString = bean.getElementName() + " - "
-						+ bean.getClassName();
-				return pattern.matcher(beanString).find();
+				if (matcher.match(bean.getElementName())) {
+					return true;
+				}
+				if (matcher.match(bean.getClassName())) {
+					return true;
+				}
+				String[] aliases = bean.getAliases();
+				if (aliases != null) {
+					for (String alias : aliases) {
+						if (matcher.match(alias)) {
+							return true;
+						}
+					}
+				}
 			}
 			return false;
 		}
 
 		public void setFilterText(String filterText) {
 			if (filterText.trim().equals("")) {
-				pattern = null;
+				matcher = null;
 			}
 			else {
-				filterText = filterText.replace("\\", "\\\\");
-				filterText = filterText.replace(".", "\\.");
-				filterText = filterText.replace("*", ".*");
-				filterText = filterText.replace("?", ".?");
-				pattern = Pattern.compile(filterText, Pattern.CASE_INSENSITIVE);
+				matcher = new StringMatcher(filterText + '*', true, false);
 			}
 		}
 	}
