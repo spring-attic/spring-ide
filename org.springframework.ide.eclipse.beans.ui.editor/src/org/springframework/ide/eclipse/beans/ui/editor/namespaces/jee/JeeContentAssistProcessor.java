@@ -34,11 +34,7 @@ public class JeeContentAssistProcessor extends AbstractContentAssistProcessor {
 	protected void computeAttributeValueProposals(ContentAssistRequest request,
 			IDOMNode node, String matchString, String attributeName,
 			String namespace, String prefix) {
-		String nodeName = node.getNodeName();
-		if (prefix != null && nodeName.startsWith(prefix)) {
-			nodeName = nodeName.substring(prefix.length() + 1);
-		}
-
+		String nodeName = node.getLocalName();
 		if ("jndi-lookup".equals(nodeName)) {
 			if ("expected-type".equals(attributeName)) {
 				addInterfaceAttributeValueProposals(request, matchString);

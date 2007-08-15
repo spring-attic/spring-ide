@@ -147,7 +147,8 @@ public class WebflowContentAssistProcessor extends
 
 	@Override
 	protected void computeAttributeValueProposals(ContentAssistRequest request,
-			IDOMNode node, String matchString, String attributeName) {
+			IDOMNode node, String matchString, String attributeName,
+			String namespace, String prefix) {
 		String nodeName = node.getLocalName();
 		if ("action".equals(nodeName)) {
 			// bean

@@ -53,12 +53,7 @@ public class AopContentAssistProcessor extends AbstractContentAssistProcessor
 	protected void computeAttributeValueProposals(ContentAssistRequest request,
 			IDOMNode node, String matchString, String attributeName,
 			String namespace, String prefix) {
-
-		String nodeName = node.getNodeName();
-		if (prefix != null) {
-			nodeName = nodeName.substring(prefix.length() + 1);
-		}
-
+		String nodeName = node.getLocalName();
 		if ("aspect".equals(nodeName)) {
 			if ("ref".equals(attributeName)) {
 				addBeanReferenceProposals(request, matchString, node

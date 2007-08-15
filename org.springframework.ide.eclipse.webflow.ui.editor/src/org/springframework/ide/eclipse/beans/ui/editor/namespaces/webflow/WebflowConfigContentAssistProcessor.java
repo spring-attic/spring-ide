@@ -76,13 +76,9 @@ public class WebflowConfigContentAssistProcessor extends
 
 	@Override
 	protected void computeAttributeValueProposals(ContentAssistRequest request,
-			IDOMNode node, String matchString, String attributeName) {
-		String nodeName = node.getNodeName();
-		String prefix = node.getPrefix();
-		if (prefix != null) {
-			nodeName = nodeName.substring(prefix.length() + 1);
-		}
-
+			IDOMNode node, String matchString, String attributeName,
+			String namespace, String prefix) {
+		String nodeName = node.getLocalName();
 		if ("executor".equals(nodeName)) {
 			if ("registry-ref".equals(attributeName)) {
 				addBeanReferenceProposals(request, matchString, node, true);

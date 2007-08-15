@@ -29,7 +29,7 @@ public class TxContentAssistProcessor extends AbstractContentAssistProcessor {
 	protected void computeAttributeValueProposals(ContentAssistRequest request,
 			IDOMNode node, String matchString, String attributeName,
 			String namespace, String prefix) {
-		String nodeName = node.getNodeName();
+		String nodeName = node.getLocalName();
 		if (prefix != null && nodeName.startsWith(prefix)) {
 			nodeName = nodeName.substring(prefix.length() + 1);
 		}

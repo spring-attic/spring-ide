@@ -18,8 +18,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionU
 import org.w3c.dom.Node;
 
 @SuppressWarnings("restriction")
-public class OsgiContentAssistProcessor extends
-		AbstractContentAssistProcessor {
+public class OsgiContentAssistProcessor extends AbstractContentAssistProcessor {
 
 	private void addBeanReferenceProposals(ContentAssistRequest request,
 			String prefix, Node node) {
@@ -34,7 +33,8 @@ public class OsgiContentAssistProcessor extends
 
 	@Override
 	protected void computeAttributeValueProposals(ContentAssistRequest request,
-			IDOMNode node, String matchString, String attributeName) {
+			IDOMNode node, String matchString, String attributeName,
+			String namespace, String prefix) {
 		String nodeName = node.getLocalName();
 		if ("service".equals(nodeName)) {
 			// bean
