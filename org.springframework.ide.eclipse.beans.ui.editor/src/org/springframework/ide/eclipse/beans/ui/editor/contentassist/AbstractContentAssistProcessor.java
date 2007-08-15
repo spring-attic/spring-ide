@@ -126,6 +126,12 @@ public abstract class AbstractContentAssistProcessor implements
 					attributeName = attributeName
 							.substring(prefix.length() + 1);
 				}
+				
+				if (prefix == null && namespace == null) {
+					prefix = node.getPrefix();
+					namespace = node.getNamespaceURI();
+				}
+				
 				computeAttributeValueProposals(request, node, matchString,
 						attributeName, namespace, prefix);
 			}

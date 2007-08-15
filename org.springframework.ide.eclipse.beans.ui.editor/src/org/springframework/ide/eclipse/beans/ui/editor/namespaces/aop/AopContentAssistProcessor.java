@@ -55,7 +55,7 @@ public class AopContentAssistProcessor extends AbstractContentAssistProcessor
 			String namespace, String prefix) {
 
 		String nodeName = node.getNodeName();
-		if (prefix != null && nodeName.startsWith(prefix)) {
+		if (prefix != null) {
 			nodeName = nodeName.substring(prefix.length() + 1);
 		}
 
