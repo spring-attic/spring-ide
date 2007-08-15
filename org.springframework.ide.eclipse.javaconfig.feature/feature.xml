@@ -2,7 +2,7 @@
 <feature
       id="org.springframework.ide.eclipse.javaconfig.feature"
       label="%featureName"
-      version="2.0.1.qualifier"
+      version="2.0.2.qualifier"
       provider-name="%providerName"
       plugin="org.springframework.ide.eclipse">
 
@@ -27,8 +27,8 @@
          version="0.0.0"/>
 
    <requires>
-      <import feature="org.springframework.ide.eclipse.feature" version="2.0.1"/>
-      <import feature="org.springframework.ide.eclipse.aop.feature" version="2.0.1"/>
+      <import feature="org.springframework.ide.eclipse.feature" version="2.0.2"/>
+      <import feature="org.springframework.ide.eclipse.aop.feature" version="2.0.2"/>
    </requires>
 
    <plugin

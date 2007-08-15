@@ -144,8 +144,8 @@
 	<target name="postBuild">
 		<antcall target="gatherLogs" />
 		<property name="sitePackagePrefix" value="springide_updatesite" />
-		<property name="sitePackageVersion" value="2.0.1" />
-		<property name="featureVersion" value="2.0.1" />
+		<property name="sitePackageVersion" value="2.0.2" />
+		<property name="featureVersion" value="2.0.2" />
 		<antcall target="generateUpdateSite" />
 		<antcall target="createEclipseStaging" />
 
