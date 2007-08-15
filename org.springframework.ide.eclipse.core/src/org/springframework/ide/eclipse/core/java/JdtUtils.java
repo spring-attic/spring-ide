@@ -187,7 +187,7 @@ public class JdtUtils {
 				}
 				// add all depending java projects
 				for (IJavaProject p : getAllDependingJavaProjects(jp)) {
-					paths.addAll(getClassPathUrls(p.getProject(), true));
+					addClassPathUrls(p.getProject(), paths, resolvedProjects);
 				}
 				paths.add(outputPath.toFile().toURL());
 			}
