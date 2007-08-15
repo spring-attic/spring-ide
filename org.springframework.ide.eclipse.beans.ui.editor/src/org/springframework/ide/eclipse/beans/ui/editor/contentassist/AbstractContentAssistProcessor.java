@@ -118,8 +118,18 @@ public abstract class AbstractContentAssistProcessor implements
 		// the name region is REQUIRED to do anything useful
 		if (nameRegion != null) {
 			String attributeName = open.getText(nameRegion);
-			computeAttributeValueProposals(request, node, matchString,
-					attributeName);
+			Node attribute = node.getAttributes().getNamedItem(attributeName);
+			if (attribute != null) {
+				String prefix = attribute.getPrefix();
+				String namespace = attribute.getNamespaceURI();
+				if (prefix != null) {
+					attributeName = attributeName
+							.substring(prefix.length() + 1);
+				}
+				computeAttributeValueProposals(request, node, matchString,
+						attributeName, namespace, prefix);
+			}
+			
 		}
 	}
 
@@ -179,7 +189,7 @@ public abstract class AbstractContentAssistProcessor implements
 
 	protected abstract void computeAttributeValueProposals(
 			ContentAssistRequest request, IDOMNode node, String matchString,
-			String attributeName);
+			String attributeName, String namespace, String prefix);
 
 	protected abstract void computeTagInsertionProposals(
 			ContentAssistRequest request, IDOMNode node);

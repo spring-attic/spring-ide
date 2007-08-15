@@ -37,7 +37,8 @@ public class LangContentAssistProcessor extends AbstractContentAssistProcessor {
 
 	@Override
 	protected void computeAttributeValueProposals(ContentAssistRequest request,
-			IDOMNode node, String matchString, String attributeName) {
+			IDOMNode node, String matchString, String attributeName, String namespace, 
+			String prefix) {
 
 		if ("jruby".equals(node.getLocalName())
 				|| "bsh".equals(node.getLocalName())) {

@@ -32,10 +32,10 @@ public class JeeContentAssistProcessor extends AbstractContentAssistProcessor {
 
 	@Override
 	protected void computeAttributeValueProposals(ContentAssistRequest request,
-			IDOMNode node, String matchString, String attributeName) {
+			IDOMNode node, String matchString, String attributeName,
+			String namespace, String prefix) {
 		String nodeName = node.getNodeName();
-		String prefix = node.getPrefix();
-		if (prefix != null) {
+		if (prefix != null && nodeName.startsWith(prefix)) {
 			nodeName = nodeName.substring(prefix.length() + 1);
 		}
 

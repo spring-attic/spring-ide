@@ -350,7 +350,8 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 
 	@Override
 	protected void computeAttributeValueProposals(ContentAssistRequest request,
-			IDOMNode node, String matchString, String attributeName) {
+			IDOMNode node, String matchString, String attributeName,
+			String namespace, String prefix) {
 
 		if ("bean".equals(node.getNodeName())) {
 			if ("class".equals(attributeName)) {
@@ -400,6 +401,10 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 			}
 			else if ("id".equals(attributeName)) {
 				addBeanIdProposal(request, matchString, node);
+			}
+			else if ("http://www.springframework.org/schema/p".equals(namespace)
+					|| attributeName.endsWith("-ref")) {
+				addBeanReferenceProposals(request, matchString, node, true);
 			}
 		}
 		else if ("property".equals(node.getNodeName())) {

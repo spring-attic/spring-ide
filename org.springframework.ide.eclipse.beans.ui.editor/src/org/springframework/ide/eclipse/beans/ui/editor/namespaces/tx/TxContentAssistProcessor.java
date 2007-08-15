@@ -27,17 +27,17 @@ public class TxContentAssistProcessor extends AbstractContentAssistProcessor {
 
 	@Override
 	protected void computeAttributeValueProposals(ContentAssistRequest request,
-			IDOMNode node, String matchString, String attributeName) {
+			IDOMNode node, String matchString, String attributeName,
+			String namespace, String prefix) {
 		String nodeName = node.getNodeName();
-		String prefix = node.getPrefix();
-		if (prefix != null) {
+		if (prefix != null && nodeName.startsWith(prefix)) {
 			nodeName = nodeName.substring(prefix.length() + 1);
 		}
 
 		if ("advice".equals(nodeName) || "annotation-driven".equals(nodeName)) {
 			if ("transaction-manager".equals(attributeName)) {
-				BeansCompletionUtils.addBeanReferenceProposals(request, matchString, node
-						.getOwnerDocument(), true);
+				BeansCompletionUtils.addBeanReferenceProposals(request,
+						matchString, node.getOwnerDocument(), true);
 			}
 		}
 	}

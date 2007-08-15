@@ -51,11 +51,11 @@ public class AopContentAssistProcessor extends AbstractContentAssistProcessor
 
 	@Override
 	protected void computeAttributeValueProposals(ContentAssistRequest request,
-			IDOMNode node, String matchString, String attributeName) {
+			IDOMNode node, String matchString, String attributeName,
+			String namespace, String prefix) {
 
 		String nodeName = node.getNodeName();
-		String prefix = node.getPrefix();
-		if (prefix != null) {
+		if (prefix != null && nodeName.startsWith(prefix)) {
 			nodeName = nodeName.substring(prefix.length() + 1);
 		}
 
@@ -149,8 +149,7 @@ public class AopContentAssistProcessor extends AbstractContentAssistProcessor
 			IFile file = BeansEditorUtils.getResource(request);
 			String className = BeansEditorUtils.getClassNameForBean(file, node
 					.getOwnerDocument(), ref);
-			IType type = JdtUtils.getJavaType(file.getProject(),
-					className);
+			IType type = JdtUtils.getJavaType(file.getProject(), className);
 			if (type != null) {
 				try {
 					Collection<?> methods = Introspector.findAllMethods(type,
