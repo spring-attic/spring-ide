@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -67,6 +68,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.ui.BeansUIActivationHistory;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
+import org.springframework.util.StringUtils;
 
 /**
  * Spring Bean selection dialog.
@@ -84,9 +86,13 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 	private static class BeanFilter extends ViewerFilter {
 
 		private StringMatcher matcher;
-		
+
+		private boolean isUpperCasePattern;
+
+		private String filterText;
+
 		private List<IBean> beanActivationHistory;
-		
+
 		protected BeanFilter(List<IBean> historyBeans) {
 			this.beanActivationHistory = historyBeans;
 		}
@@ -113,16 +119,37 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 						}
 					}
 				}
+				if (isUpperCasePattern) {
+					if (SearchPattern.camelCaseMatch(filterText, StringUtils
+							.capitalize(bean.getElementName()))) {
+						return true;
+					}
+					String className = bean.getClassName();
+					if (className != null) {
+						int i = className.lastIndexOf('.');
+						if (i > 0 && i < className.length()) {
+							className = className.substring(i+1);
+						}
+						if (SearchPattern.camelCaseMatch(filterText, className)) {
+							return true;
+						}
+					}
+				}
 			}
 			return false;
 		}
 
 		public void setFilterText(String filterText) {
 			if (filterText.trim().equals("")) {
-				matcher = null;
+				this.matcher = null;
+				this.isUpperCasePattern = false;
+				this.filterText = null;
 			}
 			else {
-				matcher = new StringMatcher(filterText + '*', true, false);
+				this.matcher = new StringMatcher(filterText + '*', true, false);
+				this.isUpperCasePattern = filterText.length() > 0
+						&& Character.isUpperCase(filterText.charAt(0));
+				this.filterText = filterText;
 			}
 		}
 	}
@@ -246,7 +273,8 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 
 		viewer.setInput(beanList);
 
-		final BeanListSelectionDialog.BeanFilter filter = new BeanListSelectionDialog.BeanFilter(historyBeans);
+		final BeanListSelectionDialog.BeanFilter filter = new BeanListSelectionDialog.BeanFilter(
+				historyBeans);
 		viewer.addFilter(filter);
 		viewer.setComparator(new ViewerComparator() {
 
@@ -438,12 +466,8 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 	protected boolean validateCurrentSelection() {
 		IStatus status;
 		if (viewer.getSelection().isEmpty()) {
-			status = new Status(
-					IStatus.ERROR,
-					PlatformUI.PLUGIN_ID,
-					IStatus.ERROR,
-					"",
-					null);
+			status = new Status(IStatus.ERROR, PlatformUI.PLUGIN_ID,
+					IStatus.ERROR, "", null);
 		}
 		else {
 			status = new Status(IStatus.OK, PlatformUI.PLUGIN_ID, IStatus.OK,
