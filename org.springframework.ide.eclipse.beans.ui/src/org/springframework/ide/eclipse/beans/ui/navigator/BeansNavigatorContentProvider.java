@@ -118,34 +118,21 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 
 	private void triggerDeferredElementLoading(final Object config,
 			final Object parent) {
-		Job job = new Job("Loading model content") {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask("Loading model content from resource '"
-						+ ((IResourceModelElement) config).getElementResource()
-								.getFullPath().toString() + "'", 2);
-				superGetChildren(config);
-				monitor.worked(1);
-				SpringUIUtils.getStandardDisplay().asyncExec(new Runnable() {
-					public void run() {
-						refreshViewerForElement(config);
-						refreshViewerForElement(parent);
-						if (parent instanceof IBeansProject) {
-							refreshViewerForElement(SpringCore.getModel()
-									.getProject(((IBeansProject) parent).getProject()));
-						}
-						if (BeansUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
-								.equals(providerID) && config instanceof IResourceModelElement) {
-							refreshViewerForElement(((IResourceModelElement) config)
-									.getElementResource());
-						}
+		// first check if a matching job is already scheduled
+		synchronized (getClass()) {
+			Job[] buildJobs = Job.getJobManager().find(
+					ModelJob.MODEL_CONTENT_FAMILY);
+			for (int i = 0; i < buildJobs.length; i++) {
+				Job curr = buildJobs[i];
+				if (curr instanceof ModelJob) {
+					ModelJob job = (ModelJob) curr;
+					if (job.isCoveredBy(config, parent)) {
+						return;
 					}
-				});
-				monitor.worked(2);
-				monitor.done();
-				return Status.OK_STATUS;
+				}
 			}
-		};
+		}
+		Job job = new ModelJob(config, parent, this);
 		job.setPriority(Job.INTERACTIVE);
 		job.setProperty(IProgressConstants.ICON_PROPERTY,
 				BeansUIImages.DESC_OBJS_SPRING);
@@ -219,5 +206,86 @@ public class BeansNavigatorContentProvider extends BeansModelContentProvider
 	@Override
 	public String toString() {
 		return String.valueOf(providerID);
+	}
+
+	/**
+	 * Internal {@link Job} that handles loading of {@link IBeansConfig} as
+	 * Eclipse progress
+	 */
+	private static class ModelJob extends Job {
+
+		private final Object config;
+
+		private final Object parent;
+
+		private final BeansNavigatorContentProvider contentProvider;
+
+		public static final Object MODEL_CONTENT_FAMILY = new Object();
+
+		public ModelJob(Object config, Object parent,
+				BeansNavigatorContentProvider contentProvider) {
+			super("Loading model content");
+			this.config = config;
+			this.parent = parent;
+			this.contentProvider = contentProvider;
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			monitor.beginTask("Loading model content from resource '"
+					+ ((IResourceModelElement) config).getElementResource()
+							.getFullPath().toString() + "'", 2);
+			synchronized (getClass()) {
+				if (monitor.isCanceled()) {
+					return Status.CANCEL_STATUS;
+				}
+				Job[] buildJobs = Job.getJobManager()
+						.find(MODEL_CONTENT_FAMILY);
+				for (int i = 0; i < buildJobs.length; i++) {
+					Job curr = buildJobs[i];
+					if (curr != this && curr instanceof ModelJob) {
+						ModelJob job = (ModelJob) curr;
+						if (job.isCoveredBy(this)) {
+							curr.cancel();
+						}
+					}
+				}
+			}
+			contentProvider.superGetChildren(config);
+			monitor.worked(1);
+			SpringUIUtils.getStandardDisplay().asyncExec(new Runnable() {
+				public void run() {
+					contentProvider.refreshViewerForElement(config);
+					contentProvider.refreshViewerForElement(parent);
+					if (parent instanceof IBeansProject) {
+						contentProvider.refreshViewerForElement(SpringCore
+								.getModel().getProject(
+										((IBeansProject) parent).getProject()));
+					}
+					if (BeansUIPlugin.PROJECT_EXPLORER_CONTENT_PROVIDER_ID
+							.equals(contentProvider.providerID)
+							&& config instanceof IResourceModelElement) {
+						contentProvider
+								.refreshViewerForElement(((IResourceModelElement) config)
+										.getElementResource());
+					}
+				}
+			});
+			monitor.worked(2);
+			monitor.done();
+			return Status.OK_STATUS;
+		}
+
+		public boolean isCoveredBy(ModelJob other) {
+			return other.parent.equals(parent) && other.config.equals(config);
+		}
+
+		public boolean isCoveredBy(Object otherConfig, Object otherParent) {
+			return otherParent.equals(parent) && otherConfig.equals(config);
+		}
+
+		public boolean belongsTo(Object family) {
+			return MODEL_CONTENT_FAMILY == family;
+		}
 	}
 }
