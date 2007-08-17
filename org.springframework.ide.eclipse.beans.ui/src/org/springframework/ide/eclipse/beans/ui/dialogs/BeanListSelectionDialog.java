@@ -128,10 +128,16 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 					if (className != null) {
 						int i = className.lastIndexOf('.');
 						if (i > 0 && i < className.length()) {
-							className = className.substring(i+1);
+							if (SearchPattern.camelCaseMatch(filterText, 0,
+									filterText.length(), className, i + 1,
+									className.length())) {
+								return true;
+							}
 						}
-						if (SearchPattern.camelCaseMatch(filterText, className)) {
-							return true;
+						else {
+							if (SearchPattern.camelCaseMatch(filterText, className)) {
+								return true;
+							}
 						}
 					}
 				}
@@ -147,8 +153,13 @@ public class BeanListSelectionDialog extends SelectionStatusDialog {
 			}
 			else {
 				this.matcher = new StringMatcher(filterText + '*', true, false);
-				this.isUpperCasePattern = filterText.length() > 0
-						&& Character.isUpperCase(filterText.charAt(0));
+				this.isUpperCasePattern = true;
+				for (char c : filterText.toCharArray()) {
+					if (Character.isLowerCase(c)) {
+						this.isUpperCasePattern = false;
+						break;
+					}
+				}
 				this.filterText = filterText;
 			}
 		}
