@@ -148,19 +148,7 @@
 		<property name="featureVersion" value="2.0.2" />
 		<antcall target="generateUpdateSite" />
 		<antcall target="createEclipseStaging" />
-
-		<java jar="${eclipseLauncherJar}" 
-              fork="true" 
-              failonerror="true" 
-              maxmemory="256m" 
-              dir="${buildDirectory}"> 
-            <arg line="-application org.eclipse.update.core.siteOptimizer" /> 
-            <arg line="-jarProcessor -verbose -processAll -repack -pack -outputDir ${updateSiteStagingLocation}" />
-            <arg line="${updateSiteStagingLocation}" /> 
-        </java> 
-		
 		<antcall target="publishToUpdateSiteDev" />
-		
 	</target>
 	
 	<target name="generateUpdateSite">
