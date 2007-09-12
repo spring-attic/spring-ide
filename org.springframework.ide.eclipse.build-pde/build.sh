@@ -27,7 +27,6 @@ pack() {
         exit 1
     fi
 }
-pack
 echo Command line: $@
 build beans-feature $@
 build aop-feature $@
@@ -36,5 +35,5 @@ build javaconfig-feature $@
 build webflow-feature $@
 build mylyn-feature $@
 
-
+pack
 
