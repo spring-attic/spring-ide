@@ -18,7 +18,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
@@ -85,8 +84,7 @@ public class BeanInitDestroyMethodRule extends
 		if (bd.getFactoryMethodName() != null) {
 			String factoryMethod = bd.getFactoryMethodName();
 			try {
-				int argCount = (bd instanceof RootBeanDefinition
-						&& !bd.isAbstract() ? bd.getConstructorArgumentValues()
+				int argCount = (!bd.isAbstract() ? bd.getConstructorArgumentValues()
 						.getArgumentCount() : -1);
 				Set<IMethod> methods = Introspector.getAllMethods(type);
 				for (IMethod method : methods) {
