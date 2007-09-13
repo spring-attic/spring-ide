@@ -18,6 +18,7 @@ import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -37,6 +38,8 @@ import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
 @SuppressWarnings("restriction")
 public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 
+	private Map<INamespaceDefinition, String> schemaVersions;
+
 	private List<INamespaceDefinition> xmlSchemaDefinitions;
 
 	public NewBeansConfigFilePage(String pageName,
@@ -54,14 +57,13 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 		PrintWriter writer = new PrintWriter(new OutputStreamWriter(
 				outputStream, charSet));
 		writer.println("<?xml version=\"1.0\" encoding=\"" + charSet + "\"?>"); //$NON-NLS-1$ //$NON-NLS-2$
-		writer
-				.println("<beans xmlns=\""
-						+ defaultXsd.getNamespaceURI()
-						+ "\"\r\n"
-						+ "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n"
-						+ getNamespaceMappings() + "\txsi:schemaLocation=\""
-						+ getSchemaLocations() + "\">\r\n" + "\r\n" + "\r\n"
-						+ "</beans>");
+		writer.println("<beans xmlns=\""
+				+ defaultXsd.getNamespaceURI()
+				+ "\"\r\n"
+				+ "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n"
+				+ getNamespaceMappings()
+				+ "\txsi:schemaLocation=\"" + getSchemaLocations()
+				+ "\">\r\n" + "\r\n" + "\r\n" + "</beans>");
 		writer.flush();
 		outputStream.close();
 
@@ -70,15 +72,28 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 		return inputStream;
 	}
 
+	protected InputStream getInitialContents() {
+		try {
+			return createXMLDocument();
+		}
+		catch (Exception e) {
+		}
+		return null;
+	}
+
 	private String getNamespaceMappings() {
+		INamespaceDefinition defaultXsd = NamespaceUtils
+				.getDefaultNamespaceDefinition();
 		StringBuilder builder = new StringBuilder();
 		for (INamespaceDefinition def : xmlSchemaDefinitions) {
-			builder.append("\t");
-			builder.append("xmlns:");
-			builder.append(def.getNamespacePrefix());
-			builder.append("=\"");
-			builder.append(def.getNamespaceURI());
-			builder.append("\"\r\n");
+			if (!def.equals(defaultXsd)) {
+				builder.append("\t");
+				builder.append("xmlns:");
+				builder.append(def.getNamespacePrefix());
+				builder.append("=\"");
+				builder.append(def.getNamespaceURI());
+				builder.append("\"\r\n");
+			}
 		}
 		return builder.toString();
 	}
@@ -91,26 +106,30 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 		builder.append("\t\t");
 		builder.append(defaultXsd.getNamespaceURI());
 		builder.append(" ");
-		builder.append(defaultXsd.getSchemaLocation());
+		if (schemaVersions.containsKey(defaultXsd)) {
+			builder.append(schemaVersions.get(defaultXsd));
+		}
+		else {
+			builder.append(defaultXsd.getDefaultSchemaLocation());
+		}
 		builder.append("\r\n");
 
 		for (INamespaceDefinition def : xmlSchemaDefinitions) {
-			builder.append("\t\t");
-			builder.append(def.getNamespaceURI());
-			builder.append(" ");
-			builder.append(def.getSchemaLocation());
-			builder.append("\r\n");
+			if (def.getDefaultSchemaLocation() != null
+					&& !def.equals(defaultXsd)) {
+				builder.append("\t\t");
+				builder.append(def.getNamespaceURI());
+				builder.append(" ");
+				if (schemaVersions.containsKey(def)) {
+					builder.append(schemaVersions.get(def));
+				}
+				else {
+					builder.append(def.getDefaultSchemaLocation());
+				}
+				builder.append("\r\n");
+			}
 		}
 		return builder.toString().trim();
-	}
-
-	protected InputStream getInitialContents() {
-		try {
-			return createXMLDocument();
-		}
-		catch (Exception e) {
-		}
-		return null;
 	}
 
 	private String getUserPreferredCharset() {
@@ -119,6 +138,11 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 		String charSet = preference
 				.getString(CommonEncodingPreferenceNames.OUTPUT_CODESET);
 		return charSet;
+	}
+
+	public void setSchemaVersions(
+			Map<INamespaceDefinition, String> schemaVersions) {
+		this.schemaVersions = schemaVersions;
 	}
 
 	public void setXmlSchemaDefinitions(

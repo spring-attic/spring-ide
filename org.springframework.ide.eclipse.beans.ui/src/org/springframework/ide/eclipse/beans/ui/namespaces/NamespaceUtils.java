@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.core.model.ModelUtils;
 /**
  * Some helper methods.
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class NamespaceUtils {
 
@@ -66,15 +67,17 @@ public class NamespaceUtils {
 				for (IConfigurationElement config : extension
 						.getConfigurationElements()) {
 					if (namespaceURI.equals(config.getAttribute("uri"))) {
-						try {
-							Object provider = config
-									.createExecutableExtension("labelProvider");
-							if (provider instanceof INamespaceLabelProvider) {
-								return (INamespaceLabelProvider) provider;
+						if (config.getAttribute("labelProvider") != null) {
+							try {
+								Object provider = config
+										.createExecutableExtension("labelProvider");
+								if (provider instanceof INamespaceLabelProvider) {
+									return (INamespaceLabelProvider) provider;
+								}
 							}
-						}
-						catch (CoreException e) {
-							BeansUIPlugin.log(e);
+							catch (CoreException e) {
+								BeansUIPlugin.log(e);
+							}
 						}
 						return null;
 					}
@@ -123,39 +126,49 @@ public class NamespaceUtils {
 		IExtensionPoint point = Platform.getExtensionRegistry()
 				.getExtensionPoint(NAMESPACES_EXTENSION_POINT);
 		if (point != null) {
-			String namespaceURI = DEFAULT_NAMESPACE_URI;
 			for (IExtension extension : point.getExtensions()) {
 				for (IConfigurationElement config : extension
 						.getConfigurationElements()) {
-					if (!namespaceURI.equals(config.getAttribute("uri"))) {
-						String ns = config.getDeclaringExtension()
-								.getNamespaceIdentifier();
-						String prefix = config.getAttribute("prefix");
-						String schemaLocation = config
-								.getAttribute("schemaLocation");
-						String uri = config.getAttribute("uri");
-						String icon = config.getAttribute("icon");
-						Image image = BeansUIPlugin.getDefault()
-								.getImageRegistry().get(icon);
-						if (image == null) {
-							ImageDescriptor imageDescriptor = BeansUIPlugin
-									.imageDescriptorFromPlugin(ns, icon);
-							BeansUIPlugin.getDefault().getImageRegistry().put(
-									icon, imageDescriptor);
-							image = BeansUIPlugin.getDefault()
-									.getImageRegistry().get(icon);
-						}
-						namespaceDefinitions.add(new SimpleNamespaceDefinition(
-								prefix, uri, schemaLocation, image));
+					String ns = config.getDeclaringExtension()
+							.getNamespaceIdentifier();
+					String prefix = config.getAttribute("prefix");
+					String schemaLocation = config
+							.getAttribute("defaultSchemaLocation");
+					String uri = config.getAttribute("uri");
+					String icon = config.getAttribute("icon");
+					Image image = BeansUIPlugin.getDefault().getImageRegistry()
+							.get(icon);
+					if (image == null) {
+						ImageDescriptor imageDescriptor = BeansUIPlugin
+								.imageDescriptorFromPlugin(ns, icon);
+						BeansUIPlugin.getDefault().getImageRegistry().put(icon,
+								imageDescriptor);
+						image = BeansUIPlugin.getDefault().getImageRegistry()
+								.get(icon);
 					}
+
+					SimpleNamespaceDefinition def = new SimpleNamespaceDefinition(
+							prefix, uri, schemaLocation, image);
+
+					// get schema locations from nested child elements
+					IConfigurationElement[] schemaLocationConfigElements = config
+							.getChildren("schemaLocation");
+					for (IConfigurationElement schemaLocationConfigElement : schemaLocationConfigElements) {
+						def.addSchemaLocation(schemaLocationConfigElement
+								.getAttribute("url"));
+					}
+
+					namespaceDefinitions.add(def);
 				}
 			}
 		}
 
 		Collections.sort(namespaceDefinitions,
 				new Comparator<INamespaceDefinition>() {
-					public int compare(INamespaceDefinition o1, INamespaceDefinition o2) {
-						return o1.getNamespacePrefix().compareTo(o2.getNamespacePrefix());
+					public int compare(INamespaceDefinition o1,
+							INamespaceDefinition o2) {
+						return o1.getNamespacePrefix().compareTo(
+								o2.getNamespacePrefix());
 					}
 				});
 
@@ -175,7 +188,7 @@ public class NamespaceUtils {
 								.getNamespaceIdentifier();
 						String prefix = config.getAttribute("prefix");
 						String schemaLocation = config
-								.getAttribute("schemaLocation");
+								.getAttribute("defaultSchemaLocation");
 						String uri = config.getAttribute("uri");
 						String icon = config.getAttribute("icon");
 

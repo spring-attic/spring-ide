@@ -10,8 +10,10 @@
 			uri="http://www.springframework.org/schema/webflow-config" 
 			prefix="flow"
 			icon="icons/full/obj16/spring_webflow_obj.gif"
-			schemaLocation="http://www.springframework.org/schema/webflow-config/spring-webflow-config-1.0.xsd"/>
-	</extension>
+			defaultSchemaLocation="http://www.springframework.org/schema/webflow-config/spring-webflow-config-2.0.xsd">
+			<schemaLocation url="http://www.springframework.org/schema/webflow-config/spring-webflow-config-1.0.xsd" />
+		</namespace>
+	</extension> 
 
  	<extension
          point="org.eclipse.ui.propertyPages">

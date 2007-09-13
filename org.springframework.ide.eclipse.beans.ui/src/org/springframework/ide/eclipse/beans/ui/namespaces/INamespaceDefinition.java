@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.namespaces;
 
+import java.util.Set;
+
 import org.eclipse.swt.graphics.Image;
 
 /**
@@ -23,7 +25,9 @@ public interface INamespaceDefinition {
 
 	String getNamespaceURI();
 
-	String getSchemaLocation();
+	String getDefaultSchemaLocation();
+	
+	Set<String> getSchemaLocations();
 	
 	Image getNamespaceImage();
 

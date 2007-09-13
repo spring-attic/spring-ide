@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.namespaces;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.swt.graphics.Image;
 
 /**
@@ -23,15 +26,17 @@ public class SimpleNamespaceDefinition implements INamespaceDefinition {
 
 	private final String uri;
 
-	private final String location;
+	private final String defaultLocation;
 
 	private final Image image;
+	
+	private Set<String> locations = new HashSet<String>();
 
 	public SimpleNamespaceDefinition(final String prefix, final String uri,
-			final String location, final Image image) {
+			final String defaultLocation, final Image image) {
 		this.prefix = prefix;
 		this.uri = uri;
-		this.location = location;
+		this.defaultLocation = defaultLocation;
 		this.image = image;
 	}
 
@@ -43,11 +48,31 @@ public class SimpleNamespaceDefinition implements INamespaceDefinition {
 		return uri;
 	}
 
-	public String getSchemaLocation() {
-		return location;
+	public String getDefaultSchemaLocation() {
+		return defaultLocation;
 	}
 
 	public Image getNamespaceImage() {
 		return image;
+	}
+
+	public Set<String> getSchemaLocations() {
+		return locations;
+	}
+	
+	public void addSchemaLocation(String location) {
+		locations.add(location);
+	}
+	
+	public int hashCode() {
+		return prefix.hashCode() ^ uri.hashCode();
+	}
+	
+	public boolean equals(Object obj) {
+		if (obj instanceof SimpleNamespaceDefinition) {
+			SimpleNamespaceDefinition o = (SimpleNamespaceDefinition) obj;
+			return o.prefix.equals(prefix) && o.uri.equals(uri);
+		}
+		return false;
 	}
 }

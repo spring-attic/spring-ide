@@ -9,47 +9,67 @@
    <extension
          point="org.springframework.ide.eclipse.beans.ui.namespaces">
       <namespace
-            name="Spring Beans"
+            name="beans Namespace"
             uri="http://www.springframework.org/schema/beans"
             labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.BeansNamespaceLabelProvider"
             prefix="bean"
-            schemaLocation="http://www.springframework.org/schema/beans/spring-beans-2.0.xsd"
-            icon="icons/full/obj16/bean_obj.gif"/>
+            icon="icons/full/obj16/bean_obj.gif"
+            defaultSchemaLocation="http://www.springframework.org/schema/beans/spring-beans.xsd">
+           	<schemaLocation url="http://www.springframework.org/schema/beans/spring-beans-2.0.xsd" />
+      </namespace>
       <namespace
-            name="Spring AOP"
+            name="aop Namespace"
             uri="http://www.springframework.org/schema/aop"
             labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.AopNamespaceLabelProvider"
             prefix="aop"
-            schemaLocation="http://www.springframework.org/schema/aop/spring-aop-2.1.xsd"
-            icon="icons/full/obj16/aspect_obj.gif"/>
+            icon="icons/full/obj16/aspect_obj.gif"
+            defaultSchemaLocation="http://www.springframework.org/schema/aop/spring-aop.xsd">
+           	<schemaLocation url="http://www.springframework.org/schema/aop/spring-aop-2.0.xsd" />
+           	<schemaLocation url="http://www.springframework.org/schema/aop/spring-aop-2.1.xsd" />
+      </namespace>
       <namespace
-            name="Spring Tx"
+            name="tx Namespace"
             uri="http://www.springframework.org/schema/tx"
             labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.TxNamespaceLabelProvider"
             prefix="tx"
-            schemaLocation="http://www.springframework.org/schema/tx/spring-tx-2.1.xsd"
-            icon="icons/full/obj16/tx_obj.gif"/>
+            icon="icons/full/obj16/tx_obj.gif"
+            defaultSchemaLocation="http://www.springframework.org/schema/tx/spring-tx.xsd">
+			<schemaLocation url="http://www.springframework.org/schema/tx/spring-tx-2.0.xsd" />
+			<schemaLocation url="http://www.springframework.org/schema/tx/spring-tx-2.1.xsd" />
+      </namespace>          
       <namespace
-            name="Spring Jee"
+            name="jee Namespace"
             uri="http://www.springframework.org/schema/jee"
             labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.JeeNamespaceLabelProvider"
             prefix="jee"
-            schemaLocation="http://www.springframework.org/schema/jee/spring-jee-2.0.xsd"
-            icon="icons/full/obj16/ejb_obj.gif"/>
+            icon="icons/full/obj16/ejb_obj.gif"
+            defaultSchemaLocation="http://www.springframework.org/schema/jee/spring-jee.xsd">
+            <schemaLocation url="http://www.springframework.org/schema/jee/spring-jee-2.0.xsd" />
+      </namespace> 
       <namespace
-            name="Spring Util"
+            name="util Namespace"
             uri="http://www.springframework.org/schema/util"
             labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.UtilNamespaceLabelProvider"
             prefix="util"
-            schemaLocation="http://www.springframework.org/schema/util/spring-util-2.0.xsd"
-            icon="icons/full/obj16/list_obj.gif"/>
+            icon="icons/full/obj16/list_obj.gif"
+            defaultSchemaLocation="http://www.springframework.org/schema/util/spring-util.xsd">
+			<schemaLocation url="http://www.springframework.org/schema/util/spring-util-2.0.xsd" />
+      </namespace>             
       <namespace
-            name="Spring Lang"
+            name="lang Namespace"
             uri="http://www.springframework.org/schema/lang"
             labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.LangNamespaceLabelProvider"
             prefix="lang"
-            schemaLocation="http://www.springframework.org/schema/lang/spring-lang-2.0.xsd"
-            icon="icons/full/obj16/script_obj.gif"/>
+            icon="icons/full/obj16/script_obj.gif"
+            defaultSchemaLocation="http://www.springframework.org/schema/lang/spring-lang.xsd">
+			<schemaLocation url="http://www.springframework.org/schema/lang/spring-lang-2.0.xsd" />
+      </namespace>                         
+      <namespace
+            name="p Namespace"
+            uri="http://www.springframework.org/schema/p"
+            prefix="p"
+            icon="icons/full/obj16/property_obj.gif">
+      </namespace>                         
    </extension>
 
    <extension

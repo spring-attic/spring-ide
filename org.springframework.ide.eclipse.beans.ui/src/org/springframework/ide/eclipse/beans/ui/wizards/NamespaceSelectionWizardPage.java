@@ -11,12 +11,20 @@
 package org.springframework.ide.eclipse.beans.ui.wizards;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -38,20 +46,7 @@ import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
  */
 public class NamespaceSelectionWizardPage extends WizardPage {
 
-	public class XsdLabelProvider implements ILabelProvider {
-
-		public void addListener(ILabelProviderListener listener) {
-		}
-
-		public void dispose() {
-		}
-
-		public boolean isLabelProperty(Object element, String property) {
-			return false;
-		}
-
-		public void removeListener(ILabelProviderListener listener) {
-		}
+	public class XsdLabelProvider extends LabelProvider {
 
 		public Image getImage(Object element) {
 			if (element instanceof INamespaceDefinition) {
@@ -65,20 +60,63 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 			if (element instanceof INamespaceDefinition) {
 				INamespaceDefinition xsdDef = (INamespaceDefinition) element;
 				return xsdDef.getNamespacePrefix() + " - "
-						+ xsdDef.getSchemaLocation();
+						+ xsdDef.getNamespaceURI();
 			}
 			return "";
+		}
+	}
+
+	public class VersionLabelProvider extends LabelProvider {
+
+		public Image getImage(Object element) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_XSD);
+		}
+
+		public String getText(Object element) {
+			if (element instanceof String) {
+				String label = (String) element;
+				if (selectedNamespaceDefinition != null
+						&& label.equals(selectedNamespaceDefinition
+								.getDefaultSchemaLocation())) {
+					label += " (default)";
+				}
+				return label;
+			}
+			return super.getText(element);
 		}
 	}
 
 	private class XsdConfigContentProvider implements
 			IStructuredContentProvider {
 
-		public XsdConfigContentProvider() {
-		}
-
 		public Object[] getElements(Object obj) {
 			return NamespaceUtils.getNamespaceDefinitions().toArray();
+		}
+
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		}
+
+		public void dispose() {
+		}
+	}
+
+	private class VersionContentProvider implements IStructuredContentProvider {
+
+		public Object[] getElements(Object obj) {
+			if (obj instanceof INamespaceDefinition) {
+				Set<String> elements = new HashSet<String>();
+				String defaultLocation = ((INamespaceDefinition) obj)
+					.getDefaultSchemaLocation();
+				if (defaultLocation != null) {
+					elements.add(defaultLocation);
+				}
+				elements.addAll(((INamespaceDefinition) obj)
+						.getSchemaLocations());
+				return elements.toArray();
+			}
+			else {
+				return new Object[0];
+			}
 		}
 
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
@@ -93,6 +131,12 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 	private static final int LIST_VIEWER_WIDTH = 340;
 
 	private CheckboxTableViewer xsdViewer;
+
+	private CheckboxTableViewer versionViewer;
+
+	private Map<INamespaceDefinition, String> selectedVersion = new HashMap<INamespaceDefinition, String>();
+
+	private INamespaceDefinition selectedNamespaceDefinition;
 
 	protected NamespaceSelectionWizardPage(String pageName) {
 		super(pageName);
@@ -112,17 +156,92 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 		composite.setFont(parent.getFont());
 		setControl(composite);
 
-		Label beansLabel = new Label(composite, SWT.NONE);
-		beansLabel.setText("Select desired XSD namespace declarations:");
-		// config set list viewer
-		xsdViewer = CheckboxTableViewer.newCheckList(composite, SWT.BORDER);
+		Label namespaceLabel = new Label(composite, SWT.NONE);
+		namespaceLabel.setText("Select desired XSD namespace declarations:");
+
 		GridData gd = new GridData(GridData.FILL_BOTH);
 		gd.widthHint = LIST_VIEWER_WIDTH;
 		gd.heightHint = XSD_LIST_VIEWER_HEIGHT;
+
+		// config set list viewer
+		xsdViewer = CheckboxTableViewer.newCheckList(composite, SWT.BORDER);
 		xsdViewer.getTable().setLayoutData(gd);
 		xsdViewer.setContentProvider(new XsdConfigContentProvider());
 		xsdViewer.setLabelProvider(new XsdLabelProvider());
 		xsdViewer.setInput(this); // activate content provider
+		INamespaceDefinition defaultDefinition = NamespaceUtils
+				.getDefaultNamespaceDefinition();
+		xsdViewer.setGrayedElements(new Object[] { defaultDefinition });
+		xsdViewer.setCheckedElements(new Object[] { defaultDefinition });
+
+		xsdViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+
+			public void selectionChanged(SelectionChangedEvent event) {
+				if (event.getSelection() instanceof IStructuredSelection) {
+					Object obj = ((IStructuredSelection) event.getSelection())
+							.getFirstElement();
+					selectedNamespaceDefinition = (INamespaceDefinition) obj;
+					versionViewer.setInput(obj);
+					if (selectedVersion
+							.containsKey(selectedNamespaceDefinition)) {
+						versionViewer
+								.setCheckedElements(new Object[] { selectedVersion
+										.get(selectedNamespaceDefinition) });
+					}
+					if (xsdViewer.getChecked(obj)
+							&& selectedNamespaceDefinition.getSchemaLocations()
+									.size() > 0) {
+						versionViewer.getControl().setEnabled(true);
+					}
+					else {
+						versionViewer.getControl().setEnabled(false);
+					}
+
+				}
+			}
+		});
+
+		xsdViewer.addCheckStateListener(new ICheckStateListener() {
+			public void checkStateChanged(final CheckStateChangedEvent event) {
+
+				if (event.getChecked()
+						&& selectedNamespaceDefinition != null
+						&& selectedNamespaceDefinition.getSchemaLocations()
+								.size() > 0) {
+					versionViewer.getControl().setEnabled(true);
+				}
+				else {
+					versionViewer.getControl().setEnabled(false);
+				}
+
+			}
+		});
+
+		Label versionLabel = new Label(composite, SWT.NONE);
+		versionLabel
+				.setText("Select desired XSD (if none is selected the default will be used):");
+
+		versionViewer = CheckboxTableViewer.newCheckList(composite, SWT.BORDER);
+		versionViewer.getTable().setLayoutData(gd);
+		versionViewer.setContentProvider(new VersionContentProvider());
+		versionViewer.setLabelProvider(new VersionLabelProvider());
+
+		versionViewer.addCheckStateListener(new ICheckStateListener() {
+			public void checkStateChanged(final CheckStateChangedEvent event) {
+				if (event.getChecked()) {
+					versionViewer.setCheckedElements(new Object[] { event
+							.getElement() });
+					if (selectedNamespaceDefinition != null) {
+						selectedVersion.put(selectedNamespaceDefinition,
+								(String) event.getElement());
+					}
+				}
+				else {
+					versionViewer.setCheckedElements(new Object[0]);
+					selectedVersion.remove(selectedNamespaceDefinition);
+				}
+			}
+		});
 	}
 
 	public List<INamespaceDefinition> getXmlSchemaDefinitions() {
@@ -134,5 +253,9 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 			}
 		}
 		return defs;
+	}
+
+	public Map<INamespaceDefinition, String> getSchemaVersions() {
+		return selectedVersion;
 	}
 }

@@ -27,9 +27,9 @@
 			name="Spring OSGi"
 			labelProvider="org.springframework.ide.eclipse.osgi.ui.namespaces.OsgiConfigNamespaceLabelProvider"
 			uri="http://www.springframework.org/schema/osgi" 
-			prefix="osgi"
+			prefix="osgi" 
 			icon="icons/full/obj16/spring_osgi_obj.gif"
-			schemaLocation="http://www.springframework.org/schema/osgi/spring-osgi.xsd"/>
+			defaultSchemaLocation="http://www.springframework.org/schema/osgi/spring-osgi.xsd"/>
 	</extension>
 	
 	<extension

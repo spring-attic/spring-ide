@@ -47,6 +47,9 @@ This extension point is used to add content providers and label providers for Sp
          </appInfo>
       </annotation>
       <complexType>
+         <sequence minOccurs="0" maxOccurs="unbounded">
+            <element ref="schemaLocation"/>
+         </sequence>
          <attribute name="name" type="string">
             <annotation>
                <documentation>
@@ -61,7 +64,7 @@ This extension point is used to add content providers and label providers for Sp
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="labelProvider" type="string" use="required">
+         <attribute name="labelProvider" type="string">
             <annotation>
                <documentation>
                   an instance of &lt;samp&gt;org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceLabelProvider&lt;/samp&gt;
@@ -81,17 +84,10 @@ This extension point is used to add content providers and label providers for Sp
                </appInfo>
             </annotation>
          </attribute>
-          <attribute name="prefix" type="string" use="required">
+         <attribute name="prefix" type="string" use="required">
             <annotation>
                <documentation>
                   the prefix used for this namespace in xml files
-               </documentation>
-            </annotation>
-         </attribute>
-         <attribute name="schemaLocation" type="string" use="required">
-            <annotation>
-               <documentation>
-                  The location of the xsd schema file
                </documentation>
             </annotation>
          </attribute>
@@ -103,6 +99,30 @@ This extension point is used to add content providers and label providers for Sp
                <appInfo>
                   <meta.attribute kind="resource"/>
                </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="defaultSchemaLocation" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="schemaLocation">
+      <annotation>
+         <appInfo>
+            <meta.element labelAttribute="url"/>
+         </appInfo>
+      </annotation>
+      <complexType>
+         <attribute name="url" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
             </annotation>
          </attribute>
       </complexType>

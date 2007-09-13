@@ -93,6 +93,7 @@ public class NewBeansConfigWizard extends Wizard implements INewWizard {
 	private void createNewConfig() {
 		// create the new Spring project operation
 		mainPage.setXmlSchemaDefinitions(xsdPage.getXmlSchemaDefinitions());
+		mainPage.setSchemaVersions(xsdPage.getSchemaVersions());
 		IFile file = mainPage.createNewFile();
 
 		BeansProject beansProject = getProject(file);
