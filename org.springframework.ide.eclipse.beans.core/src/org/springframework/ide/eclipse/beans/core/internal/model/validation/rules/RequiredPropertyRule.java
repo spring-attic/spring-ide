@@ -34,14 +34,11 @@ import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.core.type.asm.AnnotationMetadataReadingVisitor;
 import org.springframework.core.type.asm.ClassReaderFactory;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
-import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 
 /**
  * Validates a given {@link IBean}'s if all {@link Required} annotated
@@ -50,12 +47,14 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
  * @since 2.0.1
  */
 public class RequiredPropertyRule extends AbstractBeanValidationRule {
-
+	
 	@Override
-	public boolean supports(IModelElement element, IValidationContext context) {
-		return element instanceof Bean;
+	protected boolean supportsBean(IBean bean, BeansValidationContext context) {
+		return context.isBeanRegistered(
+				AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
+				RequiredAnnotationBeanPostProcessor.class.getName());
 	}
-
+	
 	/**
 	 * Validates the given {@link IBean}.
 	 * <p>
@@ -76,9 +75,7 @@ public class RequiredPropertyRule extends AbstractBeanValidationRule {
 					&& !ValidationRuleUtils.hasPlaceHolder(className)) {
 				IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(
 						bean).getProject(), className);
-				if (type != null && context.isBeanRegistered(
-					AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
-					RequiredAnnotationBeanPostProcessor.class.getName())) {
+				if (type != null) {
 					validatePropertyNames(type, bean, mergedBd, context);
 				}
 			}

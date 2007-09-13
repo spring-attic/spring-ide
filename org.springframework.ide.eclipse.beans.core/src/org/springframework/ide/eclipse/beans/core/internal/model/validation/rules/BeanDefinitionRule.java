@@ -16,8 +16,6 @@ import org.springframework.beans.factory.support.BeanDefinitionValidationExcepti
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 
 /**
  * Validates a given {@link IBean}'s bean definition.
@@ -26,12 +24,6 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
  * @since 2.0
  */
 public class BeanDefinitionRule extends AbstractBeanValidationRule {
-
-	@Override
-	public boolean supports(IModelElement element, IValidationContext context) {
-		return (element instanceof IBean
-				&& context instanceof BeansValidationContext);
-	}
 
 	@Override
 	public void validate(IBean bean, BeansValidationContext context,

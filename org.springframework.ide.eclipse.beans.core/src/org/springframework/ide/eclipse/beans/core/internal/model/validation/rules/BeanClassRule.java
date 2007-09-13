@@ -17,8 +17,6 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
-import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 
 /**
  * Validates a given {@link IBean}'s bean class. Skips child beans and bean
@@ -28,12 +26,6 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
  * @since 2.0
  */
 public class BeanClassRule extends AbstractBeanValidationRule {
-
-	@Override
-	public boolean supports(IModelElement element, IValidationContext context) {
-		return (element instanceof IBean
-				&& context instanceof BeansValidationContext);
-	}
 
 	@Override
 	public void validate(IBean bean, BeansValidationContext context,

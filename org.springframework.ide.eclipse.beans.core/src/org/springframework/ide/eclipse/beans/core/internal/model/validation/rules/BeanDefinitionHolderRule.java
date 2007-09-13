@@ -18,8 +18,6 @@ import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
-import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 
 /**
  * Validates a given root {@link IBean}'s name and aliases.
@@ -31,9 +29,8 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 public class BeanDefinitionHolderRule extends AbstractBeanValidationRule {
 
 	@Override
-	public boolean supports(IModelElement element, IValidationContext context) {
-		return (element instanceof IBean && !((IBean) element).isInnerBean() && 
-				context instanceof BeansValidationContext);
+	protected boolean supportsBean(IBean bean, BeansValidationContext context) {
+		return !bean.isInnerBean();
 	}
 
 	@Override

@@ -34,6 +34,7 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
@@ -644,7 +645,7 @@ public final class BeansModelUtils {
 
 			// Merge the bean definition hierarchy to a single bean
 			// definition
-			RootBeanDefinition rbd = null;
+			AbstractBeanDefinition rbd = null;
 			int bdCount = beanDefinitions.size();
 			for (int i = bdCount - 1; i >= 0; i--) {
 				BeanDefinition abd = beanDefinitions.get(i);
@@ -654,6 +655,9 @@ public final class BeansModelUtils {
 				else {
 					if (abd instanceof RootBeanDefinition) {
 						rbd = new RootBeanDefinition((RootBeanDefinition) abd);
+					}
+					else if (abd instanceof GenericBeanDefinition) {
+						rbd = new GenericBeanDefinition(abd);
 					}
 					else {
 						// root of hierarchy is not a root bean definition
