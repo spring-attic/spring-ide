@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.core.java;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -22,8 +23,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.IPathVariableManager;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
@@ -56,6 +59,8 @@ import org.springframework.util.StringUtils;
  * @since 2.0
  */
 public class JdtUtils {
+
+	private static final String FILE_SCHEME = "file";
 
 	static class DefaultProjectClassLoaderSupport implements
 			IProjectClassLoaderSupport {
@@ -123,6 +128,8 @@ public class JdtUtils {
 	private static void addClassPathUrls(IProject project, Set<URL> paths,
 			Set<IProject> resolvedProjects) {
 
+		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+
 		// add project to local cache to prevent adding its classpaths
 		// multiple times
 		if (resolvedProjects.contains(project)) {
@@ -137,59 +144,41 @@ public class JdtUtils {
 				IJavaProject jp = JavaCore.create(project);
 				// configured classpath
 				IClasspathEntry[] classpath = jp.getResolvedClasspath(true);
-				// build output, relative to project
-				IPath location = SpringCoreUtils.getProjectLocation(project
-						.getProject());
-				IPath outputPath = location.append(jp.getOutputLocation()
-						.removeFirstSegments(1));
 
+				// add class path entries
 				for (int i = 0; i < classpath.length; i++) {
 					IClasspathEntry path = classpath[i];
 					if (path.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
-						File file = path.getPath().toFile();
+						IPath entryPath = path.getPath();
+						File file = entryPath.toFile();
 						if (file.exists()) {
 							paths.add(file.toURL());
 						}
 						else {
 							// case for project relative links
-							String projectName = path.getPath().segment(0);
-							IProject pathProject = ResourcesPlugin
-									.getWorkspace().getRoot().getProject(
-											projectName);
-							IPath pathLocation = SpringCoreUtils
-									.getProjectLocation(pathProject);
-							IPath relPath = path.getPath().removeFirstSegments(
-									1);
-							file = new File(pathLocation + File.separator + 
-									relPath.toOSString());
-							if (file.exists()) {
-								paths.add(file.toURL());
-							}
+							String projectName = entryPath.segment(0);
+							IProject pathProject = root.getProject(projectName);
+							covertPathToUrl(pathProject, paths, entryPath);
 						}
 					}
 					else if (path.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 						// add source path as well for non java resources
 						IPath sourcePath = path.getPath();
-						if (sourcePath != null) {
-							sourcePath = location.append(sourcePath
-									.removeFirstSegments(1));
-							paths.add(sourcePath.toFile().toURL());
-						}
+						covertPathToUrl(project, paths, sourcePath);
 						// add source output locations for different source
 						// folders
 						IPath sourceOutputPath = path.getOutputLocation();
-						if (sourceOutputPath != null) {
-							sourceOutputPath = location.append(sourceOutputPath
-									.removeFirstSegments(1));
-							paths.add(sourceOutputPath.toFile().toURL());
-						}
+						covertPathToUrl(project, paths, sourceOutputPath);
 					}
 				}
 				// add all depending java projects
 				for (IJavaProject p : getAllDependingJavaProjects(jp)) {
 					addClassPathUrls(p.getProject(), paths, resolvedProjects);
 				}
-				paths.add(outputPath.toFile().toURL());
+				
+				// get default output directory
+				IPath outputPath = jp.getOutputLocation();
+				covertPathToUrl(project, paths, outputPath);
 			}
 			else {
 				for (IProject p : project.getReferencedProjects()) {
@@ -199,6 +188,40 @@ public class JdtUtils {
 		}
 		catch (Exception e) {
 			// ignore
+		}
+	}
+
+	private static void covertPathToUrl(IProject project, Set<URL> paths,
+			IPath path) throws MalformedURLException {
+		if (path != null && project != null) {
+
+			URI uri = project.findMember(path.removeFirstSegments(1))
+					.getRawLocationURI();
+
+			if (uri != null) {
+				String scheme = uri.getScheme();
+				if (FILE_SCHEME.equalsIgnoreCase(scheme)) {
+					addUri(paths, uri);
+				}
+				else {
+					IPathVariableManager variableManager = ResourcesPlugin
+							.getWorkspace().getPathVariableManager();
+					addUri(paths, variableManager.resolveURI(uri));
+				}
+			}
+		}
+	}
+
+	private static void addUri(Set<URL> paths, URI uri)
+			throws MalformedURLException {
+		File file = new File(uri);
+		if (file.exists()) {
+			if (file.isDirectory()) {
+				paths.add(new URL(uri.toString() + File.separator));
+			}
+			else {
+				paths.add(uri.toURL());
+			}
 		}
 	}
 
@@ -510,7 +533,8 @@ public class JdtUtils {
 			catch (JavaModelException e) {
 			}
 		}
-		else if (element != null && element instanceof IType && ((IType) element).getCompilationUnit() != null) {
+		else if (element != null && element instanceof IType
+				&& ((IType) element).getCompilationUnit() != null) {
 			try {
 				IType type = (IType) element;
 				int lines = 0;
