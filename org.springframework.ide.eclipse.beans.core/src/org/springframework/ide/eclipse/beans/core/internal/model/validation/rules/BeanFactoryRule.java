@@ -79,8 +79,7 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 
 							// Use constructor argument values of root bean as
 							// arguments for static factory method
-							int argCount = (bd instanceof RootBeanDefinition
-									&& !bd.isAbstract() ? bd
+							int argCount = (!bd.isAbstract() ? bd
 									.getConstructorArgumentValues()
 									.getArgumentCount() : -1);
 							validateFactoryMethod(bean, mergedClassName,
@@ -113,8 +112,7 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 						// Validate non-static factory method in factory bean
 						// Factory beans with factory methods can only be
 						// validated during runtime - so skip them
-						if (factoryBd instanceof RootBeanDefinition
-								&& factoryBd.getFactoryMethodName() == null) {
+						if (factoryBd.getFactoryMethodName() == null) {
 							validateFactoryMethod(bean, factoryBd
 									.getBeanClassName(), methodName, -1,
 									Static.NO, context);
