@@ -14,7 +14,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.springframework.ide.eclipse.core.SpringCorePreferences;
+import org.springframework.ide.eclipse.core.PersistablePreferenceObjectSupport;
 
 /**
  * Wraps contributions to the
@@ -22,31 +22,30 @@ import org.springframework.ide.eclipse.core.SpringCorePreferences;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class ProjectBuilderDefinition {
+public class ProjectBuilderDefinition extends
+		PersistablePreferenceObjectSupport {
 
 	private static final String BUILDER_PREFIX = "builders.enable.";
 
 	private static final String CLASS_ATTRIBUTE = "class";
 
+	private static final String DESCRIPTION_ATTRIBUTE = "description";
+
 	private static final String ENABLED_BY_DEFAULT_ATTRIBUTE = "enabledByDefault";
+
+	private static final String ICON_ATTRIBUTE = "icon";
 
 	private static final String ID_ATTRIBUTE = "id";
 
 	private static final String NAME_ATTRIBUTE = "name";
 
-	private static final String DESCRIPTION_ATTRIBUTE = "description";
-
-	private static final String ICON_ATTRIBUTE = "icon";
-
 	private String description;
+
+	private String iconUri;
 
 	private String id;
 
-	private boolean isEnabled = true;
-
 	private String name;
-
-	private String iconUri;
 
 	private String namespaceUri;
 
@@ -57,8 +56,23 @@ public class ProjectBuilderDefinition {
 		init(element);
 	}
 
+	private void cleanup(IProject project) {
+		if (!isEnabled(project) && project != null) {
+			try {
+				getProjectBuilder().cleanup(project, new NullProgressMonitor());
+			}
+			catch (CoreException e) {
+				// ignore
+			}
+		}
+	}
+
 	public String getDescription() {
 		return description;
+	}
+
+	public String getIconUri() {
+		return iconUri;
 	}
 
 	public String getId() {
@@ -67,6 +81,15 @@ public class ProjectBuilderDefinition {
 
 	public String getName() {
 		return name;
+	}
+
+	public String getNamespaceUri() {
+		return namespaceUri;
+	}
+
+	@Override
+	protected String getPreferenceId() {
+		return BUILDER_PREFIX + this.id;
 	}
 
 	public IProjectBuilder getProjectBuilder() {
@@ -87,45 +110,20 @@ public class ProjectBuilderDefinition {
 		String enabledByDefault = element
 				.getAttribute(ENABLED_BY_DEFAULT_ATTRIBUTE);
 		if (enabledByDefault != null) {
-			this.isEnabled = Boolean.valueOf(enabledByDefault);
+			setEnabledByDefault(Boolean.valueOf(enabledByDefault));
 		}
-	}
-
-	/**
-	 * Returns true if the wrapped {@link IProjectBuilder} is enabled.
-	 */
-	public boolean isEnabled(IProject project) {
-		return SpringCorePreferences.getProjectPreferences(project).getBoolean(
-				BUILDER_PREFIX + this.id, this.isEnabled);
-	}
-
-	public void setEnabled(boolean isEnabled, IProject project) {
-		SpringCorePreferences.getProjectPreferences(project).putBoolean(
-				BUILDER_PREFIX + this.id, isEnabled);
-		this.isEnabled = isEnabled;
-		cleanup(project);
-	}
-
-	private void cleanup(IProject project) {
-		if (!this.isEnabled) {
-			try {
-				getProjectBuilder().cleanup(project, new NullProgressMonitor());
-			}
-			catch (CoreException e) {
-			}
+		else {
+			setEnabledByDefault(true);
 		}
 	}
 
 	@Override
+	protected void onEnablementChanged(boolean isEnabled, IProject project) {
+		cleanup(project);
+	}
+
+	@Override
 	public String toString() {
-		return (name != null ? name : projectBuilder.getClass().getName());
-	}
-
-	public String getIconUri() {
-		return iconUri;
-	}
-
-	public String getNamespaceUri() {
-		return namespaceUri;
+		return id + " (" + projectBuilder.getClass().getName() + ")";
 	}
 }

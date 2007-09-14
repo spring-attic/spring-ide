@@ -48,11 +48,9 @@ public class AopPreferencePage extends PreferencePage implements
 		entryTable.setLayout(layout);
 
 		Label label = new Label(entryTable, SWT.NONE);
-		label
-				.setText("Use this preference page to specify whether the AOP Reference model should\nbe saved to file on workbench close");
+		label.setText("Use this preference page to specify whether the AOP Reference model should\nbe saved to file on workbench close");
 
 		Composite colorComposite = new Composite(entryTable, SWT.NONE);
-
 		colorComposite.setLayout(new GridLayout());
 
 		// Create a data that takes up the extra space in the dialog.
@@ -66,7 +64,6 @@ public class AopPreferencePage extends PreferencePage implements
 		group.setText("Persist AOP Model");
 
 		Composite colorComposite2 = new Composite(group, SWT.NONE);
-		layout.marginLeft = 2;
 		colorComposite2.setLayout(layout);
 		colorComposite2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 

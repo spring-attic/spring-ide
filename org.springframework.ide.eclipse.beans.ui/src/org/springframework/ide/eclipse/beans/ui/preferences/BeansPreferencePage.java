@@ -57,7 +57,8 @@ public class BeansPreferencePage extends PreferencePage implements
 		radioComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Composite radioComposite2 = new Composite(radioComposite, SWT.NONE);
-		layout.marginLeft = 2;
+		layout.marginWidth = 3;
+		layout.marginHeight = 3;
 		radioComposite2.setLayout(layout);
 		radioComposite2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		radioEditor = new RadioGroupFieldEditor(

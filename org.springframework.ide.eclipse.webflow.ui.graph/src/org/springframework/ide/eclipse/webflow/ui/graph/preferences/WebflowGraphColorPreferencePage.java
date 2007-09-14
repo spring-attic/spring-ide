@@ -67,7 +67,6 @@ public class WebflowGraphColorPreferencePage extends PreferencePage implements
 		label.setText("Use this preference page to adjust the background colors of the state shapes\nwithin the Web Flow Editor");
 
 		Composite colorComposite = new Composite(entryTable, SWT.NONE);
-
 		colorComposite.setLayout(new GridLayout());
 
 		// Create a data that takes up the extra space in the dialog.
@@ -81,7 +80,6 @@ public class WebflowGraphColorPreferencePage extends PreferencePage implements
 		group.setText("State Colors");
 		
 		Composite colorComposite2 = new Composite(group, SWT.NONE);
-		layout.marginLeft = 2;
 		colorComposite2.setLayout(layout);
 		colorComposite2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		

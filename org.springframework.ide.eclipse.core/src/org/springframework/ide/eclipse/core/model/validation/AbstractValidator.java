@@ -166,7 +166,7 @@ public abstract class AbstractValidator implements IValidator {
 								+ ruleDefinition.getName() + "'");
 						IValidationRule rule = ruleDefinition.getRule();
 						if (rule.supports(element, context)) {
-							context.setCurrentRuleId(ruleDefinition.getID());
+							context.setCurrentRuleId(ruleDefinition.getId());
 							rule.validate(element, context, monitor);
 						}
 						subMonitor.worked(1);

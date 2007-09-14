@@ -27,8 +27,8 @@ import org.springframework.ide.eclipse.core.model.ISpringModel;
 /**
  * Central access point for the Spring IDE core plug-in
  * (id <code>"org.springframework.ide.eclipse.core"</code>).
- *
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class SpringCore extends Plugin {
 
@@ -61,6 +61,9 @@ public class SpringCore extends Plugin {
 	public static final String MARKER_ID = PLUGIN_ID + ".problemmarker";
 
 	private static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
+	
+	/** The identifier for enablement of project versus workspace settings */
+	public static final String PROJECT_PROPERTY_ID = "enable.project.preferences";
 
 	/** The shared instance */
 	private static SpringCore plugin; 

@@ -80,12 +80,13 @@ public class ProjectBuilderPropertyTab {
 			}
 			return super.getText(element);
 		}
-		
+
 		public Image getImage(Object element) {
 			Image image = null;
 			if (element instanceof ProjectBuilderDefinition) {
 				String icon = ((ProjectBuilderDefinition) element).getIconUri();
-				String ns = ((ProjectBuilderDefinition) element).getNamespaceUri();
+				String ns = ((ProjectBuilderDefinition) element)
+						.getNamespaceUri();
 				if (icon != null && ns != null) {
 					image = SpringUIPlugin.getDefault().getImageRegistry().get(
 							icon);
@@ -224,7 +225,7 @@ public class ProjectBuilderPropertyTab {
 					if (checkElements.contains(projectBuilderDefinition)) {
 						projectBuilderDefinition.setEnabled(true, project);
 					}
-					else {
+					else { 
 						projectBuilderDefinition.setEnabled(false, project);
 					}
 				}

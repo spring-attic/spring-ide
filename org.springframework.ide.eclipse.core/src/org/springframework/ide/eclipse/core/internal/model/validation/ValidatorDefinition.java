@@ -14,39 +14,93 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.springframework.ide.eclipse.core.MarkerUtils;
-import org.springframework.ide.eclipse.core.SpringCorePreferences;
+import org.springframework.ide.eclipse.core.PersistablePreferenceObjectSupport;
 import org.springframework.ide.eclipse.core.model.validation.IValidator;
 
 /**
- * Wraps an {@link IValidator} and all the information from it's definition
- * via the corresponding extension point.
+ * Wraps an {@link IValidator} and all the information from it's definition via
+ * the corresponding extension point.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @since 2.0
  */
-public class ValidatorDefinition {
+public class ValidatorDefinition extends PersistablePreferenceObjectSupport {
+
+	private static final String CLASS_ATTRIBUTE = "class";
+
+	private static final String DESCRIPTION_ATTRIBUTE = "description";
+
+	private static final String ENABLED_BY_DEFAULT_ATTRIBUTE = "enabledByDefault";
 
 	private static final String ENABLEMENT_PREFIX = "validator.enable.";
-	private static final String CLASS_ATTRIBUTE = "class";
-	private static final String ID_ATTRIBUTE = "id";
-	private static final String NAME_ATTRIBUTE = "name";
-	private static final String ENABLED_BY_DEFAULT_ATTRIBUTE = "enabledByDefault";
-	private static final String DESCRIPTION_ATTRIBUTE = "description";
+
 	private static final String ICON_ATTRIBUTE = "icon";
+
+	private static final String ID_ATTRIBUTE = "id";
+
 	private static final String MARKER_ID_ATTRIBUTE = "markerId";
 
-	private IValidator validator;
-	private String id;
-	private String name;
-	private boolean isEnabled = true;
+	private static final String NAME_ATTRIBUTE = "name";
+
 	private String description;
+
 	private String iconUri;
+
+	private String id;
+
 	private String markerId;
+
+	private String name;
+
 	private String namespaceUri;
+
+	private IValidator validator;
 
 	public ValidatorDefinition(IConfigurationElement element)
 			throws CoreException {
 		init(element);
+	}
+
+	/**
+	 * Delete all problem markers created by this validator in given project.
+	 */
+	private void cleanup(IProject project) {
+		if (!isEnabled(project) && project != null) {
+			MarkerUtils.deleteMarkers(project, markerId);
+		}
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public String getIconUri() {
+		return iconUri;
+	}
+
+	public String getID() {
+		return id;
+	}
+
+	public String getMarkerId() {
+		return markerId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String getNamespaceUri() {
+		return namespaceUri;
+	}
+
+	@Override
+	protected String getPreferenceId() {
+		return ENABLEMENT_PREFIX + id;
+	}
+
+	public IValidator getValidator() {
+		return validator;
 	}
 
 	private void init(IConfigurationElement element) throws CoreException {
@@ -65,62 +119,18 @@ public class ValidatorDefinition {
 		String enabledByDefault = element
 				.getAttribute(ENABLED_BY_DEFAULT_ATTRIBUTE);
 		if (enabledByDefault != null) {
-			isEnabled = Boolean.valueOf(enabledByDefault);
+			setEnabledByDefault(Boolean.valueOf(enabledByDefault));
+		}
+		else {
+			setEnabledByDefault(true);
 		}
 	}
 
-	public IValidator getValidator() {
-		return validator;
-	}
-
-	public String getID() {
-		return id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public String getIconUri() {
-		return iconUri;
-	}
-
-	public String getMarkerId() {
-		return markerId;
-	}
-
-	public String getNamespaceUri() {
-		return namespaceUri;
-	}
-
-	/**
-	 * Returns true if the wrapped {@link IValidator} is enabled.
-	 */
-	public boolean isEnabled(IProject project) {
-		return SpringCorePreferences.getProjectPreferences(project).getBoolean(
-				ENABLEMENT_PREFIX + id, isEnabled);
-	}
-
-	public void setEnabled(boolean isEnabled, IProject project) {
-		SpringCorePreferences.getProjectPreferences(project).putBoolean(
-				ENABLEMENT_PREFIX + id, isEnabled);
-		this.isEnabled = isEnabled;
+	@Override
+	protected void onEnablementChanged(boolean isEnabled, IProject project) {
 		cleanup(project);
 	}
 	
-	/**
-	 * Delete all problem markers created by this validator in given project.
-	 */
-	private void cleanup(IProject project) {
-		if (!this.isEnabled) {
-			MarkerUtils.deleteMarkers(project, markerId);
-		}
-	}
-
 	@Override
 	public String toString() {
 		return id + " (" + validator.getClass().getName() + ")";
