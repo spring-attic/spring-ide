@@ -17,12 +17,26 @@
 	&lt;value&gt;${cursor}&lt;/value&gt;
 &lt;/property&gt;</template>
 
-	<template name="%NAME_bean_property" description="%DESC_bean_property"
+ 	<template name="%NAME_bean_property_with_ref_inline" 
+ 		description="%DESC_bean_property_with_ref_inline"
+ 		id="org.springframework.ide.eclipse.beans.ui.editor.template.bean.property_with_ref_inline"
+ 		context="org.springframework.ide.eclipse.beans.ui.editor.templates.contextType.bean" 
+ 		enabled="true" >&lt;property name="${name}" ref="${cursor}" /&gt;</template>
+ 		
+ 	<template name="%NAME_bean_property_with_value_inline" 
+ 		description="%DESC_bean_property_with_value_inline" 
+ 		id="org.springframework.ide.eclipse.beans.ui.editor.template.bean.property_with_value_inline"
+ 		context="org.springframework.ide.eclipse.beans.ui.editor.templates.contextType.bean" 
+ 		enabled="true">&lt;property name="${name}" value="${cursor}" /&gt;</template>
+
+	<template name="%NAME_bean_property" 
+		description="%DESC_bean_property"
 		id="org.springframework.ide.eclipse.beans.ui.editor.template.bean.property"
 		context="org.springframework.ide.eclipse.beans.ui.editor.templates.contextType.bean"
 		enabled="true">&lt;property name="${name}"&gt;${cursor}&lt;/property&gt;</template>
 
-	<template name="%NAME_bean_constructor" description="%DESC_bean_constructor"
+	<template name="%NAME_bean_constructor" 
+		description="%DESC_bean_constructor"
 		id="org.springframework.ide.eclipse.beans.ui.editor.template.bean.constructor"
 		context="org.springframework.ide.eclipse.beans.ui.editor.templates.contextType.bean"
 		enabled="true">&lt;constructor-arg&gt;
@@ -32,26 +46,30 @@
 &lt;/constructor-arg&gt;</template>
 
 	<!-- Templates for properties -->		
-	<template name="%NAME_property_list" description="%DESC_property_list"
+	<template name="%NAME_property_list" 
+		description="%DESC_property_list"
 		id="org.springframework.ide.eclipse.beans.ui.editor.template.bean.property.list"
 		context="sorg.springframework.ide.eclipse.beans.ui.editor.templates.contextType.property"
 		enabled="true">&lt;list&gt;
 	&lt;value&gt;${cursor}&lt;/value&gt;
 &lt;/list&gt;</template>
 
-	<template name="%NAME_property_map" description="%DESC_property_map"
+	<template name="%NAME_property_map" 
+		description="%DESC_property_map"
 		id="org.springframework.ide.eclipse.beans.ui.editor.template.bean.property.map"
 		context="org.springframework.ide.eclipse.beans.ui.editor.templates.contextType.property"
 		enabled="true">&lt;map&gt;
 	&lt;entry key="${key}"&gt;${cursor}&lt;/entry&gt;
 &lt;/map&gt;</template>
 
-	<template name="%NAME_property_ref_bean" description="%DESC_property_ref_bean"
+	<template name="%NAME_property_ref_bean" 
+		description="%DESC_property_ref_bean"
 		id="org.springframework.ide.eclipse.beans.ui.editor.template.bean.property.ref.bean"
 		context="org.springframework.ide.eclipse.beans.ui.editor.templates.contextType.property"
 		enabled="true">&lt;ref bean="${id}"/&gt;${cursor}</template>
 
-	<template name="%NAME_property_ref_local" description="%DESC_property_ref_local"
+	<template name="%NAME_property_ref_local" 
+		description="%DESC_property_ref_local"
 		id="org.springframework.ide.eclipse.beans.ui.editor.template.bean.property.ref.local"
 		context="org.springframework.ide.eclipse.beans.ui.editor.templates.contextType.property"
 		enabled="true">&lt;ref local="${id}"/&gt;${cursor}</template>
