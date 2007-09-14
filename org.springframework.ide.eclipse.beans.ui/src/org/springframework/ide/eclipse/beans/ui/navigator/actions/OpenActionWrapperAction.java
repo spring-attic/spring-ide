@@ -10,13 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.navigator.actions;
 
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.IScopeContext;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
-import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
+import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.ui.navigator.actions.AbstractNavigatorAction;
 
 /**
@@ -47,7 +44,7 @@ public class OpenActionWrapperAction extends AbstractNavigatorAction {
 	public boolean isEnabled(IStructuredSelection selection) {
 		if (selection.size() == 1) {
 			if (this.openJavaElementAction.isEnabled(selection)) {
-				if (shouldOpenConfigFile()) {
+				if (BeansUIUtils.shouldOpenConfigFile()) {
 					this.action = openConfigFileAction;
 					return openConfigFileAction.isEnabled(selection);
 				}
@@ -68,12 +65,4 @@ public class OpenActionWrapperAction extends AbstractNavigatorAction {
 	public void run() {
 		this.action.run();
 	}
-
-	private boolean shouldOpenConfigFile() {
-		IScopeContext context = new InstanceScope();
-		IEclipsePreferences node = context.getNode(BeansUIPlugin.PLUGIN_ID);
-		return node.getBoolean(
-				BeansUIPlugin.DEFAULT_DOUBLE_CLICK_ACTION_PREFERENCE_ID, true);
-	}
-
 }

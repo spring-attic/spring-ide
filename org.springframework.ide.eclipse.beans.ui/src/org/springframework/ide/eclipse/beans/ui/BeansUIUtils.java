@@ -16,6 +16,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
@@ -59,6 +62,7 @@ import org.w3c.dom.Element;
  * Some helper methods.
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public final class BeansUIUtils {
 
@@ -199,13 +203,12 @@ public final class BeansUIUtils {
 		else {
 			return null;
 		}
-		
-		
+
 		if (resource instanceof IFile) {
-			
+
 			// add to history
 			BeansUIActivationHistory.addToHistory(element);
-			
+
 			IFile file = (IFile) resource;
 			if (sourceElement.isElementArchived()) {
 				try {
@@ -281,5 +284,16 @@ public final class BeansUIUtils {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Checks if the default double click action is active
+	 * @since 2.0.2
+	 */
+	public static boolean shouldOpenConfigFile() {
+		IScopeContext context = new InstanceScope();
+		IEclipsePreferences node = context.getNode(BeansUIPlugin.PLUGIN_ID);
+		return node.getBoolean(
+				BeansUIPlugin.DEFAULT_DOUBLE_CLICK_ACTION_PREFERENCE_ID, true);
 	}
 }

@@ -27,9 +27,12 @@ import org.eclipse.gef.NodeEditPart;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
+import org.eclipse.jdt.core.IType;
+import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
 import org.springframework.ide.eclipse.beans.ui.graph.figures.BeanFigure;
 import org.springframework.ide.eclipse.beans.ui.graph.model.Bean;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 public class BeanPart extends AbstractGraphicalEditPart implements NodeEditPart {
 
@@ -49,15 +52,15 @@ public class BeanPart extends AbstractGraphicalEditPart implements NodeEditPart 
 	}
 
 	/**
-	 * Sets constraint for XYLayout (rectangle with figure bounds from bean). 
+	 * Sets constraint for XYLayout (rectangle with figure bounds from bean).
 	 */
 	@Override
 	protected void refreshVisuals() {
 		Dimension dim = getFigure().getPreferredSize();
 		Rectangle rect = new Rectangle(getBean().x, getBean().y, dim.width,
-									dim.height);
-		((GraphicalEditPart) getParent()).setLayoutConstraint(this, getFigure(),
-															  rect);
+				dim.height);
+		((GraphicalEditPart) getParent()).setLayoutConstraint(this,
+				getFigure(), rect);
 	}
 
 	@Override
@@ -93,7 +96,8 @@ public class BeanPart extends AbstractGraphicalEditPart implements NodeEditPart 
 		if (border instanceof LineBorder) {
 			if (value != EditPart.SELECTED_NONE) {
 				((LineBorder) border).setWidth(2);
-			} else {
+			}
+			else {
 				((LineBorder) border).setWidth(1);
 			}
 			getFigure().repaint();
@@ -101,12 +105,22 @@ public class BeanPart extends AbstractGraphicalEditPart implements NodeEditPart 
 	}
 
 	/**
-	 * Opens this bean's config file on double click.
+	 * Opens this bean's config file or corresponding java element on double
+	 * click.
 	 */
 	@Override
 	public void performRequest(Request req) {
 		if (req.getType() == RequestConstants.REQ_OPEN) {
-			BeansUIUtils.openInEditor(getBean().getBean());
+			if (BeansUIUtils.shouldOpenConfigFile()) {
+				BeansUIUtils.openInEditor(getBean().getBean());
+			}
+			else {
+				IType type = BeansModelUtils.getBeanType(getBean().getBean(),
+						null);
+				if (type != null) {
+					SpringUIUtils.openInEditor(type);
+				}
+			}
 		}
 		super.performRequest(req);
 	}
@@ -123,7 +137,8 @@ public class BeanPart extends AbstractGraphicalEditPart implements NodeEditPart 
 			getOwner().translateToAbsolute(p);
 			if (reference.y < p.y) {
 				p = getOwner().getBounds().getTop();
-			} else {
+			}
+			else {
 				p = getOwner().getBounds().getBottom();
 			}
 			getOwner().translateToAbsolute(p);
