@@ -65,7 +65,6 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.internal.model.process.BeansConfigPostProcessorFactory;
-import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansConfigValidator;
 import org.springframework.ide.eclipse.beans.core.internal.parser.BeansDtdResolver;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
@@ -96,7 +95,6 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.core.model.java.JavaSourceExtractor;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
-import org.springframework.ide.eclipse.core.model.validation.ValidationUtils;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceExtractor;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 import org.springframework.util.ObjectUtils;
@@ -750,10 +748,6 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			finally {
 				this.isModelPopulated = true;
 				w.unlock();
-				
-				// Create a problem marker for every parsing error
-				ValidationUtils.createProblemMarkers(file, problems,
-						BeansConfigValidator.MARKER_ID);
 			}
 		}
 	}

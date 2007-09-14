@@ -21,7 +21,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.type.asm.CachingClassReaderFactory;
 import org.springframework.core.type.asm.ClassReaderFactory;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.ValidationRuleUtils;
@@ -55,9 +54,6 @@ public class BeansValidationContext extends AbstractValidationContext {
 	public BeansValidationContext(IBeansConfig config,
 			IResourceModelElement contextElement) {
 		super(config, contextElement);
-
-		// Add parsing errors to list of validation errors
-		addProblems(((BeansConfig) config).getProblems());
 
 		incompleteRegistry = createRegistry(config, contextElement, false);
 		completeRegistry = createRegistry(config, contextElement, true);

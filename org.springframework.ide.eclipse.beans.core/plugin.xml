@@ -91,6 +91,10 @@
 		            name="%beansValidator.rule.requiredProperty.name"
 		            description="%beansValidator.rule.requiredProperty.description"
 		            enabledByDefault="false" />
+		    <rule id="parsingProblems"
+		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.SpringParsingProblemsRule"
+		            name="%beansValidator.rule.parsingProblems.name"
+		            description="%beansValidator.rule.parsingProblems.description" />
 	    </rules>
 	</extension>
 </plugin>
