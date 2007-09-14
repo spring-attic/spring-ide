@@ -10,11 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.project;
 
+import java.util.Set;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.springframework.ide.eclipse.core.PersistablePreferenceObjectSupport;
+import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.model.ISpringProject;
 
 /**
  * Wraps contributions to the
@@ -57,13 +61,30 @@ public class ProjectBuilderDefinition extends
 	}
 
 	private void cleanup(IProject project) {
-		if (!isEnabled(project) && project != null) {
-			try {
-				getProjectBuilder().cleanup(project, new NullProgressMonitor());
+		if (!isEnabled(project)) {
+			if (project != null) {
+				cleanupProject(project);
 			}
-			catch (CoreException e) {
-				// ignore
+			// cleanup projects that use workspace properties
+			else {
+				Set<ISpringProject> projects = SpringCore.getModel()
+						.getProjects();
+				for (ISpringProject sproject : projects) {
+					IProject p = sproject.getProject();
+					if (!hasProjectSpecificOptions(p)) {
+						cleanupProject(p);
+					}
+				}
 			}
+		}
+	}
+
+	private void cleanupProject(IProject project) {
+		try {
+			getProjectBuilder().cleanup(project, new NullProgressMonitor());
+		}
+		catch (CoreException e) {
+			// ignore
 		}
 	}
 

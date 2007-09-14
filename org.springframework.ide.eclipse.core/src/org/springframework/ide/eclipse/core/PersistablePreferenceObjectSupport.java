@@ -31,7 +31,7 @@ public abstract class PersistablePreferenceObjectSupport {
 	 */
 	protected abstract String getPreferenceId();
 
-	private boolean hasProjectSpecificOptions(IProject project) {
+	protected boolean hasProjectSpecificOptions(IProject project) {
 		return SpringCorePreferences.getProjectPreferences(project).getBoolean(
 				SpringCore.PROJECT_PROPERTY_ID, false);
 	}
@@ -67,12 +67,12 @@ public abstract class PersistablePreferenceObjectSupport {
 		if (project != null) {
 			SpringCorePreferences.getProjectPreferences(project).putBoolean(
 					getPreferenceId(), isEnabled);
-			onEnablementChanged(isEnabled, project);
 		}
 		else {
 			SpringCore.getDefault().getPluginPreferences().setValue(
 					getPreferenceIdForPluginPreference(), isEnabled);
 		}
+		onEnablementChanged(isEnabled, project);
 	}
 
 	private String getPreferenceIdForPluginPreference() {

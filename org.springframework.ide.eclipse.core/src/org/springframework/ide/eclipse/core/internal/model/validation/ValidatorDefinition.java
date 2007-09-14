@@ -10,11 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.core.internal.model.validation;
 
+import java.util.Set;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.PersistablePreferenceObjectSupport;
+import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.core.model.validation.IValidator;
 
 /**
@@ -65,8 +69,21 @@ public class ValidatorDefinition extends PersistablePreferenceObjectSupport {
 	 * Delete all problem markers created by this validator in given project.
 	 */
 	private void cleanup(IProject project) {
-		if (!isEnabled(project) && project != null) {
-			MarkerUtils.deleteMarkers(project, markerId);
+		if (!isEnabled(project)) {
+			if (project != null) {
+				MarkerUtils.deleteMarkers(project, markerId);
+			}
+			// cleanup projects that use workspace properties
+			else {
+				Set<ISpringProject> projects = SpringCore.getModel()
+						.getProjects();
+				for (ISpringProject sproject : projects) {
+					IProject p = sproject.getProject();
+					if (!hasProjectSpecificOptions(p)) {
+						MarkerUtils.deleteMarkers(p, markerId);
+					}
+				}
+			}
 		}
 	}
 
@@ -130,7 +147,7 @@ public class ValidatorDefinition extends PersistablePreferenceObjectSupport {
 	protected void onEnablementChanged(boolean isEnabled, IProject project) {
 		cleanup(project);
 	}
-	
+
 	@Override
 	public String toString() {
 		return id + " (" + validator.getClass().getName() + ")";
