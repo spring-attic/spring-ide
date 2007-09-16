@@ -22,7 +22,7 @@ public final class StringUtils {
 
 	public static final char SINGLE_QUOTE = '\'';
 	public static final char DOUBLE_QUOTE = '\"';
-
+ 
     /**
      * Returns concatenated text from given two texts delimited by given
      * delimiter. Both texts can be empty or <code>null</code>.

@@ -1,28 +1,29 @@
-Manifest-Version: 1
-Created-By: Bnd-0.0.145
-Bundle-License: http://www.apache.org/licenses/LICENSE-2.0
-Import-Package: org.apache.commons.logging,org.osgi.framework;version=
- 1.3,org.springframework.core;version=2.0,org.springframework.core.io;
- version=2.0,org.springframework.core.io.support;version=2.0,org.sprin
- gframework.osgi.io;version=1.0.0.m3,org.springframework.util;version=
- 2.0
-Include-Resource: src/main/resources/
+Manifest-Version: 1.0
 Export-Package: org.springframework.osgi.io;uses:="org.springframework
- .core.io.support,org.springframework.core.io,org.springframework.core
- ,org.osgi.framework,org.apache.commons.logging,org.springframework.ut
- il";version=1.0.0.m3
-Bundle-Version: 1.0.0.m3_v200707150600
+ .core,org.apache.commons.logging,org.springframework.util,org.springf
+ ramework.core.io,org.osgi.framework,org.springframework.core.io.suppo
+ rt";version=1.0.0.m3
+Private-Package: target.classes
+Implementation-Title: Spring OSGi Framework
+Spring-Version: 2.1
+Implementation-Version: 2.1
+Tool: Bnd-0.0.160
 Bundle-Name: spring-osgi-io
+Created-By: 1.6.0-dp (Apple Computer, Inc.)
+Bundle-Vendor: Spring Framework
+Bundle-Version: 1.0.0.m3_v200709161228
+Bnd-LastModified: 1189797125095
+Bundle-ManifestVersion: 2
+Bundle-License: http://www.apache.org/licenses/LICENSE-2.0
 Bundle-Description: Spring/OSGi IO abstract classes. Provides Resource
  , ResourceLoader and ResourcePatternResolver
   for OSGi environments.
-Private-Package: target.classes
-Bundle-DocURL: http://www.springframework.org
-Spring-Version: 2.0.5
-Bundle-ManifestVersion: 2
-Bundle-Vendor: Spring Framework
-Implementation-Title: Spring OSGi Framework
+Import-Package: org.apache.commons.logging,org.osgi.framework;version=
+ 1.3,org.springframework.core;version=2.1.0.m3,org.springframework.cor
+ e.io;version=2.1.0.m3,org.springframework.core.io.support;version=2.1
+ .0.m3,org.springframework.osgi.io;version=1.0.0.m3,org.springframewor
+ k.util;version=2.1.0.m3
 Bundle-SymbolicName: org.springframework.osgi.spring-osgi-io
-Implementation-Version: 2.0.5
+Bundle-DocURL: http://www.springframework.org
+Include-Resource: {src/main/resources}
 Bundle-ClassPath: spring-osgi-io.jar
-

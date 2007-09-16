@@ -27,7 +27,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigUtils;
-import org.springframework.context.annotation.ScannedRootBeanDefinition;
+import org.springframework.context.annotation.ScannedGenericBeanDefinition;
 import org.springframework.core.type.asm.AnnotationMetadataReadingVisitor;
 import org.springframework.core.type.asm.ClassReaderFactory;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
@@ -96,7 +96,7 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 		// Skip validation if auto-wiring or a factory are involved
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) ((Bean) bean)
 				.getBeanDefinition();
-		if (!(bd instanceof ScannedRootBeanDefinition)
+		if (!(bd instanceof ScannedGenericBeanDefinition)
 				&& bd.getAutowireMode() == AbstractBeanDefinition.AUTOWIRE_NO
 				&& bd.getFactoryBeanName() == null
 				&& bd.getFactoryMethodName() == null) {

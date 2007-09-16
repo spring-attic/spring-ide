@@ -89,7 +89,7 @@ public abstract class AbstractBeansRefactorAction extends
 			if (obj instanceof Element) {
 				Element node = (Element) obj;
 				String attributeName = getSelectedAttributeName(textSelection);
-				
+				 
 				// check if bean class is selected
 				String className = BeansEditorUtils.getAttribute(node, "class");
 				String propertyName = BeansEditorUtils.getAttribute(node,

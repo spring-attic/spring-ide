@@ -26,7 +26,7 @@ import org.xml.sax.SAXException;
  */
 public class OsgiBridgingEntityResolver extends AbstractBundleContextAware implements
 		EntityResolver {
-
+ 
 	/**
 	 * Resolve the system Id and return the located {@link InputSource}
 	 * implementation.

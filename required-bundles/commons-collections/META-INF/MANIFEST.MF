@@ -1,8 +1,8 @@
 Implementation-Title: commons-collections
 Implementation-Version: 3.2
 Bundle-ManifestVersion: 2
-Bundle-SymbolicName: jakarta.commons.collections
-Bundle-Name: commons-collections
+Bundle-SymbolicName: org.apache.commons.collections
+Bundle-Name: Apache Commons Collections
 Bundle-Version: 3.2
 Bundle-Vendor: Apache Jakarta Commons
 Export-Package: org.apache.commons.collections,

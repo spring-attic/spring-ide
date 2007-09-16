@@ -30,7 +30,7 @@ public abstract class AbstractBundleContextAware {
 	 * @return bundleContext
 	 */
 	protected BundleContext getBundleContext() {
-		synchronized (bundleContext) {
+		synchronized (getClass()) {
 			if (this.bundleContext == null) {
 				this.bundleContext = Activator.getDefault().getBundleContext();
 			}

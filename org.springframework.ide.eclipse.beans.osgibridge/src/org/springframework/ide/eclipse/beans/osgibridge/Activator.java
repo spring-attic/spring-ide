@@ -18,7 +18,7 @@ import org.springframework.osgi.extender.ContextLoaderListener;
  * @since 2.0.1
  */
 public class Activator extends ContextLoaderListener {
-
+ 
 	public static final String PLUGIN_ID = 
 		"org.springframework.ide.eclipse.beans.osgibridge";
 

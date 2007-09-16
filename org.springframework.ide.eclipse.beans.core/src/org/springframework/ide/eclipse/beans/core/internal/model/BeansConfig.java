@@ -146,11 +146,15 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	 * corresponding class
 	 */
 	private volatile Map<String, Set<IBean>> beanClassesMap;
+
 	private volatile boolean isBeanClassesMapPopulated = false;
 
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
+
 	private final Lock r = rwl.readLock();
+
 	private final Lock w = rwl.writeLock();
+
 	private volatile boolean isModelPopulated = false;
 
 	/**
@@ -439,7 +443,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	public Set<IBean> getBeans() {
 		// Lazily initialization of this config
 		readConfig();
-		
+
 		try {
 			r.lock();
 			// TODO CD eventually add nestend component beans to the
@@ -584,10 +588,11 @@ public class BeansConfig extends AbstractResourceModelElement implements
 		if (pos != -1) {
 			isArchived = true;
 			fileName = name.substring(0, pos);
-		} else {
+		}
+		else {
 			fileName = name;
 		}
-			
+
 		// Now check for an external config file
 		if (name.charAt(0) == '/') {
 			container = ResourcesPlugin.getWorkspace().getRoot();
@@ -604,8 +609,8 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			modificationTimestamp = IResource.NULL_STAMP;
 			String msg = "Beans config file '" + fullPath + "' not accessible";
 			problems = new LinkedHashSet<ValidationProblem>();
-			problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, msg,
-					-1));
+			problems
+					.add(new ValidationProblem(IMarker.SEVERITY_ERROR, msg, -1));
 		}
 		else {
 			modificationTimestamp = file.getModificationStamp();
@@ -716,8 +721,9 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 					// set the resource loader to use the customized project
 					// class loader
-					reader.setResourceLoader(new PathMatchingResourcePatternResolver(
-						JdtUtils.getClassLoader(file.getProject())));
+					reader
+							.setResourceLoader(new PathMatchingResourcePatternResolver(
+									JdtUtils.getClassLoader(file.getProject())));
 
 					reader.setEntityResolver(resolver);
 					reader.setSourceExtractor(new CompositeSourceExtractor(file
@@ -725,8 +731,10 @@ public class BeansConfig extends AbstractResourceModelElement implements
 					reader.setEventListener(eventListener);
 					reader.setProblemReporter(problemReporter);
 					reader.setErrorHandler(new BeansConfigErrorHandler());
-					reader.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(
-							NamespaceHandlerResolver.class.getClassLoader()));
+					reader
+							.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(
+									NamespaceHandlerResolver.class
+											.getClassLoader()));
 					reader.setBeanNameGenerator(beanNameGenerator);
 					try {
 						reader.loadBeanDefinitions(resource);
@@ -738,8 +746,10 @@ public class BeansConfig extends AbstractResourceModelElement implements
 						// Skip SAXParseExceptions because they're already
 						// handled by the SAX ErrorHandler
 						if (!(e.getCause() instanceof SAXParseException)) {
-							problems.add(new ValidationProblem(IMarker.SEVERITY_ERROR, 
-									e.getMessage(), -1));
+							problems
+									.add(new ValidationProblem(
+											IMarker.SEVERITY_ERROR, e
+													.getMessage(), -1));
 							BeansCorePlugin.log(e);
 						}
 					}
@@ -776,8 +786,8 @@ public class BeansConfig extends AbstractResourceModelElement implements
 					if (postProcessor != null) {
 						postProcessor
 								.postProcess(BeansConfigPostProcessorFactory
-										.createPostProcessingContext(beans.values(),
-												readerEventListener,
+										.createPostProcessingContext(beans
+												.values(), readerEventListener,
 												problemReporter,
 												beanNameGenerator));
 					}
@@ -787,20 +797,16 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	}
 
 	// TODO CD remove once we agree that this is not needed anymore
-	/* private final class NoOpResourcePatternResolver extends FileResourceLoader
-			implements ResourcePatternResolver {
-
-		public Resource[] getResources(String locationPattern)
-				throws IOException {
-
-			// Ignore any resource using an URI or Ant-style regular expressions
-			if (locationPattern.indexOf(':') != -1
-					|| locationPattern.indexOf('*') != -1) {
-				return new Resource[0];
-			}
-			return new Resource[] { getResource(locationPattern) };
-		}
-	} */
+	/*
+	 * private final class NoOpResourcePatternResolver extends
+	 * FileResourceLoader implements ResourcePatternResolver {
+	 * 
+	 * public Resource[] getResources(String locationPattern) throws IOException { //
+	 * Ignore any resource using an URI or Ant-style regular expressions if
+	 * (locationPattern.indexOf(':') != -1 || locationPattern.indexOf('*') !=
+	 * -1) { return new Resource[0]; } return new Resource[] {
+	 * getResource(locationPattern) }; } }
+	 */
 
 	private final class BeansConfigErrorHandler implements ErrorHandler {
 
@@ -969,25 +975,25 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	 */
 	private static final class DelegatingNamespaceHandlerResolver extends
 			DefaultNamespaceHandlerResolver {
-		
-		private static final NamespaceHandler NO_OP_NAMESPACE_HANDLER = 
-			new NoOpNamespaceHandler();
+
+		private static final NamespaceHandler NO_OP_NAMESPACE_HANDLER = new NoOpNamespaceHandler();
 
 		private final Map<String, NamespaceHandler> namespaceHandlers;
-		
+
 		private final Set<NamespaceHandlerResolver> namespaceHandlerResolvers;
 
 		public DelegatingNamespaceHandlerResolver(ClassLoader classLoader) {
 			super(classLoader);
 			namespaceHandlers = NamespaceUtils.getNamespaceHandlers();
-			namespaceHandlerResolvers = NamespaceUtils.getNamespaceHandlerResolvers();
+			namespaceHandlerResolvers = NamespaceUtils
+					.getNamespaceHandlerResolvers();
 		}
 
 		@Override
 		public NamespaceHandler resolve(String namespaceUri) {
 
 			NamespaceHandler namespaceHandler = null;
-			
+
 			// First check for a namespace handler provided by Spring
 			namespaceHandler = super.resolve(namespaceUri);
 
@@ -1003,12 +1009,19 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 			// Then check the contributed NamespaceHandlerResolver
 			for (NamespaceHandlerResolver resolver : namespaceHandlerResolvers) {
-				namespaceHandler = resolver.resolve(namespaceUri);
-				if (namespaceHandler != null) {
-					return namespaceHandler;
+				try {
+					namespaceHandler = resolver.resolve(namespaceUri);
+					if (namespaceHandler != null) {
+						return namespaceHandler;
+					}
+				}
+				catch (Exception e) {
+					// Make sure a contributed NamespaceHandlerResolver can't
+					// prevent parsing
+					BeansCorePlugin.log(e);
 				}
 			}
-			
+
 			// Finally use a no-op namespace handler
 			return NO_OP_NAMESPACE_HANDLER;
 		}
@@ -1028,11 +1041,12 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 		public BeanDefinition parse(Element element, ParserContext parserContext) {
 			// do nothing
-			
+
 			// emit a warning that the NamespaceHandler cannot be found
 			parserContext.getReaderContext().warning(
-					"Unable to locate Spring NamespaceHandler for XML schema namespace [" 
-					+ element.getNamespaceURI() + "]", parserContext.extractSource(element.getParentNode()));
+					"Unable to locate Spring NamespaceHandler for XML schema namespace ["
+							+ element.getNamespaceURI() + "]",
+					parserContext.extractSource(element.getParentNode()));
 			return null;
 		}
 	}
@@ -1067,9 +1081,9 @@ public class BeansConfig extends AbstractResourceModelElement implements
 	 */
 	private static class XmlCatalogDelegatingEntityResolver extends
 			DelegatingEntityResolver {
-		
+
 		private final Set<EntityResolver> entityResolvers;
-		
+
 		public XmlCatalogDelegatingEntityResolver(EntityResolver dtdResolver,
 				EntityResolver schemaResolver) {
 			super(dtdResolver, schemaResolver);
@@ -1088,14 +1102,22 @@ public class BeansConfig extends AbstractResourceModelElement implements
 			if (inputSource != null) {
 				return inputSource;
 			}
-			
+
 			for (EntityResolver entityResolver : this.entityResolvers) {
-				inputSource = entityResolver.resolveEntity(publicId, systemId);
-				if (inputSource != null) {
-					return inputSource;
+				try {
+					inputSource = entityResolver.resolveEntity(publicId,
+							systemId);
+					if (inputSource != null) {
+						return inputSource;
+					}
+				}
+				catch (Exception e) {
+					// Make sure a contributed EntityResolver can't prevent
+					// parsing
+					BeansCorePlugin.log(e);
 				}
 			}
-			
+
 			return inputSource;
 		}
 

@@ -188,4 +188,8 @@ public class DefaultBeanDefinitionRegistry extends AbstractBeanFactory
 			throws NoSuchBeanDefinitionException {
 		throw new BeanCreationException(beanName, "Not implemented");
 	}
+
+	@SuppressWarnings("unchecked")
+	public void registerQualifierType(Class cls) {
+	}
 }
