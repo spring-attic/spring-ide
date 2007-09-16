@@ -191,14 +191,14 @@
          unpack="false"/>
 
    <plugin
-         id="jakarta.commons.logging"
+         id="org.apache.commons.logging"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="jakarta.commons.collections"
+         id="org.apache.commons.collections"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -217,117 +217,6 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-<!--
-   <plugin
-         id="org.springframework.ide.eclipse.webflow.mylyn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.ide.eclipse.beans.mylyn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.ide.eclipse.aop.mylyn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.ide.eclipse.mylyn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-	
--->
-
-<!--
-   <plugin
-         id="org.springframework.ide.eclipse.aop.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.ide.eclipse.aop.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.ide.eclipse.aop.ui.xref"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.ide.eclipse.aop.ui.visualiser"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
--->
-
-<!--         
-   <plugin
-         id="org.springframework.ide.eclipse.webflow.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.ide.eclipse.webflow.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.ide.eclipse.webflow.ui.editor"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.ide.eclipse.webflow.ui.graph"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.webflow"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.webflow.doc"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.binding"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
--->
 	                  
 	<includes id="org.springframework.ide.eclipse.feature.source" version="0.0.0"/>
 	
