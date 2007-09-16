@@ -122,7 +122,7 @@ public final class ValidationRuleUtils {
 	/**
 	 * Extracts the {@link IType} of a bean definition.
 	 * <p>
-	 * Honors <code>factory-method</code>s.
+	 * Honors <code>factory-method</code>s and <code>factory-bean</code>.
 	 */
 	public static IType extractBeanClass(BeanDefinition bd, IBean bean,
 			String mergedClassName, BeansValidationContext context) {
@@ -134,8 +134,8 @@ public final class ValidationRuleUtils {
 			type = extractTypeFromFactoryMethod(bd, type);
 		}
 		// 2. factory-method on factory-bean
-		else if (bd.getFactoryBeanName() != null
-				&& bd.getFactoryMethodName() != null) {
+		else if (bd.getFactoryMethodName() != null
+				&& bd.getFactoryBeanName() != null) {
 			try {
 				AbstractBeanDefinition factoryBd = (AbstractBeanDefinition) context
 						.getCompleteRegistry().getBeanDefinition(
@@ -153,8 +153,13 @@ public final class ValidationRuleUtils {
 		return type;
 	}
 
-	private static IType extractTypeFromFactoryMethod(
-			BeanDefinition bd, IType type) {
+	/**
+	 * Extracts the {@link IType} of a {@link BeanDefinition} by only looking at
+	 * the <code>factory-method</code>. The passed in {@link IType} <b>must</b>
+	 * be the bean class or the resolved type of the factory bean in use.
+	 */
+	private static IType extractTypeFromFactoryMethod(BeanDefinition bd,
+			IType type) {
 		String factoryMethod = bd.getFactoryMethodName();
 		try {
 			int argCount = (!bd.isAbstract() ? bd
@@ -163,8 +168,8 @@ public final class ValidationRuleUtils {
 			for (IMethod method : methods) {
 				if (factoryMethod.equals(method.getElementName())
 						&& method.getParameterNames().length == argCount) {
-					type = JdtUtils.getJavaTypeFromSignatureClassName(
-							method.getReturnType(), type);
+					type = JdtUtils.getJavaTypeFromSignatureClassName(method
+							.getReturnType(), type);
 					break;
 				}
 			}
