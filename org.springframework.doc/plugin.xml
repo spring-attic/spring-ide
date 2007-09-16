@@ -3,7 +3,7 @@
 <plugin
    id="org.springframework.doc"
    name="%pluginName"
-   version="2.1.0.m3_v200707150600"
+   version="2.5.0.rc1_v200709161211"
    provider-name="%providerName">
 
    <runtime>

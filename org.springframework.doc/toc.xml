@@ -5,7 +5,7 @@
       <topic label="Overview" href="introduction.html#introduction-overview"/>
       <topic label="Usage scenarios" href="introduction.html#overview-usagescenarios"/>
    </topic>
-   <topic label="What's new in Spring 2.0?" href="new-in-2.html">
+   <topic label="What's new in Spring 2.0 and 2.5?" href="new-in-2.html">
       <topic label="Introduction" href="new-in-2.html#new-in-2-intro"/>
       <topic label="The Inversion of Control (IoC) container" href="new-in-2.html#new-in-2-ioc">
          <topic label="Easier XML configuration" href="new-in-2.html#new-in-2-ioc-configuration"/>
@@ -16,6 +16,7 @@
          <topic label="Easier AOP XML configuration" href="new-in-2.html#new-in-2-aop-configuration"/>
          <topic label="Support for @AspectJ aspects" href="new-in-2.html#new-in-2-aop-aspectJ"/>
       </topic>
+      <topic label="Enhanced testing support" href="new-in-2.html#new-in-2-testing"/>
       <topic label="The Middle Tier" href="new-in-2.html#new-in-2-middle-tier">
          <topic label="Easier configuration of declarative transactions in XML" href="new-in-2.html#new-in-2-middle-tier-transaction-configuration"/>
          <topic label="JPA" href="new-in-2.html#new-in-2-middle-tier-jpa"/>
@@ -87,7 +88,7 @@
                <topic label="Inner beans" href="beans.html#beans-inner-beans"/>
                <topic label="Collections" href="beans.html#beans-collection-elements">
                   <topic label="Collection merging" href="beans.html#beans-collection-elements-merging"/>
-                  <topic label="Strongly-typed collection (Java5+ only)" href="beans.html#beans-collection-elements-strongly-typed"/>
+                  <topic label="Strongly-typed collection (Java 5+ only)" href="beans.html#beans-collection-elements-strongly-typed"/>
                </topic>
                <topic label="Nulls" href="beans.html#beans-null-element"/>
                <topic label="Shortcuts and other convenience options for XML-based configuration metadata" href="beans.html#xml-config-shortcuts">
@@ -160,6 +161,8 @@
          <topic label="Glue code and the evil singleton" href="beans.html#beans-glue-code-and-singletons"/>
          <topic label="Annotation-based configuration" href="beans.html#beans-annotation-config">
             <topic label="@Autowired" href="beans.html#beans-autowired-annotation"/>
+            <topic label="Fine-tuning annotation-based autowiring with qualifiers" href="beans.html#beans-autowired-annotation-qualifiers"/>
+            <topic label="CustomAutowireConfigurer" href="beans.html#beans-custom-autowire-configurer"/>
             <topic label="@Resource" href="beans.html#beans-resource-annotation"/>
             <topic label="@PostConstruct and @PreDestroy" href="beans.html#beans-postconstruct-and-predestroy-annotations"/>
          </topic>
@@ -352,18 +355,51 @@
       </topic>
       <topic label="Testing" href="testing.html">
          <topic label="Introduction" href="testing.html#testing-introduction"/>
-         <topic label="Unit testing" href="testing.html#unit-testing"/>
+         <topic label="Unit testing" href="testing.html#unit-testing">
+            <topic label="Mock objects" href="testing.html#mock-objects">
+               <topic label="JNDI" href="testing.html#mock-objects-jndi"/>
+               <topic label="Servlet API" href="testing.html#mock-objects-servlet"/>
+               <topic label="Portlet API" href="testing.html#mock-objects-portlet"/>
+            </topic>
+            <topic label="Unit testing support classes" href="testing.html#unit-testing-support-classes">
+               <topic label="Spring MVC" href="testing.html#unit-testing-spring-mvc"/>
+            </topic>
+         </topic>
          <topic label="Integration testing" href="testing.html#integration-testing">
-            <topic label="Context management and caching" href="testing.html#testing-ctx-management"/>
-            <topic label="Dependency Injection of test fixtures" href="testing.html#testing-fixture-di">
-               <topic label="Field level injection" href="testing.html#testing-fixture-di-field"/>
+            <topic label="Overview" href="testing.html#integration-testing-overview"/>
+            <topic label="Which support framework to use" href="testing.html#integration-testing-which-framework"/>
+            <topic label="Common goals" href="testing.html#integration-testing-common-goals">
+               <topic label="Context management and caching" href="testing.html#testing-ctx-management"/>
+               <topic label="Dependency Injection of test fixtures" href="testing.html#testing-fixture-di"/>
+               <topic label="Transaction management" href="testing.html#testing-tx"/>
+               <topic label="Integration testing support classes" href="testing.html#testing-support-classes"/>
             </topic>
-            <topic label="Transaction management" href="testing.html#testing-tx"/>
-            <topic label="Convenience variables" href="testing.html#testing-superclasses"/>
-            <topic label="Java5+ specific support" href="testing.html#testing-java5-support">
-               <topic label="Annotations" href="testing.html#testing-java5-support-annotations"/>
+            <topic label="Common annotations" href="testing.html#integration-testing-common-annotations"/>
+            <topic label="JUnit 3.8 legacy support" href="testing.html#junit38-legacy-support">
+               <topic label="Context management and caching" href="testing.html#junit38-legacy-ctx-management"/>
+               <topic label="Dependency Injection of test fixtures" href="testing.html#junit38-legacy-fixture-di">
+                  <topic label="Field level injection" href="testing.html#junit38-legacy-fixture-di-field"/>
+               </topic>
+               <topic label="Transaction management" href="testing.html#junit38-legacy-tx"/>
+               <topic label="JUnit 3.8 legacy support classes" href="testing.html#junit38-legacy-support-classes"/>
+               <topic label="Java 5+ specific support" href="testing.html#junit38-legacy-java5-support">
+                  <topic label="Annotation aware transactional tests" href="testing.html#junit38-legacy-annotation-aware-tests"/>
+                  <topic label="JPA support classes" href="testing.html#junit38-legacy-jpa-tests"/>
+               </topic>
+               <topic label="PetClinic example" href="testing.html#testing-examples-petclinic"/>
             </topic>
-            <topic label="PetClinic example" href="testing.html#testing-examples-petclinic"/>
+            <topic label="Spring TestContext Framework" href="testing.html#testcontext-framework">
+               <topic label="Key abstractions" href="testing.html#testcontext-key-abstractions"/>
+               <topic label="Context management and caching" href="testing.html#testcontext-ctx-management"/>
+               <topic label="Dependency Injection of test fixtures" href="testing.html#testcontext-fixture-di"/>
+               <topic label="Transaction management" href="testing.html#testcontext-tx"/>
+               <topic label="TestContext support classes" href="testing.html#testcontext-support-classes">
+                  <topic label="JUnit 3.8 support classes" href="testing.html#testcontext-support-classes-junit38"/>
+                  <topic label="JUnit 4.4 support classes" href="testing.html#testcontext-support-classes-junit44"/>
+                  <topic label="Custom JUnit 4.4 Runner" href="testing.html#testcontext-junit4-runner"/>
+               </topic>
+               <topic label="TestContext framework annotation support" href="testing.html#testcontext-annotations"/>
+            </topic>
          </topic>
          <topic label="Further Resources" href="testing.html#testing-resources"/>
       </topic>
@@ -418,16 +454,17 @@
       </topic>
       <topic label="Data access using JDBC" href="jdbc.html">
          <topic label="Introduction" href="jdbc.html#jdbc-introduction">
+            <topic label="Choosing a style" href="jdbc.html#jdbc-choose-style"/>
             <topic label="The package hierarchy" href="jdbc.html#jdbc-packages"/>
          </topic>
-         <topic label="Using the JDBC Core classes to control basic JDBC processing and error handling" href="jdbc.html#jdbc-core">
+         <topic label="Using the JDBC Core classes to control basic JDBC processing and&#xA;    error handling" href="jdbc.html#jdbc-core">
             <topic label="JdbcTemplate" href="jdbc.html#jdbc-JdbcTemplate">
                <topic label="Examples" href="jdbc.html#jdbc-JdbcTemplate-examples">
                   <topic label="Querying (SELECT)" href="jdbc.html#jdbc-JdbcTemplate-examples-query"/>
                   <topic label="Updating (INSERT/UPDATE/DELETE)" href="jdbc.html#jdbc-JdbcTemplate-examples-update"/>
                   <topic label="Other operations" href="jdbc.html#jdbc-JdbcTemplate-examples-other"/>
                </topic>
-               <topic label="JdbcTemplate idioms (best practices)" href="jdbc.html#jdbc-JdbcTemplate-idioms"/>
+               <topic label="JdbcTemplate idioms (best&#xA;        practices)" href="jdbc.html#jdbc-JdbcTemplate-idioms"/>
             </topic>
             <topic label="NamedParameterJdbcTemplate" href="jdbc.html#jdbc-NamedParameterJdbcTemplate"/>
             <topic label="SimpleJdbcTemplate" href="jdbc.html#jdbc-SimpleJdbcTemplate"/>
@@ -436,6 +473,7 @@
             <topic label="Executing statements" href="jdbc.html#jdbc-statements-executing"/>
             <topic label="Running Queries" href="jdbc.html#jdbc-statements-querying"/>
             <topic label="Updating the database" href="jdbc.html#jdbc-updates"/>
+            <topic label="Retrieving auto-generated keys" href="jdbc.html#jdbc-auto-genereted-keys"/>
          </topic>
          <topic label="Controlling database connections" href="jdbc.html#jdbc-connections">
             <topic label="DataSourceUtils" href="jdbc.html#jdbc-DataSourceUtils"/>
@@ -445,6 +483,22 @@
             <topic label="DriverManagerDataSource" href="jdbc.html#jdbc-DriverManagerDataSource"/>
             <topic label="TransactionAwareDataSourceProxy" href="jdbc.html#jdbc-TransactionAwareDataSourceProxy"/>
             <topic label="DataSourceTransactionManager" href="jdbc.html#jdbc-DataSourceTransactionManager"/>
+         </topic>
+         <topic label="Advanced JDBC operations" href="jdbc.html#jdbc-advanced-jdbc">
+            <topic label="Batch operations with the JdbcTemplate" href="jdbc.html#jdbc-advanced-classic"/>
+            <topic label="Batch operations with the SimpleJdbcTemplate" href="jdbc.html#jdbc-advanced-simple"/>
+            <topic label="Providing SQL type information for parameters" href="jdbc.html#jdbc-type-information"/>
+         </topic>
+         <topic label="Simplifying JDBC operations with the SimpleJdbc classes" href="jdbc.html#jdbc-simple-jdbc">
+            <topic label="Inserting data using SimpleJdbcInsert" href="jdbc.html#jdbc-simple-jdbc-insert-1"/>
+            <topic label="Retreiving auto-generated keys using SimpleJdbcInsert" href="jdbc.html#jdbc-simple-jdbc-insert-2"/>
+            <topic label="Specifying the columns to use for a SimpleJdbcInsert" href="jdbc.html#jdbc-simple-jdbc-insert-3"/>
+            <topic label="Using SqlParameterSource to provide parameter values" href="jdbc.html#jdbc-simple-jdbc-parameters"/>
+            <topic label="Calling a stored procedure using SimpleJdbcCall" href="jdbc.html#jdbc-simple-jdbc-call-1"/>
+            <topic label="Declaring parameters to use for a SimpleJdbcCall" href="jdbc.html#jdbc-simple-jdbc-call-2"/>
+            <topic label="How to define SqlParameters" href="jdbc.html#jdbc-params"/>
+            <topic label="Calling a stored function using SimpleJdbcCall" href="jdbc.html#d0e19060"/>
+            <topic label="Returning ResultSet/Ref-Cursor from a SimpleJdbcCall" href="jdbc.html#d0e19092"/>
          </topic>
          <topic label="Modeling JDBC operations as Java objects" href="jdbc.html#jdbc-object">
             <topic label="SqlQuery" href="jdbc.html#jdbc-SqlQuery"/>
@@ -461,7 +515,7 @@
             <topic label="SessionFactory setup in a Spring container" href="orm.html#orm-session-factory-setup"/>
             <topic label="The HibernateTemplate" href="orm.html#orm-hibernate-template"/>
             <topic label="Implementing Spring-based DAOs without callbacks" href="orm.html#orm-hibernate-daos"/>
-            <topic label="Implementing DAOs based on plain Hibernate3 API" href="orm.html#orm-hibernate-straight"/>
+            <topic label="Implementing DAOs based on plain Hibernate 3 API" href="orm.html#orm-hibernate-straight"/>
             <topic label="Programmatic transaction demarcation" href="orm.html#orm-hibernate-tx-programmatic"/>
             <topic label="Declarative transaction demarcation" href="orm.html#orm-hibernate-tx-declarative"/>
             <topic label="Transaction management strategies" href="orm.html#orm-hibernate-tx-strategies"/>
@@ -489,11 +543,12 @@
          <topic label="JPA" href="orm.html#orm-jpa">
             <topic label="JPA setup in a Spring environment" href="orm.html#orm-jpa-setup">
                <topic label="LocalEntityManagerFactoryBean" href="orm.html#orm-jpa-setup-lemfb"/>
+               <topic label="Obtaining an EntityManagerFactory from JNDI" href="orm.html#orm-jpa-setup-jndi"/>
                <topic label="LocalContainerEntityManagerFactoryBean" href="orm.html#orm-jpa-setup-lcemfb">
-                  <topic label="Tomcat setup" href="orm.html#orm-jpa-setup-lcemfb-tomcat"/>
-                  <topic label="OC4J setup (10.1.3.1+)" href="orm.html#orm-jpa-oc4j"/>
-                  <topic label="GlassFish" href="orm.html#orm-jpa-glassfish"/>
-                  <topic label="Resin setup (3.1.0+)" href="orm.html#orm-jpa-resin"/>
+                  <topic label="Tomcat load-time weaving setup (4.1+)" href="orm.html#orm-jpa-setup-lcemfb-tomcat"/>
+                  <topic label="OC4J load-time weaving setup (10.1.3.1+)" href="orm.html#orm-jpa-oc4j"/>
+                  <topic label="GlassFish load-time weaving setup" href="orm.html#orm-jpa-glassfish"/>
+                  <topic label="Resin load-time weaving setup (3.1.0+)" href="orm.html#orm-jpa-resin"/>
                   <topic label="General LoadTimeWeaver" href="orm.html#orm-jpa-loadtimeweaver"/>
                </topic>
                <topic label="Dealing with multiple persistence units" href="orm.html#orm-jpa-multiple-pu"/>
@@ -581,8 +636,9 @@
          <topic label="Tiles" href="view.html#view-tiles">
             <topic label="Dependencies" href="view.html#view-tiles-dependencies"/>
             <topic label="How to integrate Tiles" href="view.html#view-tiles-integrate">
-               <topic label="InternalResourceViewResolver" href="view.html#view-tiles-internal"/>
+               <topic label="UrlBasedViewResolver" href="view.html#view-tiles-url"/>
                <topic label="ResourceBundleViewResolver" href="view.html#view-tiles-resource"/>
+               <topic label="SimpleSpringPreparerFactory and SpringBeanPreparerFactory" href="view.html#view-tiles-preparer"/>
             </topic>
          </topic>
          <topic label="Velocity &amp; FreeMarker" href="view.html#view-velocity">
@@ -594,9 +650,9 @@
                <topic label="FreeMarker" href="view.html#views-freemarker"/>
             </topic>
             <topic label="Bind support and form handling" href="view.html#view-velocity-forms">
-               <topic label="The bind macros" href="view.html#view-velocity-validation"/>
-               <topic label="simple binding" href="view.html#view-velocity-validationmessages"/>
-               <topic label="form input generation macros" href="view.html#views-form-macros">
+               <topic label="The bind macros" href="view.html#view-bind-macros"/>
+               <topic label="Simple binding" href="view.html#view-simple-binding"/>
+               <topic label="Form input generation macros" href="view.html#views-form-macros">
                   <topic label="Input Fields" href="view.html#views-form-macros-input"/>
                   <topic label="Selection Fields" href="view.html#views-form-macros-select"/>
                </topic>
