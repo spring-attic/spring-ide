@@ -38,7 +38,6 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.F
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PropertyNameSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PropertyValueSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PublicMethodSearchRequestor;
-import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.VoidMethodSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextTypeIds;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansCompletionUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
@@ -134,8 +133,8 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 					Collection<?> methods = Introspector
 							.findAllNoParameterMethods(type, prefix);
 					if (methods != null && methods.size() > 0) {
-						VoidMethodSearchRequestor requestor = new VoidMethodSearchRequestor(
-								request);
+						PublicMethodSearchRequestor requestor = new PublicMethodSearchRequestor(
+								request, Flags.AccPublic | Flags.AccProtected);
 						Iterator<?> iterator = methods.iterator();
 						while (iterator.hasNext()) {
 							requestor.acceptSearchMatch((IMethod) iterator

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.validation.rules;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -66,14 +65,17 @@ public abstract class AbstractBeanMethodValidationRule extends
 										+ type.getFullyQualifiedName() + "'");
 					}
 				}
-
+				
+				// TODO CD check this back in after adding configurable rule 
+				// properties
+				/*
 				// If we find a matching method, but the visibility is not
 				// public, then just create a warning
 				else if (!Flags.isPublic(method.getFlags())) {
 					if (methodType == MethodType.FACTORY) {
 						context.warning(bean, "UNDEFINED_FACTORY_BEAN_METHOD",
-								(statics == Static.YES ? "Static"
-										: "Non-static")
+								(statics == Static.NO ? "Non-static"
+										: "Static")
 								+ " factory method '" + methodName + "' "
 								+ (argCount != -1 ? "with " + argCount
 										+ " arguments " : "")
@@ -92,7 +94,7 @@ public abstract class AbstractBeanMethodValidationRule extends
 										+ "' is not public in bean class '"
 										+ type.getFullyQualifiedName() + "'");
 					}
-				}
+				} */
 			} catch (JavaModelException e) {
 				BeansCorePlugin.log(e);
 			}

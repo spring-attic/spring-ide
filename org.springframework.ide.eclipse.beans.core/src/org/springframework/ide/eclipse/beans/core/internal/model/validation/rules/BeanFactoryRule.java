@@ -35,8 +35,8 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 	@Override
 	public void validate(IBean bean, BeansValidationContext context,
 			IProgressMonitor monitor) {
-		AbstractBeanDefinition bd = (AbstractBeanDefinition)
-				((Bean) bean).getBeanDefinition();
+		AbstractBeanDefinition bd = (AbstractBeanDefinition) ((Bean) bean)
+				.getBeanDefinition();
 		BeanDefinition mergedBd = BeansModelUtils.getMergedBeanDefinition(bean,
 				context.getContextElement());
 
@@ -53,9 +53,10 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 					if (bd.getFactoryMethodName() == null) {
 						context.error(bean, "NO_FACTORY_METHOD",
 								"A factory bean requires a factory method");
-					} else {
-						validateFactoryBean(bean, bd.getFactoryBeanName(),
-								bd.getFactoryMethodName(), context);
+					}
+					else {
+						validateFactoryBean(bean, bd.getFactoryBeanName(), bd
+								.getFactoryMethodName(), context);
 					}
 				}
 
@@ -64,8 +65,8 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 				// placeholders
 				else {
 					String methodName = bd.getFactoryMethodName();
-					if (methodName != null && !ValidationRuleUtils
-							.hasPlaceHolder(methodName)) {
+					if (methodName != null
+							&& !ValidationRuleUtils.hasPlaceHolder(methodName)) {
 						if (mergedClassName == null) {
 							if (bd.getParentName() == null) {
 								context.error(bean,
@@ -78,11 +79,13 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 
 							// Use constructor argument values of root bean as
 							// arguments for static factory method
-							int argCount = (!bd.isAbstract() ? bd
+							int argCount = (!bd.isAbstract()
+									&& bd.getAutowireMode() != AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR ? bd
 									.getConstructorArgumentValues()
-									.getArgumentCount() : -1);
+									.getArgumentCount()
+									: -1);
 							validateFactoryMethod(bean, mergedClassName,
-									methodName, argCount, Static.DONT_CARE, 
+									methodName, argCount, Static.DONT_CARE,
 									context);
 						}
 					}
@@ -95,18 +98,22 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 			String methodName, BeansValidationContext context) {
 		if (beanName != null && !ValidationRuleUtils.hasPlaceHolder(beanName)) {
 			try {
-				AbstractBeanDefinition factoryBd = (AbstractBeanDefinition)
-						context.getCompleteRegistry()
-								.getBeanDefinition(beanName);
+				AbstractBeanDefinition factoryBd = (AbstractBeanDefinition) context
+						.getCompleteRegistry().getBeanDefinition(beanName);
 				// Skip validating factory beans which are created by another
 				// factory bean
 				if (factoryBd.getFactoryBeanName() == null) {
 					if (factoryBd.isAbstract()
 							|| factoryBd.getBeanClassName() == null) {
-						context.error(bean, "INVALID_FACTORY_BEAN",
-								"Referenced factory bean '" + beanName
-								+ "' is invalid (abstract or no bean class)");
-					} else {
+						context
+								.error(
+										bean,
+										"INVALID_FACTORY_BEAN",
+										"Referenced factory bean '"
+												+ beanName
+												+ "' is invalid (abstract or no bean class)");
+					}
+					else {
 
 						// Validate non-static factory method in factory bean
 						// Factory beans with factory methods can only be
@@ -118,7 +125,8 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 						}
 					}
 				}
-			} catch (NoSuchBeanDefinitionException e) {
+			}
+			catch (NoSuchBeanDefinitionException e) {
 
 				// Skip error "parent name is equal to bean name"
 				if (!e.getBeanName().equals(bean.getElementName())) {
@@ -132,8 +140,7 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 	protected void validateFactoryMethod(IBean bean, String className,
 			String methodName, int argCount, Static statics,
 			BeansValidationContext context) {
-		if (className != null && !ValidationRuleUtils
-				.hasPlaceHolder(className)) {
+		if (className != null && !ValidationRuleUtils.hasPlaceHolder(className)) {
 			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean)
 					.getProject(), className);
 
