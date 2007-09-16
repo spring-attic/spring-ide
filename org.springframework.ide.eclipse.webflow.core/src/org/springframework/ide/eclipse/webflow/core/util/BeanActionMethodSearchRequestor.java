@@ -20,30 +20,18 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.MethodSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PublicMethodSearchRequestor;
-import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
+import org.springframework.ide.eclipse.core.java.JdtUtils;
 
-/**
- * 
- */
 @SuppressWarnings("restriction")
 public class BeanActionMethodSearchRequestor extends
 		PublicMethodSearchRequestor {
 
-	/**
-	 * 
-	 */
 	private final String EVENT_CLASS = "org.springframework.webflow.execution.Event";
 
-	/**
-	 * 
-	 */
 	private final String REQUEST_CONTEXT_CLASS = "org.springframework.webflow.execution.RequestContext";
 
-	/**
-	 * @param request
-	 */
 	public BeanActionMethodSearchRequestor(ContentAssistRequest request) {
-		super(request);
+		super(request, Flags.AccPublic);
 	}
 
 	/**
@@ -65,10 +53,10 @@ public class BeanActionMethodSearchRequestor extends
 				&& method.getParameterTypes().length == 1) {
 			IType type = (IType) method.getParent();
 
-			IType returnType = BeansEditorUtils.getTypeForMethodReturnType(
+			IType returnType = JdtUtils.getJavaTypeForMethodReturnType(
 					method, type);
-			List<IType> parameterTypes = BeansEditorUtils
-					.getTypeForMethodParameterTypes(method, type);
+			List<IType> parameterTypes = JdtUtils
+					.getJavaTypesForMethodParameterTypes(method, type);
 			if (returnType != null && parameterTypes.size() == 1
 					&& parameterTypes.get(0) != null) {
 				if (EVENT_CLASS.equals(returnType.getFullyQualifiedName())

@@ -18,6 +18,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -175,7 +176,7 @@ public class JdtUtils {
 				for (IJavaProject p : getAllDependingJavaProjects(jp)) {
 					addClassPathUrls(p.getProject(), paths, resolvedProjects);
 				}
-				
+
 				// get default output directory
 				IPath outputPath = jp.getOutputLocation();
 				covertPathToUrl(project, paths, outputPath);
@@ -711,5 +712,49 @@ public class JdtUtils {
 		}
 
 		return className;
+	}
+
+	public static IType getJavaTypeFromSignatureClassName(String className,
+			IType contextType) {
+		if (contextType == null || className == null) {
+			return null;
+		}
+		try {
+			return JdtUtils.getJavaType(contextType.getJavaProject()
+					.getProject(), JdtUtils.resolveClassName(className,
+					contextType));
+		}
+		catch (IllegalArgumentException e) {
+			// do Nothing
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static final List<IType> getJavaTypesForMethodParameterTypes(
+			IMethod method, IType contextType) {
+		if (method == null || method.getParameterTypes() == null
+				|| method.getParameterTypes().length == 0) {
+			return Collections.EMPTY_LIST;
+		}
+		List<IType> parameterTypes = new ArrayList<IType>(method
+				.getParameterTypes().length);
+		String[] parameterTypeNames = method.getParameterTypes();
+		for (String parameterTypeName : parameterTypeNames) {
+			parameterTypes.add(JdtUtils.getJavaTypeFromSignatureClassName(
+					parameterTypeName, contextType));
+		}
+		return parameterTypes;
+	}
+
+	public static final IType getJavaTypeForMethodReturnType(IMethod method,
+			IType contextType) {
+		try {
+			return JdtUtils.getJavaTypeFromSignatureClassName(method
+					.getReturnType(), contextType);
+		}
+		catch (JavaModelException e) {
+		}
+		return null;
 	}
 }

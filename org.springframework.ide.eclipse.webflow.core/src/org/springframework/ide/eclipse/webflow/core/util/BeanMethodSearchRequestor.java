@@ -22,24 +22,13 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.M
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PublicMethodSearchRequestor;
 import org.springframework.ide.eclipse.core.java.Introspector;
 
-/**
- * 
- */
 @SuppressWarnings("restriction")
 public class BeanMethodSearchRequestor extends PublicMethodSearchRequestor {
 
-	/**
-	 * 
-	 */
 	public static final int PROPERTY_RELEVANCE = 5;
 
-	/**
-	 * 
-	 * 
-	 * @param request 
-	 */
 	public BeanMethodSearchRequestor(ContentAssistRequest request) {
-		super(request);
+		super(request, Flags.AccPublic);
 	}
 
 	/**

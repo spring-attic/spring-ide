@@ -34,9 +34,6 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
 import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 /**
@@ -56,10 +53,13 @@ public class BeansHyperLinkDetector extends AbstractHyperLinkDetector implements
 	protected boolean isLinkableAttr(Attr attr) {
 		String attrName = attr.getName();
 		String ownerName = attr.getOwnerElement().getNodeName();
-		if ("class".equals(attrName)) {
+		if ("class".equals(attrName) || "match".equals(attrName)) {
 			return true;
 		}
-		else if ("name".equals(attrName) && "property".equals(ownerName)) {
+		else if ("name".equals(attrName)
+				&& ("property".equals(ownerName)
+						|| "lookup-method".equals(ownerName) || "replaced-method"
+						.equals(ownerName))) {
 			return true;
 		}
 		else if ("init-method".equals(attrName)) {
@@ -82,6 +82,7 @@ public class BeansHyperLinkDetector extends AbstractHyperLinkDetector implements
 		}
 		else if ("bean".equals(attrName) || "local".equals(attrName)
 				|| "parent".equals(attrName) || "ref".equals(attrName)
+				|| "replacer".equals(attrName)
 				|| ("name".equals(attrName) && "alias".equals(ownerName))) {
 			return true;
 		}
@@ -110,7 +111,8 @@ public class BeansHyperLinkDetector extends AbstractHyperLinkDetector implements
 		if (parentNode != null) {
 			parentName = parentNode.getNodeName();
 		}
-		if ("class".equals(name) || "value".equals(name)) {
+		if ("class".equals(name) || "value".equals(name)
+				|| "match".equals(name)) {
 			IFile file = BeansEditorUtils.getFile(document);
 			IType type = JdtUtils.getJavaType(file.getProject(), target);
 			if (type != null) {
@@ -135,54 +137,31 @@ public class BeansHyperLinkDetector extends AbstractHyperLinkDetector implements
 				}
 			}
 		}
-		else if ("init-method".equals(name) || "destroy-method".equals(name)) {
-			NamedNodeMap attributes = node.getAttributes();
-			if (attributes != null && attributes.getNamedItem("class") != null) {
-				String className = attributes.getNamedItem("class")
-						.getNodeValue();
-				IFile file = BeansEditorUtils.getFile(document);
-				IType type = JdtUtils.getJavaType(file.getProject(), className);
-				try {
-					IMethod method = Introspector.findMethod(type, target, 0,
-							Public.DONT_CARE, Static.DONT_CARE);
-					if (method != null) {
-						return new JavaElementHyperlink(hyperlinkRegion, method);
-					}
+		else if ("factory-method".equals(name) || "init-method".equals(name)
+				|| "destroy-method".equals(name)) {
+			IFile file = BeansEditorUtils.getFile(document);
+			String className = BeansEditorUtils.getClassNameForBean(file, node
+					.getOwnerDocument(), node);
+			IType type = JdtUtils.getJavaType(file.getProject(), className);
+			try {
+				IMethod method = Introspector.findMethod(type, target, 0,
+						Public.DONT_CARE, Static.DONT_CARE);
+				if (method != null) {
+					return new JavaElementHyperlink(hyperlinkRegion, method);
 				}
-				catch (JavaModelException e) {
-				}
+			}
+			catch (JavaModelException e) {
 			}
 		}
-		else if ("factory-method".equals(name)) {
-			NamedNodeMap attributes = node.getAttributes();
-			String className = null;
-			if (attributes != null
-					&& attributes.getNamedItem("factory-bean") != null) {
-				Node factoryBean = attributes.getNamedItem("factory-bean");
-				if (factoryBean != null) {
-					String factoryBeanId = factoryBean.getNodeValue();
-					// TODO add factoryBean support for beans defined
-					// outside of the current xml file
-					Document doc = node.getOwnerDocument();
-					Element bean = doc.getElementById(factoryBeanId);
-					if (bean != null && bean instanceof Node) {
-						NamedNodeMap attribute = ((Node) bean).getAttributes();
-						if (attribute.getNamedItem("class") != null) {
-							className = attribute.getNamedItem("class")
-									.getNodeValue();
-						}
-					}
-				}
-			}
-			else if (attributes != null
-					&& attributes.getNamedItem("class") != null) {
-				className = attributes.getNamedItem("class").getNodeValue();
-			}
+		else if (("lookup-method".equals(node.getNodeName()) && "name".equals(name))
+				|| ("replaced-method".equals(node.getNodeName()) && "name".equals(name))) {
+			IFile file = BeansEditorUtils.getFile(document);
+			String className = BeansEditorUtils.getClassNameForBean(file, node
+					.getOwnerDocument(), node.getParentNode());
 			try {
-				IFile file = BeansEditorUtils.getFile(document);
 				IType type = JdtUtils.getJavaType(file.getProject(), className);
 				IMethod method = Introspector.findMethod(type, target, -1,
-						Public.DONT_CARE, Static.YES);
+						Public.DONT_CARE, Static.DONT_CARE);
 				if (method != null) {
 					return new JavaElementHyperlink(hyperlinkRegion, method);
 				}
@@ -193,8 +172,9 @@ public class BeansHyperLinkDetector extends AbstractHyperLinkDetector implements
 		else if ("factory-bean".equals(name) || "depends-on".equals(name)
 				|| "bean".equals(name) || "local".equals(name)
 				|| "parent".equals(name) || "ref".equals(name)
-				|| "name".equals(name) || "key-ref".equals(name)
-				|| "value-ref".equals(name) || name.endsWith("-ref")) {
+				|| "replacer".equals(name) || "name".equals(name)
+				|| "key-ref".equals(name) || "value-ref".equals(name)
+				|| name.endsWith("-ref")) {
 			Node bean = BeansEditorUtils.getFirstReferenceableNodeById(node
 					.getOwnerDocument(), target);
 			if (bean != null) {

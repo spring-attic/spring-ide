@@ -10,9 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.validation.rules;
 
+import java.util.Set;
+
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
@@ -86,8 +92,8 @@ public final class ValidationRuleUtils {
 	/**
 	 * Checks if a been registered in the {@link BeanDefinitionRegistry}.
 	 */
-	public static BeanDefinition getBeanDefinition(String beanName, String beanClass,
-			BeansValidationContext context) {
+	public static BeanDefinition getBeanDefinition(String beanName,
+			String beanClass, BeansValidationContext context) {
 		try {
 			return context.getCompleteRegistry().getBeanDefinition(beanName);
 		}
@@ -111,5 +117,60 @@ public final class ValidationRuleUtils {
 			}
 			return null;
 		}
+	}
+
+	/**
+	 * Extracts the {@link IType} of a bean definition.
+	 * <p>
+	 * Honors <code>factory-method</code>s.
+	 */
+	public static IType extractBeanClass(BeanDefinition bd, IBean bean,
+			String mergedClassName, BeansValidationContext context) {
+		IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean)
+				.getProject(), mergedClassName);
+		// 1. factory-method on bean
+		if (bd.getFactoryMethodName() != null
+				&& bd.getFactoryBeanName() == null) {
+			type = extractTypeFromFactoryMethod(bd, type);
+		}
+		// 2. factory-method on factory-bean
+		else if (bd.getFactoryBeanName() != null
+				&& bd.getFactoryMethodName() != null) {
+			try {
+				AbstractBeanDefinition factoryBd = (AbstractBeanDefinition) context
+						.getCompleteRegistry().getBeanDefinition(
+								bd.getFactoryBeanName());
+				IType factoryBeanType = extractBeanClass(factoryBd, bean,
+						factoryBd.getBeanClassName(), context);
+				if (factoryBeanType != null) {
+					type = extractTypeFromFactoryMethod(bd, factoryBeanType);
+				}
+			}
+			catch (NoSuchBeanDefinitionException e) {
+
+			}
+		}
+		return type;
+	}
+
+	private static IType extractTypeFromFactoryMethod(
+			BeanDefinition bd, IType type) {
+		String factoryMethod = bd.getFactoryMethodName();
+		try {
+			int argCount = (!bd.isAbstract() ? bd
+					.getConstructorArgumentValues().getArgumentCount() : -1);
+			Set<IMethod> methods = Introspector.getAllMethods(type);
+			for (IMethod method : methods) {
+				if (factoryMethod.equals(method.getElementName())
+						&& method.getParameterNames().length == argCount) {
+					type = JdtUtils.getJavaTypeFromSignatureClassName(
+							method.getReturnType(), type);
+					break;
+				}
+			}
+		}
+		catch (JavaModelException e) {
+		}
+		return type;
 	}
 }

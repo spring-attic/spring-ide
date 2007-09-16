@@ -15,6 +15,7 @@ import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -151,7 +152,7 @@ public class AopContentAssistProcessor extends AbstractContentAssistProcessor
 							prefix, -1, Public.YES, Static.DONT_CARE);
 					if (methods != null && methods.size() > 0) {
 						PublicMethodSearchRequestor requestor = new PublicMethodSearchRequestor(
-								request);
+								request, Flags.AccPublic);
 						Iterator<?> iterator = methods.iterator();
 						while (iterator.hasNext()) {
 							requestor.acceptSearchMatch((IMethod) iterator

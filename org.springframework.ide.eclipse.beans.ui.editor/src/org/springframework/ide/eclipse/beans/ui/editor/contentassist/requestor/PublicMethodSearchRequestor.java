@@ -23,13 +23,16 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCo
 
 @SuppressWarnings("restriction")
 public class PublicMethodSearchRequestor extends MethodSearchRequestor {
-
-	public PublicMethodSearchRequestor(ContentAssistRequest request) {
+	
+	private int publicFlag;
+	
+	public PublicMethodSearchRequestor(ContentAssistRequest request, int publicFlag) {
 		super(request);
+		this.publicFlag = publicFlag;
 	}
 
 	public void acceptSearchMatch(IMethod method) throws CoreException {
-		if (Flags.isPublic(method.getFlags())
+		if ((method.getFlags() & publicFlag) != 0
 				&& !Flags.isInterface(method.getFlags()) && method.exists()
 				&& ((IType) method.getParent()).isClass()
 				&& !method.isConstructor()) {

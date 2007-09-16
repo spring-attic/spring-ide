@@ -38,7 +38,6 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.core.java.Introspector;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
  * Validates a given {@link IBean}'s if all {@link Required} annotated
@@ -47,14 +46,14 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
  * @since 2.0.1
  */
 public class RequiredPropertyRule extends AbstractBeanValidationRule {
-	
+
 	@Override
 	protected boolean supportsBean(IBean bean, BeansValidationContext context) {
 		return context.isBeanRegistered(
 				AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
 				RequiredAnnotationBeanPostProcessor.class.getName());
 	}
-	
+
 	/**
 	 * Validates the given {@link IBean}.
 	 * <p>
@@ -69,16 +68,11 @@ public class RequiredPropertyRule extends AbstractBeanValidationRule {
 			IProgressMonitor monitor) {
 		BeanDefinition mergedBd = BeansModelUtils.getMergedBeanDefinition(bean,
 				context.getContextElement());
-		if (!mergedBd.isAbstract()) {
-			String className = mergedBd.getBeanClassName();
-			if (className != null
-					&& !ValidationRuleUtils.hasPlaceHolder(className)) {
-				IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(
-						bean).getProject(), className);
-				if (type != null) {
-					validatePropertyNames(type, bean, mergedBd, context);
-				}
-			}
+		String mergedClassName = mergedBd.getBeanClassName();
+		IType type = ValidationRuleUtils.extractBeanClass(mergedBd, bean,
+				mergedClassName, context);
+		if (type != null) {
+			validatePropertyNames(type, bean, mergedBd, context);
 		}
 	}
 

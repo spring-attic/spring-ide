@@ -90,6 +90,7 @@ public class BeansUIImages {
 	public static final String IMG_OBJS_COLLECTION = NAME_PREFIX + "collection_obj.gif";
     public static final String IMG_OBJS_LIST = NAME_PREFIX + "list_obj.gif";
     public static final String IMG_OBJS_MAP = NAME_PREFIX + "map_obj.gif";
+    public static final String IMG_OBJS_METHOD_OVERRIDE = NAME_PREFIX + "method_override_obj.gif";
     public static final String IMG_OBJS_PROPERTIES = NAME_PREFIX + "properties_obj.gif";
     public static final String IMG_OBJS_KEY = NAME_PREFIX + "key_obj.gif";
     public static final String IMG_OBJS_CONSTANT = NAME_PREFIX + "constant_obj.gif";
@@ -135,6 +136,7 @@ public class BeansUIImages {
 	public static final ImageDescriptor DESC_OBJS_COLLECTION = createManaged(OBJECT, IMG_OBJS_COLLECTION);
 	public static final ImageDescriptor DESC_OBJS_LIST = createManaged(OBJECT, IMG_OBJS_LIST);
 	public static final ImageDescriptor DESC_OBJS_MAP = createManaged(OBJECT, IMG_OBJS_MAP);
+	public static final ImageDescriptor DESC_OBJS_METHOD_OVERRIDE = createManaged(OBJECT, IMG_OBJS_METHOD_OVERRIDE);
 	public static final ImageDescriptor DESC_OBJS_PROPERTIES = createManaged(OBJECT, IMG_OBJS_PROPERTIES);
 	public static final ImageDescriptor DESC_OBJS_KEY = createManaged(OBJECT, IMG_OBJS_KEY);
 	public static final ImageDescriptor DESC_OBJS_CONSTANT = createManaged(OBJECT, IMG_OBJS_CONSTANT);

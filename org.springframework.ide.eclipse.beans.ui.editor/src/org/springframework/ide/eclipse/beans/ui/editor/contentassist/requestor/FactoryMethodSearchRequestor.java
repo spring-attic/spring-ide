@@ -25,7 +25,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCo
 public class FactoryMethodSearchRequestor extends PublicMethodSearchRequestor {
 
 	public FactoryMethodSearchRequestor(ContentAssistRequest request) {
-		super(request);
+		super(request, Flags.AccPublic);
 	}
 
 	@Override

@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.beans.ui.editor.util;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +30,6 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.ui.text.java.ProposalInfo;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.text.IDocument;
@@ -397,7 +395,6 @@ public class BeansEditorUtils {
 
 	public static final String getClassNameForBean(IFile file,
 			Document document, String id) {
-
 		boolean foundLocal = false;
 
 		NodeList beanNodes = document.getElementsByTagName("bean");
@@ -408,16 +405,12 @@ public class BeansEditorUtils {
 				String idTemp = (attributes.getNamedItem("id") != null ? attributes
 						.getNamedItem("id").getNodeValue()
 						: null);
-				String classNameTemp = (attributes.getNamedItem("class") != null ? attributes
-						.getNamedItem("class").getNodeValue()
-						: null);
-
 				if (id.equals(idTemp)) {
-					foundLocal = true;
-					return classNameTemp;
+					return getClassNameForBean(file, document, beanNode);
 				}
 			}
 		}
+
 		if (!foundLocal) {
 			List beansList = BeansEditorUtils.getBeansFromConfigSets(file);
 			for (int i = 0; i < beansList.size(); i++) {
@@ -439,6 +432,66 @@ public class BeansEditorUtils {
 					.getClassNameForElement(node);
 		}
 
+		return null;
+	}
+
+	public static final String getClassNameForBean(IFile file,
+			Document document, Node node) {
+
+		NamedNodeMap attributes = node.getAttributes();
+		String className = (attributes.getNamedItem("class") != null ? attributes
+				.getNamedItem("class").getNodeValue()
+				: null);
+		String factoryMethod = (attributes.getNamedItem("factory-method") != null ? attributes
+				.getNamedItem("factory-method").getNodeValue()
+				: null);
+		String factoryBean = (attributes.getNamedItem("factory-bean") != null ? attributes
+				.getNamedItem("factory-bean").getNodeValue()
+				: null);
+		String parent = (attributes.getNamedItem("parent") != null ? attributes
+				.getNamedItem("parent").getNodeValue() : null);
+		if (factoryBean == null && factoryMethod == null && parent == null) {
+			return className;
+		}
+		else if (className != null && factoryMethod != null
+				&& factoryBean == null) {
+			// Factory method on bean class
+			return resolveClassNameFromFactoryMethod(factoryMethod, className,
+					file.getProject());
+		}
+		else if (factoryMethod != null && factoryBean != null) {
+			// Factory method on factory bean
+			String factoryClass = getClassNameForBean(file, document,
+					factoryBean);
+			if (factoryClass != null) {
+				return resolveClassNameFromFactoryMethod(factoryMethod,
+						factoryClass, file.getProject());
+			}
+			return null;
+
+		}
+		else if (className == null && parent != null) {
+			return getClassNameForBean(file, document, parent);
+		}
+		return null;
+	}
+
+	private static String resolveClassNameFromFactoryMethod(
+			String factoryMethod, String className, IProject project) {
+		IType type = JdtUtils.getJavaType(project, className);
+		if (type != null) {
+			try {
+				Set<IMethod> methods = Introspector.getAllMethods(type);
+				for (IMethod m : methods) {
+					if (m.getElementName().equals(factoryMethod)) {
+						return JdtUtils.resolveClassName(m.getReturnType(),
+								type);
+					}
+				}
+			}
+			catch (JavaModelException e) {
+			}
+		}
 		return null;
 	}
 
@@ -468,63 +521,6 @@ public class BeansEditorUtils {
 
 			return new NullProgressMonitor();
 		}
-	}
-
-	public static final IType getTypeForMethodReturnType(IMethod method,
-			IType contextType) {
-		IType returnType = null;
-		try {
-			returnType = getTypeFromSignature(method.getReturnType(),
-					contextType);
-		}
-		catch (JavaModelException e) {
-		}
-		return returnType;
-	}
-
-	private static IType getTypeFromSignature(String string, IType contextType) {
-		IType returnType = null;
-		try {
-			String returnTypeString = Signature.toString(string).replace('$',
-					'.');
-			returnType = JdtUtils.getJavaType(contextType.getJavaProject()
-					.getProject(), resolveClassName(returnTypeString,
-					contextType));
-		}
-		catch (IllegalArgumentException e) {
-			// do Nothing
-		}
-		return returnType;
-	}
-
-	@SuppressWarnings("unchecked")
-	public static final List<IType> getTypeForMethodParameterTypes(
-			IMethod method, IType contextType) {
-		if (method == null || method.getParameterTypes() == null
-				|| method.getParameterTypes().length == 0) {
-			return Collections.EMPTY_LIST;
-		}
-		List<IType> parameterTypes = new ArrayList<IType>(method
-				.getParameterTypes().length);
-		String[] parameterTypeNames = method.getParameterTypes();
-		for (String parameterTypeName : parameterTypeNames) {
-			parameterTypes.add(getTypeFromSignature(parameterTypeName,
-					contextType));
-		}
-		return parameterTypes;
-	}
-
-	public static final String resolveClassName(String className, IType type) {
-		try {
-			String[][] fullInter = type.resolveType(className);
-			if (fullInter != null && fullInter.length > 0) {
-				return fullInter[0][0] + "." + fullInter[0][1];
-			}
-		}
-		catch (JavaModelException e) {
-		}
-
-		return className;
 	}
 
 	public static final IRegion extractPropertyPathFromCursorPosition(
@@ -581,8 +577,9 @@ public class BeansEditorUtils {
 											type,
 											PropertyAccessorUtils
 													.getPropertyName(propertyPath));
-							returnType = BeansEditorUtils
-									.getTypeForMethodReturnType(getMethod, type);
+							returnType = JdtUtils
+									.getJavaTypeForMethodReturnType(getMethod,
+											type);
 						}
 						catch (JavaModelException e) {
 						}
@@ -630,8 +627,9 @@ public class BeansEditorUtils {
 							IMethod getMethod = Introspector
 									.getReadableProperty(type,
 											(String) propertyPath.get(counter));
-							returnType = BeansEditorUtils
-									.getTypeForMethodReturnType(getMethod, type);
+							returnType = JdtUtils
+									.getJavaTypeForMethodReturnType(getMethod,
+											type);
 							methods.add(getMethod);
 						}
 						catch (JavaModelException e) {

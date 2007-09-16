@@ -20,7 +20,6 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -151,8 +150,8 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 		if ("class".equals(attName) && attributes.getNamedItem("class") != null) {
 			String className = attributes.getNamedItem("class").getNodeValue();
 			if (className != null) {
-				IType type = JdtUtils.getJavaType(this.getResource(
-						document).getProject(), className);
+				IType type = JdtUtils.getJavaType(this.getResource(document)
+						.getProject(), className);
 				if (type != null) {
 					BeansJavaDocUtils utils = new BeansJavaDocUtils(type);
 					result = utils.getJavaDoc();
@@ -242,23 +241,15 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 		else if (("factory-method").equals(attName)) {
 			String factoryMethod = attributes.getNamedItem(attName)
 					.getNodeValue();
-			String className = null;
-			if (attributes.getNamedItem("class") != null) {
-				className = attributes.getNamedItem("class").getNodeValue();
-			}
-			if (attributes.getNamedItem("factory-bean") != null) {
-				className = BeansEditorUtils.getClassNameForBean(file, xmlnode
-						.getOwnerDocument(), attributes.getNamedItem(
-						"factory-bean").getNodeValue());
-			}
+			String className = BeansEditorUtils.getClassNameForBean(
+					getResource(document), xmlnode.getOwnerDocument(), xmlnode);
 			IType type = JdtUtils.getJavaType(this.getResource(document)
 					.getProject(), className);
 			if (type != null) {
 				try {
 					IMethod[] methods = type.getMethods();
 					for (IMethod method : methods) {
-						if (method.getElementName().equals(factoryMethod)
-								&& Flags.isStatic(method.getFlags())) {
+						if (method.getElementName().equals(factoryMethod)) {
 							BeansJavaDocUtils utils = new BeansJavaDocUtils(
 									method);
 							result = utils.getJavaDoc();
@@ -272,23 +263,41 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 		}
 		if ("init-method".equals(attName) || "destroy-method".equals(attName)) {
 			String factoryMethod = attributes.getNamedItem(attName)
-				.getNodeValue();
-			if (attributes != null && attributes.getNamedItem("class") != null) {
-				String className = attributes.getNamedItem("class")
-						.getNodeValue();
-				IType type = JdtUtils.getJavaType(file.getProject(),
-						className);
-				try {
-					IMethod method = Introspector.findMethod(type, factoryMethod, 0,
-							Public.DONT_CARE, Static.DONT_CARE);
-					if (method != null) {
-						BeansJavaDocUtils utils = new BeansJavaDocUtils(
-								method);
-						result = utils.getJavaDoc();
-					}
+					.getNodeValue();
+			String className = BeansEditorUtils.getClassNameForBean(
+					getResource(document), xmlnode.getOwnerDocument(), xmlnode);
+			IType type = JdtUtils.getJavaType(this.getResource(document)
+					.getProject(), className);
+			try {
+				IMethod method = Introspector.findMethod(type, factoryMethod,
+						0, Public.DONT_CARE, Static.DONT_CARE);
+				if (method != null) {
+					BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
+					result = utils.getJavaDoc();
 				}
-				catch (JavaModelException e) {
+			}
+			catch (JavaModelException e) {
+			}
+		}
+		else if (("lookup-method".equals(xmlnode.getNodeName()) && "name"
+				.equals(attName))
+				|| ("replaced-method".equals(xmlnode.getNodeName()) && "name"
+						.equals(attName))) {
+			String factoryMethod = attributes.getNamedItem(attName)
+					.getNodeValue();
+			String className = BeansEditorUtils.getClassNameForBean(
+					getResource(document), xmlnode.getOwnerDocument(), xmlnode.getParentNode());
+			IType type = JdtUtils.getJavaType(this.getResource(document)
+					.getProject(), className);
+			try {
+				IMethod method = Introspector.findMethod(type, factoryMethod,
+						0, Public.DONT_CARE, Static.DONT_CARE);
+				if (method != null) {
+					BeansJavaDocUtils utils = new BeansJavaDocUtils(method);
+					result = utils.getJavaDoc();
 				}
+			}
+			catch (JavaModelException e) {
 			}
 		}
 		if (result != null && !"".equals(result)) {

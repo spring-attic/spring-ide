@@ -25,7 +25,6 @@ import org.springframework.ide.eclipse.beans.core.internal.model.validation.Bean
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.core.java.Introspector;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -57,10 +56,9 @@ public class BeanPropertyRule implements
 		BeanDefinition mergedBd = BeansModelUtils.getMergedBeanDefinition(bean,
 				context.getContextElement());
 		String mergedClassName = mergedBd.getBeanClassName();
-		if (mergedClassName != null
-				&& !ValidationRuleUtils.hasPlaceHolder(mergedClassName)) {
-			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(
-					bean).getProject(), mergedClassName);
+		IType type = ValidationRuleUtils.extractBeanClass(mergedBd, bean,
+				mergedClassName, context);
+		if (type != null) {
 			// Don't validate property names on ScriptFactory implementations
 			// as these property values are injected into the created object
 			if (type != null && !Introspector.doesImplement(type, 

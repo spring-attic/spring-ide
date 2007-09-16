@@ -18,6 +18,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  * Holds all data of a Spring bean.
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public interface IBean extends IBeansModelElement, ISourceModelElement {
 
@@ -52,6 +53,12 @@ public interface IBean extends IBeansModelElement, ISourceModelElement {
 	String[] getAliases();
 
 	Set<IBeanConstructorArgument> getConstructorArguments();
+	
+	/**
+	 * Returns a set of {@link IBeanMethodOverride}s.
+	 * @since 2.0.2
+	 */
+	Set<IBeanMethodOverride> getMethodOverrides();
 
 	IBeanProperty getProperty(String name);
 

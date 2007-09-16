@@ -95,6 +95,10 @@
 		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.SpringParsingProblemsRule"
 		            name="%beansValidator.rule.parsingProblems.name"
 		            description="%beansValidator.rule.parsingProblems.description" />
+		    <rule id="methodOverride"
+		            class="org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.BeanMethodOverrideRule"
+		            name="%beansValidator.rule.methodOverride.name"
+		            description="%beansValidator.rule.methodOverride.description" />
 	    </rules>
 	</extension>
 </plugin>

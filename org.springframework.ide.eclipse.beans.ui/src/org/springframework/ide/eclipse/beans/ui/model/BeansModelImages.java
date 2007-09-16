@@ -17,6 +17,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
+import org.springframework.ide.eclipse.beans.core.model.IBeanMethodOverride;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeanReference;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -79,6 +80,8 @@ public final class BeansModelImages implements BeansModelImageFlags {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_LIST);
 		} else if (element instanceof IBeansMap) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_MAP);
+		} else if (element instanceof IBeanMethodOverride) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_METHOD_OVERRIDE);
 		} else if (element instanceof IBeansProperties) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_PROPERTIES);
 		} else if (element instanceof IBeansMapEntry) {

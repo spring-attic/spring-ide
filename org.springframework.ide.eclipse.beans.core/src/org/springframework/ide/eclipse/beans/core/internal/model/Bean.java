@@ -26,9 +26,13 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.LookupOverride;
+import org.springframework.beans.factory.support.MethodOverrides;
+import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
+import org.springframework.ide.eclipse.beans.core.model.IBeanMethodOverride;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
@@ -41,6 +45,7 @@ import org.springframework.util.ObjectUtils;
 /**
  * This class holds the data for a Spring bean.
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class Bean extends AbstractBeansModelElement implements IBean {
 
@@ -49,6 +54,8 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 	private String[] aliases;
 
 	private Set<IBeanConstructorArgument> constructorArguments;
+
+	private Set<IBeanMethodOverride> methodOverrides;
 
 	private Map<String, IBeanProperty> properties;
 
@@ -82,7 +89,6 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 
 	@Override
 	public IResource getElementResource() {
-		// TODO is overriding this method ok??? 
 		// We need to make sure that the beans resource comes back
 		if (getElementSourceLocation() != null
 				&& getElementSourceLocation().getResource() instanceof IAdaptable) {
@@ -99,6 +105,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 	public IModelElement[] getElementChildren() {
 		Set<IModelElement> children = new LinkedHashSet<IModelElement>(
 				getConstructorArguments());
+		children.addAll(getMethodOverrides());
 		children.addAll(getProperties());
 		return children.toArray(new IModelElement[children.size()]);
 	}
@@ -112,6 +119,14 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 			// Now ask this beans's constructor arguments
 			for (IBeanConstructorArgument carg : getConstructorArguments()) {
 				carg.accept(visitor, monitor);
+				if (monitor.isCanceled()) {
+					return;
+				}
+			}
+			
+			// Now ask this bean's method overrides
+			for (IBeanMethodOverride mo : getMethodOverrides()) {
+				mo.accept(visitor, monitor);
 				if (monitor.isCanceled()) {
 					return;
 				}
@@ -140,6 +155,13 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 			initBean();
 		}
 		return constructorArguments;
+	}
+
+	public Set<IBeanMethodOverride> getMethodOverrides() {
+		if (methodOverrides == null) {
+			initBean();
+		}
+		return methodOverrides;
 	}
 
 	public IBeanProperty getProperty(String name) {
@@ -206,8 +228,7 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 
 	public boolean isInfrastructure() {
 		if (definition instanceof AbstractBeanDefinition) {
-			return ((AbstractBeanDefinition) definition).getRole() == 
-				BeanDefinition.ROLE_INFRASTRUCTURE;
+			return ((AbstractBeanDefinition) definition).getRole() == BeanDefinition.ROLE_INFRASTRUCTURE;
 		}
 		return false;
 	}
@@ -299,6 +320,25 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 				.getPropertyValues()) {
 			IBeanProperty property = new BeanProperty(this, propValue);
 			properties.put(property.getElementName(), property);
+		}
+
+		// Retrieve this bean's method overrides
+		if (definition instanceof AbstractBeanDefinition) {
+			methodOverrides = new LinkedHashSet<IBeanMethodOverride>();
+			MethodOverrides mos = ((AbstractBeanDefinition) definition)
+					.getMethodOverrides();
+			if (mos != null) {
+				for (Object mo : mos.getOverrides()) {
+					if (mo instanceof LookupOverride) {
+						methodOverrides.add(new BeanLookupMethodOverride(this,
+								(LookupOverride) mo));
+					}
+					else if (mo instanceof ReplaceOverride) {
+						methodOverrides.add(new BeanReplaceMethodOverride(this,
+								(ReplaceOverride) mo));
+					}
+				}
+			}
 		}
 	}
 }

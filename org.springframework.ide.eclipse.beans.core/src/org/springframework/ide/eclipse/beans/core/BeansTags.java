@@ -21,7 +21,6 @@ import org.w3c.dom.NodeList;
 
 public final class BeansTags {
 
-	// TODO Update for Spring 2.0
 	public enum Tag { DESCRIPTION, IMPORT, ALIAS, BEANS, BEAN, CONSTRUCTOR_ARG,
 		LOOKUP_METHOD, REPLACE_METHOD, PROPERTY, REF, IDREF, VALUE, NULL,
 		LIST, SET, MAP, PROPS, ENTRY, KEY, PROP, ARG_TYPE, COMMENT,
@@ -30,7 +29,7 @@ public final class BeansTags {
 	}
 
 	private static final Map<String, Tag> TAGS = new HashMap<String, Tag>();
-	// TODO Update for Spring 2.0
+
 	static {
 		TAGS.put("description", Tag.DESCRIPTION);
 		TAGS.put("import", Tag.IMPORT);
@@ -39,7 +38,7 @@ public final class BeansTags {
 		TAGS.put("bean", Tag.BEAN);
 		TAGS.put("constructor-arg", Tag.CONSTRUCTOR_ARG);
 		TAGS.put("lookup-method", Tag.LOOKUP_METHOD);
-		TAGS.put("replace-method", Tag.REPLACE_METHOD);
+		TAGS.put("replaced-method", Tag.REPLACE_METHOD);
 		TAGS.put("property", Tag.PROPERTY);
 		TAGS.put("ref", Tag.REF);
 		TAGS.put("idref", Tag.IDREF);

@@ -137,4 +137,11 @@ public interface IBeansModelElementTypes extends IModelElementTypes {
 	 * {@link IBeansTypedString}.
 	 */
 	int TYPED_STRING_TYPE = 17;
+
+	/**
+	 * Constant representing a {@link MethodOverride}.
+	 * A model element with this type can be safely cast to
+	 * {@link IBeanMethodOverride}.
+	 */
+	int METHOD_OVERRIDE_TYPE = 18;
 }

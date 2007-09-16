@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -36,6 +37,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeansJavaCo
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.FactoryMethodSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PropertyNameSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PropertyValueSearchRequestor;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.PublicMethodSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.VoidMethodSearchRequestor;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateContextTypeIds;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansCompletionUtils;
@@ -151,6 +153,64 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 		}
 	}
 
+	private void addLookupMethodAttributeValueProposals(
+			ContentAssistRequest request, String prefix, String className) {
+		if (BeansEditorUtils.getResource(request) instanceof IFile) {
+			IFile file = BeansEditorUtils.getResource(request);
+			IType type = JdtUtils.getJavaType(file.getProject(), className);
+			if (type != null) {
+				try {
+					Collection<?> methods = Introspector
+							.findAllNoParameterMethods(type, prefix);
+					if (methods != null && methods.size() > 0) {
+						PublicMethodSearchRequestor requestor = new PublicMethodSearchRequestor(
+								request, Flags.AccPublic | Flags.AccProtected);
+						Iterator<?> iterator = methods.iterator();
+						while (iterator.hasNext()) {
+							requestor.acceptSearchMatch((IMethod) iterator
+									.next());
+						}
+					}
+				}
+				catch (JavaModelException e1) {
+					// do nothing
+				}
+				catch (CoreException e) {
+					// // do nothing
+				}
+			}
+		}
+	}
+
+	private void addReplaceMethodAttributeValueProposals(
+			ContentAssistRequest request, String prefix, String className) {
+		if (BeansEditorUtils.getResource(request) instanceof IFile) {
+			IFile file = BeansEditorUtils.getResource(request);
+			IType type = JdtUtils.getJavaType(file.getProject(), className);
+			if (type != null) {
+				try {
+					Collection<?> methods = Introspector.findAllMethods(type,
+							prefix, -1, Public.DONT_CARE, Static.DONT_CARE);
+					if (methods != null && methods.size() > 0) {
+						PublicMethodSearchRequestor requestor = new PublicMethodSearchRequestor(
+								request, Flags.AccPublic | Flags.AccProtected);
+						Iterator<?> iterator = methods.iterator();
+						while (iterator.hasNext()) {
+							requestor.acceptSearchMatch((IMethod) iterator
+									.next());
+						}
+					}
+				}
+				catch (JavaModelException e1) {
+					// do nothing
+				}
+				catch (CoreException e) {
+					// // do nothing
+				}
+			}
+		}
+	}
+
 	private void addPropertyNameAttributeNameProposals(
 			ContentAssistRequest request, String prefix, String oldPrefix,
 			Node node, List classNames, boolean attrAtLocationHasValue,
@@ -178,8 +238,9 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 						Iterator iterator = methods.iterator();
 						while (iterator.hasNext()) {
 							IMethod method = (IMethod) iterator.next();
-							IType returnType = BeansEditorUtils
-									.getTypeForMethodReturnType(method, type);
+							IType returnType = JdtUtils
+									.getJavaTypeForMethodReturnType(method,
+											type);
 
 							if (returnType != null) {
 								List<IType> typesTemp = new ArrayList<IType>();
@@ -187,7 +248,6 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 
 								String newPrefix = oldPrefix + firstPrefix
 										+ ".";
-								;
 
 								addPropertyNameAttributeNameProposals(request,
 										lastPrefix, newPrefix, node, typesTemp,
@@ -253,8 +313,9 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 						Iterator<?> iterator = methods.iterator();
 						while (iterator.hasNext()) {
 							IMethod method = (IMethod) iterator.next();
-							IType returnType = BeansEditorUtils
-									.getTypeForMethodReturnType(method, type);
+							IType returnType = JdtUtils
+									.getJavaTypeForMethodReturnType(method,
+											type);
 							if (returnType != null) {
 								List<IType> typesTemp = new ArrayList<IType>();
 								typesTemp.add(returnType);
@@ -359,8 +420,9 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 			}
 			else if ("init-method".equals(attributeName)
 					|| "destroy-method".equals(attributeName)) {
-				// TODO add support for parent bean
-				String className = BeansEditorUtils.getAttribute(node, "class");
+				String className = BeansEditorUtils.getClassNameForBean(
+						BeansEditorUtils.getResource(request), node
+								.getOwnerDocument(), node);
 				if (className != null) {
 					addInitDestroyAttributeValueProposals(request, matchString,
 							className);
@@ -381,11 +443,8 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 				}
 				else {
 					// static factory method
-					List<?> list = BeansEditorUtils.getClassNamesOfBean(
-							BeansEditorUtils.getResource(request), node);
-					factoryClassName = (list.size() != 0 ? ((IType) list.get(0))
-							.getFullyQualifiedName()
-							: null);
+					factoryClassName = BeansEditorUtils.getAttribute(node,
+							"class");
 					isStatic = true;
 				}
 
@@ -402,20 +461,26 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 			else if ("id".equals(attributeName)) {
 				addBeanIdProposal(request, matchString, node);
 			}
-			else if ("http://www.springframework.org/schema/p".equals(namespace)
+			else if ("http://www.springframework.org/schema/p"
+					.equals(namespace)
 					|| attributeName.endsWith("-ref")) {
 				addBeanReferenceProposals(request, matchString, node, true);
 			}
 		}
 		else if ("property".equals(node.getNodeName())) {
 			Node parentNode = node.getParentNode();
-			NamedNodeMap parentAttributes = parentNode.getAttributes();
-
-			if ("name".equals(attributeName) && parentAttributes != null) {
-				List classNames = BeansEditorUtils.getClassNamesOfBean(
-						BeansEditorUtils.getResource(request), parentNode);
-				addPropertyNameAttributeValueProposals(request, matchString,
-						"", parentNode, classNames);
+			if ("name".equals(attributeName)) {
+				String className = BeansEditorUtils.getClassNameForBean(
+						BeansEditorUtils.getResource(request), parentNode
+								.getOwnerDocument(), parentNode);
+				IType type = JdtUtils.getJavaType(BeansEditorUtils.getResource(
+						request).getProject(), className);
+				if (type != null) {
+					List<IType> types = new ArrayList<IType>();
+					types.add(type);
+					addPropertyNameAttributeValueProposals(request, matchString,
+							"", parentNode, types);
+				}
 			}
 			else if ("ref".equals(attributeName)) {
 				addBeanReferenceProposals(request, matchString, node, true);
@@ -436,6 +501,39 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 			}
 			else if ("ref".equals(attributeName)) {
 				addBeanReferenceProposals(request, matchString, node, true);
+			}
+		}
+		else if ("lookup-method".equals(node.getNodeName())) {
+			if ("name".equals(attributeName)) {
+				String className = BeansEditorUtils.getClassNameForBean(
+						BeansEditorUtils.getResource(request), node
+								.getOwnerDocument(), node.getParentNode());
+				if (className != null) {
+					addLookupMethodAttributeValueProposals(request,
+							matchString, className);
+				}
+			}
+			else if ("bean".equals(attributeName)) {
+				addBeanReferenceProposals(request, matchString, node, true);
+			}
+		}
+		else if ("replaced-method".equals(node.getNodeName())) {
+			if ("name".equals(attributeName)) {
+				String className = BeansEditorUtils.getClassNameForBean(
+						BeansEditorUtils.getResource(request), node
+								.getOwnerDocument(), node.getParentNode());
+				if (className != null) {
+					addReplaceMethodAttributeValueProposals(request,
+							matchString, className);
+				}
+			}
+			else if ("replacer".equals(attributeName)) {
+				addBeanReferenceProposals(request, matchString, node, true);
+			}
+		}
+		else if ("arg-type".equals(node.getNodeName())) {
+			if ("match".equals(attributeName)) {
+				addClassAttributeValueProposals(request, matchString);
 			}
 		}
 		else if ("alias".equals(node.getNodeName())) {

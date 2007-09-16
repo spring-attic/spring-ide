@@ -61,6 +61,9 @@ public class BeansOutlineLabelProvider extends JFaceNodeLabelProvider {
 		if ("property".equals(nodeName)) {
 			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_PROPERTY);
 		}
+		if ("lookup-method".equals(nodeName) || "replaced-method".equals(nodeName)) {
+			return BeansUIImages.getImage(BeansUIImages.IMG_OBJS_METHOD_OVERRIDE);
+		}
 
 		// Misc elements
 		if ("list".equals(nodeName) || "set".equals(nodeName)
@@ -176,6 +179,30 @@ public class BeansOutlineLabelProvider extends JFaceNodeLabelProvider {
 				attr = attrs.getNamedItem("value");
 				if (attr != null) {
 					text += " \"" + attr.getNodeValue() + "\"";
+				}
+			}
+		}
+		else if (tag == Tag.LOOKUP_METHOD) {
+			attr = attrs.getNamedItem("name");
+			if (attr != null) {
+				text = attr.getNodeValue();
+			}
+			if (BeansContentOutlineConfiguration.isShowAttributes()) {
+				attr = attrs.getNamedItem("bean");
+				if (attr != null) {
+					text += " <" + attr.getNodeValue() + ">";
+				}
+			}
+		}
+		else if (tag == Tag.REPLACE_METHOD) {
+			attr = attrs.getNamedItem("name");
+			if (attr != null) {
+				text = attr.getNodeValue();
+			}
+			if (BeansContentOutlineConfiguration.isShowAttributes()) {
+				attr = attrs.getNamedItem("replacer");
+				if (attr != null) {
+					text += " <" + attr.getNodeValue() + ">";
 				}
 			}
 		}
