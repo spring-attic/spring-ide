@@ -28,6 +28,7 @@ pack() {
     fi
 }
 echo Command line: $@
+
 build beans-feature $@
 build aop-feature $@
 build ajdt-feature $@
