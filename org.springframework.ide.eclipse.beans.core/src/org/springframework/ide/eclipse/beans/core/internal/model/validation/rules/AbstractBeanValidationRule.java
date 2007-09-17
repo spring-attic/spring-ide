@@ -15,7 +15,6 @@ import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 
 /**
@@ -24,15 +23,15 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
  * @author Christian Dupuis
  * @since 2.0
  */
-public abstract class AbstractBeanValidationRule implements
+public abstract class AbstractBeanValidationRule extends
+		AbstractNonInfrastructureBeanValidationRule implements
 		IValidationRule<IBean, BeansValidationContext> {
 
-	public final boolean supports(IModelElement element,
-			IValidationContext context) {
-		return context instanceof BeansValidationContext
-				&& element instanceof Bean
-				&& supportsBean((IBean) element,
-						(BeansValidationContext) context);
+	@Override
+	protected boolean supportsModelElementForNonInfrastructureBean(
+			IModelElement element, BeansValidationContext context) {
+		return element instanceof Bean
+				&& supportsBean((IBean) element, context);
 	}
 
 	/**

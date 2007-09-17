@@ -26,7 +26,7 @@ public interface IValidationRule<E extends IModelElement,
 		C extends IValidationContext> {
 
 	/**
-	 * Returns <code>true</code> if ths rule is able to validate the given
+	 * Returns <code>true</code> if this rule is able to validate the given
 	 * {@link IModelElement} with the specified {@link IValidationContext}.
 	 */
 	boolean supports(IModelElement element, IValidationContext context);
@@ -35,7 +35,7 @@ public interface IValidationRule<E extends IModelElement,
 	 * Validates the given {@link IModelElement}.
 	 * @param element the element to be validated
 	 * @param context the context which encapsulates all the information
-	 * neccessary during validation
+	 * necessary during validation
 	 * @param monitor a progress monitor, or <code>null</code> if progress
 	 * reporting and cancellation are not desired
 	 */

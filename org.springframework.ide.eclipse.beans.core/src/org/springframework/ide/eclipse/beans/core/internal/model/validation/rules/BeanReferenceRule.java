@@ -36,6 +36,11 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 /**
  * Validates a given {@link IBean}'s or {@link IBeansValueHolder}'s bean
  * reference(s).
+ * <p>
+ * NOTE: This {@link IValidationRule} is the only rule that works on
+ * {@link IBean} instances or its children that does not extend
+ * {@link AbstractNonInfrastructureBeanValidationRule}. This is on purpose as
+ * we only want to validate bean references for infrastructure beans.
  * 
  * @author Torsten Juergeleit
  * @since 2.0
@@ -43,12 +48,17 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 public class BeanReferenceRule implements
 		IValidationRule<IBeansModelElement, BeansValidationContext> {
 
+	/**
+	 * Returns <code>true</code> if this rule is able to validate the given
+	 * {@link IModelElement} with the specified {@link IValidationContext}.
+	 * <p>
+	 * Skip IBeansMap because it's entries (IBeansMapEntry -> IBansValueHolder)
+	 * are validated instead.
+	 */
 	public boolean supports(IModelElement element, IValidationContext context) {
 		return (element instanceof Bean || element instanceof IBeansValueHolder
 				|| element instanceof IBeansList
 				|| element instanceof IBeansSet
-// Skip IBeansMap because it's entries (IBeansMapEntry -> IBansValueHolder) are
-// validated instead 			
 //				|| element instanceof IBeansMap
 				);
 	}

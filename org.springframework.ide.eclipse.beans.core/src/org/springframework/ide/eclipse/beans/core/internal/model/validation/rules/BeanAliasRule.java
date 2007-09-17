@@ -17,32 +17,35 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 
 /**
  * Validates a given {@link IBeanAlias}'s alias and associated bean name.
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
-public class BeanAliasRule implements
-		IValidationRule<IBeanAlias, BeansValidationContext> {
-
-	public boolean supports(IModelElement element, IValidationContext context) {
-		return (element instanceof IBeanAlias);
+public class BeanAliasRule extends AbstractNonInfrastructureBeanValidationRule
+		implements IValidationRule<IBeanAlias, BeansValidationContext> {
+	
+	@Override
+	protected boolean supportsModelElementForNonInfrastructureBean(
+			IModelElement element, BeansValidationContext context) {
+		return element instanceof IBeanAlias;
 	}
-
+	
 	public void validate(IBeanAlias alias, BeansValidationContext context,
 			IProgressMonitor monitor) {
-		IBeansConfigSet configSet = (context.getContextElement() instanceof
-				IBeansConfigSet ? (IBeansConfigSet) context.getContextElement()
-						: null);
+		IBeansConfigSet configSet = (context.getContextElement() instanceof IBeansConfigSet ? (IBeansConfigSet) context
+				.getContextElement()
+				: null);
 		// Validate bean overriding
 		if (context.getIncompleteRegistry().containsBeanDefinition(
 				alias.getElementName())) {
-			if (configSet == null || BeansModelUtils.getConfig(alias).getBean(
-					alias.getElementName()) != null) {
+			if (configSet == null
+					|| BeansModelUtils.getConfig(alias).getBean(
+							alias.getElementName()) != null) {
 				context.error(alias, "BEAN_OVERRIDE",
 						"Overrides another bean in the same config file");
 			}
@@ -57,7 +60,8 @@ public class BeanAliasRule implements
 		for (IBeanAlias al : BeansModelUtils.getConfig(alias).getAliases()) {
 			if (al == alias) {
 				continue;
-			} else if (al.getElementName().equals(alias.getElementName())) {
+			}
+			else if (al.getElementName().equals(alias.getElementName())) {
 				context.error(alias, "ALIAS_OVERRIDE",
 						"Overrides another alias in the same config file");
 				break;

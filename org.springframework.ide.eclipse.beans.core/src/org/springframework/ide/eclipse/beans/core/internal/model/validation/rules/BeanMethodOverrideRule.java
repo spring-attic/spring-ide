@@ -25,7 +25,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanMethodOverride;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 
 /**
@@ -34,7 +33,8 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
  * @author Christian Dupuis
  * @since 2.0.2
  */
-public class BeanMethodOverrideRule implements
+public class BeanMethodOverrideRule extends
+		AbstractNonInfrastructureBeanValidationRule implements
 		IValidationRule<IBeanMethodOverride, BeansValidationContext> {
 
 	/**
@@ -43,7 +43,9 @@ public class BeanMethodOverrideRule implements
 	 * @return true if and only element is a {@link IBeanMethodOverride} and the
 	 * parent element a {@link IBean}
 	 */
-	public boolean supports(IModelElement element, IValidationContext context) {
+	@Override
+	protected boolean supportsModelElementForNonInfrastructureBean(
+			IModelElement element, BeansValidationContext context) {
 		return element instanceof IBeanMethodOverride
 				&& element.getElementParent() instanceof IBean;
 	}

@@ -28,7 +28,6 @@ import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
 import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 import org.springframework.scripting.ScriptFactory;
 import org.springframework.util.StringUtils;
@@ -40,18 +39,21 @@ import org.springframework.util.StringUtils;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class BeanPropertyRule implements
+public class BeanPropertyRule extends
+		AbstractNonInfrastructureBeanValidationRule implements
 		IValidationRule<IBeanProperty, BeansValidationContext> {
 
-	public boolean supports(IModelElement element, IValidationContext context) {
+	@Override
+	protected boolean supportsModelElementForNonInfrastructureBean(
+			IModelElement element, BeansValidationContext context) {
 		return (element instanceof IBeanProperty
-				// Skip properties with placeholders
-				&& !ValidationRuleUtils.hasPlaceHolder(((IBeanProperty) element)
-						.getElementName()));
+		// Skip properties with placeholders
+		&& !ValidationRuleUtils.hasPlaceHolder(((IBeanProperty) element)
+				.getElementName()));
 	}
 
-	public void validate(IBeanProperty property, BeansValidationContext context,
-			IProgressMonitor monitor) {
+	public void validate(IBeanProperty property,
+			BeansValidationContext context, IProgressMonitor monitor) {
 		IBean bean = (IBean) property.getElementParent();
 		BeanDefinition mergedBd = BeansModelUtils.getMergedBeanDefinition(bean,
 				context.getContextElement());
@@ -61,8 +63,9 @@ public class BeanPropertyRule implements
 		if (type != null) {
 			// Don't validate property names on ScriptFactory implementations
 			// as these property values are injected into the created object
-			if (type != null && !Introspector.doesImplement(type, 
-					ScriptFactory.class.getName())) {
+			if (type != null
+					&& !Introspector.doesImplement(type, ScriptFactory.class
+							.getName())) {
 				validateProperty(property, type, context);
 			}
 		}
@@ -81,18 +84,18 @@ public class BeanPropertyRule implements
 			if (nestedIndex >= 0) {
 				String nestedPropertyName = propertyName.substring(0,
 						nestedIndex);
-				PropertyTokenHolder tokens = getPropertyNameTokens(
-						nestedPropertyName);
+				PropertyTokenHolder tokens = getPropertyNameTokens(nestedPropertyName);
 				String getterName = "get"
 						+ StringUtils.capitalize(tokens.actualName);
-				IMethod getter = Introspector.findMethod(type, getterName,
-						0, Public.YES, Static.NO);
+				IMethod getter = Introspector.findMethod(type, getterName, 0,
+						Public.YES, Static.NO);
 				if (getter == null) {
 					context.error(property, "NO_GETTER",
 							"No getter found for nested property '"
 									+ nestedPropertyName + "' in class '"
 									+ type.getFullyQualifiedName() + "'");
-				} else {
+				}
+				else {
 
 					// Check getter's return type
 					if (tokens.keys != null) {
@@ -100,7 +103,8 @@ public class BeanPropertyRule implements
 						// type
 					}
 				}
-			} else {
+			}
+			else {
 
 				// Now check for mapped property
 				int mappedIndex = propertyName
@@ -114,8 +118,8 @@ public class BeanPropertyRule implements
 					context.error(property, "INVALID_PROPERTY_NAME",
 							"Invalid property name '" + propertyName
 									+ "' - not JavaBean compliant");
-				} else if (!Introspector.hasWritableProperty(type,
-						propertyName)) {
+				}
+				else if (!Introspector.hasWritableProperty(type, propertyName)) {
 					context.error(property, "NO_SETTER",
 							"No setter found for property '" + propertyName
 									+ "' in class '"
@@ -125,7 +129,8 @@ public class BeanPropertyRule implements
 				// TODO If mapped property then check type of setter's
 				// argument
 			}
-		} catch (JavaModelException e) {
+		}
+		catch (JavaModelException e) {
 			BeansCorePlugin.log(e);
 		}
 	}
@@ -154,7 +159,8 @@ public class BeanPropertyRule implements
 			}
 			if (last) {
 				i--;
-			} else {
+			}
+			else {
 				i++;
 			}
 		}
@@ -165,8 +171,7 @@ public class BeanPropertyRule implements
 	 * Parse the given property name into the corresponding property name
 	 * tokens.
 	 * 
-	 * @param propertyName
-	 *            the property name to parse
+	 * @param propertyName the property name to parse
 	 * @return representation of the parsed property tokens
 	 */
 	private PropertyTokenHolder getPropertyNameTokens(String propertyName) {
@@ -191,7 +196,8 @@ public class BeanPropertyRule implements
 							keyEnd);
 					if (key.startsWith("'") && key.endsWith("'")) {
 						key = key.substring(1, key.length() - 1);
-					} else if (key.startsWith("\"") && key.endsWith("\"")) {
+					}
+					else if (key.startsWith("\"") && key.endsWith("\"")) {
 						key = key.substring(1, key.length() - 1);
 					}
 					keys.add(key);
@@ -216,7 +222,9 @@ public class BeanPropertyRule implements
 	private static class PropertyTokenHolder {
 
 		private String canonicalName;
+
 		private String actualName;
+
 		private String[] keys;
 	}
 }
