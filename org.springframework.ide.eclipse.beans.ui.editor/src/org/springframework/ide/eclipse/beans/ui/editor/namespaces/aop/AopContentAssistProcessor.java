@@ -113,7 +113,7 @@ public class AopContentAssistProcessor extends AbstractContentAssistProcessor
 		if (prefix == null) {
 			prefix = "";
 		}
-		IFile file = BeansEditorUtils.getResource(request);
+		IFile file = BeansEditorUtils.getFile(request);
 		if (document != null) {
 			PointcutReferenceSearchRequestor requestor = new PointcutReferenceSearchRequestor(
 					request);
@@ -142,7 +142,7 @@ public class AopContentAssistProcessor extends AbstractContentAssistProcessor
 		String ref = BeansEditorUtils.getAttribute(parentNode, "ref");
 
 		if (ref != null) {
-			IFile file = BeansEditorUtils.getResource(request);
+			IFile file = BeansEditorUtils.getFile(request);
 			String className = BeansEditorUtils.getClassNameForBean(file, node
 					.getOwnerDocument(), ref);
 			IType type = JdtUtils.getJavaType(file.getProject(), className);

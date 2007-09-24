@@ -69,7 +69,7 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 			createBeanIdProposals(request, matchString, className);
 
 			// add interface proposals
-			IType type = JdtUtils.getJavaType(BeansEditorUtils.getResource(
+			IType type = JdtUtils.getJavaType(BeansEditorUtils.getFile(
 					request).getProject(), className);
 			Set<IType> allInterfaces = Introspector
 					.getAllImplenentedInterfaces(type);
@@ -94,8 +94,8 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 	private void addFactoryMethodAttributeValueProposals(
 			ContentAssistRequest request, String prefix,
 			String factoryClassName, boolean isStatic) {
-		if (BeansEditorUtils.getResource(request) instanceof IFile) {
-			IFile file = BeansEditorUtils.getResource(request);
+		if (BeansEditorUtils.getFile(request) instanceof IFile) {
+			IFile file = BeansEditorUtils.getFile(request);
 			IType type = JdtUtils.getJavaType(file.getProject(),
 					factoryClassName);
 			if (type != null) {
@@ -125,8 +125,8 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 
 	private void addInitDestroyAttributeValueProposals(
 			ContentAssistRequest request, String prefix, String className) {
-		if (BeansEditorUtils.getResource(request) instanceof IFile) {
-			IFile file = BeansEditorUtils.getResource(request);
+		if (BeansEditorUtils.getFile(request) instanceof IFile) {
+			IFile file = BeansEditorUtils.getFile(request);
 			IType type = JdtUtils.getJavaType(file.getProject(), className);
 			if (type != null) {
 				try {
@@ -154,8 +154,8 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 
 	private void addLookupMethodAttributeValueProposals(
 			ContentAssistRequest request, String prefix, String className) {
-		if (BeansEditorUtils.getResource(request) instanceof IFile) {
-			IFile file = BeansEditorUtils.getResource(request);
+		if (BeansEditorUtils.getFile(request) instanceof IFile) {
+			IFile file = BeansEditorUtils.getFile(request);
 			IType type = JdtUtils.getJavaType(file.getProject(), className);
 			if (type != null) {
 				try {
@@ -183,8 +183,8 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 
 	private void addReplaceMethodAttributeValueProposals(
 			ContentAssistRequest request, String prefix, String className) {
-		if (BeansEditorUtils.getResource(request) instanceof IFile) {
-			IFile file = BeansEditorUtils.getResource(request);
+		if (BeansEditorUtils.getFile(request) instanceof IFile) {
+			IFile file = BeansEditorUtils.getFile(request);
 			IType type = JdtUtils.getJavaType(file.getProject(), className);
 			if (type != null) {
 				try {
@@ -401,7 +401,7 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 			}
 
 			List classNames = BeansEditorUtils.getClassNamesOfBean(
-					BeansEditorUtils.getResource(request), attributeNode);
+					BeansEditorUtils.getFile(request), attributeNode);
 			addPropertyNameAttributeNameProposals(request, prefix, "",
 					attributeNode, classNames, attrAtLocationHasValue,
 					namespacePrefix);
@@ -420,7 +420,7 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 			else if ("init-method".equals(attributeName)
 					|| "destroy-method".equals(attributeName)) {
 				String className = BeansEditorUtils.getClassNameForBean(
-						BeansEditorUtils.getResource(request), node
+						BeansEditorUtils.getFile(request), node
 								.getOwnerDocument(), node);
 				if (className != null) {
 					addInitDestroyAttributeValueProposals(request, matchString,
@@ -435,7 +435,7 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 				if (factoryBean != null) {
 					// instance factory method
 					factoryClassName = BeansEditorUtils.getClassNameForBean(
-							BeansEditorUtils.getResource(request), node
+							BeansEditorUtils.getFile(request), node
 									.getOwnerDocument(), factoryBean
 									.getNodeValue());
 					isStatic = false;
@@ -470,9 +470,9 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 			Node parentNode = node.getParentNode();
 			if ("name".equals(attributeName)) {
 				String className = BeansEditorUtils.getClassNameForBean(
-						BeansEditorUtils.getResource(request), parentNode
+						BeansEditorUtils.getFile(request), parentNode
 								.getOwnerDocument(), parentNode);
-				IType type = JdtUtils.getJavaType(BeansEditorUtils.getResource(
+				IType type = JdtUtils.getJavaType(BeansEditorUtils.getFile(
 						request).getProject(), className);
 				if (type != null) {
 					List<IType> types = new ArrayList<IType>();
@@ -505,7 +505,7 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 		else if ("lookup-method".equals(node.getNodeName())) {
 			if ("name".equals(attributeName)) {
 				String className = BeansEditorUtils.getClassNameForBean(
-						BeansEditorUtils.getResource(request), node
+						BeansEditorUtils.getFile(request), node
 								.getOwnerDocument(), node.getParentNode());
 				if (className != null) {
 					addLookupMethodAttributeValueProposals(request,
@@ -519,7 +519,7 @@ public class BeansContentAssistProcessor extends AbstractContentAssistProcessor 
 		else if ("replaced-method".equals(node.getNodeName())) {
 			if ("name".equals(attributeName)) {
 				String className = BeansEditorUtils.getClassNameForBean(
-						BeansEditorUtils.getResource(request), node
+						BeansEditorUtils.getFile(request), node
 								.getOwnerDocument(), node.getParentNode());
 				if (className != null) {
 					addReplaceMethodAttributeValueProposals(request,

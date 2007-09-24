@@ -52,7 +52,7 @@ public class WebflowContentAssistProcessor extends
 			prefix = "";
 		}
 
-		IFile file = BeansEditorUtils.getResource(request);
+		IFile file = BeansEditorUtils.getFile(request);
 		BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(
 				request);
 
@@ -77,7 +77,7 @@ public class WebflowContentAssistProcessor extends
 		if (nodes.getLength() > 0) {
 			StateReferenceSearchRequestor requestor = new StateReferenceSearchRequestor(
 					request);
-			IFile file = BeansEditorUtils.getResource(request);
+			IFile file = BeansEditorUtils.getFile(request);
 			for (int i = 0; i < nodes.getLength(); i++) {
 				requestor.acceptSearchMatch(nodes.item(i), file, prefix);
 			}
@@ -92,7 +92,7 @@ public class WebflowContentAssistProcessor extends
 
 		SubflowReferenceSearchRequestor requestor = new SubflowReferenceSearchRequestor(
 				request);
-		IFile file = BeansEditorUtils.getResource(request);
+		IFile file = BeansEditorUtils.getFile(request);
 		for (String flowId : WebflowNamespaceUtils.getWebflowConfigNames()) {
 			requestor.acceptSearchMatch(flowId, file, prefix);
 		}
@@ -160,8 +160,8 @@ public class WebflowContentAssistProcessor extends
 					&& BeansEditorUtils.hasAttribute(node, "bean")) {
 				String className = null;
 				IWebflowConfig config = Activator.getModel().getProject(
-						BeansEditorUtils.getResource(request).getProject())
-						.getConfig(BeansEditorUtils.getResource(request));
+						BeansEditorUtils.getFile(request).getProject())
+						.getConfig(BeansEditorUtils.getFile(request));
 				if (config != null) {
 					Set<IBean> beans = WebflowModelUtils.getBeans(config);
 					for (IBean bean : beans) {
@@ -172,7 +172,7 @@ public class WebflowContentAssistProcessor extends
 						}
 					}
 					IType type = JdtUtils.getJavaType(BeansEditorUtils
-							.getResource(request).getProject(), className);
+							.getFile(request).getProject(), className);
 					if (type != null) {
 						addActionMethodAttributeValueProposals(request,
 								matchString, type);
@@ -190,8 +190,8 @@ public class WebflowContentAssistProcessor extends
 					&& BeansEditorUtils.hasAttribute(node, "bean")) {
 				String className = null;
 				IWebflowConfig config = Activator.getModel().getProject(
-						BeansEditorUtils.getResource(request).getProject())
-						.getConfig(BeansEditorUtils.getResource(request));
+						BeansEditorUtils.getFile(request).getProject())
+						.getConfig(BeansEditorUtils.getFile(request));
 				if (config != null) {
 					Set<IBean> beans = WebflowModelUtils.getBeans(config);
 					for (IBean bean : beans) {
@@ -202,7 +202,7 @@ public class WebflowContentAssistProcessor extends
 						}
 					}
 					IType type = JdtUtils.getJavaType(BeansEditorUtils
-							.getResource(request).getProject(), className);
+							.getFile(request).getProject(), className);
 					if (type != null) {
 						addMethodAttributeValueProposals(request, matchString,
 								type);

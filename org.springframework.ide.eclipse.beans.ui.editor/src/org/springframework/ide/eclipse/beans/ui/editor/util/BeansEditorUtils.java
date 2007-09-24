@@ -38,7 +38,6 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.internal.Workbench;
-import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
@@ -134,29 +133,34 @@ public class BeansEditorUtils {
 	protected static final String SPACE_ENTITY = "&nbsp;"; //$NON-NLS-1$
 
 	/**
-	 * Replace matching literal portions of a string with another string
+	 * Convert <code>String</code>s in attribute name format (lowercase,
+	 * hyphens separating words) into property name format (camel-cased). For
+	 * example, <code>transaction-manager</code> is converted into
+	 * <code>transactionManager</code>.
 	 */
-	public static final String replace(String aString, String source,
-			String target) {
-		if (aString == null)
-			return null;
-		String normalString = ""; //$NON-NLS-1$
-		int length = aString.length();
-		int position = 0;
-		int previous = 0;
-		int spacer = source.length();
-		while (position + spacer - 1 < length
-				&& aString.indexOf(source, position) > -1) {
-			position = aString.indexOf(source, previous);
-			normalString = normalString + aString.substring(previous, position)
-					+ target;
-			position += spacer;
-			previous = position;
+	public static String attributeNameToPropertyName(String attributeName) {
+		if (attributeName.indexOf("-") == -1) {
+			return attributeName;
 		}
-		normalString = normalString
-				+ aString.substring(position, aString.length());
+		char[] chars = attributeName.toCharArray();
+		char[] result = new char[chars.length - 1];
 
-		return normalString;
+		int currPos = 0;
+		boolean upperCaseNext = false;
+		for (char c : chars) {
+			if (c == '-') {
+				upperCaseNext = true;
+				continue;
+			}
+			else if (upperCaseNext) {
+				result[currPos++] = Character.toUpperCase(c);
+				upperCaseNext = false;
+			}
+			else {
+				result[currPos++] = c;
+			}
+		}
+		return new String(result, 0, currPos);
 	}
 
 	public static String convertToHTMLContent(String content) {
@@ -171,51 +175,30 @@ public class BeansEditorUtils {
 		return content;
 	}
 
-	public static final List getBeansFromConfigSets(IFile file) {
-		List<IBean> beans = new ArrayList<IBean>();
-		List<IBeansConfig> configs = new ArrayList<IBeansConfig>();
-		IBeansProject project = BeansCorePlugin.getModel().getProject(
-				file.getProject());
-
-		if (project != null) {
-			Set<IBeansConfigSet> configSets = project.getConfigSets();
-
-			for (IBeansConfigSet configSet : configSets) {
-				if (configSet.hasConfig(file)
-						|| !BeansCoreUtils.isBeansConfig(file)) {
-					Set<IBeansConfig> bcs = configSet.getConfigs();
-					configs.addAll(bcs);
+	public static final String createAdditionalProposalInfo(IBean bean) {
+		StringBuffer buf = new StringBuffer();
+		buf.append("<b>id:</b> ");
+		buf.append(bean.getElementName());
+		if (bean.getAliases() != null && bean.getAliases().length > 0) {
+			buf.append("<br><b>alias:</b> ");
+			for (int i = 0; i < bean.getAliases().length; i++) {
+				buf.append(bean.getAliases()[i]);
+				if (i < bean.getAliases().length - 1) {
+					buf.append(", ");
 				}
 			}
 		}
-
-		if (BeansCoreUtils.isBeansConfig(file)) {
-			configs.add(project.getConfig(file));
-		}
-
-		for (IBeansConfig bc : configs) {
-			Set<IBean> bs = bc.getBeans();
-			for (IBean b : bs) {
-				if (!b.getElementResource().equals(file)) {
-					beans.add(b);
-				}
-			}
-			Set<IBeansComponent> components = bc.getComponents();
-			for (IBeansComponent component : components) {
-				bs = component.getBeans();
-				for (IBean b : bs) {
-					if (!b.getElementResource().equals(file)) {
-						beans.add(b);
-					}
-				}
-			}
-		}
-		return beans;
-	}
-
-	public static final boolean isSpringStyleOutline() {
-		return Activator.getDefault().getPreferenceStore().getBoolean(
-				IPreferencesConstants.OUTLINE_SPRING);
+		buf.append("<br><b>class:</b> ");
+		buf.append(bean.getClassName());
+		buf.append("<br><b>singleton:</b> ");
+		buf.append(bean.isSingleton());
+		buf.append("<br><b>abstract:</b> ");
+		buf.append(bean.isAbstract());
+		buf.append("<br><b>lazy-init:</b> ");
+		buf.append(bean.isLazyInit());
+		buf.append("<br><b>filename:</b> ");
+		buf.append(bean.getElementResource().getProjectRelativePath());
+		return buf.toString();
 	}
 
 	public static final String createAdditionalProposalInfo(Node bean,
@@ -279,30 +262,301 @@ public class BeansEditorUtils {
 		return null;
 	}
 
-	public static final String createAdditionalProposalInfo(IBean bean) {
-		StringBuffer buf = new StringBuffer();
-		buf.append("<b>id:</b> ");
-		buf.append(bean.getElementName());
-		if (bean.getAliases() != null && bean.getAliases().length > 0) {
-			buf.append("<br><b>alias:</b> ");
-			for (int i = 0; i < bean.getAliases().length; i++) {
-				buf.append(bean.getAliases()[i]);
-				if (i < bean.getAliases().length - 1) {
-					buf.append(", ");
+	public static final void extractAllMethodsFromPropertyPathElements(
+			List propertyPath, List types, IFile file, int counter,
+			List<IMethod> methods) {
+		IMethod method = null;
+		if (propertyPath != null && propertyPath.size() > 0) {
+			if (propertyPath.size() > (counter + 1)) {
+
+				if (types != null) {
+					IType returnType = null;
+					for (int i = 0; i < types.size(); i++) {
+						IType type = (IType) types.get(i);
+						try {
+							IMethod getMethod = Introspector
+									.getReadableProperty(type,
+											(String) propertyPath.get(counter));
+							returnType = JdtUtils
+									.getJavaTypeForMethodReturnType(getMethod,
+											type);
+							methods.add(getMethod);
+						}
+						catch (JavaModelException e) {
+						}
+					}
+
+					if (returnType != null) {
+						List<IType> newTypes = new ArrayList<IType>();
+						newTypes.add(returnType);
+						extractAllMethodsFromPropertyPathElements(propertyPath,
+								newTypes, file, (counter + 1), methods);
+					}
+
+				}
+			}
+			else {
+				for (int i = 0; i < types.size(); i++) {
+					IType type = (IType) types.get(i);
+					try {
+						method = Introspector.getWritableProperty(type,
+								(String) propertyPath.get(counter));
+						methods.add(method);
+
+					}
+					catch (JavaModelException e) {
+					}
 				}
 			}
 		}
-		buf.append("<br><b>class:</b> ");
-		buf.append(bean.getClassName());
-		buf.append("<br><b>singleton:</b> ");
-		buf.append(bean.isSingleton());
-		buf.append("<br><b>abstract:</b> ");
-		buf.append(bean.isAbstract());
-		buf.append("<br><b>lazy-init:</b> ");
-		buf.append(bean.isLazyInit());
-		buf.append("<br><b>filename:</b> ");
-		buf.append(bean.getElementResource().getProjectRelativePath());
-		return buf.toString();
+	}
+
+	public static final IMethod extractMethodFromPropertyPathElements(
+			List propertyPathElements, List types, IFile file, int counter) {
+		IMethod method = null;
+		if (propertyPathElements != null && propertyPathElements.size() > 0) {
+			if (propertyPathElements.size() > (counter + 1)) {
+
+				if (types != null) {
+					IType returnType = null;
+					for (int i = 0; i < types.size(); i++) {
+						IType type = (IType) types.get(i);
+						String propertyPath = (String) propertyPathElements
+								.get(counter);
+						try {
+							IMethod getMethod = Introspector
+									.getReadableProperty(
+											type,
+											PropertyAccessorUtils
+													.getPropertyName(propertyPath));
+							returnType = JdtUtils
+									.getJavaTypeForMethodReturnType(getMethod,
+											type);
+						}
+						catch (JavaModelException e) {
+						}
+					}
+
+					if (returnType != null) {
+						List<IType> newTypes = new ArrayList<IType>();
+						newTypes.add(returnType);
+						method = extractMethodFromPropertyPathElements(
+								propertyPathElements, newTypes, file,
+								(counter + 1));
+					}
+				}
+			}
+			else {
+				for (int i = 0; i < types.size(); i++) {
+					IType type = (IType) types.get(i);
+					String propertyPath = (String) propertyPathElements
+							.get(counter);
+					try {
+						method = Introspector.getWritableProperty(type,
+								PropertyAccessorUtils
+										.getPropertyName(propertyPath));
+					}
+					catch (JavaModelException e) {
+					}
+				}
+			}
+		}
+		return method;
+	}
+
+	public static final IRegion extractPropertyPathFromCursorPosition(
+			IRegion hyperlinkRegion, IRegion cursor, String target,
+			List<String> propertyPaths) {
+
+		int cursorIndexInTarget = cursor.getOffset()
+				- hyperlinkRegion.getOffset();
+
+		if (cursorIndexInTarget > 0 && cursorIndexInTarget < target.length()) {
+
+			String preTarget = target.substring(0, cursorIndexInTarget);
+			if (!preTarget.endsWith(PropertyAccessor.NESTED_PROPERTY_SEPARATOR)) {
+				int regionOffset = hyperlinkRegion.getOffset()
+						+ preTarget
+								.lastIndexOf(PropertyAccessor.NESTED_PROPERTY_SEPARATOR)
+						+ 1;
+				int segmentCount = new StringTokenizer(preTarget,
+						PropertyAccessor.NESTED_PROPERTY_SEPARATOR)
+						.countTokens();
+				StringTokenizer tok = new StringTokenizer(target,
+						PropertyAccessor.NESTED_PROPERTY_SEPARATOR);
+
+				for (int i = 0; i < segmentCount; i++) {
+					propertyPaths.add(tok.nextToken());
+				}
+
+				int regionLength = (propertyPaths.get(segmentCount - 1))
+						.length();
+
+				return new Region(regionOffset, regionLength);
+			}
+		}
+
+		return hyperlinkRegion;
+
+	}
+
+	/**
+	 * Returns the attribute from given node at specified offset.
+	 */
+	public static final Attr getAttrByOffset(Node node, int offset) {
+		if ((node instanceof IndexedRegion)
+				&& ((IndexedRegion) node).contains(offset)
+				&& (node.hasAttributes())) {
+			NamedNodeMap attrs = node.getAttributes();
+			// go through each attribute in node and if attribute contains
+			// offset, return that attribute
+			for (int i = 0; i < attrs.getLength(); ++i) {
+				// assumption that if parent node is of type IndexedRegion,
+				// then its attributes will also be of type IndexedRegion
+				IndexedRegion attRegion = (IndexedRegion) attrs.item(i);
+				if (attRegion.contains(offset)) {
+					return (Attr) attrs.item(i);
+				}
+			}
+		}
+		return null;
+	}
+
+	public static final String getAttribute(Node node, String attributeName) {
+		if (hasAttribute(node, attributeName)) {
+			return node.getAttributes().getNamedItem(attributeName)
+					.getNodeValue();
+		}
+		return null;
+	}
+
+	public static final List getBeansFromConfigSets(IFile file) {
+		List<IBean> beans = new ArrayList<IBean>();
+		List<IBeansConfig> configs = new ArrayList<IBeansConfig>();
+		IBeansProject project = BeansCorePlugin.getModel().getProject(
+				file.getProject());
+
+		if (project != null) {
+			Set<IBeansConfigSet> configSets = project.getConfigSets();
+
+			for (IBeansConfigSet configSet : configSets) {
+				if (configSet.hasConfig(file)
+						|| !BeansCoreUtils.isBeansConfig(file)) {
+					Set<IBeansConfig> bcs = configSet.getConfigs();
+					configs.addAll(bcs);
+				}
+			}
+		}
+
+		if (BeansCoreUtils.isBeansConfig(file)) {
+			configs.add(project.getConfig(file));
+		}
+
+		for (IBeansConfig bc : configs) {
+			Set<IBean> bs = bc.getBeans();
+			for (IBean b : bs) {
+				if (!b.getElementResource().equals(file)) {
+					beans.add(b);
+				}
+			}
+			Set<IBeansComponent> components = bc.getComponents();
+			for (IBeansComponent component : components) {
+				bs = component.getBeans();
+				for (IBean b : bs) {
+					if (!b.getElementResource().equals(file)) {
+						beans.add(b);
+					}
+				}
+			}
+		}
+		return beans;
+	}
+
+	public static final String getClassNameForBean(IFile file,
+			Document document, Node node) {
+
+		NamedNodeMap attributes = node.getAttributes();
+		String className = (attributes.getNamedItem("class") != null ? attributes
+				.getNamedItem("class").getNodeValue()
+				: null);
+		String factoryMethod = (attributes.getNamedItem("factory-method") != null ? attributes
+				.getNamedItem("factory-method").getNodeValue()
+				: null);
+		String factoryBean = (attributes.getNamedItem("factory-bean") != null ? attributes
+				.getNamedItem("factory-bean").getNodeValue()
+				: null);
+		String parent = (attributes.getNamedItem("parent") != null ? attributes
+				.getNamedItem("parent").getNodeValue() : null);
+		if (factoryBean == null && factoryMethod == null && parent == null) {
+			return className;
+		}
+		else if (className != null && factoryMethod != null
+				&& factoryBean == null) {
+			// Factory method on bean class
+			return resolveClassNameFromFactoryMethod(factoryMethod, className,
+					file.getProject());
+		}
+		else if (factoryMethod != null && factoryBean != null) {
+			// Factory method on factory bean
+			String factoryClass = getClassNameForBean(file, document,
+					factoryBean);
+			if (factoryClass != null) {
+				return resolveClassNameFromFactoryMethod(factoryMethod,
+						factoryClass, file.getProject());
+			}
+			return null;
+
+		}
+		else if (className == null && parent != null) {
+			return getClassNameForBean(file, document, parent);
+		}
+		return null;
+	}
+
+	public static final String getClassNameForBean(IFile file,
+			Document document, String id) {
+		boolean foundLocal = false;
+
+		NodeList beanNodes = document.getElementsByTagName("bean");
+		for (int i = 0; i < beanNodes.getLength(); i++) {
+			Node beanNode = beanNodes.item(i);
+			NamedNodeMap attributes = beanNode.getAttributes();
+			if (attributes.getNamedItem("id") != null) {
+				String idTemp = (attributes.getNamedItem("id") != null ? attributes
+						.getNamedItem("id").getNodeValue()
+						: null);
+				if (id.equals(idTemp)) {
+					return getClassNameForBean(file, document, beanNode);
+				}
+			}
+		}
+
+		if (!foundLocal) {
+			List beansList = BeansEditorUtils.getBeansFromConfigSets(file);
+			for (int i = 0; i < beansList.size(); i++) {
+				IBean bean = (IBean) beansList.get(i);
+				if (id.equals(bean.getElementName())) {
+					return BeansModelUtils.getBeanClass(bean, null);
+				}
+			}
+		}
+
+		// if we reach this point we haven't found a class name. so try to
+		// locate the xml element
+		// and calculate the class from there
+		Element node = document.getElementById(id);
+		if (node != null
+				&& node.getNamespaceURI() != null
+				&& NamespaceUtils.getClassNameProvider(node.getNamespaceURI()) != null) {
+			return NamespaceUtils.getClassNameProvider(node.getNamespaceURI())
+					.getClassNameForElement(node);
+		}
+
+		return null;
+	}
+
+	public static String getClassNameForBean(Node bean) {
+		return getAttribute(bean, "class");
 	}
 
 	public static final List getClassNamesOfBean(IFile file, Node node) {
@@ -393,272 +647,83 @@ public class BeansEditorUtils {
 		}
 	}
 
-	public static final String getClassNameForBean(IFile file,
-			Document document, String id) {
-		boolean foundLocal = false;
+	public static IFile getFile(ContentAssistRequest request) {
+		IResource resource = null;
+		String baselocation = null;
 
-		NodeList beanNodes = document.getElementsByTagName("bean");
-		for (int i = 0; i < beanNodes.getLength(); i++) {
-			Node beanNode = beanNodes.item(i);
-			NamedNodeMap attributes = beanNode.getAttributes();
-			if (attributes.getNamedItem("id") != null) {
-				String idTemp = (attributes.getNamedItem("id") != null ? attributes
-						.getNamedItem("id").getNodeValue()
-						: null);
-				if (id.equals(idTemp)) {
-					return getClassNameForBean(file, document, beanNode);
+		if (request != null) {
+			IStructuredDocumentRegion region = request.getDocumentRegion();
+			if (region != null) {
+				IDocument document = region.getParentDocument();
+				IStructuredModel model = null;
+				try {
+					model = org.eclipse.wst.sse.core.StructuredModelManager
+							.getModelManager()
+							.getExistingModelForRead(document);
+					if (model != null) {
+						baselocation = model.getBaseLocation();
+					}
 				}
-			}
-		}
-
-		if (!foundLocal) {
-			List beansList = BeansEditorUtils.getBeansFromConfigSets(file);
-			for (int i = 0; i < beansList.size(); i++) {
-				IBean bean = (IBean) beansList.get(i);
-				if (id.equals(bean.getElementName())) {
-					return BeansModelUtils.getBeanClass(bean, null);
-				}
-			}
-		}
-
-		// if we reach this point we haven't found a class name. so try to
-		// locate the xml element
-		// and calculate the class from there
-		Element node = document.getElementById(id);
-		if (node != null
-				&& node.getNamespaceURI() != null
-				&& NamespaceUtils.getClassNameProvider(node.getNamespaceURI()) != null) {
-			return NamespaceUtils.getClassNameProvider(node.getNamespaceURI())
-					.getClassNameForElement(node);
-		}
-
-		return null;
-	}
-
-	public static final String getClassNameForBean(IFile file,
-			Document document, Node node) {
-
-		NamedNodeMap attributes = node.getAttributes();
-		String className = (attributes.getNamedItem("class") != null ? attributes
-				.getNamedItem("class").getNodeValue()
-				: null);
-		String factoryMethod = (attributes.getNamedItem("factory-method") != null ? attributes
-				.getNamedItem("factory-method").getNodeValue()
-				: null);
-		String factoryBean = (attributes.getNamedItem("factory-bean") != null ? attributes
-				.getNamedItem("factory-bean").getNodeValue()
-				: null);
-		String parent = (attributes.getNamedItem("parent") != null ? attributes
-				.getNamedItem("parent").getNodeValue() : null);
-		if (factoryBean == null && factoryMethod == null && parent == null) {
-			return className;
-		}
-		else if (className != null && factoryMethod != null
-				&& factoryBean == null) {
-			// Factory method on bean class
-			return resolveClassNameFromFactoryMethod(factoryMethod, className,
-					file.getProject());
-		}
-		else if (factoryMethod != null && factoryBean != null) {
-			// Factory method on factory bean
-			String factoryClass = getClassNameForBean(file, document,
-					factoryBean);
-			if (factoryClass != null) {
-				return resolveClassNameFromFactoryMethod(factoryMethod,
-						factoryClass, file.getProject());
-			}
-			return null;
-
-		}
-		else if (className == null && parent != null) {
-			return getClassNameForBean(file, document, parent);
-		}
-		return null;
-	}
-
-	private static String resolveClassNameFromFactoryMethod(
-			String factoryMethod, String className, IProject project) {
-		IType type = JdtUtils.getJavaType(project, className);
-		if (type != null) {
-			try {
-				Set<IMethod> methods = Introspector.getAllMethods(type);
-				for (IMethod m : methods) {
-					if (m.getElementName().equals(factoryMethod)) {
-						return JdtUtils.resolveClassName(m.getReturnType(),
-								type);
+				finally {
+					if (model != null) {
+						model.releaseFromRead();
 					}
 				}
 			}
-			catch (JavaModelException e) {
+		}
+
+		if (baselocation != null) {
+			// copied from JSPTranslationAdapter#getJavaProject
+			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+			IPath filePath = new Path(baselocation);
+			if (filePath.segmentCount() > 0) {
+				resource = root.getFile(filePath);
 			}
 		}
-		return null;
+		return (IFile) resource;
 	}
 
 	/**
-	 * Returns the non-blocking Progress Monitor form the StatuslineManger
-	 * @return the progress monitor
+	 * Returns the file the given document was read from.
 	 */
-	public static final IProgressMonitor getProgressMonitor() {
-		IEditorPart editor = Activator.getActiveWorkbenchPage()
-				.getActiveEditor();
-		if (editor != null
-				&& editor.getEditorSite() != null
-				&& editor.getEditorSite().getActionBars() != null
-				&& editor.getEditorSite().getActionBars()
-						.getStatusLineManager() != null
-				&& editor.getEditorSite().getActionBars()
-						.getStatusLineManager().getProgressMonitor() != null) {
-
-			IStatusLineManager manager = editor.getEditorSite().getActionBars()
-					.getStatusLineManager();
-			IProgressMonitor monitor = manager.getProgressMonitor();
-			manager.setMessage("Processing completion proposals");
-			manager.setCancelEnabled(true);
-			return monitor;
+	public static final IFile getFile(IDocument document) {
+		IFile resource = null;
+		String baselocation = null;
+		if (document != null) {
+			IStructuredModel model = null;
+			try {
+				model = org.eclipse.wst.sse.core.StructuredModelManager
+						.getModelManager().getExistingModelForRead(document);
+				if (model != null) {
+					baselocation = model.getBaseLocation();
+				}
+			}
+			finally {
+				if (model != null) {
+					model.releaseFromRead();
+				}
+			}
 		}
-		else {
 
-			return new NullProgressMonitor();
+		if (baselocation != null) {
+			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+			IPath filePath = new Path(baselocation);
+			if (filePath.segmentCount() > 0) {
+				resource = root.getFile(filePath);
+			}
 		}
+		return resource;
 	}
 
-	public static final IRegion extractPropertyPathFromCursorPosition(
-			IRegion hyperlinkRegion, IRegion cursor, String target,
-			List<String> propertyPaths) {
-
-		int cursorIndexInTarget = cursor.getOffset()
-				- hyperlinkRegion.getOffset();
-
-		if (cursorIndexInTarget > 0 && cursorIndexInTarget < target.length()) {
-
-			String preTarget = target.substring(0, cursorIndexInTarget);
-			if (!preTarget.endsWith(PropertyAccessor.NESTED_PROPERTY_SEPARATOR)) {
-				int regionOffset = hyperlinkRegion.getOffset()
-						+ preTarget
-								.lastIndexOf(PropertyAccessor.NESTED_PROPERTY_SEPARATOR)
-						+ 1;
-				int segmentCount = new StringTokenizer(preTarget,
-						PropertyAccessor.NESTED_PROPERTY_SEPARATOR)
-						.countTokens();
-				StringTokenizer tok = new StringTokenizer(target,
-						PropertyAccessor.NESTED_PROPERTY_SEPARATOR);
-
-				for (int i = 0; i < segmentCount; i++) {
-					propertyPaths.add(tok.nextToken());
-				}
-
-				int regionLength = (propertyPaths.get(segmentCount - 1))
-						.length();
-
-				return new Region(regionOffset, regionLength);
+	public static final Node getFirstReferenceableNodeById(Document document,
+			String id) {
+		Map<String, Node> nodes = getReferenceableNodes(document);
+		for (Map.Entry<String, Node> node : nodes.entrySet()) {
+			if (node.getKey().equals(id)) {
+				return node.getValue();
 			}
 		}
-
-		return hyperlinkRegion;
-
-	}
-
-	public static final IMethod extractMethodFromPropertyPathElements(
-			List propertyPathElements, List types, IFile file, int counter) {
-		IMethod method = null;
-		if (propertyPathElements != null && propertyPathElements.size() > 0) {
-			if (propertyPathElements.size() > (counter + 1)) {
-
-				if (types != null) {
-					IType returnType = null;
-					for (int i = 0; i < types.size(); i++) {
-						IType type = (IType) types.get(i);
-						String propertyPath = (String) propertyPathElements
-								.get(counter);
-						try {
-							IMethod getMethod = Introspector
-									.getReadableProperty(
-											type,
-											PropertyAccessorUtils
-													.getPropertyName(propertyPath));
-							returnType = JdtUtils
-									.getJavaTypeForMethodReturnType(getMethod,
-											type);
-						}
-						catch (JavaModelException e) {
-						}
-					}
-
-					if (returnType != null) {
-						List<IType> newTypes = new ArrayList<IType>();
-						newTypes.add(returnType);
-						method = extractMethodFromPropertyPathElements(
-								propertyPathElements, newTypes, file,
-								(counter + 1));
-					}
-				}
-			}
-			else {
-				for (int i = 0; i < types.size(); i++) {
-					IType type = (IType) types.get(i);
-					String propertyPath = (String) propertyPathElements
-							.get(counter);
-					try {
-						method = Introspector.getWritableProperty(type,
-								PropertyAccessorUtils
-										.getPropertyName(propertyPath));
-					}
-					catch (JavaModelException e) {
-					}
-				}
-			}
-		}
-		return method;
-	}
-
-	public static final void extractAllMethodsFromPropertyPathElements(
-			List propertyPath, List types, IFile file, int counter,
-			List<IMethod> methods) {
-		IMethod method = null;
-		if (propertyPath != null && propertyPath.size() > 0) {
-			if (propertyPath.size() > (counter + 1)) {
-
-				if (types != null) {
-					IType returnType = null;
-					for (int i = 0; i < types.size(); i++) {
-						IType type = (IType) types.get(i);
-						try {
-							IMethod getMethod = Introspector
-									.getReadableProperty(type,
-											(String) propertyPath.get(counter));
-							returnType = JdtUtils
-									.getJavaTypeForMethodReturnType(getMethod,
-											type);
-							methods.add(getMethod);
-						}
-						catch (JavaModelException e) {
-						}
-					}
-
-					if (returnType != null) {
-						List<IType> newTypes = new ArrayList<IType>();
-						newTypes.add(returnType);
-						extractAllMethodsFromPropertyPathElements(propertyPath,
-								newTypes, file, (counter + 1), methods);
-					}
-
-				}
-			}
-			else {
-				for (int i = 0; i < types.size(); i++) {
-					IType type = (IType) types.get(i);
-					try {
-						method = Introspector.getWritableProperty(type,
-								(String) propertyPath.get(counter));
-						methods.add(method);
-
-					}
-					catch (JavaModelException e) {
-					}
-				}
-			}
-		}
+		return null;
 	}
 
 	/**
@@ -695,57 +760,31 @@ public class BeansEditorUtils {
 	}
 
 	/**
-	 * Returns the attribute from given node at specified offset.
+	 * Returns the non-blocking Progress Monitor form the StatuslineManger
+	 * @return the progress monitor
 	 */
-	public static final Attr getAttrByOffset(Node node, int offset) {
-		if ((node instanceof IndexedRegion)
-				&& ((IndexedRegion) node).contains(offset)
-				&& (node.hasAttributes())) {
-			NamedNodeMap attrs = node.getAttributes();
-			// go through each attribute in node and if attribute contains
-			// offset, return that attribute
-			for (int i = 0; i < attrs.getLength(); ++i) {
-				// assumption that if parent node is of type IndexedRegion,
-				// then its attributes will also be of type IndexedRegion
-				IndexedRegion attRegion = (IndexedRegion) attrs.item(i);
-				if (attRegion.contains(offset)) {
-					return (Attr) attrs.item(i);
-				}
-			}
-		}
-		return null;
-	}
+	public static final IProgressMonitor getProgressMonitor() {
+		IEditorPart editor = Activator.getActiveWorkbenchPage()
+				.getActiveEditor();
+		if (editor != null
+				&& editor.getEditorSite() != null
+				&& editor.getEditorSite().getActionBars() != null
+				&& editor.getEditorSite().getActionBars()
+						.getStatusLineManager() != null
+				&& editor.getEditorSite().getActionBars()
+						.getStatusLineManager().getProgressMonitor() != null) {
 
-	/**
-	 * Returns the file the given document was read from.
-	 */
-	public static final IFile getFile(IDocument document) {
-		IFile resource = null;
-		String baselocation = null;
-		if (document != null) {
-			IStructuredModel model = null;
-			try {
-				model = org.eclipse.wst.sse.core.StructuredModelManager
-						.getModelManager().getExistingModelForRead(document);
-				if (model != null) {
-					baselocation = model.getBaseLocation();
-				}
-			}
-			finally {
-				if (model != null) {
-					model.releaseFromRead();
-				}
-			}
+			IStatusLineManager manager = editor.getEditorSite().getActionBars()
+					.getStatusLineManager();
+			IProgressMonitor monitor = manager.getProgressMonitor();
+			manager.setMessage("Processing completion proposals");
+			manager.setCancelEnabled(true);
+			return monitor;
 		}
+		else {
 
-		if (baselocation != null) {
-			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-			IPath filePath = new Path(baselocation);
-			if (filePath.segmentCount() > 0) {
-				resource = root.getFile(filePath);
-			}
+			return new NullProgressMonitor();
 		}
-		return resource;
 	}
 
 	public static final IProject getProject(IDocument document) {
@@ -764,61 +803,29 @@ public class BeansEditorUtils {
 		return project;
 	}
 
-	public static IFile getFile(IStructuredDocument document) {
-		if (document != null) {
-			IStructuredModel model = StructuredModelManager.getModelManager()
-					.getModelForRead(document);
-			IFile resource = null;
-			try {
-				String baselocation = model.getBaseLocation();
-				if (baselocation != null) {
-					IWorkspaceRoot root = ResourcesPlugin.getWorkspace()
-							.getRoot();
-					IPath filePath = new Path(baselocation);
-					if (filePath.segmentCount() > 0) {
-						resource = root.getFile(filePath);
-					}
-				}
+	public static final Map<String, Node> getReferenceableNodes(
+			Document document) {
+		Map<String, Node> nodes = new HashMap<String, Node>();
+		for (IReferenceableElementsLocator locator : NamespaceUtils
+				.getAllElementsLocators()) {
+
+			Map<String, Node> tempNodes = locator
+					.getReferenceableElements(document);
+			if (tempNodes != null) {
+				nodes.putAll(tempNodes);
 			}
-			finally {
-				if (model != null) {
-					model.releaseFromRead();
-				}
-			}
-			return resource;
 		}
-		return null;
+		return nodes;
 	}
 
-	/**
-	 * Convert <code>String</code>s in attribute name format (lowercase,
-	 * hyphens separating words) into property name format (camel-cased). For
-	 * example, <code>transaction-manager</code> is converted into
-	 * <code>transactionManager</code>.
-	 */
-	public static String attributeNameToPropertyName(String attributeName) {
-		if (attributeName.indexOf("-") == -1) {
-			return attributeName;
-		}
-		char[] chars = attributeName.toCharArray();
-		char[] result = new char[chars.length - 1];
+	public static final boolean hasAttribute(Node node, String attributeName) {
+		return (node != null && node.hasAttributes() && node.getAttributes()
+				.getNamedItem(attributeName) != null);
+	}
 
-		int currPos = 0;
-		boolean upperCaseNext = false;
-		for (char c : chars) {
-			if (c == '-') {
-				upperCaseNext = true;
-				continue;
-			}
-			else if (upperCaseNext) {
-				result[currPos++] = Character.toUpperCase(c);
-				upperCaseNext = false;
-			}
-			else {
-				result[currPos++] = c;
-			}
-		}
-		return new String(result, 0, currPos);
+	public static final boolean isSpringStyleOutline() {
+		return Activator.getDefault().getPreferenceStore().getBoolean(
+				IPreferencesConstants.OUTLINE_SPRING);
 	}
 
 	public static final String propertyNameToAttributeName(String propertyName) {
@@ -838,82 +845,48 @@ public class BeansEditorUtils {
 		return buf.toString();
 	}
 
-	public static final String getAttribute(Node node, String attributeName) {
-		if (hasAttribute(node, attributeName)) {
-			return node.getAttributes().getNamedItem(attributeName)
-					.getNodeValue();
+	/**
+	 * Replace matching literal portions of a string with another string
+	 */
+	public static final String replace(String aString, String source,
+			String target) {
+		if (aString == null)
+			return null;
+		String normalString = ""; //$NON-NLS-1$
+		int length = aString.length();
+		int position = 0;
+		int previous = 0;
+		int spacer = source.length();
+		while (position + spacer - 1 < length
+				&& aString.indexOf(source, position) > -1) {
+			position = aString.indexOf(source, previous);
+			normalString = normalString + aString.substring(previous, position)
+					+ target;
+			position += spacer;
+			previous = position;
 		}
-		return null;
+		normalString = normalString
+				+ aString.substring(position, aString.length());
+
+		return normalString;
 	}
 
-	public static final boolean hasAttribute(Node node, String attributeName) {
-		return (node != null && node.hasAttributes() && node.getAttributes()
-				.getNamedItem(attributeName) != null);
-	}
-
-	public static final Map<String, Node> getReferenceableNodes(
-			Document document) {
-		Map<String, Node> nodes = new HashMap<String, Node>();
-		for (IReferenceableElementsLocator locator : NamespaceUtils
-				.getAllElementsLocators()) {
-
-			Map<String, Node> tempNodes = locator
-					.getReferenceableElements(document);
-			if (tempNodes != null) {
-				nodes.putAll(tempNodes);
-			}
-		}
-		return nodes;
-	}
-
-	public static final Node getFirstReferenceableNodeById(Document document,
-			String id) {
-		Map<String, Node> nodes = getReferenceableNodes(document);
-		for (Map.Entry<String, Node> node : nodes.entrySet()) {
-			if (node.getKey().equals(id)) {
-				return node.getValue();
-			}
-		}
-		return null;
-	}
-
-	public static String getClassNameForBean(Node bean) {
-		return getAttribute(bean, "class");
-	}
-
-	public static IFile getResource(ContentAssistRequest request) {
-		IResource resource = null;
-		String baselocation = null;
-
-		if (request != null) {
-			IStructuredDocumentRegion region = request.getDocumentRegion();
-			if (region != null) {
-				IDocument document = region.getParentDocument();
-				IStructuredModel model = null;
-				try {
-					model = org.eclipse.wst.sse.core.StructuredModelManager
-							.getModelManager()
-							.getExistingModelForRead(document);
-					if (model != null) {
-						baselocation = model.getBaseLocation();
-					}
-				}
-				finally {
-					if (model != null) {
-						model.releaseFromRead();
+	private static String resolveClassNameFromFactoryMethod(
+			String factoryMethod, String className, IProject project) {
+		IType type = JdtUtils.getJavaType(project, className);
+		if (type != null) {
+			try {
+				Set<IMethod> methods = Introspector.getAllMethods(type);
+				for (IMethod m : methods) {
+					if (m.getElementName().equals(factoryMethod)) {
+						return JdtUtils.resolveClassName(m.getReturnType(),
+								type);
 					}
 				}
 			}
-		}
-
-		if (baselocation != null) {
-			// copied from JSPTranslationAdapter#getJavaProject
-			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-			IPath filePath = new Path(baselocation);
-			if (filePath.segmentCount() > 0) {
-				resource = root.getFile(filePath);
+			catch (JavaModelException e) {
 			}
 		}
-		return (IFile) resource;
+		return null;
 	}
 }

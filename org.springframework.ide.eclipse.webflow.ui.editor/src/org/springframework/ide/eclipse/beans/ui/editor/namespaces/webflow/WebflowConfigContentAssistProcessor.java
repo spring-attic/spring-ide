@@ -42,7 +42,7 @@ public class WebflowConfigContentAssistProcessor extends
 			prefix = "";
 		}
 
-		IFile file = BeansEditorUtils.getResource(request);
+		IFile file = BeansEditorUtils.getFile(request);
 		if (node.getOwnerDocument() != null) {
 			BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(
 					request, BeansJavaCompletionUtils.getPropertyTypes(node,
