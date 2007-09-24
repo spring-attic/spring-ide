@@ -29,7 +29,6 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.ReplaceOverride;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanConstructorArgument;
 import org.springframework.ide.eclipse.beans.core.model.IBeanMethodOverride;
@@ -193,7 +192,8 @@ public class Bean extends AbstractBeansModelElement implements IBean {
 	}
 
 	public boolean isRootBean() {
-		return (definition instanceof RootBeanDefinition);
+		return !isChildBean();
+		// (definition instanceof RootBeanDefinition || definition instanceof GenericBeanDefinition);
 	}
 
 	public boolean isChildBean() {
