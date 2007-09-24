@@ -137,14 +137,14 @@ public class BeansJavaCompletionUtils {
 			return;
 		}
 
-		IType type = JdtUtils.getJavaType(BeansEditorUtils.getResource(request)
+		IType type = JdtUtils.getJavaType(BeansEditorUtils.getFile(request)
 				.getProject(), typeName);
 		try {
-			if (BeansEditorUtils.getResource(request).getProject().hasNature(
+			if (BeansEditorUtils.getFile(request).getProject().hasNature(
 					JavaCore.NATURE_ID)) {
 
 				ITypeHierarchy hierachy = type.newTypeHierarchy(JavaCore
-						.create(BeansEditorUtils.getResource(request)
+						.create(BeansEditorUtils.getFile(request)
 								.getProject()), new NullProgressMonitor());
 				IType[] types = hierachy.getAllSubtypes(type);
 				Map<String, IType> sortMap = new HashMap<String, IType>();
@@ -183,13 +183,15 @@ public class BeansJavaCompletionUtils {
 	private static ICompilationUnit createSourceCompilationUnit(
 			ContentAssistRequest request, String prefix)
 			throws JavaModelException {
-		IFile file = BeansEditorUtils.getResource(request);
+		IFile file = BeansEditorUtils.getFile(request);
 		IJavaProject project = JavaCore.create(file.getProject());
 		IPackageFragment root = getPackageFragment(project, prefix);
 		ICompilationUnit unit = root.getCompilationUnit("_xxx.java")
 				.getWorkingCopy(
 						CompilationUnitHelper.getInstance()
 								.getWorkingCopyOwner(),
+						CompilationUnitHelper.getInstance()
+								.getProblemRequestor(),
 						BeansEditorUtils.getProgressMonitor());
 		return unit;
 	}
