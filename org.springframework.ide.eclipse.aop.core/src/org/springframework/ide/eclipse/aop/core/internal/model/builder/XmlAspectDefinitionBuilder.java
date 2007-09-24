@@ -59,10 +59,10 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 	public void doBuildAspectDefinitions(IDOMDocument document, IFile file,
 			List<IAspectDefinition> aspectInfos,
 			IProjectClassLoaderSupport classLoaderSupport) {
-		parseXmlAspects(document, file, aspectInfos, classLoaderSupport);
+		parseAopConfigElement(document, file, aspectInfos, classLoaderSupport);
 	}
 
-	private void setLineNumbers(IAspectDefinition def, IDOMNode node) {
+	private void extractLineNumbers(IAspectDefinition def, IDOMNode node) {
 		if (def instanceof BeanAspectDefinition) {
 			BeanAspectDefinition bDef = (BeanAspectDefinition) def;
 			bDef.setAspectStartLineNumber(((IDOMDocument) node
@@ -93,7 +93,7 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 		return pointcut;
 	}
 
-	private void parseAdvisors(final IFile file, final Node aspectNode,
+	private void parseAdvisorElement(final IFile file, final Node aspectNode,
 			Map<String, String> rootPointcuts,
 			final List<IAspectDefinition> aspectInfos,
 			IProjectClassLoaderSupport classLoaderSupport) {
@@ -119,84 +119,57 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 							public void doWithActiveProjectClassLoader()
 									throws Throwable {
 
-								Class<?> advisorClass = ClassUtils
-										.loadClass(className);
+								Class<?> advisorClass = ClassUtils.loadClass(className);
 
-								if (ClassUtils.loadClass(
-										MethodInterceptor.class)
+								if (ClassUtils.loadClass(MethodInterceptor.class)
 										.isAssignableFrom(advisorClass)) {
-									JavaAdvisorDefinition info = new JavaAdvisorDefinition();
-									setLineNumbers(info, (IDOMNode) aspectNode);
-									info.setPointcutExpression(pointcutExpression);
-									info.setAspectClassName(className);
-									info.setAspectName(beanRef);
+									JavaAdvisorDefinition info = prepareJavaAdvisorDefinition(
+											file, aspectNode, beanRef,
+											className, pointcutExpression);
 									info.setType(ADVICE_TYPES.AROUND);
-									info.setAspectClassName(className);
 									info.setAdviceMethodName("invoke");
-									info
-											.setAdviceMethodParameterTypes(new String[] { MethodInvocation.class
-													.getName() });
-									info.setResource(file);
+									info.setAdviceMethodParameterTypes(new String[] { MethodInvocation.class
+										.getName() });
 									addAspectDefinition(info, aspectInfos);
 								}
-								if (ClassUtils.loadClass(
-										MethodBeforeAdvice.class)
+								if (ClassUtils.loadClass(MethodBeforeAdvice.class)
 										.isAssignableFrom(advisorClass)) {
-									JavaAdvisorDefinition info = new JavaAdvisorDefinition();
-									setLineNumbers(info, (IDOMNode) aspectNode);
-									info.setPointcutExpression(pointcutExpression);
-									info.setAspectClassName(className);
-									info.setAspectName(beanRef);
-									info.setType(ADVICE_TYPES.BEFORE);
+									JavaAdvisorDefinition info = prepareJavaAdvisorDefinition(
+											file, aspectNode, beanRef,
+											className, pointcutExpression);									info.setType(ADVICE_TYPES.BEFORE);
 									info.setAdviceMethodName(BEFORE_ELEMENT);
-									info.setAspectClassName(className);
-									info
-											.setAdviceMethodParameterTypes(new String[] {
-													Method.class.getName(),
-													Object[].class.getName(),
-													Object.class.getName() });
-									info.setResource(file);
+									info.setAdviceMethodParameterTypes(new String[] {
+										Method.class.getName(),
+										Object[].class.getName(),
+										Object.class.getName() });
 									addAspectDefinition(info, aspectInfos);
 								}
 								if (ClassUtils.loadClass(ThrowsAdvice.class)
 										.isAssignableFrom(advisorClass)) {
-									JavaAdvisorDefinition info = new JavaAdvisorDefinition();
-									setLineNumbers(info, (IDOMNode) aspectNode);
-									info
-											.setPointcutExpression(pointcutExpression);
-									info.setAspectClassName(className);
-									info.setAspectName(beanRef);
+									JavaAdvisorDefinition info = prepareJavaAdvisorDefinition(
+											file, aspectNode, beanRef,
+											className, pointcutExpression);
 									info.setType(ADVICE_TYPES.AFTER_THROWING);
 									info.setAdviceMethodName("afterThrowing");
-									info.setAspectClassName(className);
-									info
-											.setAdviceMethodParameterTypes(new String[] {
-													Method.class.getName(),
-													Object[].class.getName(),
-													Object.class.getName(),
-													Exception.class.getName() });
-									info.setResource(file);
+									info.setAdviceMethodParameterTypes(new String[] {
+										Method.class.getName(),
+										Object[].class.getName(),
+										Object.class.getName(),
+										Exception.class.getName() });
 									addAspectDefinition(info, aspectInfos);
 								}
-								if (ClassUtils.loadClass(
-										AfterReturningAdvice.class)
+								if (ClassUtils.loadClass(AfterReturningAdvice.class)
 										.isAssignableFrom(advisorClass)) {
-									JavaAdvisorDefinition info = new JavaAdvisorDefinition();
-									setLineNumbers(info, (IDOMNode) aspectNode);
-									info
-											.setPointcutExpression(pointcutExpression);
-									info.setAspectClassName(className);
-									info.setAspectName(beanRef);
+									JavaAdvisorDefinition info = prepareJavaAdvisorDefinition(
+											file, aspectNode, beanRef,
+											className, pointcutExpression);
 									info.setType(ADVICE_TYPES.AFTER_RETURNING);
 									info.setAdviceMethodName("afterReturning");
-									info.setAspectClassName(className);
-									info
-											.setAdviceMethodParameterTypes(new String[] {
-													Object.class.getName(),
-													Method.class.getName(),
-													Object[].class.getName(),
-													Object.class.getName() });
-									info.setResource(file);
+									info.setAdviceMethodParameterTypes(new String[] {
+										Object.class.getName(),
+										Method.class.getName(),
+										Object[].class.getName(),
+										Object.class.getName() });
 									addAspectDefinition(info, aspectInfos);
 								}
 							}
@@ -211,7 +184,7 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 		}
 	}
 
-	private BeanAspectDefinition parseAspect(Map<String, String> pointcuts,
+	private BeanAspectDefinition repareBeanAspectDefinition(Map<String, String> pointcuts,
 			Map<String, String> rootPointcuts, Node aspectNode,
 			IAopReference.ADVICE_TYPES type) {
 		BeanAspectDefinition info = new BeanAspectDefinition();
@@ -231,14 +204,14 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 					.commaDelimitedListToStringArray(argNames);
 		}
 		info.setArgNames(argNamesArray);
-		setLineNumbers(info, (IDOMNode) aspectNode);
+		extractLineNumbers(info, (IDOMNode) aspectNode);
 		info.setPointcutExpression(pointcut);
 		info.setType(type);
 		info.setAdviceMethodName(method);
 		return info;
 	}
 
-	private void parseAspects(IFile file, Node child,
+	private void parseAspectElement(IFile file, Node child,
 			Map<String, String> rootPointcuts,
 			List<IAspectDefinition> aspectInfos) {
 		String beanRef = getAttribute(child, "ref");
@@ -284,24 +257,24 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 								.setAspectClassName(defaultImpl);
 						((BeanIntroductionDefinition) info)
 								.setAspectName(beanRef);
-						setLineNumbers(info, (IDOMNode) aspectNode);
+						extractLineNumbers(info, (IDOMNode) aspectNode);
 					}
 				}
 				else if (BEFORE_ELEMENT.equals(aspectNode.getLocalName())) {
-					info = parseAspect(pointcuts, rootPointcuts, aspectNode,
+					info = repareBeanAspectDefinition(pointcuts, rootPointcuts, aspectNode,
 							IAopReference.ADVICE_TYPES.BEFORE);
 				}
 				else if (AROUND_ELEMENT.equals(aspectNode.getLocalName())) {
-					info = parseAspect(pointcuts, rootPointcuts, aspectNode,
+					info = repareBeanAspectDefinition(pointcuts, rootPointcuts, aspectNode,
 							IAopReference.ADVICE_TYPES.AROUND);
 				}
 				else if (AFTER_ELEMENT.equals(aspectNode.getLocalName())) {
-					info = parseAspect(pointcuts, rootPointcuts, aspectNode,
+					info = repareBeanAspectDefinition(pointcuts, rootPointcuts, aspectNode,
 							IAopReference.ADVICE_TYPES.AFTER);
 				}
 				else if (AFTER_RETURNING_ELEMENT.equals(aspectNode
 						.getLocalName())) {
-					info = parseAspect(pointcuts, rootPointcuts, aspectNode,
+					info = repareBeanAspectDefinition(pointcuts, rootPointcuts, aspectNode,
 							IAopReference.ADVICE_TYPES.AFTER_RETURNING);
 					String returning = getAttribute(aspectNode,
 							RETURNING_ATTRIBUTE);
@@ -309,14 +282,14 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 				}
 				else if (AFTER_THROWING_ELEMENT.equals(aspectNode
 						.getLocalName())) {
-					info = parseAspect(pointcuts, rootPointcuts, aspectNode,
+					info = repareBeanAspectDefinition(pointcuts, rootPointcuts, aspectNode,
 							IAopReference.ADVICE_TYPES.AFTER_THROWING);
 					String throwing = getAttribute(aspectNode,
 							THROWING_ATTRIBUTE);
 					info.setThrowing(throwing);
 				}
 				else if (AROUND_ELEMENT.equals(aspectNode.getLocalName())) {
-					info = parseAspect(pointcuts, rootPointcuts, aspectNode,
+					info = repareBeanAspectDefinition(pointcuts, rootPointcuts, aspectNode,
 							IAopReference.ADVICE_TYPES.AROUND);
 				}
 				if (info != null) {
@@ -345,7 +318,7 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 		}
 	}
 
-	private void parseXmlAspects(final IDOMDocument document, IFile file,
+	private void parseAopConfigElement(final IDOMDocument document, IFile file,
 			final List<IAspectDefinition> aspectInfos,
 			IProjectClassLoaderSupport classLoaderSupport) {
 		NodeList list = document.getDocumentElement().getElementsByTagNameNS(
@@ -362,10 +335,10 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 			for (int j = 0; j < children.getLength(); j++) {
 				Node child = children.item(j);
 				if (ASPECT_ELEMENT.equals(child.getLocalName())) {
-					parseAspects(file, child, rootPointcuts, aspectDefinitions);
+					parseAspectElement(file, child, rootPointcuts, aspectDefinitions);
 				}
 				else if (ADVISOR_ELEMENT.equals(child.getLocalName())) {
-					parseAdvisors(file, child, rootPointcuts,
+					parseAdvisorElement(file, child, rootPointcuts,
 							aspectDefinitions, classLoaderSupport);
 				}
 			}
@@ -384,5 +357,18 @@ public class XmlAspectDefinitionBuilder extends AbstractAspectDefinitionBuilder
 
 			aspectInfos.addAll(aspectDefinitions);
 		}
+	}
+
+	private JavaAdvisorDefinition prepareJavaAdvisorDefinition(
+			final IFile file, final Node aspectNode, final String beanRef,
+			final String className, final String pointcutExpression) {
+		JavaAdvisorDefinition info = new JavaAdvisorDefinition();
+		extractLineNumbers(info, (IDOMNode) aspectNode);
+		info.setPointcutExpression(pointcutExpression);
+		info.setAspectClassName(className);
+		info.setAspectName(beanRef);
+		info.setAspectClassName(className);
+		info.setResource(file);
+		return info;
 	}
 }
