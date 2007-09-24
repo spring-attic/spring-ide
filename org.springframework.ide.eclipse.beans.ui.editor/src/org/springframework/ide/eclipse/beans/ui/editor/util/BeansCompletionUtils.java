@@ -28,7 +28,7 @@ public class BeansCompletionUtils {
 		if (prefix == null) {
 			prefix = "";
 		}
-		IFile file = BeansEditorUtils.getResource(request);
+		IFile file = BeansEditorUtils.getFile(request);
 		if (document != null) {
 			BeanReferenceSearchRequestor requestor = new BeanReferenceSearchRequestor(
 					request);
