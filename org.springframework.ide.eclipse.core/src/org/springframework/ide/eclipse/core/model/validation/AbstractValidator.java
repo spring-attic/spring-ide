@@ -26,7 +26,10 @@ import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 
 /**
+ * Base {@link IValidator} implementation that abstracts model visiting and
+ * provides implementation hooks for sub classes.
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
 public abstract class AbstractValidator implements IValidator {
@@ -48,16 +51,24 @@ public abstract class AbstractValidator implements IValidator {
 				if (subMonitor.isCanceled()) {
 					throw new OperationCanceledException();
 				}
-				IResourceModelElement rootElement = getRootElement(resource);
-				Set<ValidationRuleDefinition> ruleDefinitions =
-						getRuleDefinitions(resource);
+
+				IValidationElementLifecycleManager callback = initValidationElementCallback(resource);
+
+				IResourceModelElement rootElement = callback.getRootElement();
+				Set<ValidationRuleDefinition> ruleDefinitions = getRuleDefinitions(resource);
 				if (rootElement != null && ruleDefinitions != null
 						&& ruleDefinitions.size() > 0) {
-					Set<ValidationProblem> problems = validate(resource,
-							rootElement, ruleDefinitions, subMonitor);
+					Set<ValidationProblem> problems = validate(callback,
+							ruleDefinitions, subMonitor);
 					ValidationUtils.createProblemMarkers(resource, problems,
 							getMarkerId());
 				}
+
+				// call close on callback to execute any required resource
+				// cleanup
+				// in template
+				callback.destory();
+
 				subMonitor.worked(1);
 				if (subMonitor.isCanceled()) {
 					throw new OperationCanceledException();
@@ -69,20 +80,26 @@ public abstract class AbstractValidator implements IValidator {
 		}
 	}
 
-	private Set<ValidationProblem>validate(IResource resource,
-			IResourceModelElement rootElement,
+	private IValidationElementLifecycleManager initValidationElementCallback(
+			IResource resource) {
+		IValidationElementLifecycleManager callback = createValidationElementLifecycleManager();
+		callback.init(resource);
+		return callback;
+	}
+
+	private Set<ValidationProblem> validate(
+			IValidationElementLifecycleManager callback,
 			Set<ValidationRuleDefinition> ruleDefinitions,
 			SubProgressMonitor subMonitor) {
-		Set<ValidationProblem> problems =
-				new LinkedHashSet<ValidationProblem>();
-		for (IResourceModelElement contextElement
-				: getContextElements(rootElement)) {
-			IValidationContext context = createContext(rootElement,
-					contextElement);
+		Set<ValidationProblem> problems = new LinkedHashSet<ValidationProblem>();
+		for (IResourceModelElement contextElement : callback
+				.getContextElements()) {
+			IValidationContext context = createContext(callback
+					.getRootElement(), contextElement);
 			if (context != null) {
 				IModelElementVisitor visitor = new ValidationVisitor(context,
 						ruleDefinitions);
-				rootElement.accept(visitor, subMonitor);
+				callback.getRootElement().accept(visitor, subMonitor);
 				problems.addAll(context.getProblems());
 			}
 			if (subMonitor.isCanceled()) {
@@ -106,21 +123,6 @@ public abstract class AbstractValidator implements IValidator {
 			IResource resource);
 
 	/**
-	 * Returns the {@link IResourceModelElement root element} for
-	 * the given {@link IResource} which should be visited by the validator.
-	 */
-	protected abstract IResourceModelElement getRootElement(
-			IResource resource);
-
-	/**
-	 * Returns a list of {@link IResourceModelElement context element}s for the
-	 * given {@link IResourceModelElement root element} which should be used
-	 * during validation.
-	 */
-	protected abstract Set<IResourceModelElement> getContextElements(
-			IResourceModelElement rootElement);
-
-	/**
 	 * Returns a newly created {@link IValidationContext} for the given
 	 * {@link IResourceModelElement root element} and it's
 	 * {@link IResourceModelElement context element}.
@@ -130,10 +132,15 @@ public abstract class AbstractValidator implements IValidator {
 			IResourceModelElement contextElement);
 
 	/**
-	 * Returns <code>true</code> if this validator is able to validate the given
-	 * element.
+	 * Returns <code>true</code> if this validator is able to validate the
+	 * given element.
 	 */
 	protected abstract boolean supports(IModelElement element);
+
+	/**
+	 * Returns {@link IValidationElementLifecycleManager}.
+	 */
+	protected abstract IValidationElementLifecycleManager createValidationElementLifecycleManager();
 
 	/**
 	 * {@link IModelElementVisitor} implementation that validates a specified
@@ -142,6 +149,7 @@ public abstract class AbstractValidator implements IValidator {
 	protected final class ValidationVisitor implements IModelElementVisitor {
 
 		private Set<ValidationRuleDefinition> ruleDefinitions;
+
 		private IValidationContext context;
 
 		public ValidationVisitor(IValidationContext context,
@@ -156,8 +164,7 @@ public abstract class AbstractValidator implements IValidator {
 				SubProgressMonitor subMonitor = new SubProgressMonitor(monitor,
 						ruleDefinitions.size());
 				try {
-					for (ValidationRuleDefinition ruleDefinition
-							: ruleDefinitions) {
+					for (ValidationRuleDefinition ruleDefinition : ruleDefinitions) {
 						if (subMonitor.isCanceled()) {
 							throw new OperationCanceledException();
 						}
@@ -171,7 +178,8 @@ public abstract class AbstractValidator implements IValidator {
 						}
 						subMonitor.worked(1);
 					}
-				} finally {
+				}
+				finally {
 					subMonitor.done();
 				}
 				return true;

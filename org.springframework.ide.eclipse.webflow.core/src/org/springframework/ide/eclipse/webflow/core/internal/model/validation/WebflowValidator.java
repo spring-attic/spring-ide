@@ -17,9 +17,13 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.wst.sse.core.StructuredModelManager;
+import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
+import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
@@ -30,9 +34,11 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidator;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
+import org.springframework.ide.eclipse.core.model.validation.IValidationElementLifecycleManager;
 import org.springframework.ide.eclipse.core.model.validation.IValidator;
 import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowState;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModel;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
@@ -46,6 +52,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
  * @author Torsten Juergeleit
  * @since 2.0
  */
+@SuppressWarnings("restriction")
 public class WebflowValidator extends AbstractValidator {
 
 	public static final String VALIDATOR_ID = Activator.PLUGIN_ID
@@ -132,22 +139,6 @@ public class WebflowValidator extends AbstractValidator {
 	}
 
 	@Override
-	protected IResourceModelElement getRootElement(IResource resource) {
-		if (resource instanceof IFile) {
-			return WebflowModelUtils.getWebflowState((IFile) resource);
-		}
-		return null;
-	}
-
-	@Override
-	protected Set<IResourceModelElement> getContextElements(
-			IResourceModelElement rootElement) {
-		Set<IResourceModelElement> contextElements = new HashSet<IResourceModelElement>();
-		contextElements.add(rootElement);
-		return contextElements;
-	}
-
-	@Override
 	protected IValidationContext createContext(
 			IResourceModelElement rootElement,
 			IResourceModelElement contextElement) {
@@ -163,5 +154,63 @@ public class WebflowValidator extends AbstractValidator {
 	@Override
 	protected boolean supports(IModelElement element) {
 		return (element instanceof IWebflowModelElement);
+	}
+
+	@Override
+	protected IValidationElementLifecycleManager createValidationElementLifecycleManager() {
+		return new WebflowStateLifecycleManager();
+	}
+
+	private static class WebflowStateLifecycleManager implements
+			IValidationElementLifecycleManager {
+		
+		private IStructuredModel model = null;
+		
+		private IFile file = null;
+		
+		private IWebflowState rootElement;
+		
+		public void destory() {
+			if (model != null) {
+				model.releaseFromRead();
+			}
+		}
+
+		public Set<IResourceModelElement> getContextElements() {
+			Set<IResourceModelElement> contextElements = new HashSet<IResourceModelElement>();
+			contextElements.add(rootElement);
+			return contextElements;
+		}
+
+		public IResourceModelElement getRootElement() {
+			return this.rootElement;
+		}
+
+		public void init(IResource resource) {
+			if (resource instanceof IFile) {
+				this.file = (IFile) resource;
+			}
+			try {
+				model = StructuredModelManager.getModelManager()
+						.getExistingModelForRead(resource);
+				if (model == null) {
+					model = StructuredModelManager.getModelManager()
+							.getModelForRead(file);
+
+				}
+				if (model != null) {
+					IDOMDocument document = ((DOMModelImpl) model).getDocument();
+					rootElement = new WebflowState(WebflowModelUtils
+							.getWebflowConfig(file));
+					rootElement.init((IDOMNode) document.getDocumentElement(),
+							null);
+				}
+			}
+			catch (Exception e) {
+				if (model != null) {
+					model.releaseFromRead();
+				}
+			}
+		}
 	}
 }

@@ -37,12 +37,14 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidator;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
+import org.springframework.ide.eclipse.core.model.validation.IValidationElementLifecycleManager;
 import org.springframework.ide.eclipse.core.model.validation.IValidator;
 
 /**
  * {@link IValidator} implementation that is responsible for validating the
  * {@link IBeansModelElement}s.
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
 public class BeansConfigValidator extends AbstractValidator {
@@ -83,8 +85,8 @@ public class BeansConfigValidator extends AbstractValidator {
 		return resources;
 	}
 
-	public Set<IResource> getAffectedResources(IResource resource,
-			int kind) throws CoreException {
+	public Set<IResource> getAffectedResources(IResource resource, int kind)
+			throws CoreException {
 		Set<IResource> resources = new LinkedHashSet<IResource>();
 		if (resource instanceof IFile) {
 
@@ -95,8 +97,8 @@ public class BeansConfigValidator extends AbstractValidator {
 				resources.add(resource);
 			}
 			else if (JdtUtils.isClassPathFile(resource)) {
-				IBeansProject beansProject = BeansCorePlugin.getModel().getProject(
-						resource.getProject());
+				IBeansProject beansProject = BeansCorePlugin.getModel()
+						.getProject(resource.getProject());
 				if (beansProject != null) {
 					for (IBeansConfig beansConfig : beansProject.getConfigs()) {
 						resources.add(beansConfig.getElementResource());
@@ -137,28 +139,6 @@ public class BeansConfigValidator extends AbstractValidator {
 	}
 
 	@Override
-	protected IResourceModelElement getRootElement(IResource resource) {
-		if (resource instanceof IFile) {
-			return BeansCorePlugin.getModel().getConfig((IFile) resource);
-		}
-		return null;
-	}
-
-	@Override
-	protected Set<IResourceModelElement> getContextElements(
-			IResourceModelElement rootElement) {
-		Set<IResourceModelElement> contextElements =
-				new LinkedHashSet<IResourceModelElement>();
-		if (rootElement instanceof IBeansConfig) {
-			contextElements.addAll(BeansModelUtils.getConfigSets(rootElement));
-			if (contextElements.isEmpty()) {
-				contextElements.add(rootElement);
-			}
-		}
-		return contextElements;
-	}
-
-	@Override
 	protected IValidationContext createContext(
 			IResourceModelElement rootElement,
 			IResourceModelElement contextElement) {
@@ -182,5 +162,44 @@ public class BeansConfigValidator extends AbstractValidator {
 			resources.add(config.getElementResource());
 		}
 		return resources;
+	}
+
+	@Override
+	protected IValidationElementLifecycleManager createValidationElementLifecycleManager() {
+		return new BeanElementLifecycleManager();
+	}
+
+	private static class BeanElementLifecycleManager implements
+			IValidationElementLifecycleManager {
+
+		private IResourceModelElement rootElement = null;
+
+		public void destory() {
+			// nothing to do
+		}
+
+		public Set<IResourceModelElement> getContextElements() {
+			Set<IResourceModelElement> contextElements = new LinkedHashSet<IResourceModelElement>();
+			if (rootElement instanceof IBeansConfig) {
+				contextElements.addAll(BeansModelUtils
+						.getConfigSets(rootElement));
+				if (contextElements.isEmpty()) {
+					contextElements.add(rootElement);
+				}
+			}
+			return contextElements;
+		}
+
+		public IResourceModelElement getRootElement() {
+			return rootElement;
+		}
+
+		public void init(IResource resource) {
+			if (resource instanceof IFile) {
+				rootElement = BeansCorePlugin.getModel().getConfig(
+						(IFile) resource);
+			}
+
+		}
 	}
 }
