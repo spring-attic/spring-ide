@@ -9,6 +9,7 @@ feature@org.springframework.ide.eclipse.aop.feature=SVN,trunk,http://springide.o
 feature@org.springframework.ide.eclipse.aop.feature.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.aop.feature.source
 feature@org.springframework.ide.eclipse.ajdt.feature=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.ajdt.feature
 feature@org.springframework.ide.eclipse.ajdt.feature.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.ajdt.feature.source
+feature@org.springframework.ide.eclipse.dependency.feature=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.dependency.feature
 feature@org.springframework.ide.eclipse.webflow.feature=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.webflow.feature
 feature@org.springframework.ide.eclipse.webflow.feature.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.webflow.feature.source
 feature@org.springframework.ide.eclipse.mylyn.feature=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.mylyn.feature

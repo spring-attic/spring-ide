@@ -22,9 +22,14 @@
       <update label="%updateSiteName" url="http://springide.org/updatesite/"/>
    </url>
 
+   <includes
+         id="org.springframework.ide.eclipse.feature.source"
+         version="0.0.0"/>
+
    <requires>
       <import feature="org.eclipse.wst.xml_ui.feature" version="1.5.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.jdt" version="3.2.0" match="greaterOrEqual"/>
+      <import plugin="org.apache.commons.logging"/>
    </requires>
 
    <plugin
@@ -110,28 +115,7 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-<!--
-   <plugin
-         id="org.springframework.ide.eclipse.javaconfig.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
 
-   <plugin
-         id="org.springframework.ide.eclipse.javaconfig.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.springframework.javaconfig"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
--->
    <plugin
          id="org.springframework"
          download-size="0"
@@ -167,8 +151,6 @@
          version="0.0.0"
          unpack="false"/>
 
-
-
    <plugin
          id="org.springframework.doc"
          download-size="0"
@@ -185,13 +167,6 @@
 
    <plugin
          id="org.aspectj.aspectjrt"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.commons.logging"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -217,7 +192,5 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-	                  
-	<includes id="org.springframework.ide.eclipse.feature.source" version="0.0.0"/>
-	
+
 </feature>

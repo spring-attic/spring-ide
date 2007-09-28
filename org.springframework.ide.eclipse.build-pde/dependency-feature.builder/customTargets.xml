@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Build specific targets and properties" default="noDefault">
+
+	<import file="../customTargets.xml" />
+	
+	<property name="updateSiteStagingLocation" value="${buildDirectory}/../../updatesite_nightly" />
+	<property name="eclipseStagingLocation" value="${buildDirectory}/../../eclipse_stage" />
+
+	<property name="featureName" value="org.springframework.ide.eclipse.dependency.feature" />
+	<property name="featureCategory" value="Dependencies" />
+	
+</project>

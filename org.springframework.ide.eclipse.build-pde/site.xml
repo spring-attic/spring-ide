@@ -8,4 +8,5 @@
 	<category-def name="Core" label="Core" />
 	<category-def name="Extensions" label="Extensions" />
 	<category-def name="Integrations" label="Integrations" />
+	<category-def name="Dependencies" label="Dependencies" />
 </site>

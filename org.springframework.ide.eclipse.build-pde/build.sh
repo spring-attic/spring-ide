@@ -30,6 +30,7 @@ pack() {
 echo Command line: $@
 
 build beans-feature $@
+build dependency-feature $@
 build aop-feature $@
 build ajdt-feature $@
 build javaconfig-feature $@
