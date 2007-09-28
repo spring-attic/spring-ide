@@ -9,6 +9,4 @@ Export-Package: org.apache.commons.logging;version="1.0.4",
  org.apache.commons.logging.impl;version="1.0.4"
 Import-Package: org.apache.log4j;resolution:=optional
 Bundle-ClassPath: commons-logging.jar
-Require-Bundle: org.eclipse.jdt;bundle-version="[3.2.0,3.3.0)"
-
 
