@@ -46,7 +46,7 @@ Import-Package: org.apache.commons.logging,org.osgi.framework;version=
  m3,org.springframework.osgi.service.importer;version=1.0.0.m3,org.spr
  ingframework.osgi.util;version=1.0.0.m3,org.springframework.osgi.util
  .concurrent;version=1.0.0.m3,org.springframework.util
-Bundle-SymbolicName: org.springframework.osgi.spring-osgi-extender
+Bundle-SymbolicName: org.springframework.osgi.extender
 Bundle-DocURL: http://www.springframework.org
 Include-Resource: {src/main/resources}
 Bundle-ClassPath: spring-osgi-extender.jar
