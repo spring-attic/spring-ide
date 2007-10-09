@@ -124,21 +124,21 @@
          unpack="false"/>
 
    <plugin
-         id="org.springframework.osgi.core"
+         id="org.springframework.osgi.spring-osgi-core"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.springframework.osgi.io"
+         id="org.springframework.osgi.spring-osgi-io"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.springframework.osgi.extender"
+         id="org.springframework.osgi.spring-osgi-extender"
          download-size="0"
          install-size="0"
          version="0.0.0"

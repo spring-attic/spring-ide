@@ -23,7 +23,7 @@ Import-Package: org.apache.commons.logging,org.osgi.framework;version=
  e.io;version=2.1.0.m3,org.springframework.core.io.support;version=2.1
  .0.m3,org.springframework.osgi.io;version=1.0.0.m3,org.springframewor
  k.util;version=2.1.0.m3
-Bundle-SymbolicName: org.springframework.osgi.io
+Bundle-SymbolicName: org.springframework.osgi.spring-osgi-io
 Bundle-DocURL: http://www.springframework.org
 Include-Resource: {src/main/resources}
 Bundle-ClassPath: spring-osgi-io.jar

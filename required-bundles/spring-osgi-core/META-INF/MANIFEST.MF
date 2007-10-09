@@ -122,7 +122,7 @@ Import-Package: org.aopalliance.aop;resolution:=optional,org.aopallian
  sion=1.0.0.m3,org.springframework.util;version=2.1.0.m3,org.springfra
  mework.util.xml;version=2.1.0.m3,org.w3c.dom;resolution:=optional,org
  .xml.sax;resolution:=optional
-Bundle-SymbolicName: org.springframework.osgi.core
+Bundle-SymbolicName: org.springframework.osgi.spring-osgi-core
 Bundle-DocURL: http://www.springframework.org
 Include-Resource: {src/main/resources}
 Bundle-ClassPath: spring-osgi-core.jar
