@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
@@ -323,7 +324,7 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 				aopProject.clearReferencesForResource(currentFile);
 
 				// prepare class loaders
-				this.classLoaderSupport = createWeavingClassLoaderSupport(javaProject);
+				this.classLoaderSupport = createWeavingClassLoaderSupport(project.getProject());
 
 				AopLog.log(AopLog.BUILDER_CLASSPATH, Activator.getFormattedMessage(
 						"AopReferenceModelBuilder.aopBuilderClassPath", StringUtils
@@ -361,8 +362,8 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 		return aopProject;
 	}
 
-	protected IProjectClassLoaderSupport createWeavingClassLoaderSupport(IJavaProject javaProject) {
-		return JdtUtils.getProjectClassLoaderSupport(javaProject);
+	protected IProjectClassLoaderSupport createWeavingClassLoaderSupport(IProject project) {
+		return JdtUtils.getProjectClassLoaderSupport(project);
 	}
 
 	private void handleException(Throwable t, IAspectDefinition info, IBean bean, IResource file) {

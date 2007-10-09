@@ -62,6 +62,9 @@
 		<antcall target="copy.source">
 			<param name="plugin-name" value="org.springframework.ide.eclipse.aop.ui" />
 		</antcall>
+		<antcall target="copy.source">
+			<param name="plugin-name" value="org.springframework.ide.eclipse.aop.ui.matcher" />
+		</antcall>
 	</target>
 
 	<!-- ===================================================================== -->

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+   
+   <extension
+         point="org.eclipse.search.searchPages">
+      <page
+            id="org.springframework.ide.eclipse.aop.ui.matcher.matcherPage"
+            class="org.springframework.ide.eclipse.aop.ui.matcher.PointcutMatcherSearchPage"
+            label="%matcherPage.label"
+            icon="icons/full/obj16/spring_search_obj.gif"
+            extensions="*"
+            enabled="true"
+            canSearchEnclosingProjects="true"
+            showScopeSection="true"/>
+   </extension>
+
+   <extension
+         point="org.eclipse.search.searchResultViewPages">
+      <viewPage
+            id="org.springframework.ide.eclipse.aop.ui.matcher.resultViewPage"
+            class="org.springframework.ide.eclipse.aop.ui.matcher.PointcutMatcherResultPage"
+            searchResultClass="org.springframework.ide.eclipse.aop.ui.matcher.internal.PointcutMatcherResult"/>
+   </extension>
+
+   <extension point="org.eclipse.ui.actionSets">
+		<actionSet
+			id="org.springframework.ide.eclipse.aop.ui.matcher.actionSet"
+	        label="%actionSet.label"
+			visible="true">
+	      	<menu
+	            id="org.eclipse.search.menu"
+	            label="%searchMenu.label"
+	            path="navigate">
+	         	<groupMarker name="internalDialogGroup"/>
+	         	<groupMarker name="dialogGroup"/>
+                 <separator name="contextMenuActionsGroup"/>
+                 <separator name="internalOccurrencesGroup"/>
+	      	</menu>
+			<action id="org.springframework.ide.eclipse.aop.ui.matcher.openPointcutMatcherPageAction"
+				definitionId="org.springframework.ide.eclipse.aop.ui.matcher.actions.opePointcutMatcherPage"
+				menubarPath="org.eclipse.search.menu/dialogGroup"
+				label="%action.openPointcutMatchPage.label"
+				icon="icons/full/obj16/spring_search_obj.gif"
+				class="org.springframework.ide.eclipse.aop.ui.matcher.actions.OpenPointcutMatcherPageAction"/>
+		</actionSet>
+   </extension>
+
+	<extension point="org.eclipse.ui.commands">
+		<command
+			id="org.springframework.ide.eclipse.aop.matcher.actions.openPointcutMatcherPage"
+			name="%command.openPointcutMatchPage.name"
+			description="%command.openPointcutMatchPage.description"
+			categoryId="org.eclipse.ui.category.views"/>
+   </extension>
+
+</plugin>

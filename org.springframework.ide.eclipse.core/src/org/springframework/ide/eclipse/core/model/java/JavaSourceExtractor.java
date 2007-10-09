@@ -19,12 +19,12 @@ import org.objectweb.asm.ClassReader;
 import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.type.asm.CachingClassReaderFactory;
-import org.springframework.core.type.asm.ClassMetadataReadingVisitor;
-import org.springframework.core.type.asm.ClassReaderFactory;
 import org.springframework.ide.eclipse.core.io.FileResource;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.DefaultModelSourceLocation;
+import org.springframework.ide.eclipse.core.type.asm.CachingClassReaderFactory;
+import org.springframework.ide.eclipse.core.type.asm.ClassMetadataReadingVisitor;
+import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
 
 /**
  * A {@link SourceExtractor} implementation which retrieves

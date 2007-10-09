@@ -70,7 +70,7 @@ public class JdtUtils {
 
 		private ClassLoader weavingClassLoader;
 
-		public DefaultProjectClassLoaderSupport(IJavaProject javaProject) {
+		public DefaultProjectClassLoaderSupport(IProject javaProject) {
 			setupClassLoaders(javaProject);
 		}
 
@@ -103,10 +103,9 @@ public class JdtUtils {
 			Thread.currentThread().setContextClassLoader(classLoader);
 		}
 
-		private void setupClassLoaders(IJavaProject javaProject) {
+		private void setupClassLoaders(IProject project) {
 			classLoader = Thread.currentThread().getContextClassLoader();
-			weavingClassLoader = JdtUtils.getClassLoader(javaProject
-					.getProject(), false);
+			weavingClassLoader = JdtUtils.getClassLoader(project, false);
 		}
 	}
 
@@ -261,6 +260,9 @@ public class JdtUtils {
 				// First look for the type in the project
 				if (isAjdtProject(project)) {
 					type = AjdtUtils.getAjdtType(project, className);
+					if (type != null) {
+						return type;
+					}
 				}
 
 				// Then look for the type in the referenced Java projects
@@ -633,7 +635,7 @@ public class JdtUtils {
 	}
 
 	public static IProjectClassLoaderSupport getProjectClassLoaderSupport(
-			IJavaProject je) {
+			IProject je) {
 		return new DefaultProjectClassLoaderSupport(je);
 	}
 

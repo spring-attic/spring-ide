@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAopReferenceModel;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelUtils;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.core.internal.model.resources.SpringResourceChangeListener;
 
 /**
@@ -43,8 +44,8 @@ public class AopReferenceModel implements IAopReferenceModel {
 	private Map<IJavaProject, IAopProject> projects = new ConcurrentHashMap<IJavaProject, IAopProject>();
 
 	private IResourceChangeListener workspaceListener;
-	
-	//private IModelChangeListener modelChangeListener;
+
+	// private IModelChangeListener modelChangeListener;
 
 	public void addProject(IJavaProject project, IAopProject aopProject) {
 		this.projects.put(project, aopProject);
@@ -120,14 +121,29 @@ public class AopReferenceModel implements IAopReferenceModel {
 	}
 
 	public boolean isAdvised(IJavaElement je) {
-		List<IAopReference> references = getAllReferences();
-
-		for (IAopReference reference : references) {
-			if (reference.getTarget().equals(je)) {
-				return true;
+		if (je != null) {
+			List<IAopReference> references = getAllReferences();
+			for (IAopReference reference : references) {
+				if (reference.getTarget().equals(je)) {
+					return true;
+				}
 			}
 		}
 		return false;
+	}
+
+	public boolean isAdvised(IBean bean) {
+		if (bean != null) {
+			String beanId = bean.getElementID();
+			List<IAopReference> references = getAllReferences();
+			for (IAopReference reference : references) {
+				if (reference.getTargetBeanId().equals(beanId)) {
+					return true;
+				}
+			}
+		}
+		return false;
+
 	}
 
 	public void registerAopModelChangedListener(
@@ -160,8 +176,8 @@ public class AopReferenceModel implements IAopReferenceModel {
 
 		// Remove all projects
 		projects.clear();
-		
-		//BeansCorePlugin.getModel().removeChangeListener(modelChangeListener);
+
+		// BeansCorePlugin.getModel().removeChangeListener(modelChangeListener);
 	}
 
 	public void startup() {
@@ -174,9 +190,9 @@ public class AopReferenceModel implements IAopReferenceModel {
 
 		persistence = new AopReferenceModelPeristence();
 		persistence.loadReferenceModel();
-		
-		//modelChangeListener = new AopBeansModelListener();
-		//BeansCorePlugin.getModel().addChangeListener(modelChangeListener);
+
+		// modelChangeListener = new AopBeansModelListener();
+		// BeansCorePlugin.getModel().addChangeListener(modelChangeListener);
 	}
 
 	public void unregisterAopModelChangedListener(
@@ -184,21 +200,15 @@ public class AopReferenceModel implements IAopReferenceModel {
 		this.listeners.remove(listener);
 	}
 
-	/*private class AopBeansModelListener implements IModelChangeListener {
-
-		public void elementChanged(ModelChangeEvent event) {
-			if (event.getType() == ModelChangeEvent.Type.REMOVED
-					&& event.getSource() instanceof IResource) {
-				IResource resource = (IResource) event.getSource();
-				IJavaProject jp = JdtUtils.getJavaProject(resource.getProject());
-				if (jp != null) {
-					IAopProject ap = getProject(jp);
-					if (ap != null) {
-						ap.clearReferencesForResource(resource);
-						AopReferenceModelMarkerUtils.deleteProblemMarkers(resource);
-					}
-				}
-			}
-		}
-	}*/
+	/*
+	 * private class AopBeansModelListener implements IModelChangeListener {
+	 * 
+	 * public void elementChanged(ModelChangeEvent event) { if (event.getType() ==
+	 * ModelChangeEvent.Type.REMOVED && event.getSource() instanceof IResource) {
+	 * IResource resource = (IResource) event.getSource(); IJavaProject jp =
+	 * JdtUtils.getJavaProject(resource.getProject()); if (jp != null) {
+	 * IAopProject ap = getProject(jp); if (ap != null) {
+	 * ap.clearReferencesForResource(resource);
+	 * AopReferenceModelMarkerUtils.deleteProblemMarkers(resource); } } } } }
+	 */
 }

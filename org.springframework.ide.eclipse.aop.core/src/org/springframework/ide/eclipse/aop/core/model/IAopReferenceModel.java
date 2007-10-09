@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 
 public interface IAopReferenceModel {
 	
@@ -42,6 +43,8 @@ public interface IAopReferenceModel {
 	boolean isAdvice(IJavaElement je);
 
 	boolean isAdvised(IJavaElement je);
+	
+	boolean isAdvised(IBean bean);
 
 	void registerAopModelChangedListener(IAopModelChangedListener listener);
 

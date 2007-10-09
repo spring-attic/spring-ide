@@ -31,13 +31,13 @@ import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigUtils;
-import org.springframework.core.type.asm.AnnotationMetadataReadingVisitor;
-import org.springframework.core.type.asm.ClassReaderFactory;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.core.java.Introspector;
+import org.springframework.ide.eclipse.core.type.asm.AnnotationMetadataReadingVisitor;
+import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
 
 /**
  * Validates a given {@link IBean}'s if all {@link Required} annotated

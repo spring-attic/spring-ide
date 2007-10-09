@@ -23,9 +23,6 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
  */
 public class WebflowModelLabelDecorator implements ILabelDecorator {
 
-	public WebflowModelLabelDecorator() {
-	}
-
 	public Image decorateImage(Image image, Object element) {
 
 		if (element instanceof IWebflowModelElement && image != null) {

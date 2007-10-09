@@ -18,7 +18,9 @@ Export-Package: org.springframework.ide.eclipse.core,
  org.springframework.ide.eclipse.core.model.java,
  org.springframework.ide.eclipse.core.model.validation,
  org.springframework.ide.eclipse.core.model.xml,
- org.springframework.ide.eclipse.core.project
+ org.springframework.ide.eclipse.core.project,
+ org.springframework.ide.eclipse.core.type,
+ org.springframework.ide.eclipse.core.type.asm
 Import-Package: org.eclipse.ajdt.core.javaelements;resolution:=optional
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,

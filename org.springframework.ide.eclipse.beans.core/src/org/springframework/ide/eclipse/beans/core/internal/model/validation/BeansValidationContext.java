@@ -18,8 +18,6 @@ import org.eclipse.core.resources.IResource;
 import org.objectweb.asm.ClassReader;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.core.type.asm.CachingClassReaderFactory;
-import org.springframework.core.type.asm.ClassReaderFactory;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -30,6 +28,8 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
+import org.springframework.ide.eclipse.core.type.asm.CachingClassReaderFactory;
+import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
 import org.springframework.util.Assert;
 
 /**

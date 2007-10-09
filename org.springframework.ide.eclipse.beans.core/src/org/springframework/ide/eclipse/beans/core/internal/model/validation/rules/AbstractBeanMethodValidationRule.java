@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.beans.core.internal.model.validation.rul
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.core.java.Introspector;
@@ -96,7 +95,8 @@ public abstract class AbstractBeanMethodValidationRule extends
 					}
 				} */
 			} catch (JavaModelException e) {
-				BeansCorePlugin.log(e);
+				// Suppress this expection here
+				// BeansCorePlugin.log(e);
 			}
 		}
 	}

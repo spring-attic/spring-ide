@@ -81,7 +81,7 @@
                <topic label="Some examples" href="beans.html#beans-some-examples"/>
             </topic>
             <topic label="Dependencies and configuration in detail" href="beans.html#beans-factory-properties-detailed">
-               <topic label="Straight values (primitives, Strings, etc.)" href="beans.html#beans-value-element">
+               <topic label="Straight values (primitives, Strings,&#xA;        etc.)" href="beans.html#beans-value-element">
                   <topic label="The idref element" href="beans.html#beans-idref-element"/>
                </topic>
                <topic label="References to other beans (collaborators)" href="beans.html#beans-ref-element"/>
@@ -91,9 +91,9 @@
                   <topic label="Strongly-typed collection (Java 5+ only)" href="beans.html#beans-collection-elements-strongly-typed"/>
                </topic>
                <topic label="Nulls" href="beans.html#beans-null-element"/>
-               <topic label="Shortcuts and other convenience options for XML-based configuration metadata" href="beans.html#xml-config-shortcuts">
+               <topic label="Shortcuts and other convenience options for XML-based&#xA;        configuration metadata" href="beans.html#xml-config-shortcuts">
                   <topic label="XML-based configuration metadata shortcuts" href="beans.html#beans-value-ref-shortcuts"/>
-                  <topic label="The p-namespace and how to use it to configure properties" href="beans.html#beans-p-namespace"/>
+                  <topic label="The p-namespace and how to use it to configure&#xA;          properties" href="beans.html#beans-p-namespace"/>
                </topic>
                <topic label="Compound property names" href="beans.html#beans-compound-property-names"/>
             </topic>
@@ -127,36 +127,36 @@
             </topic>
          </topic>
          <topic label="Customizing the nature of a bean" href="beans.html#beans-factory-nature">
-            <topic label="Lifecycle interfaces" href="beans.html#beans-factory-lifecycle">
+            <topic label="Lifecycle callbacks" href="beans.html#beans-factory-lifecycle">
                <topic label="Initialization callbacks" href="beans.html#beans-factory-lifecycle-initializingbean"/>
-               <topic label="Destruction callbacks" href="beans.html#beans-factory-lifecycle-disposablebean">
-                  <topic label="Default initialization &amp; destroy methods" href="beans.html#beans-factory-lifecycle-default-init-destroy-methods"/>
-                  <topic label="Shutting down the Spring IoC container gracefully in non-web applications" href="beans.html#beans-factory-shutdown"/>
-               </topic>
+               <topic label="Destruction callbacks" href="beans.html#beans-factory-lifecycle-disposablebean"/>
+               <topic label="Default initialization &amp; destroy methods" href="beans.html#beans-factory-lifecycle-default-init-destroy-methods"/>
+               <topic label="Combining lifecycle mechanisms" href="beans.html#beans-factory-lifecycle-combined-effects"/>
+               <topic label="Shutting down the Spring IoC container gracefully in non-web&#xA;        applications" href="beans.html#beans-factory-shutdown"/>
             </topic>
             <topic label="Knowing who you are" href="beans.html#beans-factory-aware">
-               <topic label="&#xA;                    BeanFactoryAware&#xA;                " href="beans.html#beans-factory-aware-beanfactoryaware"/>
+               <topic label="BeanFactoryAware" href="beans.html#beans-factory-aware-beanfactoryaware"/>
                <topic label="BeanNameAware" href="beans.html#beans-factory-aware-beannameaware"/>
             </topic>
          </topic>
          <topic label="Bean definition inheritance" href="beans.html#beans-child-bean-definitions"/>
          <topic label="Container extension points" href="beans.html#beans-factory-extension">
-            <topic label="Customizing beans using BeanPostProcessors" href="beans.html#beans-factory-extension-bpp">
-               <topic label="Example: Hello World, BeanPostProcessor-style" href="beans.html#beans-factory-extension-bpp-examples-hw"/>
-               <topic label="Example: The RequiredAnnotationBeanPostProcessor" href="beans.html#beans-factory-extension-bpp-examples-rabpp"/>
+            <topic label="Customizing beans using&#xA;      BeanPostProcessors" href="beans.html#beans-factory-extension-bpp">
+               <topic label="Example: Hello World,&#xA;        BeanPostProcessor-style" href="beans.html#beans-factory-extension-bpp-examples-hw"/>
+               <topic label="Example: The&#xA;        RequiredAnnotationBeanPostProcessor" href="beans.html#beans-factory-extension-bpp-examples-rabpp"/>
             </topic>
-            <topic label="Customizing configuration metadata with BeanFactoryPostProcessors" href="beans.html#beans-factory-extension-factory-postprocessors">
-               <topic label="Example: the PropertyPlaceholderConfigurer" href="beans.html#beans-factory-placeholderconfigurer"/>
-               <topic label="Example: the PropertyOverrideConfigurer" href="beans.html#beans-factory-overrideconfigurer"/>
+            <topic label="Customizing configuration metadata with&#xA;      BeanFactoryPostProcessors" href="beans.html#beans-factory-extension-factory-postprocessors">
+               <topic label="Example: the&#xA;        PropertyPlaceholderConfigurer" href="beans.html#beans-factory-placeholderconfigurer"/>
+               <topic label="Example: the&#xA;        PropertyOverrideConfigurer" href="beans.html#beans-factory-overrideconfigurer"/>
             </topic>
-            <topic label="Customizing instantiation logic using FactoryBeans" href="beans.html#beans-factory-extension-factorybean"/>
+            <topic label="Customizing instantiation logic using&#xA;      FactoryBeans" href="beans.html#beans-factory-extension-factorybean"/>
          </topic>
          <topic label="The ApplicationContext" href="beans.html#context-introduction">
-            <topic label="BeanFactory or ApplicationContext?" href="beans.html#context-introduction-ctx-vs-beanfactory"/>
-            <topic label="Internationalization using MessageSources" href="beans.html#context-functionality-messagesource"/>
+            <topic label="BeanFactory or&#xA;      ApplicationContext?" href="beans.html#context-introduction-ctx-vs-beanfactory"/>
+            <topic label="Internationalization using&#xA;      MessageSources" href="beans.html#context-functionality-messagesource"/>
             <topic label="Events" href="beans.html#context-functionality-events"/>
             <topic label="Convenient access to low-level resources" href="beans.html#context-functionality-resources"/>
-            <topic label="Convenient ApplicationContext instantiation for web applications" href="beans.html#context-create"/>
+            <topic label="Convenient ApplicationContext&#xA;      instantiation for web applications" href="beans.html#context-create"/>
          </topic>
          <topic label="Glue code and the evil singleton" href="beans.html#beans-glue-code-and-singletons"/>
          <topic label="Annotation-based configuration" href="beans.html#beans-annotation-config">
@@ -164,10 +164,10 @@
             <topic label="Fine-tuning annotation-based autowiring with qualifiers" href="beans.html#beans-autowired-annotation-qualifiers"/>
             <topic label="CustomAutowireConfigurer" href="beans.html#beans-custom-autowire-configurer"/>
             <topic label="@Resource" href="beans.html#beans-resource-annotation"/>
-            <topic label="@PostConstruct and @PreDestroy" href="beans.html#beans-postconstruct-and-predestroy-annotations"/>
+            <topic label="@PostConstruct and&#xA;      @PreDestroy" href="beans.html#beans-postconstruct-and-predestroy-annotations"/>
          </topic>
          <topic label="Classpath scanning for beans" href="beans.html#beans-classpath-scanning">
-            <topic label="@Component and @Repository" href="beans.html#beans-stereotype-annotations"/>
+            <topic label="@Component and&#xA;      @Repository" href="beans.html#beans-stereotype-annotations"/>
             <topic label="Using filters to customize scanning" href="beans.html#beans-scanning-filters"/>
             <topic label="Naming auto-detected beans" href="beans.html#beans-scanning-name-generator"/>
             <topic label="Providing a scope for auto-detected beans" href="beans.html#beans-scanning-scope-resolver"/>
@@ -362,6 +362,7 @@
                <topic label="Portlet API" href="testing.html#mock-objects-portlet"/>
             </topic>
             <topic label="Unit testing support classes" href="testing.html#unit-testing-support-classes">
+               <topic label="General utilities" href="testing.html#unit-testing-utilities"/>
                <topic label="Spring MVC" href="testing.html#unit-testing-spring-mvc"/>
             </topic>
          </topic>
@@ -374,6 +375,7 @@
                <topic label="Transaction management" href="testing.html#testing-tx"/>
                <topic label="Integration testing support classes" href="testing.html#testing-support-classes"/>
             </topic>
+            <topic label="JDBC testing support" href="testing.html#integration-testing-support-jdbc"/>
             <topic label="Common annotations" href="testing.html#integration-testing-common-annotations"/>
             <topic label="JUnit 3.8 legacy support" href="testing.html#junit38-legacy-support">
                <topic label="Context management and caching" href="testing.html#junit38-legacy-ctx-management"/>
@@ -397,6 +399,7 @@
                   <topic label="JUnit 3.8 support classes" href="testing.html#testcontext-support-classes-junit38"/>
                   <topic label="JUnit 4.4 support classes" href="testing.html#testcontext-support-classes-junit44"/>
                   <topic label="Custom JUnit 4.4 Runner" href="testing.html#testcontext-junit4-runner"/>
+                  <topic label="TestNG support classes" href="testing.html#testcontext-support-classes-testng"/>
                </topic>
                <topic label="TestContext framework annotation support" href="testing.html#testcontext-annotations"/>
             </topic>
@@ -497,8 +500,8 @@
             <topic label="Calling a stored procedure using SimpleJdbcCall" href="jdbc.html#jdbc-simple-jdbc-call-1"/>
             <topic label="Declaring parameters to use for a SimpleJdbcCall" href="jdbc.html#jdbc-simple-jdbc-call-2"/>
             <topic label="How to define SqlParameters" href="jdbc.html#jdbc-params"/>
-            <topic label="Calling a stored function using SimpleJdbcCall" href="jdbc.html#d0e19060"/>
-            <topic label="Returning ResultSet/Ref-Cursor from a SimpleJdbcCall" href="jdbc.html#d0e19092"/>
+            <topic label="Calling a stored function using SimpleJdbcCall" href="jdbc.html#d0e19532"/>
+            <topic label="Returning ResultSet/Ref-Cursor from a SimpleJdbcCall" href="jdbc.html#d0e19564"/>
          </topic>
          <topic label="Modeling JDBC operations as Java objects" href="jdbc.html#jdbc-object">
             <topic label="SqlQuery" href="jdbc.html#jdbc-SqlQuery"/>

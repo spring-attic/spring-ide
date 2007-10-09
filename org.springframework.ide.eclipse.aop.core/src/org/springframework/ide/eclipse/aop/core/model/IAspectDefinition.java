@@ -22,7 +22,6 @@ import org.springframework.ide.eclipse.aop.core.internal.model.AopReferenceModel
  * identify an aspect definition
  * @author Christian Dupuis
  * @since 2.0
- *
  */
 public interface IAspectDefinition {
 
@@ -56,27 +55,4 @@ public interface IAspectDefinition {
 	
 	// TODO CD move into other interface
 	void setResource(IResource file);
-
-	/*void setAdviceMethodName(String methodname);
-
-	void setAdviceMethodParameterTypes(String[] params);
-
-	void setArgNames(String[] argNames);
-
-	void setAspectClassName(String className);
-
-	void setAspectStartLineNumber(int lineNumber);
-
-	void setAspectEndLineNumber(int lineNumber);
-	
-	void setAspectName(String aspectName);
-
-	void setProxyTargetClass(boolean proxyTargetClass);
-
-	void setReturning(String returning);
-
-	void setThrowing(String throwable);
-	
-	void setType(IAopReference.ADVICE_TYPES type); */
-
 }

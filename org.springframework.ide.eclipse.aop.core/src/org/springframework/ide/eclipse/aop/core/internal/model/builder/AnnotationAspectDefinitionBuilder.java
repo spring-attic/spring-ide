@@ -22,8 +22,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
-import org.springframework.core.type.asm.CachingClassReaderFactory;
-import org.springframework.core.type.asm.ClassReaderFactory;
 import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.internal.model.AnnotationAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.logging.AopLog;
@@ -35,6 +33,8 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.core.java.IProjectClassLoaderSupport;
+import org.springframework.ide.eclipse.core.type.asm.CachingClassReaderFactory;
+import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;

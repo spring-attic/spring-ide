@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.aop.core.Activator;
 import org.springframework.ide.eclipse.aop.core.model.IAnnotationAopDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopModelChangedListener;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
+import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceAopTargetBeanNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceAopTargetMethodNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceDeclareParentAopSourceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdviceRootAopReferenceNode;
@@ -29,8 +30,10 @@ import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedAopSourceMe
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedAopSourceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.AdvisedDeclareParentAopSourceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.BeanMethodReferenceNode;
+import org.springframework.ide.eclipse.aop.ui.navigator.model.BeanReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.IReferenceNode;
 import org.springframework.ide.eclipse.aop.ui.navigator.util.AopReferenceModelImages;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
@@ -90,6 +93,16 @@ public class AopReferenceModelImageDecorator extends BeansModelLabelDecorator
 			decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE,
 					IDecoration.TOP_LEFT);
 		}
+		else if (element instanceof AdviceAopTargetBeanNode) {
+			decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE,
+					IDecoration.TOP_LEFT);
+		}
+		else if (element instanceof BeanReferenceNode
+				&& Activator.getModel().isAdvised(
+						((BeanReferenceNode) element).getBean())) {
+			decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE,
+					IDecoration.TOP_LEFT);
+		}
 		else if (element instanceof AdvisedAopSourceMethodNode) {
 			if (Activator.getModel().isAdvised(
 					((AdvisedAopSourceMethodNode) element).getReference()
@@ -134,6 +147,14 @@ public class AopReferenceModelImageDecorator extends BeansModelLabelDecorator
 				decoration.addOverlay(
 						AopReferenceModelImages.DESC_OVR_ANNOTATION,
 						IDecoration.BOTTOM_LEFT);
+			}
+		}
+		// add overlay to IBeans
+		else if (element instanceof IBean) {
+			IBean bean = (IBean) element;
+			if (Activator.getModel().isAdvised(bean)) {
+				decoration.addOverlay(AopReferenceModelImages.DESC_OVR_ADVICE,
+						IDecoration.TOP_LEFT);
 			}
 		}
 

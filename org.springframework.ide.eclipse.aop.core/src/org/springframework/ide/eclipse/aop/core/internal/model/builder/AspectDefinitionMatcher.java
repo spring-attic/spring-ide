@@ -152,8 +152,11 @@ public class AspectDefinitionMatcher {
 				m.invoke(pc, info.getPointcutExpression());
 			}
 		}
-		ClassUtils.invokeMethod(pc, "setPointcutDeclarationScope", ClassUtils
-				.loadClass(info.getAspectClassName()));
+		// don't set the declaration scope if no aspect class is yet given
+		if (info.getAspectClassName() != null) { 
+			ClassUtils.invokeMethod(pc, "setPointcutDeclarationScope", ClassUtils
+					.loadClass(info.getAspectClassName()));
+		}
 		return pc;
 	}
 
