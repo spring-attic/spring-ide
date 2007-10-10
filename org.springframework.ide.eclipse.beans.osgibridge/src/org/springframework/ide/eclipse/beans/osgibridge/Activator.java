@@ -10,39 +10,41 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.osgibridge;
 
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.osgi.extender.ContextLoaderListener;
+import org.xml.sax.EntityResolver;
 
 /**
+ * OSGi {@link BundleActivator} that extends Spring's Dynamic Modules
+ * {@link ContextLoaderListener} in order to get access to other bundles
+ * {@link NamespaceHandlerResolver} and {@link EntityResolver}.
  * @author Christian Dupuis
  * @since 2.0.1
  */
 public class Activator extends ContextLoaderListener {
- 
+
 	public static final String PLUGIN_ID = 
 		"org.springframework.ide.eclipse.beans.osgibridge";
 
 	private static Activator plugin;
 
-	private BundleContext bundleContext;
-
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		this.bundleContext = context;
 	}
 
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
-		this.bundleContext = null;
 	}
 
 	public static Activator getDefault() {
 		return plugin;
 	}
- 
+
 	public BundleContext getBundleContext() {
-		return bundleContext;
+		return context;
 	}
 }
