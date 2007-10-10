@@ -510,6 +510,9 @@ public class BeansEditorUtils {
 		else if (className == null && parent != null) {
 			return getClassNameForBean(file, document, parent);
 		}
+		else if (className != null) {
+			return className;
+		}
 		return null;
 	}
 
