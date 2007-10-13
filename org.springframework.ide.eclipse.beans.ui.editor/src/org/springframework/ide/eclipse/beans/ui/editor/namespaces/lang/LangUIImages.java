@@ -109,10 +109,9 @@ public class LangUIImages {
 		if (imageRegistry == null) {
 			imageRegistry = new ImageRegistry();
 			for (String string : imageDescriptors.keySet()) {
-String key = string;
-imageRegistry.put(key, imageDescriptors
-				.get(key));
-}
+				String key = string;
+				imageRegistry.put(key, imageDescriptors.get(key));
+			}
 			imageDescriptors = null;
 		}
 		return imageRegistry;

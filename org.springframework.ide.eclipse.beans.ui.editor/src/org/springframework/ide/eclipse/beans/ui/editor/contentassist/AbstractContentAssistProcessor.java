@@ -200,13 +200,6 @@ public abstract class AbstractContentAssistProcessor implements
 	protected abstract void computeTagInsertionProposals(
 			ContentAssistRequest request, IDOMNode node);
 
-	/**
-	 * Returns project request is in
-	 * 
-	 * @param request
-	 * @return
-	 */
-
 	protected BeansTemplateCompletionProcessor getTemplateCompletionProcessor() {
 		if (templateProcessor == null) {
 			templateProcessor = new BeansTemplateCompletionProcessor();

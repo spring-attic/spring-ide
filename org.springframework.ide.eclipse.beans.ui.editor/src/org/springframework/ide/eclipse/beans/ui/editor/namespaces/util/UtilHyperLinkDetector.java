@@ -17,7 +17,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
-import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperLinkDetector;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperlinkDetector_;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.JavaElementHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -31,7 +31,7 @@ import org.w3c.dom.Node;
  * 
  * @author Christian Dupuis
  */
-public class UtilHyperLinkDetector extends AbstractHyperLinkDetector implements
+public class UtilHyperLinkDetector extends AbstractHyperlinkDetector_ implements
 		IHyperlinkDetector {
 
 	/**

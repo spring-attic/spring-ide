@@ -23,7 +23,7 @@ import org.eclipse.wst.xml.core.text.IXMLPartitions;
 import org.eclipse.wst.xml.ui.StructuredTextViewerConfigurationXML;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.DelegatingContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.hover.BeansTextHoverProcessor;
-import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.DelegatingHyperLinkDetector;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.DelegatingHyperlinkDetector_;
 
 public class BeansStructuredTextViewerConfiguration extends
 		StructuredTextViewerConfigurationXML {
@@ -53,7 +53,7 @@ public class BeansStructuredTextViewerConfiguration extends
 			return null;
 
 		List<IHyperlinkDetector> allDetectors = new ArrayList<IHyperlinkDetector>();
-		allDetectors.add(new DelegatingHyperLinkDetector());
+		allDetectors.add(new DelegatingHyperlinkDetector_());
 		IHyperlinkDetector[] superDetectors = super
 				.getHyperlinkDetectors(sourceViewer);
 		for (IHyperlinkDetector detector : superDetectors) {

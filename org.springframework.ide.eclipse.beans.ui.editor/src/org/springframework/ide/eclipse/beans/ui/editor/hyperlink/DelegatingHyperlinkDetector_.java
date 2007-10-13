@@ -25,7 +25,7 @@ import org.w3c.dom.Node;
  * extension point.
  * @author Christian Dupuis
  */
-public class DelegatingHyperLinkDetector implements IHyperlinkDetector {
+public class DelegatingHyperlinkDetector_ implements IHyperlinkDetector {
 
 	public IHyperlink[] detectHyperlinks(ITextViewer textViewer,
 			IRegion region, boolean canShowMultipleHyperlinks) {
