@@ -8,7 +8,9 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.ui.editor.namespaces.util;
+package org.springframework.ide.eclipse.beans.ui.editor.namespaces.lang;
+
+import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IType;
@@ -17,8 +19,11 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
-import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperlinkDetector_;
+import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperlinkDetector;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.ExternalBeanHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.JavaElementHyperlink;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.NodeElementHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.w3c.dom.Attr;
@@ -31,7 +36,7 @@ import org.w3c.dom.Node;
  * 
  * @author Christian Dupuis
  */
-public class UtilHyperLinkDetector extends AbstractHyperlinkDetector_ implements
+public class LangHyperlinkDetector_ extends AbstractHyperlinkDetector implements
 		IHyperlinkDetector {
 
 	/**
@@ -40,10 +45,8 @@ public class UtilHyperLinkDetector extends AbstractHyperlinkDetector_ implements
 	@Override
 	protected boolean isLinkableAttr(Attr attr) {
 		String attrName = attr.getName();
-		return ("list-class".equals(attrName) || "map-class".equals(attrName)
-				|| "set-class".equals(attrName)
-				|| "value-type".equals(attrName) || "key-type".equals(attrName));
-
+		return ("script-interfaces".equals(attrName) || "customizer-ref"
+				.equals(attrName));
 	}
 
 	@Override
@@ -53,10 +56,34 @@ public class UtilHyperLinkDetector extends AbstractHyperlinkDetector_ implements
 		if (name == null) {
 			return null;
 		}
-		IFile file = BeansEditorUtils.getFile(document);
-		IType type = JdtUtils.getJavaType(file.getProject(), target);
-		if (type != null) {
-			return new JavaElementHyperlink(hyperlinkRegion, type);
+		if ("customizer-ref".equals(name)) {
+			Node bean = BeansEditorUtils.getFirstReferenceableNodeById(node
+					.getOwnerDocument(), target);
+			if (bean != null) {
+				IRegion region = getHyperlinkRegion(bean);
+				return new NodeElementHyperlink(hyperlinkRegion, region,
+						textViewer);
+			}
+			else {
+				IFile file = BeansEditorUtils.getFile(document);
+				// assume this is an external reference
+				Iterator<?> beans = BeansEditorUtils.getBeansFromConfigSets(
+						file).iterator();
+				while (beans.hasNext()) {
+					IBean modelBean = (IBean) beans.next();
+					if (modelBean.getElementName().equals(target)) {
+						return new ExternalBeanHyperlink(modelBean,
+								hyperlinkRegion);
+					}
+				}
+			}
+		}
+		else if ("script-interfaces".equals(name)) {
+			IFile file = BeansEditorUtils.getFile(document);
+			IType type = JdtUtils.getJavaType(file.getProject(), target);
+			if (type != null) {
+				return new JavaElementHyperlink(hyperlinkRegion, type);
+			}
 		}
 		return null;
 	}

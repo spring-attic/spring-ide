@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.ui.editor.namespaces.jee;
+package org.springframework.ide.eclipse.beans.ui.editor.namespaces.util;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IType;
@@ -17,7 +17,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
-import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperlinkDetector_;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperlinkDetector;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.JavaElementHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -31,7 +31,7 @@ import org.w3c.dom.Node;
  * 
  * @author Christian Dupuis
  */
-public class JeeHyperLinkDetector extends AbstractHyperlinkDetector_ implements
+public class UtilHyperlinkDetector_ extends AbstractHyperlinkDetector implements
 		IHyperlinkDetector {
 
 	/**
@@ -40,10 +40,10 @@ public class JeeHyperLinkDetector extends AbstractHyperlinkDetector_ implements
 	@Override
 	protected boolean isLinkableAttr(Attr attr) {
 		String attrName = attr.getName();
-		return ("expected-type".equals(attrName)
-				|| "proxy-interface".equals(attrName)
-				|| "business-interface".equals(attrName) || "home-interface"
-				.equals(attrName));
+		return ("list-class".equals(attrName) || "map-class".equals(attrName)
+				|| "set-class".equals(attrName)
+				|| "value-type".equals(attrName) || "key-type".equals(attrName));
+
 	}
 
 	@Override

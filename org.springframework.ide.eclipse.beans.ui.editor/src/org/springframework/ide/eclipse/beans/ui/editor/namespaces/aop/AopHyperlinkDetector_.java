@@ -22,7 +22,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperlinkDetector_;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperlinkDetector;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.ExternalBeanHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.JavaElementHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.NodeElementHyperlink;
@@ -42,7 +42,7 @@ import org.w3c.dom.NodeList;
  * 
  * @author Christian Dupuis
  */
-public class AopHyperLinkDetector extends AbstractHyperlinkDetector_ implements
+public class AopHyperlinkDetector_ extends AbstractHyperlinkDetector implements
 		IHyperlinkDetector {
 
 	/**

@@ -24,7 +24,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperlinkDetector_;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperlinkDetector;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.ExternalBeanHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.JavaElementHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.NodeElementHyperlink;
@@ -46,7 +46,7 @@ import org.w3c.dom.Node;
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  */
-public class BeansHyperLinkDetector extends AbstractHyperlinkDetector_ implements
+public class BeansHyperlinkDetector_ extends AbstractHyperlinkDetector implements
 		IHyperlinkDetector {
 
 	/**
@@ -177,8 +177,7 @@ public class BeansHyperLinkDetector extends AbstractHyperlinkDetector_ implement
 			catch (JavaModelException e) {
 			}
 		}
-		else if ("init-method".equals(name)
-				|| "destroy-method".equals(name)) {
+		else if ("init-method".equals(name) || "destroy-method".equals(name)) {
 			IFile file = BeansEditorUtils.getFile(document);
 			String className = BeansEditorUtils.getClassNameForBean(file, node
 					.getOwnerDocument(), node);
@@ -193,8 +192,10 @@ public class BeansHyperLinkDetector extends AbstractHyperlinkDetector_ implement
 			catch (JavaModelException e) {
 			}
 		}
-		else if (("lookup-method".equals(node.getNodeName()) && "name".equals(name))
-				|| ("replaced-method".equals(node.getNodeName()) && "name".equals(name))) {
+		else if (("lookup-method".equals(node.getNodeName()) && "name"
+				.equals(name))
+				|| ("replaced-method".equals(node.getNodeName()) && "name"
+						.equals(name))) {
 			IFile file = BeansEditorUtils.getFile(document);
 			String className = BeansEditorUtils.getClassNameForBean(file, node
 					.getOwnerDocument(), node.getParentNode());
