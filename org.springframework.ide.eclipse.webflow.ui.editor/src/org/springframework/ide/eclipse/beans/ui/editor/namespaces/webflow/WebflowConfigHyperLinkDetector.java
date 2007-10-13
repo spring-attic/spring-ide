@@ -20,7 +20,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperLinkDetector;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperlinkDetector;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.ExternalBeanHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.JavaElementHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.NodeElementHyperlink;
@@ -36,7 +36,7 @@ import org.w3c.dom.Node;
  * 
  * @author Christian Dupuis
  */
-public class WebflowConfigHyperLinkDetector extends AbstractHyperLinkDetector implements IHyperlinkDetector {
+public class WebflowConfigHyperLinkDetector extends AbstractHyperlinkDetector implements IHyperlinkDetector {
 
 	/**
 	 * Returns <code>true</code> if given attribute is openable.

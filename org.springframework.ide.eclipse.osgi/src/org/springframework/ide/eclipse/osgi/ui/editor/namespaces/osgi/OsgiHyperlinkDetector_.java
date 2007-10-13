@@ -20,7 +20,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
-import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperLinkDetector;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperlinkDetector;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.JavaElementHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
@@ -31,7 +31,7 @@ import org.w3c.dom.Node;
  * @author Christian Dupuis
  * @since 2.0.1
  */
-public class OsgiHyperLinkDetector extends AbstractHyperLinkDetector implements
+public class OsgiHyperlinkDetector_ extends AbstractHyperlinkDetector implements
 		IHyperlinkDetector {
 
 	private static final Set<String> VALID_ATTRIBUTES;

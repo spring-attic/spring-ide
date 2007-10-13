@@ -24,7 +24,7 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperLinkDetector;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperlinkDetector;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.ExternalBeanHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.JavaElementHyperlink;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.NodeElementHyperlink;
@@ -45,7 +45,7 @@ import org.w3c.dom.NodeList;
  * references to parent beans or factory beans).
  * @author Christian Dupuis
  */
-public class WebflowHyperLinkDetector extends AbstractHyperLinkDetector
+public class WebflowHyperlinkDetector_ extends AbstractHyperlinkDetector
 		implements IHyperlinkDetector {
 
 	private static final Set<String> VALID_ATTRIBUTES;
