@@ -75,7 +75,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
-import org.springframework.ide.eclipse.beans.core.namespaces.DefaultModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.core.io.FileResource;
@@ -115,7 +114,8 @@ import org.xml.sax.SAXParseException;
 public class BeansConfig extends AbstractResourceModelElement implements
 		IBeansConfig, ILazyInitializedModelElement {
 
-	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = new DefaultModelElementProvider();
+	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = 
+		new DefaultModelElementProvider();
 
 	/** This bean's config file */
 	private IFile file;

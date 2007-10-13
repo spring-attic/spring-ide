@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.namespaces;
+package org.springframework.ide.eclipse.beans.core.internal.model;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -16,13 +16,11 @@ import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
-import org.springframework.ide.eclipse.beans.core.internal.model.BeansComponent;
-import org.springframework.ide.eclipse.beans.core.internal.model.UniqueBeanNameGenerator;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
+import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
@@ -32,6 +30,7 @@ import org.springframework.ide.eclipse.core.model.ISourceModelElement;
  * {@link IBeansComponent}(s).
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
 public class DefaultModelElementProvider implements IModelElementProvider {
