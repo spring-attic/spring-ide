@@ -37,7 +37,7 @@
 		<namespace
 			contentAssistProcessor="org.springframework.ide.eclipse.osgi.ui.editor.namespaces.osgi.OsgiContentAssistProcessor"
 			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
-			hyperLinkDetector="org.springframework.ide.eclipse.osgi.ui.editor.namespaces.osgi.OsgiHyperlinkDetector_"
+			hyperLinkDetector="org.springframework.ide.eclipse.osgi.ui.editor.namespaces.osgi.OsgiHyperlinkDetector"
 			labelProvider="org.springframework.ide.eclipse.osgi.ui.editor.namespaces.osgi.OsgiOutlineLabelProvider"
 			name="Spring OSGi"
 			uri="http://www.springframework.org/schema/osgi" />

@@ -69,7 +69,7 @@
 		<namespace
 			contentAssistProcessor="org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowContentAssistProcessor"
 			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
-			hyperLinkDetector="org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowHyperlinkDetector_"
+			hyperLinkDetector="org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowHyperlinkDetector"
 			labelProvider="org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowOutlineLabelProvider"
 			name="Spring Web Flow"
 			uri="http://www.springframework.org/schema/webflow" />

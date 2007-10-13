@@ -45,7 +45,7 @@ import org.w3c.dom.NodeList;
  * references to parent beans or factory beans).
  * @author Christian Dupuis
  */
-public class WebflowHyperlinkDetector_ extends AbstractHyperlinkDetector
+public class WebflowHyperlinkDetector extends AbstractHyperlinkDetector
 		implements IHyperlinkDetector {
 
 	private static final Set<String> VALID_ATTRIBUTES;

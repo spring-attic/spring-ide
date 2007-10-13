@@ -31,7 +31,7 @@ import org.w3c.dom.Node;
  * @author Christian Dupuis
  * @since 2.0.1
  */
-public class OsgiHyperlinkDetector_ extends AbstractHyperlinkDetector implements
+public class OsgiHyperlinkDetector extends AbstractHyperlinkDetector implements
 		IHyperlinkDetector {
 
 	private static final Set<String> VALID_ATTRIBUTES;
