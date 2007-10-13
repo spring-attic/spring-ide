@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.aop.core.model.builder;
+package org.springframework.ide.eclipse.aop.core.internal.model.builder;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLClassLoader;
@@ -38,12 +38,11 @@ import org.springframework.ide.eclipse.aop.core.internal.model.AopReferenceModel
 import org.springframework.ide.eclipse.aop.core.internal.model.BeanAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.internal.model.BeanIntroductionDefinition;
 import org.springframework.ide.eclipse.aop.core.internal.model.JavaAdvisorDefinition;
-import org.springframework.ide.eclipse.aop.core.internal.model.builder.AspectDefinitionBuilderFactory;
-import org.springframework.ide.eclipse.aop.core.internal.model.builder.AspectDefinitionMatcher;
 import org.springframework.ide.eclipse.aop.core.logging.AopLog;
 import org.springframework.ide.eclipse.aop.core.model.IAopProject;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
+import org.springframework.ide.eclipse.aop.core.model.builder.IAspectDefinitionBuilder;
 import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelMarkerUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
