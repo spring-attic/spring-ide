@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.ui.editor.namespaces.util;
+package org.springframework.ide.eclipse.beans.ui.editor.namespaces.jee;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IType;
@@ -31,7 +31,7 @@ import org.w3c.dom.Node;
  * 
  * @author Christian Dupuis
  */
-public class UtilHyperlinkDetector_ extends AbstractHyperlinkDetector implements
+public class JeeHyperlinkDetector extends AbstractHyperlinkDetector implements
 		IHyperlinkDetector {
 
 	/**
@@ -40,10 +40,10 @@ public class UtilHyperlinkDetector_ extends AbstractHyperlinkDetector implements
 	@Override
 	protected boolean isLinkableAttr(Attr attr) {
 		String attrName = attr.getName();
-		return ("list-class".equals(attrName) || "map-class".equals(attrName)
-				|| "set-class".equals(attrName)
-				|| "value-type".equals(attrName) || "key-type".equals(attrName));
-
+		return ("expected-type".equals(attrName)
+				|| "proxy-interface".equals(attrName)
+				|| "business-interface".equals(attrName) || "home-interface"
+				.equals(attrName));
 	}
 
 	@Override

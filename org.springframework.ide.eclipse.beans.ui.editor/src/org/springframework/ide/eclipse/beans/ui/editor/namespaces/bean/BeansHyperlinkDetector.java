@@ -46,7 +46,7 @@ import org.w3c.dom.Node;
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  */
-public class BeansHyperlinkDetector_ extends AbstractHyperlinkDetector implements
+public class BeansHyperlinkDetector extends AbstractHyperlinkDetector implements
 		IHyperlinkDetector {
 
 	/**

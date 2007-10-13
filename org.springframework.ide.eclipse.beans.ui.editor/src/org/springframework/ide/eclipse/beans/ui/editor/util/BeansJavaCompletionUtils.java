@@ -180,6 +180,7 @@ public class BeansJavaCompletionUtils {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	private static ICompilationUnit createSourceCompilationUnit(
 			ContentAssistRequest request, String prefix)
 			throws JavaModelException {

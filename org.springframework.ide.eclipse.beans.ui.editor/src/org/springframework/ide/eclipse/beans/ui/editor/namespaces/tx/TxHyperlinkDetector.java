@@ -33,7 +33,7 @@ import org.w3c.dom.Node;
  * 
  * @author Christian Dupuis
  */
-public class TxHyperlinkDetector_ extends AbstractHyperlinkDetector implements
+public class TxHyperlinkDetector extends AbstractHyperlinkDetector implements
 		IHyperlinkDetector {
 
 	/**

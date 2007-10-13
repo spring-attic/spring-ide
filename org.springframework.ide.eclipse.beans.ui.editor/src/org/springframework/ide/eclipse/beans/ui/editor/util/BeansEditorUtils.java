@@ -785,7 +785,6 @@ public class BeansEditorUtils {
 			return monitor;
 		}
 		else {
-
 			return new NullProgressMonitor();
 		}
 	}

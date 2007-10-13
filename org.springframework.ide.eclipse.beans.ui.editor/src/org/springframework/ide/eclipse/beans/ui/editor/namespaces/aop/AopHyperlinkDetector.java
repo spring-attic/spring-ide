@@ -42,7 +42,7 @@ import org.w3c.dom.NodeList;
  * 
  * @author Christian Dupuis
  */
-public class AopHyperlinkDetector_ extends AbstractHyperlinkDetector implements
+public class AopHyperlinkDetector extends AbstractHyperlinkDetector implements
 		IHyperlinkDetector {
 
 	/**
