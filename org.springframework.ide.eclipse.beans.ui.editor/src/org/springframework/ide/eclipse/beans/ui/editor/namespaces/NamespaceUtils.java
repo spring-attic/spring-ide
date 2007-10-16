@@ -37,8 +37,11 @@ public class NamespaceUtils {
 
 	public static INamespaceContentAssistProcessor getContentAssistProcessor(
 			String namespaceUri) {
-		return getExecutableExtension(namespaceUri, "contentAssistProcessor",
+		INamespaceContentAssistProcessor processor = getExecutableExtension(
+				namespaceUri, "contentAssistProcessor",
 				INamespaceContentAssistProcessor.class);
+		processor.init();
+		return processor;
 	}
 
 	public static IReferenceableElementsLocator getElementsLocator(
@@ -100,8 +103,12 @@ public class NamespaceUtils {
 	}
 
 	public static IHyperlinkDetector getHyperlinkDetector(String namespaceUri) {
-		return getExecutableExtension(namespaceUri, "hyperLinkDetector",
-				IHyperlinkDetector.class);
+		IHyperlinkDetector detector = getExecutableExtension(namespaceUri,
+				"hyperLinkDetector", IHyperlinkDetector.class);
+		if (detector instanceof INamespaceHyperlinkDetector) {
+			((INamespaceHyperlinkDetector) detector).init();
+		}
+		return detector;
 	}
 
 	public static ILabelProvider getLabelProvider(String namespaceUri) {

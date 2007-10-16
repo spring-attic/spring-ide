@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
+package org.springframework.ide.eclipse.beans.ui.editor.util;
 
 import java.util.ArrayList;
 import java.util.List;

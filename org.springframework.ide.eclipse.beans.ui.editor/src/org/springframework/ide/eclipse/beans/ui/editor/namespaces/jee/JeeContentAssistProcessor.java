@@ -10,52 +10,27 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces.jee;
 
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
-import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
-import org.springframework.ide.eclipse.beans.ui.editor.contentassist.AbstractContentAssistProcessor;
-import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionUtils;
-import org.w3c.dom.Node;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassContentAssistCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.NamespaceContentAssistProcessorSupport;
+import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceContentAssistProcessor;
 
-@SuppressWarnings("restriction")
-public class JeeContentAssistProcessor extends AbstractContentAssistProcessor {
-
-	private void addInterfaceAttributeValueProposals(
-			ContentAssistRequest request, String prefix) {
-		BeansJavaCompletionUtils.addClassValueProposals(request, prefix, true);
-	}
-
-	@Override
-	protected void computeAttributeNameProposals(ContentAssistRequest request,
-			String prefix, String namespace, String namespacePrefix,
-			Node attributeNode) {
-	}
+/**
+ * {@link INamespaceContentAssistProcessor} responsible for handling content assist 
+ * request on elements of the <code>jee:*</code> namespace.
+ * @author Christian Dupuis
+ * @since 2.0
+ */
+public class JeeContentAssistProcessor extends NamespaceContentAssistProcessorSupport {
 
 	@Override
-	protected void computeAttributeValueProposals(ContentAssistRequest request,
-			IDOMNode node, String matchString, String attributeName,
-			String namespace, String prefix) {
-		String nodeName = node.getLocalName();
-		if ("jndi-lookup".equals(nodeName)) {
-			if ("expected-type".equals(attributeName)) {
-				addInterfaceAttributeValueProposals(request, matchString);
-			}
-			else if ("proxy-interface".equals(attributeName)) {
-				addInterfaceAttributeValueProposals(request, matchString);
-			}
-		}
-		else if ("remote-slsb".equals(nodeName)
-				|| "local-slsb".equals(nodeName)) {
-			if ("business-interface".equals(attributeName)) {
-				addInterfaceAttributeValueProposals(request, matchString);
-			}
-			else if ("home-interface".equals(attributeName)) {
-				addInterfaceAttributeValueProposals(request, matchString);
-			}
-		}
-	}
-
-	@Override
-	protected void computeTagInsertionProposals(ContentAssistRequest request,
-			IDOMNode node) {
+	public void init() {
+		IContentAssistCalculator calculator = new ClassContentAssistCalculator(true);
+		registerContentAssistCalculator("jndi-lookup", "expected-type", calculator);
+		registerContentAssistCalculator("jndi-lookup", "proxy-interface", calculator);
+		registerContentAssistCalculator("remote-slsb", "home-interface", calculator);
+		registerContentAssistCalculator("remote-slsb", "business-interface", calculator);
+		registerContentAssistCalculator("local-slsb", "home-interface", calculator);
+		registerContentAssistCalculator("local-slsb", "business-interface", calculator);
 	}
 }

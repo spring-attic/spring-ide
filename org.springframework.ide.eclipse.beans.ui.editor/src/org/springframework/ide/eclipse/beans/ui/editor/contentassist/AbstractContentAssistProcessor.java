@@ -23,7 +23,9 @@ import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateCo
 import org.w3c.dom.Node;
 
 /**
- * Main entry point for the Spring beans xml editor's content assist.
+ * Abstract super class for content assist processors.
+ * @author Christian Dupuis
+ * @since 2.0
  */
 @SuppressWarnings("restriction")
 public abstract class AbstractContentAssistProcessor implements
@@ -33,6 +35,10 @@ public abstract class AbstractContentAssistProcessor implements
 
 	private BeansTemplateCompletionProcessor templateProcessor = null;
 
+	public void init() {
+		// nothing to do;
+	}
+	
 	public void addAttributeNameProposals(
 			IContentAssistProcessor delegatingContextAssistProcessor,
 			ContentAssistRequest request) {

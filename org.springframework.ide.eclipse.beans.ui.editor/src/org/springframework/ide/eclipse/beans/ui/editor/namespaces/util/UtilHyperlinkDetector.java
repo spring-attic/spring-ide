@@ -10,54 +10,27 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces.util;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
-import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperlinkDetector;
-import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.JavaElementHyperlink;
-import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Node;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.NamespaceHyperlinkDetectorSupport;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.ClassHyperlinkCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceHyperlinkDetector;
 
 /**
- * Detects hyperlinks in XML tags. Includes detection of bean classes and bean
- * properties in attribute values. Resolves bean references (including
- * references to parent beans or factory beans).
- * 
+ * {@link INamespaceHyperlinkDetector} responsible for handling hyperlink
+ * detection on elements of the <code>util:*</code> namespace.
  * @author Christian Dupuis
+ * @since 2.0
  */
-public class UtilHyperlinkDetector extends AbstractHyperlinkDetector implements
+public class UtilHyperlinkDetector extends NamespaceHyperlinkDetectorSupport implements
 		IHyperlinkDetector {
-
-	/**
-	 * Returns <code>true</code> if given attribute is openable.
-	 */
+	
 	@Override
-	protected boolean isLinkableAttr(Attr attr) {
-		String attrName = attr.getName();
-		return ("list-class".equals(attrName) || "map-class".equals(attrName)
-				|| "set-class".equals(attrName)
-				|| "value-type".equals(attrName) || "key-type".equals(attrName));
-
-	}
-
-	@Override
-	protected IHyperlink createHyperlink(String name, String target,
-			Node parentNode, IRegion hyperlinkRegion, IDocument document,
-			Node node, ITextViewer textViewer, IRegion cursor) {
-		if (name == null) {
-			return null;
-		}
-		IFile file = BeansEditorUtils.getFile(document);
-		IType type = JdtUtils.getJavaType(file.getProject(), target);
-		if (type != null) {
-			return new JavaElementHyperlink(hyperlinkRegion, type);
-		}
-		return null;
+	public void init() {
+		ClassHyperlinkCalculator typeRef = new ClassHyperlinkCalculator();
+		registerHyperlinkCalculator("list-class", typeRef);
+		registerHyperlinkCalculator("map-class", typeRef);
+		registerHyperlinkCalculator("set-class", typeRef);
+		registerHyperlinkCalculator("value-type", typeRef);
+		registerHyperlinkCalculator("key-type", typeRef);
 	}
 }

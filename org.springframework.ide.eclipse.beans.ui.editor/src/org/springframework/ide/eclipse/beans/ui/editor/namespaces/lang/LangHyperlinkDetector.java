@@ -10,81 +10,24 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces.lang;
 
-import java.util.Iterator;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
-import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperlinkDetector;
-import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.ExternalBeanHyperlink;
-import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.JavaElementHyperlink;
-import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.NodeElementHyperlink;
-import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Node;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.BeanHyperlinkCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.NamespaceHyperlinkDetectorSupport;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.ClassHyperlinkCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceHyperlinkDetector;
 
 /**
- * Detects hyperlinks in XML tags. Includes detection of bean classes and bean
- * properties in attribute values. Resolves bean references (including
- * references to parent beans or factory beans).
- * 
+ * {@link INamespaceHyperlinkDetector} responsible for handling hyperlink
+ * detection on elements of the <code>lang:*</code> namespace.
  * @author Christian Dupuis
+ * @since 2.0
  */
-public class LangHyperlinkDetector extends AbstractHyperlinkDetector implements
+public class LangHyperlinkDetector extends NamespaceHyperlinkDetectorSupport implements
 		IHyperlinkDetector {
 
-	/**
-	 * Returns <code>true</code> if given attribute is openable.
-	 */
 	@Override
-	protected boolean isLinkableAttr(Attr attr) {
-		String attrName = attr.getName();
-		return ("script-interfaces".equals(attrName) || "customizer-ref"
-				.equals(attrName));
-	}
-
-	@Override
-	protected IHyperlink createHyperlink(String name, String target,
-			Node parentNode, IRegion hyperlinkRegion, IDocument document,
-			Node node, ITextViewer textViewer, IRegion cursor) {
-		if (name == null) {
-			return null;
-		}
-		if ("customizer-ref".equals(name)) {
-			Node bean = BeansEditorUtils.getFirstReferenceableNodeById(node
-					.getOwnerDocument(), target);
-			if (bean != null) {
-				IRegion region = getHyperlinkRegion(bean);
-				return new NodeElementHyperlink(hyperlinkRegion, region,
-						textViewer);
-			}
-			else {
-				IFile file = BeansEditorUtils.getFile(document);
-				// assume this is an external reference
-				Iterator<?> beans = BeansEditorUtils.getBeansFromConfigSets(
-						file).iterator();
-				while (beans.hasNext()) {
-					IBean modelBean = (IBean) beans.next();
-					if (modelBean.getElementName().equals(target)) {
-						return new ExternalBeanHyperlink(modelBean,
-								hyperlinkRegion);
-					}
-				}
-			}
-		}
-		else if ("script-interfaces".equals(name)) {
-			IFile file = BeansEditorUtils.getFile(document);
-			IType type = JdtUtils.getJavaType(file.getProject(), target);
-			if (type != null) {
-				return new JavaElementHyperlink(hyperlinkRegion, type);
-			}
-		}
-		return null;
+	public void init() {
+		registerHyperlinkCalculator("script-interfaces", new ClassHyperlinkCalculator());
+		registerHyperlinkCalculator("customizer-ref", new BeanHyperlinkCalculator());
 	}
 }

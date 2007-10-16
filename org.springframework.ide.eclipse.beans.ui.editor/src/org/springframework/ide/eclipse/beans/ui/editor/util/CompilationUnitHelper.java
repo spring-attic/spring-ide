@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
+package org.springframework.ide.eclipse.beans.ui.editor.util;
 
 import org.eclipse.jdt.core.WorkingCopyOwner;
 

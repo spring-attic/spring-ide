@@ -11,12 +11,21 @@
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.NamespaceUtils;
 
+/**
+ * {@link IContentAssistProcessor} that delegates to
+ * {@link INamespaceContentAssistProcessor}s contribute via the
+ * <code>org.springframework.ide.eclipse.beans.ui.editor</code> extension
+ * point.
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 @SuppressWarnings("restriction")
 public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor {
 

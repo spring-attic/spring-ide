@@ -52,8 +52,7 @@ public class BeansHyperlinkDetector extends AbstractHyperlinkDetector implements
 	/**
 	 * Returns <code>true</code> if given attribute is openable.
 	 */
-	@Override
-	protected boolean isLinkableAttr(Attr attr) {
+	public boolean isLinkableAttr(Attr attr) {
 		String attrName = attr.getName();
 		String ownerName = attr.getOwnerElement().getNodeName();
 		if ("class".equals(attrName) || "match".equals(attrName)) {
@@ -103,10 +102,9 @@ public class BeansHyperlinkDetector extends AbstractHyperlinkDetector implements
 		return false;
 	}
 
-	@Override
-	protected IHyperlink createHyperlink(String name, String target,
-			Node parentNode, IRegion hyperlinkRegion, IDocument document,
-			Node node, ITextViewer textViewer, IRegion cursor) {
+	public IHyperlink createHyperlink(String name, String target, Node node,
+			Node parentNode, IDocument document, ITextViewer textViewer,
+			IRegion hyperlinkRegion, IRegion cursor) {
 		if (name == null) {
 			return null;
 		}

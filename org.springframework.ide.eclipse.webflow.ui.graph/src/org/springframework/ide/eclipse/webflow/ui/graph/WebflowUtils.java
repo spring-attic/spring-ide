@@ -21,13 +21,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
-import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
+import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.validation.IValidationProblemMarker;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
@@ -38,8 +37,6 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
-import org.springframework.ide.eclipse.webflow.core.util.BeanActionMethodSearchRequestor;
-import org.springframework.ide.eclipse.webflow.core.util.BeanMethodSearchRequestor;
 import org.springframework.ide.eclipse.webflow.ui.editor.Activator;
 
 /**
@@ -50,7 +47,7 @@ import org.springframework.ide.eclipse.webflow.ui.editor.Activator;
 @SuppressWarnings("restriction")
 public abstract class WebflowUtils {
 
-	private static final List<IMethod> NO_METHOD_MATCHES = new ArrayList<IMethod>();
+	private static final Set<IMethod> NO_METHOD_MATCHES = new HashSet<IMethod>();
 
 	public static WebflowEditor getActiveFlowEditor() {
 
@@ -87,7 +84,7 @@ public abstract class WebflowUtils {
 		return WebflowModelUtils.getBeans(getActiveWebflowConfig());
 	}
 
-	public static List<IMethod> getActionMethods(IDOMNode node) {
+	public static Set<IMethod> getActionMethods(IDOMNode node) {
 		Set<IBean> beans = getBeansFromEditorInput();
 		String className = null;
 		for (IBean bean : beans) {
@@ -97,81 +94,19 @@ public abstract class WebflowUtils {
 			}
 		}
 
-		IType type = JdtUtils.getJavaType(getActiveFlowEditorInput()
-				.getFile().getProject(), className);
+		IType type = JdtUtils.getJavaType(getActiveFlowEditorInput().getFile()
+				.getProject(), className);
 		if (type != null) {
 			if ("bean-action".equals(node.getLocalName())) {
-				MethodSearchRequestor requestor = new MethodSearchRequestor(
-						null);
-				try {
-					IMethod[] methods = type.getMethods();
-					if (methods != null) {
-						for (IMethod method : methods) {
-							requestor.acceptSearchMatch(method, "");
-						}
-					}
-				}
-				catch (JavaModelException e) {
-				}
-				catch (CoreException e) {
-				}
-				return requestor.getMethods();
+				return Introspector.findAllMethods(type, WebflowModelUtils
+						.getBeanMethodFilter());
 			}
 			else {
-				ActionMethodSearchRequestor requestor = new ActionMethodSearchRequestor(
-						null);
-				try {
-					IMethod[] methods = type.getMethods();
-					if (methods != null) {
-						for (IMethod method : methods) {
-							requestor.acceptSearchMatch(method, "");
-						}
-					}
-				}
-				catch (JavaModelException e) {
-				}
-				catch (CoreException e) {
-				}
-				return requestor.getMethods();
+				return Introspector.findAllMethods(type, WebflowModelUtils
+						.getBeanActionMethodFilter());
 			}
 		}
 		return NO_METHOD_MATCHES;
-	}
-
-	private static class ActionMethodSearchRequestor extends
-			BeanActionMethodSearchRequestor {
-
-		private List<IMethod> methods = new ArrayList<IMethod>();
-
-		public ActionMethodSearchRequestor(ContentAssistRequest request) {
-			super(request);
-		}
-
-		protected void createMethodProposal(IMethod method, int relevance) {
-			methods.add(method);
-		}
-
-		public List<IMethod> getMethods() {
-			return methods;
-		}
-	}
-
-	private static class MethodSearchRequestor extends
-			BeanMethodSearchRequestor {
-
-		private List<IMethod> methods = new ArrayList<IMethod>();
-
-		public MethodSearchRequestor(ContentAssistRequest request) {
-			super(request);
-		}
-
-		protected void createMethodProposal(IMethod method, int relevance) {
-			methods.add(method);
-		}
-
-		public List<IMethod> getMethods() {
-			return methods;
-		}
 	}
 
 	public static String[] getWebflowConfigNames() {
@@ -234,8 +169,7 @@ public abstract class WebflowUtils {
 	private static class NoMarkerCreatingWebflowValidator extends
 			WebflowValidator {
 
-		private Set<ValidationProblem> validationProblems = 
-			new HashSet<ValidationProblem>();
+		private Set<ValidationProblem> validationProblems = new HashSet<ValidationProblem>();
 
 		protected void createProblemMarker(IResource resource,
 				ValidationProblem problem) {

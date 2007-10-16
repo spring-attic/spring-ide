@@ -16,10 +16,14 @@ import java.util.Map;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
-import org.springframework.ide.eclipse.beans.ui.editor.contentassist.requestor.BeanReferenceSearchRequestor;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+/**
+ * Utility class with helper methods to calculate bean reference proposals.
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 @SuppressWarnings("restriction")
 public class BeansCompletionUtils {
 	

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.core.internal.model.validation.rules;
 
-import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IMethod;
@@ -53,7 +53,7 @@ public class ActionValidationRule implements
 				&& !Introspector.doesImplement(WebflowModelUtils.getActionType(
 						context.getWebflowConfig(), action.getNode()),
 						FactoryBean.class.getName())) {
-			List<IMethod> methods = WebflowModelUtils.getActionMethods(context
+			Set<IMethod> methods = WebflowModelUtils.getActionMethods(context
 					.getWebflowConfig(), action.getNode());
 			boolean found = false;
 			for (IMethod method : methods) {

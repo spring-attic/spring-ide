@@ -10,40 +10,27 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces.tx;
 
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
-import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
-import org.springframework.ide.eclipse.beans.ui.editor.contentassist.AbstractContentAssistProcessor;
-import org.springframework.ide.eclipse.beans.ui.editor.util.BeansCompletionUtils;
-import org.w3c.dom.Node;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeanReferenceContentAssistCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.NamespaceContentAssistProcessorSupport;
+import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceContentAssistProcessor;
 
+/**
+ * {@link INamespaceContentAssistProcessor} responsible for handling content assist 
+ * request on elements of the <code>tx:*</code> namespace.
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 @SuppressWarnings("restriction")
-public class TxContentAssistProcessor extends AbstractContentAssistProcessor {
+public class TxContentAssistProcessor extends
+		NamespaceContentAssistProcessorSupport {
 
 	@Override
-	protected void computeAttributeNameProposals(ContentAssistRequest request,
-			String prefix, String namespace, String namespacePrefix,
-			Node attributeNode) {
-	}
-
-	@Override
-	protected void computeAttributeValueProposals(ContentAssistRequest request,
-			IDOMNode node, String matchString, String attributeName,
-			String namespace, String prefix) {
-		String nodeName = node.getLocalName();
-		if (prefix != null && nodeName.startsWith(prefix)) {
-			nodeName = nodeName.substring(prefix.length() + 1);
-		}
-
-		if ("advice".equals(nodeName) || "annotation-driven".equals(nodeName)) {
-			if ("transaction-manager".equals(attributeName)) {
-				BeansCompletionUtils.addBeanReferenceProposals(request,
-						matchString, node.getOwnerDocument(), true);
-			}
-		}
-	}
-
-	@Override
-	protected void computeTagInsertionProposals(ContentAssistRequest request,
-			IDOMNode node) {
+	public void init() {
+		BeanReferenceContentAssistCalculator calculator = 
+			new BeanReferenceContentAssistCalculator(true);
+		registerContentAssistCalculator("advice", "transaction-manager",
+				calculator);
+		registerContentAssistCalculator("annotation-driven",
+				"transaction-manager", calculator);
 	}
 }

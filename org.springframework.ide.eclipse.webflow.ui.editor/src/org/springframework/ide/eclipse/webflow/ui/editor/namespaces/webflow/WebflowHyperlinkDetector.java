@@ -72,15 +72,14 @@ public class WebflowHyperlinkDetector extends AbstractHyperlinkDetector
 	 * @param attr
 	 * @return
 	 */
-	@Override
-	protected boolean isLinkableAttr(Attr attr) {
+	public boolean isLinkableAttr(Attr attr) {
 		return VALID_ATTRIBUTES.contains(attr.getLocalName());
 	}
 
-	@Override
-	protected IHyperlink createHyperlink(final String name, final String target,
-			Node parentNode, final IRegion hyperlinkRegion, IDocument document,
-			Node node, ITextViewer textViewer, IRegion cursor) {
+	public IHyperlink createHyperlink(final String name, final String target,
+			Node node, Node parentNode, IDocument document,
+			ITextViewer textViewer, final IRegion hyperlinkRegion,
+			IRegion cursor) {
 		if (name == null) {
 			return null;
 		}

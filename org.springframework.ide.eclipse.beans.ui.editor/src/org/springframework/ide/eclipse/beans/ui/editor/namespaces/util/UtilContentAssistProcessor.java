@@ -10,61 +10,35 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces.util;
 
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
-import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
-import org.springframework.ide.eclipse.beans.ui.editor.contentassist.AbstractContentAssistProcessor;
-import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionUtils;
-import org.w3c.dom.Node;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassContentAssistCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassHierachyContentAssistCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.NamespaceContentAssistProcessorSupport;
+import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceContentAssistProcessor;
 
 /**
- * Main entry point for the Spring beans xml editor's content assist.
+ * {@link INamespaceContentAssistProcessor} responsible for handling content assist 
+ * request on elements of the <code>util:*</code> namespace.
  * @author Christian Dupuis
+ * @since 2.0
  */
 @SuppressWarnings("restriction")
-public class UtilContentAssistProcessor extends AbstractContentAssistProcessor {
-
-	private void addClassAttributeValueProposals(ContentAssistRequest request,
-			String prefix) {
-		BeansJavaCompletionUtils.addClassValueProposals(request, prefix);
-	}
-
-	private void addCollectionTypesAttributeValueProposals(
-			ContentAssistRequest request, final String prefix, String typeName) {
-		BeansJavaCompletionUtils.addTypeHierachyAttributeValueProposals(
-				request, prefix, typeName);
-	}
+public class UtilContentAssistProcessor extends
+		NamespaceContentAssistProcessorSupport {
 
 	@Override
-	protected void computeAttributeNameProposals(ContentAssistRequest request,
-			String prefix, String namespace, String namespacePrefix,
-			Node attributeNode) {
-	}
-
-	@Override
-	protected void computeAttributeValueProposals(ContentAssistRequest request,
-			IDOMNode node, String matchString, String attributeName,
-			String namespace, String prefix) {
-
-		if ("list-class".equals(attributeName)) {
-			addCollectionTypesAttributeValueProposals(request, matchString,
-					"java.util.List");
-		}
-		else if ("map-class".equals(attributeName)) {
-			addCollectionTypesAttributeValueProposals(request, matchString,
-					"java.util.Map");
-		}
-		else if ("set-class".equals(attributeName)) {
-			addCollectionTypesAttributeValueProposals(request, matchString,
-					"java.util.Set");
-		}
-		else if ("value-type".equals(attributeName)
-				|| "key-type".equals(attributeName)) {
-			addClassAttributeValueProposals(request, matchString);
-		}
-	}
-
-	@Override
-	protected void computeTagInsertionProposals(ContentAssistRequest request,
-			IDOMNode node) {
+	public void init() {
+		registerContentAssistCalculator("list-class",
+				new ClassHierachyContentAssistCalculator(List.class.getName()));
+		registerContentAssistCalculator("map-class",
+				new ClassHierachyContentAssistCalculator(Map.class.getName()));
+		registerContentAssistCalculator("set-class",
+				new ClassHierachyContentAssistCalculator(Set.class.getName()));
+		ClassContentAssistCalculator calculator = new ClassContentAssistCalculator();
+		registerContentAssistCalculator("value-type", calculator);
+		registerContentAssistCalculator("key-type", calculator);
 	}
 }

@@ -18,19 +18,18 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
-import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
+import org.springframework.ide.eclipse.core.java.FlagsMethodFilter;
+import org.springframework.ide.eclipse.core.java.IMethodFilter;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -42,8 +41,6 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowModel;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
-import org.springframework.ide.eclipse.webflow.core.util.BeanActionMethodSearchRequestor;
-import org.springframework.ide.eclipse.webflow.core.util.BeanMethodSearchRequestor;
 
 /**
  * @author Christian Dupuis
@@ -52,44 +49,25 @@ import org.springframework.ide.eclipse.webflow.core.util.BeanMethodSearchRequest
 @SuppressWarnings("restriction")
 public class WebflowModelUtils {
 
-	private static class ActionMethodSearchRequestor extends
-			BeanActionMethodSearchRequestor {
+	private static final Set<IMethod> NO_METHOD_MATCHES = new HashSet<IMethod>();
+	
+	private static final String EVENT_CLASS = "org.springframework.webflow.execution.Event";
 
-		private List<IMethod> methods = new ArrayList<IMethod>();
+	private static final String REQUEST_CONTEXT_CLASS = "org.springframework.webflow.execution.RequestContext";
 
-		public ActionMethodSearchRequestor(ContentAssistRequest request) {
-			super(request);
-		}
-
-		protected void createMethodProposal(IMethod method, int relevance) {
-			methods.add(method);
-		}
-
-		public List<IMethod> getMethods() {
-			return methods;
-		}
+	public static IMethodFilter getBeanMethodFilter() {
+		return new FlagsMethodFilter(FlagsMethodFilter.PUBLIC
+				| FlagsMethodFilter.NOT_INTERFACE
+				| FlagsMethodFilter.NOT_CONSTRUCTOR, EVENT_CLASS,
+				new String[] { REQUEST_CONTEXT_CLASS });
 	}
 
-	private static class MethodSearchRequestor extends
-			BeanMethodSearchRequestor {
-
-		private List<IMethod> methods = new ArrayList<IMethod>();
-
-		public MethodSearchRequestor(ContentAssistRequest request) {
-			super(request);
-		}
-
-		protected void createMethodProposal(IMethod method, int relevance) {
-			methods.add(method);
-		}
-
-		public List<IMethod> getMethods() {
-			return methods;
-		}
+	public static IMethodFilter getBeanActionMethodFilter() {
+		return new FlagsMethodFilter(FlagsMethodFilter.PUBLIC
+				| FlagsMethodFilter.NOT_INTERFACE
+				| FlagsMethodFilter.NOT_CONSTRUCTOR);
 	}
-
-	private static final List<IMethod> NO_METHOD_MATCHES = new ArrayList<IMethod>();
-
+	
 	public static IType getActionType(IWebflowConfig config, IDOMNode node) {
 		Set<IBean> beans = getBeans(config);
 		String className = null;
@@ -101,47 +79,18 @@ public class WebflowModelUtils {
 			}
 		}
 
-		return JdtUtils.getJavaType(config.getProject().getProject(),
-				className);
+		return JdtUtils.getJavaType(config.getProject().getProject(), className);
 	}
 
-	public static List<IMethod> getActionMethods(IWebflowConfig config,
+	public static Set<IMethod> getActionMethods(IWebflowConfig config,
 			IDOMNode node) {
 		IType type = getActionType(config, node);
 		if (type != null) {
 			if ("bean-action".equals(node.getLocalName())) {
-				MethodSearchRequestor requestor = new MethodSearchRequestor(
-						null);
-				try {
-					Set<IMethod> methods = Introspector.getAllMethods(type);
-					if (methods != null) {
-						for (IMethod method : methods) {
-							requestor.acceptSearchMatch(method, "");
-						}
-					}
-				}
-				catch (JavaModelException e) {
-				}
-				catch (CoreException e) {
-				}
-				return requestor.getMethods();
+				return Introspector.findAllMethods(type, getBeanMethodFilter());
 			}
 			else {
-				ActionMethodSearchRequestor requestor = new ActionMethodSearchRequestor(
-						null);
-				try {
-					Set<IMethod> methods = Introspector.getAllMethods(type);
-					if (methods != null) {
-						for (IMethod method : methods) {
-							requestor.acceptSearchMatch(method, "");
-						}
-					}
-				}
-				catch (JavaModelException e) {
-				}
-				catch (CoreException e) {
-				}
-				return requestor.getMethods();
+				return Introspector.findAllMethods(type, getBeanActionMethodFilter());
 			}
 		}
 		return NO_METHOD_MATCHES;
@@ -298,5 +247,4 @@ public class WebflowModelUtils {
 		return flowNames;
 	}
 
-	
 }

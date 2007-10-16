@@ -10,66 +10,25 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.osgi.ui.editor.namespaces.osgi;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
-import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.AbstractHyperlinkDetector;
-import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.JavaElementHyperlink;
-import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
-import org.springframework.ide.eclipse.core.java.JdtUtils;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Node;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.BeanHyperlinkCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.ClassHyperlinkCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.NamespaceHyperlinkDetectorSupport;
 
 /**
+ * {@link INamespaceHyperlinkDetector} implementation responsible for the
+ * <code>osgi:*</code> namespace.
  * @author Christian Dupuis
  * @since 2.0.1
  */
-public class OsgiHyperlinkDetector extends AbstractHyperlinkDetector implements
-		IHyperlinkDetector {
-
-	private static final Set<String> VALID_ATTRIBUTES;
-
-	static {
-		VALID_ATTRIBUTES = new LinkedHashSet<String>();
-		VALID_ATTRIBUTES.add("ref");
-		VALID_ATTRIBUTES.add("depends-on");
-		VALID_ATTRIBUTES.add("interface");
-	}
+public class OsgiHyperlinkDetector extends NamespaceHyperlinkDetectorSupport
+		implements IHyperlinkDetector {
 
 	@Override
-	protected boolean isLinkableAttr(Attr attr) {
-		return VALID_ATTRIBUTES.contains(attr.getLocalName());
-	}
-
-	@Override
-	protected IHyperlink createHyperlink(String name, String target,
-			Node parentNode, IRegion hyperlinkRegion, IDocument document,
-			Node node, ITextViewer textViewer, IRegion cursor) {
-		if (name == null) {
-			return null;
-		}
-		if ("depends-on".equals(name)) {
-			return createBeanReferenceHyperlink(target, hyperlinkRegion,
-					document, node, textViewer);
-		}
-		else if ("ref".equals(name)) {
-			return createBeanReferenceHyperlink(target, hyperlinkRegion,
-					document, node, textViewer);
-		}
-		else if ("interface".equals(name)) {
-			IFile file = BeansEditorUtils.getFile(document);
-			IType type = JdtUtils.getJavaType(file.getProject(), target);
-			if (type != null) {
-				return new JavaElementHyperlink(hyperlinkRegion, type);
-			}
-		}
-		return null;
+	public void init() {
+		BeanHyperlinkCalculator beanRef = new BeanHyperlinkCalculator();
+		registerHyperlinkCalculator("depends-on", beanRef);
+		registerHyperlinkCalculator("ref", beanRef);
+		registerHyperlinkCalculator("interface", new ClassHyperlinkCalculator());
 	}
 }

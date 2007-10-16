@@ -15,6 +15,12 @@ import java.util.Map;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+/**
+ * Implementations of this interface can provide a {@link Map} of {@link Node}
+ * that can be referenced.
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 public interface IReferenceableElementsLocator {
 
 	Map<String, Node> getReferenceableElements(Document document);

@@ -18,6 +18,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+/**
+ * Default implementation of {@link IReferenceableElementsLocator} that returns
+ * every {@link Node} that has an <code>id</code> attribute.
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 public class DefaultReferenceableElementsLocator implements
 		IReferenceableElementsLocator {
 

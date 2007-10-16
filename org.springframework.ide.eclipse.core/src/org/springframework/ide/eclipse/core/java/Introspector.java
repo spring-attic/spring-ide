@@ -31,12 +31,107 @@ import org.springframework.ide.eclipse.core.StringUtils;
  */
 public final class Introspector {
 
+	public enum Public {
+		YES, NO, DONT_CARE
+	}
+
 	public enum Static {
 		YES, NO, DONT_CARE
 	}
 
-	public enum Public {
-		YES, NO, DONT_CARE
+	/**
+	 * Utility method that handles property names.
+	 * <p>
+	 * See {@link java.beans.Introspector#decapitalize(String)} for the reverse
+	 * operation done in the Java SDK.
+	 * @see java.beans.Introspector#decapitalize(String)
+	 */
+	private static String capitalize(String name) {
+		if (name == null || name.length() == 0) {
+			return name;
+		}
+		if (name.length() > 1 && Character.isUpperCase(name.charAt(1))
+				&& Character.isLowerCase(name.charAt(0))) {
+			return name;
+		}
+		char chars[] = name.toCharArray();
+		chars[0] = Character.toUpperCase(chars[0]);
+		return new String(chars);
+	}
+
+	/**
+	 * Returns <code>true</code> if the given Java type extends or is the
+	 * specified class.
+	 * @param type the Java type to be examined
+	 * @param className the full qualified name of the class we are looking for
+	 */
+	public static boolean doesExtend(IType type, String className) {
+		return hasSuperType(type, className, false);
+	}
+
+	/**
+	 * Returns <code>true</code> if the given Java type implements the
+	 * specified interface.
+	 * @param type the Java type to be examined
+	 * @param interfaceName the full qualified name of the interface we are
+	 * looking for
+	 */
+	public static boolean doesImplement(IType type, String interfaceName) {
+		return hasSuperType(type, interfaceName, true);
+	}
+
+	/**
+	 * Returns a list of all constructors from given type.
+	 */
+	public static Set<IMethod> findAllConstructors(IType type)
+			throws JavaModelException {
+		Map<String, IMethod> allConstructors = new HashMap<String, IMethod>();
+		while (type != null) {
+			for (IMethod method : type.getMethods()) {
+				String key = method.getElementName() + method.getSignature();
+				if (!allConstructors.containsKey(key) && method.isConstructor()) {
+					allConstructors.put(key, method);
+				}
+			}
+			type = getSuperType(type);
+		}
+		return new HashSet<IMethod>(allConstructors.values());
+	}
+
+	/**
+	 * Finds all {@link IMethod}s in the given {@link IType}'s hierarchy that
+	 * match the given filter.
+	 * <p>
+	 * Note: calling this method is equivalent to calling
+	 * {@link #findAllMethods(IType, String, IMethodFilter)}.
+	 * @since 2.0.2
+	 */
+	public static Set<IMethod> findAllMethods(IType type, IMethodFilter filter) {
+		return findAllMethods(type, "", filter);
+	}
+	
+	/**
+	 * Finds all {@link IMethod}s in the given {@link IType}'s hierarchy that
+	 * match the given filter, applying the prefix.
+	 * @since 2.0.2
+	 */
+	public static Set<IMethod> findAllMethods(IType type, String prefix,
+			IMethodFilter filter) {
+		Set<IMethod> methods = new HashSet<IMethod>();
+		try {
+			while (type != null) {
+				for (IMethod method : type.getMethods()) {
+					if (filter.matches(method, prefix)) {
+						methods.add(method);
+					}
+				}
+				type = getSuperType(type);
+			}
+		}
+		catch (JavaModelException e) {
+			// don't do anything here
+		}
+		return methods;
 	}
 
 	/**
@@ -83,24 +178,6 @@ public final class Introspector {
 	}
 
 	/**
-	 * Returns a list of all constructors from given type.
-	 */
-	public static Set<IMethod> findAllConstructors(IType type)
-			throws JavaModelException {
-		Map<String, IMethod> allConstructors = new HashMap<String, IMethod>();
-		while (type != null) {
-			for (IMethod method : type.getMethods()) {
-				String key = method.getElementName() + method.getSignature();
-				if (!allConstructors.containsKey(key) && method.isConstructor()) {
-					allConstructors.put(key, method);
-				}
-			}
-			type = getSuperType(type);
-		}
-		return new HashSet<IMethod>(allConstructors.values());
-	}
-
-	/**
 	 * Returns a list of all methods from given type with given prefix and no
 	 * arguments.
 	 */
@@ -111,6 +188,14 @@ public final class Introspector {
 		}
 		return findAllMethods(type, prefix, 0, Public.DONT_CARE,
 				Static.DONT_CARE);
+	}
+
+	/**
+	 * Returns a list of all setters.
+	 */
+	public static Set<IMethod> findAllWritableProperties(IType type)
+			throws JavaModelException {
+		return findAllMethods(type, "set", 1, Public.YES, Static.NO);
 	}
 
 	/**
@@ -146,33 +231,6 @@ public final class Introspector {
 	}
 
 	/**
-	 * Returns a list of all setters with the given prefix.
-	 */
-	public static Set<IMethod> findWritableProperties(IType type,
-			String methodPrefix) throws JavaModelException {
-		String base = capitalize(methodPrefix);
-		return findAllMethods(type, "set" + base, 1, Public.YES, Static.NO);
-	}
-
-	/**
-	 * Returns a list of all setters.
-	 */
-	public static Set<IMethod> findAllWritableProperties(IType type) 
-		throws JavaModelException {
-		return findAllMethods(type, "set", 1, Public.YES, Static.NO);
-	}
-
-	/**
-	 * Returns a list of all setters with the given prefix.
-	 */
-	public static Set<IMethod> findWritableProperties(IType type,
-			String methodPrefix, boolean ignoreCase) throws JavaModelException {
-		String base = capitalize(methodPrefix);
-		return findAllMethods(type, "set" + base, 1, Public.YES, Static.NO,
-				ignoreCase);
-	}
-
-	/**
 	 * Returns a list of all getters with the given prefix.
 	 */
 	public static Set<IMethod> findReadableProperties(IType type,
@@ -192,6 +250,78 @@ public final class Introspector {
 	}
 
 	/**
+	 * Returns a list of all setters with the given prefix.
+	 */
+	public static Set<IMethod> findWritableProperties(IType type,
+			String methodPrefix) throws JavaModelException {
+		String base = capitalize(methodPrefix);
+		return findAllMethods(type, "set" + base, 1, Public.YES, Static.NO);
+	}
+
+	/**
+	 * Returns a list of all setters with the given prefix.
+	 */
+	public static Set<IMethod> findWritableProperties(IType type,
+			String methodPrefix, boolean ignoreCase) throws JavaModelException {
+		String base = capitalize(methodPrefix);
+		return findAllMethods(type, "set" + base, 1, Public.YES, Static.NO,
+				ignoreCase);
+	}
+
+	public static Set<IType> getAllImplenentedInterfaces(IType type) {
+		Set<IType> allInterfaces = new HashSet<IType>();
+		try {
+			while (type != null) {
+				String[] interfaces = type.getSuperInterfaceTypeSignatures();
+				if (interfaces != null) {
+					for (String iface : interfaces) {
+						String fqin = JdtUtils.resolveClassName(iface, type);
+						IType interfaceType = type.getJavaProject().findType(
+								fqin);
+						if (interfaceType != null) {
+							allInterfaces.add(interfaceType);
+						}
+
+					}
+				}
+				type = getSuperType(type);
+			}
+		}
+		catch (JavaModelException e) {
+			// BeansCorePlugin.log(e);
+		}
+		return allInterfaces;
+	}
+
+	/**
+	 * Returns <strong>all</strong> methods of the given {@link IType}
+	 * instance.
+	 * @param type the type
+	 * @return set of {@link IMethod}
+	 * @throws JavaModelException
+	 */
+	public static Set<IMethod> getAllMethods(IType type)
+			throws JavaModelException {
+		Map<String, IMethod> allMethods = new HashMap<String, IMethod>();
+		while (type != null) {
+			for (IMethod method : type.getMethods()) {
+				String key = method.getElementName() + method.getSignature();
+				if (!allMethods.containsKey(key)) {
+					allMethods.put(key, method);
+				}
+			}
+			type = getSuperType(type);
+		}
+		return new HashSet<IMethod>(allMethods.values());
+	}
+
+	public static IMethod getReadableProperty(IType type, String propertyName)
+			throws JavaModelException {
+		String base = capitalize(propertyName);
+		return findMethod(type, "get" + base, 0, Public.YES, Static.NO);
+	}
+
+	/**
 	 * Returns the super type of the given type.
 	 */
 	protected static IType getSuperType(IType type) throws JavaModelException {
@@ -208,6 +338,12 @@ public final class Introspector {
 			}
 		}
 		return null;
+	}
+
+	public static IMethod getWritableProperty(IType type, String propertyName)
+			throws JavaModelException {
+		String base = capitalize(propertyName);
+		return findMethod(type, "set" + base, 1, Public.YES, Static.NO);
 	}
 
 	/**
@@ -252,6 +388,27 @@ public final class Introspector {
 		return false;
 	}
 
+	private static boolean hasSuperType(IType type, String className,
+			boolean isInterface) {
+		if (type != null && type.exists() && className != null
+				&& className.length() > 0) {
+			try {
+				IType requiredType = type.getJavaProject().findType(className);
+				if (requiredType != null
+						&& ((isInterface && requiredType.isInterface()) || (!isInterface && !requiredType
+								.isInterface()))) {
+					ITypeHierarchy hierachy = SuperTypeHierarchyCache
+							.getTypeHierarchy(type);
+					return hierachy.contains(requiredType);
+				}
+			}
+			catch (JavaModelException e) {
+				SpringCore.log(e);
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * Returns true if the given type has a public setter (one-argument method
 	 * named "set" + property name with an uppercase first character) for the
@@ -263,18 +420,6 @@ public final class Introspector {
 			throws JavaModelException {
 		String base = capitalize(propertyName);
 		return (findMethod(type, "set" + base, 1, Public.YES, Static.NO) != null);
-	}
-
-	public static IMethod getWritableProperty(IType type, String propertyName)
-			throws JavaModelException {
-		String base = capitalize(propertyName);
-		return findMethod(type, "set" + base, 1, Public.YES, Static.NO);
-	}
-
-	public static IMethod getReadableProperty(IType type, String propertyName)
-			throws JavaModelException {
-		String base = capitalize(propertyName);
-		return findMethod(type, "get" + base, 0, Public.YES, Static.NO);
 	}
 
 	/**
@@ -303,115 +448,6 @@ public final class Introspector {
 			return false;
 		}
 		return true;
-	}
-
-	/**
-	 * Utility method that handles property names.
-	 * <p>
-	 * See {@link java.beans.Introspector#decapitalize(String)} for the reverse
-	 * operation done in the Java SDK.
-	 * @see java.beans.Introspector#decapitalize(String)
-	 */
-	private static String capitalize(String name) {
-		if (name == null || name.length() == 0) {
-			return name;
-		}
-		if (name.length() > 1 && Character.isUpperCase(name.charAt(1))
-				&& Character.isLowerCase(name.charAt(0))) {
-			return name;
-		}
-		char chars[] = name.toCharArray();
-		chars[0] = Character.toUpperCase(chars[0]);
-		return new String(chars);
-	}
-
-	public static Set<IType> getAllImplenentedInterfaces(IType type) {
-		Set<IType> allInterfaces = new HashSet<IType>();
-		try {
-			while (type != null) {
-				String[] interfaces = type.getSuperInterfaceTypeSignatures();
-				if (interfaces != null) {
-					for (String iface : interfaces) {
-						String fqin = JdtUtils.resolveClassName(iface, type);
-						IType interfaceType = type.getJavaProject().findType(
-								fqin);
-						if (interfaceType != null) {
-							allInterfaces.add(interfaceType);
-						}
-
-					}
-				}
-				type = getSuperType(type);
-			}
-		}
-		catch (JavaModelException e) {
-			// BeansCorePlugin.log(e);
-		}
-		return allInterfaces;
-	}
-
-	/**
-	 * Returns <code>true</code> if the given Java type extends or is the 
-	 * specified class.
-	 * @param type the Java type to be examined
-	 * @param className the full qualified name of the class we are looking for
-	 */
-	public static boolean doesExtend(IType type, String className) {
-		return hasSuperType(type, className, false);
-	}
-	
-	/**
-	 * Returns <code>true</code> if the given Java type implements the
-	 * specified interface.
-	 * @param type the Java type to be examined
-	 * @param interfaceName the full qualified name of the interface we are
-	 * looking for
-	 */
-	public static boolean doesImplement(IType type, String interfaceName) {
-		return hasSuperType(type, interfaceName, true);
-	}
-	
-	private static boolean hasSuperType(IType type, String className,
-			boolean isInterface) {
-		if (type != null && type.exists() && className != null
-				&& className.length() > 0) {
-			try {
-				IType requiredType = type.getJavaProject().findType(className);
-				if (requiredType != null
-						&& ((isInterface && requiredType.isInterface()) 
-								|| (!isInterface && !requiredType.isInterface()))) {
-					ITypeHierarchy hierachy = SuperTypeHierarchyCache
-							.getTypeHierarchy(type);
-					return hierachy.contains(requiredType);
-				}
-			}
-			catch (JavaModelException e) {
-				SpringCore.log(e);
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Returns <strong>all</strong> methods of the given {@link IType}
-	 * instance.
-	 * @param type the type
-	 * @return set of {@link IMethod}
-	 * @throws JavaModelException
-	 */
-	public static Set<IMethod> getAllMethods(IType type)
-			throws JavaModelException {
-		Map<String, IMethod> allMethods = new HashMap<String, IMethod>();
-		while (type != null) {
-			for (IMethod method : type.getMethods()) {
-				String key = method.getElementName() + method.getSignature();
-				if (!allMethods.containsKey(key)) {
-					allMethods.put(key, method);
-				}
-			}
-			type = getSuperType(type);
-		}
-		return new HashSet<IMethod>(allMethods.values());
 	}
 
 }

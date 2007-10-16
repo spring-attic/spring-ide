@@ -759,4 +759,43 @@ public class JdtUtils {
 		}
 		return null;
 	}
+	
+	public static String[] getParameterTypesString(IMethod method) {
+		try {
+			String[] parameterQualifiedTypes = Signature
+					.getParameterTypes(method.getSignature());
+			int length = parameterQualifiedTypes == null ? 0
+					: parameterQualifiedTypes.length;
+			String[] parameterPackages = new String[length];
+			for (int i = 0; i < length; i++) {
+				parameterQualifiedTypes[i] = parameterQualifiedTypes[i]
+						.replace('/', '.');
+				parameterPackages[i] = Signature
+						.getSignatureSimpleName(parameterQualifiedTypes[i]);
+			}
+			return parameterPackages;
+		}
+		catch (IllegalArgumentException e) {
+		}
+		catch (JavaModelException e) {
+		}
+		return null;
+	}
+
+	public static String getReturnTypeString(IMethod method, boolean classTypesOnly) {
+		try {
+			String qualifiedReturnType = Signature.getReturnType(method
+					.getSignature());
+			if (!classTypesOnly || qualifiedReturnType.startsWith("L")
+					|| qualifiedReturnType.startsWith("Q")) {
+				return Signature.getSignatureSimpleName(qualifiedReturnType
+						.replace('/', '.'));
+			}
+		}
+		catch (IllegalArgumentException e) {
+		}
+		catch (JavaModelException e) {
+		}
+		return null;
+	}
 }

@@ -12,6 +12,15 @@ package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 
 import org.w3c.dom.Element;
 
+/**
+ * Implementations of this interface return full qualified class names for
+ * Spring 2.0 namespace elements.
+ * <p>
+ * E.g. the <pre><tx:transaction-manager /></pre> element would qualify to
+ * TransactionManager.
+ * @author Christian Dupuis
+ * @since 2.0
+ */
 public interface IClassNameProvider {
 
 	String getClassNameForElement(Element elem);
