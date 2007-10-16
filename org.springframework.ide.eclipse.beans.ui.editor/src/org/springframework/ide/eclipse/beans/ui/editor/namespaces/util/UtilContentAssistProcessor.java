@@ -16,12 +16,13 @@ import java.util.Set;
 
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.ClassHierachyContentAssistCalculator;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.FieldContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.NamespaceContentAssistProcessorSupport;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceContentAssistProcessor;
 
 /**
- * {@link INamespaceContentAssistProcessor} responsible for handling content assist 
- * request on elements of the <code>util:*</code> namespace.
+ * {@link INamespaceContentAssistProcessor} responsible for handling content
+ * assist request on elements of the <code>util:*</code> namespace.
  * @author Christian Dupuis
  * @since 2.0
  */
@@ -40,5 +41,9 @@ public class UtilContentAssistProcessor extends
 		ClassContentAssistCalculator calculator = new ClassContentAssistCalculator();
 		registerContentAssistCalculator("value-type", calculator);
 		registerContentAssistCalculator("key-type", calculator);
+
+		registerContentAssistCalculator("constant", "static-field",
+				new FieldContentAssistCalculator());
+
 	}
 }

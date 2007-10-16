@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.beans.ui.editor.namespaces.util;
 
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.FieldHyperlinkCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.NamespaceHyperlinkDetectorSupport;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.ClassHyperlinkCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceHyperlinkDetector;
@@ -32,5 +33,7 @@ public class UtilHyperlinkDetector extends NamespaceHyperlinkDetectorSupport imp
 		registerHyperlinkCalculator("set-class", typeRef);
 		registerHyperlinkCalculator("value-type", typeRef);
 		registerHyperlinkCalculator("key-type", typeRef);
+
+		registerHyperlinkCalculator("constant", "static-field", new FieldHyperlinkCalculator());
 	}
 }
