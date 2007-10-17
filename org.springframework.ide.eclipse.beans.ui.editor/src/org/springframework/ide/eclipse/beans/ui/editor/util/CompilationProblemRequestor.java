@@ -16,7 +16,7 @@ import java.util.List;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.compiler.IProblem;
 
-public class CompilationProblemRequestor implements IProblemRequestor {
+class CompilationProblemRequestor implements IProblemRequestor {
 
 	private boolean fIsActive = false;
 

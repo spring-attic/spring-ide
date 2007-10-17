@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.beans.ui.editor.util;
 
 import org.eclipse.jdt.core.WorkingCopyOwner;
 
-public class CompilationUnitHelper {
+class CompilationUnitHelper {
 
 	private CompilationProblemRequestor fProblemRequestor = null;
 

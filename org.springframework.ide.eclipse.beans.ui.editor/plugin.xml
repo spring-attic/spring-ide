@@ -313,9 +313,9 @@
 			labelProvider="org.springframework.ide.eclipse.beans.ui.editor.outline.jee.JeeOutlineLabelProvider"
 			name="Spring Jee" uri="http://www.springframework.org/schema/jee" />
 		<namespace
-			contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.hyperlink.lang.LangContentAssistProcessor"
+			contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.contentassist.lang.LangContentAssistProcessor"
 			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
-			hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.contentassist.lang.LangHyperlinkDetector"
+			hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.hyperlink.lang.LangHyperlinkDetector"
 			labelProvider="org.springframework.ide.eclipse.beans.ui.editor.outline.lang.LangOutlineLabelProvider"
 			name="Spring Lang" uri="http://www.springframework.org/schema/lang" />
 		<namespace

@@ -21,7 +21,7 @@ import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
  * @author Christian Dupuis
  * @since 1.3.6
  */
-public class BeansJavaCompletionProposalCollector extends
+class BeansJavaCompletionProposalCollector extends
 		CompletionProposalCollector {
 	
 	private int flags;

@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.ui.editor.contentassist.lang;
+package org.springframework.ide.eclipse.beans.ui.editor.hyperlink.lang;
 
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.BeanHyperlinkCalculator;
