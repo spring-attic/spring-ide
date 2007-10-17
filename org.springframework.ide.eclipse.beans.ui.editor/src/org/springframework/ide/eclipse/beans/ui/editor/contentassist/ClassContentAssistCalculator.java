@@ -23,7 +23,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionU
 public class ClassContentAssistCalculator implements IContentAssistCalculator {
 
 	private final boolean isInterfaceRequired;
-
+	
 	/**
 	 * Default constructor
 	 */
@@ -46,7 +46,11 @@ public class ClassContentAssistCalculator implements IContentAssistCalculator {
 	public void computeProposals(ContentAssistRequest request,
 			String matchString, String attributeName, String namespace,
 			String namepacePrefix) {
-		BeansJavaCompletionUtils.addClassValueProposals(request, matchString,
-				isInterfaceRequired);
+		if (isInterfaceRequired) {
+			BeansJavaCompletionUtils.addInterfaceValueProposals(request, matchString);
+		}
+		else {
+			BeansJavaCompletionUtils.addClassValueProposals(request, matchString);
+		}
 	}
 }

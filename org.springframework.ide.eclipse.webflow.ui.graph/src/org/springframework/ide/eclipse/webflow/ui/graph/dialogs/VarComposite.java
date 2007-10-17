@@ -32,7 +32,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeEnabled;
 import org.springframework.ide.eclipse.webflow.core.model.IVar;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
-import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
+import org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow.WebflowUIImages;
 
 /**
  * 

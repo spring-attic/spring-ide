@@ -20,7 +20,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.springframework.ide.eclipse.webflow.core.model.IEndState;
 import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
-import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
+import org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow.WebflowUIImages;
 import org.springframework.ide.eclipse.webflow.ui.graph.parts.FlowPart;
 
 /**

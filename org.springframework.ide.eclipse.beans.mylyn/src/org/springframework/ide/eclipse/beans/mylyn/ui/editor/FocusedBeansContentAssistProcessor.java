@@ -17,7 +17,7 @@ import org.eclipse.wst.xml.core.internal.document.ElementImpl;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
-import org.springframework.ide.eclipse.beans.ui.editor.namespaces.bean.BeansContentAssistProcessor;
+import org.springframework.ide.eclipse.beans.ui.editor.contentassist.bean.BeansContentAssistProcessor;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.mylyn.ui.editor.FocusedStructuredTextViewerContentAssistProcessor;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;

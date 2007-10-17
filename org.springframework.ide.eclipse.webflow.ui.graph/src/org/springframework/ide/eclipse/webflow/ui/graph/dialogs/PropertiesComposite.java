@@ -29,7 +29,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.springframework.ide.eclipse.webflow.core.internal.model.Attribute;
 import org.springframework.ide.eclipse.webflow.core.model.IAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.IAttributeEnabled;
-import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
+import org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow.WebflowUIImages;
 
 /**
  * 

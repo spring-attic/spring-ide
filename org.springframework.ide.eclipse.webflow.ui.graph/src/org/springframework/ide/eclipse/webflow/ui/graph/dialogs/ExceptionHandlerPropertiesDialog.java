@@ -37,7 +37,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.webflow.core.internal.model.ExceptionHandler;
 import org.springframework.ide.eclipse.webflow.core.model.ICloneableModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
-import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
+import org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow.WebflowUIImages;
 import org.springframework.ide.eclipse.webflow.ui.graph.WebflowUtils;
 
 /**

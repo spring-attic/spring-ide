@@ -47,7 +47,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IEntryActions;
 import org.springframework.ide.eclipse.webflow.core.model.IExitActions;
 import org.springframework.ide.eclipse.webflow.core.model.IRenderActions;
 import org.springframework.ide.eclipse.webflow.ui.editor.Activator;
-import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
+import org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow.WebflowUIImages;
 import org.springframework.ide.eclipse.webflow.ui.graph.model.WebflowModelLabelDecorator;
 
 /**

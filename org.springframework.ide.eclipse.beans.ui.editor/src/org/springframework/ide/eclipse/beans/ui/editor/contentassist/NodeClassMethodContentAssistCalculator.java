@@ -38,7 +38,6 @@ public abstract class NodeClassMethodContentAssistCalculator extends
 			String attributeName) {
 		Node node = getClassNode(request, attributeName);
 		if (node != null) {
-
 			String className = BeansEditorUtils.getClassNameForBean(
 					BeansEditorUtils.getFile(request), node.getOwnerDocument(),
 					node);
@@ -50,5 +49,4 @@ public abstract class NodeClassMethodContentAssistCalculator extends
 
 	protected abstract Node getClassNode(ContentAssistRequest request,
 			String attributeName);
-
 }

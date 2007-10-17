@@ -60,17 +60,17 @@
 	<extension
 		point="org.springframework.ide.eclipse.beans.ui.editor.namespaces">
 		<namespace
-			contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.namespaces.webflow.WebflowConfigContentAssistProcessor"
+			contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.contentassist.webflow.WebflowConfigContentAssistProcessor"
 			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
-			hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.namespaces.webflow.WebflowConfigHyperLinkDetector"
-			labelProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.webflow.WebflowConfigOutlineLabelProvider"
+			hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.hyperlink.webflow.WebflowConfigHyperLinkDetector"
+			labelProvider="org.springframework.ide.eclipse.beans.ui.editor.outline.webflow.WebflowConfigOutlineLabelProvider"
 			name="Spring Web Flow Config"
 			uri="http://www.springframework.org/schema/webflow-config" />
 		<namespace
-			contentAssistProcessor="org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowContentAssistProcessor"
+			contentAssistProcessor="org.springframework.ide.eclipse.webflow.ui.editor.contentassist.webflow.WebflowContentAssistProcessor"
 			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
-			hyperLinkDetector="org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowHyperlinkDetector"
-			labelProvider="org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowOutlineLabelProvider"
+			hyperLinkDetector="org.springframework.ide.eclipse.webflow.ui.editor.hyperlink.webflow.WebflowHyperlinkDetector"
+			labelProvider="org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow.WebflowOutlineLabelProvider"
 			name="Spring Web Flow"
 			uri="http://www.springframework.org/schema/webflow" />
 	</extension>

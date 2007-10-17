@@ -52,7 +52,11 @@ import org.w3c.dom.Node;
  */
 @SuppressWarnings("restriction")
 public class BeansJavaCompletionUtils {
-
+	
+	public static final int FLAG_INTERFACE = 1 << 2;
+	public static final int FLAG_CLASS = 1 << 3;
+	public static final int FLAG_PACKAGE = 1 << 4;
+	
 	private static final String CLASS_NAME = "_xxx";
 
 	private static final String CLASS_SOURCE_END = "\n" + "    }\n" + "}";
@@ -71,7 +75,29 @@ public class BeansJavaCompletionUtils {
 	 */
 	public static void addClassValueProposals(ContentAssistRequest request,
 			String prefix) {
-		addClassValueProposals(request, prefix, false);
+		addClassValueProposals(request, prefix, FLAG_PACKAGE | FLAG_CLASS);
+	}
+
+	/**
+	 * Add interface content assist proposals that match the given
+	 * <code>prefix</code>.
+	 * @param request the {@link ContentAssistRequest} to add the proposals
+	 * @param prefix the prefix
+	 */
+	public static void addInterfaceValueProposals(ContentAssistRequest request,
+			String prefix) {
+		addClassValueProposals(request, prefix, FLAG_PACKAGE | FLAG_INTERFACE);
+	}
+
+	/**
+	 * Add package content assist proposals that match the given
+	 * <code>prefix</code>.
+	 * @param request the {@link ContentAssistRequest} to add the proposals
+	 * @param prefix the prefix
+	 */
+	public static void addPackageValueProposals(ContentAssistRequest request,
+			String prefix) {
+		addClassValueProposals(request, prefix, FLAG_PACKAGE);
 	}
 
 	/**
@@ -82,7 +108,7 @@ public class BeansJavaCompletionUtils {
 	 * @param interfaceRequired true if only interfaces are requested
 	 */
 	public static void addClassValueProposals(ContentAssistRequest request,
-			String prefix, boolean interfaceRequired) {
+			String prefix, int flags) {
 
 		if (prefix == null || prefix.length() == 0) {
 			return;
@@ -102,7 +128,7 @@ public class BeansJavaCompletionUtils {
 			setContents(unit, source);
 
 			BeansJavaCompletionProposalCollector collector = new BeansJavaCompletionProposalCollector(
-					unit, interfaceRequired);
+					unit, flags);
 			unit.codeComplete(sourceStart.length(), collector,
 					DefaultWorkingCopyOwner.PRIMARY);
 

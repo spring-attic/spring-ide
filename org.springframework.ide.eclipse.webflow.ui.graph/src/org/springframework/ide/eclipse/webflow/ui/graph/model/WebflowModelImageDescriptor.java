@@ -23,7 +23,7 @@ import org.springframework.ide.eclipse.webflow.core.model.IIf;
 import org.springframework.ide.eclipse.webflow.core.model.IState;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
-import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
+import org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow.WebflowUIImages;
 import org.springframework.ide.eclipse.webflow.ui.graph.WebflowUtils;
 
 /**

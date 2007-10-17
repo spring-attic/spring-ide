@@ -18,7 +18,7 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.ui.navigator.actions.AbstractNavigatorAction;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
-import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
+import org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow.WebflowUIImages;
 import org.springframework.ide.eclipse.webflow.ui.graph.WebflowEditor;
 import org.springframework.ide.eclipse.webflow.ui.graph.WebflowEditorInput;
 

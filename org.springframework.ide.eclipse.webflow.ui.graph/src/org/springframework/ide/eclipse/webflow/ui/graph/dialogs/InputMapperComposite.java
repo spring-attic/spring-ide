@@ -35,7 +35,7 @@ import org.springframework.ide.eclipse.webflow.core.internal.model.Mapping;
 import org.springframework.ide.eclipse.webflow.core.model.IInputAttribute;
 import org.springframework.ide.eclipse.webflow.core.model.IInputMapper;
 import org.springframework.ide.eclipse.webflow.core.model.IMapping;
-import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
+import org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow.WebflowUIImages;
 
 /**
  * 

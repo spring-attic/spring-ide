@@ -162,10 +162,10 @@ public class FlagsMethodFilter extends ParameterMethodFilter {
 			}
 
 			// return type checks
-			if ((flags & VOID) != 0 && method.getReturnType() != null) {
+			if ((flags & VOID) != 0 && !"V".equals(method.getReturnType())) {
 				return false;
 			}
-			if ((flags & NOT_VOID) != 0 && method.getReturnType() == null) {
+			if ((flags & NOT_VOID) != 0 && "V".equals(method.getReturnType())) {
 				return false;
 			}
 

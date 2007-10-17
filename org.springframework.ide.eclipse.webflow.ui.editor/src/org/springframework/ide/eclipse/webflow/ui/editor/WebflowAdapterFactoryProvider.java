@@ -26,17 +26,9 @@ import org.eclipse.wst.xml.ui.internal.registry.AdapterFactoryProviderForXML;
 import org.springframework.ide.eclipse.beans.ui.editor.outline.BeansJFaceNodeAdapterFactory;
 import org.springframework.util.Assert;
 
-/**
- * 
- */
 @SuppressWarnings("restriction")
 public class WebflowAdapterFactoryProvider extends AdapterFactoryProviderForXML {
 
-	/**
-	 * 
-	 * 
-	 * @param structuredModel 
-	 */
 	@Override
 	@SuppressWarnings("deprecation")
 	protected void addContentBasedFactories(IStructuredModel structuredModel) {
@@ -69,13 +61,6 @@ public class WebflowAdapterFactoryProvider extends AdapterFactoryProviderForXML 
 		}
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param contentTypeDescription 
-	 * 
-	 * @return 
-	 */
 	@Override
 	public boolean isFor(IDocumentTypeHandler contentTypeDescription) {
 		return (contentTypeDescription instanceof WebflowModelHandler);

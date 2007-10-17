@@ -798,4 +798,14 @@ public class JdtUtils {
 		}
 		return null;
 	}
+	
+	public static String getPropertyNameFromMethodName(IMethod method) {
+		String replaceText = method.getElementName().substring("set".length(),
+				method.getElementName().length());
+		if (replaceText != null) {
+			replaceText = java.beans.Introspector.decapitalize(replaceText);
+		}
+		return replaceText;
+	}
+
 }

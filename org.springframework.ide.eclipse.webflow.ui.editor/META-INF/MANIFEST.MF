@@ -24,7 +24,11 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.ui
 Eclipse-LazyStart: true
 Export-Package: 
- org.springframework.ide.eclipse.beans.ui.editor.namespaces.webflow,
+ org.springframework.ide.eclipse.beans.ui.editor.contentassist.webflow,
+ org.springframework.ide.eclipse.beans.ui.editor.hyperlink.webflow,
+ org.springframework.ide.eclipse.beans.ui.editor.outline.webflow,
  org.springframework.ide.eclipse.webflow.ui.editor,
- org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow
+ org.springframework.ide.eclipse.webflow.ui.editor.contentassist.webflow,
+ org.springframework.ide.eclipse.webflow.ui.editor.hyperlink.webflow,
+ org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

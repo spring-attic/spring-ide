@@ -25,7 +25,7 @@
             icon="icons/full/obj16/aspect_obj.gif"
             defaultSchemaLocation="http://www.springframework.org/schema/aop/spring-aop.xsd">
            	<schemaLocation url="http://www.springframework.org/schema/aop/spring-aop-2.0.xsd" />
-           	<schemaLocation url="http://www.springframework.org/schema/aop/spring-aop-2.1.xsd" />
+           	<schemaLocation url="http://www.springframework.org/schema/aop/spring-aop-2.5.xsd" />
       </namespace>
       <namespace
             name="tx Namespace"
@@ -35,7 +35,7 @@
             icon="icons/full/obj16/tx_obj.gif"
             defaultSchemaLocation="http://www.springframework.org/schema/tx/spring-tx.xsd">
 			<schemaLocation url="http://www.springframework.org/schema/tx/spring-tx-2.0.xsd" />
-			<schemaLocation url="http://www.springframework.org/schema/tx/spring-tx-2.1.xsd" />
+			<schemaLocation url="http://www.springframework.org/schema/tx/spring-tx-2.5.xsd" />
       </namespace>          
       <namespace
             name="jee Namespace"
@@ -63,6 +63,24 @@
             icon="icons/full/obj16/script_obj.gif"
             defaultSchemaLocation="http://www.springframework.org/schema/lang/spring-lang.xsd">
 			<schemaLocation url="http://www.springframework.org/schema/lang/spring-lang-2.0.xsd" />
+      </namespace>                         
+      <namespace
+            name="jms Namespace"
+            uri="http://www.springframework.org/schema/jms"
+            labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.JmsNamespaceLabelProvider"
+            prefix="jms"
+            icon="icons/full/obj16/jms_obj.gif"
+            defaultSchemaLocation="http://www.springframework.org/schema/jms/spring-lang.xsd">
+			<schemaLocation url="http://www.springframework.org/schema/jms/spring-lang-2.5.xsd" />
+      </namespace>                         
+      <namespace
+            name="context Namespace"
+            uri="http://www.springframework.org/schema/context"
+            labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.ContextNamespaceLabelProvider"
+            prefix="context"
+            icon="icons/full/obj16/context_obj.gif"
+            defaultSchemaLocation="http://www.springframework.org/schema/context/spring-context.xsd">
+			<schemaLocation url="http://www.springframework.org/schema/context/spring-context-2.5.xsd" />
       </namespace>                         
       <namespace
             name="p Namespace"

@@ -17,7 +17,7 @@ import org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorLabelPro
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
-import org.springframework.ide.eclipse.webflow.ui.editor.namespaces.webflow.WebflowUIImages;
+import org.springframework.ide.eclipse.webflow.ui.editor.outline.webflow.WebflowUIImages;
 
 /**
  * {@link ICommonLabelProvider} which knows about the beans core model's

@@ -35,10 +35,10 @@
 	<extension
 		point="org.springframework.ide.eclipse.beans.ui.editor.namespaces">
 		<namespace
-			contentAssistProcessor="org.springframework.ide.eclipse.osgi.ui.editor.namespaces.osgi.OsgiContentAssistProcessor"
+			contentAssistProcessor="org.springframework.ide.eclipse.osgi.ui.editor.contentassist.osgi.OsgiContentAssistProcessor"
 			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
-			hyperLinkDetector="org.springframework.ide.eclipse.osgi.ui.editor.namespaces.osgi.OsgiHyperlinkDetector"
-			labelProvider="org.springframework.ide.eclipse.osgi.ui.editor.namespaces.osgi.OsgiOutlineLabelProvider"
+			hyperLinkDetector="org.springframework.ide.eclipse.osgi.ui.editor.hyperlink.osgi.OsgiHyperlinkDetector"
+			labelProvider="org.springframework.ide.eclipse.osgi.ui.editor.outline.osgi.OsgiOutlineLabelProvider"
 			name="Spring OSGi"
 			uri="http://www.springframework.org/schema/osgi" />
 	</extension>
