@@ -87,10 +87,10 @@ public class WebflowModelUtils {
 		IType type = getActionType(config, node);
 		if (type != null) {
 			if ("bean-action".equals(node.getLocalName())) {
-				return Introspector.findAllMethods(type, getBeanMethodFilter());
+				return Introspector.findAllMethods(type, getBeanActionMethodFilter());
 			}
 			else {
-				return Introspector.findAllMethods(type, getBeanActionMethodFilter());
+				return Introspector.findAllMethods(type, getBeanMethodFilter());
 			}
 		}
 		return NO_METHOD_MATCHES;

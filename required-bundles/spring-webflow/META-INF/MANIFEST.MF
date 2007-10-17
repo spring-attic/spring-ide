@@ -39,4 +39,4 @@ Export-Package: org.springframework.webflow.action,
  org.springframework.webflow.test.execution,
  org.springframework.webflow.util
 Require-Bundle: org.springframework.binding;bundle-version="1.0.1";visibility:=reexport,
- org.springframework
+ org.springframework.bundle.spring
