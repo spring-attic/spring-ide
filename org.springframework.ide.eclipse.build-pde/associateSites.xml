@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<associateSites>
+	<associateSite label="AJDT" url="http://download.eclipse.org/tools/ajdt/33/update/"/>
+	<associateSite label="Mylyn" url="http://download.eclipse.org/tools/mylyn/update/e3.3/"/>
+	<associateSite label="Mylyn (Extras)" url="http://download.eclipse.org/tools/mylyn/update/extras/"/>
+</associateSites>
