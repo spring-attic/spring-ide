@@ -125,7 +125,12 @@
 
    <extension
          point="org.eclipse.ui.navigator.viewer">
-      <viewer viewerId="org.springframework.ide.eclipse.ui.navigator.springExplorer"/>
+      <viewer viewerId="org.springframework.ide.eclipse.ui.navigator.springExplorer">
+      	 <options>
+      	 	<!-- Hide the "Link with Editor" action from the toolbar of the viewer -->
+		 	<property name="org.eclipse.ui.navigator.hideLinkWithEditorAction" value="true" />
+		 </options>
+      </viewer>
       <viewerContentBinding viewerId="org.springframework.ide.eclipse.ui.navigator.springExplorer">
          <includes>
             <contentExtension pattern="org.springframework.ide.eclipse.ui.navigator.workingsets"/>
