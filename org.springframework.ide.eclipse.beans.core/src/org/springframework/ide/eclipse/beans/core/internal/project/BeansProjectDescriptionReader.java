@@ -91,6 +91,6 @@ public class BeansProjectDescriptionReader {
 		}
 
 		// Add default config extension to project
-		project.addConfigExtension(IBeansProject.DEFAULT_CONFIG_EXTENSION);
+		project.addConfigSuffix(IBeansProject.DEFAULT_CONFIG_SUFFIX);
 	}
 }

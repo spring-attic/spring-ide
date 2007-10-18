@@ -28,13 +28,15 @@ import org.xml.sax.helpers.DefaultHandler;
  * This class provides a SAX handler for a Spring project's description file.
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class BeansProjectDescriptionHandler extends DefaultHandler implements
 		IBeansProjectDescriptionConstants {
 	protected enum State { INITIAL, PROJECT_DESC, CONFIG_EXTENSIONS,
-		CONFIG_EXTENSION, CONFIGS, CONFIG, CONFIG_SETS, CONFIG_SET,
-		CONFIG_SET_NAME, CONFIG_SET_OVERRIDING, CONFIG_SET_INCOMPLETE,
-		CONFIG_SET_CONFIGS,CONFIG_SET_CONFIG
+		CONFIG_EXTENSION, CONFIG_SUFFIXES, CONFIG_SUFFIX, CONFIGS, 
+		CONFIG, CONFIG_SETS, CONFIG_SET, CONFIG_SET_NAME, CONFIG_SET_OVERRIDING, 
+		CONFIG_SET_INCOMPLETE, CONFIG_SET_CONFIGS,CONFIG_SET_CONFIG, VERSION, 
+		PLUGIN_VERSION
 	}
 	protected BeansProject project;
 	protected MultiStatus problems;
@@ -71,6 +73,8 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 		} else if (state == State.PROJECT_DESC) {
 			if (elementName.equals(CONFIG_EXTENSIONS)) {
 				state = State.CONFIG_EXTENSIONS;
+			} else if (elementName.equals(CONFIG_SUFFIXES)) {
+				state = State.CONFIG_SUFFIXES;
 			} else if (elementName.equals(CONFIGS)) {
 				state = State.CONFIGS;
 			} else if (elementName.equals(CONFIG_SETS)) {
@@ -79,6 +83,10 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 		} else if (state == State.CONFIG_EXTENSIONS) {
 			if (elementName.equals(CONFIG_EXTENSION)) {
 				state = State.CONFIG_EXTENSION;
+			}
+		} else if (state == State.CONFIG_SUFFIXES) {
+			if (elementName.equals(CONFIG_SUFFIX)) {
+				state = State.CONFIG_SUFFIX;
 			}
 		} else if (state == State.CONFIGS) {
 			if (elementName.equals(CONFIG)) {
@@ -110,21 +118,31 @@ public class BeansProjectDescriptionHandler extends DefaultHandler implements
 			throws SAXException {
 		if (state == State.PROJECT_DESC) {
 
-			// make sure that at least the default config extension is in
-			// the list of config extensions
-			if (project.getConfigExtensions().isEmpty()) {
-				project.addConfigExtension(IBeansProject
-						.DEFAULT_CONFIG_EXTENSION);
+			// make sure that at least the default config suffix is in
+			// the list of config suffix
+			if (project.getConfigSuffixes().isEmpty()) {
+				project.addConfigSuffix(IBeansProject
+						.DEFAULT_CONFIG_SUFFIX);
 			}
 		} else if (state == State.CONFIG_EXTENSIONS) {
 			if (elementName.equals(CONFIG_EXTENSIONS)) {
 				state = State.PROJECT_DESC;
 			}
+		} else if (state == State.CONFIG_SUFFIXES) {
+			if (elementName.equals(CONFIG_SUFFIXES)) {
+				state = State.PROJECT_DESC;
+			}
 		} else if (state == State.CONFIG_EXTENSION) {
 			if (elementName.equals(CONFIG_EXTENSION)) {
 				String extension = charBuffer.toString().trim();
-				project.addConfigExtension(extension);
+				project.addConfigSuffix(extension);
 				state = State.CONFIG_EXTENSIONS;
+			}
+		} else if (state == State.CONFIG_SUFFIX) {
+			if (elementName.equals(CONFIG_SUFFIX)) {
+				String extension = charBuffer.toString().trim();
+				project.addConfigSuffix(extension);
+				state = State.CONFIG_SUFFIXES;
 			}
 		} else if (state == State.CONFIGS) {
 			if (elementName.equals(CONFIGS)) {

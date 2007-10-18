@@ -71,8 +71,12 @@ public class BeansProjectDescriptionWriter implements
 
 	protected static void write(BeansProject project, XMLWriter writer) {
 		writer.startTag(PROJECT_DESCRIPTION, null);
-		write(CONFIG_EXTENSIONS, CONFIG_EXTENSION, project
-				.getConfigExtensions(), writer);
+		// add version number
+		writer.printSimpleTag(VERSION, CURRENT_VERSION);
+		// add plugin version number
+		writer.printCDataTag(PLUGIN_VERSION, BeansCorePlugin.getPluginVersion());
+		writeCData(CONFIG_SUFFIXES, CONFIG_SUFFIX, project
+				.getConfigSuffixes(), writer);
 		write(CONFIGS, CONFIG, project.getConfigNames(), writer);
 		write(CONFIG_SETS, project.getConfigSets(), writer);
 		writer.endTag(PROJECT_DESCRIPTION);
@@ -114,6 +118,15 @@ public class BeansProjectDescriptionWriter implements
 		writer.startTag(name, null);
 		for (Object value : values) {
 			writer.printSimpleTag(elementTagName, value);
+		}
+		writer.endTag(name);
+	}
+
+	protected static void writeCData(String name, String elementTagName,
+			Set<?> values, XMLWriter writer) {
+		writer.startTag(name, null);
+		for (Object value : values) {
+			writer.printCDataTag(elementTagName, value);
 		}
 		writer.endTag(name);
 	}

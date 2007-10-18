@@ -49,7 +49,7 @@ public class NewSpringProjectCreationPage extends WizardNewProjectCreationPage {
 	private Label sourceDirLabel;
 	private Text outputDirText;
 	private Label outputDirLabel;
-	private Text extensionsText;
+	private Text suffixesText;
 	
 	private Button enableProjectFacetsButton;
 
@@ -73,8 +73,8 @@ public class NewSpringProjectCreationPage extends WizardNewProjectCreationPage {
 		return outputDirText.getText();
 	}
 
-	public Set<String> getConfigExtensions() {
-		return StringUtils.commaDelimitedListToSet(extensionsText.getText());
+	public Set<String> getConfigSuffixes() {
+		return StringUtils.commaDelimitedListToSet(suffixesText.getText());
 	}
 
 	@Override
@@ -99,10 +99,10 @@ public class NewSpringProjectCreationPage extends WizardNewProjectCreationPage {
 		springGroup.setLayout(dirLayout);
 		springGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		extensionsText = SpringUIUtils.createTextField(springGroup,
-				BeansWizardsMessages.NewProjectPage_extensions);
-		extensionsText.setText(IBeansProject.DEFAULT_CONFIG_EXTENSION);
-		extensionsText.addModifyListener(new ModifyListener() {
+		suffixesText = SpringUIUtils.createTextField(springGroup,
+				BeansWizardsMessages.NewProjectPage_suffixes);
+		suffixesText.setText(IBeansProject.DEFAULT_CONFIG_SUFFIX);
+		suffixesText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				setPageComplete(validatePage());
 			}
@@ -210,32 +210,25 @@ public class NewSpringProjectCreationPage extends WizardNewProjectCreationPage {
 			}
 		}
 
-		String extensions = extensionsText.getText().trim();
-		if (extensions.length() == 0) {
-			setErrorMessage(BeansWizardsMessages.NewProjectPage_noExtensions);
+		String suffixes = suffixesText.getText().trim();
+		if (suffixes.length() == 0) {
+			setErrorMessage(BeansWizardsMessages.NewProjectPage_noSuffixes);
 			return false;
 		}
-		StringTokenizer tokenizer = new StringTokenizer(extensions, ",");
+		StringTokenizer tokenizer = new StringTokenizer(suffixes, ",");
 		while (tokenizer.hasMoreTokens()) {
-			String extension = tokenizer.nextToken().trim();
-			if (!isValidExtension(extension)) {
-				setErrorMessage(BeansWizardsMessages.NewProjectPage_invalidExtensions);
+			String suffix = tokenizer.nextToken().trim();
+			if (!isValidSuffix(suffix)) {
+				setErrorMessage(BeansWizardsMessages.NewProjectPage_invalidSuffixes);
 				return false;
 			}
 		}
 		return true;
 	}
 
-	private boolean isValidExtension(String extension) {
-		if (extension.length() == 0) {
+	private boolean isValidSuffix(String suffix) {
+		if (suffix.length() == 0) {
 			return false;
-		} else {
-			for (int i = 0; i < extension.length(); i++) {
-				char c = extension.charAt(i);
-				if (!Character.isLetterOrDigit(c)) {
-					return false;
-				}
-			}
 		}
 		return true;
 	}

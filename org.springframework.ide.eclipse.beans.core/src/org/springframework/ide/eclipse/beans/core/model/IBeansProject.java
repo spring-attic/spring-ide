@@ -20,6 +20,7 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
  * This interface provides information for a Spring Beans project.
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public interface IBeansProject extends IBeansModelElement,
 		IResourceModelElement, IBeanClassAware {
@@ -28,7 +29,7 @@ public interface IBeansProject extends IBeansModelElement,
 	public static final String DESCRIPTION_FILE = ".springBeans";
 
 	/** Default file extension for beans config files */
-	public static final String DEFAULT_CONFIG_EXTENSION = "xml";
+	public static final String DEFAULT_CONFIG_SUFFIX = "xml";
 
 	/**
 	 * Returns corresponding Eclipse project. 
@@ -36,14 +37,31 @@ public interface IBeansProject extends IBeansModelElement,
 	IProject getProject();
 
 	/**
-	 * Returns a list of file extensions for <code>IBeansConfig</code> files. 
+	 * Returns a list of file suffixes for <code>IBeansConfig</code> files.
+	 * @since 2.0.2 
 	 */
+	Set<String> getConfigSuffixes();
+
+	/**
+	 * Returns a list of file extensions for <code>IBeansConfig</code> files.
+	 * @deprecated use {@link #getConfigSuffixes()} instead.
+	 */
+	@Deprecated
 	Set<String> getConfigExtensions();
 
 	/**
-	 * Returns true if given config extension belongs to the list of Spring
-	 * bean config file extensions which are stored in the project description. 
+	 * Returns true if given config suffix belongs to the list of Spring
+	 * bean config file suffixes which are stored in the project description.
+	 * @since 2.0.2 
 	 */
+	boolean hasConfigSuffix(String suffix);
+
+	/**
+	 * Returns true if given config extension belongs to the list of Spring
+	 * bean config file extensions which are stored in the project description.
+	 * @deprecated use {@link #hasConfigSuffix(String)} instead.
+	 */
+	@Deprecated
 	boolean hasConfigExtension(String extension);
 
 	/**

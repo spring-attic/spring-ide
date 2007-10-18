@@ -16,14 +16,13 @@ package org.springframework.ide.eclipse.webflow.core.internal.model.project;
 public interface IWebflowProjectDescriptionConstants {
 
 	String PROJECT_DESCRIPTION = "webflow-project-description";
-
 	String CONFIG = "config";
-
 	String CONFIGS = "configs";
-
 	String FILE = "file";
-
 	String BEANS_CONFIG = "beans-config";
-
 	String NAME = "name";
+	
+	String PLUGIN_VERSION = "pluginVersion";
+	String VERSION = "version";
+	String CURRENT_VERSION = "1";
 }

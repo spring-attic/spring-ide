@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.core.io.xml.XMLWriter;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.webflow.core.Activator;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 
@@ -79,6 +80,10 @@ public class WebflowProjectDescriptionWriter implements
 	protected static void write(WebflowProjectDescription description,
 			XMLWriter writer) throws IOException {
 		writer.startTag(PROJECT_DESCRIPTION, null);
+		// add version number
+		writer.printSimpleTag(VERSION, CURRENT_VERSION);
+		// add plugin version number
+		writer.printCDataTag(PLUGIN_VERSION, Activator.getPluginVersion());
 		write(CONFIGS, CONFIG, description.getConfigs(), writer);
 		writer.endTag(PROJECT_DESCRIPTION);
 	}

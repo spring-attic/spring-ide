@@ -23,38 +23,39 @@ import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 
 /**
  * Viewer filter for file selection dialogs. The filter is not case sensitive.
- * Folders are only shown if, searched recursivly, contain at least one file
- * which has one of the specified file extensions.
+ * Folders are only shown if, searched recursively, contain at least one file
+ * which has one of the specified file suffixes.
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
-public class FileExtensionFilter extends ViewerFilter {
+public class FileSuffixFilter extends ViewerFilter {
 
-	private String[] allowedFileExtensions;
+	private String[] allowedFileSuffixes;
 
 	/**
 	 * Creates new instance of filter.
 	 * 
-	 * @param allowedFileExtensions list of file extension the filter has to
+	 * @param allowedFileSuffixes list of file suffixes the filter has to
 	 *			recognize or <code>null</code> if all files are allowed 
 	 */
-	public FileExtensionFilter(String[] allowedFileExtensions) {
-		this.allowedFileExtensions = allowedFileExtensions;
+	public FileSuffixFilter(String[] allowedFileSuffixes) {
+		this.allowedFileSuffixes = allowedFileSuffixes;
 	}
 
-	public FileExtensionFilter(Collection<String> allowedFileExtensions) {
-		this(allowedFileExtensions.toArray(new String[allowedFileExtensions
+	public FileSuffixFilter(Collection<String> allowedFileSuffixes) {
+		this(allowedFileSuffixes.toArray(new String[allowedFileSuffixes
 				.size()]));
 	}
 
-	public FileExtensionFilter() {
-		allowedFileExtensions = null;
+	public FileSuffixFilter() {
+		allowedFileSuffixes = null;
 	}
 
 	@Override
 	public boolean select(Viewer viewer, Object parent, Object element) {
 		if (element instanceof IFile) {
-			return hasAllowedFileExtension(((IFile) element).getFullPath());
+			return hasAllowedFileSuffix(((IFile) element).getFullPath());
 		} else if (element instanceof IContainer) { // IProject, IFolder
 			try {
 				for (IResource resource : ((IContainer) element).members()) {
@@ -70,14 +71,14 @@ public class FileExtensionFilter extends ViewerFilter {
 		return false;
 	}
 
-	protected boolean hasAllowedFileExtension(IPath path) {
-		if (allowedFileExtensions == null) {
+	protected boolean hasAllowedFileSuffix(IPath path) {
+		if (allowedFileSuffixes == null) {
 			return true;
 		}
-		String extension = path.getFileExtension();
-		if (extension != null) {
-			for (String allowedExtension : allowedFileExtensions) {
-				if (extension.equalsIgnoreCase(allowedExtension)) {
+		String fileName = path.lastSegment();
+		if (fileName != null) {
+			for (String allowedSuffix : allowedFileSuffixes) {
+				if (fileName.endsWith(allowedSuffix)) {
 					return true;
 				}
 			}

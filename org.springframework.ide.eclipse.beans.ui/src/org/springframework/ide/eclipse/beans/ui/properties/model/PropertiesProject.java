@@ -41,8 +41,8 @@ public class PropertiesProject extends BeansProject {
 		// class accidently tries to populate the project from the config file
 		modelPopulated = true;
 
-		configExtensions = new LinkedHashSet<String>(project
-				.getConfigExtensions());
+		configSuffixes = new LinkedHashSet<String>(project
+				.getConfigSuffixes());
 
 		configs = new LinkedHashMap<String, IBeansConfig>();
 		for (IBeansConfig config : project.getConfigs()) {
@@ -58,13 +58,13 @@ public class PropertiesProject extends BeansProject {
 	}
 
 	@Override
-	public void setConfigExtensions(Set<String> extensions) {
-		super.setConfigExtensions(extensions);
+	public void setConfigSuffixes(Set<String> suffixes) {
+		super.setConfigSuffixes(suffixes);
 	}
 
 	@Override
-	public boolean addConfigExtension(String extension) {
-		if (super.addConfigExtension(extension)) {
+	public boolean addConfigSuffix(String suffix) {
+		if (super.addConfigSuffix(suffix)) {
 			notifyListeners();
 			return true;
 		}

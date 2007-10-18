@@ -13,7 +13,9 @@ package org.springframework.ide.eclipse.webflow.core;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModel;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowModel;
 
@@ -129,6 +131,12 @@ public class Activator extends AbstractUIPlugin {
 			message = "";
 		}
 		return new Status(Status.ERROR, PLUGIN_ID, 0, message, exception);
+	}
+	
+
+	public static String getPluginVersion() {
+		Bundle bundle = getDefault().getBundle();
+		return (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION);
 	}
 
 }

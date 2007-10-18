@@ -59,7 +59,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 
 	private final IProject project;
 
-	protected volatile Set<String> configExtensions;
+	protected volatile Set<String> configSuffixes;
 
 	protected volatile Map<String, IBeansConfig> configs;
 
@@ -118,35 +118,35 @@ public class BeansProject extends AbstractResourceModelElement implements
 	}
 
 	/**
-	 * Updates the list of config extensions belonging to this project.
+	 * Updates the list of config suffixes belonging to this project.
 	 * <p>
 	 * The modified project description has to be saved to disk by calling
 	 * {@link #saveDescription()}.
-	 * @param extensions list of config extensions
+	 * @param suffixes list of config suffixes
 	 */
-	public void setConfigExtensions(Set<String> extensions) {
+	public void setConfigSuffixes(Set<String> suffixes) {
 		if (!this.modelPopulated) {
 			populateModel();
 		}
 		try {
 			w.lock();
-			configExtensions.clear();
-			configExtensions.addAll(extensions);
+			configSuffixes.clear();
+			configSuffixes.addAll(suffixes);
 		}
 		finally {
 			w.unlock();
 		}
 	}
 
-	public boolean addConfigExtension(String extension) {
-		if (extension != null && extension.length() > 0) {
+	public boolean addConfigSuffix(String suffix) {
+		if (suffix != null && suffix.length() > 0) {
 			if (!this.modelPopulated) {
 				populateModel();
 			}
 			try {
 				w.lock();
-				if (!configExtensions.contains(extension)) {
-					configExtensions.add(extension);
+				if (!configSuffixes.contains(suffix)) {
+					configSuffixes.add(suffix);
 					return true;
 				}
 			}
@@ -157,27 +157,43 @@ public class BeansProject extends AbstractResourceModelElement implements
 		return false;
 	}
 
-	public Set<String> getConfigExtensions() {
+	public Set<String> getConfigSuffixes() {
 		if (!this.modelPopulated) {
 			populateModel();
 		}
 		try {
 			r.lock();
-			return Collections.unmodifiableSet(configExtensions);
+			return Collections.unmodifiableSet(configSuffixes);
 		}
 		finally {
 			r.unlock();
 		}
 	}
+	
+	/**
+	 * @deprecated user {@link #getConfigSuffixes()} instead.
+	 */
+	@Deprecated
+	public Set<String> getConfigExtensions() {
+		return getConfigSuffixes();
+	}
 
-	public boolean hasConfigExtension(String extension) {
+	public boolean hasConfigSuffix(String suffix) {
 		try {
 			r.lock();
-			return getConfigExtensions().contains(extension);
+			return getConfigSuffixes().contains(suffix);
 		}
 		finally {
 			r.unlock();
 		}
+	}
+	
+	/**
+	 * @deprecated user {@link #hasConfigSuffix(String)} instead.
+	 */
+	@Deprecated
+	public boolean hasConfigExtension(String extension) {
+		return hasConfigSuffix(extension);
 	}
 
 	/**
@@ -507,7 +523,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 		try {
 			w.lock();
 			this.modelPopulated = false;
-			configExtensions = null;
+			configSuffixes = null;
 			configs = null;
 			configSets = null;
 		}
@@ -541,7 +557,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 		try {
 			r.lock();
 			return "Project=" + getElementName() + ", ConfigExtensions="
-				+ configExtensions + ", Configs=" + configs.values()
+				+ configSuffixes + ", Configs=" + configs.values()
 				+ ", ConfigsSets=" + configSets;
 		}
 		finally {
@@ -598,7 +614,7 @@ public class BeansProject extends AbstractResourceModelElement implements
 			}
 			// Initialize the model's data structures and read the project
 			// description file
-			configExtensions = new LinkedHashSet<String>();
+			configSuffixes = new LinkedHashSet<String>();
 			configs = new LinkedHashMap<String, IBeansConfig>();
 			configSets = new LinkedHashMap<String, IBeansConfigSet>();
 			this.modelPopulated = true;

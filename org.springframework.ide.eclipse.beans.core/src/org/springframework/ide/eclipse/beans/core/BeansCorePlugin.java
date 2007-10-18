@@ -19,15 +19,17 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.core.MessageUtils;
 
 /**
- * Central access point for the Spring Framework Core plug-in
- * (id <code>"org.springframework.ide.eclipse.beans.core"</code>).
- *
+ * Central access point for the Spring Framework Core plug-in (id
+ * <code>"org.springframework.ide.eclipse.beans.core"</code>).
+ * 
  * @author Torsten Juergeleit
  */
 public class BeansCorePlugin extends Plugin {
@@ -36,8 +38,7 @@ public class BeansCorePlugin extends Plugin {
 	 * Plugin identifier for Spring Beans Core (value
 	 * <code>org.springframework.ide.eclipse.beans.core</code>).
 	 */
-	public static final String PLUGIN_ID =
-			"org.springframework.ide.eclipse.beans.core";
+	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.beans.core";
 
 	private static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
 
@@ -61,7 +62,8 @@ public class BeansCorePlugin extends Plugin {
 		model = new BeansModel();
 		try {
 			resourceBundle = ResourceBundle.getBundle(RESOURCE_NAME);
-		} catch (MissingResourceException e) {
+		}
+		catch (MissingResourceException e) {
 			resourceBundle = null;
 		}
 	}
@@ -109,11 +111,13 @@ public class BeansCorePlugin extends Plugin {
 		if (bundle != null) {
 			try {
 				bundleString = bundle.getString(key);
-			} catch (MissingResourceException e) {
+			}
+			catch (MissingResourceException e) {
 				log(e);
 				bundleString = "!" + key + "!";
 			}
-		} else {
+		}
+		else {
 			bundleString = "!" + key + "!";
 		}
 		return bundleString;
@@ -144,24 +148,29 @@ public class BeansCorePlugin extends Plugin {
 		IStatus status = createErrorStatus(message, exception);
 		getDefault().getLog().log(status);
 	}
-	
+
 	public static void log(Throwable exception) {
-		getDefault().getLog().log(createErrorStatus(
-						getResourceString("Plugin.internal_error"), exception));
+		getDefault().getLog().log(
+				createErrorStatus(getResourceString("Plugin.internal_error"),
+						exception));
 	}
 
 	/**
 	 * Returns a new {@link IStatus} with status "ERROR" for this plug-in.
 	 */
-	public static IStatus createErrorStatus(String message,
-											Throwable exception) {
+	public static IStatus createErrorStatus(String message, Throwable exception) {
 		if (message == null) {
-			message = ""; 
-		}		
+			message = "";
+		}
 		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
 	}
 
 	public static String getFormattedMessage(String key, Object... args) {
 		return MessageUtils.format(getResourceString(key), args);
+	}
+
+	public static String getPluginVersion() {
+		Bundle bundle = getDefault().getBundle();
+		return (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION);
 	}
 }

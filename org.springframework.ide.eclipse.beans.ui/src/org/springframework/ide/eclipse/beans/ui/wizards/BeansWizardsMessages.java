@@ -44,9 +44,9 @@ public final class BeansWizardsMessages extends NLS {
 	public static String NewProject_internalError;
 
 	public static String NewProjectPage_springSettings;
-	public static String NewProjectPage_extensions;
-	public static String NewProjectPage_noExtensions;
-	public static String NewProjectPage_invalidExtensions;
+	public static String NewProjectPage_suffixes;
+	public static String NewProjectPage_noSuffixes;
+	public static String NewProjectPage_invalidSuffixes;
 
 	public static String NewProjectPage_javaSettings;
 	public static String NewProjectPage_java;

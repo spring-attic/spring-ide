@@ -55,7 +55,7 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.ui.dialogs.FilteredElementTreeSelectionDialog;
 import org.springframework.ide.eclipse.ui.dialogs.StorageSelectionValidator;
-import org.springframework.ide.eclipse.ui.viewers.JavaFileExtensionFilter;
+import org.springframework.ide.eclipse.ui.viewers.JavaFileSuffixFilter;
 
 /**
  * Property page tab for defining the list of beans config file extensions and
@@ -68,11 +68,11 @@ public class ConfigFilesTab {
 	private static final String PREFIX = "ConfigurationPropertyPage."
 			+ "tabConfigFiles.";
 	private static final String DESCRIPTION = PREFIX + "description";
-	private static final String EXTENSIONS_LABEL = PREFIX + "extensions.label";
-	private static final String ERROR_NO_EXTENSIONS = PREFIX
-			+ "error.noExtensions";
-	private static final String ERROR_INVALID_EXTENSIONS = PREFIX
-			+ "error.invalidExtensions";
+	private static final String SUFFIXES_LABEL = PREFIX + "suffixes.label";
+	private static final String ERROR_NO_SUFFIXES = PREFIX
+			+ "error.noSuffixes";
+	private static final String ERROR_INVALID_SUFFIXES = PREFIX
+			+ "error.invalidSuffixes";
 	private static final String ADD_BUTTON = PREFIX + "addButton";
 	private static final String REMOVE_BUTTON = PREFIX + "removeButton";
 	private static final String DIALOG_TITLE = PREFIX + "addConfigDialog.title";
@@ -84,7 +84,7 @@ public class ConfigFilesTab {
 	private PropertiesModel model;
 	private PropertiesProject project;
 
-	private Text extensionsText;
+	private Text suffixesText;
 	private Table configsTable;
 	private TableViewer configsViewer;
 	private Label errorLabel;
@@ -131,13 +131,13 @@ public class ConfigFilesTab {
 		description.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		// Create extension text field
-		extensionsText = SpringUIUtils.createTextField(composite, BeansUIPlugin
-				.getResourceString(EXTENSIONS_LABEL));
-		extensionsText.setText(StringUtils.collectionToDelimitedString(project
-				.getConfigExtensions(), ","));
-		extensionsText.addModifyListener(new ModifyListener() {
+		suffixesText = SpringUIUtils.createTextField(composite, BeansUIPlugin
+				.getResourceString(SUFFIXES_LABEL));
+		suffixesText.setText(StringUtils.collectionToDelimitedString(project
+				.getConfigSuffixes(), ","));
+		suffixesText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				handleExtensionsTextModified();
+				handleSuffixesTextModified();
 			}
 		});
 
@@ -187,8 +187,8 @@ public class ConfigFilesTab {
 		removeButton = SpringUIUtils.createButton(buttonArea, BeansUIPlugin
 				.getResourceString(REMOVE_BUTTON), buttonListener, 0, false);
 		model.addChangeListener(modelChangeListener);
-		handleExtensionsTextModified();
-		hasUserMadeChanges = false; // handleExtensionTextModified() has set
+		handleSuffixesTextModified();
+		hasUserMadeChanges = false; // handleSuffixTextModified() has set
 									// this to true
 		return composite;
 	}
@@ -198,30 +198,30 @@ public class ConfigFilesTab {
 	}
 
 	/**
-	 * The user has modified the comma-separated list of config extensions.
+	 * The user has modified the comma-separated list of config suffixes.
 	 * Validate the input and update the "Add" button enablement and error label
 	 * accordingly.
 	 */
-	private void handleExtensionsTextModified() {
+	private void handleSuffixesTextModified() {
 		String errorMessage = null;
-		Set<String> extensions = new LinkedHashSet<String>();
-		String extText = extensionsText.getText().trim();
+		Set<String> suffixes = new LinkedHashSet<String>();
+		String extText = suffixesText.getText().trim();
 		if (extText.length() == 0) {
-			errorMessage = BeansUIPlugin.getResourceString(ERROR_NO_EXTENSIONS);
+			errorMessage = BeansUIPlugin.getResourceString(ERROR_NO_SUFFIXES);
 		} else {
 			StringTokenizer tokenizer = new StringTokenizer(extText, ",");
 			while (tokenizer.hasMoreTokens()) {
-				String extension = tokenizer.nextToken().trim();
-				if (isValidExtension(extension)) {
-					extensions.add(extension);
+				String suffix = tokenizer.nextToken().trim();
+				if (isValidSuffix(suffix)) {
+					suffixes.add(suffix);
 				} else {
 					errorMessage = BeansUIPlugin
-							.getResourceString(ERROR_INVALID_EXTENSIONS);
+							.getResourceString(ERROR_INVALID_SUFFIXES);
 					break;
 				}
 			}
 			if (errorMessage == null) {
-				project.setConfigExtensions(extensions);
+				project.setConfigSuffixes(suffixes);
 				hasUserMadeChanges = true;
 			}
 		}
@@ -235,16 +235,9 @@ public class ConfigFilesTab {
 		errorLabel.getParent().update();
 	}
 
-	private boolean isValidExtension(String extension) {
-		if (extension.length() == 0) {
+	private boolean isValidSuffix(String suffix) {
+		if (suffix.length() == 0) {
 			return false;
-		} else {
-			for (int i = 0; i < extension.length(); i++) {
-				char c = extension.charAt(i);
-				if (!Character.isLetterOrDigit(c)) {
-					return false;
-				}
-			}
 		}
 		return true;
 	}
@@ -288,8 +281,8 @@ public class ConfigFilesTab {
 							SpringUIUtils.getStandardDisplay().getActiveShell(),
 							new JavaElementLabelProvider(),
 							new NonJavaResourceContentProvider());
-			selDialog.addFilter(new JavaFileExtensionFilter(project
-					.getConfigExtensions()));
+			selDialog.addFilter(new JavaFileSuffixFilter(project
+					.getConfigSuffixes()));
 			selDialog.setValidator(new StorageSelectionValidator(true));
 			selDialog.setInput(project.getProject());
 			selDialog.setSorter(new JavaElementSorter());
@@ -300,8 +293,8 @@ public class ConfigFilesTab {
 							SpringUIUtils.getStandardDisplay().getActiveShell(),
 							new JavaElementLabelProvider(),
 							new NonJavaResourceContentProvider());
-			selDialog.addFilter(new JavaFileExtensionFilter(project
-					.getConfigExtensions()));
+			selDialog.addFilter(new JavaFileSuffixFilter(project
+					.getConfigSuffixes()));
 			selDialog.setValidator(new StorageSelectionValidator(true));
 			selDialog.setInput(project.getProject());
 			selDialog.setSorter(new JavaElementSorter());

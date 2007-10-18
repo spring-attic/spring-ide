@@ -103,7 +103,7 @@ public class NewSpringProjectWizard extends Wizard implements INewWizard,
 
 		// get the data from the UI widgets
 		final IProject project = mainPage.getProjectHandle();
-		final Set<String> configExtensions = mainPage.getConfigExtensions();
+		final Set<String> configExtensions = mainPage.getConfigSuffixes();
 		final boolean isJavaProject = mainPage.isJavaProject();
 		final boolean enableProjectFacets = mainPage.enableProjectFacets();
 		final String sourceDir = mainPage.getSourceDirectory().trim();
@@ -248,7 +248,7 @@ public class NewSpringProjectWizard extends Wizard implements INewWizard,
 
 			IBeansModel model = BeansCorePlugin.getModel();
 			BeansProject project = new BeansProject(model, projectHandle);
-			project.setConfigExtensions(configExtensions);
+			project.setConfigSuffixes(configExtensions);
 			project.saveDescription();
 			monitor.worked(2);
 		}

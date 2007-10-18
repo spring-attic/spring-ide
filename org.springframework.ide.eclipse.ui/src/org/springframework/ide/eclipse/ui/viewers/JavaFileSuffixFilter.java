@@ -23,12 +23,13 @@ import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 
 /**
  * Viewer filter for file selection dialogs. The filter is not case sensitive.
- * Java fragments and folders are only shown if, searched recursivly, contain at
- * least one file which has one of the specified file extensions.
+ * Java fragments and folders are only shown if, searched recursively, contain at
+ * least one file name ends with one of specified file suffixes.
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
-public class JavaFileExtensionFilter extends FileExtensionFilter {
+public class JavaFileSuffixFilter extends FileSuffixFilter {
 
 	/**
 	 * Creates new instance of filter.
@@ -36,16 +37,16 @@ public class JavaFileExtensionFilter extends FileExtensionFilter {
 	 * @param allowedFileExtensions list of file extension the filter has to
 	 *			recognize or <code>null</code> if all files are allowed 
 	 */
-	public JavaFileExtensionFilter(String[] allowedFileExtensions) {
+	public JavaFileSuffixFilter(String[] allowedFileExtensions) {
 		super(allowedFileExtensions);
 	}
 
-	public JavaFileExtensionFilter(Collection<String> allowedFileExtensions) {
+	public JavaFileSuffixFilter(Collection<String> allowedFileExtensions) {
 		super(allowedFileExtensions.toArray(new String[allowedFileExtensions
 				.size()]));
 	}
 
-	public JavaFileExtensionFilter() {
+	public JavaFileSuffixFilter() {
 		super();
 	}
 
@@ -90,7 +91,7 @@ public class JavaFileExtensionFilter extends FileExtensionFilter {
 			}
 			return false;
 		} else if (element instanceof IStorage && !(element instanceof IFile)) {
-			return hasAllowedFileExtension(((IStorage) element).getFullPath());
+			return hasAllowedFileSuffix(((IStorage) element).getFullPath());
 		}
 		return super.select(viewer, parent, element);
 	}
