@@ -2,7 +2,7 @@
 <toc label="Spring	 Documentation">
 	<topic label="The Spring Framework - Reference Documentation"
 		href="../org.springframework.doc/index.html">
-		<link toc="../org.springframework.doc/toc.xml" />
+		<link toc="../org.springframework.bundle.spring.doc/toc.xml" />
 	</topic>
 	<topic label="Spring Web Flow - Reference Documentation"
 		href="../org.springframework.webflow.doc/index.html">
