@@ -287,10 +287,9 @@
                <topic label="'META-INF/aop.xml'" href="aop.html#aop-aj-ltw-aop_dot_xml"/>
                <topic label="Required libraries (JARS)" href="aop.html#aop-aj-ltw-libraries"/>
                <topic label="Spring configuration" href="aop.html#aop-aj-ltw-spring"/>
-               <topic label="Agents" href="aop.html#aop-aj-ltw-agents"/>
                <topic label="Environment-specific configuration" href="aop.html#aop-aj-ltw-environments">
-                  <topic label="Tomcat" href="aop.html#aop-aj-ltw-environments-tomcat"/>
-                  <topic label="GlassFish" href="aop.html#aop-aj-ltw-environments-glassfish"/>
+                  <topic label="OC4J" href="aop.html#aop-aj-ltw-environments-oc4j"/>
+                  <topic label="Generic Java applications" href="aop.html#aop-aj-ltw-environment-generic"/>
                </topic>
             </topic>
          </topic>
@@ -486,22 +485,22 @@
             <topic label="DriverManagerDataSource" href="jdbc.html#jdbc-DriverManagerDataSource"/>
             <topic label="TransactionAwareDataSourceProxy" href="jdbc.html#jdbc-TransactionAwareDataSourceProxy"/>
             <topic label="DataSourceTransactionManager" href="jdbc.html#jdbc-DataSourceTransactionManager"/>
+            <topic label="NativeJdbcExtractor" href="jdbc.html#d0e19207"/>
          </topic>
-         <topic label="Advanced JDBC operations" href="jdbc.html#jdbc-advanced-jdbc">
+         <topic label="JDBC batch operations" href="jdbc.html#jdbc-advanced-jdbc">
             <topic label="Batch operations with the JdbcTemplate" href="jdbc.html#jdbc-advanced-classic"/>
             <topic label="Batch operations with the SimpleJdbcTemplate" href="jdbc.html#jdbc-advanced-simple"/>
-            <topic label="Providing SQL type information for parameters" href="jdbc.html#jdbc-type-information"/>
          </topic>
          <topic label="Simplifying JDBC operations with the SimpleJdbc classes" href="jdbc.html#jdbc-simple-jdbc">
             <topic label="Inserting data using SimpleJdbcInsert" href="jdbc.html#jdbc-simple-jdbc-insert-1"/>
-            <topic label="Retreiving auto-generated keys using SimpleJdbcInsert" href="jdbc.html#jdbc-simple-jdbc-insert-2"/>
+            <topic label="Retrieving auto-generated keys using SimpleJdbcInsert" href="jdbc.html#jdbc-simple-jdbc-insert-2"/>
             <topic label="Specifying the columns to use for a SimpleJdbcInsert" href="jdbc.html#jdbc-simple-jdbc-insert-3"/>
             <topic label="Using SqlParameterSource to provide parameter values" href="jdbc.html#jdbc-simple-jdbc-parameters"/>
             <topic label="Calling a stored procedure using SimpleJdbcCall" href="jdbc.html#jdbc-simple-jdbc-call-1"/>
             <topic label="Declaring parameters to use for a SimpleJdbcCall" href="jdbc.html#jdbc-simple-jdbc-call-2"/>
             <topic label="How to define SqlParameters" href="jdbc.html#jdbc-params"/>
-            <topic label="Calling a stored function using SimpleJdbcCall" href="jdbc.html#d0e19532"/>
-            <topic label="Returning ResultSet/Ref-Cursor from a SimpleJdbcCall" href="jdbc.html#d0e19564"/>
+            <topic label="Calling a stored function using SimpleJdbcCall" href="jdbc.html#d0e19571"/>
+            <topic label="Returning ResultSet/REF Cursor from a SimpleJdbcCall" href="jdbc.html#d0e19603"/>
          </topic>
          <topic label="Modeling JDBC operations as Java objects" href="jdbc.html#jdbc-object">
             <topic label="SqlQuery" href="jdbc.html#jdbc-SqlQuery"/>
@@ -509,6 +508,11 @@
             <topic label="SqlUpdate" href="jdbc.html#jdbc-SqlUpdate"/>
             <topic label="StoredProcedure" href="jdbc.html#jdbc-StoredProcedure"/>
             <topic label="SqlFunction" href="jdbc.html#jdbc-SqlFunction"/>
+         </topic>
+         <topic label="Common issues with parameter and data value handling" href="jdbc.html#d0e19933">
+            <topic label="Providing SQL type information for parameters" href="jdbc.html#jdbc-type-information"/>
+            <topic label="Handling BLOB and CLOB objects" href="jdbc.html#d0e19975"/>
+            <topic label="Handling complex types for stored procedure calls" href="jdbc.html#d0e20082"/>
          </topic>
       </topic>
       <topic label="Object Relational Mapping (ORM) data access" href="orm.html">
