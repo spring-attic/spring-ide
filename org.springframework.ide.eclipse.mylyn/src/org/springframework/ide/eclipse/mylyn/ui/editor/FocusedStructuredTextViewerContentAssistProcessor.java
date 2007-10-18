@@ -24,7 +24,6 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.mylyn.context.core.ContextCorePlugin;
 import org.eclipse.mylyn.context.core.IInteractionElement;
-import org.eclipse.mylyn.internal.context.core.InteractionContextManager;
 import org.eclipse.mylyn.internal.context.ui.ContextUiImages;
 import org.eclipse.mylyn.internal.java.ui.editor.FocusedJavaProposalProcessor;
 import org.eclipse.wst.sse.ui.internal.contentassist.IRelevanceCompletionProposal;
@@ -156,11 +155,10 @@ public class FocusedStructuredTextViewerContentAssistProcessor implements
 	private boolean determineRelevanceForProposedElements(
 			BeansJavaCompletionProposal proposal, int baseRelevance,
 			String handle) {
-		IInteractionElement mylarElement = ContextCorePlugin
+		IInteractionElement mylynElement = ContextCorePlugin
 				.getContextManager().getElement(handle);
-		float interest = mylarElement.getInterest().getValue();
-		if (interest > InteractionContextManager.getScalingFactors()
-				.getInteresting()) {
+		if (mylynElement.getInterest().isInteresting()) {
+			float interest = mylynElement.getInterest().getValue();
 			proposal.setRelevance(THRESHOLD_INTEREST + baseRelevance
 					+ (int) (interest * 10));
 			return true;

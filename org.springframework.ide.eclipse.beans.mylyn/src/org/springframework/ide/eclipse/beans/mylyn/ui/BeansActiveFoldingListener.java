@@ -132,11 +132,11 @@ public class BeansActiveFoldingListener implements IInteractionContextListener {
 			ProjectionAnnotationModel annotationModel,
 			IStructuredDocument document, ISourceModelElement modelElement) {
 		if (annotationModel != null) {
-			IInteractionElement mylarElement = ContextCorePlugin
+			IInteractionElement mylynElement = ContextCorePlugin
 					.getContextManager().getElement(
 							BRIDGE.getHandleIdentifier(modelElement));
-			if (mylarElement != null
-					&& mylarElement.getInterest().isInteresting()) {
+			if (mylynElement != null
+					&& mylynElement.getInterest().isInteresting()) {
 				try {
 					int startOffset = document.getLineOffset(modelElement
 							.getElementStartLine());

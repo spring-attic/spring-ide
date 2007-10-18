@@ -20,13 +20,14 @@ import org.eclipse.mylyn.context.core.ContextCorePlugin;
 import org.eclipse.mylyn.context.core.IImplicitlyIntersting;
 import org.eclipse.mylyn.context.core.IInteractionElement;
 import org.eclipse.mylyn.context.ui.InterestFilter;
-import org.eclipse.mylyn.internal.context.core.InteractionContextManager;
 import org.eclipse.swt.widgets.Tree;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.ui.navigator.model.IReferenceNode;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 
 /**
+ * Extension to the Mylyn {@link InterestFilter} that is used to filter the
+ * Spring Aop cross references view.
  * @author Christian Dupuis
  * @since 2.0.1
  */
@@ -38,7 +39,7 @@ public class AopReferenceModelNavigatorInterestFilter extends InterestFilter {
 	public boolean select(Viewer viewer, Object parent, Object object) {
 		try {
 			if (!(viewer instanceof StructuredViewer)
-					|| !containsMylarInterestFilter((StructuredViewer) viewer)) {
+					|| !containsMylynInterestFilter((StructuredViewer) viewer)) {
 				return true;
 			}
 			if (isTemporarilyUnfiltered(parent)) {
@@ -88,11 +89,12 @@ public class AopReferenceModelNavigatorInterestFilter extends InterestFilter {
 					if (element != null && isInteresting(interestElement)) {
 						return true;
 					}
-					// TODO CD uncomment this if *really* only interested elements
+					// TODO CD uncomment this if *really* only interested
+					// elements
 					// should be displayed
-					/*else {
-						return false;
-					}*/
+					/*
+					 * else { return false; }
+					 */
 				}
 			}
 			if (object.getChildren() != null && object.getChildren().length > 0) {
@@ -117,8 +119,7 @@ public class AopReferenceModelNavigatorInterestFilter extends InterestFilter {
 			return false;
 		}
 		else {
-			return element.getInterest().getValue() > InteractionContextManager
-					.getScalingFactors().getInteresting();
+			return element.getInterest().isInteresting();
 		}
 	}
 
@@ -131,7 +132,7 @@ public class AopReferenceModelNavigatorInterestFilter extends InterestFilter {
 				&& temporarilyUnfiltered.equals(parent);
 	}
 
-	protected boolean containsMylarInterestFilter(StructuredViewer viewer) {
+	protected boolean containsMylynInterestFilter(StructuredViewer viewer) {
 		for (ViewerFilter filter : viewer.getFilters()) {
 			if (filter instanceof InterestFilter) {
 				return true;
