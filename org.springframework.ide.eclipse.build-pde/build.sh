@@ -36,6 +36,7 @@ build ajdt-feature $@
 build javaconfig-feature $@
 build webflow-feature $@
 build mylyn-feature $@
+build osgi-feature $@
 
 pack
 
