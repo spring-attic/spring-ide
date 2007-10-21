@@ -16,12 +16,15 @@ feature@org.springframework.ide.eclipse.mylyn.feature=SVN,trunk,http://springide
 feature@org.springframework.ide.eclipse.mylyn.feature.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.mylyn.feature.source
 feature@org.springframework.ide.eclipse.javaconfig.feature=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.javaconfig.feature
 feature@org.springframework.ide.eclipse.javaconfig.feature.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.javaconfig.feature.source
+feature@org.springframework.ide.eclipse.osgi.feature=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.osgi.feature
+feature@org.springframework.ide.eclipse.osgi.feature.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.osgi.feature.source
 
 plugin@org.springframework.ide.eclipse=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse
 plugin@org.springframework.ide.eclipse.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.source
 plugin@org.springframework.ide.eclipse.aop.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.aop.source
 plugin@org.springframework.ide.eclipse.ajdt.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.ajdt.source
 plugin@org.springframework.ide.eclipse.webflow.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.webflow.source
+plugin@org.springframework.ide.eclipse.osgi.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.osgi.source
 plugin@org.springframework.ide.eclipse.mylyn.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.mylyn.source
 plugin@org.springframework.ide.eclipse.mylyn=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.mylyn
 plugin@org.springframework.ide.eclipse.osgi=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.osgi

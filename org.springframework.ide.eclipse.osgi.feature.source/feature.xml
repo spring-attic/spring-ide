@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.springframework.ide.eclipse.osgi.feature.source"
+      label="%featureName"
+      version="2.0.2.qualifier"
+      provider-name="%providerName">
+
+   <description>
+      %description
+   </description>
+
+   <copyright>
+      %copyright
+   </copyright>
+
+   <license url="%licenseUrl">
+      %license
+   </license>
+
+   <url>
+      <update label="%updateSiteName" url="http://springide.org/updatesite/"/>
+   </url>
+
+   <plugin
+         id="org.springframework.ide.eclipse.osgi.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+</feature>
