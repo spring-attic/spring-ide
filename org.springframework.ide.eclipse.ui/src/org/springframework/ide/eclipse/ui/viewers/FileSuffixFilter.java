@@ -37,15 +37,15 @@ public class FileSuffixFilter extends ViewerFilter {
 	 * Creates new instance of filter.
 	 * 
 	 * @param allowedFileSuffixes list of file suffixes the filter has to
-	 *			recognize or <code>null</code> if all files are allowed 
+	 * recognize or <code>null</code> if all files are allowed
 	 */
 	public FileSuffixFilter(String[] allowedFileSuffixes) {
 		this.allowedFileSuffixes = allowedFileSuffixes;
 	}
 
 	public FileSuffixFilter(Collection<String> allowedFileSuffixes) {
-		this(allowedFileSuffixes.toArray(new String[allowedFileSuffixes
-				.size()]));
+		this(allowedFileSuffixes
+				.toArray(new String[allowedFileSuffixes.size()]));
 	}
 
 	public FileSuffixFilter() {
@@ -55,8 +55,10 @@ public class FileSuffixFilter extends ViewerFilter {
 	@Override
 	public boolean select(Viewer viewer, Object parent, Object element) {
 		if (element instanceof IFile) {
-			return hasAllowedFileSuffix(((IFile) element).getFullPath());
-		} else if (element instanceof IContainer) { // IProject, IFolder
+			return hasAllowedFileSuffix(((IFile) element).getFullPath())
+					&& selectFile((IFile) element);
+		}
+		else if (element instanceof IContainer) { // IProject, IFolder
 			try {
 				for (IResource resource : ((IContainer) element).members()) {
 					// recursive! Only show containers that contain a configs
@@ -64,11 +66,20 @@ public class FileSuffixFilter extends ViewerFilter {
 						return true;
 					}
 				}
-			} catch (CoreException e) {
+			}
+			catch (CoreException e) {
 				SpringUIPlugin.log(e.getStatus());
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Template method to be overridden by subclasses to post process file
+	 * selecting.
+	 */
+	protected boolean selectFile(IFile element) {
+		return true;
 	}
 
 	protected boolean hasAllowedFileSuffix(IPath path) {

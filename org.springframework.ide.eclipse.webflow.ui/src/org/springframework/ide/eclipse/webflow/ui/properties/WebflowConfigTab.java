@@ -46,7 +46,9 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceSorter;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springframework.ide.eclipse.ui.viewers.JavaFileSuffixFilter;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowConfig;
+import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
 import org.springframework.ide.eclipse.webflow.ui.Activator;
@@ -117,22 +119,10 @@ public class WebflowConfigTab {
 
 	}
 
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
 	public boolean hasUserMadeChanges() {
 		return hasUserMadeChanges;
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param parent
-	 * 
-	 * @return
-	 */
 	public Control createControl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
@@ -191,7 +181,7 @@ public class WebflowConfigTab {
 				.getResourceString(REMOVE_BUTTON), buttonListener, 0, false);
 		return composite;
 	}
-	
+
 	private void handleDoubleClick(DoubleClickEvent event) {
 		ISelection selection = event.getSelection();
 		if (selection instanceof IStructuredSelection) {
@@ -239,9 +229,6 @@ public class WebflowConfigTab {
 		configsTable.setFocus();
 	}
 
-	/**
-	 * 
-	 */
 	private void handleEditButtonPressed() {
 		IStructuredSelection selection = (IStructuredSelection) configsViewer
 				.getSelection();
@@ -277,7 +264,7 @@ public class WebflowConfigTab {
 				new WorkbenchLabelProvider(), new WorkbenchContentProvider());
 		dialog.setTitle(Activator.getResourceString(DIALOG_TITLE));
 		dialog.setMessage(Activator.getResourceString(DIALOG_MESSAGE));
-		dialog.addFilter(new FileFilter(new String[] { "xml" }));
+		dialog.addFilter(new ConfigFileFilter(new String[] { "xml" }));
 		dialog.setValidator(new FileSelectionValidator(true));
 		dialog.setInput(element);
 		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
@@ -320,104 +307,64 @@ public class WebflowConfigTab {
 		}
 	}
 
-	/**
-	 * 
-	 */
 	private class ConfigFilesContentProvider implements
 			IStructuredContentProvider {
 
-		/**
-		 * 
-		 */
 		private Set<IWebflowConfig> files;
 
-		/**
-		 * 
-		 * 
-		 * @param files
-		 */
 		public ConfigFilesContentProvider(Set<IWebflowConfig> files) {
 			this.files = files;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
-		 */
 		public Object[] getElements(Object obj) {
 			return files.toArray();
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer,
-		 * java.lang.Object, java.lang.Object)
-		 */
 		public void inputChanged(Viewer arg0, Object arg1, Object arg2) {
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
-		 */
 		public void dispose() {
 		}
 	}
 
-	/**
-	 * 
-	 */
 	private class ConfigFilesSorter extends ViewerSorter {
 
 		// Categories
-		/**
-		 * 
-		 */
 		public static final int SUB_DIR = 0;
 
-		/**
-		 * 
-		 */
 		public static final int ROOT_DIR = 1;
 
-		/*
-		 * (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ViewerComparator#category(java.lang.Object)
-		 */
 		public int category(Object element) {
 			return (((IWebflowConfig) element).getResource().getName().indexOf(
 					'/') == -1 ? ROOT_DIR : SUB_DIR);
 		}
 	}
 
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
 	public Map<IWebflowConfig, Set<IModelElement>> getConfigFilesToBeansConfigs() {
 		return configFilesToBeansConfigs;
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param configFiles
-	 */
 	public void setConfigFiles(Set<IWebflowConfig> configFiles) {
 		this.configFiles = configFiles;
 	}
 
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
 	public Set<IWebflowConfig> getConfigFiles() {
 		return configFiles;
 	}
 
 	public Map<IWebflowConfig, String> getConfigFilesToNames() {
 		return this.configFilesToNames;
+	}
+
+	private static class ConfigFileFilter extends JavaFileSuffixFilter {
+
+		public ConfigFileFilter(String[] allowedFileExtensions) {
+			super(allowedFileExtensions);
+		}
+
+		@Override
+		protected boolean selectFile(IFile element) {
+			return !WebflowModelUtils.isWebflowConfig(element);
+		}
 	}
 }

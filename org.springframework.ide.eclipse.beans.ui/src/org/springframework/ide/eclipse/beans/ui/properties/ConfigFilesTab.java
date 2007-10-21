@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
+import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
@@ -67,27 +68,39 @@ public class ConfigFilesTab {
 
 	private static final String PREFIX = "ConfigurationPropertyPage."
 			+ "tabConfigFiles.";
+
 	private static final String DESCRIPTION = PREFIX + "description";
+
 	private static final String SUFFIXES_LABEL = PREFIX + "suffixes.label";
-	private static final String ERROR_NO_SUFFIXES = PREFIX
-			+ "error.noSuffixes";
+
+	private static final String ERROR_NO_SUFFIXES = PREFIX + "error.noSuffixes";
+
 	private static final String ERROR_INVALID_SUFFIXES = PREFIX
 			+ "error.invalidSuffixes";
+
 	private static final String ADD_BUTTON = PREFIX + "addButton";
+
 	private static final String REMOVE_BUTTON = PREFIX + "removeButton";
+
 	private static final String DIALOG_TITLE = PREFIX + "addConfigDialog.title";
+
 	private static final String DIALOG_MESSAGE = PREFIX
 			+ "addConfigDialog.message";
 
 	private static final int TABLE_WIDTH = 250;
 
 	private PropertiesModel model;
+
 	private PropertiesProject project;
 
 	private Text suffixesText;
+
 	private Table configsTable;
+
 	private TableViewer configsViewer;
+
 	private Label errorLabel;
+
 	private Button addButton, removeButton;
 
 	private SelectionListener buttonListener = new SelectionAdapter() {
@@ -97,8 +110,7 @@ public class ConfigFilesTab {
 		}
 	};
 
-	private IModelChangeListener modelChangeListener =
-			new IModelChangeListener() {
+	private IModelChangeListener modelChangeListener = new IModelChangeListener() {
 		public void elementChanged(ModelChangeEvent event) {
 			if (configsViewer != null
 					&& !configsViewer.getControl().isDisposed()) {
@@ -189,7 +201,7 @@ public class ConfigFilesTab {
 		model.addChangeListener(modelChangeListener);
 		handleSuffixesTextModified();
 		hasUserMadeChanges = false; // handleSuffixTextModified() has set
-									// this to true
+		// this to true
 		return composite;
 	}
 
@@ -208,13 +220,15 @@ public class ConfigFilesTab {
 		String extText = suffixesText.getText().trim();
 		if (extText.length() == 0) {
 			errorMessage = BeansUIPlugin.getResourceString(ERROR_NO_SUFFIXES);
-		} else {
+		}
+		else {
 			StringTokenizer tokenizer = new StringTokenizer(extText, ",");
 			while (tokenizer.hasMoreTokens()) {
 				String suffix = tokenizer.nextToken().trim();
 				if (isValidSuffix(suffix)) {
 					suffixes.add(suffix);
-				} else {
+				}
+				else {
 					errorMessage = BeansUIPlugin
 							.getResourceString(ERROR_INVALID_SUFFIXES);
 					break;
@@ -228,7 +242,8 @@ public class ConfigFilesTab {
 		if (errorMessage != null) {
 			errorLabel.setText(errorMessage);
 			addButton.setEnabled(false);
-		} else {
+		}
+		else {
 			errorLabel.setText("");
 			addButton.setEnabled(true);
 		}
@@ -251,7 +266,8 @@ public class ConfigFilesTab {
 				.getSelection();
 		if (selection.isEmpty()) {
 			removeButton.setEnabled(false);
-		} else {
+		}
+		else {
 			removeButton.setEnabled(true);
 		}
 	}
@@ -262,7 +278,8 @@ public class ConfigFilesTab {
 	private void handleButtonPressed(Button button) {
 		if (button == addButton) {
 			handleAddButtonPressed();
-		} else if (button == removeButton) {
+		}
+		else if (button == removeButton) {
 			handleRemoveButtonPressed();
 		}
 		handleTableSelectionChanged();
@@ -276,24 +293,23 @@ public class ConfigFilesTab {
 	private void handleAddButtonPressed() {
 		SelectionStatusDialog dialog;
 		if (SpringCoreUtils.isEclipseSameOrNewer(3, 2)) {
-			FilteredElementTreeSelectionDialog selDialog =
-					new FilteredElementTreeSelectionDialog(
-							SpringUIUtils.getStandardDisplay().getActiveShell(),
-							new JavaElementLabelProvider(),
-							new NonJavaResourceContentProvider());
-			selDialog.addFilter(new JavaFileSuffixFilter(project
+			FilteredElementTreeSelectionDialog selDialog = new FilteredElementTreeSelectionDialog(
+					SpringUIUtils.getStandardDisplay().getActiveShell(),
+					new JavaElementLabelProvider(),
+					new NonJavaResourceContentProvider());
+			selDialog.addFilter(new ConfigFileFilter(project
 					.getConfigSuffixes()));
 			selDialog.setValidator(new StorageSelectionValidator(true));
 			selDialog.setInput(project.getProject());
 			selDialog.setSorter(new JavaElementSorter());
 			dialog = selDialog;
-		} else {
-			ElementTreeSelectionDialog selDialog =
-					new ElementTreeSelectionDialog(
-							SpringUIUtils.getStandardDisplay().getActiveShell(),
-							new JavaElementLabelProvider(),
-							new NonJavaResourceContentProvider());
-			selDialog.addFilter(new JavaFileSuffixFilter(project
+		}
+		else {
+			ElementTreeSelectionDialog selDialog = new ElementTreeSelectionDialog(
+					SpringUIUtils.getStandardDisplay().getActiveShell(),
+					new JavaElementLabelProvider(),
+					new NonJavaResourceContentProvider());
+			selDialog.addFilter(new ConfigFileFilter(project
 					.getConfigSuffixes()));
 			selDialog.setValidator(new StorageSelectionValidator(true));
 			selDialog.setInput(project.getProject());
@@ -310,7 +326,8 @@ public class ConfigFilesTab {
 					if (element instanceof ZipEntryStorage) {
 						ZipEntryStorage storage = (ZipEntryStorage) element;
 						config = storage.getFullName();
-					} else {
+					}
+					else {
 						IFile file = (IFile) element;
 						config = file.getProjectRelativePath().toString();
 					}
@@ -353,8 +370,7 @@ public class ConfigFilesTab {
 			return project.getConfigs().toArray();
 		}
 
-		public void inputChanged(Viewer viewer, Object oldInput,
-				Object newInput) {
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 
 		public void dispose() {
@@ -370,13 +386,26 @@ public class ConfigFilesTab {
 		@Override
 		public int category(Object element) {
 			if (element instanceof IBeansConfig) {
-				if (((IBeansConfig) element).getElementName()
-						.indexOf('/') == -1) {
+				if (((IBeansConfig) element).getElementName().indexOf('/') == -1) {
 					return Category.ROOT_DIR.ordinal();
 				}
 				return Category.SUB_DIR.ordinal();
 			}
 			return Category.OTHER.ordinal();
+		}
+	}
+
+	private static class ConfigFileFilter extends JavaFileSuffixFilter {
+		
+		public ConfigFileFilter(Set<String> allowedFileExtensions) {
+			super(allowedFileExtensions);
+		}
+		
+		@Override
+		protected boolean selectFile(IFile element) {
+			IBeansProject project = BeansCorePlugin.getModel().getProject(
+					element.getProject());
+			return !project.hasConfig(element);
 		}
 	}
 }
