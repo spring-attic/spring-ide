@@ -24,87 +24,37 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
-/**
- * 
- */
 public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 		IWebflowProjectDescriptionConstants {
 
-	/**
-	 * 
-	 */
 	protected static final int S_INITIAL = 0;
 
-	/**
-	 * 
-	 */
 	protected static final int S_PROJECT_DESC = 1;
 
-	/**
-	 * 
-	 */
 	protected static final int S_CONFIGS = 2;
 
-	/**
-	 * 
-	 */
 	protected static final int S_CONFIG = 3;
 
-	/**
-	 * 
-	 */
 	protected static final int S_BEAN_CONFIG = 4;
 
-	/**
-	 * 
-	 */
 	protected static final int S_FILE = 5;
 
-	/**
-	 * 
-	 */
 	protected static final int S_NAME = 6;
 
-	/**
-	 * 
-	 */
 	protected IWebflowProject project;
 
-	/**
-	 * 
-	 */
 	protected IWebflowConfig webflowConfig;
 
-	/**
-	 * 
-	 */
 	protected MultiStatus problems;
 
-	/**
-	 * 
-	 */
 	protected WebflowProjectDescription description;
 
-	/**
-	 * 
-	 */
 	protected int state;
 
-	/**
-	 * 
-	 */
 	protected final StringBuffer charBuffer = new StringBuffer();
 
-	/**
-	 * 
-	 */
 	protected Locator locator;
 
-	/**
-	 * 
-	 * 
-	 * @param project
-	 */
 	public WebflowProjectDescriptionHandler(IWebflowProject project) {
 		this.project = project;
 		problems = new MultiStatus(Activator.PLUGIN_ID,
@@ -114,29 +64,14 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 		state = S_INITIAL;
 	}
 
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
 	public IStatus getStatus() {
 		return problems;
 	}
 
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
 	public WebflowProjectDescription getDescription() {
 		return description;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.xml.sax.helpers.DefaultHandler#startElement(java.lang.String,
-	 * java.lang.String, java.lang.String, org.xml.sax.Attributes)
-	 */
 	public void startElement(String uri, String elementName, String qname,
 			Attributes attributes) throws SAXException {
 		// clear the character buffer at the start of every element
@@ -146,19 +81,11 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 			if (elementName.equals(PROJECT_DESCRIPTION)) {
 				state = S_PROJECT_DESC;
 			}
-			else {
-				throw new SAXParseException("No Spring project description",
-						locator);
-			}
 			break;
 
 		case S_PROJECT_DESC:
 			if (elementName.equals(CONFIGS)) {
 				state = S_CONFIGS;
-			}
-			else {
-				throw new SAXParseException("No Spring project description",
-						locator);
 			}
 			break;
 
@@ -185,11 +112,6 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String,
-	 * java.lang.String, java.lang.String)
-	 */
 	public void endElement(String uri, String elementName, String qname)
 			throws SAXException {
 		switch (state) {
@@ -257,66 +179,33 @@ public class WebflowProjectDescriptionHandler extends DefaultHandler implements
 		charBuffer.setLength(0);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.xml.sax.helpers.DefaultHandler#characters(char[], int, int)
-	 */
 	public void characters(char[] chars, int offset, int length)
 			throws SAXException {
 		// accumulate characters and process them when endElement is reached
 		charBuffer.append(chars, offset, length);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.xml.sax.helpers.DefaultHandler#setDocumentLocator(org.xml.sax.Locator)
-	 */
 	public void setDocumentLocator(Locator locator) {
 		this.locator = locator;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.xml.sax.helpers.DefaultHandler#fatalError(org.xml.sax.SAXParseException)
-	 */
 	public void fatalError(SAXParseException error) throws SAXException {
 		log(IStatus.ERROR, error);
 		throw error;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.xml.sax.helpers.DefaultHandler#error(org.xml.sax.SAXParseException)
-	 */
 	public void error(SAXParseException error) throws SAXException {
 		log(IStatus.WARNING, error);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.xml.sax.helpers.DefaultHandler#warning(org.xml.sax.SAXParseException)
-	 */
 	public void warning(SAXParseException error) throws SAXException {
 		log(IStatus.WARNING, error);
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param code
-	 * @param error
-	 */
 	public void log(int code, Throwable error) {
 		log(code, error.getMessage(), error);
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param code
-	 * @param errorMessage
-	 * @param error
-	 */
 	public void log(int code, String errorMessage, Throwable error) {
 		problems.add(new Status(code, Activator.PLUGIN_ID,
 				IResourceStatus.FAILED_READ_METADATA, errorMessage, error));

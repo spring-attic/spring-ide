@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui;
 
+import java.util.Map;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -164,9 +166,11 @@ public final class BeansUIUtils {
 		return null;
 	}
 
-	public static void showProjectPropertyPage(IProject project, int block) {
+	public static void showProjectPropertyPage(IProject project,
+			Map<String, Object> data) {
 		if (project != null) {
-			SpringUIUtils.showPreferenceDialog(ProjectPropertyPage.ID, project);
+			SpringUIUtils.showPreferenceDialog(ProjectPropertyPage.ID, project,
+					data);
 		}
 	}
 

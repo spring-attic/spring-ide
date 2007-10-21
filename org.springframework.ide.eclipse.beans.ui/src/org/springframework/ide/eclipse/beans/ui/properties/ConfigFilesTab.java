@@ -21,6 +21,7 @@ import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jface.resource.JFaceColors;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
@@ -52,6 +53,7 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.ui.dialogs.FilteredElementTreeSelectionDialog;
@@ -103,6 +105,8 @@ public class ConfigFilesTab {
 
 	private Button addButton, removeButton;
 
+	private IModelElement selectedElement;
+
 	private SelectionListener buttonListener = new SelectionAdapter() {
 		@Override
 		public void widgetSelected(SelectionEvent e) {
@@ -121,9 +125,18 @@ public class ConfigFilesTab {
 
 	private boolean hasUserMadeChanges;
 
-	public ConfigFilesTab(PropertiesModel model, PropertiesProject project) {
+	public ConfigFilesTab(PropertiesModel model, PropertiesProject project,
+			IModelElement selectedModelElement) {
 		this.model = model;
 		this.project = project;
+		calculateSelectedElement(selectedModelElement);
+	}
+
+	private void calculateSelectedElement(IModelElement modelElement) {
+		if (modelElement != null && this.project != null) {
+			this.selectedElement = this.project.getConfig(modelElement
+					.getElementName());
+		}
 	}
 
 	public boolean hasUserMadeChanges() {
@@ -180,6 +193,11 @@ public class ConfigFilesTab {
 		configsViewer.setInput(this); // activate content provider
 		configsViewer.setSorter(new ConfigFilesSorter());
 
+		if (this.selectedElement != null) {
+			configsViewer.setSelection(
+					new StructuredSelection(selectedElement), true);
+		}
+
 		// Create error label
 		errorLabel = new Label(composite, SWT.NONE);
 		errorLabel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
@@ -202,6 +220,9 @@ public class ConfigFilesTab {
 		handleSuffixesTextModified();
 		hasUserMadeChanges = false; // handleSuffixTextModified() has set
 		// this to true
+		
+		handleTableSelectionChanged();
+		
 		return composite;
 	}
 
@@ -396,11 +417,11 @@ public class ConfigFilesTab {
 	}
 
 	private static class ConfigFileFilter extends JavaFileSuffixFilter {
-		
+
 		public ConfigFileFilter(Set<String> allowedFileExtensions) {
 			super(allowedFileExtensions);
 		}
-		
+
 		@Override
 		protected boolean selectFile(IFile element) {
 			IBeansProject project = BeansCorePlugin.getModel().getProject(

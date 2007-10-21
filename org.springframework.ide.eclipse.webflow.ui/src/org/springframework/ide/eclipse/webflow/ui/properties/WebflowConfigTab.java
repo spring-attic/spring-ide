@@ -26,6 +26,7 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
@@ -99,9 +100,12 @@ public class WebflowConfigTab {
 
 	private Map<IWebflowConfig, String> configFilesToNames;
 
+	private IModelElement selectedElement;
+
 	private Button editButton;
 
-	public WebflowConfigTab(IWebflowProject project, IAdaptable element) {
+	public WebflowConfigTab(IWebflowProject project, IAdaptable element,
+			IModelElement selectedModelElement) {
 		this.project = project;
 		this.element = element;
 		this.configFiles = new HashSet<IWebflowConfig>();
@@ -117,6 +121,14 @@ public class WebflowConfigTab {
 			}
 		}
 
+		if (selectedModelElement != null) {
+			for (IWebflowConfig config : configFiles) {
+				if (config.getElementName().equals(
+						selectedModelElement.getElementName())) {
+					this.selectedElement = config;
+				}
+			}
+		}
 	}
 
 	public boolean hasUserMadeChanges() {
@@ -166,6 +178,11 @@ public class WebflowConfigTab {
 			}
 		});
 
+		if (this.selectedElement != null) {
+			configsViewer.setSelection(
+					new StructuredSelection(selectedElement), true);
+		}
+
 		// button area
 		Composite buttonArea = new Composite(tableAndButtons, SWT.NONE);
 		layout = new GridLayout();
@@ -179,6 +196,9 @@ public class WebflowConfigTab {
 				.getResourceString(EDIT_BUTTON), buttonListener, 0, false);
 		removeButton = SpringUIUtils.createButton(buttonArea, Activator
 				.getResourceString(REMOVE_BUTTON), buttonListener, 0, false);
+
+		handleTableSelectionChanged();
+
 		return composite;
 	}
 
@@ -252,6 +272,7 @@ public class WebflowConfigTab {
 				hasUserMadeChanges = true;
 			}
 		}
+		this.configsViewer.refresh();
 	}
 
 	/**

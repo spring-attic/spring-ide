@@ -19,8 +19,7 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.ui.dialogs.SpringPreferencePage;
 
 /**
- * Opens the project's property page for currently selected
- * {@link IProject}.
+ * Opens the project's property page for currently selected {@link IProject}.
  * 
  * @author Christian Dupuis
  * @since 2.0.1
@@ -31,8 +30,8 @@ public class OpenPropertiesAction extends AbstractNavigatorAction {
 
 	public OpenPropertiesAction(ICommonActionExtensionSite site) {
 		super(site);
-		setText("&Properties");	// TODO externalize text
-    }
+		setText("&Properties"); // TODO externalize text
+	}
 
 	@Override
 	public boolean isEnabled(IStructuredSelection selection) {
@@ -51,6 +50,7 @@ public class OpenPropertiesAction extends AbstractNavigatorAction {
 
 	@Override
 	public void run() {
-		SpringUIUtils.showPreferenceDialog(SpringPreferencePage.ID, project);
+		SpringUIUtils.showPreferenceDialog(SpringPreferencePage.ID, project,
+				null);
 	}
 }

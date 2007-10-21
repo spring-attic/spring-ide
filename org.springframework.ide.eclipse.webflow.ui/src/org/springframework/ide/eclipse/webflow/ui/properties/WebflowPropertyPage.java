@@ -40,13 +40,20 @@ import org.springframework.ide.eclipse.webflow.ui.model.WebflowModelLabelDecorat
  */
 public class WebflowPropertyPage extends PropertyPage {
 
-	public static final String ID = Activator.PLUGIN_ID + ".properties.projectPropertyPage";
+	public static final String ID = Activator.PLUGIN_ID
+			+ ".properties.projectPropertyPage";
+
+	public static final String SELECTED_RESOURCE = ID + ".selectedResource";
 
 	private static final String TITLE = "ConfigurationPropertyPage.title";
 
 	private static final String CONFIG_FILES_LABEL = "ConfigurationPropertyPage.tabConfigFiles.label";
 
 	private WebflowConfigTab configFilesBlock;
+
+	private Map<String, Object> pageData;
+
+	private IModelElement selectedModelElement;
 
 	public WebflowPropertyPage() {
 		this(null);
@@ -66,7 +73,8 @@ public class WebflowPropertyPage extends PropertyPage {
 		TabFolder folder = new TabFolder(parent, SWT.NONE);
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		configFilesBlock = new WebflowConfigTab(project, getElement());
+		configFilesBlock = new WebflowConfigTab(project, getElement(),
+				selectedModelElement);
 		TabItem item = new TabItem(folder, SWT.NONE);
 		item.setText(Activator.getResourceString(CONFIG_FILES_LABEL));
 		item.setControl(configFilesBlock.createControl(folder));
@@ -85,7 +93,8 @@ public class WebflowPropertyPage extends PropertyPage {
 			Set<IWebflowConfig> files = configFilesBlock.getConfigFiles();
 			Map<IWebflowConfig, Set<IModelElement>> filesToConfig = configFilesBlock
 					.getConfigFilesToBeansConfigs();
-			Map<IWebflowConfig, String> names = configFilesBlock.getConfigFilesToNames();
+			Map<IWebflowConfig, String> names = configFilesBlock
+					.getConfigFilesToNames();
 			List<IWebflowConfig> webflowConfigs = new ArrayList<IWebflowConfig>();
 			for (IWebflowConfig file : files) {
 				WebflowConfig webflowConfig = new WebflowConfig(project);
@@ -101,8 +110,8 @@ public class WebflowPropertyPage extends PropertyPage {
 			List<IWebflowConfig> currentConfigs = project.getConfigs();
 			for (IWebflowConfig currentConfig : currentConfigs) {
 				if (getConfig(currentConfig.getResource(), webflowConfigs) == null) {
-					MarkerUtils.deleteMarkers(currentConfig
-							.getResource(), WebflowValidator.MARKER_ID);
+					MarkerUtils.deleteMarkers(currentConfig.getResource(),
+							WebflowValidator.MARKER_ID);
 				}
 			}
 			project.setConfigs(webflowConfigs);
@@ -112,7 +121,7 @@ public class WebflowPropertyPage extends PropertyPage {
 		}
 		return super.performOk();
 	}
-	
+
 	public IWebflowConfig getConfig(IFile file, List<IWebflowConfig> configs) {
 		if (configs != null) {
 			for (IWebflowConfig config : configs) {
@@ -132,4 +141,18 @@ public class WebflowPropertyPage extends PropertyPage {
 	public void dispose() {
 		super.dispose();
 	}
+
+	@SuppressWarnings("unchecked")
+	public void applyData(Object data) {
+		super.applyData(data);
+		if (data instanceof Map) {
+			this.pageData = (Map<String, Object>) data;
+			if (this.pageData.containsKey(SELECTED_RESOURCE)
+					&& this.pageData.get(SELECTED_RESOURCE) instanceof IModelElement) {
+				this.selectedModelElement = (IModelElement) this.pageData
+						.get(SELECTED_RESOURCE);
+			}
+		}
+	}
+
 }

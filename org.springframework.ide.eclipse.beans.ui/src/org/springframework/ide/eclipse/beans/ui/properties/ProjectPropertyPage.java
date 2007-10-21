@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.properties;
 
+import java.util.Map;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
@@ -28,15 +30,22 @@ import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesModel
 import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesProject;
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
  * Spring project property page.
+ * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class ProjectPropertyPage extends PropertyPage {
 
 	public static final String ID = BeansUIPlugin.PLUGIN_ID
 			+ ".properties.ProjectPropertyPage";
+
+	public static final String BLOCK_ID = ID + ".blockId";
+
+	public static final String SELECTED_RESOURCE = ID + ".selectedResource";
 
 	private static final String PREFIX = "ConfigurationPropertyPage.";
 
@@ -55,6 +64,10 @@ public class ProjectPropertyPage extends PropertyPage {
 	private ConfigSetsTab configSetsTab;
 
 	private int selectedTab;
+
+	private IModelElement selectedModelElement;
+
+	private Map<String, Object> pageData;
 
 	public ProjectPropertyPage() {
 		this(null, 0);
@@ -85,12 +98,14 @@ public class ProjectPropertyPage extends PropertyPage {
 		TabFolder folder = new TabFolder(parent, SWT.NONE);
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		configFilesTab = new ConfigFilesTab(model, modelProject);
+		configFilesTab = new ConfigFilesTab(model, modelProject,
+				selectedModelElement);
 		TabItem item = new TabItem(folder, SWT.NONE);
 		item.setText(BeansUIPlugin.getResourceString(CONFIG_FILES_LABEL));
 		item.setControl(configFilesTab.createControl(folder));
 
-		configSetsTab = new ConfigSetsTab(model, modelProject);
+		configSetsTab = new ConfigSetsTab(model, modelProject,
+				selectedModelElement);
 		item = new TabItem(folder, SWT.NONE);
 		item.setText(BeansUIPlugin.getResourceString(CONFIG_SETS_LABEL));
 		item.setControl(configSetsTab.createControl(folder));
@@ -144,5 +159,19 @@ public class ProjectPropertyPage extends PropertyPage {
 			configSetsTab.dispose();
 		}
 		super.dispose();
+	}
+
+	@SuppressWarnings("unchecked")
+	public void applyData(Object data) {
+		super.applyData(data);
+		if (data instanceof Map) {
+			this.pageData = (Map<String, Object>) data;
+			this.selectedTab = (Integer) this.pageData.get(BLOCK_ID);
+			if (this.pageData.containsKey(SELECTED_RESOURCE)
+					&& this.pageData.get(SELECTED_RESOURCE) instanceof IModelElement) {
+				this.selectedModelElement = (IModelElement) this.pageData
+						.get(SELECTED_RESOURCE);
+			}
+		}
 	}
 }

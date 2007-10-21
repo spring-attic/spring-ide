@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.navigator.actions;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -21,6 +24,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.BeansUIUtils;
+import org.springframework.ide.eclipse.beans.ui.properties.ProjectPropertyPage;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.ui.navigator.actions.AbstractNavigatorAction;
@@ -30,11 +34,13 @@ import org.springframework.ide.eclipse.ui.navigator.actions.AbstractNavigatorAct
  * {@link IModelElement}.
  * 
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class OpenPropertiesAction extends AbstractNavigatorAction {
 
 	private IProject project;
 	private int block = 0;
+	private IModelElement modelElement;
 
 	public OpenPropertiesAction(ICommonActionExtensionSite site) {
 		super(site);
@@ -65,6 +71,7 @@ public class OpenPropertiesAction extends AbstractNavigatorAction {
 					project = BeansModelUtils.getProject(element).getProject();
 					block = getProjectPropertyPageBlock(
 							tSelection.getPaths()[0]);
+					modelElement = element;
 					return true;
 				}
 			}
@@ -74,7 +81,10 @@ public class OpenPropertiesAction extends AbstractNavigatorAction {
 
 	@Override
 	public void run() {
-		BeansUIUtils.showProjectPropertyPage(project, block);
+		Map<String, Object> data = new HashMap<String, Object>();
+		data.put(ProjectPropertyPage.BLOCK_ID, block);
+		data.put(ProjectPropertyPage.SELECTED_RESOURCE, modelElement);
+		BeansUIUtils.showProjectPropertyPage(project, data);
 	}
 
 	/**

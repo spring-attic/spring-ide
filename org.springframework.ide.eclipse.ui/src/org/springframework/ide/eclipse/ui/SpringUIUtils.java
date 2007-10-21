@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.ui;
 
+import java.util.Map;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -75,6 +77,7 @@ import org.springframework.ide.eclipse.ui.dialogs.SpringPreferencePage;
 
 /**
  * This is a collection of UI-related helper methods.
+ * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
@@ -204,7 +207,7 @@ public final class SpringUIUtils {
 	 * <code>true</code> if <code>PreferenceDialog.OK</code> was selected.
 	 */
 	public static boolean showPreferenceDialog(String propertyPageId,
-			IProject project) {
+			IProject project, Map<String, Object> data) {
 		IPreferenceNode targetNode = null;
 
 		PropertyPageManager pageManager = new PropertyPageManager();
@@ -221,13 +224,14 @@ public final class SpringUIUtils {
 		if (targetNode != null) {
 			return openPreferenceNode(propertyPageId, targetNode,
 					SpringUIMessages.PropertiesPage_title + project.getName(),
-					project);
+					project, data);
 		}
 		return false;
 	}
 
 	private static boolean openPreferenceNode(final String propertyPageId,
-			final IPreferenceNode targetNode, final String title, Object element) {
+			final IPreferenceNode targetNode, final String title,
+			Object element, Map<String, Object> data) {
 
 		PreferenceManager manager = new PreferenceManager();
 		manager.addToRoot(targetNode);
@@ -237,6 +241,9 @@ public final class SpringUIUtils {
 
 		if (propertyPageId != null) {
 			dialog.setSelectedNode(propertyPageId);
+		}
+		if (data != null) {
+			dialog.setPageData(data);
 		}
 
 		final boolean[] result = new boolean[] { false };

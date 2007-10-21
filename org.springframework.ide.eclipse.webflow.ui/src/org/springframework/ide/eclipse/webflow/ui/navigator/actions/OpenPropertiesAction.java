@@ -10,10 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.ui.navigator.actions;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
+import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
 import org.springframework.ide.eclipse.ui.navigator.actions.AbstractNavigatorAction;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowModelUtils;
@@ -34,6 +38,8 @@ public class OpenPropertiesAction extends AbstractNavigatorAction {
 
 	private IProject project;
 
+	private IModelElement modelElement;
+
 	public OpenPropertiesAction(ICommonActionExtensionSite site) {
 		super(site);
 		setText("&Properties"); // TODO externalize text
@@ -45,9 +51,11 @@ public class OpenPropertiesAction extends AbstractNavigatorAction {
 			IProject project = null;
 			if (sElement instanceof IWebflowProject) {
 				project = ((IWebflowProject) sElement).getProject();
+				modelElement = null;
 			}
 			else if (sElement instanceof IWebflowConfig) {
 				project = ((IWebflowConfig) sElement).getProject().getProject();
+				modelElement = (IWebflowConfig) sElement;
 			}
 			else if (sElement instanceof IFile) {
 				if (WebflowModelUtils.isWebflowConfig((IFile) sElement)
@@ -55,6 +63,8 @@ public class OpenPropertiesAction extends AbstractNavigatorAction {
 								.equals(getActionSite().getExtensionId())) {
 					project = WebflowModelUtils.getWebflowConfig(
 							(IFile) sElement).getProject().getProject();
+					modelElement = WebflowModelUtils
+							.getWebflowConfig((IFile) sElement);
 				}
 			}
 			if (project != null) {
@@ -67,6 +77,10 @@ public class OpenPropertiesAction extends AbstractNavigatorAction {
 
 	@Override
 	public void run() {
-		SpringUIUtils.showPreferenceDialog(WebflowPropertyPage.ID, project);
+		Map<String, Object> data = new HashMap<String, Object>();
+		if (modelElement != null) {
+			data.put(WebflowPropertyPage.SELECTED_RESOURCE, modelElement);
+		}
+		SpringUIUtils.showPreferenceDialog(WebflowPropertyPage.ID, project, data);
 	}
 }
