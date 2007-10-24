@@ -8,39 +8,52 @@
    <topic label="What's new in Spring 2.0 and 2.5?" href="new-in-2.html">
       <topic label="Introduction" href="new-in-2.html#new-in-2-intro"/>
       <topic label="The Inversion of Control (IoC) container" href="new-in-2.html#new-in-2-ioc">
-         <topic label="Easier XML configuration" href="new-in-2.html#new-in-2-ioc-configuration"/>
          <topic label="New bean scopes" href="new-in-2.html#new-in-2-ioc-scopes"/>
+         <topic label="Easier XML configuration" href="new-in-2.html#new-in-2-ioc-configuration"/>
          <topic label="Extensible XML authoring" href="new-in-2.html#new-in-2-ioc-custom-configuration"/>
+         <topic label="Annotation-driven configuration" href="new-in-2.html#new-in-2-ioc-annotations"/>
+         <topic label="Autodetecting components in the classpath" href="new-in-2.html#new-in-2-ioc-component-scanning"/>
       </topic>
       <topic label="Aspect Oriented Programming (AOP)" href="new-in-2.html#new-in-2-aop">
          <topic label="Easier AOP XML configuration" href="new-in-2.html#new-in-2-aop-configuration"/>
-         <topic label="Support for @AspectJ aspects" href="new-in-2.html#new-in-2-aop-aspectJ"/>
+         <topic label="Support for @AspectJ aspects" href="new-in-2.html#new-in-2-aop-aspectj"/>
+         <topic label="Support for bean name pointcut element" href="new-in-2.html#new-in-2-aop-bean-pointcuts"/>
+         <topic label="Support for AspectJ load-time weaving" href="new-in-2.html#new-in-2-aop-load-time-weaving"/>
       </topic>
-      <topic label="Enhanced testing support" href="new-in-2.html#new-in-2-testing"/>
       <topic label="The Middle Tier" href="new-in-2.html#new-in-2-middle-tier">
          <topic label="Easier configuration of declarative transactions in XML" href="new-in-2.html#new-in-2-middle-tier-transaction-configuration"/>
+         <topic label="Full WebSphere transaction management support" href="new-in-2.html#new-in-2-middle-tier-websphere"/>
          <topic label="JPA" href="new-in-2.html#new-in-2-middle-tier-jpa"/>
          <topic label="Asynchronous JMS" href="new-in-2.html#new-in-2-middle-tier-async-jms"/>
          <topic label="JDBC" href="new-in-2.html#new-in-2-middle-tier-jdbc"/>
       </topic>
       <topic label="The Web Tier" href="new-in-2.html#new-in-2-web">
-         <topic label="A form tag library for Spring MVC" href="new-in-2.html#new-in-2-web-form-tags"/>
          <topic label="Sensible defaulting in Spring MVC" href="new-in-2.html#new-in-2-web-convention"/>
          <topic label="Portlet framework" href="new-in-2.html#new-in-2-web-portlet"/>
+         <topic label="Annotation-based controllers" href="new-in-2.html#new-in-2-web-annotations"/>
+         <topic label="A form tag library for Spring MVC" href="new-in-2.html#new-in-2-web-form-tags"/>
+         <topic label="Tiles 2 support" href="new-in-2.html#new-in-2-web-tiles2"/>
+         <topic label="JSF 1.2 support" href="new-in-2.html#new-in-2-web-jsf12"/>
+         <topic label="JAX-WS support" href="new-in-2.html#new-in-2-web-jaxws"/>
       </topic>
       <topic label="Everything else" href="new-in-2.html#new-in-2-other">
          <topic label="Dynamic language support" href="new-in-2.html#new-in-2-other-dynamic-language-support"/>
-         <topic label="JMX" href="new-in-2.html#new-in-2-other-jmx"/>
+         <topic label="Enhanced testing support" href="new-in-2.html#new-in-2-other-testing"/>
+         <topic label="JMX support" href="new-in-2.html#new-in-2-other-jmx"/>
+         <topic label="Deploying a Spring application context as JCA adapter" href="new-in-2.html#new-in-2-other-jca"/>
          <topic label="Task scheduling" href="new-in-2.html#new-in-2-other-taskexecutor"/>
          <topic label="Java 5 (Tiger) support" href="new-in-2.html#new-in-2-other-java5"/>
       </topic>
-      <topic label="Migrating to Spring 2.0" href="new-in-2.html#new-in-2-migrating">
+      <topic label="Migrating to Spring 2.5" href="new-in-2.html#new-in-2-migrating">
          <topic label="Changes" href="new-in-2.html#new-in-2-migrating-changes">
+            <topic label="Supported JDK versions" href="new-in-2.html#new-in-2-migrating-jdk"/>
             <topic label="Jar packaging" href="new-in-2.html#new-in-2-migrating-packaging"/>
             <topic label="XML configuration" href="new-in-2.html#new-in-2-migrating-xml-configuration"/>
             <topic label="Deprecated classes and methods" href="new-in-2.html#new-in-2-migrating-deprecated"/>
             <topic label="Apache OJB" href="new-in-2.html#new-in-2-migrating-ojb"/>
-            <topic label="iBatis" href="new-in-2.html#new-in-2-migrating-ibatis"/>
+            <topic label="iBATIS" href="new-in-2.html#new-in-2-migrating-ibatis"/>
+            <topic label="Hibernate" href="new-in-2.html#new-in-2-migrating-hibernate"/>
+            <topic label="JDO" href="new-in-2.html#new-in-2-migrating-jdo"/>
             <topic label="UrlFilenameViewController" href="new-in-2.html#new-in-2-migrating-UrlFilenameViewController"/>
          </topic>
       </topic>
@@ -167,7 +180,7 @@
             <topic label="@PostConstruct and&#xA;      @PreDestroy" href="beans.html#beans-postconstruct-and-predestroy-annotations"/>
          </topic>
          <topic label="Classpath scanning for beans" href="beans.html#beans-classpath-scanning">
-            <topic label="@Component and&#xA;      @Repository" href="beans.html#beans-stereotype-annotations"/>
+            <topic label="@Component and&#xA;      further stereotype annotations" href="beans.html#beans-stereotype-annotations"/>
             <topic label="Using filters to customize scanning" href="beans.html#beans-scanning-filters"/>
             <topic label="Naming auto-detected beans" href="beans.html#beans-scanning-name-generator"/>
             <topic label="Providing a scope for auto-detected beans" href="beans.html#beans-scanning-scope-resolver"/>
@@ -485,7 +498,7 @@
             <topic label="DriverManagerDataSource" href="jdbc.html#jdbc-DriverManagerDataSource"/>
             <topic label="TransactionAwareDataSourceProxy" href="jdbc.html#jdbc-TransactionAwareDataSourceProxy"/>
             <topic label="DataSourceTransactionManager" href="jdbc.html#jdbc-DataSourceTransactionManager"/>
-            <topic label="NativeJdbcExtractor" href="jdbc.html#d0e19207"/>
+            <topic label="NativeJdbcExtractor" href="jdbc.html#d0e19435"/>
          </topic>
          <topic label="JDBC batch operations" href="jdbc.html#jdbc-advanced-jdbc">
             <topic label="Batch operations with the JdbcTemplate" href="jdbc.html#jdbc-advanced-classic"/>
@@ -499,8 +512,8 @@
             <topic label="Calling a stored procedure using SimpleJdbcCall" href="jdbc.html#jdbc-simple-jdbc-call-1"/>
             <topic label="Declaring parameters to use for a SimpleJdbcCall" href="jdbc.html#jdbc-simple-jdbc-call-2"/>
             <topic label="How to define SqlParameters" href="jdbc.html#jdbc-params"/>
-            <topic label="Calling a stored function using SimpleJdbcCall" href="jdbc.html#d0e19571"/>
-            <topic label="Returning ResultSet/REF Cursor from a SimpleJdbcCall" href="jdbc.html#d0e19603"/>
+            <topic label="Calling a stored function using SimpleJdbcCall" href="jdbc.html#d0e19799"/>
+            <topic label="Returning ResultSet/REF Cursor from a SimpleJdbcCall" href="jdbc.html#d0e19831"/>
          </topic>
          <topic label="Modeling JDBC operations as Java objects" href="jdbc.html#jdbc-object">
             <topic label="SqlQuery" href="jdbc.html#jdbc-SqlQuery"/>
@@ -509,10 +522,10 @@
             <topic label="StoredProcedure" href="jdbc.html#jdbc-StoredProcedure"/>
             <topic label="SqlFunction" href="jdbc.html#jdbc-SqlFunction"/>
          </topic>
-         <topic label="Common issues with parameter and data value handling" href="jdbc.html#d0e19933">
+         <topic label="Common issues with parameter and data value handling" href="jdbc.html#d0e20161">
             <topic label="Providing SQL type information for parameters" href="jdbc.html#jdbc-type-information"/>
-            <topic label="Handling BLOB and CLOB objects" href="jdbc.html#d0e19975"/>
-            <topic label="Handling complex types for stored procedure calls" href="jdbc.html#d0e20082"/>
+            <topic label="Handling BLOB and CLOB objects" href="jdbc.html#d0e20203"/>
+            <topic label="Handling complex types for stored procedure calls" href="jdbc.html#d0e20310"/>
          </topic>
       </topic>
       <topic label="Object Relational Mapping (ORM) data access" href="orm.html">
@@ -576,7 +589,7 @@
          </topic>
          <topic label="The DispatcherServlet" href="mvc.html#mvc-servlet"/>
          <topic label="Controllers" href="mvc.html#mvc-controller">
-            <topic label="AbstractController and WebContentGenerator" href="mvc.html#mvc-controller-abstractcontroller"/>
+            <topic label="AbstractController and&#xA;      WebContentGenerator" href="mvc.html#mvc-controller-abstractcontroller"/>
             <topic label="Other simple controllers" href="mvc.html#mvc-controller-othersimplecontrollers"/>
             <topic label="The MultiActionController" href="mvc.html#mvc-controller-multiaction"/>
             <topic label="Command controllers" href="mvc.html#mvc-controller-command"/>
@@ -584,10 +597,10 @@
          <topic label="Handler mappings" href="mvc.html#mvc-handlermapping">
             <topic label="BeanNameUrlHandlerMapping" href="mvc.html#mvc-handlermapping-beanname"/>
             <topic label="SimpleUrlHandlerMapping" href="mvc.html#mvc-handlermapping-urlhandlermapping"/>
-            <topic label="Intercepting requests - the HandlerInterceptor interface" href="mvc.html#mvc-handlermapping-interceptor"/>
+            <topic label="Intercepting requests - the&#xA;      HandlerInterceptor interface" href="mvc.html#mvc-handlermapping-interceptor"/>
          </topic>
          <topic label="Views and resolving them" href="mvc.html#mvc-viewresolver">
-            <topic label="Resolving views - the ViewResolver interface" href="mvc.html#mvc-viewresolver-resolver"/>
+            <topic label="Resolving views - the ViewResolver&#xA;      interface" href="mvc.html#mvc-viewresolver-resolver"/>
             <topic label="Chaining ViewResolvers" href="mvc.html#mvc-viewresolver-chaining"/>
             <topic label="Redirecting to views" href="mvc.html#mvc-redirecting">
                <topic label="RedirectView" href="mvc.html#mvc-redirecting-redirect-view"/>
@@ -608,7 +621,7 @@
          </topic>
          <topic label="Spring's multipart (fileupload) support" href="mvc.html#mvc-multipart">
             <topic label="Introduction" href="mvc.html#mvc-multipart-introduction"/>
-            <topic label="Using the MultipartResolver" href="mvc.html#mvc-multipart-resolver"/>
+            <topic label="Using the&#xA;      MultipartResolver" href="mvc.html#mvc-multipart-resolver"/>
             <topic label="Handling a file upload in a form" href="mvc.html#mvc-multipart-forms"/>
          </topic>
          <topic label="Using Spring's form tag library" href="mvc.html#mvc-formtaglib">
@@ -616,7 +629,9 @@
             <topic label="The form tag" href="mvc.html#mvc-formtaglib-formtag"/>
             <topic label="The input tag" href="mvc.html#mvc-formtaglib-inputtag"/>
             <topic label="The checkbox tag" href="mvc.html#mvc-formtaglib-checkboxtag"/>
+            <topic label="The checkboxes tag" href="mvc.html#mvc-formtaglib-checkboxestag"/>
             <topic label="The radiobutton tag" href="mvc.html#mvc-formtaglib-radiobuttontag"/>
+            <topic label="The radiobuttons tag" href="mvc.html#mvc-formtaglib-radiobuttonstag"/>
             <topic label="The password tag" href="mvc.html#mvc-formtaglib-passwordtag"/>
             <topic label="The select tag" href="mvc.html#mvc-formtaglib-selecttag"/>
             <topic label="The option tag" href="mvc.html#mvc-formtaglib-optiontag"/>
@@ -627,9 +642,17 @@
          </topic>
          <topic label="Handling exceptions" href="mvc.html#mvc-exceptionhandlers"/>
          <topic label="Convention over configuration" href="mvc.html#mvc-coc">
-            <topic label="The Controller - ControllerClassNameHandlerMapping" href="mvc.html#mvc-coc-ccnhm"/>
-            <topic label="The Model - ModelMap (ModelAndView)" href="mvc.html#mvc-coc-modelmap"/>
-            <topic label="The View - RequestToViewNameTranslator" href="mvc.html#mvc-coc-r2vnt"/>
+            <topic label="The Controller -&#xA;      ControllerClassNameHandlerMapping" href="mvc.html#mvc-coc-ccnhm"/>
+            <topic label="The Model - ModelMap&#xA;      (ModelAndView)" href="mvc.html#mvc-coc-modelmap"/>
+            <topic label="The View -&#xA;      RequestToViewNameTranslator" href="mvc.html#mvc-coc-r2vnt"/>
+         </topic>
+         <topic label="Annotation-based controller configuration" href="mvc.html#mvc-annotation">
+            <topic label="Defining a controller with&#xA;      @Controller" href="mvc.html#mvc-ann-controller"/>
+            <topic label="Mapping requests to methods with&#xA;      @RequestMapping" href="mvc.html#mvc-ann-requestmapping"/>
+            <topic label="Binding request parameters to method parameters with&#xA;      @RequestParam" href="mvc.html#mvc-ann-requestparam"/>
+            <topic label="Providing a link to data from the model with&#xA;      @ModelAttribute" href="mvc.html#mvc-ann-modelattrib"/>
+            <topic label="Specifying attributes to store in a Session with&#xA;      @SessionAttribute" href="mvc.html#mvc-ann-sessionattrib"/>
+            <topic label="Customizing the&#xA;      AnnotationMethodHandlerAdapter" href="mvc.html#mvc-ann-adapter"/>
          </topic>
          <topic label="Further Resources" href="mvc.html#mvc-resources"/>
       </topic>
