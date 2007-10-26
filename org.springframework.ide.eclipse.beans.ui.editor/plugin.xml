@@ -77,14 +77,20 @@
 			<!-- Util namespace -->
 			<public
 				publicId="http://www.springframework.org/schema/util"
-				uri="platform:/plugin/org.springframework/org/springframework/beans/factory/xml/spring-util-2.0.xsd"
+				uri="platform:/plugin/org.springframework/org/springframework/beans/factory/xml/spring-util-2.5.xsd"
 				webURL="http://www.springframework.org/schema/util/spring-util.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/util/spring-util.xsd"
-				uri="platform:/plugin/org.springframework/org/springframework/beans/factory/xml/spring-util-2.0.xsd" />
+				uri="platform:/plugin/org.springframework/org/springframework/beans/factory/xml/spring-util-2.5.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/util/spring-util-2.0.xsd"
 				uri="platform:/plugin/org.springframework/org/springframework/beans/factory/xml/spring-util-2.0.xsd" />
+			<system
+				systemId="http://www.springframework.org/schema/util/spring-util-2.1.xsd"
+				uri="platform:/plugin/org.springframework/org/springframework/beans/factory/xml/spring-util-2.5.xsd" />
+			<system
+				systemId="http://www.springframework.org/schema/util/spring-util-2.5.xsd"
+				uri="platform:/plugin/org.springframework/org/springframework/beans/factory/xml/spring-util-2.5.xsd" />
 
 			<!-- JMS namespace -->
 			<public
