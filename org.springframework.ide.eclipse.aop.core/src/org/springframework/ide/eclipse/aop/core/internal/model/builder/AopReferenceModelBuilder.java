@@ -62,7 +62,6 @@ import org.springframework.util.StringUtils;
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings("restriction")
 public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 
 	private static final String PROCESSING_TOOK_MSG = "Processing took";
@@ -336,7 +335,6 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
 	private IAopProject buildAopReferencesForFile(IFile currentFile,
 			IProgressMonitor monitor) {
 		IAopProject aopProject = null;

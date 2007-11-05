@@ -47,7 +47,6 @@ import org.springframework.util.ReflectionUtils;
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings("restriction")
 public class AspectDefinitionMatcher {
 	
 	private Map<IAspectDefinition, Object> pointcutExpressionCache = 
