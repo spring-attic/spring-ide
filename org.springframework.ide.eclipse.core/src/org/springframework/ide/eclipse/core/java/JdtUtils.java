@@ -412,9 +412,9 @@ public class JdtUtils {
 		Set<URL> paths = new LinkedHashSet<URL>();
 		if (!useParentClassLoader) {
 			// add required libraries from osgi bundles
-			paths.addAll(getBundleClassPath("org.springframework"));
+			paths.addAll(getBundleClassPath("org.springframework.bundle.spring"));
 			paths.addAll(getBundleClassPath("org.aspectj.aspectjweaver"));
-			paths.addAll(getBundleClassPath("jakarta.commons.logging"));
+			paths.addAll(getBundleClassPath("org.apache.logging"));
 			paths.addAll(getBundleClassPath("org.objectweb.asm"));
 		}
 
