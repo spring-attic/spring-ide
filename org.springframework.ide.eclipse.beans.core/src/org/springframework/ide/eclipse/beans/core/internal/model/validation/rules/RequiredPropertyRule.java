@@ -26,10 +26,12 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
+import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
@@ -46,6 +48,9 @@ import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
  * @since 2.0.1
  */
 public class RequiredPropertyRule extends AbstractBeanValidationRule {
+
+	private static final String REQUIRED_ANNOTATION_TYPE_PROPERTY_NAME = 
+		"requiredAnnotationType";
 
 	@Override
 	protected boolean supportsBean(IBean bean, BeansValidationContext context) {
@@ -79,7 +84,7 @@ public class RequiredPropertyRule extends AbstractBeanValidationRule {
 	/**
 	 * Validates {@link PropertyValues} of given {link BeanDefinition} if all
 	 * required are configured.
-	 * @param type the type whose hierachy to check for {@link Required}
+	 * @param type the type whose hierarchy to check for {@link Required}
 	 * annotated properties
 	 * @param bean the underlying {@link IBean} instance
 	 * @param mergedBd the {@link BeanDefinition} behind the {@link IBean}
@@ -90,7 +95,8 @@ public class RequiredPropertyRule extends AbstractBeanValidationRule {
 			BeanDefinition mergedBd, BeansValidationContext context) {
 		try {
 			RequiredAnnotationMetadata annotationMetadata = getRequiredAnnotationMetadata(
-					context.getClassReaderFactory(), bean, type);
+					context.getClassReaderFactory(), bean, type,
+					getRequiredAnnotationTypes(context));
 
 			List<String> missingProperties = new ArrayList<String>();
 			Set<IMethod> properties = Introspector
@@ -123,9 +129,10 @@ public class RequiredPropertyRule extends AbstractBeanValidationRule {
 	 */
 	private RequiredAnnotationMetadata getRequiredAnnotationMetadata(
 			final ClassReaderFactory classReaderFactory, final IBean bean,
-			final IType type) {
+			final IType type, Set<String> requiredAnnotationTypes) {
 		String className = type.getFullyQualifiedName();
-		RequiredAnnotationMetadata visitor = new RequiredAnnotationMetadata();
+		RequiredAnnotationMetadata visitor = new RequiredAnnotationMetadata(
+				requiredAnnotationTypes);
 		try {
 			while (className != null
 					&& !Object.class.getName().equals(className)) {
@@ -149,10 +156,19 @@ public class RequiredPropertyRule extends AbstractBeanValidationRule {
 	private static class RequiredAnnotationMetadata extends
 			AnnotationMetadataReadingVisitor {
 
-		private static final String REQUIRED_NAME = Type
+		public static final String REQUIRED_NAME = Type
 				.getDescriptor(Required.class);
 
+		private Set<String> requiredAnnotationTypes = new HashSet<String>();
+
 		private Set<String> requiredPropertyNames = new HashSet<String>();
+
+		public RequiredAnnotationMetadata(Set<String> requiredAnnotationTypes) {
+			for (String className : requiredAnnotationTypes) {
+				this.requiredAnnotationTypes.add('L' + className.replace('.',
+						'/') + ';');
+			}
+		}
 
 		@Override
 		public MethodVisitor visitMethod(int modifier, final String name,
@@ -162,7 +178,7 @@ public class RequiredPropertyRule extends AbstractBeanValidationRule {
 					@Override
 					public AnnotationVisitor visitAnnotation(final String desc,
 							boolean visible) {
-						if (REQUIRED_NAME.equals(desc)) {
+						if (requiredAnnotationTypes.contains(desc)) {
 							requiredPropertyNames.add(java.beans.Introspector
 									.decapitalize(name.substring(3)));
 						}
@@ -176,6 +192,32 @@ public class RequiredPropertyRule extends AbstractBeanValidationRule {
 		public boolean isRequiredProperty(String propertyName) {
 			return requiredPropertyNames.contains(propertyName);
 		}
+	}
+
+	/**
+	 * Extracts the configured <code>requiredAnnotationType</code> values from
+	 * all registered {@link RequiredAnnotationBeanPostProcessor}.
+	 * @since 2.0.2
+	 */
+	private Set<String> getRequiredAnnotationTypes(
+			BeansValidationContext context) {
+		Set<String> requiredAnnotationTypes = new HashSet<String>();
+		Set<BeanDefinition> bds = context.getRegisteredBeanDefinition(
+				AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
+				RequiredAnnotationBeanPostProcessor.class.getName());
+		for (BeanDefinition bd : bds) {
+			PropertyValue property = bd.getPropertyValues().getPropertyValue(
+					REQUIRED_ANNOTATION_TYPE_PROPERTY_NAME);
+			if (property != null
+					&& property.getValue() instanceof TypedStringValue) {
+				requiredAnnotationTypes.add(((TypedStringValue) property
+						.getValue()).getValue());
+			}
+			else {
+				requiredAnnotationTypes.add(Required.class.getName());
+			}
+		}
+		return requiredAnnotationTypes;
 	}
 
 	/**

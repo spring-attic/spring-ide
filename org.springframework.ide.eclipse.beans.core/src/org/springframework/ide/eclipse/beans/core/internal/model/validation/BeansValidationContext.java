@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.beans.core.internal.model.validation;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -49,7 +50,7 @@ public class BeansValidationContext extends AbstractValidationContext {
 
 	private ClassReaderFactory classReaderFactory;
 
-	private Map<String, BeanDefinition> beanLookupCache;
+	private Map<String, Set<BeanDefinition>> beanLookupCache;
 
 	public BeansValidationContext(IBeansConfig config,
 			IResourceModelElement contextElement) {
@@ -58,7 +59,7 @@ public class BeansValidationContext extends AbstractValidationContext {
 		incompleteRegistry = createRegistry(config, contextElement, false);
 		completeRegistry = createRegistry(config, contextElement, true);
 
-		beanLookupCache = new HashMap<String, BeanDefinition>();
+		beanLookupCache = new HashMap<String, Set<BeanDefinition>>();
 	}
 
 	public BeanDefinitionRegistry getIncompleteRegistry() {
@@ -138,6 +139,29 @@ public class BeansValidationContext extends AbstractValidationContext {
 	}
 
 	/**
+	 * Returns a matching {@link BeanDefinition} for the given
+	 * <code>beanName</code> and <code>beanClass</code>.
+	 * @param beanName the name of the bean to look for
+	 * @param beanClass the class of the bean to look for
+	 * @since 2.0.2
+	 */
+	public Set<BeanDefinition> getRegisteredBeanDefinition(String beanName,
+			String beanClass) {
+		Assert.notNull(beanName);
+		Assert.notNull(beanClass);
+
+		String key = beanClass + KEY_SEPARATOR_CHAR + beanName;
+		if (beanLookupCache.containsKey(key)) {
+			return beanLookupCache.get(key);
+		}
+		Set<BeanDefinition> bds = ValidationRuleUtils.getBeanDefinitions(beanName,
+				beanClass, this);
+		// as we don't use a Hashtable we can insert null values
+		beanLookupCache.put(key, bds);
+		return bds;
+	}
+
+	/**
 	 * Checks if a bean matching the given <code>beanName</code> and
 	 * <code>beanClass</code> is registered in this context.
 	 * @param beanName the name of the bean to look for
@@ -146,17 +170,7 @@ public class BeansValidationContext extends AbstractValidationContext {
 	 * context; false otherwise
 	 */
 	public boolean isBeanRegistered(String beanName, String beanClass) {
-		Assert.notNull(beanName);
-		Assert.notNull(beanClass);
-
-		String key = beanClass + KEY_SEPARATOR_CHAR + beanName;
-		if (beanLookupCache.containsKey(key)) {
-			return beanLookupCache.get(key) != null;
-		}
-		BeanDefinition bd = ValidationRuleUtils.getBeanDefinition(beanName, 
-				beanClass, this);
-		// as we don't use a Hashtable we can insert null values
-		beanLookupCache.put(key, bd);
-		return bd != null;
+		Set<BeanDefinition> bds = getRegisteredBeanDefinition(beanName, beanClass);
+		return bds != null && bds.size() > 0;
 	}
 }

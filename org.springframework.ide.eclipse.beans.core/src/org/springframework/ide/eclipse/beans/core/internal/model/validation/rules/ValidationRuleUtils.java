@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.validation.rules;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.jdt.core.IMethod;
@@ -19,7 +20,6 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
@@ -90,33 +90,37 @@ public final class ValidationRuleUtils {
 	}
 
 	/**
-	 * Checks if a been registered in the {@link BeanDefinitionRegistry}.
+	 * Returns all registered {@link BeanDefinition} matching the given
+	 * <code>beanName</code> and <code>beanClass</code>.
 	 */
-	public static BeanDefinition getBeanDefinition(String beanName,
+	public static Set<BeanDefinition> getBeanDefinitions(String beanName,
 			String beanClass, BeansValidationContext context) {
+		Set<BeanDefinition> beanDefinition = new HashSet<BeanDefinition>();
 		try {
-			return context.getCompleteRegistry().getBeanDefinition(beanName);
+			beanDefinition.add(context.getCompleteRegistry().getBeanDefinition(
+					beanName));
 		}
 		catch (NoSuchBeanDefinitionException e) {
-			// fall back for manual installation of the post processor
-			for (String name : context.getCompleteRegistry()
-					.getBeanDefinitionNames()) {
-				try {
-					BeanDefinition db = context.getCompleteRegistry()
-							.getBeanDefinition(name);
-					if (db.getBeanClassName() != null
-							&& Introspector.doesExtend(JdtUtils.getJavaType(
-									context.getRootElementProject(), db
-											.getBeanClassName()), beanClass)) {
-						return db;
-					}
-				}
-				catch (BeanDefinitionStoreException e1) {
-					// ignore here
+			// this is ok here
+		}
+		// fall back for manual installation of the post processor
+		for (String name : context.getCompleteRegistry()
+				.getBeanDefinitionNames()) {
+			try {
+				BeanDefinition db = context.getCompleteRegistry()
+						.getBeanDefinition(name);
+				if (db.getBeanClassName() != null
+						&& Introspector.doesExtend(JdtUtils
+								.getJavaType(context.getRootElementProject(),
+										db.getBeanClassName()), beanClass)) {
+					beanDefinition.add(db);
 				}
 			}
-			return null;
+			catch (BeanDefinitionStoreException e1) {
+				// ignore here
+			}
 		}
+		return beanDefinition;
 	}
 
 	/**
