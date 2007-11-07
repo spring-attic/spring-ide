@@ -62,7 +62,7 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 
 	public String getDescription(Object element) {
 		if (element instanceof IBeansProject) {
-			return "Beans"	// TODO Externalize string
+			return "Beans" // TODO Externalize string
 					+ " - " + ((IBeansProject) element).getProject().getName();
 		}
 		else if (element instanceof ISourceModelElement) {
@@ -71,31 +71,29 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 			if (provider != null && provider instanceof IDescriptionProvider) {
 				return ((IDescriptionProvider) provider)
 						.getDescription(element);
-			} else {
-				return DEFAULT_NAMESPACE_LABEL_PROVIDER
-						.getDescription(element);
 			}
-		} else if (element instanceof IModelElement) {
-			return BeansModelLabels
-					.getElementLabel((IModelElement) element,
-							BeansUILabels.APPEND_PATH
-									| BeansUILabels.DESCRIPTION);
+			else {
+				return DEFAULT_NAMESPACE_LABEL_PROVIDER.getDescription(element);
+			}
+		}
+		else if (element instanceof IModelElement) {
+			return BeansModelLabels.getElementLabel((IModelElement) element,
+					BeansUILabels.APPEND_PATH | BeansUILabels.DESCRIPTION);
 		}
 		if (element instanceof IFile) {
 			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
 					(IFile) element);
 			if (config != null) {
 				return BeansModelLabels.getElementLabel(config,
-						BeansUILabels.APPEND_PATH
-								| BeansUILabels.DESCRIPTION);
+						BeansUILabels.APPEND_PATH | BeansUILabels.DESCRIPTION);
 			}
-		} else if (element instanceof ZipEntryStorage) {
+		}
+		else if (element instanceof ZipEntryStorage) {
 			IBeansConfig config = BeansCorePlugin.getModel().getConfig(
 					((ZipEntryStorage) element).getAbsoluteName());
 			if (config != null) {
 				return BeansModelLabels.getElementLabel(config,
-						BeansUILabels.APPEND_PATH
-								| BeansUILabels.DESCRIPTION);
+						BeansUILabels.APPEND_PATH | BeansUILabels.DESCRIPTION);
 			}
 		}
 		return null;
@@ -113,7 +111,8 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 	@Override
 	protected Image getImage(Object element, Object parentElement) {
 		if (element instanceof IBeansProject) {
-			Image image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_VIRTUAL_FOLDER);
+			Image image = BeansUIImages
+					.getImage(BeansUIImages.IMG_OBJS_VIRTUAL_FOLDER);
 			return image;
 		}
 		return super.getImage(element, parentElement);
@@ -122,18 +121,20 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 	@Override
 	protected String getText(Object element, Object parentElement) {
 		if (element instanceof IBeansProject) {
-			return "Beans";	// TODO CD Externalize string
+			return "Beans"; // TODO CD Externalize string
 		}
 		else if (element instanceof IBeansConfig
-				&& (parentElement instanceof ISpringProject
-						|| parentElement instanceof IBeansProject)) {
+				&& (parentElement instanceof ISpringProject || parentElement instanceof IBeansProject)) {
 			return ((IBeansConfig) element).getElementName();
 		}
 		else if (element instanceof IFile
-				&& parentElement instanceof IBeansProject) {
-			return ((IFile) element).getProjectRelativePath().toString();
+				&& parentElement != null) {
+			return ((IFile) element).getName()
+					+ " - "
+					+ ((IFile) element).getProjectRelativePath()
+							.removeLastSegments(1).toString();
 		}
-		else if (element instanceof ILazyInitializedModelElement 
+		else if (element instanceof ILazyInitializedModelElement
 				&& !((ILazyInitializedModelElement) element).isInitialized()) {
 			return "loading model content..."; // TODO CD Externalize string
 		}

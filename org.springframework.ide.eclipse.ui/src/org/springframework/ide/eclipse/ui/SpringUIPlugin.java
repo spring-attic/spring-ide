@@ -38,6 +38,8 @@ public class SpringUIPlugin extends AbstractUIPlugin {
 	 * <code>org.springframework.ide.eclipse.ui</code>).
 	 */
 	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.ui";
+	
+	public static final String SORTING_ENABLED_KEY = PLUGIN_ID + ".sortingEnabled";
 
 	/**
 	 * Viewer identifier of the Spring Explorer (value

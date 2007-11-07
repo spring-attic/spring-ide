@@ -38,6 +38,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -66,6 +67,7 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.internal.dialogs.PropertyDialog;
 import org.eclipse.ui.internal.dialogs.PropertyPageContributorManager;
 import org.eclipse.ui.internal.dialogs.PropertyPageManager;
+import org.eclipse.ui.navigator.CommonViewer;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.wst.sse.core.StructuredModelManager;
@@ -488,14 +490,23 @@ public final class SpringUIUtils {
 		}
 		return null;
 	}
+	
+	public static boolean isSortingEnabled() {
+		return SpringUIPlugin.getDefault().getPluginPreferences().getBoolean(
+				SpringUIPlugin.SORTING_ENABLED_KEY);
+	}
 
-	// TODO CD remove if really not required anymore
-	/*
-	 * public static Image getDecoratedImage(Image image, int severity) { if
-	 * (severity == IMarker.SEVERITY_WARNING) { return
-	 * SpringUIImages.getDecoratedImage(image, SpringUIImages.FLAG_WARNING); }
-	 * else if (severity == IMarker.SEVERITY_ERROR) { return
-	 * SpringUIImages.getDecoratedImage(image, SpringUIImages.FLAG_ERROR); }
-	 * return image; }
-	 */
+	public static void setSortingEnabled(boolean isEnabled) {
+		SpringUIPlugin.getDefault().getPluginPreferences().setValue(
+				SpringUIPlugin.SORTING_ENABLED_KEY, isEnabled);
+	}
+	
+	public static boolean isSpringExplorer(Viewer viewer) {
+		if (viewer instanceof CommonViewer) {
+			return SpringUIPlugin.SPRING_EXPLORER_ID
+					.equals(((CommonViewer) viewer)
+							.getNavigatorContentService().getViewerId());
+		}
+		return false;
+	}
 }

@@ -73,14 +73,20 @@ public class WebflowNavigatorLabelProvider extends BeansNavigatorLabelProvider {
 				return config.getName();
 			}
 			else {
-				return config.getResource().getFullPath().makeRelative()
-						.toString();
+				return getFileLabel(config.getResource());
 			}
 		}
 		else if (element instanceof IFile
-				&& parentElement instanceof IWebflowProject) {
-			return ((IFile) element).getProjectRelativePath().toString();
+				&& parentElement != null) {
+			return getFileLabel((IFile) element);
 		}
 		return super.getText(element, parentElement);
+	}
+	
+	private String getFileLabel(IFile file) {
+		return file.getName()
+				+ " - "
+				+ file.getProjectRelativePath().removeLastSegments(1)
+						.toString();
 	}
 }

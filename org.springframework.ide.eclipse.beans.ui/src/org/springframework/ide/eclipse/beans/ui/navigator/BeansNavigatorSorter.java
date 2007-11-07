@@ -10,17 +10,22 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.navigator;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
+import org.springframework.ide.eclipse.ui.SpringUIUtils;
 
 /**
  * Sorter for Spring beans {@link ISourceModelElement}s. It keeps them in the
- * order found in the corresponding {@link IBeansConfig} file.
- * 
+ * order found in the corresponding {@link IBeansConfig} file in case the common
+ * navigator is not the spring explorer and sorting is not enabled.
+ * <p>
+ * Otherwise this sorter does a lexical sorting of the elements
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  */
 public class BeansNavigatorSorter extends ViewerSorter {
 
@@ -36,13 +41,27 @@ public class BeansNavigatorSorter extends ViewerSorter {
 
 	@Override
 	public int compare(Viewer viewer, Object e1, Object e2) {
-		if (e1 instanceof ISourceModelElement
-				|| e2 instanceof ISourceModelElement) {
-
-			// We don't want to sort it, just show it in the order it's found
-			// in the file
-			return 0;
+		if (SpringUIUtils.isSortingEnabled()
+				&& SpringUIUtils.isSpringExplorer(viewer)) {
+			// add hack for beans config sorting
+			if (e1 instanceof IFile && e2 instanceof IFile) {
+				String f1 = getFileLabel((IFile) e1);
+				String f2 = getFileLabel((IFile) e2);
+				return super.compare(viewer, f1, f2);
+			}
+			else {
+				return super.compare(viewer, e1, e2);
+			}
 		}
-		return super.compare(viewer, e1, e2);
+		// We don't want to sort it, just show it in the order it's found
+		// in the file
+		return 0;
+	}
+
+	private String getFileLabel(IFile file) {
+		return file.getName()
+				+ " - "
+				+ file.getProjectRelativePath().removeLastSegments(1)
+						.toString();
 	}
 }
