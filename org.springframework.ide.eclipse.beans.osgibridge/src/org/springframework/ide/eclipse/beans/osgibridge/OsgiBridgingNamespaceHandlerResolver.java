@@ -14,7 +14,6 @@ import java.util.Stack;
 
 import org.springframework.beans.factory.xml.NamespaceHandler;
 import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
-import org.springframework.osgi.context.support.OsgiBundleNamespaceHandlerAndEntityResolver;
 
 /**
  * Uses Spring OSGi infrastructure services to locate installed
@@ -47,7 +46,7 @@ public class OsgiBridgingNamespaceHandlerResolver extends AbstractBundleContextA
 							}
 						}
 					}, getBundleContext(),
-					OsgiBundleNamespaceHandlerAndEntityResolver.class);
+					NamespaceHandlerResolver.class);
 		}
 		catch (Exception e) {
 			// don't really care here
