@@ -6,10 +6,8 @@ Bundle-Version: 2.0.2.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.beans.osgibridge.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.springframework.osgi.spring-osgi-extender,
  org.springframework.bundle.spring,
  org.springframework.ide.eclipse.beans.core,
- org.springframework.osgi.spring-osgi-core,
  org.eclipse.wst.xml.core
 Eclipse-LazyStart: true
 Bundle-Vendor: %providerName

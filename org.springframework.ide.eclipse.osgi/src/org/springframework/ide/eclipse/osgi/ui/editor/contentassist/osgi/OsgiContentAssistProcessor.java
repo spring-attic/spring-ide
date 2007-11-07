@@ -21,7 +21,6 @@ import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceCont
  * @author Christian Dupuis
  * @since 2.0.1
  */
-@SuppressWarnings("restriction")
 public class OsgiContentAssistProcessor extends
 		NamespaceContentAssistProcessorSupport {
 
@@ -36,7 +35,7 @@ public class OsgiContentAssistProcessor extends
 
 		ClassContentAssistCalculator classRef = new ClassContentAssistCalculator(
 				true);
-		registerContentAssistCalculator("service", "interfce", classRef);
-		registerContentAssistCalculator("reference", "interfce", classRef);
+		registerContentAssistCalculator("service", "interface", classRef);
+		registerContentAssistCalculator("reference", "interface", classRef);
 	}
 }

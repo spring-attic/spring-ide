@@ -1,52 +1,44 @@
 Manifest-Version: 1.0
-Export-Package: org.springframework.osgi.extender.support;uses:="org.s
- pringframework.osgi.service.importer,org.osgi.framework";version=1.0.
- 0.m3,org.springframework.osgi.extender.dependencies.startup;uses:="or
- g.springframework.osgi.context,org.apache.commons.logging,org.springf
- ramework.util,org.springframework.osgi.service.importer,org.springfra
- mework.beans,org.springframework.context,org.springframework.beans.fa
- ctory.config,org.springframework.osgi.util.concurrent,org.springframe
- work.beans.factory.support,org.springframework.osgi.util,org.osgi.fra
- mework,org.springframework.core.task,org.springframework.core.enums,o
- rg.springframework.beans.factory";version=1.0.0.m3,org.springframewor
- k.osgi.extender.dependencies.shutdown;uses:="org.springframework.util
- ,org.osgi.framework";version=1.0.0.m3,org.springframework.osgi.extend
- er;uses:="org.springframework.osgi.context,org.apache.commons.logging
- ,org.springframework.util,org.springframework.osgi.util.concurrent,or
- g.springframework.core,org.springframework.osgi.extender.dependencies
- .startup,org.springframework.osgi.util,org.springframework.osgi.conte
- xt.support,org.osgi.framework,org.springframework.core.task";version=
- 1.0.0.m3
-Private-Package: !*
-Implementation-Title: Spring OSGi Framework
-Spring-Version: 2.1
-Implementation-Version: 2.1
-Tool: Bnd-0.0.160
-Bundle-Name: spring-osgi-extender
-Created-By: 1.6.0-dp (Apple Computer, Inc.)
-Bundle-Vendor: Spring Framework
-Bundle-Version: 1.0.0.m3_v200709161228
-Bnd-LastModified: 1189797152546
-Bundle-Activator: org.springframework.osgi.extender.ContextLoaderListe
- ner
-Bundle-ManifestVersion: 2
+Bundle-Activator: org.springframework.osgi.internal.extender.ContextLo
+ aderListener
+Created-By: 1.5.0_13 (Apple Inc.)
 Bundle-License: http://www.apache.org/licenses/LICENSE-2.0
-Bundle-Description: Spring/OSGi extender. Listens for and bootstraps S
- pring-powered OSGi bundles.
 Import-Package: org.apache.commons.logging,org.osgi.framework;version=
  1.3,org.springframework.beans,org.springframework.beans.factory,org.s
  pringframework.beans.factory.config,org.springframework.beans.factory
- .support,org.springframework.context,org.springframework.core,org.spr
- ingframework.core.enums,org.springframework.core.task,org.springframe
- work.osgi.context;version=1.0.0.m3,org.springframework.osgi.context.s
- upport;version=1.0.0.m3,org.springframework.osgi.extender;version=1.0
- .0.m3,org.springframework.osgi.extender.dependencies.shutdown;version
- =1.0.0.m3,org.springframework.osgi.extender.dependencies.startup;vers
- ion=1.0.0.m3,org.springframework.osgi.extender.support;version=1.0.0.
- m3,org.springframework.osgi.service.importer;version=1.0.0.m3,org.spr
- ingframework.osgi.util;version=1.0.0.m3,org.springframework.osgi.util
- .concurrent;version=1.0.0.m3,org.springframework.util
-Bundle-SymbolicName: org.springframework.osgi.spring-osgi-extender
+ .xml,org.springframework.context,org.springframework.core,org.springf
+ ramework.core.enums,org.springframework.core.task,org.springframework
+ .osgi.context;version=1.0.0.rc1,org.springframework.osgi.context.supp
+ ort;version=1.0.0.rc1,org.springframework.osgi.internal.context,org.s
+ pringframework.osgi.internal.context.support,org.springframework.osgi
+ .internal.util.concurrent,org.springframework.osgi.service.importer;v
+ ersion=1.0.0.rc1,org.springframework.osgi.util;version=1.0.0.rc1,org.
+ springframework.util,org.xml.sax;resolution:=optional
+Spring-DM-Version: 1.0-rc1-SNAPSHOT
+Include-Resource: src/main/resources
+Implementation-Vendor-Id: org.springframework.osgi
+Bnd-LastModified: 1194367454150
+Bundle-Version: 1.0.0.rc1_v200711061752
+Ignore-Package: org.springframework.osgi.internal.extender.dependencie
+ s.shutdown,org.springframework.osgi.internal.extender.util,org.spring
+ framework.osgi.internal.extender.dependencies.startup,org.springframe
+ work.osgi.internal.extender.support,org.springframework.osgi.internal
+ .extender
+Bundle-Name: spring-osgi-extender
+Bundle-Description: Spring/OSGi extender. Listens for and bootstraps S
+ pring-powered OSGi bundles.
+Private-Package: org.springframework.osgi.internal.extender,org.spring
+ framework.osgi.internal.extender.dependencies.shutdown,org.springfram
+ ework.osgi.internal.extender.dependencies.startup,org.springframework
+ .osgi.internal.extender.support,org.springframework.osgi.internal.ext
+ ender.util
 Bundle-DocURL: http://www.springframework.org
-Include-Resource: {src/main/resources}
+Spring-Version: 2.5-rc1
+Bundle-Vendor: Spring Framework
+Bundle-ManifestVersion: 2
+Implementation-Title: Spring Dynamic Modules Framework
+Bundle-SymbolicName: org.springframework.osgi.bundle.extender
+Tool: Bnd-0.0.160
+Implementation-Version: 1.0-rc1-SNAPSHOT
+Implementation-Vendor: Spring Dynamic Modules Framework
 Bundle-ClassPath: spring-osgi-extender.jar

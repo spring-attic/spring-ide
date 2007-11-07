@@ -2,34 +2,52 @@
 <?eclipse version="3.0"?>
 <plugin>
 
-	<extension
-		point="org.springframework.ide.eclipse.beans.core.namespaces">
-		<namespace
-			namespaceHandler="org.springframework.osgi.config.OsgiNamespaceHandler"
-			uri="http://www.springframework.org/schema/osgi" />
-	</extension>  
-	
 	<extension point="org.eclipse.wst.xml.core.catalogContributions">
 		<catalogContribution>
 			<public
 				publicId="http://www.springframework.org/schema/osgi"
-				uri="platform:/plugin/org.springframework.osgi.spring-osgi-core/org/springframework/osgi/config/spring-osgi.xsd"
-				webURL="http://www.springframework.org/schema/osgi/spring-osgi.xsd" />
+				uri="platform:/plugin/org.springframework.osgi.bundle.core/org/springframework/osgi/config/spring-osgi-1.0-rc1.xsd"
+				webURL="http://www.springframework.org/schema/osgi/spring-osgi-1.0-rc1.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/osgi/spring-osgi.xsd"
-				uri="platform:/plugin/org.springframework.osgi.spring-osgi-core/org/springframework/osgi/config/spring-osgi.xsd" />
+				uri="platform:/plugin/org.springframework.osgi.bundle.core/org/springframework/osgi/config/spring-osgi-1.0-rc1.xsd" />
+			<system
+				systemId="http://www.springframework.org/schema/osgi/spring-osgi-1.0-rc1.xsd"
+				uri="platform:/plugin/org.springframework.osgi.bundle.core/org/springframework/osgi/config/spring-osgi-1.0-rc1.xsd" />
+
+			<public
+				publicId="http://www.springframework.org/schema/osgi-compendium"
+				uri="platform:/plugin/org.springframework.osgi.spring-osgi-core/org/springframework/osgi/config/spring-osgi-1.0-rc1.xsd"
+				webURL="http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium-1.0-rc1.xsd" />
+			<system
+				systemId="http://www.springframework.org/schema/osgi/spring-osgi-compendium.xsd"
+				uri="platform:/plugin/org.springframework.osgi.bundle.core/org/springframework/osgi/compendium/config/spring-osgi-compendium-1.0-rc1.xsd" />
+			<system
+				systemId="http://www.springframework.org/schema/osgi/spring-osgi-compendium-1.0-rc1.xsd"
+				uri="platform:/plugin/org.springframework.osgi.bundle.core/org/springframework/osgi/compendium/config/spring-osgi-compendium-1.0-rc1.xsd" />
 		</catalogContribution>
 	</extension>
 	
 	<extension
 		point="org.springframework.ide.eclipse.beans.ui.namespaces">
 		<namespace
-			name="Spring OSGi"
+			name="Spring Dynamic Modules"
 			labelProvider="org.springframework.ide.eclipse.osgi.ui.namespaces.OsgiConfigNamespaceLabelProvider"
 			uri="http://www.springframework.org/schema/osgi" 
 			prefix="osgi" 
 			icon="icons/full/obj16/spring_osgi_obj.gif"
-			defaultSchemaLocation="http://www.springframework.org/schema/osgi/spring-osgi.xsd"/>
+			defaultSchemaLocation="http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+			<schemaLocation url="http://www.springframework.org/schema/osgi/spring-osgi-1.0-rc1.xsd" />
+		</namespace>
+		<namespace
+			name="Spring Dynamic Modules Compendium"
+			labelProvider="org.springframework.ide.eclipse.osgi.ui.namespaces.OsgiConfigNamespaceLabelProvider"
+			uri="http://www.springframework.org/schema/osgi-compendium" 
+			prefix="osgi-compendium" 
+			icon="icons/full/obj16/spring_osgi_obj.gif"
+			defaultSchemaLocation="http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd">
+			<schemaLocation url="http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium-1.0-rc1.xsd" />
+		</namespace>
 	</extension>
 	
 	<extension
@@ -39,8 +57,15 @@
 			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
 			hyperLinkDetector="org.springframework.ide.eclipse.osgi.ui.editor.hyperlink.osgi.OsgiHyperlinkDetector"
 			labelProvider="org.springframework.ide.eclipse.osgi.ui.editor.outline.osgi.OsgiOutlineLabelProvider"
-			name="Spring OSGi"
+			name="Spring Dynamic Modules"
 			uri="http://www.springframework.org/schema/osgi" />
+		<namespace
+			contentAssistProcessor="org.springframework.ide.eclipse.osgi.ui.editor.contentassist.osgi.OsgiContentAssistProcessor"
+			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
+			hyperLinkDetector="org.springframework.ide.eclipse.osgi.ui.editor.hyperlink.osgi.OsgiHyperlinkDetector"
+			labelProvider="org.springframework.ide.eclipse.osgi.ui.editor.outline.osgi.OsgiOutlineLabelProvider"
+			name="Spring Dynamic Modules Compendium"
+			uri="http://www.springframework.org/schema/osgi-compendium" />
 	</extension>
 
 </plugin>

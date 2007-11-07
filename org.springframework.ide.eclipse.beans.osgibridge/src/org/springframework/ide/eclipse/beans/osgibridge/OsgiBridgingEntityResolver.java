@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.beans.osgibridge;
 import java.io.IOException;
 import java.util.Stack;
 
-import org.springframework.osgi.context.support.OsgiBundleNamespaceHandlerAndEntityResolver;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -24,9 +23,9 @@ import org.xml.sax.SAXException;
  * @author Christian Dupuis
  * @since 2.0.1
  */
-public class OsgiBridgingEntityResolver extends AbstractBundleContextAware implements
-		EntityResolver {
- 
+public class OsgiBridgingEntityResolver extends AbstractBundleContextAware
+		implements EntityResolver {
+
 	/**
 	 * Resolve the system Id and return the located {@link InputSource}
 	 * implementation.
@@ -47,8 +46,7 @@ public class OsgiBridgingEntityResolver extends AbstractBundleContextAware imple
 						}
 					}
 				}
-			}, getBundleContext(),
-					OsgiBundleNamespaceHandlerAndEntityResolver.class);
+			}, getBundleContext(), EntityResolver.class);
 		}
 		catch (Exception e) {
 			// don't really care here

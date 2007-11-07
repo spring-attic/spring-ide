@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.osgibridge;
 
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
-import org.springframework.osgi.extender.ContextLoaderListener;
+import org.springframework.web.context.ContextLoaderListener;
 import org.xml.sax.EntityResolver;
 
 /**
@@ -23,16 +24,22 @@ import org.xml.sax.EntityResolver;
  * @author Christian Dupuis
  * @since 2.0.1
  */
-public class Activator extends ContextLoaderListener {
+public class Activator extends AbstractUIPlugin {
 
 	public static final String PLUGIN_ID = 
 		"org.springframework.ide.eclipse.beans.osgibridge";
 
+	public static final String OSGI_EXTENDER_SYMBOLIC_NAME = 
+		"org.springframework.osgi.bundle.extender";
+
 	private static Activator plugin;
+
+	private BundleContext context;
 
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		this.context = context;
 	}
 
 	public void stop(BundleContext context) throws Exception {

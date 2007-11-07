@@ -48,6 +48,7 @@ plugin@org.springframework.ide.eclipse.doc=SVN,trunk,http://springide.org/repos,
 plugin@org.springframework.ide.eclipse.ui=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.ui
 plugin@org.springframework.bundle.spring.doc=SVN,trunk,http://springide.org/repos,,org.springframework.bundle.spring.doc
 plugin@org.springframework.source=SVN,trunk,http://springide.org/repos,,org.springframework.source
+plugin@org.springframework.osgi.source=SVN,trunk,http://springide.org/repos,,org.springframework.osgi.source
 plugin@org.springframework.ide.eclipse.javaconfig.core=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.javaconfig.core
 plugin@org.springframework.ide.eclipse.javaconfig.ui=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.javaconfig.ui
 plugin@org.springframework.ide.eclipse.javaconfig.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.javaconfig.source
