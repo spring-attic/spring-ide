@@ -117,7 +117,6 @@ public class WebflowProject extends AbstractModelElement
 	public boolean isElementArchived() {
 		return false;
 	}
-
 	
 	public IWebflowConfig getConfig(String flowId) {
 		for (IWebflowConfig config : getConfigs()) {
@@ -126,5 +125,10 @@ public class WebflowProject extends AbstractModelElement
 			}
 		}
 		return null;
+	}
+	
+	public void saveDescription() {
+		WebflowProjectDescription description = getDescription();
+		WebflowProjectDescriptionWriter.write(project, description);
 	}
 }

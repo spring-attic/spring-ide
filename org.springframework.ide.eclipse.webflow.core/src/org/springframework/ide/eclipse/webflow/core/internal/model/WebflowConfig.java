@@ -34,7 +34,6 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowProject;
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings("restriction")
 public class WebflowConfig extends AbstractModelElement implements
 		IWebflowConfig, IAdaptable {
 
@@ -50,7 +49,6 @@ public class WebflowConfig extends AbstractModelElement implements
 
 	private String name;
 
-	@SuppressWarnings("unused")
 	private final IWebflowProject project;
 
 	public IWebflowProject getProject() {

@@ -126,8 +126,8 @@
    <extension
          point="org.eclipse.ui.navigator.viewer">
       <viewer viewerId="org.springframework.ide.eclipse.ui.navigator.springExplorer">
+      	 <!-- Hide the "Link with Editor" action from the toolbar of the viewer -->
       	 <options>
-      	 	<!-- Hide the "Link with Editor" action from the toolbar of the viewer -->
 		 	<property name="org.eclipse.ui.navigator.hideLinkWithEditorAction" value="true" />
 		 </options>
       </viewer>
@@ -158,7 +158,8 @@
          <possibleChildren>
          	<or>
 				<instanceof value="org.springframework.ide.eclipse.core.model.ISpringProject"/>
-				<instanceof	value="org.eclipse.core.resources.IWorkspaceRoot" />
+				<instanceof	value="org.eclipse.core.resources.IResource" />
+				<instanceof	value="org.eclipse.jdt.core.IJavaProject" />
 			</or>
          </possibleChildren>
          <actionProvider
@@ -179,7 +180,14 @@
 					</adapt>
 				</or>
            </enablement>            
-      </actionProvider>
+      	 </actionProvider>
+         <dropAssistant
+               class="org.springframework.ide.eclipse.ui.internal.navigator.SpringNavigatorDropAdapter"
+               id="org.springframework.ide.eclipse.ui.navigator.springExplorerContent.dropAssistent">
+            <possibleDropTargets>
+				<adapt type="org.eclipse.core.resources.IResource" />	
+            </possibleDropTargets>
+         </dropAssistant>
       </navigatorContent>
       
       <navigatorContent
@@ -262,7 +270,7 @@
             %decorator.description
          </description>
          <enablement>
-         	<objectClass name=" org.springframework.ide.eclipse.core.model.ISpringProject"/>
+         	<objectClass name="org.springframework.ide.eclipse.core.model.ISpringProject"/>
          </enablement>
       </decorator>
    </extension>
@@ -283,5 +291,21 @@
    			visible="true" />
    	</perspectiveExtension>
    </extension>
+   
+   	<extension point="org.eclipse.ui.viewActions"> 
+    	<viewContribution 
+	    	id="org.springframework.ide.eclipse.ui.navigator.springExplorer.sorting" 
+   		    targetID="org.springframework.ide.eclipse.ui.navigator.springExplorer">
+	    	<action
+	            class="org.springframework.ide.eclipse.ui.navigator.actions.LexicalSortingAction"
+	            enablesFor="*"
+	            icon="icons/full/elcl16/alphab_sort_co.gif"
+	            id="org.springframework.ide.eclipse.ui.navigator.springExplorer.sortingAction"
+	            label="%sortSpringExplorerAction.label"
+	            style="toggle"
+	            toolbarPath="additions-start"
+	            tooltip="%sortSpringExplorerAction.tooltip"/>
+	  	</viewContribution> 
+	</extension>
 
 </plugin>

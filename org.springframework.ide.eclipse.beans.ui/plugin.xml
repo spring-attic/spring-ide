@@ -257,10 +257,7 @@
 		 </triggerPoints>
          <possibleChildren>
 			<or>
-				<and>
-					<instanceof value="org.eclipse.core.resources.IFile"/>
-					<test property="org.springframework.ide.eclipse.beans.core.model.isBeansConfig"/>
-				</and>
+				<instanceof value="org.eclipse.core.resources.IResource"/>
 				<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansModelElement"/>
 			</or>
          </possibleChildren>
@@ -281,6 +278,22 @@
 	            </or>
 	         </enablement>
          </actionProvider>
+         <dropAssistant
+               class="org.springframework.ide.eclipse.beans.ui.navigator.BeansNavigatorDropAdapter"
+               id="org.springframework.ide.eclipse.beans.ui.navigator.springExplorerContent.dropAssistent">
+            <possibleDropTargets>
+            	<or>
+            		<!-- drop to config sets -> node: '<config set name>' -->
+					<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet"/>
+            		<!-- drop to beans project -> node: 'beans' -->
+					<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansProject"/>
+            		<!-- drop to spring config -> node: '<project name>' -->
+					<instanceof value="org.springframework.ide.eclipse.core.model.ISpringProject"/>
+            		<!-- drop to empty space -->
+					<instanceof value="org.eclipse.core.resources.IWorkspaceRoot"/>
+				</or>
+            </possibleDropTargets>
+         </dropAssistant>
       </navigatorContent>
 
       <navigatorContent

@@ -128,7 +128,7 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider
 			return ((IBeansConfig) element).getElementName();
 		}
 		else if (element instanceof IFile
-				&& parentElement != null) {
+				&& parentElement instanceof IModelElement) {
 			return ((IFile) element).getName()
 					+ " - "
 					+ ((IFile) element).getProjectRelativePath()

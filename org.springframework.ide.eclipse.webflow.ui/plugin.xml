@@ -84,11 +84,10 @@
          <possibleChildren>
 			<or>
 				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject"/>
-				<and>
-					<instanceof value="org.eclipse.core.resources.IFile"/>
-					<test property="org.springframework.ide.eclipse.webflow.core.model.isWebflowConfig"/>
-				</and>
 				<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowModelElement"/>
+				<instanceof value="org.eclipse.core.resources.IFile"/>
+				<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansConfig"/>
+				<instanceof value="org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet"/>
 			</or>
          </possibleChildren>
          <commonSorter
@@ -108,6 +107,22 @@
 	            </or>
 	         </enablement>
 	      </actionProvider>
+	       <dropAssistant
+               class="org.springframework.ide.eclipse.webflow.ui.navigator.WebflowNavigatorDropAdapter"
+               id="org.springframework.ide.eclipse.webflow.ui.navigator.springExplorerContent.dropAssistent">
+            <possibleDropTargets>
+            	<or>
+            		<!-- drop to config or config sets -> node: '<config name>' -->
+					<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowConfig"/>
+            		<!-- drop to webflow project -> node: 'web flow' -->
+					<instanceof value="org.springframework.ide.eclipse.webflow.core.model.IWebflowProject"/>
+            		<!-- drop to spring config -> node: '<project name>' -->
+					<instanceof value="org.springframework.ide.eclipse.core.model.ISpringProject"/>
+            		<!-- drop to empty space -->
+					<instanceof value="org.eclipse.core.resources.IWorkspaceRoot"/>
+				</or>
+            </possibleDropTargets>
+         </dropAssistant>
       </navigatorContent>
 
       <navigatorContent
