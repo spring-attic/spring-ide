@@ -21,9 +21,10 @@ import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
-import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
+import org.springframework.ide.eclipse.beans.core.model.validation.AbstractNonInfrastructureBeanValidationRule;
+import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
@@ -41,11 +42,11 @@ import org.springframework.util.StringUtils;
  */
 public class BeanPropertyRule extends
 		AbstractNonInfrastructureBeanValidationRule implements
-		IValidationRule<IBeanProperty, BeansValidationContext> {
+		IValidationRule<IBeanProperty, IBeansValidationContext> {
 
 	@Override
 	protected boolean supportsModelElementForNonInfrastructureBean(
-			IModelElement element, BeansValidationContext context) {
+			IModelElement element, IBeansValidationContext context) {
 		return (element instanceof IBeanProperty
 		// Skip properties with placeholders
 		&& !ValidationRuleUtils.hasPlaceHolder(((IBeanProperty) element)
@@ -53,7 +54,7 @@ public class BeanPropertyRule extends
 	}
 
 	public void validate(IBeanProperty property,
-			BeansValidationContext context, IProgressMonitor monitor) {
+			IBeansValidationContext context, IProgressMonitor monitor) {
 		IBean bean = (IBean) property.getElementParent();
 		BeanDefinition mergedBd = BeansModelUtils.getMergedBeanDefinition(bean,
 				context.getContextElement());
@@ -72,7 +73,7 @@ public class BeanPropertyRule extends
 	}
 
 	private void validateProperty(IBeanProperty property, IType type,
-			BeansValidationContext context) {
+			IBeansValidationContext context) {
 		String propertyName = property.getElementName();
 
 		// Check for property accessor in given type

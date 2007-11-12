@@ -8,11 +8,10 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.internal.model.validation.rules;
+package org.springframework.ide.eclipse.beans.core.model.validation;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
-import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
@@ -25,11 +24,11 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
  */
 public abstract class AbstractBeanValidationRule extends
 		AbstractNonInfrastructureBeanValidationRule implements
-		IValidationRule<IBean, BeansValidationContext> {
+		IValidationRule<IBean, IBeansValidationContext> {
 
 	@Override
-	protected boolean supportsModelElementForNonInfrastructureBean(
-			IModelElement element, BeansValidationContext context) {
+	protected final boolean supportsModelElementForNonInfrastructureBean(
+			IModelElement element, IBeansValidationContext context) {
 		return element instanceof Bean
 				&& supportsBean((IBean) element, context);
 	}
@@ -40,10 +39,14 @@ public abstract class AbstractBeanValidationRule extends
 	 * @return true if rule supports given element
 	 * @since 2.0.2
 	 */
-	protected boolean supportsBean(IBean bean, BeansValidationContext context) {
+	protected boolean supportsBean(IBean bean, IBeansValidationContext context) {
 		return true;
 	}
 
-	public abstract void validate(IBean bean, BeansValidationContext context,
+	/**
+	 * Execute the concrete validation logic of the given {@link IBean} under
+	 * the given {@link IBeansValidationContext}.
+	 */
+	public abstract void validate(IBean bean, IBeansValidationContext context,
 			IProgressMonitor monitor);
 }

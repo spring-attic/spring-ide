@@ -12,10 +12,11 @@ package org.springframework.ide.eclipse.beans.core.internal.model.validation.rul
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
-import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBeanAlias;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.validation.AbstractNonInfrastructureBeanValidationRule;
+import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
 
@@ -27,15 +28,15 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
  * @since 2.0
  */
 public class BeanAliasRule extends AbstractNonInfrastructureBeanValidationRule
-		implements IValidationRule<IBeanAlias, BeansValidationContext> {
+		implements IValidationRule<IBeanAlias, IBeansValidationContext> {
 	
 	@Override
 	protected boolean supportsModelElementForNonInfrastructureBean(
-			IModelElement element, BeansValidationContext context) {
+			IModelElement element, IBeansValidationContext context) {
 		return element instanceof IBeanAlias;
 	}
 	
-	public void validate(IBeanAlias alias, BeansValidationContext context,
+	public void validate(IBeanAlias alias, IBeansValidationContext context,
 			IProgressMonitor monitor) {
 		IBeansConfigSet configSet = (context.getContextElement() instanceof IBeansConfigSet ? (IBeansConfigSet) context
 				.getContextElement()

@@ -12,8 +12,8 @@ package org.springframework.ide.eclipse.beans.core.internal.model.validation.rul
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansConfig;
-import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
+import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
@@ -26,24 +26,24 @@ import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
  * @since 2.0.2
  */
 public class SpringParsingProblemsRule implements
-		IValidationRule<BeansConfig, BeansValidationContext> {
+		IValidationRule<BeansConfig, IBeansValidationContext> {
 
 	/**
 	 * Checks if the this rule supports given {@link IModelElement} and
 	 * {@link IValidationContext}.
 	 * @return true if element is a {@link BeansConfig} and context is
-	 * {@link BeansValidationContext}
+	 * {@link IBeansValidationContext}
 	 */
 	public boolean supports(IModelElement element, IValidationContext context) {
 		return element instanceof BeansConfig
-				&& context instanceof BeansValidationContext;
+				&& context instanceof IBeansValidationContext;
 	}
 
 	/**
 	 * Pass all {@link ValidationProblem}s that are stored in given
 	 * {@link BeansConfig} into the <code>context</code>.
 	 */
-	public void validate(BeansConfig element, BeansValidationContext context,
+	public void validate(BeansConfig element, IBeansValidationContext context,
 			IProgressMonitor monitor) {
 		context.getProblems().addAll(element.getProblems());
 	}

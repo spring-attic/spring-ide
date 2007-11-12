@@ -8,10 +8,9 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.core.internal.model.validation.rules;
+package org.springframework.ide.eclipse.beans.core.model.validation;
 
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
@@ -43,15 +42,15 @@ public abstract class AbstractNonInfrastructureBeanValidationRule {
 	 * @param context the validation context
 	 * @return true if given element is supported by this rule implementation
 	 * @see #supportsModelElementForNonInfrastructureBean(IModelElement,
-	 * BeansValidationContext)
+	 * IBeansValidationContext)
 	 */
 	public final boolean supports(IModelElement element,
 			IValidationContext context) {
 		IBean bean = resolveBeanFromModelElement(element);
-		return context instanceof BeansValidationContext
+		return context instanceof IBeansValidationContext
 				&& (bean == null || (bean != null && !bean.isInfrastructure()))
 				&& supportsModelElementForNonInfrastructureBean(element,
-						(BeansValidationContext) context);
+						(IBeansValidationContext) context);
 	}
 
 	/**
@@ -72,13 +71,13 @@ public abstract class AbstractNonInfrastructureBeanValidationRule {
 
 	/**
 	 * Returns <code>true</code> if this rule is able to validate the given
-	 * {@link IModelElement} with the specified {@link BeansValidationContext}.
+	 * {@link IModelElement} with the specified {@link IBeansValidationContext}.
 	 * <p>
 	 * This default implementation simply returns <code>true</code>. Subclasses
 	 * can override this template method to implement specific checking.
 	 */
 	protected boolean supportsModelElementForNonInfrastructureBean(
-			IModelElement element, BeansValidationContext context) {
+			IModelElement element, IBeansValidationContext context) {
 		return true;
 	}
 }

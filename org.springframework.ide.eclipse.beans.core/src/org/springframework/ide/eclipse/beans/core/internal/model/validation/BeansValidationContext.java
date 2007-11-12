@@ -16,7 +16,6 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.objectweb.asm.ClassReader;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.DefaultBeanDefinitionRegistry;
@@ -25,6 +24,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.internal.model.validation.rules.ValidationRuleUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.AbstractValidationContext;
@@ -40,7 +40,8 @@ import org.springframework.util.Assert;
  * @author Christian Dupuis
  * @since 2.0
  */
-public class BeansValidationContext extends AbstractValidationContext {
+public class BeansValidationContext extends AbstractValidationContext implements
+		IBeansValidationContext {
 
 	private static final char KEY_SEPARATOR_CHAR = '/';
 
@@ -62,10 +63,18 @@ public class BeansValidationContext extends AbstractValidationContext {
 		beanLookupCache = new HashMap<String, Set<BeanDefinition>>();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext#getIncompleteRegistry()
+	 */
 	public BeanDefinitionRegistry getIncompleteRegistry() {
 		return incompleteRegistry;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext#getCompleteRegistry()
+	 */
 	public BeanDefinitionRegistry getCompleteRegistry() {
 		return completeRegistry;
 	}
@@ -102,13 +111,9 @@ public class BeansValidationContext extends AbstractValidationContext {
 		return registry;
 	}
 
-	/**
-	 * Returns a {@link ClassReaderFactory}.
-	 * <p>
-	 * The purpose of this method is to enable caching of {@link ClassReader}
-	 * instances throughout the entire validation process.
-	 * @return a {@link ClassReaderFactory} instance
-	 * @since 2.0.1
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext#getClassReaderFactory()
 	 */
 	public ClassReaderFactory getClassReaderFactory() {
 		synchronized (this) {
@@ -121,9 +126,9 @@ public class BeansValidationContext extends AbstractValidationContext {
 		return this.classReaderFactory;
 	}
 
-	/**
-	 * Returns the corresponding {@link IProject} that is the parent of the
-	 * validation target.
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext#getRootElementProject()
 	 */
 	public IProject getRootElementProject() {
 		return (getRootElement().getElementResource() != null ? getRootElement()
@@ -131,19 +136,18 @@ public class BeansValidationContext extends AbstractValidationContext {
 				: null);
 	}
 
-	/**
-	 * Returns the corresponding {@link IResource} of the validation target.
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext#getRootElementResource()
 	 */
 	public IResource getRootElementResource() {
 		return getRootElement().getElementResource();
 	}
 
-	/**
-	 * Returns a matching {@link BeanDefinition} for the given
-	 * <code>beanName</code> and <code>beanClass</code>.
-	 * @param beanName the name of the bean to look for
-	 * @param beanClass the class of the bean to look for
-	 * @since 2.0.2
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext#getRegisteredBeanDefinition(java.lang.String,
+	 * java.lang.String)
 	 */
 	public Set<BeanDefinition> getRegisteredBeanDefinition(String beanName,
 			String beanClass) {
@@ -154,23 +158,21 @@ public class BeansValidationContext extends AbstractValidationContext {
 		if (beanLookupCache.containsKey(key)) {
 			return beanLookupCache.get(key);
 		}
-		Set<BeanDefinition> bds = ValidationRuleUtils.getBeanDefinitions(beanName,
-				beanClass, this);
+		Set<BeanDefinition> bds = ValidationRuleUtils.getBeanDefinitions(
+				beanName, beanClass, this);
 		// as we don't use a Hashtable we can insert null values
 		beanLookupCache.put(key, bds);
 		return bds;
 	}
 
-	/**
-	 * Checks if a bean matching the given <code>beanName</code> and
-	 * <code>beanClass</code> is registered in this context.
-	 * @param beanName the name of the bean to look for
-	 * @param beanClass the class of the bean to look for
-	 * @return true if a bean with matching criteria is registered in this
-	 * context; false otherwise
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.ide.eclipse.beans.core.internal.model.validation.IBeansValidationContext#isBeanRegistered(java.lang.String,
+	 * java.lang.String)
 	 */
 	public boolean isBeanRegistered(String beanName, String beanClass) {
-		Set<BeanDefinition> bds = getRegisteredBeanDefinition(beanName, beanClass);
+		Set<BeanDefinition> bds = getRegisteredBeanDefinition(beanName,
+				beanClass);
 		return bds != null && bds.size() > 0;
 	}
 }

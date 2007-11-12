@@ -14,8 +14,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
-import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.validation.AbstractBeanValidationRule;
+import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
@@ -28,7 +29,7 @@ import org.springframework.ide.eclipse.core.java.JdtUtils;
 public class BeanClassRule extends AbstractBeanValidationRule {
 
 	@Override
-	public void validate(IBean bean, BeansValidationContext context,
+	public void validate(IBean bean, IBeansValidationContext context,
 			IProgressMonitor monitor) {
 		String className = ((Bean) bean).getBeanDefinition().getBeanClassName();
 

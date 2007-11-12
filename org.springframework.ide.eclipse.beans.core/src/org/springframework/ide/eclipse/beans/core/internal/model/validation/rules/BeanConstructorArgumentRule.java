@@ -31,8 +31,9 @@ import org.springframework.context.annotation.ScannedGenericBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
-import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.validation.AbstractBeanValidationRule;
+import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
@@ -49,12 +50,12 @@ import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
 public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 	
 	@Override
-	protected boolean supportsBean(IBean bean, BeansValidationContext context) {
+	protected boolean supportsBean(IBean bean, IBeansValidationContext context) {
 		return !bean.isAbstract();
 	}
 	
 	@Override
-	public void validate(IBean bean, BeansValidationContext context,
+	public void validate(IBean bean, IBeansValidationContext context,
 			IProgressMonitor monitor) {
 		BeanDefinition bd = ((Bean) bean).getBeanDefinition();
 		BeanDefinition mergedBd = BeansModelUtils.getMergedBeanDefinition(bean,
@@ -91,7 +92,7 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 
 	protected void validateConstructorArguments(final IBean bean,
 			final IType type, ConstructorArgumentValues argumentValues,
-			final BeansValidationContext context) {
+			final IBeansValidationContext context) {
 
 		// Skip validation if auto-wiring or a factory are involved
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) ((Bean) bean)

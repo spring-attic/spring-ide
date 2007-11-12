@@ -20,9 +20,10 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeanReplaceMethodOverride;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
-import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanMethodOverride;
+import org.springframework.ide.eclipse.beans.core.model.validation.AbstractNonInfrastructureBeanValidationRule;
+import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
@@ -35,17 +36,17 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
  */
 public class BeanMethodOverrideRule extends
 		AbstractNonInfrastructureBeanValidationRule implements
-		IValidationRule<IBeanMethodOverride, BeansValidationContext> {
+		IValidationRule<IBeanMethodOverride, IBeansValidationContext> {
 
 	/**
-	 * Checks if this valiation rule supports given <code>element</code> and
+	 * Checks if this validation rule supports given <code>element</code> and
 	 * <code>context</code>.
 	 * @return true if and only element is a {@link IBeanMethodOverride} and the
 	 * parent element a {@link IBean}
 	 */
 	@Override
 	protected boolean supportsModelElementForNonInfrastructureBean(
-			IModelElement element, BeansValidationContext context) {
+			IModelElement element, IBeansValidationContext context) {
 		return element instanceof IBeanMethodOverride
 				&& element.getElementParent() instanceof IBean;
 	}
@@ -55,7 +56,7 @@ public class BeanMethodOverrideRule extends
 	 * override.
 	 */
 	public void validate(IBeanMethodOverride override,
-			BeansValidationContext context, IProgressMonitor monitor) {
+			IBeansValidationContext context, IProgressMonitor monitor) {
 		IBean bean = (IBean) override.getElementParent();
 		AbstractBeanDefinition mergedBd = (AbstractBeanDefinition) BeansModelUtils
 				.getMergedBeanDefinition(bean, context.getContextElement());
@@ -90,7 +91,7 @@ public class BeanMethodOverrideRule extends
 	 * @param context the validation context
 	 */
 	private void validateReplaceOverride(IBeanMethodOverride override,
-			IType type, BeansValidationContext context) {
+			IType type, IBeansValidationContext context) {
 		if (override instanceof BeanReplaceMethodOverride) {
 			String methodName = override.getMethodName();
 			try {
@@ -133,7 +134,7 @@ public class BeanMethodOverrideRule extends
 	 * @param context the validation context
 	 */
 	private void validateLookupOverride(IBeanMethodOverride override,
-			IType type, BeansValidationContext context) {
+			IType type, IBeansValidationContext context) {
 		String methodName = override.getMethodName();
 		try {
 			Set<IMethod> methods = Introspector.findAllNoParameterMethods(type,

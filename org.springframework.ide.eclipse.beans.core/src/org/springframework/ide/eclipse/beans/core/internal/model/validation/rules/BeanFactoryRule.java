@@ -21,8 +21,8 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
-import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
@@ -37,10 +37,11 @@ import org.springframework.ide.eclipse.core.type.asm.AnnotationMetadataReadingVi
  */
 public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 
-	private static final String ASPECT_ANNOTATION_NAME = "org.aspectj.lang.annotation.Aspect";
+	private static final String ASPECT_ANNOTATION_NAME = 
+		"org.aspectj.lang.annotation.Aspect";
 
 	@Override
-	public void validate(IBean bean, BeansValidationContext context,
+	public void validate(IBean bean, IBeansValidationContext context,
 			IProgressMonitor monitor) {
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) ((Bean) bean)
 				.getBeanDefinition();
@@ -102,7 +103,7 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 	}
 
 	protected void validateFactoryBean(IBean bean, String beanName,
-			String methodName, BeansValidationContext context) {
+			String methodName, IBeansValidationContext context) {
 		if (beanName != null && !ValidationRuleUtils.hasPlaceHolder(beanName)) {
 			try {
 				AbstractBeanDefinition factoryBd = (AbstractBeanDefinition) context
@@ -146,7 +147,7 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 
 	protected void validateFactoryMethod(IBean bean, String className,
 			String methodName, int argCount, Static statics,
-			BeansValidationContext context) {
+			IBeansValidationContext context) {
 		if (className != null && !ValidationRuleUtils.hasPlaceHolder(className)) {
 			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean)
 					.getProject(), className);
@@ -175,7 +176,7 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 	 * the <code>@Aspect</code> annotation.
 	 */
 	private boolean hasAspectAnnotation(String className,
-			BeansValidationContext context) {
+			IBeansValidationContext context) {
 
 		AnnotationMetadataReadingVisitor visitor = new AnnotationMetadataReadingVisitor();
 		try {

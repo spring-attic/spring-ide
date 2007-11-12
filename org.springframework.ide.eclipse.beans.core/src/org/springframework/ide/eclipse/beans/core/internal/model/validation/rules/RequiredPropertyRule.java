@@ -35,8 +35,9 @@ import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
-import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.validation.AbstractBeanValidationRule;
+import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.type.asm.AnnotationMetadataReadingVisitor;
 import org.springframework.ide.eclipse.core.type.asm.ClassReaderFactory;
@@ -53,7 +54,7 @@ public class RequiredPropertyRule extends AbstractBeanValidationRule {
 		"requiredAnnotationType";
 
 	@Override
-	protected boolean supportsBean(IBean bean, BeansValidationContext context) {
+	protected boolean supportsBean(IBean bean, IBeansValidationContext context) {
 		return context.isBeanRegistered(
 				AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
 				RequiredAnnotationBeanPostProcessor.class.getName());
@@ -69,7 +70,7 @@ public class RequiredPropertyRule extends AbstractBeanValidationRule {
 	 * property setters.
 	 */
 	@Override
-	public void validate(IBean bean, BeansValidationContext context,
+	public void validate(IBean bean, IBeansValidationContext context,
 			IProgressMonitor monitor) {
 		BeanDefinition mergedBd = BeansModelUtils.getMergedBeanDefinition(bean,
 				context.getContextElement());
@@ -92,7 +93,7 @@ public class RequiredPropertyRule extends AbstractBeanValidationRule {
 	 * report errors
 	 */
 	private void validatePropertyNames(IType type, IBean bean,
-			BeanDefinition mergedBd, BeansValidationContext context) {
+			BeanDefinition mergedBd, IBeansValidationContext context) {
 		try {
 			RequiredAnnotationMetadata annotationMetadata = getRequiredAnnotationMetadata(
 					context.getClassReaderFactory(), bean, type,
@@ -200,7 +201,7 @@ public class RequiredPropertyRule extends AbstractBeanValidationRule {
 	 * @since 2.0.2
 	 */
 	private Set<String> getRequiredAnnotationTypes(
-			BeansValidationContext context) {
+			IBeansValidationContext context) {
 		Set<String> requiredAnnotationTypes = new HashSet<String>();
 		Set<BeanDefinition> bds = context.getRegisteredBeanDefinition(
 				AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME,

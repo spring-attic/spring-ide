@@ -14,8 +14,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
-import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.validation.AbstractBeanValidationRule;
+import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 
 /**
  * Validates a given {@link IBean}'s bean definition.
@@ -26,7 +27,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 public class BeanDefinitionRule extends AbstractBeanValidationRule {
 
 	@Override
-	public void validate(IBean bean, BeansValidationContext context,
+	public void validate(IBean bean, IBeansValidationContext context,
 			IProgressMonitor monitor) {
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) ((Bean) bean)
 				.getBeanDefinition();

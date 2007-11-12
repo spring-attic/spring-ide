@@ -21,12 +21,13 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeanReference;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
-import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansList;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansValueHolder;
+import org.springframework.ide.eclipse.beans.core.model.validation.AbstractNonInfrastructureBeanValidationRule;
+import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -46,7 +47,7 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
  * @since 2.0
  */
 public class BeanReferenceRule implements
-		IValidationRule<IBeansModelElement, BeansValidationContext> {
+		IValidationRule<IBeansModelElement, IBeansValidationContext> {
 
 	/**
 	 * Returns <code>true</code> if this rule is able to validate the given
@@ -64,7 +65,7 @@ public class BeanReferenceRule implements
 	}
 
 	public void validate(IBeansModelElement element,
-			BeansValidationContext context, IProgressMonitor monitor) {
+			IBeansValidationContext context, IProgressMonitor monitor) {
 		if (element instanceof Bean) {
 			validateBean((Bean) element, context);
 		} else if (element instanceof IBeansValueHolder) {
@@ -83,7 +84,7 @@ public class BeanReferenceRule implements
 		}
 	}
 
-	private void validateBean(Bean bean, BeansValidationContext context) {
+	private void validateBean(Bean bean, IBeansValidationContext context) {
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) bean
 				.getBeanDefinition();
 
@@ -111,7 +112,7 @@ public class BeanReferenceRule implements
 	}
 
 	private void validateDependsOnBean(IBean bean, String beanName,
-			BeansValidationContext context) {
+			IBeansValidationContext context) {
 		if (beanName != null && !ValidationRuleUtils.hasPlaceHolder(beanName)) {
 			try {
 				BeanDefinition dependsBd = context.getCompleteRegistry()
@@ -136,7 +137,7 @@ public class BeanReferenceRule implements
 	}
 
 	private void validateValue(IBeansModelElement element, Object value,
-			BeansValidationContext context) {
+			IBeansValidationContext context) {
 		String beanName = null;
 		if (value instanceof RuntimeBeanReference) {
 			beanName = ((RuntimeBeanReference) value).getBeanName();

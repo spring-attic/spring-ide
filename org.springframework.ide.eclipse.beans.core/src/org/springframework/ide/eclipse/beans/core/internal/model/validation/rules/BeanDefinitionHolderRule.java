@@ -15,9 +15,10 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
-import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.validation.AbstractBeanValidationRule;
+import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 
 /**
  * Validates a given root {@link IBean}'s name and aliases.
@@ -29,12 +30,12 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 public class BeanDefinitionHolderRule extends AbstractBeanValidationRule {
 
 	@Override
-	protected boolean supportsBean(IBean bean, BeansValidationContext context) {
+	protected boolean supportsBean(IBean bean, IBeansValidationContext context) {
 		return !bean.isInnerBean();
 	}
 
 	@Override
-	public void validate(IBean bean, BeansValidationContext context,
+	public void validate(IBean bean, IBeansValidationContext context,
 			IProgressMonitor monitor) {
 
 		// only validate bean override for non-infrastructure beans
@@ -49,10 +50,10 @@ public class BeanDefinitionHolderRule extends AbstractBeanValidationRule {
 	 * <p>
 	 * The implementation relies on the fact that a {@link BeanDefinitionRegistry}
 	 * throws a {@link BeanDefinitionStoreException} if the bean name is already
-	 * choosen.
+	 * chosen.
 	 */
 	private void validateBeanNameAndAlias(Bean bean,
-			BeansValidationContext context) {
+			IBeansValidationContext context) {
 		try {
 			context.getIncompleteRegistry().registerBeanDefinition(
 					bean.getElementName(), bean.getBeanDefinition());

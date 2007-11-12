@@ -16,8 +16,8 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
-import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
 
@@ -32,7 +32,7 @@ import org.springframework.ide.eclipse.core.java.Introspector.Static;
 public class BeanInitDestroyMethodRule extends AbstractBeanMethodValidationRule {
 
 	@Override
-	public void validate(IBean bean, BeansValidationContext context,
+	public void validate(IBean bean, IBeansValidationContext context,
 			IProgressMonitor monitor) {
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) ((Bean) bean)
 				.getBeanDefinition();

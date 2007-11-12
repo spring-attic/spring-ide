@@ -21,10 +21,10 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
-import org.springframework.ide.eclipse.beans.core.internal.model.validation.BeansValidationContext;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
+import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -94,7 +94,7 @@ public final class ValidationRuleUtils {
 	 * <code>beanName</code> and <code>beanClass</code>.
 	 */
 	public static Set<BeanDefinition> getBeanDefinitions(String beanName,
-			String beanClass, BeansValidationContext context) {
+			String beanClass, IBeansValidationContext context) {
 		Set<BeanDefinition> beanDefinition = new HashSet<BeanDefinition>();
 		try {
 			beanDefinition.add(context.getCompleteRegistry().getBeanDefinition(
@@ -129,7 +129,7 @@ public final class ValidationRuleUtils {
 	 * Honors <code>factory-method</code>s and <code>factory-bean</code>.
 	 */
 	public static IType extractBeanClass(BeanDefinition bd, IBean bean,
-			String mergedClassName, BeansValidationContext context) {
+			String mergedClassName, IBeansValidationContext context) {
 		IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean)
 				.getProject(), mergedClassName);
 		// 1. factory-method on bean
