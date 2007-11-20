@@ -17,7 +17,7 @@
 
 			<public
 				publicId="http://www.springframework.org/schema/osgi-compendium"
-				uri="platform:/plugin/org.springframework.osgi.spring-osgi-core/org/springframework/osgi/config/spring-osgi-1.0-rc1.xsd"
+				uri="platform:/plugin/org.springframework.osgi.bundle.core/org/springframework/osgi/config/spring-osgi-compendium-1.0-rc1.xsd"
 				webURL="http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium-1.0-rc1.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/osgi/spring-osgi-compendium.xsd"
