@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<toc label="Spring	 Documentation">
+<toc label="Spring Documentation">
 	<topic label="The Spring Framework - Reference Documentation"
 		href="../org.springframework.doc/index.html">
 		<link toc="../org.springframework.bundle.spring.doc/toc.xml" />
@@ -16,4 +16,5 @@
 		<topic label="AOP Support" href="http://springide.org/doc/AOP" />
 		<topic label="Web Flow Support" href="http://springide.org/doc/SWF" />
 	</topic>
+	<anchor id="additions" />
 </toc>
