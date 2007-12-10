@@ -109,7 +109,7 @@ public final class Introspector {
 	public static Set<IMethod> findAllMethods(IType type, IMethodFilter filter) {
 		return findAllMethods(type, "", filter);
 	}
-	
+
 	/**
 	 * Finds all {@link IMethod}s in the given {@link IType}'s hierarchy that
 	 * match the given filter, applying the prefix.
@@ -157,9 +157,11 @@ public final class Introspector {
 				String key = method.getElementName() + method.getSignature();
 				if (!allMethods.containsKey(key)
 						&& (publics == Public.DONT_CARE
-								|| (publics == Public.YES && Flags
-										.isPublic(flags)) || (publics == Public.NO && !Flags
-								.isPublic(flags)))
+								|| (publics == Public.YES && (Flags
+										.isPublic(flags) || Flags
+										.isInterface(type.getFlags()))) || (publics == Public.NO && (!Flags
+								.isPublic(flags) && !Flags.isInterface(type
+								.getFlags()))))
 						&& (statics == Static.DONT_CARE
 								|| (statics == Static.YES && Flags
 										.isStatic(flags)) || (statics == Static.NO && !Flags
@@ -214,8 +216,9 @@ public final class Introspector {
 			for (IMethod method : type.getMethods()) {
 				int flags = method.getFlags();
 				if ((publics == Public.DONT_CARE
-						|| (publics == Public.YES && Flags.isPublic(flags)) || (publics == Public.NO && !Flags
-						.isPublic(flags)))
+						|| (publics == Public.YES && (Flags.isPublic(flags) || Flags
+								.isInterface(type.getFlags()))) || (publics == Public.NO && (!Flags
+						.isPublic(flags) && !Flags.isInterface(type.getFlags()))))
 						&& (statics == Static.DONT_CARE
 								|| (statics == Static.YES && Flags
 										.isStatic(flags)) || (statics == Static.NO && !Flags
