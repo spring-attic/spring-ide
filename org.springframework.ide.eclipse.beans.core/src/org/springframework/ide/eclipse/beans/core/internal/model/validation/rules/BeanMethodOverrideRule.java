@@ -24,6 +24,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanMethodOverride;
 import org.springframework.ide.eclipse.beans.core.model.validation.AbstractNonInfrastructureBeanValidationRule;
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
@@ -63,7 +64,7 @@ public class BeanMethodOverrideRule extends
 
 		String mergedClassName = mergedBd.getBeanClassName();
 		if (mergedClassName != null
-				&& !ValidationRuleUtils.hasPlaceHolder(mergedClassName)) {
+				&& !SpringCoreUtils.hasPlaceHolder(mergedClassName)) {
 			IType type = ValidationRuleUtils.extractBeanClass(mergedBd, bean,
 					mergedClassName, context);
 			if (type != null) {

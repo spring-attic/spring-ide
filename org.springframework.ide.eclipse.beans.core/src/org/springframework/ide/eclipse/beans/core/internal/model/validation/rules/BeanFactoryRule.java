@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.Bean;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
@@ -51,7 +52,7 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 		// Validate a bean's factory bean and factory method
 		String mergedClassName = mergedBd.getBeanClassName();
 		if (mergedClassName != null
-				&& !ValidationRuleUtils.hasPlaceHolder(mergedClassName)) {
+				&& !SpringCoreUtils.hasPlaceHolder(mergedClassName)) {
 			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean)
 					.getProject(), mergedClassName);
 			if (type != null) {
@@ -74,7 +75,7 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 				else {
 					String methodName = bd.getFactoryMethodName();
 					if (methodName != null
-							&& !ValidationRuleUtils.hasPlaceHolder(methodName)) {
+							&& !SpringCoreUtils.hasPlaceHolder(methodName)) {
 						if (mergedClassName == null) {
 							if (bd.getParentName() == null) {
 								context.error(bean,
@@ -104,7 +105,7 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 
 	protected void validateFactoryBean(IBean bean, String beanName,
 			String methodName, IBeansValidationContext context) {
-		if (beanName != null && !ValidationRuleUtils.hasPlaceHolder(beanName)) {
+		if (beanName != null && !SpringCoreUtils.hasPlaceHolder(beanName)) {
 			try {
 				AbstractBeanDefinition factoryBd = (AbstractBeanDefinition) context
 						.getCompleteRegistry().getBeanDefinition(beanName);
@@ -148,7 +149,7 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 	protected void validateFactoryMethod(IBean bean, String className,
 			String methodName, int argCount, Static statics,
 			IBeansValidationContext context) {
-		if (className != null && !ValidationRuleUtils.hasPlaceHolder(className)) {
+		if (className != null && !SpringCoreUtils.hasPlaceHolder(className)) {
 			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean)
 					.getProject(), className);
 

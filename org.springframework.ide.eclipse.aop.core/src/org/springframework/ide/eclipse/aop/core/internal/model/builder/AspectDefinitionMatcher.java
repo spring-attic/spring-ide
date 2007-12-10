@@ -14,6 +14,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -31,6 +32,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.ide.eclipse.aop.core.model.IAspectDefinition;
 import org.springframework.ide.eclipse.aop.core.model.IAopReference.ADVICE_TYPES;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.ClassUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.Assert;
@@ -233,6 +235,11 @@ public class AspectDefinitionMatcher {
 	public Set<IMethod> matches(final Class<?> targetClass,
 			final IBean targetBean, final IAspectDefinition info,
 			final IProject project) throws Throwable {
+		
+		// check aspect definition
+		if (SpringCoreUtils.hasPlaceHolder(info.getPointcutExpression())) {
+			return Collections.emptySet();
+		}
 		
 		// expose bean name on thread local
 		Class<?> proxyCreationContextClass = ClassUtils

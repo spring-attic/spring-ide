@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.validation.AbstractNonInfrastructureBeanValidationRule;
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
@@ -49,7 +50,7 @@ public class BeanPropertyRule extends
 			IModelElement element, IBeansValidationContext context) {
 		return (element instanceof IBeanProperty
 		// Skip properties with placeholders
-		&& !ValidationRuleUtils.hasPlaceHolder(((IBeanProperty) element)
+		&& !SpringCoreUtils.hasPlaceHolder(((IBeanProperty) element)
 				.getElementName()));
 	}
 
@@ -121,6 +122,17 @@ public class BeanPropertyRule extends
 									+ "' - not JavaBean compliant");
 				}
 				else if (!Introspector.hasWritableProperty(type, propertyName)) {
+					// move this code to Introspector to make ITD generally available
+					/*AJRelationshipType[] types = new AJRelationshipType[] {AJRelationshipManager.DECLARED_ON};
+					List<AJRelationship> rels = AJModel.getInstance().getAllRelationships(context.getRootElementProject(), types);
+					for (AJRelationship rel : rels) {
+						 if (rel.getTarget().equals(type)) {
+							 IntertypeElement iType = (IntertypeElement) rel.getSource();
+							 if (iType.getParameterTypes().length == 1) {
+								 System.out.println(iType.getElementName() + " - " + iType.getReturnType());
+							 }
+						 }
+					}*/
 					context.error(property, "NO_SETTER",
 							"No setter found for property '" + propertyName
 									+ "' in class '"

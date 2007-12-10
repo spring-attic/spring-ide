@@ -38,25 +38,12 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
  */
 public final class ValidationRuleUtils {
 
-	public static final String PLACEHOLDER_PREFIX = "${";
-
-	public static final String PLACEHOLDER_SUFFIX = "}";
-
 	public static final String FACTORY_BEAN_REFERENCE_PREFIX = "&";
 
 	public static final String FACTORY_BEAN_REFERENCE_REGEXP = "["
 			+ FACTORY_BEAN_REFERENCE_PREFIX + "]";
 
 	public static final String ASPECT_OF_METHOD_NAME = "aspectOf";
-
-	/**
-	 * Returns <code>true</code> if given text contains a placeholder, e.g.
-	 * <code>${beansRef}</code>.
-	 */
-	public static boolean hasPlaceHolder(String text) {
-		int pos = text.indexOf(PLACEHOLDER_PREFIX);
-		return (pos != -1 && text.indexOf(PLACEHOLDER_SUFFIX, pos) != -1);
-	}
 
 	/**
 	 * Returns <code>true</code> if the specified text is a reference to a

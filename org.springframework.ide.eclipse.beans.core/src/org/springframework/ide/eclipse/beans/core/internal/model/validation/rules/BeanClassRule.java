@@ -17,6 +17,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.validation.AbstractBeanValidationRule;
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 
 /**
@@ -35,7 +36,7 @@ public class BeanClassRule extends AbstractBeanValidationRule {
 
 		// Validate bean class and constructor arguments - skip child beans and
 		// class names with placeholders
-		if (className != null && !ValidationRuleUtils
+		if (className != null && !SpringCoreUtils
 				.hasPlaceHolder(className)) {
 			IType type = JdtUtils.getJavaType(BeansModelUtils
 					.getProject(bean).getProject(), className);

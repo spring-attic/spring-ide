@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.validation.AbstractBeanValidationRule;
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.Introspector.Public;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
@@ -35,7 +36,7 @@ public abstract class AbstractBeanMethodValidationRule extends
 			MethodType methodType, String methodName, int argCount,
 			Static statics, IBeansValidationContext context) {
 		if (methodName != null
-				&& !ValidationRuleUtils.hasPlaceHolder(methodName)) {
+				&& !SpringCoreUtils.hasPlaceHolder(methodName)) {
 			try {
 				IMethod method = Introspector.findMethod(type, methodName,
 						argCount, Public.DONT_CARE, statics); 

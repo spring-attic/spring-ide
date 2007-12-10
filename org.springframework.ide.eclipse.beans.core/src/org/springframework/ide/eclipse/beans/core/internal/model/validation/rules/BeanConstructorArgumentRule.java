@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.validation.AbstractBeanValidationRule;
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
@@ -64,7 +65,7 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 		// Validate merged constructor arguments in bean's class (child beans
 		// not supported)
 		String className = bd.getBeanClassName();
-		if (className != null && !ValidationRuleUtils.hasPlaceHolder(className)) {
+		if (className != null && !SpringCoreUtils.hasPlaceHolder(className)) {
 			IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(bean)
 					.getProject(), className);
 			if (type != null) {
@@ -79,7 +80,7 @@ public class BeanConstructorArgumentRule extends AbstractBeanValidationRule {
 		if (!bd.getConstructorArgumentValues().isEmpty()) {
 			String mergedClassName = mergedBd.getBeanClassName();
 			if (mergedClassName != null
-					&& !ValidationRuleUtils.hasPlaceHolder(mergedClassName)) {
+					&& !SpringCoreUtils.hasPlaceHolder(mergedClassName)) {
 				IType type = JdtUtils.getJavaType(BeansModelUtils.getProject(
 						bean).getProject(), mergedClassName);
 				if (type != null) {

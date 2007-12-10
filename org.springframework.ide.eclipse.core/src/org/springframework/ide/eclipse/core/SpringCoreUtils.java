@@ -44,6 +44,19 @@ import org.osgi.framework.Bundle;
  * @author Christian Dupuis
  */
 public final class SpringCoreUtils {
+	
+	public static final String PLACEHOLDER_PREFIX = "${";
+
+	public static final String PLACEHOLDER_SUFFIX = "}";
+	
+	/**
+	 * Returns <code>true</code> if given text contains a placeholder, e.g.
+	 * <code>${beansRef}</code>.
+	 */
+	public static boolean hasPlaceHolder(String text) {
+		int pos = text.indexOf(PLACEHOLDER_PREFIX);
+		return (pos != -1 && text.indexOf(PLACEHOLDER_SUFFIX, pos) != -1);
+	}
 
 	/**
 	 * Returns the specified adapter for the given object or <code>null</code>

@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansValueHolder;
 import org.springframework.ide.eclipse.beans.core.model.validation.AbstractNonInfrastructureBeanValidationRule;
 import org.springframework.ide.eclipse.beans.core.model.validation.IBeansValidationContext;
+import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -92,7 +93,7 @@ public class BeanReferenceRule implements
 		if (bean.isChildBean()) {
 			String parentName = bean.getParentName();
 			if (parentName != null
-					&& !ValidationRuleUtils.hasPlaceHolder(parentName)) {
+					&& !SpringCoreUtils.hasPlaceHolder(parentName)) {
 				try {
 					context.getCompleteRegistry()
 									.getBeanDefinition(parentName);
@@ -113,7 +114,7 @@ public class BeanReferenceRule implements
 
 	private void validateDependsOnBean(IBean bean, String beanName,
 			IBeansValidationContext context) {
-		if (beanName != null && !ValidationRuleUtils.hasPlaceHolder(beanName)) {
+		if (beanName != null && !SpringCoreUtils.hasPlaceHolder(beanName)) {
 			try {
 				BeanDefinition dependsBd = context.getCompleteRegistry()
 					.getBeanDefinition(beanName);
@@ -145,7 +146,7 @@ public class BeanReferenceRule implements
 		else if (value instanceof BeanReference) {
 			beanName = ((BeanReference) value).getBeanName();
 		}
-		if (beanName != null && !ValidationRuleUtils.hasPlaceHolder(beanName)) {
+		if (beanName != null && !SpringCoreUtils.hasPlaceHolder(beanName)) {
 			try {
 				BeanDefinition refBd = context.getCompleteRegistry().
 					getBeanDefinition(beanName);
