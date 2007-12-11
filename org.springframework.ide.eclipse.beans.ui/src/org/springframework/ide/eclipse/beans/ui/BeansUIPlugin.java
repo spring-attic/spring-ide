@@ -21,12 +21,14 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelDecorator;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.ui.ImageDescriptorRegistry;
 
@@ -108,8 +110,8 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 
-		getPreferenceStore().setDefault(DEFAULT_DOUBLE_CLICK_ACTION_PREFERENCE_ID,
-				true);
+		getPreferenceStore().setDefault(
+				DEFAULT_DOUBLE_CLICK_ACTION_PREFERENCE_ID, true);
 	}
 
 	public static ImageDescriptorRegistry getImageDescriptorRegistry() {
@@ -135,7 +137,9 @@ public class BeansUIPlugin extends AbstractUIPlugin {
 
 	private synchronized ILabelProvider internalGetLabelProvider() {
 		if (labelProvider == null) {
-			labelProvider = new BeansModelLabelProvider(true);
+			labelProvider = new DecoratingLabelProvider(
+					new BeansModelLabelProvider(true),
+					new BeansModelLabelDecorator());
 		}
 		return labelProvider;
 	}

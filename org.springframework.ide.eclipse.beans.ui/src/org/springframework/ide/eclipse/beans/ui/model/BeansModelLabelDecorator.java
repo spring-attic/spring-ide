@@ -20,8 +20,11 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IDecoration;
+import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
+import org.eclipse.swt.graphics.Image;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
@@ -52,8 +55,8 @@ import org.springframework.ide.eclipse.ui.SpringUIUtils;
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-public class BeansModelLabelDecorator extends SpringLabelDecorator
-		implements ILightweightLabelDecorator {
+public class BeansModelLabelDecorator extends SpringLabelDecorator implements
+		ILightweightLabelDecorator, ILabelDecorator {
 
 	public static final String DECORATOR_ID = BeansUIPlugin.PLUGIN_ID
 			+ ".model.beansModelLabelDecorator";
@@ -96,7 +99,7 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator
 					decoration);
 		}
 	}
-	
+
 	/**
 	 * Adds decorations to {@link Bean}s.
 	 * @since 2.0.1
@@ -279,5 +282,26 @@ public class BeansModelLabelDecorator extends SpringLabelDecorator
 	@Override
 	public boolean isLabelProperty(Object element, String property) {
 		return false;
+	}
+
+	public Image decorateImage(Image image, Object element) {
+		int severity = getSeverity(element);
+		int flags = 0;
+		if (severity == IMarker.SEVERITY_WARNING) {
+			flags |= BeansModelImageDescriptor.FLAG_WARNING;
+		}
+		else if (severity == IMarker.SEVERITY_ERROR) {
+			flags |= BeansModelImageDescriptor.FLAG_ERROR;
+		}
+		if (element instanceof IBeansModelElement && image != null) {
+			ImageDescriptor descriptor = new BeansModelImageDescriptor(image,
+					(IBeansModelElement) element, flags);
+			image = BeansUIPlugin.getImageDescriptorRegistry().get(descriptor);
+		}
+		return image;
+	}
+
+	public String decorateText(String text, Object element) {
+		return text;
 	}
 }
