@@ -13,11 +13,15 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.wst.xml.core,
  org.springframework.ide.eclipse.core,
  org.eclipse.ui,
- org.objectweb.asm
+ org.objectweb.asm,
+ org.eclipse.ajdt.core
 Eclipse-LazyStart: true
 Export-Package: org.springframework.ide.eclipse.beans.core,
  org.springframework.ide.eclipse.beans.core.internal.model,
+ org.springframework.ide.eclipse.beans.core.internal.model.process,
  org.springframework.ide.eclipse.beans.core.internal.model.resources,
+ org.springframework.ide.eclipse.beans.core.internal.model.validation,
+ org.springframework.ide.eclipse.beans.core.internal.model.validation.rules,
  org.springframework.ide.eclipse.beans.core.internal.parser,
  org.springframework.ide.eclipse.beans.core.internal.project,
  org.springframework.ide.eclipse.beans.core.model,
