@@ -47,6 +47,7 @@ import org.springframework.ide.eclipse.aop.core.util.AopReferenceModelMarkerUtil
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
+import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
@@ -269,11 +270,14 @@ public class AopReferenceModelBuilder implements IWorkspaceRunnable {
 		beans.addAll(config.getBeans());
 
 		// add component registered beans
-		// TODO CD consider adding components as potential weaving candidates
-		/*
-		 * for (IBeansComponent component : config.getComponents()) {
-		 * beans.addAll(component.getBeans()); }
-		 */
+		for (IBeansComponent component : config.getComponents()) {
+			Set<IBean> nestedBeans = component.getBeans();
+			for (IBean nestedBean : nestedBeans) {
+				if (!nestedBean.isInfrastructure()) {
+					beans.add(nestedBean); 
+				}
+			}
+		}
 
 		buildAopReferencesForBeans(config, info, matcher, monitor, file, 
 				aopProject, beans);
