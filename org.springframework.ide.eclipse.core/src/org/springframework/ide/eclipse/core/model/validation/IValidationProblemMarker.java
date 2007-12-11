@@ -17,14 +17,20 @@ import org.eclipse.core.resources.IMarker;
  * <p>
  * This interface declares constants only; it is not intended to be implemented
  * or extended.
- * </p>
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
 public interface IValidationProblemMarker {
 
 	int SEVERITY_WARNING = IMarker.SEVERITY_WARNING;
+
 	int SEVERITY_ERROR = IMarker.SEVERITY_ERROR;
+	
+	/**
+	 * @since 2.0.2
+	 */
+	int SEVERITY_INFO = IMarker.SEVERITY_INFO;
 
 	/**
 	 * Rule ID marker attribute (value <code>"ruleId"</code>).

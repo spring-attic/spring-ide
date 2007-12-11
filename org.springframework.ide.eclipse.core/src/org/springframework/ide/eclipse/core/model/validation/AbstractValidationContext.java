@@ -18,14 +18,20 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 
 /**
+ * Base {@link IValidationContext} implementation that handles creation of
+ * {@link ValidationProblem}s instances.
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
 public abstract class AbstractValidationContext implements IValidationContext {
 
 	private IResourceModelElement rootElement;
+
 	private IResourceModelElement contextElement;
+
 	private String currentRuleId;
+
 	private Set<ValidationProblem> problems;
 
 	public AbstractValidationContext(IResourceModelElement rootElement,
@@ -42,7 +48,7 @@ public abstract class AbstractValidationContext implements IValidationContext {
 	public IResourceModelElement getContextElement() {
 		return contextElement;
 	}
-	
+
 	public void setCurrentRuleId(String ruleId) {
 		currentRuleId = ruleId;
 	}
@@ -51,11 +57,19 @@ public abstract class AbstractValidationContext implements IValidationContext {
 		return problems;
 	}
 
+	/**
+	 * @since 2.0.2
+	 */
+	public void info(IModelElement element, String problemId, String message,
+			ValidationProblemAttribute... attributes) {
+		problems.add(createProblem(element, problemId,
+				IValidationProblemMarker.SEVERITY_INFO, message, attributes));
+	}
+
 	public void warning(IModelElement element, String problemId,
 			String message, ValidationProblemAttribute... attributes) {
 		problems.add(createProblem(element, problemId,
-				IValidationProblemMarker.SEVERITY_WARNING, message,
-				attributes));
+				IValidationProblemMarker.SEVERITY_WARNING, message, attributes));
 	}
 
 	public void error(IModelElement element, String problemId, String message,
@@ -67,8 +81,9 @@ public abstract class AbstractValidationContext implements IValidationContext {
 	protected final ValidationProblem createProblem(IModelElement element,
 			String problemId, int severity, String message,
 			ValidationProblemAttribute... attributes) {
-		int line = (element instanceof ISourceModelElement
-				? ((ISourceModelElement) element).getElementStartLine() : -1);
+		int line = (element instanceof ISourceModelElement ? ((ISourceModelElement) element)
+				.getElementStartLine()
+				: -1);
 		return new ValidationProblem(currentRuleId, problemId, severity,
 				message, line, attributes);
 	}
