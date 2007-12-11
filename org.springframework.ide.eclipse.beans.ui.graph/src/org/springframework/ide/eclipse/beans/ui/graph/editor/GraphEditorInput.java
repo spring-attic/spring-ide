@@ -173,10 +173,30 @@ public class GraphEditorInput implements IEditorInput, IPersistableElement {
 	protected void createBeansMap() {
 		Set<IBean> list = new LinkedHashSet<IBean>();
 		if (getElement(elementId) instanceof IBeansConfig) {
-			list.addAll(((IBeansConfig) getElement(elementId)).getBeans());
+			IBeansConfig bc = (IBeansConfig) getElement(elementId);
+			list.addAll(bc.getBeans());
+			// add component registered beans
+			for (IBeansComponent component : bc.getComponents()) {
+				Set<IBean> nestedBeans = component.getBeans();
+				for (IBean nestedBean : nestedBeans) {
+					if (!nestedBean.isInfrastructure()) {
+						list.add(nestedBean); 
+					}
+				}
+			}
 		}
 		else if (getElement(elementId) instanceof IBeansConfigSet) {
-			list.addAll(((IBeansConfigSet) getElement(elementId)).getBeans());
+			IBeansConfigSet bcs = (IBeansConfigSet) getElement(elementId);
+			list.addAll(bcs.getBeans());
+			// add component registered beans
+			for (IBeansComponent component : bcs.getComponents()) {
+				Set<IBean> nestedBeans = component.getBeans();
+				for (IBean nestedBean : nestedBeans) {
+					if (!nestedBean.isInfrastructure()) {
+						list.add(nestedBean); 
+					}
+				}
+			}
 		}
 		else if (getElement(elementId) instanceof IBean) {
 			list.add((IBean) getElement(elementId));
