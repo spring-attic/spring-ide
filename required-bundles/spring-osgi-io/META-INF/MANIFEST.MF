@@ -2,32 +2,31 @@ Manifest-Version: 1.0
 Created-By: 1.5.0_13 (Apple Inc.)
 Bundle-License: http://www.apache.org/licenses/LICENSE-2.0
 Import-Package: org.apache.commons.logging,org.osgi.framework;version=
- 1.3,org.springframework.core;version=2.5.0.rc1,org.springframework.co
- re.io;version=2.5.0.rc1,org.springframework.core.io.support;version=2
- .5.0.rc1,org.springframework.osgi.io;version=1.0.0.rc1,org.springfram
- ework.util;version=2.5.0.rc1
-Spring-DM-Version: 1.0-rc1-SNAPSHOT
+ 1.3,org.springframework.core.io;version=2.5,org.springframework.core.
+ io.support;version=2.5,org.springframework.osgi.io;version=1.0.0.rc1,
+ org.springframework.util;version=2.5
+Spring-DM-Version: 1.0-rc2-SNAPSHOT
 Include-Resource: src/main/resources
 Implementation-Vendor-Id: org.springframework.osgi
-Bnd-LastModified: 1194367433939
+Bnd-LastModified: 1197401578654
 Export-Package: org.springframework.osgi.io;uses:="org.springframework
- .core.io.support,org.springframework.core.io,org.springframework.core
- ,org.osgi.framework,org.springframework.osgi.internal.io,org.apache.c
- ommons.logging,org.springframework.util";version=1.0.0.rc1
-Bundle-Version: 1.0.0.rc1_v200711061752
-Ignore-Package: org.springframework.osgi.internal.io
+ .osgi.io.internal,org.springframework.core.io.support,org.springframe
+ work.core.io,org.osgi.framework,org.apache.commons.logging,org.spring
+ framework.util";version=1.0.0.rc1
+Bundle-Version: 1.0.0.rc2_v200712112043
+Ignore-Package: org.springframework.osgi.io.internal
 Bundle-Name: spring-osgi-io
 Bundle-Description: Spring/OSGi IO abstract classes. Provides Resource
  , ResourceLoader and ResourcePatternResolver
   for OSGi environments.
-Private-Package: org.springframework.osgi.internal.io,target.classes
+Private-Package: org.springframework.osgi.io.internal
 Bundle-DocURL: http://www.springframework.org
-Spring-Version: 2.5-rc1
+Spring-Version: 2.5
 Bundle-Vendor: Spring Framework
 Bundle-ManifestVersion: 2
 Implementation-Title: Spring Dynamic Modules Framework
 Bundle-SymbolicName: org.springframework.osgi.bundle.io
 Tool: Bnd-0.0.160
-Implementation-Version: 1.0-rc1-SNAPSHOT
+Implementation-Version: 1.0-rc2-SNAPSHOT
 Implementation-Vendor: Spring Dynamic Modules Framework
 Bundle-ClassPath: spring-osgi-io.jar

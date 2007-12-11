@@ -6,25 +6,25 @@
 		<catalogContribution>
 			<public
 				publicId="http://www.springframework.org/schema/osgi"
-				uri="platform:/plugin/org.springframework.osgi.bundle.core/org/springframework/osgi/config/spring-osgi-1.0-rc1.xsd"
-				webURL="http://www.springframework.org/schema/osgi/spring-osgi-1.0-rc1.xsd" />
+				uri="platform:/plugin/org.springframework.osgi.bundle.core/org/springframework/osgi/config/spring-osgi-1.0-rc2.xsd"
+				webURL="http://www.springframework.org/schema/osgi/spring-osgi-1.0-rc2.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/osgi/spring-osgi.xsd"
-				uri="platform:/plugin/org.springframework.osgi.bundle.core/org/springframework/osgi/config/spring-osgi-1.0-rc1.xsd" />
+				uri="platform:/plugin/org.springframework.osgi.bundle.core/org/springframework/osgi/config/spring-osgi-1.0-rc2.xsd" />
 			<system
-				systemId="http://www.springframework.org/schema/osgi/spring-osgi-1.0-rc1.xsd"
-				uri="platform:/plugin/org.springframework.osgi.bundle.core/org/springframework/osgi/config/spring-osgi-1.0-rc1.xsd" />
+				systemId="http://www.springframework.org/schema/osgi/spring-osgi-1.0-rc2.xsd"
+				uri="platform:/plugin/org.springframework.osgi.bundle.core/org/springframework/osgi/config/spring-osgi-1.0-rc2.xsd" />
 
 			<public
 				publicId="http://www.springframework.org/schema/osgi-compendium"
-				uri="platform:/plugin/org.springframework.osgi.bundle.core/org/springframework/osgi/config/spring-osgi-compendium-1.0-rc1.xsd"
-				webURL="http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium-1.0-rc1.xsd" />
+				uri="platform:/plugin/org.springframework.osgi.bundle.core/org/springframework/osgi/config/spring-osgi-compendium-1.0-rc2.xsd"
+				webURL="http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium-1.0-rc2.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/osgi/spring-osgi-compendium.xsd"
-				uri="platform:/plugin/org.springframework.osgi.bundle.core/org/springframework/osgi/compendium/config/spring-osgi-compendium-1.0-rc1.xsd" />
+				uri="platform:/plugin/org.springframework.osgi.bundle.core/org/springframework/osgi/compendium/config/spring-osgi-compendium-1.0-rc2.xsd" />
 			<system
-				systemId="http://www.springframework.org/schema/osgi/spring-osgi-compendium-1.0-rc1.xsd"
-				uri="platform:/plugin/org.springframework.osgi.bundle.core/org/springframework/osgi/compendium/config/spring-osgi-compendium-1.0-rc1.xsd" />
+				systemId="http://www.springframework.org/schema/osgi/spring-osgi-compendium-1.0-rc2.xsd"
+				uri="platform:/plugin/org.springframework.osgi.bundle.core/org/springframework/osgi/compendium/config/spring-osgi-compendium-1.0-rc2.xsd" />
 		</catalogContribution>
 	</extension>
 	
@@ -37,7 +37,7 @@
 			prefix="osgi" 
 			icon="icons/full/obj16/spring_osgi_obj.gif"
 			defaultSchemaLocation="http://www.springframework.org/schema/osgi/spring-osgi.xsd">
-			<schemaLocation url="http://www.springframework.org/schema/osgi/spring-osgi-1.0-rc1.xsd" />
+			<schemaLocation url="http://www.springframework.org/schema/osgi/spring-osgi-1.0-rc2.xsd" />
 		</namespace>
 		<namespace
 			name="Spring Dynamic Modules Compendium"
@@ -46,7 +46,7 @@
 			prefix="osgi-compendium" 
 			icon="icons/full/obj16/spring_osgi_obj.gif"
 			defaultSchemaLocation="http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd">
-			<schemaLocation url="http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium-1.0-rc1.xsd" />
+			<schemaLocation url="http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium-1.0-rc2.xsd" />
 		</namespace>
 	</extension>
 	
