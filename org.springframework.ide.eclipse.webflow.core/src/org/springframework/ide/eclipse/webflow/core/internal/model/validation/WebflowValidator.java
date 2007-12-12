@@ -26,8 +26,6 @@ import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
-import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
-import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinitionFactory;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
@@ -54,12 +52,6 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
  */
 @SuppressWarnings("restriction")
 public class WebflowValidator extends AbstractValidator {
-
-	public static final String VALIDATOR_ID = Activator.PLUGIN_ID
-			+ ".validator";
-
-	public static final String MARKER_ID = Activator.PLUGIN_ID
-			+ ".problemmarker";
 
 	public Set<IResource> deriveResources(Object object) {
 		Set<IResource> resources = new LinkedHashSet<IResource>();
@@ -124,18 +116,6 @@ public class WebflowValidator extends AbstractValidator {
 			}
 		}
 		return resources;
-	}
-
-	@Override
-	protected String getMarkerId() {
-		return MARKER_ID;
-	}
-
-	@Override
-	protected Set<ValidationRuleDefinition> getRuleDefinitions(
-			IResource resource) {
-		return ValidationRuleDefinitionFactory.getEnabledRuleDefinitions(
-				VALIDATOR_ID, resource.getProject());
 	}
 
 	@Override

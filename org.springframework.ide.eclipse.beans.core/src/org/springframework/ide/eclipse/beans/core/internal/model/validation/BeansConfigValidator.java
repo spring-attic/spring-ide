@@ -29,8 +29,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfigSet;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElement;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
-import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinition;
-import org.springframework.ide.eclipse.core.internal.model.validation.ValidationRuleDefinitionFactory;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
@@ -48,12 +46,6 @@ import org.springframework.ide.eclipse.core.model.validation.IValidator;
  * @since 2.0
  */
 public class BeansConfigValidator extends AbstractValidator {
-
-	public static final String VALIDATOR_ID = BeansCorePlugin.PLUGIN_ID
-			+ ".beansvalidator";
-
-	public static final String MARKER_ID = BeansCorePlugin.PLUGIN_ID
-			+ ".problemmarker";
 
 	public Set<IResource> deriveResources(Object object) {
 		Set<IResource> resources = new LinkedHashSet<IResource>();
@@ -124,18 +116,6 @@ public class BeansConfigValidator extends AbstractValidator {
 			}
 		}
 		return resources;
-	}
-
-	@Override
-	protected String getMarkerId() {
-		return MARKER_ID;
-	}
-
-	@Override
-	protected Set<ValidationRuleDefinition> getRuleDefinitions(
-			IResource resource) {
-		return ValidationRuleDefinitionFactory.getEnabledRuleDefinitions(
-				VALIDATOR_ID, resource.getProject());
 	}
 
 	@Override

@@ -19,6 +19,7 @@ import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.PersistablePreferenceObjectSupport;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.model.ISpringProject;
+import org.springframework.ide.eclipse.core.model.validation.AbstractValidator;
 import org.springframework.ide.eclipse.core.model.validation.IValidator;
 
 /**
@@ -140,6 +141,14 @@ public class ValidatorDefinition extends PersistablePreferenceObjectSupport {
 		}
 		else {
 			setEnabledByDefault(true);
+		}
+		initValidator();
+	}
+
+	private void initValidator() {
+		if (validator instanceof AbstractValidator) {
+			((AbstractValidator) validator).setMarkerId(markerId);
+			((AbstractValidator) validator).setValidatorId(id);
 		}
 	}
 
