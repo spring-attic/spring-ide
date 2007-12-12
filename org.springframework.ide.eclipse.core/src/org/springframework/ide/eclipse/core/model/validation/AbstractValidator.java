@@ -203,8 +203,7 @@ public abstract class AbstractValidator implements IValidator {
 				}
 
 				// call close on callback to execute any required resource
-				// cleanup
-				// in template
+				// cleanup in template
 				callback.destory();
 
 				subMonitor.worked(1);
