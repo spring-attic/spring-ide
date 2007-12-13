@@ -10,11 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model.validation.rules;
 
-import java.io.IOException;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IType;
-import org.objectweb.asm.ClassReader;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -27,7 +24,6 @@ import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.Introspector;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.ide.eclipse.core.java.Introspector.Static;
-import org.springframework.ide.eclipse.core.type.asm.AnnotationMetadataReadingVisitor;
 
 /**
  * Validates a given {@link IBean}'s factory bean and factory method.
@@ -37,9 +33,6 @@ import org.springframework.ide.eclipse.core.type.asm.AnnotationMetadataReadingVi
  * @since 2.0
  */
 public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
-
-	private static final String ASPECT_ANNOTATION_NAME = 
-		"org.aspectj.lang.annotation.Aspect";
 
 	@Override
 	public void validate(IBean bean, IBeansValidationContext context,
@@ -114,13 +107,9 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 				if (factoryBd.getFactoryBeanName() == null) {
 					if (factoryBd.isAbstract()
 							|| factoryBd.getBeanClassName() == null) {
-						context
-								.error(
-										bean,
-										"INVALID_FACTORY_BEAN",
-										"Referenced factory bean '"
-												+ beanName
-												+ "' is invalid (abstract or no bean class)");
+						context.error(bean, "INVALID_FACTORY_BEAN",
+							"Referenced factory bean '"	+ beanName
+							+ "' is invalid (abstract or no bean class)");
 					}
 					else {
 
@@ -156,10 +145,8 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 			// Skip factory-method validation for factory beans which are
 			// Spring factory beans as well and for those aspectOf methods
 			if (type != null
-					&& !(ValidationRuleUtils.ASPECT_OF_METHOD_NAME
-							.equals(methodName) && (JdtUtils
-							.isTypeAjdtElement(type) || hasAspectAnnotation(
-							className, context)))
+					&& !ValidationRuleUtils.ASPECT_OF_METHOD_NAME
+							.equals(methodName)
 					&& !Introspector.doesImplement(type, FactoryBean.class
 							.getName())) {
 				validateMethod(bean, type, MethodType.FACTORY, methodName,
@@ -168,31 +155,4 @@ public class BeanFactoryRule extends AbstractBeanMethodValidationRule {
 		}
 	}
 
-	/**
-	 * Checks if a given class identified by its name has the AspectJ
-	 * <code>@Aspect</code> annotation.
-	 * @param className the name of the class to search for <code>@Aspect</code> annotation
-	 * @param context the context
-	 * @return true if the given class identified by its name is annotated with
-	 * the <code>@Aspect</code> annotation.
-	 */
-	private boolean hasAspectAnnotation(String className,
-			IBeansValidationContext context) {
-
-		AnnotationMetadataReadingVisitor visitor = new AnnotationMetadataReadingVisitor();
-		try {
-			while (className != null
-					&& !Object.class.getName().equals(className)) {
-				ClassReader classReader = context.getClassReaderFactory()
-						.getClassReader(className);
-				classReader.accept(visitor, false);
-				className = visitor.getSuperClassName();
-			}
-		}
-		catch (IOException e) {
-			// ignore any missing files here as this will be
-			// reported as missing bean class
-		}
-		return visitor.hasAnnotation(ASPECT_ANNOTATION_NAME);
-	}
 }
