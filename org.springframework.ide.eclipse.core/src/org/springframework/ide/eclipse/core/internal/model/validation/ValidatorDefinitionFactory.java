@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.core.SpringCore;
  * Helper class that loads {@link ValidatorDefinition}s from the Platforms
  * extension point registry.
  * @author Torsten Juergeleit
+ * @author Christian Dupuis
  * @since 2.0
  */
 public class ValidatorDefinitionFactory {
@@ -31,6 +32,10 @@ public class ValidatorDefinitionFactory {
 			+ ".validators";
 	public static final String VALIDATOR_ELEMENT = "validator";
 
+	
+	/**
+	 * Returns all contributed {@link ValidatorDefinition}. 
+	 */
 	public static Set<ValidatorDefinition> getValidatorDefinitions() {
 		Set<ValidatorDefinition> validatorDefinitions =
 				new LinkedHashSet<ValidatorDefinition>();
@@ -53,4 +58,19 @@ public class ValidatorDefinitionFactory {
 		}
 		return validatorDefinitions;
 	}
+	
+	/**
+	 * Returns a specific {@link ValidatorDefinition} or null if the requested
+	 * one can't be found.
+	 * @param validatorId the id of the desired {@link ValidatorDefinition}
+	 */
+	public static ValidatorDefinition getValidatorDefinition(String validatorId) {
+		for (ValidatorDefinition validator : getValidatorDefinitions()) {
+			if (validator.getID().equals(validatorId)) {
+				return validator;
+			}
+		}
+		return null;
+	}
+	
 }

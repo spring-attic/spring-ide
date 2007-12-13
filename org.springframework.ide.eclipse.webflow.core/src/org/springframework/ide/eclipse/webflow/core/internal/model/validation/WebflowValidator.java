@@ -53,6 +53,9 @@ import org.springframework.ide.eclipse.webflow.core.model.IWebflowState;
 @SuppressWarnings("restriction")
 public class WebflowValidator extends AbstractValidator {
 
+	public static final String VALIDATOR_ID = Activator.PLUGIN_ID
+			+ ".validator";
+
 	public Set<IResource> deriveResources(Object object) {
 		Set<IResource> resources = new LinkedHashSet<IResource>();
 		if (object instanceof ISpringProject) {
@@ -143,13 +146,13 @@ public class WebflowValidator extends AbstractValidator {
 
 	private static class WebflowStateLifecycleManager implements
 			IValidationElementLifecycleManager {
-		
+
 		private IStructuredModel model = null;
-		
+
 		private IFile file = null;
-		
+
 		private IWebflowState rootElement;
-		
+
 		public void destory() {
 			if (model != null) {
 				model.releaseFromRead();
@@ -179,7 +182,8 @@ public class WebflowValidator extends AbstractValidator {
 
 				}
 				if (model != null) {
-					IDOMDocument document = ((DOMModelImpl) model).getDocument();
+					IDOMDocument document = ((DOMModelImpl) model)
+							.getDocument();
 					rootElement = new WebflowState(WebflowModelUtils
 							.getWebflowConfig(file));
 					rootElement.init((IDOMNode) document.getDocumentElement(),
