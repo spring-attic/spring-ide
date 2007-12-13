@@ -122,25 +122,13 @@ public class BeanPropertyRule extends
 									+ "' - not JavaBean compliant");
 				}
 				else if (!Introspector.hasWritableProperty(type, propertyName)) {
-					// move this code to Introspector to make ITD generally available
-					/*AJRelationshipType[] types = new AJRelationshipType[] {AJRelationshipManager.DECLARED_ON};
-					List<AJRelationship> rels = AJModel.getInstance().getAllRelationships(context.getRootElementProject(), types);
-					for (AJRelationship rel : rels) {
-						 if (rel.getTarget().equals(type)) {
-							 IntertypeElement iType = (IntertypeElement) rel.getSource();
-							 if (iType.getParameterTypes().length == 1) {
-								 System.out.println(iType.getElementName() + " - " + iType.getReturnType());
-							 }
-						 }
-					}*/
 					context.error(property, "NO_SETTER",
 							"No setter found for property '" + propertyName
 									+ "' in class '"
 									+ type.getFullyQualifiedName() + "'");
 				}
 
-				// TODO If mapped property then check type of setter's
-				// argument
+				// TODO If mapped property then check type of setter's argument
 			}
 		}
 		catch (JavaModelException e) {
