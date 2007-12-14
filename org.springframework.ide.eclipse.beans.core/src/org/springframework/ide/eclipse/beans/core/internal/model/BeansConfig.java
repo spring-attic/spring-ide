@@ -721,9 +721,8 @@ public class BeansConfig extends AbstractResourceModelElement implements
 
 					// set the resource loader to use the customized project
 					// class loader
-					reader
-							.setResourceLoader(new PathMatchingResourcePatternResolver(
-									JdtUtils.getClassLoader(file.getProject())));
+					reader.setResourceLoader(new PathMatchingResourcePatternResolver(
+							JdtUtils.getClassLoader(file.getProject())));
 
 					reader.setEntityResolver(resolver);
 					reader.setSourceExtractor(new CompositeSourceExtractor(file

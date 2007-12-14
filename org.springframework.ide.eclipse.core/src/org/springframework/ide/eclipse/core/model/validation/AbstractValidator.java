@@ -113,7 +113,7 @@ public abstract class AbstractValidator implements IValidator {
 	 * Returns the ID of this validator's
 	 * {@link IMarker validation problem marker} ID.
 	 */
-	protected final String getMarkerId() {
+	protected String getMarkerId() {
 		return markerId;
 	}
 
@@ -130,7 +130,7 @@ public abstract class AbstractValidator implements IValidator {
 	/**
 	 * Returns the validator id
 	 */
-	protected final String getValidatorId() {
+	protected String getValidatorId() {
 		return validatorId;
 	}
 

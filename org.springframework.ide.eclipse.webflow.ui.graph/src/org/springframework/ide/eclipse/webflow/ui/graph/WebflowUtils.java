@@ -170,6 +170,10 @@ public abstract class WebflowUtils {
 			WebflowValidator {
 
 		private Set<ValidationProblem> validationProblems = new HashSet<ValidationProblem>();
+		
+		public NoMarkerCreatingWebflowValidator() {
+			setMarkerId(VALIDATOR_ID);
+		}
 
 		protected void createProblemMarker(IResource resource,
 				ValidationProblem problem) {
@@ -188,6 +192,12 @@ public abstract class WebflowUtils {
 		public boolean hasErrors() {
 			return this.validationProblems.size() > 0;
 		}
+		
+		@Override
+		protected String getValidatorId() {
+			return VALIDATOR_ID;
+		}
+		
 	}
 
 }
