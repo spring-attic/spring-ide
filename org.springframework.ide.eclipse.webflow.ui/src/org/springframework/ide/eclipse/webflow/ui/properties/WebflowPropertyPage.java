@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.springframework.ide.eclipse.core.MarkerUtils;
+import org.springframework.ide.eclipse.core.internal.model.validation.ValidatorDefinitionFactory;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.webflow.core.internal.model.WebflowConfig;
 import org.springframework.ide.eclipse.webflow.core.internal.model.validation.WebflowValidator;
@@ -111,7 +112,8 @@ public class WebflowPropertyPage extends PropertyPage {
 			for (IWebflowConfig currentConfig : currentConfigs) {
 				if (getConfig(currentConfig.getResource(), webflowConfigs) == null) {
 					MarkerUtils.deleteMarkers(currentConfig.getResource(),
-							WebflowValidator.MARKER_ID);
+						ValidatorDefinitionFactory.getValidatorDefinition(
+							WebflowValidator.VALIDATOR_ID).getMarkerId());
 				}
 			}
 			project.setConfigs(webflowConfigs);
