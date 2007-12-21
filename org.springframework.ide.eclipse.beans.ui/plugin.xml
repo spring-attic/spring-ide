@@ -70,8 +70,8 @@
             labelProvider="org.springframework.ide.eclipse.beans.ui.namespaces.JmsNamespaceLabelProvider"
             prefix="jms"
             icon="icons/full/obj16/jms_obj.gif"
-            defaultSchemaLocation="http://www.springframework.org/schema/jms/spring-lang.xsd">
-			<schemaLocation url="http://www.springframework.org/schema/jms/spring-lang-2.5.xsd" />
+            defaultSchemaLocation="http://www.springframework.org/schema/jms/spring-jms.xsd">
+			<schemaLocation url="http://www.springframework.org/schema/jms/spring-jms-2.5.xsd" />
       </namespace>                         
       <namespace
             name="context Namespace"
