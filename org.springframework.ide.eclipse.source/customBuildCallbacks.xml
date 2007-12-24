@@ -59,9 +59,11 @@
 		<antcall target="copy.source">
 			<param name="plugin-name" value="org.springframework.ide.eclipse.beans.core" />
 		</antcall>
+<!--
 		<antcall target="copy.source">
 			<param name="plugin-name" value="org.springframework.ide.eclipse.beans.osgibridge" />
 		</antcall>
+-->
 		<antcall target="copy.source">
 			<param name="plugin-name" value="org.springframework.ide.eclipse.beans.ui" />
 		</antcall>
