@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.ide.eclipse.beans.ui.editor; singleton:=true
-Bundle-Version: 2.0.2.qualifier
+Bundle-Version: 2.0.3.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.beans.ui.editor.Activator
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.core.runtime,
@@ -23,7 +23,9 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.ui,
  org.springframework.ide.eclipse.beans.core,
  org.springframework.ide.eclipse.beans.ui,
- org.springframework.ide.eclipse.beans.ui.search
+ org.springframework.ide.eclipse.beans.ui.search,
+ org.eclipse.wst.xsd.core,
+ org.eclipse.xsd
 Eclipse-LazyStart: true
 Bundle-Vendor: %providerName
 Export-Package: org.springframework.ide.eclipse.beans.ui.editor,

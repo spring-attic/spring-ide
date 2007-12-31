@@ -2,7 +2,7 @@
 <feature
       id="org.springframework.ide.eclipse.mylyn.feature"
       label="%featureName"
-      version="2.0.2.qualifier"
+      version="2.0.3.qualifier"
       provider-name="%providerName"
       plugin="org.springframework.ide.eclipse">
 
@@ -27,8 +27,8 @@
          version="0.0.0"/>
 
    <requires>
-      <import feature="org.springframework.ide.eclipse.feature" version="2.0.2"/>
-      <import feature="org.springframework.ide.eclipse.aop.feature" version="2.0.2"/>
+      <import feature="org.springframework.ide.eclipse.feature" version="2.0.3"/>
+      <import feature="org.springframework.ide.eclipse.aop.feature" version="2.0.3"/>
       <import feature="org.eclipse.mylyn.context_feature" version="2.0.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.mylyn.ide_feature" version="2.0.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.mylyn.java_feature" version="2.0.0" match="greaterOrEqual"/>
@@ -39,28 +39,28 @@
          id="org.springframework.ide.eclipse.webflow.mylyn"
          download-size="0"
          install-size="0"
-         version="2.0.2.qualifier"
+         version="2.0.3.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.springframework.ide.eclipse.beans.mylyn"
          download-size="0"
          install-size="0"
-         version="2.0.2.qualifier"
+         version="2.0.3.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.springframework.ide.eclipse.aop.mylyn"
          download-size="0"
          install-size="0"
-         version="2.0.2.qualifier"
+         version="2.0.3.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.springframework.ide.eclipse.mylyn"
          download-size="0"
          install-size="0"
-         version="2.0.2.qualifier"
+         version="2.0.3.qualifier"
          unpack="false"/>
 
 </feature>

@@ -22,11 +22,12 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
-import org.eclipse.jdt.internal.corext.refactoring.structure.JavaMoveRefactoring;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CreateTargetQueries;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMoveWizard;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgQueries;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
@@ -61,22 +62,15 @@ public class BeansMoveRefactorAction extends AbstractBeansRefactorAction {
 			IMovePolicy policy = ReorgPolicyFactory.createMovePolicy(resources,
 					javaElements);
 			if (policy.canEnable()) {
-				final JavaMoveProcessor processor = new JavaMoveProcessor(
-						policy);
-				final JavaMoveRefactoring refactoring = new JavaMoveRefactoring(
-						processor);
-				final RefactoringWizard wizard = new ReorgMoveWizard(
+				JavaMoveProcessor processor = new JavaMoveProcessor(policy);
+				Refactoring refactoring = new MoveRefactoring(processor);
+				RefactoringWizard wizard = new ReorgMoveWizard(processor,
 						refactoring);
-				processor
-						.setCreateTargetQueries(new CreateTargetQueries(wizard));
+				processor.setCreateTargetQueries(new CreateTargetQueries(wizard));
 				processor.setReorgQueries(new ReorgQueries(wizard));
-				new RefactoringStarter()
-						.activate(
-								refactoring,
-								wizard,
-								shell,
-								RefactoringMessages.OpenRefactoringWizardAction_refactoring,
-								RefactoringSaveHelper.SAVE_ALL_ALWAYS_ASK);
+				new RefactoringStarter().activate(refactoring, wizard,
+					shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring,
+					RefactoringSaveHelper.SAVE_ALL_ALWAYS_ASK);
 			}
 		}
 	}
