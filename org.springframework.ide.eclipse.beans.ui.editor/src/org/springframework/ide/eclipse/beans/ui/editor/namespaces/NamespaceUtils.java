@@ -23,6 +23,12 @@ import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.editor.Activator;
 import org.w3c.dom.Element;
 
+/**
+ * Utility class that loads contributions to the
+ * <code>org.springframework.ide.eclipse.beans.ui.editor.namespaces</code>
+ * extension point.
+ * @author Christian Dupuis
+ */
 public class NamespaceUtils {
 
 	public static final String DEFAULT_NAMESPACE_URI = "http://www.springframework.org/schema/beans";
@@ -40,7 +46,9 @@ public class NamespaceUtils {
 		INamespaceContentAssistProcessor processor = getExecutableExtension(
 				namespaceUri, "contentAssistProcessor",
 				INamespaceContentAssistProcessor.class);
-		processor.init();
+		if (processor != null) {
+			processor.init();
+		}
 		return processor;
 	}
 
@@ -60,9 +68,8 @@ public class NamespaceUtils {
 						.getConfigurationElements()) {
 					try {
 						if (config.getAttribute("elementLocator") != null) {
-							locators
-									.add(((IReferenceableElementsLocator) config
-											.createExecutableExtension("elementLocator")));
+							locators.add(((IReferenceableElementsLocator) config
+								.createExecutableExtension("elementLocator")));
 						}
 					}
 					catch (Exception e) {
