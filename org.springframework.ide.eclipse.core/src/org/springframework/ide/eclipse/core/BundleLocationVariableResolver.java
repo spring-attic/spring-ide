@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.variables.IDynamicVariable;
 import org.eclipse.core.variables.IDynamicVariableResolver;
 import org.osgi.framework.Bundle;
+
 /**
  * {@link IDynamicVariableResolver} that is capable to resolve
  * <code>${bundle_loc}</code> to the bundle location.
