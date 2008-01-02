@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.bundle.spring.doc;singleton:=true
-Bundle-Version: 2.5.0.rc1_v200710242130
+Bundle-Version: 2.5.1.v200801020919
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Eclipse-LazyStart: true
