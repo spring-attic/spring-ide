@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+	
+   <extension
+         point="org.eclipse.pde.core.targets">
+	  <!-- Target Definiton for latest released Spring DM version -->	
+      <target
+            definition="targets/release/spring-dm-release.target"
+            id="org.springframework.ide.eclipse.osgi.targetdefinition.release"
+            name="Spring Dynamic Modules for OSGi(tm) Service Platforms RC1">
+      </target>
+   
+      <!-- Target Definiton for latest snapshot Spring DM version -->	
+      <target
+            definition="targets/snapshot/spring-dm-snapshot.target"
+            id="org.springframework.ide.eclipse.osgi.targetdefinition.snapshot"
+            name="Spring Dynamic Modules for OSGi(tm) Service Platforms Snapshot">
+      </target>
+   </extension>
+
+</plugin>
