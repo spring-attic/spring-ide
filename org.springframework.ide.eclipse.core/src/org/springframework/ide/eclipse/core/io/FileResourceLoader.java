@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.core.io;
 
 import org.eclipse.core.runtime.Assert;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
@@ -37,7 +38,7 @@ public class FileResourceLoader implements ResourceLoader {
 
 	/**
 	 * Returns <code>null</code> because Spring IDE's plug-in classloader is
-	 * not useable in Spring's context.
+	 * not usable in Spring's context.
 	 */
 	public ClassLoader getClassLoader() {
 		return null;
