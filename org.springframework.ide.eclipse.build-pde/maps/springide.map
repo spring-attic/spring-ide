@@ -28,6 +28,7 @@ plugin@org.springframework.ide.eclipse.osgi.source=SVN,trunk,http://springide.or
 plugin@org.springframework.ide.eclipse.mylyn.source=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.mylyn.source
 plugin@org.springframework.ide.eclipse.mylyn=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.mylyn
 plugin@org.springframework.ide.eclipse.osgi=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.osgi
+plugin@org.springframework.ide.eclipse.osgi.targetdefinition=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.osgi.targetdefinition
 plugin@org.springframework.ide.eclipse.aop.core=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.aop.core
 plugin@org.springframework.ide.eclipse.aop.ui=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.aop.ui
 plugin@org.springframework.ide.eclipse.aop.ui.matcher=SVN,trunk,http://springide.org/repos,,org.springframework.ide.eclipse.aop.ui.matcher
