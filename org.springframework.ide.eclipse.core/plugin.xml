@@ -35,4 +35,16 @@
 			<markerTypeReference id="org.springframework.ide.eclipse.core.problemmarker"/>
 		</markerTypeCategory>
 	</extension>
+	
+	
+   <extension
+         point="org.eclipse.core.variables.dynamicVariables">
+      <variable
+            description="description"
+            name="bundle_loc"
+            resolver="org.springframework.ide.eclipse.core.BundleLocationVariableResolver"
+            supportsArgument="true">
+      </variable>
+   </extension>
+	
 </plugin>
