@@ -3,14 +3,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>${spring.osgi.groupId}</groupId>
   <artifactId>${spring.osgi.groupId}.target</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0-rc2-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Target Platform for Spring Dynamic Modules for OSGi(tm) Service Platforms</name>
   <properties>
     <spring.groupId>org.springframework</spring.groupId>
     <spring.version>2.5</spring.version>
     <spring.osgi.groupId>org.springframework.osgi</spring.osgi.groupId>
-    <spring.osgi.version>1.0-SNAPSHOT</spring.osgi.version>
+    <spring.osgi.version>1.0-rc2-SNAPSHOT</spring.osgi.version>
     <felix.commons.groupId>org.apache.felix.commons</felix.commons.groupId>
   </properties>
   <dependencies>
@@ -90,17 +90,12 @@
     <dependency>
       <groupId>${spring.osgi.groupId}</groupId>
       <artifactId>junit.osgi</artifactId>
-      <version>3.8.1-SNAPSHOT</version>
+      <version>3.8.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>${spring.osgi.groupId}</groupId>
       <artifactId>log4j.osgi</artifactId>
       <version>1.2.15-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>${spring.osgi.groupId}</groupId>
-      <artifactId>mx4j</artifactId>
-      <version>3.0.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
