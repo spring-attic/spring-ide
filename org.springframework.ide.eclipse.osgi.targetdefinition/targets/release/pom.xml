@@ -90,17 +90,12 @@
     <dependency>
       <groupId>${spring.osgi.groupId}</groupId>
       <artifactId>junit.osgi</artifactId>
-      <version>3.8.1-SNAPSHOT</version>
+      <version>3.8.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>${spring.osgi.groupId}</groupId>
       <artifactId>log4j.osgi</artifactId>
       <version>1.2.15-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>${spring.osgi.groupId}</groupId>
-      <artifactId>mx4j</artifactId>
-      <version>3.0.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
