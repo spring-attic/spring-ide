@@ -27,7 +27,7 @@ pack() {
         exit 1
     fi
 }
-echo Command line: $@
+#echo Command line: $@
 
 build beans-feature $@
 build dependency-feature $@

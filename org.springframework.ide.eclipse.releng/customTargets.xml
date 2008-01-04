@@ -40,7 +40,7 @@
 			  </classpath>
 		    </java>-->
 				
-		<svn javahl="false">
+		<svn javahl="false" username="${svn.username}" password="${svn.password}">
 			<export srcurl="${mapsRepo}" destpath="${buildDirectory}/maps" force="true" />
 		</svn>
 
