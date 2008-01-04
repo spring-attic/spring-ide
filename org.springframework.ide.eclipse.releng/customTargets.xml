@@ -28,7 +28,7 @@
 	<!-- ===================================================================== -->
 	<target name="getMapFiles" depends="checkLocalMaps" unless="skipMaps">
 
-			<mkdir dir="${buildDirectory}/maps" />
+			<!--<mkdir dir="${buildDirectory}/maps" />
 		    <java classname="org.tmatesoft.svn.cli.SVN"
 		       dir="${buildDirectory}/maps" fork="true">
 		      <arg value="co"/>
@@ -38,11 +38,11 @@
 			        <pathelement location="${builder}/../org.eclipse.releng.basebuilder/eclipse/plugins/org.apache.ant_1.6.5/lib/svnkit.jar" />
 			        <pathelement location="${builder}/../org.eclipse.releng.basebuilder/eclipse/plugins/org.apache.ant_1.6.5/lib/svnkit-cli.jar" />
 			  </classpath>
-		    </java>
+		    </java>-->
 				
-		<!--<svn javahl="false">
+		<svn javahl="false">
 			<export srcurl="${mapsRepo}" destpath="${buildDirectory}/maps" force="true" />
-		</svn>-->
+		</svn>
 
 	</target>
 
