@@ -47,7 +47,6 @@ import org.w3c.dom.Node;
 /**
  * Hover information processor to create hover information for the spring beans
  * editor
- * 
  * @author Christian Dupuis
  */
 @SuppressWarnings("restriction")
@@ -129,8 +128,6 @@ public class BeansTextHoverProcessor extends XMLTagInfoHoverProcessor implements
 	/**
 	 * Computes the hover help for the attribute value (this is the same as the
 	 * attribute name's help)
-	 * 
-	 * @throws JavaModelException
 	 */
 	protected String computeTagAttValueHelp(IDOMNode xmlnode,
 			IDOMNode parentNode, IStructuredDocumentRegion flatNode,

@@ -31,6 +31,10 @@ public class FieldContentAssistCalculator extends ClassContentAssistCalculator {
 
 	private final JavaElementImageProvider imageProvider = new JavaElementImageProvider();
 
+	public FieldContentAssistCalculator() {
+		super(false);
+	}
+	
 	public void computeProposals(ContentAssistRequest request,
 			String matchString, String attributeName, String namespace,
 			String namepacePrefix) {

@@ -12,47 +12,27 @@ package org.springframework.ide.eclipse.beans.ui.editor.namespaces;
 
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
+import org.w3c.dom.Node;
 
 /**
  * Implementations of this interface are able to calculate content assist
- * proposals.
+ * proposals based on a given annotation element.
  * @author Christian Dupuis
  * @since 2.0.2
  */
 @SuppressWarnings("restriction")
-public interface INamespaceContentAssistProcessor {
-	
+public interface IAnnotationBasedContentAssistProcessor {
+
 	/**
 	 * Init this content assist processor.
 	 */
 	void init();
-	
+
 	/**
-	 *  Add content assist proposals for attribute values.
+	 * Add content assist proposals for attribute values.
 	 */
 	void addAttributeValueProposals(
 			IContentAssistProcessor delegatingContentAssistProcessor,
-			ContentAssistRequest request);
+			ContentAssistRequest request, Node annotation);
 
-	/**
-	 *  Add content assist proposals for attribute name.
-	 */
-	void addAttributeNameProposals(
-			IContentAssistProcessor delegatingContentAssistProcessor,
-			ContentAssistRequest request);
-
-	/**
-	 *  Add content assist proposals for closing tags.
-	 */
-	void addTagCloseProposals(
-			IContentAssistProcessor delegatingContentAssistProcessor,
-			ContentAssistRequest request);
-	
-	/**
-	 *  Add content assist proposals for inserting of tags.
-	 */
-	void addTagInsertionProposals(
-			IContentAssistProcessor delegatingContentAssistProcessor,
-			ContentAssistRequest request, int childPosition);
-	
 }

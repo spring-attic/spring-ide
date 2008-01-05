@@ -22,13 +22,15 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.BeansJavaCompletionU
 @SuppressWarnings("restriction")
 public class ClassContentAssistCalculator implements IContentAssistCalculator {
 
-	private final boolean isInterfaceRequired;
-	
+	private boolean isInterfaceRequired;
+
+	private boolean useBoth;
+
 	/**
 	 * Default constructor
 	 */
 	public ClassContentAssistCalculator() {
-		this(false);
+		this.useBoth = true;
 	}
 
 	/**
@@ -37,6 +39,7 @@ public class ClassContentAssistCalculator implements IContentAssistCalculator {
 	 */
 	public ClassContentAssistCalculator(boolean isInterfaceRequired) {
 		this.isInterfaceRequired = isInterfaceRequired;
+		this.useBoth = false;
 	}
 
 	/**
@@ -46,11 +49,21 @@ public class ClassContentAssistCalculator implements IContentAssistCalculator {
 	public void computeProposals(ContentAssistRequest request,
 			String matchString, String attributeName, String namespace,
 			String namepacePrefix) {
-		if (isInterfaceRequired) {
-			BeansJavaCompletionUtils.addInterfaceValueProposals(request, matchString);
+		if (useBoth) {
+			BeansJavaCompletionUtils.addClassValueProposals(request,
+					matchString, BeansJavaCompletionUtils.FLAG_PACKAGE
+							| BeansJavaCompletionUtils.FLAG_CLASS
+							| BeansJavaCompletionUtils.FLAG_INTERFACE);
 		}
 		else {
-			BeansJavaCompletionUtils.addClassValueProposals(request, matchString);
+			if (isInterfaceRequired) {
+				BeansJavaCompletionUtils.addInterfaceValueProposals(request,
+						matchString);
+			}
+			else {
+				BeansJavaCompletionUtils.addClassValueProposals(request,
+						matchString);
+			}
 		}
 	}
 }

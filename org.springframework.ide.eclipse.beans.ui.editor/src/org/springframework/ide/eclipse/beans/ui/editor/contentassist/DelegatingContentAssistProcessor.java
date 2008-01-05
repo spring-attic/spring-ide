@@ -10,13 +10,24 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.editor.contentassist;
 
+import java.util.List;
+
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
+import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentRegion;
+import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegion;
+import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegionList;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
+import org.eclipse.wst.xml.core.internal.regions.DOMRegionContext;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.eclipse.wst.xml.ui.internal.contentassist.XMLContentAssistProcessor;
+import org.springframework.ide.eclipse.beans.ui.editor.namespaces.IAnnotationBasedContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.beans.ui.editor.util.ToolAnnotationUtils;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * {@link IContentAssistProcessor} that delegates to
@@ -30,15 +41,80 @@ import org.springframework.ide.eclipse.beans.ui.editor.namespaces.NamespaceUtils
 public class DelegatingContentAssistProcessor extends XMLContentAssistProcessor {
 
 	@Override
-	protected void addAttributeValueProposals(ContentAssistRequest request) {
-		IDOMNode node = (IDOMNode) request.getNode();
+	protected void addAttributeValueProposals(
+			ContentAssistRequest contentAssistRequest) {
+
+		int proposalCount = 0;
+		if (contentAssistRequest.getCompletionProposals() != null) {
+			proposalCount = contentAssistRequest.getCompletionProposals().length;
+
+		}
+
+		IDOMNode node = (IDOMNode) contentAssistRequest.getNode();
 		String namespace = node.getNamespaceURI();
 		INamespaceContentAssistProcessor processor = NamespaceUtils
 				.getContentAssistProcessor(namespace);
 		if (processor != null) {
-			processor.addAttributeValueProposals(this, request);
+			processor.addAttributeValueProposals(this, contentAssistRequest);
 		}
-		super.addAttributeValueProposals(request);
+
+		// only calculate content assists based on annotations if no other processor
+		// kicked in already.
+		if (contentAssistRequest.getCompletionProposals() == null
+				|| contentAssistRequest.getCompletionProposals().length == proposalCount) {
+			addAnnotationBasedAttributeValueProposals(contentAssistRequest,
+					node);
+		}
+
+		super.addAttributeValueProposals(contentAssistRequest);
+	}
+	
+	private void addAnnotationBasedAttributeValueProposals(
+			ContentAssistRequest contentAssistRequest, IDOMNode node) {
+
+		IStructuredDocumentRegion open = node
+				.getFirstStructuredDocumentRegion();
+		ITextRegionList openRegions = open.getRegions();
+		int i = openRegions.indexOf(contentAssistRequest.getRegion());
+		if (i < 0) {
+			return;
+		}
+		ITextRegion nameRegion = null;
+		while (i >= 0) {
+			nameRegion = openRegions.get(i--);
+			if (nameRegion.getType() == DOMRegionContext.XML_TAG_ATTRIBUTE_NAME) {
+				break;
+			}
+		}
+
+		// the name region is REQUIRED to do anything useful
+		if (nameRegion != null) {
+			String attributeName = open.getText(nameRegion);
+			List<Element> appInfo = ToolAnnotationUtils
+					.getApplicationInformationElements(node, attributeName);
+			for (Element elem : appInfo) {
+				NodeList children = elem.getChildNodes();
+				for (int j = 0; j < children.getLength(); j++) {
+					Node child = children.item(j);
+					if (child.getNodeType() == Node.ELEMENT_NODE) {
+						invokeAnnotationBasedContentAssistProcessor(
+								contentAssistRequest, child);
+					}
+				}
+			}
+		}
+	}
+
+	private void invokeAnnotationBasedContentAssistProcessor(
+			ContentAssistRequest contentAssistRequest, Node child) {
+
+		IAnnotationBasedContentAssistProcessor annotationProcessor = NamespaceUtils
+				.getAnnotationBasedContentAssistProcessor(child
+						.getNamespaceURI());
+		if (annotationProcessor != null) {
+			annotationProcessor.addAttributeValueProposals(this,
+					contentAssistRequest, child);
+		}
 	}
 
 	@Override

@@ -21,6 +21,7 @@ import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.beans.ui.editor.Activator;
+import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.IAnnotationBasedHyperlinkDetector;
 import org.w3c.dom.Element;
 
 /**
@@ -52,6 +53,22 @@ public class NamespaceUtils {
 		return processor;
 	}
 
+	/**
+	 * Returns the registered {@link IAnnotationBasedContentAssistProcessor} for
+	 * the given namespace uri.
+	 * @since 2.0.3
+	 */
+	public static IAnnotationBasedContentAssistProcessor getAnnotationBasedContentAssistProcessor(
+			String namespaceUri) {
+		IAnnotationBasedContentAssistProcessor processor = getExecutableExtension(
+				namespaceUri, "contentAssistProcessor",
+				IAnnotationBasedContentAssistProcessor.class);
+		if (processor != null) {
+			processor.init();
+		}
+		return processor;
+	}
+
 	public static IReferenceableElementsLocator getElementsLocator(
 			String namespaceUri) {
 		return getExecutableExtension(namespaceUri, "elementLocator",
@@ -68,8 +85,9 @@ public class NamespaceUtils {
 						.getConfigurationElements()) {
 					try {
 						if (config.getAttribute("elementLocator") != null) {
-							locators.add(((IReferenceableElementsLocator) config
-								.createExecutableExtension("elementLocator")));
+							locators
+									.add(((IReferenceableElementsLocator) config
+											.createExecutableExtension("elementLocator")));
 						}
 					}
 					catch (Exception e) {
@@ -112,6 +130,16 @@ public class NamespaceUtils {
 	public static IHyperlinkDetector getHyperlinkDetector(String namespaceUri) {
 		IHyperlinkDetector detector = getExecutableExtension(namespaceUri,
 				"hyperLinkDetector", IHyperlinkDetector.class);
+		if (detector instanceof INamespaceHyperlinkDetector) {
+			((INamespaceHyperlinkDetector) detector).init();
+		}
+		return detector;
+	}
+
+	public static IAnnotationBasedHyperlinkDetector getAnnotationBasedHyperlinkDetector(
+			String namespaceUri) {
+		IAnnotationBasedHyperlinkDetector detector = getExecutableExtension(namespaceUri,
+				"hyperLinkDetector", IAnnotationBasedHyperlinkDetector.class);
 		if (detector instanceof INamespaceHyperlinkDetector) {
 			((INamespaceHyperlinkDetector) detector).init();
 		}

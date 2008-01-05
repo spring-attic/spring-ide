@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.ui.editor.namespaces.context;
+package org.springframework.ide.eclipse.beans.ui.editor.outline.jms;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -41,7 +41,7 @@ import org.springframework.ide.eclipse.beans.ui.editor.Activator;
  * 
  * @see org.eclipse.jface.resource.ImageRegistry
  */
-public class ContextUIImages {
+public class JmsUIImages {
 
 	private static final String ICON_PATH_PREFIX = "";
 
@@ -73,10 +73,10 @@ public class ContextUIImages {
 	/*
 	 * Available cached Images in the Java plugin image registry.
 	 */
-	public static final String IMG_OBJS_CONTEXT = NAME_PREFIX + "context_obj.gif";
+	public static final String IMG_OBJS_JMS = NAME_PREFIX + "jms_obj.gif";
 
-	public static final ImageDescriptor DESC_OBJS_CONTEXT = createManaged(
-			STRUCTURE, IMG_OBJS_CONTEXT);
+	public static final ImageDescriptor DESC_OBJS_JMS = createManaged(
+			STRUCTURE, IMG_OBJS_JMS);
 
 	/**
 	 * Returns the <code>Image<code> identified by the given key,

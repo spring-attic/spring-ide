@@ -125,7 +125,7 @@
 			<!-- AOP namespace -->
 			<public 
 				publicId="http://www.springframework.org/schema/aop"
-				uri="platform:/plugin/org.springframework.bundle.spring/org/springframework/aop/config/spring-aop-2.5.xsd"
+				uri="platform:/plugin/org.springframework.bundle.spring/5org/springframework/aop/config/spring-aop-2.5.xsd"
 				webURL="http://www.springframework.org/schema/aop/spring-aop.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/aop/spring-aop.xsd"
@@ -293,18 +293,18 @@
 			contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.contentassist.bean.BeansContentAssistProcessor"
 			labelProvider="org.springframework.ide.eclipse.beans.ui.editor.outline.bean.BeansOutlineLabelProvider"
 			name="Spring P" uri="http://www.springframework.org/schema/p" />
-		<namespace
+		<!--<namespace
 			contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.contentassist.aop.AopContentAssistProcessor"
 			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
 			hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.hyperlink.aop.AopHyperlinkDetector"
 			labelProvider="org.springframework.ide.eclipse.beans.ui.editor.outline.aop.AopOutlineLabelProvider"
-			name="Spring AOP" uri="http://www.springframework.org/schema/aop" />
-		<namespace
+			name="Spring AOP" uri="http://www.springframework.org/schema/aop" />-->
+		<!--<namespace
 			contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.contentassist.util.UtilContentAssistProcessor"
 			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
 			hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.hyperlink.util.UtilHyperlinkDetector"
 			labelProvider="org.springframework.ide.eclipse.beans.ui.editor.outline.util.UtilOutlineLabelProvider"
-			name="Spring Util" uri="http://www.springframework.org/schema/util" />
+			name="Spring Util" uri="http://www.springframework.org/schema/util" />-->
 		<namespace
 			classNameProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.tx.TxClassNameProvider"
 			contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.contentassist.tx.TxContentAssistProcessor"
@@ -325,17 +325,21 @@
 			labelProvider="org.springframework.ide.eclipse.beans.ui.editor.outline.lang.LangOutlineLabelProvider"
 			name="Spring Lang" uri="http://www.springframework.org/schema/lang" />
 		<namespace
-			contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.namespaces.jms.JmsContentAssistProcessor"
+			contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.contentassist.jms.JmsContentAssistProcessor"
 			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
-			hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.namespaces.jms.JmsHyperlinkDetector"
-			labelProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.jms.JmsOutlineLabelProvider"
+			hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.hyperlink.jms.JmsHyperlinkDetector"
+			labelProvider="org.springframework.ide.eclipse.beans.ui.editor.outline.jms.JmsOutlineLabelProvider"
 			name="Spring Jms" uri="http://www.springframework.org/schema/jms" />
 		<namespace
-			contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.namespaces.context.ContextContentAssistProcessor"
+			contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.contentassist.context.ContextContentAssistProcessor"
 			elementLocator="org.springframework.ide.eclipse.beans.ui.editor.namespaces.DefaultReferenceableElementsLocator"
-			hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.namespaces.context.ContextHyperlinkDetector"
-			labelProvider="org.springframework.ide.eclipse.beans.ui.editor.namespaces.context.ContextOutlineLabelProvider"
+			hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.hyperlink.context.ContextHyperlinkDetector"
+			labelProvider="org.springframework.ide.eclipse.beans.ui.editor.outline.context.ContextOutlineLabelProvider"
 			name="Spring Context" uri="http://www.springframework.org/schema/context" />
+		<namespace
+			contentAssistProcessor="org.springframework.ide.eclipse.beans.ui.editor.contentassist.tool.ToolAnnotationBasedContentAssistProcessor"
+			hyperLinkDetector="org.springframework.ide.eclipse.beans.ui.editor.hyperlink.tool.ToolAnnotationBasedHyperlinkDetector"
+			name="Spring Tool" uri="http://www.springframework.org/schema/tool" />
 	</extension>
 
 </plugin>

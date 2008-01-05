@@ -26,7 +26,6 @@ import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceCont
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings("restriction")
 public class UtilContentAssistProcessor extends
 		NamespaceContentAssistProcessorSupport {
 
@@ -38,7 +37,7 @@ public class UtilContentAssistProcessor extends
 				new ClassHierachyContentAssistCalculator(Map.class.getName()));
 		registerContentAssistCalculator("set-class",
 				new ClassHierachyContentAssistCalculator(Set.class.getName()));
-		ClassContentAssistCalculator calculator = new ClassContentAssistCalculator();
+		ClassContentAssistCalculator calculator = new ClassContentAssistCalculator(false);
 		registerContentAssistCalculator("value-type", calculator);
 		registerContentAssistCalculator("key-type", calculator);
 

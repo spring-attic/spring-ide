@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.ui.editor.namespaces.context;
+package org.springframework.ide.eclipse.beans.ui.editor.hyperlink.context;
 
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.springframework.ide.eclipse.beans.ui.editor.hyperlink.BeanHyperlinkCalculator;

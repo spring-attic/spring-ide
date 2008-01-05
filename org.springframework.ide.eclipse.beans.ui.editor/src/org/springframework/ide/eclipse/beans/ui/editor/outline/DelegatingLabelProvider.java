@@ -18,7 +18,6 @@ import org.springframework.ide.eclipse.beans.ui.editor.namespaces.NamespaceUtils
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.w3c.dom.Node;
 
-@SuppressWarnings("restriction")
 public class DelegatingLabelProvider extends LabelProvider {
 
 	private static XMLContentOutlineConfiguration contentOutlineConfiguration = 

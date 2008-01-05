@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.ui.editor.namespaces.jms;
+package org.springframework.ide.eclipse.beans.ui.editor.hyperlink.jms;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IType;

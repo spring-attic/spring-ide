@@ -20,7 +20,6 @@ import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceCont
  * @author Christian Dupuis
  * @since 2.0
  */
-@SuppressWarnings("restriction")
 public class TxContentAssistProcessor extends
 		NamespaceContentAssistProcessorSupport {
 

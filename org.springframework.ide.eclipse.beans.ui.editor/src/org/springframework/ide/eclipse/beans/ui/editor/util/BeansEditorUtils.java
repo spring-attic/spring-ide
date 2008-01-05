@@ -891,4 +891,16 @@ public class BeansEditorUtils {
 		}
 		return null;
 	}
+
+	public static String prepareMatchString(ContentAssistRequest request) {
+		String matchString = request.getMatchString();
+		if (matchString == null) {
+			matchString = "";
+		}
+		if (matchString.length() > 0
+				&& (matchString.startsWith("\"") || matchString.startsWith("'"))) {
+			matchString = matchString.substring(1);
+		}
+		return matchString;
+	}
 }

@@ -55,7 +55,7 @@
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="labelProvider" type="string" use="required">
+         <attribute name="labelProvider" type="string">
             <annotation>
                <documentation>
                   an instance of &lt;samp&gt;org.eclipse.wst.xml.ui.internal.contentoutline.JFaceNodeLabelProvider&lt;/samp&gt;
@@ -69,9 +69,10 @@
             <annotation>
                <documentation>
                   an instance of &lt;samp&gt;org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceContentAssistProcessor&lt;/samp&gt;
+or &lt;samp&gt;org.springframework.ide.eclipse.beans.ui.editor.namespaces.IAnnotationContentAssistProcessor&lt;/samp&gt;
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn="org.springframework.ide.eclipse.beans.ui.editor.namespacess.INamespaceContentAssistProcessor"/>
+                  <meta.attribute kind="java"/>
                </appInfo>
             </annotation>
          </attribute>
@@ -79,9 +80,10 @@
             <annotation>
                <documentation>
                   an instance of &lt;samp&gt;org.eclipse.jface.text.hyperlink.IHyperlinkDetector&lt;/samp&gt;
+or &lt;samp&gt;org.springframework.ide.eclipse.beans.ui.editor.hyperlink.IAnnotationBasedHyperlinkDetector&lt;/samp&gt;
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn="org.eclipse.jface.text.hyperlink.IHyperlinkDetector"/>
+                  <meta.attribute kind="java"/>
                </appInfo>
             </annotation>
          </attribute>
@@ -117,14 +119,6 @@
       </documentation>
    </annotation>
 
-   <annotation>
-      <appInfo>
-         <meta.section type="examples"/>
-      </appInfo>
-      <documentation>
-         
-      </documentation>
-   </annotation>
 
    <annotation>
       <appInfo>

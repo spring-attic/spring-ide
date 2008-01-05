@@ -20,6 +20,7 @@ import org.eclipse.wst.xml.core.internal.regions.DOMRegionContext;
 import org.eclipse.wst.xml.ui.internal.contentassist.ContentAssistRequest;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.INamespaceContentAssistProcessor;
 import org.springframework.ide.eclipse.beans.ui.editor.templates.BeansTemplateCompletionProcessor;
+import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.w3c.dom.Node;
 
 /**
@@ -112,14 +113,7 @@ public abstract class AbstractContentAssistProcessor implements
 			}
 		}
 
-		String matchString = request.getMatchString();
-		if (matchString == null) {
-			matchString = "";
-		}
-		if (matchString.length() > 0
-				&& (matchString.startsWith("\"") || matchString.startsWith("'"))) {
-			matchString = matchString.substring(1);
-		}
+		String matchString = BeansEditorUtils.prepareMatchString(request);
 
 		// the name region is REQUIRED to do anything useful
 		if (nameRegion != null) {

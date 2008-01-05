@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.ui.editor.namespaces.jms;
+package org.springframework.ide.eclipse.beans.ui.editor.contentassist.jms;
 
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.BeanReferenceContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistCalculator;

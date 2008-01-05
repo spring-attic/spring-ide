@@ -47,7 +47,7 @@ import org.w3c.dom.Node;
  * @author Christian Dupuis
  * @author Torsten Juergeleit
  */
-@SuppressWarnings( { "restriction", "unchecked" })
+@SuppressWarnings("restriction")
 public class BeansContentAssistProcessor extends
 		NamespaceContentAssistProcessorSupport {
 
@@ -87,8 +87,7 @@ public class BeansContentAssistProcessor extends
 				}
 			};
 
-			calculator.computeProposals(request, prefix,
-					null, null, null);
+			calculator.computeProposals(request, prefix, null, null, null);
 		}
 	}
 
@@ -224,7 +223,8 @@ public class BeansContentAssistProcessor extends
 
 	@Override
 	public void init() {
-		ClassContentAssistCalculator clazz = new ClassContentAssistCalculator();
+		ClassContentAssistCalculator clazz = new ClassContentAssistCalculator(
+				false);
 		registerContentAssistCalculator("bean", "class", clazz);
 		registerContentAssistCalculator("constructor-arg", "type", clazz);
 		registerContentAssistCalculator("arg-type", "match", clazz);
@@ -260,8 +260,9 @@ public class BeansContentAssistProcessor extends
 				new ReplaceMethodContentAssistCalculator());
 		registerContentAssistCalculator("lookup-method", "name",
 				new LookupMethodContentAssistCalculator());
-		
-		registerContentAssistCalculator("property", "name", new PropertyNameContentAssistCalculator());
+
+		registerContentAssistCalculator("property", "name",
+				new PropertyNameContentAssistCalculator());
 	}
 
 	@Override
