@@ -53,7 +53,7 @@
 				publicId="-//SPRING//DTD BEAN 2.0//EN"
 				uri="platform:/plugin/org.springframework.bundle.spring/org/springframework/beans/factory/xml/spring-beans-2.0.dtd"
 				webURL="http://www.springframework.org/dtd/spring-beans-2.0.dtd" />
-<!--			<public 
+			<!-- <public 
 				publicId="-//SPRING//DTD BEAN 2.5//EN"
 				uri="platform:/plugin/org.springframework.bundle.spring/org/springframework/beans/factory/xml/spring-beans-2.5.dtd"
 				webURL="http://www.springframework.org/dtd/spring-beans-2.5.dtd" /> -->
@@ -125,7 +125,7 @@
 			<!-- AOP namespace -->
 			<public 
 				publicId="http://www.springframework.org/schema/aop"
-				uri="platform:/plugin/org.springframework.bundle.spring/5org/springframework/aop/config/spring-aop-2.5.xsd"
+				uri="platform:/plugin/org.springframework.bundle.spring/org/springframework/aop/config/spring-aop-2.5.xsd"
 				webURL="http://www.springframework.org/schema/aop/spring-aop.xsd" />
 			<system
 				systemId="http://www.springframework.org/schema/aop/spring-aop.xsd"
