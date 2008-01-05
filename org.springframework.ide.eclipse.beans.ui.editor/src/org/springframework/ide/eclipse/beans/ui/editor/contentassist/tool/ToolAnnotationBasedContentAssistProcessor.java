@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,30 @@ import org.springframework.ide.eclipse.beans.ui.editor.util.ToolAnnotationUtils.
 import org.w3c.dom.Node;
 
 /**
- * TODO
+ * {@link IAnnotationBasedContentAssistProcessor} that calculates content assist
+ * proposals based on Spring core's tool namespace annotations.
+ * <p>
+ * Adding the following annotation will trigger a bean reference content assist
+ * search:
+ * 
+ * <pre>
+ * &lt;tool:annotation kind=“ref”&gt;
+ *    &lt;tool:expected-type type=“org.springframework.aop.Pointcut”/&gt;
+ * &lt;/tool:annotation&gt;
+ * </pre>
+ * 
+ * <p>
+ * The following will launch the class, package and interface content assist.
+ * Depending on the assignable-to value that proposals might be further narrowed
+ * to those implementing the interface specified:
+ * 
+ * <pre>
+ * &lt;tool:annotation&gt;
+ *    &lt;tool:expected-type type=“java.lang.Class”/&gt;
+ *    &lt;tool:assignable-to type=“java.util.List”/&gt;
+ * &lt;/tool:annotation&gt;
+ * </pre>
+ * 
  * @author Christian Dupuis
  * @since 2.0.3
  */
@@ -36,7 +59,6 @@ public class ToolAnnotationBasedContentAssistProcessor implements
 
 	private static final IContentAssistCalculator CLASS_CALCULATOR = new ClassContentAssistCalculator();
 
-	
 	public void addAttributeValueProposals(
 			IContentAssistProcessor delegatingContentAssistProcessor,
 			ContentAssistRequest request, Node annotation) {
