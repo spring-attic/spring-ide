@@ -27,7 +27,7 @@ public class WebflowContentAssistProcessor extends
 
 	@Override
 	public void init() {
-		ClassContentAssistCalculator clazz = new ClassContentAssistCalculator();
+		ClassContentAssistCalculator clazz = new ClassContentAssistCalculator(false);
 		registerContentAssistCalculator("argument", "parameter-type", clazz);
 		registerContentAssistCalculator("mapping", "to", clazz);
 		registerContentAssistCalculator("mapping", "form", clazz);

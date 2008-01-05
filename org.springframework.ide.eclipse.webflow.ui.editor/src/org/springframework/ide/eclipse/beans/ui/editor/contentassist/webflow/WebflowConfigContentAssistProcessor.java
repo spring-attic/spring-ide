@@ -34,6 +34,6 @@ public class WebflowConfigContentAssistProcessor extends
 				"conversation-manager-ref", beanRef);
 		registerContentAssistCalculator("listener", "ref", beanRef);
 		registerContentAssistCalculator("attribute", "type",
-				new ClassContentAssistCalculator());
+				new ClassContentAssistCalculator(false));
 	}
 }
