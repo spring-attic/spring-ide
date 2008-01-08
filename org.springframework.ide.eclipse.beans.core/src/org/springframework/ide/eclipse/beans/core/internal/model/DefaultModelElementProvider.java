@@ -50,8 +50,7 @@ public class DefaultModelElementProvider implements IModelElementProvider {
 
 		// Create beans from wrapped bean definitions
 		for (BeanDefinition beanDef : definition.getBeanDefinitions()) {
-			if (beanDef instanceof AbstractBeanDefinition && beanDef
-					.getRole() != BeanDefinition.ROLE_INFRASTRUCTURE) {
+			if (beanDef instanceof AbstractBeanDefinition) {
 				String beanName = UniqueBeanNameGenerator.generateBeanName(
 						beanDef, config);
 				IBean bean = new Bean(component, beanName, null, beanDef);

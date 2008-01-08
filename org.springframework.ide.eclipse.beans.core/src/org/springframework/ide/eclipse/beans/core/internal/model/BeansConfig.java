@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core.internal.model;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,11 +32,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.ui.IPersistableElement;
-import org.eclipse.wst.xml.core.internal.XMLCorePlugin;
-import org.eclipse.wst.xml.core.internal.catalog.provisional.ICatalog;
 import org.springframework.beans.BeanMetadataElement;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.parsing.AliasDefinition;
@@ -49,14 +43,9 @@ import org.springframework.beans.factory.parsing.ImportDefinition;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.ReaderEventListener;
-import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.BeanNameGenerator;
-import org.springframework.beans.factory.xml.DefaultNamespaceHandlerResolver;
-import org.springframework.beans.factory.xml.DelegatingEntityResolver;
 import org.springframework.beans.factory.xml.DocumentDefaultsDefinition;
-import org.springframework.beans.factory.xml.NamespaceHandler;
 import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
-import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
@@ -92,16 +81,12 @@ import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
-import org.springframework.ide.eclipse.core.model.java.JavaSourceExtractor;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
-import org.springframework.ide.eclipse.core.model.xml.XmlSourceExtractor;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
 import org.springframework.util.ObjectUtils;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
@@ -110,12 +95,10 @@ import org.xml.sax.SAXParseException;
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
-@SuppressWarnings("restriction")
 public class BeansConfig extends AbstractResourceModelElement implements
 		IBeansConfig, ILazyInitializedModelElement {
 
-	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = 
-		new DefaultModelElementProvider();
+	public static final IModelElementProvider DEFAULT_ELEMENT_PROVIDER = new DefaultModelElementProvider();
 
 	/** This bean's config file */
 	private IFile file;
@@ -722,18 +705,16 @@ public class BeansConfig extends AbstractResourceModelElement implements
 					// set the resource loader to use the customized project
 					// class loader
 					reader.setResourceLoader(new PathMatchingResourcePatternResolver(
-							JdtUtils.getClassLoader(file.getProject())));
+						JdtUtils.getClassLoader(file.getProject())));
 
 					reader.setEntityResolver(resolver);
-					reader.setSourceExtractor(new CompositeSourceExtractor(file
+					reader.setSourceExtractor(new DelegatingSourceExtractor(file
 							.getProject()));
 					reader.setEventListener(eventListener);
 					reader.setProblemReporter(problemReporter);
 					reader.setErrorHandler(new BeansConfigErrorHandler());
-					reader
-							.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(
-									NamespaceHandlerResolver.class
-											.getClassLoader()));
+					reader.setNamespaceHandlerResolver(new DelegatingNamespaceHandlerResolver(
+						NamespaceHandlerResolver.class.getClassLoader(), this));
 					reader.setBeanNameGenerator(beanNameGenerator);
 					try {
 						reader.loadBeanDefinitions(resource);
@@ -856,7 +837,7 @@ public class BeansConfig extends AbstractResourceModelElement implements
 				message.append(rootCause.getMessage());
 			}
 			return message.toString();
-		}
+		} 
 
 		private int getLine(Problem problem) {
 			Object source = problem.getLocation().getSource();
@@ -958,210 +939,6 @@ public class BeansConfig extends AbstractResourceModelElement implements
 				}
 			}
 			return false;
-		}
-	}
-
-	/**
-	 * This {@link NamespaceHandlerResolver} provides a {@link NamespaceHandler}
-	 * for a given namespace URI. Depending on this namespace URI the returned
-	 * namespace handler is one of the following (in the provided order):
-	 * <ol>
-	 * <li>a namespace handler provided by the Spring framework</li>
-	 * <li>a namespace handler contributed via the extension point
-	 * <code>org.springframework.ide.eclipse.beans.core.namespaces</code></li>
-	 * <li>a no-op {@link NoOpNamespaceHandler namespace handler}</li>
-	 * </ol>
-	 */
-	private static final class DelegatingNamespaceHandlerResolver extends
-			DefaultNamespaceHandlerResolver {
-
-		private static final NamespaceHandler NO_OP_NAMESPACE_HANDLER = new NoOpNamespaceHandler();
-
-		private final Map<String, NamespaceHandler> namespaceHandlers;
-
-		private final Set<NamespaceHandlerResolver> namespaceHandlerResolvers;
-
-		public DelegatingNamespaceHandlerResolver(ClassLoader classLoader) {
-			super(classLoader);
-			namespaceHandlers = NamespaceUtils.getNamespaceHandlers();
-			namespaceHandlerResolvers = NamespaceUtils
-					.getNamespaceHandlerResolvers();
-		}
-
-		@Override
-		public NamespaceHandler resolve(String namespaceUri) {
-
-			NamespaceHandler namespaceHandler = null;
-
-			// First check for a namespace handler provided by Spring
-			namespaceHandler = super.resolve(namespaceUri);
-
-			if (namespaceHandler != null) {
-				return namespaceHandler;
-			}
-
-			// Then check for a namespace handler provided by an extension
-			namespaceHandler = namespaceHandlers.get(namespaceUri);
-			if (namespaceHandler != null) {
-				return namespaceHandler;
-			}
-
-			// Then check the contributed NamespaceHandlerResolver
-			for (NamespaceHandlerResolver resolver : namespaceHandlerResolvers) {
-				try {
-					namespaceHandler = resolver.resolve(namespaceUri);
-					if (namespaceHandler != null) {
-						return namespaceHandler;
-					}
-				}
-				catch (Exception e) {
-					// Make sure a contributed NamespaceHandlerResolver can't
-					// prevent parsing
-					BeansCorePlugin.log(e);
-				}
-			}
-
-			// Finally use a no-op namespace handler
-			return NO_OP_NAMESPACE_HANDLER;
-		}
-	}
-
-	private static final class NoOpNamespaceHandler implements NamespaceHandler {
-
-		public void init() {
-			// do nothing
-		}
-
-		public BeanDefinitionHolder decorate(Node source,
-				BeanDefinitionHolder definition, ParserContext parserContext) {
-			// don't decorate bean definition holder and just return
-			return definition;
-		}
-
-		public BeanDefinition parse(Element element, ParserContext parserContext) {
-			// do nothing
-
-			// emit a warning that the NamespaceHandler cannot be found
-			parserContext.getReaderContext().warning(
-					"Unable to locate Spring NamespaceHandler for XML schema namespace ["
-							+ element.getNamespaceURI() + "]",
-					parserContext.extractSource(element.getParentNode()));
-			return null;
-		}
-	}
-
-	private static class CompositeSourceExtractor implements SourceExtractor {
-
-		private Set<SourceExtractor> sourceExtractors;
-
-		public CompositeSourceExtractor(IProject project) {
-			this.sourceExtractors = new HashSet<SourceExtractor>();
-			this.sourceExtractors.add(new XmlSourceExtractor());
-			this.sourceExtractors.add(new JavaSourceExtractor(project));
-		}
-
-		public Object extractSource(Object sourceCandidate,
-				Resource definingResource) {
-			if (sourceCandidate != null) {
-				for (SourceExtractor sourceExtractor : sourceExtractors) {
-					Object object = sourceExtractor.extractSource(
-							sourceCandidate, definingResource);
-					if (!sourceCandidate.equals(object)) {
-						return object;
-					}
-				}
-			}
-			return sourceCandidate;
-		}
-	}
-
-	/**
-	 * This {@link EntityResolver}
-	 */
-	private static class XmlCatalogDelegatingEntityResolver extends
-			DelegatingEntityResolver {
-
-		private final Set<EntityResolver> entityResolvers;
-
-		public XmlCatalogDelegatingEntityResolver(EntityResolver dtdResolver,
-				EntityResolver schemaResolver) {
-			super(dtdResolver, schemaResolver);
-			this.entityResolvers = NamespaceUtils.getEntityResolvers();
-		}
-
-		@Override
-		public InputSource resolveEntity(String publicId, String systemId)
-				throws SAXException, IOException {
-			InputSource inputSource = super.resolveEntity(publicId, systemId);
-			if (inputSource != null) {
-				return inputSource;
-			}
-
-			inputSource = resolveEntityViaXmlCatalog(publicId, systemId);
-			if (inputSource != null) {
-				return inputSource;
-			}
-
-			for (EntityResolver entityResolver : this.entityResolvers) {
-				try {
-					inputSource = entityResolver.resolveEntity(publicId,
-							systemId);
-					if (inputSource != null) {
-						return inputSource;
-					}
-				}
-				catch (Exception e) {
-					// Make sure a contributed EntityResolver can't prevent
-					// parsing
-					BeansCorePlugin.log(e);
-				}
-			}
-
-			return inputSource;
-		}
-
-		public InputSource resolveEntityViaXmlCatalog(String publicId,
-				String systemId) {
-			ICatalog catalog = XMLCorePlugin.getDefault()
-					.getDefaultXMLCatalog();
-			if (systemId != null) {
-				try {
-					String resolvedSystemId = catalog.resolveSystem(systemId);
-					if (resolvedSystemId == null) {
-						resolvedSystemId = catalog.resolveURI(systemId);
-					}
-					if (resolvedSystemId != null) {
-						return new InputSource(resolvedSystemId);
-					}
-				}
-				catch (MalformedURLException me) {
-					// ignore
-				}
-				catch (IOException ie) {
-					// ignore
-				}
-			}
-			if (publicId != null) {
-				if (!(systemId != null && systemId.endsWith(XSD_SUFFIX))) {
-					try {
-						String resolvedSystemId = catalog.resolvePublic(
-								publicId, systemId);
-						if (resolvedSystemId == null) {
-							resolvedSystemId = catalog.resolveURI(publicId);
-						}
-						if (resolvedSystemId != null) {
-							return new InputSource(resolvedSystemId);
-						}
-					}
-					catch (MalformedURLException me) {
-						// ignore
-					}
-					catch (IOException ie) {
-						// ignore
-					}
-				}
-			}
-			return null;
 		}
 	}
 
