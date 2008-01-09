@@ -21,4 +21,4 @@ then
     exit 1
 fi
 
-scp -r $WORKSPACE/../updatesite_nightly/* ${USER}@springide.org:/home/springide/htdocs/$REMOTE_PATH
+scp -r $WORKSPACE/updatesite/* ${USER}@springide.org:/home/springide/htdocs/$REMOTE_PATH

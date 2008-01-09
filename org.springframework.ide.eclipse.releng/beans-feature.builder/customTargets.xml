@@ -3,20 +3,7 @@
 
 	<import file="../customTargets.xml" />
 	
-	<property name="updateSiteStagingLocation" value="${buildDirectory}/../../updatesite_nightly" />
-	<property name="eclipseStagingLocation" value="${buildDirectory}/../../eclipse_stage" />
-
 	<property name="featureName" value="org.springframework.ide.eclipse.feature" />
 	<property name="featureCategory" value="Core" />
 	
-	<!-- ===================================================================== -->
-	<!-- Steps to do before setup -->
-	<!-- ===================================================================== -->
-	<target name="preSetup">
-		<delete dir="${buildDirectory}" />
-		<delete dir="${updateSiteStagingLocation}" />
-		<delete dir="${eclipseStagingLocation}" />
-		<tstamp />
-	</target>
-
 </project>
