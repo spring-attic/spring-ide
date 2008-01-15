@@ -528,7 +528,7 @@ public class BeansEditorUtils {
 				String idTemp = (attributes.getNamedItem("id") != null ? attributes
 						.getNamedItem("id").getNodeValue()
 						: null);
-				if (id.equals(idTemp)) {
+				if (id != null && id.equals(idTemp)) {
 					return getClassNameForBean(file, document, beanNode);
 				}
 			}
@@ -538,7 +538,7 @@ public class BeansEditorUtils {
 			List beansList = BeansEditorUtils.getBeansFromConfigSets(file);
 			for (int i = 0; i < beansList.size(); i++) {
 				IBean bean = (IBean) beansList.get(i);
-				if (id.equals(bean.getElementName())) {
+				if (id != null && id.equals(bean.getElementName())) {
 					return BeansModelUtils.getBeanClass(bean, null);
 				}
 			}
