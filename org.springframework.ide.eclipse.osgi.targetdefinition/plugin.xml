@@ -8,14 +8,14 @@
       <target
             definition="targets/release/spring-dm-release.target"
             id="org.springframework.ide.eclipse.osgi.targetdefinition.release"
-            name="Spring Dynamic Modules for OSGi(tm) Service Platforms RC1">
+            name="%releaseTarget.name">
       </target>
    
       <!-- Target Definiton for latest snapshot Spring DM version -->	
       <target
             definition="targets/snapshot/spring-dm-snapshot.target"
             id="org.springframework.ide.eclipse.osgi.targetdefinition.snapshot"
-            name="Spring Dynamic Modules for OSGi(tm) Service Platforms Snapshot">
+            name="%snapshotTarget.name">
       </target>
    </extension>
 
