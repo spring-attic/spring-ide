@@ -3,5 +3,4 @@
 	<associateSite label="Spring IDE" url="http://springide.org/updatesite/"/>
 	<associateSite label="Mylyn" url="http://download.eclipse.org/tools/mylyn/update/e3.3/"/>
 	<associateSite label="Mylyn (Extras)" url="http://download.eclipse.org/tools/mylyn/update/extras/"/>
-	<associateSite label="Subversive" url="http://www.polarion.org/projects/subversive/download/1.1/update-site/"/>
 </associateSites>
