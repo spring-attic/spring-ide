@@ -334,7 +334,7 @@ public final class SpringCoreUtils {
 		if (ResourcesPlugin.getWorkspace().isAutoBuilding()) {
 			scheduleBuildInBackground(project, ResourcesPlugin.getWorkspace()
 					.getRuleFactory().buildRule(),
-					new Object[] { ResourcesPlugin.FAMILY_MANUAL_BUILD });
+					new Object[] { ResourcesPlugin.FAMILY_AUTO_BUILD });
 		}
 	}
 
