@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Spring IDE Developers
+ * Copyright (c) 2005, 2008 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -461,26 +461,31 @@ public final class SpringUIUtils {
 
 	public static IFile getFile(IStructuredDocument document) {
 		if (document != null) {
-			IStructuredModel model = StructuredModelManager.getModelManager()
-					.getModelForRead(document);
-			IFile resource = null;
 			try {
-				String baselocation = model.getBaseLocation();
-				if (baselocation != null) {
-					IWorkspaceRoot root = ResourcesPlugin.getWorkspace()
-							.getRoot();
-					IPath filePath = new Path(baselocation);
-					if (filePath.segmentCount() > 0) {
-						resource = root.getFile(filePath);
+				IStructuredModel model = StructuredModelManager
+						.getModelManager().getModelForRead(document);
+				IFile resource = null;
+				try {
+					String baselocation = model.getBaseLocation();
+					if (baselocation != null) {
+						IWorkspaceRoot root = ResourcesPlugin.getWorkspace()
+								.getRoot();
+						IPath filePath = new Path(baselocation);
+						if (filePath.segmentCount() > 0) {
+							resource = root.getFile(filePath);
+						}
 					}
 				}
-			}
-			finally {
-				if (model != null) {
-					model.releaseFromRead();
+				finally {
+					if (model != null) {
+						model.releaseFromRead();
+					}
 				}
+				return resource;
 			}
-			return resource;
+			catch (Exception e) {
+				// Sometime WTP fails for no good reason
+			}
 		}
 		// fall back
 		IEditorPart editor = SpringUIUtils.getActiveEditor();
@@ -490,7 +495,7 @@ public final class SpringUIUtils {
 		}
 		return null;
 	}
-	
+
 	public static boolean isSortingEnabled() {
 		return SpringUIPlugin.getDefault().getPluginPreferences().getBoolean(
 				SpringUIPlugin.SORTING_ENABLED_KEY);
@@ -500,7 +505,7 @@ public final class SpringUIUtils {
 		SpringUIPlugin.getDefault().getPluginPreferences().setValue(
 				SpringUIPlugin.SORTING_ENABLED_KEY, isEnabled);
 	}
-	
+
 	public static boolean isSpringExplorer(Viewer viewer) {
 		if (viewer instanceof CommonViewer) {
 			return SpringUIPlugin.SPRING_EXPLORER_ID
