@@ -17,7 +17,6 @@ import java.util.Set;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
-
 import org.springframework.ide.eclipse.core.type.AnnotationMetadata;
 
 /**
@@ -59,6 +58,18 @@ public class AnnotationMetadataReadingVisitor extends
 
 	public Map<String, Object> getAnnotationAttributes(String annotationType) {
 		return this.attributesMap.get(annotationType);
+	}
+
+	public String getEnclosingClassName() {
+		return null;
+	}
+
+	public boolean hasEnclosingClass() {
+		return false;
+	}
+
+	public boolean isIndependent() {
+		return false;
 	}
 
 }
